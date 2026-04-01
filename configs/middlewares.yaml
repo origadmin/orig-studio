@@ -1,0 +1,40 @@
+# Middlewares Configuration
+middlewares:
+  # Recovery middleware (always enabled)
+  recovery:
+    stack: ${MIDDLEWARE_RECOVERY_STACK:true}
+    disable_stack_trace: ${MIDDLEWARE_RECOVERY_DISABLE_STACK:false}
+
+  # Logging middleware
+  logging:
+    skip_paths:
+      - "/health"
+      - "/metrics"
+      - "/ready"
+    ignore_health_check: ${MIDDLEWARE_LOGGING_IGNORE_HEALTH:true}
+
+  # Authentication middleware
+  authn:
+    skip_paths:
+      - "/api/v1/auth/login"
+      - "/api/v1/auth/register"
+      - "/api/v1/auth/refresh"
+      - "/health"
+    token_header: ${MIDDLEWARE_AUTHN_TOKEN_HEADER:Authorization}
+    token_prefix: ${MIDDLEWARE_AUTHN_TOKEN_PREFIX:Bearer}
+
+  # Authorization middleware
+  authz:
+    policy_path: ${MIDDLEWARE_AUTHZ_POLICY_PATH:./resources/authz_model.conf}
+    auto_reload: ${MIDDLEWARE_AUTHZ_AUTO_RELOAD:false}
+
+  # CORS middleware
+  cors:
+    config_key: "cors"
+
+  # Rate limiting middleware
+  ratelimit:
+    strategy: ${MIDDLEWARE_RATELIMIT_STRATEGY:token_bucket}  # token_bucket, sliding_window, fixed_window
+    burst: ${MIDDLEWARE_RATELIMIT_BURST:20}
+    refill_rate: ${MIDDLEWARE_RATELIMIT_REFILL_RATE:10}
+    refill_interval: ${MIDDLEWARE_RATELIMIT_REFILL_INTERVAL:1s}

@@ -1,0 +1,32 @@
+server:
+  grpc:
+    network: tcp
+    addr: ":9001"
+  http:
+    network: tcp
+    addr: ":9000"
+
+data:
+  database:
+    driver: sqlite3
+    source: ./data/origcms.db
+    max_open: 10
+    max_idle: 5
+  cache:
+    driver: memory
+    addr: ""
+
+logger:
+  level: debug
+  format: json
+  output: stdout
+
+discovery:
+  type: consul
+  addr: 127.0.0.1:8500
+  scheme: http
+
+security:
+  jwt:
+    secret: origcms-secret-key-change-in-production
+    expire_hour: 24

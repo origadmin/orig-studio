@@ -1,0 +1,12 @@
+# Database Configuration
+data:
+  databases:
+    default:
+      name: ${DATABASE_NAME:orig_cms}
+      dialect: ${DATABASE_DIALECT:postgres} # postgres, mysql, sqlite3
+      source: ${DATABASE_SOURCE:host=localhost user=postgres password=postgres dbname=orig_cms port=5432 sslmode=disable}
+      # Table prefix for multi-tenant/schema isolation
+      table_prefix: "${DATABASE_TABLE_PREFIX:user_}"
+      max_open_conns: ${DATABASE_MAX_OPEN_CONNS:25}
+      max_idle_conns: ${DATABASE_MAX_IDLE_CONNS:5}
+      conn_max_lifetime: ${DATABASE_CONN_MAX_LIFETIME:300s}

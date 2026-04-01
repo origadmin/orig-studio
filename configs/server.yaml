@@ -1,0 +1,90 @@
+# Server Configuration
+servers:
+  configs:
+    # API Gateway HTTP Server
+    - name: "${GATEWAY_SERVER_NAME:gateway}"
+      protocol: "http"
+      http:
+        addr: "${GATEWAY_SERVER_ADDR:0.0.0.0:8000}"
+        timeout: ${GATEWAY_SERVER_TIMEOUT:60s}
+        cors:
+          allowed_origins:
+            - "*"
+          allowed_methods:
+            - "GET"
+            - "POST"
+            - "PUT"
+            - "DELETE"
+            - "OPTIONS"
+          allowed_headers:
+            - "*"
+          allow_credentials: true
+        middlewares:
+          - "recovery"
+          - "logging"
+
+    # User Service Servers
+    - name: "${USER_SERVER_NAME:user}"
+      protocol: "grpc"
+      grpc:
+        addr: "${USER_GRPC_SERVER_ADDR:0.0.0.0:18001}"
+        timeout: ${USER_SERVER_TIMEOUT:5s}
+        middlewares:
+          - "recovery"
+          - "authz"
+    - name: "${USER_SERVER_NAME:user}"
+      protocol: "http"
+      http:
+        addr: "${USER_HTTP_SERVER_ADDR:0.0.0.0:18002}"
+        timeout: ${USER_SERVER_TIMEOUT:5s}
+        middlewares:
+          - "recovery"
+          - "authz"
+
+    # Media Service Servers
+    - name: "${MEDIA_SERVER_NAME:media}"
+      protocol: "grpc"
+      grpc:
+        addr: "${MEDIA_GRPC_SERVER_ADDR:0.0.0.0:18011}"
+        timeout: ${MEDIA_SERVER_TIMEOUT:60s}
+        middlewares:
+          - "recovery"
+          - "propagation"
+    - name: "${MEDIA_SERVER_NAME:media}"
+      protocol: "http"
+      http:
+        addr: "${MEDIA_HTTP_SERVER_ADDR:0.0.0.0:18012}"
+        timeout: ${MEDIA_SERVER_TIMEOUT:60s}
+        middlewares:
+          - "recovery"
+          - "propagation"
+    - name: "${MEDIA_SERVER_NAME:media}"
+      protocol: "watermill"
+      watermill:
+        broker:
+          type: "nats"
+          nats:
+            address: "nats://${NATS_HOST:localhost}:${NATS_PORT:4222}"
+            jetstream_enabled: true
+            jetstream_stream_name: "media_events"
+            connect_timeout: 15s
+            reconnect_wait: 2s
+            max_reconnects: 10
+
+    # Content Service Servers
+    - name: "${CONTENT_SERVER_NAME:content}"
+      protocol: "grpc"
+      grpc:
+        addr: "${CONTENT_GRPC_SERVER_ADDR:0.0.0.0:18021}"
+        timeout: ${CONTENT_SERVER_TIMEOUT:5s}
+        middlewares:
+          - "recovery"
+          - "authz"
+    - name: "${CONTENT_SERVER_NAME:content}"
+      protocol: "http"
+      http:
+        addr: "${CONTENT_HTTP_SERVER_ADDR:0.0.0.0:18022}"
+        timeout: ${CONTENT_SERVER_TIMEOUT:5s}
+        middlewares:
+          - "recovery"
+          - "authz"

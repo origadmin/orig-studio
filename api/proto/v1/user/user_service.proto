@@ -1,0 +1,292 @@
+syntax = "proto3";
+
+package api.v1.services.user;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "types/user.proto";
+
+option go_package = "origadmin/application/origcms/api/v1/services/user;user";
+option java_multiple_files = true;
+option java_outer_classname = "OrigCMSServiceUserProto";
+option java_package = "com.origcms.api.v1.services.user";
+option objc_class_prefix = "OrigCMSUser";
+
+// The user service definition.
+service UserService {
+  // Login authenticates a user and returns JWT tokens.
+  rpc Login(LoginRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/users/login"
+      body: "*"
+    };
+  }
+
+  // Logout invalidates the current session.
+  rpc Logout(LogoutRequest) returns (LogoutResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/users/logout"
+      body: "*"
+    };
+  }
+
+  // ListUsers returns a list of users.
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
+    option (google.api.http) = {get: "/api/v1/users"};
+  }
+
+  // GetUser returns a user by ID.
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {
+    option (google.api.http) = {get: "/api/v1/users/{id}"};
+  }
+
+  // CreateUser creates a new user.
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/users"
+      body: "*"
+    };
+  }
+
+  // UpdateUser updates an existing user.
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/users/{user.id}"
+      body: "*"
+    };
+  }
+
+  // DeleteUser deletes a user.
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {
+    option (google.api.http) = {delete: "/api/v1/users/{id}"};
+  }
+
+  // UpdateUserStatus updates a user's status.
+  rpc UpdateUserStatus(UpdateUserStatusRequest) returns (UpdateUserStatusResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/users/{id}/status"
+      body: "*"
+    };
+  }
+
+  // UpdateUserRoles updates a user's roles.
+  rpc UpdateUserRoles(UpdateUserRolesRequest) returns (UpdateUserRolesResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/users/{id}/roles"
+      body: "*"
+    };
+  }
+
+  // ChangeUserPassword changes a user's password.
+  rpc ChangeUserPassword(ChangeUserPasswordRequest) returns (ChangeUserPasswordResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/users/{id}/password"
+      body: "*"
+    };
+  }
+
+  // VerifyPassword verifies if the provided password matches the user's password.
+  rpc VerifyPassword(VerifyPasswordRequest) returns (VerifyPasswordResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/users/verify-password"
+      body: "*"
+    };
+  }
+
+  // ListUserRoles returns roles assigned to a user.
+  rpc ListUserRoles(ListUserRolesRequest) returns (ListUserRolesResponse) {
+    option (google.api.http) = {get: "/api/v1/users/{id}/roles"};
+  }
+}
+
+// ListUsersRequest is the request message for listing users.
+message ListUsersRequest {
+  // The page number.
+  int32 page = 1 [json_name = "page"];
+  // The maximum number of items to return.
+  int32 page_size = 2 [json_name = "page_size"];
+  // The next_page_token value returned from a previous List request, if any.
+  string page_token = 3 [json_name = "page_token"];
+  // Filter by keyword (username, email, phone, nickname)
+  string keyword = 4 [json_name = "keyword"];
+  // Filter by status
+  optional int32 status = 5 [json_name = "status"];
+  // Whether to include roles in the response.
+  bool with_roles = 6 [json_name = "with_roles"];
+}
+
+// ListUsersResponse is the response message for listing users.
+message ListUsersResponse {
+  // The total number of items in the list.
+  int32 total = 1 [json_name = "total"];
+  // The paging users
+  repeated api.v1.services.types.User users = 2 [json_name = "users"];
+  // The page number.
+  int32 page = 3 [json_name = "page"];
+  // The maximum number of items to return.
+  int32 page_size = 4 [json_name = "page_size"];
+  // Token to retrieve the next page of results, or empty if there are no
+  // more results in the list.
+  string next_page_token = 5 [json_name = "next_page_token"];
+}
+
+// GetUserRequest is the request message for getting a user.
+message GetUserRequest {
+  // The field will contain id of the resource requested.
+  int64 id = 1;
+  // Whether to include roles in the response.
+  bool with_roles = 2 [json_name = "with_roles"];
+  // Whether to include profile in the response.
+  bool with_profile = 3 [json_name = "with_profile"];
+  // Whether to include setting in the response.
+  bool with_setting = 4 [json_name = "with_setting"];
+}
+
+// GetUserResponse is the response message for getting a user.
+message GetUserResponse {
+  // The user resource for get.
+  api.v1.services.types.User user = 1 [json_name = "user"];
+}
+
+// CreateUserRequest is the request message for creating a user.
+message CreateUserRequest {
+  // The user resource to be created.
+  api.v1.services.types.User user = 1;
+  // The password to use for this user.
+  // If this field is left empty, a random password will be generated by the server.
+  string password = 2 [json_name = "password"];
+  // For requests: Use this field to set the roles for the user.
+  repeated int64 role_ids = 3 [json_name = "role_ids"];
+}
+
+// CreateUserResponse is the response message for creating a user.
+message CreateUserResponse {
+  // The user resource for create.
+  api.v1.services.types.User user = 1 [json_name = "user"];
+}
+
+// UpdateUserRequest is the request message for updating a user.
+message UpdateUserRequest {
+  // The user resource which replaces the resource on the server.
+  api.v1.services.types.User user = 1 [json_name = "user"];
+  // The update mask applies to the resource.
+  google.protobuf.FieldMask update_mask = 2 [json_name = "update_mask"];
+  // For requests: Use this field to set or replace the list of roles for the user.
+  repeated int64 role_ids = 3 [json_name = "role_ids"];
+}
+
+// UpdateUserResponse is the response message for updating a user.
+message UpdateUserResponse {
+  // The user resource for update.
+  api.v1.services.types.User user = 1 [json_name = "user"];
+}
+
+// DeleteUserRequest is the request message for deleting a user.
+message DeleteUserRequest {
+  // The resource id of the user to be deleted.
+  int64 id = 1;
+}
+
+// DeleteUserResponse is the response message for deleting a user.
+message DeleteUserResponse {
+  // The empty response body.
+  google.protobuf.Empty empty = 1 [json_name = "empty"];
+}
+
+// UpdateUserStatusRequest is the request message for updating user status.
+message UpdateUserStatusRequest {
+  // The field will contain id of the resource requested.
+  int64 id = 1 [json_name = "id"];
+  // The status of the user.
+  int32 status = 2 [json_name = "status"];
+}
+
+// UpdateUserStatusResponse is the response message for updating user status.
+message UpdateUserStatusResponse {}
+
+// UpdateUserRolesRequest is the request message for updating user roles.
+message UpdateUserRolesRequest {
+  // The field will contain id of the resource requested.
+  int64 id = 1 [json_name = "id"];
+  // For requests: Use this field to set or replace the list of roles for the user.
+  repeated int64 role_ids = 2 [json_name = "role_ids"];
+}
+
+// UpdateUserRolesResponse is the response message for updating user roles.
+message UpdateUserRolesResponse {
+  api.v1.services.types.User user = 1 [json_name = "user"];
+}
+
+// ChangeUserPasswordRequest is the request message for changing user password.
+message ChangeUserPasswordRequest {
+  // The field will contain id of the resource requested.
+  int64 id = 1 [json_name = "id"];
+  // The password to use for this user (plain text, will be hashed).
+  string password = 2 [json_name = "password"];
+}
+
+// ChangeUserPasswordResponse is the response message for changing user password.
+message ChangeUserPasswordResponse {}
+
+// VerifyPasswordRequest is the request message for verifying password.
+message VerifyPasswordRequest {
+  // The user ID.
+  int64 user_id = 1 [json_name = "user_id"];
+  // The username (alternative to user_id).
+  string username = 2 [json_name = "username"];
+  // The plain text password to verify.
+  string password = 3 [json_name = "password"];
+}
+
+// VerifyPasswordResponse is the response message for verifying password.
+message VerifyPasswordResponse {
+  // True if the password is valid, false otherwise.
+  bool valid = 1 [json_name = "valid"];
+}
+
+// ListUserRolesRequest is the request message for listing user roles.
+message ListUserRolesRequest {
+  // The field will contain id of the user requested.
+  int64 id = 1 [json_name = "id"];
+}
+
+// ListUserRolesResponse is the response message for listing user roles.
+message ListUserRolesResponse {
+  // The total number of items in the list.
+  int32 total = 1 [json_name = "total"];
+  // The list of roles
+  repeated api.v1.services.types.Role roles = 2 [json_name = "roles"];
+}
+
+// LoginRequest is the request message for user login.
+message LoginRequest {
+  // The username or email.
+  string username = 1 [json_name = "username"];
+  // The plain text password.
+  string password = 2 [json_name = "password"];
+}
+
+// LoginResponse is the response message for user login.
+message LoginResponse {
+  // The access token.
+  string access_token = 1 [json_name = "access_token"];
+  // The refresh token.
+  string refresh_token = 2 [json_name = "refresh_token"];
+  // Token expiration timestamp.
+  int64 expires_at = 3 [json_name = "expires_at"];
+  // The user info.
+  api.v1.services.types.User user = 4 [json_name = "user"];
+}
+
+// LogoutRequest is the request message for user logout.
+message LogoutRequest {
+  // The access token to invalidate.
+  string access_token = 1 [json_name = "access_token"];
+}
+
+// LogoutResponse is the response message for user logout.
+message LogoutResponse {
+  // Whether the logout was successful.
+  bool success = 1 [json_name = "success"];
+}

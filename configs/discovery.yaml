@@ -1,0 +1,11 @@
+# Service Discovery Configuration
+discovery:
+  type: ${DISCOVERY_TYPE:consul}  # consul, etcd, kubernetes
+  consul:
+    address: "${CONSUL_HOST:localhost}:${CONSUL_PORT:8500}"
+    scheme: "${CONSUL_SCHEME:http}"
+    timeout: ${CONSUL_TIMEOUT:5s}
+    health_check:
+      interval: ${CONSUL_HEALTH_CHECK_INTERVAL:10s}
+      timeout: ${CONSUL_HEALTH_CHECK_TIMEOUT:3s}
+      deregister_critical_service_after: ${CONSUL_DEREGISTER_AFTER:30s}

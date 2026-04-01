@@ -1,0 +1,74 @@
+name: Test
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  test:
+    if: github.repository != 'origadmin/orig-cms'
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get Go Version
+        id: go-version
+        run: |
+          GO_VERSION=$(cat go.work | grep "go " | awk '{print $$2}')
+          echo "GO_VERSION=${GO_VERSION}" >> $GITHUB_ENV
+
+      - name: Set up Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+          cache: true
+
+      - name: Install Tools
+        run: make init
+
+      - name: Run tests
+        run: make test
+
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest'
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.txt
+          fail_ci_if_error: false
+
+  lint:
+    if: github.repository != 'origadmin/orig-cms'
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get Go Version
+        id: go-version
+        run: |
+          GO_VERSION=$(cat go.work | grep "go " | awk '{print $$2}')
+          echo "GO_VERSION=${GO_VERSION}" >> $GITHUB_ENV
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+
+      - name: Install Tools
+        run: make init
+
+      - name: Run golangci-lint
+        run: make lint

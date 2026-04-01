@@ -1,0 +1,11 @@
+# Captcha Configuration
+captcha:
+  enabled: ${CAPTCHA_ENABLED:false}
+  type: ${CAPTCHA_TYPE:math}  # math, digit, alpha, chinese
+  length: ${CAPTCHA_LENGTH:6}
+  width: ${CAPTCHA_WIDTH:120}
+  height: ${CAPTCHA_HEIGHT:40}
+  expiration: ${CAPTCHA_EXPIRATION:5m}  # 5 minutes
+  case_sensitive: ${CAPTCHA_CASE_SENSITIVE:false}
+  bg_color: ${CAPTCHA_BG_COLOR:#ffffff}
+  font_size: ${CAPTCHA_FONT_SIZE:25}

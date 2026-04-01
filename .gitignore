@@ -1,0 +1,83 @@
+# Go
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# JetBrains IDEs (GoLand, IntelliJ, etc.)
+.idea/
+
+# Visual Studio Code
+.vscode/
+.history/
+*.code-workspace
+
+# macOS
+.DS_Store
+
+# Local environment variables
+.env
+.env.*
+!.env.example
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+**/node_modules
+# roadhog-api-doc ignore
+/src/utils/request-temp.js
+_roadhog-api-doc
+
+# production
+**/dist
+
+# misc
+.DS_Store
+npm-debug.log*
+yarn-error.log
+
+/coverage
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
+*bak
+.vscode
+.husky
+
+# visual studio code
+.history
+*.log
+functions/*
+.temp/**
+
+# umi
+.umi
+.umi-production
+.umi-test
+
+# screenshot
+screenshot
+.firebase
+.eslintcache
+
+build
+
+# Frontend build output
+web/build-output.txt
+web/tsc-output.txt
+
+# Database
+*.db
+
+

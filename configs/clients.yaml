@@ -1,0 +1,20 @@
+# gRPC Clients Configuration (for service-to-service communication)
+clients:
+  user:
+    grpc:
+      target: "${USER_SERVICE_GRPC_TARGET:localhost:18001}"
+      timeout: ${USER_SERVICE_GRPC_TIMEOUT:5s}
+  media:
+    grpc:
+      target: "${MEDIA_SERVICE_GRPC_TARGET:localhost:18011}"
+      timeout: ${MEDIA_SERVICE_GRPC_TIMEOUT:60s}
+  content:
+    grpc:
+      target: "${CONTENT_SERVICE_GRPC_TARGET:localhost:18021}"
+      timeout: ${CONTENT_SERVICE_GRPC_TIMEOUT:5s}
+  # Service client pool settings
+  pool:
+    max_idle_conns: ${GRPC_CLIENT_POOL_MAX_IDLE:5}
+    max_conns_per_host: ${GRPC_CLIENT_POOL_MAX_PER_HOST:10}
+    max_concurrent_streams: ${GRPC_CLIENT_POOL_MAX_STREAMS:100}
+    connection_timeout: ${GRPC_CLIENT_POOL_CONN_TIMEOUT:10s}

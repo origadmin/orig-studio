@@ -1,0 +1,12 @@
+# Logger Configuration
+logger:
+  level: ${LOG_LEVEL:info}
+  format: ${LOG_FORMAT:json}  # json, console
+  output: ${LOG_OUTPUT:stdout}  # stdout, file
+  file:
+    path: ${LOG_FILE_PATH:./logs/app.log}
+    max_size: ${LOG_FILE_MAX_SIZE:100}  # MB
+    max_age: ${LOG_FILE_MAX_AGE:30}  # days
+    max_backups: ${LOG_FILE_MAX_BACKUPS:10}
+    compress: ${LOG_FILE_COMPRESS:true}
+  development: ${LOG_DEV:false}

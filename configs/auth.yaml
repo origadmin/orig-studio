@@ -1,0 +1,20 @@
+# Authentication & Authorization Configuration
+auth:
+  jwt:
+    secret: ${JWT_SECRET:your-secret-key-change-in-production}
+    issuer: ${JWT_ISSUER:orig-cms}
+    audience: ${JWT_AUDIENCE:orig-cms-api}
+    access_token_ttl: ${JWT_ACCESS_TOKEN_TTL:2h}
+    refresh_token_ttl: ${JWT_REFRESH_TOKEN_TTL:7d}
+    signing_algorithm: ${JWT_SIGNING_ALGORITHM:HS256}
+  session:
+    type: ${SESSION_TYPE:redis}  # redis, memory
+    timeout: ${SESSION_TIMEOUT:24h}
+  password:
+    min_length: ${PASSWORD_MIN_LENGTH:8}
+    require_uppercase: ${PASSWORD_REQUIRE_UPPERCASE:true}
+    require_lowercase: ${PASSWORD_REQUIRE_LOWERCASE:true}
+    require_numbers: ${PASSWORD_REQUIRE_NUMBERS:true}
+    require_special_chars: ${PASSWORD_REQUIRE_SPECIAL_CHARS:false}
+    hash_algorithm: ${PASSWORD_HASH_ALGORITHM:bcrypt}
+    bcrypt_cost: ${PASSWORD_BCRYPT_COST:12}

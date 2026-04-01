@@ -1,0 +1,577 @@
+syntax = "proto3";
+
+package api.v1.services.media;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "types/media.proto";
+
+option go_package = "origadmin/application/origcms/api/v1/services/media;media";
+option java_multiple_files = true;
+option java_outer_classname = "OrigCMSServiceMediaProto";
+option java_package = "com.origcms.api.v1.services.media";
+option objc_class_prefix = "OrigCMSMedia";
+
+// The media service definition.
+service MediaService {
+  // ListMedias returns a list of medias.
+  rpc ListMedias(ListMediasRequest) returns (ListMediasResponse) {
+    option (google.api.http) = {get: "/api/v1/medias"};
+  }
+
+  // GetMedia returns a media by ID.
+  rpc GetMedia(GetMediaRequest) returns (GetMediaResponse) {
+    option (google.api.http) = {get: "/api/v1/medias/{id}"};
+  }
+
+  // CreateMedia creates a new media.
+  rpc CreateMedia(CreateMediaRequest) returns (CreateMediaResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/medias"
+      body: "*"
+    };
+  }
+
+  // UpdateMedia updates an existing media.
+  rpc UpdateMedia(UpdateMediaRequest) returns (UpdateMediaResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/medias/{media.id}"
+      body: "*"
+    };
+  }
+
+  // DeleteMedia deletes a media.
+  rpc DeleteMedia(DeleteMediaRequest) returns (DeleteMediaResponse) {
+    option (google.api.http) = {delete: "/api/v1/medias/{id}"};
+  }
+
+  // IncrementViewCount increments the view count of a media.
+  rpc IncrementViewCount(IncrementViewCountRequest) returns (IncrementViewCountResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/medias/{id}/view"
+      body: "*"
+    };
+  }
+
+  // UploadMedia uploads a media file.
+  // Note: For large files, standard HTTP multipart is preferred over gRPC in the gateway.
+  rpc UploadMedia(UploadMediaRequest) returns (UploadMediaResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/medias/upload"
+      body: "*"
+    };
+  }
+}
+
+// ListMediasRequest is the request message for listing medias.
+message ListMediasRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+  string page_token = 3 [json_name = "page_token"];
+  string keyword = 4 [json_name = "keyword"];
+  optional int32 type = 5 [json_name = "type"];
+  optional int32 status = 6 [json_name = "status"];
+  optional int64 category_id = 7 [json_name = "category_id"];
+  optional int64 user_id = 8 [json_name = "user_id"];
+  string order_by = 9 [json_name = "order_by"];
+  bool descending = 10 [json_name = "descending"];
+}
+
+// ListMediasResponse is the response message for listing medias.
+message ListMediasResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Media medias = 2 [json_name = "medias"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+  string next_page_token = 5 [json_name = "next_page_token"];
+}
+
+// GetMediaRequest is the request message for getting a media.
+message GetMediaRequest {
+  int64 id = 1;
+}
+
+// GetMediaResponse is the response message for getting a media.
+message GetMediaResponse {
+  api.v1.services.types.Media media = 1 [json_name = "media"];
+}
+
+// CreateMediaRequest is the request message for creating a media.
+message CreateMediaRequest {
+  api.v1.services.types.Media media = 1;
+}
+
+// CreateMediaResponse is the response message for creating a media.
+message CreateMediaResponse {
+  api.v1.services.types.Media media = 1 [json_name = "media"];
+}
+
+// UpdateMediaRequest is the request message for updating a media.
+message UpdateMediaRequest {
+  api.v1.services.types.Media media = 1 [json_name = "media"];
+  google.protobuf.FieldMask update_mask = 2 [json_name = "update_mask"];
+}
+
+// UpdateMediaResponse is the response message for updating a media.
+message UpdateMediaResponse {
+  api.v1.services.types.Media media = 1 [json_name = "media"];
+}
+
+// DeleteMediaRequest is the request message for deleting a media.
+message DeleteMediaRequest {
+  int64 id = 1;
+}
+
+// DeleteMediaResponse is the response message for deleting a media.
+message DeleteMediaResponse {
+  google.protobuf.Empty empty = 1 [json_name = "empty"];
+}
+
+// IncrementViewCountRequest is the request message for incrementing view count.
+message IncrementViewCountRequest {
+  int64 id = 1;
+}
+
+// IncrementViewCountResponse is the response message for incrementing view count.
+message IncrementViewCountResponse {
+  int64 view_count = 1 [json_name = "view_count"];
+}
+
+// UploadMediaRequest is the request message for uploading a media file.
+message UploadMediaRequest {
+  // The file title.
+  string title = 1 [json_name = "title"];
+  // The file description.
+  string description = 2 [json_name = "description"];
+  // The file type (video, image, audio).
+  string type = 3 [json_name = "type"];
+  // The file path on the server (set by server after upload).
+  string file_path = 4 [json_name = "file_path"];
+  // The file size in bytes.
+  int64 size = 5 [json_name = "size"];
+  // The media duration in seconds (for video/audio).
+  int32 duration = 6 [json_name = "duration"];
+  // The user ID who uploaded the file.
+  int64 user_id = 7 [json_name = "user_id"];
+}
+
+// UploadMediaResponse is the response message for uploading a media file.
+message UploadMediaResponse {
+  api.v1.services.types.Media media = 1 [json_name = "media"];
+}
+
+// Category Service
+service CategoryService {
+  rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse) {
+    option (google.api.http) = {get: "/api/v1/categories"};
+  }
+  rpc GetCategory(GetCategoryRequest) returns (GetCategoryResponse) {
+    option (google.api.http) = {get: "/api/v1/categories/{id}"};
+  }
+  rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/categories"
+      body: "*"
+    };
+  }
+  rpc UpdateCategory(UpdateCategoryRequest) returns (UpdateCategoryResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/categories/{category.id}"
+      body: "*"
+    };
+  }
+  rpc DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryResponse) {
+    option (google.api.http) = {delete: "/api/v1/categories/{id}"};
+  }
+}
+
+message ListCategoriesRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+  string page_token = 3 [json_name = "page_token"];
+  optional int64 parent_id = 4 [json_name = "parent_id"];
+  optional int32 status = 5 [json_name = "status"];
+}
+
+message ListCategoriesResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Category categories = 2 [json_name = "categories"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+  string next_page_token = 5 [json_name = "next_page_token"];
+}
+
+message GetCategoryRequest {
+  int64 id = 1;
+}
+
+message GetCategoryResponse {
+  api.v1.services.types.Category category = 1 [json_name = "category"];
+}
+
+message CreateCategoryRequest {
+  api.v1.services.types.Category category = 1;
+}
+
+message CreateCategoryResponse {
+  api.v1.services.types.Category category = 1 [json_name = "category"];
+}
+
+message UpdateCategoryRequest {
+  api.v1.services.types.Category category = 1 [json_name = "category"];
+  google.protobuf.FieldMask update_mask = 2 [json_name = "update_mask"];
+}
+
+message UpdateCategoryResponse {
+  api.v1.services.types.Category category = 1 [json_name = "category"];
+}
+
+message DeleteCategoryRequest {
+  int64 id = 1;
+}
+
+message DeleteCategoryResponse {
+  google.protobuf.Empty empty = 1 [json_name = "empty"];
+}
+
+// Tag Service
+service TagService {
+  rpc ListTags(ListTagsRequest) returns (ListTagsResponse) {
+    option (google.api.http) = {get: "/api/v1/tags"};
+  }
+  rpc GetTag(GetTagRequest) returns (GetTagResponse) {
+    option (google.api.http) = {get: "/api/v1/tags/{id}"};
+  }
+  rpc CreateTag(CreateTagRequest) returns (CreateTagResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/tags"
+      body: "*"
+    };
+  }
+  rpc UpdateTag(UpdateTagRequest) returns (UpdateTagResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/tags/{tag.id}"
+      body: "*"
+    };
+  }
+  rpc DeleteTag(DeleteTagRequest) returns (DeleteTagResponse) {
+    option (google.api.http) = {delete: "/api/v1/tags/{id}"};
+  }
+}
+
+message ListTagsRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+  string page_token = 3 [json_name = "page_token"];
+  string keyword = 4 [json_name = "keyword"];
+  optional int32 status = 5 [json_name = "status"];
+}
+
+message ListTagsResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Tag tags = 2 [json_name = "tags"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+  string next_page_token = 5 [json_name = "next_page_token"];
+}
+
+message GetTagRequest {
+  int64 id = 1;
+}
+
+message GetTagResponse {
+  api.v1.services.types.Tag tag = 1 [json_name = "tag"];
+}
+
+message CreateTagRequest {
+  api.v1.services.types.Tag tag = 1;
+}
+
+message CreateTagResponse {
+  api.v1.services.types.Tag tag = 1 [json_name = "tag"];
+}
+
+message UpdateTagRequest {
+  api.v1.services.types.Tag tag = 1 [json_name = "tag"];
+  google.protobuf.FieldMask update_mask = 2 [json_name = "update_mask"];
+}
+
+message UpdateTagResponse {
+  api.v1.services.types.Tag tag = 1 [json_name = "tag"];
+}
+
+message DeleteTagRequest {
+  int64 id = 1;
+}
+
+message DeleteTagResponse {
+  google.protobuf.Empty empty = 1 [json_name = "empty"];
+}
+
+// Comment Service
+service CommentService {
+  rpc ListComments(ListCommentsRequest) returns (ListCommentsResponse) {
+    option (google.api.http) = {get: "/api/v1/comments"};
+  }
+  rpc GetComment(GetCommentRequest) returns (GetCommentResponse) {
+    option (google.api.http) = {get: "/api/v1/comments/{id}"};
+  }
+  rpc CreateComment(CreateCommentRequest) returns (CreateCommentResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/comments"
+      body: "*"
+    };
+  }
+  rpc UpdateComment(UpdateCommentRequest) returns (UpdateCommentResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/comments/{comment.id}"
+      body: "*"
+    };
+  }
+  rpc DeleteComment(DeleteCommentRequest) returns (DeleteCommentResponse) {
+    option (google.api.http) = {delete: "/api/v1/comments/{id}"};
+  }
+}
+
+message ListCommentsRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+  string page_token = 3 [json_name = "page_token"];
+  optional int64 media_id = 4 [json_name = "media_id"];
+  optional int64 user_id = 5 [json_name = "user_id"];
+  optional int64 parent_id = 6 [json_name = "parent_id"];
+  optional int32 status = 7 [json_name = "status"];
+}
+
+message ListCommentsResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Comment comments = 2 [json_name = "comments"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+  string next_page_token = 5 [json_name = "next_page_token"];
+}
+
+message GetCommentRequest {
+  int64 id = 1;
+}
+
+message GetCommentResponse {
+  api.v1.services.types.Comment comment = 1 [json_name = "comment"];
+}
+
+message CreateCommentRequest {
+  api.v1.services.types.Comment comment = 1;
+}
+
+message CreateCommentResponse {
+  api.v1.services.types.Comment comment = 1 [json_name = "comment"];
+}
+
+message UpdateCommentRequest {
+  api.v1.services.types.Comment comment = 1 [json_name = "comment"];
+  google.protobuf.FieldMask update_mask = 2 [json_name = "update_mask"];
+}
+
+message UpdateCommentResponse {
+  api.v1.services.types.Comment comment = 1 [json_name = "comment"];
+}
+
+message DeleteCommentRequest {
+  int64 id = 1;
+}
+
+message DeleteCommentResponse {
+  google.protobuf.Empty empty = 1 [json_name = "empty"];
+}
+
+// Like Service
+service LikeService {
+  rpc ToggleLike(ToggleLikeRequest) returns (ToggleLikeResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/likes/toggle"
+      body: "*"
+    };
+  }
+  rpc GetMediaLikes(GetMediaLikesRequest) returns (GetMediaLikesResponse) {
+    option (google.api.http) = {get: "/api/v1/medias/{media_id}/likes"};
+  }
+  rpc GetUserLikes(GetUserLikesRequest) returns (GetUserLikesResponse) {
+    option (google.api.http) = {get: "/api/v1/users/{user_id}/likes"};
+  }
+}
+
+message ToggleLikeRequest {
+  int64 user_id = 1 [json_name = "user_id"];
+  int64 media_id = 2 [json_name = "media_id"];
+  string type = 3 [json_name = "type"];
+}
+
+message ToggleLikeResponse {
+  bool liked = 1 [json_name = "liked"];
+  int64 like_count = 2 [json_name = "like_count"];
+}
+
+message GetMediaLikesRequest {
+  int64 media_id = 1;
+}
+
+message GetMediaLikesResponse {
+  int64 like_count = 1 [json_name = "like_count"];
+  int64 dislike_count = 2 [json_name = "dislike_count"];
+}
+
+message GetUserLikesRequest {
+  int64 user_id = 1;
+}
+
+message GetUserLikesResponse {
+  repeated api.v1.services.types.Like likes = 1 [json_name = "likes"];
+}
+
+// Favorite Service
+service FavoriteService {
+  rpc GetFavorites(GetFavoritesRequest) returns (GetFavoritesResponse) {
+    option (google.api.http) = {get: "/api/v1/favorites"};
+  }
+  rpc ToggleFavorite(ToggleFavoriteRequest) returns (ToggleFavoriteResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/favorites/toggle"
+      body: "*"
+    };
+  }
+  rpc RemoveFavorite(RemoveFavoriteRequest) returns (RemoveFavoriteResponse) {
+    option (google.api.http) = {delete: "/api/v1/favorites/{id}"};
+  }
+}
+
+message GetFavoritesRequest {
+  int64 user_id = 1 [json_name = "user_id"];
+  int32 page = 2 [json_name = "page"];
+  int32 page_size = 3 [json_name = "page_size"];
+}
+
+message GetFavoritesResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Favorite favorites = 2 [json_name = "favorites"];
+  repeated api.v1.services.types.Media medias = 3 [json_name = "medias"];
+}
+
+message ToggleFavoriteRequest {
+  int64 user_id = 1 [json_name = "user_id"];
+  int64 media_id = 2 [json_name = "media_id"];
+}
+
+message ToggleFavoriteResponse {
+  bool favorited = 1 [json_name = "favorited"];
+  int64 favorite_count = 2 [json_name = "favorite_count"];
+}
+
+message RemoveFavoriteRequest {
+  int64 id = 1;
+}
+
+message RemoveFavoriteResponse {
+  google.protobuf.Empty empty = 1 [json_name = "empty"];
+}
+
+// Playlist Service
+service PlaylistService {
+  rpc GetPlaylists(GetPlaylistsRequest) returns (GetPlaylistsResponse) {
+    option (google.api.http) = {get: "/api/v1/playlists"};
+  }
+  rpc GetPlaylist(GetPlaylistRequest) returns (GetPlaylistResponse) {
+    option (google.api.http) = {get: "/api/v1/playlists/{id}"};
+  }
+  rpc CreatePlaylist(CreatePlaylistRequest) returns (CreatePlaylistResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/playlists"
+      body: "*"
+    };
+  }
+  rpc UpdatePlaylist(UpdatePlaylistRequest) returns (UpdatePlaylistResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/playlists/{playlist.id}"
+      body: "*"
+    };
+  }
+  rpc DeletePlaylist(DeletePlaylistRequest) returns (DeletePlaylistResponse) {
+    option (google.api.http) = {delete: "/api/v1/playlists/{id}"};
+  }
+  rpc AddToPlaylist(AddToPlaylistRequest) returns (AddToPlaylistResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/playlists/{playlist_id}/add"
+      body: "*"
+    };
+  }
+  rpc RemoveFromPlaylist(RemoveFromPlaylistRequest) returns (RemoveFromPlaylistResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/playlists/{playlist_id}/remove"
+      body: "*"
+    };
+  }
+}
+
+message GetPlaylistsRequest {
+  int64 user_id = 1 [json_name = "user_id"];
+  optional bool is_public = 2 [json_name = "is_public"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+message GetPlaylistsResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Playlist playlists = 2 [json_name = "playlists"];
+}
+
+message GetPlaylistRequest {
+  int64 id = 1;
+}
+
+message GetPlaylistResponse {
+  api.v1.services.types.Playlist playlist = 1 [json_name = "playlist"];
+  repeated api.v1.services.types.Media medias = 2 [json_name = "medias"];
+}
+
+message CreatePlaylistRequest {
+  api.v1.services.types.Playlist playlist = 1;
+}
+
+message CreatePlaylistResponse {
+  api.v1.services.types.Playlist playlist = 1 [json_name = "playlist"];
+}
+
+message UpdatePlaylistRequest {
+  api.v1.services.types.Playlist playlist = 1 [json_name = "playlist"];
+  google.protobuf.FieldMask update_mask = 2 [json_name = "update_mask"];
+}
+
+message UpdatePlaylistResponse {
+  api.v1.services.types.Playlist playlist = 1 [json_name = "playlist"];
+}
+
+message DeletePlaylistRequest {
+  int64 id = 1;
+}
+
+message DeletePlaylistResponse {
+  google.protobuf.Empty empty = 1 [json_name = "empty"];
+}
+
+message AddToPlaylistRequest {
+  int64 playlist_id = 1 [json_name = "playlist_id"];
+  int64 media_id = 2 [json_name = "media_id"];
+}
+
+message AddToPlaylistResponse {
+  int64 media_count = 1 [json_name = "media_count"];
+}
+
+message RemoveFromPlaylistRequest {
+  int64 playlist_id = 1 [json_name = "playlist_id"];
+  int64 media_id = 2 [json_name = "media_id"];
+}
+
+message RemoveFromPlaylistResponse {
+  int64 media_count = 1 [json_name = "media_count"];
+}
