@@ -1,11 +1,13 @@
-version: v1
-name: buf.build/origadmin/origcms
+version: v2
+modules:
+  - path: proto
+    name: buf.build/origadmin/origcms
 deps:
   - buf.build/googleapis/googleapis
   - buf.build/envoyproxy/protoc-gen-validate
 lint:
   use:
-    - DEFAULT
+    - STANDARD
   except:
     - PACKAGE_VERSION_SUFFIX
 breaking:
