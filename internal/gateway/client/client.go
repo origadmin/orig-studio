@@ -7,8 +7,8 @@ package client
 
 import (
 	"github.com/google/wire"
-	mediav1 "origadmin/application/origcms/api/v1/services/media"
-	userv1 "origadmin/application/origcms/api/v1/services/user"
+	mediav1 "origadmin/application/origcms/api/gen/v1/media"
+	userv1 "origadmin/application/origcms/api/gen/v1/user"
 )
 
 // Clients holds all downstream gRPC service clients.

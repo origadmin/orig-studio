@@ -14,7 +14,7 @@ import (
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/runtime/log"
 	"github.com/origadmin/toolkits/crypto/hash"
-	"origadmin/application/origcms/api/v1/services/types"
+	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/svc-user/dto"
 )
 

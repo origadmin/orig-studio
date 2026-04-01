@@ -8,8 +8,8 @@ import (
 	"context"
 
 	"github.com/origadmin/runtime/log"
-	mediav1 "origadmin/application/origcms/api/v1/services/media"
-	userv1 "origadmin/application/origcms/api/v1/services/user"
+	mediav1 "origadmin/application/origcms/api/gen/v1/media"
+	userv1 "origadmin/application/origcms/api/gen/v1/user"
 	"origadmin/application/origcms/internal/gateway/client"
 )
 

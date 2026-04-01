@@ -842,8 +842,8 @@ const file_types_user_proto_rawDesc = "" +
 	"\bUserRole\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
 	"\auser_id\x18\x02 \x01(\x03R\auser_id\x12\x18\n" +
-	"\arole_id\x18\x03 \x01(\x03R\arole_idB\x87\x01\n" +
-	"!com.origcms.api.v1.services.typesB\x1bOrigCMSServiceTypeUserProtoP\x01Z9origadmin/application/origcms/api/v1/services/types;types\xa2\x02\aOrigCMSb\x06proto3"
+	"\arole_id\x18\x03 \x01(\x03R\arole_idB\x82\x01\n" +
+	"!com.origcms.api.v1.services.typesB\x1bOrigCMSServiceTypeUserProtoP\x01Z4origadmin/application/origcms/api/gen/v1/types;types\xa2\x02\aOrigCMSb\x06proto3"
 
 var (
 	file_types_user_proto_rawDescOnce sync.Once

@@ -7,7 +7,7 @@ package service
 import (
 	"context"
 
-	"origadmin/application/origcms/api/v1/services/media"
+	"origadmin/application/origcms/api/gen/v1/media"
 
 	"github.com/origadmin/runtime/errors"
 	"github.com/origadmin/runtime/log"

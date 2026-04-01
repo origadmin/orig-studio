@@ -8,8 +8,8 @@ package dto
 import (
 	"context"
 
-	"origadmin/application/origcms/api/v1/services/types"
-	"origadmin/application/origcms/api/v1/services/user"
+	"origadmin/application/origcms/api/gen/v1/types"
+	"origadmin/application/origcms/api/gen/v1/user"
 	"origadmin/application/origcms/internal/helpers/repo"
 )
 

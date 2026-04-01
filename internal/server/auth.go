@@ -18,7 +18,7 @@ import (
 	"origadmin/application/origcms/internal/svc-user/biz"
 	"origadmin/application/origcms/internal/svc-user/dto"
 
-	"origadmin/application/origcms/api/v1/services/types"
+	"origadmin/application/origcms/api/gen/v1/types"
 )
 
 // AuthHandler handles /api/v1/auth/* routes.

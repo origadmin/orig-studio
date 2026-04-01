@@ -12,7 +12,7 @@ import (
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
-	types "origadmin/application/origcms/api/v1/services/types"
+	types "origadmin/application/origcms/api/gen/v1/types"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -1447,8 +1447,8 @@ const file_user_user_service_proto_rawDesc = "" +
 	"\x0fUpdateUserRoles\x12,.api.v1.services.user.UpdateUserRolesRequest\x1a-.api.v1.services.user.UpdateUserRolesResponse\"#\x82\xd3\xe4\x93\x02\x1d:\x01*\x1a\x18/api/v1/users/{id}/roles\x12\x9f\x01\n" +
 	"\x12ChangeUserPassword\x12/.api.v1.services.user.ChangeUserPasswordRequest\x1a0.api.v1.services.user.ChangeUserPasswordResponse\"&\x82\xd3\xe4\x93\x02 :\x01*\"\x1b/api/v1/users/{id}/password\x12\x95\x01\n" +
 	"\x0eVerifyPassword\x12+.api.v1.services.user.VerifyPasswordRequest\x1a,.api.v1.services.user.VerifyPasswordResponse\"(\x82\xd3\xe4\x93\x02\":\x01*\"\x1d/api/v1/users/verify-password\x12\x8a\x01\n" +
-	"\rListUserRoles\x12*.api.v1.services.user.ListUserRolesRequest\x1a+.api.v1.services.user.ListUserRolesResponse\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/users/{id}/rolesB\x84\x01\n" +
-	" com.origcms.api.v1.services.userB\x17OrigCMSServiceUserProtoP\x01Z7origadmin/application/origcms/api/v1/services/user;user\xa2\x02\vOrigCMSUserb\x06proto3"
+	"\rListUserRoles\x12*.api.v1.services.user.ListUserRolesRequest\x1a+.api.v1.services.user.ListUserRolesResponse\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/users/{id}/rolesB\x7f\n" +
+	" com.origcms.api.v1.services.userB\x17OrigCMSServiceUserProtoP\x01Z2origadmin/application/origcms/api/gen/v1/user;user\xa2\x02\vOrigCMSUserb\x06proto3"
 
 var (
 	file_user_user_service_proto_rawDescOnce sync.Once

@@ -21,7 +21,7 @@ import (
 	"github.com/origadmin/runtime/service/transport/grpc"
 	"github.com/origadmin/runtime/service/transport/http"
 
-	userv1 "origadmin/application/origcms/api/v1/services/user"
+	userv1 "origadmin/application/origcms/api/gen/v1/user"
 	"origadmin/application/origcms/internal/svc-user/service"
 )
 

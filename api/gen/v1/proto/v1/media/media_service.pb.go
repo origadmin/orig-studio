@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        (unknown)
-// source: media/media_service.proto
+// source: proto/v1/media/media_service.proto
 
 package media
 
@@ -12,7 +12,7 @@ import (
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
-	types "origadmin/application/origcms/api/v1/services/types"
+	types "origadmin/application/origcms/api/gen/v1/types"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -44,7 +44,7 @@ type ListMediasRequest struct {
 
 func (x *ListMediasRequest) Reset() {
 	*x = ListMediasRequest{}
-	mi := &file_media_media_service_proto_msgTypes[0]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -56,7 +56,7 @@ func (x *ListMediasRequest) String() string {
 func (*ListMediasRequest) ProtoMessage() {}
 
 func (x *ListMediasRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[0]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -69,7 +69,7 @@ func (x *ListMediasRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMediasRequest.ProtoReflect.Descriptor instead.
 func (*ListMediasRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{0}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *ListMediasRequest) GetPage() int32 {
@@ -156,7 +156,7 @@ type ListMediasResponse struct {
 
 func (x *ListMediasResponse) Reset() {
 	*x = ListMediasResponse{}
-	mi := &file_media_media_service_proto_msgTypes[1]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -168,7 +168,7 @@ func (x *ListMediasResponse) String() string {
 func (*ListMediasResponse) ProtoMessage() {}
 
 func (x *ListMediasResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[1]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -181,7 +181,7 @@ func (x *ListMediasResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMediasResponse.ProtoReflect.Descriptor instead.
 func (*ListMediasResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{1}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *ListMediasResponse) GetTotal() int32 {
@@ -229,7 +229,7 @@ type GetMediaRequest struct {
 
 func (x *GetMediaRequest) Reset() {
 	*x = GetMediaRequest{}
-	mi := &file_media_media_service_proto_msgTypes[2]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -241,7 +241,7 @@ func (x *GetMediaRequest) String() string {
 func (*GetMediaRequest) ProtoMessage() {}
 
 func (x *GetMediaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[2]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -254,7 +254,7 @@ func (x *GetMediaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMediaRequest.ProtoReflect.Descriptor instead.
 func (*GetMediaRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{2}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GetMediaRequest) GetId() int64 {
@@ -274,7 +274,7 @@ type GetMediaResponse struct {
 
 func (x *GetMediaResponse) Reset() {
 	*x = GetMediaResponse{}
-	mi := &file_media_media_service_proto_msgTypes[3]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -286,7 +286,7 @@ func (x *GetMediaResponse) String() string {
 func (*GetMediaResponse) ProtoMessage() {}
 
 func (x *GetMediaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[3]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -299,7 +299,7 @@ func (x *GetMediaResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMediaResponse.ProtoReflect.Descriptor instead.
 func (*GetMediaResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{3}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetMediaResponse) GetMedia() *types.Media {
@@ -319,7 +319,7 @@ type CreateMediaRequest struct {
 
 func (x *CreateMediaRequest) Reset() {
 	*x = CreateMediaRequest{}
-	mi := &file_media_media_service_proto_msgTypes[4]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -331,7 +331,7 @@ func (x *CreateMediaRequest) String() string {
 func (*CreateMediaRequest) ProtoMessage() {}
 
 func (x *CreateMediaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[4]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -344,7 +344,7 @@ func (x *CreateMediaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateMediaRequest.ProtoReflect.Descriptor instead.
 func (*CreateMediaRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{4}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *CreateMediaRequest) GetMedia() *types.Media {
@@ -364,7 +364,7 @@ type CreateMediaResponse struct {
 
 func (x *CreateMediaResponse) Reset() {
 	*x = CreateMediaResponse{}
-	mi := &file_media_media_service_proto_msgTypes[5]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -376,7 +376,7 @@ func (x *CreateMediaResponse) String() string {
 func (*CreateMediaResponse) ProtoMessage() {}
 
 func (x *CreateMediaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[5]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -389,7 +389,7 @@ func (x *CreateMediaResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateMediaResponse.ProtoReflect.Descriptor instead.
 func (*CreateMediaResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{5}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *CreateMediaResponse) GetMedia() *types.Media {
@@ -410,7 +410,7 @@ type UpdateMediaRequest struct {
 
 func (x *UpdateMediaRequest) Reset() {
 	*x = UpdateMediaRequest{}
-	mi := &file_media_media_service_proto_msgTypes[6]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -422,7 +422,7 @@ func (x *UpdateMediaRequest) String() string {
 func (*UpdateMediaRequest) ProtoMessage() {}
 
 func (x *UpdateMediaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[6]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -435,7 +435,7 @@ func (x *UpdateMediaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateMediaRequest.ProtoReflect.Descriptor instead.
 func (*UpdateMediaRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{6}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *UpdateMediaRequest) GetMedia() *types.Media {
@@ -462,7 +462,7 @@ type UpdateMediaResponse struct {
 
 func (x *UpdateMediaResponse) Reset() {
 	*x = UpdateMediaResponse{}
-	mi := &file_media_media_service_proto_msgTypes[7]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -474,7 +474,7 @@ func (x *UpdateMediaResponse) String() string {
 func (*UpdateMediaResponse) ProtoMessage() {}
 
 func (x *UpdateMediaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[7]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -487,7 +487,7 @@ func (x *UpdateMediaResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateMediaResponse.ProtoReflect.Descriptor instead.
 func (*UpdateMediaResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{7}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *UpdateMediaResponse) GetMedia() *types.Media {
@@ -507,7 +507,7 @@ type DeleteMediaRequest struct {
 
 func (x *DeleteMediaRequest) Reset() {
 	*x = DeleteMediaRequest{}
-	mi := &file_media_media_service_proto_msgTypes[8]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -519,7 +519,7 @@ func (x *DeleteMediaRequest) String() string {
 func (*DeleteMediaRequest) ProtoMessage() {}
 
 func (x *DeleteMediaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[8]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -532,7 +532,7 @@ func (x *DeleteMediaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteMediaRequest.ProtoReflect.Descriptor instead.
 func (*DeleteMediaRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{8}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DeleteMediaRequest) GetId() int64 {
@@ -552,7 +552,7 @@ type DeleteMediaResponse struct {
 
 func (x *DeleteMediaResponse) Reset() {
 	*x = DeleteMediaResponse{}
-	mi := &file_media_media_service_proto_msgTypes[9]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -564,7 +564,7 @@ func (x *DeleteMediaResponse) String() string {
 func (*DeleteMediaResponse) ProtoMessage() {}
 
 func (x *DeleteMediaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[9]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -577,7 +577,7 @@ func (x *DeleteMediaResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteMediaResponse.ProtoReflect.Descriptor instead.
 func (*DeleteMediaResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{9}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *DeleteMediaResponse) GetEmpty() *emptypb.Empty {
@@ -597,7 +597,7 @@ type IncrementViewCountRequest struct {
 
 func (x *IncrementViewCountRequest) Reset() {
 	*x = IncrementViewCountRequest{}
-	mi := &file_media_media_service_proto_msgTypes[10]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -609,7 +609,7 @@ func (x *IncrementViewCountRequest) String() string {
 func (*IncrementViewCountRequest) ProtoMessage() {}
 
 func (x *IncrementViewCountRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[10]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -622,7 +622,7 @@ func (x *IncrementViewCountRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IncrementViewCountRequest.ProtoReflect.Descriptor instead.
 func (*IncrementViewCountRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{10}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *IncrementViewCountRequest) GetId() int64 {
@@ -642,7 +642,7 @@ type IncrementViewCountResponse struct {
 
 func (x *IncrementViewCountResponse) Reset() {
 	*x = IncrementViewCountResponse{}
-	mi := &file_media_media_service_proto_msgTypes[11]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -654,7 +654,7 @@ func (x *IncrementViewCountResponse) String() string {
 func (*IncrementViewCountResponse) ProtoMessage() {}
 
 func (x *IncrementViewCountResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[11]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -667,7 +667,7 @@ func (x *IncrementViewCountResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IncrementViewCountResponse.ProtoReflect.Descriptor instead.
 func (*IncrementViewCountResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{11}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *IncrementViewCountResponse) GetViewCount() int64 {
@@ -700,7 +700,7 @@ type UploadMediaRequest struct {
 
 func (x *UploadMediaRequest) Reset() {
 	*x = UploadMediaRequest{}
-	mi := &file_media_media_service_proto_msgTypes[12]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -712,7 +712,7 @@ func (x *UploadMediaRequest) String() string {
 func (*UploadMediaRequest) ProtoMessage() {}
 
 func (x *UploadMediaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[12]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -725,7 +725,7 @@ func (x *UploadMediaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UploadMediaRequest.ProtoReflect.Descriptor instead.
 func (*UploadMediaRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{12}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *UploadMediaRequest) GetTitle() string {
@@ -787,7 +787,7 @@ type UploadMediaResponse struct {
 
 func (x *UploadMediaResponse) Reset() {
 	*x = UploadMediaResponse{}
-	mi := &file_media_media_service_proto_msgTypes[13]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -799,7 +799,7 @@ func (x *UploadMediaResponse) String() string {
 func (*UploadMediaResponse) ProtoMessage() {}
 
 func (x *UploadMediaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[13]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -812,7 +812,7 @@ func (x *UploadMediaResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UploadMediaResponse.ProtoReflect.Descriptor instead.
 func (*UploadMediaResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{13}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *UploadMediaResponse) GetMedia() *types.Media {
@@ -835,7 +835,7 @@ type ListCategoriesRequest struct {
 
 func (x *ListCategoriesRequest) Reset() {
 	*x = ListCategoriesRequest{}
-	mi := &file_media_media_service_proto_msgTypes[14]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -847,7 +847,7 @@ func (x *ListCategoriesRequest) String() string {
 func (*ListCategoriesRequest) ProtoMessage() {}
 
 func (x *ListCategoriesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[14]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -860,7 +860,7 @@ func (x *ListCategoriesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCategoriesRequest.ProtoReflect.Descriptor instead.
 func (*ListCategoriesRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{14}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ListCategoriesRequest) GetPage() int32 {
@@ -911,7 +911,7 @@ type ListCategoriesResponse struct {
 
 func (x *ListCategoriesResponse) Reset() {
 	*x = ListCategoriesResponse{}
-	mi := &file_media_media_service_proto_msgTypes[15]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -923,7 +923,7 @@ func (x *ListCategoriesResponse) String() string {
 func (*ListCategoriesResponse) ProtoMessage() {}
 
 func (x *ListCategoriesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[15]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -936,7 +936,7 @@ func (x *ListCategoriesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCategoriesResponse.ProtoReflect.Descriptor instead.
 func (*ListCategoriesResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{15}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *ListCategoriesResponse) GetTotal() int32 {
@@ -983,7 +983,7 @@ type GetCategoryRequest struct {
 
 func (x *GetCategoryRequest) Reset() {
 	*x = GetCategoryRequest{}
-	mi := &file_media_media_service_proto_msgTypes[16]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -995,7 +995,7 @@ func (x *GetCategoryRequest) String() string {
 func (*GetCategoryRequest) ProtoMessage() {}
 
 func (x *GetCategoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[16]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1008,7 +1008,7 @@ func (x *GetCategoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCategoryRequest.ProtoReflect.Descriptor instead.
 func (*GetCategoryRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{16}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *GetCategoryRequest) GetId() int64 {
@@ -1027,7 +1027,7 @@ type GetCategoryResponse struct {
 
 func (x *GetCategoryResponse) Reset() {
 	*x = GetCategoryResponse{}
-	mi := &file_media_media_service_proto_msgTypes[17]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1039,7 +1039,7 @@ func (x *GetCategoryResponse) String() string {
 func (*GetCategoryResponse) ProtoMessage() {}
 
 func (x *GetCategoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[17]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1052,7 +1052,7 @@ func (x *GetCategoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCategoryResponse.ProtoReflect.Descriptor instead.
 func (*GetCategoryResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{17}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *GetCategoryResponse) GetCategory() *types.Category {
@@ -1071,7 +1071,7 @@ type CreateCategoryRequest struct {
 
 func (x *CreateCategoryRequest) Reset() {
 	*x = CreateCategoryRequest{}
-	mi := &file_media_media_service_proto_msgTypes[18]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1083,7 +1083,7 @@ func (x *CreateCategoryRequest) String() string {
 func (*CreateCategoryRequest) ProtoMessage() {}
 
 func (x *CreateCategoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[18]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1096,7 +1096,7 @@ func (x *CreateCategoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCategoryRequest.ProtoReflect.Descriptor instead.
 func (*CreateCategoryRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{18}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *CreateCategoryRequest) GetCategory() *types.Category {
@@ -1115,7 +1115,7 @@ type CreateCategoryResponse struct {
 
 func (x *CreateCategoryResponse) Reset() {
 	*x = CreateCategoryResponse{}
-	mi := &file_media_media_service_proto_msgTypes[19]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1127,7 +1127,7 @@ func (x *CreateCategoryResponse) String() string {
 func (*CreateCategoryResponse) ProtoMessage() {}
 
 func (x *CreateCategoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[19]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1140,7 +1140,7 @@ func (x *CreateCategoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCategoryResponse.ProtoReflect.Descriptor instead.
 func (*CreateCategoryResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{19}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *CreateCategoryResponse) GetCategory() *types.Category {
@@ -1160,7 +1160,7 @@ type UpdateCategoryRequest struct {
 
 func (x *UpdateCategoryRequest) Reset() {
 	*x = UpdateCategoryRequest{}
-	mi := &file_media_media_service_proto_msgTypes[20]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1172,7 +1172,7 @@ func (x *UpdateCategoryRequest) String() string {
 func (*UpdateCategoryRequest) ProtoMessage() {}
 
 func (x *UpdateCategoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[20]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1185,7 +1185,7 @@ func (x *UpdateCategoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCategoryRequest.ProtoReflect.Descriptor instead.
 func (*UpdateCategoryRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{20}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *UpdateCategoryRequest) GetCategory() *types.Category {
@@ -1211,7 +1211,7 @@ type UpdateCategoryResponse struct {
 
 func (x *UpdateCategoryResponse) Reset() {
 	*x = UpdateCategoryResponse{}
-	mi := &file_media_media_service_proto_msgTypes[21]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1223,7 +1223,7 @@ func (x *UpdateCategoryResponse) String() string {
 func (*UpdateCategoryResponse) ProtoMessage() {}
 
 func (x *UpdateCategoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[21]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1236,7 +1236,7 @@ func (x *UpdateCategoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCategoryResponse.ProtoReflect.Descriptor instead.
 func (*UpdateCategoryResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{21}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *UpdateCategoryResponse) GetCategory() *types.Category {
@@ -1255,7 +1255,7 @@ type DeleteCategoryRequest struct {
 
 func (x *DeleteCategoryRequest) Reset() {
 	*x = DeleteCategoryRequest{}
-	mi := &file_media_media_service_proto_msgTypes[22]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1267,7 +1267,7 @@ func (x *DeleteCategoryRequest) String() string {
 func (*DeleteCategoryRequest) ProtoMessage() {}
 
 func (x *DeleteCategoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[22]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1280,7 +1280,7 @@ func (x *DeleteCategoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCategoryRequest.ProtoReflect.Descriptor instead.
 func (*DeleteCategoryRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{22}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *DeleteCategoryRequest) GetId() int64 {
@@ -1299,7 +1299,7 @@ type DeleteCategoryResponse struct {
 
 func (x *DeleteCategoryResponse) Reset() {
 	*x = DeleteCategoryResponse{}
-	mi := &file_media_media_service_proto_msgTypes[23]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1311,7 +1311,7 @@ func (x *DeleteCategoryResponse) String() string {
 func (*DeleteCategoryResponse) ProtoMessage() {}
 
 func (x *DeleteCategoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[23]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1324,7 +1324,7 @@ func (x *DeleteCategoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCategoryResponse.ProtoReflect.Descriptor instead.
 func (*DeleteCategoryResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{23}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *DeleteCategoryResponse) GetEmpty() *emptypb.Empty {
@@ -1347,7 +1347,7 @@ type ListTagsRequest struct {
 
 func (x *ListTagsRequest) Reset() {
 	*x = ListTagsRequest{}
-	mi := &file_media_media_service_proto_msgTypes[24]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1359,7 +1359,7 @@ func (x *ListTagsRequest) String() string {
 func (*ListTagsRequest) ProtoMessage() {}
 
 func (x *ListTagsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[24]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1372,7 +1372,7 @@ func (x *ListTagsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTagsRequest.ProtoReflect.Descriptor instead.
 func (*ListTagsRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{24}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *ListTagsRequest) GetPage() int32 {
@@ -1423,7 +1423,7 @@ type ListTagsResponse struct {
 
 func (x *ListTagsResponse) Reset() {
 	*x = ListTagsResponse{}
-	mi := &file_media_media_service_proto_msgTypes[25]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1435,7 +1435,7 @@ func (x *ListTagsResponse) String() string {
 func (*ListTagsResponse) ProtoMessage() {}
 
 func (x *ListTagsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[25]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1448,7 +1448,7 @@ func (x *ListTagsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTagsResponse.ProtoReflect.Descriptor instead.
 func (*ListTagsResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{25}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ListTagsResponse) GetTotal() int32 {
@@ -1495,7 +1495,7 @@ type GetTagRequest struct {
 
 func (x *GetTagRequest) Reset() {
 	*x = GetTagRequest{}
-	mi := &file_media_media_service_proto_msgTypes[26]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1507,7 +1507,7 @@ func (x *GetTagRequest) String() string {
 func (*GetTagRequest) ProtoMessage() {}
 
 func (x *GetTagRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[26]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1520,7 +1520,7 @@ func (x *GetTagRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTagRequest.ProtoReflect.Descriptor instead.
 func (*GetTagRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{26}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *GetTagRequest) GetId() int64 {
@@ -1539,7 +1539,7 @@ type GetTagResponse struct {
 
 func (x *GetTagResponse) Reset() {
 	*x = GetTagResponse{}
-	mi := &file_media_media_service_proto_msgTypes[27]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1551,7 +1551,7 @@ func (x *GetTagResponse) String() string {
 func (*GetTagResponse) ProtoMessage() {}
 
 func (x *GetTagResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[27]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1564,7 +1564,7 @@ func (x *GetTagResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTagResponse.ProtoReflect.Descriptor instead.
 func (*GetTagResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{27}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *GetTagResponse) GetTag() *types.Tag {
@@ -1583,7 +1583,7 @@ type CreateTagRequest struct {
 
 func (x *CreateTagRequest) Reset() {
 	*x = CreateTagRequest{}
-	mi := &file_media_media_service_proto_msgTypes[28]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1595,7 +1595,7 @@ func (x *CreateTagRequest) String() string {
 func (*CreateTagRequest) ProtoMessage() {}
 
 func (x *CreateTagRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[28]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1608,7 +1608,7 @@ func (x *CreateTagRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTagRequest.ProtoReflect.Descriptor instead.
 func (*CreateTagRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{28}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *CreateTagRequest) GetTag() *types.Tag {
@@ -1627,7 +1627,7 @@ type CreateTagResponse struct {
 
 func (x *CreateTagResponse) Reset() {
 	*x = CreateTagResponse{}
-	mi := &file_media_media_service_proto_msgTypes[29]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1639,7 +1639,7 @@ func (x *CreateTagResponse) String() string {
 func (*CreateTagResponse) ProtoMessage() {}
 
 func (x *CreateTagResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[29]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1652,7 +1652,7 @@ func (x *CreateTagResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTagResponse.ProtoReflect.Descriptor instead.
 func (*CreateTagResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{29}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *CreateTagResponse) GetTag() *types.Tag {
@@ -1672,7 +1672,7 @@ type UpdateTagRequest struct {
 
 func (x *UpdateTagRequest) Reset() {
 	*x = UpdateTagRequest{}
-	mi := &file_media_media_service_proto_msgTypes[30]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1684,7 +1684,7 @@ func (x *UpdateTagRequest) String() string {
 func (*UpdateTagRequest) ProtoMessage() {}
 
 func (x *UpdateTagRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[30]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1697,7 +1697,7 @@ func (x *UpdateTagRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTagRequest.ProtoReflect.Descriptor instead.
 func (*UpdateTagRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{30}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *UpdateTagRequest) GetTag() *types.Tag {
@@ -1723,7 +1723,7 @@ type UpdateTagResponse struct {
 
 func (x *UpdateTagResponse) Reset() {
 	*x = UpdateTagResponse{}
-	mi := &file_media_media_service_proto_msgTypes[31]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1735,7 +1735,7 @@ func (x *UpdateTagResponse) String() string {
 func (*UpdateTagResponse) ProtoMessage() {}
 
 func (x *UpdateTagResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[31]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1748,7 +1748,7 @@ func (x *UpdateTagResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTagResponse.ProtoReflect.Descriptor instead.
 func (*UpdateTagResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{31}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *UpdateTagResponse) GetTag() *types.Tag {
@@ -1767,7 +1767,7 @@ type DeleteTagRequest struct {
 
 func (x *DeleteTagRequest) Reset() {
 	*x = DeleteTagRequest{}
-	mi := &file_media_media_service_proto_msgTypes[32]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1779,7 +1779,7 @@ func (x *DeleteTagRequest) String() string {
 func (*DeleteTagRequest) ProtoMessage() {}
 
 func (x *DeleteTagRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[32]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1792,7 +1792,7 @@ func (x *DeleteTagRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteTagRequest.ProtoReflect.Descriptor instead.
 func (*DeleteTagRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{32}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *DeleteTagRequest) GetId() int64 {
@@ -1811,7 +1811,7 @@ type DeleteTagResponse struct {
 
 func (x *DeleteTagResponse) Reset() {
 	*x = DeleteTagResponse{}
-	mi := &file_media_media_service_proto_msgTypes[33]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1823,7 +1823,7 @@ func (x *DeleteTagResponse) String() string {
 func (*DeleteTagResponse) ProtoMessage() {}
 
 func (x *DeleteTagResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[33]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1836,7 +1836,7 @@ func (x *DeleteTagResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteTagResponse.ProtoReflect.Descriptor instead.
 func (*DeleteTagResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{33}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *DeleteTagResponse) GetEmpty() *emptypb.Empty {
@@ -1861,7 +1861,7 @@ type ListCommentsRequest struct {
 
 func (x *ListCommentsRequest) Reset() {
 	*x = ListCommentsRequest{}
-	mi := &file_media_media_service_proto_msgTypes[34]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1873,7 +1873,7 @@ func (x *ListCommentsRequest) String() string {
 func (*ListCommentsRequest) ProtoMessage() {}
 
 func (x *ListCommentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[34]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1886,7 +1886,7 @@ func (x *ListCommentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCommentsRequest.ProtoReflect.Descriptor instead.
 func (*ListCommentsRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{34}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *ListCommentsRequest) GetPage() int32 {
@@ -1951,7 +1951,7 @@ type ListCommentsResponse struct {
 
 func (x *ListCommentsResponse) Reset() {
 	*x = ListCommentsResponse{}
-	mi := &file_media_media_service_proto_msgTypes[35]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1963,7 +1963,7 @@ func (x *ListCommentsResponse) String() string {
 func (*ListCommentsResponse) ProtoMessage() {}
 
 func (x *ListCommentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[35]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1976,7 +1976,7 @@ func (x *ListCommentsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCommentsResponse.ProtoReflect.Descriptor instead.
 func (*ListCommentsResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{35}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *ListCommentsResponse) GetTotal() int32 {
@@ -2023,7 +2023,7 @@ type GetCommentRequest struct {
 
 func (x *GetCommentRequest) Reset() {
 	*x = GetCommentRequest{}
-	mi := &file_media_media_service_proto_msgTypes[36]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2035,7 +2035,7 @@ func (x *GetCommentRequest) String() string {
 func (*GetCommentRequest) ProtoMessage() {}
 
 func (x *GetCommentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[36]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2048,7 +2048,7 @@ func (x *GetCommentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCommentRequest.ProtoReflect.Descriptor instead.
 func (*GetCommentRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{36}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *GetCommentRequest) GetId() int64 {
@@ -2067,7 +2067,7 @@ type GetCommentResponse struct {
 
 func (x *GetCommentResponse) Reset() {
 	*x = GetCommentResponse{}
-	mi := &file_media_media_service_proto_msgTypes[37]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2079,7 +2079,7 @@ func (x *GetCommentResponse) String() string {
 func (*GetCommentResponse) ProtoMessage() {}
 
 func (x *GetCommentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[37]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2092,7 +2092,7 @@ func (x *GetCommentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCommentResponse.ProtoReflect.Descriptor instead.
 func (*GetCommentResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{37}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *GetCommentResponse) GetComment() *types.Comment {
@@ -2111,7 +2111,7 @@ type CreateCommentRequest struct {
 
 func (x *CreateCommentRequest) Reset() {
 	*x = CreateCommentRequest{}
-	mi := &file_media_media_service_proto_msgTypes[38]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2123,7 +2123,7 @@ func (x *CreateCommentRequest) String() string {
 func (*CreateCommentRequest) ProtoMessage() {}
 
 func (x *CreateCommentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[38]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2136,7 +2136,7 @@ func (x *CreateCommentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCommentRequest.ProtoReflect.Descriptor instead.
 func (*CreateCommentRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{38}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *CreateCommentRequest) GetComment() *types.Comment {
@@ -2155,7 +2155,7 @@ type CreateCommentResponse struct {
 
 func (x *CreateCommentResponse) Reset() {
 	*x = CreateCommentResponse{}
-	mi := &file_media_media_service_proto_msgTypes[39]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2167,7 +2167,7 @@ func (x *CreateCommentResponse) String() string {
 func (*CreateCommentResponse) ProtoMessage() {}
 
 func (x *CreateCommentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[39]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2180,7 +2180,7 @@ func (x *CreateCommentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCommentResponse.ProtoReflect.Descriptor instead.
 func (*CreateCommentResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{39}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *CreateCommentResponse) GetComment() *types.Comment {
@@ -2200,7 +2200,7 @@ type UpdateCommentRequest struct {
 
 func (x *UpdateCommentRequest) Reset() {
 	*x = UpdateCommentRequest{}
-	mi := &file_media_media_service_proto_msgTypes[40]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2212,7 +2212,7 @@ func (x *UpdateCommentRequest) String() string {
 func (*UpdateCommentRequest) ProtoMessage() {}
 
 func (x *UpdateCommentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[40]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2225,7 +2225,7 @@ func (x *UpdateCommentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCommentRequest.ProtoReflect.Descriptor instead.
 func (*UpdateCommentRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{40}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *UpdateCommentRequest) GetComment() *types.Comment {
@@ -2251,7 +2251,7 @@ type UpdateCommentResponse struct {
 
 func (x *UpdateCommentResponse) Reset() {
 	*x = UpdateCommentResponse{}
-	mi := &file_media_media_service_proto_msgTypes[41]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2263,7 +2263,7 @@ func (x *UpdateCommentResponse) String() string {
 func (*UpdateCommentResponse) ProtoMessage() {}
 
 func (x *UpdateCommentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[41]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2276,7 +2276,7 @@ func (x *UpdateCommentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCommentResponse.ProtoReflect.Descriptor instead.
 func (*UpdateCommentResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{41}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *UpdateCommentResponse) GetComment() *types.Comment {
@@ -2295,7 +2295,7 @@ type DeleteCommentRequest struct {
 
 func (x *DeleteCommentRequest) Reset() {
 	*x = DeleteCommentRequest{}
-	mi := &file_media_media_service_proto_msgTypes[42]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2307,7 +2307,7 @@ func (x *DeleteCommentRequest) String() string {
 func (*DeleteCommentRequest) ProtoMessage() {}
 
 func (x *DeleteCommentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[42]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2320,7 +2320,7 @@ func (x *DeleteCommentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCommentRequest.ProtoReflect.Descriptor instead.
 func (*DeleteCommentRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{42}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *DeleteCommentRequest) GetId() int64 {
@@ -2339,7 +2339,7 @@ type DeleteCommentResponse struct {
 
 func (x *DeleteCommentResponse) Reset() {
 	*x = DeleteCommentResponse{}
-	mi := &file_media_media_service_proto_msgTypes[43]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2351,7 +2351,7 @@ func (x *DeleteCommentResponse) String() string {
 func (*DeleteCommentResponse) ProtoMessage() {}
 
 func (x *DeleteCommentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[43]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2364,7 +2364,7 @@ func (x *DeleteCommentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCommentResponse.ProtoReflect.Descriptor instead.
 func (*DeleteCommentResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{43}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *DeleteCommentResponse) GetEmpty() *emptypb.Empty {
@@ -2385,7 +2385,7 @@ type ToggleLikeRequest struct {
 
 func (x *ToggleLikeRequest) Reset() {
 	*x = ToggleLikeRequest{}
-	mi := &file_media_media_service_proto_msgTypes[44]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2397,7 +2397,7 @@ func (x *ToggleLikeRequest) String() string {
 func (*ToggleLikeRequest) ProtoMessage() {}
 
 func (x *ToggleLikeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[44]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2410,7 +2410,7 @@ func (x *ToggleLikeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToggleLikeRequest.ProtoReflect.Descriptor instead.
 func (*ToggleLikeRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{44}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *ToggleLikeRequest) GetUserId() int64 {
@@ -2444,7 +2444,7 @@ type ToggleLikeResponse struct {
 
 func (x *ToggleLikeResponse) Reset() {
 	*x = ToggleLikeResponse{}
-	mi := &file_media_media_service_proto_msgTypes[45]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2456,7 +2456,7 @@ func (x *ToggleLikeResponse) String() string {
 func (*ToggleLikeResponse) ProtoMessage() {}
 
 func (x *ToggleLikeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[45]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2469,7 +2469,7 @@ func (x *ToggleLikeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToggleLikeResponse.ProtoReflect.Descriptor instead.
 func (*ToggleLikeResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{45}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *ToggleLikeResponse) GetLiked() bool {
@@ -2495,7 +2495,7 @@ type GetMediaLikesRequest struct {
 
 func (x *GetMediaLikesRequest) Reset() {
 	*x = GetMediaLikesRequest{}
-	mi := &file_media_media_service_proto_msgTypes[46]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2507,7 +2507,7 @@ func (x *GetMediaLikesRequest) String() string {
 func (*GetMediaLikesRequest) ProtoMessage() {}
 
 func (x *GetMediaLikesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[46]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2520,7 +2520,7 @@ func (x *GetMediaLikesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMediaLikesRequest.ProtoReflect.Descriptor instead.
 func (*GetMediaLikesRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{46}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *GetMediaLikesRequest) GetMediaId() int64 {
@@ -2540,7 +2540,7 @@ type GetMediaLikesResponse struct {
 
 func (x *GetMediaLikesResponse) Reset() {
 	*x = GetMediaLikesResponse{}
-	mi := &file_media_media_service_proto_msgTypes[47]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2552,7 +2552,7 @@ func (x *GetMediaLikesResponse) String() string {
 func (*GetMediaLikesResponse) ProtoMessage() {}
 
 func (x *GetMediaLikesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[47]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2565,7 +2565,7 @@ func (x *GetMediaLikesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMediaLikesResponse.ProtoReflect.Descriptor instead.
 func (*GetMediaLikesResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{47}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *GetMediaLikesResponse) GetLikeCount() int64 {
@@ -2591,7 +2591,7 @@ type GetUserLikesRequest struct {
 
 func (x *GetUserLikesRequest) Reset() {
 	*x = GetUserLikesRequest{}
-	mi := &file_media_media_service_proto_msgTypes[48]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2603,7 +2603,7 @@ func (x *GetUserLikesRequest) String() string {
 func (*GetUserLikesRequest) ProtoMessage() {}
 
 func (x *GetUserLikesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[48]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2616,7 +2616,7 @@ func (x *GetUserLikesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserLikesRequest.ProtoReflect.Descriptor instead.
 func (*GetUserLikesRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{48}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *GetUserLikesRequest) GetUserId() int64 {
@@ -2635,7 +2635,7 @@ type GetUserLikesResponse struct {
 
 func (x *GetUserLikesResponse) Reset() {
 	*x = GetUserLikesResponse{}
-	mi := &file_media_media_service_proto_msgTypes[49]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2647,7 +2647,7 @@ func (x *GetUserLikesResponse) String() string {
 func (*GetUserLikesResponse) ProtoMessage() {}
 
 func (x *GetUserLikesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[49]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2660,7 +2660,7 @@ func (x *GetUserLikesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserLikesResponse.ProtoReflect.Descriptor instead.
 func (*GetUserLikesResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{49}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *GetUserLikesResponse) GetLikes() []*types.Like {
@@ -2681,7 +2681,7 @@ type GetFavoritesRequest struct {
 
 func (x *GetFavoritesRequest) Reset() {
 	*x = GetFavoritesRequest{}
-	mi := &file_media_media_service_proto_msgTypes[50]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2693,7 +2693,7 @@ func (x *GetFavoritesRequest) String() string {
 func (*GetFavoritesRequest) ProtoMessage() {}
 
 func (x *GetFavoritesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[50]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2706,7 +2706,7 @@ func (x *GetFavoritesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFavoritesRequest.ProtoReflect.Descriptor instead.
 func (*GetFavoritesRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{50}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *GetFavoritesRequest) GetUserId() int64 {
@@ -2741,7 +2741,7 @@ type GetFavoritesResponse struct {
 
 func (x *GetFavoritesResponse) Reset() {
 	*x = GetFavoritesResponse{}
-	mi := &file_media_media_service_proto_msgTypes[51]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2753,7 +2753,7 @@ func (x *GetFavoritesResponse) String() string {
 func (*GetFavoritesResponse) ProtoMessage() {}
 
 func (x *GetFavoritesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[51]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2766,7 +2766,7 @@ func (x *GetFavoritesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFavoritesResponse.ProtoReflect.Descriptor instead.
 func (*GetFavoritesResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{51}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *GetFavoritesResponse) GetTotal() int32 {
@@ -2800,7 +2800,7 @@ type ToggleFavoriteRequest struct {
 
 func (x *ToggleFavoriteRequest) Reset() {
 	*x = ToggleFavoriteRequest{}
-	mi := &file_media_media_service_proto_msgTypes[52]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2812,7 +2812,7 @@ func (x *ToggleFavoriteRequest) String() string {
 func (*ToggleFavoriteRequest) ProtoMessage() {}
 
 func (x *ToggleFavoriteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[52]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2825,7 +2825,7 @@ func (x *ToggleFavoriteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToggleFavoriteRequest.ProtoReflect.Descriptor instead.
 func (*ToggleFavoriteRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{52}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *ToggleFavoriteRequest) GetUserId() int64 {
@@ -2852,7 +2852,7 @@ type ToggleFavoriteResponse struct {
 
 func (x *ToggleFavoriteResponse) Reset() {
 	*x = ToggleFavoriteResponse{}
-	mi := &file_media_media_service_proto_msgTypes[53]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2864,7 +2864,7 @@ func (x *ToggleFavoriteResponse) String() string {
 func (*ToggleFavoriteResponse) ProtoMessage() {}
 
 func (x *ToggleFavoriteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[53]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2877,7 +2877,7 @@ func (x *ToggleFavoriteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToggleFavoriteResponse.ProtoReflect.Descriptor instead.
 func (*ToggleFavoriteResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{53}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *ToggleFavoriteResponse) GetFavorited() bool {
@@ -2903,7 +2903,7 @@ type RemoveFavoriteRequest struct {
 
 func (x *RemoveFavoriteRequest) Reset() {
 	*x = RemoveFavoriteRequest{}
-	mi := &file_media_media_service_proto_msgTypes[54]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2915,7 +2915,7 @@ func (x *RemoveFavoriteRequest) String() string {
 func (*RemoveFavoriteRequest) ProtoMessage() {}
 
 func (x *RemoveFavoriteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[54]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2928,7 +2928,7 @@ func (x *RemoveFavoriteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveFavoriteRequest.ProtoReflect.Descriptor instead.
 func (*RemoveFavoriteRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{54}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *RemoveFavoriteRequest) GetId() int64 {
@@ -2947,7 +2947,7 @@ type RemoveFavoriteResponse struct {
 
 func (x *RemoveFavoriteResponse) Reset() {
 	*x = RemoveFavoriteResponse{}
-	mi := &file_media_media_service_proto_msgTypes[55]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2959,7 +2959,7 @@ func (x *RemoveFavoriteResponse) String() string {
 func (*RemoveFavoriteResponse) ProtoMessage() {}
 
 func (x *RemoveFavoriteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[55]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2972,7 +2972,7 @@ func (x *RemoveFavoriteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveFavoriteResponse.ProtoReflect.Descriptor instead.
 func (*RemoveFavoriteResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{55}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{55}
 }
 
 func (x *RemoveFavoriteResponse) GetEmpty() *emptypb.Empty {
@@ -2994,7 +2994,7 @@ type GetPlaylistsRequest struct {
 
 func (x *GetPlaylistsRequest) Reset() {
 	*x = GetPlaylistsRequest{}
-	mi := &file_media_media_service_proto_msgTypes[56]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3006,7 +3006,7 @@ func (x *GetPlaylistsRequest) String() string {
 func (*GetPlaylistsRequest) ProtoMessage() {}
 
 func (x *GetPlaylistsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[56]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3019,7 +3019,7 @@ func (x *GetPlaylistsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPlaylistsRequest.ProtoReflect.Descriptor instead.
 func (*GetPlaylistsRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{56}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{56}
 }
 
 func (x *GetPlaylistsRequest) GetUserId() int64 {
@@ -3060,7 +3060,7 @@ type GetPlaylistsResponse struct {
 
 func (x *GetPlaylistsResponse) Reset() {
 	*x = GetPlaylistsResponse{}
-	mi := &file_media_media_service_proto_msgTypes[57]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3072,7 +3072,7 @@ func (x *GetPlaylistsResponse) String() string {
 func (*GetPlaylistsResponse) ProtoMessage() {}
 
 func (x *GetPlaylistsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[57]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3085,7 +3085,7 @@ func (x *GetPlaylistsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPlaylistsResponse.ProtoReflect.Descriptor instead.
 func (*GetPlaylistsResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{57}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{57}
 }
 
 func (x *GetPlaylistsResponse) GetTotal() int32 {
@@ -3111,7 +3111,7 @@ type GetPlaylistRequest struct {
 
 func (x *GetPlaylistRequest) Reset() {
 	*x = GetPlaylistRequest{}
-	mi := &file_media_media_service_proto_msgTypes[58]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3123,7 +3123,7 @@ func (x *GetPlaylistRequest) String() string {
 func (*GetPlaylistRequest) ProtoMessage() {}
 
 func (x *GetPlaylistRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[58]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3136,7 +3136,7 @@ func (x *GetPlaylistRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPlaylistRequest.ProtoReflect.Descriptor instead.
 func (*GetPlaylistRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{58}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{58}
 }
 
 func (x *GetPlaylistRequest) GetId() int64 {
@@ -3156,7 +3156,7 @@ type GetPlaylistResponse struct {
 
 func (x *GetPlaylistResponse) Reset() {
 	*x = GetPlaylistResponse{}
-	mi := &file_media_media_service_proto_msgTypes[59]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[59]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3168,7 +3168,7 @@ func (x *GetPlaylistResponse) String() string {
 func (*GetPlaylistResponse) ProtoMessage() {}
 
 func (x *GetPlaylistResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[59]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[59]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3181,7 +3181,7 @@ func (x *GetPlaylistResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPlaylistResponse.ProtoReflect.Descriptor instead.
 func (*GetPlaylistResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{59}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{59}
 }
 
 func (x *GetPlaylistResponse) GetPlaylist() *types.Playlist {
@@ -3207,7 +3207,7 @@ type CreatePlaylistRequest struct {
 
 func (x *CreatePlaylistRequest) Reset() {
 	*x = CreatePlaylistRequest{}
-	mi := &file_media_media_service_proto_msgTypes[60]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3219,7 +3219,7 @@ func (x *CreatePlaylistRequest) String() string {
 func (*CreatePlaylistRequest) ProtoMessage() {}
 
 func (x *CreatePlaylistRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[60]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3232,7 +3232,7 @@ func (x *CreatePlaylistRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreatePlaylistRequest.ProtoReflect.Descriptor instead.
 func (*CreatePlaylistRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{60}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{60}
 }
 
 func (x *CreatePlaylistRequest) GetPlaylist() *types.Playlist {
@@ -3251,7 +3251,7 @@ type CreatePlaylistResponse struct {
 
 func (x *CreatePlaylistResponse) Reset() {
 	*x = CreatePlaylistResponse{}
-	mi := &file_media_media_service_proto_msgTypes[61]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3263,7 +3263,7 @@ func (x *CreatePlaylistResponse) String() string {
 func (*CreatePlaylistResponse) ProtoMessage() {}
 
 func (x *CreatePlaylistResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[61]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3276,7 +3276,7 @@ func (x *CreatePlaylistResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreatePlaylistResponse.ProtoReflect.Descriptor instead.
 func (*CreatePlaylistResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{61}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{61}
 }
 
 func (x *CreatePlaylistResponse) GetPlaylist() *types.Playlist {
@@ -3296,7 +3296,7 @@ type UpdatePlaylistRequest struct {
 
 func (x *UpdatePlaylistRequest) Reset() {
 	*x = UpdatePlaylistRequest{}
-	mi := &file_media_media_service_proto_msgTypes[62]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[62]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3308,7 +3308,7 @@ func (x *UpdatePlaylistRequest) String() string {
 func (*UpdatePlaylistRequest) ProtoMessage() {}
 
 func (x *UpdatePlaylistRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[62]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[62]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3321,7 +3321,7 @@ func (x *UpdatePlaylistRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdatePlaylistRequest.ProtoReflect.Descriptor instead.
 func (*UpdatePlaylistRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{62}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{62}
 }
 
 func (x *UpdatePlaylistRequest) GetPlaylist() *types.Playlist {
@@ -3347,7 +3347,7 @@ type UpdatePlaylistResponse struct {
 
 func (x *UpdatePlaylistResponse) Reset() {
 	*x = UpdatePlaylistResponse{}
-	mi := &file_media_media_service_proto_msgTypes[63]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[63]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3359,7 +3359,7 @@ func (x *UpdatePlaylistResponse) String() string {
 func (*UpdatePlaylistResponse) ProtoMessage() {}
 
 func (x *UpdatePlaylistResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[63]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[63]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3372,7 +3372,7 @@ func (x *UpdatePlaylistResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdatePlaylistResponse.ProtoReflect.Descriptor instead.
 func (*UpdatePlaylistResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{63}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{63}
 }
 
 func (x *UpdatePlaylistResponse) GetPlaylist() *types.Playlist {
@@ -3391,7 +3391,7 @@ type DeletePlaylistRequest struct {
 
 func (x *DeletePlaylistRequest) Reset() {
 	*x = DeletePlaylistRequest{}
-	mi := &file_media_media_service_proto_msgTypes[64]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[64]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3403,7 +3403,7 @@ func (x *DeletePlaylistRequest) String() string {
 func (*DeletePlaylistRequest) ProtoMessage() {}
 
 func (x *DeletePlaylistRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[64]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[64]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3416,7 +3416,7 @@ func (x *DeletePlaylistRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeletePlaylistRequest.ProtoReflect.Descriptor instead.
 func (*DeletePlaylistRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{64}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{64}
 }
 
 func (x *DeletePlaylistRequest) GetId() int64 {
@@ -3435,7 +3435,7 @@ type DeletePlaylistResponse struct {
 
 func (x *DeletePlaylistResponse) Reset() {
 	*x = DeletePlaylistResponse{}
-	mi := &file_media_media_service_proto_msgTypes[65]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[65]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3447,7 +3447,7 @@ func (x *DeletePlaylistResponse) String() string {
 func (*DeletePlaylistResponse) ProtoMessage() {}
 
 func (x *DeletePlaylistResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[65]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[65]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3460,7 +3460,7 @@ func (x *DeletePlaylistResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeletePlaylistResponse.ProtoReflect.Descriptor instead.
 func (*DeletePlaylistResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{65}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{65}
 }
 
 func (x *DeletePlaylistResponse) GetEmpty() *emptypb.Empty {
@@ -3480,7 +3480,7 @@ type AddToPlaylistRequest struct {
 
 func (x *AddToPlaylistRequest) Reset() {
 	*x = AddToPlaylistRequest{}
-	mi := &file_media_media_service_proto_msgTypes[66]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[66]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3492,7 +3492,7 @@ func (x *AddToPlaylistRequest) String() string {
 func (*AddToPlaylistRequest) ProtoMessage() {}
 
 func (x *AddToPlaylistRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[66]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[66]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3505,7 +3505,7 @@ func (x *AddToPlaylistRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddToPlaylistRequest.ProtoReflect.Descriptor instead.
 func (*AddToPlaylistRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{66}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{66}
 }
 
 func (x *AddToPlaylistRequest) GetPlaylistId() int64 {
@@ -3531,7 +3531,7 @@ type AddToPlaylistResponse struct {
 
 func (x *AddToPlaylistResponse) Reset() {
 	*x = AddToPlaylistResponse{}
-	mi := &file_media_media_service_proto_msgTypes[67]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[67]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3543,7 +3543,7 @@ func (x *AddToPlaylistResponse) String() string {
 func (*AddToPlaylistResponse) ProtoMessage() {}
 
 func (x *AddToPlaylistResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[67]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[67]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3556,7 +3556,7 @@ func (x *AddToPlaylistResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddToPlaylistResponse.ProtoReflect.Descriptor instead.
 func (*AddToPlaylistResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{67}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{67}
 }
 
 func (x *AddToPlaylistResponse) GetMediaCount() int64 {
@@ -3576,7 +3576,7 @@ type RemoveFromPlaylistRequest struct {
 
 func (x *RemoveFromPlaylistRequest) Reset() {
 	*x = RemoveFromPlaylistRequest{}
-	mi := &file_media_media_service_proto_msgTypes[68]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[68]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3588,7 +3588,7 @@ func (x *RemoveFromPlaylistRequest) String() string {
 func (*RemoveFromPlaylistRequest) ProtoMessage() {}
 
 func (x *RemoveFromPlaylistRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[68]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[68]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3601,7 +3601,7 @@ func (x *RemoveFromPlaylistRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveFromPlaylistRequest.ProtoReflect.Descriptor instead.
 func (*RemoveFromPlaylistRequest) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{68}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{68}
 }
 
 func (x *RemoveFromPlaylistRequest) GetPlaylistId() int64 {
@@ -3627,7 +3627,7 @@ type RemoveFromPlaylistResponse struct {
 
 func (x *RemoveFromPlaylistResponse) Reset() {
 	*x = RemoveFromPlaylistResponse{}
-	mi := &file_media_media_service_proto_msgTypes[69]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[69]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3639,7 +3639,7 @@ func (x *RemoveFromPlaylistResponse) String() string {
 func (*RemoveFromPlaylistResponse) ProtoMessage() {}
 
 func (x *RemoveFromPlaylistResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_media_media_service_proto_msgTypes[69]
+	mi := &file_proto_v1_media_media_service_proto_msgTypes[69]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3652,7 +3652,7 @@ func (x *RemoveFromPlaylistResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveFromPlaylistResponse.ProtoReflect.Descriptor instead.
 func (*RemoveFromPlaylistResponse) Descriptor() ([]byte, []int) {
-	return file_media_media_service_proto_rawDescGZIP(), []int{69}
+	return file_proto_v1_media_media_service_proto_rawDescGZIP(), []int{69}
 }
 
 func (x *RemoveFromPlaylistResponse) GetMediaCount() int64 {
@@ -3662,11 +3662,11 @@ func (x *RemoveFromPlaylistResponse) GetMediaCount() int64 {
 	return 0
 }
 
-var File_media_media_service_proto protoreflect.FileDescriptor
+var File_proto_v1_media_media_service_proto protoreflect.FileDescriptor
 
-const file_media_media_service_proto_rawDesc = "" +
+const file_proto_v1_media_media_service_proto_rawDesc = "" +
 	"\n" +
-	"\x19media/media_service.proto\x12\x15api.v1.services.media\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a google/protobuf/field_mask.proto\x1a\x11types/media.proto\"\xe7\x02\n" +
+	"\"proto/v1/media/media_service.proto\x12\x15api.v1.services.media\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a google/protobuf/field_mask.proto\x1a\x1aproto/v1/types/media.proto\"\xe7\x02\n" +
 	"\x11ListMediasRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\x12\x1e\n" +
@@ -3955,23 +3955,23 @@ const file_media_media_service_proto_rawDesc = "" +
 	"\x0eUpdatePlaylist\x12,.api.v1.services.media.UpdatePlaylistRequest\x1a-.api.v1.services.media.UpdatePlaylistResponse\"*\x82\xd3\xe4\x93\x02$:\x01*\x1a\x1f/api/v1/playlists/{playlist.id}\x12\x8d\x01\n" +
 	"\x0eDeletePlaylist\x12,.api.v1.services.media.DeletePlaylistRequest\x1a-.api.v1.services.media.DeletePlaylistResponse\"\x1e\x82\xd3\xe4\x93\x02\x18*\x16/api/v1/playlists/{id}\x12\x9a\x01\n" +
 	"\rAddToPlaylist\x12+.api.v1.services.media.AddToPlaylistRequest\x1a,.api.v1.services.media.AddToPlaylistResponse\".\x82\xd3\xe4\x93\x02(:\x01*\"#/api/v1/playlists/{playlist_id}/add\x12\xac\x01\n" +
-	"\x12RemoveFromPlaylist\x120.api.v1.services.media.RemoveFromPlaylistRequest\x1a1.api.v1.services.media.RemoveFromPlaylistResponse\"1\x82\xd3\xe4\x93\x02+:\x01*\"&/api/v1/playlists/{playlist_id}/removeB\x89\x01\n" +
-	"!com.origcms.api.v1.services.mediaB\x18OrigCMSServiceMediaProtoP\x01Z9origadmin/application/origcms/api/v1/services/media;media\xa2\x02\fOrigCMSMediab\x06proto3"
+	"\x12RemoveFromPlaylist\x120.api.v1.services.media.RemoveFromPlaylistRequest\x1a1.api.v1.services.media.RemoveFromPlaylistResponse\"1\x82\xd3\xe4\x93\x02+:\x01*\"&/api/v1/playlists/{playlist_id}/removeB\x84\x01\n" +
+	"!com.origcms.api.v1.services.mediaB\x18OrigCMSServiceMediaProtoP\x01Z4origadmin/application/origcms/api/gen/v1/media;media\xa2\x02\fOrigCMSMediab\x06proto3"
 
 var (
-	file_media_media_service_proto_rawDescOnce sync.Once
-	file_media_media_service_proto_rawDescData []byte
+	file_proto_v1_media_media_service_proto_rawDescOnce sync.Once
+	file_proto_v1_media_media_service_proto_rawDescData []byte
 )
 
-func file_media_media_service_proto_rawDescGZIP() []byte {
-	file_media_media_service_proto_rawDescOnce.Do(func() {
-		file_media_media_service_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_media_media_service_proto_rawDesc), len(file_media_media_service_proto_rawDesc)))
+func file_proto_v1_media_media_service_proto_rawDescGZIP() []byte {
+	file_proto_v1_media_media_service_proto_rawDescOnce.Do(func() {
+		file_proto_v1_media_media_service_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_v1_media_media_service_proto_rawDesc), len(file_proto_v1_media_media_service_proto_rawDesc)))
 	})
-	return file_media_media_service_proto_rawDescData
+	return file_proto_v1_media_media_service_proto_rawDescData
 }
 
-var file_media_media_service_proto_msgTypes = make([]protoimpl.MessageInfo, 70)
-var file_media_media_service_proto_goTypes = []any{
+var file_proto_v1_media_media_service_proto_msgTypes = make([]protoimpl.MessageInfo, 70)
+var file_proto_v1_media_media_service_proto_goTypes = []any{
 	(*ListMediasRequest)(nil),          // 0: api.v1.services.media.ListMediasRequest
 	(*ListMediasResponse)(nil),         // 1: api.v1.services.media.ListMediasResponse
 	(*GetMediaRequest)(nil),            // 2: api.v1.services.media.GetMediaRequest
@@ -4052,7 +4052,7 @@ var file_media_media_service_proto_goTypes = []any{
 	(*types.Favorite)(nil),             // 77: api.v1.services.types.Favorite
 	(*types.Playlist)(nil),             // 78: api.v1.services.types.Playlist
 }
-var file_media_media_service_proto_depIdxs = []int32{
+var file_proto_v1_media_media_service_proto_depIdxs = []int32{
 	70, // 0: api.v1.services.media.ListMediasResponse.medias:type_name -> api.v1.services.types.Media
 	70, // 1: api.v1.services.media.GetMediaResponse.media:type_name -> api.v1.services.types.Media
 	70, // 2: api.v1.services.media.CreateMediaRequest.media:type_name -> api.v1.services.types.Media
@@ -4176,31 +4176,31 @@ var file_media_media_service_proto_depIdxs = []int32{
 	0,  // [0:46] is the sub-list for field type_name
 }
 
-func init() { file_media_media_service_proto_init() }
-func file_media_media_service_proto_init() {
-	if File_media_media_service_proto != nil {
+func init() { file_proto_v1_media_media_service_proto_init() }
+func file_proto_v1_media_media_service_proto_init() {
+	if File_proto_v1_media_media_service_proto != nil {
 		return
 	}
-	file_media_media_service_proto_msgTypes[0].OneofWrappers = []any{}
-	file_media_media_service_proto_msgTypes[14].OneofWrappers = []any{}
-	file_media_media_service_proto_msgTypes[24].OneofWrappers = []any{}
-	file_media_media_service_proto_msgTypes[34].OneofWrappers = []any{}
-	file_media_media_service_proto_msgTypes[56].OneofWrappers = []any{}
+	file_proto_v1_media_media_service_proto_msgTypes[0].OneofWrappers = []any{}
+	file_proto_v1_media_media_service_proto_msgTypes[14].OneofWrappers = []any{}
+	file_proto_v1_media_media_service_proto_msgTypes[24].OneofWrappers = []any{}
+	file_proto_v1_media_media_service_proto_msgTypes[34].OneofWrappers = []any{}
+	file_proto_v1_media_media_service_proto_msgTypes[56].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_media_media_service_proto_rawDesc), len(file_media_media_service_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_v1_media_media_service_proto_rawDesc), len(file_proto_v1_media_media_service_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   70,
 			NumExtensions: 0,
 			NumServices:   7,
 		},
-		GoTypes:           file_media_media_service_proto_goTypes,
-		DependencyIndexes: file_media_media_service_proto_depIdxs,
-		MessageInfos:      file_media_media_service_proto_msgTypes,
+		GoTypes:           file_proto_v1_media_media_service_proto_goTypes,
+		DependencyIndexes: file_proto_v1_media_media_service_proto_depIdxs,
+		MessageInfos:      file_proto_v1_media_media_service_proto_msgTypes,
 	}.Build()
-	File_media_media_service_proto = out.File
-	file_media_media_service_proto_goTypes = nil
-	file_media_media_service_proto_depIdxs = nil
+	File_proto_v1_media_media_service_proto = out.File
+	file_proto_v1_media_media_service_proto_goTypes = nil
+	file_proto_v1_media_media_service_proto_depIdxs = nil
 }

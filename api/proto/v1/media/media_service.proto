@@ -5,9 +5,9 @@ package api.v1.services.media;
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/field_mask.proto";
-import "types/media.proto";
+import "proto/v1/types/media.proto";
 
-option go_package = "origadmin/application/origcms/api/v1/services/media;media";
+option go_package = "origadmin/application/origcms/api/gen/v1/media;media";
 option java_multiple_files = true;
 option java_outer_classname = "OrigCMSServiceMediaProto";
 option java_package = "com.origcms.api.v1.services.media";

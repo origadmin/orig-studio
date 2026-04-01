@@ -9,7 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/google/wire"
 	"github.com/origadmin/runtime"
-	"origadmin/application/origcms/api/v1/services/media"
+	"origadmin/application/origcms/api/gen/v1/media"
 	"origadmin/application/origcms/internal/svc-media/service"
 )
 

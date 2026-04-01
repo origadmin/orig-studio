@@ -8,7 +8,7 @@ import (
 	"context"
 
 	"github.com/origadmin/runtime/log"
-	"origadmin/application/origcms/api/v1/services/types"
+	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/svc-media/dto"
 )
 

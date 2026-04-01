@@ -10,7 +10,7 @@ import (
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"origadmin/application/origcms/api/v1/services/types"
+	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/svc-media/dto"
 )
