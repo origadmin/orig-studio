@@ -24,6 +24,7 @@ import (
 	"github.com/origadmin/runtime/log"
 	"github.com/origadmin/toolkits/crypto/hash"
 	hashtypes "github.com/origadmin/toolkits/crypto/hash/types"
+	_ "github.com/sqlite3ent/sqlite3"
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/data/entity"
 	confhelper "origadmin/application/origcms/internal/helpers/conf"
@@ -207,7 +208,8 @@ func ensurePostgresDB(dsn string) error {
 
 	// Check if database exists
 	var exists bool
-	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = $1)", dbName).Scan(&exists)
+	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = $1)", dbName).
+		Scan(&exists)
 	if err != nil {
 		return err
 	}

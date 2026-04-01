@@ -21,6 +21,8 @@ import (
 var ProviderSet = wire.NewSet(
 	NewEntClient,
 	NewMediaRepo,
+	NewUploadRepo,
+	NewLocalStorage,
 )
 
 // NewEntClient creates a new *entity.Client for svc-media.

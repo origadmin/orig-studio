@@ -85,8 +85,8 @@ func (h *FeedHandler) GetFeed(c *gin.Context) {
 	items := make([]MediaItem, len(medias))
 	for i, m := range medias {
 		username := ""
-		if len(m.Edges.User) > 0 {
-			username = m.Edges.User[0].Username
+		if m.Edges.User != nil {
+			username = m.Edges.User.Username
 		}
 		items[i] = MediaItem{
 			ID:          int(m.ID),

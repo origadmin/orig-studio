@@ -615,7 +615,6 @@ func (_u *MediaUpdate) ClearTags() *MediaUpdate {
 
 // SetUserID sets the "user_id" field.
 func (_u *MediaUpdate) SetUserID(v int) *MediaUpdate {
-	_u.mutation.ResetUserID()
 	_u.mutation.SetUserID(v)
 	return _u
 }
@@ -625,12 +624,6 @@ func (_u *MediaUpdate) SetNillableUserID(v *int) *MediaUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
-	return _u
-}
-
-// AddUserID adds value to the "user_id" field.
-func (_u *MediaUpdate) AddUserID(v int) *MediaUpdate {
-	_u.mutation.AddUserID(v)
 	return _u
 }
 
@@ -674,19 +667,9 @@ func (_u *MediaUpdate) SetUpdatedAt(v time.Time) *MediaUpdate {
 	return _u
 }
 
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *MediaUpdate) AddUserIDs(ids ...int) *MediaUpdate {
-	_u.mutation.AddUserIDs(ids...)
-	return _u
-}
-
-// AddUser adds the "user" edges to the User entity.
-func (_u *MediaUpdate) AddUser(v ...*User) *MediaUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddUserIDs(ids...)
+// SetUser sets the "user" edge to the User entity.
+func (_u *MediaUpdate) SetUser(v *User) *MediaUpdate {
+	return _u.SetUserID(v.ID)
 }
 
 // SetCategoryID sets the "category" edge to the Category entity by ID.
@@ -803,25 +786,10 @@ func (_u *MediaUpdate) Mutation() *MediaMutation {
 	return _u.mutation
 }
 
-// ClearUser clears all "user" edges to the User entity.
+// ClearUser clears the "user" edge to the User entity.
 func (_u *MediaUpdate) ClearUser() *MediaUpdate {
 	_u.mutation.ClearUser()
 	return _u
-}
-
-// RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (_u *MediaUpdate) RemoveUserIDs(ids ...int) *MediaUpdate {
-	_u.mutation.RemoveUserIDs(ids...)
-	return _u
-}
-
-// RemoveUser removes "user" edges to User entities.
-func (_u *MediaUpdate) RemoveUser(v ...*User) *MediaUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveUserIDs(ids...)
 }
 
 // ClearCategory clears the "category" edge to the Category entity.
@@ -1064,6 +1032,9 @@ func (_u *MediaUpdate) check() error {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`entity: validator failed for field "Media.state": %w`, err)}
 		}
 	}
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "Media.user"`)
+	}
 	return nil
 }
 
@@ -1249,12 +1220,6 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.TagsCleared() {
 		_spec.ClearField(media.FieldTags, field.TypeJSON)
 	}
-	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(media.FieldUserID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(media.FieldUserID, field.TypeInt, value)
-	}
 	if value, ok := _u.mutation.PublishedAt(); ok {
 		_spec.SetField(media.FieldPublishedAt, field.TypeTime, value)
 	}
@@ -1269,39 +1234,23 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   media.UserTable,
-			Columns: media.UserPrimaryKey,
+			Columns: []string{media.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedUserIDs(); len(nodes) > 0 && !_u.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   media.UserTable,
-			Columns: media.UserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   media.UserTable,
-			Columns: media.UserPrimaryKey,
+			Columns: []string{media.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
@@ -2210,7 +2159,6 @@ func (_u *MediaUpdateOne) ClearTags() *MediaUpdateOne {
 
 // SetUserID sets the "user_id" field.
 func (_u *MediaUpdateOne) SetUserID(v int) *MediaUpdateOne {
-	_u.mutation.ResetUserID()
 	_u.mutation.SetUserID(v)
 	return _u
 }
@@ -2220,12 +2168,6 @@ func (_u *MediaUpdateOne) SetNillableUserID(v *int) *MediaUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
-	return _u
-}
-
-// AddUserID adds value to the "user_id" field.
-func (_u *MediaUpdateOne) AddUserID(v int) *MediaUpdateOne {
-	_u.mutation.AddUserID(v)
 	return _u
 }
 
@@ -2269,19 +2211,9 @@ func (_u *MediaUpdateOne) SetUpdatedAt(v time.Time) *MediaUpdateOne {
 	return _u
 }
 
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *MediaUpdateOne) AddUserIDs(ids ...int) *MediaUpdateOne {
-	_u.mutation.AddUserIDs(ids...)
-	return _u
-}
-
-// AddUser adds the "user" edges to the User entity.
-func (_u *MediaUpdateOne) AddUser(v ...*User) *MediaUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddUserIDs(ids...)
+// SetUser sets the "user" edge to the User entity.
+func (_u *MediaUpdateOne) SetUser(v *User) *MediaUpdateOne {
+	return _u.SetUserID(v.ID)
 }
 
 // SetCategoryID sets the "category" edge to the Category entity by ID.
@@ -2398,25 +2330,10 @@ func (_u *MediaUpdateOne) Mutation() *MediaMutation {
 	return _u.mutation
 }
 
-// ClearUser clears all "user" edges to the User entity.
+// ClearUser clears the "user" edge to the User entity.
 func (_u *MediaUpdateOne) ClearUser() *MediaUpdateOne {
 	_u.mutation.ClearUser()
 	return _u
-}
-
-// RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (_u *MediaUpdateOne) RemoveUserIDs(ids ...int) *MediaUpdateOne {
-	_u.mutation.RemoveUserIDs(ids...)
-	return _u
-}
-
-// RemoveUser removes "user" edges to User entities.
-func (_u *MediaUpdateOne) RemoveUser(v ...*User) *MediaUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveUserIDs(ids...)
 }
 
 // ClearCategory clears the "category" edge to the Category entity.
@@ -2672,6 +2589,9 @@ func (_u *MediaUpdateOne) check() error {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`entity: validator failed for field "Media.state": %w`, err)}
 		}
 	}
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "Media.user"`)
+	}
 	return nil
 }
 
@@ -2874,12 +2794,6 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	if _u.mutation.TagsCleared() {
 		_spec.ClearField(media.FieldTags, field.TypeJSON)
 	}
-	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(media.FieldUserID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(media.FieldUserID, field.TypeInt, value)
-	}
 	if value, ok := _u.mutation.PublishedAt(); ok {
 		_spec.SetField(media.FieldPublishedAt, field.TypeTime, value)
 	}
@@ -2894,39 +2808,23 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   media.UserTable,
-			Columns: media.UserPrimaryKey,
+			Columns: []string{media.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedUserIDs(); len(nodes) > 0 && !_u.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   media.UserTable,
-			Columns: media.UserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   media.UserTable,
-			Columns: media.UserPrimaryKey,
+			Columns: []string{media.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),

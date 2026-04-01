@@ -80,7 +80,7 @@ func (Media) Indexes() []ent.Index {
 
 func (Media) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).Ref("media").Required(),
+		edge.From("user", User.Type).Ref("media").Field("user_id").Required().Unique(),
 		edge.From("category", Category.Type).Ref("media").Unique(),
 		edge.To("comments", Comment.Type),
 		edge.From("channels", Channel.Type).Ref("media"),

@@ -12,23 +12,23 @@ import (
 
 	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/svc-media/biz"
 	"origadmin/application/origcms/internal/svc-media/dto"
 )
 
-// mediaRepo implements the dto.MediaRepo interface using the shared entity.Client.
+// mediaRepo implements the biz.MediaRepo interface using the shared entity.Client.
 type mediaRepo struct {
 	db *entity.Client
 }
 
 // NewMediaRepo creates a new Media repository.
-func NewMediaRepo(db *entity.Client) dto.MediaRepo {
+func NewMediaRepo(db *entity.Client) biz.MediaRepo {
 	return &mediaRepo{db: db}
 }
 
 func (r *mediaRepo) Get(
 	ctx context.Context,
 	id int64,
-	opts ...*dto.MediaQueryOption,
 ) (*types.Media, error) {
 	m, err := r.db.Media.Get(ctx, int(id))
 	if err != nil {
@@ -78,7 +78,6 @@ func (r *mediaRepo) List(
 func (r *mediaRepo) Create(
 	ctx context.Context,
 	in *types.Media,
-	opts ...*dto.MediaCreateOption,
 ) (*types.Media, error) {
 	create := r.db.Media.Create().
 		SetTitle(in.Title).
@@ -112,7 +111,6 @@ func (r *mediaRepo) Create(
 func (r *mediaRepo) Update(
 	ctx context.Context,
 	in *types.Media,
-	opts ...*dto.MediaUpdateOption,
 ) (*types.Media, error) {
 	update := r.db.Media.UpdateOneID(int(in.Id)).
 		SetTitle(in.Title)

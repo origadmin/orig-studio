@@ -245,7 +245,6 @@ var (
 		{Name: "is_reviewed", Type: field.TypeBool, Default: true},
 		{Name: "reported_times", Type: field.TypeInt, Default: 0},
 		{Name: "tags", Type: field.TypeJSON, Nullable: true},
-		{Name: "user_id", Type: field.TypeInt},
 		{Name: "published_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
@@ -253,6 +252,7 @@ var (
 		{Name: "media_category_media", Type: field.TypeInt, Nullable: true},
 		{Name: "media_playlist_media", Type: field.TypeInt, Nullable: true},
 		{Name: "media_tag_media", Type: field.TypeInt, Nullable: true},
+		{Name: "user_id", Type: field.TypeInt},
 	}
 	// MediaTable holds the schema information for the "media" table.
 	MediaTable = &schema.Table{
@@ -262,27 +262,33 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "media_categories_media",
-				Columns:    []*schema.Column{MediaColumns[36]},
+				Columns:    []*schema.Column{MediaColumns[35]},
 				RefColumns: []*schema.Column{CategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_files_media_category_media",
-				Columns:    []*schema.Column{MediaColumns[37]},
+				Columns:    []*schema.Column{MediaColumns[36]},
 				RefColumns: []*schema.Column{FilesMediaCategoryColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_files_playlistmedia_media",
-				Columns:    []*schema.Column{MediaColumns[38]},
+				Columns:    []*schema.Column{MediaColumns[37]},
 				RefColumns: []*schema.Column{FilesPlaylistmediaColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_files_media_tags_media",
-				Columns:    []*schema.Column{MediaColumns[39]},
+				Columns:    []*schema.Column{MediaColumns[38]},
 				RefColumns: []*schema.Column{FilesMediaTagsColumns[0]},
 				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "media_users_user_media",
+				Columns:    []*schema.Column{MediaColumns[39]},
+				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -324,12 +330,12 @@ var (
 			{
 				Name:    "media_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[34]},
+				Columns: []*schema.Column{MediaColumns[33]},
 			},
 			{
 				Name:    "media_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[32]},
+				Columns: []*schema.Column{MediaColumns[39]},
 			},
 		},
 	}
@@ -689,31 +695,6 @@ var (
 			},
 		},
 	}
-	// UserMediaColumns holds the columns for the "user_media" table.
-	UserMediaColumns = []*schema.Column{
-		{Name: "user_id", Type: field.TypeInt},
-		{Name: "media_id", Type: field.TypeInt},
-	}
-	// UserMediaTable holds the schema information for the "user_media" table.
-	UserMediaTable = &schema.Table{
-		Name:       "user_media",
-		Columns:    UserMediaColumns,
-		PrimaryKey: []*schema.Column{UserMediaColumns[0], UserMediaColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "user_media_user_id",
-				Columns:    []*schema.Column{UserMediaColumns[0]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "user_media_media_id",
-				Columns:    []*schema.Column{UserMediaColumns[1]},
-				RefColumns: []*schema.Column{MediaColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// UserPlaylistsColumns holds the columns for the "user_playlists" table.
 	UserPlaylistsColumns = []*schema.Column{
 		{Name: "user_id", Type: field.TypeInt},
@@ -833,7 +814,6 @@ var (
 		ChannelMediaTable,
 		CommentRepliesTable,
 		MediaCommentsTable,
-		UserMediaTable,
 		UserPlaylistsTable,
 		UserCommentsTable,
 		UserNotificationsTable,
@@ -866,6 +846,7 @@ func init() {
 	MediaTable.ForeignKeys[1].RefTable = FilesMediaCategoryTable
 	MediaTable.ForeignKeys[2].RefTable = FilesPlaylistmediaTable
 	MediaTable.ForeignKeys[3].RefTable = FilesMediaTagsTable
+	MediaTable.ForeignKeys[4].RefTable = UsersUserTable
 	FilesMediaCategoryTable.Annotation = &entsql.Annotation{
 		Table: "files_media_category",
 	}
@@ -899,8 +880,6 @@ func init() {
 	CommentRepliesTable.ForeignKeys[1].RefTable = FilesCommentTable
 	MediaCommentsTable.ForeignKeys[0].RefTable = MediaTable
 	MediaCommentsTable.ForeignKeys[1].RefTable = FilesCommentTable
-	UserMediaTable.ForeignKeys[0].RefTable = UsersUserTable
-	UserMediaTable.ForeignKeys[1].RefTable = MediaTable
 	UserPlaylistsTable.ForeignKeys[0].RefTable = UsersUserTable
 	UserPlaylistsTable.ForeignKeys[1].RefTable = FilesPlaylistTable
 	UserCommentsTable.ForeignKeys[0].RefTable = UsersUserTable

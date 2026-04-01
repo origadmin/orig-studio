@@ -4357,14 +4357,11 @@ type MediaMutation struct {
 	addreported_times *int
 	tags              *[]string
 	appendtags        []string
-	user_id           *int
-	adduser_id        *int
 	published_at      *time.Time
 	created_at        *time.Time
 	updated_at        *time.Time
 	clearedFields     map[string]struct{}
-	user              map[int]struct{}
-	removeduser       map[int]struct{}
+	user              *int
 	cleareduser       bool
 	category          *int
 	clearedcategory   bool
@@ -5986,13 +5983,12 @@ func (m *MediaMutation) ResetTags() {
 
 // SetUserID sets the "user_id" field.
 func (m *MediaMutation) SetUserID(i int) {
-	m.user_id = &i
-	m.adduser_id = nil
+	m.user = &i
 }
 
 // UserID returns the value of the "user_id" field in the mutation.
 func (m *MediaMutation) UserID() (r int, exists bool) {
-	v := m.user_id
+	v := m.user
 	if v == nil {
 		return
 	}
@@ -6016,28 +6012,9 @@ func (m *MediaMutation) OldUserID(ctx context.Context) (v int, err error) {
 	return oldValue.UserID, nil
 }
 
-// AddUserID adds i to the "user_id" field.
-func (m *MediaMutation) AddUserID(i int) {
-	if m.adduser_id != nil {
-		*m.adduser_id += i
-	} else {
-		m.adduser_id = &i
-	}
-}
-
-// AddedUserID returns the value that was added to the "user_id" field in this mutation.
-func (m *MediaMutation) AddedUserID() (r int, exists bool) {
-	v := m.adduser_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ResetUserID resets all changes to the "user_id" field.
 func (m *MediaMutation) ResetUserID() {
-	m.user_id = nil
-	m.adduser_id = nil
+	m.user = nil
 }
 
 // SetPublishedAt sets the "published_at" field.
@@ -6161,19 +6138,10 @@ func (m *MediaMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// AddUserIDs adds the "user" edge to the User entity by ids.
-func (m *MediaMutation) AddUserIDs(ids ...int) {
-	if m.user == nil {
-		m.user = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.user[ids[i]] = struct{}{}
-	}
-}
-
 // ClearUser clears the "user" edge to the User entity.
 func (m *MediaMutation) ClearUser() {
 	m.cleareduser = true
+	m.clearedFields[media.FieldUserID] = struct{}{}
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
@@ -6181,29 +6149,12 @@ func (m *MediaMutation) UserCleared() bool {
 	return m.cleareduser
 }
 
-// RemoveUserIDs removes the "user" edge to the User entity by IDs.
-func (m *MediaMutation) RemoveUserIDs(ids ...int) {
-	if m.removeduser == nil {
-		m.removeduser = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.user, ids[i])
-		m.removeduser[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedUser returns the removed IDs of the "user" edge to the User entity.
-func (m *MediaMutation) RemovedUserIDs() (ids []int) {
-	for id := range m.removeduser {
-		ids = append(ids, id)
-	}
-	return
-}
-
 // UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
 func (m *MediaMutation) UserIDs() (ids []int) {
-	for id := range m.user {
-		ids = append(ids, id)
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -6212,7 +6163,6 @@ func (m *MediaMutation) UserIDs() (ids []int) {
 func (m *MediaMutation) ResetUser() {
 	m.user = nil
 	m.cleareduser = false
-	m.removeduser = nil
 }
 
 // SetCategoryID sets the "category" edge to the Category entity by id.
@@ -6706,7 +6656,7 @@ func (m *MediaMutation) Fields() []string {
 	if m.tags != nil {
 		fields = append(fields, media.FieldTags)
 	}
-	if m.user_id != nil {
+	if m.user != nil {
 		fields = append(fields, media.FieldUserID)
 	}
 	if m.published_at != nil {
@@ -7170,9 +7120,6 @@ func (m *MediaMutation) AddedFields() []string {
 	if m.addreported_times != nil {
 		fields = append(fields, media.FieldReportedTimes)
 	}
-	if m.adduser_id != nil {
-		fields = append(fields, media.FieldUserID)
-	}
 	return fields
 }
 
@@ -7203,8 +7150,6 @@ func (m *MediaMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedDownloadCount()
 	case media.FieldReportedTimes:
 		return m.AddedReportedTimes()
-	case media.FieldUserID:
-		return m.AddedUserID()
 	}
 	return nil, false
 }
@@ -7290,13 +7235,6 @@ func (m *MediaMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddReportedTimes(v)
-		return nil
-	case media.FieldUserID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddUserID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Media numeric field %s", name)
@@ -7544,11 +7482,9 @@ func (m *MediaMutation) AddedEdges() []string {
 func (m *MediaMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case media.EdgeUser:
-		ids := make([]ent.Value, 0, len(m.user))
-		for id := range m.user {
-			ids = append(ids, id)
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	case media.EdgeCategory:
 		if id := m.category; id != nil {
 			return []ent.Value{*id}
@@ -7596,9 +7532,6 @@ func (m *MediaMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *MediaMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 8)
-	if m.removeduser != nil {
-		edges = append(edges, media.EdgeUser)
-	}
 	if m.removedcomments != nil {
 		edges = append(edges, media.EdgeComments)
 	}
@@ -7624,12 +7557,6 @@ func (m *MediaMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *MediaMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case media.EdgeUser:
-		ids := make([]ent.Value, 0, len(m.removeduser))
-		for id := range m.removeduser {
-			ids = append(ids, id)
-		}
-		return ids
 	case media.EdgeComments:
 		ids := make([]ent.Value, 0, len(m.removedcomments))
 		for id := range m.removedcomments {
@@ -7728,6 +7655,9 @@ func (m *MediaMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *MediaMutation) ClearEdge(name string) error {
 	switch name {
+	case media.EdgeUser:
+		m.ClearUser()
+		return nil
 	case media.EdgeCategory:
 		m.ClearCategory()
 		return nil

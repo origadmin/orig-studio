@@ -82,11 +82,13 @@ const (
 	EdgeLikes = "likes"
 	// Table holds the table name of the user in the database.
 	Table = "users_user"
-	// MediaTable is the table that holds the media relation/edge. The primary key declared below.
-	MediaTable = "user_media"
+	// MediaTable is the table that holds the media relation/edge.
+	MediaTable = "media"
 	// MediaInverseTable is the table name for the Media entity.
 	// It exists in this package in order to avoid circular dependency with the "media" package.
 	MediaInverseTable = "media"
+	// MediaColumn is the table column denoting the media relation/edge.
+	MediaColumn = "user_id"
 	// ChannelsTable is the table that holds the channels relation/edge.
 	ChannelsTable = "users_channel"
 	// ChannelsInverseTable is the table name for the Channel entity.
@@ -174,9 +176,6 @@ var ForeignKeys = []string{
 }
 
 var (
-	// MediaPrimaryKey and MediaColumn2 are the table columns denoting the
-	// primary key for the media relation (M2M).
-	MediaPrimaryKey = []string{"user_id", "media_id"}
 	// PlaylistsPrimaryKey and PlaylistsColumn2 are the table columns denoting the
 	// primary key for the playlists relation (M2M).
 	PlaylistsPrimaryKey = []string{"user_id", "playlist_id"}
@@ -508,7 +507,7 @@ func newMediaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MediaInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, MediaTable, MediaPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, false, MediaTable, MediaColumn),
 	)
 }
 func newChannelsStep() *sqlgraph.Step {

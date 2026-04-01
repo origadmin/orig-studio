@@ -1810,26 +1810,6 @@ func UserIDNotIn(vs ...int) predicate.Media {
 	return predicate.Media(sql.FieldNotIn(FieldUserID, vs...))
 }
 
-// UserIDGT applies the GT predicate on the "user_id" field.
-func UserIDGT(v int) predicate.Media {
-	return predicate.Media(sql.FieldGT(FieldUserID, v))
-}
-
-// UserIDGTE applies the GTE predicate on the "user_id" field.
-func UserIDGTE(v int) predicate.Media {
-	return predicate.Media(sql.FieldGTE(FieldUserID, v))
-}
-
-// UserIDLT applies the LT predicate on the "user_id" field.
-func UserIDLT(v int) predicate.Media {
-	return predicate.Media(sql.FieldLT(FieldUserID, v))
-}
-
-// UserIDLTE applies the LTE predicate on the "user_id" field.
-func UserIDLTE(v int) predicate.Media {
-	return predicate.Media(sql.FieldLTE(FieldUserID, v))
-}
-
 // PublishedAtEQ applies the EQ predicate on the "published_at" field.
 func PublishedAtEQ(v time.Time) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldPublishedAt, v))
@@ -1965,7 +1945,7 @@ func HasUser() predicate.Media {
 	return predicate.Media(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, UserTable, UserPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

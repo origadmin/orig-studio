@@ -102,11 +102,13 @@ const (
 	EdgeLikes = "likes"
 	// Table holds the table name of the media in the database.
 	Table = "media"
-	// UserTable is the table that holds the user relation/edge. The primary key declared below.
-	UserTable = "user_media"
+	// UserTable is the table that holds the user relation/edge.
+	UserTable = "media"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users_user"
+	// UserColumn is the table column denoting the user relation/edge.
+	UserColumn = "user_id"
 	// CategoryTable is the table that holds the category relation/edge.
 	CategoryTable = "media"
 	// CategoryInverseTable is the table name for the Category entity.
@@ -204,9 +206,6 @@ var ForeignKeys = []string{
 }
 
 var (
-	// UserPrimaryKey and UserColumn2 are the table columns denoting the
-	// primary key for the user relation (M2M).
-	UserPrimaryKey = []string{"user_id", "media_id"}
 	// CommentsPrimaryKey and CommentsColumn2 are the table columns denoting the
 	// primary key for the comments relation (M2M).
 	CommentsPrimaryKey = []string{"media_id", "comment_id"}
@@ -481,17 +480,10 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
-// ByUserCount orders the results by user count.
-func ByUserCount(opts ...sql.OrderTermOption) OrderOption {
+// ByUserField orders the results by user field.
+func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newUserStep(), opts...)
-	}
-}
-
-// ByUser orders the results by user terms.
-func ByUser(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUserStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -589,7 +581,7 @@ func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, UserTable, UserPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 	)
 }
 func newCategoryStep() *sqlgraph.Step {

@@ -1303,7 +1303,7 @@ func (c *MediaClient) QueryUser(_m *Media) *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(media.Table, media.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, media.UserTable, media.UserPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, media.UserTable, media.UserColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -2639,7 +2639,7 @@ func (c *UserClient) QueryMedia(_m *User) *MediaQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(media.Table, media.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.MediaTable, user.MediaPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.MediaTable, user.MediaColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil

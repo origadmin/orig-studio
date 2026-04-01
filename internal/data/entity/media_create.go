@@ -486,19 +486,9 @@ func (_c *MediaCreate) SetNillableUpdatedAt(v *time.Time) *MediaCreate {
 	return _c
 }
 
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_c *MediaCreate) AddUserIDs(ids ...int) *MediaCreate {
-	_c.mutation.AddUserIDs(ids...)
-	return _c
-}
-
-// AddUser adds the "user" edges to the User entity.
-func (_c *MediaCreate) AddUser(v ...*User) *MediaCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddUserIDs(ids...)
+// SetUser sets the "user" edge to the User entity.
+func (_c *MediaCreate) SetUser(v *User) *MediaCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // SetCategoryID sets the "category" edge to the Category entity by ID.
@@ -1021,10 +1011,6 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 		_spec.SetField(media.FieldTags, field.TypeJSON, value)
 		_node.Tags = value
 	}
-	if value, ok := _c.mutation.UserID(); ok {
-		_spec.SetField(media.FieldUserID, field.TypeInt, value)
-		_node.UserID = value
-	}
 	if value, ok := _c.mutation.PublishedAt(); ok {
 		_spec.SetField(media.FieldPublishedAt, field.TypeTime, value)
 		_node.PublishedAt = value
@@ -1039,10 +1025,10 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   media.UserTable,
-			Columns: media.UserPrimaryKey,
+			Columns: []string{media.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
@@ -1051,6 +1037,7 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.CategoryIDs(); len(nodes) > 0 {
