@@ -48,13 +48,11 @@ import {
 } from "@/components/ui/select";
 import {Label} from "@/components/ui/label";
 import {mediaApi, type Media} from '@/lib/api/media';
+import {useAdminMediaList, useUpdateMedia, useDeleteMedia} from '@/hooks/queries';
 import {UploadComponent} from '@/components/upload/UploadComponent';
 import {formatFileSize} from '@/lib/format';
 
 export default function MediaPage() {
-    const [mediaList, setMediaList] = useState<Media[]>([]);
-    const [loading, setLoading] = useState(false);
-
     // 弹窗状态
     const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
@@ -76,24 +74,14 @@ export default function MediaPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
 
-    const loadMedia = async () => {
-        setLoading(true);
-        try {
-            const res = await mediaApi.adminList({page: 1, page_size: 50});
-            // 确保如果后端返回数据中有 list 则使用 list，否则直接使用数据数组或空数组
-            setMediaList(res?.list || (Array.isArray(res) ? res : []));
-        } catch (err) {
-            console.error("Failed to load media", err);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // React Query Hooks
+    const {data: mediaData, isLoading: loading, refetch: loadMedia} = useAdminMediaList({page: 1, page_size: 50});
+    const updateMutation = useUpdateMedia();
+    const deleteMutation = useDeleteMedia();
 
-    useEffect(() => {
-        loadMedia();
-    }, []);
+    const mediaList = mediaData?.list || (Array.isArray(mediaData) ? mediaData : []) as Media[];
 
-    const filteredMedia = mediaList.filter(item => {
+    const filteredMedia = mediaList.filter((item: Media) => {
         const matchesSearch = item.title?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesStatus = statusFilter === 'all' || item.state === statusFilter;
         return matchesSearch && matchesStatus;
@@ -132,12 +120,14 @@ export default function MediaPage() {
     const handleSaveEdit = async () => {
         if (!editingMedia) return;
         try {
-            await mediaApi.update(editingMedia.id, {
-                title: editForm.title,
-                description: editForm.description,
-                state: editForm.status,
-                // category 需要映射 ID，为了简单此时如果后端接受名/传空先略过或者只做演示
-                tags: editForm.tags.split(',').map(s => s.trim()).filter(Boolean),
+            await updateMutation.mutateAsync({
+                id: String(editingMedia.id),
+                data: {
+                    title: editForm.title,
+                    description: editForm.description,
+                    state: editForm.status,
+                    tags: editForm.tags.split(',').map(s => s.trim()).filter(Boolean),
+                }
             });
             setEditDialogOpen(false);
             loadMedia();
@@ -154,7 +144,7 @@ export default function MediaPage() {
     const handleConfirmDelete = async () => {
         if (!deletingMedia) return;
         try {
-            await mediaApi.delete(deletingMedia.id);
+            await deleteMutation.mutateAsync(String(deletingMedia.id));
             setDeleteDialogOpen(false);
             loadMedia();
         } catch (err) {
@@ -288,7 +278,7 @@ export default function MediaPage() {
                                                     className="w-16 h-10 bg-slate-100 rounded overflow-hidden shrink-0 flex items-center justify-center">
                                                     {media.thumbnail ? (
                                                         <img
-                                                            src={media.thumbnail.startsWith('http') ? media.thumbnail : `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:9090'}${media.thumbnail.startsWith('/') ? '' : '/'}${media.thumbnail}`}
+                                                            src={media.thumbnail.startsWith('http') ? media.thumbnail : `${(import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:9090'}${media.thumbnail.startsWith('/') ? '' : '/'}${media.thumbnail}`}
                                                             alt="" className="w-full h-full object-cover"/>
                                                     ) : (
                                                         media.type === 'video' ?

@@ -8,12 +8,15 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/uuid"
+	"origadmin/application/origcms/internal/helpers/ffmpeg"
 )
 
 const (
@@ -242,10 +245,65 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 	session.Sha256 = sha256
 	_ = uc.repo.UpdateSession(ctx, session)
 
-	// Cleanup temporary parts
+	// Clean up temporary parts
 	_ = uc.storage.DeleteParts(ctx, uploadID)
 
+	// Background thumbnail generation
+	if strings.HasPrefix(session.ContentType, "video/") {
+		go uc.generateThumbnail(context.Background(), createdMedia.Id, finalPath, session.ContentType)
+	}
+
 	return createdMedia, nil
+}
+
+// generateThumbnail extracts a frame from the video and updates the media record.
+func (uc *UploadUseCase) generateThumbnail(ctx context.Context, mediaID int64, mediaPath, contentType string) {
+	// Base directory for data (should ideally be configurable)
+	baseDir := "./data/uploads"
+	fullPath := filepath.Join(baseDir, mediaPath)
+	thumbDir := filepath.Join(baseDir, "thumbnails")
+	thumbFilename := fmt.Sprintf("%d.jpg", mediaID)
+	thumbPath := filepath.Join(thumbDir, thumbFilename)
+
+	if err := os.MkdirAll(thumbDir, 0755); err != nil {
+		uc.log.Errorf("failed to create thumbnails directory: %v", err)
+		return
+	}
+
+	uc.log.Infof("generating thumbnail for media %d at %s", mediaID, thumbPath)
+
+	// Extract thumbnail at 5 seconds (or 0 if video is shorter)
+	err := ffmpeg.ExtractThumbnail(ctx, fullPath, thumbPath, "00:00:05")
+	if err != nil {
+		uc.log.Errorf("failed to generate thumbnail for media %d: %v", mediaID, err)
+		// Try at 0 seconds as fallback
+		err = ffmpeg.ExtractThumbnail(ctx, fullPath, thumbPath, "00:00:00")
+		if err != nil {
+			uc.log.Errorf("fallback thumbnail generation also failed for media %d: %v", mediaID, err)
+			return
+		}
+	}
+
+	// Update media record with thumbnail URL
+	// The URL should be relative for the static file server
+	thumbUrl := fmt.Sprintf("thumbnails/%s", thumbFilename)
+
+	// We need a fresh context because the original might have been cancelled
+	updateCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	media, err := uc.mediaRepo.Get(updateCtx, mediaID)
+	if err != nil {
+		uc.log.Errorf("failed to get media %d for thumbnail update: %v", mediaID, err)
+		return
+	}
+
+	media.Thumbnail = thumbUrl
+	if _, err := uc.mediaRepo.Update(updateCtx, media); err != nil {
+		uc.log.Errorf("failed to update media %d with thumbnail: %v", mediaID, err)
+	} else {
+		uc.log.Infof("successfully generated and updated thumbnail for media %d", mediaID)
+	}
 }
 
 // AbortMultipartUpload cancels the upload and cleans up.

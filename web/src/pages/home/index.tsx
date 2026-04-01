@@ -11,6 +11,7 @@ import {Badge} from '@/components/ui/badge';
 import {formatDuration, formatViews, formatDate} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
 import {mediaApi, type Media} from '@/lib/api/media';
+import {useInfiniteMediaList} from '@/hooks/queries';
 
 const categories = [
     {id: 1, name: '技术'},
@@ -26,46 +27,32 @@ const PAGE_SIZE = 12;
 
 const HomePage = () => {
     const {t} = useTranslation();
-    const [items, setItems] = useState<Media[]>([]);
     const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
     const sentinelRef = useRef<HTMLDivElement>(null);
 
-    // 获取数据的方法
-    const fetchMedia = useCallback(async (pageNum: number, categoryId: number | null, append: boolean = true) => {
-        if (loading) return;
-        setLoading(true);
-        try {
-            const res = await mediaApi.list({
-                page: pageNum,
-                page_size: PAGE_SIZE,
-                category_id: categoryId || undefined,
-                state: 'active'
-            });
+    // Get data with react-query
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        status,
+        isLoading
+    } = useInfiniteMediaList({
+        page_size: PAGE_SIZE,
+        category_id: activeCategoryId || undefined,
+        status: 'active'
+    });
 
-            const newItems = res.list || [];
-            setItems(prev => append ? [...prev, ...newItems] : newItems);
-            setHasMore(newItems.length === PAGE_SIZE);
-            setPage(pageNum);
-        } catch (err) {
-            console.error("Failed to fetch media:", err);
-        } finally {
-            setLoading(false);
-        }
-    }, [loading]);
+    const items = data ? data.pages.flatMap(page => Array.isArray(page) ? page : (page.list || [])) : [];
+    const hasMore = hasNextPage;
+    const loading = isLoading;
 
-    // 初始加载
-    useEffect(() => {
-        fetchMedia(1, activeCategoryId, false);
-    }, [activeCategoryId]);
-
-    // 加载更多
+    // Load more callback
     const loadMore = useCallback(() => {
-        if (loading || !hasMore) return;
-        fetchMedia(page + 1, activeCategoryId, true);
-    }, [loading, hasMore, page, activeCategoryId, fetchMedia]);
+        if (isFetchingNextPage || !hasNextPage) return;
+        fetchNextPage();
+    }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
 
     // 滚动监听
     useEffect(() => {
@@ -78,7 +65,7 @@ const HomePage = () => {
         return () => obs.disconnect();
     }, [loadMore]);
 
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
+    const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || "http://localhost:9090";
 
     return (
         <div className="space-y-8">
@@ -194,7 +181,7 @@ const HomePage = () => {
                                             <span>{formatDate(media.created_at)}</span>
                                         </div>
                                         <div className="flex flex-wrap gap-1 mt-2">
-                                            {media.tags?.slice(0, 2).map((tag, tIdx) => (
+                                            {media.tags?.slice(0, 2).map((tag: string, tIdx: number) => (
                                                 <Badge key={`${tag}-${tIdx}`} variant="secondary"
                                                        className="text-xs">{tag}</Badge>
                                             ))}
@@ -209,14 +196,14 @@ const HomePage = () => {
 
             {/* 无限滚动哨兵 */}
             <div ref={sentinelRef} className="flex flex-col items-center py-8">
-                {loading && (
-                    <div className="flex items-center gap-3 text-gray-400">
+                {isFetchingNextPage && (
+                    <div className="flex items-center gap-3 text-gray-400 py-2">
                         <div
                             className="animate-spin w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full"/>
                         <span className="text-sm">{t('common.loading')}</span>
                     </div>
                 )}
-                {!hasMore && items.length > 0 && (
+                {!hasNextPage && items.length > 0 && (
                     <p className="text-sm text-gray-400 py-4">— {t('common.allLoaded')} —</p>
                 )}
             </div>

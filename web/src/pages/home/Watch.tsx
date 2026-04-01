@@ -16,45 +16,23 @@ import {Card, CardContent} from '@/components/ui/card';
 import {Skeleton} from '@/components/ui/skeleton';
 import {formatViews, formatDate, formatDuration} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
-import {mediaApi, type Media} from '@/lib/api/media';
+import {type Media} from '@/lib/api/media';
+import {useMediaDetail, useMediaList} from '@/hooks/queries';
 
 const WatchPage = () => {
     const {t} = useTranslation();
     const {v: id} = useSearch({strict: false});
-    const [media, setMedia] = useState<Media | null>(null);
-    const [recommendations, setRecommendations] = useState<Media[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const {data: media, isLoading: isMediaLoading, error: mediaError} = useMediaDetail(id as string);
 
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
+    const {data: recData} = useMediaList({
+        page_size: 10,
+        category_id: media?.edges?.category?.id || undefined,
+        status: 'active'
+    });
 
-    useEffect(() => {
-        const loadData = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                if (!id) return;
-                // 1. 获取视频详情
-                const data = await mediaApi.get(id);
-                setMedia(data);
-
-                // 2. 获取推荐列表 (同分类)
-                const recRes = await mediaApi.list({
-                    page_size: 10,
-                    category_id: data.edges?.category?.id,
-                    state: 'active'
-                });
-                setRecommendations(recRes.list.filter(m => m.id !== Number(id)));
-            } catch (err) {
-                console.error("Failed to load video:", err);
-                setError(t('watch.failedToLoad'));
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (id) loadData();
-    }, [id, t]);
+    const recommendations = recData?.list?.filter(m => m.id !== Number(id)) || [];
+    const loading = isMediaLoading;
+    const error = mediaError ? t('watch.failedToLoad') : null;
 
     if (loading) {
         return (
@@ -98,6 +76,8 @@ const WatchPage = () => {
             </div>
         );
     }
+
+    const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || "http://localhost:9090";
 
     const getFullUrl = (path?: string) => {
         if (!path) return '';
