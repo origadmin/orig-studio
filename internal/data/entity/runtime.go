@@ -14,6 +14,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/playlist"
 	"origadmin/application/origcms/internal/data/entity/schema"
 	"origadmin/application/origcms/internal/data/entity/tag"
+	"origadmin/application/origcms/internal/data/entity/uploadsession"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
 )
@@ -344,6 +345,100 @@ func init() {
 	tagDescListingsThumbnail := tagFields[2].Descriptor()
 	// tag.ListingsThumbnailValidator is a validator for the "listings_thumbnail" field. It is called by the builders before save.
 	tag.ListingsThumbnailValidator = tagDescListingsThumbnail.Validators[0].(func(string) error)
+	uploadsessionFields := schema.UploadSession{}.Fields()
+	_ = uploadsessionFields
+	// uploadsessionDescUploadID is the schema descriptor for upload_id field.
+	uploadsessionDescUploadID := uploadsessionFields[0].Descriptor()
+	// uploadsession.UploadIDValidator is a validator for the "upload_id" field. It is called by the builders before save.
+	uploadsession.UploadIDValidator = func() func(string) error {
+		validators := uploadsessionDescUploadID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(upload_id string) error {
+			for _, fn := range fns {
+				if err := fn(upload_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// uploadsessionDescFilename is the schema descriptor for filename field.
+	uploadsessionDescFilename := uploadsessionFields[1].Descriptor()
+	// uploadsession.FilenameValidator is a validator for the "filename" field. It is called by the builders before save.
+	uploadsession.FilenameValidator = func() func(string) error {
+		validators := uploadsessionDescFilename.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(filename string) error {
+			for _, fn := range fns {
+				if err := fn(filename); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// uploadsessionDescFileSize is the schema descriptor for file_size field.
+	uploadsessionDescFileSize := uploadsessionFields[2].Descriptor()
+	// uploadsession.FileSizeValidator is a validator for the "file_size" field. It is called by the builders before save.
+	uploadsession.FileSizeValidator = uploadsessionDescFileSize.Validators[0].(func(int64) error)
+	// uploadsessionDescContentType is the schema descriptor for content_type field.
+	uploadsessionDescContentType := uploadsessionFields[3].Descriptor()
+	// uploadsession.ContentTypeValidator is a validator for the "content_type" field. It is called by the builders before save.
+	uploadsession.ContentTypeValidator = uploadsessionDescContentType.Validators[0].(func(string) error)
+	// uploadsessionDescTotalParts is the schema descriptor for total_parts field.
+	uploadsessionDescTotalParts := uploadsessionFields[4].Descriptor()
+	// uploadsession.TotalPartsValidator is a validator for the "total_parts" field. It is called by the builders before save.
+	uploadsession.TotalPartsValidator = uploadsessionDescTotalParts.Validators[0].(func(int) error)
+	// uploadsessionDescChunkSize is the schema descriptor for chunk_size field.
+	uploadsessionDescChunkSize := uploadsessionFields[5].Descriptor()
+	// uploadsession.DefaultChunkSize holds the default value on creation for the chunk_size field.
+	uploadsession.DefaultChunkSize = uploadsessionDescChunkSize.Default.(int)
+	// uploadsessionDescUploadedSize is the schema descriptor for uploaded_size field.
+	uploadsessionDescUploadedSize := uploadsessionFields[6].Descriptor()
+	// uploadsession.DefaultUploadedSize holds the default value on creation for the uploaded_size field.
+	uploadsession.DefaultUploadedSize = uploadsessionDescUploadedSize.Default.(int64)
+	// uploadsessionDescTitle is the schema descriptor for title field.
+	uploadsessionDescTitle := uploadsessionFields[7].Descriptor()
+	// uploadsession.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	uploadsession.TitleValidator = uploadsessionDescTitle.Validators[0].(func(string) error)
+	// uploadsessionDescStatus is the schema descriptor for status field.
+	uploadsessionDescStatus := uploadsessionFields[12].Descriptor()
+	// uploadsession.DefaultStatus holds the default value on creation for the status field.
+	uploadsession.DefaultStatus = uploadsessionDescStatus.Default.(string)
+	// uploadsession.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	uploadsession.StatusValidator = uploadsessionDescStatus.Validators[0].(func(string) error)
+	// uploadsessionDescSha256 is the schema descriptor for sha256 field.
+	uploadsessionDescSha256 := uploadsessionFields[14].Descriptor()
+	// uploadsession.Sha256Validator is a validator for the "sha256" field. It is called by the builders before save.
+	uploadsession.Sha256Validator = uploadsessionDescSha256.Validators[0].(func(string) error)
+	// uploadsessionDescStoragePath is the schema descriptor for storage_path field.
+	uploadsessionDescStoragePath := uploadsessionFields[15].Descriptor()
+	// uploadsession.StoragePathValidator is a validator for the "storage_path" field. It is called by the builders before save.
+	uploadsession.StoragePathValidator = uploadsessionDescStoragePath.Validators[0].(func(string) error)
+	// uploadsessionDescTempDir is the schema descriptor for temp_dir field.
+	uploadsessionDescTempDir := uploadsessionFields[16].Descriptor()
+	// uploadsession.TempDirValidator is a validator for the "temp_dir" field. It is called by the builders before save.
+	uploadsession.TempDirValidator = uploadsessionDescTempDir.Validators[0].(func(string) error)
+	// uploadsessionDescExpiresAt is the schema descriptor for expires_at field.
+	uploadsessionDescExpiresAt := uploadsessionFields[17].Descriptor()
+	// uploadsession.DefaultExpiresAt holds the default value on creation for the expires_at field.
+	uploadsession.DefaultExpiresAt = uploadsessionDescExpiresAt.Default.(func() time.Time)
+	// uploadsessionDescCreatedAt is the schema descriptor for created_at field.
+	uploadsessionDescCreatedAt := uploadsessionFields[18].Descriptor()
+	// uploadsession.DefaultCreatedAt holds the default value on creation for the created_at field.
+	uploadsession.DefaultCreatedAt = uploadsessionDescCreatedAt.Default.(func() time.Time)
+	// uploadsessionDescUpdatedAt is the schema descriptor for updated_at field.
+	uploadsessionDescUpdatedAt := uploadsessionFields[19].Descriptor()
+	// uploadsession.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	uploadsession.DefaultUpdatedAt = uploadsessionDescUpdatedAt.Default.(func() time.Time)
+	// uploadsession.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	uploadsession.UpdateDefaultUpdatedAt = uploadsessionDescUpdatedAt.UpdateDefault.(func() time.Time)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescUsername is the schema descriptor for username field.

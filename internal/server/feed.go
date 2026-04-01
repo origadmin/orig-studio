@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
 	"origadmin/application/origcms/internal/data/entity"
 	entitymedia "origadmin/application/origcms/internal/data/entity/media"
 )
@@ -45,11 +46,11 @@ type MediaItem struct {
 	Description string `json:"description"`
 	Thumbnail   string `json:"thumbnail"`
 	Duration    int    `json:"duration"`
-	ViewCount int64  `json:"view_count"`
-	UserID    int    `json:"user_id"`
-	Username  string `json:"username"`
+	ViewCount   int64  `json:"view_count"`
+	UserID      int    `json:"user_id"`
+	Username    string `json:"username"`
 	URL         string `json:"url"`
-	Type      string `json:"type"`
+	Type        string `json:"type"`
 }
 
 // GetFeed godoc: GET /api/v1/feed
@@ -91,13 +92,13 @@ func (h *FeedHandler) GetFeed(c *gin.Context) {
 			ID:          int(m.ID),
 			Title:       m.Title,
 			Description: m.Description,
-			Thumbnail: m.Thumbnail,
-			Duration:  m.Duration,
-			ViewCount: m.ViewCount,
-			UserID:    m.UserID,
-			Username:  username,
-			URL:       fmt.Sprintf("/v/%d", m.ID),
-			Type:      m.Type,
+			Thumbnail:   m.Thumbnail,
+			Duration:    m.Duration,
+			ViewCount:   m.ViewCount,
+			UserID:      m.UserID,
+			Username:    username,
+			URL:         fmt.Sprintf("/v/%d", m.ID),
+			Type:        m.Type,
 		}
 	}
 

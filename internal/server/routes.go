@@ -40,5 +40,8 @@ func RegisterRoutes(router *gin.Engine, client *entity.Client, jwtMgr *auth.Mana
 
 		// Playlist routes
 		RegisterPlaylistRoutes(v1, client)
+
+		// Upload routes (chunked multipart upload, requires JWT)
+		RegisterUploadRoutes(v1, client, jwtMgr)
 	}
 }

@@ -42,5 +42,8 @@ type Playlist func(*sql.Selector)
 // Tag is the predicate function for tag builders.
 type Tag func(*sql.Selector)
 
+// UploadSession is the predicate function for uploadsession builders.
+type UploadSession func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

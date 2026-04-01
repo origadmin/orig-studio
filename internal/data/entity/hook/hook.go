@@ -152,6 +152,18 @@ func (f TagFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Value, e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.TagMutation", m)
 }
 
+// The UploadSessionFunc type is an adapter to allow the use of ordinary
+// function as UploadSession mutator.
+type UploadSessionFunc func(context.Context, *entity.UploadSessionMutation) (entity.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UploadSessionFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Value, error) {
+	if mv, ok := m.(*entity.UploadSessionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.UploadSessionMutation", m)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *entity.UserMutation) (entity.Value, error)

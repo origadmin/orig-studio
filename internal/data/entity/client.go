@@ -23,6 +23,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/playlist"
 	"origadmin/application/origcms/internal/data/entity/tag"
+	"origadmin/application/origcms/internal/data/entity/uploadsession"
 	"origadmin/application/origcms/internal/data/entity/user"
 
 	"entgo.io/ent"
@@ -60,6 +61,8 @@ type Client struct {
 	Playlist *PlaylistClient
 	// Tag is the client for interacting with the Tag builders.
 	Tag *TagClient
+	// UploadSession is the client for interacting with the UploadSession builders.
+	UploadSession *UploadSessionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -85,6 +88,7 @@ func (c *Client) init() {
 	c.Notification = NewNotificationClient(c.config)
 	c.Playlist = NewPlaylistClient(c.config)
 	c.Tag = NewTagClient(c.config)
+	c.UploadSession = NewUploadSessionClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -190,6 +194,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Notification:  NewNotificationClient(cfg),
 		Playlist:      NewPlaylistClient(cfg),
 		Tag:           NewTagClient(cfg),
+		UploadSession: NewUploadSessionClient(cfg),
 		User:          NewUserClient(cfg),
 	}, nil
 }
@@ -222,6 +227,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Notification:  NewNotificationClient(cfg),
 		Playlist:      NewPlaylistClient(cfg),
 		Tag:           NewTagClient(cfg),
+		UploadSession: NewUploadSessionClient(cfg),
 		User:          NewUserClient(cfg),
 	}, nil
 }
@@ -253,7 +259,8 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Category, c.Channel, c.Comment, c.Favorite, c.Like, c.Media, c.MediaCategory,
-		c.MediaPlaylist, c.MediaTag, c.Notification, c.Playlist, c.Tag, c.User,
+		c.MediaPlaylist, c.MediaTag, c.Notification, c.Playlist, c.Tag,
+		c.UploadSession, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -264,7 +271,8 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Category, c.Channel, c.Comment, c.Favorite, c.Like, c.Media, c.MediaCategory,
-		c.MediaPlaylist, c.MediaTag, c.Notification, c.Playlist, c.Tag, c.User,
+		c.MediaPlaylist, c.MediaTag, c.Notification, c.Playlist, c.Tag,
+		c.UploadSession, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -297,6 +305,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Playlist.mutate(ctx, m)
 	case *TagMutation:
 		return c.Tag.mutate(ctx, m)
+	case *UploadSessionMutation:
+		return c.UploadSession.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
@@ -2380,6 +2390,139 @@ func (c *TagClient) mutate(ctx context.Context, m *TagMutation) (Value, error) {
 	}
 }
 
+// UploadSessionClient is a client for the UploadSession schema.
+type UploadSessionClient struct {
+	config
+}
+
+// NewUploadSessionClient returns a client for the UploadSession from the given config.
+func NewUploadSessionClient(c config) *UploadSessionClient {
+	return &UploadSessionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `uploadsession.Hooks(f(g(h())))`.
+func (c *UploadSessionClient) Use(hooks ...Hook) {
+	c.hooks.UploadSession = append(c.hooks.UploadSession, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `uploadsession.Intercept(f(g(h())))`.
+func (c *UploadSessionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.UploadSession = append(c.inters.UploadSession, interceptors...)
+}
+
+// Create returns a builder for creating a UploadSession entity.
+func (c *UploadSessionClient) Create() *UploadSessionCreate {
+	mutation := newUploadSessionMutation(c.config, OpCreate)
+	return &UploadSessionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UploadSession entities.
+func (c *UploadSessionClient) CreateBulk(builders ...*UploadSessionCreate) *UploadSessionCreateBulk {
+	return &UploadSessionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *UploadSessionClient) MapCreateBulk(slice any, setFunc func(*UploadSessionCreate, int)) *UploadSessionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &UploadSessionCreateBulk{err: fmt.Errorf("calling to UploadSessionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*UploadSessionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &UploadSessionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UploadSession.
+func (c *UploadSessionClient) Update() *UploadSessionUpdate {
+	mutation := newUploadSessionMutation(c.config, OpUpdate)
+	return &UploadSessionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UploadSessionClient) UpdateOne(_m *UploadSession) *UploadSessionUpdateOne {
+	mutation := newUploadSessionMutation(c.config, OpUpdateOne, withUploadSession(_m))
+	return &UploadSessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UploadSessionClient) UpdateOneID(id int) *UploadSessionUpdateOne {
+	mutation := newUploadSessionMutation(c.config, OpUpdateOne, withUploadSessionID(id))
+	return &UploadSessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UploadSession.
+func (c *UploadSessionClient) Delete() *UploadSessionDelete {
+	mutation := newUploadSessionMutation(c.config, OpDelete)
+	return &UploadSessionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UploadSessionClient) DeleteOne(_m *UploadSession) *UploadSessionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UploadSessionClient) DeleteOneID(id int) *UploadSessionDeleteOne {
+	builder := c.Delete().Where(uploadsession.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UploadSessionDeleteOne{builder}
+}
+
+// Query returns a query builder for UploadSession.
+func (c *UploadSessionClient) Query() *UploadSessionQuery {
+	return &UploadSessionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUploadSession},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a UploadSession entity by its id.
+func (c *UploadSessionClient) Get(ctx context.Context, id int) (*UploadSession, error) {
+	return c.Query().Where(uploadsession.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UploadSessionClient) GetX(ctx context.Context, id int) *UploadSession {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *UploadSessionClient) Hooks() []Hook {
+	return c.hooks.UploadSession
+}
+
+// Interceptors returns the client interceptors.
+func (c *UploadSessionClient) Interceptors() []Interceptor {
+	return c.inters.UploadSession
+}
+
+func (c *UploadSessionClient) mutate(ctx context.Context, m *UploadSessionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UploadSessionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UploadSessionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UploadSessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UploadSessionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entity: unknown UploadSession mutation op: %q", m.Op())
+	}
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -2661,10 +2804,10 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 type (
 	hooks struct {
 		Category, Channel, Comment, Favorite, Like, Media, MediaCategory, MediaPlaylist,
-		MediaTag, Notification, Playlist, Tag, User []ent.Hook
+		MediaTag, Notification, Playlist, Tag, UploadSession, User []ent.Hook
 	}
 	inters struct {
 		Category, Channel, Comment, Favorite, Like, Media, MediaCategory, MediaPlaylist,
-		MediaTag, Notification, Playlist, Tag, User []ent.Interceptor
+		MediaTag, Notification, Playlist, Tag, UploadSession, User []ent.Interceptor
 	}
 )

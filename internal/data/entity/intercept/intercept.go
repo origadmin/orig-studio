@@ -20,6 +20,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/playlist"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"origadmin/application/origcms/internal/data/entity/tag"
+	"origadmin/application/origcms/internal/data/entity/uploadsession"
 	"origadmin/application/origcms/internal/data/entity/user"
 
 	"entgo.io/ent/dialect/sql"
@@ -405,6 +406,33 @@ func (f TraverseTag) Traverse(ctx context.Context, q entity.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *entity.TagQuery", q)
 }
 
+// The UploadSessionFunc type is an adapter to allow the use of ordinary function as a Querier.
+type UploadSessionFunc func(context.Context, *entity.UploadSessionQuery) (entity.Value, error)
+
+// Query calls f(ctx, q).
+func (f UploadSessionFunc) Query(ctx context.Context, q entity.Query) (entity.Value, error) {
+	if q, ok := q.(*entity.UploadSessionQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *entity.UploadSessionQuery", q)
+}
+
+// The TraverseUploadSession type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseUploadSession func(context.Context, *entity.UploadSessionQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseUploadSession) Intercept(next entity.Querier) entity.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseUploadSession) Traverse(ctx context.Context, q entity.Query) error {
+	if q, ok := q.(*entity.UploadSessionQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *entity.UploadSessionQuery", q)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary function as a Querier.
 type UserFunc func(context.Context, *entity.UserQuery) (entity.Value, error)
 
@@ -459,6 +487,8 @@ func NewQuery(q entity.Query) (Query, error) {
 		return &query[*entity.PlaylistQuery, predicate.Playlist, playlist.OrderOption]{typ: entity.TypePlaylist, tq: q}, nil
 	case *entity.TagQuery:
 		return &query[*entity.TagQuery, predicate.Tag, tag.OrderOption]{typ: entity.TypeTag, tq: q}, nil
+	case *entity.UploadSessionQuery:
+		return &query[*entity.UploadSessionQuery, predicate.UploadSession, uploadsession.OrderOption]{typ: entity.TypeUploadSession, tq: q}, nil
 	case *entity.UserQuery:
 		return &query[*entity.UserQuery, predicate.User, user.OrderOption]{typ: entity.TypeUser, tq: q}, nil
 	default:

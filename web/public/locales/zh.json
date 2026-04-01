@@ -171,7 +171,17 @@
     "addTagPlaceholder": "添加标签",
     "addTag": "添加",
     "uploading": "上传中...",
-    "upload": "上传"
+    "upload": "上传",
+    "allDone": "全部完成",
+    "statusWaiting": "等待中",
+    "statusInitiating": "正在初始化...",
+    "statusUploading": "上传中...",
+    "statusPaused": "已暂停",
+    "statusCompleting": "正在合并...",
+    "statusSuccess": "上传成功",
+    "statusError": "上传失败",
+    "statusAborted": "已取消",
+    "chunkedUpload": "大文件分片上传中，支持断点续传"
   },
   "favorites": {
     "title": "我的收藏",

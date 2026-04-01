@@ -18,6 +18,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/playlist"
 	"origadmin/application/origcms/internal/data/entity/tag"
+	"origadmin/application/origcms/internal/data/entity/uploadsession"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"reflect"
 	"sync"
@@ -97,6 +98,7 @@ func checkColumn(t, c string) error {
 			notification.Table:  notification.ValidColumn,
 			playlist.Table:      playlist.ValidColumn,
 			tag.Table:           tag.ValidColumn,
+			uploadsession.Table: uploadsession.ValidColumn,
 			user.Table:          user.ValidColumn,
 		})
 	})

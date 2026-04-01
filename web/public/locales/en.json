@@ -171,7 +171,17 @@
     "addTagPlaceholder": "Add tag",
     "addTag": "Add",
     "uploading": "Uploading...",
-    "upload": "Upload"
+    "upload": "Upload",
+    "allDone": "All Done",
+    "statusWaiting": "Waiting",
+    "statusInitiating": "Initializing...",
+    "statusUploading": "Uploading...",
+    "statusPaused": "Paused",
+    "statusCompleting": "Merging...",
+    "statusSuccess": "Upload Complete",
+    "statusError": "Upload Failed",
+    "statusAborted": "Cancelled",
+    "chunkedUpload": "Large file chunked upload with resume support"
   },
   "favorites": {
     "title": "My Favorites",

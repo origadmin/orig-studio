@@ -1,44 +1,67 @@
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
- * Upload Page
+ * Upload Page - 支持分片上传与断点续传
  */
 
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useCallback} from 'react';
 import {useNavigate} from '@tanstack/react-router';
-import {Upload, X, File, Image, Video, CheckCircle, AlertCircle} from 'lucide-react';
+import {
+    Upload, X, File, Image, Video, CheckCircle,
+    AlertCircle, Pause, Play, RotateCcw,
+} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
 import {Badge} from '@/components/ui/badge';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {mediaApi} from '@/lib/api/media';
-import {formatFileSize} from '@/lib/format';
+import {formatFileSize, formatRelativeTime} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
+import {
+    startMultipartUpload,
+    cancelUpload,
+    shouldUseChunkedUpload,
+    type UploadTask,
+    type UploadCallbacks,
+    type UploadStatus,
+} from '@/lib/upload';
 
-interface UploadFile {
+interface UploadFileItem {
     id: string;
     file: File;
     preview?: string;
     progress: number;
-    status: 'pending' | 'uploading' | 'success' | 'error';
+    status: UploadStatus;
+    error?: string;
+    uploadId?: string;
+    speed?: number;
+    parts?: { part_number: number; etag: string; size: number }[];
+    startedAt?: number;
+    completedAt?: number;
 }
 
 const categories = [
-    "技术", "编程", "运维", "数据科学", "云计算",
-    "前端", "职业", "音乐", "游戏", "娱乐",
+    '技术', '编程', '运维', '数据科学', '云计算',
+    '前端', '职业', '音乐', '游戏', '娱乐',
 ];
 
 const UploadPage = () => {
     const {t} = useTranslation();
     const navigate = useNavigate();
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [files, setFiles] = useState<UploadFile[]>([]);
+    const [files, setFiles] = useState<UploadFileItem[]>([]);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState('');
     const [tags, setTags] = useState<string[]>([]);
     const [tagInput, setTagInput] = useState('');
     const [isDragging, setIsDragging] = useState(false);
+
+    const updateFile = useCallback((id: string, updates: Partial<UploadFileItem>) => {
+        setFiles((prev) =>
+            prev.map((f) => (f.id === id ? {...f, ...updates} : f)),
+        );
+    }, []);
 
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
@@ -59,22 +82,27 @@ const UploadPage = () => {
 
     const handleFiles = (newFiles: File[]) => {
         const validTypes = ['video/', 'image/', 'audio/'];
-        const valid = newFiles.filter(f =>
-            validTypes.some(t => f.type.startsWith(t))
+        const valid = newFiles.filter((f) =>
+            validTypes.some((t) => f.type.startsWith(t)),
         );
-        setFiles(prev => [
+        setFiles((prev) => [
             ...prev,
-            ...valid.map(f => ({
+            ...valid.map((f) => ({
                 id: Math.random().toString(36).substr(2, 9),
                 file: f,
-                preview: f.type.startsWith('image/') ? URL.createObjectURL(f) : undefined,
+                preview: f.type.startsWith('image/')
+                    ? URL.createObjectURL(f)
+                    : undefined,
                 progress: 0,
-                status: 'pending' as const,
+                status: 'waiting' as UploadStatus,
             })),
         ]);
     };
 
-    const removeFile = (id: string) => setFiles(prev => prev.filter(f => f.id !== id));
+    const removeFile = (id: string) => {
+        setFiles((prev) => prev.filter((f) => f.id !== id));
+        cancelUpload(id);
+    };
 
     const addTag = () => {
         const val = tagInput.trim();
@@ -84,42 +112,80 @@ const UploadPage = () => {
         }
     };
 
-    const removeTag = (tag: string) => setTags(tags.filter(t => t !== tag));
+    const removeTag = (tag: string) => setTags(tags.filter((t) => t !== tag));
 
+    // Upload handler using chunked upload for large files
     const handleUpload = async () => {
         if (!title || files.length === 0) return;
-        setFiles(prev => prev.map(f => ({...f, status: 'uploading'})));
 
-        for (const file of files) {
-            try {
-                await mediaApi.upload(
-                    file.file,
-                    {
-                        title,
-                        description,
-                        category_id: category ? parseInt(category) : undefined,
-                        tags,
-                        privacy: 1, // public
-                    },
-                    (percent) => {
-                        setFiles(prev =>
-                            prev.map(f => f.id === file.id ? {...f, progress: percent} : f)
-                        );
-                    },
-                );
-                setFiles(prev =>
-                    prev.map(f => f.id === file.id ? {...f, status: 'success'} : f)
-                );
-            } catch (err) {
-                console.error('Upload failed:', err);
-                setFiles(prev =>
-                    prev.map(f => f.id === file.id ? {...f, status: 'error'} : f)
-                );
+        const metadata = {
+            title,
+            description,
+            category_id: category ? parseInt(category) : undefined,
+            tags,
+        };
+
+        for (const fileItem of files) {
+            if (fileItem.status === 'success' || fileItem.status === 'uploading') continue;
+
+            // Small file: use simple upload
+            if (!shouldUseChunkedUpload(fileItem.file.size)) {
+                updateFile(fileItem.id, {status: 'uploading', progress: 0});
+                try {
+                    await mediaApi.upload(fileItem.file, metadata, (percent) => {
+                        updateFile(fileItem.id, {progress: percent});
+                    });
+                    updateFile(fileItem.id, {status: 'success', progress: 100});
+                } catch (err) {
+                    const msg = err instanceof Error ? err.message : 'Upload failed';
+                    updateFile(fileItem.id, {status: 'error', error: msg});
+                }
+                continue;
             }
-        }
 
-        // All uploads done, navigate after short delay
-        setTimeout(() => navigate({to: '/'}), 1500);
+            // Large file: use multipart upload
+            const callbacks: UploadCallbacks = {
+                onProgress: (taskId, progress, speed) => {
+                    updateFile(fileItem.id, {progress, speed});
+                },
+                onStatusChange: (taskId, status) => {
+                    updateFile(fileItem.id, {status});
+                },
+                onSuccess: (taskId) => {
+                    updateFile(fileItem.id, {
+                        status: 'success',
+                        progress: 100,
+                        completedAt: Date.now(),
+                    });
+                },
+                onError: (taskId, error) => {
+                    updateFile(fileItem.id, {status: 'error', error});
+                },
+            };
+
+            const task: UploadTask = {
+                id: fileItem.id,
+                file: fileItem.file,
+                progress: 0,
+                status: 'waiting',
+                parts: fileItem.parts || [],
+                uploadId: fileItem.uploadId,
+                title: metadata.title,
+                description: metadata.description,
+                categoryId: metadata.category_id,
+                tags: metadata.tags,
+            };
+
+            // Fire and forget - each upload runs independently
+            startMultipartUpload(task, callbacks).catch(() => {
+                // Error already handled in callbacks
+            });
+        }
+    };
+
+    const handleCancelUpload = (id: string) => {
+        cancelUpload(id);
+        updateFile(id, {status: 'aborted', progress: 0});
     };
 
     const getFileIcon = (type: string) => {
@@ -128,7 +194,46 @@ const UploadPage = () => {
         return <File className="w-8 h-8 text-slate-500"/>;
     };
 
-    const uploading = files.some(f => f.status === 'uploading');
+    const getStatusIcon = (status: UploadStatus) => {
+        switch (status) {
+            case 'success':
+                return <CheckCircle className="w-5 h-5 text-green-500"/>;
+            case 'error':
+                return <AlertCircle className="w-5 h-5 text-red-500"/>;
+            case 'aborted':
+                return <RotateCcw className="w-5 h-5 text-orange-500"/>;
+            default:
+                return null;
+        }
+    };
+
+    const getStatusText = (status: UploadStatus) => {
+        switch (status) {
+            case 'waiting':
+                return t('upload.statusWaiting');
+            case 'initiating':
+                return t('upload.statusInitiating');
+            case 'uploading':
+                return t('upload.statusUploading');
+            case 'paused':
+                return t('upload.statusPaused');
+            case 'completing':
+                return t('upload.statusCompleting');
+            case 'success':
+                return t('upload.statusSuccess');
+            case 'error':
+                return t('upload.statusError');
+            case 'aborted':
+                return t('upload.statusAborted');
+            default:
+                return status;
+        }
+    };
+
+    const uploading = files.some(
+        (f) => ['uploading', 'initiating', 'completing'].includes(f.status),
+    );
+    const allDone = files.length > 0 && files.every((f) => f.status === 'success');
     const canSubmit = !!title && files.length > 0 && !uploading;
 
     return (
@@ -191,36 +296,99 @@ const UploadPage = () => {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {files.map(file => (
-                            <div key={file.id}
-                                 className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                        {files.map((fileItem) => (
+                            <div
+                                key={fileItem.id}
+                                className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl"
+                            >
+                                {/* Preview / Icon */}
                                 <div
                                     className="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-lg overflow-hidden shrink-0">
-                                    {file.preview ? (
-                                        <img src={file.preview} alt="" className="w-full h-full object-cover"/>
+                                    {fileItem.preview ? (
+                                        <img
+                                            src={fileItem.preview}
+                                            alt=""
+                                            className="w-full h-full object-cover"
+                                        />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
-                                            {getFileIcon(file.file.type)}
+                                            {getFileIcon(fileItem.file.type)}
                                         </div>
                                     )}
                                 </div>
+
+                                {/* File info */}
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-medium text-gray-900 dark:text-white truncate">{file.file.name}</p>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">{formatFileSize(file.file.size)}</p>
-                                    {file.status === 'uploading' && (
+                                    <p className="font-medium text-gray-900 dark:text-white truncate">
+                                        {fileItem.file.name}
+                                    </p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        {formatFileSize(fileItem.file.size)}
+                                        {fileItem.speed != null && fileItem.status === 'uploading' && (
+                                            <span className="ml-2">
+                                                · {formatFileSize(fileItem.speed)}/s
+                                            </span>
+                                        )}
+                                    </p>
+
+                                    {/* Progress bar */}
+                                    {['uploading', 'initiating', 'completing'].includes(fileItem.status) && (
                                         <div
                                             className="mt-2 h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                                            <div className="h-full bg-blue-600 transition-all"
-                                                 style={{width: `${file.progress}%`}}/>
+                                            <div
+                                                className={`h-full transition-all duration-300 ${
+                                                    fileItem.status === 'completing'
+                                                        ? 'bg-yellow-500'
+                                                        : 'bg-blue-600'
+                                                }`}
+                                                style={{width: `${fileItem.progress}%`}}
+                                            />
                                         </div>
                                     )}
+
+                                    {/* Status / Error */}
+                                    {fileItem.status !== 'waiting' && (
+                                        <p className={`text-xs mt-1 ${
+                                            fileItem.status === 'success'
+                                                ? 'text-green-500'
+                                                : fileItem.status === 'error'
+                                                    ? 'text-red-500'
+                                                    : 'text-gray-400'
+                                        }`}>
+                                            {getStatusText(fileItem.status)}
+                                            {fileItem.error && `: ${fileItem.error}`}
+                                        </p>
+                                    )}
                                 </div>
+
+                                {/* Actions */}
                                 <div className="flex items-center gap-2">
-                                    {file.status === 'success' && <CheckCircle className="w-5 h-5 text-green-500"/>}
-                                    {file.status === 'error' && <AlertCircle className="w-5 h-5 text-red-500"/>}
-                                    {file.status === 'pending' && (
-                                        <Button variant="ghost" size="sm" onClick={() => removeFile(file.id)}>
+                                    {getStatusIcon(fileItem.status)}
+                                    {fileItem.status === 'pending' && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => removeFile(fileItem.id)}
+                                        >
                                             <X className="w-4 h-4"/>
+                                        </Button>
+                                    )}
+                                    {fileItem.status === 'uploading' && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleCancelUpload(fileItem.id)}
+                                        >
+                                            <Pause className="w-4 h-4"/>
+                                        </Button>
+                                    )}
+                                    {fileItem.status === 'aborted' && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => removeFile(fileItem.id)}
+                                        >
+                                            <RotateCcw className="w-4 h-4"/>
                                         </Button>
                                     )}
                                 </div>
@@ -237,42 +405,58 @@ const UploadPage = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="space-y-2">
-                        <label
-                            className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('upload.titleLabel')}</label>
-                        <Input placeholder={t('upload.titlePlaceholder')} value={title}
-                               onChange={(e) => setTitle(e.target.value)}/>
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {t('upload.titleLabel')}
+                        </label>
+                        <Input
+                            placeholder={t('upload.titlePlaceholder')}
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                        />
                     </div>
                     <div className="space-y-2">
-                        <label
-                            className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('upload.descLabel')}</label>
-                        <Textarea placeholder={t('upload.descPlaceholder')} rows={4} value={description}
-                                  onChange={(e) => setDescription(e.target.value)}/>
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {t('upload.descLabel')}
+                        </label>
+                        <Textarea
+                            placeholder={t('upload.descPlaceholder')}
+                            rows={4}
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                        />
                     </div>
                     <div className="space-y-2">
-                        <label
-                            className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('upload.categoryLabel')}</label>
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {t('upload.categoryLabel')}
+                        </label>
                         <select
                             className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm dark:bg-gray-700 dark:text-white"
                             value={category}
                             onChange={(e) => setCategory(e.target.value)}
                         >
                             <option value="">{t('upload.selectCategory')}</option>
-                            {categories.map(cat => (
+                            {categories.map((cat) => (
                                 <option key={cat} value={cat}>{cat}</option>
                             ))}
                         </select>
                     </div>
                     <div className="space-y-2">
-                        <label
-                            className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('upload.tagLabel')}</label>
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {t('upload.tagLabel')}
+                        </label>
                         <div className="flex gap-2 mb-2">
-                            <Input placeholder={t('upload.addTagPlaceholder')} value={tagInput}
+                            <Input
+                                placeholder={t('upload.addTagPlaceholder')}
+                                value={tagInput}
                                 onChange={(e) => setTagInput(e.target.value)}
-                                   onKeyDown={(e) => e.key === 'Enter' && addTag()}/>
-                            <Button variant="outline" onClick={addTag}>{t('upload.addTag')}</Button>
+                                onKeyDown={(e) => e.key === 'Enter' && addTag()}
+                            />
+                            <Button variant="outline" onClick={addTag}>
+                                {t('upload.addTag')}
+                            </Button>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                            {tags.map(tag => (
+                            {tags.map((tag) => (
                                 <Badge key={tag} variant="secondary" className="flex items-center gap-1">
                                     {tag}
                                     <button onClick={() => removeTag(tag)} className="hover:text-red-500">
@@ -291,7 +475,11 @@ const UploadPage = () => {
                     {t('common.cancel')}
                 </Button>
                 <Button onClick={handleUpload} disabled={!canSubmit}>
-                    {uploading ? t('upload.uploading') : t('upload.upload')}
+                    {allDone
+                        ? t('upload.allDone')
+                        : uploading
+                            ? t('upload.uploading')
+                            : t('upload.upload')}
                 </Button>
             </div>
         </div>
