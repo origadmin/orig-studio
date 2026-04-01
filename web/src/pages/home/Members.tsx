@@ -6,6 +6,7 @@
 import React, {useState} from 'react';
 import {Link} from '@tanstack/react-router';
 import {Users, Search} from 'lucide-react';
+import {useTranslation} from 'react-i18next';
 
 interface MemberInfo {
     id: number;
@@ -95,6 +96,7 @@ const mockMembers: MemberInfo[] = [
 const formatNumber = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}万` : n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
 
 const MembersPage = () => {
+    const {t} = useTranslation();
     const [filter, setFilter] = useState('');
     const filtered = mockMembers.filter(m =>
         m.displayName.toLowerCase().includes(filter.toLowerCase()) ||
@@ -107,9 +109,9 @@ const MembersPage = () => {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <Users size={24} className="text-emerald-600"/>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">成员</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('members.title')}</h1>
                 </div>
-                <span className="text-sm text-gray-500">{mockMembers.length} 位创作者</span>
+                <span className="text-sm text-gray-500">{t('members.creatorCount', {count: mockMembers.length})}</span>
             </div>
 
             {/* 搜索 */}
@@ -119,7 +121,7 @@ const MembersPage = () => {
                     type="text"
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
-                    placeholder="搜索成员..."
+                    placeholder={t('members.searchPlaceholder')}
                     className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg pl-9 pr-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
                 />
             </div>
@@ -148,8 +150,8 @@ const MembersPage = () => {
                         </div>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 line-clamp-2">{member.bio}</p>
                         <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
-                            <span>{member.mediaCount} 个视频</span>
-                            <span>{formatNumber(member.followerCount)} 粉丝</span>
+                            <span>{member.mediaCount} {t('members.videos')}</span>
+                            <span>{formatNumber(member.followerCount)} {t('members.followers')}</span>
                         </div>
                     </Link>
                 ))}
@@ -158,7 +160,7 @@ const MembersPage = () => {
             {filtered.length === 0 && (
                 <div className="text-center py-16 text-gray-400">
                     <Users size={48} className="mx-auto mb-3 opacity-30"/>
-                    <p>没有找到匹配的成员</p>
+                    <p>{t('members.noMatch')}</p>
                 </div>
             )}
         </div>

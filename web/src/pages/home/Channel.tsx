@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {useParams} from '@tanstack/react-router';
 import {Link} from '@tanstack/react-router';
 import {Play, Eye, Settings, Bell, Crown} from 'lucide-react';
+import {useTranslation} from 'react-i18next';
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Badge} from '@/components/ui/badge';
@@ -77,6 +78,7 @@ const mockVideos = [
 
 const ChannelPage = () => {
     const {id} = useParams({from: '/c/$id'});
+    const {t} = useTranslation();
     const [channel] = useState(mockChannel);
     const [videos] = useState(mockVideos);
     const [activeTab, setActiveTab] = useState('videos');
@@ -95,11 +97,13 @@ const ChannelPage = () => {
                 <div className="absolute top-4 right-4 flex gap-2">
                     {channel.is_owner ? (
                         <Button variant="outline" className="bg-white dark:bg-gray-800"><Settings
-                            className="w-4 h-4 mr-2"/>管理频道</Button>
+                            className="w-4 h-4 mr-2"/>{t('channel.manageChannel')}</Button>
                     ) : channel.is_subscribed ? (
-                        <Button variant="outline" className="bg-white dark:bg-gray-800"><Bell className="w-4 h-4 mr-2"/>已通知</Button>
+                        <Button variant="outline" className="bg-white dark:bg-gray-800"><Bell
+                            className="w-4 h-4 mr-2"/>{t('common.notify')}</Button>
                     ) : (
-                        <Button className="bg-red-600 hover:bg-red-700"><Bell className="w-4 h-4 mr-2"/>订阅</Button>
+                        <Button className="bg-red-600 hover:bg-red-700"><Bell
+                            className="w-4 h-4 mr-2"/>{t('common.subscribe')}</Button>
                     )}
                 </div>
             </div>
@@ -107,24 +111,25 @@ const ChannelPage = () => {
             <div className="pt-20 px-6 space-y-4">
                 <div className="flex items-center gap-3">
                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{channel.name}</h1>
-                    {channel.is_verified && <Badge variant="default" className="bg-emerald-500">已认证</Badge>}
+                    {channel.is_verified &&
+                        <Badge variant="default" className="bg-emerald-500">{t('common.verified')}</Badge>}
                 </div>
                 <div className="flex flex-wrap gap-6 text-sm">
                     <div><span
                         className="font-semibold text-slate-900 dark:text-white">{formatViews(channel.subscriber_count)}</span><span
-                        className="text-slate-500 dark:text-gray-400"> 订阅者</span></div>
+                        className="text-slate-500 dark:text-gray-400"> {t('common.subscribers')}</span></div>
                     <div><span
                         className="font-semibold text-slate-900 dark:text-white">{channel.video_count}</span><span
-                        className="text-slate-500 dark:text-gray-400"> 个视频</span></div>
+                        className="text-slate-500 dark:text-gray-400"> {t('common.videos_count')}</span></div>
                     <div><span
                         className="font-semibold text-slate-900 dark:text-white">{formatViews(channel.total_views)}</span><span
-                        className="text-slate-500 dark:text-gray-400"> 次观看</span></div>
+                        className="text-slate-500 dark:text-gray-400"> {t('common.views')}</span></div>
                 </div>
                 <p className="text-slate-600 dark:text-gray-300 max-w-2xl">{channel.description}</p>
                 {channel.links && (
                     <div className="flex gap-4">
                         {channel.links.website && <a href={channel.links.website}
-                                                     className="text-emerald-600 hover:underline text-sm">网站</a>}
+                                                     className="text-emerald-600 hover:underline text-sm">{t('channel.website')}</a>}
                         {channel.links.github &&
                             <a href="#" className="text-emerald-600 hover:underline text-sm">{channel.links.github}</a>}
                     </div>
@@ -134,10 +139,10 @@ const ChannelPage = () => {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="w-full justify-start border-b dark:border-gray-700 bg-transparent h-auto p-0">
                     {[
-                        {v: 'videos', icon: <Play className="w-4 h-4 mr-2"/>, l: '视频'},
-                        {v: 'playlists', l: '播放列表'},
-                        {v: 'community', l: '社区'},
-                        {v: 'about', l: '关于'},
+                        {v: 'videos', icon: <Play className="w-4 h-4 mr-2"/>, l: t('channel.tabVideos')},
+                        {v: 'playlists', l: t('channel.tabPlaylists')},
+                        {v: 'community', l: t('channel.tabCommunity')},
+                        {v: 'about', l: t('channel.tabAbout')},
                     ].map(t => (
                         <TabsTrigger key={t.v} value={t.v}
                                      className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-none px-4 py-3">
@@ -158,11 +163,11 @@ const ChannelPage = () => {
                                             className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">{formatDuration(video.duration)}</div>
                                         {video.is_premium && <div className="absolute top-2 left-2"><Badge
                                             className="bg-amber-500 hover:bg-amber-600"><Crown
-                                            className="w-3 h-3 mr-1"/>付费</Badge></div>}
+                                            className="w-3 h-3 mr-1"/>{t('channel.premium')}</Badge></div>}
                                     </div>
                                     <div className="p-3">
                                         <h3 className="font-semibold text-slate-900 dark:text-white line-clamp-2 text-sm group-hover:text-emerald-600 transition-colors">{video.title}</h3>
-                                        <p className="text-xs text-slate-500 dark:text-gray-400 mt-2">{formatViews(video.view_count)} 次观看
+                                        <p className="text-xs text-slate-500 dark:text-gray-400 mt-2">{formatViews(video.view_count)} {t('common.views')}
                                             · {formatDate(video.create_time)}</p>
                                     </div>
                                 </div>
@@ -171,14 +176,16 @@ const ChannelPage = () => {
                     </div>
                 </TabsContent>
                 <TabsContent value="playlists" className="mt-6">
-                    <div className="text-center py-12 text-slate-500 dark:text-gray-400">暂无播放列表</div>
+                    <div
+                        className="text-center py-12 text-slate-500 dark:text-gray-400">{t('channel.noPlaylists')}</div>
                 </TabsContent>
                 <TabsContent value="community" className="mt-6">
-                    <div className="text-center py-12 text-slate-500 dark:text-gray-400">暂无社区帖子</div>
+                    <div
+                        className="text-center py-12 text-slate-500 dark:text-gray-400">{t('channel.noCommunity')}</div>
                 </TabsContent>
                 <TabsContent value="about" className="mt-6">
                     <div className="max-w-2xl"><h3
-                        className="font-semibold text-slate-900 dark:text-white mb-4">简介</h3><p
+                        className="font-semibold text-slate-900 dark:text-white mb-4">{t('channel.description')}</h3><p
                         className="text-slate-600 dark:text-gray-300">{channel.description}</p></div>
                 </TabsContent>
             </Tabs>

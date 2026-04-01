@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
@@ -34,6 +35,7 @@ const mockTags = [
 ];
 
 const Tags: React.FC = () => {
+    const {t} = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
     const [trendingFilter, setTrendingFilter] = useState('all');
     const [tags] = useState(mockTags);
@@ -62,7 +64,7 @@ const Tags: React.FC = () => {
                             <Hash className="h-5 w-5 text-purple-600"/>
                             <div>
                                 <div className="text-2xl font-bold">{totalTags}</div>
-                                <p className="text-sm text-muted-foreground">标签总数</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.tagTotal')}</p>
                             </div>
                         </div>
                     </CardContent>
@@ -70,19 +72,19 @@ const Tags: React.FC = () => {
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold text-green-600">{activeTags}</div>
-                        <p className="text-sm text-muted-foreground">活跃标签</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.activeTags')}</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold text-orange-500">{trendingTags}</div>
-                        <p className="text-sm text-muted-foreground">热门标签</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.trendingTags')}</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold">{totalMedia}</div>
-                        <p className="text-sm text-muted-foreground">关联媒体</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.relatedMedia')}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -93,7 +95,7 @@ const Tags: React.FC = () => {
                     <div className="relative flex-1 max-w-md">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                         <Input
-                            placeholder="搜索标签..."
+                            placeholder={t('admin.search') || t('admin.tags') + '...'}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="pl-10"
@@ -104,33 +106,33 @@ const Tags: React.FC = () => {
                         value={trendingFilter}
                         onChange={(e) => setTrendingFilter(e.target.value)}
                     >
-                        <option value="all">全部</option>
-                        <option value="trending">热门</option>
-                        <option value="normal">普通</option>
+                        <option value="all">{t('admin.all')}</option>
+                        <option value="trending">{t('admin.trending')}</option>
+                        <option value="normal">{t('admin.normalTag')}</option>
                     </select>
                 </div>
                 <Button>
                     <Plus className="mr-2 h-4 w-4"/>
-                    新建标签
+                    {t('admin.newTag')}
                 </Button>
             </div>
 
             {/* 标签表格 */}
             <Card>
                 <CardHeader>
-                    <CardTitle>标签列表</CardTitle>
+                    <CardTitle>{t('admin.tagList')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>ID</TableHead>
-                                <TableHead>标签名称</TableHead>
+                                <TableHead>{t('admin.tagName')}</TableHead>
                                 <TableHead>Slug</TableHead>
-                                <TableHead className="text-right">媒体数</TableHead>
-                                <TableHead>热门</TableHead>
-                                <TableHead>状态</TableHead>
-                                <TableHead className="text-right">操作</TableHead>
+                                <TableHead className="text-right">{t('admin.mediaCount')}</TableHead>
+                                <TableHead>{t('admin.trendingCol')}</TableHead>
+                                <TableHead>{t('admin.status')}</TableHead>
+                                <TableHead className="text-right">{t('admin.actions')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -146,14 +148,15 @@ const Tags: React.FC = () => {
                                     <TableCell className="text-right">{tag.mediaCount}</TableCell>
                                     <TableCell>
                                         {tag.trending ? (
-                                            <Badge variant="default" className="bg-orange-500">热门</Badge>
+                                            <Badge variant="default"
+                                                   className="bg-orange-500">{t('admin.trending')}</Badge>
                                         ) : (
                                             <span className="text-muted-foreground">-</span>
                                         )}
                                     </TableCell>
                                     <TableCell>
                                         <Badge variant={tag.status === 'active' ? 'secondary' : 'outline'}>
-                                            {tag.status === 'active' ? '启用' : '禁用'}
+                                            {tag.status === 'active' ? t('admin.enabled') : t('admin.disabled')}
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
@@ -166,15 +169,15 @@ const Tags: React.FC = () => {
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuItem>
                                                     <Eye className="mr-2 h-4 w-4"/>
-                                                    查看
+                                                    {t('admin.view')}
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem>
                                                     <Edit className="mr-2 h-4 w-4"/>
-                                                    编辑
+                                                    {t('admin.edit')}
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem className="text-red-600">
                                                     <Trash2 className="mr-2 h-4 w-4"/>
-                                                    删除
+                                                    {t('admin.delete')}
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>

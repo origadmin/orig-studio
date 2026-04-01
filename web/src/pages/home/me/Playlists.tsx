@@ -6,6 +6,7 @@
 import React, {useState} from 'react';
 import {Link} from '@tanstack/react-router';
 import {ListVideo, Plus, MoreVertical, Play, Video} from 'lucide-react';
+import {useTranslation} from 'react-i18next';
 
 interface PlaylistInfo {
     id: number;
@@ -35,13 +36,18 @@ const mockPlaylists: PlaylistInfo[] = [
     },
 ];
 
-const visibilityLabel = (v: string) => {
-    const map: Record<string, string> = {public: '公开', private: '私密', unlisted: '不公开'};
-    return map[v] || v;
-};
-
 const PlaylistsPage = () => {
+    const {t} = useTranslation();
     const [playlists] = useState(mockPlaylists);
+
+    const visibilityLabel = (v: string) => {
+        const map: Record<string, string> = {
+            public: t('common.public'),
+            private: t('common.private'),
+            unlisted: t('common.unlisted')
+        };
+        return map[v] || v;
+    };
 
     return (
         <div className="space-y-6">
@@ -49,12 +55,12 @@ const PlaylistsPage = () => {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <ListVideo size={24} className="text-emerald-600"/>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">我的播放列表</h1>
-                    <span className="text-sm text-gray-500">{playlists.length} 个列表</span>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('playlists.title')}</h1>
+                    <span className="text-sm text-gray-500">{t('playlists.listCount', {count: playlists.length})}</span>
                 </div>
                 <button
                     className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors">
-                    <Plus size={16}/> 新建列表
+                    <Plus size={16}/> {t('playlists.newList')}
                 </button>
             </div>
 
@@ -73,7 +79,7 @@ const PlaylistsPage = () => {
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"/>
                                 <div className="absolute bottom-3 left-3 flex items-center gap-2">
                                     <Video size={14} className="text-white/80"/>
-                                    <span className="text-white text-sm">{pl.count} 个视频</span>
+                                    <span className="text-white text-sm">{pl.count} {t('common.videos_count')}</span>
                                 </div>
                                 <div className="absolute top-3 right-3">
                                     <span className={`text-xs px-2 py-0.5 rounded-full ${
@@ -101,7 +107,7 @@ const PlaylistsPage = () => {
                                     {pl.title}
                                 </h3>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{pl.description}</p>
-                                <p className="text-xs text-gray-400 mt-2">更新于 {pl.updatedAt}</p>
+                                <p className="text-xs text-gray-400 mt-2">{t('playlists.updated', {date: pl.updatedAt})}</p>
                             </div>
                         </div>
                     ))}
@@ -109,8 +115,8 @@ const PlaylistsPage = () => {
             ) : (
                 <div className="text-center py-20 text-gray-400">
                     <ListVideo size={48} className="mx-auto mb-3 opacity-30"/>
-                    <p className="text-lg mb-1">还没有播放列表</p>
-                    <p className="text-sm">创建你的第一个播放列表，收藏喜欢的视频</p>
+                    <p className="text-lg mb-1">{t('playlists.empty')}</p>
+                    <p className="text-sm">{t('playlists.emptyDesc')}</p>
                 </div>
             )}
         </div>

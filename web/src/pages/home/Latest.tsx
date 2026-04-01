@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
- * Latest Page — infinite scroll (TODO: i18n)
+ * Latest Page — infinite scroll
  */
 
 import React, {useState, useEffect, useRef, useCallback} from 'react';
@@ -8,6 +8,7 @@ import {Link} from '@tanstack/react-router';
 import {Clock, Play, Eye} from 'lucide-react';
 import {MediaItem} from '@/types/media';
 import {formatDuration, formatViews, formatDate} from '@/lib/format';
+import {useTranslation} from 'react-i18next';
 
 // TODO: replace with API call
 function generateMockData(startId: number, count: number): MediaItem[] {
@@ -47,6 +48,7 @@ function generateMockData(startId: number, count: number): MediaItem[] {
 const PAGE_SIZE = 12;
 
 const LatestPage = () => {
+    const {t} = useTranslation();
     const [items, setItems] = useState<MediaItem[]>(() => generateMockData(0, PAGE_SIZE));
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
@@ -80,7 +82,7 @@ const LatestPage = () => {
         <div className="space-y-6">
             <div className="flex items-center gap-3">
                 <Clock size={24} className="text-emerald-600"/>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{/* TODO: i18n */}最新内容</h1>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('latest.title')}</h1>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
@@ -129,11 +131,11 @@ const LatestPage = () => {
                     <div className="flex items-center gap-3 text-gray-400">
                         <div
                             className="animate-spin w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full"/>
-                        <span className="text-sm">{/* TODO: i18n */}加载中...</span>
+                        <span className="text-sm">{t('common.loading')}</span>
                     </div>
                 )}
                 {!hasMore && items.length > 0 && (
-                    <p className="text-sm text-gray-400 py-4">— {/* TODO: i18n */}已加载全部内容 —</p>
+                    <p className="text-sm text-gray-400 py-4">— {t('common.allLoaded')} —</p>
                 )}
             </div>
         </div>

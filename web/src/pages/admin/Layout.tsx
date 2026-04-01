@@ -3,6 +3,7 @@ import {useState} from "react";
 import {Link, useRouterState} from "@tanstack/react-router";
 import {signOut} from "@/lib/auth";
 import {useAuth} from "@/hooks/useAuth";
+import {useTranslation} from "react-i18next";
 import {Button} from "@/components/ui/button";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
 import {
@@ -28,22 +29,23 @@ import {
     Settings,
 } from "lucide-react";
 
-const menuItems = [
-    {id: "dashboard", icon: LayoutDashboard, label: "仪表盘", path: "/admin"},
-    {id: "media", icon: Film, label: "媒体管理", path: "/admin/media"},
-    {id: "users", icon: Users, label: "用户管理", path: "/admin/users"},
-    {id: "categories", icon: FolderTree, label: "分类管理", path: "/admin/categories"},
-    {id: "channels", icon: Radio, label: "频道管理", path: "/admin/channels"},
-    {id: "tags", icon: Tags, label: "标签管理", path: "/admin/tags"},
-    {id: "comments", icon: MessageSquare, label: "评论管理", path: "/admin/comments"},
-    {id: "playlists", icon: PlayCircle, label: "播放列表", path: "/admin/playlists"},
-    {id: "content", icon: FileText, label: "内容管理", path: "/admin/content"},
-    {id: "settings", icon: Settings, label: "系统设置", path: "/admin/settings"},
-];
-
 export default function AdminPageLayout({children}: { children?: React.ReactNode }) {
+    const {t} = useTranslation();
     const state = useRouterState();
     const {user} = useAuth();
+
+    const menuItems = [
+        {id: "dashboard", icon: LayoutDashboard, label: t('admin.dashboard'), path: "/admin"},
+        {id: "media", icon: Film, label: t('admin.media'), path: "/admin/media"},
+        {id: "users", icon: Users, label: t('admin.users'), path: "/admin/users"},
+        {id: "categories", icon: FolderTree, label: t('admin.categories'), path: "/admin/categories"},
+        {id: "channels", icon: Radio, label: t('admin.channels'), path: "/admin/channels"},
+        {id: "tags", icon: Tags, label: t('admin.tags'), path: "/admin/tags"},
+        {id: "comments", icon: MessageSquare, label: t('admin.comments'), path: "/admin/comments"},
+        {id: "playlists", icon: PlayCircle, label: t('admin.playlists'), path: "/admin/playlists"},
+        {id: "content", icon: FileText, label: t('admin.content'), path: "/admin/content"},
+        {id: "settings", icon: Settings, label: t('admin.settings'), path: "/admin/settings"},
+    ];
 
     const isActive = (path: string) =>
         path === "/admin"
@@ -94,7 +96,7 @@ export default function AdminPageLayout({children}: { children?: React.ReactNode
                         className="flex items-center gap-2 px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
                     >
                         <ArrowLeft size={18}/>
-                        <span>返回用户端</span>
+                        <span>{t('admin.exitAdmin')}</span>
                     </Link>
                 </div>
             </aside>
@@ -102,7 +104,7 @@ export default function AdminPageLayout({children}: { children?: React.ReactNode
             {/* 主内容区 */}
             <div className="flex-1 flex flex-col">
                 <header className="h-16 bg-background border-b flex items-center justify-between px-6">
-                    <div className="text-sm text-muted-foreground">欢迎使用 OrigCMS 管理后台</div>
+                    <div className="text-sm text-muted-foreground">{t('admin.welcomeAdmin')}</div>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="flex items-center gap-2 px-2">
@@ -117,11 +119,11 @@ export default function AdminPageLayout({children}: { children?: React.ReactNode
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-56">
-                            <DropdownMenuLabel>我的账户</DropdownMenuLabel>
+                            <DropdownMenuLabel>{t('admin.myAccount')}</DropdownMenuLabel>
                             <DropdownMenuSeparator/>
                             <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                                 <LogOut className="mr-2 h-4 w-4"/>
-                                <span>退出登录</span>
+                                <span>{t('admin.logout')}</span>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

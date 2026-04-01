@@ -6,6 +6,7 @@
 import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {Link} from '@tanstack/react-router';
 import {Tag, Hash, Search} from 'lucide-react';
+import {useTranslation} from 'react-i18next';
 
 interface TagInfo {
     name: string;
@@ -26,6 +27,7 @@ const mockTags: TagInfo[] = [
 ];
 
 const TagsPage = () => {
+    const {t} = useTranslation();
     const [filter, setFilter] = useState('');
     const filteredTags = mockTags.filter(t =>
         t.name.toLowerCase().includes(filter.toLowerCase())
@@ -42,9 +44,9 @@ const TagsPage = () => {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <Tag size={24} className="text-emerald-600"/>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">标签</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('tags.title')}</h1>
                 </div>
-                <span className="text-sm text-gray-500">{mockTags.length} 个标签</span>
+                <span className="text-sm text-gray-500">{t('tags.tagCount', {count: mockTags.length})}</span>
             </div>
 
             {/* 搜索 */}
@@ -54,7 +56,7 @@ const TagsPage = () => {
                     type="text"
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
-                    placeholder="搜索标签..."
+                    placeholder={t('tags.searchPlaceholder')}
                     className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg pl-9 pr-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
                 />
             </div>
@@ -73,7 +75,7 @@ const TagsPage = () => {
                             <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                                 {tag.name}
                             </p>
-                            <p className="text-xs text-gray-400">{tag.count} 个视频</p>
+                            <p className="text-xs text-gray-400">{t('tags.videosCount', {count: tag.count})}</p>
                         </div>
                     </Link>
                 ))}
@@ -82,7 +84,7 @@ const TagsPage = () => {
             {filteredTags.length === 0 && (
                 <div className="text-center py-16 text-gray-400">
                     <Tag size={48} className="mx-auto mb-3 opacity-30"/>
-                    <p>没有找到匹配的标签</p>
+                    <p>{t('tags.noMatch')}</p>
                 </div>
             )}
         </div>

@@ -5,69 +5,70 @@
 
 import React from 'react';
 import {Info, Heart, Code, Users} from 'lucide-react';
+import {useTranslation} from 'react-i18next';
 
 const AboutPage = () => {
+    const {t} = useTranslation();
     return (
         <div className="space-y-8 max-w-3xl">
             <div className="flex items-center gap-3">
                 <Info size={24} className="text-emerald-600"/>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">关于 OrigCMS</h1>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('about.title')}</h1>
             </div>
 
             <div
                 className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-8 space-y-6">
                 <div>
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">什么是 OrigCMS？</h2>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{t('about.whatIs')}</h2>
                     <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                        OrigCMS 是一个开源的视频内容管理系统，基于 Go + React 构建。
-                        它提供了完整的视频上传、转码、管理和播放功能，适用于个人、团队和企业使用。
+                        {t('about.description')}
                     </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <Code size={28} className="mx-auto text-emerald-500 mb-2"/>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">Go + React</p>
-                        <p className="text-xs text-gray-500 mt-1">现代技术栈</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">{t('about.goReact')}</p>
+                        <p className="text-xs text-gray-500 mt-1">{t('about.modernStack')}</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <Heart size={28} className="mx-auto text-red-500 mb-2"/>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">开源免费</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">{t('about.openSource')}</p>
                         <p className="text-xs text-gray-500 mt-1">MIT License</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <Users size={28} className="mx-auto text-blue-500 mb-2"/>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">社区驱动</p>
-                        <p className="text-xs text-gray-500 mt-1">欢迎参与贡献</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">{t('about.communityDriven')}</p>
+                        <p className="text-xs text-gray-500 mt-1">{t('about.welcomeContrib')}</p>
                     </div>
                 </div>
 
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">主要功能</h2>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">{t('about.features')}</h2>
                     <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
                         <li className="flex items-start gap-2">
                             <span className="text-emerald-500 mt-1">&#10003;</span>
-                            视频上传、转码和管理
+                            {t('about.feature1')}
                         </li>
                         <li className="flex items-start gap-2">
                             <span className="text-emerald-500 mt-1">&#10003;</span>
-                            用户系统（注册、登录、个人中心）
+                            {t('about.feature2')}
                         </li>
                         <li className="flex items-start gap-2">
                             <span className="text-emerald-500 mt-1">&#10003;</span>
-                            分类、标签、搜索
+                            {t('about.feature3')}
                         </li>
                         <li className="flex items-start gap-2">
                             <span className="text-emerald-500 mt-1">&#10003;</span>
-                            播放列表、收藏、历史记录
+                            {t('about.feature4')}
                         </li>
                         <li className="flex items-start gap-2">
                             <span className="text-emerald-500 mt-1">&#10003;</span>
-                            管理后台（媒体、用户、评论、设置）
+                            {t('about.feature5')}
                         </li>
                         <li className="flex items-start gap-2">
                             <span className="text-emerald-500 mt-1">&#10003;</span>
-                            亮色/暗色主题切换
+                            {t('about.feature6')}
                         </li>
                     </ul>
                 </div>

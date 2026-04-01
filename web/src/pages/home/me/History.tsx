@@ -6,6 +6,7 @@
 import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {Link} from '@tanstack/react-router';
 import {History, Play, Eye, Trash2, X} from 'lucide-react';
+import {useTranslation} from 'react-i18next';
 
 interface HistoryItem {
     id: number;
@@ -42,6 +43,7 @@ const formatTimeAgo = (iso: string) => {
 };
 
 const HistoryPage = () => {
+    const {t} = useTranslation();
     const [items, setItems] = useState(mockHistory);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(false);
@@ -76,13 +78,13 @@ const HistoryPage = () => {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <History size={24} className="text-emerald-600"/>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">历史记录</h1>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('history.title')}</h1>
                     </div>
                 </div>
                 <div className="text-center py-20 text-gray-400">
                     <History size={48} className="mx-auto mb-3 opacity-30"/>
-                    <p className="text-lg mb-1">暂无观看记录</p>
-                    <p className="text-sm">你观看的视频会出现在这里</p>
+                    <p className="text-lg mb-1">{t('history.empty')}</p>
+                    <p className="text-sm">{t('history.emptyDesc')}</p>
                 </div>
             </div>
         );
@@ -94,14 +96,14 @@ const HistoryPage = () => {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <History size={24} className="text-emerald-600"/>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">历史记录</h1>
-                    <span className="text-sm text-gray-500">{items.length} 条记录</span>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('history.title')}</h1>
+                    <span className="text-sm text-gray-500">{t('history.recordCount', {count: items.length})}</span>
                 </div>
                 <button
                     onClick={clearHistory}
                     className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                 >
-                    <Trash2 size={14}/> 清空记录
+                    <Trash2 size={14}/> {t('history.clear')}
                 </button>
             </div>
 

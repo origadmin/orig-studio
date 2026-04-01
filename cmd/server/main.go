@@ -126,7 +126,7 @@ func main() {
 	r.Static("/uploads", "./data/uploads")
 
 	// Register all module routes (user, media, content, etc.)
-	server.RegisterRoutes(r, db)
+	server.RegisterRoutes(r, db, jwtManager)
 
 	// Auth routes (public) - these supplement the standard CRUD routes
 	authGroup := r.Group("/api/v1/auth")

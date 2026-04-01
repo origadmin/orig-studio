@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
@@ -91,6 +92,7 @@ const mockComments = [
 ];
 
 const Comments: React.FC = () => {
+    const {t} = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [comments] = useState(mockComments);
@@ -109,16 +111,16 @@ const Comments: React.FC = () => {
     const reportedCount = comments.filter(c => c.status === 'reported' || c.isSpam).length;
 
     const getStatusBadge = (status: string, isSpam: boolean) => {
-        if (isSpam) return <Badge variant="destructive">垃圾信息</Badge>;
+        if (isSpam) return <Badge variant="destructive">{t('admin.spam')}</Badge>;
         const variants: Record<string, 'default' | 'secondary' | 'outline'> = {
             approved: 'default',
             pending: 'outline',
             reported: 'destructive',
         };
         const labels: Record<string, string> = {
-            approved: '已通过',
-            pending: '待审核',
-            reported: '已举报',
+            approved: t('admin.approved'),
+            pending: t('admin.pending'),
+            reported: t('admin.reported'),
         };
         return <Badge variant={variants[status] || 'outline'}>{labels[status] || status}</Badge>;
     };
@@ -133,7 +135,7 @@ const Comments: React.FC = () => {
                             <MessageCircle className="h-5 w-5 text-blue-600"/>
                             <div>
                                 <div className="text-2xl font-bold">{totalComments}</div>
-                                <p className="text-sm text-muted-foreground">评论总数</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.totalComments')}</p>
                             </div>
                         </div>
                     </CardContent>
@@ -141,19 +143,19 @@ const Comments: React.FC = () => {
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold text-green-600">{approvedCount}</div>
-                        <p className="text-sm text-muted-foreground">已通过</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.approved')}</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold text-yellow-600">{pendingCount}</div>
-                        <p className="text-sm text-muted-foreground">待审核</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.pending')}</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold text-red-600">{reportedCount}</div>
-                        <p className="text-sm text-muted-foreground">举报/垃圾</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.spam')}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -164,7 +166,7 @@ const Comments: React.FC = () => {
                     <div className="relative flex-1 max-w-md">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                         <Input
-                            placeholder="搜索评论..."
+                            placeholder={t('admin.search') || t('admin.comments') + '...'}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="pl-10"
@@ -175,10 +177,10 @@ const Comments: React.FC = () => {
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
                     >
-                        <option value="all">全部状态</option>
-                        <option value="approved">已通过</option>
-                        <option value="pending">待审核</option>
-                        <option value="reported">已举报</option>
+                        <option value="all">{t('admin.allStatus')}</option>
+                        <option value="approved">{t('admin.approved')}</option>
+                        <option value="pending">{t('admin.pending')}</option>
+                        <option value="reported">{t('admin.reported')}</option>
                     </select>
                 </div>
             </div>
@@ -186,21 +188,21 @@ const Comments: React.FC = () => {
             {/* 评论表格 */}
             <Card>
                 <CardHeader>
-                    <CardTitle>评论列表</CardTitle>
+                    <CardTitle>{t('admin.commentList')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>ID</TableHead>
-                                <TableHead>用户</TableHead>
-                                <TableHead>评论内容</TableHead>
-                                <TableHead>所属视频</TableHead>
-                                <TableHead className="text-center">点赞</TableHead>
-                                <TableHead className="text-center">回复</TableHead>
-                                <TableHead>状态</TableHead>
-                                <TableHead>发布时间</TableHead>
-                                <TableHead className="text-right">操作</TableHead>
+                                <TableHead>{t('admin.user')}</TableHead>
+                                <TableHead>{t('admin.commentContent')}</TableHead>
+                                <TableHead>{t('admin.belongVideo')}</TableHead>
+                                <TableHead className="text-center">{t('admin.likes')}</TableHead>
+                                <TableHead className="text-center">{t('admin.replies')}</TableHead>
+                                <TableHead>{t('admin.status')}</TableHead>
+                                <TableHead>{t('admin.publishTime')}</TableHead>
+                                <TableHead className="text-right">{t('admin.actions')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -250,29 +252,29 @@ const Comments: React.FC = () => {
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuItem>
                                                     <Eye className="mr-2 h-4 w-4"/>
-                                                    查看
+                                                    {t('admin.view')}
                                                 </DropdownMenuItem>
                                                 {comment.status === 'pending' && (
                                                     <>
                                                         <DropdownMenuItem>
                                                             <MessageCircle className="mr-2 h-4 w-4"/>
-                                                            通过
+                                                            {t('admin.approve')}
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem className="text-red-600">
                                                             <Ban className="mr-2 h-4 w-4"/>
-                                                            拒绝
+                                                            {t('admin.reject')}
                                                         </DropdownMenuItem>
                                                     </>
                                                 )}
                                                 {comment.isSpam && (
                                                     <DropdownMenuItem>
                                                         <Ban className="mr-2 h-4 w-4"/>
-                                                        封禁用户
+                                                        {t('admin.banUser')}
                                                     </DropdownMenuItem>
                                                 )}
                                                 <DropdownMenuItem className="text-red-600">
                                                     <Trash2 className="mr-2 h-4 w-4"/>
-                                                    删除
+                                                    {t('admin.delete')}
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>

@@ -3,6 +3,7 @@ import {Link} from '@tanstack/react-router';
 import {Play, Heart, Trash2} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {formatDuration, formatViews, formatDate} from '@/lib/format';
+import {useTranslation} from 'react-i18next';
 
 const mockFavorites = [
     {
@@ -44,15 +45,16 @@ const mockFavorites = [
 ];
 
 const FavoritesPage = () => {
+    const {t} = useTranslation();
     const [favorites] = useState(mockFavorites);
 
     return (
         <div className="max-w-6xl mx-auto space-y-6">
             <div>
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <Heart className="w-6 h-6 text-rose-500 fill-current"/>我的收藏
+                    <Heart className="w-6 h-6 text-rose-500 fill-current"/>{t('favorites.title')}
                 </h1>
-                <p className="text-slate-500 dark:text-gray-400 text-sm mt-1">已保存 {favorites.length} 个视频</p>
+                <p className="text-slate-500 dark:text-gray-400 text-sm mt-1">{t('favorites.savedCount', {count: favorites.length})}</p>
             </div>
 
             {favorites.length > 0 ? (
@@ -77,7 +79,7 @@ const FavoritesPage = () => {
                                     <div className="flex items-center gap-2 mt-2"><span
                                         className="text-xs text-slate-500 dark:text-gray-400">{video.author_name}</span>
                                     </div>
-                                    <p className="text-xs text-slate-400 dark:text-gray-500 mt-1">{formatViews(video.view_count)} 次观看
+                                    <p className="text-xs text-slate-400 dark:text-gray-500 mt-1">{formatViews(video.view_count)} {t('common.views')}
                                         · {formatDate(video.create_time)}</p>
                                 </div>
                             </div>
@@ -87,8 +89,8 @@ const FavoritesPage = () => {
             ) : (
                 <div className="text-center py-20">
                     <Heart className="w-16 h-16 text-slate-200 dark:text-gray-700 mx-auto mb-4"/>
-                    <p className="text-slate-500 dark:text-gray-400">暂无收藏</p>
-                    <p className="text-sm text-slate-400 dark:text-gray-500 mt-1">收藏的视频将显示在这里</p>
+                    <p className="text-slate-500 dark:text-gray-400">{t('favorites.empty')}</p>
+                    <p className="text-sm text-slate-400 dark:text-gray-500 mt-1">{t('favorites.emptyDesc')}</p>
                 </div>
             )}
         </div>

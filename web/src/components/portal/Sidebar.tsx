@@ -21,7 +21,9 @@ import {
     Info,
     Sun,
     Moon,
+    Globe,
 } from 'lucide-react';
+import {useTranslation} from 'react-i18next';
 import {useAuth} from '../../hooks/useAuth';
 
 /* ── Props ───────────────────────────────────────────────────────────────── */
@@ -46,6 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                              onToggleDarkMode,
                                              collapsed = false,
                                          }) => {
+    const {t, i18n} = useTranslation();
     const location = useLocation();
     const pathname = location.pathname;
     const {isAuthenticated, isAdmin} = useAuth();
@@ -55,29 +58,29 @@ const Sidebar: React.FC<SidebarProps> = ({
     // ── 导航分组 ──
 
     const browseItems: NavItem[] = [
-        {icon: <Home size={18}/>, label: '主页', to: '/'},
-        {icon: <Star size={18}/>, label: '精选', to: '/featured'},
-        {icon: <Clock size={18}/>, label: '最新', to: '/latest'},
-        {icon: <LayoutGrid size={18}/>, label: '分类', to: '/categories'},
-        {icon: <Tag size={18}/>, label: '标签', to: '/tags'},
-        {icon: <Users size={18}/>, label: '成员', to: '/members'},
+        {icon: <Home size={18}/>, label: t('nav.home'), to: '/'},
+        {icon: <Star size={18}/>, label: t('nav.featured'), to: '/featured'},
+        {icon: <Clock size={18}/>, label: t('nav.latest'), to: '/latest'},
+        {icon: <LayoutGrid size={18}/>, label: t('nav.categories'), to: '/categories'},
+        {icon: <Tag size={18}/>, label: t('nav.tags'), to: '/tags'},
+        {icon: <Users size={18}/>, label: t('nav.members'), to: '/members'},
     ];
 
     const myItems: NavItem[] = [
-        {icon: <Upload size={18}/>, label: '我的上传', to: '/me/upload'},
-        {icon: <ListVideo size={18}/>, label: '我的播放列表', to: '/me/playlists'},
-        {icon: <History size={18}/>, label: '历史记录', to: '/me/history'},
-        {icon: <Heart size={18}/>, label: '我的收藏', to: '/me/favorites'},
+        {icon: <Upload size={18}/>, label: t('nav.myUploads'), to: '/me/upload'},
+        {icon: <ListVideo size={18}/>, label: t('nav.myPlaylists'), to: '/me/playlists'},
+        {icon: <History size={18}/>, label: t('nav.history'), to: '/me/history'},
+        {icon: <Heart size={18}/>, label: t('nav.myFavorites'), to: '/me/favorites'},
     ];
 
     const adminItems: NavItem[] = [
-        {icon: <Shield size={18}/>, label: '管理媒体', to: '/admin/media'},
-        {icon: <Users size={18}/>, label: '管理用户', to: '/admin/users'},
-        {icon: <Settings size={18}/>, label: '系统设置', to: '/admin/settings'},
+        {icon: <Shield size={18}/>, label: t('nav.adminMedia'), to: '/admin/media'},
+        {icon: <Users size={18}/>, label: t('nav.adminUsers'), to: '/admin/users'},
+        {icon: <Settings size={18}/>, label: t('nav.systemSettings'), to: '/admin/settings'},
     ];
 
     const otherItems: NavItem[] = [
-        {icon: <Info size={18}/>, label: '关于', to: '/about'},
+        {icon: <Info size={18}/>, label: t('nav.about'), to: '/about'},
     ];
 
     // ── 渲染区段 ──
@@ -129,7 +132,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 {isAuthenticated && (
                     <>
                         <div className={collapsed ? 'px-2' : 'px-2'}>
-                            <NavSection title="我的" items={myItems}/>
+                            <NavSection title={t('nav.mySection')} items={myItems}/>
                         </div>
                     </>
                 )}
@@ -138,27 +141,27 @@ const Sidebar: React.FC<SidebarProps> = ({
                 {isAdmin && (
                     <>
                         <div className={collapsed ? 'px-2' : 'px-2'}>
-                            <NavSection title="管理" items={adminItems}/>
+                            <NavSection title={t('nav.adminSection')} items={adminItems}/>
                         </div>
                     </>
                 )}
 
                 {/* 其他 */}
                 <div className={collapsed ? 'px-2' : 'px-2'}>
-                    <NavSection title="其他" items={otherItems}/>
+                    <NavSection title={t('nav.otherSection')} items={otherItems}/>
                 </div>
 
                 {/* 底部弹性空间 */}
                 <div className="flex-1"/>
 
-                {/* 主题切换 */}
-                <div className={`px-2 py-3 ${collapsed ? 'px-2' : ''}`}>
+                {/* 主题 & 语言切换 */}
+                <div className={`px-2 py-3 space-y-1 ${collapsed ? 'px-2' : ''}`}>
                     <button
                         onClick={onToggleDarkMode}
                         className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all ${
                             collapsed ? 'justify-center' : ''
                         }`}
-                        title={collapsed ? (darkMode ? '亮色模式' : '暗色模式') : undefined}
+                        title={collapsed ? (darkMode ? t('common.lightMode') : t('common.darkMode')) : undefined}
                     >
                         {darkMode ? (
                             <Sun size={18} className="text-amber-500 shrink-0"/>
@@ -166,7 +169,20 @@ const Sidebar: React.FC<SidebarProps> = ({
                             <Moon size={18} className="text-gray-400 shrink-0"/>
                         )}
                         {!collapsed && (
-                            <span className="text-[13px]">{darkMode ? '亮色模式' : '暗色模式'}</span>
+                            <span
+                                className="text-[13px]">{darkMode ? t('common.lightMode') : t('common.darkMode')}</span>
+                        )}
+                    </button>
+                    <button
+                        onClick={() => i18n.changeLanguage(i18n.language === 'zh' ? 'en' : 'zh')}
+                        className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all ${
+                            collapsed ? 'justify-center' : ''
+                        }`}
+                        title={collapsed ? t('common.language') : undefined}
+                    >
+                        <Globe size={18} className="text-emerald-500 shrink-0"/>
+                        {!collapsed && (
+                            <span className="text-[13px]">{i18n.language === 'zh' ? '中文' : 'EN'}</span>
                         )}
                     </button>
                 </div>

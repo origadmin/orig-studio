@@ -16,21 +16,24 @@ import {
     MessageSquare,
     PlayCircle
 } from 'lucide-react';
-
-const menuItems = [
-    {id: "dashboard", icon: LayoutDashboard, label: "仪表盘", path: "/admin"},
-    {id: "media", icon: Film, label: "媒体管理", path: "/admin/media"},
-    {id: "users", icon: Users, label: "用户管理", path: "/admin/users"},
-    {id: "categories", icon: FolderTree, label: "分类管理", path: "/admin/categories"},
-    {id: "channels", icon: Radio, label: "频道管理", path: "/admin/channels"},
-    {id: "tags", icon: Tags, label: "标签管理", path: "/admin/tags"},
-    {id: "comments", icon: MessageSquare, label: "评论管理", path: "/admin/comments"},
-    {id: "playlists", icon: PlayCircle, label: "播放列表", path: "/admin/playlists"},
-    {id: "content", icon: Settings, label: "内容管理", path: "/admin/content"},
-    {id: "settings", icon: Settings, label: "系统设置", path: "/admin/settings"},
-];
+import {useTranslation} from 'react-i18next';
 
 const AdminLayout = () => {
+    const {t} = useTranslation();
+
+    const menuItems = [
+        {id: "dashboard", icon: LayoutDashboard, label: t('admin.dashboard'), path: "/admin"},
+        {id: "media", icon: Film, label: t('admin.media'), path: "/admin/media"},
+        {id: "users", icon: Users, label: t('admin.users'), path: "/admin/users"},
+        {id: "categories", icon: FolderTree, label: t('admin.categories'), path: "/admin/categories"},
+        {id: "channels", icon: Radio, label: t('admin.channels'), path: "/admin/channels"},
+        {id: "tags", icon: Tags, label: t('admin.tags'), path: "/admin/tags"},
+        {id: "comments", icon: MessageSquare, label: t('admin.comments'), path: "/admin/comments"},
+        {id: "playlists", icon: PlayCircle, label: t('admin.playlists'), path: "/admin/playlists"},
+        {id: "content", icon: Settings, label: t('admin.content'), path: "/admin/content"},
+        {id: "settings", icon: Settings, label: t('admin.settings'), path: "/admin/settings"},
+    ];
+
     return (
         <div className="min-h-screen bg-gray-50 flex">
             {/* Sidebar */}

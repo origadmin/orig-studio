@@ -4,11 +4,12 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 
+	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/data/entity"
 )
 
 // RegisterRoutes registers all HTTP routes
-func RegisterRoutes(router *gin.Engine, client *entity.Client) {
+func RegisterRoutes(router *gin.Engine, client *entity.Client, jwtMgr *auth.Manager) {
 	// Health check
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
@@ -25,8 +26,8 @@ func RegisterRoutes(router *gin.Engine, client *entity.Client) {
 		// User routes
 		RegisterUserRoutes(v1, client)
 
-		// Media routes
-		RegisterMediaRoutes(v1, client)
+		// Media routes (with JWT for upload/update/delete)
+		RegisterMediaRoutes(v1, client, jwtMgr)
 
 		// Category routes
 		RegisterCategoryRoutes(v1, client)

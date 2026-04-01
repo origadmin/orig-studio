@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
@@ -97,6 +98,7 @@ const mockPlaylists = [
 ];
 
 const Playlists: React.FC = () => {
+    const {t} = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
     const [visibilityFilter, setVisibilityFilter] = useState('all');
     const [playlists] = useState(mockPlaylists);
@@ -115,9 +117,9 @@ const Playlists: React.FC = () => {
 
     const getVisibilityBadge = (visibility: string) => {
         const configs = {
-            public: {icon: Globe, label: '公开', variant: 'default' as const},
-            private: {icon: Lock, label: '私有', variant: 'secondary' as const},
-            unlisted: {icon: Eye, label: '未列出', variant: 'outline' as const},
+            public: {icon: Globe, label: t('admin.pub'), variant: 'default' as const},
+            private: {icon: Lock, label: t('admin.priv'), variant: 'secondary' as const},
+            unlisted: {icon: Eye, label: t('admin.unlisted'), variant: 'outline' as const},
         };
         const config = configs[visibility] || configs.public;
         const Icon = config.icon;
@@ -130,7 +132,7 @@ const Playlists: React.FC = () => {
     };
 
     const formatNumber = (num: number) => {
-        if (num >= 10000) return (num / 10000).toFixed(1) + '万';
+        if (num >= 10000) return (num / 10000).toFixed(1) + t('common.wan');
         return num.toString();
     };
 
@@ -144,7 +146,7 @@ const Playlists: React.FC = () => {
                             <PlayCircle className="h-5 w-5 text-indigo-600"/>
                             <div>
                                 <div className="text-2xl font-bold">{totalPlaylists}</div>
-                                <p className="text-sm text-muted-foreground">播放列表总数</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.playlistTotal')}</p>
                             </div>
                         </div>
                     </CardContent>
@@ -152,19 +154,19 @@ const Playlists: React.FC = () => {
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold text-green-600">{publicCount}</div>
-                        <p className="text-sm text-muted-foreground">公开列表</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.publicLists')}</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold text-yellow-600">{privateCount}</div>
-                        <p className="text-sm text-muted-foreground">私有列表</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.privateLists')}</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold">{formatNumber(totalViews)}</div>
-                        <p className="text-sm text-muted-foreground">总播放量</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.totalViews')}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -175,7 +177,7 @@ const Playlists: React.FC = () => {
                     <div className="relative flex-1 max-w-md">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                         <Input
-                            placeholder="搜索播放列表..."
+                            placeholder={t('admin.search') || t('admin.playlists') + '...'}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="pl-10"
@@ -186,35 +188,35 @@ const Playlists: React.FC = () => {
                         value={visibilityFilter}
                         onChange={(e) => setVisibilityFilter(e.target.value)}
                     >
-                        <option value="all">全部可见性</option>
-                        <option value="public">公开</option>
-                        <option value="private">私有</option>
-                        <option value="unlisted">未列出</option>
+                        <option value="all">{t('admin.allVisibility')}</option>
+                        <option value="public">{t('admin.pub')}</option>
+                        <option value="private">{t('admin.priv')}</option>
+                        <option value="unlisted">{t('admin.unlisted')}</option>
                     </select>
                 </div>
                 <Button>
                     <PlayCircle className="mr-2 h-4 w-4"/>
-                    新建播放列表
+                    {t('admin.newPlaylist')}
                 </Button>
             </div>
 
             {/* 播放列表表格 */}
             <Card>
                 <CardHeader>
-                    <CardTitle>播放列表列表</CardTitle>
+                    <CardTitle>{t('admin.playlistList')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>ID</TableHead>
-                                <TableHead>名称</TableHead>
-                                <TableHead>创建者</TableHead>
-                                <TableHead className="text-right">视频数</TableHead>
-                                <TableHead className="text-right">播放量</TableHead>
-                                <TableHead>可见性</TableHead>
-                                <TableHead>创建时间</TableHead>
-                                <TableHead className="text-right">操作</TableHead>
+                                <TableHead>{t('admin.name')}</TableHead>
+                                <TableHead>{t('admin.creator')}</TableHead>
+                                <TableHead className="text-right">{t('admin.videoCount')}</TableHead>
+                                <TableHead className="text-right">{t('admin.viewCount')}</TableHead>
+                                <TableHead>{t('admin.visibility')}</TableHead>
+                                <TableHead>{t('admin.createdAt')}</TableHead>
+                                <TableHead className="text-right">{t('admin.actions')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -251,15 +253,15 @@ const Playlists: React.FC = () => {
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuItem>
                                                     <Eye className="mr-2 h-4 w-4"/>
-                                                    查看
+                                                    {t('admin.view')}
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem>
                                                     <Edit className="mr-2 h-4 w-4"/>
-                                                    编辑
+                                                    {t('admin.edit')}
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem className="text-red-600">
                                                     <Trash2 className="mr-2 h-4 w-4"/>
-                                                    删除
+                                                    {t('admin.delete')}
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>

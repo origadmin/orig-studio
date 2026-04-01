@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
@@ -46,6 +47,7 @@ const mockCategories = [
 ];
 
 const Categories: React.FC = () => {
+    const {t} = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
     const [categories] = useState(mockCategories);
 
@@ -64,25 +66,25 @@ const Categories: React.FC = () => {
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold">{categories.length}</div>
-                        <p className="text-sm text-muted-foreground">总分类数</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.totalCategories')}</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold text-green-600">{activeCount}</div>
-                        <p className="text-sm text-muted-foreground">活跃分类</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.activeCategories')}</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold">{totalMedia}</div>
-                        <p className="text-sm text-muted-foreground">媒体总数</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.totalMedia')}</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold text-blue-600">5</div>
-                        <p className="text-sm text-muted-foreground">一级分类</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.topCategories')}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -92,7 +94,7 @@ const Categories: React.FC = () => {
                 <div className="relative flex-1 max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                     <Input
-                        placeholder="搜索分类..."
+                        placeholder={t('admin.search') || t('admin.categories') + '...'}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10"
@@ -100,27 +102,27 @@ const Categories: React.FC = () => {
                 </div>
                 <Button>
                     <Plus className="mr-2 h-4 w-4"/>
-                    新建分类
+                    {t('admin.newCategory')}
                 </Button>
             </div>
 
             {/* 分类表格 */}
             <Card>
                 <CardHeader>
-                    <CardTitle>分类列表</CardTitle>
+                    <CardTitle>{t('admin.categoryList')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>ID</TableHead>
-                                <TableHead>名称</TableHead>
+                                <TableHead>{t('admin.name')}</TableHead>
                                 <TableHead>Slug</TableHead>
-                                <TableHead>描述</TableHead>
-                                <TableHead className="text-right">媒体数</TableHead>
-                                <TableHead>排序</TableHead>
-                                <TableHead>状态</TableHead>
-                                <TableHead className="text-right">操作</TableHead>
+                                <TableHead>{t('admin.description')}</TableHead>
+                                <TableHead className="text-right">{t('admin.mediaCount')}</TableHead>
+                                <TableHead>{t('admin.order')}</TableHead>
+                                <TableHead>{t('admin.status')}</TableHead>
+                                <TableHead className="text-right">{t('admin.actions')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -138,7 +140,7 @@ const Categories: React.FC = () => {
                                     <TableCell>{category.order}</TableCell>
                                     <TableCell>
                                         <Badge variant={category.status === 'active' ? 'default' : 'secondary'}>
-                                            {category.status === 'active' ? '启用' : '禁用'}
+                                            {category.status === 'active' ? t('admin.enabled') : t('admin.disabled')}
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
@@ -151,15 +153,15 @@ const Categories: React.FC = () => {
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuItem>
                                                     <Eye className="mr-2 h-4 w-4"/>
-                                                    查看
+                                                    {t('admin.view')}
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem>
                                                     <Edit className="mr-2 h-4 w-4"/>
-                                                    编辑
+                                                    {t('admin.edit')}
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem className="text-red-600">
                                                     <Trash2 className="mr-2 h-4 w-4"/>
-                                                    删除
+                                                    {t('admin.delete')}
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>

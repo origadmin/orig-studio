@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
@@ -85,6 +86,7 @@ const mockChannels = [
 ];
 
 const Channels: React.FC = () => {
+    const {t} = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [channels] = useState(mockChannels);
@@ -108,16 +110,16 @@ const Channels: React.FC = () => {
             banned: 'destructive',
         };
         const labels: Record<string, string> = {
-            verified: '已认证',
-            active: '正常',
-            pending: '待审核',
-            banned: '已封禁',
+            verified: t('common.verified'),
+            active: t('admin.normal'),
+            pending: t('admin.pending'),
+            banned: t('admin.banned'),
         };
         return <Badge variant={variants[status] || 'outline'}>{labels[status] || status}</Badge>;
     };
 
     const formatNumber = (num: number) => {
-        if (num >= 10000) return (num / 10000).toFixed(1) + '万';
+        if (num >= 10000) return (num / 10000).toFixed(1) + t('common.wan');
         return num.toString();
     };
 
@@ -131,7 +133,7 @@ const Channels: React.FC = () => {
                             <Users className="h-5 w-5 text-blue-600"/>
                             <div>
                                 <div className="text-2xl font-bold">{channels.length}</div>
-                                <p className="text-sm text-muted-foreground">频道总数</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.channelTotal')}</p>
                             </div>
                         </div>
                     </CardContent>
@@ -139,19 +141,19 @@ const Channels: React.FC = () => {
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold">{formatNumber(totalSubscribers)}</div>
-                        <p className="text-sm text-muted-foreground">总订阅数</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.totalSubscribers')}</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold text-green-600">{verifiedCount}</div>
-                        <p className="text-sm text-muted-foreground">已认证频道</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.verifiedChannels')}</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold text-yellow-600">{pendingCount}</div>
-                        <p className="text-sm text-muted-foreground">待审核</p>
+                        <p className="text-sm text-muted-foreground">{t('admin.pending')}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -162,7 +164,7 @@ const Channels: React.FC = () => {
                     <div className="relative flex-1 max-w-md">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                         <Input
-                            placeholder="搜索频道..."
+                            placeholder={t('admin.search') || t('admin.channels') + '...'}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="pl-10"
@@ -173,35 +175,35 @@ const Channels: React.FC = () => {
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
                     >
-                        <option value="all">全部状态</option>
-                        <option value="verified">已认证</option>
-                        <option value="active">正常</option>
-                        <option value="pending">待审核</option>
+                        <option value="all">{t('admin.allStatus')}</option>
+                        <option value="verified">{t('common.verified')}</option>
+                        <option value="active">{t('admin.normal')}</option>
+                        <option value="pending">{t('admin.pending')}</option>
                     </select>
                 </div>
                 <Button>
                     <Plus className="mr-2 h-4 w-4"/>
-                    新建频道
+                    {t('admin.newChannel')}
                 </Button>
             </div>
 
             {/* 频道表格 */}
             <Card>
                 <CardHeader>
-                    <CardTitle>频道列表</CardTitle>
+                    <CardTitle>{t('admin.channelList')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>频道</TableHead>
-                                <TableHead>所有者</TableHead>
-                                <TableHead className="text-right">订阅数</TableHead>
-                                <TableHead className="text-right">视频数</TableHead>
-                                <TableHead>分类</TableHead>
-                                <TableHead>状态</TableHead>
-                                <TableHead>创建时间</TableHead>
-                                <TableHead className="text-right">操作</TableHead>
+                                <TableHead>{t('admin.channel')}</TableHead>
+                                <TableHead>{t('admin.owner')}</TableHead>
+                                <TableHead className="text-right">{t('admin.subscriberCount')}</TableHead>
+                                <TableHead className="text-right">{t('admin.videoCount')}</TableHead>
+                                <TableHead>{t('admin.category')}</TableHead>
+                                <TableHead>{t('admin.status')}</TableHead>
+                                <TableHead>{t('admin.createdAt')}</TableHead>
+                                <TableHead className="text-right">{t('admin.actions')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -246,21 +248,21 @@ const Channels: React.FC = () => {
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuItem>
                                                     <Eye className="mr-2 h-4 w-4"/>
-                                                    查看
+                                                    {t('admin.view')}
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem>
                                                     <Edit className="mr-2 h-4 w-4"/>
-                                                    编辑
+                                                    {t('admin.edit')}
                                                 </DropdownMenuItem>
                                                 {channel.status === 'pending' && (
                                                     <DropdownMenuItem>
                                                         <UserPlus className="mr-2 h-4 w-4"/>
-                                                        认证
+                                                        {t('admin.verify')}
                                                     </DropdownMenuItem>
                                                 )}
                                                 <DropdownMenuItem className="text-red-600">
                                                     <Trash2 className="mr-2 h-4 w-4"/>
-                                                    删除
+                                                    {t('admin.delete')}
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>

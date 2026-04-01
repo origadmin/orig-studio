@@ -9,6 +9,7 @@ import {Play, Eye, Clock, TrendingUp, Plus} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Badge} from '@/components/ui/badge';
 import {formatDuration, formatViews, formatDate} from '@/lib/format';
+import {useTranslation} from 'react-i18next';
 
 /* ── Mock 数据生成 ─────────────────────────────────────────────────────── */
 
@@ -52,13 +53,14 @@ const PAGE_SIZE = 12;
 /* ── Component ─────────────────────────────────────────────────────────── */
 
 const HomePage = () => {
+    const {t} = useTranslation();
     const [items, setItems] = useState(() => generateMockData(0, PAGE_SIZE));
     const [activeCategory, setActiveCategory] = useState('全部');
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const sentinelRef = useRef<HTMLDivElement>(null);
 
-    const allCategories = ['全部', ...categories];
+    const allCategories = [t('home.all'), ...categories];
 
     const filteredItems = activeCategory === '全部'
         ? items
@@ -95,18 +97,19 @@ const HomePage = () => {
                 <div className="relative px-6 py-8 flex items-center">
                     <div className="max-w-xl">
                         <Badge className="bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 mb-4">
-                            <TrendingUp className="w-3 h-3 mr-1"/> 精选推荐
+                            <TrendingUp className="w-3 h-3 mr-1"/> {t('home.heroBadge')}
                         </Badge>
-                        <h1 className="text-4xl font-black mb-4 leading-tight">发现优质视频内容</h1>
-                        <p className="text-lg text-slate-300 mb-6">浏览来自全球创作者的原创视频，探索感兴趣的领域。</p>
+                        <h1 className="text-4xl font-black mb-4 leading-tight">{t('home.heroTitle')}</h1>
+                        <p className="text-lg text-slate-300 mb-6">{t('home.heroDesc')}</p>
                         <div className="flex gap-4">
                             <Link to="/featured">
-                                <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700">探索内容</Button>
+                                <Button size="lg"
+                                        className="bg-emerald-600 hover:bg-emerald-700">{t('home.exploreContent')}</Button>
                             </Link>
                             <Link to="/me/upload">
                                 <Button size="lg" variant="outline"
                                         className="border-slate-600 text-white hover:bg-slate-800">
-                                    开始创作
+                                    {t('home.startCreating')}
                                 </Button>
                             </Link>
                         </div>
@@ -116,25 +119,28 @@ const HomePage = () => {
 
             {/* 分类标签 */}
             <section className="flex flex-wrap gap-2">
-                {allCategories.map(cat => (
-                    <Button
-                        key={cat}
-                        variant={activeCategory === cat ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setActiveCategory(cat)}
-                        className={activeCategory === cat ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
-                    >{cat}</Button>
-                ))}
+                {allCategories.map((cat, idx) => {
+                    const catKey = idx === 0 ? '全部' : categories[idx - 1];
+                    return (
+                        <Button
+                            key={catKey}
+                            variant={activeCategory === catKey ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setActiveCategory(catKey)}
+                            className={activeCategory === catKey ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+                        >{cat}</Button>
+                    );
+                })}
             </section>
 
             {/* 列表标题 */}
             <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-                    {activeCategory === '全部' ? '最新视频' : `${activeCategory}视频`}
+                    {activeCategory === '全部' ? t('home.latestVideos') : t('home.categoryVideos', {category: activeCategory})}
                 </h2>
                 <Link to="/latest"
                       className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 font-medium">
-                    查看全部 →
+                    {t('home.viewAll')}
                 </Link>
             </div>
 
@@ -191,11 +197,11 @@ const HomePage = () => {
                     <div className="flex items-center gap-3 text-gray-400">
                         <div
                             className="animate-spin w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full"/>
-                        <span className="text-sm">加载中...</span>
+                        <span className="text-sm">{t('common.loading')}</span>
                     </div>
                 )}
                 {!hasMore && items.length > 0 && (
-                    <p className="text-sm text-gray-400 py-4">— 已加载全部内容 —</p>
+                    <p className="text-sm text-gray-400 py-4">— {t('common.allLoaded')} —</p>
                 )}
             </div>
         </div>

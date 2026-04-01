@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
- * Notifications Page (TODO: i18n)
+ * Notifications Page
  */
 
 import React, {useState} from 'react';
@@ -8,6 +8,8 @@ import {Link} from '@tanstack/react-router';
 import {Bell, MessageSquare, Heart, UserPlus, Eye, CheckCheck} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
+import {formatRelativeTime} from '@/lib/format';
+import {useTranslation} from 'react-i18next';
 
 interface Notification {
     id: string;
@@ -24,36 +26,36 @@ interface Notification {
 const mockNotifications: Notification[] = [
     {
         id: "1", type: "comment",
-        title: "New comment on your video", // TODO: i18n
-        message: "React Master commented on 'Building Go Microservices'",
+        title: "视频收到了新评论",
+        message: "React 大师 评论了「从零构建 Go 微服务」",
         avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100",
         is_read: false, created_at: "2024-03-15T14:30:00", link: "/v/1",
     },
     {
         id: "2", type: "like",
-        title: "Someone liked your video", // TODO: i18n
-        message: "DevOps Pro liked 'Docker Tutorial'",
+        title: "有人赞了你的视频",
+        message: "运维专家 赞了「Docker 入门教程」",
         avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100",
         is_read: false, created_at: "2024-03-15T12:15:00", link: "/v/3",
     },
     {
         id: "3", type: "subscribe",
-        title: "New subscriber", // TODO: i18n
-        message: "TypeScript Guru subscribed to your channel",
+        title: "新订阅者",
+        message: "TypeScript 达人 订阅了你的频道",
         avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100",
         is_read: true, created_at: "2024-03-14T18:20:00", link: "/u/4",
     },
     {
         id: "4", type: "view",
-        title: "Your video is trending", // TODO: i18n
-        message: "'Go Microservices' reached 100K views",
+        title: "你的视频正在流行",
+        message: "「Go 微服务」播放量突破 10 万",
         avatar: null,
         is_read: true, created_at: "2024-03-14T10:00:00", link: "/v/1",
     },
     {
         id: "5", type: "system",
-        title: "System notification", // TODO: i18n
-        message: "Your video has been approved and published",
+        title: "系统通知",
+        message: "你的视频已审核通过并发布",
         avatar: null,
         is_read: true, created_at: "2024-03-13T09:00:00", link: "/v/1",
     },
@@ -74,18 +76,8 @@ function getIcon(type: Notification['type']) {
     }
 }
 
-// TODO: extract to lib/format.ts
-function formatTime(dateStr: string): string {
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-    if (hours < 1) return 'Just now'; // TODO: i18n
-    if (hours < 24) return `${hours}h ago`; // TODO: i18n
-    if (days < 7) return `${days}d ago`; // TODO: i18n
-    return new Date(dateStr).toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
-}
-
 const NotificationsPage = () => {
+    const {t} = useTranslation();
     const [notifications] = useState(mockNotifications);
     const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
@@ -102,22 +94,22 @@ const NotificationsPage = () => {
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         <Bell className="w-6 h-6"/>
-                        {/* TODO: i18n */}通知
+                        {t('notifications.title')}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
                         {unreadCount > 0
-                            ? `${unreadCount} 条未读通知` // TODO: i18n
-                            : '没有新通知'} {/* TODO: i18n */}
+                            ? t('notifications.unreadCount', {count: unreadCount})
+                            : t('notifications.noNew')}
                     </p>
                 </div>
                 <div className="flex gap-2">
                     <Button variant={filter === 'all' ? 'default' : 'outline'} size="sm"
                             onClick={() => setFilter('all')}>
-                        {/* TODO: i18n */}全部
+                        {t('notifications.all')}
                     </Button>
                     <Button variant={filter === 'unread' ? 'default' : 'outline'} size="sm"
                             onClick={() => setFilter('unread')}>
-                        {/* TODO: i18n */}未读
+                        {t('notifications.unread')}
                     </Button>
                 </div>
             </div>
@@ -126,7 +118,7 @@ const NotificationsPage = () => {
             {unreadCount > 0 && (
                 <Button variant="ghost" size="sm" className="text-blue-600 dark:text-blue-400">
                     <CheckCheck className="w-4 h-4 mr-2"/>
-                    {/* TODO: i18n */}全部已读
+                    {t('notifications.markAllRead')}
                 </Button>
             )}
 
@@ -168,7 +160,7 @@ const NotificationsPage = () => {
             {filtered.length === 0 && (
                 <div className="text-center py-20">
                     <Bell className="w-16 h-16 text-gray-200 dark:text-gray-700 mx-auto mb-4"/>
-                    <p className="text-gray-500 dark:text-gray-400">{/* TODO: i18n */}暂无通知</p>
+                    <p className="text-gray-500 dark:text-gray-400">{t('notifications.empty')}</p>
                 </div>
             )}
         </div>

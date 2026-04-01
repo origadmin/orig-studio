@@ -6,6 +6,7 @@
 import React, {useState} from 'react';
 import {useParams, Link} from '@tanstack/react-router';
 import {Play, ThumbsUp, ThumbsDown, Share2, Flag, Eye, Calendar, Star} from 'lucide-react';
+import {useTranslation} from 'react-i18next';
 import {Button} from '@/components/ui/button';
 import {Badge} from '@/components/ui/badge';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
@@ -180,7 +181,7 @@ const WatchPage = () => {
 
             {/* 相关推荐 */}
             <div className="space-y-4">
-                <h3 className="font-semibold text-slate-900 dark:text-white">接下来播放</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-white">{t('watch.nextUp')}</h3>
                 {relatedVideos.map(item => (
                     <Link key={item.id} to="/v/$id" params={{id: String(item.id)}} className="flex gap-3 group">
                         <div className="relative w-40 h-24 bg-slate-200 rounded-lg overflow-hidden shrink-0">
@@ -192,7 +193,7 @@ const WatchPage = () => {
                         <div className="min-w-0 flex-1">
                             <h4 className="text-sm font-medium text-slate-900 dark:text-white line-clamp-2 group-hover:text-blue-600 transition-colors">{item.title}</h4>
                             <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">{item.author_name}</p>
-                            <p className="text-xs text-slate-400 dark:text-gray-500">{formatViews(item.view_count)} 次观看</p>
+                            <p className="text-xs text-slate-400 dark:text-gray-500">{formatViews(item.view_count)} {t('common.views')}</p>
                         </div>
                     </Link>
                 ))}

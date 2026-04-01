@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
- * Upload Page (TODO: i18n)
+ * Upload Page
  */
 
 import React, {useState, useRef} from 'react';
@@ -11,6 +11,9 @@ import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
 import {Badge} from '@/components/ui/badge';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
+import {mediaApi} from '@/lib/api/media';
+import {formatFileSize} from '@/lib/format';
+import {useTranslation} from 'react-i18next';
 
 interface UploadFile {
     id: string;
@@ -20,20 +23,13 @@ interface UploadFile {
     status: 'pending' | 'uploading' | 'success' | 'error';
 }
 
-// TODO: move to i18n
 const categories = [
-    "Technology", "Programming", "DevOps", "Data Science", "Cloud",
-    "Frontend", "Career", "Music", "Gaming", "Entertainment",
+    "技术", "编程", "运维", "数据科学", "云计算",
+    "前端", "职业", "音乐", "游戏", "娱乐",
 ];
 
-function formatFileSize(bytes: number): string {
-    if (bytes >= 1073741824) return `${(bytes / 1073741824).toFixed(2)} GB`;
-    if (bytes >= 1048576) return `${(bytes / 1048576).toFixed(2)} MB`;
-    if (bytes >= 1024) return `${(bytes / 1024).toFixed(2)} KB`;
-    return `${bytes} B`;
-}
-
 const UploadPage = () => {
+    const {t} = useTranslation();
     const navigate = useNavigate();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [files, setFiles] = useState<UploadFile[]>([]);
@@ -81,31 +77,49 @@ const UploadPage = () => {
     const removeFile = (id: string) => setFiles(prev => prev.filter(f => f.id !== id));
 
     const addTag = () => {
-        const t = tagInput.trim();
-        if (t && !tags.includes(t)) {
-            setTags([...tags, t]);
+        const val = tagInput.trim();
+        if (val && !tags.includes(val)) {
+            setTags([...tags, val]);
             setTagInput('');
         }
     };
 
     const removeTag = (tag: string) => setTags(tags.filter(t => t !== tag));
 
-    const handleUpload = () => {
+    const handleUpload = async () => {
         if (!title || files.length === 0) return;
         setFiles(prev => prev.map(f => ({...f, status: 'uploading'})));
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 10;
-            setFiles(prev => prev.map(f => ({
-                ...f,
-                progress: Math.min(progress, 100),
-                status: progress >= 100 ? 'success' : 'uploading',
-            })));
-            if (progress >= 100) {
-                clearInterval(interval);
-                setTimeout(() => navigate({to: '/'}), 1000);
+
+        for (const file of files) {
+            try {
+                await mediaApi.upload(
+                    file.file,
+                    {
+                        title,
+                        description,
+                        category_id: category ? parseInt(category) : undefined,
+                        tags,
+                        privacy: 1, // public
+                    },
+                    (percent) => {
+                        setFiles(prev =>
+                            prev.map(f => f.id === file.id ? {...f, progress: percent} : f)
+                        );
+                    },
+                );
+                setFiles(prev =>
+                    prev.map(f => f.id === file.id ? {...f, status: 'success'} : f)
+                );
+            } catch (err) {
+                console.error('Upload failed:', err);
+                setFiles(prev =>
+                    prev.map(f => f.id === file.id ? {...f, status: 'error'} : f)
+                );
             }
-        }, 500);
+        }
+
+        // All uploads done, navigate after short delay
+        setTimeout(() => navigate({to: '/'}), 1500);
     };
 
     const getFileIcon = (type: string) => {
@@ -122,10 +136,10 @@ const UploadPage = () => {
             {/* Header */}
             <div className="text-center">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    {/* TODO: i18n */}上传内容
+                    {t('upload.title')}
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400">
-                    {/* TODO: i18n */}与全世界分享你的视频、图片和音频
+                    {t('upload.description')}
                 </p>
             </div>
 
@@ -154,16 +168,16 @@ const UploadPage = () => {
                         <Upload className="w-8 h-8 text-blue-600 dark:text-blue-400"/>
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                        {/* TODO: i18n */}拖放文件到此处
+                        {t('upload.dropzoneTitle')}
                     </h3>
                     <p className="text-gray-500 dark:text-gray-400 mb-4">
-                        {/* TODO: i18n */}或点击从电脑中选择文件
+                        {t('upload.dropzoneDesc')}
                     </p>
                     <Button onClick={() => fileInputRef.current?.click()}>
-                        {/* TODO: i18n */}选择文件
+                        {t('upload.selectFiles')}
                     </Button>
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">
-                        {/* TODO: i18n */}支持格式：MP4, MOV, AVI, MKV, MP3, WAV, PNG, JPG, GIF
+                        {t('upload.supportedFormats')}
                     </p>
                 </div>
             </div>
@@ -173,7 +187,7 @@ const UploadPage = () => {
                 <Card className="dark:bg-gray-800">
                     <CardHeader>
                         <CardTitle className="dark:text-white">
-                            {/* TODO: i18n */}已选择文件 ({files.length})
+                            {t('upload.selectedFiles', {count: files.length})}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -219,30 +233,30 @@ const UploadPage = () => {
             {/* Details form */}
             <Card className="dark:bg-gray-800">
                 <CardHeader>
-                    <CardTitle className="dark:text-white">{/* TODO: i18n */}内容详情</CardTitle>
+                    <CardTitle className="dark:text-white">{t('upload.contentDetails')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{/* TODO: i18n */}标题
-                            *</label>
-                        <Input placeholder="Enter title" value={title}
+                        <label
+                            className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('upload.titleLabel')}</label>
+                        <Input placeholder={t('upload.titlePlaceholder')} value={title}
                                onChange={(e) => setTitle(e.target.value)}/>
                     </div>
                     <div className="space-y-2">
                         <label
-                            className="text-sm font-medium text-gray-700 dark:text-gray-300">{/* TODO: i18n */}描述</label>
-                        <Textarea placeholder="Describe your content..." rows={4} value={description}
+                            className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('upload.descLabel')}</label>
+                        <Textarea placeholder={t('upload.descPlaceholder')} rows={4} value={description}
                                   onChange={(e) => setDescription(e.target.value)}/>
                     </div>
                     <div className="space-y-2">
                         <label
-                            className="text-sm font-medium text-gray-700 dark:text-gray-300">{/* TODO: i18n */}分类</label>
+                            className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('upload.categoryLabel')}</label>
                         <select
                             className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm dark:bg-gray-700 dark:text-white"
                             value={category}
                             onChange={(e) => setCategory(e.target.value)}
                         >
-                            <option value="">{/* TODO: i18n */}选择分类</option>
+                            <option value="">{t('upload.selectCategory')}</option>
                             {categories.map(cat => (
                                 <option key={cat} value={cat}>{cat}</option>
                             ))}
@@ -250,12 +264,12 @@ const UploadPage = () => {
                     </div>
                     <div className="space-y-2">
                         <label
-                            className="text-sm font-medium text-gray-700 dark:text-gray-300">{/* TODO: i18n */}标签</label>
+                            className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('upload.tagLabel')}</label>
                         <div className="flex gap-2 mb-2">
-                            <Input placeholder="Add tag" value={tagInput}
+                            <Input placeholder={t('upload.addTagPlaceholder')} value={tagInput}
                                 onChange={(e) => setTagInput(e.target.value)}
                                    onKeyDown={(e) => e.key === 'Enter' && addTag()}/>
-                            <Button variant="outline" onClick={addTag}>{/* TODO: i18n */}添加</Button>
+                            <Button variant="outline" onClick={addTag}>{t('upload.addTag')}</Button>
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {tags.map(tag => (
@@ -274,10 +288,10 @@ const UploadPage = () => {
             {/* Actions */}
             <div className="flex justify-end gap-4">
                 <Button variant="outline" onClick={() => navigate({to: '/'})}>
-                    {/* TODO: i18n */}取消
+                    {t('common.cancel')}
                 </Button>
                 <Button onClick={handleUpload} disabled={!canSubmit}>
-                    {uploading ? /* TODO: i18n */ '上传中...' : /* TODO: i18n */ '上传'}
+                    {uploading ? t('upload.uploading') : t('upload.upload')}
                 </Button>
             </div>
         </div>

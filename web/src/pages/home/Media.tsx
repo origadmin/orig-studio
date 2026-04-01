@@ -2,8 +2,10 @@
 import {useState, useEffect} from "react";
 import {Link} from "@tanstack/react-router";
 import {mediaApi, categoryApi, type Media, type Category} from "@/lib/api";
+import {useTranslation} from 'react-i18next';
 
 export default function MediaPage() {
+    const {t} = useTranslation();
     const [mediaList, setMediaList] = useState<Media[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
@@ -72,9 +74,9 @@ export default function MediaPage() {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
-                    <p className="text-red-500 mb-2">加载失败: {error}</p>
+                    <p className="text-red-500 mb-2">{t('media.loadFailed', {error})}</p>
                     <button onClick={loadData} className="text-indigo-600 hover:underline">
-                        重试
+                        {t('media.retry')}
                     </button>
                 </div>
             </div>
@@ -85,9 +87,9 @@ export default function MediaPage() {
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 py-8">
                 <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-2xl font-bold text-gray-900">媒体库</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">{t('media.title')}</h1>
                     <Link to="/" className="text-indigo-600 hover:underline">
-                        ← 返回首页
+                        {t('media.back')}
                     </Link>
                 </div>
 
@@ -101,7 +103,7 @@ export default function MediaPage() {
                                 : "bg-white text-gray-700 hover:bg-gray-100"
                         }`}
                     >
-                        全部
+                        {t('media.all')}
                     </button>
                     {categories.map((cat) => (
                         <button
@@ -121,7 +123,7 @@ export default function MediaPage() {
                 {/* 媒体列表 */}
                 {mediaList.length === 0 ? (
                     <div className="text-center py-12 text-gray-500">
-                        暂无媒体内容
+                        {t('media.noMedia')}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

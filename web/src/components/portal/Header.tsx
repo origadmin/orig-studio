@@ -17,6 +17,7 @@ import {
     ChevronDown,
     Plus,
 } from 'lucide-react';
+import {useTranslation} from 'react-i18next';
 import {useAuth} from '../../hooks/useAuth';
 
 /* ── QuickLink 定义 ──────────────────────────────────────────────────────── */
@@ -26,14 +27,6 @@ interface QuickLink {
     to: string;
     icon?: React.ReactNode;
 }
-
-const defaultQuickLinks: QuickLink[] = [
-    {label: '精选', to: '/featured'},
-    {label: '最新', to: '/latest'},
-    {label: '分类', to: '/categories'},
-    {label: '标签', to: '/tags'},
-    {label: '成员', to: '/members'},
-];
 
 /** 顶部最多显示 N 个，超过收进"更多"下拉 */
 const VISIBLE_QUICK_LINKS = 4;
@@ -48,6 +41,7 @@ interface HeaderProps {
 /* ── Component ───────────────────────────────────────────────────────────── */
 
 const Header: React.FC<HeaderProps> = ({onToggleSidebar, sidebarCollapsed}) => {
+    const {t} = useTranslation();
     const [search, setSearch] = useState('');
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -67,7 +61,15 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, sidebarCollapsed}) => {
         }
     });
 
-    const allLinks = [...defaultQuickLinks, ...customLinks];
+    const quickLinks: QuickLink[] = [
+        {label: t('nav.featured'), to: '/featured'},
+        {label: t('nav.latest'), to: '/latest'},
+        {label: t('nav.categories'), to: '/categories'},
+        {label: t('nav.tags'), to: '/tags'},
+        {label: t('nav.members'), to: '/members'},
+    ];
+
+    const allLinks = [...quickLinks, ...customLinks];
     const visibleLinks = allLinks.slice(0, VISIBLE_QUICK_LINKS);
     const moreLinks = allLinks.slice(VISIBLE_QUICK_LINKS);
 
@@ -100,7 +102,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, sidebarCollapsed}) => {
                 <button
                     onClick={onToggleSidebar}
                     className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors shrink-0"
-                    title={sidebarCollapsed ? '展开菜单' : '收起菜单'}
+                    title={sidebarCollapsed ? t('nav.expandMenu') : t('nav.collapseMenu')}
                 >
                     <Menu size={20}/>
                 </button>
@@ -137,7 +139,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, sidebarCollapsed}) => {
                                 onClick={() => setMoreMenuOpen(!moreMenuOpen)}
                                 className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
                             >
-                                更多
+                                {t('nav.more')}
                                 <ChevronDown size={14}
                                              className={`transition-transform ${moreMenuOpen ? 'rotate-180' : ''}`}/>
                             </button>
@@ -175,7 +177,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, sidebarCollapsed}) => {
                             type="search"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="搜索视频、标签、用户..."
+                            placeholder={t('header.searchPlaceholder')}
                             className="w-full bg-gray-100 dark:bg-gray-800 border-0 rounded-full pl-9 pr-4 py-1.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:bg-white dark:focus:bg-gray-700 transition-all outline-none"
                         />
                     </div>
@@ -191,7 +193,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, sidebarCollapsed}) => {
                                 className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
                             >
                                 <Plus size={16}/>
-                                <span className="hidden lg:inline">上传</span>
+                                <span className="hidden lg:inline">{t('nav.upload')}</span>
                             </Link>
 
                             {/* 用户头像 + 下拉菜单 */}
@@ -236,21 +238,21 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, sidebarCollapsed}) => {
                                             onClick={() => setUserMenuOpen(false)}
                                             className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                                         >
-                                            <User size={16}/> 我的频道
+                                            <User size={16}/> {t('nav.myChannel')}
                                         </Link>
                                         <Link
                                             to="/me/upload"
                                             onClick={() => setUserMenuOpen(false)}
                                             className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                                         >
-                                            <Upload size={16}/> 上传视频
+                                            <Upload size={16}/> {t('nav.uploadVideo')}
                                         </Link>
                                         <Link
                                             to="/me/favorites"
                                             onClick={() => setUserMenuOpen(false)}
                                             className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                                         >
-                                            <Settings size={16}/> 我的收藏
+                                            <Settings size={16}/> {t('nav.myFavorites')}
                                         </Link>
 
                                         {isAdmin && (
@@ -259,7 +261,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, sidebarCollapsed}) => {
                                                 onClick={() => setUserMenuOpen(false)}
                                                 className="flex items-center gap-3 px-4 py-2.5 text-sm text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                                             >
-                                                <Shield size={16}/> 管理后台
+                                                <Shield size={16}/> {t('nav.admin')}
                                             </Link>
                                         )}
 
@@ -273,7 +275,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, sidebarCollapsed}) => {
                                             }}
                                             className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                                         >
-                                            <LogOut size={16}/> 退出登录
+                                            <LogOut size={16}/> {t('nav.logout')}
                                         </button>
                                     </div>
                                 )}
@@ -285,7 +287,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, sidebarCollapsed}) => {
                             className="flex items-center gap-2 px-4 py-1.5 bg-emerald-600 text-white text-sm font-medium rounded-full hover:bg-emerald-700 transition-colors"
                         >
                             <LogIn size={16}/>
-                            登录
+                            {t('nav.login')}
                         </Link>
                     )}
                 </div>

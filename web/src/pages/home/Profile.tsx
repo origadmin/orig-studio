@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {useParams} from '@tanstack/react-router';
 import {Link} from '@tanstack/react-router';
 import {Play, Eye, Calendar, Settings, Bell, Heart, UserPlus, MessageSquare} from 'lucide-react';
+import {useTranslation} from 'react-i18next';
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Badge} from '@/components/ui/badge';
@@ -70,6 +71,7 @@ const mockVideos = [
 
 const ProfilePage = () => {
     const {id} = useParams({from: '/u/$id'});
+    const {t} = useTranslation();
     const [user] = useState(mockUser);
     const [videos] = useState(mockVideos);
 
@@ -87,12 +89,12 @@ const ProfilePage = () => {
                 <div className="absolute top-4 right-4">
                     {user.is_me ? (
                         <Button variant="outline" className="bg-white dark:bg-gray-800"><Settings
-                            className="w-4 h-4 mr-2"/>编辑资料</Button>
+                            className="w-4 h-4 mr-2"/>{t('common.editProfile')}</Button>
                     ) : user.is_subscribed ? (
                         <Button variant="outline" className="bg-white dark:bg-gray-800"><UserPlus
-                            className="w-4 h-4 mr-2"/>已订阅</Button>
+                            className="w-4 h-4 mr-2"/>{t('common.subscribed')}</Button>
                     ) : (
-                        <Button className="bg-red-600 hover:bg-red-700">订阅</Button>
+                        <Button className="bg-red-600 hover:bg-red-700">{t('common.subscribe')}</Button>
                     )}
                 </div>
             </div>
@@ -100,32 +102,34 @@ const ProfilePage = () => {
             <div className="pt-20 px-6 space-y-4">
                 <div className="flex items-center gap-3">
                     <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{user.nickname}</h1>
-                    {user.is_verified && <Badge variant="default" className="bg-emerald-500">已认证</Badge>}
+                    {user.is_verified &&
+                        <Badge variant="default" className="bg-emerald-500">{t('common.verified')}</Badge>}
                 </div>
                 <p className="text-slate-500 dark:text-gray-400">@{user.username}</p>
                 <p className="text-slate-600 dark:text-gray-300 max-w-2xl">{user.bio}</p>
                 <div className="flex flex-wrap gap-6 text-sm">
                     <div className="flex items-center gap-2"><UserPlus className="w-4 h-4 text-slate-400"/><span
                         className="font-semibold text-slate-900 dark:text-white">{formatViews(user.subscriber_count)}</span><span
-                        className="text-slate-500 dark:text-gray-400">订阅者</span></div>
+                        className="text-slate-500 dark:text-gray-400">{t('common.subscribers')}</span></div>
                     <div className="flex items-center gap-2"><Play className="w-4 h-4 text-slate-400"/><span
                         className="font-semibold text-slate-900 dark:text-white">{user.video_count}</span><span
-                        className="text-slate-500 dark:text-gray-400">个视频</span></div>
+                        className="text-slate-500 dark:text-gray-400">{t('common.videos_count')}</span></div>
                     <div className="flex items-center gap-2"><Eye className="w-4 h-4 text-slate-400"/><span
                         className="font-semibold text-slate-900 dark:text-white">{formatViews(user.total_views)}</span><span
-                        className="text-slate-500 dark:text-gray-400">次观看</span></div>
+                        className="text-slate-500 dark:text-gray-400">{t('common.views')}</span></div>
                     <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-slate-400"/><span
-                        className="text-slate-500 dark:text-gray-400">加入于 {formatDate(user.joined_date)}</span></div>
+                        className="text-slate-500 dark:text-gray-400">{t('common.joinedAt', {date: formatDate(user.joined_date)})}</span>
+                    </div>
                 </div>
             </div>
 
             <Tabs defaultValue="videos" className="w-full">
                 <TabsList className="w-full justify-start border-b dark:border-gray-700 bg-transparent h-auto p-0">
                     {[
-                        {v: 'videos', icon: <Play className="w-4 h-4 mr-2"/>, l: '视频'},
-                        {v: 'playlists', l: '播放列表'},
-                        {v: 'favorites', icon: <Heart className="w-4 h-4 mr-2"/>, l: '收藏'},
-                        {v: 'community', icon: <MessageSquare className="w-4 h-4 mr-2"/>, l: '社区'},
+                        {v: 'videos', icon: <Play className="w-4 h-4 mr-2"/>, l: t('channel.tabVideos')},
+                        {v: 'playlists', l: t('profile.tabPlaylists')},
+                        {v: 'favorites', icon: <Heart className="w-4 h-4 mr-2"/>, l: t('profile.tabFavorites')},
+                        {v: 'community', icon: <MessageSquare className="w-4 h-4 mr-2"/>, l: t('profile.tabCommunity')},
                     ].map(t => (
                         <TabsTrigger key={t.v} value={t.v}
                                      className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-none px-4 py-3">
@@ -147,7 +151,7 @@ const ProfilePage = () => {
                                     </div>
                                     <div className="p-3">
                                         <h3 className="font-semibold text-slate-900 dark:text-white line-clamp-2 text-sm group-hover:text-emerald-600 transition-colors">{video.title}</h3>
-                                        <p className="text-xs text-slate-500 dark:text-gray-400 mt-2">{formatViews(video.view_count)} 次观看
+                                        <p className="text-xs text-slate-500 dark:text-gray-400 mt-2">{formatViews(video.view_count)} {t('common.views')}
                                             · {formatDate(video.create_time)}</p>
                                     </div>
                                 </div>
@@ -156,13 +160,16 @@ const ProfilePage = () => {
                     </div>
                 </TabsContent>
                 <TabsContent value="playlists" className="mt-6">
-                    <div className="text-center py-12 text-slate-500 dark:text-gray-400">暂无播放列表</div>
+                    <div
+                        className="text-center py-12 text-slate-500 dark:text-gray-400">{t('profile.noPlaylists')}</div>
                 </TabsContent>
                 <TabsContent value="favorites" className="mt-6">
-                    <div className="text-center py-12 text-slate-500 dark:text-gray-400">暂无收藏</div>
+                    <div
+                        className="text-center py-12 text-slate-500 dark:text-gray-400">{t('profile.noFavorites')}</div>
                 </TabsContent>
                 <TabsContent value="community" className="mt-6">
-                    <div className="text-center py-12 text-slate-500 dark:text-gray-400">暂无帖子</div>
+                    <div
+                        className="text-center py-12 text-slate-500 dark:text-gray-400">{t('profile.noCommunity')}</div>
                 </TabsContent>
             </Tabs>
         </div>
