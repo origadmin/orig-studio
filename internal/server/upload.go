@@ -63,6 +63,7 @@ func initiateMultipartUpload(uc *biz.UploadUseCase) gin.HandlerFunc {
 			Description string   `json:"description"`
 			CategoryID  *int64   `json:"category_id"`
 			Tags        []string `json:"tags"`
+			Thumbnail   string   `json:"thumbnail"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request: " + err.Error()})
@@ -78,6 +79,7 @@ func initiateMultipartUpload(uc *biz.UploadUseCase) gin.HandlerFunc {
 			req.Description,
 			req.CategoryID,
 			req.Tags,
+			req.Thumbnail,
 			&claims.UserID,
 		)
 		if err != nil {
@@ -139,6 +141,7 @@ func listParts(uc *biz.UploadUseCase) gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{
 			"parts":         parts,
 			"total_parts":   session.TotalParts,
+			"chunk_size":    session.ChunkSize,
 			"uploaded_size": session.UploadedSize,
 			"total_size":    session.FileSize,
 			"status":        session.Status,
@@ -155,15 +158,23 @@ func completeMultipartUpload(uc *biz.UploadUseCase) gin.HandlerFunc {
 			Description string   `json:"description"`
 			CategoryID  *int64   `json:"category_id"`
 			Tags        []string `json:"tags"`
+			Thumbnail   string   `json:"thumbnail"`
 		}
-		if err := c.ShouldBindJSON(&req); err == nil {
-			// Optional metadata update at completion
-			if req.Title != "" {
-				_ = uc.UpdateUploadMetadata(c.Request.Context(), uploadID, req.Title, req.Description, req.CategoryID, req.Tags)
-			}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			// Even if JSON binding fails or is empty, we try to complete with defaults
+			// But usually, we expect at least the completion call.
 		}
 
-		media, err := uc.CompleteMultipartUpload(c.Request.Context(), uploadID, req.Sha256)
+		media, err := uc.CompleteMultipartUpload(
+			c.Request.Context(),
+			uploadID,
+			req.Sha256,
+			req.Title,
+			req.Description,
+			req.CategoryID,
+			req.Tags,
+			req.Thumbnail,
+		)
 		if err != nil {
 			c.JSON(
 				http.StatusInternalServerError,
@@ -184,6 +195,7 @@ func updateUploadMetadata(uc *biz.UploadUseCase) gin.HandlerFunc {
 			Description string   `json:"description"`
 			CategoryID  *int64   `json:"category_id"`
 			Tags        []string `json:"tags"`
+			Thumbnail   string   `json:"thumbnail"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request: " + err.Error()})
@@ -197,6 +209,7 @@ func updateUploadMetadata(uc *biz.UploadUseCase) gin.HandlerFunc {
 			req.Description,
 			req.CategoryID,
 			req.Tags,
+			req.Thumbnail,
 		)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

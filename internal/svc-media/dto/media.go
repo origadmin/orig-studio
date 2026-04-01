@@ -35,6 +35,7 @@ type MediaQueryOption struct {
 	Type       *int32
 	UserID     *int64
 	CategoryID *int64
+	Status     *int32
 }
 
 // MediaCreateOption specifies options for creating media.

@@ -36,6 +36,7 @@ const SignUpPage = lazy(() => import('../pages/auth/SignUp/index'));
 
 // User center (protected)
 const UploadPage = lazy(() => import('../pages/home/me/Upload'));
+const MyVideosPage = lazy(() => import('../pages/home/me/MyVideos'));
 const FavoritesPage = lazy(() => import('../pages/home/me/Favorites'));
 const NotificationsPage = lazy(() => import('../pages/home/me/Notifications'));
 const HistoryPage = lazy(() => import('../pages/home/me/History'));
@@ -197,6 +198,12 @@ const uploadRoute = createRoute({
     component: () => <Lazy><UploadPage/></Lazy>,
 });
 
+const myVideosRoute = createRoute({
+    getParentRoute: () => meLayoutRoute,
+    path: '/me/videos',
+    component: () => <Lazy><MyVideosPage/></Lazy>,
+});
+
 const favoritesRoute = createRoute({
     getParentRoute: () => meLayoutRoute,
     path: '/me/favorites',
@@ -307,6 +314,7 @@ const routeTree = rootRoute.addChildren([
         profileRoute,
         meLayoutRoute.addChildren([
             uploadRoute,
+            myVideosRoute,
             favoritesRoute,
             notificationsRoute,
             historyRoute,

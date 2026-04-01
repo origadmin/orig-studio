@@ -13,6 +13,8 @@ import (
 
 	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/data/entity/category"
+	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/svc-media/biz"
 	"origadmin/application/origcms/internal/svc-media/dto"
 )
@@ -48,6 +50,23 @@ func (r *mediaRepo) List(
 	}
 
 	query := r.db.Media.Query()
+
+	// Apply filters
+	if opt.UserID != nil {
+		query = query.Where(media.UserIDEQ(int(*opt.UserID)))
+	}
+	if opt.CategoryID != nil {
+		query = query.Where(media.HasCategoryWith(category.ID(int(*opt.CategoryID))))
+	}
+	if opt.Status != nil {
+		// Map integer status to string state if needed, or use directly if it's already a string in your business logic.
+		// Assuming status 1 = active for now, or just converting to string.
+		state := fmt.Sprintf("%d", *opt.Status)
+		query = query.Where(media.StateEQ(state))
+	}
+	if opt.Keyword != "" {
+		query = query.Where(media.TitleContains(opt.Keyword))
+	}
 
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -125,6 +144,13 @@ func (r *mediaRepo) Update(
 	}
 	if in.Thumbnail != "" {
 		update = update.SetThumbnail(in.Thumbnail)
+	}
+	if in.Duration > 0 {
+		update = update.SetDuration(int(in.Duration))
+	}
+	if in.CategoryId > 0 {
+		v := int(in.CategoryId)
+		update = update.SetNillableCategoryID(&v)
 	}
 
 	m, err := update.Save(ctx)

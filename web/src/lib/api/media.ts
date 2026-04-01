@@ -1,6 +1,6 @@
 // API 客户端 - 媒体模块
 // 类型定义对齐后端 ent entity JSON 输出
-import {api} from "../request";
+import {api, getAccessToken} from "../request";
 
 // Media 对齐后端 entity.Media JSON 序列化字段
 export interface Media {
@@ -149,7 +149,7 @@ export const mediaApi = {
         if (metadata.privacy) formData.append("privacy", String(metadata.privacy));
 
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
-        const token = localStorage.getItem("origcms_token");
+        const token = getAccessToken();
 
         return new Promise<{ data: Media }>((resolve, reject) => {
             const xhr = new XMLHttpRequest();

@@ -12,6 +12,7 @@ import {
     Tag,
     LayoutGrid,
     Users,
+    Video,
     History,
     Heart,
     ListVideo,
@@ -67,7 +68,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     ];
 
     const myItems: NavItem[] = [
-        {icon: <Upload size={18}/>, label: t('nav.myUploads'), to: '/me/upload'},
+        {icon: <Video size={18}/>, label: t('nav.myUploads'), to: '/me/videos'},
+        {icon: <Upload size={18}/>, label: t('nav.uploadVideo'), to: '/me/upload'},
         {icon: <ListVideo size={18}/>, label: t('nav.myPlaylists'), to: '/me/playlists'},
         {icon: <History size={18}/>, label: t('nav.history'), to: '/me/history'},
         {icon: <Heart size={18}/>, label: t('nav.myFavorites'), to: '/me/favorites'},

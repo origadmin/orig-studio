@@ -16,6 +16,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/uuid"
+
 	"origadmin/application/origcms/internal/helpers/ffmpeg"
 )
 
@@ -41,6 +42,7 @@ type UploadSession struct {
 	Tags         []string       `json:"tags"`
 	UserID       *int64         `json:"user_id"`
 	Status       string         `json:"status"`
+	Thumbnail    string         `json:"thumbnail"`
 	Parts        map[int]string `json:"parts"` // part_number -> etag
 	Sha256       string         `json:"sha256"`
 	StoragePath  string         `json:"storage_path"`
@@ -94,7 +96,7 @@ func NewUploadUseCase(
 		repo:      repo,
 		mediaRepo: mediaRepo,
 		storage:   storage,
-		chunkSize: 2 * 1024 * 1024, // 2MB default
+		chunkSize: 5 * 1024 * 1024, // 5MB default
 		log:       log.NewHelper(log.With(logger, "module", "upload.biz")),
 	}
 }
@@ -108,6 +110,7 @@ func (uc *UploadUseCase) InitiateMultipartUpload(
 	title, description string,
 	categoryID *int64,
 	tags []string,
+	thumbnail string,
 	userID *int64,
 ) (*UploadSession, error) {
 	uploadID := uuid.New().String()
@@ -124,6 +127,7 @@ func (uc *UploadUseCase) InitiateMultipartUpload(
 		Description: description,
 		CategoryID:  categoryID,
 		Tags:        tags,
+		Thumbnail:   thumbnail,
 		UserID:      userID,
 		Status:      StatusPending,
 		Parts:       make(map[int]string),
@@ -173,7 +177,7 @@ func (uc *UploadUseCase) UploadPart(
 }
 
 // UpdateUploadMetadata updates the metadata of an ongoing upload session.
-func (uc *UploadUseCase) UpdateUploadMetadata(ctx context.Context, uploadID string, title, description string, categoryID *int64, tags []string) error {
+func (uc *UploadUseCase) UpdateUploadMetadata(ctx context.Context, uploadID string, title, description string, categoryID *int64, tags []string, thumbnail string) error {
 	uc.mu.Lock()
 	defer uc.mu.Unlock()
 
@@ -192,6 +196,9 @@ func (uc *UploadUseCase) UpdateUploadMetadata(ctx context.Context, uploadID stri
 	session.Description = description
 	session.CategoryID = categoryID
 	session.Tags = tags
+	if thumbnail != "" {
+		session.Thumbnail = thumbnail
+	}
 
 	return uc.repo.UpdateSession(ctx, session)
 }
@@ -201,7 +208,14 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 	ctx context.Context,
 	uploadID string,
 	sha256 string,
+	title, description string,
+	categoryID *int64,
+	tags []string,
+	thumbnail string,
 ) (*Media, error) {
+	uc.mu.Lock()
+	defer uc.mu.Unlock()
+
 	session, err := uc.repo.GetSession(ctx, uploadID)
 	if err != nil {
 		return nil, err
@@ -223,16 +237,67 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 		return nil, err
 	}
 
+	// Use metadata from completion request, falling back to session metadata if not provided
+	finalTitle := title
+	if finalTitle == "" {
+		finalTitle = session.Title
+	}
+	finalDescription := description
+	if finalDescription == "" {
+		finalDescription = session.Description
+	}
+	finalCategoryID := categoryID
+	if finalCategoryID == nil {
+		finalCategoryID = session.CategoryID
+	}
+	finalTags := tags
+	if len(finalTags) == 0 {
+		finalTags = session.Tags
+	}
+	finalThumbnail := thumbnail
+	if finalThumbnail == "" {
+		finalThumbnail = session.Thumbnail
+	}
+
+	// Extract duration if it's a video
+	var duration time.Duration
+	if strings.Contains(session.ContentType, "video") {
+		// Base directory for data (should ideally be configurable)
+		baseDir := "./data/uploads"
+		fullPath := filepath.Join(baseDir, finalPath)
+		if d, err := ffmpeg.GetVideoDuration(ctx, fullPath); err == nil {
+			duration = d
+		} else {
+			uc.log.Errorf("failed to extract duration for %s: %v", fullPath, err)
+		}
+	}
+
 	// Create media record
 	media := &Media{
-		Title:       session.Title,
-		Description: session.Description,
+		Title:       finalTitle,
+		Description: finalDescription,
 		Url:         finalPath,
 		Size:        session.FileSize,
 		MimeType:    session.ContentType,
+		Thumbnail:   finalThumbnail,
+		Tags:        finalTags,
+		Duration:    int32(duration.Seconds()),
+	}
+	if finalCategoryID != nil {
+		media.CategoryId = *finalCategoryID
 	}
 	if session.UserID != nil {
 		media.UserId = *session.UserID
+	}
+
+	// Derive media type (e.g., video, image)
+	media.Type = "file"
+	if strings.Contains(session.ContentType, "video") {
+		media.Type = "video"
+	} else if strings.Contains(session.ContentType, "image") {
+		media.Type = "image"
+	} else if strings.Contains(session.ContentType, "audio") {
+		media.Type = "audio"
 	}
 
 	createdMedia, err := uc.mediaRepo.Create(ctx, media)
@@ -249,7 +314,7 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 	_ = uc.storage.DeleteParts(ctx, uploadID)
 
 	// Background thumbnail generation
-	if strings.HasPrefix(session.ContentType, "video/") {
+	if strings.HasPrefix(session.ContentType, "video/") && createdMedia.Thumbnail == "" {
 		go uc.generateThumbnail(context.Background(), createdMedia.Id, finalPath, session.ContentType)
 	}
 
