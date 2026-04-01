@@ -6,10 +6,11 @@ import (
 
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/svc-media/biz"
 )
 
 // RegisterRoutes registers all HTTP routes
-func RegisterRoutes(router *gin.Engine, client *entity.Client, jwtMgr *auth.Manager) {
+func RegisterRoutes(router *gin.Engine, client *entity.Client, jwtMgr *auth.Manager, uploadUC *biz.UploadUseCase) {
 	// Health check
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
@@ -42,6 +43,6 @@ func RegisterRoutes(router *gin.Engine, client *entity.Client, jwtMgr *auth.Mana
 		RegisterPlaylistRoutes(v1, client)
 
 		// Upload routes (chunked multipart upload, requires JWT)
-		RegisterUploadRoutes(v1, client, jwtMgr)
+		RegisterUploadRoutes(v1, uploadUC, jwtMgr)
 	}
 }

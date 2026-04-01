@@ -28,20 +28,30 @@ func (m *MockRepo) CreateSession(ctx context.Context, session *UploadSession) er
 	args := m.Called(ctx, session)
 	return args.Error(0)
 }
+
 func (m *MockRepo) GetSession(ctx context.Context, uploadID string) (*UploadSession, error) {
 	args := m.Called(ctx, uploadID)
 	return args.Get(0).(*UploadSession), args.Error(1)
 }
+
 func (m *MockRepo) UpdateSession(ctx context.Context, session *UploadSession) error {
 	args := m.Called(ctx, session)
 	return args.Error(0)
 }
+
 func (m *MockRepo) DeleteSession(ctx context.Context, uploadID string) error {
 	return nil
 }
-func (m *MockRepo) ListSessions(ctx context.Context, userID int64, status string, page, pageSize int) ([]*UploadSession, int, error) {
+
+func (m *MockRepo) ListSessions(
+	ctx context.Context,
+	userID int64,
+	status string,
+	page, pageSize int,
+) ([]*UploadSession, int, error) {
 	return nil, 0, nil
 }
+
 func (m *MockRepo) DeleteExpiredSessions(ctx context.Context, now time.Time) ([]string, error) {
 	return nil, nil
 }
@@ -55,12 +65,22 @@ func (m *MockMediaRepo) Create(ctx context.Context, media *Media) (*Media, error
 	args := m.Called(ctx, media)
 	return args.Get(0).(*Media), args.Error(1)
 }
-func (m *MockMediaRepo) Get(ctx context.Context, id int64) (*Media, error)        { return nil, nil }
-func (m *MockMediaRepo) List(ctx context.Context, opts ...*dto.MediaQueryOption) ([]*Media, int32, error) {
+func (m *MockMediaRepo) Get(ctx context.Context, id int64) (*Media, error) { return nil, nil }
+
+func (m *MockMediaRepo) List(
+	ctx context.Context,
+	opts ...*dto.MediaQueryOption,
+) ([]*Media, int32, error) {
 	return nil, 0, nil
 }
-func (m *MockMediaRepo) Update(ctx context.Context, media *Media) (*Media, error) { return nil, nil }
-func (m *MockMediaRepo) Delete(ctx context.Context, id int64) error               { return nil }
+
+func (m *MockMediaRepo) Update(
+	ctx context.Context,
+	media *Media,
+) (*Media, error) {
+	return nil, nil
+}
+func (m *MockMediaRepo) Delete(ctx context.Context, id int64) error { return nil }
 func (m *MockMediaRepo) IncrementViewCount(ctx context.Context, id int64) (int64, error) {
 	return 0, nil
 }
@@ -87,7 +107,17 @@ func TestUploadWorkflow(t *testing.T) {
 
 	// 1. Test Initiate
 	repo.On("CreateSession", ctx, mock.AnythingOfType("*biz.UploadSession")).Return(nil)
-	session, err := uc.InitiateMultipartUpload(ctx, filename, fileSize, "text/plain", "Title", "Desc", nil, nil, &userID)
+	session, err := uc.InitiateMultipartUpload(
+		ctx,
+		filename,
+		fileSize,
+		"text/plain",
+		"Title",
+		"Desc",
+		nil,
+		nil,
+		&userID,
+	)
 	assert.NoError(t, err)
 	assert.Equal(t, 3, session.TotalParts)
 	uploadID := session.UploadID
@@ -107,7 +137,7 @@ func TestUploadWorkflow(t *testing.T) {
 	assert.NoError(t, err)
 
 	// 3. Test Complete
-	// Using mock.Anything because Media is an alias to types.Media 
+	// Using mock.Anything because Media is an alias to types.Media
 	// and mock.AnythingOfType may have issues with type aliases in some environments.
 	mediaRepo.On("Create", ctx, mock.Anything).Return(&Media{Id: 1, Title: "Title"}, nil)
 
@@ -126,15 +156,26 @@ type testStorage struct {
 	baseDir string
 }
 
-func (s *testStorage) StorePart(ctx context.Context, uploadID string, partNumber int, data []byte) (string, error) {
+func (s *testStorage) StorePart(
+	ctx context.Context,
+	uploadID string,
+	partNumber int,
+	data []byte,
+) (string, error) {
 	path := filepath.Join(s.baseDir, uploadID, fmt.Sprintf("part_%d", partNumber))
-	_ = os.MkdirAll(filepath.Dir(path), 0755)
-	_ = os.WriteFile(path, data, 0644)
+	_ = os.MkdirAll(filepath.Dir(path), 0o755)
+	_ = os.WriteFile(path, data, 0o644)
 	return "etag", nil
 }
-func (s *testStorage) MergeParts(ctx context.Context, uploadID string, totalParts int, finalPath string) error {
+
+func (s *testStorage) MergeParts(
+	ctx context.Context,
+	uploadID string,
+	totalParts int,
+	finalPath string,
+) error {
 	dest := filepath.Join(s.baseDir, finalPath)
-	_ = os.MkdirAll(filepath.Dir(dest), 0755)
+	_ = os.MkdirAll(filepath.Dir(dest), 0o755)
 	f, _ := os.Create(dest)
 	defer f.Close()
 	for i := 1; i <= totalParts; i++ {
@@ -143,6 +184,7 @@ func (s *testStorage) MergeParts(ctx context.Context, uploadID string, totalPart
 	}
 	return nil
 }
+
 func (s *testStorage) DeleteParts(ctx context.Context, uploadID string) error {
 	return os.RemoveAll(filepath.Join(s.baseDir, uploadID))
 }

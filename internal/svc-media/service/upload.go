@@ -6,11 +6,9 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
-	"google.golang.org/protobuf/types/known/emptypb"
 
 	pb "origadmin/application/origcms/api/gen/v1/upload"
 	"origadmin/application/origcms/internal/svc-media/biz"
@@ -46,7 +44,7 @@ func (s *UploadService) InitiateMultipartUpload(ctx context.Context, req *pb.Ini
 		req.ContentType,
 		req.Title,
 		req.Description,
-		req.CategoryId,
+		&req.CategoryId,
 		req.Tags,
 		userID,
 	)
@@ -139,7 +137,7 @@ func (s *UploadService) UploadFile(ctx context.Context, req *pb.UploadFileReques
 		req.ContentType,
 		req.Title,
 		req.Description,
-		req.CategoryId,
+		&req.CategoryId,
 		req.Tags,
 		userID,
 	)

@@ -1,0 +1,254 @@
+syntax = "proto3";
+
+package api.v1.services.upload;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "v1/types/media.proto";
+
+option go_package = "origadmin/application/origcms/api/gen/v1/upload;upload";
+option java_multiple_files = true;
+option java_outer_classname = "OrigCMSServiceUploadProto";
+option java_package = "com.origcms.api.v1.services.upload";
+option objc_class_prefix = "OrigCMSUpload";
+
+// UploadService provides multipart upload functionality for large files.
+// Supports chunked upload, resume from interruption, and progress tracking.
+service UploadService {
+  // InitiateMultipartUpload starts a new multipart upload session.
+  // Returns an upload_id that should be used for subsequent part uploads.
+  rpc InitiateMultipartUpload(InitiateMultipartUploadRequest) returns (InitiateMultipartUploadResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/uploads/multipart"
+      body: "*"
+    };
+  }
+
+  // UploadPart uploads a single part of a multipart upload.
+  // Each part is identified by its part_number (1-indexed).
+  // Returns an etag that should be saved for the complete operation.
+  rpc UploadPart(UploadPartRequest) returns (UploadPartResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/uploads/{upload_id}/parts/{part_number}"
+      body: "*"
+    };
+  }
+
+  // ListParts returns the list of parts that have been uploaded for a given upload_id.
+  // This is used for resuming interrupted uploads.
+  rpc ListParts(ListPartsRequest) returns (ListPartsResponse) {
+    option (google.api.http) = {get: "/api/v1/uploads/{upload_id}/parts"};
+  }
+
+  // CompleteMultipartUpload finalizes a multipart upload.
+  // All parts must be uploaded before calling this method.
+  // The server will merge all parts and create the final media record.
+  rpc CompleteMultipartUpload(CompleteMultipartUploadRequest) returns (CompleteMultipartUploadResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/uploads/{upload_id}/complete"
+      body: "*"
+    };
+  }
+
+  // AbortMultipartUpload cancels an in-progress multipart upload.
+  // All uploaded parts will be deleted.
+  rpc AbortMultipartUpload(AbortMultipartUploadRequest) returns (AbortMultipartUploadResponse) {
+    option (google.api.http) = {delete: "/api/v1/uploads/{upload_id}"};
+  }
+
+  // UploadFile uploads a small file in a single request.
+  // For files larger than 2MB, use multipart upload instead.
+  rpc UploadFile(UploadFileRequest) returns (UploadFileResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/uploads"
+      body: "*"
+    };
+  }
+
+  // GetUploadSession returns the current state of an upload session.
+  rpc GetUploadSession(GetUploadSessionRequest) returns (GetUploadSessionResponse) {
+    option (google.api.http) = {get: "/api/v1/uploads/{upload_id}"};
+  }
+
+  // ListUploadSessions returns all upload sessions for the current user.
+  rpc ListUploadSessions(ListUploadSessionsRequest) returns (ListUploadSessionsResponse) {
+    option (google.api.http) = {get: "/api/v1/uploads"};
+  }
+}
+
+// PartInfo represents information about an uploaded part.
+message PartInfo {
+  // Part number (1-indexed)
+  int32 part_number = 1 [json_name = "part_number"];
+  // ETag returned by the server after upload
+  string etag = 2 [json_name = "etag"];
+  // Size of the part in bytes
+  int64 size = 3 [json_name = "size"];
+}
+
+// InitiateMultipartUploadRequest is the request for starting a multipart upload.
+message InitiateMultipartUploadRequest {
+  // Original filename
+  string filename = 1 [json_name = "filename"];
+  // Total file size in bytes
+  int64 file_size = 2 [json_name = "file_size"];
+  // MIME type of the file
+  string content_type = 3 [json_name = "content_type"];
+  // Media title (optional)
+  string title = 4 [json_name = "title"];
+  // Media description (optional)
+  string description = 5 [json_name = "description"];
+  // Category ID (optional)
+  int64 category_id = 6 [json_name = "category_id"];
+  // Tags (optional)
+  repeated string tags = 7 [json_name = "tags"];
+}
+
+// InitiateMultipartUploadResponse is the response for starting a multipart upload.
+message InitiateMultipartUploadResponse {
+  // Unique upload session ID
+  string upload_id = 1 [json_name = "upload_id"];
+  // Total number of parts to upload
+  int32 total_parts = 2 [json_name = "total_parts"];
+  // Size of each chunk in bytes
+  int32 chunk_size = 3 [json_name = "chunk_size"];
+}
+
+// UploadPartRequest is the request for uploading a part.
+message UploadPartRequest {
+  // Upload session ID
+  string upload_id = 1 [json_name = "upload_id"];
+  // Part number (1-indexed)
+  int32 part_number = 2 [json_name = "part_number"];
+  // Part data
+  bytes data = 3 [json_name = "data"];
+}
+
+// UploadPartResponse is the response for uploading a part.
+message UploadPartResponse {
+  // ETag for this part (used in complete)
+  string etag = 1 [json_name = "etag"];
+  // Size of the uploaded part
+  int64 size = 2 [json_name = "size"];
+}
+
+// ListPartsRequest is the request for listing uploaded parts.
+message ListPartsRequest {
+  // Upload session ID
+  string upload_id = 1 [json_name = "upload_id"];
+}
+
+// ListPartsResponse is the response for listing uploaded parts.
+message ListPartsResponse {
+  // List of uploaded parts
+  repeated PartInfo parts = 1 [json_name = "parts"];
+  // Total number of parts expected
+  int32 total_parts = 2 [json_name = "total_parts"];
+  // Total bytes uploaded so far
+  int64 uploaded_size = 3 [json_name = "uploaded_size"];
+  // Total file size
+  int64 total_size = 4 [json_name = "total_size"];
+  // Upload session status
+  string status = 5 [json_name = "status"];
+}
+
+// CompleteMultipartUploadRequest is the request for completing a multipart upload.
+message CompleteMultipartUploadRequest {
+  // Upload session ID
+  string upload_id = 1 [json_name = "upload_id"];
+  // List of all parts with their ETags
+  repeated PartInfo parts = 2 [json_name = "parts"];
+  // SHA-256 hash of the entire file (optional, for integrity verification)
+  string sha256 = 3 [json_name = "sha256"];
+}
+
+// CompleteMultipartUploadResponse is the response for completing a multipart upload.
+message CompleteMultipartUploadResponse {
+  // Created media record
+  api.v1.services.types.Media media = 1 [json_name = "media"];
+}
+
+// AbortMultipartUploadRequest is the request for aborting a multipart upload.
+message AbortMultipartUploadRequest {
+  // Upload session ID
+  string upload_id = 1 [json_name = "upload_id"];
+}
+
+// AbortMultipartUploadResponse is the response for aborting a multipart upload.
+message AbortMultipartUploadResponse {
+  google.protobuf.Empty empty = 1 [json_name = "empty"];
+}
+
+// UploadFileRequest is the request for uploading a small file.
+message UploadFileRequest {
+  // File data
+  bytes data = 1 [json_name = "data"];
+  // Original filename
+  string filename = 2 [json_name = "filename"];
+  // MIME type of the file
+  string content_type = 3 [json_name = "content_type"];
+  // Media title (optional)
+  string title = 4 [json_name = "title"];
+  // Media description (optional)
+  string description = 5 [json_name = "description"];
+  // Category ID (optional)
+  int64 category_id = 6 [json_name = "category_id"];
+  // Tags (optional)
+  repeated string tags = 7 [json_name = "tags"];
+}
+
+// UploadFileResponse is the response for uploading a small file.
+message UploadFileResponse {
+  // Created media record
+  api.v1.services.types.Media media = 1 [json_name = "media"];
+}
+
+// GetUploadSessionRequest is the request for getting upload session info.
+message GetUploadSessionRequest {
+  // Upload session ID
+  string upload_id = 1 [json_name = "upload_id"];
+}
+
+// GetUploadSessionResponse is the response for getting upload session info.
+message GetUploadSessionResponse {
+  // Upload session ID
+  string upload_id = 1 [json_name = "upload_id"];
+  // Original filename
+  string filename = 2 [json_name = "filename"];
+  // Total file size
+  int64 file_size = 3 [json_name = "file_size"];
+  // Content type
+  string content_type = 4 [json_name = "content_type"];
+  // Total parts expected
+  int32 total_parts = 5 [json_name = "total_parts"];
+  // Chunk size
+  int32 chunk_size = 6 [json_name = "chunk_size"];
+  // Uploaded bytes so far
+  int64 uploaded_size = 7 [json_name = "uploaded_size"];
+  // Session status
+  string status = 8 [json_name = "status"];
+  // Uploaded parts
+  repeated PartInfo parts = 9 [json_name = "parts"];
+  // Created at
+  string created_at = 10 [json_name = "created_at"];
+  // Expires at
+  string expires_at = 11 [json_name = "expires_at"];
+}
+
+// ListUploadSessionsRequest is the request for listing user's upload sessions.
+message ListUploadSessionsRequest {
+  // Filter by status (optional)
+  optional string status = 1 [json_name = "status"];
+  // Page number
+  int32 page = 2 [json_name = "page"];
+  // Page size
+  int32 page_size = 3 [json_name = "page_size"];
+}
+
+// ListUploadSessionsResponse is the response for listing upload sessions.
+message ListUploadSessionsResponse {
+  // List of upload sessions
+  repeated GetUploadSessionResponse sessions = 1 [json_name = "sessions"];
+  // Total count
+  int32 total = 2 [json_name = "total"];
+}

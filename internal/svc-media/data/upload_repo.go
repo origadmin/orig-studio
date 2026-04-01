@@ -29,7 +29,7 @@ func NewUploadRepo(data *entity.Client, logger log.Logger) biz.UploadRepo {
 }
 
 func (r *uploadRepo) CreateSession(ctx context.Context, session *biz.UploadSession) error {
-	_, err := r.data.UploadSession.Create().
+	builder := r.data.UploadSession.Create().
 		SetUploadID(session.UploadID).
 		SetFilename(session.Filename).
 		SetFileSize(session.FileSize).
@@ -39,16 +39,22 @@ func (r *uploadRepo) CreateSession(ctx context.Context, session *biz.UploadSessi
 		SetUploadedSize(session.UploadedSize).
 		SetTitle(session.Title).
 		SetDescription(session.Description).
-		SetCategoryID(session.CategoryID).
 		SetTags(session.Tags).
-		SetUserID(session.UserID).
 		SetStatus(session.Status).
 		SetParts(session.Parts).
 		SetSha256(session.Sha256).
 		SetStoragePath(session.StoragePath).
 		SetTempDir(session.TempDir).
-		SetExpiresAt(session.ExpiresAt).
-		Save(ctx)
+		SetExpiresAt(session.ExpiresAt)
+
+	if session.CategoryID != nil {
+		builder.SetCategoryID(*session.CategoryID)
+	}
+	if session.UserID != nil {
+		builder.SetUserID(*session.UserID)
+	}
+
+	_, err := builder.Save(ctx)
 	return err
 }
 

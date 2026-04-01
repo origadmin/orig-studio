@@ -16,12 +16,17 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/sqlite3ent/sqlite3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	_ "github.com/sqlite3ent/sqlite3"
+
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/svc-media/biz"
+	"origadmin/application/origcms/internal/svc-media/data"
+	pb "origadmin/application/origcms/api/gen/v1/upload"
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 func TestUploadE2E(t *testing.T) {
@@ -30,7 +35,7 @@ func TestUploadE2E(t *testing.T) {
 
 	// Create required directories for the test
 	// The handler uses 'data/uploads' and 'data/uploads/.chunks'
-	require.NoError(t, os.MkdirAll("data/uploads/.chunks", 0755))
+	require.NoError(t, os.MkdirAll("data/uploads/.chunks", 0o755))
 	defer os.RemoveAll("data") // Cleanup after test
 
 	// Initialize In-memory SQLite
@@ -42,9 +47,16 @@ func TestUploadE2E(t *testing.T) {
 	// Initialize JWT Manager
 	jwtMgr := auth.NewManager("secret-key", 24*time.Hour)
 
+	// Setup svc-media dependencies
+	logger := log.NewStdLogger(os.Stderr)
+	uploadRepo := data.NewUploadRepo(client, logger)
+	mediaRepo := data.NewMediaRepo(client)
+	storage := data.NewLocalStorage("data/uploads", logger)
+	uploadUC := biz.NewUploadUseCase(uploadRepo, mediaRepo, storage, logger)
+
 	// Setup Router
 	router := gin.Default()
-	RegisterRoutes(router, client, jwtMgr)
+	RegisterRoutes(router, client, jwtMgr, uploadUC)
 
 	// 2. Register & Login to get token
 	username := "testuser"
@@ -69,13 +81,13 @@ func TestUploadE2E(t *testing.T) {
 	fileSize := int64(1024 * 1024 * 3) // 3MB, so 2 parts (2MB + 1MB)
 
 	// --- A. Initiate Multipart Upload ---
-	initReq := initiateUploadRequest{
+	initReq := pb.InitiateMultipartUploadRequest{
 		Filename:    filename,
 		FileSize:    fileSize,
 		ContentType: "video/mp4",
 		Title:       "My E2E Video",
 	}
-	body, _ := json.Marshal(initReq)
+	body, _ := json.Marshal(&initReq)
 	req, _ := http.NewRequest("POST", "/api/v1/uploads/multipart", bytes.NewBuffer(body))
 	req.Header.Set("Authorization", authHeader)
 	req.Header.Set("Content-Type", "application/json")
@@ -84,10 +96,10 @@ func TestUploadE2E(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	var initResp initiateUploadResponse
+	var initResp pb.InitiateMultipartUploadResponse
 	err = json.Unmarshal(w.Body.Bytes(), &initResp)
 	require.NoError(t, err)
-	uploadID := initResp.UploadID
+	uploadID := initResp.UploadId
 	assert.NotEmpty(t, uploadID)
 	assert.Equal(t, int32(2), initResp.TotalParts)
 
@@ -109,7 +121,7 @@ func TestUploadE2E(t *testing.T) {
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	var listResp listPartsResponse
+	var listResp pb.ListPartsResponse
 	err = json.Unmarshal(w.Body.Bytes(), &listResp)
 	require.NoError(t, err)
 	assert.Len(t, listResp.Parts, 1)
@@ -127,11 +139,11 @@ func TestUploadE2E(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// --- E. Complete Upload ---
-	completeReq := completeUploadRequest{
-		UploadID: uploadID,
+	completeReq := pb.CompleteMultipartUploadRequest{
+		UploadId: uploadID,
 		Sha256:   "dummy-sha256",
 	}
-	body, _ = json.Marshal(completeReq)
+	body, _ = json.Marshal(&completeReq)
 	req, _ = http.NewRequest("POST", fmt.Sprintf("/api/v1/uploads/%s/complete", uploadID), bytes.NewBuffer(body))
 	req.Header.Set("Authorization", authHeader)
 	req.Header.Set("Content-Type", "application/json")

@@ -31,6 +31,9 @@ import (
 	"origadmin/application/origcms/internal/server"
 	"origadmin/application/origcms/internal/svc-user/biz"
 	"origadmin/application/origcms/internal/svc-user/data"
+
+	mediabiz "origadmin/application/origcms/internal/svc-media/biz"
+	mediadata "origadmin/application/origcms/internal/svc-media/data"
 )
 
 var (
@@ -95,6 +98,12 @@ func main() {
 
 	authHandler := server.NewAuthHandler(userUC, jwtManager)
 
+	// svc-media initialization
+	uploadRepo := mediadata.NewUploadRepo(db, logger)
+	mediaRepo := mediadata.NewMediaRepo(db)
+	storage := mediadata.NewLocalStorage("./data/uploads", logger)
+	uploadUC := mediabiz.NewUploadUseCase(uploadRepo, mediaRepo, storage, logger)
+
 	// ── 3. Gin router ─────────────────────────────────────────────────────────
 	if getEnv("GIN_MODE", "debug") == "release" {
 		gin.SetMode(gin.ReleaseMode)
@@ -127,7 +136,7 @@ func main() {
 	r.Static("/uploads", "./data/uploads")
 
 	// Register all module routes (user, media, content, etc.)
-	server.RegisterRoutes(r, db, jwtManager)
+	server.RegisterRoutes(r, db, jwtManager, uploadUC)
 
 	// Auth routes (public) - these supplement the standard CRUD routes
 	authGroup := r.Group("/api/v1/auth")

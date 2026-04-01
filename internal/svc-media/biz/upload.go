@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -71,6 +72,7 @@ type UploadUseCase struct {
 	storage   Storage
 	chunkSize int
 	log       *log.Helper
+	mu        sync.Mutex
 }
 
 // NewUploadUseCase .
@@ -115,6 +117,9 @@ func (uc *UploadUseCase) InitiateMultipartUpload(ctx context.Context, filename s
 
 // UploadPart handles a single part upload.
 func (uc *UploadUseCase) UploadPart(ctx context.Context, uploadID string, partNumber int, data []byte) (string, error) {
+	uc.mu.Lock()
+	defer uc.mu.Unlock()
+
 	session, err := uc.repo.GetSession(ctx, uploadID)
 	if err != nil {
 		return "", err

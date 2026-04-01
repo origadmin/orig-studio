@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
@@ -7,6 +7,7 @@ package data
 
 import (
 	"context"
+	"fmt"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -82,7 +83,9 @@ func (r *mediaRepo) Create(
 	create := r.db.Media.Create().
 		SetTitle(in.Title).
 		SetURL(in.Url).
-		SetType(in.Type)
+		SetType(in.Type).
+		SetMimeType(in.MimeType).
+		SetSize(fmt.Sprintf("%d", in.Size))
 
 	if in.Description != "" {
 		create = create.SetDescription(in.Description)
@@ -113,7 +116,9 @@ func (r *mediaRepo) Update(
 	in *types.Media,
 ) (*types.Media, error) {
 	update := r.db.Media.UpdateOneID(int(in.Id)).
-		SetTitle(in.Title)
+		SetTitle(in.Title).
+		SetMimeType(in.MimeType).
+		SetSize(fmt.Sprintf("%d", in.Size))
 
 	if in.Description != "" {
 		update = update.SetDescription(in.Description)
@@ -174,6 +179,9 @@ func (r *mediaRepo) IncrementViewCount(ctx context.Context, id int64) (int64, er
 
 // convertMediaToProto converts entity.Media → proto types.Media.
 func convertMediaToProto(m *entity.Media) *types.Media {
+	var size int64
+	_, _ = fmt.Sscanf(m.Size, "%d", &size)
+
 	return &types.Media{
 		Id:          int64(m.ID),
 		Title:       m.Title,
@@ -182,6 +190,8 @@ func convertMediaToProto(m *entity.Media) *types.Media {
 		Url:         m.URL,
 		Thumbnail:   m.Thumbnail,
 		Duration:    int32(m.Duration),
+		Size:        size,
+		MimeType:    m.MimeType,
 		ViewCount:   m.ViewCount,
 		LikeCount:   m.LikeCount,
 		UserId:      int64(m.UserID),

@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.1
 // - protoc             (unknown)
-// source: media/media_service.proto
+// source: v1/media/media_service.proto
 
 package media
 
@@ -365,7 +365,7 @@ var MediaService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "media/media_service.proto",
+	Metadata: "v1/media/media_service.proto",
 }
 
 const (
@@ -623,7 +623,7 @@ var CategoryService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "media/media_service.proto",
+	Metadata: "v1/media/media_service.proto",
 }
 
 const (
@@ -881,7 +881,7 @@ var TagService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "media/media_service.proto",
+	Metadata: "v1/media/media_service.proto",
 }
 
 const (
@@ -1139,7 +1139,7 @@ var CommentService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "media/media_service.proto",
+	Metadata: "v1/media/media_service.proto",
 }
 
 const (
@@ -1321,7 +1321,7 @@ var LikeService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "media/media_service.proto",
+	Metadata: "v1/media/media_service.proto",
 }
 
 const (
@@ -1503,7 +1503,7 @@ var FavoriteService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "media/media_service.proto",
+	Metadata: "v1/media/media_service.proto",
 }
 
 const (
@@ -1837,5 +1837,5 @@ var PlaylistService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "media/media_service.proto",
+	Metadata: "v1/media/media_service.proto",
 }
