@@ -112,8 +112,7 @@ const HistoryPage = () => {
                 {items.map((item) => (
                     <Link
                         key={item.id}
-                        to="/v/$id"
-                        params={{id: String(item.id)}}
+                        to="/watch" search={{v: String(item.id)}}
                         className="group flex items-center gap-4 p-3 bg-white dark:bg-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                     >
                         {/* 缩略图 */}

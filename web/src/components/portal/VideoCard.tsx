@@ -12,7 +12,7 @@ const VideoCard = ({video}: { video: MediaItem }) => {
     return (
         <div
             className="group cursor-pointer rounded-[2rem] bg-white border border-gray-100 hover:border-blue-100 transition-all overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 duration-500 ease-out">
-            <Link to={`/v/${video.id}`} className="block relative aspect-video overflow-hidden">
+            <Link to="/watch" search={{v: String(video.id)}} className="block relative aspect-video overflow-hidden">
                 <img
                     src={video.thumbnail || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800'}
                     alt={video.title}
@@ -35,7 +35,7 @@ const VideoCard = ({video}: { video: MediaItem }) => {
 
             <div className="p-6 space-y-4">
                 <h3 className="font-black text-slate-900 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors text-lg tracking-tight">
-                    <Link to={`/v/${video.id}`}>{video.title}</Link>
+                    <Link to="/watch" search={{v: String(video.id)}}>{video.title}</Link>
                 </h3>
 
                 <div className="flex items-center space-x-4 border-t border-gray-50 pt-4">

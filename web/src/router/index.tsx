@@ -143,7 +143,8 @@ const aboutRoute = createRoute({
 
 const watchRoute = createRoute({
     getParentRoute: () => portalLayoutRoute,
-    path: '/v/$id',
+    path: '/watch',
+    validateSearch: (search: Record<string, unknown>) => search as { v?: string },
     component: () => <Lazy><WatchPage/></Lazy>,
 });
 

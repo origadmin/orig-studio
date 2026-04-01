@@ -1,202 +1,245 @@
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
- * 视频播放页面
+ * 视频播放页 - 对接真实数据
  */
 
-import React, {useState} from 'react';
-import {useParams, Link} from '@tanstack/react-router';
-import {Play, ThumbsUp, ThumbsDown, Share2, Flag, Eye, Calendar, Star} from 'lucide-react';
-import {useTranslation} from 'react-i18next';
+import React, {useState, useEffect} from 'react';
+import {useSearch, Link} from '@tanstack/react-router';
+import {
+    ThumbsUp, ThumbsDown, Share2, MessageCircle,
+    MoreHorizontal, UserPlus, Eye
+} from 'lucide-react';
 import {Button} from '@/components/ui/button';
-import {Badge} from '@/components/ui/badge';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
-import {formatDuration, formatViews, formatDate} from '@/lib/format';
-
-const mockVideo = {
-    id: 1,
-    title: '从零构建 Go 微服务',
-    description: '学习如何使用 Go 和 Kratos 框架构建生产级微服务。\n\n本教程涵盖：\n• Go 项目结构搭建\n• RESTful API 实现\n• 数据库集成\n• 认证与授权\n• 错误处理与日志\n• 部署策略',
-    thumbnail: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800',
-    duration: 3600,
-    view_count: 125400,
-    create_time: '2024-03-15',
-    user_id: 1,
-    author_name: 'Gopher 专家',
-    author_avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
-    category: '技术',
-    tags: ['Go', '微服务', '后端'],
-    likes: 8400,
-    dislikes: 120,
-};
-
-const mockRelatedVideos = [
-    {
-        id: 2,
-        title: 'React 18 高级模式与最佳实践',
-        thumbnail: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=300',
-        duration: 2400,
-        view_count: 89400,
-        author_name: 'React 大师'
-    },
-    {
-        id: 3,
-        title: 'Docker & Kubernetes 深度解析',
-        thumbnail: 'https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?auto=format&fit=crop&q=80&w=300',
-        duration: 5400,
-        view_count: 234500,
-        author_name: '运维专家'
-    },
-    {
-        id: 4,
-        title: 'TypeScript 高级类型大师课',
-        thumbnail: 'https://images.unsplash.com/photo-1516116216624-53e697fedbea?auto=format&fit=crop&q=80&w=300',
-        duration: 1800,
-        view_count: 67800,
-        author_name: 'TS 达人'
-    },
-    {
-        id: 5,
-        title: '系统设计面试完全指南',
-        thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=300',
-        duration: 7200,
-        view_count: 456000,
-        author_name: '面试教练'
-    },
-    {
-        id: 6,
-        title: 'Python 数据科学实战',
-        thumbnail: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&q=80&w=300',
-        duration: 4800,
-        view_count: 189000,
-        author_name: '数据科学家'
-    },
-];
+import {Badge} from '@/components/ui/badge';
+import {Card, CardContent} from '@/components/ui/card';
+import {Skeleton} from '@/components/ui/skeleton';
+import {formatViews, formatDate, formatDuration} from '@/lib/format';
+import {useTranslation} from 'react-i18next';
+import {mediaApi, type Media} from '@/lib/api/media';
 
 const WatchPage = () => {
-    const {id} = useParams({from: '/v/$id'});
-    const [video] = useState(mockVideo);
-    const [relatedVideos] = useState(mockRelatedVideos);
-    const [isLiked, setIsLiked] = useState(false);
-    const [isDisliked, setIsDisliked] = useState(false);
-    const [isFavorited, setIsFavorited] = useState(false);
-    const [likeCount, setLikeCount] = useState(mockVideo.likes);
+    const {t} = useTranslation();
+    const {v: id} = useSearch({strict: false});
+    const [media, setMedia] = useState<Media | null>(null);
+    const [recommendations, setRecommendations] = useState<Media[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleLike = () => {
-        if (isLiked) {
-            setIsLiked(false);
-            setLikeCount(likeCount - 1);
-        } else {
-            setIsLiked(true);
-            setLikeCount(likeCount + 1);
-            if (isDisliked) setIsDisliked(false);
-        }
-    };
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
 
-    const handleDislike = () => {
-        if (isDisliked) {
-            setIsDisliked(false);
-        } else {
-            setIsDisliked(true);
-            if (isLiked) {
-                setIsLiked(false);
-                setLikeCount(likeCount - 1);
+    useEffect(() => {
+        const loadData = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                if (!id) return;
+                // 1. 获取视频详情
+                const data = await mediaApi.get(id);
+                setMedia(data);
+
+                // 2. 获取推荐列表 (同分类)
+                const recRes = await mediaApi.list({
+                    page_size: 10,
+                    category_id: data.edges?.category?.id,
+                    state: 'active'
+                });
+                setRecommendations(recRes.list.filter(m => m.id !== Number(id)));
+            } catch (err) {
+                console.error("Failed to load video:", err);
+                setError(t('watch.failedToLoad'));
+            } finally {
+                setLoading(false);
             }
-        }
-    };
+        };
 
-    return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
-                {/* 播放器 */}
-                <div className="relative aspect-video bg-slate-900 rounded-2xl overflow-hidden group">
-                    <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover opacity-80"/>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <button
-                            className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform">
-                            <Play className="w-10 h-10 text-white ml-1" fill="currentColor"/>
-                        </button>
-                    </div>
-                    <div className="absolute bottom-4 right-4 bg-black/80 text-white text-sm px-3 py-1 rounded">
-                        {formatDuration(video.duration)}
+        if (id) loadData();
+    }, [id, t]);
+
+    if (loading) {
+        return (
+            <div className="flex flex-col lg:flex-row gap-6 animate-pulse">
+                <div className="flex-1 space-y-4">
+                    <Skeleton className="aspect-video w-full rounded-2xl"/>
+                    <Skeleton className="h-8 w-3/4"/>
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                            <Skeleton className="h-12 w-12 rounded-full"/>
+                            <div className="space-y-2">
+                                <Skeleton className="h-4 w-24"/>
+                                <Skeleton className="h-3 w-16"/>
+                            </div>
+                        </div>
+                        <Skeleton className="h-10 w-32 rounded-full"/>
                     </div>
                 </div>
+                <div className="lg:w-80 xl:w-96 space-y-4">
+                    {Array.from({length: 5}).map((_, i) => (
+                        <div key={i} className="flex gap-3">
+                            <Skeleton className="w-40 aspect-video rounded-lg shrink-0"/>
+                            <div className="flex-1 space-y-2 py-1">
+                                <Skeleton className="h-4 w-full"/>
+                                <Skeleton className="h-3 w-2/3"/>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
-                {/* 视频信息 */}
-                <div className="space-y-4">
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{video.title}</h1>
+    if (error || !media) {
+        return (
+            <div className="py-20 text-center space-y-4">
+                <div className="text-red-500 text-lg">{error || "Video not found"}</div>
+                <Link to="/">
+                    <Button variant="outline">{t('common.backToHome')}</Button>
+                </Link>
+            </div>
+        );
+    }
+
+    const getFullUrl = (path?: string) => {
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        const base = API_BASE_URL.replace(/\/$/, '');
+        const sep = path.startsWith('/') ? '' : '/';
+        return `${base}${sep}${path}`;
+    };
+
+    const videoUrl = getFullUrl(media.url);
+    const user = media.edges?.user?.[0];
+
+    return (
+        <div className="flex flex-col lg:flex-row gap-6">
+            {/* Main Content: Player & Details */}
+            <div className="flex-1 min-w-0">
+                {/* Player Container */}
+                <div className="bg-black rounded-2xl overflow-hidden aspect-video shadow-2xl relative group">
+                    <video
+                        key={videoUrl}
+                        src={videoUrl}
+                        controls
+                        autoPlay
+                        className="w-full h-full"
+                        poster={media.poster ? getFullUrl(media.poster) : (media.thumbnail ? getFullUrl(media.thumbnail) : undefined)}
+                    >
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+
+                {/* Video Info */}
+                <div className="mt-6 space-y-4">
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white line-clamp-2">
+                        {media.title}
+                    </h1>
 
                     <div
-                        className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
-                        <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-gray-400">
-                            <span className="flex items-center gap-1"><Eye
-                                className="w-4 h-4"/>{formatViews(video.view_count)} 次观看</span>
-                            <span className="flex items-center gap-1"><Calendar
-                                className="w-4 h-4"/>{formatDate(video.create_time)}</span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <Button variant={isLiked ? 'default' : 'outline'} size="sm" onClick={handleLike}
-                                    className={isLiked ? 'bg-blue-600' : ''}>
-                                <ThumbsUp className="w-4 h-4 mr-1"/>{formatViews(likeCount)}
-                            </Button>
-                            <Button variant={isDisliked ? 'default' : 'outline'} size="sm" onClick={handleDislike}
-                                    className={isDisliked ? 'bg-slate-600' : ''}>
-                                <ThumbsDown className="w-4 h-4"/>
-                            </Button>
-                            <Button variant={isFavorited ? 'default' : 'outline'} size="sm"
-                                    onClick={() => setIsFavorited(!isFavorited)}
-                                    className={isFavorited ? 'bg-rose-600' : ''}>
-                                <Star
-                                    className={`w-4 h-4 mr-1 ${isFavorited ? 'fill-current' : ''}`}/>{isFavorited ? '已收藏' : '收藏'}
-                            </Button>
-                            <Button variant="outline" size="sm"><Share2 className="w-4 h-4 mr-1"/>分享</Button>
-                            <Button variant="ghost" size="sm"><Flag className="w-4 h-4"/></Button>
-                        </div>
-                    </div>
-
-                    {/* 作者 */}
-                    <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-gray-800 rounded-xl">
-                        <Link to={`/u/${video.user_id}`} className="flex items-center gap-3">
-                            <Avatar className="w-12 h-12">
-                                <AvatarImage src={video.author_avatar}/>
-                                <AvatarFallback>{video.author_name.charAt(0)}</AvatarFallback>
-                            </Avatar>
+                        className="flex flex-wrap items-center justify-between gap-4 py-2 border-b dark:border-gray-800">
+                        <div className="flex items-center gap-4">
+                            <Link to="/u/$id" params={{id: String(media.user_id)}}>
+                                <Avatar className="h-12 w-12 ring-2 ring-gray-100 dark:ring-gray-800">
+                                    <AvatarImage src={user?.avatar}/>
+                                    <AvatarFallback>{user?.username?.[0] || 'U'}</AvatarFallback>
+                                </Avatar>
+                            </Link>
                             <div>
-                                <p className="font-semibold text-slate-900 dark:text-white">{video.author_name}</p>
-                                <p className="text-sm text-slate-500 dark:text-gray-400">12.5 万订阅者</p>
+                                <Link to="/u/$id" params={{id: String(media.user_id)}}
+                                      className="font-bold text-gray-900 dark:text-white hover:text-blue-600 transition-colors">
+                                    {user?.nickname || user?.username || 'Unknown Gopher'}
+                                </Link>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">1.2M {t('watch.subscribers')}</p>
                             </div>
-                        </Link>
-                        <Button className="bg-red-600 hover:bg-red-700">订阅</Button>
+                            <Button
+                                className="ml-4 rounded-full bg-gray-900 dark:bg-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200">
+                                {t('watch.subscribe')}
+                            </Button>
+                        </div>
+
+                        <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full p-1">
+                            <Button variant="ghost"
+                                    className="rounded-l-full gap-2 px-4 hover:bg-gray-200 dark:hover:bg-gray-700">
+                                <ThumbsUp className="w-5 h-5"/>
+                                <span className="text-sm font-medium">{formatViews(media.like_count)}</span>
+                            </Button>
+                            <div className="w-[1px] h-6 bg-gray-300 dark:bg-gray-600"/>
+                            <Button variant="ghost"
+                                    className="rounded-r-full px-4 hover:bg-gray-200 dark:hover:bg-gray-700">
+                                <ThumbsDown className="w-5 h-5"/>
+                            </Button>
+                        </div>
                     </div>
 
-                    {/* 描述 */}
-                    <div className="p-4 bg-slate-50 dark:bg-gray-800 rounded-xl">
-                        <div className="flex flex-wrap gap-2 mb-4">
-                            {video.tags.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
-                        </div>
-                        <p className="text-sm text-slate-600 dark:text-gray-300 whitespace-pre-line">{video.description}</p>
-                    </div>
+                    {/* Meta & Description */}
+                    <Card
+                        className="bg-gray-100 dark:bg-gray-800 border-none shadow-none rounded-xl overflow-hidden mt-4">
+                        <CardContent className="p-4 space-y-2">
+                            <div className="flex gap-3 text-sm font-bold text-gray-900 dark:text-white">
+                                <span>{formatViews(media.view_count)} {t('watch.views')}</span>
+                                <span>{formatDate(media.created_at)}</span>
+                                {media.tags?.map(tag => (
+                                    <span key={tag}
+                                          className="text-blue-600 dark:text-blue-400 cursor-pointer hover:underline">#{tag}</span>
+                                ))}
+                            </div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                                {media.description || t('watch.noDescription')}
+                            </p>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
 
-            {/* 相关推荐 */}
-            <div className="space-y-4">
-                <h3 className="font-semibold text-slate-900 dark:text-white">{t('watch.nextUp')}</h3>
-                {relatedVideos.map(item => (
-                    <Link key={item.id} to="/v/$id" params={{id: String(item.id)}} className="flex gap-3 group">
-                        <div className="relative w-40 h-24 bg-slate-200 rounded-lg overflow-hidden shrink-0">
-                            <img src={item.thumbnail} alt={item.title}
-                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform"/>
-                            <div
-                                className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded">{formatDuration(item.duration)}</div>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                            <h4 className="text-sm font-medium text-slate-900 dark:text-white line-clamp-2 group-hover:text-blue-600 transition-colors">{item.title}</h4>
-                            <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">{item.author_name}</p>
-                            <p className="text-xs text-slate-400 dark:text-gray-500">{formatViews(item.view_count)} {t('common.views')}</p>
-                        </div>
-                    </Link>
-                ))}
+            {/* Sidebar: Recommendations */}
+            <div className="lg:w-80 xl:w-96 shrink-0 space-y-4">
+                <h3 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+                    {t('watch.nextVideos')}
+                </h3>
+
+                <div className="space-y-4">
+                    {recommendations.length === 0 ? (
+                        <p className="text-sm text-gray-500 py-4 italic">{t('watch.noRecommendations')}</p>
+                    ) : (
+                        recommendations.map((item) => {
+                            const recUser = item.edges?.user?.[0];
+                            const recThumb = item.thumbnail
+                                ? getFullUrl(item.thumbnail)
+                                : 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=400&h=225';
+
+                            return (
+                                <Link
+                                    key={item.id}
+                                    to="/watch"
+                                    search={{v: String(item.id)}}
+                                    className="flex gap-3 group"
+                                >
+                                    <div className="relative w-40 aspect-video rounded-lg overflow-hidden shrink-0">
+                                        <img
+                                            src={recThumb}
+                                            alt={item.title}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        />
+                                        <div
+                                            className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1 rounded">
+                                            {formatDuration(item.duration)}
+                                        </div>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-snug group-hover:text-blue-600 transition-colors">
+                                            {item.title}
+                                        </h4>
+                                        <p className="text-xs text-gray-500 mt-1">{recUser?.nickname || recUser?.username || 'Unknown'}</p>
+                                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                                            <span>{formatViews(item.view_count)} views</span>
+                                            <span>·</span>
+                                            <span>{formatDate(item.created_at)}</span>
+                                        </div>
+                                    </div>
+                                </Link>
+                            );
+                        })
+                    )}
+                </div>
             </div>
         </div>
     );

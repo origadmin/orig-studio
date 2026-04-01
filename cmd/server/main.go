@@ -133,7 +133,7 @@ func main() {
 	})
 
 	// Static files for media uploads
-	r.Static("/uploads", "./data/uploads")
+	r.Static("/uploads", "./data/uploads/uploads")
 
 	// Register all module routes (user, media, content, etc.)
 	server.RegisterRoutes(r, db, jwtManager, uploadUC)

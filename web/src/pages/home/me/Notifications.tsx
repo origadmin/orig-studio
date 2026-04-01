@@ -29,14 +29,14 @@ const mockNotifications: Notification[] = [
         title: "视频收到了新评论",
         message: "React 大师 评论了「从零构建 Go 微服务」",
         avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100",
-        is_read: false, created_at: "2024-03-15T14:30:00", link: "/v/1",
+        is_read: false, created_at: "2024-03-15T14:30:00", link: "/watch?v=1",
     },
     {
         id: "2", type: "like",
         title: "有人赞了你的视频",
         message: "运维专家 赞了「Docker 入门教程」",
         avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100",
-        is_read: false, created_at: "2024-03-15T12:15:00", link: "/v/3",
+        is_read: false, created_at: "2024-03-15T12:15:00", link: "/watch?v=3",
     },
     {
         id: "3", type: "subscribe",
@@ -50,14 +50,14 @@ const mockNotifications: Notification[] = [
         title: "你的视频正在流行",
         message: "「Go 微服务」播放量突破 10 万",
         avatar: null,
-        is_read: true, created_at: "2024-03-14T10:00:00", link: "/v/1",
+        is_read: true, created_at: "2024-03-14T10:00:00", link: "/watch?v=1",
     },
     {
         id: "5", type: "system",
         title: "系统通知",
         message: "你的视频已审核通过并发布",
         avatar: null,
-        is_read: true, created_at: "2024-03-13T09:00:00", link: "/v/1",
+        is_read: true, created_at: "2024-03-13T09:00:00", link: "/watch?v=1",
     },
 ];
 

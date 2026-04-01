@@ -87,7 +87,7 @@ const LatestPage = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                 {items.map((media) => (
-                    <Link key={media.id} to="/v/$id" params={{id: String(media.id)}} className="group">
+                    <Link key={media.id} to="/watch" search={{v: String(media.id)}} className="group">
                         <div
                             className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
                             <div className="relative aspect-video overflow-hidden">

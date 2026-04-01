@@ -59,7 +59,7 @@ const FeaturedPage = () => {
 
             {/* Hero cards */}
             {mockFeatured.slice(0, 2).map((item) => (
-                <Link key={item.id} to="/v/$id" params={{id: String(item.id)}} className="group block">
+                <Link key={item.id} to="/watch" search={{v: String(item.id)}} className="group block">
                     <div
                         className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-gray-900 to-gray-800 dark:from-gray-800 dark:to-gray-900">
                         <div className="flex flex-col md:flex-row">
@@ -105,7 +105,7 @@ const FeaturedPage = () => {
             {/* Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {mockFeatured.slice(2).map((item) => (
-                    <Link key={item.id} to="/v/$id" params={{id: String(item.id)}} className="group">
+                    <Link key={item.id} to="/watch" search={{v: String(item.id)}} className="group">
                         <div
                             className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
                             <div className="relative aspect-video overflow-hidden">
