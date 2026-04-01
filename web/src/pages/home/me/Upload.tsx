@@ -7,7 +7,7 @@ import React, {useState, useRef, useCallback, useEffect} from 'react';
 import {useNavigate} from '@tanstack/react-router';
 import {
     Upload, X, File, Image, Video, CheckCircle,
-    AlertCircle, Pause, Play, RotateCcw, Edit2, ChevronRight
+    AlertCircle, Pause, RotateCcw, Edit2
 } from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
@@ -21,6 +21,7 @@ import {
     startMultipartUpload,
     cancelUpload,
     shouldUseChunkedUpload,
+    updateUploadMetadataApi,
     type UploadTask,
     type UploadCallbacks,
     type UploadStatus,
@@ -65,19 +66,70 @@ const UploadPage = () => {
         );
     }, []);
 
+    // ── 物理上传逻辑 ──
+    const performUpload = useCallback(async (fileItem: UploadFileItem) => {
+        if (fileItem.status === 'success' || ['uploading', 'initiating', 'completing'].includes(fileItem.status)) return;
+
+        const getMetadata = () => ({
+            title: fileItem.title,
+            description: fileItem.description,
+            category_id: fileItem.category ? categories.indexOf(fileItem.category) + 1 : undefined,
+            tags: fileItem.tags,
+        });
+
+        // Small file: simple upload
+        if (!shouldUseChunkedUpload(fileItem.file.size)) {
+            updateFile(fileItem.id, {status: 'uploading', progress: 0});
+            try {
+                const media = await mediaApi.upload(fileItem.file, getMetadata(), (percent) => {
+                    updateFile(fileItem.id, {progress: percent});
+                });
+                updateFile(fileItem.id, {status: 'success', progress: 100});
+            } catch (err) {
+                const msg = err instanceof Error ? err.message : 'Upload failed';
+                updateFile(fileItem.id, {status: 'error', error: msg});
+            }
+            return;
+        }
+
+        // Large file: multipart upload
+        const callbacks: UploadCallbacks = {
+            onProgress: (taskId, progress, speed) => updateFile(taskId, {progress, speed}),
+            onStatusChange: (taskId, status) => updateFile(taskId, {status}),
+            onSuccess: (taskId) => updateFile(taskId, {status: 'success', progress: 100, completedAt: Date.now()}),
+            onError: (taskId, error) => updateFile(taskId, {status: 'error', error}),
+        };
+
+        const task: UploadTask = {
+            id: fileItem.id,
+            file: fileItem.file,
+            progress: fileItem.progress,
+            status: 'waiting',
+            parts: [],
+            uploadId: fileItem.uploadId,
+            title: fileItem.title,
+            description: fileItem.description,
+            categoryId: getMetadata().category_id,
+            tags: fileItem.tags,
+        };
+
+        startMultipartUpload(task, callbacks).catch(() => {
+        });
+    }, [updateFile]);
+
     const handleFiles = (newFiles: File[]) => {
         const validTypes = ['video/', 'image/', 'audio/'];
         const valid = newFiles.filter((f) =>
             validTypes.some((t) => f.type.startsWith(t)),
         );
 
-        const newItems = valid.map((f) => ({
+        const newItems: UploadFileItem[] = valid.map((f) => ({
             id: Math.random().toString(36).substr(2, 9),
             file: f,
             preview: f.type.startsWith('image/') ? URL.createObjectURL(f) : undefined,
             progress: 0,
-            status: 'waiting' as UploadStatus,
-            title: f.name.replace(/\.[^.]+$/, ''), // 默认标题为文件名
+            status: 'waiting',
+            title: f.name.replace(/\.[^.]+$/, ''),
             description: '',
             category: '',
             tags: [],
@@ -87,6 +139,9 @@ const UploadPage = () => {
         if (!selectedFileId && newItems.length > 0) {
             setSelectedFileId(newItems[0].id);
         }
+
+        // 选中即开始物理上传
+        newItems.forEach(item => performUpload(item));
     };
 
     const handleDrop = (e: React.DragEvent) => {
@@ -108,6 +163,29 @@ const UploadPage = () => {
 
     const selectedFile = files.find(f => f.id === selectedFileId);
 
+    // ── 异步元数据同步 ──
+    useEffect(() => {
+        if (!selectedFile || !selectedFile.uploadId || selectedFile.status === 'success') return;
+
+        const timer = setTimeout(() => {
+            const task: UploadTask = {
+                id: selectedFile.id,
+                file: selectedFile.file,
+                uploadId: selectedFile.uploadId,
+                title: selectedFile.title,
+                description: selectedFile.description,
+                categoryId: selectedFile.category ? categories.indexOf(selectedFile.category) + 1 : undefined,
+                tags: selectedFile.tags,
+                progress: selectedFile.progress,
+                status: selectedFile.status,
+                parts: []
+            };
+            updateUploadMetadataApi(task).catch(err => console.error("Sync metadata failed", err));
+        }, 1000); // 1秒防抖
+
+        return () => clearTimeout(timer);
+    }, [selectedFile?.title, selectedFile?.description, selectedFile?.category, selectedFile?.tags?.length]);
+
     const addTag = () => {
         if (!selectedFile) return;
         const val = tagInput.trim();
@@ -122,83 +200,12 @@ const UploadPage = () => {
         updateFile(selectedFile.id, {tags: selectedFile.tags.filter(t => t !== tag)});
     };
 
-    const handleUpload = async () => {
-        for (const fileItem of files) {
-            if (fileItem.status === 'success' || ['uploading', 'initiating', 'completing'].includes(fileItem.status)) continue;
-
-            const metadata = {
-                title: fileItem.title,
-                description: fileItem.description,
-                category_id: fileItem.category ? categories.indexOf(fileItem.category) + 1 : undefined,
-                tags: fileItem.tags,
-            };
-
-            // Small file: simple upload
-            if (!shouldUseChunkedUpload(fileItem.file.size)) {
-                updateFile(fileItem.id, {status: 'uploading', progress: 0});
-                try {
-                    await mediaApi.upload(fileItem.file, metadata, (percent) => {
-                        updateFile(fileItem.id, {progress: percent});
-                    });
-                    updateFile(fileItem.id, {status: 'success', progress: 100});
-                } catch (err) {
-                    const msg = err instanceof Error ? err.message : 'Upload failed';
-                    updateFile(fileItem.id, {status: 'error', error: msg});
-                }
-                continue;
-            }
-
-            // Large file: multipart upload
-            const callbacks: UploadCallbacks = {
-                onProgress: (taskId, progress, speed) => {
-                    updateFile(taskId, {progress, speed});
-                },
-                onStatusChange: (taskId, status) => {
-                    updateFile(taskId, {status});
-                },
-                onSuccess: (taskId) => {
-                    updateFile(taskId, {
-                        status: 'success',
-                        progress: 100,
-                        completedAt: Date.now(),
-                    });
-                },
-                onError: (taskId, error) => {
-                    updateFile(taskId, {status: 'error', error});
-                },
-            };
-
-            const task: UploadTask = {
-                id: fileItem.id,
-                file: fileItem.file,
-                progress: fileItem.progress,
-                status: 'waiting',
-                parts: [],
-                uploadId: fileItem.uploadId,
-                title: fileItem.title,
-                description: fileItem.description,
-                categoryId: metadata.category_id,
-                tags: fileItem.tags,
-            };
-
-            startMultipartUpload(task, callbacks).catch(() => {
-            });
-        }
-    };
-
-    const uploading = files.some(f => ['uploading', 'initiating', 'completing'].includes(f.status));
-    const allDone = files.length > 0 && files.every(f => f.status === 'success');
-    // 只要有一个文件没填标题且不是上传成功状态，就不能提交
-    const canSubmit = files.length > 0 && files.every(f => f.status === 'success' || !!f.title) && !uploading;
-
     const getStatusIcon = (status: UploadStatus) => {
         switch (status) {
             case 'success':
                 return <CheckCircle className="w-5 h-5 text-green-500"/>;
             case 'error':
                 return <AlertCircle className="w-5 h-5 text-red-500"/>;
-            case 'aborted':
-                return <RotateCcw className="w-5 h-5 text-orange-500"/>;
             case 'uploading':
                 return <div
                     className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"/>;
@@ -289,7 +296,7 @@ const UploadPage = () => {
                                         </div>
                                     ) : (
                                         <p className={`text-[10px] mt-1 ${fileItem.status === 'success' ? 'text-green-500' : fileItem.status === 'error' ? 'text-red-500' : 'text-gray-400'}`}>
-                                            {fileItem.status === 'waiting' && !fileItem.title ? '⚠️ 请填写标题' : t(`upload.status${fileItem.status.charAt(0).toUpperCase()}${fileItem.status.slice(1)}`)}
+                                            {t(`upload.status${fileItem.status.charAt(0).toUpperCase()}${fileItem.status.slice(1)}`)}
                                         </p>
                                     )}
                                 </div>
@@ -330,7 +337,7 @@ const UploadPage = () => {
                                         value={selectedFile.title}
                                         onChange={(e) => updateFile(selectedFile.id, {title: e.target.value})}
                                         placeholder="为媒体起一个吸引人的标题"
-                                        disabled={selectedFile?.status === 'success'}
+                                        disabled={selectedFile.status === 'success'}
                                     />
                                 </div>
 
@@ -342,6 +349,7 @@ const UploadPage = () => {
                                         onChange={(e) => updateFile(selectedFile.id, {description: e.target.value})}
                                         placeholder="介绍一下这个媒体的内容..."
                                         rows={3}
+                                        disabled={selectedFile.status === 'success'}
                                     />
                                 </div>
 
@@ -349,9 +357,10 @@ const UploadPage = () => {
                                     <label
                                         className="text-xs font-bold text-gray-500 uppercase">{t('upload.categoryLabel')}</label>
                                     <select
-                                        className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                                        className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm disabled:opacity-50"
                                         value={selectedFile.category}
                                         onChange={(e) => updateFile(selectedFile.id, {category: e.target.value})}
+                                        disabled={selectedFile.status === 'success'}
                                     >
                                         <option value="">选择分类</option>
                                         {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
@@ -367,8 +376,10 @@ const UploadPage = () => {
                                             onChange={(e) => setTagInput(e.target.value)}
                                             onKeyDown={(e) => e.key === 'Enter' && addTag()}
                                             placeholder="输入标签按回车"
+                                            disabled={selectedFile.status === 'success'}
                                         />
-                                        <Button variant="outline" size="sm" onClick={addTag}>添加</Button>
+                                        <Button variant="outline" size="sm" onClick={addTag}
+                                                disabled={selectedFile.status === 'success'}>添加</Button>
                                     </div>
                                     <div className="flex flex-wrap gap-1.5 mt-2">
                                         {selectedFile.tags.map(tag => (
@@ -383,16 +394,17 @@ const UploadPage = () => {
                                 </div>
 
                                 <div className="pt-4 border-t mt-6 flex flex-col gap-3">
-                                    <Button
-                                        className="w-full bg-blue-600 hover:bg-blue-700"
-                                        onClick={handleUpload}
-                                        disabled={!canSubmit || uploading}
-                                    >
-                                        {uploading ? '上传中...' : files.length > 1 ? '上传全部文件' : '开始上传'}
-                                    </Button>
+                                    {selectedFile.status === 'error' && (
+                                        <Button
+                                            className="w-full bg-orange-500 hover:bg-orange-600"
+                                            onClick={() => performUpload(selectedFile)}
+                                        >
+                                            重试上传
+                                        </Button>
+                                    )}
                                     <Button variant="ghost" className="w-full text-gray-400"
                                             onClick={() => navigate({to: '/'})}>
-                                        取消
+                                        返回首页
                                     </Button>
                                 </div>
                             </CardContent>

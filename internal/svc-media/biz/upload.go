@@ -53,7 +53,12 @@ type UploadRepo interface {
 	GetSession(ctx context.Context, uploadID string) (*UploadSession, error)
 	UpdateSession(ctx context.Context, session *UploadSession) error
 	DeleteSession(ctx context.Context, uploadID string) error
-	ListSessions(ctx context.Context, userID int64, status string, page, pageSize int) ([]*UploadSession, int, error)
+	ListSessions(
+		ctx context.Context,
+		userID int64,
+		status string,
+		page, pageSize int,
+	) ([]*UploadSession, int, error)
 	// DeleteExpiredSessions finds and deletes sessions that have expired.
 	// Returns the list of upload IDs deleted.
 	DeleteExpiredSessions(ctx context.Context, now time.Time) ([]string, error)
@@ -76,7 +81,12 @@ type UploadUseCase struct {
 }
 
 // NewUploadUseCase .
-func NewUploadUseCase(repo UploadRepo, mediaRepo MediaRepo, storage Storage, logger log.Logger) *UploadUseCase {
+func NewUploadUseCase(
+	repo UploadRepo,
+	mediaRepo MediaRepo,
+	storage Storage,
+	logger log.Logger,
+) *UploadUseCase {
 	return &UploadUseCase{
 		repo:      repo,
 		mediaRepo: mediaRepo,
@@ -87,7 +97,16 @@ func NewUploadUseCase(repo UploadRepo, mediaRepo MediaRepo, storage Storage, log
 }
 
 // InitiateMultipartUpload starts a new multipart upload.
-func (uc *UploadUseCase) InitiateMultipartUpload(ctx context.Context, filename string, fileSize int64, contentType string, title, description string, categoryID *int64, tags []string, userID *int64) (*UploadSession, error) {
+func (uc *UploadUseCase) InitiateMultipartUpload(
+	ctx context.Context,
+	filename string,
+	fileSize int64,
+	contentType string,
+	title, description string,
+	categoryID *int64,
+	tags []string,
+	userID *int64,
+) (*UploadSession, error) {
 	uploadID := uuid.New().String()
 	totalParts := int(math.Ceil(float64(fileSize) / float64(uc.chunkSize)))
 
@@ -116,7 +135,12 @@ func (uc *UploadUseCase) InitiateMultipartUpload(ctx context.Context, filename s
 }
 
 // UploadPart handles a single part upload.
-func (uc *UploadUseCase) UploadPart(ctx context.Context, uploadID string, partNumber int, data []byte) (string, error) {
+func (uc *UploadUseCase) UploadPart(
+	ctx context.Context,
+	uploadID string,
+	partNumber int,
+	data []byte,
+) (string, error) {
 	uc.mu.Lock()
 	defer uc.mu.Unlock()
 
@@ -145,15 +169,47 @@ func (uc *UploadUseCase) UploadPart(ctx context.Context, uploadID string, partNu
 	return etag, nil
 }
 
+// UpdateUploadMetadata updates the metadata of an ongoing upload session.
+func (uc *UploadUseCase) UpdateUploadMetadata(ctx context.Context, uploadID string, title, description string, categoryID *int64, tags []string) error {
+	uc.mu.Lock()
+	defer uc.mu.Unlock()
+
+	session, err := uc.repo.GetSession(ctx, uploadID)
+	if err != nil {
+		return err
+	}
+
+	if session.Status == StatusCompleted || session.Status == StatusAborted {
+		return fmt.Errorf("cannot update metadata for %s upload session", session.Status)
+	}
+
+	if title != "" {
+		session.Title = title
+	}
+	session.Description = description
+	session.CategoryID = categoryID
+	session.Tags = tags
+
+	return uc.repo.UpdateSession(ctx, session)
+}
+
 // CompleteMultipartUpload finalizes the upload and merges all parts.
-func (uc *UploadUseCase) CompleteMultipartUpload(ctx context.Context, uploadID string, sha256 string) (*Media, error) {
+func (uc *UploadUseCase) CompleteMultipartUpload(
+	ctx context.Context,
+	uploadID string,
+	sha256 string,
+) (*Media, error) {
 	session, err := uc.repo.GetSession(ctx, uploadID)
 	if err != nil {
 		return nil, err
 	}
 
 	if len(session.Parts) < session.TotalParts {
-		return nil, fmt.Errorf("not all parts uploaded: %d/%d", len(session.Parts), session.TotalParts)
+		return nil, fmt.Errorf(
+			"not all parts uploaded: %d/%d",
+			len(session.Parts),
+			session.TotalParts,
+		)
 	}
 
 	// Define final path (should be configurable)
@@ -211,7 +267,12 @@ func (uc *UploadUseCase) GetSession(ctx context.Context, uploadID string) (*Uplo
 	return uc.repo.GetSession(ctx, uploadID)
 }
 
-func (uc *UploadUseCase) ListSessions(ctx context.Context, userID int64, status string, page, pageSize int) ([]*UploadSession, int, error) {
+func (uc *UploadUseCase) ListSessions(
+	ctx context.Context,
+	userID int64,
+	status string,
+	page, pageSize int,
+) ([]*UploadSession, int, error) {
 	return uc.repo.ListSessions(ctx, userID, status, page, pageSize)
 }
 

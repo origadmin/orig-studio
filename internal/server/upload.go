@@ -35,6 +35,9 @@ func RegisterUploadRoutes(group *gin.RouterGroup, uc *biz.UploadUseCase, jwtMgr 
 		// Complete multipart upload
 		uploads.POST("/:upload_id/complete", completeMultipartUpload(uc))
 
+		// Update upload metadata (can be called anytime during upload)
+		uploads.PATCH("/:upload_id/metadata", updateUploadMetadata(uc))
+
 		// Abort multipart upload
 		uploads.DELETE("/:upload_id", abortMultipartUpload(uc))
 
@@ -147,17 +150,60 @@ func completeMultipartUpload(uc *biz.UploadUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uploadID := c.Param("upload_id")
 		var req struct {
-			Sha256 string `json:"sha256"`
+			Sha256      string   `json:"sha256"`
+			Title       string   `json:"title"`
+			Description string   `json:"description"`
+			CategoryID  *int64   `json:"category_id"`
+			Tags        []string `json:"tags"`
 		}
-		_ = c.ShouldBindJSON(&req)
+		if err := c.ShouldBindJSON(&req); err == nil {
+			// Optional metadata update at completion
+			if req.Title != "" {
+				_ = uc.UpdateUploadMetadata(c.Request.Context(), uploadID, req.Title, req.Description, req.CategoryID, req.Tags)
+			}
+		}
 
 		media, err := uc.CompleteMultipartUpload(c.Request.Context(), uploadID, req.Sha256)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to complete upload: " + err.Error()})
+			c.JSON(
+				http.StatusInternalServerError,
+				gin.H{"error": "failed to complete upload: " + err.Error()},
+			)
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{"media": media})
+	}
+}
+
+func updateUploadMetadata(uc *biz.UploadUseCase) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		uploadID := c.Param("upload_id")
+		var req struct {
+			Title       string   `json:"title"`
+			Description string   `json:"description"`
+			CategoryID  *int64   `json:"category_id"`
+			Tags        []string `json:"tags"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request: " + err.Error()})
+			return
+		}
+
+		err := uc.UpdateUploadMetadata(
+			c.Request.Context(),
+			uploadID,
+			req.Title,
+			req.Description,
+			req.CategoryID,
+			req.Tags,
+		)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "metadata updated"})
 	}
 }
 
@@ -191,7 +237,13 @@ func listUploadSessions(uc *biz.UploadUseCase) gin.HandlerFunc {
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 		status := c.Query("status")
 
-		sessions, total, err := uc.ListSessions(c.Request.Context(), claims.UserID, status, page, pageSize)
+		sessions, total, err := uc.ListSessions(
+			c.Request.Context(),
+			claims.UserID,
+			status,
+			page,
+			pageSize,
+		)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

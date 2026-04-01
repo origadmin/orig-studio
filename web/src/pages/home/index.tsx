@@ -181,8 +181,9 @@ const HomePage = () => {
                                     <span>{formatDate(media.create_time)}</span>
                                 </div>
                                 <div className="flex flex-wrap gap-1 mt-2">
-                                    {media.tags?.slice(0, 2).map(tag => (
-                                        <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+                                    {media.tags?.slice(0, 2).map((tag, tagIdx) => (
+                                        <Badge key={`${tag}-${tagIdx}`} variant="secondary"
+                                               className="text-xs">{tag}</Badge>
                                     ))}
                                 </div>
                             </div>
