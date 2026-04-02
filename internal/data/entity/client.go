@@ -14,6 +14,8 @@ import (
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/encodeprofile"
+	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
@@ -43,6 +45,10 @@ type Client struct {
 	Channel *ChannelClient
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
+	// EncodeProfile is the client for interacting with the EncodeProfile builders.
+	EncodeProfile *EncodeProfileClient
+	// EncodingTask is the client for interacting with the EncodingTask builders.
+	EncodingTask *EncodingTaskClient
 	// Favorite is the client for interacting with the Favorite builders.
 	Favorite *FavoriteClient
 	// Like is the client for interacting with the Like builders.
@@ -79,6 +85,8 @@ func (c *Client) init() {
 	c.Category = NewCategoryClient(c.config)
 	c.Channel = NewChannelClient(c.config)
 	c.Comment = NewCommentClient(c.config)
+	c.EncodeProfile = NewEncodeProfileClient(c.config)
+	c.EncodingTask = NewEncodingTaskClient(c.config)
 	c.Favorite = NewFavoriteClient(c.config)
 	c.Like = NewLikeClient(c.config)
 	c.Media = NewMediaClient(c.config)
@@ -185,6 +193,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Category:      NewCategoryClient(cfg),
 		Channel:       NewChannelClient(cfg),
 		Comment:       NewCommentClient(cfg),
+		EncodeProfile: NewEncodeProfileClient(cfg),
+		EncodingTask:  NewEncodingTaskClient(cfg),
 		Favorite:      NewFavoriteClient(cfg),
 		Like:          NewLikeClient(cfg),
 		Media:         NewMediaClient(cfg),
@@ -218,6 +228,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Category:      NewCategoryClient(cfg),
 		Channel:       NewChannelClient(cfg),
 		Comment:       NewCommentClient(cfg),
+		EncodeProfile: NewEncodeProfileClient(cfg),
+		EncodingTask:  NewEncodingTaskClient(cfg),
 		Favorite:      NewFavoriteClient(cfg),
 		Like:          NewLikeClient(cfg),
 		Media:         NewMediaClient(cfg),
@@ -258,9 +270,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Category, c.Channel, c.Comment, c.Favorite, c.Like, c.Media, c.MediaCategory,
-		c.MediaPlaylist, c.MediaTag, c.Notification, c.Playlist, c.Tag,
-		c.UploadSession, c.User,
+		c.Category, c.Channel, c.Comment, c.EncodeProfile, c.EncodingTask, c.Favorite,
+		c.Like, c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaTag, c.Notification,
+		c.Playlist, c.Tag, c.UploadSession, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -270,9 +282,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Category, c.Channel, c.Comment, c.Favorite, c.Like, c.Media, c.MediaCategory,
-		c.MediaPlaylist, c.MediaTag, c.Notification, c.Playlist, c.Tag,
-		c.UploadSession, c.User,
+		c.Category, c.Channel, c.Comment, c.EncodeProfile, c.EncodingTask, c.Favorite,
+		c.Like, c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaTag, c.Notification,
+		c.Playlist, c.Tag, c.UploadSession, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -287,6 +299,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Channel.mutate(ctx, m)
 	case *CommentMutation:
 		return c.Comment.mutate(ctx, m)
+	case *EncodeProfileMutation:
+		return c.EncodeProfile.mutate(ctx, m)
+	case *EncodingTaskMutation:
+		return c.EncodingTask.mutate(ctx, m)
 	case *FavoriteMutation:
 		return c.Favorite.mutate(ctx, m)
 	case *LikeMutation:
@@ -857,6 +873,320 @@ func (c *CommentClient) mutate(ctx context.Context, m *CommentMutation) (Value, 
 	}
 }
 
+// EncodeProfileClient is a client for the EncodeProfile schema.
+type EncodeProfileClient struct {
+	config
+}
+
+// NewEncodeProfileClient returns a client for the EncodeProfile from the given config.
+func NewEncodeProfileClient(c config) *EncodeProfileClient {
+	return &EncodeProfileClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `encodeprofile.Hooks(f(g(h())))`.
+func (c *EncodeProfileClient) Use(hooks ...Hook) {
+	c.hooks.EncodeProfile = append(c.hooks.EncodeProfile, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `encodeprofile.Intercept(f(g(h())))`.
+func (c *EncodeProfileClient) Intercept(interceptors ...Interceptor) {
+	c.inters.EncodeProfile = append(c.inters.EncodeProfile, interceptors...)
+}
+
+// Create returns a builder for creating a EncodeProfile entity.
+func (c *EncodeProfileClient) Create() *EncodeProfileCreate {
+	mutation := newEncodeProfileMutation(c.config, OpCreate)
+	return &EncodeProfileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EncodeProfile entities.
+func (c *EncodeProfileClient) CreateBulk(builders ...*EncodeProfileCreate) *EncodeProfileCreateBulk {
+	return &EncodeProfileCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EncodeProfileClient) MapCreateBulk(slice any, setFunc func(*EncodeProfileCreate, int)) *EncodeProfileCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EncodeProfileCreateBulk{err: fmt.Errorf("calling to EncodeProfileClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EncodeProfileCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EncodeProfileCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EncodeProfile.
+func (c *EncodeProfileClient) Update() *EncodeProfileUpdate {
+	mutation := newEncodeProfileMutation(c.config, OpUpdate)
+	return &EncodeProfileUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EncodeProfileClient) UpdateOne(_m *EncodeProfile) *EncodeProfileUpdateOne {
+	mutation := newEncodeProfileMutation(c.config, OpUpdateOne, withEncodeProfile(_m))
+	return &EncodeProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EncodeProfileClient) UpdateOneID(id int) *EncodeProfileUpdateOne {
+	mutation := newEncodeProfileMutation(c.config, OpUpdateOne, withEncodeProfileID(id))
+	return &EncodeProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EncodeProfile.
+func (c *EncodeProfileClient) Delete() *EncodeProfileDelete {
+	mutation := newEncodeProfileMutation(c.config, OpDelete)
+	return &EncodeProfileDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EncodeProfileClient) DeleteOne(_m *EncodeProfile) *EncodeProfileDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EncodeProfileClient) DeleteOneID(id int) *EncodeProfileDeleteOne {
+	builder := c.Delete().Where(encodeprofile.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EncodeProfileDeleteOne{builder}
+}
+
+// Query returns a query builder for EncodeProfile.
+func (c *EncodeProfileClient) Query() *EncodeProfileQuery {
+	return &EncodeProfileQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEncodeProfile},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a EncodeProfile entity by its id.
+func (c *EncodeProfileClient) Get(ctx context.Context, id int) (*EncodeProfile, error) {
+	return c.Query().Where(encodeprofile.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EncodeProfileClient) GetX(ctx context.Context, id int) *EncodeProfile {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTasks queries the tasks edge of a EncodeProfile.
+func (c *EncodeProfileClient) QueryTasks(_m *EncodeProfile) *EncodingTaskQuery {
+	query := (&EncodingTaskClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(encodeprofile.Table, encodeprofile.FieldID, id),
+			sqlgraph.To(encodingtask.Table, encodingtask.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, encodeprofile.TasksTable, encodeprofile.TasksColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EncodeProfileClient) Hooks() []Hook {
+	return c.hooks.EncodeProfile
+}
+
+// Interceptors returns the client interceptors.
+func (c *EncodeProfileClient) Interceptors() []Interceptor {
+	return c.inters.EncodeProfile
+}
+
+func (c *EncodeProfileClient) mutate(ctx context.Context, m *EncodeProfileMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EncodeProfileCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EncodeProfileUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EncodeProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EncodeProfileDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entity: unknown EncodeProfile mutation op: %q", m.Op())
+	}
+}
+
+// EncodingTaskClient is a client for the EncodingTask schema.
+type EncodingTaskClient struct {
+	config
+}
+
+// NewEncodingTaskClient returns a client for the EncodingTask from the given config.
+func NewEncodingTaskClient(c config) *EncodingTaskClient {
+	return &EncodingTaskClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `encodingtask.Hooks(f(g(h())))`.
+func (c *EncodingTaskClient) Use(hooks ...Hook) {
+	c.hooks.EncodingTask = append(c.hooks.EncodingTask, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `encodingtask.Intercept(f(g(h())))`.
+func (c *EncodingTaskClient) Intercept(interceptors ...Interceptor) {
+	c.inters.EncodingTask = append(c.inters.EncodingTask, interceptors...)
+}
+
+// Create returns a builder for creating a EncodingTask entity.
+func (c *EncodingTaskClient) Create() *EncodingTaskCreate {
+	mutation := newEncodingTaskMutation(c.config, OpCreate)
+	return &EncodingTaskCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EncodingTask entities.
+func (c *EncodingTaskClient) CreateBulk(builders ...*EncodingTaskCreate) *EncodingTaskCreateBulk {
+	return &EncodingTaskCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EncodingTaskClient) MapCreateBulk(slice any, setFunc func(*EncodingTaskCreate, int)) *EncodingTaskCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EncodingTaskCreateBulk{err: fmt.Errorf("calling to EncodingTaskClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EncodingTaskCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EncodingTaskCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EncodingTask.
+func (c *EncodingTaskClient) Update() *EncodingTaskUpdate {
+	mutation := newEncodingTaskMutation(c.config, OpUpdate)
+	return &EncodingTaskUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EncodingTaskClient) UpdateOne(_m *EncodingTask) *EncodingTaskUpdateOne {
+	mutation := newEncodingTaskMutation(c.config, OpUpdateOne, withEncodingTask(_m))
+	return &EncodingTaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EncodingTaskClient) UpdateOneID(id int) *EncodingTaskUpdateOne {
+	mutation := newEncodingTaskMutation(c.config, OpUpdateOne, withEncodingTaskID(id))
+	return &EncodingTaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EncodingTask.
+func (c *EncodingTaskClient) Delete() *EncodingTaskDelete {
+	mutation := newEncodingTaskMutation(c.config, OpDelete)
+	return &EncodingTaskDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EncodingTaskClient) DeleteOne(_m *EncodingTask) *EncodingTaskDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EncodingTaskClient) DeleteOneID(id int) *EncodingTaskDeleteOne {
+	builder := c.Delete().Where(encodingtask.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EncodingTaskDeleteOne{builder}
+}
+
+// Query returns a query builder for EncodingTask.
+func (c *EncodingTaskClient) Query() *EncodingTaskQuery {
+	return &EncodingTaskQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEncodingTask},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a EncodingTask entity by its id.
+func (c *EncodingTaskClient) Get(ctx context.Context, id int) (*EncodingTask, error) {
+	return c.Query().Where(encodingtask.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EncodingTaskClient) GetX(ctx context.Context, id int) *EncodingTask {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryMedia queries the media edge of a EncodingTask.
+func (c *EncodingTaskClient) QueryMedia(_m *EncodingTask) *MediaQuery {
+	query := (&MediaClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(encodingtask.Table, encodingtask.FieldID, id),
+			sqlgraph.To(media.Table, media.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, encodingtask.MediaTable, encodingtask.MediaColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryProfile queries the profile edge of a EncodingTask.
+func (c *EncodingTaskClient) QueryProfile(_m *EncodingTask) *EncodeProfileQuery {
+	query := (&EncodeProfileClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(encodingtask.Table, encodingtask.FieldID, id),
+			sqlgraph.To(encodeprofile.Table, encodeprofile.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, encodingtask.ProfileTable, encodingtask.ProfileColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EncodingTaskClient) Hooks() []Hook {
+	return c.hooks.EncodingTask
+}
+
+// Interceptors returns the client interceptors.
+func (c *EncodingTaskClient) Interceptors() []Interceptor {
+	return c.inters.EncodingTask
+}
+
+func (c *EncodingTaskClient) mutate(ctx context.Context, m *EncodingTaskMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EncodingTaskCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EncodingTaskUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EncodingTaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EncodingTaskDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entity: unknown EncodingTask mutation op: %q", m.Op())
+	}
+}
+
 // FavoriteClient is a client for the Favorite schema.
 type FavoriteClient struct {
 	config
@@ -1416,6 +1746,22 @@ func (c *MediaClient) QueryLikes(_m *Media) *LikeQuery {
 			sqlgraph.From(media.Table, media.FieldID, id),
 			sqlgraph.To(like.Table, like.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, media.LikesTable, media.LikesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTasks queries the tasks edge of a Media.
+func (c *MediaClient) QueryTasks(_m *Media) *EncodingTaskQuery {
+	query := (&EncodingTaskClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(media.Table, media.FieldID, id),
+			sqlgraph.To(encodingtask.Table, encodingtask.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, media.TasksTable, media.TasksColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -2803,11 +3149,13 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Category, Channel, Comment, Favorite, Like, Media, MediaCategory, MediaPlaylist,
-		MediaTag, Notification, Playlist, Tag, UploadSession, User []ent.Hook
+		Category, Channel, Comment, EncodeProfile, EncodingTask, Favorite, Like, Media,
+		MediaCategory, MediaPlaylist, MediaTag, Notification, Playlist, Tag,
+		UploadSession, User []ent.Hook
 	}
 	inters struct {
-		Category, Channel, Comment, Favorite, Like, Media, MediaCategory, MediaPlaylist,
-		MediaTag, Notification, Playlist, Tag, UploadSession, User []ent.Interceptor
+		Category, Channel, Comment, EncodeProfile, EncodingTask, Favorite, Like, Media,
+		MediaCategory, MediaPlaylist, MediaTag, Notification, Playlist, Tag,
+		UploadSession, User []ent.Interceptor
 	}
 )

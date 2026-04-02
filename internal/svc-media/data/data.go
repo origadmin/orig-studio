@@ -22,6 +22,8 @@ var ProviderSet = wire.NewSet(
 	NewEntClient,
 	NewMediaRepo,
 	NewUploadRepo,
+	NewEncodeProfileRepo,
+	NewEncodingTaskRepo,
 	NewLocalStorage,
 )
 

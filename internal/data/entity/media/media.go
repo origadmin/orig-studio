@@ -100,6 +100,8 @@ const (
 	EdgeFavorites = "favorites"
 	// EdgeLikes holds the string denoting the likes edge name in mutations.
 	EdgeLikes = "likes"
+	// EdgeTasks holds the string denoting the tasks edge name in mutations.
+	EdgeTasks = "tasks"
 	// Table holds the table name of the media in the database.
 	Table = "media"
 	// UserTable is the table that holds the user relation/edge.
@@ -154,6 +156,13 @@ const (
 	LikesInverseTable = "files_like"
 	// LikesColumn is the table column denoting the likes relation/edge.
 	LikesColumn = "media_likes"
+	// TasksTable is the table that holds the tasks relation/edge.
+	TasksTable = "encoding_tasks"
+	// TasksInverseTable is the table name for the EncodingTask entity.
+	// It exists in this package in order to avoid circular dependency with the "encodingtask" package.
+	TasksInverseTable = "encoding_tasks"
+	// TasksColumn is the table column denoting the tasks relation/edge.
+	TasksColumn = "media_id"
 )
 
 // Columns holds all SQL columns for media fields.
@@ -577,6 +586,20 @@ func ByLikes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLikesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByTasksCount orders the results by tasks count.
+func ByTasksCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTasksStep(), opts...)
+	}
+}
+
+// ByTasks orders the results by tasks terms.
+func ByTasks(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTasksStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -631,5 +654,12 @@ func newLikesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LikesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LikesTable, LikesColumn),
+	)
+}
+func newTasksStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TasksInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TasksTable, TasksColumn),
 	)
 }

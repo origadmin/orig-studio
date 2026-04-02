@@ -120,6 +120,9 @@ func NewHTTPServer(app *runtime.App, cfg *httpv1.Server, mediaSvc *service.Media
 		_, _ = w.Write([]byte(`{"status":"ok","service":"svc-media"}`))
 	}))
 
+	// Register SSE endpoint
+	srv.Handle("/api/v1/medias/transcoding/events", stdhttp.HandlerFunc(mediaSvc.SSEHandler))
+
 	// media.RegisterMediaServiceHTTPServer(srv, mediaSvc) // Not available without http annotations in proto
 	_ = mediaSvc
 

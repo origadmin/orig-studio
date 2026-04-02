@@ -88,5 +88,6 @@ func (Media) Edges() []ent.Edge {
 		edge.To("tags_rel", MediaTag.Type),
 		edge.To("favorites", Favorite.Type),
 		edge.To("likes", Like.Type),
+		edge.To("tasks", EncodingTask.Type),
 	}
 }

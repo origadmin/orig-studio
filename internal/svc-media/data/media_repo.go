@@ -145,6 +145,12 @@ func (r *mediaRepo) Update(
 	if in.Thumbnail != "" {
 		update = update.SetThumbnail(in.Thumbnail)
 	}
+	if in.HlsFile != "" {
+		update = update.SetHlsFile(in.HlsFile)
+	}
+	if in.EncodingStatus != "" {
+		update = update.SetEncodingStatus(in.EncodingStatus)
+	}
 	if in.Duration > 0 {
 		update = update.SetDuration(int(in.Duration))
 	}
@@ -209,19 +215,21 @@ func convertMediaToProto(m *entity.Media) *types.Media {
 	_, _ = fmt.Sscanf(m.Size, "%d", &size)
 
 	return &types.Media{
-		Id:          int64(m.ID),
-		Title:       m.Title,
-		Description: m.Description,
-		Type:        m.Type,
-		Url:         m.URL,
-		Thumbnail:   m.Thumbnail,
-		Duration:    int32(m.Duration),
-		Size:        size,
-		MimeType:    m.MimeType,
-		ViewCount:   m.ViewCount,
-		LikeCount:   m.LikeCount,
-		UserId:      int64(m.UserID),
-		CreateTime:  timestamppb.New(m.CreatedAt),
+		Id:             int64(m.ID),
+		Title:          m.Title,
+		Description:    m.Description,
+		Type:           m.Type,
+		Url:            m.URL,
+		Thumbnail:      m.Thumbnail,
+		HlsFile:        m.HlsFile,
+		EncodingStatus: m.EncodingStatus,
+		Duration:       int32(m.Duration),
+		Size:           size,
+		MimeType:       m.MimeType,
+		ViewCount:      m.ViewCount,
+		LikeCount:      m.LikeCount,
+		UserId:         int64(m.UserID),
+		CreateTime:     timestamppb.New(m.CreatedAt),
 	}
 }
 

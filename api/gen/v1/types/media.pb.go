@@ -74,9 +74,13 @@ type Media struct {
 	// media.field.category_id
 	CategoryId int64 `protobuf:"varint,24,opt,name=category_id,proto3" json:"category_id,omitempty"`
 	// media.field.tags
-	Tags          []string `protobuf:"bytes,25,rep,name=tags,proto3" json:"tags,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Tags []string `protobuf:"bytes,25,rep,name=tags,proto3" json:"tags,omitempty"`
+	// media.field.hls_file
+	HlsFile string `protobuf:"bytes,26,opt,name=hls_file,proto3" json:"hls_file,omitempty"`
+	// media.field.encoding_status
+	EncodingStatus string `protobuf:"bytes,27,opt,name=encoding_status,proto3" json:"encoding_status,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *Media) Reset() {
@@ -284,6 +288,230 @@ func (x *Media) GetTags() []string {
 	return nil
 }
 
+func (x *Media) GetHlsFile() string {
+	if x != nil {
+		return x.HlsFile
+	}
+	return ""
+}
+
+func (x *Media) GetEncodingStatus() string {
+	if x != nil {
+		return x.EncodingStatus
+	}
+	return ""
+}
+
+// EncodeProfile is the model entity for EncodeProfile.
+type EncodeProfile struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Extension     string                 `protobuf:"bytes,4,opt,name=extension,proto3" json:"extension,omitempty"`
+	Resolution    string                 `protobuf:"bytes,5,opt,name=resolution,proto3" json:"resolution,omitempty"`
+	VideoCodec    string                 `protobuf:"bytes,6,opt,name=video_codec,proto3" json:"video_codec,omitempty"`
+	AudioCodec    string                 `protobuf:"bytes,7,opt,name=audio_codec,proto3" json:"audio_codec,omitempty"`
+	IsActive      bool                   `protobuf:"varint,8,opt,name=is_active,proto3" json:"is_active,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EncodeProfile) Reset() {
+	*x = EncodeProfile{}
+	mi := &file_v1_types_media_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EncodeProfile) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EncodeProfile) ProtoMessage() {}
+
+func (x *EncodeProfile) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_types_media_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EncodeProfile.ProtoReflect.Descriptor instead.
+func (*EncodeProfile) Descriptor() ([]byte, []int) {
+	return file_v1_types_media_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *EncodeProfile) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *EncodeProfile) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *EncodeProfile) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *EncodeProfile) GetExtension() string {
+	if x != nil {
+		return x.Extension
+	}
+	return ""
+}
+
+func (x *EncodeProfile) GetResolution() string {
+	if x != nil {
+		return x.Resolution
+	}
+	return ""
+}
+
+func (x *EncodeProfile) GetVideoCodec() string {
+	if x != nil {
+		return x.VideoCodec
+	}
+	return ""
+}
+
+func (x *EncodeProfile) GetAudioCodec() string {
+	if x != nil {
+		return x.AudioCodec
+	}
+	return ""
+}
+
+func (x *EncodeProfile) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
+}
+
+// EncodingTask is the model entity for EncodingTask.
+type EncodingTask struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	MediaId       int64                  `protobuf:"varint,2,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	ProfileId     int32                  `protobuf:"varint,3,opt,name=profile_id,proto3" json:"profile_id,omitempty"`
+	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
+	Progress      int32                  `protobuf:"varint,5,opt,name=progress,proto3" json:"progress,omitempty"`
+	OutputPath    string                 `protobuf:"bytes,6,opt,name=output_path,proto3" json:"output_path,omitempty"`
+	ErrorMessage  string                 `protobuf:"bytes,7,opt,name=error_message,proto3" json:"error_message,omitempty"`
+	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=update_time,proto3" json:"update_time,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EncodingTask) Reset() {
+	*x = EncodingTask{}
+	mi := &file_v1_types_media_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EncodingTask) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EncodingTask) ProtoMessage() {}
+
+func (x *EncodingTask) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_types_media_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EncodingTask.ProtoReflect.Descriptor instead.
+func (*EncodingTask) Descriptor() ([]byte, []int) {
+	return file_v1_types_media_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *EncodingTask) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *EncodingTask) GetMediaId() int64 {
+	if x != nil {
+		return x.MediaId
+	}
+	return 0
+}
+
+func (x *EncodingTask) GetProfileId() int32 {
+	if x != nil {
+		return x.ProfileId
+	}
+	return 0
+}
+
+func (x *EncodingTask) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *EncodingTask) GetProgress() int32 {
+	if x != nil {
+		return x.Progress
+	}
+	return 0
+}
+
+func (x *EncodingTask) GetOutputPath() string {
+	if x != nil {
+		return x.OutputPath
+	}
+	return ""
+}
+
+func (x *EncodingTask) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
+	}
+	return ""
+}
+
+func (x *EncodingTask) GetCreateTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreateTime
+	}
+	return nil
+}
+
+func (x *EncodingTask) GetUpdateTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdateTime
+	}
+	return nil
+}
+
 // Category is the model entity for Category.
 type Category struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -317,7 +545,7 @@ type Category struct {
 
 func (x *Category) Reset() {
 	*x = Category{}
-	mi := &file_v1_types_media_proto_msgTypes[1]
+	mi := &file_v1_types_media_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -329,7 +557,7 @@ func (x *Category) String() string {
 func (*Category) ProtoMessage() {}
 
 func (x *Category) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_types_media_proto_msgTypes[1]
+	mi := &file_v1_types_media_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -342,7 +570,7 @@ func (x *Category) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Category.ProtoReflect.Descriptor instead.
 func (*Category) Descriptor() ([]byte, []int) {
-	return file_v1_types_media_proto_rawDescGZIP(), []int{1}
+	return file_v1_types_media_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Category) GetId() int64 {
@@ -456,7 +684,7 @@ type Tag struct {
 
 func (x *Tag) Reset() {
 	*x = Tag{}
-	mi := &file_v1_types_media_proto_msgTypes[2]
+	mi := &file_v1_types_media_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -468,7 +696,7 @@ func (x *Tag) String() string {
 func (*Tag) ProtoMessage() {}
 
 func (x *Tag) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_types_media_proto_msgTypes[2]
+	mi := &file_v1_types_media_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -481,7 +709,7 @@ func (x *Tag) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Tag.ProtoReflect.Descriptor instead.
 func (*Tag) Descriptor() ([]byte, []int) {
-	return file_v1_types_media_proto_rawDescGZIP(), []int{2}
+	return file_v1_types_media_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Tag) GetId() int64 {
@@ -574,7 +802,7 @@ type Comment struct {
 
 func (x *Comment) Reset() {
 	*x = Comment{}
-	mi := &file_v1_types_media_proto_msgTypes[3]
+	mi := &file_v1_types_media_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -586,7 +814,7 @@ func (x *Comment) String() string {
 func (*Comment) ProtoMessage() {}
 
 func (x *Comment) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_types_media_proto_msgTypes[3]
+	mi := &file_v1_types_media_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -599,7 +827,7 @@ func (x *Comment) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Comment.ProtoReflect.Descriptor instead.
 func (*Comment) Descriptor() ([]byte, []int) {
-	return file_v1_types_media_proto_rawDescGZIP(), []int{3}
+	return file_v1_types_media_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *Comment) GetId() int64 {
@@ -684,7 +912,7 @@ type Like struct {
 
 func (x *Like) Reset() {
 	*x = Like{}
-	mi := &file_v1_types_media_proto_msgTypes[4]
+	mi := &file_v1_types_media_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -696,7 +924,7 @@ func (x *Like) String() string {
 func (*Like) ProtoMessage() {}
 
 func (x *Like) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_types_media_proto_msgTypes[4]
+	mi := &file_v1_types_media_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -709,7 +937,7 @@ func (x *Like) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Like.ProtoReflect.Descriptor instead.
 func (*Like) Descriptor() ([]byte, []int) {
-	return file_v1_types_media_proto_rawDescGZIP(), []int{4}
+	return file_v1_types_media_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *Like) GetId() int64 {
@@ -766,7 +994,7 @@ type Favorite struct {
 
 func (x *Favorite) Reset() {
 	*x = Favorite{}
-	mi := &file_v1_types_media_proto_msgTypes[5]
+	mi := &file_v1_types_media_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -778,7 +1006,7 @@ func (x *Favorite) String() string {
 func (*Favorite) ProtoMessage() {}
 
 func (x *Favorite) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_types_media_proto_msgTypes[5]
+	mi := &file_v1_types_media_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -791,7 +1019,7 @@ func (x *Favorite) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Favorite.ProtoReflect.Descriptor instead.
 func (*Favorite) Descriptor() ([]byte, []int) {
-	return file_v1_types_media_proto_rawDescGZIP(), []int{5}
+	return file_v1_types_media_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *Favorite) GetId() int64 {
@@ -858,7 +1086,7 @@ type Playlist struct {
 
 func (x *Playlist) Reset() {
 	*x = Playlist{}
-	mi := &file_v1_types_media_proto_msgTypes[6]
+	mi := &file_v1_types_media_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -870,7 +1098,7 @@ func (x *Playlist) String() string {
 func (*Playlist) ProtoMessage() {}
 
 func (x *Playlist) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_types_media_proto_msgTypes[6]
+	mi := &file_v1_types_media_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -883,7 +1111,7 @@ func (x *Playlist) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Playlist.ProtoReflect.Descriptor instead.
 func (*Playlist) Descriptor() ([]byte, []int) {
-	return file_v1_types_media_proto_rawDescGZIP(), []int{6}
+	return file_v1_types_media_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *Playlist) GetId() int64 {
@@ -960,7 +1188,7 @@ var File_v1_types_media_proto protoreflect.FileDescriptor
 
 const file_v1_types_media_proto_rawDesc = "" +
 	"\n" +
-	"\x14v1/types/media.proto\x12\x15api.v1.services.types\x1a\x1fgoogle/protobuf/timestamp.proto\"\x8b\x06\n" +
+	"\x14v1/types/media.proto\x12\x15api.v1.services.types\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd1\x06\n" +
 	"\x05Media\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
@@ -991,7 +1219,32 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\x0edownload_count\x18\x16 \x01(\x03R\x0edownload_count\x12\x18\n" +
 	"\auser_id\x18\x17 \x01(\x03R\auser_id\x12 \n" +
 	"\vcategory_id\x18\x18 \x01(\x03R\vcategory_id\x12\x12\n" +
-	"\x04tags\x18\x19 \x03(\tR\x04tags\"\xfe\x02\n" +
+	"\x04tags\x18\x19 \x03(\tR\x04tags\x12\x1a\n" +
+	"\bhls_file\x18\x1a \x01(\tR\bhls_file\x12(\n" +
+	"\x0fencoding_status\x18\x1b \x01(\tR\x0fencoding_status\"\xf5\x01\n" +
+	"\rEncodeProfile\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1c\n" +
+	"\textension\x18\x04 \x01(\tR\textension\x12\x1e\n" +
+	"\n" +
+	"resolution\x18\x05 \x01(\tR\n" +
+	"resolution\x12 \n" +
+	"\vvideo_codec\x18\x06 \x01(\tR\vvideo_codec\x12 \n" +
+	"\vaudio_codec\x18\a \x01(\tR\vaudio_codec\x12\x1c\n" +
+	"\tis_active\x18\b \x01(\bR\tis_active\"\xd2\x02\n" +
+	"\fEncodingTask\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x1a\n" +
+	"\bmedia_id\x18\x02 \x01(\x03R\bmedia_id\x12\x1e\n" +
+	"\n" +
+	"profile_id\x18\x03 \x01(\x05R\n" +
+	"profile_id\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\tR\x06status\x12\x1a\n" +
+	"\bprogress\x18\x05 \x01(\x05R\bprogress\x12 \n" +
+	"\voutput_path\x18\x06 \x01(\tR\voutput_path\x12$\n" +
+	"\rerror_message\x18\a \x01(\tR\rerror_message\x12<\n" +
+	"\vcreate_time\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
+	"\vupdate_time\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\"\xfe\x02\n" +
 	"\bCategory\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
@@ -1066,35 +1319,39 @@ func file_v1_types_media_proto_rawDescGZIP() []byte {
 	return file_v1_types_media_proto_rawDescData
 }
 
-var file_v1_types_media_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_v1_types_media_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_v1_types_media_proto_goTypes = []any{
 	(*Media)(nil),                 // 0: api.v1.services.types.Media
-	(*Category)(nil),              // 1: api.v1.services.types.Category
-	(*Tag)(nil),                   // 2: api.v1.services.types.Tag
-	(*Comment)(nil),               // 3: api.v1.services.types.Comment
-	(*Like)(nil),                  // 4: api.v1.services.types.Like
-	(*Favorite)(nil),              // 5: api.v1.services.types.Favorite
-	(*Playlist)(nil),              // 6: api.v1.services.types.Playlist
-	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
+	(*EncodeProfile)(nil),         // 1: api.v1.services.types.EncodeProfile
+	(*EncodingTask)(nil),          // 2: api.v1.services.types.EncodingTask
+	(*Category)(nil),              // 3: api.v1.services.types.Category
+	(*Tag)(nil),                   // 4: api.v1.services.types.Tag
+	(*Comment)(nil),               // 5: api.v1.services.types.Comment
+	(*Like)(nil),                  // 6: api.v1.services.types.Like
+	(*Favorite)(nil),              // 7: api.v1.services.types.Favorite
+	(*Playlist)(nil),              // 8: api.v1.services.types.Playlist
+	(*timestamppb.Timestamp)(nil), // 9: google.protobuf.Timestamp
 }
 var file_v1_types_media_proto_depIdxs = []int32{
-	7,  // 0: api.v1.services.types.Media.create_time:type_name -> google.protobuf.Timestamp
-	7,  // 1: api.v1.services.types.Media.update_time:type_name -> google.protobuf.Timestamp
-	7,  // 2: api.v1.services.types.Category.create_time:type_name -> google.protobuf.Timestamp
-	7,  // 3: api.v1.services.types.Category.update_time:type_name -> google.protobuf.Timestamp
-	7,  // 4: api.v1.services.types.Tag.create_time:type_name -> google.protobuf.Timestamp
-	7,  // 5: api.v1.services.types.Tag.update_time:type_name -> google.protobuf.Timestamp
-	7,  // 6: api.v1.services.types.Comment.create_time:type_name -> google.protobuf.Timestamp
-	7,  // 7: api.v1.services.types.Comment.update_time:type_name -> google.protobuf.Timestamp
-	7,  // 8: api.v1.services.types.Like.create_time:type_name -> google.protobuf.Timestamp
-	7,  // 9: api.v1.services.types.Favorite.create_time:type_name -> google.protobuf.Timestamp
-	7,  // 10: api.v1.services.types.Playlist.create_time:type_name -> google.protobuf.Timestamp
-	7,  // 11: api.v1.services.types.Playlist.update_time:type_name -> google.protobuf.Timestamp
-	12, // [12:12] is the sub-list for method output_type
-	12, // [12:12] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	9,  // 0: api.v1.services.types.Media.create_time:type_name -> google.protobuf.Timestamp
+	9,  // 1: api.v1.services.types.Media.update_time:type_name -> google.protobuf.Timestamp
+	9,  // 2: api.v1.services.types.EncodingTask.create_time:type_name -> google.protobuf.Timestamp
+	9,  // 3: api.v1.services.types.EncodingTask.update_time:type_name -> google.protobuf.Timestamp
+	9,  // 4: api.v1.services.types.Category.create_time:type_name -> google.protobuf.Timestamp
+	9,  // 5: api.v1.services.types.Category.update_time:type_name -> google.protobuf.Timestamp
+	9,  // 6: api.v1.services.types.Tag.create_time:type_name -> google.protobuf.Timestamp
+	9,  // 7: api.v1.services.types.Tag.update_time:type_name -> google.protobuf.Timestamp
+	9,  // 8: api.v1.services.types.Comment.create_time:type_name -> google.protobuf.Timestamp
+	9,  // 9: api.v1.services.types.Comment.update_time:type_name -> google.protobuf.Timestamp
+	9,  // 10: api.v1.services.types.Like.create_time:type_name -> google.protobuf.Timestamp
+	9,  // 11: api.v1.services.types.Favorite.create_time:type_name -> google.protobuf.Timestamp
+	9,  // 12: api.v1.services.types.Playlist.create_time:type_name -> google.protobuf.Timestamp
+	9,  // 13: api.v1.services.types.Playlist.update_time:type_name -> google.protobuf.Timestamp
+	14, // [14:14] is the sub-list for method output_type
+	14, // [14:14] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_v1_types_media_proto_init() }
@@ -1108,7 +1365,7 @@ func file_v1_types_media_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_types_media_proto_rawDesc), len(file_v1_types_media_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -62,6 +62,35 @@ message Media {
   int64 category_id = 24 [json_name = "category_id"];
   // media.field.tags
   repeated string tags = 25 [json_name = "tags"];
+  // media.field.hls_file
+  string hls_file = 26 [json_name = "hls_file"];
+  // media.field.encoding_status
+  string encoding_status = 27 [json_name = "encoding_status"];
+}
+
+// EncodeProfile is the model entity for EncodeProfile.
+message EncodeProfile {
+  int32 id = 1 [json_name = "id"];
+  string name = 2 [json_name = "name"];
+  string description = 3 [json_name = "description"];
+  string extension = 4 [json_name = "extension"];
+  string resolution = 5 [json_name = "resolution"];
+  string video_codec = 6 [json_name = "video_codec"];
+  string audio_codec = 7 [json_name = "audio_codec"];
+  bool is_active = 8 [json_name = "is_active"];
+}
+
+// EncodingTask is the model entity for EncodingTask.
+message EncodingTask {
+  int32 id = 1 [json_name = "id"];
+  int64 media_id = 2 [json_name = "media_id"];
+  int32 profile_id = 3 [json_name = "profile_id"];
+  string status = 4 [json_name = "status"];
+  int32 progress = 5 [json_name = "progress"];
+  string output_path = 6 [json_name = "output_path"];
+  string error_message = 7 [json_name = "error_message"];
+  google.protobuf.Timestamp create_time = 8 [json_name = "create_time"];
+  google.protobuf.Timestamp update_time = 9 [json_name = "update_time"];
 }
 
 // Category is the model entity for Category.

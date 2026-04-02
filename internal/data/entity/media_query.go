@@ -10,6 +10,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
@@ -40,6 +41,7 @@ type MediaQuery struct {
 	withTagsRel   *MediaTagQuery
 	withFavorites *FavoriteQuery
 	withLikes     *LikeQuery
+	withTasks     *EncodingTaskQuery
 	withFKs       bool
 	modifiers     []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -254,6 +256,28 @@ func (_q *MediaQuery) QueryLikes() *LikeQuery {
 	return query
 }
 
+// QueryTasks chains the current query on the "tasks" edge.
+func (_q *MediaQuery) QueryTasks() *EncodingTaskQuery {
+	query := (&EncodingTaskClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(media.Table, media.FieldID, selector),
+			sqlgraph.To(encodingtask.Table, encodingtask.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, media.TasksTable, media.TasksColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first Media entity from the query.
 // Returns a *NotFoundError when no Media was found.
 func (_q *MediaQuery) First(ctx context.Context) (*Media, error) {
@@ -454,6 +478,7 @@ func (_q *MediaQuery) Clone() *MediaQuery {
 		withTagsRel:   _q.withTagsRel.Clone(),
 		withFavorites: _q.withFavorites.Clone(),
 		withLikes:     _q.withLikes.Clone(),
+		withTasks:     _q.withTasks.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -549,6 +574,17 @@ func (_q *MediaQuery) WithLikes(opts ...func(*LikeQuery)) *MediaQuery {
 	return _q
 }
 
+// WithTasks tells the query-builder to eager-load the nodes that are connected to
+// the "tasks" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *MediaQuery) WithTasks(opts ...func(*EncodingTaskQuery)) *MediaQuery {
+	query := (&EncodingTaskClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withTasks = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -628,7 +664,7 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 		nodes       = []*Media{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [8]bool{
+		loadedTypes = [9]bool{
 			_q.withUser != nil,
 			_q.withCategory != nil,
 			_q.withComments != nil,
@@ -637,6 +673,7 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 			_q.withTagsRel != nil,
 			_q.withFavorites != nil,
 			_q.withLikes != nil,
+			_q.withTasks != nil,
 		}
 	)
 	if _q.withCategory != nil {
@@ -717,6 +754,13 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 		if err := _q.loadLikes(ctx, query, nodes,
 			func(n *Media) { n.Edges.Likes = []*Like{} },
 			func(n *Media, e *Like) { n.Edges.Likes = append(n.Edges.Likes, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withTasks; query != nil {
+		if err := _q.loadTasks(ctx, query, nodes,
+			func(n *Media) { n.Edges.Tasks = []*EncodingTask{} },
+			func(n *Media, e *EncodingTask) { n.Edges.Tasks = append(n.Edges.Tasks, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1025,6 +1069,36 @@ func (_q *MediaQuery) loadLikes(ctx context.Context, query *LikeQuery, nodes []*
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "media_likes" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *MediaQuery) loadTasks(ctx context.Context, query *EncodingTaskQuery, nodes []*Media, init func(*Media), assign func(*Media, *EncodingTask)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Media)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(encodingtask.FieldMediaID)
+	}
+	query.Where(predicate.EncodingTask(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(media.TasksColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.MediaID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "media_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

@@ -99,10 +99,15 @@ func main() {
 	authHandler := server.NewAuthHandler(userUC, jwtManager)
 
 	// svc-media initialization
-	uploadRepo := mediadata.NewUploadRepo(db, logger)
 	mediaRepo := mediadata.NewMediaRepo(db)
+	profileRepo := mediadata.NewEncodeProfileRepo(db)
+	taskRepo := mediadata.NewEncodingTaskRepo(db)
+
+	mediaUC := mediabiz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, logger)
+
+	uploadRepo := mediadata.NewUploadRepo(db, logger)
 	storage := mediadata.NewLocalStorage("./data/uploads", logger)
-	uploadUC := mediabiz.NewUploadUseCase(uploadRepo, mediaRepo, storage, logger)
+	uploadUC := mediabiz.NewUploadUseCase(uploadRepo, mediaRepo, profileRepo, taskRepo, mediaUC, storage, logger)
 
 	// ── 3. Gin router ─────────────────────────────────────────────────────────
 	if getEnv("GIN_MODE", "debug") == "release" {
@@ -135,6 +140,7 @@ func main() {
 	// Static files for media uploads
 	r.Static("/uploads", "./data/uploads/uploads")
 	r.Static("/thumbnails", "./data/uploads/thumbnails")
+	r.Static("/hls", "./data/uploads/hls")
 
 	// Register all module routes (user, media, content, etc.)
 	server.RegisterRoutes(r, db, jwtManager, uploadUC)

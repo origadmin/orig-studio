@@ -10,6 +10,8 @@ import (
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/encodeprofile"
+	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
@@ -161,6 +163,60 @@ func (f TraverseComment) Traverse(ctx context.Context, q entity.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *entity.CommentQuery", q)
+}
+
+// The EncodeProfileFunc type is an adapter to allow the use of ordinary function as a Querier.
+type EncodeProfileFunc func(context.Context, *entity.EncodeProfileQuery) (entity.Value, error)
+
+// Query calls f(ctx, q).
+func (f EncodeProfileFunc) Query(ctx context.Context, q entity.Query) (entity.Value, error) {
+	if q, ok := q.(*entity.EncodeProfileQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *entity.EncodeProfileQuery", q)
+}
+
+// The TraverseEncodeProfile type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseEncodeProfile func(context.Context, *entity.EncodeProfileQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseEncodeProfile) Intercept(next entity.Querier) entity.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseEncodeProfile) Traverse(ctx context.Context, q entity.Query) error {
+	if q, ok := q.(*entity.EncodeProfileQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *entity.EncodeProfileQuery", q)
+}
+
+// The EncodingTaskFunc type is an adapter to allow the use of ordinary function as a Querier.
+type EncodingTaskFunc func(context.Context, *entity.EncodingTaskQuery) (entity.Value, error)
+
+// Query calls f(ctx, q).
+func (f EncodingTaskFunc) Query(ctx context.Context, q entity.Query) (entity.Value, error) {
+	if q, ok := q.(*entity.EncodingTaskQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *entity.EncodingTaskQuery", q)
+}
+
+// The TraverseEncodingTask type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseEncodingTask func(context.Context, *entity.EncodingTaskQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseEncodingTask) Intercept(next entity.Querier) entity.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseEncodingTask) Traverse(ctx context.Context, q entity.Query) error {
+	if q, ok := q.(*entity.EncodingTaskQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *entity.EncodingTaskQuery", q)
 }
 
 // The FavoriteFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -469,6 +525,10 @@ func NewQuery(q entity.Query) (Query, error) {
 		return &query[*entity.ChannelQuery, predicate.Channel, channel.OrderOption]{typ: entity.TypeChannel, tq: q}, nil
 	case *entity.CommentQuery:
 		return &query[*entity.CommentQuery, predicate.Comment, comment.OrderOption]{typ: entity.TypeComment, tq: q}, nil
+	case *entity.EncodeProfileQuery:
+		return &query[*entity.EncodeProfileQuery, predicate.EncodeProfile, encodeprofile.OrderOption]{typ: entity.TypeEncodeProfile, tq: q}, nil
+	case *entity.EncodingTaskQuery:
+		return &query[*entity.EncodingTaskQuery, predicate.EncodingTask, encodingtask.OrderOption]{typ: entity.TypeEncodingTask, tq: q}, nil
 	case *entity.FavoriteQuery:
 		return &query[*entity.FavoriteQuery, predicate.Favorite, favorite.OrderOption]{typ: entity.TypeFavorite, tq: q}, nil
 	case *entity.LikeQuery:

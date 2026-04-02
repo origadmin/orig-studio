@@ -27,6 +27,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity"
 	entitycategory "origadmin/application/origcms/internal/data/entity/category"
 	entitymedia "origadmin/application/origcms/internal/data/entity/media"
+	"origadmin/application/origcms/internal/svc-media/biz"
 )
 
 // UploadDir is the directory where uploaded media files are stored.
@@ -108,7 +109,7 @@ func computeFileMD5(r io.Reader) (string, error) {
 }
 
 // RegisterMediaRoutes registers media CRUD routes.
-func RegisterMediaRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr *auth.Manager) {
+func RegisterMediaRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr *auth.Manager, uc *biz.MediaUseCase) {
 	// Ensure upload directory exists
 	if err := os.MkdirAll(UploadDir, 0755); err != nil {
 		slog.Warn("failed to create upload directory", "err", err)
@@ -130,6 +131,11 @@ func RegisterMediaRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr *
 
 		// Delete media (requires JWT + owner/admin check)
 		media.DELETE("/:id", JWTMiddleware(jwtMgr), deleteMedia(client))
+
+		// Transcoding status and tasks
+		media.GET("/:id/tasks", listEncodingTasks(uc))
+		media.GET("/transcoding/status", getTranscodingStatus(uc))
+		media.GET("/transcoding/events", transcodingEvents(uc))
 	}
 }
 
@@ -586,6 +592,78 @@ func deleteMedia(client *entity.Client) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{"message": "deleted"})
+	}
+}
+
+// --- Transcoding Handlers ---
+
+// listEncodingTasks returns a list of encoding tasks for a specific media.
+func listEncodingTasks(uc *biz.MediaUseCase) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			return
+		}
+
+		tasks, err := uc.ListEncodingTasks(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, tasks)
+	}
+}
+
+// getTranscodingStatus returns the overall system transcoding status.
+func getTranscodingStatus(uc *biz.MediaUseCase) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		status, err := uc.GetTranscodingStatus(c.Request.Context(), nil)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, status)
+	}
+}
+
+// transcodingEvents handles SSE for transcoding progress.
+func transcodingEvents(uc *biz.MediaUseCase) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		mediaIdStr := c.Query("media_id")
+		var mediaID int64
+		if mediaIdStr != "" {
+			fmt.Sscanf(mediaIdStr, "%d", &mediaID)
+		}
+
+		c.Writer.Header().Set("Content-Type", "text/event-stream")
+		c.Writer.Header().Set("Cache-Control", "no-cache")
+		c.Writer.Header().Set("Connection", "keep-alive")
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+
+		ctx := c.Request.Context()
+		events, cleanup := uc.Subscribe(ctx, mediaID)
+		defer cleanup()
+
+		c.Stream(func(w io.Writer) bool {
+			select {
+			case <-ctx.Done():
+				return false
+			case ev, ok := <-events:
+				if !ok {
+					return false
+				}
+				c.SSEvent("transcoding_progress", gin.H{
+					"media_id": ev.MediaId,
+					"task_id":  ev.Task.Id,
+					"status":   ev.Task.Status,
+					"progress": ev.Task.Progress,
+				})
+				return true
+			}
+		})
 	}
 }
 

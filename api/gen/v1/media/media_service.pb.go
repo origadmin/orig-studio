@@ -3662,6 +3662,206 @@ func (x *RemoveFromPlaylistResponse) GetMediaCount() int64 {
 	return 0
 }
 
+type ListEncodingTasksRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MediaId       int64                  `protobuf:"varint,1,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEncodingTasksRequest) Reset() {
+	*x = ListEncodingTasksRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[70]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEncodingTasksRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEncodingTasksRequest) ProtoMessage() {}
+
+func (x *ListEncodingTasksRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[70]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEncodingTasksRequest.ProtoReflect.Descriptor instead.
+func (*ListEncodingTasksRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{70}
+}
+
+func (x *ListEncodingTasksRequest) GetMediaId() int64 {
+	if x != nil {
+		return x.MediaId
+	}
+	return 0
+}
+
+type ListEncodingTasksResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Tasks         []*types.EncodingTask  `protobuf:"bytes,1,rep,name=tasks,proto3" json:"tasks,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEncodingTasksResponse) Reset() {
+	*x = ListEncodingTasksResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[71]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEncodingTasksResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEncodingTasksResponse) ProtoMessage() {}
+
+func (x *ListEncodingTasksResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[71]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEncodingTasksResponse.ProtoReflect.Descriptor instead.
+func (*ListEncodingTasksResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{71}
+}
+
+func (x *ListEncodingTasksResponse) GetTasks() []*types.EncodingTask {
+	if x != nil {
+		return x.Tasks
+	}
+	return nil
+}
+
+type GetTranscodingStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        *int64                 `protobuf:"varint,1,opt,name=user_id,proto3,oneof" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetTranscodingStatusRequest) Reset() {
+	*x = GetTranscodingStatusRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[72]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTranscodingStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTranscodingStatusRequest) ProtoMessage() {}
+
+func (x *GetTranscodingStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[72]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTranscodingStatusRequest.ProtoReflect.Descriptor instead.
+func (*GetTranscodingStatusRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{72}
+}
+
+func (x *GetTranscodingStatusRequest) GetUserId() int64 {
+	if x != nil && x.UserId != nil {
+		return *x.UserId
+	}
+	return 0
+}
+
+type GetTranscodingStatusResponse struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	ProcessingCount int32                  `protobuf:"varint,1,opt,name=processing_count,proto3" json:"processing_count,omitempty"`
+	PendingCount    int32                  `protobuf:"varint,2,opt,name=pending_count,proto3" json:"pending_count,omitempty"`
+	FailedCount     int32                  `protobuf:"varint,3,opt,name=failed_count,proto3" json:"failed_count,omitempty"`
+	SuccessCount    int32                  `protobuf:"varint,4,opt,name=success_count,proto3" json:"success_count,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *GetTranscodingStatusResponse) Reset() {
+	*x = GetTranscodingStatusResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[73]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTranscodingStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTranscodingStatusResponse) ProtoMessage() {}
+
+func (x *GetTranscodingStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[73]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTranscodingStatusResponse.ProtoReflect.Descriptor instead.
+func (*GetTranscodingStatusResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{73}
+}
+
+func (x *GetTranscodingStatusResponse) GetProcessingCount() int32 {
+	if x != nil {
+		return x.ProcessingCount
+	}
+	return 0
+}
+
+func (x *GetTranscodingStatusResponse) GetPendingCount() int32 {
+	if x != nil {
+		return x.PendingCount
+	}
+	return 0
+}
+
+func (x *GetTranscodingStatusResponse) GetFailedCount() int32 {
+	if x != nil {
+		return x.FailedCount
+	}
+	return 0
+}
+
+func (x *GetTranscodingStatusResponse) GetSuccessCount() int32 {
+	if x != nil {
+		return x.SuccessCount
+	}
+	return 0
+}
+
 var File_v1_media_media_service_proto protoreflect.FileDescriptor
 
 const file_v1_media_media_service_proto_rawDesc = "" +
@@ -3909,7 +4109,21 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\vplaylist_id\x18\x01 \x01(\x03R\vplaylist_id\x12\x1a\n" +
 	"\bmedia_id\x18\x02 \x01(\x03R\bmedia_id\">\n" +
 	"\x1aRemoveFromPlaylistResponse\x12 \n" +
-	"\vmedia_count\x18\x01 \x01(\x03R\vmedia_count2\xbf\a\n" +
+	"\vmedia_count\x18\x01 \x01(\x03R\vmedia_count\"6\n" +
+	"\x18ListEncodingTasksRequest\x12\x1a\n" +
+	"\bmedia_id\x18\x01 \x01(\x03R\bmedia_id\"V\n" +
+	"\x19ListEncodingTasksResponse\x129\n" +
+	"\x05tasks\x18\x01 \x03(\v2#.api.v1.services.types.EncodingTaskR\x05tasks\"H\n" +
+	"\x1bGetTranscodingStatusRequest\x12\x1d\n" +
+	"\auser_id\x18\x01 \x01(\x03H\x00R\auser_id\x88\x01\x01B\n" +
+	"\n" +
+	"\b_user_id\"\xba\x01\n" +
+	"\x1cGetTranscodingStatusResponse\x12*\n" +
+	"\x10processing_count\x18\x01 \x01(\x05R\x10processing_count\x12$\n" +
+	"\rpending_count\x18\x02 \x01(\x05R\rpending_count\x12\"\n" +
+	"\ffailed_count\x18\x03 \x01(\x05R\ffailed_count\x12$\n" +
+	"\rsuccess_count\x18\x04 \x01(\x05R\rsuccess_count2\x8e\n" +
+	"\n" +
 	"\fMediaService\x12y\n" +
 	"\n" +
 	"ListMedias\x12(.api.v1.services.media.ListMediasRequest\x1a).api.v1.services.media.ListMediasResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/api/v1/medias\x12x\n" +
@@ -3918,7 +4132,9 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\vUpdateMedia\x12).api.v1.services.media.UpdateMediaRequest\x1a*.api.v1.services.media.UpdateMediaResponse\"$\x82\xd3\xe4\x93\x02\x1e:\x01*\x1a\x19/api/v1/medias/{media.id}\x12\x81\x01\n" +
 	"\vDeleteMedia\x12).api.v1.services.media.DeleteMediaRequest\x1a*.api.v1.services.media.DeleteMediaResponse\"\x1b\x82\xd3\xe4\x93\x02\x15*\x13/api/v1/medias/{id}\x12\x9e\x01\n" +
 	"\x12IncrementViewCount\x120.api.v1.services.media.IncrementViewCountRequest\x1a1.api.v1.services.media.IncrementViewCountResponse\"#\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/api/v1/medias/{id}/view\x12\x86\x01\n" +
-	"\vUploadMedia\x12).api.v1.services.media.UploadMediaRequest\x1a*.api.v1.services.media.UploadMediaResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/medias/upload2\xe2\x05\n" +
+	"\vUploadMedia\x12).api.v1.services.media.UploadMediaRequest\x1a*.api.v1.services.media.UploadMediaResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/medias/upload\x12\x9f\x01\n" +
+	"\x11ListEncodingTasks\x12/.api.v1.services.media.ListEncodingTasksRequest\x1a0.api.v1.services.media.ListEncodingTasksResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/api/v1/medias/{media_id}/tasks\x12\xaa\x01\n" +
+	"\x14GetTranscodingStatus\x122.api.v1.services.media.GetTranscodingStatusRequest\x1a3.api.v1.services.media.GetTranscodingStatusResponse\")\x82\xd3\xe4\x93\x02#\x12!/api/v1/medias/transcoding/status2\xe2\x05\n" +
 	"\x0fCategoryService\x12\x89\x01\n" +
 	"\x0eListCategories\x12,.api.v1.services.media.ListCategoriesRequest\x1a-.api.v1.services.media.ListCategoriesResponse\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/categories\x12\x85\x01\n" +
 	"\vGetCategory\x12).api.v1.services.media.GetCategoryRequest\x1a*.api.v1.services.media.GetCategoryResponse\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/categories/{id}\x12\x8c\x01\n" +
@@ -3970,210 +4186,220 @@ func file_v1_media_media_service_proto_rawDescGZIP() []byte {
 	return file_v1_media_media_service_proto_rawDescData
 }
 
-var file_v1_media_media_service_proto_msgTypes = make([]protoimpl.MessageInfo, 70)
+var file_v1_media_media_service_proto_msgTypes = make([]protoimpl.MessageInfo, 74)
 var file_v1_media_media_service_proto_goTypes = []any{
-	(*ListMediasRequest)(nil),          // 0: api.v1.services.media.ListMediasRequest
-	(*ListMediasResponse)(nil),         // 1: api.v1.services.media.ListMediasResponse
-	(*GetMediaRequest)(nil),            // 2: api.v1.services.media.GetMediaRequest
-	(*GetMediaResponse)(nil),           // 3: api.v1.services.media.GetMediaResponse
-	(*CreateMediaRequest)(nil),         // 4: api.v1.services.media.CreateMediaRequest
-	(*CreateMediaResponse)(nil),        // 5: api.v1.services.media.CreateMediaResponse
-	(*UpdateMediaRequest)(nil),         // 6: api.v1.services.media.UpdateMediaRequest
-	(*UpdateMediaResponse)(nil),        // 7: api.v1.services.media.UpdateMediaResponse
-	(*DeleteMediaRequest)(nil),         // 8: api.v1.services.media.DeleteMediaRequest
-	(*DeleteMediaResponse)(nil),        // 9: api.v1.services.media.DeleteMediaResponse
-	(*IncrementViewCountRequest)(nil),  // 10: api.v1.services.media.IncrementViewCountRequest
-	(*IncrementViewCountResponse)(nil), // 11: api.v1.services.media.IncrementViewCountResponse
-	(*UploadMediaRequest)(nil),         // 12: api.v1.services.media.UploadMediaRequest
-	(*UploadMediaResponse)(nil),        // 13: api.v1.services.media.UploadMediaResponse
-	(*ListCategoriesRequest)(nil),      // 14: api.v1.services.media.ListCategoriesRequest
-	(*ListCategoriesResponse)(nil),     // 15: api.v1.services.media.ListCategoriesResponse
-	(*GetCategoryRequest)(nil),         // 16: api.v1.services.media.GetCategoryRequest
-	(*GetCategoryResponse)(nil),        // 17: api.v1.services.media.GetCategoryResponse
-	(*CreateCategoryRequest)(nil),      // 18: api.v1.services.media.CreateCategoryRequest
-	(*CreateCategoryResponse)(nil),     // 19: api.v1.services.media.CreateCategoryResponse
-	(*UpdateCategoryRequest)(nil),      // 20: api.v1.services.media.UpdateCategoryRequest
-	(*UpdateCategoryResponse)(nil),     // 21: api.v1.services.media.UpdateCategoryResponse
-	(*DeleteCategoryRequest)(nil),      // 22: api.v1.services.media.DeleteCategoryRequest
-	(*DeleteCategoryResponse)(nil),     // 23: api.v1.services.media.DeleteCategoryResponse
-	(*ListTagsRequest)(nil),            // 24: api.v1.services.media.ListTagsRequest
-	(*ListTagsResponse)(nil),           // 25: api.v1.services.media.ListTagsResponse
-	(*GetTagRequest)(nil),              // 26: api.v1.services.media.GetTagRequest
-	(*GetTagResponse)(nil),             // 27: api.v1.services.media.GetTagResponse
-	(*CreateTagRequest)(nil),           // 28: api.v1.services.media.CreateTagRequest
-	(*CreateTagResponse)(nil),          // 29: api.v1.services.media.CreateTagResponse
-	(*UpdateTagRequest)(nil),           // 30: api.v1.services.media.UpdateTagRequest
-	(*UpdateTagResponse)(nil),          // 31: api.v1.services.media.UpdateTagResponse
-	(*DeleteTagRequest)(nil),           // 32: api.v1.services.media.DeleteTagRequest
-	(*DeleteTagResponse)(nil),          // 33: api.v1.services.media.DeleteTagResponse
-	(*ListCommentsRequest)(nil),        // 34: api.v1.services.media.ListCommentsRequest
-	(*ListCommentsResponse)(nil),       // 35: api.v1.services.media.ListCommentsResponse
-	(*GetCommentRequest)(nil),          // 36: api.v1.services.media.GetCommentRequest
-	(*GetCommentResponse)(nil),         // 37: api.v1.services.media.GetCommentResponse
-	(*CreateCommentRequest)(nil),       // 38: api.v1.services.media.CreateCommentRequest
-	(*CreateCommentResponse)(nil),      // 39: api.v1.services.media.CreateCommentResponse
-	(*UpdateCommentRequest)(nil),       // 40: api.v1.services.media.UpdateCommentRequest
-	(*UpdateCommentResponse)(nil),      // 41: api.v1.services.media.UpdateCommentResponse
-	(*DeleteCommentRequest)(nil),       // 42: api.v1.services.media.DeleteCommentRequest
-	(*DeleteCommentResponse)(nil),      // 43: api.v1.services.media.DeleteCommentResponse
-	(*ToggleLikeRequest)(nil),          // 44: api.v1.services.media.ToggleLikeRequest
-	(*ToggleLikeResponse)(nil),         // 45: api.v1.services.media.ToggleLikeResponse
-	(*GetMediaLikesRequest)(nil),       // 46: api.v1.services.media.GetMediaLikesRequest
-	(*GetMediaLikesResponse)(nil),      // 47: api.v1.services.media.GetMediaLikesResponse
-	(*GetUserLikesRequest)(nil),        // 48: api.v1.services.media.GetUserLikesRequest
-	(*GetUserLikesResponse)(nil),       // 49: api.v1.services.media.GetUserLikesResponse
-	(*GetFavoritesRequest)(nil),        // 50: api.v1.services.media.GetFavoritesRequest
-	(*GetFavoritesResponse)(nil),       // 51: api.v1.services.media.GetFavoritesResponse
-	(*ToggleFavoriteRequest)(nil),      // 52: api.v1.services.media.ToggleFavoriteRequest
-	(*ToggleFavoriteResponse)(nil),     // 53: api.v1.services.media.ToggleFavoriteResponse
-	(*RemoveFavoriteRequest)(nil),      // 54: api.v1.services.media.RemoveFavoriteRequest
-	(*RemoveFavoriteResponse)(nil),     // 55: api.v1.services.media.RemoveFavoriteResponse
-	(*GetPlaylistsRequest)(nil),        // 56: api.v1.services.media.GetPlaylistsRequest
-	(*GetPlaylistsResponse)(nil),       // 57: api.v1.services.media.GetPlaylistsResponse
-	(*GetPlaylistRequest)(nil),         // 58: api.v1.services.media.GetPlaylistRequest
-	(*GetPlaylistResponse)(nil),        // 59: api.v1.services.media.GetPlaylistResponse
-	(*CreatePlaylistRequest)(nil),      // 60: api.v1.services.media.CreatePlaylistRequest
-	(*CreatePlaylistResponse)(nil),     // 61: api.v1.services.media.CreatePlaylistResponse
-	(*UpdatePlaylistRequest)(nil),      // 62: api.v1.services.media.UpdatePlaylistRequest
-	(*UpdatePlaylistResponse)(nil),     // 63: api.v1.services.media.UpdatePlaylistResponse
-	(*DeletePlaylistRequest)(nil),      // 64: api.v1.services.media.DeletePlaylistRequest
-	(*DeletePlaylistResponse)(nil),     // 65: api.v1.services.media.DeletePlaylistResponse
-	(*AddToPlaylistRequest)(nil),       // 66: api.v1.services.media.AddToPlaylistRequest
-	(*AddToPlaylistResponse)(nil),      // 67: api.v1.services.media.AddToPlaylistResponse
-	(*RemoveFromPlaylistRequest)(nil),  // 68: api.v1.services.media.RemoveFromPlaylistRequest
-	(*RemoveFromPlaylistResponse)(nil), // 69: api.v1.services.media.RemoveFromPlaylistResponse
-	(*types.Media)(nil),                // 70: api.v1.services.types.Media
-	(*fieldmaskpb.FieldMask)(nil),      // 71: google.protobuf.FieldMask
-	(*emptypb.Empty)(nil),              // 72: google.protobuf.Empty
-	(*types.Category)(nil),             // 73: api.v1.services.types.Category
-	(*types.Tag)(nil),                  // 74: api.v1.services.types.Tag
-	(*types.Comment)(nil),              // 75: api.v1.services.types.Comment
-	(*types.Like)(nil),                 // 76: api.v1.services.types.Like
-	(*types.Favorite)(nil),             // 77: api.v1.services.types.Favorite
-	(*types.Playlist)(nil),             // 78: api.v1.services.types.Playlist
+	(*ListMediasRequest)(nil),            // 0: api.v1.services.media.ListMediasRequest
+	(*ListMediasResponse)(nil),           // 1: api.v1.services.media.ListMediasResponse
+	(*GetMediaRequest)(nil),              // 2: api.v1.services.media.GetMediaRequest
+	(*GetMediaResponse)(nil),             // 3: api.v1.services.media.GetMediaResponse
+	(*CreateMediaRequest)(nil),           // 4: api.v1.services.media.CreateMediaRequest
+	(*CreateMediaResponse)(nil),          // 5: api.v1.services.media.CreateMediaResponse
+	(*UpdateMediaRequest)(nil),           // 6: api.v1.services.media.UpdateMediaRequest
+	(*UpdateMediaResponse)(nil),          // 7: api.v1.services.media.UpdateMediaResponse
+	(*DeleteMediaRequest)(nil),           // 8: api.v1.services.media.DeleteMediaRequest
+	(*DeleteMediaResponse)(nil),          // 9: api.v1.services.media.DeleteMediaResponse
+	(*IncrementViewCountRequest)(nil),    // 10: api.v1.services.media.IncrementViewCountRequest
+	(*IncrementViewCountResponse)(nil),   // 11: api.v1.services.media.IncrementViewCountResponse
+	(*UploadMediaRequest)(nil),           // 12: api.v1.services.media.UploadMediaRequest
+	(*UploadMediaResponse)(nil),          // 13: api.v1.services.media.UploadMediaResponse
+	(*ListCategoriesRequest)(nil),        // 14: api.v1.services.media.ListCategoriesRequest
+	(*ListCategoriesResponse)(nil),       // 15: api.v1.services.media.ListCategoriesResponse
+	(*GetCategoryRequest)(nil),           // 16: api.v1.services.media.GetCategoryRequest
+	(*GetCategoryResponse)(nil),          // 17: api.v1.services.media.GetCategoryResponse
+	(*CreateCategoryRequest)(nil),        // 18: api.v1.services.media.CreateCategoryRequest
+	(*CreateCategoryResponse)(nil),       // 19: api.v1.services.media.CreateCategoryResponse
+	(*UpdateCategoryRequest)(nil),        // 20: api.v1.services.media.UpdateCategoryRequest
+	(*UpdateCategoryResponse)(nil),       // 21: api.v1.services.media.UpdateCategoryResponse
+	(*DeleteCategoryRequest)(nil),        // 22: api.v1.services.media.DeleteCategoryRequest
+	(*DeleteCategoryResponse)(nil),       // 23: api.v1.services.media.DeleteCategoryResponse
+	(*ListTagsRequest)(nil),              // 24: api.v1.services.media.ListTagsRequest
+	(*ListTagsResponse)(nil),             // 25: api.v1.services.media.ListTagsResponse
+	(*GetTagRequest)(nil),                // 26: api.v1.services.media.GetTagRequest
+	(*GetTagResponse)(nil),               // 27: api.v1.services.media.GetTagResponse
+	(*CreateTagRequest)(nil),             // 28: api.v1.services.media.CreateTagRequest
+	(*CreateTagResponse)(nil),            // 29: api.v1.services.media.CreateTagResponse
+	(*UpdateTagRequest)(nil),             // 30: api.v1.services.media.UpdateTagRequest
+	(*UpdateTagResponse)(nil),            // 31: api.v1.services.media.UpdateTagResponse
+	(*DeleteTagRequest)(nil),             // 32: api.v1.services.media.DeleteTagRequest
+	(*DeleteTagResponse)(nil),            // 33: api.v1.services.media.DeleteTagResponse
+	(*ListCommentsRequest)(nil),          // 34: api.v1.services.media.ListCommentsRequest
+	(*ListCommentsResponse)(nil),         // 35: api.v1.services.media.ListCommentsResponse
+	(*GetCommentRequest)(nil),            // 36: api.v1.services.media.GetCommentRequest
+	(*GetCommentResponse)(nil),           // 37: api.v1.services.media.GetCommentResponse
+	(*CreateCommentRequest)(nil),         // 38: api.v1.services.media.CreateCommentRequest
+	(*CreateCommentResponse)(nil),        // 39: api.v1.services.media.CreateCommentResponse
+	(*UpdateCommentRequest)(nil),         // 40: api.v1.services.media.UpdateCommentRequest
+	(*UpdateCommentResponse)(nil),        // 41: api.v1.services.media.UpdateCommentResponse
+	(*DeleteCommentRequest)(nil),         // 42: api.v1.services.media.DeleteCommentRequest
+	(*DeleteCommentResponse)(nil),        // 43: api.v1.services.media.DeleteCommentResponse
+	(*ToggleLikeRequest)(nil),            // 44: api.v1.services.media.ToggleLikeRequest
+	(*ToggleLikeResponse)(nil),           // 45: api.v1.services.media.ToggleLikeResponse
+	(*GetMediaLikesRequest)(nil),         // 46: api.v1.services.media.GetMediaLikesRequest
+	(*GetMediaLikesResponse)(nil),        // 47: api.v1.services.media.GetMediaLikesResponse
+	(*GetUserLikesRequest)(nil),          // 48: api.v1.services.media.GetUserLikesRequest
+	(*GetUserLikesResponse)(nil),         // 49: api.v1.services.media.GetUserLikesResponse
+	(*GetFavoritesRequest)(nil),          // 50: api.v1.services.media.GetFavoritesRequest
+	(*GetFavoritesResponse)(nil),         // 51: api.v1.services.media.GetFavoritesResponse
+	(*ToggleFavoriteRequest)(nil),        // 52: api.v1.services.media.ToggleFavoriteRequest
+	(*ToggleFavoriteResponse)(nil),       // 53: api.v1.services.media.ToggleFavoriteResponse
+	(*RemoveFavoriteRequest)(nil),        // 54: api.v1.services.media.RemoveFavoriteRequest
+	(*RemoveFavoriteResponse)(nil),       // 55: api.v1.services.media.RemoveFavoriteResponse
+	(*GetPlaylistsRequest)(nil),          // 56: api.v1.services.media.GetPlaylistsRequest
+	(*GetPlaylistsResponse)(nil),         // 57: api.v1.services.media.GetPlaylistsResponse
+	(*GetPlaylistRequest)(nil),           // 58: api.v1.services.media.GetPlaylistRequest
+	(*GetPlaylistResponse)(nil),          // 59: api.v1.services.media.GetPlaylistResponse
+	(*CreatePlaylistRequest)(nil),        // 60: api.v1.services.media.CreatePlaylistRequest
+	(*CreatePlaylistResponse)(nil),       // 61: api.v1.services.media.CreatePlaylistResponse
+	(*UpdatePlaylistRequest)(nil),        // 62: api.v1.services.media.UpdatePlaylistRequest
+	(*UpdatePlaylistResponse)(nil),       // 63: api.v1.services.media.UpdatePlaylistResponse
+	(*DeletePlaylistRequest)(nil),        // 64: api.v1.services.media.DeletePlaylistRequest
+	(*DeletePlaylistResponse)(nil),       // 65: api.v1.services.media.DeletePlaylistResponse
+	(*AddToPlaylistRequest)(nil),         // 66: api.v1.services.media.AddToPlaylistRequest
+	(*AddToPlaylistResponse)(nil),        // 67: api.v1.services.media.AddToPlaylistResponse
+	(*RemoveFromPlaylistRequest)(nil),    // 68: api.v1.services.media.RemoveFromPlaylistRequest
+	(*RemoveFromPlaylistResponse)(nil),   // 69: api.v1.services.media.RemoveFromPlaylistResponse
+	(*ListEncodingTasksRequest)(nil),     // 70: api.v1.services.media.ListEncodingTasksRequest
+	(*ListEncodingTasksResponse)(nil),    // 71: api.v1.services.media.ListEncodingTasksResponse
+	(*GetTranscodingStatusRequest)(nil),  // 72: api.v1.services.media.GetTranscodingStatusRequest
+	(*GetTranscodingStatusResponse)(nil), // 73: api.v1.services.media.GetTranscodingStatusResponse
+	(*types.Media)(nil),                  // 74: api.v1.services.types.Media
+	(*fieldmaskpb.FieldMask)(nil),        // 75: google.protobuf.FieldMask
+	(*emptypb.Empty)(nil),                // 76: google.protobuf.Empty
+	(*types.Category)(nil),               // 77: api.v1.services.types.Category
+	(*types.Tag)(nil),                    // 78: api.v1.services.types.Tag
+	(*types.Comment)(nil),                // 79: api.v1.services.types.Comment
+	(*types.Like)(nil),                   // 80: api.v1.services.types.Like
+	(*types.Favorite)(nil),               // 81: api.v1.services.types.Favorite
+	(*types.Playlist)(nil),               // 82: api.v1.services.types.Playlist
+	(*types.EncodingTask)(nil),           // 83: api.v1.services.types.EncodingTask
 }
 var file_v1_media_media_service_proto_depIdxs = []int32{
-	70, // 0: api.v1.services.media.ListMediasResponse.medias:type_name -> api.v1.services.types.Media
-	70, // 1: api.v1.services.media.GetMediaResponse.media:type_name -> api.v1.services.types.Media
-	70, // 2: api.v1.services.media.CreateMediaRequest.media:type_name -> api.v1.services.types.Media
-	70, // 3: api.v1.services.media.CreateMediaResponse.media:type_name -> api.v1.services.types.Media
-	70, // 4: api.v1.services.media.UpdateMediaRequest.media:type_name -> api.v1.services.types.Media
-	71, // 5: api.v1.services.media.UpdateMediaRequest.update_mask:type_name -> google.protobuf.FieldMask
-	70, // 6: api.v1.services.media.UpdateMediaResponse.media:type_name -> api.v1.services.types.Media
-	72, // 7: api.v1.services.media.DeleteMediaResponse.empty:type_name -> google.protobuf.Empty
-	70, // 8: api.v1.services.media.UploadMediaResponse.media:type_name -> api.v1.services.types.Media
-	73, // 9: api.v1.services.media.ListCategoriesResponse.categories:type_name -> api.v1.services.types.Category
-	73, // 10: api.v1.services.media.GetCategoryResponse.category:type_name -> api.v1.services.types.Category
-	73, // 11: api.v1.services.media.CreateCategoryRequest.category:type_name -> api.v1.services.types.Category
-	73, // 12: api.v1.services.media.CreateCategoryResponse.category:type_name -> api.v1.services.types.Category
-	73, // 13: api.v1.services.media.UpdateCategoryRequest.category:type_name -> api.v1.services.types.Category
-	71, // 14: api.v1.services.media.UpdateCategoryRequest.update_mask:type_name -> google.protobuf.FieldMask
-	73, // 15: api.v1.services.media.UpdateCategoryResponse.category:type_name -> api.v1.services.types.Category
-	72, // 16: api.v1.services.media.DeleteCategoryResponse.empty:type_name -> google.protobuf.Empty
-	74, // 17: api.v1.services.media.ListTagsResponse.tags:type_name -> api.v1.services.types.Tag
-	74, // 18: api.v1.services.media.GetTagResponse.tag:type_name -> api.v1.services.types.Tag
-	74, // 19: api.v1.services.media.CreateTagRequest.tag:type_name -> api.v1.services.types.Tag
-	74, // 20: api.v1.services.media.CreateTagResponse.tag:type_name -> api.v1.services.types.Tag
-	74, // 21: api.v1.services.media.UpdateTagRequest.tag:type_name -> api.v1.services.types.Tag
-	71, // 22: api.v1.services.media.UpdateTagRequest.update_mask:type_name -> google.protobuf.FieldMask
-	74, // 23: api.v1.services.media.UpdateTagResponse.tag:type_name -> api.v1.services.types.Tag
-	72, // 24: api.v1.services.media.DeleteTagResponse.empty:type_name -> google.protobuf.Empty
-	75, // 25: api.v1.services.media.ListCommentsResponse.comments:type_name -> api.v1.services.types.Comment
-	75, // 26: api.v1.services.media.GetCommentResponse.comment:type_name -> api.v1.services.types.Comment
-	75, // 27: api.v1.services.media.CreateCommentRequest.comment:type_name -> api.v1.services.types.Comment
-	75, // 28: api.v1.services.media.CreateCommentResponse.comment:type_name -> api.v1.services.types.Comment
-	75, // 29: api.v1.services.media.UpdateCommentRequest.comment:type_name -> api.v1.services.types.Comment
-	71, // 30: api.v1.services.media.UpdateCommentRequest.update_mask:type_name -> google.protobuf.FieldMask
-	75, // 31: api.v1.services.media.UpdateCommentResponse.comment:type_name -> api.v1.services.types.Comment
-	72, // 32: api.v1.services.media.DeleteCommentResponse.empty:type_name -> google.protobuf.Empty
-	76, // 33: api.v1.services.media.GetUserLikesResponse.likes:type_name -> api.v1.services.types.Like
-	77, // 34: api.v1.services.media.GetFavoritesResponse.favorites:type_name -> api.v1.services.types.Favorite
-	70, // 35: api.v1.services.media.GetFavoritesResponse.medias:type_name -> api.v1.services.types.Media
-	72, // 36: api.v1.services.media.RemoveFavoriteResponse.empty:type_name -> google.protobuf.Empty
-	78, // 37: api.v1.services.media.GetPlaylistsResponse.playlists:type_name -> api.v1.services.types.Playlist
-	78, // 38: api.v1.services.media.GetPlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
-	70, // 39: api.v1.services.media.GetPlaylistResponse.medias:type_name -> api.v1.services.types.Media
-	78, // 40: api.v1.services.media.CreatePlaylistRequest.playlist:type_name -> api.v1.services.types.Playlist
-	78, // 41: api.v1.services.media.CreatePlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
-	78, // 42: api.v1.services.media.UpdatePlaylistRequest.playlist:type_name -> api.v1.services.types.Playlist
-	71, // 43: api.v1.services.media.UpdatePlaylistRequest.update_mask:type_name -> google.protobuf.FieldMask
-	78, // 44: api.v1.services.media.UpdatePlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
-	72, // 45: api.v1.services.media.DeletePlaylistResponse.empty:type_name -> google.protobuf.Empty
-	0,  // 46: api.v1.services.media.MediaService.ListMedias:input_type -> api.v1.services.media.ListMediasRequest
-	2,  // 47: api.v1.services.media.MediaService.GetMedia:input_type -> api.v1.services.media.GetMediaRequest
-	4,  // 48: api.v1.services.media.MediaService.CreateMedia:input_type -> api.v1.services.media.CreateMediaRequest
-	6,  // 49: api.v1.services.media.MediaService.UpdateMedia:input_type -> api.v1.services.media.UpdateMediaRequest
-	8,  // 50: api.v1.services.media.MediaService.DeleteMedia:input_type -> api.v1.services.media.DeleteMediaRequest
-	10, // 51: api.v1.services.media.MediaService.IncrementViewCount:input_type -> api.v1.services.media.IncrementViewCountRequest
-	12, // 52: api.v1.services.media.MediaService.UploadMedia:input_type -> api.v1.services.media.UploadMediaRequest
-	14, // 53: api.v1.services.media.CategoryService.ListCategories:input_type -> api.v1.services.media.ListCategoriesRequest
-	16, // 54: api.v1.services.media.CategoryService.GetCategory:input_type -> api.v1.services.media.GetCategoryRequest
-	18, // 55: api.v1.services.media.CategoryService.CreateCategory:input_type -> api.v1.services.media.CreateCategoryRequest
-	20, // 56: api.v1.services.media.CategoryService.UpdateCategory:input_type -> api.v1.services.media.UpdateCategoryRequest
-	22, // 57: api.v1.services.media.CategoryService.DeleteCategory:input_type -> api.v1.services.media.DeleteCategoryRequest
-	24, // 58: api.v1.services.media.TagService.ListTags:input_type -> api.v1.services.media.ListTagsRequest
-	26, // 59: api.v1.services.media.TagService.GetTag:input_type -> api.v1.services.media.GetTagRequest
-	28, // 60: api.v1.services.media.TagService.CreateTag:input_type -> api.v1.services.media.CreateTagRequest
-	30, // 61: api.v1.services.media.TagService.UpdateTag:input_type -> api.v1.services.media.UpdateTagRequest
-	32, // 62: api.v1.services.media.TagService.DeleteTag:input_type -> api.v1.services.media.DeleteTagRequest
-	34, // 63: api.v1.services.media.CommentService.ListComments:input_type -> api.v1.services.media.ListCommentsRequest
-	36, // 64: api.v1.services.media.CommentService.GetComment:input_type -> api.v1.services.media.GetCommentRequest
-	38, // 65: api.v1.services.media.CommentService.CreateComment:input_type -> api.v1.services.media.CreateCommentRequest
-	40, // 66: api.v1.services.media.CommentService.UpdateComment:input_type -> api.v1.services.media.UpdateCommentRequest
-	42, // 67: api.v1.services.media.CommentService.DeleteComment:input_type -> api.v1.services.media.DeleteCommentRequest
-	44, // 68: api.v1.services.media.LikeService.ToggleLike:input_type -> api.v1.services.media.ToggleLikeRequest
-	46, // 69: api.v1.services.media.LikeService.GetMediaLikes:input_type -> api.v1.services.media.GetMediaLikesRequest
-	48, // 70: api.v1.services.media.LikeService.GetUserLikes:input_type -> api.v1.services.media.GetUserLikesRequest
-	50, // 71: api.v1.services.media.FavoriteService.GetFavorites:input_type -> api.v1.services.media.GetFavoritesRequest
-	52, // 72: api.v1.services.media.FavoriteService.ToggleFavorite:input_type -> api.v1.services.media.ToggleFavoriteRequest
-	54, // 73: api.v1.services.media.FavoriteService.RemoveFavorite:input_type -> api.v1.services.media.RemoveFavoriteRequest
-	56, // 74: api.v1.services.media.PlaylistService.GetPlaylists:input_type -> api.v1.services.media.GetPlaylistsRequest
-	58, // 75: api.v1.services.media.PlaylistService.GetPlaylist:input_type -> api.v1.services.media.GetPlaylistRequest
-	60, // 76: api.v1.services.media.PlaylistService.CreatePlaylist:input_type -> api.v1.services.media.CreatePlaylistRequest
-	62, // 77: api.v1.services.media.PlaylistService.UpdatePlaylist:input_type -> api.v1.services.media.UpdatePlaylistRequest
-	64, // 78: api.v1.services.media.PlaylistService.DeletePlaylist:input_type -> api.v1.services.media.DeletePlaylistRequest
-	66, // 79: api.v1.services.media.PlaylistService.AddToPlaylist:input_type -> api.v1.services.media.AddToPlaylistRequest
-	68, // 80: api.v1.services.media.PlaylistService.RemoveFromPlaylist:input_type -> api.v1.services.media.RemoveFromPlaylistRequest
-	1,  // 81: api.v1.services.media.MediaService.ListMedias:output_type -> api.v1.services.media.ListMediasResponse
-	3,  // 82: api.v1.services.media.MediaService.GetMedia:output_type -> api.v1.services.media.GetMediaResponse
-	5,  // 83: api.v1.services.media.MediaService.CreateMedia:output_type -> api.v1.services.media.CreateMediaResponse
-	7,  // 84: api.v1.services.media.MediaService.UpdateMedia:output_type -> api.v1.services.media.UpdateMediaResponse
-	9,  // 85: api.v1.services.media.MediaService.DeleteMedia:output_type -> api.v1.services.media.DeleteMediaResponse
-	11, // 86: api.v1.services.media.MediaService.IncrementViewCount:output_type -> api.v1.services.media.IncrementViewCountResponse
-	13, // 87: api.v1.services.media.MediaService.UploadMedia:output_type -> api.v1.services.media.UploadMediaResponse
-	15, // 88: api.v1.services.media.CategoryService.ListCategories:output_type -> api.v1.services.media.ListCategoriesResponse
-	17, // 89: api.v1.services.media.CategoryService.GetCategory:output_type -> api.v1.services.media.GetCategoryResponse
-	19, // 90: api.v1.services.media.CategoryService.CreateCategory:output_type -> api.v1.services.media.CreateCategoryResponse
-	21, // 91: api.v1.services.media.CategoryService.UpdateCategory:output_type -> api.v1.services.media.UpdateCategoryResponse
-	23, // 92: api.v1.services.media.CategoryService.DeleteCategory:output_type -> api.v1.services.media.DeleteCategoryResponse
-	25, // 93: api.v1.services.media.TagService.ListTags:output_type -> api.v1.services.media.ListTagsResponse
-	27, // 94: api.v1.services.media.TagService.GetTag:output_type -> api.v1.services.media.GetTagResponse
-	29, // 95: api.v1.services.media.TagService.CreateTag:output_type -> api.v1.services.media.CreateTagResponse
-	31, // 96: api.v1.services.media.TagService.UpdateTag:output_type -> api.v1.services.media.UpdateTagResponse
-	33, // 97: api.v1.services.media.TagService.DeleteTag:output_type -> api.v1.services.media.DeleteTagResponse
-	35, // 98: api.v1.services.media.CommentService.ListComments:output_type -> api.v1.services.media.ListCommentsResponse
-	37, // 99: api.v1.services.media.CommentService.GetComment:output_type -> api.v1.services.media.GetCommentResponse
-	39, // 100: api.v1.services.media.CommentService.CreateComment:output_type -> api.v1.services.media.CreateCommentResponse
-	41, // 101: api.v1.services.media.CommentService.UpdateComment:output_type -> api.v1.services.media.UpdateCommentResponse
-	43, // 102: api.v1.services.media.CommentService.DeleteComment:output_type -> api.v1.services.media.DeleteCommentResponse
-	45, // 103: api.v1.services.media.LikeService.ToggleLike:output_type -> api.v1.services.media.ToggleLikeResponse
-	47, // 104: api.v1.services.media.LikeService.GetMediaLikes:output_type -> api.v1.services.media.GetMediaLikesResponse
-	49, // 105: api.v1.services.media.LikeService.GetUserLikes:output_type -> api.v1.services.media.GetUserLikesResponse
-	51, // 106: api.v1.services.media.FavoriteService.GetFavorites:output_type -> api.v1.services.media.GetFavoritesResponse
-	53, // 107: api.v1.services.media.FavoriteService.ToggleFavorite:output_type -> api.v1.services.media.ToggleFavoriteResponse
-	55, // 108: api.v1.services.media.FavoriteService.RemoveFavorite:output_type -> api.v1.services.media.RemoveFavoriteResponse
-	57, // 109: api.v1.services.media.PlaylistService.GetPlaylists:output_type -> api.v1.services.media.GetPlaylistsResponse
-	59, // 110: api.v1.services.media.PlaylistService.GetPlaylist:output_type -> api.v1.services.media.GetPlaylistResponse
-	61, // 111: api.v1.services.media.PlaylistService.CreatePlaylist:output_type -> api.v1.services.media.CreatePlaylistResponse
-	63, // 112: api.v1.services.media.PlaylistService.UpdatePlaylist:output_type -> api.v1.services.media.UpdatePlaylistResponse
-	65, // 113: api.v1.services.media.PlaylistService.DeletePlaylist:output_type -> api.v1.services.media.DeletePlaylistResponse
-	67, // 114: api.v1.services.media.PlaylistService.AddToPlaylist:output_type -> api.v1.services.media.AddToPlaylistResponse
-	69, // 115: api.v1.services.media.PlaylistService.RemoveFromPlaylist:output_type -> api.v1.services.media.RemoveFromPlaylistResponse
-	81, // [81:116] is the sub-list for method output_type
-	46, // [46:81] is the sub-list for method input_type
-	46, // [46:46] is the sub-list for extension type_name
-	46, // [46:46] is the sub-list for extension extendee
-	0,  // [0:46] is the sub-list for field type_name
+	74, // 0: api.v1.services.media.ListMediasResponse.medias:type_name -> api.v1.services.types.Media
+	74, // 1: api.v1.services.media.GetMediaResponse.media:type_name -> api.v1.services.types.Media
+	74, // 2: api.v1.services.media.CreateMediaRequest.media:type_name -> api.v1.services.types.Media
+	74, // 3: api.v1.services.media.CreateMediaResponse.media:type_name -> api.v1.services.types.Media
+	74, // 4: api.v1.services.media.UpdateMediaRequest.media:type_name -> api.v1.services.types.Media
+	75, // 5: api.v1.services.media.UpdateMediaRequest.update_mask:type_name -> google.protobuf.FieldMask
+	74, // 6: api.v1.services.media.UpdateMediaResponse.media:type_name -> api.v1.services.types.Media
+	76, // 7: api.v1.services.media.DeleteMediaResponse.empty:type_name -> google.protobuf.Empty
+	74, // 8: api.v1.services.media.UploadMediaResponse.media:type_name -> api.v1.services.types.Media
+	77, // 9: api.v1.services.media.ListCategoriesResponse.categories:type_name -> api.v1.services.types.Category
+	77, // 10: api.v1.services.media.GetCategoryResponse.category:type_name -> api.v1.services.types.Category
+	77, // 11: api.v1.services.media.CreateCategoryRequest.category:type_name -> api.v1.services.types.Category
+	77, // 12: api.v1.services.media.CreateCategoryResponse.category:type_name -> api.v1.services.types.Category
+	77, // 13: api.v1.services.media.UpdateCategoryRequest.category:type_name -> api.v1.services.types.Category
+	75, // 14: api.v1.services.media.UpdateCategoryRequest.update_mask:type_name -> google.protobuf.FieldMask
+	77, // 15: api.v1.services.media.UpdateCategoryResponse.category:type_name -> api.v1.services.types.Category
+	76, // 16: api.v1.services.media.DeleteCategoryResponse.empty:type_name -> google.protobuf.Empty
+	78, // 17: api.v1.services.media.ListTagsResponse.tags:type_name -> api.v1.services.types.Tag
+	78, // 18: api.v1.services.media.GetTagResponse.tag:type_name -> api.v1.services.types.Tag
+	78, // 19: api.v1.services.media.CreateTagRequest.tag:type_name -> api.v1.services.types.Tag
+	78, // 20: api.v1.services.media.CreateTagResponse.tag:type_name -> api.v1.services.types.Tag
+	78, // 21: api.v1.services.media.UpdateTagRequest.tag:type_name -> api.v1.services.types.Tag
+	75, // 22: api.v1.services.media.UpdateTagRequest.update_mask:type_name -> google.protobuf.FieldMask
+	78, // 23: api.v1.services.media.UpdateTagResponse.tag:type_name -> api.v1.services.types.Tag
+	76, // 24: api.v1.services.media.DeleteTagResponse.empty:type_name -> google.protobuf.Empty
+	79, // 25: api.v1.services.media.ListCommentsResponse.comments:type_name -> api.v1.services.types.Comment
+	79, // 26: api.v1.services.media.GetCommentResponse.comment:type_name -> api.v1.services.types.Comment
+	79, // 27: api.v1.services.media.CreateCommentRequest.comment:type_name -> api.v1.services.types.Comment
+	79, // 28: api.v1.services.media.CreateCommentResponse.comment:type_name -> api.v1.services.types.Comment
+	79, // 29: api.v1.services.media.UpdateCommentRequest.comment:type_name -> api.v1.services.types.Comment
+	75, // 30: api.v1.services.media.UpdateCommentRequest.update_mask:type_name -> google.protobuf.FieldMask
+	79, // 31: api.v1.services.media.UpdateCommentResponse.comment:type_name -> api.v1.services.types.Comment
+	76, // 32: api.v1.services.media.DeleteCommentResponse.empty:type_name -> google.protobuf.Empty
+	80, // 33: api.v1.services.media.GetUserLikesResponse.likes:type_name -> api.v1.services.types.Like
+	81, // 34: api.v1.services.media.GetFavoritesResponse.favorites:type_name -> api.v1.services.types.Favorite
+	74, // 35: api.v1.services.media.GetFavoritesResponse.medias:type_name -> api.v1.services.types.Media
+	76, // 36: api.v1.services.media.RemoveFavoriteResponse.empty:type_name -> google.protobuf.Empty
+	82, // 37: api.v1.services.media.GetPlaylistsResponse.playlists:type_name -> api.v1.services.types.Playlist
+	82, // 38: api.v1.services.media.GetPlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
+	74, // 39: api.v1.services.media.GetPlaylistResponse.medias:type_name -> api.v1.services.types.Media
+	82, // 40: api.v1.services.media.CreatePlaylistRequest.playlist:type_name -> api.v1.services.types.Playlist
+	82, // 41: api.v1.services.media.CreatePlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
+	82, // 42: api.v1.services.media.UpdatePlaylistRequest.playlist:type_name -> api.v1.services.types.Playlist
+	75, // 43: api.v1.services.media.UpdatePlaylistRequest.update_mask:type_name -> google.protobuf.FieldMask
+	82, // 44: api.v1.services.media.UpdatePlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
+	76, // 45: api.v1.services.media.DeletePlaylistResponse.empty:type_name -> google.protobuf.Empty
+	83, // 46: api.v1.services.media.ListEncodingTasksResponse.tasks:type_name -> api.v1.services.types.EncodingTask
+	0,  // 47: api.v1.services.media.MediaService.ListMedias:input_type -> api.v1.services.media.ListMediasRequest
+	2,  // 48: api.v1.services.media.MediaService.GetMedia:input_type -> api.v1.services.media.GetMediaRequest
+	4,  // 49: api.v1.services.media.MediaService.CreateMedia:input_type -> api.v1.services.media.CreateMediaRequest
+	6,  // 50: api.v1.services.media.MediaService.UpdateMedia:input_type -> api.v1.services.media.UpdateMediaRequest
+	8,  // 51: api.v1.services.media.MediaService.DeleteMedia:input_type -> api.v1.services.media.DeleteMediaRequest
+	10, // 52: api.v1.services.media.MediaService.IncrementViewCount:input_type -> api.v1.services.media.IncrementViewCountRequest
+	12, // 53: api.v1.services.media.MediaService.UploadMedia:input_type -> api.v1.services.media.UploadMediaRequest
+	70, // 54: api.v1.services.media.MediaService.ListEncodingTasks:input_type -> api.v1.services.media.ListEncodingTasksRequest
+	72, // 55: api.v1.services.media.MediaService.GetTranscodingStatus:input_type -> api.v1.services.media.GetTranscodingStatusRequest
+	14, // 56: api.v1.services.media.CategoryService.ListCategories:input_type -> api.v1.services.media.ListCategoriesRequest
+	16, // 57: api.v1.services.media.CategoryService.GetCategory:input_type -> api.v1.services.media.GetCategoryRequest
+	18, // 58: api.v1.services.media.CategoryService.CreateCategory:input_type -> api.v1.services.media.CreateCategoryRequest
+	20, // 59: api.v1.services.media.CategoryService.UpdateCategory:input_type -> api.v1.services.media.UpdateCategoryRequest
+	22, // 60: api.v1.services.media.CategoryService.DeleteCategory:input_type -> api.v1.services.media.DeleteCategoryRequest
+	24, // 61: api.v1.services.media.TagService.ListTags:input_type -> api.v1.services.media.ListTagsRequest
+	26, // 62: api.v1.services.media.TagService.GetTag:input_type -> api.v1.services.media.GetTagRequest
+	28, // 63: api.v1.services.media.TagService.CreateTag:input_type -> api.v1.services.media.CreateTagRequest
+	30, // 64: api.v1.services.media.TagService.UpdateTag:input_type -> api.v1.services.media.UpdateTagRequest
+	32, // 65: api.v1.services.media.TagService.DeleteTag:input_type -> api.v1.services.media.DeleteTagRequest
+	34, // 66: api.v1.services.media.CommentService.ListComments:input_type -> api.v1.services.media.ListCommentsRequest
+	36, // 67: api.v1.services.media.CommentService.GetComment:input_type -> api.v1.services.media.GetCommentRequest
+	38, // 68: api.v1.services.media.CommentService.CreateComment:input_type -> api.v1.services.media.CreateCommentRequest
+	40, // 69: api.v1.services.media.CommentService.UpdateComment:input_type -> api.v1.services.media.UpdateCommentRequest
+	42, // 70: api.v1.services.media.CommentService.DeleteComment:input_type -> api.v1.services.media.DeleteCommentRequest
+	44, // 71: api.v1.services.media.LikeService.ToggleLike:input_type -> api.v1.services.media.ToggleLikeRequest
+	46, // 72: api.v1.services.media.LikeService.GetMediaLikes:input_type -> api.v1.services.media.GetMediaLikesRequest
+	48, // 73: api.v1.services.media.LikeService.GetUserLikes:input_type -> api.v1.services.media.GetUserLikesRequest
+	50, // 74: api.v1.services.media.FavoriteService.GetFavorites:input_type -> api.v1.services.media.GetFavoritesRequest
+	52, // 75: api.v1.services.media.FavoriteService.ToggleFavorite:input_type -> api.v1.services.media.ToggleFavoriteRequest
+	54, // 76: api.v1.services.media.FavoriteService.RemoveFavorite:input_type -> api.v1.services.media.RemoveFavoriteRequest
+	56, // 77: api.v1.services.media.PlaylistService.GetPlaylists:input_type -> api.v1.services.media.GetPlaylistsRequest
+	58, // 78: api.v1.services.media.PlaylistService.GetPlaylist:input_type -> api.v1.services.media.GetPlaylistRequest
+	60, // 79: api.v1.services.media.PlaylistService.CreatePlaylist:input_type -> api.v1.services.media.CreatePlaylistRequest
+	62, // 80: api.v1.services.media.PlaylistService.UpdatePlaylist:input_type -> api.v1.services.media.UpdatePlaylistRequest
+	64, // 81: api.v1.services.media.PlaylistService.DeletePlaylist:input_type -> api.v1.services.media.DeletePlaylistRequest
+	66, // 82: api.v1.services.media.PlaylistService.AddToPlaylist:input_type -> api.v1.services.media.AddToPlaylistRequest
+	68, // 83: api.v1.services.media.PlaylistService.RemoveFromPlaylist:input_type -> api.v1.services.media.RemoveFromPlaylistRequest
+	1,  // 84: api.v1.services.media.MediaService.ListMedias:output_type -> api.v1.services.media.ListMediasResponse
+	3,  // 85: api.v1.services.media.MediaService.GetMedia:output_type -> api.v1.services.media.GetMediaResponse
+	5,  // 86: api.v1.services.media.MediaService.CreateMedia:output_type -> api.v1.services.media.CreateMediaResponse
+	7,  // 87: api.v1.services.media.MediaService.UpdateMedia:output_type -> api.v1.services.media.UpdateMediaResponse
+	9,  // 88: api.v1.services.media.MediaService.DeleteMedia:output_type -> api.v1.services.media.DeleteMediaResponse
+	11, // 89: api.v1.services.media.MediaService.IncrementViewCount:output_type -> api.v1.services.media.IncrementViewCountResponse
+	13, // 90: api.v1.services.media.MediaService.UploadMedia:output_type -> api.v1.services.media.UploadMediaResponse
+	71, // 91: api.v1.services.media.MediaService.ListEncodingTasks:output_type -> api.v1.services.media.ListEncodingTasksResponse
+	73, // 92: api.v1.services.media.MediaService.GetTranscodingStatus:output_type -> api.v1.services.media.GetTranscodingStatusResponse
+	15, // 93: api.v1.services.media.CategoryService.ListCategories:output_type -> api.v1.services.media.ListCategoriesResponse
+	17, // 94: api.v1.services.media.CategoryService.GetCategory:output_type -> api.v1.services.media.GetCategoryResponse
+	19, // 95: api.v1.services.media.CategoryService.CreateCategory:output_type -> api.v1.services.media.CreateCategoryResponse
+	21, // 96: api.v1.services.media.CategoryService.UpdateCategory:output_type -> api.v1.services.media.UpdateCategoryResponse
+	23, // 97: api.v1.services.media.CategoryService.DeleteCategory:output_type -> api.v1.services.media.DeleteCategoryResponse
+	25, // 98: api.v1.services.media.TagService.ListTags:output_type -> api.v1.services.media.ListTagsResponse
+	27, // 99: api.v1.services.media.TagService.GetTag:output_type -> api.v1.services.media.GetTagResponse
+	29, // 100: api.v1.services.media.TagService.CreateTag:output_type -> api.v1.services.media.CreateTagResponse
+	31, // 101: api.v1.services.media.TagService.UpdateTag:output_type -> api.v1.services.media.UpdateTagResponse
+	33, // 102: api.v1.services.media.TagService.DeleteTag:output_type -> api.v1.services.media.DeleteTagResponse
+	35, // 103: api.v1.services.media.CommentService.ListComments:output_type -> api.v1.services.media.ListCommentsResponse
+	37, // 104: api.v1.services.media.CommentService.GetComment:output_type -> api.v1.services.media.GetCommentResponse
+	39, // 105: api.v1.services.media.CommentService.CreateComment:output_type -> api.v1.services.media.CreateCommentResponse
+	41, // 106: api.v1.services.media.CommentService.UpdateComment:output_type -> api.v1.services.media.UpdateCommentResponse
+	43, // 107: api.v1.services.media.CommentService.DeleteComment:output_type -> api.v1.services.media.DeleteCommentResponse
+	45, // 108: api.v1.services.media.LikeService.ToggleLike:output_type -> api.v1.services.media.ToggleLikeResponse
+	47, // 109: api.v1.services.media.LikeService.GetMediaLikes:output_type -> api.v1.services.media.GetMediaLikesResponse
+	49, // 110: api.v1.services.media.LikeService.GetUserLikes:output_type -> api.v1.services.media.GetUserLikesResponse
+	51, // 111: api.v1.services.media.FavoriteService.GetFavorites:output_type -> api.v1.services.media.GetFavoritesResponse
+	53, // 112: api.v1.services.media.FavoriteService.ToggleFavorite:output_type -> api.v1.services.media.ToggleFavoriteResponse
+	55, // 113: api.v1.services.media.FavoriteService.RemoveFavorite:output_type -> api.v1.services.media.RemoveFavoriteResponse
+	57, // 114: api.v1.services.media.PlaylistService.GetPlaylists:output_type -> api.v1.services.media.GetPlaylistsResponse
+	59, // 115: api.v1.services.media.PlaylistService.GetPlaylist:output_type -> api.v1.services.media.GetPlaylistResponse
+	61, // 116: api.v1.services.media.PlaylistService.CreatePlaylist:output_type -> api.v1.services.media.CreatePlaylistResponse
+	63, // 117: api.v1.services.media.PlaylistService.UpdatePlaylist:output_type -> api.v1.services.media.UpdatePlaylistResponse
+	65, // 118: api.v1.services.media.PlaylistService.DeletePlaylist:output_type -> api.v1.services.media.DeletePlaylistResponse
+	67, // 119: api.v1.services.media.PlaylistService.AddToPlaylist:output_type -> api.v1.services.media.AddToPlaylistResponse
+	69, // 120: api.v1.services.media.PlaylistService.RemoveFromPlaylist:output_type -> api.v1.services.media.RemoveFromPlaylistResponse
+	84, // [84:121] is the sub-list for method output_type
+	47, // [47:84] is the sub-list for method input_type
+	47, // [47:47] is the sub-list for extension type_name
+	47, // [47:47] is the sub-list for extension extendee
+	0,  // [0:47] is the sub-list for field type_name
 }
 
 func init() { file_v1_media_media_service_proto_init() }
@@ -4186,13 +4412,14 @@ func file_v1_media_media_service_proto_init() {
 	file_v1_media_media_service_proto_msgTypes[24].OneofWrappers = []any{}
 	file_v1_media_media_service_proto_msgTypes[34].OneofWrappers = []any{}
 	file_v1_media_media_service_proto_msgTypes[56].OneofWrappers = []any{}
+	file_v1_media_media_service_proto_msgTypes[72].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_media_media_service_proto_rawDesc), len(file_v1_media_media_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   70,
+			NumMessages:   74,
 			NumExtensions: 0,
 			NumServices:   7,
 		},

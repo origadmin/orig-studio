@@ -9,6 +9,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
@@ -600,6 +601,21 @@ func (_c *MediaCreate) AddLikes(v ...*Like) *MediaCreate {
 	return _c.AddLikeIDs(ids...)
 }
 
+// AddTaskIDs adds the "tasks" edge to the EncodingTask entity by IDs.
+func (_c *MediaCreate) AddTaskIDs(ids ...int) *MediaCreate {
+	_c.mutation.AddTaskIDs(ids...)
+	return _c
+}
+
+// AddTasks adds the "tasks" edges to the EncodingTask entity.
+func (_c *MediaCreate) AddTasks(v ...*EncodingTask) *MediaCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddTaskIDs(ids...)
+}
+
 // Mutation returns the MediaMutation object of the builder.
 func (_c *MediaCreate) Mutation() *MediaMutation {
 	return _c.mutation
@@ -1146,6 +1162,22 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TasksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.TasksTable,
+			Columns: []string{media.TasksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

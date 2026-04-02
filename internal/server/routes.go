@@ -10,7 +10,7 @@ import (
 )
 
 // RegisterRoutes registers all HTTP routes
-func RegisterRoutes(router *gin.Engine, client *entity.Client, jwtMgr *auth.Manager, uploadUC *biz.UploadUseCase) {
+func RegisterRoutes(router *gin.Engine, client *entity.Client, jwtMgr *auth.Manager, uploadUC *biz.UploadUseCase, mediaUC *biz.MediaUseCase) {
 	// Health check
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
@@ -28,7 +28,7 @@ func RegisterRoutes(router *gin.Engine, client *entity.Client, jwtMgr *auth.Mana
 		RegisterUserRoutes(v1, client)
 
 		// Media routes (with JWT for upload/update/delete)
-		RegisterMediaRoutes(v1, client, jwtMgr)
+		RegisterMediaRoutes(v1, client, jwtMgr, mediaUC)
 
 		// Category routes
 		RegisterCategoryRoutes(v1, client)

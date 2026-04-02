@@ -51,12 +51,16 @@ func TestUploadE2E(t *testing.T) {
 	logger := log.NewStdLogger(os.Stderr)
 	uploadRepo := data.NewUploadRepo(client, logger)
 	mediaRepo := data.NewMediaRepo(client)
+	profileRepo := data.NewEncodeProfileRepo(client)
+	taskRepo := data.NewEncodingTaskRepo(client)
+	mediaUC := biz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, logger)
 	storage := data.NewLocalStorage("data/uploads", logger)
-	uploadUC := biz.NewUploadUseCase(uploadRepo, mediaRepo, storage, logger)
+
+	uploadUC := biz.NewUploadUseCase(uploadRepo, mediaRepo, profileRepo, taskRepo, mediaUC, storage, logger)
 
 	// Setup Router
 	router := gin.Default()
-	RegisterRoutes(router, client, jwtMgr, uploadUC)
+	RegisterRoutes(router, client, jwtMgr, uploadUC, mediaUC)
 
 	// 2. Register & Login to get token
 	username := "testuser"

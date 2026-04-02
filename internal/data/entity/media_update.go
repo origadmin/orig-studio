@@ -9,6 +9,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
@@ -781,6 +782,21 @@ func (_u *MediaUpdate) AddLikes(v ...*Like) *MediaUpdate {
 	return _u.AddLikeIDs(ids...)
 }
 
+// AddTaskIDs adds the "tasks" edge to the EncodingTask entity by IDs.
+func (_u *MediaUpdate) AddTaskIDs(ids ...int) *MediaUpdate {
+	_u.mutation.AddTaskIDs(ids...)
+	return _u
+}
+
+// AddTasks adds the "tasks" edges to the EncodingTask entity.
+func (_u *MediaUpdate) AddTasks(v ...*EncodingTask) *MediaUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddTaskIDs(ids...)
+}
+
 // Mutation returns the MediaMutation object of the builder.
 func (_u *MediaUpdate) Mutation() *MediaMutation {
 	return _u.mutation
@@ -922,6 +938,27 @@ func (_u *MediaUpdate) RemoveLikes(v ...*Like) *MediaUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveLikeIDs(ids...)
+}
+
+// ClearTasks clears all "tasks" edges to the EncodingTask entity.
+func (_u *MediaUpdate) ClearTasks() *MediaUpdate {
+	_u.mutation.ClearTasks()
+	return _u
+}
+
+// RemoveTaskIDs removes the "tasks" edge to EncodingTask entities by IDs.
+func (_u *MediaUpdate) RemoveTaskIDs(ids ...int) *MediaUpdate {
+	_u.mutation.RemoveTaskIDs(ids...)
+	return _u
+}
+
+// RemoveTasks removes "tasks" edges to EncodingTask entities.
+func (_u *MediaUpdate) RemoveTasks(v ...*EncodingTask) *MediaUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveTaskIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -1553,6 +1590,51 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.TasksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.TasksTable,
+			Columns: []string{media.TasksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedTasksIDs(); len(nodes) > 0 && !_u.mutation.TasksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.TasksTable,
+			Columns: []string{media.TasksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TasksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.TasksTable,
+			Columns: []string{media.TasksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -2325,6 +2407,21 @@ func (_u *MediaUpdateOne) AddLikes(v ...*Like) *MediaUpdateOne {
 	return _u.AddLikeIDs(ids...)
 }
 
+// AddTaskIDs adds the "tasks" edge to the EncodingTask entity by IDs.
+func (_u *MediaUpdateOne) AddTaskIDs(ids ...int) *MediaUpdateOne {
+	_u.mutation.AddTaskIDs(ids...)
+	return _u
+}
+
+// AddTasks adds the "tasks" edges to the EncodingTask entity.
+func (_u *MediaUpdateOne) AddTasks(v ...*EncodingTask) *MediaUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddTaskIDs(ids...)
+}
+
 // Mutation returns the MediaMutation object of the builder.
 func (_u *MediaUpdateOne) Mutation() *MediaMutation {
 	return _u.mutation
@@ -2466,6 +2563,27 @@ func (_u *MediaUpdateOne) RemoveLikes(v ...*Like) *MediaUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveLikeIDs(ids...)
+}
+
+// ClearTasks clears all "tasks" edges to the EncodingTask entity.
+func (_u *MediaUpdateOne) ClearTasks() *MediaUpdateOne {
+	_u.mutation.ClearTasks()
+	return _u
+}
+
+// RemoveTaskIDs removes the "tasks" edge to EncodingTask entities by IDs.
+func (_u *MediaUpdateOne) RemoveTaskIDs(ids ...int) *MediaUpdateOne {
+	_u.mutation.RemoveTaskIDs(ids...)
+	return _u
+}
+
+// RemoveTasks removes "tasks" edges to EncodingTask entities.
+func (_u *MediaUpdateOne) RemoveTasks(v ...*EncodingTask) *MediaUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveTaskIDs(ids...)
 }
 
 // Where appends a list predicates to the MediaUpdate builder.
@@ -3127,6 +3245,51 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.TasksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.TasksTable,
+			Columns: []string{media.TasksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedTasksIDs(); len(nodes) > 0 && !_u.mutation.TasksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.TasksTable,
+			Columns: []string{media.TasksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TasksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.TasksTable,
+			Columns: []string{media.TasksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

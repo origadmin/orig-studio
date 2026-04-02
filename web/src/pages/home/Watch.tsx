@@ -3,11 +3,11 @@
  * 视频播放页 - 对接真实数据
  */
 
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {useSearch, Link} from '@tanstack/react-router';
 import {
     ThumbsUp, ThumbsDown, Share2, MessageCircle,
-    MoreHorizontal, UserPlus, Eye
+    MoreHorizontal, UserPlus, Eye, Loader2
 } from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
@@ -18,11 +18,13 @@ import {formatViews, formatDate, formatDuration} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
 import {type Media} from '@/lib/api/media';
 import {useMediaDetail, useMediaList} from '@/hooks/queries';
+import Hls from 'hls.js';
 
 const WatchPage = () => {
     const {t} = useTranslation();
     const {v: id} = useSearch({strict: false});
     const {data: media, isLoading: isMediaLoading, error: mediaError} = useMediaDetail(id as string);
+    const videoRef = useRef<HTMLVideoElement>(null);
 
     const {data: recData} = useMediaList({
         page_size: 10,
@@ -33,6 +35,45 @@ const WatchPage = () => {
     const recommendations = recData?.list?.filter(m => m.id !== Number(id)) || [];
     const loading = isMediaLoading;
     const error = mediaError ? t('watch.failedToLoad') : null;
+
+    useEffect(() => {
+        if (!media || !videoRef.current) return;
+
+        const video = videoRef.current;
+        const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || "http://localhost:9090";
+        const getFullUrl = (path?: string) => {
+            if (!path) return '';
+            if (path.startsWith('http')) return path;
+            const base = API_BASE_URL.replace(/\/$/, '');
+            const sep = path.startsWith('/') ? '' : '/';
+            return `${base}${sep}${path}`;
+        };
+
+        const hlsUrl = media.hls_file ? getFullUrl(media.hls_file) : null;
+        const originalUrl = getFullUrl(media.url);
+
+        if (hlsUrl && Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(hlsUrl);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                video.play().catch(() => {
+                    // Autoplay might be blocked
+                    console.log("Autoplay blocked");
+                });
+            });
+
+            return () => {
+                hls.destroy();
+            };
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            // Native HLS support (Safari)
+            video.src = hlsUrl || originalUrl;
+        } else {
+            // Fallback to original MP4
+            video.src = originalUrl;
+        }
+    }, [media]);
 
     if (loading) {
         return (
@@ -87,8 +128,8 @@ const WatchPage = () => {
         return `${base}${sep}${path}`;
     };
 
-    const videoUrl = getFullUrl(media.url);
     const user = media.edges?.user?.[0];
+    const isProcessing = media.encoding_status !== 'success';
 
     return (
         <div className="flex flex-col lg:flex-row gap-6">
@@ -97,15 +138,33 @@ const WatchPage = () => {
                 {/* Player Container */}
                 <div className="bg-black rounded-2xl overflow-hidden aspect-video shadow-2xl relative group">
                     <video
-                        key={videoUrl}
-                        src={videoUrl}
+                        ref={videoRef}
                         controls
-                        autoPlay
                         className="w-full h-full"
                         poster={media.poster ? getFullUrl(media.poster) : (media.thumbnail ? getFullUrl(media.thumbnail) : undefined)}
                     >
                         Your browser does not support the video tag.
                     </video>
+
+                    {/* Processing Overlay */}
+                    {isProcessing && (
+                        <div className="absolute top-4 left-4 z-10">
+                            <Badge variant="secondary"
+                                   className="bg-black/60 text-white border-white/20 backdrop-blur-md flex items-center gap-2 px-3 py-1.5">
+                                {media.encoding_status === 'processing' ? (
+                                    <>
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin"/>
+                                        {t('watch.transcoding')}...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Eye className="w-3.5 h-3.5"/>
+                                        {t('watch.optimizing')}...
+                                    </>
+                                )}
+                            </Badge>
+                        </div>
+                    )}
                 </div>
 
                 {/* Video Info */}

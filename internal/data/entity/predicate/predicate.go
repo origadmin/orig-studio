@@ -15,6 +15,12 @@ type Channel func(*sql.Selector)
 // Comment is the predicate function for comment builders.
 type Comment func(*sql.Selector)
 
+// EncodeProfile is the predicate function for encodeprofile builders.
+type EncodeProfile func(*sql.Selector)
+
+// EncodingTask is the predicate function for encodingtask builders.
+type EncodingTask func(*sql.Selector)
+
 // Favorite is the predicate function for favorite builders.
 type Favorite func(*sql.Selector)
 

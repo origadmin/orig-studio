@@ -85,6 +85,36 @@ func (m *MockMediaRepo) IncrementViewCount(ctx context.Context, id int64) (int64
 	return 0, nil
 }
 
+// MockEncodeProfileRepo
+type MockEncodeProfileRepo struct {
+	mock.Mock
+}
+
+func (m *MockEncodeProfileRepo) ListActive(ctx context.Context) ([]*EncodeProfile, error) {
+	return nil, nil
+}
+func (m *MockEncodeProfileRepo) Get(ctx context.Context, id int) (*EncodeProfile, error) {
+	return nil, nil
+}
+
+// MockEncodingTaskRepo
+type MockEncodingTaskRepo struct {
+	mock.Mock
+}
+
+func (m *MockEncodingTaskRepo) Create(ctx context.Context, task *EncodingTask) (*EncodingTask, error) {
+	return task, nil
+}
+func (m *MockEncodingTaskRepo) Update(ctx context.Context, task *EncodingTask) (*EncodingTask, error) {
+	return task, nil
+}
+func (m *MockEncodingTaskRepo) Get(ctx context.Context, id int) (*EncodingTask, error) {
+	return nil, nil
+}
+func (m *MockEncodingTaskRepo) ListByMedia(ctx context.Context, mediaId int64) ([]*EncodingTask, error) {
+	return nil, nil
+}
+
 func TestUploadWorkflow(t *testing.T) {
 	// Setup
 	tempDir, _ := os.MkdirTemp("", "upload-test-*")
@@ -96,8 +126,11 @@ func TestUploadWorkflow(t *testing.T) {
 	storage := &testStorage{baseDir: tempDir}
 	repo := new(MockRepo)
 	mediaRepo := new(MockMediaRepo)
+	profileRepo := new(MockEncodeProfileRepo)
+	taskRepo := new(MockEncodingTaskRepo)
+	mediaUC := NewMediaUseCase(mediaRepo, profileRepo, taskRepo, logger)
 
-	uc := NewUploadUseCase(repo, mediaRepo, storage, logger)
+	uc := NewUploadUseCase(repo, mediaRepo, profileRepo, taskRepo, mediaUC, storage, logger)
 	uc.chunkSize = 10 // Small chunk size for testing
 
 	ctx := context.Background()

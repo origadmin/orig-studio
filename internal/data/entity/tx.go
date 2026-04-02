@@ -18,6 +18,10 @@ type Tx struct {
 	Channel *ChannelClient
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
+	// EncodeProfile is the client for interacting with the EncodeProfile builders.
+	EncodeProfile *EncodeProfileClient
+	// EncodingTask is the client for interacting with the EncodingTask builders.
+	EncodingTask *EncodingTaskClient
 	// Favorite is the client for interacting with the Favorite builders.
 	Favorite *FavoriteClient
 	// Like is the client for interacting with the Like builders.
@@ -174,6 +178,8 @@ func (tx *Tx) init() {
 	tx.Category = NewCategoryClient(tx.config)
 	tx.Channel = NewChannelClient(tx.config)
 	tx.Comment = NewCommentClient(tx.config)
+	tx.EncodeProfile = NewEncodeProfileClient(tx.config)
+	tx.EncodingTask = NewEncodingTaskClient(tx.config)
 	tx.Favorite = NewFavoriteClient(tx.config)
 	tx.Like = NewLikeClient(tx.config)
 	tx.Media = NewMediaClient(tx.config)

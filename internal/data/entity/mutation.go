@@ -9,6 +9,8 @@ import (
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/encodeprofile"
+	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
@@ -41,6 +43,8 @@ const (
 	TypeCategory      = "Category"
 	TypeChannel       = "Channel"
 	TypeComment       = "Comment"
+	TypeEncodeProfile = "EncodeProfile"
+	TypeEncodingTask  = "EncodingTask"
 	TypeFavorite      = "Favorite"
 	TypeLike          = "Like"
 	TypeMedia         = "Media"
@@ -3352,6 +3356,1906 @@ func (m *CommentMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Comment edge %s", name)
 }
 
+// EncodeProfileMutation represents an operation that mutates the EncodeProfile nodes in the graph.
+type EncodeProfileMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	name          *string
+	description   *string
+	extension     *string
+	resolution    *string
+	video_codec   *string
+	video_bitrate *string
+	audio_codec   *string
+	audio_bitrate *string
+	is_active     *bool
+	created_at    *time.Time
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	tasks         map[int]struct{}
+	removedtasks  map[int]struct{}
+	clearedtasks  bool
+	done          bool
+	oldValue      func(context.Context) (*EncodeProfile, error)
+	predicates    []predicate.EncodeProfile
+}
+
+var _ ent.Mutation = (*EncodeProfileMutation)(nil)
+
+// encodeprofileOption allows management of the mutation configuration using functional options.
+type encodeprofileOption func(*EncodeProfileMutation)
+
+// newEncodeProfileMutation creates new mutation for the EncodeProfile entity.
+func newEncodeProfileMutation(c config, op Op, opts ...encodeprofileOption) *EncodeProfileMutation {
+	m := &EncodeProfileMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeEncodeProfile,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withEncodeProfileID sets the ID field of the mutation.
+func withEncodeProfileID(id int) encodeprofileOption {
+	return func(m *EncodeProfileMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *EncodeProfile
+		)
+		m.oldValue = func(ctx context.Context) (*EncodeProfile, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().EncodeProfile.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withEncodeProfile sets the old EncodeProfile of the mutation.
+func withEncodeProfile(node *EncodeProfile) encodeprofileOption {
+	return func(m *EncodeProfileMutation) {
+		m.oldValue = func(context.Context) (*EncodeProfile, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m EncodeProfileMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m EncodeProfileMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("entity: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *EncodeProfileMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *EncodeProfileMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().EncodeProfile.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *EncodeProfileMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *EncodeProfileMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the EncodeProfile entity.
+// If the EncodeProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodeProfileMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *EncodeProfileMutation) ResetName() {
+	m.name = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *EncodeProfileMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *EncodeProfileMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the EncodeProfile entity.
+// If the EncodeProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodeProfileMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *EncodeProfileMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[encodeprofile.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *EncodeProfileMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[encodeprofile.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *EncodeProfileMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, encodeprofile.FieldDescription)
+}
+
+// SetExtension sets the "extension" field.
+func (m *EncodeProfileMutation) SetExtension(s string) {
+	m.extension = &s
+}
+
+// Extension returns the value of the "extension" field in the mutation.
+func (m *EncodeProfileMutation) Extension() (r string, exists bool) {
+	v := m.extension
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExtension returns the old "extension" field's value of the EncodeProfile entity.
+// If the EncodeProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodeProfileMutation) OldExtension(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExtension is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExtension requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExtension: %w", err)
+	}
+	return oldValue.Extension, nil
+}
+
+// ResetExtension resets all changes to the "extension" field.
+func (m *EncodeProfileMutation) ResetExtension() {
+	m.extension = nil
+}
+
+// SetResolution sets the "resolution" field.
+func (m *EncodeProfileMutation) SetResolution(s string) {
+	m.resolution = &s
+}
+
+// Resolution returns the value of the "resolution" field in the mutation.
+func (m *EncodeProfileMutation) Resolution() (r string, exists bool) {
+	v := m.resolution
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResolution returns the old "resolution" field's value of the EncodeProfile entity.
+// If the EncodeProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodeProfileMutation) OldResolution(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResolution is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResolution requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResolution: %w", err)
+	}
+	return oldValue.Resolution, nil
+}
+
+// ResetResolution resets all changes to the "resolution" field.
+func (m *EncodeProfileMutation) ResetResolution() {
+	m.resolution = nil
+}
+
+// SetVideoCodec sets the "video_codec" field.
+func (m *EncodeProfileMutation) SetVideoCodec(s string) {
+	m.video_codec = &s
+}
+
+// VideoCodec returns the value of the "video_codec" field in the mutation.
+func (m *EncodeProfileMutation) VideoCodec() (r string, exists bool) {
+	v := m.video_codec
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVideoCodec returns the old "video_codec" field's value of the EncodeProfile entity.
+// If the EncodeProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodeProfileMutation) OldVideoCodec(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVideoCodec is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVideoCodec requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVideoCodec: %w", err)
+	}
+	return oldValue.VideoCodec, nil
+}
+
+// ResetVideoCodec resets all changes to the "video_codec" field.
+func (m *EncodeProfileMutation) ResetVideoCodec() {
+	m.video_codec = nil
+}
+
+// SetVideoBitrate sets the "video_bitrate" field.
+func (m *EncodeProfileMutation) SetVideoBitrate(s string) {
+	m.video_bitrate = &s
+}
+
+// VideoBitrate returns the value of the "video_bitrate" field in the mutation.
+func (m *EncodeProfileMutation) VideoBitrate() (r string, exists bool) {
+	v := m.video_bitrate
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVideoBitrate returns the old "video_bitrate" field's value of the EncodeProfile entity.
+// If the EncodeProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodeProfileMutation) OldVideoBitrate(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVideoBitrate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVideoBitrate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVideoBitrate: %w", err)
+	}
+	return oldValue.VideoBitrate, nil
+}
+
+// ClearVideoBitrate clears the value of the "video_bitrate" field.
+func (m *EncodeProfileMutation) ClearVideoBitrate() {
+	m.video_bitrate = nil
+	m.clearedFields[encodeprofile.FieldVideoBitrate] = struct{}{}
+}
+
+// VideoBitrateCleared returns if the "video_bitrate" field was cleared in this mutation.
+func (m *EncodeProfileMutation) VideoBitrateCleared() bool {
+	_, ok := m.clearedFields[encodeprofile.FieldVideoBitrate]
+	return ok
+}
+
+// ResetVideoBitrate resets all changes to the "video_bitrate" field.
+func (m *EncodeProfileMutation) ResetVideoBitrate() {
+	m.video_bitrate = nil
+	delete(m.clearedFields, encodeprofile.FieldVideoBitrate)
+}
+
+// SetAudioCodec sets the "audio_codec" field.
+func (m *EncodeProfileMutation) SetAudioCodec(s string) {
+	m.audio_codec = &s
+}
+
+// AudioCodec returns the value of the "audio_codec" field in the mutation.
+func (m *EncodeProfileMutation) AudioCodec() (r string, exists bool) {
+	v := m.audio_codec
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAudioCodec returns the old "audio_codec" field's value of the EncodeProfile entity.
+// If the EncodeProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodeProfileMutation) OldAudioCodec(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAudioCodec is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAudioCodec requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAudioCodec: %w", err)
+	}
+	return oldValue.AudioCodec, nil
+}
+
+// ResetAudioCodec resets all changes to the "audio_codec" field.
+func (m *EncodeProfileMutation) ResetAudioCodec() {
+	m.audio_codec = nil
+}
+
+// SetAudioBitrate sets the "audio_bitrate" field.
+func (m *EncodeProfileMutation) SetAudioBitrate(s string) {
+	m.audio_bitrate = &s
+}
+
+// AudioBitrate returns the value of the "audio_bitrate" field in the mutation.
+func (m *EncodeProfileMutation) AudioBitrate() (r string, exists bool) {
+	v := m.audio_bitrate
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAudioBitrate returns the old "audio_bitrate" field's value of the EncodeProfile entity.
+// If the EncodeProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodeProfileMutation) OldAudioBitrate(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAudioBitrate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAudioBitrate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAudioBitrate: %w", err)
+	}
+	return oldValue.AudioBitrate, nil
+}
+
+// ClearAudioBitrate clears the value of the "audio_bitrate" field.
+func (m *EncodeProfileMutation) ClearAudioBitrate() {
+	m.audio_bitrate = nil
+	m.clearedFields[encodeprofile.FieldAudioBitrate] = struct{}{}
+}
+
+// AudioBitrateCleared returns if the "audio_bitrate" field was cleared in this mutation.
+func (m *EncodeProfileMutation) AudioBitrateCleared() bool {
+	_, ok := m.clearedFields[encodeprofile.FieldAudioBitrate]
+	return ok
+}
+
+// ResetAudioBitrate resets all changes to the "audio_bitrate" field.
+func (m *EncodeProfileMutation) ResetAudioBitrate() {
+	m.audio_bitrate = nil
+	delete(m.clearedFields, encodeprofile.FieldAudioBitrate)
+}
+
+// SetIsActive sets the "is_active" field.
+func (m *EncodeProfileMutation) SetIsActive(b bool) {
+	m.is_active = &b
+}
+
+// IsActive returns the value of the "is_active" field in the mutation.
+func (m *EncodeProfileMutation) IsActive() (r bool, exists bool) {
+	v := m.is_active
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsActive returns the old "is_active" field's value of the EncodeProfile entity.
+// If the EncodeProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodeProfileMutation) OldIsActive(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsActive is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsActive requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsActive: %w", err)
+	}
+	return oldValue.IsActive, nil
+}
+
+// ResetIsActive resets all changes to the "is_active" field.
+func (m *EncodeProfileMutation) ResetIsActive() {
+	m.is_active = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *EncodeProfileMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *EncodeProfileMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the EncodeProfile entity.
+// If the EncodeProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodeProfileMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *EncodeProfileMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *EncodeProfileMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *EncodeProfileMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the EncodeProfile entity.
+// If the EncodeProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodeProfileMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *EncodeProfileMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// AddTaskIDs adds the "tasks" edge to the EncodingTask entity by ids.
+func (m *EncodeProfileMutation) AddTaskIDs(ids ...int) {
+	if m.tasks == nil {
+		m.tasks = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.tasks[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTasks clears the "tasks" edge to the EncodingTask entity.
+func (m *EncodeProfileMutation) ClearTasks() {
+	m.clearedtasks = true
+}
+
+// TasksCleared reports if the "tasks" edge to the EncodingTask entity was cleared.
+func (m *EncodeProfileMutation) TasksCleared() bool {
+	return m.clearedtasks
+}
+
+// RemoveTaskIDs removes the "tasks" edge to the EncodingTask entity by IDs.
+func (m *EncodeProfileMutation) RemoveTaskIDs(ids ...int) {
+	if m.removedtasks == nil {
+		m.removedtasks = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.tasks, ids[i])
+		m.removedtasks[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTasks returns the removed IDs of the "tasks" edge to the EncodingTask entity.
+func (m *EncodeProfileMutation) RemovedTasksIDs() (ids []int) {
+	for id := range m.removedtasks {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TasksIDs returns the "tasks" edge IDs in the mutation.
+func (m *EncodeProfileMutation) TasksIDs() (ids []int) {
+	for id := range m.tasks {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTasks resets all changes to the "tasks" edge.
+func (m *EncodeProfileMutation) ResetTasks() {
+	m.tasks = nil
+	m.clearedtasks = false
+	m.removedtasks = nil
+}
+
+// Where appends a list predicates to the EncodeProfileMutation builder.
+func (m *EncodeProfileMutation) Where(ps ...predicate.EncodeProfile) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the EncodeProfileMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *EncodeProfileMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.EncodeProfile, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *EncodeProfileMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *EncodeProfileMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (EncodeProfile).
+func (m *EncodeProfileMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *EncodeProfileMutation) Fields() []string {
+	fields := make([]string, 0, 11)
+	if m.name != nil {
+		fields = append(fields, encodeprofile.FieldName)
+	}
+	if m.description != nil {
+		fields = append(fields, encodeprofile.FieldDescription)
+	}
+	if m.extension != nil {
+		fields = append(fields, encodeprofile.FieldExtension)
+	}
+	if m.resolution != nil {
+		fields = append(fields, encodeprofile.FieldResolution)
+	}
+	if m.video_codec != nil {
+		fields = append(fields, encodeprofile.FieldVideoCodec)
+	}
+	if m.video_bitrate != nil {
+		fields = append(fields, encodeprofile.FieldVideoBitrate)
+	}
+	if m.audio_codec != nil {
+		fields = append(fields, encodeprofile.FieldAudioCodec)
+	}
+	if m.audio_bitrate != nil {
+		fields = append(fields, encodeprofile.FieldAudioBitrate)
+	}
+	if m.is_active != nil {
+		fields = append(fields, encodeprofile.FieldIsActive)
+	}
+	if m.created_at != nil {
+		fields = append(fields, encodeprofile.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, encodeprofile.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *EncodeProfileMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case encodeprofile.FieldName:
+		return m.Name()
+	case encodeprofile.FieldDescription:
+		return m.Description()
+	case encodeprofile.FieldExtension:
+		return m.Extension()
+	case encodeprofile.FieldResolution:
+		return m.Resolution()
+	case encodeprofile.FieldVideoCodec:
+		return m.VideoCodec()
+	case encodeprofile.FieldVideoBitrate:
+		return m.VideoBitrate()
+	case encodeprofile.FieldAudioCodec:
+		return m.AudioCodec()
+	case encodeprofile.FieldAudioBitrate:
+		return m.AudioBitrate()
+	case encodeprofile.FieldIsActive:
+		return m.IsActive()
+	case encodeprofile.FieldCreatedAt:
+		return m.CreatedAt()
+	case encodeprofile.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *EncodeProfileMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case encodeprofile.FieldName:
+		return m.OldName(ctx)
+	case encodeprofile.FieldDescription:
+		return m.OldDescription(ctx)
+	case encodeprofile.FieldExtension:
+		return m.OldExtension(ctx)
+	case encodeprofile.FieldResolution:
+		return m.OldResolution(ctx)
+	case encodeprofile.FieldVideoCodec:
+		return m.OldVideoCodec(ctx)
+	case encodeprofile.FieldVideoBitrate:
+		return m.OldVideoBitrate(ctx)
+	case encodeprofile.FieldAudioCodec:
+		return m.OldAudioCodec(ctx)
+	case encodeprofile.FieldAudioBitrate:
+		return m.OldAudioBitrate(ctx)
+	case encodeprofile.FieldIsActive:
+		return m.OldIsActive(ctx)
+	case encodeprofile.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case encodeprofile.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown EncodeProfile field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EncodeProfileMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case encodeprofile.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case encodeprofile.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case encodeprofile.FieldExtension:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExtension(v)
+		return nil
+	case encodeprofile.FieldResolution:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResolution(v)
+		return nil
+	case encodeprofile.FieldVideoCodec:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVideoCodec(v)
+		return nil
+	case encodeprofile.FieldVideoBitrate:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVideoBitrate(v)
+		return nil
+	case encodeprofile.FieldAudioCodec:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAudioCodec(v)
+		return nil
+	case encodeprofile.FieldAudioBitrate:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAudioBitrate(v)
+		return nil
+	case encodeprofile.FieldIsActive:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsActive(v)
+		return nil
+	case encodeprofile.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case encodeprofile.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EncodeProfile field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *EncodeProfileMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *EncodeProfileMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EncodeProfileMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown EncodeProfile numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *EncodeProfileMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(encodeprofile.FieldDescription) {
+		fields = append(fields, encodeprofile.FieldDescription)
+	}
+	if m.FieldCleared(encodeprofile.FieldVideoBitrate) {
+		fields = append(fields, encodeprofile.FieldVideoBitrate)
+	}
+	if m.FieldCleared(encodeprofile.FieldAudioBitrate) {
+		fields = append(fields, encodeprofile.FieldAudioBitrate)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *EncodeProfileMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *EncodeProfileMutation) ClearField(name string) error {
+	switch name {
+	case encodeprofile.FieldDescription:
+		m.ClearDescription()
+		return nil
+	case encodeprofile.FieldVideoBitrate:
+		m.ClearVideoBitrate()
+		return nil
+	case encodeprofile.FieldAudioBitrate:
+		m.ClearAudioBitrate()
+		return nil
+	}
+	return fmt.Errorf("unknown EncodeProfile nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *EncodeProfileMutation) ResetField(name string) error {
+	switch name {
+	case encodeprofile.FieldName:
+		m.ResetName()
+		return nil
+	case encodeprofile.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case encodeprofile.FieldExtension:
+		m.ResetExtension()
+		return nil
+	case encodeprofile.FieldResolution:
+		m.ResetResolution()
+		return nil
+	case encodeprofile.FieldVideoCodec:
+		m.ResetVideoCodec()
+		return nil
+	case encodeprofile.FieldVideoBitrate:
+		m.ResetVideoBitrate()
+		return nil
+	case encodeprofile.FieldAudioCodec:
+		m.ResetAudioCodec()
+		return nil
+	case encodeprofile.FieldAudioBitrate:
+		m.ResetAudioBitrate()
+		return nil
+	case encodeprofile.FieldIsActive:
+		m.ResetIsActive()
+		return nil
+	case encodeprofile.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case encodeprofile.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown EncodeProfile field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *EncodeProfileMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.tasks != nil {
+		edges = append(edges, encodeprofile.EdgeTasks)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *EncodeProfileMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case encodeprofile.EdgeTasks:
+		ids := make([]ent.Value, 0, len(m.tasks))
+		for id := range m.tasks {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *EncodeProfileMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedtasks != nil {
+		edges = append(edges, encodeprofile.EdgeTasks)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *EncodeProfileMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case encodeprofile.EdgeTasks:
+		ids := make([]ent.Value, 0, len(m.removedtasks))
+		for id := range m.removedtasks {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *EncodeProfileMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedtasks {
+		edges = append(edges, encodeprofile.EdgeTasks)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *EncodeProfileMutation) EdgeCleared(name string) bool {
+	switch name {
+	case encodeprofile.EdgeTasks:
+		return m.clearedtasks
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *EncodeProfileMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown EncodeProfile unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *EncodeProfileMutation) ResetEdge(name string) error {
+	switch name {
+	case encodeprofile.EdgeTasks:
+		m.ResetTasks()
+		return nil
+	}
+	return fmt.Errorf("unknown EncodeProfile edge %s", name)
+}
+
+// EncodingTaskMutation represents an operation that mutates the EncodingTask nodes in the graph.
+type EncodingTaskMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *int
+	status         *string
+	progress       *int
+	addprogress    *int
+	output_path    *string
+	error_message  *string
+	created_at     *time.Time
+	updated_at     *time.Time
+	clearedFields  map[string]struct{}
+	media          *int
+	clearedmedia   bool
+	profile        *int
+	clearedprofile bool
+	done           bool
+	oldValue       func(context.Context) (*EncodingTask, error)
+	predicates     []predicate.EncodingTask
+}
+
+var _ ent.Mutation = (*EncodingTaskMutation)(nil)
+
+// encodingtaskOption allows management of the mutation configuration using functional options.
+type encodingtaskOption func(*EncodingTaskMutation)
+
+// newEncodingTaskMutation creates new mutation for the EncodingTask entity.
+func newEncodingTaskMutation(c config, op Op, opts ...encodingtaskOption) *EncodingTaskMutation {
+	m := &EncodingTaskMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeEncodingTask,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withEncodingTaskID sets the ID field of the mutation.
+func withEncodingTaskID(id int) encodingtaskOption {
+	return func(m *EncodingTaskMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *EncodingTask
+		)
+		m.oldValue = func(ctx context.Context) (*EncodingTask, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().EncodingTask.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withEncodingTask sets the old EncodingTask of the mutation.
+func withEncodingTask(node *EncodingTask) encodingtaskOption {
+	return func(m *EncodingTaskMutation) {
+		m.oldValue = func(context.Context) (*EncodingTask, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m EncodingTaskMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m EncodingTaskMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("entity: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *EncodingTaskMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *EncodingTaskMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().EncodingTask.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetMediaID sets the "media_id" field.
+func (m *EncodingTaskMutation) SetMediaID(i int) {
+	m.media = &i
+}
+
+// MediaID returns the value of the "media_id" field in the mutation.
+func (m *EncodingTaskMutation) MediaID() (r int, exists bool) {
+	v := m.media
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMediaID returns the old "media_id" field's value of the EncodingTask entity.
+// If the EncodingTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodingTaskMutation) OldMediaID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMediaID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMediaID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMediaID: %w", err)
+	}
+	return oldValue.MediaID, nil
+}
+
+// ResetMediaID resets all changes to the "media_id" field.
+func (m *EncodingTaskMutation) ResetMediaID() {
+	m.media = nil
+}
+
+// SetProfileID sets the "profile_id" field.
+func (m *EncodingTaskMutation) SetProfileID(i int) {
+	m.profile = &i
+}
+
+// ProfileID returns the value of the "profile_id" field in the mutation.
+func (m *EncodingTaskMutation) ProfileID() (r int, exists bool) {
+	v := m.profile
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProfileID returns the old "profile_id" field's value of the EncodingTask entity.
+// If the EncodingTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodingTaskMutation) OldProfileID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProfileID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProfileID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProfileID: %w", err)
+	}
+	return oldValue.ProfileID, nil
+}
+
+// ResetProfileID resets all changes to the "profile_id" field.
+func (m *EncodingTaskMutation) ResetProfileID() {
+	m.profile = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *EncodingTaskMutation) SetStatus(s string) {
+	m.status = &s
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *EncodingTaskMutation) Status() (r string, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the EncodingTask entity.
+// If the EncodingTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodingTaskMutation) OldStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *EncodingTaskMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetProgress sets the "progress" field.
+func (m *EncodingTaskMutation) SetProgress(i int) {
+	m.progress = &i
+	m.addprogress = nil
+}
+
+// Progress returns the value of the "progress" field in the mutation.
+func (m *EncodingTaskMutation) Progress() (r int, exists bool) {
+	v := m.progress
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProgress returns the old "progress" field's value of the EncodingTask entity.
+// If the EncodingTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodingTaskMutation) OldProgress(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProgress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProgress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProgress: %w", err)
+	}
+	return oldValue.Progress, nil
+}
+
+// AddProgress adds i to the "progress" field.
+func (m *EncodingTaskMutation) AddProgress(i int) {
+	if m.addprogress != nil {
+		*m.addprogress += i
+	} else {
+		m.addprogress = &i
+	}
+}
+
+// AddedProgress returns the value that was added to the "progress" field in this mutation.
+func (m *EncodingTaskMutation) AddedProgress() (r int, exists bool) {
+	v := m.addprogress
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetProgress resets all changes to the "progress" field.
+func (m *EncodingTaskMutation) ResetProgress() {
+	m.progress = nil
+	m.addprogress = nil
+}
+
+// SetOutputPath sets the "output_path" field.
+func (m *EncodingTaskMutation) SetOutputPath(s string) {
+	m.output_path = &s
+}
+
+// OutputPath returns the value of the "output_path" field in the mutation.
+func (m *EncodingTaskMutation) OutputPath() (r string, exists bool) {
+	v := m.output_path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOutputPath returns the old "output_path" field's value of the EncodingTask entity.
+// If the EncodingTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodingTaskMutation) OldOutputPath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOutputPath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOutputPath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOutputPath: %w", err)
+	}
+	return oldValue.OutputPath, nil
+}
+
+// ClearOutputPath clears the value of the "output_path" field.
+func (m *EncodingTaskMutation) ClearOutputPath() {
+	m.output_path = nil
+	m.clearedFields[encodingtask.FieldOutputPath] = struct{}{}
+}
+
+// OutputPathCleared returns if the "output_path" field was cleared in this mutation.
+func (m *EncodingTaskMutation) OutputPathCleared() bool {
+	_, ok := m.clearedFields[encodingtask.FieldOutputPath]
+	return ok
+}
+
+// ResetOutputPath resets all changes to the "output_path" field.
+func (m *EncodingTaskMutation) ResetOutputPath() {
+	m.output_path = nil
+	delete(m.clearedFields, encodingtask.FieldOutputPath)
+}
+
+// SetErrorMessage sets the "error_message" field.
+func (m *EncodingTaskMutation) SetErrorMessage(s string) {
+	m.error_message = &s
+}
+
+// ErrorMessage returns the value of the "error_message" field in the mutation.
+func (m *EncodingTaskMutation) ErrorMessage() (r string, exists bool) {
+	v := m.error_message
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldErrorMessage returns the old "error_message" field's value of the EncodingTask entity.
+// If the EncodingTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodingTaskMutation) OldErrorMessage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldErrorMessage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldErrorMessage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldErrorMessage: %w", err)
+	}
+	return oldValue.ErrorMessage, nil
+}
+
+// ClearErrorMessage clears the value of the "error_message" field.
+func (m *EncodingTaskMutation) ClearErrorMessage() {
+	m.error_message = nil
+	m.clearedFields[encodingtask.FieldErrorMessage] = struct{}{}
+}
+
+// ErrorMessageCleared returns if the "error_message" field was cleared in this mutation.
+func (m *EncodingTaskMutation) ErrorMessageCleared() bool {
+	_, ok := m.clearedFields[encodingtask.FieldErrorMessage]
+	return ok
+}
+
+// ResetErrorMessage resets all changes to the "error_message" field.
+func (m *EncodingTaskMutation) ResetErrorMessage() {
+	m.error_message = nil
+	delete(m.clearedFields, encodingtask.FieldErrorMessage)
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *EncodingTaskMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *EncodingTaskMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the EncodingTask entity.
+// If the EncodingTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodingTaskMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *EncodingTaskMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *EncodingTaskMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *EncodingTaskMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the EncodingTask entity.
+// If the EncodingTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodingTaskMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *EncodingTaskMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// ClearMedia clears the "media" edge to the Media entity.
+func (m *EncodingTaskMutation) ClearMedia() {
+	m.clearedmedia = true
+	m.clearedFields[encodingtask.FieldMediaID] = struct{}{}
+}
+
+// MediaCleared reports if the "media" edge to the Media entity was cleared.
+func (m *EncodingTaskMutation) MediaCleared() bool {
+	return m.clearedmedia
+}
+
+// MediaIDs returns the "media" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// MediaID instead. It exists only for internal usage by the builders.
+func (m *EncodingTaskMutation) MediaIDs() (ids []int) {
+	if id := m.media; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetMedia resets all changes to the "media" edge.
+func (m *EncodingTaskMutation) ResetMedia() {
+	m.media = nil
+	m.clearedmedia = false
+}
+
+// ClearProfile clears the "profile" edge to the EncodeProfile entity.
+func (m *EncodingTaskMutation) ClearProfile() {
+	m.clearedprofile = true
+	m.clearedFields[encodingtask.FieldProfileID] = struct{}{}
+}
+
+// ProfileCleared reports if the "profile" edge to the EncodeProfile entity was cleared.
+func (m *EncodingTaskMutation) ProfileCleared() bool {
+	return m.clearedprofile
+}
+
+// ProfileIDs returns the "profile" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ProfileID instead. It exists only for internal usage by the builders.
+func (m *EncodingTaskMutation) ProfileIDs() (ids []int) {
+	if id := m.profile; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetProfile resets all changes to the "profile" edge.
+func (m *EncodingTaskMutation) ResetProfile() {
+	m.profile = nil
+	m.clearedprofile = false
+}
+
+// Where appends a list predicates to the EncodingTaskMutation builder.
+func (m *EncodingTaskMutation) Where(ps ...predicate.EncodingTask) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the EncodingTaskMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *EncodingTaskMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.EncodingTask, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *EncodingTaskMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *EncodingTaskMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (EncodingTask).
+func (m *EncodingTaskMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *EncodingTaskMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.media != nil {
+		fields = append(fields, encodingtask.FieldMediaID)
+	}
+	if m.profile != nil {
+		fields = append(fields, encodingtask.FieldProfileID)
+	}
+	if m.status != nil {
+		fields = append(fields, encodingtask.FieldStatus)
+	}
+	if m.progress != nil {
+		fields = append(fields, encodingtask.FieldProgress)
+	}
+	if m.output_path != nil {
+		fields = append(fields, encodingtask.FieldOutputPath)
+	}
+	if m.error_message != nil {
+		fields = append(fields, encodingtask.FieldErrorMessage)
+	}
+	if m.created_at != nil {
+		fields = append(fields, encodingtask.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, encodingtask.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *EncodingTaskMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case encodingtask.FieldMediaID:
+		return m.MediaID()
+	case encodingtask.FieldProfileID:
+		return m.ProfileID()
+	case encodingtask.FieldStatus:
+		return m.Status()
+	case encodingtask.FieldProgress:
+		return m.Progress()
+	case encodingtask.FieldOutputPath:
+		return m.OutputPath()
+	case encodingtask.FieldErrorMessage:
+		return m.ErrorMessage()
+	case encodingtask.FieldCreatedAt:
+		return m.CreatedAt()
+	case encodingtask.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *EncodingTaskMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case encodingtask.FieldMediaID:
+		return m.OldMediaID(ctx)
+	case encodingtask.FieldProfileID:
+		return m.OldProfileID(ctx)
+	case encodingtask.FieldStatus:
+		return m.OldStatus(ctx)
+	case encodingtask.FieldProgress:
+		return m.OldProgress(ctx)
+	case encodingtask.FieldOutputPath:
+		return m.OldOutputPath(ctx)
+	case encodingtask.FieldErrorMessage:
+		return m.OldErrorMessage(ctx)
+	case encodingtask.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case encodingtask.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown EncodingTask field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EncodingTaskMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case encodingtask.FieldMediaID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMediaID(v)
+		return nil
+	case encodingtask.FieldProfileID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProfileID(v)
+		return nil
+	case encodingtask.FieldStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case encodingtask.FieldProgress:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProgress(v)
+		return nil
+	case encodingtask.FieldOutputPath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOutputPath(v)
+		return nil
+	case encodingtask.FieldErrorMessage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetErrorMessage(v)
+		return nil
+	case encodingtask.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case encodingtask.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EncodingTask field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *EncodingTaskMutation) AddedFields() []string {
+	var fields []string
+	if m.addprogress != nil {
+		fields = append(fields, encodingtask.FieldProgress)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *EncodingTaskMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case encodingtask.FieldProgress:
+		return m.AddedProgress()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EncodingTaskMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case encodingtask.FieldProgress:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddProgress(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EncodingTask numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *EncodingTaskMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(encodingtask.FieldOutputPath) {
+		fields = append(fields, encodingtask.FieldOutputPath)
+	}
+	if m.FieldCleared(encodingtask.FieldErrorMessage) {
+		fields = append(fields, encodingtask.FieldErrorMessage)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *EncodingTaskMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *EncodingTaskMutation) ClearField(name string) error {
+	switch name {
+	case encodingtask.FieldOutputPath:
+		m.ClearOutputPath()
+		return nil
+	case encodingtask.FieldErrorMessage:
+		m.ClearErrorMessage()
+		return nil
+	}
+	return fmt.Errorf("unknown EncodingTask nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *EncodingTaskMutation) ResetField(name string) error {
+	switch name {
+	case encodingtask.FieldMediaID:
+		m.ResetMediaID()
+		return nil
+	case encodingtask.FieldProfileID:
+		m.ResetProfileID()
+		return nil
+	case encodingtask.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case encodingtask.FieldProgress:
+		m.ResetProgress()
+		return nil
+	case encodingtask.FieldOutputPath:
+		m.ResetOutputPath()
+		return nil
+	case encodingtask.FieldErrorMessage:
+		m.ResetErrorMessage()
+		return nil
+	case encodingtask.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case encodingtask.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown EncodingTask field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *EncodingTaskMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.media != nil {
+		edges = append(edges, encodingtask.EdgeMedia)
+	}
+	if m.profile != nil {
+		edges = append(edges, encodingtask.EdgeProfile)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *EncodingTaskMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case encodingtask.EdgeMedia:
+		if id := m.media; id != nil {
+			return []ent.Value{*id}
+		}
+	case encodingtask.EdgeProfile:
+		if id := m.profile; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *EncodingTaskMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *EncodingTaskMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *EncodingTaskMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedmedia {
+		edges = append(edges, encodingtask.EdgeMedia)
+	}
+	if m.clearedprofile {
+		edges = append(edges, encodingtask.EdgeProfile)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *EncodingTaskMutation) EdgeCleared(name string) bool {
+	switch name {
+	case encodingtask.EdgeMedia:
+		return m.clearedmedia
+	case encodingtask.EdgeProfile:
+		return m.clearedprofile
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *EncodingTaskMutation) ClearEdge(name string) error {
+	switch name {
+	case encodingtask.EdgeMedia:
+		m.ClearMedia()
+		return nil
+	case encodingtask.EdgeProfile:
+		m.ClearProfile()
+		return nil
+	}
+	return fmt.Errorf("unknown EncodingTask unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *EncodingTaskMutation) ResetEdge(name string) error {
+	switch name {
+	case encodingtask.EdgeMedia:
+		m.ResetMedia()
+		return nil
+	case encodingtask.EdgeProfile:
+		m.ResetProfile()
+		return nil
+	}
+	return fmt.Errorf("unknown EncodingTask edge %s", name)
+}
+
 // FavoriteMutation represents an operation that mutates the Favorite nodes in the graph.
 type FavoriteMutation struct {
 	config
@@ -4383,6 +6287,9 @@ type MediaMutation struct {
 	likes             map[int]struct{}
 	removedlikes      map[int]struct{}
 	clearedlikes      bool
+	tasks             map[int]struct{}
+	removedtasks      map[int]struct{}
+	clearedtasks      bool
 	done              bool
 	oldValue          func(context.Context) (*Media, error)
 	predicates        []predicate.Media
@@ -6528,6 +8435,60 @@ func (m *MediaMutation) ResetLikes() {
 	m.removedlikes = nil
 }
 
+// AddTaskIDs adds the "tasks" edge to the EncodingTask entity by ids.
+func (m *MediaMutation) AddTaskIDs(ids ...int) {
+	if m.tasks == nil {
+		m.tasks = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.tasks[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTasks clears the "tasks" edge to the EncodingTask entity.
+func (m *MediaMutation) ClearTasks() {
+	m.clearedtasks = true
+}
+
+// TasksCleared reports if the "tasks" edge to the EncodingTask entity was cleared.
+func (m *MediaMutation) TasksCleared() bool {
+	return m.clearedtasks
+}
+
+// RemoveTaskIDs removes the "tasks" edge to the EncodingTask entity by IDs.
+func (m *MediaMutation) RemoveTaskIDs(ids ...int) {
+	if m.removedtasks == nil {
+		m.removedtasks = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.tasks, ids[i])
+		m.removedtasks[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTasks returns the removed IDs of the "tasks" edge to the EncodingTask entity.
+func (m *MediaMutation) RemovedTasksIDs() (ids []int) {
+	for id := range m.removedtasks {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TasksIDs returns the "tasks" edge IDs in the mutation.
+func (m *MediaMutation) TasksIDs() (ids []int) {
+	for id := range m.tasks {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTasks resets all changes to the "tasks" edge.
+func (m *MediaMutation) ResetTasks() {
+	m.tasks = nil
+	m.clearedtasks = false
+	m.removedtasks = nil
+}
+
 // Where appends a list predicates to the MediaMutation builder.
 func (m *MediaMutation) Where(ps ...predicate.Media) {
 	m.predicates = append(m.predicates, ps...)
@@ -7449,7 +9410,7 @@ func (m *MediaMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *MediaMutation) AddedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 9)
 	if m.user != nil {
 		edges = append(edges, media.EdgeUser)
 	}
@@ -7473,6 +9434,9 @@ func (m *MediaMutation) AddedEdges() []string {
 	}
 	if m.likes != nil {
 		edges = append(edges, media.EdgeLikes)
+	}
+	if m.tasks != nil {
+		edges = append(edges, media.EdgeTasks)
 	}
 	return edges
 }
@@ -7525,13 +9489,19 @@ func (m *MediaMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case media.EdgeTasks:
+		ids := make([]ent.Value, 0, len(m.tasks))
+		for id := range m.tasks {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *MediaMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 9)
 	if m.removedcomments != nil {
 		edges = append(edges, media.EdgeComments)
 	}
@@ -7549,6 +9519,9 @@ func (m *MediaMutation) RemovedEdges() []string {
 	}
 	if m.removedlikes != nil {
 		edges = append(edges, media.EdgeLikes)
+	}
+	if m.removedtasks != nil {
+		edges = append(edges, media.EdgeTasks)
 	}
 	return edges
 }
@@ -7593,13 +9566,19 @@ func (m *MediaMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case media.EdgeTasks:
+		ids := make([]ent.Value, 0, len(m.removedtasks))
+		for id := range m.removedtasks {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *MediaMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 9)
 	if m.cleareduser {
 		edges = append(edges, media.EdgeUser)
 	}
@@ -7624,6 +9603,9 @@ func (m *MediaMutation) ClearedEdges() []string {
 	if m.clearedlikes {
 		edges = append(edges, media.EdgeLikes)
 	}
+	if m.clearedtasks {
+		edges = append(edges, media.EdgeTasks)
+	}
 	return edges
 }
 
@@ -7647,6 +9629,8 @@ func (m *MediaMutation) EdgeCleared(name string) bool {
 		return m.clearedfavorites
 	case media.EdgeLikes:
 		return m.clearedlikes
+	case media.EdgeTasks:
+		return m.clearedtasks
 	}
 	return false
 }
@@ -7692,6 +9676,9 @@ func (m *MediaMutation) ResetEdge(name string) error {
 		return nil
 	case media.EdgeLikes:
 		m.ResetLikes()
+		return nil
+	case media.EdgeTasks:
+		m.ResetTasks()
 		return nil
 	}
 	return fmt.Errorf("unknown Media edge %s", name)

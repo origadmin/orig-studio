@@ -4,11 +4,13 @@
 
 import React from 'react';
 import {Link} from '@tanstack/react-router';
-import {Play, Eye, Calendar} from 'lucide-react';
+import {Play, Eye, Calendar, Loader2} from 'lucide-react';
 import {MediaItem} from '@/types/media';
 import {formatDuration, formatViews, formatDate} from '@/lib/format';
 
 const VideoCard = ({video}: { video: MediaItem }) => {
+    const isProcessing = video.encoding_status !== 'success';
+
     return (
         <div
             className="group cursor-pointer rounded-[2rem] bg-white border border-gray-100 hover:border-blue-100 transition-all overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 duration-500 ease-out">
@@ -18,6 +20,27 @@ const VideoCard = ({video}: { video: MediaItem }) => {
                     alt={video.title}
                     className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700 ease-in-out"
                 />
+
+                {/* Processing Badge */}
+                {isProcessing && (
+                    <div className="absolute top-3 left-3 z-10">
+                        <div
+                            className="bg-black/60 backdrop-blur-md text-white text-[10px] font-black px-2 py-1 rounded-lg flex items-center gap-1.5 shadow-lg border border-white/10 uppercase tracking-wider">
+                            {video.encoding_status === 'processing' ? (
+                                <>
+                                    <Loader2 size={10} className="animate-spin"/>
+                                    Processing
+                                </>
+                            ) : (
+                                <>
+                                    <Eye size={10}/>
+                                    Optimizing
+                                </>
+                            )}
+                        </div>
+                    </div>
+                )}
+
                 {/* Play Icon Overlay */}
                 <div
                     className="absolute inset-0 bg-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

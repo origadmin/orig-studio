@@ -157,6 +157,88 @@ var (
 			},
 		},
 	}
+	// EncodeProfilesColumns holds the columns for the "encode_profiles" table.
+	EncodeProfilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString, Unique: true, Size: 100},
+		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "extension", Type: field.TypeString, Size: 20, Default: "mp4"},
+		{Name: "resolution", Type: field.TypeString, Size: 20},
+		{Name: "video_codec", Type: field.TypeString, Size: 50, Default: "h264"},
+		{Name: "video_bitrate", Type: field.TypeString, Nullable: true, Size: 20},
+		{Name: "audio_codec", Type: field.TypeString, Size: 50, Default: "aac"},
+		{Name: "audio_bitrate", Type: field.TypeString, Nullable: true, Size: 20},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// EncodeProfilesTable holds the schema information for the "encode_profiles" table.
+	EncodeProfilesTable = &schema.Table{
+		Name:       "encode_profiles",
+		Columns:    EncodeProfilesColumns,
+		PrimaryKey: []*schema.Column{EncodeProfilesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "encodeprofile_name",
+				Unique:  false,
+				Columns: []*schema.Column{EncodeProfilesColumns[1]},
+			},
+			{
+				Name:    "encodeprofile_is_active",
+				Unique:  false,
+				Columns: []*schema.Column{EncodeProfilesColumns[9]},
+			},
+		},
+	}
+	// EncodingTasksColumns holds the columns for the "encoding_tasks" table.
+	EncodingTasksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "status", Type: field.TypeString, Size: 20, Default: "pending"},
+		{Name: "progress", Type: field.TypeInt, Default: 0},
+		{Name: "output_path", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "error_message", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "profile_id", Type: field.TypeInt},
+		{Name: "media_id", Type: field.TypeInt},
+	}
+	// EncodingTasksTable holds the schema information for the "encoding_tasks" table.
+	EncodingTasksTable = &schema.Table{
+		Name:       "encoding_tasks",
+		Columns:    EncodingTasksColumns,
+		PrimaryKey: []*schema.Column{EncodingTasksColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "encoding_tasks_encode_profiles_tasks",
+				Columns:    []*schema.Column{EncodingTasksColumns[7]},
+				RefColumns: []*schema.Column{EncodeProfilesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "encoding_tasks_media_tasks",
+				Columns:    []*schema.Column{EncodingTasksColumns[8]},
+				RefColumns: []*schema.Column{MediaColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "encodingtask_media_id",
+				Unique:  false,
+				Columns: []*schema.Column{EncodingTasksColumns[8]},
+			},
+			{
+				Name:    "encodingtask_status",
+				Unique:  false,
+				Columns: []*schema.Column{EncodingTasksColumns[1]},
+			},
+			{
+				Name:    "encodingtask_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{EncodingTasksColumns[5]},
+			},
+		},
+	}
 	// FilesFavoriteColumns holds the columns for the "files_favorite" table.
 	FilesFavoriteColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -800,6 +882,8 @@ var (
 		CategoriesTable,
 		UsersChannelTable,
 		FilesCommentTable,
+		EncodeProfilesTable,
+		EncodingTasksTable,
 		FilesFavoriteTable,
 		FilesLikeTable,
 		MediaTable,
@@ -832,6 +916,8 @@ func init() {
 	FilesCommentTable.Annotation = &entsql.Annotation{
 		Table: "files_comment",
 	}
+	EncodingTasksTable.ForeignKeys[0].RefTable = EncodeProfilesTable
+	EncodingTasksTable.ForeignKeys[1].RefTable = MediaTable
 	FilesFavoriteTable.ForeignKeys[0].RefTable = MediaTable
 	FilesFavoriteTable.ForeignKeys[1].RefTable = UsersUserTable
 	FilesFavoriteTable.Annotation = &entsql.Annotation{

@@ -19,13 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MediaService_ListMedias_FullMethodName         = "/api.v1.services.media.MediaService/ListMedias"
-	MediaService_GetMedia_FullMethodName           = "/api.v1.services.media.MediaService/GetMedia"
-	MediaService_CreateMedia_FullMethodName        = "/api.v1.services.media.MediaService/CreateMedia"
-	MediaService_UpdateMedia_FullMethodName        = "/api.v1.services.media.MediaService/UpdateMedia"
-	MediaService_DeleteMedia_FullMethodName        = "/api.v1.services.media.MediaService/DeleteMedia"
-	MediaService_IncrementViewCount_FullMethodName = "/api.v1.services.media.MediaService/IncrementViewCount"
-	MediaService_UploadMedia_FullMethodName        = "/api.v1.services.media.MediaService/UploadMedia"
+	MediaService_ListMedias_FullMethodName           = "/api.v1.services.media.MediaService/ListMedias"
+	MediaService_GetMedia_FullMethodName             = "/api.v1.services.media.MediaService/GetMedia"
+	MediaService_CreateMedia_FullMethodName          = "/api.v1.services.media.MediaService/CreateMedia"
+	MediaService_UpdateMedia_FullMethodName          = "/api.v1.services.media.MediaService/UpdateMedia"
+	MediaService_DeleteMedia_FullMethodName          = "/api.v1.services.media.MediaService/DeleteMedia"
+	MediaService_IncrementViewCount_FullMethodName   = "/api.v1.services.media.MediaService/IncrementViewCount"
+	MediaService_UploadMedia_FullMethodName          = "/api.v1.services.media.MediaService/UploadMedia"
+	MediaService_ListEncodingTasks_FullMethodName    = "/api.v1.services.media.MediaService/ListEncodingTasks"
+	MediaService_GetTranscodingStatus_FullMethodName = "/api.v1.services.media.MediaService/GetTranscodingStatus"
 )
 
 // MediaServiceClient is the client API for MediaService service.
@@ -49,6 +51,10 @@ type MediaServiceClient interface {
 	// UploadMedia uploads a media file.
 	// Note: For large files, standard HTTP multipart is preferred over gRPC in the gateway.
 	UploadMedia(ctx context.Context, in *UploadMediaRequest, opts ...grpc.CallOption) (*UploadMediaResponse, error)
+	// ListEncodingTasks returns a list of encoding tasks for a media.
+	ListEncodingTasks(ctx context.Context, in *ListEncodingTasksRequest, opts ...grpc.CallOption) (*ListEncodingTasksResponse, error)
+	// GetTranscodingStatus returns the overall transcoding status of the system.
+	GetTranscodingStatus(ctx context.Context, in *GetTranscodingStatusRequest, opts ...grpc.CallOption) (*GetTranscodingStatusResponse, error)
 }
 
 type mediaServiceClient struct {
@@ -129,6 +135,26 @@ func (c *mediaServiceClient) UploadMedia(ctx context.Context, in *UploadMediaReq
 	return out, nil
 }
 
+func (c *mediaServiceClient) ListEncodingTasks(ctx context.Context, in *ListEncodingTasksRequest, opts ...grpc.CallOption) (*ListEncodingTasksResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListEncodingTasksResponse)
+	err := c.cc.Invoke(ctx, MediaService_ListEncodingTasks_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) GetTranscodingStatus(ctx context.Context, in *GetTranscodingStatusRequest, opts ...grpc.CallOption) (*GetTranscodingStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTranscodingStatusResponse)
+	err := c.cc.Invoke(ctx, MediaService_GetTranscodingStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MediaServiceServer is the server API for MediaService service.
 // All implementations must embed UnimplementedMediaServiceServer
 // for forward compatibility.
@@ -150,6 +176,10 @@ type MediaServiceServer interface {
 	// UploadMedia uploads a media file.
 	// Note: For large files, standard HTTP multipart is preferred over gRPC in the gateway.
 	UploadMedia(context.Context, *UploadMediaRequest) (*UploadMediaResponse, error)
+	// ListEncodingTasks returns a list of encoding tasks for a media.
+	ListEncodingTasks(context.Context, *ListEncodingTasksRequest) (*ListEncodingTasksResponse, error)
+	// GetTranscodingStatus returns the overall transcoding status of the system.
+	GetTranscodingStatus(context.Context, *GetTranscodingStatusRequest) (*GetTranscodingStatusResponse, error)
 	mustEmbedUnimplementedMediaServiceServer()
 }
 
@@ -180,6 +210,12 @@ func (UnimplementedMediaServiceServer) IncrementViewCount(context.Context, *Incr
 }
 func (UnimplementedMediaServiceServer) UploadMedia(context.Context, *UploadMediaRequest) (*UploadMediaResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UploadMedia not implemented")
+}
+func (UnimplementedMediaServiceServer) ListEncodingTasks(context.Context, *ListEncodingTasksRequest) (*ListEncodingTasksResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListEncodingTasks not implemented")
+}
+func (UnimplementedMediaServiceServer) GetTranscodingStatus(context.Context, *GetTranscodingStatusRequest) (*GetTranscodingStatusResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetTranscodingStatus not implemented")
 }
 func (UnimplementedMediaServiceServer) mustEmbedUnimplementedMediaServiceServer() {}
 func (UnimplementedMediaServiceServer) testEmbeddedByValue()                      {}
@@ -328,6 +364,42 @@ func _MediaService_UploadMedia_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MediaService_ListEncodingTasks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListEncodingTasksRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).ListEncodingTasks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_ListEncodingTasks_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).ListEncodingTasks(ctx, req.(*ListEncodingTasksRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_GetTranscodingStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTranscodingStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).GetTranscodingStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_GetTranscodingStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).GetTranscodingStatus(ctx, req.(*GetTranscodingStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MediaService_ServiceDesc is the grpc.ServiceDesc for MediaService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -362,6 +434,14 @@ var MediaService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UploadMedia",
 			Handler:    _MediaService_UploadMedia_Handler,
+		},
+		{
+			MethodName: "ListEncodingTasks",
+			Handler:    _MediaService_ListEncodingTasks_Handler,
+		},
+		{
+			MethodName: "GetTranscodingStatus",
+			Handler:    _MediaService_GetTranscodingStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

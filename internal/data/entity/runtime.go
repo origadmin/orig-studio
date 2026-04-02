@@ -6,6 +6,8 @@ import (
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/encodeprofile"
+	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
@@ -117,6 +119,82 @@ func init() {
 	commentDescAddDate := commentFields[2].Descriptor()
 	// comment.DefaultAddDate holds the default value on creation for the add_date field.
 	comment.DefaultAddDate = commentDescAddDate.Default.(func() time.Time)
+	encodeprofileFields := schema.EncodeProfile{}.Fields()
+	_ = encodeprofileFields
+	// encodeprofileDescName is the schema descriptor for name field.
+	encodeprofileDescName := encodeprofileFields[0].Descriptor()
+	// encodeprofile.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	encodeprofile.NameValidator = encodeprofileDescName.Validators[0].(func(string) error)
+	// encodeprofileDescExtension is the schema descriptor for extension field.
+	encodeprofileDescExtension := encodeprofileFields[2].Descriptor()
+	// encodeprofile.DefaultExtension holds the default value on creation for the extension field.
+	encodeprofile.DefaultExtension = encodeprofileDescExtension.Default.(string)
+	// encodeprofile.ExtensionValidator is a validator for the "extension" field. It is called by the builders before save.
+	encodeprofile.ExtensionValidator = encodeprofileDescExtension.Validators[0].(func(string) error)
+	// encodeprofileDescResolution is the schema descriptor for resolution field.
+	encodeprofileDescResolution := encodeprofileFields[3].Descriptor()
+	// encodeprofile.ResolutionValidator is a validator for the "resolution" field. It is called by the builders before save.
+	encodeprofile.ResolutionValidator = encodeprofileDescResolution.Validators[0].(func(string) error)
+	// encodeprofileDescVideoCodec is the schema descriptor for video_codec field.
+	encodeprofileDescVideoCodec := encodeprofileFields[4].Descriptor()
+	// encodeprofile.DefaultVideoCodec holds the default value on creation for the video_codec field.
+	encodeprofile.DefaultVideoCodec = encodeprofileDescVideoCodec.Default.(string)
+	// encodeprofile.VideoCodecValidator is a validator for the "video_codec" field. It is called by the builders before save.
+	encodeprofile.VideoCodecValidator = encodeprofileDescVideoCodec.Validators[0].(func(string) error)
+	// encodeprofileDescVideoBitrate is the schema descriptor for video_bitrate field.
+	encodeprofileDescVideoBitrate := encodeprofileFields[5].Descriptor()
+	// encodeprofile.VideoBitrateValidator is a validator for the "video_bitrate" field. It is called by the builders before save.
+	encodeprofile.VideoBitrateValidator = encodeprofileDescVideoBitrate.Validators[0].(func(string) error)
+	// encodeprofileDescAudioCodec is the schema descriptor for audio_codec field.
+	encodeprofileDescAudioCodec := encodeprofileFields[6].Descriptor()
+	// encodeprofile.DefaultAudioCodec holds the default value on creation for the audio_codec field.
+	encodeprofile.DefaultAudioCodec = encodeprofileDescAudioCodec.Default.(string)
+	// encodeprofile.AudioCodecValidator is a validator for the "audio_codec" field. It is called by the builders before save.
+	encodeprofile.AudioCodecValidator = encodeprofileDescAudioCodec.Validators[0].(func(string) error)
+	// encodeprofileDescAudioBitrate is the schema descriptor for audio_bitrate field.
+	encodeprofileDescAudioBitrate := encodeprofileFields[7].Descriptor()
+	// encodeprofile.AudioBitrateValidator is a validator for the "audio_bitrate" field. It is called by the builders before save.
+	encodeprofile.AudioBitrateValidator = encodeprofileDescAudioBitrate.Validators[0].(func(string) error)
+	// encodeprofileDescIsActive is the schema descriptor for is_active field.
+	encodeprofileDescIsActive := encodeprofileFields[8].Descriptor()
+	// encodeprofile.DefaultIsActive holds the default value on creation for the is_active field.
+	encodeprofile.DefaultIsActive = encodeprofileDescIsActive.Default.(bool)
+	// encodeprofileDescCreatedAt is the schema descriptor for created_at field.
+	encodeprofileDescCreatedAt := encodeprofileFields[9].Descriptor()
+	// encodeprofile.DefaultCreatedAt holds the default value on creation for the created_at field.
+	encodeprofile.DefaultCreatedAt = encodeprofileDescCreatedAt.Default.(func() time.Time)
+	// encodeprofileDescUpdatedAt is the schema descriptor for updated_at field.
+	encodeprofileDescUpdatedAt := encodeprofileFields[10].Descriptor()
+	// encodeprofile.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	encodeprofile.DefaultUpdatedAt = encodeprofileDescUpdatedAt.Default.(func() time.Time)
+	// encodeprofile.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	encodeprofile.UpdateDefaultUpdatedAt = encodeprofileDescUpdatedAt.UpdateDefault.(func() time.Time)
+	encodingtaskFields := schema.EncodingTask{}.Fields()
+	_ = encodingtaskFields
+	// encodingtaskDescStatus is the schema descriptor for status field.
+	encodingtaskDescStatus := encodingtaskFields[2].Descriptor()
+	// encodingtask.DefaultStatus holds the default value on creation for the status field.
+	encodingtask.DefaultStatus = encodingtaskDescStatus.Default.(string)
+	// encodingtask.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	encodingtask.StatusValidator = encodingtaskDescStatus.Validators[0].(func(string) error)
+	// encodingtaskDescProgress is the schema descriptor for progress field.
+	encodingtaskDescProgress := encodingtaskFields[3].Descriptor()
+	// encodingtask.DefaultProgress holds the default value on creation for the progress field.
+	encodingtask.DefaultProgress = encodingtaskDescProgress.Default.(int)
+	// encodingtaskDescOutputPath is the schema descriptor for output_path field.
+	encodingtaskDescOutputPath := encodingtaskFields[4].Descriptor()
+	// encodingtask.OutputPathValidator is a validator for the "output_path" field. It is called by the builders before save.
+	encodingtask.OutputPathValidator = encodingtaskDescOutputPath.Validators[0].(func(string) error)
+	// encodingtaskDescCreatedAt is the schema descriptor for created_at field.
+	encodingtaskDescCreatedAt := encodingtaskFields[6].Descriptor()
+	// encodingtask.DefaultCreatedAt holds the default value on creation for the created_at field.
+	encodingtask.DefaultCreatedAt = encodingtaskDescCreatedAt.Default.(func() time.Time)
+	// encodingtaskDescUpdatedAt is the schema descriptor for updated_at field.
+	encodingtaskDescUpdatedAt := encodingtaskFields[7].Descriptor()
+	// encodingtask.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	encodingtask.DefaultUpdatedAt = encodingtaskDescUpdatedAt.Default.(func() time.Time)
+	// encodingtask.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	encodingtask.UpdateDefaultUpdatedAt = encodingtaskDescUpdatedAt.UpdateDefault.(func() time.Time)
 	favoriteFields := schema.Favorite{}.Fields()
 	_ = favoriteFields
 	// favoriteDescCreatedAt is the schema descriptor for created_at field.

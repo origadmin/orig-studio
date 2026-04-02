@@ -77,27 +77,36 @@ type Storage interface {
 }
 
 type UploadUseCase struct {
-	repo      UploadRepo
-	mediaRepo MediaRepo
-	storage   Storage
-	chunkSize int
-	log       *log.Helper
-	mu        sync.Mutex
+	repo         UploadRepo
+	mediaRepo    MediaRepo
+	profileRepo  EncodeProfileRepo
+	encodingRepo EncodingTaskRepo
+	mediaUseCase *MediaUseCase
+	storage      Storage
+	chunkSize    int
+	log          *log.Helper
+	mu           sync.Mutex
 }
 
 // NewUploadUseCase .
 func NewUploadUseCase(
 	repo UploadRepo,
 	mediaRepo MediaRepo,
+	profileRepo EncodeProfileRepo,
+	encodingRepo EncodingTaskRepo,
+	mediaUseCase *MediaUseCase,
 	storage Storage,
 	logger log.Logger,
 ) *UploadUseCase {
 	return &UploadUseCase{
-		repo:      repo,
-		mediaRepo: mediaRepo,
-		storage:   storage,
-		chunkSize: 5 * 1024 * 1024, // 5MB default
-		log:       log.NewHelper(log.With(logger, "module", "upload.biz")),
+		repo:         repo,
+		mediaRepo:    mediaRepo,
+		profileRepo:  profileRepo,
+		encodingRepo: encodingRepo,
+		mediaUseCase: mediaUseCase,
+		storage:      storage,
+		chunkSize:    5 * 1024 * 1024, // 5MB default
+		log:          log.NewHelper(log.With(logger, "module", "upload.biz")),
 	}
 }
 
@@ -177,7 +186,14 @@ func (uc *UploadUseCase) UploadPart(
 }
 
 // UpdateUploadMetadata updates the metadata of an ongoing upload session.
-func (uc *UploadUseCase) UpdateUploadMetadata(ctx context.Context, uploadID string, title, description string, categoryID *int64, tags []string, thumbnail string) error {
+func (uc *UploadUseCase) UpdateUploadMetadata(
+	ctx context.Context,
+	uploadID string,
+	title, description string,
+	categoryID *int64,
+	tags []string,
+	thumbnail string,
+) error {
 	uc.mu.Lock()
 	defer uc.mu.Unlock()
 
@@ -274,14 +290,15 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 
 	// Create media record
 	media := &Media{
-		Title:       finalTitle,
-		Description: finalDescription,
-		Url:         finalPath,
-		Size:        session.FileSize,
-		MimeType:    session.ContentType,
-		Thumbnail:   finalThumbnail,
-		Tags:        finalTags,
-		Duration:    int32(duration.Seconds()),
+		Title:          finalTitle,
+		Description:    finalDescription,
+		Url:            finalPath,
+		Size:           session.FileSize,
+		MimeType:       session.ContentType,
+		Thumbnail:      finalThumbnail,
+		Tags:           finalTags,
+		Duration:       int32(duration.Seconds()),
+		EncodingStatus: "pending",
 	}
 	if finalCategoryID != nil {
 		media.CategoryId = *finalCategoryID
@@ -313,61 +330,131 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 	// Clean up temporary parts
 	_ = uc.storage.DeleteParts(ctx, uploadID)
 
-	// Background thumbnail generation
-	if strings.HasPrefix(session.ContentType, "video/") && createdMedia.Thumbnail == "" {
-		go uc.generateThumbnail(context.Background(), createdMedia.Id, finalPath, session.ContentType)
+	// Background media processing (Thumbnail + HLS Transcoding)
+	if strings.HasPrefix(session.ContentType, "video/") {
+		go uc.processMedia(context.Background(), createdMedia.Id, finalPath, session.ContentType)
 	}
 
 	return createdMedia, nil
 }
 
-// generateThumbnail extracts a frame from the video and updates the media record.
-func (uc *UploadUseCase) generateThumbnail(ctx context.Context, mediaID int64, mediaPath, contentType string) {
-	// Base directory for data (should ideally be configurable)
+// processMedia handles background tasks like thumbnail generation and multi-variant HLS transcoding.
+func (uc *UploadUseCase) processMedia(ctx context.Context, mediaID int64, mediaPath, contentType string) {
+	// Base directory for data
 	baseDir := "./data/uploads"
 	fullPath := filepath.Join(baseDir, mediaPath)
-	thumbDir := filepath.Join(baseDir, "thumbnails")
-	thumbFilename := fmt.Sprintf("%d.jpg", mediaID)
-	thumbPath := filepath.Join(thumbDir, thumbFilename)
 
-	if err := os.MkdirAll(thumbDir, 0755); err != nil {
-		uc.log.Errorf("failed to create thumbnails directory: %v", err)
-		return
-	}
-
-	uc.log.Infof("generating thumbnail for media %d at %s", mediaID, thumbPath)
-
-	// Extract thumbnail at 5 seconds (or 0 if video is shorter)
-	err := ffmpeg.ExtractThumbnail(ctx, fullPath, thumbPath, "00:00:05")
-	if err != nil {
-		uc.log.Errorf("failed to generate thumbnail for media %d: %v", mediaID, err)
-		// Try at 0 seconds as fallback
-		err = ffmpeg.ExtractThumbnail(ctx, fullPath, thumbPath, "00:00:00")
-		if err != nil {
-			uc.log.Errorf("fallback thumbnail generation also failed for media %d: %v", mediaID, err)
-			return
-		}
-	}
-
-	// Update media record with thumbnail URL
-	// The URL should be relative for the static file server
-	thumbUrl := fmt.Sprintf("thumbnails/%s", thumbFilename)
-
-	// We need a fresh context because the original might have been cancelled
-	updateCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	// Update overall media status to processing
+	updateCtx, cancel := context.WithTimeout(context.Background(), 2*time.Hour)
 	defer cancel()
 
 	media, err := uc.mediaRepo.Get(updateCtx, mediaID)
 	if err != nil {
-		uc.log.Errorf("failed to get media %d for thumbnail update: %v", mediaID, err)
+		uc.log.Errorf("failed to get media %d for processing: %v", mediaID, err)
 		return
 	}
 
-	media.Thumbnail = thumbUrl
-	if _, err := uc.mediaRepo.Update(updateCtx, media); err != nil {
-		uc.log.Errorf("failed to update media %d with thumbnail: %v", mediaID, err)
+	media.EncodingStatus = "processing"
+	_, _ = uc.mediaRepo.Update(updateCtx, media)
+
+	// 1. Generate Thumbnail
+	if media.Thumbnail == "" {
+		thumbDir := filepath.Join(baseDir, "thumbnails")
+		thumbFilename := fmt.Sprintf("%d.jpg", mediaID)
+		thumbPath := filepath.Join(thumbDir, thumbFilename)
+
+		if err := os.MkdirAll(thumbDir, 0o755); err != nil {
+			uc.log.Errorf("failed to create thumbnails directory: %v", err)
+		} else {
+			uc.log.Infof("generating thumbnail for media %d", mediaID)
+			err = ffmpeg.ExtractThumbnail(ctx, fullPath, thumbPath, "00:00:05")
+			if err != nil {
+				_ = ffmpeg.ExtractThumbnail(ctx, fullPath, thumbPath, "00:00:00")
+			}
+			media.Thumbnail = fmt.Sprintf("thumbnails/%s", thumbFilename)
+		}
+	}
+
+	// 2. Fetch Active Profiles and Create Tasks
+	profiles, err := uc.profileRepo.ListActive(updateCtx)
+	if err != nil {
+		uc.log.Errorf("failed to list active profiles for media %d: %v", mediaID, err)
+		return
+	}
+
+	tempWorkDir := filepath.Join(baseDir, "temp", fmt.Sprintf("%d", mediaID))
+	_ = os.MkdirAll(tempWorkDir, 0755)
+	defer os.RemoveAll(tempWorkDir) // clean up intermediate MP4s
+
+	var intermediateFiles []string
+	var tasks []*EncodingTask
+
+	for _, p := range profiles {
+		task := &EncodingTask{
+			MediaId:   mediaID,
+			ProfileId: p.Id,
+			Status:    "pending",
+			Progress:  0,
+		}
+		t, err := uc.encodingRepo.Create(updateCtx, task)
+		if err == nil {
+			tasks = append(tasks, t)
+		}
+	}
+
+	// 3. Variant Transcoding
+	for _, t := range tasks {
+		profile, err := uc.profileRepo.Get(updateCtx, t.ProfileId)
+		if err != nil {
+			continue
+		}
+
+		t.Status = "processing"
+		t.Progress = 10
+		_, _ = uc.encodingRepo.Update(updateCtx, t)
+		uc.mediaUseCase.Publish(mediaID, &EncodingEvent{MediaId: mediaID, Task: t})
+
+		variantPath := filepath.Join(tempWorkDir, fmt.Sprintf("variant_%d.%s", profile.Id, profile.Extension))
+		uc.log.Infof("encoding variant for profile %s", profile.Name)
+
+		err = ffmpeg.TranscodeToMP4(updateCtx, fullPath, variantPath, profile.Resolution, profile.VideoCodec, profile.AudioCodec)
+		if err != nil {
+			uc.log.Errorf("transcoding failed for profile %s: %v", profile.Name, err)
+			t.Status = "failed"
+			t.ErrorMessage = err.Error()
+			_, _ = uc.encodingRepo.Update(updateCtx, t)
+			uc.mediaUseCase.Publish(mediaID, &EncodingEvent{MediaId: mediaID, Task: t})
+			continue
+		}
+
+		t.Status = "success"
+		t.Progress = 100
+		t.OutputPath = variantPath
+		_, _ = uc.encodingRepo.Update(updateCtx, t)
+		uc.mediaUseCase.Publish(mediaID, &EncodingEvent{MediaId: mediaID, Task: t})
+		intermediateFiles = append(intermediateFiles, variantPath)
+	}
+
+	// 4. Packaging with Bento4
+	if len(intermediateFiles) > 0 {
+		hlsDir := filepath.Join(baseDir, "hls", fmt.Sprintf("%d", mediaID))
+		uc.log.Infof("packaging multi-variant HLS for media %d at %s", mediaID, hlsDir)
+
+		err = ffmpeg.MP4HLS(updateCtx, hlsDir, intermediateFiles)
+		if err != nil {
+			uc.log.Errorf("HLS packaging failed for media %d: %v", mediaID, err)
+			media.EncodingStatus = "failed"
+		} else {
+			media.EncodingStatus = "success"
+			media.HlsFile = fmt.Sprintf("hls/%d/master.m3u8", mediaID)
+		}
 	} else {
-		uc.log.Infof("successfully generated and updated thumbnail for media %d", mediaID)
+		media.EncodingStatus = "failed"
+	}
+
+	// Final update
+	if _, err := uc.mediaRepo.Update(updateCtx, media); err != nil {
+		uc.log.Errorf("failed to update media %d after processing: %v", mediaID, err)
 	}
 }
 

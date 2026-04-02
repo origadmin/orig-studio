@@ -44,6 +44,30 @@ func (f CommentFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.CommentMutation", m)
 }
 
+// The EncodeProfileFunc type is an adapter to allow the use of ordinary
+// function as EncodeProfile mutator.
+type EncodeProfileFunc func(context.Context, *entity.EncodeProfileMutation) (entity.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EncodeProfileFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Value, error) {
+	if mv, ok := m.(*entity.EncodeProfileMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.EncodeProfileMutation", m)
+}
+
+// The EncodingTaskFunc type is an adapter to allow the use of ordinary
+// function as EncodingTask mutator.
+type EncodingTaskFunc func(context.Context, *entity.EncodingTaskMutation) (entity.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EncodingTaskFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Value, error) {
+	if mv, ok := m.(*entity.EncodingTaskMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.EncodingTaskMutation", m)
+}
+
 // The FavoriteFunc type is an adapter to allow the use of ordinary
 // function as Favorite mutator.
 type FavoriteFunc func(context.Context, *entity.FavoriteMutation) (entity.Value, error)

@@ -118,9 +118,11 @@ type MediaEdges struct {
 	Favorites []*Favorite `json:"favorites,omitempty"`
 	// Likes holds the value of the likes edge.
 	Likes []*Like `json:"likes,omitempty"`
+	// Tasks holds the value of the tasks edge.
+	Tasks []*EncodingTask `json:"tasks,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [8]bool
+	loadedTypes [9]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -197,6 +199,15 @@ func (e MediaEdges) LikesOrErr() ([]*Like, error) {
 		return e.Likes, nil
 	}
 	return nil, &NotLoadedError{edge: "likes"}
+}
+
+// TasksOrErr returns the Tasks value or an error if the edge
+// was not loaded in eager-loading.
+func (e MediaEdges) TasksOrErr() ([]*EncodingTask, error) {
+	if e.loadedTypes[8] {
+		return e.Tasks, nil
+	}
+	return nil, &NotLoadedError{edge: "tasks"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -534,6 +545,11 @@ func (_m *Media) QueryFavorites() *FavoriteQuery {
 // QueryLikes queries the "likes" edge of the Media entity.
 func (_m *Media) QueryLikes() *LikeQuery {
 	return NewMediaClient(_m.config).QueryLikes(_m)
+}
+
+// QueryTasks queries the "tasks" edge of the Media entity.
+func (_m *Media) QueryTasks() *EncodingTaskQuery {
+	return NewMediaClient(_m.config).QueryTasks(_m)
 }
 
 // Update returns a builder for updating this Media.
