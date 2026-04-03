@@ -8,7 +8,15 @@ import (
 	"origadmin/application/origcms/internal/data/entity"
 )
 
-func RegisterUserRoutes(group *gin.RouterGroup, client *entity.Client) {
+type UserHandler struct {
+	client *entity.Client
+}
+
+func NewUserHandler(client *entity.Client) *UserHandler {
+	return &UserHandler{client: client}
+}
+
+func (h *UserHandler) Register(group *gin.RouterGroup) {
 	users := group.Group("/users")
 	{
 		// List users
@@ -26,7 +34,7 @@ func RegisterUserRoutes(group *gin.RouterGroup, client *entity.Client) {
 				}
 			}
 
-			users, err := client.User.Query().Limit(limit).Offset(offset).All(c.Request.Context())
+			users, err := h.client.User.Query().Limit(limit).Offset(offset).All(c.Request.Context())
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
@@ -45,7 +53,7 @@ func RegisterUserRoutes(group *gin.RouterGroup, client *entity.Client) {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 				return
 			}
-			u, err := client.User.Get(c.Request.Context(), id)
+			u, err := h.client.User.Get(c.Request.Context(), id)
 			if err != nil {
 				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 				return
@@ -66,7 +74,7 @@ func RegisterUserRoutes(group *gin.RouterGroup, client *entity.Client) {
 				return
 			}
 
-			u, err := client.User.Create().
+			u, err := h.client.User.Create().
 				SetUsername(input.Username).
 				SetEmail(input.Email).
 				SetName(input.Name).
@@ -87,7 +95,7 @@ func RegisterUserRoutes(group *gin.RouterGroup, client *entity.Client) {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 				return
 			}
-			err = client.User.DeleteOneID(id).Exec(c.Request.Context())
+			err = h.client.User.DeleteOneID(id).Exec(c.Request.Context())
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return

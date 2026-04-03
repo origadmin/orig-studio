@@ -28,6 +28,11 @@ const (
 	MediaService_UploadMedia_FullMethodName          = "/api.v1.services.media.MediaService/UploadMedia"
 	MediaService_ListEncodingTasks_FullMethodName    = "/api.v1.services.media.MediaService/ListEncodingTasks"
 	MediaService_GetTranscodingStatus_FullMethodName = "/api.v1.services.media.MediaService/GetTranscodingStatus"
+	MediaService_ListEncodeProfiles_FullMethodName   = "/api.v1.services.media.MediaService/ListEncodeProfiles"
+	MediaService_GetEncodeProfile_FullMethodName     = "/api.v1.services.media.MediaService/GetEncodeProfile"
+	MediaService_CreateEncodeProfile_FullMethodName  = "/api.v1.services.media.MediaService/CreateEncodeProfile"
+	MediaService_UpdateEncodeProfile_FullMethodName  = "/api.v1.services.media.MediaService/UpdateEncodeProfile"
+	MediaService_DeleteEncodeProfile_FullMethodName  = "/api.v1.services.media.MediaService/DeleteEncodeProfile"
 )
 
 // MediaServiceClient is the client API for MediaService service.
@@ -55,6 +60,16 @@ type MediaServiceClient interface {
 	ListEncodingTasks(ctx context.Context, in *ListEncodingTasksRequest, opts ...grpc.CallOption) (*ListEncodingTasksResponse, error)
 	// GetTranscodingStatus returns the overall transcoding status of the system.
 	GetTranscodingStatus(ctx context.Context, in *GetTranscodingStatusRequest, opts ...grpc.CallOption) (*GetTranscodingStatusResponse, error)
+	// ListEncodeProfiles returns a list of encoding profiles.
+	ListEncodeProfiles(ctx context.Context, in *ListEncodeProfilesRequest, opts ...grpc.CallOption) (*ListEncodeProfilesResponse, error)
+	// GetEncodeProfile returns an encoding profile by ID.
+	GetEncodeProfile(ctx context.Context, in *GetEncodeProfileRequest, opts ...grpc.CallOption) (*GetEncodeProfileResponse, error)
+	// CreateEncodeProfile creates a new encoding profile.
+	CreateEncodeProfile(ctx context.Context, in *CreateEncodeProfileRequest, opts ...grpc.CallOption) (*CreateEncodeProfileResponse, error)
+	// UpdateEncodeProfile updates an existing encoding profile.
+	UpdateEncodeProfile(ctx context.Context, in *UpdateEncodeProfileRequest, opts ...grpc.CallOption) (*UpdateEncodeProfileResponse, error)
+	// DeleteEncodeProfile deletes an encoding profile.
+	DeleteEncodeProfile(ctx context.Context, in *DeleteEncodeProfileRequest, opts ...grpc.CallOption) (*DeleteEncodeProfileResponse, error)
 }
 
 type mediaServiceClient struct {
@@ -155,6 +170,56 @@ func (c *mediaServiceClient) GetTranscodingStatus(ctx context.Context, in *GetTr
 	return out, nil
 }
 
+func (c *mediaServiceClient) ListEncodeProfiles(ctx context.Context, in *ListEncodeProfilesRequest, opts ...grpc.CallOption) (*ListEncodeProfilesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListEncodeProfilesResponse)
+	err := c.cc.Invoke(ctx, MediaService_ListEncodeProfiles_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) GetEncodeProfile(ctx context.Context, in *GetEncodeProfileRequest, opts ...grpc.CallOption) (*GetEncodeProfileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetEncodeProfileResponse)
+	err := c.cc.Invoke(ctx, MediaService_GetEncodeProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) CreateEncodeProfile(ctx context.Context, in *CreateEncodeProfileRequest, opts ...grpc.CallOption) (*CreateEncodeProfileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateEncodeProfileResponse)
+	err := c.cc.Invoke(ctx, MediaService_CreateEncodeProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) UpdateEncodeProfile(ctx context.Context, in *UpdateEncodeProfileRequest, opts ...grpc.CallOption) (*UpdateEncodeProfileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateEncodeProfileResponse)
+	err := c.cc.Invoke(ctx, MediaService_UpdateEncodeProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) DeleteEncodeProfile(ctx context.Context, in *DeleteEncodeProfileRequest, opts ...grpc.CallOption) (*DeleteEncodeProfileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteEncodeProfileResponse)
+	err := c.cc.Invoke(ctx, MediaService_DeleteEncodeProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MediaServiceServer is the server API for MediaService service.
 // All implementations must embed UnimplementedMediaServiceServer
 // for forward compatibility.
@@ -180,6 +245,16 @@ type MediaServiceServer interface {
 	ListEncodingTasks(context.Context, *ListEncodingTasksRequest) (*ListEncodingTasksResponse, error)
 	// GetTranscodingStatus returns the overall transcoding status of the system.
 	GetTranscodingStatus(context.Context, *GetTranscodingStatusRequest) (*GetTranscodingStatusResponse, error)
+	// ListEncodeProfiles returns a list of encoding profiles.
+	ListEncodeProfiles(context.Context, *ListEncodeProfilesRequest) (*ListEncodeProfilesResponse, error)
+	// GetEncodeProfile returns an encoding profile by ID.
+	GetEncodeProfile(context.Context, *GetEncodeProfileRequest) (*GetEncodeProfileResponse, error)
+	// CreateEncodeProfile creates a new encoding profile.
+	CreateEncodeProfile(context.Context, *CreateEncodeProfileRequest) (*CreateEncodeProfileResponse, error)
+	// UpdateEncodeProfile updates an existing encoding profile.
+	UpdateEncodeProfile(context.Context, *UpdateEncodeProfileRequest) (*UpdateEncodeProfileResponse, error)
+	// DeleteEncodeProfile deletes an encoding profile.
+	DeleteEncodeProfile(context.Context, *DeleteEncodeProfileRequest) (*DeleteEncodeProfileResponse, error)
 	mustEmbedUnimplementedMediaServiceServer()
 }
 
@@ -216,6 +291,21 @@ func (UnimplementedMediaServiceServer) ListEncodingTasks(context.Context, *ListE
 }
 func (UnimplementedMediaServiceServer) GetTranscodingStatus(context.Context, *GetTranscodingStatusRequest) (*GetTranscodingStatusResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetTranscodingStatus not implemented")
+}
+func (UnimplementedMediaServiceServer) ListEncodeProfiles(context.Context, *ListEncodeProfilesRequest) (*ListEncodeProfilesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListEncodeProfiles not implemented")
+}
+func (UnimplementedMediaServiceServer) GetEncodeProfile(context.Context, *GetEncodeProfileRequest) (*GetEncodeProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetEncodeProfile not implemented")
+}
+func (UnimplementedMediaServiceServer) CreateEncodeProfile(context.Context, *CreateEncodeProfileRequest) (*CreateEncodeProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateEncodeProfile not implemented")
+}
+func (UnimplementedMediaServiceServer) UpdateEncodeProfile(context.Context, *UpdateEncodeProfileRequest) (*UpdateEncodeProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateEncodeProfile not implemented")
+}
+func (UnimplementedMediaServiceServer) DeleteEncodeProfile(context.Context, *DeleteEncodeProfileRequest) (*DeleteEncodeProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteEncodeProfile not implemented")
 }
 func (UnimplementedMediaServiceServer) mustEmbedUnimplementedMediaServiceServer() {}
 func (UnimplementedMediaServiceServer) testEmbeddedByValue()                      {}
@@ -400,6 +490,96 @@ func _MediaService_GetTranscodingStatus_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MediaService_ListEncodeProfiles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListEncodeProfilesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).ListEncodeProfiles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_ListEncodeProfiles_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).ListEncodeProfiles(ctx, req.(*ListEncodeProfilesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_GetEncodeProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEncodeProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).GetEncodeProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_GetEncodeProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).GetEncodeProfile(ctx, req.(*GetEncodeProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_CreateEncodeProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateEncodeProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).CreateEncodeProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_CreateEncodeProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).CreateEncodeProfile(ctx, req.(*CreateEncodeProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_UpdateEncodeProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateEncodeProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).UpdateEncodeProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_UpdateEncodeProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).UpdateEncodeProfile(ctx, req.(*UpdateEncodeProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_DeleteEncodeProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteEncodeProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).DeleteEncodeProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_DeleteEncodeProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).DeleteEncodeProfile(ctx, req.(*DeleteEncodeProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MediaService_ServiceDesc is the grpc.ServiceDesc for MediaService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -442,6 +622,26 @@ var MediaService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTranscodingStatus",
 			Handler:    _MediaService_GetTranscodingStatus_Handler,
+		},
+		{
+			MethodName: "ListEncodeProfiles",
+			Handler:    _MediaService_ListEncodeProfiles_Handler,
+		},
+		{
+			MethodName: "GetEncodeProfile",
+			Handler:    _MediaService_GetEncodeProfile_Handler,
+		},
+		{
+			MethodName: "CreateEncodeProfile",
+			Handler:    _MediaService_CreateEncodeProfile_Handler,
+		},
+		{
+			MethodName: "UpdateEncodeProfile",
+			Handler:    _MediaService_UpdateEncodeProfile_Handler,
+		},
+		{
+			MethodName: "DeleteEncodeProfile",
+			Handler:    _MediaService_DeleteEncodeProfile_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

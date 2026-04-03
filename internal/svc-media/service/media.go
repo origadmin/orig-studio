@@ -16,7 +16,6 @@ import (
 
 	"github.com/origadmin/runtime/errors"
 	"github.com/origadmin/runtime/log"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type MediaService struct {
@@ -33,7 +32,6 @@ func NewMediaService(uc *biz.MediaUseCase, logger log.Logger) *MediaService {
 }
 
 func (s *MediaService) ListMedias(ctx context.Context, req *media.ListMediasRequest) (*media.ListMediasResponse, error) {
-	// Not ideal to use biz.MediaQueryOption here, but for simplicity:
 	items, total, err := s.uc.ListMedias(ctx)
 	if err != nil {
 		return nil, err
@@ -112,12 +110,145 @@ func (s *MediaService) GetTranscodingStatus(ctx context.Context, req *media.GetT
 	if err != nil {
 		return nil, err
 	}
+
+	// Convert items
+	items := make([]*media.TranscodingMediaItem, len(status.Items))
+	for i, item := range status.Items {
+		tasks := make([]*types.EncodingTask, len(item.Tasks))
+		for j, t := range item.Tasks {
+			tasks[j] = &types.EncodingTask{
+				Id:           int32(t.Id),
+				MediaId:      t.MediaId,
+				ProfileId:    int32(t.ProfileId),
+				Status:       t.Status,
+				Progress:     int32(t.Progress),
+				OutputPath:   t.OutputPath,
+				ErrorMessage: t.ErrorMessage,
+			}
+		}
+
+		items[i] = &media.TranscodingMediaItem{
+			Media: item.Media,
+			Tasks: tasks,
+		}
+	}
+
 	return &media.GetTranscodingStatusResponse{
 		ProcessingCount: int32(status.ProcessingCount),
 		PendingCount:    int32(status.PendingCount),
 		FailedCount:     int32(status.FailedCount),
 		SuccessCount:    int32(status.SuccessCount),
+		Items:           items,
 	}, nil
+}
+
+// ListEncodeProfiles returns a list of encoding profiles.
+func (s *MediaService) ListEncodeProfiles(ctx context.Context, req *media.ListEncodeProfilesRequest) (*media.ListEncodeProfilesResponse, error) {
+	profiles, err := s.uc.ListEncodeProfiles(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*types.EncodeProfile, len(profiles))
+	for i, p := range profiles {
+		result[i] = &types.EncodeProfile{
+			Id:          int32(p.Id),
+			Name:        p.Name,
+			Description: p.Description,
+			Extension:   p.Extension,
+			Resolution:  p.Resolution,
+			VideoCodec:  p.VideoCodec,
+			AudioCodec:  p.AudioCodec,
+			IsActive:    p.IsActive,
+		}
+	}
+	return &media.ListEncodeProfilesResponse{Profiles: result}, nil
+}
+
+// GetEncodeProfile returns an encoding profile by ID.
+func (s *MediaService) GetEncodeProfile(ctx context.Context, req *media.GetEncodeProfileRequest) (*media.GetEncodeProfileResponse, error) {
+	p, err := s.uc.GetEncodeProfile(ctx, int(req.Id))
+	if err != nil {
+		return nil, err
+	}
+	return &media.GetEncodeProfileResponse{
+		Profile: &types.EncodeProfile{
+			Id:          int32(p.Id),
+			Name:        p.Name,
+			Description: p.Description,
+			Extension:   p.Extension,
+			Resolution:  p.Resolution,
+			VideoCodec:  p.VideoCodec,
+			AudioCodec:  p.AudioCodec,
+			IsActive:    p.IsActive,
+		},
+	}, nil
+}
+
+// CreateEncodeProfile creates a new encoding profile.
+func (s *MediaService) CreateEncodeProfile(ctx context.Context, req *media.CreateEncodeProfileRequest) (*media.CreateEncodeProfileResponse, error) {
+	p, err := s.uc.CreateEncodeProfile(ctx, &biz.EncodeProfile{
+		Name:        req.Profile.Name,
+		Description: req.Profile.Description,
+		Extension:   req.Profile.Extension,
+		Resolution:  req.Profile.Resolution,
+		VideoCodec:  req.Profile.VideoCodec,
+		AudioCodec:  req.Profile.AudioCodec,
+		IsActive:    req.Profile.IsActive,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &media.CreateEncodeProfileResponse{
+		Profile: &types.EncodeProfile{
+			Id:          int32(p.Id),
+			Name:        p.Name,
+			Description: p.Description,
+			Extension:   p.Extension,
+			Resolution:  p.Resolution,
+			VideoCodec:  p.VideoCodec,
+			AudioCodec:  p.AudioCodec,
+			IsActive:    p.IsActive,
+		},
+	}, nil
+}
+
+// UpdateEncodeProfile updates an existing encoding profile.
+func (s *MediaService) UpdateEncodeProfile(ctx context.Context, req *media.UpdateEncodeProfileRequest) (*media.UpdateEncodeProfileResponse, error) {
+	p, err := s.uc.UpdateEncodeProfile(ctx, &biz.EncodeProfile{
+		Id:          int(req.Profile.Id),
+		Name:        req.Profile.Name,
+		Description: req.Profile.Description,
+		Extension:   req.Profile.Extension,
+		Resolution:  req.Profile.Resolution,
+		VideoCodec:  req.Profile.VideoCodec,
+		AudioCodec:  req.Profile.AudioCodec,
+		IsActive:    req.Profile.IsActive,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &media.UpdateEncodeProfileResponse{
+		Profile: &types.EncodeProfile{
+			Id:          int32(p.Id),
+			Name:        p.Name,
+			Description: p.Description,
+			Extension:   p.Extension,
+			Resolution:  p.Resolution,
+			VideoCodec:  p.VideoCodec,
+			AudioCodec:  p.AudioCodec,
+			IsActive:    p.IsActive,
+		},
+	}, nil
+}
+
+// DeleteEncodeProfile deletes an encoding profile.
+func (s *MediaService) DeleteEncodeProfile(ctx context.Context, req *media.DeleteEncodeProfileRequest) (*media.DeleteEncodeProfileResponse, error) {
+	err := s.uc.DeleteEncodeProfile(ctx, int(req.Id))
+	if err != nil {
+		return nil, err
+	}
+	return &media.DeleteEncodeProfileResponse{}, nil
 }
 
 // SSEHandler handles Server-Sent Events for transcoding progress.

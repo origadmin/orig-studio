@@ -9,21 +9,21 @@ import (
 	"origadmin/application/origcms/internal/data/entity"
 )
 
-func RegisterCategoryRoutes(group *gin.RouterGroup, client *entity.Client) {
+type CategoryHandler struct {
+	client *entity.Client
+}
+
+func NewCategoryHandler(client *entity.Client) *CategoryHandler {
+	return &CategoryHandler{client: client}
+}
+
+func (h *CategoryHandler) Register(group *gin.RouterGroup) {
 	categories := group.Group("/categories")
 	{
-		categories.GET("", func(c *gin.Context) {
-			items, err := client.Category.Query().All(c.Request.Context())
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-			c.JSON(http.StatusOK, items)
-		})
-
+		categories.GET("", h.listCategories())
 		categories.GET("/:id", func(c *gin.Context) {
 			id, _ := strconv.Atoi(c.Param("id"))
-			cat, err := client.Category.Get(c.Request.Context(), id)
+			cat, err := h.client.Category.Get(c.Request.Context(), id)
 			if err != nil {
 				c.JSON(http.StatusNotFound, gin.H{"error": "Category not found"})
 				return
@@ -42,7 +42,7 @@ func RegisterCategoryRoutes(group *gin.RouterGroup, client *entity.Client) {
 				return
 			}
 
-			cat, err := client.Category.Create().
+			cat, err := h.client.Category.Create().
 				SetName(input.Name).
 				SetDescription(input.Description).
 				SetIsGlobal(input.IsGlobal).
@@ -57,8 +57,19 @@ func RegisterCategoryRoutes(group *gin.RouterGroup, client *entity.Client) {
 
 		categories.DELETE("/:id", func(c *gin.Context) {
 			id, _ := strconv.Atoi(c.Param("id"))
-			client.Category.DeleteOneID(id).Exec(c.Request.Context())
+			h.client.Category.DeleteOneID(id).Exec(c.Request.Context())
 			c.JSON(http.StatusOK, gin.H{"message": "deleted"})
 		})
+	}
+}
+
+func (h *CategoryHandler) listCategories() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		items, err := h.client.Category.Query().All(c.Request.Context())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, items)
 	}
 }

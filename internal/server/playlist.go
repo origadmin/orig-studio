@@ -2,46 +2,79 @@ package server
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/internal/data/entity"
 )
 
-func RegisterPlaylistRoutes(group *gin.RouterGroup, client *entity.Client) {
+type PlaylistHandler struct {
+	client *entity.Client
+}
+
+func NewPlaylistHandler(client *entity.Client) *PlaylistHandler {
+	return &PlaylistHandler{client: client}
+}
+
+func (h *PlaylistHandler) Register(group *gin.RouterGroup) {
 	playlists := group.Group("/playlists")
 	{
-		playlists.GET("", func(c *gin.Context) {
-			items, err := client.Playlist.Query().All(c.Request.Context())
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-			c.JSON(http.StatusOK, gin.H{"list": items})
-		})
+		playlists.GET("", h.listPlaylists())
+		playlists.POST("", h.createPlaylist())
+		playlists.DELETE("/:id", h.deletePlaylist())
+	}
+}
 
-		playlists.POST("", func(c *gin.Context) {
-			var input struct {
-				Title       string `json:"title"`
-				Description string `json:"description"`
-				UserID      int    `json:"user_id"`
-			}
-			if err := c.ShouldBindJSON(&input); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				return
-			}
+func (h *PlaylistHandler) listPlaylists() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		items, err := h.client.Playlist.Query().All(c.Request.Context())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"list": items})
+	}
+}
 
-			p, err := client.Playlist.Create().
-				SetTitle(input.Title).
-				SetDescription(input.Description).
-				SetUserID(input.UserID).
-				Save(c.Request.Context())
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
+func (h *PlaylistHandler) createPlaylist() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var input struct {
+			Title       string `json:"title"`
+			Description string `json:"description"`
+			UserID      int    `json:"user_id"`
+		}
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 
-			c.JSON(http.StatusCreated, p)
-		})
+		p, err := h.client.Playlist.Create().
+			SetTitle(input.Title).
+			SetDescription(input.Description).
+			SetUserID(input.UserID).
+			Save(c.Request.Context())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusCreated, p)
+	}
+}
+
+func (h *PlaylistHandler) deletePlaylist() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			return
+		}
+		err = h.client.Playlist.DeleteOneID(id).Exec(c.Request.Context())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "deleted"})
 	}
 }

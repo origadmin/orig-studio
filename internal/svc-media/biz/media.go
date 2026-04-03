@@ -44,12 +44,18 @@ type EncodeProfile struct {
 	AudioCodec   string `json:"audio_codec"`
 	AudioBitrate string `json:"audio_bitrate"`
 	IsActive     bool   `json:"is_active"`
+	// BentoParameters stores additional arguments for Bento4 tools (e.g., mp4hls)
+	BentoParameters string `json:"bento_parameters"`
 }
 
 // EncodeProfileRepo defines the storage operations for encode profiles.
 type EncodeProfileRepo interface {
 	ListActive(ctx context.Context) ([]*EncodeProfile, error)
+	ListAll(ctx context.Context) ([]*EncodeProfile, error)
 	Get(ctx context.Context, id int) (*EncodeProfile, error)
+	Create(ctx context.Context, profile *EncodeProfile) (*EncodeProfile, error)
+	Update(ctx context.Context, profile *EncodeProfile) (*EncodeProfile, error)
+	Delete(ctx context.Context, id int) error
 }
 
 // EncodingTask represents a transcoding sub-task for a specific media and profile.
@@ -119,22 +125,36 @@ func (uc *MediaUseCase) ListEncodingTasks(ctx context.Context, mediaId int64) ([
 	return uc.encodingRepo.ListByMedia(ctx, mediaId)
 }
 
+type TranscodingMediaItem struct {
+	Media *Media          `json:"media"`
+	Tasks []*EncodingTask `json:"tasks"`
+}
+
 type TranscodingStatus struct {
 	ProcessingCount int
 	PendingCount    int
 	FailedCount     int
 	SuccessCount    int
+	Items           []*TranscodingMediaItem
 }
 
 func (uc *MediaUseCase) GetTranscodingStatus(ctx context.Context, userID *int64) (*TranscodingStatus, error) {
-	// For now, list all tasks to aggregate. In production, this should be a optimized query.
-	tasks, err := uc.encodingRepo.ListByMedia(ctx, 0) // 0 implies all if repo supports it, otherwise refine repo
+	// List all encoding tasks
+	tasks, err := uc.encodingRepo.ListByMedia(ctx, 0) // 0 implies all if repo supports it
 	if err != nil {
 		return nil, err
 	}
 
-	status := &TranscodingStatus{}
+	status := &TranscodingStatus{
+		Items: make([]*TranscodingMediaItem, 0),
+	}
+
+	// Group tasks by media_id
+	mediaTasksMap := make(map[int64][]*EncodingTask)
 	for _, t := range tasks {
+		mediaTasksMap[t.MediaId] = append(mediaTasksMap[t.MediaId], t)
+
+		// Count status
 		switch t.Status {
 		case "processing":
 			status.ProcessingCount++
@@ -146,6 +166,21 @@ func (uc *MediaUseCase) GetTranscodingStatus(ctx context.Context, userID *int64)
 			status.SuccessCount++
 		}
 	}
+
+	// Fetch media details for each media_id
+	for mediaID, mediaTasks := range mediaTasksMap {
+		media, err := uc.repo.Get(ctx, mediaID)
+		if err != nil {
+			uc.log.Errorf("failed to fetch media %d: %v", mediaID, err)
+			continue
+		}
+
+		status.Items = append(status.Items, &TranscodingMediaItem{
+			Media: media,
+			Tasks: mediaTasks,
+		})
+	}
+
 	return status, nil
 }
 
@@ -185,4 +220,29 @@ func (uc *MediaUseCase) Publish(mediaID int64, event *EncodingEvent) {
 			// Buffer full, skip
 		}
 	}
+}
+
+// ListEncodeProfiles returns all encoding profiles.
+func (uc *MediaUseCase) ListEncodeProfiles(ctx context.Context) ([]*EncodeProfile, error) {
+	return uc.profileRepo.ListAll(ctx)
+}
+
+// GetEncodeProfile returns an encoding profile by ID.
+func (uc *MediaUseCase) GetEncodeProfile(ctx context.Context, id int) (*EncodeProfile, error) {
+	return uc.profileRepo.Get(ctx, id)
+}
+
+// CreateEncodeProfile creates a new encoding profile.
+func (uc *MediaUseCase) CreateEncodeProfile(ctx context.Context, profile *EncodeProfile) (*EncodeProfile, error) {
+	return uc.profileRepo.Create(ctx, profile)
+}
+
+// UpdateEncodeProfile updates an existing encoding profile.
+func (uc *MediaUseCase) UpdateEncodeProfile(ctx context.Context, profile *EncodeProfile) (*EncodeProfile, error) {
+	return uc.profileRepo.Update(ctx, profile)
+}
+
+// DeleteEncodeProfile deletes an encoding profile.
+func (uc *MediaUseCase) DeleteEncodeProfile(ctx context.Context, id int) error {
+	return uc.profileRepo.Delete(ctx, id)
 }

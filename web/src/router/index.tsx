@@ -53,6 +53,8 @@ const AdminTags = lazy(() => import('../pages/admin/Tags'));
 const AdminComments = lazy(() => import('../pages/admin/Comments'));
 const AdminPlaylists = lazy(() => import('../pages/admin/Playlists'));
 const AdminSettings = lazy(() => import('../pages/admin/Settings'));
+const AdminTranscodingProfiles = lazy(() => import('../pages/admin/TranscodingProfiles'));
+const AdminTranscodingStatus = lazy(() => import('../pages/admin/TranscodingStatus'));
 
 // ── Loading fallback ──────────────────────────────────────────────────────────
 
@@ -297,6 +299,18 @@ const adminSettingsRoute = createRoute({
     component: () => <Lazy><AdminSettings/></Lazy>,
 });
 
+const adminTranscodingProfilesRoute = createRoute({
+    getParentRoute: () => adminLayoutRoute,
+    path: '/admin/transcoding/profiles',
+    component: () => <Lazy><AdminTranscodingProfiles/></Lazy>,
+});
+
+const adminTranscodingStatusRoute = createRoute({
+    getParentRoute: () => adminLayoutRoute,
+    path: '/admin/transcoding/status',
+    component: () => <Lazy><AdminTranscodingStatus/></Lazy>,
+});
+
 // ── Router ────────────────────────────────────────────────────────────────────
 
 const routeTree = rootRoute.addChildren([
@@ -334,6 +348,8 @@ const routeTree = rootRoute.addChildren([
         adminCommentsRoute,
         adminPlaylistsRoute,
         adminSettingsRoute,
+        adminTranscodingProfilesRoute,
+        adminTranscodingStatusRoute,
     ]),
 ]);
 

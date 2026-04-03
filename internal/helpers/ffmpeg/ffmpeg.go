@@ -38,7 +38,7 @@ func SetFFprobePath(path string) {
 // ExtractThumbnail extracts a frame from the video at the given timestamp and saves it as an image.
 func ExtractThumbnail(ctx context.Context, inputPath, outputPath string, timestamp string) error {
 	// Create the output directory if it doesn't exist
-	if err := os.MkdirAll(filepath.Dir(outputPath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
 		return fmt.Errorf("failed to create thumbnail directory: %w", err)
 	}
 
@@ -88,8 +88,14 @@ func GetVideoDuration(ctx context.Context, inputPath string) (time.Duration, err
 }
 
 // TranscodeToMP4 transcodes the input file to a standard MP4 file with specific resolution and codec.
-func TranscodeToMP4(ctx context.Context, inputPath, outputPath string, resolution string, videoCodec string, audioCodec string) error {
-	if err := os.MkdirAll(filepath.Dir(outputPath), 0755); err != nil {
+func TranscodeToMP4(
+	ctx context.Context,
+	inputPath, outputPath string,
+	resolution string,
+	videoCodec string,
+	audioCodec string,
+) error {
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 

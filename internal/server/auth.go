@@ -32,6 +32,22 @@ func NewAuthHandler(uc *biz.UserUseCase, jwt *auth.Manager) *AuthHandler {
 	return &AuthHandler{uc: uc, jwt: jwt}
 }
 
+func (h *AuthHandler) Register(group *gin.RouterGroup) {
+	authGroup := group.Group("/auth")
+	{
+		authGroup.POST("/signin", h.Login)
+		authGroup.POST("/signup", h.SignUp)
+		authGroup.POST("/signout", h.Logout)
+
+		// Protected auth routes
+		protected := authGroup.Group("")
+		protected.Use(JWTMiddleware(h.jwt))
+		{
+			protected.GET("/me", h.Me)
+		}
+	}
+}
+
 // LoginRequest is the request body for POST /api/v1/auth/login.
 type LoginRequest struct {
 	Username string `json:"username" binding:"required"`
@@ -106,8 +122,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, TokenResponse{AccessToken: token, TokenType: "Bearer", ExpiresIn: 86400, User: loginUser})
 }
 
-// Register godoc: POST /api/v1/auth/register
-func (h *AuthHandler) Register(c *gin.Context) {
+// SignUp godoc: POST /api/v1/auth/signup
+func (h *AuthHandler) SignUp(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

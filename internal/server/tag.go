@@ -8,21 +8,21 @@ import (
 	"origadmin/application/origcms/internal/data/entity"
 )
 
-func RegisterTagRoutes(group *gin.RouterGroup, client *entity.Client) {
+type TagHandler struct {
+	client *entity.Client
+}
+
+func NewTagHandler(client *entity.Client) *TagHandler {
+	return &TagHandler{client: client}
+}
+
+func (h *TagHandler) Register(group *gin.RouterGroup) {
 	tags := group.Group("/tags")
 	{
-		tags.GET("", func(c *gin.Context) {
-			items, err := client.Tag.Query().All(c.Request.Context())
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-			c.JSON(http.StatusOK, items)
-		})
-
+		tags.GET("", h.listTags())
 		tags.GET("/:id", func(c *gin.Context) {
 			id, _ := strconv.Atoi(c.Param("id"))
-			tag, err := client.Tag.Get(c.Request.Context(), id)
+			tag, err := h.client.Tag.Get(c.Request.Context(), id)
 			if err != nil {
 				c.JSON(http.StatusNotFound, gin.H{"error": "Tag not found"})
 				return
@@ -39,7 +39,7 @@ func RegisterTagRoutes(group *gin.RouterGroup, client *entity.Client) {
 				return
 			}
 
-			tag, err := client.Tag.Create().
+			tag, err := h.client.Tag.Create().
 				SetTitle(input.Title).
 				Save(c.Request.Context())
 			if err != nil {
@@ -49,5 +49,16 @@ func RegisterTagRoutes(group *gin.RouterGroup, client *entity.Client) {
 
 			c.JSON(http.StatusCreated, tag)
 		})
+	}
+}
+
+func (h *TagHandler) listTags() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		items, err := h.client.Tag.Query().All(c.Request.Context())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, items)
 	}
 }

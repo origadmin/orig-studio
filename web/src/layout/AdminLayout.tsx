@@ -14,7 +14,9 @@ import {
     Radio,
     Tags,
     MessageSquare,
-    PlayCircle
+    PlayCircle,
+    Cpu,
+    Activity
 } from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 
@@ -24,6 +26,18 @@ const AdminLayout = () => {
     const menuItems = [
         {id: "dashboard", icon: LayoutDashboard, label: t('admin.dashboard'), path: "/admin"},
         {id: "media", icon: Film, label: t('admin.media'), path: "/admin/media"},
+        {
+            id: "transcoding-profiles",
+            icon: Cpu,
+            label: t('admin.transcodingProfiles') || "Transcoding Profiles",
+            path: "/admin/transcoding/profiles"
+        },
+        {
+            id: "transcoding-status",
+            icon: Activity,
+            label: t('admin.transcodingStatus') || "Transcoding Status",
+            path: "/admin/transcoding/status"
+        },
         {id: "users", icon: Users, label: t('admin.users'), path: "/admin/users"},
         {id: "categories", icon: FolderTree, label: t('admin.categories'), path: "/admin/categories"},
         {id: "channels", icon: Radio, label: t('admin.channels'), path: "/admin/channels"},

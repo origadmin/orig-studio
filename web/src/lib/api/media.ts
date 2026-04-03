@@ -101,6 +101,44 @@ export interface UpdateMediaRequest {
     featured?: boolean;
 }
 
+export interface EncodeProfile {
+    id: number;
+    name: string;
+    description: string;
+    extension: string;
+    resolution: string;
+    video_codec: string;
+    video_bitrate: string;
+    audio_codec: string;
+    audio_bitrate: string;
+    is_active: boolean;
+}
+
+export interface EncodingTask {
+    id: number;
+    media_id: number;
+    profile_id: number;
+    status: string; // "pending" | "processing" | "success" | "failed"
+    progress: number;
+    output_path: string;
+    error_message: string;
+    create_time: string;
+    update_time: string;
+}
+
+export interface TranscodingStatus {
+    processing_count: number;
+    pending_count: number;
+    failed_count: number;
+    success_count: number;
+    items: TranscodingMediaItem[];
+}
+
+export interface TranscodingMediaItem {
+    media: Media;
+    tasks: EncodingTask[];
+}
+
 export const mediaApi = {
     // 获取媒体列表（公开，默认只返回 active 状态）
     list: (params?: {
@@ -197,4 +235,23 @@ export const mediaApi = {
 
     // 删除媒体（需要 JWT + owner 权限）
     delete: (id: number | string) => api.del<void>(`/media/${id}`),
+
+    // 转码预设管理
+    listProfiles: () => api.get<{ profiles: EncodeProfile[] }>("/media/profiles"),
+    getProfile: (id: number) => api.get<{ profile: EncodeProfile }>(`/media/profiles/${id}`),
+    createProfile: (data: Partial<EncodeProfile>) => api.post<{ profile: EncodeProfile }>("/media/profiles", data),
+    updateProfile: (id: number, data: Partial<EncodeProfile>) => api.put<{
+        profile: EncodeProfile
+    }>(`/media/profiles/${id}`, data),
+    deleteProfile: (id: number) => api.del<void>(`/media/profiles/${id}`),
+
+    // 转码状态与监控
+    getTranscodingStatus: () => api.get<TranscodingStatus>("/media/transcoding/status"),
+    listTasks: (mediaId: number) => api.get<{ tasks: EncodingTask[] }>(`/media/${mediaId}/tasks`),
+
+    // SSE 订阅地址
+    getSSEUrl: (mediaId?: number) => {
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
+        return `${API_BASE_URL}/api/v1/media/transcoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
+    }
 };

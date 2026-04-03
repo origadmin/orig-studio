@@ -72,6 +72,37 @@ service MediaService {
   rpc GetTranscodingStatus(GetTranscodingStatusRequest) returns (GetTranscodingStatusResponse) {
     option (google.api.http) = {get: "/api/v1/medias/transcoding/status"};
   }
+
+  // ListEncodeProfiles returns a list of encoding profiles.
+  rpc ListEncodeProfiles(ListEncodeProfilesRequest) returns (ListEncodeProfilesResponse) {
+    option (google.api.http) = {get: "/api/v1/media/profiles"};
+  }
+
+  // GetEncodeProfile returns an encoding profile by ID.
+  rpc GetEncodeProfile(GetEncodeProfileRequest) returns (GetEncodeProfileResponse) {
+    option (google.api.http) = {get: "/api/v1/media/profiles/{id}"};
+  }
+
+  // CreateEncodeProfile creates a new encoding profile.
+  rpc CreateEncodeProfile(CreateEncodeProfileRequest) returns (CreateEncodeProfileResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/media/profiles"
+      body: "*"
+    };
+  }
+
+  // UpdateEncodeProfile updates an existing encoding profile.
+  rpc UpdateEncodeProfile(UpdateEncodeProfileRequest) returns (UpdateEncodeProfileResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/media/profiles/{profile.id}"
+      body: "*"
+    };
+  }
+
+  // DeleteEncodeProfile deletes an encoding profile.
+  rpc DeleteEncodeProfile(DeleteEncodeProfileRequest) returns (DeleteEncodeProfileResponse) {
+    option (google.api.http) = {delete: "/api/v1/media/profiles/{id}"};
+  }
 }
 
 // ListMediasRequest is the request message for listing medias.
@@ -603,4 +634,50 @@ message GetTranscodingStatusResponse {
   int32 pending_count = 2 [json_name = "pending_count"];
   int32 failed_count = 3 [json_name = "failed_count"];
   int32 success_count = 4 [json_name = "success_count"];
+  // List of media items with their encoding tasks
+  repeated TranscodingMediaItem items = 5 [json_name = "items"];
+}
+
+// TranscodingMediaItem contains media info and its encoding tasks
+message TranscodingMediaItem {
+  api.v1.services.types.Media media = 1 [json_name = "media"];
+  repeated api.v1.services.types.EncodingTask tasks = 2 [json_name = "tasks"];
+}
+
+message ListEncodeProfilesRequest {}
+
+message ListEncodeProfilesResponse {
+  repeated api.v1.services.types.EncodeProfile profiles = 1 [json_name = "profiles"];
+}
+
+message GetEncodeProfileRequest {
+  int32 id = 1;
+}
+
+message GetEncodeProfileResponse {
+  api.v1.services.types.EncodeProfile profile = 1 [json_name = "profile"];
+}
+
+message CreateEncodeProfileRequest {
+  api.v1.services.types.EncodeProfile profile = 1;
+}
+
+message CreateEncodeProfileResponse {
+  api.v1.services.types.EncodeProfile profile = 1 [json_name = "profile"];
+}
+
+message UpdateEncodeProfileRequest {
+  api.v1.services.types.EncodeProfile profile = 1;
+}
+
+message UpdateEncodeProfileResponse {
+  api.v1.services.types.EncodeProfile profile = 1 [json_name = "profile"];
+}
+
+message DeleteEncodeProfileRequest {
+  int32 id = 1;
+}
+
+message DeleteEncodeProfileResponse {
+  google.protobuf.Empty empty = 1 [json_name = "empty"];
 }

@@ -16,42 +16,37 @@ import (
 
 // --- Route registration ---
 
-// RegisterUploadRoutes registers chunked upload routes using the UploadUseCase.
-func RegisterUploadRoutes(group *gin.RouterGroup, uc *biz.UploadUseCase, jwtMgr *auth.Manager) {
+// UploadHandler handles file uploads.
+type UploadHandler struct {
+	uc     *biz.UploadUseCase
+	jwtMgr *auth.Manager
+}
+
+func NewUploadHandler(uc *biz.UploadUseCase, jwtMgr *auth.Manager) *UploadHandler {
+	return &UploadHandler{uc: uc, jwtMgr: jwtMgr}
+}
+
+func (h *UploadHandler) Register(group *gin.RouterGroup) {
 	uploads := group.Group("/uploads")
+	uploads.Use(JWTMiddleware(h.jwtMgr))
 	{
-		// Require JWT for all upload operations
-		uploads.Use(JWTMiddleware(jwtMgr))
+		// Multipart upload routes
+		uploads.POST("/multipart", h.initiateMultipartUpload())
+		uploads.POST("/:uploadId/parts/:partNumber", h.uploadPart())
+		uploads.POST("/:uploadId/complete", h.completeMultipartUpload())
+		uploads.POST("/:uploadId/abort", h.abortMultipartUpload())
+		uploads.GET("/:uploadId/parts", h.listParts())
 
-		// Initiate a new multipart upload session
-		uploads.POST("/multipart", initiateMultipartUpload(uc))
-
-		// Upload a single part
-		uploads.POST("/:upload_id/parts/:part_number", uploadPart(uc))
-
-		// List uploaded parts (for resume)
-		uploads.GET("/:upload_id/parts", listParts(uc))
-
-		// Complete multipart upload
-		uploads.POST("/:upload_id/complete", completeMultipartUpload(uc))
-
-		// Update upload metadata (can be called anytime during upload)
-		uploads.PATCH("/:upload_id/metadata", updateUploadMetadata(uc))
-
-		// Abort multipart upload
-		uploads.DELETE("/:upload_id", abortMultipartUpload(uc))
-
-		// Get upload session info
-		uploads.GET("/:upload_id", getUploadSession(uc))
-
-		// List user's upload sessions
-		uploads.GET("", listUploadSessions(uc))
+		// Session management
+		uploads.GET("/sessions", h.listUploadSessions())
+		uploads.GET("/sessions/:uploadId", h.getUploadSession())
 	}
 }
 
 // --- Handlers (Refactored to use biz.UploadUseCase) ---
 
-func initiateMultipartUpload(uc *biz.UploadUseCase) gin.HandlerFunc {
+// initiateMultipartUpload starts a new multipart upload session.
+func (h *UploadHandler) initiateMultipartUpload() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		claims, _ := c.MustGet("claims").(*auth.Claims)
 
@@ -70,7 +65,7 @@ func initiateMultipartUpload(uc *biz.UploadUseCase) gin.HandlerFunc {
 			return
 		}
 
-		session, err := uc.InitiateMultipartUpload(
+		session, err := h.uc.InitiateMultipartUpload(
 			c.Request.Context(),
 			req.Filename,
 			req.FileSize,
@@ -95,10 +90,11 @@ func initiateMultipartUpload(uc *biz.UploadUseCase) gin.HandlerFunc {
 	}
 }
 
-func uploadPart(uc *biz.UploadUseCase) gin.HandlerFunc {
+// uploadPart uploads a single part of a multipart upload.
+func (h *UploadHandler) uploadPart() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		uploadID := c.Param("upload_id")
-		partNumber, _ := strconv.Atoi(c.Param("part_number"))
+		uploadID := c.Param("uploadId")
+		partNumber, _ := strconv.Atoi(c.Param("partNumber"))
 
 		data, err := c.GetRawData()
 		if err != nil {
@@ -106,7 +102,7 @@ func uploadPart(uc *biz.UploadUseCase) gin.HandlerFunc {
 			return
 		}
 
-		etag, err := uc.UploadPart(c.Request.Context(), uploadID, partNumber, data)
+		etag, err := h.uc.UploadPart(c.Request.Context(), uploadID, partNumber, data)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -119,10 +115,11 @@ func uploadPart(uc *biz.UploadUseCase) gin.HandlerFunc {
 	}
 }
 
-func listParts(uc *biz.UploadUseCase) gin.HandlerFunc {
+// listParts lists all uploaded parts for a specific session.
+func (h *UploadHandler) listParts() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		uploadID := c.Param("upload_id")
-		session, err := uc.GetSession(c.Request.Context(), uploadID)
+		uploadID := c.Param("uploadId")
+		session, err := h.uc.GetSession(c.Request.Context(), uploadID)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "upload session not found"})
 			return
@@ -149,9 +146,10 @@ func listParts(uc *biz.UploadUseCase) gin.HandlerFunc {
 	}
 }
 
-func completeMultipartUpload(uc *biz.UploadUseCase) gin.HandlerFunc {
+// completeMultipartUpload completes a multipart upload session.
+func (h *UploadHandler) completeMultipartUpload() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		uploadID := c.Param("upload_id")
+		uploadID := c.Param("uploadId")
 		var req struct {
 			Sha256      string   `json:"sha256"`
 			Title       string   `json:"title"`
@@ -162,10 +160,9 @@ func completeMultipartUpload(uc *biz.UploadUseCase) gin.HandlerFunc {
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			// Even if JSON binding fails or is empty, we try to complete with defaults
-			// But usually, we expect at least the completion call.
 		}
 
-		media, err := uc.CompleteMultipartUpload(
+		media, err := h.uc.CompleteMultipartUpload(
 			c.Request.Context(),
 			uploadID,
 			req.Sha256,
@@ -187,43 +184,11 @@ func completeMultipartUpload(uc *biz.UploadUseCase) gin.HandlerFunc {
 	}
 }
 
-func updateUploadMetadata(uc *biz.UploadUseCase) gin.HandlerFunc {
+// abortMultipartUpload aborts a multipart upload session.
+func (h *UploadHandler) abortMultipartUpload() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		uploadID := c.Param("upload_id")
-		var req struct {
-			Title       string   `json:"title"`
-			Description string   `json:"description"`
-			CategoryID  *int64   `json:"category_id"`
-			Tags        []string `json:"tags"`
-			Thumbnail   string   `json:"thumbnail"`
-		}
-		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request: " + err.Error()})
-			return
-		}
-
-		err := uc.UpdateUploadMetadata(
-			c.Request.Context(),
-			uploadID,
-			req.Title,
-			req.Description,
-			req.CategoryID,
-			req.Tags,
-			req.Thumbnail,
-		)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{"message": "metadata updated"})
-	}
-}
-
-func abortMultipartUpload(uc *biz.UploadUseCase) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		uploadID := c.Param("upload_id")
-		if err := uc.AbortMultipartUpload(c.Request.Context(), uploadID); err != nil {
+		uploadID := c.Param("uploadId")
+		if err := h.uc.AbortMultipartUpload(c.Request.Context(), uploadID); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -231,10 +196,11 @@ func abortMultipartUpload(uc *biz.UploadUseCase) gin.HandlerFunc {
 	}
 }
 
-func getUploadSession(uc *biz.UploadUseCase) gin.HandlerFunc {
+// getUploadSession returns details for a specific upload session.
+func (h *UploadHandler) getUploadSession() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		uploadID := c.Param("upload_id")
-		session, err := uc.GetSession(c.Request.Context(), uploadID)
+		uploadID := c.Param("uploadId")
+		session, err := h.uc.GetSession(c.Request.Context(), uploadID)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "upload session not found"})
 			return
@@ -243,14 +209,15 @@ func getUploadSession(uc *biz.UploadUseCase) gin.HandlerFunc {
 	}
 }
 
-func listUploadSessions(uc *biz.UploadUseCase) gin.HandlerFunc {
+// listUploadSessions lists all active upload sessions.
+func (h *UploadHandler) listUploadSessions() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		claims, _ := c.MustGet("claims").(*auth.Claims)
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 		status := c.Query("status")
 
-		sessions, total, err := uc.ListSessions(
+		sessions, total, err := h.uc.ListSessions(
 			c.Request.Context(),
 			claims.UserID,
 			status,

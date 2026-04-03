@@ -19,9 +19,12 @@ type FeedHandler struct {
 	db *entity.Client
 }
 
-// NewFeedHandler creates a new FeedHandler
 func NewFeedHandler(db *entity.Client) *FeedHandler {
 	return &FeedHandler{db: db}
+}
+
+func (h *FeedHandler) Register(group *gin.RouterGroup) {
+	group.GET("/feed", h.GetFeed)
 }
 
 // FeedResponse represents the feed response structure

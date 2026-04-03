@@ -332,14 +332,18 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 
 	// Background media processing (Thumbnail + HLS Transcoding)
 	if strings.HasPrefix(session.ContentType, "video/") {
-		go uc.processMedia(context.Background(), createdMedia.Id, finalPath, session.ContentType)
+		go uc.ProcessMedia(context.Background(), createdMedia.Id, finalPath, session.ContentType)
 	}
 
 	return createdMedia, nil
 }
 
-// processMedia handles background tasks like thumbnail generation and multi-variant HLS transcoding.
-func (uc *UploadUseCase) processMedia(ctx context.Context, mediaID int64, mediaPath, contentType string) {
+// ProcessMedia handles background tasks like thumbnail generation and multi-variant HLS transcoding.
+func (uc *UploadUseCase) ProcessMedia(
+	ctx context.Context,
+	mediaID int64,
+	mediaPath, contentType string,
+) {
 	// Base directory for data
 	baseDir := "./data/uploads"
 	fullPath := filepath.Join(baseDir, mediaPath)
@@ -383,7 +387,7 @@ func (uc *UploadUseCase) processMedia(ctx context.Context, mediaID int64, mediaP
 	}
 
 	tempWorkDir := filepath.Join(baseDir, "temp", fmt.Sprintf("%d", mediaID))
-	_ = os.MkdirAll(tempWorkDir, 0755)
+	_ = os.MkdirAll(tempWorkDir, 0o755)
 	defer os.RemoveAll(tempWorkDir) // clean up intermediate MP4s
 
 	var intermediateFiles []string
@@ -414,10 +418,20 @@ func (uc *UploadUseCase) processMedia(ctx context.Context, mediaID int64, mediaP
 		_, _ = uc.encodingRepo.Update(updateCtx, t)
 		uc.mediaUseCase.Publish(mediaID, &EncodingEvent{MediaId: mediaID, Task: t})
 
-		variantPath := filepath.Join(tempWorkDir, fmt.Sprintf("variant_%d.%s", profile.Id, profile.Extension))
+		variantPath := filepath.Join(
+			tempWorkDir,
+			fmt.Sprintf("variant_%d.%s", profile.Id, profile.Extension),
+		)
 		uc.log.Infof("encoding variant for profile %s", profile.Name)
 
-		err = ffmpeg.TranscodeToMP4(updateCtx, fullPath, variantPath, profile.Resolution, profile.VideoCodec, profile.AudioCodec)
+		err = ffmpeg.TranscodeToMP4(
+			updateCtx,
+			fullPath,
+			variantPath,
+			profile.Resolution,
+			profile.VideoCodec,
+			profile.AudioCodec,
+		)
 		if err != nil {
 			uc.log.Errorf("transcoding failed for profile %s: %v", profile.Name, err)
 			t.Status = "failed"

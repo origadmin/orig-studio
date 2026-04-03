@@ -29,11 +29,10 @@ import (
 	"origadmin/application/origcms/internal/data/entity"
 	confhelper "origadmin/application/origcms/internal/helpers/conf"
 	"origadmin/application/origcms/internal/server"
-	"origadmin/application/origcms/internal/svc-user/biz"
-	"origadmin/application/origcms/internal/svc-user/data"
-
 	mediabiz "origadmin/application/origcms/internal/svc-media/biz"
 	mediadata "origadmin/application/origcms/internal/svc-media/data"
+	"origadmin/application/origcms/internal/svc-user/biz"
+	"origadmin/application/origcms/internal/svc-user/data"
 )
 
 var (
@@ -80,6 +79,13 @@ func main() {
 	}
 	slog.Info("database migration complete")
 
+	// --- Initialize Seed Data ---
+	if err := mediadata.SeedEncodeProfiles(ctx, db); err != nil {
+		slog.Error("failed to seed encode profiles", "err", err)
+		os.Exit(1)
+	}
+	slog.Info("encode profiles seeded successfully")
+
 	// ── 2. Dependency injection (manual wire) ────────────────────────────────
 	hasher, err := hash.NewCrypto(hashtypes.BCRYPT)
 	if err != nil {
@@ -96,8 +102,6 @@ func main() {
 		time.Duration(cfg.JWTExpireHour)*time.Hour,
 	)
 
-	authHandler := server.NewAuthHandler(userUC, jwtManager)
-
 	// svc-media initialization
 	mediaRepo := mediadata.NewMediaRepo(db)
 	profileRepo := mediadata.NewEncodeProfileRepo(db)
@@ -107,25 +111,45 @@ func main() {
 
 	uploadRepo := mediadata.NewUploadRepo(db, logger)
 	storage := mediadata.NewLocalStorage("./data/uploads", logger)
-	uploadUC := mediabiz.NewUploadUseCase(uploadRepo, mediaRepo, profileRepo, taskRepo, mediaUC, storage, logger)
+	uploadUC := mediabiz.NewUploadUseCase(
+		uploadRepo,
+		mediaRepo,
+		profileRepo,
+		taskRepo,
+		mediaUC,
+		storage,
+		logger,
+	)
 
-	// ── 3. Gin router ─────────────────────────────────────────────────────────
+	// --- 3. Handlers (Monolith) ---
+	authHandler := server.NewAuthHandler(userUC, jwtManager)
+	userHandler := server.NewUserHandler(db)
+	mediaHandler := server.NewMediaHandler(db, jwtManager, mediaUC, uploadUC)
+	uploadHandler := server.NewUploadHandler(uploadUC, jwtManager)
+	categoryHandler := server.NewCategoryHandler(db)
+	tagHandler := server.NewTagHandler(db)
+	commentHandler := server.NewCommentHandler(db)
+	playlistHandler := server.NewPlaylistHandler(db)
+	feedHandler := server.NewFeedHandler(db)
+
+	// ── 4. Gin router ─────────────────────────────────────────────────────────
 	if getEnv("GIN_MODE", "debug") == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
+	r := gin.Default()
 
-	r := gin.New()
-	r.Use(gin.Logger(), gin.Recovery())
-
-	// CORS middleware
+	// CORS
 	r.Use(func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		if c.Request.Method == http.MethodOptions {
-			c.AbortWithStatus(http.StatusNoContent)
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, Range")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
 			return
 		}
+
 		c.Next()
 	})
 
@@ -142,25 +166,20 @@ func main() {
 	r.Static("/thumbnails", "./data/uploads/thumbnails")
 	r.Static("/hls", "./data/uploads/hls")
 
-	// Register all module routes (user, media, content, etc.)
-	server.RegisterRoutes(r, db, jwtManager, uploadUC)
+	// Register all module routes using the new interface-based approach
+	server.RegisterRoutes(r,
+		authHandler,
+		userHandler,
+		mediaHandler,
+		uploadHandler,
+		categoryHandler,
+		tagHandler,
+		commentHandler,
+		playlistHandler,
+		feedHandler,
+	)
 
-	// Auth routes (public) - these supplement the standard CRUD routes
-	authGroup := r.Group("/api/v1/auth")
-	{
-		authGroup.POST("/signin", authHandler.Login)
-		authGroup.POST("/signup", authHandler.Register)
-		authGroup.POST("/signout", authHandler.Logout)
-	}
-
-	// Protected auth routes
-	protected := r.Group("/api/v1/auth")
-	protected.Use(server.JWTMiddleware(jwtManager))
-	{
-		protected.GET("/me", authHandler.Me)
-	}
-
-	// ── 4. Start server ───────────────────────────────────────────────────────
+	// ── 5. Start server ───────────────────────────────────────────────────────
 	addr := fmt.Sprintf(":%d", cfg.ServerPort)
 	slog.Info("origcms server starting", "addr", addr)
 	if err := r.Run(addr); err != nil {

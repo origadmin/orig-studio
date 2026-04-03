@@ -256,9 +256,11 @@
     }
   },
   "admin": {
-    "dashboard": "Platform Overview",
-    "dashboardDesc": "Real-time statistics for your media platform.",
+    "dashboard": "平台概览",
+    "dashboardDesc": "媒体平台的实时统计数据。",
     "media": "媒体管理",
+    "transcodingProfiles": "转码预设",
+    "transcodingStatus": "转码状态",
     "users": "用户管理",
     "categories": "分类管理",
     "channels": "频道管理",

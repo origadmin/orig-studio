@@ -5,6 +5,7 @@
 package data
 
 import (
+	"context" // Import context
 	"fmt"
 
 	entsql "entgo.io/ent/dialect/sql"
@@ -36,6 +37,16 @@ func NewEntClient(app *runtime.App) (*entity.Client, func(), error) {
 
 	drv := entsql.OpenDB(dbInst.Dialect(), dbInst.DB())
 	client := entity.NewClient(entity.Driver(drv))
+
+	// Ensure the database schema is created
+	if err := client.Schema.Create(context.Background()); err != nil {
+		return nil, nil, fmt.Errorf("failed creating schema resources: %w", err)
+	}
+
+	// Call SeedEncodeProfiles to initialize default data
+	if err := SeedEncodeProfiles(context.Background(), client); err != nil {
+		return nil, nil, fmt.Errorf("failed to seed encode profiles: %w", err)
+	}
 
 	cleanup := func() {
 		_ = client.Close()

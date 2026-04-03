@@ -1,4 +1,4 @@
-# orig-cms 项目分析文档
+/pl# orig-cms 项目分析文档
 
 > **生成时间**：2026-03-31  
 > **项目路径**：`D:\workspace\project\golang\origadmin\framework\projects\orig-cms`

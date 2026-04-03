@@ -3800,8 +3800,10 @@ type GetTranscodingStatusResponse struct {
 	PendingCount    int32                  `protobuf:"varint,2,opt,name=pending_count,proto3" json:"pending_count,omitempty"`
 	FailedCount     int32                  `protobuf:"varint,3,opt,name=failed_count,proto3" json:"failed_count,omitempty"`
 	SuccessCount    int32                  `protobuf:"varint,4,opt,name=success_count,proto3" json:"success_count,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	// List of media items with their encoding tasks
+	Items         []*TranscodingMediaItem `protobuf:"bytes,5,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetTranscodingStatusResponse) Reset() {
@@ -3860,6 +3862,498 @@ func (x *GetTranscodingStatusResponse) GetSuccessCount() int32 {
 		return x.SuccessCount
 	}
 	return 0
+}
+
+func (x *GetTranscodingStatusResponse) GetItems() []*TranscodingMediaItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+// TranscodingMediaItem contains media info and its encoding tasks
+type TranscodingMediaItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Media         *types.Media           `protobuf:"bytes,1,opt,name=media,proto3" json:"media,omitempty"`
+	Tasks         []*types.EncodingTask  `protobuf:"bytes,2,rep,name=tasks,proto3" json:"tasks,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TranscodingMediaItem) Reset() {
+	*x = TranscodingMediaItem{}
+	mi := &file_v1_media_media_service_proto_msgTypes[74]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TranscodingMediaItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TranscodingMediaItem) ProtoMessage() {}
+
+func (x *TranscodingMediaItem) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[74]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TranscodingMediaItem.ProtoReflect.Descriptor instead.
+func (*TranscodingMediaItem) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{74}
+}
+
+func (x *TranscodingMediaItem) GetMedia() *types.Media {
+	if x != nil {
+		return x.Media
+	}
+	return nil
+}
+
+func (x *TranscodingMediaItem) GetTasks() []*types.EncodingTask {
+	if x != nil {
+		return x.Tasks
+	}
+	return nil
+}
+
+type ListEncodeProfilesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEncodeProfilesRequest) Reset() {
+	*x = ListEncodeProfilesRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[75]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEncodeProfilesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEncodeProfilesRequest) ProtoMessage() {}
+
+func (x *ListEncodeProfilesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[75]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEncodeProfilesRequest.ProtoReflect.Descriptor instead.
+func (*ListEncodeProfilesRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{75}
+}
+
+type ListEncodeProfilesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Profiles      []*types.EncodeProfile `protobuf:"bytes,1,rep,name=profiles,proto3" json:"profiles,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEncodeProfilesResponse) Reset() {
+	*x = ListEncodeProfilesResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[76]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEncodeProfilesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEncodeProfilesResponse) ProtoMessage() {}
+
+func (x *ListEncodeProfilesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[76]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEncodeProfilesResponse.ProtoReflect.Descriptor instead.
+func (*ListEncodeProfilesResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{76}
+}
+
+func (x *ListEncodeProfilesResponse) GetProfiles() []*types.EncodeProfile {
+	if x != nil {
+		return x.Profiles
+	}
+	return nil
+}
+
+type GetEncodeProfileRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetEncodeProfileRequest) Reset() {
+	*x = GetEncodeProfileRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[77]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetEncodeProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetEncodeProfileRequest) ProtoMessage() {}
+
+func (x *GetEncodeProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[77]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetEncodeProfileRequest.ProtoReflect.Descriptor instead.
+func (*GetEncodeProfileRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{77}
+}
+
+func (x *GetEncodeProfileRequest) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type GetEncodeProfileResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Profile       *types.EncodeProfile   `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetEncodeProfileResponse) Reset() {
+	*x = GetEncodeProfileResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[78]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetEncodeProfileResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetEncodeProfileResponse) ProtoMessage() {}
+
+func (x *GetEncodeProfileResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[78]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetEncodeProfileResponse.ProtoReflect.Descriptor instead.
+func (*GetEncodeProfileResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{78}
+}
+
+func (x *GetEncodeProfileResponse) GetProfile() *types.EncodeProfile {
+	if x != nil {
+		return x.Profile
+	}
+	return nil
+}
+
+type CreateEncodeProfileRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Profile       *types.EncodeProfile   `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateEncodeProfileRequest) Reset() {
+	*x = CreateEncodeProfileRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[79]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateEncodeProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateEncodeProfileRequest) ProtoMessage() {}
+
+func (x *CreateEncodeProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[79]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateEncodeProfileRequest.ProtoReflect.Descriptor instead.
+func (*CreateEncodeProfileRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{79}
+}
+
+func (x *CreateEncodeProfileRequest) GetProfile() *types.EncodeProfile {
+	if x != nil {
+		return x.Profile
+	}
+	return nil
+}
+
+type CreateEncodeProfileResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Profile       *types.EncodeProfile   `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateEncodeProfileResponse) Reset() {
+	*x = CreateEncodeProfileResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[80]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateEncodeProfileResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateEncodeProfileResponse) ProtoMessage() {}
+
+func (x *CreateEncodeProfileResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[80]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateEncodeProfileResponse.ProtoReflect.Descriptor instead.
+func (*CreateEncodeProfileResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{80}
+}
+
+func (x *CreateEncodeProfileResponse) GetProfile() *types.EncodeProfile {
+	if x != nil {
+		return x.Profile
+	}
+	return nil
+}
+
+type UpdateEncodeProfileRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Profile       *types.EncodeProfile   `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateEncodeProfileRequest) Reset() {
+	*x = UpdateEncodeProfileRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[81]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateEncodeProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateEncodeProfileRequest) ProtoMessage() {}
+
+func (x *UpdateEncodeProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[81]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateEncodeProfileRequest.ProtoReflect.Descriptor instead.
+func (*UpdateEncodeProfileRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{81}
+}
+
+func (x *UpdateEncodeProfileRequest) GetProfile() *types.EncodeProfile {
+	if x != nil {
+		return x.Profile
+	}
+	return nil
+}
+
+type UpdateEncodeProfileResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Profile       *types.EncodeProfile   `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateEncodeProfileResponse) Reset() {
+	*x = UpdateEncodeProfileResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[82]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateEncodeProfileResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateEncodeProfileResponse) ProtoMessage() {}
+
+func (x *UpdateEncodeProfileResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[82]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateEncodeProfileResponse.ProtoReflect.Descriptor instead.
+func (*UpdateEncodeProfileResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{82}
+}
+
+func (x *UpdateEncodeProfileResponse) GetProfile() *types.EncodeProfile {
+	if x != nil {
+		return x.Profile
+	}
+	return nil
+}
+
+type DeleteEncodeProfileRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteEncodeProfileRequest) Reset() {
+	*x = DeleteEncodeProfileRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[83]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteEncodeProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteEncodeProfileRequest) ProtoMessage() {}
+
+func (x *DeleteEncodeProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[83]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteEncodeProfileRequest.ProtoReflect.Descriptor instead.
+func (*DeleteEncodeProfileRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{83}
+}
+
+func (x *DeleteEncodeProfileRequest) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type DeleteEncodeProfileResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Empty         *emptypb.Empty         `protobuf:"bytes,1,opt,name=empty,proto3" json:"empty,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteEncodeProfileResponse) Reset() {
+	*x = DeleteEncodeProfileResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[84]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteEncodeProfileResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteEncodeProfileResponse) ProtoMessage() {}
+
+func (x *DeleteEncodeProfileResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[84]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteEncodeProfileResponse.ProtoReflect.Descriptor instead.
+func (*DeleteEncodeProfileResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{84}
+}
+
+func (x *DeleteEncodeProfileResponse) GetEmpty() *emptypb.Empty {
+	if x != nil {
+		return x.Empty
+	}
+	return nil
 }
 
 var File_v1_media_media_service_proto protoreflect.FileDescriptor
@@ -4117,13 +4611,35 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\x1bGetTranscodingStatusRequest\x12\x1d\n" +
 	"\auser_id\x18\x01 \x01(\x03H\x00R\auser_id\x88\x01\x01B\n" +
 	"\n" +
-	"\b_user_id\"\xba\x01\n" +
+	"\b_user_id\"\xfd\x01\n" +
 	"\x1cGetTranscodingStatusResponse\x12*\n" +
 	"\x10processing_count\x18\x01 \x01(\x05R\x10processing_count\x12$\n" +
 	"\rpending_count\x18\x02 \x01(\x05R\rpending_count\x12\"\n" +
 	"\ffailed_count\x18\x03 \x01(\x05R\ffailed_count\x12$\n" +
-	"\rsuccess_count\x18\x04 \x01(\x05R\rsuccess_count2\x8e\n" +
-	"\n" +
+	"\rsuccess_count\x18\x04 \x01(\x05R\rsuccess_count\x12A\n" +
+	"\x05items\x18\x05 \x03(\v2+.api.v1.services.media.TranscodingMediaItemR\x05items\"\x85\x01\n" +
+	"\x14TranscodingMediaItem\x122\n" +
+	"\x05media\x18\x01 \x01(\v2\x1c.api.v1.services.types.MediaR\x05media\x129\n" +
+	"\x05tasks\x18\x02 \x03(\v2#.api.v1.services.types.EncodingTaskR\x05tasks\"\x1b\n" +
+	"\x19ListEncodeProfilesRequest\"^\n" +
+	"\x1aListEncodeProfilesResponse\x12@\n" +
+	"\bprofiles\x18\x01 \x03(\v2$.api.v1.services.types.EncodeProfileR\bprofiles\")\n" +
+	"\x17GetEncodeProfileRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\"Z\n" +
+	"\x18GetEncodeProfileResponse\x12>\n" +
+	"\aprofile\x18\x01 \x01(\v2$.api.v1.services.types.EncodeProfileR\aprofile\"\\\n" +
+	"\x1aCreateEncodeProfileRequest\x12>\n" +
+	"\aprofile\x18\x01 \x01(\v2$.api.v1.services.types.EncodeProfileR\aprofile\"]\n" +
+	"\x1bCreateEncodeProfileResponse\x12>\n" +
+	"\aprofile\x18\x01 \x01(\v2$.api.v1.services.types.EncodeProfileR\aprofile\"\\\n" +
+	"\x1aUpdateEncodeProfileRequest\x12>\n" +
+	"\aprofile\x18\x01 \x01(\v2$.api.v1.services.types.EncodeProfileR\aprofile\"]\n" +
+	"\x1bUpdateEncodeProfileResponse\x12>\n" +
+	"\aprofile\x18\x01 \x01(\v2$.api.v1.services.types.EncodeProfileR\aprofile\",\n" +
+	"\x1aDeleteEncodeProfileRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\"K\n" +
+	"\x1bDeleteEncodeProfileResponse\x12,\n" +
+	"\x05empty\x18\x01 \x01(\v2\x16.google.protobuf.EmptyR\x05empty2\xba\x10\n" +
 	"\fMediaService\x12y\n" +
 	"\n" +
 	"ListMedias\x12(.api.v1.services.media.ListMediasRequest\x1a).api.v1.services.media.ListMediasResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/api/v1/medias\x12x\n" +
@@ -4134,7 +4650,12 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\x12IncrementViewCount\x120.api.v1.services.media.IncrementViewCountRequest\x1a1.api.v1.services.media.IncrementViewCountResponse\"#\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/api/v1/medias/{id}/view\x12\x86\x01\n" +
 	"\vUploadMedia\x12).api.v1.services.media.UploadMediaRequest\x1a*.api.v1.services.media.UploadMediaResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/medias/upload\x12\x9f\x01\n" +
 	"\x11ListEncodingTasks\x12/.api.v1.services.media.ListEncodingTasksRequest\x1a0.api.v1.services.media.ListEncodingTasksResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/api/v1/medias/{media_id}/tasks\x12\xaa\x01\n" +
-	"\x14GetTranscodingStatus\x122.api.v1.services.media.GetTranscodingStatusRequest\x1a3.api.v1.services.media.GetTranscodingStatusResponse\")\x82\xd3\xe4\x93\x02#\x12!/api/v1/medias/transcoding/status2\xe2\x05\n" +
+	"\x14GetTranscodingStatus\x122.api.v1.services.media.GetTranscodingStatusRequest\x1a3.api.v1.services.media.GetTranscodingStatusResponse\")\x82\xd3\xe4\x93\x02#\x12!/api/v1/medias/transcoding/status\x12\x99\x01\n" +
+	"\x12ListEncodeProfiles\x120.api.v1.services.media.ListEncodeProfilesRequest\x1a1.api.v1.services.media.ListEncodeProfilesResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/api/v1/media/profiles\x12\x98\x01\n" +
+	"\x10GetEncodeProfile\x12..api.v1.services.media.GetEncodeProfileRequest\x1a/.api.v1.services.media.GetEncodeProfileResponse\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/v1/media/profiles/{id}\x12\x9f\x01\n" +
+	"\x13CreateEncodeProfile\x121.api.v1.services.media.CreateEncodeProfileRequest\x1a2.api.v1.services.media.CreateEncodeProfileResponse\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/api/v1/media/profiles\x12\xac\x01\n" +
+	"\x13UpdateEncodeProfile\x121.api.v1.services.media.UpdateEncodeProfileRequest\x1a2.api.v1.services.media.UpdateEncodeProfileResponse\".\x82\xd3\xe4\x93\x02(:\x01*\x1a#/api/v1/media/profiles/{profile.id}\x12\xa1\x01\n" +
+	"\x13DeleteEncodeProfile\x121.api.v1.services.media.DeleteEncodeProfileRequest\x1a2.api.v1.services.media.DeleteEncodeProfileResponse\"#\x82\xd3\xe4\x93\x02\x1d*\x1b/api/v1/media/profiles/{id}2\xe2\x05\n" +
 	"\x0fCategoryService\x12\x89\x01\n" +
 	"\x0eListCategories\x12,.api.v1.services.media.ListCategoriesRequest\x1a-.api.v1.services.media.ListCategoriesResponse\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/categories\x12\x85\x01\n" +
 	"\vGetCategory\x12).api.v1.services.media.GetCategoryRequest\x1a*.api.v1.services.media.GetCategoryResponse\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/categories/{id}\x12\x8c\x01\n" +
@@ -4186,7 +4707,7 @@ func file_v1_media_media_service_proto_rawDescGZIP() []byte {
 	return file_v1_media_media_service_proto_rawDescData
 }
 
-var file_v1_media_media_service_proto_msgTypes = make([]protoimpl.MessageInfo, 74)
+var file_v1_media_media_service_proto_msgTypes = make([]protoimpl.MessageInfo, 85)
 var file_v1_media_media_service_proto_goTypes = []any{
 	(*ListMediasRequest)(nil),            // 0: api.v1.services.media.ListMediasRequest
 	(*ListMediasResponse)(nil),           // 1: api.v1.services.media.ListMediasResponse
@@ -4262,144 +4783,176 @@ var file_v1_media_media_service_proto_goTypes = []any{
 	(*ListEncodingTasksResponse)(nil),    // 71: api.v1.services.media.ListEncodingTasksResponse
 	(*GetTranscodingStatusRequest)(nil),  // 72: api.v1.services.media.GetTranscodingStatusRequest
 	(*GetTranscodingStatusResponse)(nil), // 73: api.v1.services.media.GetTranscodingStatusResponse
-	(*types.Media)(nil),                  // 74: api.v1.services.types.Media
-	(*fieldmaskpb.FieldMask)(nil),        // 75: google.protobuf.FieldMask
-	(*emptypb.Empty)(nil),                // 76: google.protobuf.Empty
-	(*types.Category)(nil),               // 77: api.v1.services.types.Category
-	(*types.Tag)(nil),                    // 78: api.v1.services.types.Tag
-	(*types.Comment)(nil),                // 79: api.v1.services.types.Comment
-	(*types.Like)(nil),                   // 80: api.v1.services.types.Like
-	(*types.Favorite)(nil),               // 81: api.v1.services.types.Favorite
-	(*types.Playlist)(nil),               // 82: api.v1.services.types.Playlist
-	(*types.EncodingTask)(nil),           // 83: api.v1.services.types.EncodingTask
+	(*TranscodingMediaItem)(nil),         // 74: api.v1.services.media.TranscodingMediaItem
+	(*ListEncodeProfilesRequest)(nil),    // 75: api.v1.services.media.ListEncodeProfilesRequest
+	(*ListEncodeProfilesResponse)(nil),   // 76: api.v1.services.media.ListEncodeProfilesResponse
+	(*GetEncodeProfileRequest)(nil),      // 77: api.v1.services.media.GetEncodeProfileRequest
+	(*GetEncodeProfileResponse)(nil),     // 78: api.v1.services.media.GetEncodeProfileResponse
+	(*CreateEncodeProfileRequest)(nil),   // 79: api.v1.services.media.CreateEncodeProfileRequest
+	(*CreateEncodeProfileResponse)(nil),  // 80: api.v1.services.media.CreateEncodeProfileResponse
+	(*UpdateEncodeProfileRequest)(nil),   // 81: api.v1.services.media.UpdateEncodeProfileRequest
+	(*UpdateEncodeProfileResponse)(nil),  // 82: api.v1.services.media.UpdateEncodeProfileResponse
+	(*DeleteEncodeProfileRequest)(nil),   // 83: api.v1.services.media.DeleteEncodeProfileRequest
+	(*DeleteEncodeProfileResponse)(nil),  // 84: api.v1.services.media.DeleteEncodeProfileResponse
+	(*types.Media)(nil),                  // 85: api.v1.services.types.Media
+	(*fieldmaskpb.FieldMask)(nil),        // 86: google.protobuf.FieldMask
+	(*emptypb.Empty)(nil),                // 87: google.protobuf.Empty
+	(*types.Category)(nil),               // 88: api.v1.services.types.Category
+	(*types.Tag)(nil),                    // 89: api.v1.services.types.Tag
+	(*types.Comment)(nil),                // 90: api.v1.services.types.Comment
+	(*types.Like)(nil),                   // 91: api.v1.services.types.Like
+	(*types.Favorite)(nil),               // 92: api.v1.services.types.Favorite
+	(*types.Playlist)(nil),               // 93: api.v1.services.types.Playlist
+	(*types.EncodingTask)(nil),           // 94: api.v1.services.types.EncodingTask
+	(*types.EncodeProfile)(nil),          // 95: api.v1.services.types.EncodeProfile
 }
 var file_v1_media_media_service_proto_depIdxs = []int32{
-	74, // 0: api.v1.services.media.ListMediasResponse.medias:type_name -> api.v1.services.types.Media
-	74, // 1: api.v1.services.media.GetMediaResponse.media:type_name -> api.v1.services.types.Media
-	74, // 2: api.v1.services.media.CreateMediaRequest.media:type_name -> api.v1.services.types.Media
-	74, // 3: api.v1.services.media.CreateMediaResponse.media:type_name -> api.v1.services.types.Media
-	74, // 4: api.v1.services.media.UpdateMediaRequest.media:type_name -> api.v1.services.types.Media
-	75, // 5: api.v1.services.media.UpdateMediaRequest.update_mask:type_name -> google.protobuf.FieldMask
-	74, // 6: api.v1.services.media.UpdateMediaResponse.media:type_name -> api.v1.services.types.Media
-	76, // 7: api.v1.services.media.DeleteMediaResponse.empty:type_name -> google.protobuf.Empty
-	74, // 8: api.v1.services.media.UploadMediaResponse.media:type_name -> api.v1.services.types.Media
-	77, // 9: api.v1.services.media.ListCategoriesResponse.categories:type_name -> api.v1.services.types.Category
-	77, // 10: api.v1.services.media.GetCategoryResponse.category:type_name -> api.v1.services.types.Category
-	77, // 11: api.v1.services.media.CreateCategoryRequest.category:type_name -> api.v1.services.types.Category
-	77, // 12: api.v1.services.media.CreateCategoryResponse.category:type_name -> api.v1.services.types.Category
-	77, // 13: api.v1.services.media.UpdateCategoryRequest.category:type_name -> api.v1.services.types.Category
-	75, // 14: api.v1.services.media.UpdateCategoryRequest.update_mask:type_name -> google.protobuf.FieldMask
-	77, // 15: api.v1.services.media.UpdateCategoryResponse.category:type_name -> api.v1.services.types.Category
-	76, // 16: api.v1.services.media.DeleteCategoryResponse.empty:type_name -> google.protobuf.Empty
-	78, // 17: api.v1.services.media.ListTagsResponse.tags:type_name -> api.v1.services.types.Tag
-	78, // 18: api.v1.services.media.GetTagResponse.tag:type_name -> api.v1.services.types.Tag
-	78, // 19: api.v1.services.media.CreateTagRequest.tag:type_name -> api.v1.services.types.Tag
-	78, // 20: api.v1.services.media.CreateTagResponse.tag:type_name -> api.v1.services.types.Tag
-	78, // 21: api.v1.services.media.UpdateTagRequest.tag:type_name -> api.v1.services.types.Tag
-	75, // 22: api.v1.services.media.UpdateTagRequest.update_mask:type_name -> google.protobuf.FieldMask
-	78, // 23: api.v1.services.media.UpdateTagResponse.tag:type_name -> api.v1.services.types.Tag
-	76, // 24: api.v1.services.media.DeleteTagResponse.empty:type_name -> google.protobuf.Empty
-	79, // 25: api.v1.services.media.ListCommentsResponse.comments:type_name -> api.v1.services.types.Comment
-	79, // 26: api.v1.services.media.GetCommentResponse.comment:type_name -> api.v1.services.types.Comment
-	79, // 27: api.v1.services.media.CreateCommentRequest.comment:type_name -> api.v1.services.types.Comment
-	79, // 28: api.v1.services.media.CreateCommentResponse.comment:type_name -> api.v1.services.types.Comment
-	79, // 29: api.v1.services.media.UpdateCommentRequest.comment:type_name -> api.v1.services.types.Comment
-	75, // 30: api.v1.services.media.UpdateCommentRequest.update_mask:type_name -> google.protobuf.FieldMask
-	79, // 31: api.v1.services.media.UpdateCommentResponse.comment:type_name -> api.v1.services.types.Comment
-	76, // 32: api.v1.services.media.DeleteCommentResponse.empty:type_name -> google.protobuf.Empty
-	80, // 33: api.v1.services.media.GetUserLikesResponse.likes:type_name -> api.v1.services.types.Like
-	81, // 34: api.v1.services.media.GetFavoritesResponse.favorites:type_name -> api.v1.services.types.Favorite
-	74, // 35: api.v1.services.media.GetFavoritesResponse.medias:type_name -> api.v1.services.types.Media
-	76, // 36: api.v1.services.media.RemoveFavoriteResponse.empty:type_name -> google.protobuf.Empty
-	82, // 37: api.v1.services.media.GetPlaylistsResponse.playlists:type_name -> api.v1.services.types.Playlist
-	82, // 38: api.v1.services.media.GetPlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
-	74, // 39: api.v1.services.media.GetPlaylistResponse.medias:type_name -> api.v1.services.types.Media
-	82, // 40: api.v1.services.media.CreatePlaylistRequest.playlist:type_name -> api.v1.services.types.Playlist
-	82, // 41: api.v1.services.media.CreatePlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
-	82, // 42: api.v1.services.media.UpdatePlaylistRequest.playlist:type_name -> api.v1.services.types.Playlist
-	75, // 43: api.v1.services.media.UpdatePlaylistRequest.update_mask:type_name -> google.protobuf.FieldMask
-	82, // 44: api.v1.services.media.UpdatePlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
-	76, // 45: api.v1.services.media.DeletePlaylistResponse.empty:type_name -> google.protobuf.Empty
-	83, // 46: api.v1.services.media.ListEncodingTasksResponse.tasks:type_name -> api.v1.services.types.EncodingTask
-	0,  // 47: api.v1.services.media.MediaService.ListMedias:input_type -> api.v1.services.media.ListMediasRequest
-	2,  // 48: api.v1.services.media.MediaService.GetMedia:input_type -> api.v1.services.media.GetMediaRequest
-	4,  // 49: api.v1.services.media.MediaService.CreateMedia:input_type -> api.v1.services.media.CreateMediaRequest
-	6,  // 50: api.v1.services.media.MediaService.UpdateMedia:input_type -> api.v1.services.media.UpdateMediaRequest
-	8,  // 51: api.v1.services.media.MediaService.DeleteMedia:input_type -> api.v1.services.media.DeleteMediaRequest
-	10, // 52: api.v1.services.media.MediaService.IncrementViewCount:input_type -> api.v1.services.media.IncrementViewCountRequest
-	12, // 53: api.v1.services.media.MediaService.UploadMedia:input_type -> api.v1.services.media.UploadMediaRequest
-	70, // 54: api.v1.services.media.MediaService.ListEncodingTasks:input_type -> api.v1.services.media.ListEncodingTasksRequest
-	72, // 55: api.v1.services.media.MediaService.GetTranscodingStatus:input_type -> api.v1.services.media.GetTranscodingStatusRequest
-	14, // 56: api.v1.services.media.CategoryService.ListCategories:input_type -> api.v1.services.media.ListCategoriesRequest
-	16, // 57: api.v1.services.media.CategoryService.GetCategory:input_type -> api.v1.services.media.GetCategoryRequest
-	18, // 58: api.v1.services.media.CategoryService.CreateCategory:input_type -> api.v1.services.media.CreateCategoryRequest
-	20, // 59: api.v1.services.media.CategoryService.UpdateCategory:input_type -> api.v1.services.media.UpdateCategoryRequest
-	22, // 60: api.v1.services.media.CategoryService.DeleteCategory:input_type -> api.v1.services.media.DeleteCategoryRequest
-	24, // 61: api.v1.services.media.TagService.ListTags:input_type -> api.v1.services.media.ListTagsRequest
-	26, // 62: api.v1.services.media.TagService.GetTag:input_type -> api.v1.services.media.GetTagRequest
-	28, // 63: api.v1.services.media.TagService.CreateTag:input_type -> api.v1.services.media.CreateTagRequest
-	30, // 64: api.v1.services.media.TagService.UpdateTag:input_type -> api.v1.services.media.UpdateTagRequest
-	32, // 65: api.v1.services.media.TagService.DeleteTag:input_type -> api.v1.services.media.DeleteTagRequest
-	34, // 66: api.v1.services.media.CommentService.ListComments:input_type -> api.v1.services.media.ListCommentsRequest
-	36, // 67: api.v1.services.media.CommentService.GetComment:input_type -> api.v1.services.media.GetCommentRequest
-	38, // 68: api.v1.services.media.CommentService.CreateComment:input_type -> api.v1.services.media.CreateCommentRequest
-	40, // 69: api.v1.services.media.CommentService.UpdateComment:input_type -> api.v1.services.media.UpdateCommentRequest
-	42, // 70: api.v1.services.media.CommentService.DeleteComment:input_type -> api.v1.services.media.DeleteCommentRequest
-	44, // 71: api.v1.services.media.LikeService.ToggleLike:input_type -> api.v1.services.media.ToggleLikeRequest
-	46, // 72: api.v1.services.media.LikeService.GetMediaLikes:input_type -> api.v1.services.media.GetMediaLikesRequest
-	48, // 73: api.v1.services.media.LikeService.GetUserLikes:input_type -> api.v1.services.media.GetUserLikesRequest
-	50, // 74: api.v1.services.media.FavoriteService.GetFavorites:input_type -> api.v1.services.media.GetFavoritesRequest
-	52, // 75: api.v1.services.media.FavoriteService.ToggleFavorite:input_type -> api.v1.services.media.ToggleFavoriteRequest
-	54, // 76: api.v1.services.media.FavoriteService.RemoveFavorite:input_type -> api.v1.services.media.RemoveFavoriteRequest
-	56, // 77: api.v1.services.media.PlaylistService.GetPlaylists:input_type -> api.v1.services.media.GetPlaylistsRequest
-	58, // 78: api.v1.services.media.PlaylistService.GetPlaylist:input_type -> api.v1.services.media.GetPlaylistRequest
-	60, // 79: api.v1.services.media.PlaylistService.CreatePlaylist:input_type -> api.v1.services.media.CreatePlaylistRequest
-	62, // 80: api.v1.services.media.PlaylistService.UpdatePlaylist:input_type -> api.v1.services.media.UpdatePlaylistRequest
-	64, // 81: api.v1.services.media.PlaylistService.DeletePlaylist:input_type -> api.v1.services.media.DeletePlaylistRequest
-	66, // 82: api.v1.services.media.PlaylistService.AddToPlaylist:input_type -> api.v1.services.media.AddToPlaylistRequest
-	68, // 83: api.v1.services.media.PlaylistService.RemoveFromPlaylist:input_type -> api.v1.services.media.RemoveFromPlaylistRequest
-	1,  // 84: api.v1.services.media.MediaService.ListMedias:output_type -> api.v1.services.media.ListMediasResponse
-	3,  // 85: api.v1.services.media.MediaService.GetMedia:output_type -> api.v1.services.media.GetMediaResponse
-	5,  // 86: api.v1.services.media.MediaService.CreateMedia:output_type -> api.v1.services.media.CreateMediaResponse
-	7,  // 87: api.v1.services.media.MediaService.UpdateMedia:output_type -> api.v1.services.media.UpdateMediaResponse
-	9,  // 88: api.v1.services.media.MediaService.DeleteMedia:output_type -> api.v1.services.media.DeleteMediaResponse
-	11, // 89: api.v1.services.media.MediaService.IncrementViewCount:output_type -> api.v1.services.media.IncrementViewCountResponse
-	13, // 90: api.v1.services.media.MediaService.UploadMedia:output_type -> api.v1.services.media.UploadMediaResponse
-	71, // 91: api.v1.services.media.MediaService.ListEncodingTasks:output_type -> api.v1.services.media.ListEncodingTasksResponse
-	73, // 92: api.v1.services.media.MediaService.GetTranscodingStatus:output_type -> api.v1.services.media.GetTranscodingStatusResponse
-	15, // 93: api.v1.services.media.CategoryService.ListCategories:output_type -> api.v1.services.media.ListCategoriesResponse
-	17, // 94: api.v1.services.media.CategoryService.GetCategory:output_type -> api.v1.services.media.GetCategoryResponse
-	19, // 95: api.v1.services.media.CategoryService.CreateCategory:output_type -> api.v1.services.media.CreateCategoryResponse
-	21, // 96: api.v1.services.media.CategoryService.UpdateCategory:output_type -> api.v1.services.media.UpdateCategoryResponse
-	23, // 97: api.v1.services.media.CategoryService.DeleteCategory:output_type -> api.v1.services.media.DeleteCategoryResponse
-	25, // 98: api.v1.services.media.TagService.ListTags:output_type -> api.v1.services.media.ListTagsResponse
-	27, // 99: api.v1.services.media.TagService.GetTag:output_type -> api.v1.services.media.GetTagResponse
-	29, // 100: api.v1.services.media.TagService.CreateTag:output_type -> api.v1.services.media.CreateTagResponse
-	31, // 101: api.v1.services.media.TagService.UpdateTag:output_type -> api.v1.services.media.UpdateTagResponse
-	33, // 102: api.v1.services.media.TagService.DeleteTag:output_type -> api.v1.services.media.DeleteTagResponse
-	35, // 103: api.v1.services.media.CommentService.ListComments:output_type -> api.v1.services.media.ListCommentsResponse
-	37, // 104: api.v1.services.media.CommentService.GetComment:output_type -> api.v1.services.media.GetCommentResponse
-	39, // 105: api.v1.services.media.CommentService.CreateComment:output_type -> api.v1.services.media.CreateCommentResponse
-	41, // 106: api.v1.services.media.CommentService.UpdateComment:output_type -> api.v1.services.media.UpdateCommentResponse
-	43, // 107: api.v1.services.media.CommentService.DeleteComment:output_type -> api.v1.services.media.DeleteCommentResponse
-	45, // 108: api.v1.services.media.LikeService.ToggleLike:output_type -> api.v1.services.media.ToggleLikeResponse
-	47, // 109: api.v1.services.media.LikeService.GetMediaLikes:output_type -> api.v1.services.media.GetMediaLikesResponse
-	49, // 110: api.v1.services.media.LikeService.GetUserLikes:output_type -> api.v1.services.media.GetUserLikesResponse
-	51, // 111: api.v1.services.media.FavoriteService.GetFavorites:output_type -> api.v1.services.media.GetFavoritesResponse
-	53, // 112: api.v1.services.media.FavoriteService.ToggleFavorite:output_type -> api.v1.services.media.ToggleFavoriteResponse
-	55, // 113: api.v1.services.media.FavoriteService.RemoveFavorite:output_type -> api.v1.services.media.RemoveFavoriteResponse
-	57, // 114: api.v1.services.media.PlaylistService.GetPlaylists:output_type -> api.v1.services.media.GetPlaylistsResponse
-	59, // 115: api.v1.services.media.PlaylistService.GetPlaylist:output_type -> api.v1.services.media.GetPlaylistResponse
-	61, // 116: api.v1.services.media.PlaylistService.CreatePlaylist:output_type -> api.v1.services.media.CreatePlaylistResponse
-	63, // 117: api.v1.services.media.PlaylistService.UpdatePlaylist:output_type -> api.v1.services.media.UpdatePlaylistResponse
-	65, // 118: api.v1.services.media.PlaylistService.DeletePlaylist:output_type -> api.v1.services.media.DeletePlaylistResponse
-	67, // 119: api.v1.services.media.PlaylistService.AddToPlaylist:output_type -> api.v1.services.media.AddToPlaylistResponse
-	69, // 120: api.v1.services.media.PlaylistService.RemoveFromPlaylist:output_type -> api.v1.services.media.RemoveFromPlaylistResponse
-	84, // [84:121] is the sub-list for method output_type
-	47, // [47:84] is the sub-list for method input_type
-	47, // [47:47] is the sub-list for extension type_name
-	47, // [47:47] is the sub-list for extension extendee
-	0,  // [0:47] is the sub-list for field type_name
+	85, // 0: api.v1.services.media.ListMediasResponse.medias:type_name -> api.v1.services.types.Media
+	85, // 1: api.v1.services.media.GetMediaResponse.media:type_name -> api.v1.services.types.Media
+	85, // 2: api.v1.services.media.CreateMediaRequest.media:type_name -> api.v1.services.types.Media
+	85, // 3: api.v1.services.media.CreateMediaResponse.media:type_name -> api.v1.services.types.Media
+	85, // 4: api.v1.services.media.UpdateMediaRequest.media:type_name -> api.v1.services.types.Media
+	86, // 5: api.v1.services.media.UpdateMediaRequest.update_mask:type_name -> google.protobuf.FieldMask
+	85, // 6: api.v1.services.media.UpdateMediaResponse.media:type_name -> api.v1.services.types.Media
+	87, // 7: api.v1.services.media.DeleteMediaResponse.empty:type_name -> google.protobuf.Empty
+	85, // 8: api.v1.services.media.UploadMediaResponse.media:type_name -> api.v1.services.types.Media
+	88, // 9: api.v1.services.media.ListCategoriesResponse.categories:type_name -> api.v1.services.types.Category
+	88, // 10: api.v1.services.media.GetCategoryResponse.category:type_name -> api.v1.services.types.Category
+	88, // 11: api.v1.services.media.CreateCategoryRequest.category:type_name -> api.v1.services.types.Category
+	88, // 12: api.v1.services.media.CreateCategoryResponse.category:type_name -> api.v1.services.types.Category
+	88, // 13: api.v1.services.media.UpdateCategoryRequest.category:type_name -> api.v1.services.types.Category
+	86, // 14: api.v1.services.media.UpdateCategoryRequest.update_mask:type_name -> google.protobuf.FieldMask
+	88, // 15: api.v1.services.media.UpdateCategoryResponse.category:type_name -> api.v1.services.types.Category
+	87, // 16: api.v1.services.media.DeleteCategoryResponse.empty:type_name -> google.protobuf.Empty
+	89, // 17: api.v1.services.media.ListTagsResponse.tags:type_name -> api.v1.services.types.Tag
+	89, // 18: api.v1.services.media.GetTagResponse.tag:type_name -> api.v1.services.types.Tag
+	89, // 19: api.v1.services.media.CreateTagRequest.tag:type_name -> api.v1.services.types.Tag
+	89, // 20: api.v1.services.media.CreateTagResponse.tag:type_name -> api.v1.services.types.Tag
+	89, // 21: api.v1.services.media.UpdateTagRequest.tag:type_name -> api.v1.services.types.Tag
+	86, // 22: api.v1.services.media.UpdateTagRequest.update_mask:type_name -> google.protobuf.FieldMask
+	89, // 23: api.v1.services.media.UpdateTagResponse.tag:type_name -> api.v1.services.types.Tag
+	87, // 24: api.v1.services.media.DeleteTagResponse.empty:type_name -> google.protobuf.Empty
+	90, // 25: api.v1.services.media.ListCommentsResponse.comments:type_name -> api.v1.services.types.Comment
+	90, // 26: api.v1.services.media.GetCommentResponse.comment:type_name -> api.v1.services.types.Comment
+	90, // 27: api.v1.services.media.CreateCommentRequest.comment:type_name -> api.v1.services.types.Comment
+	90, // 28: api.v1.services.media.CreateCommentResponse.comment:type_name -> api.v1.services.types.Comment
+	90, // 29: api.v1.services.media.UpdateCommentRequest.comment:type_name -> api.v1.services.types.Comment
+	86, // 30: api.v1.services.media.UpdateCommentRequest.update_mask:type_name -> google.protobuf.FieldMask
+	90, // 31: api.v1.services.media.UpdateCommentResponse.comment:type_name -> api.v1.services.types.Comment
+	87, // 32: api.v1.services.media.DeleteCommentResponse.empty:type_name -> google.protobuf.Empty
+	91, // 33: api.v1.services.media.GetUserLikesResponse.likes:type_name -> api.v1.services.types.Like
+	92, // 34: api.v1.services.media.GetFavoritesResponse.favorites:type_name -> api.v1.services.types.Favorite
+	85, // 35: api.v1.services.media.GetFavoritesResponse.medias:type_name -> api.v1.services.types.Media
+	87, // 36: api.v1.services.media.RemoveFavoriteResponse.empty:type_name -> google.protobuf.Empty
+	93, // 37: api.v1.services.media.GetPlaylistsResponse.playlists:type_name -> api.v1.services.types.Playlist
+	93, // 38: api.v1.services.media.GetPlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
+	85, // 39: api.v1.services.media.GetPlaylistResponse.medias:type_name -> api.v1.services.types.Media
+	93, // 40: api.v1.services.media.CreatePlaylistRequest.playlist:type_name -> api.v1.services.types.Playlist
+	93, // 41: api.v1.services.media.CreatePlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
+	93, // 42: api.v1.services.media.UpdatePlaylistRequest.playlist:type_name -> api.v1.services.types.Playlist
+	86, // 43: api.v1.services.media.UpdatePlaylistRequest.update_mask:type_name -> google.protobuf.FieldMask
+	93, // 44: api.v1.services.media.UpdatePlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
+	87, // 45: api.v1.services.media.DeletePlaylistResponse.empty:type_name -> google.protobuf.Empty
+	94, // 46: api.v1.services.media.ListEncodingTasksResponse.tasks:type_name -> api.v1.services.types.EncodingTask
+	74, // 47: api.v1.services.media.GetTranscodingStatusResponse.items:type_name -> api.v1.services.media.TranscodingMediaItem
+	85, // 48: api.v1.services.media.TranscodingMediaItem.media:type_name -> api.v1.services.types.Media
+	94, // 49: api.v1.services.media.TranscodingMediaItem.tasks:type_name -> api.v1.services.types.EncodingTask
+	95, // 50: api.v1.services.media.ListEncodeProfilesResponse.profiles:type_name -> api.v1.services.types.EncodeProfile
+	95, // 51: api.v1.services.media.GetEncodeProfileResponse.profile:type_name -> api.v1.services.types.EncodeProfile
+	95, // 52: api.v1.services.media.CreateEncodeProfileRequest.profile:type_name -> api.v1.services.types.EncodeProfile
+	95, // 53: api.v1.services.media.CreateEncodeProfileResponse.profile:type_name -> api.v1.services.types.EncodeProfile
+	95, // 54: api.v1.services.media.UpdateEncodeProfileRequest.profile:type_name -> api.v1.services.types.EncodeProfile
+	95, // 55: api.v1.services.media.UpdateEncodeProfileResponse.profile:type_name -> api.v1.services.types.EncodeProfile
+	87, // 56: api.v1.services.media.DeleteEncodeProfileResponse.empty:type_name -> google.protobuf.Empty
+	0,  // 57: api.v1.services.media.MediaService.ListMedias:input_type -> api.v1.services.media.ListMediasRequest
+	2,  // 58: api.v1.services.media.MediaService.GetMedia:input_type -> api.v1.services.media.GetMediaRequest
+	4,  // 59: api.v1.services.media.MediaService.CreateMedia:input_type -> api.v1.services.media.CreateMediaRequest
+	6,  // 60: api.v1.services.media.MediaService.UpdateMedia:input_type -> api.v1.services.media.UpdateMediaRequest
+	8,  // 61: api.v1.services.media.MediaService.DeleteMedia:input_type -> api.v1.services.media.DeleteMediaRequest
+	10, // 62: api.v1.services.media.MediaService.IncrementViewCount:input_type -> api.v1.services.media.IncrementViewCountRequest
+	12, // 63: api.v1.services.media.MediaService.UploadMedia:input_type -> api.v1.services.media.UploadMediaRequest
+	70, // 64: api.v1.services.media.MediaService.ListEncodingTasks:input_type -> api.v1.services.media.ListEncodingTasksRequest
+	72, // 65: api.v1.services.media.MediaService.GetTranscodingStatus:input_type -> api.v1.services.media.GetTranscodingStatusRequest
+	75, // 66: api.v1.services.media.MediaService.ListEncodeProfiles:input_type -> api.v1.services.media.ListEncodeProfilesRequest
+	77, // 67: api.v1.services.media.MediaService.GetEncodeProfile:input_type -> api.v1.services.media.GetEncodeProfileRequest
+	79, // 68: api.v1.services.media.MediaService.CreateEncodeProfile:input_type -> api.v1.services.media.CreateEncodeProfileRequest
+	81, // 69: api.v1.services.media.MediaService.UpdateEncodeProfile:input_type -> api.v1.services.media.UpdateEncodeProfileRequest
+	83, // 70: api.v1.services.media.MediaService.DeleteEncodeProfile:input_type -> api.v1.services.media.DeleteEncodeProfileRequest
+	14, // 71: api.v1.services.media.CategoryService.ListCategories:input_type -> api.v1.services.media.ListCategoriesRequest
+	16, // 72: api.v1.services.media.CategoryService.GetCategory:input_type -> api.v1.services.media.GetCategoryRequest
+	18, // 73: api.v1.services.media.CategoryService.CreateCategory:input_type -> api.v1.services.media.CreateCategoryRequest
+	20, // 74: api.v1.services.media.CategoryService.UpdateCategory:input_type -> api.v1.services.media.UpdateCategoryRequest
+	22, // 75: api.v1.services.media.CategoryService.DeleteCategory:input_type -> api.v1.services.media.DeleteCategoryRequest
+	24, // 76: api.v1.services.media.TagService.ListTags:input_type -> api.v1.services.media.ListTagsRequest
+	26, // 77: api.v1.services.media.TagService.GetTag:input_type -> api.v1.services.media.GetTagRequest
+	28, // 78: api.v1.services.media.TagService.CreateTag:input_type -> api.v1.services.media.CreateTagRequest
+	30, // 79: api.v1.services.media.TagService.UpdateTag:input_type -> api.v1.services.media.UpdateTagRequest
+	32, // 80: api.v1.services.media.TagService.DeleteTag:input_type -> api.v1.services.media.DeleteTagRequest
+	34, // 81: api.v1.services.media.CommentService.ListComments:input_type -> api.v1.services.media.ListCommentsRequest
+	36, // 82: api.v1.services.media.CommentService.GetComment:input_type -> api.v1.services.media.GetCommentRequest
+	38, // 83: api.v1.services.media.CommentService.CreateComment:input_type -> api.v1.services.media.CreateCommentRequest
+	40, // 84: api.v1.services.media.CommentService.UpdateComment:input_type -> api.v1.services.media.UpdateCommentRequest
+	42, // 85: api.v1.services.media.CommentService.DeleteComment:input_type -> api.v1.services.media.DeleteCommentRequest
+	44, // 86: api.v1.services.media.LikeService.ToggleLike:input_type -> api.v1.services.media.ToggleLikeRequest
+	46, // 87: api.v1.services.media.LikeService.GetMediaLikes:input_type -> api.v1.services.media.GetMediaLikesRequest
+	48, // 88: api.v1.services.media.LikeService.GetUserLikes:input_type -> api.v1.services.media.GetUserLikesRequest
+	50, // 89: api.v1.services.media.FavoriteService.GetFavorites:input_type -> api.v1.services.media.GetFavoritesRequest
+	52, // 90: api.v1.services.media.FavoriteService.ToggleFavorite:input_type -> api.v1.services.media.ToggleFavoriteRequest
+	54, // 91: api.v1.services.media.FavoriteService.RemoveFavorite:input_type -> api.v1.services.media.RemoveFavoriteRequest
+	56, // 92: api.v1.services.media.PlaylistService.GetPlaylists:input_type -> api.v1.services.media.GetPlaylistsRequest
+	58, // 93: api.v1.services.media.PlaylistService.GetPlaylist:input_type -> api.v1.services.media.GetPlaylistRequest
+	60, // 94: api.v1.services.media.PlaylistService.CreatePlaylist:input_type -> api.v1.services.media.CreatePlaylistRequest
+	62, // 95: api.v1.services.media.PlaylistService.UpdatePlaylist:input_type -> api.v1.services.media.UpdatePlaylistRequest
+	64, // 96: api.v1.services.media.PlaylistService.DeletePlaylist:input_type -> api.v1.services.media.DeletePlaylistRequest
+	66, // 97: api.v1.services.media.PlaylistService.AddToPlaylist:input_type -> api.v1.services.media.AddToPlaylistRequest
+	68, // 98: api.v1.services.media.PlaylistService.RemoveFromPlaylist:input_type -> api.v1.services.media.RemoveFromPlaylistRequest
+	1,  // 99: api.v1.services.media.MediaService.ListMedias:output_type -> api.v1.services.media.ListMediasResponse
+	3,  // 100: api.v1.services.media.MediaService.GetMedia:output_type -> api.v1.services.media.GetMediaResponse
+	5,  // 101: api.v1.services.media.MediaService.CreateMedia:output_type -> api.v1.services.media.CreateMediaResponse
+	7,  // 102: api.v1.services.media.MediaService.UpdateMedia:output_type -> api.v1.services.media.UpdateMediaResponse
+	9,  // 103: api.v1.services.media.MediaService.DeleteMedia:output_type -> api.v1.services.media.DeleteMediaResponse
+	11, // 104: api.v1.services.media.MediaService.IncrementViewCount:output_type -> api.v1.services.media.IncrementViewCountResponse
+	13, // 105: api.v1.services.media.MediaService.UploadMedia:output_type -> api.v1.services.media.UploadMediaResponse
+	71, // 106: api.v1.services.media.MediaService.ListEncodingTasks:output_type -> api.v1.services.media.ListEncodingTasksResponse
+	73, // 107: api.v1.services.media.MediaService.GetTranscodingStatus:output_type -> api.v1.services.media.GetTranscodingStatusResponse
+	76, // 108: api.v1.services.media.MediaService.ListEncodeProfiles:output_type -> api.v1.services.media.ListEncodeProfilesResponse
+	78, // 109: api.v1.services.media.MediaService.GetEncodeProfile:output_type -> api.v1.services.media.GetEncodeProfileResponse
+	80, // 110: api.v1.services.media.MediaService.CreateEncodeProfile:output_type -> api.v1.services.media.CreateEncodeProfileResponse
+	82, // 111: api.v1.services.media.MediaService.UpdateEncodeProfile:output_type -> api.v1.services.media.UpdateEncodeProfileResponse
+	84, // 112: api.v1.services.media.MediaService.DeleteEncodeProfile:output_type -> api.v1.services.media.DeleteEncodeProfileResponse
+	15, // 113: api.v1.services.media.CategoryService.ListCategories:output_type -> api.v1.services.media.ListCategoriesResponse
+	17, // 114: api.v1.services.media.CategoryService.GetCategory:output_type -> api.v1.services.media.GetCategoryResponse
+	19, // 115: api.v1.services.media.CategoryService.CreateCategory:output_type -> api.v1.services.media.CreateCategoryResponse
+	21, // 116: api.v1.services.media.CategoryService.UpdateCategory:output_type -> api.v1.services.media.UpdateCategoryResponse
+	23, // 117: api.v1.services.media.CategoryService.DeleteCategory:output_type -> api.v1.services.media.DeleteCategoryResponse
+	25, // 118: api.v1.services.media.TagService.ListTags:output_type -> api.v1.services.media.ListTagsResponse
+	27, // 119: api.v1.services.media.TagService.GetTag:output_type -> api.v1.services.media.GetTagResponse
+	29, // 120: api.v1.services.media.TagService.CreateTag:output_type -> api.v1.services.media.CreateTagResponse
+	31, // 121: api.v1.services.media.TagService.UpdateTag:output_type -> api.v1.services.media.UpdateTagResponse
+	33, // 122: api.v1.services.media.TagService.DeleteTag:output_type -> api.v1.services.media.DeleteTagResponse
+	35, // 123: api.v1.services.media.CommentService.ListComments:output_type -> api.v1.services.media.ListCommentsResponse
+	37, // 124: api.v1.services.media.CommentService.GetComment:output_type -> api.v1.services.media.GetCommentResponse
+	39, // 125: api.v1.services.media.CommentService.CreateComment:output_type -> api.v1.services.media.CreateCommentResponse
+	41, // 126: api.v1.services.media.CommentService.UpdateComment:output_type -> api.v1.services.media.UpdateCommentResponse
+	43, // 127: api.v1.services.media.CommentService.DeleteComment:output_type -> api.v1.services.media.DeleteCommentResponse
+	45, // 128: api.v1.services.media.LikeService.ToggleLike:output_type -> api.v1.services.media.ToggleLikeResponse
+	47, // 129: api.v1.services.media.LikeService.GetMediaLikes:output_type -> api.v1.services.media.GetMediaLikesResponse
+	49, // 130: api.v1.services.media.LikeService.GetUserLikes:output_type -> api.v1.services.media.GetUserLikesResponse
+	51, // 131: api.v1.services.media.FavoriteService.GetFavorites:output_type -> api.v1.services.media.GetFavoritesResponse
+	53, // 132: api.v1.services.media.FavoriteService.ToggleFavorite:output_type -> api.v1.services.media.ToggleFavoriteResponse
+	55, // 133: api.v1.services.media.FavoriteService.RemoveFavorite:output_type -> api.v1.services.media.RemoveFavoriteResponse
+	57, // 134: api.v1.services.media.PlaylistService.GetPlaylists:output_type -> api.v1.services.media.GetPlaylistsResponse
+	59, // 135: api.v1.services.media.PlaylistService.GetPlaylist:output_type -> api.v1.services.media.GetPlaylistResponse
+	61, // 136: api.v1.services.media.PlaylistService.CreatePlaylist:output_type -> api.v1.services.media.CreatePlaylistResponse
+	63, // 137: api.v1.services.media.PlaylistService.UpdatePlaylist:output_type -> api.v1.services.media.UpdatePlaylistResponse
+	65, // 138: api.v1.services.media.PlaylistService.DeletePlaylist:output_type -> api.v1.services.media.DeletePlaylistResponse
+	67, // 139: api.v1.services.media.PlaylistService.AddToPlaylist:output_type -> api.v1.services.media.AddToPlaylistResponse
+	69, // 140: api.v1.services.media.PlaylistService.RemoveFromPlaylist:output_type -> api.v1.services.media.RemoveFromPlaylistResponse
+	99, // [99:141] is the sub-list for method output_type
+	57, // [57:99] is the sub-list for method input_type
+	57, // [57:57] is the sub-list for extension type_name
+	57, // [57:57] is the sub-list for extension extendee
+	0,  // [0:57] is the sub-list for field type_name
 }
 
 func init() { file_v1_media_media_service_proto_init() }
@@ -4419,7 +4972,7 @@ func file_v1_media_media_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_media_media_service_proto_rawDesc), len(file_v1_media_media_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   74,
+			NumMessages:   85,
 			NumExtensions: 0,
 			NumServices:   7,
 		},

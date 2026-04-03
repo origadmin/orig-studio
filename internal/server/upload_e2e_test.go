@@ -21,12 +21,13 @@ import (
 
 	_ "github.com/sqlite3ent/sqlite3"
 
+	"github.com/go-kratos/kratos/v2/log"
+
+	pb "origadmin/application/origcms/api/gen/v1/upload"
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/svc-media/biz"
 	"origadmin/application/origcms/internal/svc-media/data"
-	pb "origadmin/application/origcms/api/gen/v1/upload"
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 func TestUploadE2E(t *testing.T) {

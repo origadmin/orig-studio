@@ -3,8 +3,6 @@
  */
 
 // Package server provides HTTP handlers for media CRUD + upload.
-// T2.1: Enhanced upload with type detection, size limits, MIME/MD5,
-// JWT protection, and full field population.
 package server
 
 import (
@@ -108,41 +106,55 @@ func computeFileMD5(r io.Reader) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-// RegisterMediaRoutes registers media CRUD routes.
-func RegisterMediaRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr *auth.Manager, uc *biz.MediaUseCase) {
+// MediaHandler handles media requests.
+type MediaHandler struct {
+	client   *entity.Client
+	jwtMgr   *auth.Manager
+	uc       *biz.MediaUseCase
+	uploadUC *biz.UploadUseCase
+}
+
+func NewMediaHandler(client *entity.Client, jwtMgr *auth.Manager, uc *biz.MediaUseCase, uploadUC *biz.UploadUseCase) *MediaHandler {
+	return &MediaHandler{client: client, jwtMgr: jwtMgr, uc: uc, uploadUC: uploadUC}
+}
+
+func (h *MediaHandler) Register(group *gin.RouterGroup) {
 	// Ensure upload directory exists
-	if err := os.MkdirAll(UploadDir, 0755); err != nil {
+	if err := os.MkdirAll(UploadDir, 0o755); err != nil {
 		slog.Warn("failed to create upload directory", "err", err)
 	}
 
 	media := group.Group("/media")
 	{
-		// List media (public, with filters)
-		media.GET("", listMedia(client))
+		// 1. Static/Fixed routes MUST come before parameter routes
+		media.GET("/transcoding/status", h.getTranscodingStatus())
+		media.GET("/transcoding/events", h.transcodingEvents())
 
-		// Get media by ID (public, increments view count)
-		media.GET("/:id", getMedia(client))
+		profiles := media.Group("/profiles")
+		{
+			profiles.GET("", h.listEncodeProfiles())
+			profiles.GET("/:profile_id", h.getEncodeProfile())
+			profiles.POST("", JWTMiddleware(h.jwtMgr), h.createEncodeProfile())
+			profiles.PUT("/:profile_id", JWTMiddleware(h.jwtMgr), h.updateEncodeProfile())
+			profiles.DELETE("/:profile_id", JWTMiddleware(h.jwtMgr), h.deleteEncodeProfile())
+		}
 
-		// Upload media file (requires JWT)
-		media.POST("/upload", JWTMiddleware(jwtMgr), uploadMedia(client))
+		media.POST("/upload", JWTMiddleware(h.jwtMgr), h.uploadMedia())
 
-		// Update media (requires JWT + owner check)
-		media.PUT("/:id", JWTMiddleware(jwtMgr), updateMedia(client))
+		// 2. Collection routes
+		media.GET("", h.listMedia())
 
-		// Delete media (requires JWT + owner/admin check)
-		media.DELETE("/:id", JWTMiddleware(jwtMgr), deleteMedia(client))
-
-		// Transcoding status and tasks
-		media.GET("/:id/tasks", listEncodingTasks(uc))
-		media.GET("/transcoding/status", getTranscodingStatus(uc))
-		media.GET("/transcoding/events", transcodingEvents(uc))
+		// 3. Parameter routes (/:id)
+		media.GET("/:id", h.getMedia())
+		media.PUT("/:id", JWTMiddleware(h.jwtMgr), h.updateMedia())
+		media.DELETE("/:id", JWTMiddleware(h.jwtMgr), h.deleteMedia())
+		media.GET("/:id/tasks", h.listEncodingTasks())
 	}
 }
 
 // --- List Media ---
 
-// listMedia returns a paginated, filterable list of media.
-func listMedia(client *entity.Client) gin.HandlerFunc {
+func (h *MediaHandler) listMedia() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
@@ -155,52 +167,44 @@ func listMedia(client *entity.Client) gin.HandlerFunc {
 			pageSize = 20
 		}
 
-		query := client.Media.Query()
+		query := h.client.Media.Query()
 
-		// Only show active state by default
 		if state := c.Query("state"); state != "" {
 			query = query.Where(entitymedia.StateEQ(state))
 		} else {
 			query = query.Where(entitymedia.StateEQ("active"))
 		}
 
-		// Filter by type
 		if mediaType := c.Query("type"); mediaType != "" {
 			query = query.Where(entitymedia.TypeEQ(mediaType))
 		}
 
-		// Filter by user_id
 		if userIDStr := c.Query("user_id"); userIDStr != "" {
 			if userID, err := strconv.Atoi(userIDStr); err == nil {
 				query = query.Where(entitymedia.UserIDEQ(userID))
 			}
 		}
 
-		// Filter by category_id (via edge)
 		if catIDStr := c.Query("category_id"); catIDStr != "" {
 			if catID, err := strconv.Atoi(catIDStr); err == nil {
 				query = query.Where(entitymedia.HasCategoryWith(entitycategory.IDEQ(catID)))
 			}
 		}
 
-		// Filter by keyword (title search)
 		if keyword := c.Query("keyword"); keyword != "" {
 			query = query.Where(entitymedia.TitleContains(keyword))
 		}
 
-		// Filter: featured
 		if c.Query("featured") == "true" {
 			query = query.Where(entitymedia.FeaturedEQ(true))
 		}
 
-		// Count total (before pagination)
 		total, err := query.Count(ctx)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		// Ordering
 		orderBy := c.DefaultQuery("order_by", "created_at")
 		desc := c.DefaultQuery("descending", "true") == "true"
 
@@ -227,7 +231,6 @@ func listMedia(client *entity.Client) gin.HandlerFunc {
 			}
 		}
 
-		// Pagination
 		offset := (page - 1) * pageSize
 		items, err := query.
 			Limit(pageSize).
@@ -249,10 +252,7 @@ func listMedia(client *entity.Client) gin.HandlerFunc {
 	}
 }
 
-// --- Get Media ---
-
-// getMedia returns a single media by ID and increments view count.
-func getMedia(client *entity.Client) gin.HandlerFunc {
+func (h *MediaHandler) getMedia() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
@@ -262,7 +262,7 @@ func getMedia(client *entity.Client) gin.HandlerFunc {
 			return
 		}
 
-		m, err := client.Media.Query().
+		m, err := h.client.Media.Query().
 			Where(entitymedia.ID(id)).
 			WithUser().
 			WithCategory().
@@ -272,31 +272,26 @@ func getMedia(client *entity.Client) gin.HandlerFunc {
 			return
 		}
 
-		// Increment view count (fire-and-forget)
 		go func() {
 			bgCtx := context.Background()
-			client.Media.UpdateOneID(id).AddViewCount(1).Exec(bgCtx)
+			h.client.Media.UpdateOneID(id).AddViewCount(1).Exec(bgCtx)
 		}()
 
 		c.JSON(http.StatusOK, m)
 	}
 }
 
-// --- Upload Media ---
-
-// uploadMedia handles multipart file upload with validation.
-func uploadMedia(client *entity.Client) gin.HandlerFunc {
+func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
+		client := h.client
 
-		// Get user ID from JWT claims
 		claims, ok := c.MustGet("claims").(*auth.Claims)
 		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
 		}
 
-		// Limit request body size (5 GB max)
 		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, MaxUploadSizeVideo)
 
 		file, header, err := c.Request.FormFile("file")
@@ -306,19 +301,15 @@ func uploadMedia(client *entity.Client) gin.HandlerFunc {
 		}
 		defer file.Close()
 
-		// Detect MIME type (use http.DetectContentType for the first 512 bytes)
 		buf := make([]byte, 512)
 		n, _ := file.Read(buf)
 		mimeType := http.DetectContentType(buf[:n])
-		// Seek back to start
 		if seeker, ok := file.(io.Seeker); ok {
 			seeker.Seek(0, io.SeekStart)
 		}
 
-		// Also consider the client-provided Content-Type as a fallback
 		clientMIME := header.Header.Get("Content-Type")
 		if clientMIME != "" && clientMIME != "application/octet-stream" {
-			// Trust client MIME if it's more specific (e.g. "video/mp4" vs "application/octet-stream")
 			if mimeType == "application/octet-stream" {
 				mimeType = clientMIME
 			}
@@ -326,7 +317,6 @@ func uploadMedia(client *entity.Client) gin.HandlerFunc {
 
 		mediaType := detectMediaType(mimeType)
 
-		// Validate MIME type
 		if !isMIMEAllowed(mimeType, mediaType) {
 			c.JSON(http.StatusUnsupportedMediaType, gin.H{
 				"error": fmt.Sprintf("File type %s is not allowed for %s", mimeType, mediaType),
@@ -334,7 +324,6 @@ func uploadMedia(client *entity.Client) gin.HandlerFunc {
 			return
 		}
 
-		// Validate file size
 		maxSize := maxUploadSizeByType(mediaType)
 		if header.Size > maxSize {
 			c.JSON(http.StatusRequestEntityTooLarge, gin.H{
@@ -343,8 +332,6 @@ func uploadMedia(client *entity.Client) gin.HandlerFunc {
 			return
 		}
 
-		// Compute MD5
-		// Reset reader for MD5 computation
 		if seeker, ok := file.(io.Seeker); ok {
 			seeker.Seek(0, io.SeekStart)
 		}
@@ -354,38 +341,36 @@ func uploadMedia(client *entity.Client) gin.HandlerFunc {
 			fileMD5 = ""
 		}
 
-		// Reset reader for saving
 		if seeker, ok := file.(io.Seeker); ok {
 			seeker.Seek(0, io.SeekStart)
 		}
 
-		// Generate unique filename preserving extension
 		ext := filepath.Ext(header.Filename)
 		if ext == "" {
 			ext = mimeToExt(mimeType)
 		}
 		newFilename := uuid.New().String() + ext
-		filePath := filepath.Join(UploadDir, newFilename)
+		// Store in 'uploads' sub-dir to match Register routes
+		relativePath := "uploads/" + newFilename
+		filePath := filepath.Join(UploadDir, "uploads", newFilename)
+		_ = os.MkdirAll(filepath.Dir(filePath), 0755)
 
-		// Save file to disk
 		out, err := os.Create(filePath)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file: " + err.Error()})
 			return
 		}
 		defer out.Close()
 
 		written, err := io.Copy(out, file)
 		if err != nil {
-			os.Remove(filePath) // cleanup
+			os.Remove(filePath)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to write file"})
 			return
 		}
 
-		// Build the public URL
-		fileURL := "/uploads/" + newFilename
+		fileURL := relativePath
 
-		// Get form fields
 		title := c.PostForm("title")
 		description := c.PostForm("description")
 		categoryIDStr := c.PostForm("category_id")
@@ -396,7 +381,6 @@ func uploadMedia(client *entity.Client) gin.HandlerFunc {
 			title = strings.TrimSuffix(header.Filename, ext)
 		}
 
-		// Parse optional fields
 		var categoryID int
 		if categoryIDStr != "" {
 			categoryID, _ = strconv.Atoi(categoryIDStr)
@@ -412,7 +396,6 @@ func uploadMedia(client *entity.Client) gin.HandlerFunc {
 
 		privacy, _ := strconv.Atoi(privacyStr)
 
-		// Create database record
 		create := client.Media.Create().
 			SetTitle(title).
 			SetDescription(description).
@@ -434,12 +417,16 @@ func uploadMedia(client *entity.Client) gin.HandlerFunc {
 
 		m, err := create.Save(ctx)
 		if err != nil {
-			os.Remove(filePath) // cleanup
+			os.Remove(filePath)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save media record: " + err.Error()})
 			return
 		}
 
-		// Reload with user edge
+		// Background media processing (Transcoding)
+		if mediaType == "video" && h.uploadUC != nil {
+			go h.uploadUC.ProcessMedia(context.Background(), int64(m.ID), fileURL, mimeType)
+		}
+
 		m, _ = client.Media.Query().
 			Where(entitymedia.ID(m.ID)).
 			WithUser().
@@ -449,8 +436,6 @@ func uploadMedia(client *entity.Client) gin.HandlerFunc {
 		c.JSON(http.StatusCreated, m)
 	}
 }
-
-// --- Update Media ---
 
 // updateMediaRequest is the JSON body for PUT /media/:id
 type updateMediaRequest struct {
@@ -463,12 +448,11 @@ type updateMediaRequest struct {
 	Featured    *bool    `json:"featured"`
 }
 
-// updateMedia updates an existing media record.
-func updateMedia(client *entity.Client) gin.HandlerFunc {
+func (h *MediaHandler) updateMedia() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
+		client := h.client
 
-		// Get user from JWT
 		claims, ok := c.MustGet("claims").(*auth.Claims)
 		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
@@ -481,20 +465,17 @@ func updateMedia(client *entity.Client) gin.HandlerFunc {
 			return
 		}
 
-		// Fetch existing media
 		m, err := client.Media.Get(ctx, id)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Media not found"})
 			return
 		}
 
-		// Owner or admin check
 		if m.UserID != int(claims.UserID) && !claims.IsStaff {
 			c.JSON(http.StatusForbidden, gin.H{"error": "you can only edit your own media"})
 			return
 		}
 
-		// Parse request body
 		var req updateMediaRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -535,7 +516,6 @@ func updateMedia(client *entity.Client) gin.HandlerFunc {
 			return
 		}
 
-		// Reload with edges
 		updated, _ = client.Media.Query().
 			Where(entitymedia.ID(id)).
 			WithUser().
@@ -546,14 +526,11 @@ func updateMedia(client *entity.Client) gin.HandlerFunc {
 	}
 }
 
-// --- Delete Media ---
-
-// deleteMedia deletes a media record and its file.
-func deleteMedia(client *entity.Client) gin.HandlerFunc {
+func (h *MediaHandler) deleteMedia() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
+		client := h.client
 
-		// Get user from JWT
 		claims, ok := c.MustGet("claims").(*auth.Claims)
 		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
@@ -566,26 +543,22 @@ func deleteMedia(client *entity.Client) gin.HandlerFunc {
 			return
 		}
 
-		// Fetch existing media
 		m, err := client.Media.Get(ctx, id)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Media not found"})
 			return
 		}
 
-		// Owner or admin check
 		if m.UserID != int(claims.UserID) && !claims.IsStaff {
 			c.JSON(http.StatusForbidden, gin.H{"error": "you can only delete your own media"})
 			return
 		}
 
-		// Delete file from disk
 		if m.URL != "" {
 			filename := filepath.Base(m.URL)
-			_ = os.Remove(filepath.Join(UploadDir, filename))
+			_ = os.Remove(filepath.Join(UploadDir, "uploads", filename))
 		}
 
-		// Delete from database
 		if err := client.Media.DeleteOneID(id).Exec(ctx); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -595,10 +568,7 @@ func deleteMedia(client *entity.Client) gin.HandlerFunc {
 	}
 }
 
-// --- Transcoding Handlers ---
-
-// listEncodingTasks returns a list of encoding tasks for a specific media.
-func listEncodingTasks(uc *biz.MediaUseCase) gin.HandlerFunc {
+func (h *MediaHandler) listEncodingTasks() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 		if err != nil {
@@ -606,7 +576,7 @@ func listEncodingTasks(uc *biz.MediaUseCase) gin.HandlerFunc {
 			return
 		}
 
-		tasks, err := uc.ListEncodingTasks(c.Request.Context(), id)
+		tasks, err := h.uc.ListEncodingTasks(c.Request.Context(), id)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -616,10 +586,9 @@ func listEncodingTasks(uc *biz.MediaUseCase) gin.HandlerFunc {
 	}
 }
 
-// getTranscodingStatus returns the overall system transcoding status.
-func getTranscodingStatus(uc *biz.MediaUseCase) gin.HandlerFunc {
+func (h *MediaHandler) getTranscodingStatus() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		status, err := uc.GetTranscodingStatus(c.Request.Context(), nil)
+		status, err := h.uc.GetTranscodingStatus(c.Request.Context(), nil)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -629,8 +598,7 @@ func getTranscodingStatus(uc *biz.MediaUseCase) gin.HandlerFunc {
 	}
 }
 
-// transcodingEvents handles SSE for transcoding progress.
-func transcodingEvents(uc *biz.MediaUseCase) gin.HandlerFunc {
+func (h *MediaHandler) transcodingEvents() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mediaIdStr := c.Query("media_id")
 		var mediaID int64
@@ -644,7 +612,7 @@ func transcodingEvents(uc *biz.MediaUseCase) gin.HandlerFunc {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 
 		ctx := c.Request.Context()
-		events, cleanup := uc.Subscribe(ctx, mediaID)
+		events, cleanup := h.uc.Subscribe(ctx, mediaID)
 		defer cleanup()
 
 		c.Stream(func(w io.Writer) bool {
@@ -667,9 +635,90 @@ func transcodingEvents(uc *biz.MediaUseCase) gin.HandlerFunc {
 	}
 }
 
+// --- Encode Profile CRUD ---
+
+func (h *MediaHandler) listEncodeProfiles() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		profiles, err := h.uc.ListEncodeProfiles(c.Request.Context())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"profiles": profiles})
+	}
+}
+
+func (h *MediaHandler) getEncodeProfile() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("profile_id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Profile ID"})
+			return
+		}
+		p, err := h.uc.GetEncodeProfile(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Profile not found"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"profile": p})
+	}
+}
+
+func (h *MediaHandler) createEncodeProfile() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var profile biz.EncodeProfile
+		if err := c.ShouldBindJSON(&profile); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		p, err := h.uc.CreateEncodeProfile(c.Request.Context(), &profile)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusCreated, gin.H{"profile": p})
+	}
+}
+
+func (h *MediaHandler) updateEncodeProfile() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("profile_id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Profile ID"})
+			return
+		}
+		var profile biz.EncodeProfile
+		if err := c.ShouldBindJSON(&profile); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		profile.Id = id
+		p, err := h.uc.UpdateEncodeProfile(c.Request.Context(), &profile)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"profile": p})
+	}
+}
+
+func (h *MediaHandler) deleteEncodeProfile() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("profile_id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Profile ID"})
+			return
+		}
+		if err := h.uc.DeleteEncodeProfile(c.Request.Context(), id); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "deleted"})
+	}
+}
+
 // --- Helpers ---
 
-// mimeToExt returns a file extension for a given MIME type.
 func mimeToExt(mimeType string) string {
 	exts := map[string]string{
 		"video/mp4":        ".mp4",
@@ -695,5 +744,3 @@ func mimeToExt(mimeType string) string {
 	}
 	return ""
 }
-
-// Helper to sort query order direction
