@@ -3,8 +3,9 @@
  */
 
 // main is the M1 monolith entry point for origcms.
+// Uses runtime for config loading and logger initialization.
 // Wires up ent (SQLite/PostgreSQL), svc-user biz/data, and a Gin HTTP server.
-// Run: go run ./cmd/server (zero-config with SQLite by default)
+// Run: go run ./cmd/server -conf configs/bootstrap.yaml
 package main
 
 import (
@@ -12,8 +13,6 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"log/slog"
-	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -21,7 +20,9 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq" // PostgreSQL driver
 
+	"github.com/origadmin/runtime"
 	"github.com/origadmin/runtime/log"
+	_ "github.com/origadmin/runtime/config/envsource"
 	"github.com/origadmin/toolkits/crypto/hash"
 	hashtypes "github.com/origadmin/toolkits/crypto/hash/types"
 	_ "github.com/sqlite3ent/sqlite3"
@@ -52,54 +53,76 @@ func main() {
 	// Initialize environment variables and find configuration file
 	confPath := confhelper.InitEnvAndConf(envName, flagconf)
 	if confPath == "" {
-		slog.Error(
+		log.Fatalf(
 			"Could not find configuration file. Searched -conf flag, executable path, and development path.",
 		)
-		os.Exit(1)
 	}
 
-	slog.Info("Loading configuration from: " + confPath)
+	log.Infof("Loading configuration from: %s\n", confPath)
 
-	// Load config
-	cfg := loadConfig()
+	// ── 1. Runtime: config loading + logger initialization ────────────
+	rt := runtime.New("origcms.server", "v1.0.0")
+	if err := rt.Load(confPath); err != nil {
+		log.Fatalf("failed to load runtime: %v", err)
+	}
+	defer func() {
+		_ = rt.Decoder().Close()
+	}()
 
-	// ── 1. Database ──────────────────────────────────────────────────────────
-	db, err := openDB(cfg.DBSource, cfg.DatabaseType)
+	// Set runtime logger as global logger
+	log.SetLogger(rt.Logger())
+
+	rt.ShowAppInfo()
+
+	// Decode business config from YAML
+	cfg := &Config{}
+	if rt.Decoder() != nil {
+		if err := rt.Decoder().Scan(cfg); err != nil {
+			log.Fatalf("failed to scan config: %v", err)
+		}
+	}
+
+	// ── 2. Database ──────────────────────────────────────────────────
+	db, err := openDB(cfg.Data.Database.Source, cfg.Data.Database.Driver)
 	if err != nil {
-		slog.Error("failed to connect to database", "err", err)
-		os.Exit(1)
+		log.Fatalf("failed to connect to database: %v", err)
 	}
 	defer db.Close()
 
 	ctx := context.Background()
 	// AutoMigrate all schemas in the unified entity
 	if err := db.Schema.Create(ctx); err != nil {
-		slog.Error("ent AutoMigrate failed", "err", err)
-		os.Exit(1)
+		log.Fatalf("ent AutoMigrate failed: %v", err)
 	}
-	slog.Info("database migration complete")
+	log.Info("database migration complete")
 
 	// --- Initialize Seed Data ---
 	if err := mediadata.SeedEncodeProfiles(ctx, db); err != nil {
-		slog.Error("failed to seed encode profiles", "err", err)
-		os.Exit(1)
+		log.Fatalf("failed to seed encode profiles: %v", err)
 	}
-	slog.Info("encode profiles seeded successfully")
+	log.Info("encode profiles seeded successfully")
 
-	// ── 2. Dependency injection (manual wire) ────────────────────────────────
+	// ── 3. Dependency injection (manual wire) ────────────────────────
 	hasher, err := hash.NewCrypto(hashtypes.BCRYPT)
 	if err != nil {
-		slog.Error("failed to create hasher", "err", err)
-		os.Exit(1)
+		log.Fatalf("failed to create hasher: %v", err)
 	}
 
-	logger := log.NewStdLogger(os.Stderr)
+	logger := rt.Logger()
 	userRepo := data.NewUserRepo(db)
 	userUC := biz.NewUserUseCase(userRepo, hasher, logger)
 
+	jwtSecret := cfg.Security.JWT.Secret
+	if jwtSecret == "" {
+		jwtSecret = "change-me-in-production"
+	}
+	jwtExpire := cfg.Security.JWT.ExpireHour
+	if jwtExpire == 0 {
+		jwtExpire = 24
+	}
 	jwtManager := auth.NewManager(
-		cfg.JWTSecret,
-		time.Duration(cfg.JWTExpireHour)*time.Hour,
+		jwtSecret,
+		time.Duration(jwtExpire)*time.Hour,
 	)
 
 	// svc-media initialization
@@ -121,7 +144,7 @@ func main() {
 		logger,
 	)
 
-	// --- 3. Handlers (Monolith) ---
+	// --- 4. Handlers (Monolith) ---
 	authHandler := server.NewAuthHandler(userUC, jwtManager)
 	userHandler := server.NewUserHandler(db)
 	mediaHandler := server.NewMediaHandler(db, jwtManager, mediaUC, uploadUC)
@@ -132,7 +155,7 @@ func main() {
 	playlistHandler := server.NewPlaylistHandler(db)
 	feedHandler := server.NewFeedHandler(db)
 
-	// ── 4. Gin router ─────────────────────────────────────────────────────────
+	// ── 5. Gin router ───────────────────────────────────────────────
 	if getEnv("GIN_MODE", "debug") == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -153,14 +176,6 @@ func main() {
 		c.Next()
 	})
 
-	// Health
-	r.GET("/healthz", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"status":  "ok",
-			"version": "1.0.0",
-		})
-	})
-
 	// Static files for media uploads
 	r.Static("/uploads", "./data/uploads/uploads")
 	r.Static("/thumbnails", "./data/uploads/thumbnails")
@@ -179,33 +194,42 @@ func main() {
 		feedHandler,
 	)
 
-	// ── 5. Start server ───────────────────────────────────────────────────────
-	addr := fmt.Sprintf(":%d", cfg.ServerPort)
-	slog.Info("origcms server starting", "addr", addr)
+	// ── 6. Start server ─────────────────────────────────────────────
+	addr := cfg.Server.HTTP.Addr
+	if addr == "" {
+		addr = ":9090"
+	}
+	log.Infof("origcms server starting, addr: %s", addr)
 	if err := r.Run(addr); err != nil {
-		slog.Error("server error", "err", err)
-		os.Exit(1)
+		log.Fatalf("server error: %v", err)
 	}
 }
 
-// config holds all runtime configuration from environment/config file.
-type config struct {
-	DBSource      string
-	ServerPort    int
-	JWTSecret     string
-	JWTExpireHour int
-	DatabaseType  string // sqlite3 or postgres
-}
-
-func loadConfig() config {
-	// Default to SQLite for zero-config testing
-	return config{
-		DBSource:      getEnv("DB_SOURCE", "./data/origcms.db"),
-		ServerPort:    getEnvInt("SERVER_PORT", 9090),
-		JWTSecret:     getEnv("JWT_SECRET", "change-me-in-production"),
-		JWTExpireHour: getEnvInt("JWT_EXPIRE_HOUR", 24),
-		DatabaseType:  getEnv("DATABASE_TYPE", "sqlite3"),
-	}
+// Config holds all runtime configuration parsed from bootstrap.yaml.
+// Fields use YAML tags matching the config file structure.
+type Config struct {
+	Data struct {
+		Database struct {
+			Driver string `yaml:"driver"`
+			Source string `yaml:"source"`
+		} `yaml:"database"`
+	} `yaml:"data"`
+	Server struct {
+		HTTP struct {
+			Network string `yaml:"network"`
+			Addr    string `yaml:"addr"`
+		} `yaml:"http"`
+		GRPC struct {
+			Network string `yaml:"network"`
+			Addr    string `yaml:"addr"`
+		} `yaml:"grpc"`
+	} `yaml:"server"`
+	Security struct {
+		JWT struct {
+			Secret     string `yaml:"secret"`
+			ExpireHour int    `yaml:"expire_hour"`
+		} `yaml:"jwt"`
+	} `yaml:"security"`
 }
 
 // openDB opens an ent client using entity.Open
@@ -254,7 +278,7 @@ func ensurePostgresDB(dsn string) error {
 		if err != nil {
 			return fmt.Errorf("create database %s: %w", dbName, err)
 		}
-		slog.Info("Created database: " + dbName)
+		log.Info("Created database: " + dbName)
 	}
 	return nil
 }
@@ -300,16 +324,6 @@ func containsAny(s, substr string) bool {
 func getEnv(key, defaultVal string) string {
 	if v, ok := os.LookupEnv(key); ok {
 		return v
-	}
-	return defaultVal
-}
-
-func getEnvInt(key string, defaultVal int) int {
-	if v, ok := os.LookupEnv(key); ok {
-		var n int
-		if _, err := fmt.Sscanf(v, "%d", &n); err == nil {
-			return n
-		}
 	}
 	return defaultVal
 }
