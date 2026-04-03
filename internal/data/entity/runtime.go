@@ -156,15 +156,15 @@ func init() {
 	// encodeprofile.AudioBitrateValidator is a validator for the "audio_bitrate" field. It is called by the builders before save.
 	encodeprofile.AudioBitrateValidator = encodeprofileDescAudioBitrate.Validators[0].(func(string) error)
 	// encodeprofileDescIsActive is the schema descriptor for is_active field.
-	encodeprofileDescIsActive := encodeprofileFields[8].Descriptor()
+	encodeprofileDescIsActive := encodeprofileFields[9].Descriptor()
 	// encodeprofile.DefaultIsActive holds the default value on creation for the is_active field.
 	encodeprofile.DefaultIsActive = encodeprofileDescIsActive.Default.(bool)
 	// encodeprofileDescCreatedAt is the schema descriptor for created_at field.
-	encodeprofileDescCreatedAt := encodeprofileFields[9].Descriptor()
+	encodeprofileDescCreatedAt := encodeprofileFields[10].Descriptor()
 	// encodeprofile.DefaultCreatedAt holds the default value on creation for the created_at field.
 	encodeprofile.DefaultCreatedAt = encodeprofileDescCreatedAt.Default.(func() time.Time)
 	// encodeprofileDescUpdatedAt is the schema descriptor for updated_at field.
-	encodeprofileDescUpdatedAt := encodeprofileFields[10].Descriptor()
+	encodeprofileDescUpdatedAt := encodeprofileFields[11].Descriptor()
 	// encodeprofile.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	encodeprofile.DefaultUpdatedAt = encodeprofileDescUpdatedAt.Default.(func() time.Time)
 	// encodeprofile.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -217,126 +217,130 @@ func init() {
 	mediaDescFriendlyToken := mediaFields[2].Descriptor()
 	// media.FriendlyTokenValidator is a validator for the "friendly_token" field. It is called by the builders before save.
 	media.FriendlyTokenValidator = mediaDescFriendlyToken.Validators[0].(func(string) error)
+	// mediaDescUUID is the schema descriptor for uuid field.
+	mediaDescUUID := mediaFields[3].Descriptor()
+	// media.UUIDValidator is a validator for the "uuid" field. It is called by the builders before save.
+	media.UUIDValidator = mediaDescUUID.Validators[0].(func(string) error)
 	// mediaDescType is the schema descriptor for type field.
-	mediaDescType := mediaFields[3].Descriptor()
+	mediaDescType := mediaFields[4].Descriptor()
 	// media.DefaultType holds the default value on creation for the type field.
 	media.DefaultType = mediaDescType.Default.(string)
 	// media.TypeValidator is a validator for the "type" field. It is called by the builders before save.
 	media.TypeValidator = mediaDescType.Validators[0].(func(string) error)
 	// mediaDescURL is the schema descriptor for url field.
-	mediaDescURL := mediaFields[4].Descriptor()
+	mediaDescURL := mediaFields[5].Descriptor()
 	// media.URLValidator is a validator for the "url" field. It is called by the builders before save.
 	media.URLValidator = mediaDescURL.Validators[0].(func(string) error)
 	// mediaDescHlsFile is the schema descriptor for hls_file field.
-	mediaDescHlsFile := mediaFields[5].Descriptor()
+	mediaDescHlsFile := mediaFields[6].Descriptor()
 	// media.HlsFileValidator is a validator for the "hls_file" field. It is called by the builders before save.
 	media.HlsFileValidator = mediaDescHlsFile.Validators[0].(func(string) error)
 	// mediaDescThumbnail is the schema descriptor for thumbnail field.
-	mediaDescThumbnail := mediaFields[6].Descriptor()
+	mediaDescThumbnail := mediaFields[7].Descriptor()
 	// media.ThumbnailValidator is a validator for the "thumbnail" field. It is called by the builders before save.
 	media.ThumbnailValidator = mediaDescThumbnail.Validators[0].(func(string) error)
 	// mediaDescPoster is the schema descriptor for poster field.
-	mediaDescPoster := mediaFields[7].Descriptor()
+	mediaDescPoster := mediaFields[8].Descriptor()
 	// media.PosterValidator is a validator for the "poster" field. It is called by the builders before save.
 	media.PosterValidator = mediaDescPoster.Validators[0].(func(string) error)
 	// mediaDescPreviewFilePath is the schema descriptor for preview_file_path field.
-	mediaDescPreviewFilePath := mediaFields[8].Descriptor()
+	mediaDescPreviewFilePath := mediaFields[9].Descriptor()
 	// media.PreviewFilePathValidator is a validator for the "preview_file_path" field. It is called by the builders before save.
 	media.PreviewFilePathValidator = mediaDescPreviewFilePath.Validators[0].(func(string) error)
 	// mediaDescDuration is the schema descriptor for duration field.
-	mediaDescDuration := mediaFields[9].Descriptor()
+	mediaDescDuration := mediaFields[10].Descriptor()
 	// media.DefaultDuration holds the default value on creation for the duration field.
 	media.DefaultDuration = mediaDescDuration.Default.(int)
 	// mediaDescSize is the schema descriptor for size field.
-	mediaDescSize := mediaFields[10].Descriptor()
+	mediaDescSize := mediaFields[11].Descriptor()
 	// media.SizeValidator is a validator for the "size" field. It is called by the builders before save.
 	media.SizeValidator = mediaDescSize.Validators[0].(func(string) error)
 	// mediaDescWidth is the schema descriptor for width field.
-	mediaDescWidth := mediaFields[11].Descriptor()
+	mediaDescWidth := mediaFields[12].Descriptor()
 	// media.DefaultWidth holds the default value on creation for the width field.
 	media.DefaultWidth = mediaDescWidth.Default.(int)
 	// mediaDescHeight is the schema descriptor for height field.
-	mediaDescHeight := mediaFields[12].Descriptor()
+	mediaDescHeight := mediaFields[13].Descriptor()
 	// media.DefaultHeight holds the default value on creation for the height field.
 	media.DefaultHeight = mediaDescHeight.Default.(int)
 	// mediaDescMimeType is the schema descriptor for mime_type field.
-	mediaDescMimeType := mediaFields[13].Descriptor()
+	mediaDescMimeType := mediaFields[14].Descriptor()
 	// media.MimeTypeValidator is a validator for the "mime_type" field. It is called by the builders before save.
 	media.MimeTypeValidator = mediaDescMimeType.Validators[0].(func(string) error)
 	// mediaDescMd5sum is the schema descriptor for md5sum field.
-	mediaDescMd5sum := mediaFields[14].Descriptor()
+	mediaDescMd5sum := mediaFields[15].Descriptor()
 	// media.Md5sumValidator is a validator for the "md5sum" field. It is called by the builders before save.
 	media.Md5sumValidator = mediaDescMd5sum.Validators[0].(func(string) error)
 	// mediaDescExtension is the schema descriptor for extension field.
-	mediaDescExtension := mediaFields[15].Descriptor()
+	mediaDescExtension := mediaFields[16].Descriptor()
 	// media.ExtensionValidator is a validator for the "extension" field. It is called by the builders before save.
 	media.ExtensionValidator = mediaDescExtension.Validators[0].(func(string) error)
 	// mediaDescPrivacy is the schema descriptor for privacy field.
-	mediaDescPrivacy := mediaFields[16].Descriptor()
+	mediaDescPrivacy := mediaFields[17].Descriptor()
 	// media.DefaultPrivacy holds the default value on creation for the privacy field.
 	media.DefaultPrivacy = mediaDescPrivacy.Default.(int)
 	// mediaDescEncodingStatus is the schema descriptor for encoding_status field.
-	mediaDescEncodingStatus := mediaFields[17].Descriptor()
+	mediaDescEncodingStatus := mediaFields[18].Descriptor()
 	// media.DefaultEncodingStatus holds the default value on creation for the encoding_status field.
 	media.DefaultEncodingStatus = mediaDescEncodingStatus.Default.(string)
 	// media.EncodingStatusValidator is a validator for the "encoding_status" field. It is called by the builders before save.
 	media.EncodingStatusValidator = mediaDescEncodingStatus.Validators[0].(func(string) error)
 	// mediaDescState is the schema descriptor for state field.
-	mediaDescState := mediaFields[18].Descriptor()
+	mediaDescState := mediaFields[19].Descriptor()
 	// media.DefaultState holds the default value on creation for the state field.
 	media.DefaultState = mediaDescState.Default.(string)
 	// media.StateValidator is a validator for the "state" field. It is called by the builders before save.
 	media.StateValidator = mediaDescState.Validators[0].(func(string) error)
 	// mediaDescViewCount is the schema descriptor for view_count field.
-	mediaDescViewCount := mediaFields[19].Descriptor()
+	mediaDescViewCount := mediaFields[20].Descriptor()
 	// media.DefaultViewCount holds the default value on creation for the view_count field.
 	media.DefaultViewCount = mediaDescViewCount.Default.(int64)
 	// mediaDescLikeCount is the schema descriptor for like_count field.
-	mediaDescLikeCount := mediaFields[20].Descriptor()
+	mediaDescLikeCount := mediaFields[21].Descriptor()
 	// media.DefaultLikeCount holds the default value on creation for the like_count field.
 	media.DefaultLikeCount = mediaDescLikeCount.Default.(int64)
 	// mediaDescDislikeCount is the schema descriptor for dislike_count field.
-	mediaDescDislikeCount := mediaFields[21].Descriptor()
+	mediaDescDislikeCount := mediaFields[22].Descriptor()
 	// media.DefaultDislikeCount holds the default value on creation for the dislike_count field.
 	media.DefaultDislikeCount = mediaDescDislikeCount.Default.(int64)
 	// mediaDescCommentCount is the schema descriptor for comment_count field.
-	mediaDescCommentCount := mediaFields[22].Descriptor()
+	mediaDescCommentCount := mediaFields[23].Descriptor()
 	// media.DefaultCommentCount holds the default value on creation for the comment_count field.
 	media.DefaultCommentCount = mediaDescCommentCount.Default.(int64)
 	// mediaDescFavoriteCount is the schema descriptor for favorite_count field.
-	mediaDescFavoriteCount := mediaFields[23].Descriptor()
+	mediaDescFavoriteCount := mediaFields[24].Descriptor()
 	// media.DefaultFavoriteCount holds the default value on creation for the favorite_count field.
 	media.DefaultFavoriteCount = mediaDescFavoriteCount.Default.(int64)
 	// mediaDescDownloadCount is the schema descriptor for download_count field.
-	mediaDescDownloadCount := mediaFields[24].Descriptor()
+	mediaDescDownloadCount := mediaFields[25].Descriptor()
 	// media.DefaultDownloadCount holds the default value on creation for the download_count field.
 	media.DefaultDownloadCount = mediaDescDownloadCount.Default.(int64)
 	// mediaDescAllowDownload is the schema descriptor for allow_download field.
-	mediaDescAllowDownload := mediaFields[25].Descriptor()
+	mediaDescAllowDownload := mediaFields[26].Descriptor()
 	// media.DefaultAllowDownload holds the default value on creation for the allow_download field.
 	media.DefaultAllowDownload = mediaDescAllowDownload.Default.(bool)
 	// mediaDescEnableComments is the schema descriptor for enable_comments field.
-	mediaDescEnableComments := mediaFields[26].Descriptor()
+	mediaDescEnableComments := mediaFields[27].Descriptor()
 	// media.DefaultEnableComments holds the default value on creation for the enable_comments field.
 	media.DefaultEnableComments = mediaDescEnableComments.Default.(bool)
 	// mediaDescFeatured is the schema descriptor for featured field.
-	mediaDescFeatured := mediaFields[27].Descriptor()
+	mediaDescFeatured := mediaFields[28].Descriptor()
 	// media.DefaultFeatured holds the default value on creation for the featured field.
 	media.DefaultFeatured = mediaDescFeatured.Default.(bool)
 	// mediaDescIsReviewed is the schema descriptor for is_reviewed field.
-	mediaDescIsReviewed := mediaFields[28].Descriptor()
+	mediaDescIsReviewed := mediaFields[29].Descriptor()
 	// media.DefaultIsReviewed holds the default value on creation for the is_reviewed field.
 	media.DefaultIsReviewed = mediaDescIsReviewed.Default.(bool)
 	// mediaDescReportedTimes is the schema descriptor for reported_times field.
-	mediaDescReportedTimes := mediaFields[29].Descriptor()
+	mediaDescReportedTimes := mediaFields[30].Descriptor()
 	// media.DefaultReportedTimes holds the default value on creation for the reported_times field.
 	media.DefaultReportedTimes = mediaDescReportedTimes.Default.(int)
 	// mediaDescCreatedAt is the schema descriptor for created_at field.
-	mediaDescCreatedAt := mediaFields[33].Descriptor()
+	mediaDescCreatedAt := mediaFields[34].Descriptor()
 	// media.DefaultCreatedAt holds the default value on creation for the created_at field.
 	media.DefaultCreatedAt = mediaDescCreatedAt.Default.(func() time.Time)
 	// mediaDescUpdatedAt is the schema descriptor for updated_at field.
-	mediaDescUpdatedAt := mediaFields[34].Descriptor()
+	mediaDescUpdatedAt := mediaFields[35].Descriptor()
 	// media.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	media.DefaultUpdatedAt = mediaDescUpdatedAt.Default.(func() time.Time)
 	// media.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

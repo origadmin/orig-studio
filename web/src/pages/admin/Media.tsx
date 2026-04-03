@@ -4,7 +4,21 @@
  */
 
 import {useState, useEffect} from 'react';
-import {Play, Eye, MoreVertical, Trash2, Edit, Search, Upload, Image as ImageIcon, Video} from 'lucide-react';
+import {useLocation, useSearchParams} from '@tanstack/react-router';
+import {
+    Play,
+    Eye,
+    MoreVertical,
+    Trash2,
+    Edit,
+    Search,
+    Upload,
+    Image as ImageIcon,
+    Video,
+    ExternalLink,
+    RotateCcw,
+    Loader2
+} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Badge} from '@/components/ui/badge';
@@ -47,12 +61,16 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {Label} from "@/components/ui/label";
-import {mediaApi, type Media} from '@/lib/api/media';
+import {mediaApi, type Media, type MediaVariantSummary} from '@/lib/api/media';
 import {useAdminMediaList, useUpdateMedia, useDeleteMedia} from '@/hooks/queries';
 import {UploadComponent} from '@/components/upload/UploadComponent';
 import {formatFileSize} from '@/lib/format';
 
 export default function MediaPage() {
+    // Read incoming search term from URL params (e.g. from TranscodingStatus link)
+    const location = useLocation();
+    const urlSearch = new URLSearchParams(location.search).get("q");
+
     // 弹窗状态
     const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
@@ -71,7 +89,12 @@ export default function MediaPage() {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [deletingMedia, setDeletingMedia] = useState<Media | null>(null);
 
-    const [searchTerm, setSearchTerm] = useState('');
+    // 转码详情弹窗
+    const [variantDetailOpen, setVariantDetailOpen] = useState(false);
+    const [variantData, setVariantData] = useState<MediaVariantSummary | null>(null);
+    const [retryingAllId, setRetryingAllId] = useState<number | null>(null);
+
+    const [searchTerm, setSearchTerm] = useState(urlSearch || '');
     const [statusFilter, setStatusFilter] = useState('all');
 
     // React Query Hooks
@@ -83,8 +106,13 @@ export default function MediaPage() {
 
     const filteredMedia = mediaList.filter((item: Media) => {
         const matchesSearch = item.title?.toLowerCase().includes(searchTerm.toLowerCase());
+        // Search by ID when query starts with "#", otherwise search by title
+        const isIdSearch = searchTerm.startsWith("#");
+        const actualSearch = isIdSearch
+            ? `#${item.id}` === searchTerm
+            : item.title?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesStatus = statusFilter === 'all' || item.state === statusFilter;
-        return matchesSearch && matchesStatus;
+        return actualSearch && matchesStatus;
     });
 
     const formatDuration = (seconds: number) => {
@@ -149,6 +177,92 @@ export default function MediaPage() {
             loadMedia();
         } catch (err) {
             console.error("Failed to delete media", err);
+        }
+    };
+
+    // Show transcoding variant details for a media
+    const handleShowVariants = async (media: Media) => {
+        try {
+            const data = await mediaApi.getVariants(media.id);
+            setVariantData(data as unknown as MediaVariantSummary);
+            setVariantDetailOpen(true);
+        } catch (err: any) {
+            console.error("Failed to fetch variants:", err.message);
+        }
+    };
+
+    // Retry all failed tasks for a media (from media management page)
+    const handleRetryAllFailed = async (mediaId: number) => {
+        setRetryingAllId(mediaId);
+        try {
+            await mediaApi.retryAllFailed(mediaId);
+            // Refresh variant detail if open, or just refresh the list
+            if (variantData?.media_id === mediaId) {
+                handleShowVariants({id: mediaId} as Media);
+            }
+        } catch (err: any) {
+            console.error("Retry all failed:", err.message);
+        } finally {
+            setRetryingAllId(null);
+        }
+    };
+
+    // Helper: encoding status badge color
+    const encStatusBadge = (status?: string) => {
+        switch (status) {
+            case "success":
+                return "outline" as const;
+            case "processing":
+                return "default" as const;
+            case "partial":
+                return "secondary" as const;
+            case "failed":
+                return "destructive" as const;
+            default:
+                return "secondary" as const;
+        }
+    };
+
+    const encStatusDot = (status?: string) => {
+        switch (status) {
+            case "processing":
+                return "bg-blue-500";
+            case "pending":
+                return "bg-yellow-500";
+            case "partial":
+                return "bg-orange-500";
+            case "failed":
+                return "bg-red-500";
+            case "success":
+                return "bg-green-500";
+            default:
+                return "bg-gray-300";
+        }
+    };
+
+    // Helper: resolve preview image URL
+    const resolvePreview = (path?: string) => {
+        if (!path) return "";
+        if (path.startsWith("http")) return path;
+        const base = (import.meta as any).env.VITE_API_BASE_URL || "http://localhost:9090";
+        return `${base}${path.startsWith("/") ? "" : "/"}${path}`;
+    };
+
+    // Helper: text color for task status in variant list
+    const statusTextColor = (status?: string) => {
+        switch (status) {
+            case "success":
+                return "text-green-600";
+            case "processing":
+                return "text-blue-600";
+            case "pending":
+                return "text-yellow-600";
+            case "partial":
+                return "text-orange-600";
+            case "failed":
+                return "text-red-600";
+            default:
+                return "text-muted-foreground";
         }
     };
 
@@ -264,6 +378,7 @@ export default function MediaPage() {
                                     <TableHead>时长</TableHead>
                                     <TableHead>播放量</TableHead>
                                     <TableHead>状态</TableHead>
+                                    <TableHead>转码</TableHead>
                                     <TableHead>作者</TableHead>
                                     <TableHead>日期</TableHead>
                                     <TableHead className="text-right">操作</TableHead>
@@ -271,7 +386,7 @@ export default function MediaPage() {
                             </TableHeader>
                             <TableBody>
                                 {filteredMedia.length > 0 ? filteredMedia.map((media) => (
-                                    <TableRow key={media.id}>
+                                    <TableRow key={media.id} id={`media-row-${media.id}`}>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 <div
@@ -311,6 +426,33 @@ export default function MediaPage() {
                                                 {media.state || 'draft'}
                                             </Badge>
                                         </TableCell>
+                                        {/* Transcoding Status column — shows encoding status + link to task detail */}
+                                        <TableCell>
+                                            {media.encoding_status && media.encoding_status !== 'pending' ? (
+                                                <div className="flex items-center gap-2">
+                                                    <span
+                                                        className={`w-2 h-2 rounded-full ${encStatusDot(media.encoding_status)}`}/>
+                                                    <Badge variant={encStatusBadge(media.encoding_status)}
+                                                           className="text-[10px] px-1.5 py-0 h-4">
+                                                        {media.encoding_status}
+                                                    </Badge>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-6 w-6 p-0 text-[11px]"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleShowVariants(media);
+                                                        }}
+                                                        title="查看转码详情"
+                                                    >
+                                                        <ExternalLink className="w-3 h-3"/>
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <span className="text-xs text-muted-foreground">--</span>
+                                            )}
+                                        </TableCell>
                                         <TableCell
                                             className="text-sm text-slate-500">{media.edges?.user?.[0]?.nickname || media.edges?.user?.[0]?.username || '-'}</TableCell>
                                         <TableCell
@@ -343,7 +485,7 @@ export default function MediaPage() {
                                     </TableRow>
                                 )) : (
                                     <TableRow>
-                                        <TableCell colSpan={9} className="h-24 text-center text-slate-400">
+                                        <TableCell colSpan={10} className="h-24 text-center text-slate-400">
                                             没有找到匹配的媒体数据
                                         </TableCell>
                                     </TableRow>
@@ -435,6 +577,143 @@ export default function MediaPage() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* 转码详情弹窗 — 媒体管理页的聚合视图 */}
+            <Dialog open={variantDetailOpen} onOpenChange={setVariantDetailOpen}>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            转码概况
+                            {variantData?.encoding_status && (
+                                <Badge variant={encStatusBadge(variantData.encoding_status)} className="text-xs">
+                                    {variantData.encoding_status}
+                                </Badge>
+                            )}
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    {variantData && (
+                        <div className="space-y-4 py-2">
+                            {/* Summary stats — all encoding statuses */}
+                            <div className="grid grid-cols-5 gap-2 text-center">
+                                <div className="rounded-lg bg-yellow-50 dark:bg-yellow-950/20 p-3">
+                                    <p className="text-lg font-bold text-yellow-600">{variantData.video_pending_count ?? 0}</p>
+                                    <p className="text-[11px] text-muted-foreground">排队</p>
+                                </div>
+                                <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 p-3">
+                                    <p className="text-lg font-bold text-blue-600">{variantData.video_processing_count ?? 0}</p>
+                                    <p className="text-[11px] text-muted-foreground">转码中</p>
+                                </div>
+                                <div className="rounded-lg bg-green-50 dark:bg-green-950/20 p-3">
+                                    <p className="text-lg font-bold text-green-600">{variantData.video_success_count}</p>
+                                    <p className="text-[11px] text-muted-foreground">成功</p>
+                                </div>
+                                <div className="rounded-lg bg-red-50 dark:bg-red-950/20 p-3">
+                                    <p className="text-lg font-bold text-red-600">{variantData.video_failed_count}</p>
+                                    <p className="text-[11px] text-muted-foreground">失败</p>
+                                </div>
+                                <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-3">
+                                    <p className="text-lg font-bold text-slate-700">{variantData.video_total_count}</p>
+                                    <p className="text-[11px] text-muted-foreground">总计</p>
+                                </div>
+                            </div>
+
+                            {/* HLS / Preview paths */}
+                            {(variantData.hls_file || variantData.preview_file) && (
+                                <div className="text-xs space-y-1 bg-muted/50 rounded-md p-3">
+                                    {variantData.hls_file && (
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="font-medium text-muted-foreground">HLS:</span>
+                                            <code
+                                                className="text-green-700 dark:text-green-400">{variantData.hls_file}</code>
+                                        </div>
+                                    )}
+                                    {variantData.preview_file && (
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="font-medium text-muted-foreground">Preview:</span>
+                                            <img
+                                                src={resolvePreview(variantData.preview_file)}
+                                                alt="preview"
+                                                className="h-12 rounded border"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Variant list */}
+                            {variantData.variants.length > 0 && (
+                                <div className="space-y-1.5">
+                                    <p className="text-sm font-medium flex items-center gap-2">
+                                        各清晰度任务
+                                        {variantData.video_failed_count > 0 && (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="h-6 text-[10px] ml-auto"
+                                                disabled={retryingAllId === variantData.media_id}
+                                                onClick={() => handleRetryAllFailed(variantData.media_id)}
+                                            >
+                                                {retryingAllId === variantData.media_id ? (
+                                                    <Loader2 className="w-3 h-3 animate-spin mr-1"/>
+                                                ) : (
+                                                    <RotateCcw className="w-3 h-3 mr-1"/>
+                                                )}
+                                                重试全部失败
+                                            </Button>
+                                        )}
+                                    </p>
+                                    {variantData.variants.map((v) => (
+                                        <div
+                                            key={v.task_id}
+                                            className={`flex items-center justify-between rounded-md px-3 py-2 text-xs ${
+                                                v.status === "failed" ? "bg-red-50 dark:bg-red-950/20" :
+                                                    v.status === "success" ? "bg-green-50 dark:bg-green-950/20" :
+                                                        "bg-muted/30"
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <span
+                                                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${encStatusDot(v.status)}`}/>
+                                                <span className="font-mono font-medium truncate">{v.profile_name}</span>
+                                                {v.resolution && (
+                                                    <span
+                                                        className="text-muted-foreground hidden sm:inline">{v.resolution}</span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-2 shrink-0 ml-2">
+                                                <span
+                                                    className={`capitalize ${statusTextColor(v.status)}`}>{v.status}</span>
+                                                {v.output_path && v.status === "success" && (
+                                                    <code
+                                                        className="text-[10px] text-green-700 dark:text-green-400 max-w-[150px] truncate block">{v.output_path}</code>
+                                                )}
+                                                {v.error_message && (
+                                                    <span className="text-red-500 max-w-[200px] truncate block"
+                                                          title={v.error_message}>{v.error_message}</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Link to TranscodingStatus page for full task view */}
+                            <div className="pt-2 border-t">
+                                <a
+                                    href={`/admin/transcoding/status?media_id=${variantData.media_id}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                                >
+                                    在转码任务页面查看完整任务列表
+                                    <ExternalLink className="w-3 h-3"/>
+                                </a>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

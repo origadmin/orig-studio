@@ -17,10 +17,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ThreeDotsLabs/watermill"
+	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq" // PostgreSQL driver
 
 	"github.com/origadmin/runtime"
+	"github.com/origadmin/runtime/engine/bootstrap"
 	"github.com/origadmin/runtime/log"
 	_ "github.com/origadmin/runtime/config/envsource"
 	"github.com/origadmin/toolkits/crypto/hash"
@@ -29,6 +32,7 @@ import (
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/data/entity"
 	confhelper "origadmin/application/origcms/internal/helpers/conf"
+	"origadmin/application/origcms/internal/pubsub"
 	"origadmin/application/origcms/internal/server"
 	mediabiz "origadmin/application/origcms/internal/svc-media/biz"
 	mediadata "origadmin/application/origcms/internal/svc-media/data"
@@ -62,7 +66,7 @@ func main() {
 
 	// ── 1. Runtime: config loading + logger initialization ────────────
 	rt := runtime.New("origcms.server", "v1.0.0")
-	if err := rt.Load(confPath); err != nil {
+	if err := rt.Load(confPath, bootstrap.WithDirectly(true), bootstrap.WithEnvSource()); err != nil {
 		log.Fatalf("failed to load runtime: %v", err)
 	}
 	defer func() {
@@ -83,7 +87,8 @@ func main() {
 	}
 
 	// ── 2. Database ──────────────────────────────────────────────────
-	db, err := openDB(cfg.Data.Database.Source, cfg.Data.Database.Driver)
+	dbDialect, dbSource := cfg.GetDefaultDB()
+	db, err := openDB(dbSource, dbDialect)
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
@@ -112,23 +117,25 @@ func main() {
 	userRepo := data.NewUserRepo(db)
 	userUC := biz.NewUserUseCase(userRepo, hasher, logger)
 
-	jwtSecret := cfg.Security.JWT.Secret
-	if jwtSecret == "" {
-		jwtSecret = "change-me-in-production"
-	}
-	jwtExpire := cfg.Security.JWT.ExpireHour
-	if jwtExpire == 0 {
-		jwtExpire = 24
-	}
+	jwtSigningKey, _, jwtTTL := cfg.GetJWTConfig()
+	jwtExpire := parseDuration(jwtTTL, 3600*time.Second)
 	jwtManager := auth.NewManager(
-		jwtSecret,
-		time.Duration(jwtExpire)*time.Hour,
+		jwtSigningKey,
+		jwtExpire,
 	)
 
 	// svc-media initialization
 	mediaRepo := mediadata.NewMediaRepo(db)
 	profileRepo := mediadata.NewEncodeProfileRepo(db)
 	taskRepo := mediadata.NewEncodingTaskRepo(db)
+
+	// Reset stale processing media (recovery from service restart)
+	resetCount, err := mediaRepo.ResetStaleProcessing(ctx)
+	if err != nil {
+		log.Warnf("failed to reset stale processing media: %v", err)
+	} else if resetCount > 0 {
+		log.Infof("reset %d media items from 'processing' back to 'pending' (service restart recovery)", resetCount)
+	}
 
 	mediaUC := mediabiz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, logger)
 
@@ -143,6 +150,48 @@ func main() {
 		storage,
 		logger,
 	)
+
+	// ── 3b. Watermill GoChannel + Transcode Pipeline ─────────────────
+	wmLogger := watermill.NewStdLogger(true, true)
+	ps := pubsub.NewGoChannel(64, wmLogger)
+
+	maxWorkers := int32(envInt("TRANSCODE_MAX_WORKERS", 3))
+	worker := mediabiz.NewGoroutineWorker(maxWorkers, log.NewHelper(log.With(logger, "module", "transcode.worker")))
+
+	transcodeHandler := mediabiz.NewTranscodeHandler(
+		mediaUC,
+		profileRepo,
+		taskRepo,
+		mediaRepo,
+		worker,
+		ps.Pub,
+		logger,
+		"./data/uploads",
+	)
+
+	router, err := message.NewRouter(message.RouterConfig{}, wmLogger)
+	if err != nil {
+		log.Fatalf("failed to create Watermill router: %v", err)
+	}
+	router.AddHandler(
+		"media_transcode",
+		pubsub.MediaEncodeRequestTopic,
+		ps.Sub,
+		"",  // no output topic (handler publishes directly)
+		nil, // no output publisher needed
+		func(msg *message.Message) ([]*message.Message, error) {
+			return nil, transcodeHandler.Handle(msg)
+		},
+	)
+	go func() {
+		if err := router.Run(context.Background()); err != nil {
+			log.Fatalf("Watermill router error: %v", err)
+		}
+	}()
+	log.Infof("transcode pipeline started (maxWorkers=%d)", maxWorkers)
+
+	// Inject publisher into UploadUseCase for async encoding requests
+	uploadUC.SetPublisher(ps.Pub)
 
 	// --- 4. Handlers (Monolith) ---
 	authHandler := server.NewAuthHandler(userUC, jwtManager)
@@ -207,32 +256,60 @@ func main() {
 
 // Config holds all runtime configuration parsed from bootstrap.yaml.
 // Fields use YAML tags matching the config file structure.
+// Structure aligns with backend (projects/backend/resources/configs/).
 type Config struct {
 	Data struct {
-		Database struct {
-			Driver string `yaml:"driver"`
-			Source string `yaml:"source"`
-		} `yaml:"database"`
+		Databases map[string]struct {
+			Name    string `yaml:"name"`
+			Dialect string `yaml:"dialect"`
+			Source  string `yaml:"source"`
+		} `yaml:"databases"`
 	} `yaml:"data"`
 	Server struct {
 		HTTP struct {
 			Network string `yaml:"network"`
 			Addr    string `yaml:"addr"`
+			Timeout string `yaml:"timeout"`
 		} `yaml:"http"`
-		GRPC struct {
-			Network string `yaml:"network"`
-			Addr    string `yaml:"addr"`
-		} `yaml:"grpc"`
 	} `yaml:"server"`
 	Security struct {
-		JWT struct {
-			Secret     string `yaml:"secret"`
-			ExpireHour int    `yaml:"expire_hour"`
-		} `yaml:"jwt"`
+		Authn struct {
+			Configs []struct {
+				Type string `yaml:"type"`
+				JWT  struct {
+					SigningKey      string `yaml:"signing_key"`
+					SigningMethod   string `yaml:"signing_method"`
+					AccessTokenTTL  string `yaml:"access_token_ttl"`
+					RefreshTokenTTL string `yaml:"refresh_token_ttl"`
+				} `yaml:"jwt"`
+			} `yaml:"configs"`
+		} `yaml:"authn"`
 	} `yaml:"security"`
 }
 
-// openDB opens an ent client using entity.Open
+// GetDefaultDB returns the "default" database config for convenience.
+func (c *Config) GetDefaultDB() (dialect, source string) {
+	if c.Data.Databases != nil {
+		if db, ok := c.Data.Databases["default"]; ok {
+			return db.Dialect, db.Source
+		}
+	}
+	return "postgres", ""
+}
+
+// GetJWTConfig returns the first JWT authn config found.
+func (c *Config) GetJWTConfig() (signingKey, signingMethod, accessTokenTTL string) {
+	for _, cfg := range c.Security.Authn.Configs {
+		if cfg.Type == "jwt" {
+			return cfg.JWT.SigningKey, cfg.JWT.SigningMethod, cfg.JWT.AccessTokenTTL
+		}
+	}
+	return "change-me-in-production", "HS256", "3600s"
+}
+
+// openDB opens an ent client using entity.Open.
+// Supports both URI DSN (postgres://user:pass@host:5432/db?sslmode=disable)
+// and key=value DSN (host=x user=y dbname=z).
 func openDB(dsn, dbType string) (*entity.Client, error) {
 	driverName := "sqlite3"
 	if dbType == "postgres" {
@@ -242,8 +319,18 @@ func openDB(dsn, dbType string) (*entity.Client, error) {
 			return nil, fmt.Errorf("ensure database: %w", err)
 		}
 		// Add sslmode if not present
-		if !contains(dsn, "sslmode") {
-			dsn = dsn + " sslmode=disable"
+		if !strings.Contains(dsn, "sslmode") {
+			if strings.HasPrefix(dsn, "postgres://") || strings.HasPrefix(dsn, "postgresql://") {
+				// URI format: append as query param
+				if strings.Contains(dsn, "?") {
+					dsn = dsn + "&sslmode=disable"
+				} else {
+					dsn = dsn + "?sslmode=disable"
+				}
+			} else {
+				// key=value format: append as param
+				dsn = dsn + " sslmode=disable"
+			}
 		}
 	}
 	return entity.Open(driverName, dsn)
@@ -252,13 +339,21 @@ func openDB(dsn, dbType string) (*entity.Client, error) {
 // ensurePostgresDB creates the database if it doesn't exist
 func ensurePostgresDB(dsn string) error {
 	// Parse DSN to extract connection info
-	connStr, dbName := parsePostgresDSN(dsn)
+	_, dbName := parsePostgresDSN(dsn)
 	if dbName == "" {
 		return nil
 	}
 
-	// Connect to default 'postgres' database to create our DB
-	defaultDSN := connStr + " dbname=postgres sslmode=disable"
+	// Build a DSN pointing to the default 'postgres' database
+	var defaultDSN string
+	if strings.HasPrefix(dsn, "postgres://") || strings.HasPrefix(dsn, "postgresql://") {
+		// URI format: replace the database name in the path
+		defaultDSN = replaceDBNameInURI(dsn, "postgres")
+	} else {
+		// key=value format: append/override dbname
+		defaultDSN = dsn + " dbname=postgres sslmode=disable"
+	}
+
 	db, err := sql.Open("postgres", defaultDSN)
 	if err != nil {
 		return err
@@ -283,8 +378,85 @@ func ensurePostgresDB(dsn string) error {
 	return nil
 }
 
-// parsePostgresDSN extracts connection string and database name from DSN
+// replaceDBNameInURI replaces the database name in a URI-style PostgreSQL DSN.
+// e.g. postgres://user:pass@host:5432/mydb?sslmode=disable
+//   -> postgres://user:pass@host:5432/postgres?sslmode=disable
+func replaceDBNameInURI(dsn, newDBName string) string {
+	scheme := "postgres://"
+	if strings.HasPrefix(dsn, "postgresql://") {
+		scheme = "postgresql://"
+	}
+	rest := dsn[len(scheme):]
+
+	slashIdx := strings.Index(rest, "/")
+	if slashIdx < 0 {
+		// No path, append /newDBName
+		return dsn + "/" + newDBName
+	}
+
+	authority := rest[:slashIdx]
+	remainder := rest[slashIdx+1:]
+
+	// Separate path from query
+	qIdx := strings.Index(remainder, "?")
+	var query string
+	if qIdx >= 0 {
+		query = "?" + remainder[qIdx+1:]
+		remainder = remainder[:qIdx]
+	}
+
+	return scheme + authority + "/" + newDBName + query
+}
+
+// parsePostgresDSN extracts the connection string and database name from DSN.
+// Supports both URI format (postgres://user:pass@host/db?opts) and
+// key=value format (host=x dbname=y).
 func parsePostgresDSN(dsn string) (connStr, dbName string) {
+	// URI format: postgres://user:pass@host:port/dbname?options
+	if strings.HasPrefix(dsn, "postgres://") || strings.HasPrefix(dsn, "postgresql://") {
+		return parsePostgresURIDSN(dsn)
+	}
+	// key=value format: host=x dbname=y
+	return parsePostgresKVDSN(dsn)
+}
+
+// parsePostgresURIDSN parses a URI-style PostgreSQL DSN.
+func parsePostgresURIDSN(dsn string) (connStr, dbName string) {
+	// Remove scheme
+	rest := dsn
+	if idx := strings.Index(rest, "://"); idx >= 0 {
+		rest = rest[idx+3:]
+	}
+
+	// Split authority and path
+	var _, pathPart, queryPart string
+	if slashIdx := strings.Index(rest, "/"); slashIdx >= 0 {
+		remainder := rest[slashIdx+1:]
+		if qIdx := strings.Index(remainder, "?"); qIdx >= 0 {
+			pathPart = remainder[:qIdx]
+			queryPart = remainder[qIdx+1:]
+		} else {
+			pathPart = remainder
+		}
+	}
+
+	dbName = pathPart
+
+	// Rebuild connection string pointing to 'postgres' default database
+	connStr = dsn
+	// Replace dbname in URI
+	if dbName != "" {
+		if queryPart != "" {
+			connStr = strings.Replace(connStr, "/"+dbName+"?", "/postgres?", 1)
+		} else {
+			connStr = strings.Replace(connStr, "/"+dbName, "/postgres", 1)
+		}
+	}
+	return connStr, dbName
+}
+
+// parsePostgresKVDSN parses a key=value style PostgreSQL DSN.
+func parsePostgresKVDSN(dsn string) (connStr, dbName string) {
 	// Find dbname
 	if i := strings.Index(dsn, "dbname="); i >= 0 {
 		start := i + 7
@@ -305,20 +477,34 @@ func parsePostgresDSN(dsn string) (connStr, dbName string) {
 		connParts = append(connParts, part)
 	}
 	connStr = strings.Join(connParts, " ")
-	return
+	return connStr, dbName
 }
 
 func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > 0 && containsAny(s, substr))
+	return strings.Contains(s, substr)
 }
 
-func containsAny(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
+func parseDuration(s string, fallback time.Duration) time.Duration {
+	d, err := time.ParseDuration(s)
+	if err != nil {
+		return fallback
 	}
-	return false
+	return d
+}
+
+func envInt(key string, defaultVal int) int {
+	v := os.Getenv(key)
+	if v == "" {
+		return defaultVal
+	}
+	n := 0
+	for _, c := range v {
+		if c < '0' || c > '9' {
+			return defaultVal
+		}
+		n = n*10 + int(c-'0')
+	}
+	return n
 }
 
 func getEnv(key, defaultVal string) string {

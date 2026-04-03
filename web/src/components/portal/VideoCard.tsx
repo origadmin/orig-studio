@@ -5,6 +5,7 @@
 import React from 'react';
 import {Link} from '@tanstack/react-router';
 import {Play, Eye, Calendar, Loader2} from 'lucide-react';
+import {Badge} from '@/components/ui/badge';
 import {MediaItem} from '@/types/media';
 import {formatDuration, formatViews, formatDate} from '@/lib/format';
 
@@ -21,24 +22,18 @@ const VideoCard = ({video}: { video: MediaItem }) => {
                     className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700 ease-in-out"
                 />
 
-                {/* Processing Badge */}
+                {/* Processing indicator */}
                 {isProcessing && (
-                    <div className="absolute top-3 left-3 z-10">
-                        <div
-                            className="bg-black/60 backdrop-blur-md text-white text-[10px] font-black px-2 py-1 rounded-lg flex items-center gap-1.5 shadow-lg border border-white/10 uppercase tracking-wider">
-                            {video.encoding_status === 'processing' ? (
-                                <>
-                                    <Loader2 size={10} className="animate-spin"/>
-                                    Processing
-                                </>
-                            ) : (
-                                <>
-                                    <Eye size={10}/>
-                                    Optimizing
-                                </>
-                            )}
-                        </div>
-                    </div>
+                    <Badge
+                        variant="secondary"
+                        className="absolute top-2 left-2 z-10 gap-1 bg-black/60 text-white border-white/10 backdrop-blur text-[9px] px-1.5 py-0 h-5 hover:bg-black/60 uppercase tracking-wide"
+                    >
+                        {video.encoding_status === 'processing' ? (
+                            <><Loader2 size={8} className="animate-spin"/>Processing</>
+                        ) : (
+                            <><Eye size={8}/>Optimizing</>
+                        )}
+                    </Badge>
                 )}
 
                 {/* Play Icon Overlay */}
@@ -49,11 +44,13 @@ const VideoCard = ({video}: { video: MediaItem }) => {
                         <Play size={28} className="fill-current ml-1"/>
                     </div>
                 </div>
-                {/* Duration Badge */}
-                <div
-                    className="absolute bottom-3 right-3 bg-black/80 text-white text-[10px] font-black px-2 py-1 rounded-lg leading-none backdrop-blur-sm shadow-lg">
+                {/* Duration */}
+                <Badge
+                    variant="secondary"
+                    className="absolute bottom-3 right-3 bg-black/80 text-white text-[10px] font-black px-2 py-0 h-5 backdrop-blur-sm hover:bg-black/80 leading-none"
+                >
                     {formatDuration(video.duration)}
-                </div>
+                </Badge>
             </Link>
 
             <div className="p-6 space-y-4">

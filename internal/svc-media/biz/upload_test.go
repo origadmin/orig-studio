@@ -93,8 +93,20 @@ type MockEncodeProfileRepo struct {
 func (m *MockEncodeProfileRepo) ListActive(ctx context.Context) ([]*EncodeProfile, error) {
 	return nil, nil
 }
+func (m *MockEncodeProfileRepo) ListAll(ctx context.Context) ([]*EncodeProfile, error) {
+	return nil, nil
+}
 func (m *MockEncodeProfileRepo) Get(ctx context.Context, id int) (*EncodeProfile, error) {
 	return nil, nil
+}
+func (m *MockEncodeProfileRepo) Create(ctx context.Context, profile *EncodeProfile) (*EncodeProfile, error) {
+	return profile, nil
+}
+func (m *MockEncodeProfileRepo) Update(ctx context.Context, profile *EncodeProfile) (*EncodeProfile, error) {
+	return profile, nil
+}
+func (m *MockEncodeProfileRepo) Delete(ctx context.Context, id int) error {
+	return nil
 }
 
 // MockEncodingTaskRepo
@@ -149,6 +161,7 @@ func TestUploadWorkflow(t *testing.T) {
 		"Desc",
 		nil,
 		nil,
+		"", // thumbnail
 		&userID,
 	)
 	assert.NoError(t, err)
@@ -174,7 +187,8 @@ func TestUploadWorkflow(t *testing.T) {
 	// and mock.AnythingOfType may have issues with type aliases in some environments.
 	mediaRepo.On("Create", ctx, mock.Anything).Return(&Media{Id: 1, Title: "Title"}, nil)
 
-	media, err := uc.CompleteMultipartUpload(ctx, uploadID, "hash")
+	media, err := uc.CompleteMultipartUpload(ctx, uploadID, "hash",
+		"", "", nil, nil, "")
 	assert.NoError(t, err)
 	assert.NotNil(t, media)
 

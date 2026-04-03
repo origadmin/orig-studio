@@ -14,6 +14,7 @@ import (
 	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/category"
+	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/svc-media/biz"
 	"origadmin/application/origcms/internal/svc-media/dto"
@@ -151,6 +152,9 @@ func (r *mediaRepo) Update(
 	if in.EncodingStatus != "" {
 		update = update.SetEncodingStatus(in.EncodingStatus)
 	}
+	if in.Uuid != "" {
+		update = update.SetUUID(in.Uuid)
+	}
 	if in.Duration > 0 {
 		update = update.SetDuration(int(in.Duration))
 	}
@@ -209,6 +213,113 @@ func (r *mediaRepo) IncrementViewCount(ctx context.Context, id int64) (int64, er
 	return m.ViewCount, nil
 }
 
+// CountByEncodingStatus returns per-status media counts using a single GROUP BY query.
+func (r *mediaRepo) CountByEncodingStatus(ctx context.Context) (*biz.StatusCounts, error) {
+	type countRow struct {
+		EncodingStatus string `json:"encoding_status"`
+		Count          int    `json:"count"`
+	}
+
+	var rows []countRow
+	err := r.db.Media.Query().
+		GroupBy(media.FieldEncodingStatus).
+		Aggregate(entity.Count()).
+		Scan(ctx, &rows)
+	if err != nil {
+		return nil, err
+	}
+
+	counts := &biz.StatusCounts{}
+	for _, row := range rows {
+		switch row.EncodingStatus {
+		case "processing":
+			counts.Processing = row.Count
+		case "pending":
+			counts.Pending = row.Count
+		case "partial":
+			counts.Partial = row.Count
+		case "failed":
+			counts.Failed = row.Count
+		case "success":
+			counts.Success = row.Count
+		}
+	}
+	return counts, nil
+}
+
+// ListFilteredByEncodingStatus returns a paginated list of media filtered by encoding status.
+func (r *mediaRepo) ListFilteredByEncodingStatus(ctx context.Context, statuses []string, page, pageSize int) ([]*types.Media, int, error) {
+	if len(statuses) == 0 {
+		return nil, 0, nil
+	}
+
+	query := r.db.Media.Query().
+		Where(media.EncodingStatusIn(statuses...)).
+		Order(entity.Desc(media.FieldUpdatedAt))
+
+	total, err := query.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * pageSize
+	items, err := query.
+		Limit(pageSize).
+		Offset(offset).
+		All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	result := make([]*types.Media, len(items))
+	for i, item := range items {
+		result[i] = convertMediaToProto(item)
+	}
+	return result, total, nil
+}
+
+// ResetStaleProcessing resets media stuck in "processing" back to "pending"
+// and marks their associated encoding tasks still in "processing" as "failed".
+// Returns the count of reset media items.
+func (r *mediaRepo) ResetStaleProcessing(ctx context.Context) (int, error) {
+	// 1. Find all media with encoding_status = "processing"
+	staleMedia, err := r.db.Media.Query().
+		Where(media.EncodingStatusEQ("processing")).
+		All(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("query stale processing media: %w", err)
+	}
+
+	if len(staleMedia) == 0 {
+		return 0, nil
+	}
+
+	// 2. Delete orphaned encoding tasks still in "processing" — they were
+	// interrupted by the restart and will be recreated when the media is re-processed.
+	for _, m := range staleMedia {
+		_, err := r.db.EncodingTask.Delete().
+			Where(
+				encodingtask.MediaIDEQ(m.ID),
+				encodingtask.StatusEQ("processing"),
+			).
+			Exec(ctx)
+		if err != nil {
+			return 0, fmt.Errorf("delete orphaned tasks for media %d: %w", m.ID, err)
+		}
+	}
+
+	// 3. Reset all stale media to "pending"
+	count, err := r.db.Media.Update().
+		Where(media.EncodingStatusEQ("processing")).
+		SetEncodingStatus("pending").
+		Save(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("reset stale media status: %w", err)
+	}
+
+	return count, nil
+}
+
 // convertMediaToProto converts entity.Media → proto types.Media.
 func convertMediaToProto(m *entity.Media) *types.Media {
 	var size int64
@@ -223,6 +334,7 @@ func convertMediaToProto(m *entity.Media) *types.Media {
 		Thumbnail:      m.Thumbnail,
 		HlsFile:        m.HlsFile,
 		EncodingStatus: m.EncodingStatus,
+		Uuid:           m.UUID,
 		Duration:       int32(m.Duration),
 		Size:           size,
 		MimeType:       m.MimeType,

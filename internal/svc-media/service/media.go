@@ -6,8 +6,11 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	stdhttp "net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/origadmin/runtime/errors"
@@ -339,4 +342,232 @@ func (s *MediaService) SSEHandler(w stdhttp.ResponseWriter, r *stdhttp.Request) 
 			flusher.Flush()
 		}
 	}
+}
+
+// TranscodingStatusHTTPHandler handles GET /api/v1/media/transcoding/status with query parameters.
+// This bypasses the gRPC gateway to properly pass status/page/page_size from query string.
+func (s *MediaService) TranscodingStatusHTTPHandler(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+	filter := &biz.TranscodingStatusFilter{
+		Page:     1,
+		PageSize: 20,
+	}
+
+	if q := r.URL.Query().Get("status"); q != "" {
+		filter.Status = q
+	} else {
+		filter.Status = "active"
+	}
+	if p := r.URL.Query().Get("page"); p != "" {
+		if v, err := strconv.Atoi(p); err == nil && v > 0 {
+			filter.Page = v
+		}
+	}
+	if ps := r.URL.Query().Get("page_size"); ps != "" {
+		if v, err := strconv.Atoi(ps); err == nil && v > 0 && v <= 100 {
+			filter.PageSize = v
+		}
+	}
+
+	status, err := s.uc.GetTranscodingStatus(r.Context(), filter)
+	if err != nil {
+		stdhttp.Error(w, err.Error(), stdhttp.StatusInternalServerError)
+		return
+	}
+
+	// Convert to response
+	items := make([]*media.TranscodingMediaItem, len(status.Items))
+	for i, item := range status.Items {
+		tasks := make([]*types.EncodingTask, len(item.Tasks))
+		for j, t := range item.Tasks {
+			tasks[j] = &types.EncodingTask{
+				Id:           int32(t.Id),
+				MediaId:      t.MediaId,
+				ProfileId:    int32(t.ProfileId),
+				Status:       t.Status,
+				Progress:     int32(t.Progress),
+				OutputPath:   t.OutputPath,
+				ErrorMessage: t.ErrorMessage,
+			}
+		}
+		items[i] = &media.TranscodingMediaItem{
+			Media: item.Media,
+			Tasks: tasks,
+		}
+	}
+
+	resp := map[string]any{
+		"processing_count": status.ProcessingCount,
+		"pending_count":    status.PendingCount,
+		"failed_count":     status.FailedCount,
+		"success_count":    status.SuccessCount,
+		"total_filtered":   status.TotalFiltered,
+		"page":             status.Page,
+		"page_size":        status.PageSize,
+		"items":            items,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+// RetryTaskHTTPHandler handles POST /api/v1/media/retry with query parameter task_id.
+// Resets a single failed encoding task to "pending" for re-processing.
+// Query params:
+//   - task_id (required): the encoding task ID to retry
+func (s *MediaService) RetryTaskHTTPHandler(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+	if r.Method != stdhttp.MethodPost {
+		stdhttp.Error(w, "Method not allowed", stdhttp.StatusMethodNotAllowed)
+		return
+	}
+
+	taskIDStr := r.URL.Query().Get("task_id")
+	if taskIDStr == "" {
+		writeRetryError(w, "task_id is required", 400)
+		return
+	}
+
+	var taskID int
+	if _, err := fmt.Sscanf(taskIDStr, "%d", &taskID); err != nil || taskID <= 0 {
+		writeRetryError(w, "invalid task_id: must be a positive integer", 400)
+		return
+	}
+
+	task, err := s.uc.RetryTask(r.Context(), taskID)
+	if err != nil {
+		writeRetryError(w, err.Error(), 422) // Unprocessable Entity
+		return
+	}
+
+	resp := map[string]any{
+		"success": true,
+		"task": map[string]any{
+			"id":            task.Id,
+			"media_id":      task.MediaId,
+			"profile_id":    task.ProfileId,
+			"status":        task.Status,
+			"progress":      task.Progress,
+			"error_message": task.ErrorMessage,
+		},
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+// RetryAllFailedHTTPHandler handles POST /api/v1/media/retry-all-failed with query parameter media_id.
+// Resets all failed tasks for a media back to "pending".
+func (s *MediaService) RetryAllFailedHTTPHandler(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+	if r.Method != stdhttp.MethodPost {
+		stdhttp.Error(w, "Method not allowed", stdhttp.StatusMethodNotAllowed)
+		return
+	}
+
+	mediaIDStr := r.URL.Query().Get("media_id")
+	if mediaIDStr == "" {
+		writeRetryError(w, "media_id is required", 400)
+		return
+	}
+
+	var mediaID int64
+	fmt.Sscanf(mediaIDStr, "%d", &mediaID)
+
+	count, err := s.uc.RetryAllFailedTasks(r.Context(), mediaID)
+	if err != nil {
+		writeRetryError(w, err.Error(), 500)
+		return
+	}
+
+	resp := map[string]any{
+		"success":     true,
+		"reset_count": count,
+		"media_id":    mediaID,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func writeRetryError(w stdhttp.ResponseWriter, message string, code int) {
+	w.WriteHeader(code)
+	_ = json.NewEncoder(w).Encode(map[string]string{
+		"error": message,
+	})
+}
+
+// MediaVariantsHTTPHandler handles GET /api/v1/media/{id}/variants
+// Returns aggregated transcoding status for a single media, including all variant details.
+// This is the API that the "media management" page uses to display transcoding overview.
+func (s *MediaService) MediaVariantsHTTPHandler(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+	// Extract media ID from URL path: /api/v1/media/{id}/variants
+	var mediaID int64
+	_, err := fmt.Sscanf(r.URL.Path, "/api/v1/media/%d/variants", &mediaID)
+	if err != nil || mediaID <= 0 {
+		writeRetryError(w, "invalid media ID in path", 400)
+		return
+	}
+
+	summary, err := s.uc.GetMediaVariants(r.Context(), mediaID)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			writeRetryError(w, "media not found", 404)
+			return
+		}
+		writeRetryError(w, err.Error(), 500)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	_ = json.NewEncoder(w).Encode(summary)
+}
+
+// EncodingTasksHTTPHandler handles GET /api/v1/media/encoding/tasks.
+// Returns a flat, paginated list of encoding tasks (one row per task).
+// Query params:
+//   - status: "active" | "processing" | "pending" | "partial" | "failed" | "success" | "all"
+//   - page: page number (default 1)
+//   - page_size: items per page (default 25, max 100)
+//   - media_id: optional filter to a specific media
+func (s *MediaService) EncodingTasksHTTPHandler(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+	filter := &biz.TranscodingStatusFilter{
+		Page:     1,
+		PageSize: 25,
+	}
+
+	if q := r.URL.Query().Get("status"); q != "" {
+		filter.Status = q
+	} else {
+		filter.Status = "all"
+	}
+	if p := r.URL.Query().Get("page"); p != "" {
+		if v, err := strconv.Atoi(p); err == nil && v > 0 {
+			filter.Page = v
+		}
+	}
+	if ps := r.URL.Query().Get("page_size"); ps != "" {
+		if v, err := strconv.Atoi(ps); err == nil && v > 0 && v <= 100 {
+			filter.PageSize = v
+		}
+	}
+
+	var mediaID *int64
+	if m := r.URL.Query().Get("media_id"); m != "" {
+		var id int64
+		if _, err := fmt.Sscanf(m, "%d", &id); err == nil && id > 0 {
+			mediaID = &id
+		}
+	}
+
+	result, err := s.uc.ListEncodingTasksFlat(r.Context(), filter, mediaID)
+	if err != nil {
+		stdhttp.Error(w, err.Error(), stdhttp.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	_ = json.NewEncoder(w).Encode(result)
 }

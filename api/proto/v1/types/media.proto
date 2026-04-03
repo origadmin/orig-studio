@@ -66,6 +66,32 @@ message Media {
   string hls_file = 26 [json_name = "hls_file"];
   // media.field.encoding_status
   string encoding_status = 27 [json_name = "encoding_status"];
+  // media.field.uuid — secure unique ID for public paths (HLS, thumbnails, previews)
+  string uuid = 28 [json_name = "uuid"];
+  // media.field.preview_file — path to GIF preview generated during transcoding
+  string preview_file = 29 [json_name = "preview_file"];
+  // media.field.state — publication state: draft, active, deleted
+  string state = 30 [json_name = "state"];
+  // media.field.friendly_token — URL-friendly token for public access
+  string friendly_token = 31 [json_name = "friendly_token"];
+  // media.field.published_at
+  google.protobuf.Timestamp published_at = 32 [json_name = "published_at"];
+  // media.field.allow_download
+  bool allow_download = 33 [json_name = "allow_download"];
+  // media.field.enable_comments
+  bool enable_comments = 34 [json_name = "enable_comments"];
+  // media.field.featured
+  bool featured = 35 [json_name = "featured"];
+  // media.field.is_reviewed
+  bool is_reviewed = 36 [json_name = "is_reviewed"];
+  // media.field.reported_times
+  int32 reported_times = 37 [json_name = "reported_times"];
+  // media.field.extension
+  string extension = 38 [json_name = "extension"];
+  // media.field.md5sum
+  string md5sum = 39 [json_name = "md5sum"];
+  // media.field.poster
+  string poster = 40 [json_name = "poster"];
 }
 
 // EncodeProfile is the model entity for EncodeProfile.

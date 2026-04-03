@@ -25,12 +25,13 @@ func (Media) Fields() []ent.Field {
 		field.String("title").MaxLen(255),
 		field.Text("description").Optional(),
 		field.String("friendly_token").Unique().MaxLen(150).Optional(),
+		field.String("uuid").Unique().MaxLen(36).Optional(), // UUID for secure public paths (HLS, thumbnails, previews)
 		field.String("type").MaxLen(20).Default("video"), // video / image / audio
 		field.String("url").MaxLen(512),                  // original file path
-		field.String("hls_file").MaxLen(1024).Optional(), // HLS master playlist path
-		field.String("thumbnail").MaxLen(512).Optional(),
+		field.String("hls_file").MaxLen(1024).Optional(),    // HLS master playlist path (uses UUID)
+		field.String("thumbnail").MaxLen(512).Optional(),    // thumbnail path (uses UUID)
 		field.String("poster").MaxLen(512).Optional(),
-		field.String("preview_file_path").MaxLen(512).Optional(),
+		field.String("preview_file_path").MaxLen(512).Optional(), // GIF preview path (uses UUID)
 		field.Int("duration").Default(0),
 		field.String("size").MaxLen(32).Optional(),
 		field.Int("width").Default(0),
@@ -39,7 +40,7 @@ func (Media) Fields() []ent.Field {
 		field.String("md5sum").MaxLen(64).Optional(),
 		field.String("extension").MaxLen(32).Optional(),
 		field.Int("privacy").Default(1), // 1: public, 2: private, 3: unlisted
-		// encoding_status: pending / processing / success / failed
+		// encoding_status: pending / processing / success / partial / failed
 		field.String("encoding_status").MaxLen(20).Default("pending"),
 		// state: draft / active / deleted
 		field.String("state").MaxLen(20).Default("active"),
@@ -65,7 +66,8 @@ func (Media) Fields() []ent.Field {
 
 func (Media) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("friendly_token"),
+		index.Fields("uuid").Unique(),
+		index.Fields("friendly_token").Unique(),
 		index.Fields("title"),
 		index.Fields("type"),
 		index.Fields("state"),

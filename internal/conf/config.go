@@ -3,7 +3,6 @@ package conf
 
 import (
 	"fmt"
-	"os"
 
 	runtimeconfig "github.com/origadmin/runtime/config"
 	runtimebootstrap "github.com/origadmin/runtime/engine/bootstrap"
@@ -20,36 +19,9 @@ func transformer(cfg runtimeconfig.KConfig) (any, error) {
 	return &c, nil
 }
 
-type Config struct {
-	Server   ServerConfig
-	Database DatabaseConfig
-}
-
-type ServerConfig struct {
-	Port string
-}
-
-type DatabaseConfig struct {
-	Driver string
-	Source string
-}
-
-func LoadConfig() (*Config, error) {
-	return &Config{
-		Server: ServerConfig{
-			Port: getEnv("SERVER_PORT", "9090"),
-		},
-		Database: DatabaseConfig{
-			Driver: getEnv("DB_DRIVER", "postgres"),
-			Source: getEnv("DB_SOURCE", "host=localhost user=postgres password=postgres dbname=origcms port=5432 sslmode=disable"),
-		},
-	}, nil
-}
-
-func getEnv(key, defaultValue string) string {
-	if value, exists := os.LookupEnv(key); exists {
-		return value
-	}
-	return defaultValue
-}
-
+// Config is a placeholder for runtime-based config scanning.
+// The actual config struct lives in cmd/server/main.go since the monolith
+// entry point defines its own Config matching the bootstrap.yaml structure.
+// This file exists to satisfy the Transformer registration used by the
+// runtime engine.
+type Config struct{}

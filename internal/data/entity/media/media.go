@@ -20,6 +20,8 @@ const (
 	FieldDescription = "description"
 	// FieldFriendlyToken holds the string denoting the friendly_token field in the database.
 	FieldFriendlyToken = "friendly_token"
+	// FieldUUID holds the string denoting the uuid field in the database.
+	FieldUUID = "uuid"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
 	// FieldURL holds the string denoting the url field in the database.
@@ -171,6 +173,7 @@ var Columns = []string{
 	FieldTitle,
 	FieldDescription,
 	FieldFriendlyToken,
+	FieldUUID,
 	FieldType,
 	FieldURL,
 	FieldHlsFile,
@@ -243,6 +246,8 @@ var (
 	TitleValidator func(string) error
 	// FriendlyTokenValidator is a validator for the "friendly_token" field. It is called by the builders before save.
 	FriendlyTokenValidator func(string) error
+	// UUIDValidator is a validator for the "uuid" field. It is called by the builders before save.
+	UUIDValidator func(string) error
 	// DefaultType holds the default value on creation for the "type" field.
 	DefaultType string
 	// TypeValidator is a validator for the "type" field. It is called by the builders before save.
@@ -332,6 +337,11 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 // ByFriendlyToken orders the results by the friendly_token field.
 func ByFriendlyToken(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldFriendlyToken, opts...).ToFunc()
+}
+
+// ByUUID orders the results by the uuid field.
+func ByUUID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUUID, opts...).ToFunc()
 }
 
 // ByType orders the results by the type field.

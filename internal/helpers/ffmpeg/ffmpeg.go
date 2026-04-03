@@ -88,39 +88,170 @@ func GetVideoDuration(ctx context.Context, inputPath string) (time.Duration, err
 }
 
 // TranscodeToMP4 transcodes the input file to a standard MP4 file with specific resolution and codec.
+// DEPRECATED: Use TranscodeToHLS instead for direct HLS output (no intermediate MP4 needed).
+// Kept for backward compatibility with non-HLS use cases.
 func TranscodeToMP4(
 	ctx context.Context,
 	inputPath, outputPath string,
 	resolution string,
 	videoCodec string,
 	audioCodec string,
+	videoBitrate string,
+	audioBitrate string,
 ) error {
 	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
-	// Basic ffmpeg command for standard MP4 output
-	// ffmpeg -i [input] -s [resolution] -c:v [vcodec] -c:a [acodec] -f mp4 -y [output]
-	args := []string{
-		"-i", inputPath,
-		"-s", resolution,
-		"-c:v", "libx264", // default to libx264 for now, could be mapped from videoCodec
-		"-c:a", "aac",
-		"-movflags", "faststart+frag_keyframe+empty_moov", // optimized for streaming/dash/hls inputs
-		"-y",
-		outputPath,
+	size := ResolutionToSize(resolution)
+
+	// Select video codec
+	vcodec := "libx264"
+	if videoCodec == "h265" || videoCodec == "hevc" {
+		vcodec = "libx265"
 	}
 
-	// Simple codec mapping if needed
-	if videoCodec == "h265" || videoCodec == "hevc" {
-		args[5] = "libx265"
+	args := []string{
+		"-i", inputPath,
+		"-s", size,
+		"-c:v", vcodec,
 	}
+
+	// Apply video bitrate if specified and not "auto"
+	if videoBitrate != "" && videoBitrate != "auto" {
+		args = append(args, "-b:v", videoBitrate)
+	}
+
+	// Audio codec: always aac for MP4 compatibility
+	args = append(args, "-c:a", "aac")
+
+	// Apply audio bitrate if specified
+	if audioBitrate != "" {
+		args = append(args, "-b:a", audioBitrate)
+	}
+
+	args = append(args,
+		"-movflags", "faststart+frag_keyframe+empty_moov",
+		"-y",
+		outputPath,
+	)
 
 	cmd := exec.CommandContext(ctx, ffmpegPath, args...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("ffmpeg transcoding to MP4 failed: %w, output: %s", err, string(output))
 	}
+
+	return nil
+}
+
+// TranscodeToHLS transcodes the input file directly to HLS segments in one pass.
+// No intermediate MP4 is created — this is more efficient than TranscodeToMP4 + MP4HLS.
+//
+// Output structure:
+//
+//	{outputDir}/          (e.g., hls/{uuid}/{profile_name}/)
+//	  index.m3u8          (variant playlist)
+//	  segment_001.ts
+//	  segment_002.ts
+//	  ...
+func TranscodeToHLS(
+	ctx context.Context,
+	inputPath string,
+	outputDir string,
+	profileName string,
+	resolution string,
+	videoCodec string,
+	audioCodec string,
+	videoBitrate string,
+	audioBitrate string,
+) error {
+	if err := os.MkdirAll(outputDir, 0o755); err != nil {
+		return fmt.Errorf("failed to create HLS output directory: %w", err)
+	}
+
+	size := ResolutionToSize(resolution)
+
+	// Select video codec
+	vcodec := "libx264"
+	if videoCodec == "h265" || videoCodec == "hevc" {
+		vcodec = "libx265"
+	}
+
+	segmentPattern := filepath.Join(outputDir, "segment_%03d.ts")
+	playlistPath := filepath.Join(outputDir, "index.m3u8")
+
+	args := []string{
+		"-i", inputPath,
+		"-s", size,
+		"-c:v", vcodec,
+		"-c:a", "aac",
+		// HLS muxer settings
+		"-f", "hls",
+		"-hls_time", "6",
+		"-hls_list_size", "0",
+		"-hls_segment_filename", segmentPattern,
+	}
+
+	// Apply bitrates if specified
+	if videoBitrate != "" && videoBitrate != "auto" {
+		args = append(args, "-b:v", videoBitrate)
+	}
+	if audioBitrate != "" {
+		args = append(args, "-b:a", audioBitrate)
+	}
+
+	args = append(args, "-y", playlistPath)
+
+	cmd := exec.CommandContext(ctx, ffmpegPath, args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("ffmpeg direct HLS transcoding failed for profile %s: %w, output: %s", profileName, err, string(output))
+	}
+
+	return nil
+}
+
+// GenerateGIFPreview creates an animated GIF preview from the source video.
+// Used for hover thumbnails on progress bars and media list previews.
+// Output is written to outputPath (e.g., previews/{uuid}.gif).
+func GenerateGIFPreview(ctx context.Context, inputPath, outputPath string, scale string) error {
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
+		return fmt.Errorf("failed to create preview output directory: %w", err)
+	}
+
+	// ffmpeg palette generation for high quality GIF
+	palettePath := outputPath + ".png"
+
+	// Step 1: Generate color palette
+	paletteArgs := []string{
+		"-i", inputPath,
+		"-vf", fmt.Sprintf("fps=10,scale=%s:flags=lanczos,palettegen", scale),
+		"-t", "5", // first 5 seconds only
+		"-y",
+		palettePath,
+	}
+	paletteCmd := exec.CommandContext(ctx, ffmpegPath, paletteArgs...)
+	if output, err := paletteCmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("ffmpeg palette generation failed: %w, output: %s", err, string(output))
+	}
+
+	// Step 2: Use palette to create GIF
+	gifArgs := []string{
+		"-i", inputPath,
+		"-i", palettePath,
+		"-lavfi", fmt.Sprintf("fps=10,scale=%s:flags=lanczos [x]; [x][1:v] paletteuse", scale),
+		"-t", "5",
+		"-y",
+		outputPath,
+	}
+	gifCmd := exec.CommandContext(ctx, ffmpegPath, gifArgs...)
+	if output, err := gifCmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("ffmpeg GIF preview failed: %w, output: %s", err, string(output))
+	}
+
+	// Clean up temporary palette file
+	os.Remove(palettePath)
 
 	return nil
 }

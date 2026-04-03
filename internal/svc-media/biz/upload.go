@@ -6,6 +6,7 @@ package biz
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math"
 	"os"
@@ -14,10 +15,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/uuid"
 
 	"origadmin/application/origcms/internal/helpers/ffmpeg"
+	"origadmin/application/origcms/internal/pubsub"
 )
 
 const (
@@ -83,6 +86,7 @@ type UploadUseCase struct {
 	encodingRepo EncodingTaskRepo
 	mediaUseCase *MediaUseCase
 	storage      Storage
+	publisher message.Publisher // Watermill publisher for async encoding
 	chunkSize    int
 	log          *log.Helper
 	mu           sync.Mutex
@@ -108,6 +112,12 @@ func NewUploadUseCase(
 		chunkSize:    5 * 1024 * 1024, // 5MB default
 		log:          log.NewHelper(log.With(logger, "module", "upload.biz")),
 	}
+}
+
+// SetPublisher injects a Watermill publisher for async media encoding requests.
+// Called after construction to decouple from the constructor signature.
+func (uc *UploadUseCase) SetPublisher(publisher message.Publisher) {
+	uc.publisher = publisher
 }
 
 // InitiateMultipartUpload starts a new multipart upload.
@@ -332,7 +342,15 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 
 	// Background media processing (Thumbnail + HLS Transcoding)
 	if strings.HasPrefix(session.ContentType, "video/") {
-		go uc.ProcessMedia(context.Background(), createdMedia.Id, finalPath, session.ContentType)
+		payload, _ := json.Marshal(MediaEncodeRequest{
+			MediaID:     createdMedia.Id,
+			MediaPath:   finalPath,
+			ContentType: session.ContentType,
+		})
+		msg := pubsub.NewMessage(payload)
+		if err := uc.publisher.Publish(pubsub.MediaEncodeRequestTopic, msg); err != nil {
+			uc.log.Errorf("failed to publish encode request for media %d: %v", createdMedia.Id, err)
+		}
 	}
 
 	return createdMedia, nil
@@ -387,7 +405,10 @@ func (uc *UploadUseCase) ProcessMedia(
 	}
 
 	tempWorkDir := filepath.Join(baseDir, "temp", fmt.Sprintf("%d", mediaID))
-	_ = os.MkdirAll(tempWorkDir, 0o755)
+	if err := os.MkdirAll(tempWorkDir, 0o755); err != nil {
+		uc.log.Errorf("failed to create temp work directory %s: %v", tempWorkDir, err)
+		return
+	}
 	defer os.RemoveAll(tempWorkDir) // clean up intermediate MP4s
 
 	var intermediateFiles []string
@@ -431,6 +452,8 @@ func (uc *UploadUseCase) ProcessMedia(
 			profile.Resolution,
 			profile.VideoCodec,
 			profile.AudioCodec,
+			profile.VideoBitrate,
+			profile.AudioBitrate,
 		)
 		if err != nil {
 			uc.log.Errorf("transcoding failed for profile %s: %v", profile.Name, err)
@@ -449,12 +472,25 @@ func (uc *UploadUseCase) ProcessMedia(
 		intermediateFiles = append(intermediateFiles, variantPath)
 	}
 
-	// 4. Packaging with Bento4
+	// 4. Packaging with ffmpeg HLS muxer
 	if len(intermediateFiles) > 0 {
 		hlsDir := filepath.Join(baseDir, "hls", fmt.Sprintf("%d", mediaID))
 		uc.log.Infof("packaging multi-variant HLS for media %d at %s", mediaID, hlsDir)
 
-		err = ffmpeg.MP4HLS(updateCtx, hlsDir, intermediateFiles)
+		// Build variant info from successful profiles
+		var variants []ffmpeg.VariantInfo
+		for _, p := range profiles {
+			if p.Extension != "mp4" && p.Extension != "webm" {
+				continue
+			}
+			variants = append(variants, ffmpeg.VariantInfo{
+				Name:       p.Name,
+				Resolution: ffmpeg.ResolutionToSize(p.Resolution),
+				Bandwidth:  1_000_000, // fallback estimate
+			})
+		}
+
+		err = ffmpeg.MP4HLS(updateCtx, hlsDir, intermediateFiles, variants)
 		if err != nil {
 			uc.log.Errorf("HLS packaging failed for media %d: %v", mediaID, err)
 			media.EncodingStatus = "failed"
@@ -513,5 +549,54 @@ func (uc *UploadUseCase) CleanupExpiredSessions(ctx context.Context) error {
 		_ = uc.storage.DeleteParts(ctx, id)
 	}
 
+	return nil
+}
+
+// RetryTranscode re-triggers transcoding for a failed media item.
+// It validates the media state, cleans up old encoding tasks, resets the status,
+// and publishes a new encode request to the transcode pipeline.
+// Uses mutex to prevent concurrent retry of the same media.
+func (uc *UploadUseCase) RetryTranscode(ctx context.Context, mediaID int64) error {
+	uc.mu.Lock()
+	defer uc.mu.Unlock()
+
+	media, err := uc.mediaRepo.Get(ctx, mediaID)
+	if err != nil {
+		return fmt.Errorf("media not found: %w", err)
+	}
+
+	// Only allow retry for failed media — do not interrupt in-progress tasks
+	if media.EncodingStatus != "failed" {
+		return fmt.Errorf("cannot retry media with status %q, only 'failed' allowed", media.EncodingStatus)
+	}
+
+	// Validate that the source file still exists
+	if media.Url == "" {
+		return fmt.Errorf("media has no source file URL")
+	}
+
+	// Delete old encoding tasks (they'll be recreated by the transcode handler)
+	if err := uc.encodingRepo.DeleteByMedia(ctx, mediaID); err != nil {
+		uc.log.Warnf("failed to delete old encoding tasks for media %d: %v", mediaID, err)
+	}
+
+	// Reset media status to pending
+	media.EncodingStatus = "pending"
+	if _, err := uc.mediaRepo.Update(ctx, media); err != nil {
+		return fmt.Errorf("failed to reset media status: %w", err)
+	}
+
+	// Publish new encode request
+	payload, _ := json.Marshal(MediaEncodeRequest{
+		MediaID:     mediaID,
+		MediaPath:   media.Url,
+		ContentType: media.MimeType,
+	})
+	msg := pubsub.NewMessage(payload)
+	if err := uc.publisher.Publish(pubsub.MediaEncodeRequestTopic, msg); err != nil {
+		return fmt.Errorf("failed to publish encode request: %w", err)
+	}
+
+	uc.log.Infof("retry transcoding requested for media %d", mediaID)
 	return nil
 }

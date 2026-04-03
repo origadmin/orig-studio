@@ -63,6 +63,20 @@ func (_c *MediaCreate) SetNillableFriendlyToken(v *string) *MediaCreate {
 	return _c
 }
 
+// SetUUID sets the "uuid" field.
+func (_c *MediaCreate) SetUUID(v string) *MediaCreate {
+	_c.mutation.SetUUID(v)
+	return _c
+}
+
+// SetNillableUUID sets the "uuid" field if the given value is not nil.
+func (_c *MediaCreate) SetNillableUUID(v *string) *MediaCreate {
+	if v != nil {
+		_c.SetUUID(*v)
+	}
+	return _c
+}
+
 // SetType sets the "type" field.
 func (_c *MediaCreate) SetType(v string) *MediaCreate {
 	_c.mutation.SetType(v)
@@ -748,6 +762,11 @@ func (_c *MediaCreate) check() error {
 			return &ValidationError{Name: "friendly_token", err: fmt.Errorf(`entity: validator failed for field "Media.friendly_token": %w`, err)}
 		}
 	}
+	if v, ok := _c.mutation.UUID(); ok {
+		if err := media.UUIDValidator(v); err != nil {
+			return &ValidationError{Name: "uuid", err: fmt.Errorf(`entity: validator failed for field "Media.uuid": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`entity: missing required field "Media.type"`)}
 	}
@@ -914,6 +933,10 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.FriendlyToken(); ok {
 		_spec.SetField(media.FieldFriendlyToken, field.TypeString, value)
 		_node.FriendlyToken = value
+	}
+	if value, ok := _c.mutation.UUID(); ok {
+		_spec.SetField(media.FieldUUID, field.TypeString, value)
+		_node.UUID = value
 	}
 	if value, ok := _c.mutation.GetType(); ok {
 		_spec.SetField(media.FieldType, field.TypeString, value)

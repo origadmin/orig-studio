@@ -168,6 +168,7 @@ var (
 		{Name: "video_bitrate", Type: field.TypeString, Nullable: true, Size: 20},
 		{Name: "audio_codec", Type: field.TypeString, Size: 50, Default: "aac"},
 		{Name: "audio_bitrate", Type: field.TypeString, Nullable: true, Size: 20},
+		{Name: "bento_parameters", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "is_active", Type: field.TypeBool, Default: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
@@ -186,7 +187,7 @@ var (
 			{
 				Name:    "encodeprofile_is_active",
 				Unique:  false,
-				Columns: []*schema.Column{EncodeProfilesColumns[9]},
+				Columns: []*schema.Column{EncodeProfilesColumns[10]},
 			},
 		},
 	}
@@ -299,6 +300,7 @@ var (
 		{Name: "title", Type: field.TypeString, Size: 255},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "friendly_token", Type: field.TypeString, Unique: true, Nullable: true, Size: 150},
+		{Name: "uuid", Type: field.TypeString, Unique: true, Nullable: true, Size: 36},
 		{Name: "type", Type: field.TypeString, Size: 20, Default: "video"},
 		{Name: "url", Type: field.TypeString, Size: 512},
 		{Name: "hls_file", Type: field.TypeString, Nullable: true, Size: 1024},
@@ -344,39 +346,44 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "media_categories_media",
-				Columns:    []*schema.Column{MediaColumns[35]},
+				Columns:    []*schema.Column{MediaColumns[36]},
 				RefColumns: []*schema.Column{CategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_files_media_category_media",
-				Columns:    []*schema.Column{MediaColumns[36]},
+				Columns:    []*schema.Column{MediaColumns[37]},
 				RefColumns: []*schema.Column{FilesMediaCategoryColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_files_playlistmedia_media",
-				Columns:    []*schema.Column{MediaColumns[37]},
+				Columns:    []*schema.Column{MediaColumns[38]},
 				RefColumns: []*schema.Column{FilesPlaylistmediaColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_files_media_tags_media",
-				Columns:    []*schema.Column{MediaColumns[38]},
+				Columns:    []*schema.Column{MediaColumns[39]},
 				RefColumns: []*schema.Column{FilesMediaTagsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_users_user_media",
-				Columns:    []*schema.Column{MediaColumns[39]},
+				Columns:    []*schema.Column{MediaColumns[40]},
 				RefColumns: []*schema.Column{UsersUserColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
+				Name:    "media_uuid",
+				Unique:  true,
+				Columns: []*schema.Column{MediaColumns[4]},
+			},
+			{
 				Name:    "media_friendly_token",
-				Unique:  false,
+				Unique:  true,
 				Columns: []*schema.Column{MediaColumns[3]},
 			},
 			{
@@ -387,37 +394,37 @@ var (
 			{
 				Name:    "media_type",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[4]},
+				Columns: []*schema.Column{MediaColumns[5]},
 			},
 			{
 				Name:    "media_state",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[19]},
+				Columns: []*schema.Column{MediaColumns[20]},
 			},
 			{
 				Name:    "media_encoding_status",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[18]},
+				Columns: []*schema.Column{MediaColumns[19]},
 			},
 			{
 				Name:    "media_featured",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[28]},
+				Columns: []*schema.Column{MediaColumns[29]},
 			},
 			{
 				Name:    "media_view_count",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[20]},
+				Columns: []*schema.Column{MediaColumns[21]},
 			},
 			{
 				Name:    "media_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[33]},
+				Columns: []*schema.Column{MediaColumns[34]},
 			},
 			{
 				Name:    "media_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[39]},
+				Columns: []*schema.Column{MediaColumns[40]},
 			},
 		},
 	}

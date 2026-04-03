@@ -22,8 +22,9 @@ export interface Media {
     md5sum?: string;
     extension?: string;
     privacy: number; // 1: public, 2: private, 3: unlisted
-    encoding_status: string; // "pending" | "processing" | "success" | "failed"
+    encoding_status: string; // "pending" | "processing" | "success" | "partial" | "failed"
     state: string; // "draft" | "active" | "deleted"
+    uuid?: string; // secure unique ID for public paths (HLS, thumbnails)
     view_count: number;
     like_count: number;
     dislike_count: number;
@@ -126,17 +127,33 @@ export interface EncodingTask {
     update_time: string;
 }
 
-export interface TranscodingStatus {
+export interface TranscodingStatusResponse {
     processing_count: number;
     pending_count: number;
+    partial_count: number;
     failed_count: number;
     success_count: number;
+    total_filtered: number;
+    page: number;
+    page_size: number;
     items: TranscodingMediaItem[];
 }
 
 export interface TranscodingMediaItem {
     media: Media;
     tasks: EncodingTask[];
+}
+
+export interface EncodingTaskListResponse {
+    processing_count: number;
+    pending_count: number;
+    partial_count: number;
+    failed_count: number;
+    success_count: number;
+    total_filtered: number;
+    page: number;
+    page_size: number;
+    items: (EncodingTask & { profile_name?: string })[];
 }
 
 export const mediaApi = {
@@ -245,13 +262,89 @@ export const mediaApi = {
     }>(`/media/profiles/${id}`, data),
     deleteProfile: (id: number) => api.del<void>(`/media/profiles/${id}`),
 
-    // 转码状态与监控
-    getTranscodingStatus: () => api.get<TranscodingStatus>("/media/transcoding/status"),
+    // Transcoding status — filtered + paginated (grouped by media, for media management page)
+    getTranscodingStatus: (params?: {
+        status?: string;
+        page?: number;
+        page_size?: number;
+    }) => api.get<TranscodingStatusResponse>("/media/transcoding/status", params as Record<string, unknown>),
+
+    // Flat encoding task list — one row per task (for TranscodingStatus page)
+    getEncodingTasks: (params?: {
+        status?: string;
+        page?: number;
+        page_size?: number;
+        media_id?: number;
+    }) => api.get<EncodingTaskListResponse>("/media/encoding/tasks", params as Record<string, unknown>),
+
+    // List tasks for a specific media
     listTasks: (mediaId: number) => api.get<{ tasks: EncodingTask[] }>(`/media/${mediaId}/tasks`),
 
     // SSE 订阅地址
     getSSEUrl: (mediaId?: number) => {
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
         return `${API_BASE_URL}/api/v1/media/transcoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
-    }
+    },
+
+    // Retry transcoding for a failed/stuck media item (legacy — media-level)
+    retryTranscode: (mediaId: number) =>
+        api.post<{ message: string; media_id: number }>(`/media/${mediaId}/retry`),
+
+    // Per-task retry: reset a single failed task to pending
+    retryTask: (taskId: number) => {
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
+        return fetch(`${API_BASE_URL}/api/v1/media/retry?task_id=${taskId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...(getAccessToken() ? {Authorization: `Bearer ${getAccessToken()}`} : {}),
+            },
+        }).then((r) => !r.ok ? r.json().then((e) => Promise.reject(e)) : r.json());
+    },
+
+    // Media variant summary (for media management page)
+    getVariants: (mediaId: number) =>
+        api.get<MediaVariantSummary>(`/media/${mediaId}/variants`),
+
+    // Bulk retry all failed tasks for a media
+    retryAllFailed: (mediaId: number) => {
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
+        return fetch(`${API_BASE_URL}/api/v1/media/retry-all-failed?media_id=${mediaId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...(getAccessToken() ? {Authorization: `Bearer ${getAccessToken()}`} : {}),
+            },
+        }).then((r) => !r.ok ? r.json().then((e) => Promise.reject(e)) : r.json());
+    },
 };
+
+// MediaVariantSummary is the aggregated transcoding status for a single media.
+export interface MediaVariantSummary {
+    media_id: number;
+    uuid: string;
+    encoding_status: string;
+    hls_file?: string;
+    thumbnail?: string;
+    preview_file?: string;
+    video_total_count: number;
+    video_success_count: number;
+    video_failed_count: number;
+    video_pending_count?: number;
+    video_processing_count?: number;
+    variants: VariantInfo[];
+}
+
+export interface VariantInfo {
+    task_id: number;
+    profile_name: string;
+    profile_id: number;
+    resolution: string;
+    codec: string;
+    status: string;
+    output_path: string;
+    bandwidth: number;
+    error_message?: string;
+}
+
+

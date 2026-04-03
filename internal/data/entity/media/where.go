@@ -70,6 +70,11 @@ func FriendlyToken(v string) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldFriendlyToken, v))
 }
 
+// UUID applies equality check predicate on the "uuid" field. It's identical to UUIDEQ.
+func UUID(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldUUID, v))
+}
+
 // Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
 func Type(v string) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldType, v))
@@ -438,6 +443,81 @@ func FriendlyTokenEqualFold(v string) predicate.Media {
 // FriendlyTokenContainsFold applies the ContainsFold predicate on the "friendly_token" field.
 func FriendlyTokenContainsFold(v string) predicate.Media {
 	return predicate.Media(sql.FieldContainsFold(FieldFriendlyToken, v))
+}
+
+// UUIDEQ applies the EQ predicate on the "uuid" field.
+func UUIDEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldUUID, v))
+}
+
+// UUIDNEQ applies the NEQ predicate on the "uuid" field.
+func UUIDNEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldUUID, v))
+}
+
+// UUIDIn applies the In predicate on the "uuid" field.
+func UUIDIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldUUID, vs...))
+}
+
+// UUIDNotIn applies the NotIn predicate on the "uuid" field.
+func UUIDNotIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldUUID, vs...))
+}
+
+// UUIDGT applies the GT predicate on the "uuid" field.
+func UUIDGT(v string) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldUUID, v))
+}
+
+// UUIDGTE applies the GTE predicate on the "uuid" field.
+func UUIDGTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldUUID, v))
+}
+
+// UUIDLT applies the LT predicate on the "uuid" field.
+func UUIDLT(v string) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldUUID, v))
+}
+
+// UUIDLTE applies the LTE predicate on the "uuid" field.
+func UUIDLTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldUUID, v))
+}
+
+// UUIDContains applies the Contains predicate on the "uuid" field.
+func UUIDContains(v string) predicate.Media {
+	return predicate.Media(sql.FieldContains(FieldUUID, v))
+}
+
+// UUIDHasPrefix applies the HasPrefix predicate on the "uuid" field.
+func UUIDHasPrefix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasPrefix(FieldUUID, v))
+}
+
+// UUIDHasSuffix applies the HasSuffix predicate on the "uuid" field.
+func UUIDHasSuffix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasSuffix(FieldUUID, v))
+}
+
+// UUIDIsNil applies the IsNil predicate on the "uuid" field.
+func UUIDIsNil() predicate.Media {
+	return predicate.Media(sql.FieldIsNull(FieldUUID))
+}
+
+// UUIDNotNil applies the NotNil predicate on the "uuid" field.
+func UUIDNotNil() predicate.Media {
+	return predicate.Media(sql.FieldNotNull(FieldUUID))
+}
+
+// UUIDEqualFold applies the EqualFold predicate on the "uuid" field.
+func UUIDEqualFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldUUID, v))
+}
+
+// UUIDContainsFold applies the ContainsFold predicate on the "uuid" field.
+func UUIDContainsFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldUUID, v))
 }
 
 // TypeEQ applies the EQ predicate on the "type" field.

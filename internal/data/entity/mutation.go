@@ -3359,27 +3359,28 @@ func (m *CommentMutation) ResetEdge(name string) error {
 // EncodeProfileMutation represents an operation that mutates the EncodeProfile nodes in the graph.
 type EncodeProfileMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	name          *string
-	description   *string
-	extension     *string
-	resolution    *string
-	video_codec   *string
-	video_bitrate *string
-	audio_codec   *string
-	audio_bitrate *string
-	is_active     *bool
-	created_at    *time.Time
-	updated_at    *time.Time
-	clearedFields map[string]struct{}
-	tasks         map[int]struct{}
-	removedtasks  map[int]struct{}
-	clearedtasks  bool
-	done          bool
-	oldValue      func(context.Context) (*EncodeProfile, error)
-	predicates    []predicate.EncodeProfile
+	op               Op
+	typ              string
+	id               *int
+	name             *string
+	description      *string
+	extension        *string
+	resolution       *string
+	video_codec      *string
+	video_bitrate    *string
+	audio_codec      *string
+	audio_bitrate    *string
+	bento_parameters *string
+	is_active        *bool
+	created_at       *time.Time
+	updated_at       *time.Time
+	clearedFields    map[string]struct{}
+	tasks            map[int]struct{}
+	removedtasks     map[int]struct{}
+	clearedtasks     bool
+	done             bool
+	oldValue         func(context.Context) (*EncodeProfile, error)
+	predicates       []predicate.EncodeProfile
 }
 
 var _ ent.Mutation = (*EncodeProfileMutation)(nil)
@@ -3807,6 +3808,55 @@ func (m *EncodeProfileMutation) ResetAudioBitrate() {
 	delete(m.clearedFields, encodeprofile.FieldAudioBitrate)
 }
 
+// SetBentoParameters sets the "bento_parameters" field.
+func (m *EncodeProfileMutation) SetBentoParameters(s string) {
+	m.bento_parameters = &s
+}
+
+// BentoParameters returns the value of the "bento_parameters" field in the mutation.
+func (m *EncodeProfileMutation) BentoParameters() (r string, exists bool) {
+	v := m.bento_parameters
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBentoParameters returns the old "bento_parameters" field's value of the EncodeProfile entity.
+// If the EncodeProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EncodeProfileMutation) OldBentoParameters(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBentoParameters is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBentoParameters requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBentoParameters: %w", err)
+	}
+	return oldValue.BentoParameters, nil
+}
+
+// ClearBentoParameters clears the value of the "bento_parameters" field.
+func (m *EncodeProfileMutation) ClearBentoParameters() {
+	m.bento_parameters = nil
+	m.clearedFields[encodeprofile.FieldBentoParameters] = struct{}{}
+}
+
+// BentoParametersCleared returns if the "bento_parameters" field was cleared in this mutation.
+func (m *EncodeProfileMutation) BentoParametersCleared() bool {
+	_, ok := m.clearedFields[encodeprofile.FieldBentoParameters]
+	return ok
+}
+
+// ResetBentoParameters resets all changes to the "bento_parameters" field.
+func (m *EncodeProfileMutation) ResetBentoParameters() {
+	m.bento_parameters = nil
+	delete(m.clearedFields, encodeprofile.FieldBentoParameters)
+}
+
 // SetIsActive sets the "is_active" field.
 func (m *EncodeProfileMutation) SetIsActive(b bool) {
 	m.is_active = &b
@@ -4003,7 +4053,7 @@ func (m *EncodeProfileMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EncodeProfileMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.name != nil {
 		fields = append(fields, encodeprofile.FieldName)
 	}
@@ -4027,6 +4077,9 @@ func (m *EncodeProfileMutation) Fields() []string {
 	}
 	if m.audio_bitrate != nil {
 		fields = append(fields, encodeprofile.FieldAudioBitrate)
+	}
+	if m.bento_parameters != nil {
+		fields = append(fields, encodeprofile.FieldBentoParameters)
 	}
 	if m.is_active != nil {
 		fields = append(fields, encodeprofile.FieldIsActive)
@@ -4061,6 +4114,8 @@ func (m *EncodeProfileMutation) Field(name string) (ent.Value, bool) {
 		return m.AudioCodec()
 	case encodeprofile.FieldAudioBitrate:
 		return m.AudioBitrate()
+	case encodeprofile.FieldBentoParameters:
+		return m.BentoParameters()
 	case encodeprofile.FieldIsActive:
 		return m.IsActive()
 	case encodeprofile.FieldCreatedAt:
@@ -4092,6 +4147,8 @@ func (m *EncodeProfileMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldAudioCodec(ctx)
 	case encodeprofile.FieldAudioBitrate:
 		return m.OldAudioBitrate(ctx)
+	case encodeprofile.FieldBentoParameters:
+		return m.OldBentoParameters(ctx)
 	case encodeprofile.FieldIsActive:
 		return m.OldIsActive(ctx)
 	case encodeprofile.FieldCreatedAt:
@@ -4163,6 +4220,13 @@ func (m *EncodeProfileMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAudioBitrate(v)
 		return nil
+	case encodeprofile.FieldBentoParameters:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBentoParameters(v)
+		return nil
 	case encodeprofile.FieldIsActive:
 		v, ok := value.(bool)
 		if !ok {
@@ -4223,6 +4287,9 @@ func (m *EncodeProfileMutation) ClearedFields() []string {
 	if m.FieldCleared(encodeprofile.FieldAudioBitrate) {
 		fields = append(fields, encodeprofile.FieldAudioBitrate)
 	}
+	if m.FieldCleared(encodeprofile.FieldBentoParameters) {
+		fields = append(fields, encodeprofile.FieldBentoParameters)
+	}
 	return fields
 }
 
@@ -4245,6 +4312,9 @@ func (m *EncodeProfileMutation) ClearField(name string) error {
 		return nil
 	case encodeprofile.FieldAudioBitrate:
 		m.ClearAudioBitrate()
+		return nil
+	case encodeprofile.FieldBentoParameters:
+		m.ClearBentoParameters()
 		return nil
 	}
 	return fmt.Errorf("unknown EncodeProfile nullable field %s", name)
@@ -4277,6 +4347,9 @@ func (m *EncodeProfileMutation) ResetField(name string) error {
 		return nil
 	case encodeprofile.FieldAudioBitrate:
 		m.ResetAudioBitrate()
+		return nil
+	case encodeprofile.FieldBentoParameters:
+		m.ResetBentoParameters()
 		return nil
 	case encodeprofile.FieldIsActive:
 		m.ResetIsActive()
@@ -6221,6 +6294,7 @@ type MediaMutation struct {
 	title             *string
 	description       *string
 	friendly_token    *string
+	uuid              *string
 	_type             *string
 	url               *string
 	hls_file          *string
@@ -6525,6 +6599,55 @@ func (m *MediaMutation) FriendlyTokenCleared() bool {
 func (m *MediaMutation) ResetFriendlyToken() {
 	m.friendly_token = nil
 	delete(m.clearedFields, media.FieldFriendlyToken)
+}
+
+// SetUUID sets the "uuid" field.
+func (m *MediaMutation) SetUUID(s string) {
+	m.uuid = &s
+}
+
+// UUID returns the value of the "uuid" field in the mutation.
+func (m *MediaMutation) UUID() (r string, exists bool) {
+	v := m.uuid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUUID returns the old "uuid" field's value of the Media entity.
+// If the Media object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaMutation) OldUUID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUUID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUUID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUUID: %w", err)
+	}
+	return oldValue.UUID, nil
+}
+
+// ClearUUID clears the value of the "uuid" field.
+func (m *MediaMutation) ClearUUID() {
+	m.uuid = nil
+	m.clearedFields[media.FieldUUID] = struct{}{}
+}
+
+// UUIDCleared returns if the "uuid" field was cleared in this mutation.
+func (m *MediaMutation) UUIDCleared() bool {
+	_, ok := m.clearedFields[media.FieldUUID]
+	return ok
+}
+
+// ResetUUID resets all changes to the "uuid" field.
+func (m *MediaMutation) ResetUUID() {
+	m.uuid = nil
+	delete(m.clearedFields, media.FieldUUID)
 }
 
 // SetType sets the "type" field.
@@ -8523,7 +8646,7 @@ func (m *MediaMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MediaMutation) Fields() []string {
-	fields := make([]string, 0, 35)
+	fields := make([]string, 0, 36)
 	if m.title != nil {
 		fields = append(fields, media.FieldTitle)
 	}
@@ -8532,6 +8655,9 @@ func (m *MediaMutation) Fields() []string {
 	}
 	if m.friendly_token != nil {
 		fields = append(fields, media.FieldFriendlyToken)
+	}
+	if m.uuid != nil {
+		fields = append(fields, media.FieldUUID)
 	}
 	if m._type != nil {
 		fields = append(fields, media.FieldType)
@@ -8643,6 +8769,8 @@ func (m *MediaMutation) Field(name string) (ent.Value, bool) {
 		return m.Description()
 	case media.FieldFriendlyToken:
 		return m.FriendlyToken()
+	case media.FieldUUID:
+		return m.UUID()
 	case media.FieldType:
 		return m.GetType()
 	case media.FieldURL:
@@ -8722,6 +8850,8 @@ func (m *MediaMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldDescription(ctx)
 	case media.FieldFriendlyToken:
 		return m.OldFriendlyToken(ctx)
+	case media.FieldUUID:
+		return m.OldUUID(ctx)
 	case media.FieldType:
 		return m.OldType(ctx)
 	case media.FieldURL:
@@ -8815,6 +8945,13 @@ func (m *MediaMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetFriendlyToken(v)
+		return nil
+	case media.FieldUUID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUUID(v)
 		return nil
 	case media.FieldType:
 		v, ok := value.(string)
@@ -9211,6 +9348,9 @@ func (m *MediaMutation) ClearedFields() []string {
 	if m.FieldCleared(media.FieldFriendlyToken) {
 		fields = append(fields, media.FieldFriendlyToken)
 	}
+	if m.FieldCleared(media.FieldUUID) {
+		fields = append(fields, media.FieldUUID)
+	}
 	if m.FieldCleared(media.FieldHlsFile) {
 		fields = append(fields, media.FieldHlsFile)
 	}
@@ -9261,6 +9401,9 @@ func (m *MediaMutation) ClearField(name string) error {
 	case media.FieldFriendlyToken:
 		m.ClearFriendlyToken()
 		return nil
+	case media.FieldUUID:
+		m.ClearUUID()
+		return nil
 	case media.FieldHlsFile:
 		m.ClearHlsFile()
 		return nil
@@ -9307,6 +9450,9 @@ func (m *MediaMutation) ResetField(name string) error {
 		return nil
 	case media.FieldFriendlyToken:
 		m.ResetFriendlyToken()
+		return nil
+	case media.FieldUUID:
+		m.ResetUUID()
 		return nil
 	case media.FieldType:
 		m.ResetType()

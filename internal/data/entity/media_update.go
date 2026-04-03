@@ -93,6 +93,26 @@ func (_u *MediaUpdate) ClearFriendlyToken() *MediaUpdate {
 	return _u
 }
 
+// SetUUID sets the "uuid" field.
+func (_u *MediaUpdate) SetUUID(v string) *MediaUpdate {
+	_u.mutation.SetUUID(v)
+	return _u
+}
+
+// SetNillableUUID sets the "uuid" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableUUID(v *string) *MediaUpdate {
+	if v != nil {
+		_u.SetUUID(*v)
+	}
+	return _u
+}
+
+// ClearUUID clears the value of the "uuid" field.
+func (_u *MediaUpdate) ClearUUID() *MediaUpdate {
+	_u.mutation.ClearUUID()
+	return _u
+}
+
 // SetType sets the "type" field.
 func (_u *MediaUpdate) SetType(v string) *MediaUpdate {
 	_u.mutation.SetType(v)
@@ -1009,6 +1029,11 @@ func (_u *MediaUpdate) check() error {
 			return &ValidationError{Name: "friendly_token", err: fmt.Errorf(`entity: validator failed for field "Media.friendly_token": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.UUID(); ok {
+		if err := media.UUIDValidator(v); err != nil {
+			return &ValidationError{Name: "uuid", err: fmt.Errorf(`entity: validator failed for field "Media.uuid": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.GetType(); ok {
 		if err := media.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`entity: validator failed for field "Media.type": %w`, err)}
@@ -1107,6 +1132,12 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.FriendlyTokenCleared() {
 		_spec.ClearField(media.FieldFriendlyToken, field.TypeString)
+	}
+	if value, ok := _u.mutation.UUID(); ok {
+		_spec.SetField(media.FieldUUID, field.TypeString, value)
+	}
+	if _u.mutation.UUIDCleared() {
+		_spec.ClearField(media.FieldUUID, field.TypeString)
 	}
 	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(media.FieldType, field.TypeString, value)
@@ -1715,6 +1746,26 @@ func (_u *MediaUpdateOne) SetNillableFriendlyToken(v *string) *MediaUpdateOne {
 // ClearFriendlyToken clears the value of the "friendly_token" field.
 func (_u *MediaUpdateOne) ClearFriendlyToken() *MediaUpdateOne {
 	_u.mutation.ClearFriendlyToken()
+	return _u
+}
+
+// SetUUID sets the "uuid" field.
+func (_u *MediaUpdateOne) SetUUID(v string) *MediaUpdateOne {
+	_u.mutation.SetUUID(v)
+	return _u
+}
+
+// SetNillableUUID sets the "uuid" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableUUID(v *string) *MediaUpdateOne {
+	if v != nil {
+		_u.SetUUID(*v)
+	}
+	return _u
+}
+
+// ClearUUID clears the value of the "uuid" field.
+func (_u *MediaUpdateOne) ClearUUID() *MediaUpdateOne {
+	_u.mutation.ClearUUID()
 	return _u
 }
 
@@ -2647,6 +2698,11 @@ func (_u *MediaUpdateOne) check() error {
 			return &ValidationError{Name: "friendly_token", err: fmt.Errorf(`entity: validator failed for field "Media.friendly_token": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.UUID(); ok {
+		if err := media.UUIDValidator(v); err != nil {
+			return &ValidationError{Name: "uuid", err: fmt.Errorf(`entity: validator failed for field "Media.uuid": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.GetType(); ok {
 		if err := media.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`entity: validator failed for field "Media.type": %w`, err)}
@@ -2762,6 +2818,12 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	}
 	if _u.mutation.FriendlyTokenCleared() {
 		_spec.ClearField(media.FieldFriendlyToken, field.TypeString)
+	}
+	if value, ok := _u.mutation.UUID(); ok {
+		_spec.SetField(media.FieldUUID, field.TypeString, value)
+	}
+	if _u.mutation.UUIDCleared() {
+		_spec.ClearField(media.FieldUUID, field.TypeString)
 	}
 	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(media.FieldType, field.TypeString, value)

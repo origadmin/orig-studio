@@ -129,6 +129,10 @@ func (h *MediaHandler) Register(group *gin.RouterGroup) {
 		// 1. Static/Fixed routes MUST come before parameter routes
 		media.GET("/transcoding/status", h.getTranscodingStatus())
 		media.GET("/transcoding/events", h.transcodingEvents())
+		media.GET("/encoding/tasks", h.getEncodingTasksFlat())                       // flat task list for TranscodingStatus page
+		media.GET("/:id/variants", h.getMediaVariants())                             // variant summary for media management page
+		media.POST("/retry", JWTMiddleware(h.jwtMgr), h.retryTaskByID())             // retry by task_id
+		media.POST("/retry-all-failed", JWTMiddleware(h.jwtMgr), h.retryAllFailed()) // retry all failed tasks
 
 		profiles := media.Group("/profiles")
 		{
@@ -149,6 +153,7 @@ func (h *MediaHandler) Register(group *gin.RouterGroup) {
 		media.PUT("/:id", JWTMiddleware(h.jwtMgr), h.updateMedia())
 		media.DELETE("/:id", JWTMiddleware(h.jwtMgr), h.deleteMedia())
 		media.GET("/:id/tasks", h.listEncodingTasks())
+		media.POST("/:id/retry", JWTMiddleware(h.jwtMgr), h.retryTranscode())
 	}
 }
 
@@ -422,10 +427,8 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 			return
 		}
 
-		// Background media processing (Transcoding)
-		if mediaType == "video" && h.uploadUC != nil {
-			go h.uploadUC.ProcessMedia(context.Background(), int64(m.ID), fileURL, mimeType)
-		}
+		// Note: Media processing is triggered via Watermill message in
+		// UploadUseCase.CompleteMultipartUpload, NOT here.
 
 		m, _ = client.Media.Query().
 			Where(entitymedia.ID(m.ID)).
@@ -586,15 +589,194 @@ func (h *MediaHandler) listEncodingTasks() gin.HandlerFunc {
 	}
 }
 
+func (h *MediaHandler) retryTranscode() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid media ID"})
+			return
+		}
+
+		if err := h.uploadUC.RetryTranscode(c.Request.Context(), id); err != nil {
+			statusCode := http.StatusInternalServerError
+			if strings.Contains(err.Error(), "cannot retry") || strings.Contains(err.Error(), "not found") {
+				statusCode = http.StatusBadRequest
+			}
+			c.JSON(statusCode, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "transcode retry initiated", "media_id": id})
+	}
+}
+
 func (h *MediaHandler) getTranscodingStatus() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		status, err := h.uc.GetTranscodingStatus(c.Request.Context(), nil)
+		filter := &biz.TranscodingStatusFilter{
+			Status:   c.DefaultQuery("status", "active"),
+			Page:     1,
+			PageSize: 20,
+		}
+
+		if p, err := strconv.Atoi(c.DefaultQuery("page", "1")); err == nil && p >= 1 {
+			filter.Page = p
+		}
+		if ps, err := strconv.Atoi(c.DefaultQuery("page_size", "20")); err == nil && ps >= 1 && ps <= 100 {
+			filter.PageSize = ps
+		}
+
+		status, err := h.uc.GetTranscodingStatus(c.Request.Context(), filter)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusOK, status)
+		// Build clean response to avoid protobuf field leakage.
+		items := make([]gin.H, 0, len(status.Items))
+		for _, item := range status.Items {
+			m := item.Media
+			items = append(items, gin.H{
+				"media": gin.H{
+					"id":              m.Id,
+					"title":           m.Title,
+					"description":     m.Description,
+					"type":            m.Type,
+					"url":             m.Url,
+					"thumbnail":       m.Thumbnail,
+					"hls_file":        m.HlsFile,
+					"encoding_status": m.EncodingStatus,
+					"duration":        m.Duration,
+					"size":            m.Size,
+					"mime_type":       m.MimeType,
+					"user_id":         m.UserId,
+					"view_count":      m.ViewCount,
+					"like_count":      m.LikeCount,
+					"create_time":     m.CreateTime,
+					"update_time":     m.UpdateTime,
+				},
+				"tasks": item.Tasks,
+			})
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"processing_count": status.ProcessingCount,
+			"pending_count":    status.PendingCount,
+			"failed_count":     status.FailedCount,
+			"success_count":    status.SuccessCount,
+			"total_filtered":   status.TotalFiltered,
+			"page":             status.Page,
+			"page_size":        status.PageSize,
+			"items":            items,
+		})
+	}
+}
+
+// getEncodingTasksFlat returns a flat, paginated list of encoding tasks (one row per task).
+// Query params: status, page, page_size, media_id
+func (h *MediaHandler) getEncodingTasksFlat() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		filter := &biz.TranscodingStatusFilter{
+			Status:   c.DefaultQuery("status", "all"),
+			Page:     1,
+			PageSize: 25,
+		}
+
+		if p, err := strconv.Atoi(c.DefaultQuery("page", "1")); err == nil && p >= 1 {
+			filter.Page = p
+		}
+		if ps, err := strconv.Atoi(c.DefaultQuery("page_size", "25")); err == nil && ps >= 1 && ps <= 100 {
+			filter.PageSize = ps
+		}
+
+		var mediaID *int64
+		if m := c.Query("media_id"); m != "" {
+			var id int64
+			if _, err := fmt.Sscanf(m, "%d", &id); err == nil && id > 0 {
+				mediaID = &id
+			}
+		}
+
+		result, err := h.uc.ListEncodingTasksFlat(c.Request.Context(), filter, mediaID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, result)
+	}
+}
+
+// getMediaVariants returns aggregated transcoding status for a single media.
+// Used by the media management page to show variant details.
+func (h *MediaHandler) getMediaVariants() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+		if err != nil || id <= 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid media ID"})
+			return
+		}
+
+		summary, err := h.uc.GetMediaVariants(c.Request.Context(), id)
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				c.JSON(http.StatusNotFound, gin.H{"error": "media not found"})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, summary)
+	}
+}
+
+// retryTaskByID retries a specific failed encoding task by task_id query param.
+func (h *MediaHandler) retryTaskByID() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		taskIDStr := c.Query("task_id")
+		if taskIDStr == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "task_id is required"})
+			return
+		}
+		taskID, err := strconv.Atoi(taskIDStr)
+		if err != nil || taskID <= 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid task_id: must be a positive integer"})
+			return
+		}
+
+		task, err := h.uc.RetryTask(c.Request.Context(), taskID)
+		if err != nil {
+			statusCode := http.StatusInternalServerError
+			if strings.Contains(err.Error(), "cannot retry") || strings.Contains(err.Error(), "not found") {
+				statusCode = http.StatusUnprocessableEntity
+			}
+			c.JSON(statusCode, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "retry queued", "task": task})
+	}
+}
+
+// retryAllFailed retries all failed encoding tasks.
+func (h *MediaHandler) retryAllFailed() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		mediaIdStr := c.Query("media_id")
+		var mediaID int64
+		if mediaIdStr != "" {
+			if _, err := fmt.Sscanf(mediaIdStr, "%d", &mediaID); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "invalid media_id"})
+				return
+			}
+		}
+
+		count, err := h.uc.RetryAllFailedTasks(c.Request.Context(), mediaID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "retry initiated", "retried_count": count})
 	}
 }
 

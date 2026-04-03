@@ -146,21 +146,17 @@ const WatchPage = () => {
                         Your browser does not support the video tag.
                     </video>
 
-                    {/* Processing Overlay */}
+                    {/* Processing Indicator */}
                     {isProcessing && (
-                        <div className="absolute top-4 left-4 z-10">
-                            <Badge variant="secondary"
-                                   className="bg-black/60 text-white border-white/20 backdrop-blur-md flex items-center gap-2 px-3 py-1.5">
+                        <div className="absolute top-3 left-3 z-10">
+                            <Badge
+                                variant="secondary"
+                                className="gap-1 bg-black/60 text-white border-white/20 backdrop-blur-md text-[10px] px-1.5 py-0 h-5 hover:bg-black/60"
+                            >
                                 {media.encoding_status === 'processing' ? (
-                                    <>
-                                        <Loader2 className="w-3.5 h-3.5 animate-spin"/>
-                                        {t('watch.transcoding')}...
-                                    </>
+                                    <><Loader2 size={9} className="animate-spin"/>{t('watch.transcoding')}</>
                                 ) : (
-                                    <>
-                                        <Eye className="w-3.5 h-3.5"/>
-                                        {t('watch.optimizing')}...
-                                    </>
+                                    <><Eye size={9}/>{t('watch.optimizing')}</>
                                 )}
                             </Badge>
                         </div>

@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"log/slog"
+	"strings"
 
 	"origadmin/application/origcms/internal/data/entity"
 )
@@ -67,11 +68,11 @@ func SeedEncodeProfiles(ctx context.Context, client *entity.Client) error {
 			SetResolution(p.Res).
 			SetExtension(p.Ext).
 			SetVideoCodec(p.Codec).
-			SetVideoBitrate("auto").
+			SetVideoBitrate(extractBentoBitrate(p.BentoParams, "video")).
 			SetAudioCodec("aac").
-			SetAudioBitrate("128k").
+			SetAudioBitrate(extractBentoBitrate(p.BentoParams, "audio")).
+			SetBentoParameters(p.BentoParams).
 			SetIsActive(p.Active).
-			// SetBentoParameters(p.BentoParams).
 			Save(ctx)
 		if err != nil {
 			slog.Error("failed to seed encode profile", "name", p.Name, "err", err)
@@ -81,4 +82,20 @@ func SeedEncodeProfiles(ctx context.Context, client *entity.Client) error {
 
 	slog.Info("Successfully seeded 22 Bento4-ready profiles")
 	return nil
+}
+
+// extractBentoBitrate extracts bitrate value from Bento4 parameter string.
+// e.g., "--video-bitrate 400k --audio-bitrate 64k" → "400k" (kind=video) or "64k" (kind=audio)
+func extractBentoBitrate(bentoParams, kind string) string {
+	if bentoParams == "" {
+		return ""
+	}
+	parts := strings.Fields(bentoParams)
+	prefix := "--" + kind + "-bitrate"
+	for i, p := range parts {
+		if p == prefix && i+1 < len(parts) {
+			return parts[i+1]
+		}
+	}
+	return ""
 }

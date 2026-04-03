@@ -54,7 +54,7 @@ func (r *encodeProfileRepo) Get(ctx context.Context, id int) (*biz.EncodeProfile
 }
 
 func (r *encodeProfileRepo) Create(ctx context.Context, profile *biz.EncodeProfile) (*biz.EncodeProfile, error) {
-	item, err := r.db.EncodeProfile.Create().
+	builder := r.db.EncodeProfile.Create().
 		SetName(profile.Name).
 		SetDescription(profile.Description).
 		SetExtension(profile.Extension).
@@ -63,8 +63,14 @@ func (r *encodeProfileRepo) Create(ctx context.Context, profile *biz.EncodeProfi
 		SetVideoBitrate(profile.VideoBitrate).
 		SetAudioCodec(profile.AudioCodec).
 		SetAudioBitrate(profile.AudioBitrate).
-		SetIsActive(true).
-		Save(ctx)
+		SetBentoParameters(profile.BentoParameters).
+		SetIsActive(true)
+	if profile.IsActive {
+		builder = builder.SetIsActive(true)
+	} else {
+		builder = builder.SetIsActive(false)
+	}
+	item, err := builder.Save(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -81,6 +87,7 @@ func (r *encodeProfileRepo) Update(ctx context.Context, profile *biz.EncodeProfi
 		SetVideoBitrate(profile.VideoBitrate).
 		SetAudioCodec(profile.AudioCodec).
 		SetAudioBitrate(profile.AudioBitrate).
+		SetBentoParameters(profile.BentoParameters).
 		SetIsActive(profile.IsActive).
 		Save(ctx)
 	if err != nil {
@@ -95,15 +102,16 @@ func (r *encodeProfileRepo) Delete(ctx context.Context, id int) error {
 
 func convertEncodeProfileToBiz(m *entity.EncodeProfile) *biz.EncodeProfile {
 	return &biz.EncodeProfile{
-		Id:           m.ID,
-		Name:         m.Name,
-		Description:  m.Description,
-		Extension:    m.Extension,
-		Resolution:   m.Resolution,
-		VideoCodec:   m.VideoCodec,
-		VideoBitrate: m.VideoBitrate,
-		AudioCodec:   m.AudioCodec,
-		AudioBitrate: m.AudioBitrate,
-		IsActive:     m.IsActive,
+		Id:              m.ID,
+		Name:            m.Name,
+		Description:     m.Description,
+		Extension:       m.Extension,
+		Resolution:      m.Resolution,
+		VideoCodec:      m.VideoCodec,
+		VideoBitrate:    m.VideoBitrate,
+		AudioCodec:      m.AudioCodec,
+		AudioBitrate:    m.AudioBitrate,
+		BentoParameters: m.BentoParameters,
+		IsActive:        m.IsActive,
 	}
 }

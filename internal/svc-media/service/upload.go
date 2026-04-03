@@ -46,6 +46,7 @@ func (s *UploadService) InitiateMultipartUpload(ctx context.Context, req *pb.Ini
 		req.Description,
 		&req.CategoryId,
 		req.Tags,
+		"", // thumbnail not supported in proto
 		userID,
 	)
 	if err != nil {
@@ -102,7 +103,8 @@ func (s *UploadService) ListParts(ctx context.Context, req *pb.ListPartsRequest)
 
 // CompleteMultipartUpload implements pb.UploadServiceServer.
 func (s *UploadService) CompleteMultipartUpload(ctx context.Context, req *pb.CompleteMultipartUploadRequest) (*pb.CompleteMultipartUploadResponse, error) {
-	media, err := s.uc.CompleteMultipartUpload(ctx, req.UploadId, req.Sha256)
+	media, err := s.uc.CompleteMultipartUpload(ctx, req.UploadId, req.Sha256,
+		"", "", nil, nil, "")
 	if err != nil {
 		s.log.Errorf("failed to complete multipart upload %s: %v", req.UploadId, err)
 		return nil, err
@@ -139,6 +141,7 @@ func (s *UploadService) UploadFile(ctx context.Context, req *pb.UploadFileReques
 		req.Description,
 		&req.CategoryId,
 		req.Tags,
+		"", // thumbnail not supported in proto
 		userID,
 	)
 	if err != nil {
@@ -151,7 +154,8 @@ func (s *UploadService) UploadFile(ctx context.Context, req *pb.UploadFileReques
 		return nil, err
 	}
 
-	media, err := s.uc.CompleteMultipartUpload(ctx, session.UploadID, "")
+	media, err := s.uc.CompleteMultipartUpload(ctx, session.UploadID, "",
+		req.Title, req.Description, &req.CategoryId, req.Tags, "")
 	if err != nil {
 		_ = s.uc.AbortMultipartUpload(ctx, session.UploadID)
 		return nil, err

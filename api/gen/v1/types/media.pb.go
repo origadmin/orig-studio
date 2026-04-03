@@ -79,8 +79,34 @@ type Media struct {
 	HlsFile string `protobuf:"bytes,26,opt,name=hls_file,proto3" json:"hls_file,omitempty"`
 	// media.field.encoding_status
 	EncodingStatus string `protobuf:"bytes,27,opt,name=encoding_status,proto3" json:"encoding_status,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	// media.field.uuid — secure unique ID for public paths (HLS, thumbnails, previews)
+	Uuid string `protobuf:"bytes,28,opt,name=uuid,proto3" json:"uuid,omitempty"`
+	// media.field.preview_file — path to GIF preview generated during transcoding
+	PreviewFile string `protobuf:"bytes,29,opt,name=preview_file,proto3" json:"preview_file,omitempty"`
+	// media.field.state — publication state: draft, active, deleted
+	State string `protobuf:"bytes,30,opt,name=state,proto3" json:"state,omitempty"`
+	// media.field.friendly_token — URL-friendly token for public access
+	FriendlyToken string `protobuf:"bytes,31,opt,name=friendly_token,proto3" json:"friendly_token,omitempty"`
+	// media.field.published_at
+	PublishedAt *timestamppb.Timestamp `protobuf:"bytes,32,opt,name=published_at,proto3" json:"published_at,omitempty"`
+	// media.field.allow_download
+	AllowDownload bool `protobuf:"varint,33,opt,name=allow_download,proto3" json:"allow_download,omitempty"`
+	// media.field.enable_comments
+	EnableComments bool `protobuf:"varint,34,opt,name=enable_comments,proto3" json:"enable_comments,omitempty"`
+	// media.field.featured
+	Featured bool `protobuf:"varint,35,opt,name=featured,proto3" json:"featured,omitempty"`
+	// media.field.is_reviewed
+	IsReviewed bool `protobuf:"varint,36,opt,name=is_reviewed,proto3" json:"is_reviewed,omitempty"`
+	// media.field.reported_times
+	ReportedTimes int32 `protobuf:"varint,37,opt,name=reported_times,proto3" json:"reported_times,omitempty"`
+	// media.field.extension
+	Extension string `protobuf:"bytes,38,opt,name=extension,proto3" json:"extension,omitempty"`
+	// media.field.md5sum
+	Md5Sum string `protobuf:"bytes,39,opt,name=md5sum,proto3" json:"md5sum,omitempty"`
+	// media.field.poster
+	Poster        string `protobuf:"bytes,40,opt,name=poster,proto3" json:"poster,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Media) Reset() {
@@ -298,6 +324,97 @@ func (x *Media) GetHlsFile() string {
 func (x *Media) GetEncodingStatus() string {
 	if x != nil {
 		return x.EncodingStatus
+	}
+	return ""
+}
+
+func (x *Media) GetUuid() string {
+	if x != nil {
+		return x.Uuid
+	}
+	return ""
+}
+
+func (x *Media) GetPreviewFile() string {
+	if x != nil {
+		return x.PreviewFile
+	}
+	return ""
+}
+
+func (x *Media) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *Media) GetFriendlyToken() string {
+	if x != nil {
+		return x.FriendlyToken
+	}
+	return ""
+}
+
+func (x *Media) GetPublishedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.PublishedAt
+	}
+	return nil
+}
+
+func (x *Media) GetAllowDownload() bool {
+	if x != nil {
+		return x.AllowDownload
+	}
+	return false
+}
+
+func (x *Media) GetEnableComments() bool {
+	if x != nil {
+		return x.EnableComments
+	}
+	return false
+}
+
+func (x *Media) GetFeatured() bool {
+	if x != nil {
+		return x.Featured
+	}
+	return false
+}
+
+func (x *Media) GetIsReviewed() bool {
+	if x != nil {
+		return x.IsReviewed
+	}
+	return false
+}
+
+func (x *Media) GetReportedTimes() int32 {
+	if x != nil {
+		return x.ReportedTimes
+	}
+	return 0
+}
+
+func (x *Media) GetExtension() string {
+	if x != nil {
+		return x.Extension
+	}
+	return ""
+}
+
+func (x *Media) GetMd5Sum() string {
+	if x != nil {
+		return x.Md5Sum
+	}
+	return ""
+}
+
+func (x *Media) GetPoster() string {
+	if x != nil {
+		return x.Poster
 	}
 	return ""
 }
@@ -1188,7 +1305,8 @@ var File_v1_types_media_proto protoreflect.FileDescriptor
 
 const file_v1_types_media_proto_rawDesc = "" +
 	"\n" +
-	"\x14v1/types/media.proto\x12\x15api.v1.services.types\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd1\x06\n" +
+	"\x14v1/types/media.proto\x12\x15api.v1.services.types\x1a\x1fgoogle/protobuf/timestamp.proto\"\x8d\n" +
+	"\n" +
 	"\x05Media\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
@@ -1221,7 +1339,20 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\vcategory_id\x18\x18 \x01(\x03R\vcategory_id\x12\x12\n" +
 	"\x04tags\x18\x19 \x03(\tR\x04tags\x12\x1a\n" +
 	"\bhls_file\x18\x1a \x01(\tR\bhls_file\x12(\n" +
-	"\x0fencoding_status\x18\x1b \x01(\tR\x0fencoding_status\"\xf5\x01\n" +
+	"\x0fencoding_status\x18\x1b \x01(\tR\x0fencoding_status\x12\x12\n" +
+	"\x04uuid\x18\x1c \x01(\tR\x04uuid\x12\"\n" +
+	"\fpreview_file\x18\x1d \x01(\tR\fpreview_file\x12\x14\n" +
+	"\x05state\x18\x1e \x01(\tR\x05state\x12&\n" +
+	"\x0efriendly_token\x18\x1f \x01(\tR\x0efriendly_token\x12>\n" +
+	"\fpublished_at\x18  \x01(\v2\x1a.google.protobuf.TimestampR\fpublished_at\x12&\n" +
+	"\x0eallow_download\x18! \x01(\bR\x0eallow_download\x12(\n" +
+	"\x0fenable_comments\x18\" \x01(\bR\x0fenable_comments\x12\x1a\n" +
+	"\bfeatured\x18# \x01(\bR\bfeatured\x12 \n" +
+	"\vis_reviewed\x18$ \x01(\bR\vis_reviewed\x12&\n" +
+	"\x0ereported_times\x18% \x01(\x05R\x0ereported_times\x12\x1c\n" +
+	"\textension\x18& \x01(\tR\textension\x12\x16\n" +
+	"\x06md5sum\x18' \x01(\tR\x06md5sum\x12\x16\n" +
+	"\x06poster\x18( \x01(\tR\x06poster\"\xf5\x01\n" +
 	"\rEncodeProfile\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -1335,23 +1466,24 @@ var file_v1_types_media_proto_goTypes = []any{
 var file_v1_types_media_proto_depIdxs = []int32{
 	9,  // 0: api.v1.services.types.Media.create_time:type_name -> google.protobuf.Timestamp
 	9,  // 1: api.v1.services.types.Media.update_time:type_name -> google.protobuf.Timestamp
-	9,  // 2: api.v1.services.types.EncodingTask.create_time:type_name -> google.protobuf.Timestamp
-	9,  // 3: api.v1.services.types.EncodingTask.update_time:type_name -> google.protobuf.Timestamp
-	9,  // 4: api.v1.services.types.Category.create_time:type_name -> google.protobuf.Timestamp
-	9,  // 5: api.v1.services.types.Category.update_time:type_name -> google.protobuf.Timestamp
-	9,  // 6: api.v1.services.types.Tag.create_time:type_name -> google.protobuf.Timestamp
-	9,  // 7: api.v1.services.types.Tag.update_time:type_name -> google.protobuf.Timestamp
-	9,  // 8: api.v1.services.types.Comment.create_time:type_name -> google.protobuf.Timestamp
-	9,  // 9: api.v1.services.types.Comment.update_time:type_name -> google.protobuf.Timestamp
-	9,  // 10: api.v1.services.types.Like.create_time:type_name -> google.protobuf.Timestamp
-	9,  // 11: api.v1.services.types.Favorite.create_time:type_name -> google.protobuf.Timestamp
-	9,  // 12: api.v1.services.types.Playlist.create_time:type_name -> google.protobuf.Timestamp
-	9,  // 13: api.v1.services.types.Playlist.update_time:type_name -> google.protobuf.Timestamp
-	14, // [14:14] is the sub-list for method output_type
-	14, // [14:14] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	9,  // 2: api.v1.services.types.Media.published_at:type_name -> google.protobuf.Timestamp
+	9,  // 3: api.v1.services.types.EncodingTask.create_time:type_name -> google.protobuf.Timestamp
+	9,  // 4: api.v1.services.types.EncodingTask.update_time:type_name -> google.protobuf.Timestamp
+	9,  // 5: api.v1.services.types.Category.create_time:type_name -> google.protobuf.Timestamp
+	9,  // 6: api.v1.services.types.Category.update_time:type_name -> google.protobuf.Timestamp
+	9,  // 7: api.v1.services.types.Tag.create_time:type_name -> google.protobuf.Timestamp
+	9,  // 8: api.v1.services.types.Tag.update_time:type_name -> google.protobuf.Timestamp
+	9,  // 9: api.v1.services.types.Comment.create_time:type_name -> google.protobuf.Timestamp
+	9,  // 10: api.v1.services.types.Comment.update_time:type_name -> google.protobuf.Timestamp
+	9,  // 11: api.v1.services.types.Like.create_time:type_name -> google.protobuf.Timestamp
+	9,  // 12: api.v1.services.types.Favorite.create_time:type_name -> google.protobuf.Timestamp
+	9,  // 13: api.v1.services.types.Playlist.create_time:type_name -> google.protobuf.Timestamp
+	9,  // 14: api.v1.services.types.Playlist.update_time:type_name -> google.protobuf.Timestamp
+	15, // [15:15] is the sub-list for method output_type
+	15, // [15:15] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_v1_types_media_proto_init() }

@@ -1,32 +1,52 @@
+# origcms bootstrap.yaml
+# Follows the same config structure as backend (projects/backend/resources/configs/)
+sources:
+  - file:
+      path: .
+      ignores:
+        - "bootstrap.yaml"
+    type: file
+  - type: env
+
+app:
+  name: "${APP_NAME:origcms.server}"
+  version: "${APP_VERSION:v1.0.0}"
+  id: "${APP_ID:origcms-server}"
+
 server:
-  grpc:
-    network: tcp
-    addr: ":9001"
   http:
     network: tcp
-    addr: ":9000"
+    addr: "${SERVER_HTTP_ADDR:0.0.0.0:9090}"
+    timeout: "${SERVER_HTTP_TIMEOUT:60s}"
 
 data:
-  database:
-    driver: sqlite3
-    source: ./data/origcms.db
-    max_open: 10
-    max_idle: 5
-  cache:
-    driver: memory
-    addr: ""
-
-logger:
-  level: debug
-  format: json
-  output: stdout
-
-discovery:
-  type: consul
-  addr: 127.0.0.1:8500
-  scheme: http
+  databases:
+    default:
+      name: "${DATABASE_NAME:origcms}"
+      dialect: "${DATABASE_DIALECT:postgres}"
+      source: "${DATABASE_SOURCE:postgres://user:password@127.0.0.1:5432/origcms?sslmode=disable}"
+  caches:
+    configs:
+      - name: default
+        driver: memory
+  object_stores:
+    default:
+      type: local
+      local:
+        root: "${OBJECTSTORE_BASE_PATH:./tmp/objects}"
 
 security:
-  jwt:
-    secret: origcms-secret-key-change-in-production
-    expire_hour: 24
+  authn:
+    configs:
+      - type: jwt
+        jwt:
+          signing_key: "${JWT_SIGNING_KEY:origcms-secret-key-change-in-production}"
+          signing_method: "${JWT_SIGNING_METHOD:HS256}"
+          access_token_ttl: "${JWT_ACCESS_TOKEN_TTL:3600s}"
+          refresh_token_ttl: "${JWT_REFRESH_TOKEN_TTL:7200s}"
+
+logger:
+  caller: true
+  format: dev
+  level: "${LOG_LEVEL:debug}"
+  output: "${LOG_OUTPUT:stdout}"
