@@ -2,6 +2,7 @@
 
 > **制定时间**：2026-03-31  
 > **基准状态**：见 [PROJECT_ANALYSIS.md](./PROJECT_ANALYSIS.md)  
+> **快速入手**：新 session 请先读 [QUICK_START.md](./QUICK_START.md)（防重复劳动知识地图）
 > **更新规则**：每完成一个任务请打勾 `[x]`，并在对应里程碑底部追加完成日期
 
 ---
@@ -11,17 +12,16 @@
 | 里程碑 | 主题 | 目标 | 预估周期 | 状态 |
 |--------|------|------|----------|------|
 | [M0](#m0-架构准备) | 架构准备 | 锁定服务边界、前端目录重构、废弃 svc-portal | 3 天 | ✅ 已完成 (2026-03-31) |
-| [M1](#m1-基础闭环) | 基础闭环 | 单体模式跑通 + 用户认证 + 前端框架 | 2 周 | ✅ 已完成 (2026-03-31) |
-| [M2](#m2-媒体上传与播放) | 媒体上传与播放 | 文件上传 + 基础视频播放（无转码） | 4 周 | 🔲 未开始 |
-| [M3](#m3-视频转码与-hls) | 视频转码与 HLS | 异步转码 + HLS 流媒体播放 | 8 周 | 🔲 未开始 |
+| [M1](#m1-基础闭环) | 基础闭环 | 单体模式跑通 + 用户认证 + 前端框架 | 2 周 | 🔶 部分完成 (T1.1/T1.2/T1.5 done; T1.3/T1.4/T1.6 pending) |
+| [M2](#m2-媒体上传与播放) | 媒体上传与播放 | 文件上传 + 基础视频播放（无转码） | 4 周 | 🔶 部分完成 (upload plan + transcoding helpers exist; full upload/ playback flow not integrated) |
+| [M3](#m3-视频转码与-hls) | 视频转码与 HLS | 异步转码 + HLS 流媒体播放 | 8 周 | 🔶 部分完成 (ffmpeg helpers + HLS logic + encode profile exist; async worker pipeline not complete) |
 | [M4](#m4-完整内容管理) | 完整内容管理 | 评论/收藏/频道/RBAC 权限 | 12 周 | 🔲 未开始 |
 | [M5](#m5-生产就绪) | 生产就绪 | 监控/搜索/对象存储/可观测性 | 20 周 | 🔲 未开始 |
 
-> **架构说明**：详见 [ARCHITECTURE.md](./ARCHITECTURE.md)  
-> **核心决策**：  
-> - svc-portal 废弃，聚合职责合并到 svc-api-gateway  
-> - M1 优先在 `cmd/server` 单体模式跑通，M2 起按需拆分微服务  
-> - 前端分为三层：`pages/auth` + `pages/app`（用户侧） + `pages/admin`（管理后台）
+> **Architecture**: See [ARCHITECTURE.md](./ARCHITECTURE.md)
+> **Key decisions**:
+> - Monolith-first: `cmd/server` is the active entry point
+> - Frontend split into three layers: `pages/auth` + `pages/home` (public) + `pages/admin`
 
 ---
 

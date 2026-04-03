@@ -10,12 +10,11 @@ import (
 	stdhttp "net/http"
 	"time"
 
+	"github.com/origadmin/runtime/errors"
+	"github.com/origadmin/runtime/log"
 	"origadmin/application/origcms/api/gen/v1/media"
 	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/svc-media/biz"
-
-	"github.com/origadmin/runtime/errors"
-	"github.com/origadmin/runtime/log"
 )
 
 type MediaService struct {
@@ -31,7 +30,10 @@ func NewMediaService(uc *biz.MediaUseCase, logger log.Logger) *MediaService {
 	}
 }
 
-func (s *MediaService) ListMedias(ctx context.Context, req *media.ListMediasRequest) (*media.ListMediasResponse, error) {
+func (s *MediaService) ListMedias(
+	ctx context.Context,
+	req *media.ListMediasRequest,
+) (*media.ListMediasResponse, error) {
 	items, total, err := s.uc.ListMedias(ctx)
 	if err != nil {
 		return nil, err
@@ -44,7 +46,10 @@ func (s *MediaService) ListMedias(ctx context.Context, req *media.ListMediasRequ
 	}, nil
 }
 
-func (s *MediaService) GetMedia(ctx context.Context, req *media.GetMediaRequest) (*media.GetMediaResponse, error) {
+func (s *MediaService) GetMedia(
+	ctx context.Context,
+	req *media.GetMediaRequest,
+) (*media.GetMediaResponse, error) {
 	item, err := s.uc.GetMedia(ctx, req.Id)
 	if err != nil {
 		return nil, errors.NotFound("MEDIA_NOT_FOUND", "Media not found")
@@ -52,7 +57,10 @@ func (s *MediaService) GetMedia(ctx context.Context, req *media.GetMediaRequest)
 	return &media.GetMediaResponse{Media: item}, nil
 }
 
-func (s *MediaService) CreateMedia(ctx context.Context, req *media.CreateMediaRequest) (*media.CreateMediaResponse, error) {
+func (s *MediaService) CreateMedia(
+	ctx context.Context,
+	req *media.CreateMediaRequest,
+) (*media.CreateMediaResponse, error) {
 	item, err := s.uc.CreateMedia(ctx, req.Media)
 	if err != nil {
 		return nil, err
@@ -60,7 +68,10 @@ func (s *MediaService) CreateMedia(ctx context.Context, req *media.CreateMediaRe
 	return &media.CreateMediaResponse{Media: item}, nil
 }
 
-func (s *MediaService) UpdateMedia(ctx context.Context, req *media.UpdateMediaRequest) (*media.UpdateMediaResponse, error) {
+func (s *MediaService) UpdateMedia(
+	ctx context.Context,
+	req *media.UpdateMediaRequest,
+) (*media.UpdateMediaResponse, error) {
 	item, err := s.uc.UpdateMedia(ctx, req.Media)
 	if err != nil {
 		return nil, err
@@ -68,7 +79,10 @@ func (s *MediaService) UpdateMedia(ctx context.Context, req *media.UpdateMediaRe
 	return &media.UpdateMediaResponse{Media: item}, nil
 }
 
-func (s *MediaService) DeleteMedia(ctx context.Context, req *media.DeleteMediaRequest) (*media.DeleteMediaResponse, error) {
+func (s *MediaService) DeleteMedia(
+	ctx context.Context,
+	req *media.DeleteMediaRequest,
+) (*media.DeleteMediaResponse, error) {
 	err := s.uc.DeleteMedia(ctx, req.Id)
 	if err != nil {
 		return nil, err
@@ -76,7 +90,10 @@ func (s *MediaService) DeleteMedia(ctx context.Context, req *media.DeleteMediaRe
 	return &media.DeleteMediaResponse{}, nil
 }
 
-func (s *MediaService) IncrementViewCount(ctx context.Context, req *media.IncrementViewCountRequest) (*media.IncrementViewCountResponse, error) {
+func (s *MediaService) IncrementViewCount(
+	ctx context.Context,
+	req *media.IncrementViewCountRequest,
+) (*media.IncrementViewCountResponse, error) {
 	count, err := s.uc.IncrementViewCount(ctx, req.Id)
 	if err != nil {
 		return nil, err
@@ -84,7 +101,10 @@ func (s *MediaService) IncrementViewCount(ctx context.Context, req *media.Increm
 	return &media.IncrementViewCountResponse{ViewCount: count}, nil
 }
 
-func (s *MediaService) ListEncodingTasks(ctx context.Context, req *media.ListEncodingTasksRequest) (*media.ListEncodingTasksResponse, error) {
+func (s *MediaService) ListEncodingTasks(
+	ctx context.Context,
+	req *media.ListEncodingTasksRequest,
+) (*media.ListEncodingTasksResponse, error) {
 	tasks, err := s.uc.ListEncodingTasks(ctx, req.MediaId)
 	if err != nil {
 		return nil, err
@@ -105,7 +125,10 @@ func (s *MediaService) ListEncodingTasks(ctx context.Context, req *media.ListEnc
 	return &media.ListEncodingTasksResponse{Tasks: result}, nil
 }
 
-func (s *MediaService) GetTranscodingStatus(ctx context.Context, req *media.GetTranscodingStatusRequest) (*media.GetTranscodingStatusResponse, error) {
+func (s *MediaService) GetTranscodingStatus(
+	ctx context.Context,
+	req *media.GetTranscodingStatusRequest,
+) (*media.GetTranscodingStatusResponse, error) {
 	status, err := s.uc.GetTranscodingStatus(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -143,7 +166,10 @@ func (s *MediaService) GetTranscodingStatus(ctx context.Context, req *media.GetT
 }
 
 // ListEncodeProfiles returns a list of encoding profiles.
-func (s *MediaService) ListEncodeProfiles(ctx context.Context, req *media.ListEncodeProfilesRequest) (*media.ListEncodeProfilesResponse, error) {
+func (s *MediaService) ListEncodeProfiles(
+	ctx context.Context,
+	req *media.ListEncodeProfilesRequest,
+) (*media.ListEncodeProfilesResponse, error) {
 	profiles, err := s.uc.ListEncodeProfiles(ctx)
 	if err != nil {
 		return nil, err
@@ -166,7 +192,10 @@ func (s *MediaService) ListEncodeProfiles(ctx context.Context, req *media.ListEn
 }
 
 // GetEncodeProfile returns an encoding profile by ID.
-func (s *MediaService) GetEncodeProfile(ctx context.Context, req *media.GetEncodeProfileRequest) (*media.GetEncodeProfileResponse, error) {
+func (s *MediaService) GetEncodeProfile(
+	ctx context.Context,
+	req *media.GetEncodeProfileRequest,
+) (*media.GetEncodeProfileResponse, error) {
 	p, err := s.uc.GetEncodeProfile(ctx, int(req.Id))
 	if err != nil {
 		return nil, err
@@ -186,7 +215,10 @@ func (s *MediaService) GetEncodeProfile(ctx context.Context, req *media.GetEncod
 }
 
 // CreateEncodeProfile creates a new encoding profile.
-func (s *MediaService) CreateEncodeProfile(ctx context.Context, req *media.CreateEncodeProfileRequest) (*media.CreateEncodeProfileResponse, error) {
+func (s *MediaService) CreateEncodeProfile(
+	ctx context.Context,
+	req *media.CreateEncodeProfileRequest,
+) (*media.CreateEncodeProfileResponse, error) {
 	p, err := s.uc.CreateEncodeProfile(ctx, &biz.EncodeProfile{
 		Name:        req.Profile.Name,
 		Description: req.Profile.Description,
@@ -214,7 +246,10 @@ func (s *MediaService) CreateEncodeProfile(ctx context.Context, req *media.Creat
 }
 
 // UpdateEncodeProfile updates an existing encoding profile.
-func (s *MediaService) UpdateEncodeProfile(ctx context.Context, req *media.UpdateEncodeProfileRequest) (*media.UpdateEncodeProfileResponse, error) {
+func (s *MediaService) UpdateEncodeProfile(
+	ctx context.Context,
+	req *media.UpdateEncodeProfileRequest,
+) (*media.UpdateEncodeProfileResponse, error) {
 	p, err := s.uc.UpdateEncodeProfile(ctx, &biz.EncodeProfile{
 		Id:          int(req.Profile.Id),
 		Name:        req.Profile.Name,
@@ -243,7 +278,10 @@ func (s *MediaService) UpdateEncodeProfile(ctx context.Context, req *media.Updat
 }
 
 // DeleteEncodeProfile deletes an encoding profile.
-func (s *MediaService) DeleteEncodeProfile(ctx context.Context, req *media.DeleteEncodeProfileRequest) (*media.DeleteEncodeProfileResponse, error) {
+func (s *MediaService) DeleteEncodeProfile(
+	ctx context.Context,
+	req *media.DeleteEncodeProfileRequest,
+) (*media.DeleteEncodeProfileResponse, error) {
 	err := s.uc.DeleteEncodeProfile(ctx, int(req.Id))
 	if err != nil {
 		return nil, err
@@ -290,8 +328,14 @@ func (s *MediaService) SSEHandler(w stdhttp.ResponseWriter, r *stdhttp.Request) 
 			if ev == nil {
 				return
 			}
-			fmt.Fprintf(w, "event: transcoding_progress\ndata: {\"media_id\": %d, \"task_id\": %d, \"status\": \"%s\", \"progress\": %d}\n\n",
-				ev.MediaId, ev.Task.Id, ev.Task.Status, ev.Task.Progress)
+			fmt.Fprintf(
+				w,
+				"event: transcoding_progress\ndata: {\"media_id\": %d, \"task_id\": %d, \"status\": \"%s\", \"progress\": %d}\n\n",
+				ev.MediaId,
+				ev.Task.Id,
+				ev.Task.Status,
+				ev.Task.Progress,
+			)
 			flusher.Flush()
 		}
 	}
