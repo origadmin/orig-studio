@@ -26,8 +26,8 @@ func (Media) Fields() []ent.Field {
 		field.Text("description").Optional(),
 		field.String("friendly_token").Unique().MaxLen(150).Optional(),
 		field.String("uuid").Unique().MaxLen(36).Optional(), // UUID for secure public paths (HLS, thumbnails, previews)
-		field.String("type").MaxLen(20).Default("video"), // video / image / audio
-		field.String("url").MaxLen(512),                  // original file path
+		field.String("type").MaxLen(20).Default("video"),    // video / image / audio
+		field.String("url").MaxLen(512),                     // original file path
 		field.String("hls_file").MaxLen(1024).Optional(),    // HLS master playlist path (uses UUID)
 		field.String("thumbnail").MaxLen(512).Optional(),    // thumbnail path (uses UUID)
 		field.String("poster").MaxLen(512).Optional(),

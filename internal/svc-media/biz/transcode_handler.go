@@ -100,17 +100,17 @@ func (h *TranscodeHandler) Handle(msg *message.Message) error {
 //
 // Pipeline:
 //
-//	1. Ensure UUID exists on media record
-//	2. Generate thumbnail (if not already set)
-//	3. Create encoding tasks for all active profiles
-//	4. Submit video profile jobs → direct HLS output to hls/{uuid}/{profile_name}/
-//	5. Submit preview job → GIF output to previews/{uuid}.gif
-//	6. Collect results, generate master.m3u8 from successful variants
-//	7. Determine final encoding_status:
-//	       - all video tasks success → "success"
-//	       - some video success + some failed → "partial"
-//	       - all video tasks failed → "failed"
-//	       - preview task outcome does NOT affect overall status
+//  1. Ensure UUID exists on media record
+//  2. Generate thumbnail (if not already set)
+//  3. Create encoding tasks for all active profiles
+//  4. Submit video profile jobs → direct HLS output to hls/{uuid}/{profile_name}/
+//  5. Submit preview job → GIF output to previews/{uuid}.gif
+//  6. Collect results, generate master.m3u8 from successful variants
+//  7. Determine final encoding_status:
+//     - all video tasks success → "success"
+//     - some video success + some failed → "partial"
+//     - all video tasks failed → "failed"
+//     - preview task outcome does NOT affect overall status
 func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeRequest) error {
 	mediaID := req.MediaID
 	fullPath := filepath.Join(h.baseDir, req.MediaPath)
@@ -398,7 +398,11 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 
 // waitForOutput polls for the expected output file after worker submission.
 // For video profiles: checks for index.m3u8; for preview: checks for .gif file.
-func (h *TranscodeHandler) waitForOutput(job TranscodeJob, task *EncodingTask, result *transcodeResult) error {
+func (h *TranscodeHandler) waitForOutput(
+	job TranscodeJob,
+	task *EncodingTask,
+	result *transcodeResult,
+) error {
 	var expectedFile string
 	maxAttempts := 120 // max 10 min wait per task (5s interval)
 

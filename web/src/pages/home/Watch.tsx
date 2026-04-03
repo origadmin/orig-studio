@@ -3,11 +3,11 @@
  * 视频播放页 - 对接真实数据
  */
 
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {useSearch, Link} from '@tanstack/react-router';
 import {
     ThumbsUp, ThumbsDown, Share2, MessageCircle,
-    MoreHorizontal, UserPlus, Eye, Loader2
+    MoreHorizontal, UserPlus, Eye, Loader2, Settings, RefreshCw, AlertTriangle
 } from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
@@ -16,7 +16,8 @@ import {Card, CardContent} from '@/components/ui/card';
 import {Skeleton} from '@/components/ui/skeleton';
 import {formatViews, formatDate, formatDuration} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
-import {type Media} from '@/lib/api/media';
+import {type Media, type VariantInfo} from '@/lib/api/media';
+import {mediaApi} from '@/lib/api/media';
 import {useMediaDetail, useMediaList} from '@/hooks/queries';
 import Hls from 'hls.js';
 
@@ -25,6 +26,13 @@ const WatchPage = () => {
     const {v: id} = useSearch({strict: false});
     const {data: media, isLoading: isMediaLoading, error: mediaError} = useMediaDetail(id as string);
     const videoRef = useRef<HTMLVideoElement>(null);
+    const hlsRef = useRef<Hls | null>(null);
+
+    // Quality switcher state
+    const [variants, setVariants] = useState<VariantInfo[]>([]);
+    const [currentLevel, setCurrentLevel] = useState(-1); // -1 = auto
+    const [showQualityMenu, setShowQualityMenu] = useState(false);
+    const [retrying, setRetrying] = useState(false);
 
     const {data: recData} = useMediaList({
         page_size: 10,
@@ -36,6 +44,37 @@ const WatchPage = () => {
     const loading = isMediaLoading;
     const error = mediaError ? t('watch.failedToLoad') : null;
 
+    // Fetch variants for quality switcher (only for successfully transcoded videos)
+    useEffect(() => {
+        if (!media || media.encoding_status !== 'success' && media.encoding_status !== 'partial') {
+            return;
+        }
+        const mediaId = Number(id);
+        if (!mediaId || mediaId <= 0) return;
+
+        mediaApi.getVariants(mediaId)
+            .then(res => {
+                if (res.data?.variants) {
+                    // Filter to only successful video variants for quality switching
+                    const successful = res.data.variants.filter(
+                        v => v.status === 'success' && (
+                            v.output_path?.includes('.m3u8') ||
+                            v.profile_name?.includes('playlist')
+                        )
+                    );
+                    // Sort by resolution descending (highest first)
+                    successful.sort((a, b) => {
+                        const parseRes = (r: string) => parseInt(r.replace(/\D/g, '')) || 0;
+                        return parseRes(b.resolution) - parseRes(a.resolution);
+                    });
+                    setVariants(successful);
+                }
+            })
+            .catch(() => { /* variants are optional */
+            });
+    }, [media?.id, media?.encoding_status, id]);
+
+    // HLS player setup with quality level control
     useEffect(() => {
         if (!media || !videoRef.current) return;
 
@@ -52,19 +91,38 @@ const WatchPage = () => {
         const hlsUrl = media.hls_file ? getFullUrl(media.hls_file) : null;
         const originalUrl = getFullUrl(media.url);
 
+        // Cleanup previous HLS instance
+        if (hlsRef.current) {
+            hlsRef.current.destroy();
+            hlsRef.current = null;
+        }
+
         if (hlsUrl && Hls.isSupported()) {
-            const hls = new Hls();
+            const hls = new Hls({
+                enableWorker: true,
+                lowLatencyMode: true,
+            });
             hls.loadSource(hlsUrl);
             hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
                 video.play().catch(() => {
                     // Autoplay might be blocked
                     console.log("Autoplay blocked");
                 });
+                // Store available levels for quality switching
+                if (data.levels.length > 1) {
+                    setCurrentLevel(-1); // auto by default
+                }
             });
+            // Track level changes for UI sync
+            hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
+                setCurrentLevel(data.level);
+            });
+            hlsRef.current = hls;
 
             return () => {
                 hls.destroy();
+                hlsRef.current = null;
             };
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
             // Native HLS support (Safari)
@@ -74,6 +132,32 @@ const WatchPage = () => {
             video.src = originalUrl;
         }
     }, [media]);
+
+    // Quality level switch handler
+    const handleQualityChange = useCallback((levelIndex: number) => {
+        if (hlsRef.current) {
+            // Map variant index to HLS level (levels are ordered by HLS, usually descending bitrate)
+            // levelIndex -1 = auto, 0+ = specific level
+            hlsRef.current.currentLevel = levelIndex;
+            setCurrentLevel(levelIndex);
+        }
+        setShowQualityMenu(false);
+    }, []);
+
+    // Retry transcoding handler
+    const handleRetry = useCallback(async () => {
+        if (!media || retrying) return;
+        setRetrying(true);
+        try {
+            await mediaApi.retryTranscode(media.id);
+            // Reload the page data after a short delay to show processing state
+            setTimeout(() => window.location.reload(), 1000);
+        } catch {
+            // Error silently — user can see the button still there
+        } finally {
+            setRetrying(false);
+        }
+    }, [media, retrying]);
 
     if (loading) {
         return (
@@ -146,19 +230,102 @@ const WatchPage = () => {
                         Your browser does not support the video tag.
                     </video>
 
-                    {/* Processing Indicator */}
+                    {/* Quality Switcher — only when HLS has multiple levels or variants available */}
+                    {(variants.length > 0 || (hlsRef.current && (hlsRef.current.levels?.length ?? 0) > 1)) && (
+                        <div className="absolute bottom-16 right-3 z-10">
+                            <div className="relative">
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    className="bg-black/70 hover:bg-black/90 text-white border-white/20 backdrop-blur-md text-xs gap-1.5 h-7 px-2"
+                                    onClick={() => setShowQualityMenu(!showQualityMenu)}
+                                >
+                                    <Settings size={12}/>
+                                    {currentLevel === -1 ? 'AUTO' :
+                                        variants[currentLevel]?.resolution || `${currentLevel}p`}
+                                </Button>
+                                {showQualityMenu && (
+                                    <div
+                                        className="absolute bottom-full right-0 mb-1 bg-black/90 backdrop-blur-md border border-white/20 rounded-lg overflow-hidden min-w-[120px] shadow-xl">
+                                        <button
+                                            className={`w-full text-left text-xs px-3 py-1.5 text-white hover:bg-white/10 transition-colors flex justify-between items-center ${currentLevel === -1 ? 'bg-blue-600/40 font-semibold' : ''}`}
+                                            onClick={() => handleQualityChange(-1)}
+                                        >
+                                            <span>AUTO</span>
+                                            {currentLevel === -1 && <span>✓</span>}
+                                        </button>
+                                        {hlsRef.current?.levels?.map((level, idx) => {
+                                            const width = level.width;
+                                            const height = level.height;
+                                            const label = height >= 720 ? `${height}p` : `${width}x${height}`;
+                                            return (
+                                                <button
+                                                    key={idx}
+                                                    className={`w-full text-left text-xs px-3 py-1.5 text-white hover:bg-white/10 transition-colors flex justify-between items-center ${currentLevel === idx ? 'bg-blue-600/40 font-semibold' : ''}`}
+                                                    onClick={() => handleQualityChange(idx)}
+                                                >
+                                                    <span>{label}</span>
+                                                    {currentLevel === idx && <span>✓</span>}
+                                                </button>
+                                            );
+                                        }) || variants.map((v, idx) => (
+                                            <button
+                                                key={v.task_id || idx}
+                                                className={`w-full text-left text-xs px-3 py-1.5 text-white hover:bg-white/10 transition-colors flex justify-between items-center ${currentLevel === idx ? 'bg-blue-600/40 font-semibold' : ''}`}
+                                                onClick={() => handleQualityChange(idx)}
+                                            >
+                                                <span>{v.profile_name || v.resolution}</span>
+                                                {v.status === 'success' && <span className="text-green-400">✓</span>}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Encoding Status Indicator */}
                     {isProcessing && (
-                        <div className="absolute top-3 left-3 z-10">
+                        <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
                             <Badge
                                 variant="secondary"
-                                className="gap-1 bg-black/60 text-white border-white/20 backdrop-blur-md text-[10px] px-1.5 py-0 h-5 hover:bg-black/60"
+                                className="gap-1 bg-black/60 text-white border-white/20 backdrop-blur-md text-[10px] px-1.5 py-0 h-5 whitespace-nowrap"
                             >
                                 {media.encoding_status === 'processing' ? (
-                                    <><Loader2 size={9} className="animate-spin"/>{t('watch.transcoding')}</>
+                                    <><Loader2 size={9}
+                                               className="animate-spin"/>{t('watch.transcoding') || 'Transcoding...'}</>
+                                ) : media.encoding_status === 'failed' ? (
+                                    <><AlertTriangle size={9}/>{t('watch.failed') || 'Failed'}</>
+                                ) : media.encoding_status === 'pending' ? (
+                                    <><Eye size={9}/>{t('watch.optimizing') || 'Queued'}</>
                                 ) : (
-                                    <><Eye size={9}/>{t('watch.optimizing')}</>
+                                    <><Eye size={9}/>{t('watch.partial') || 'Partial'}</>
                                 )}
                             </Badge>
+
+                            {/* Retry button for failed status */}
+                            {media.encoding_status === 'failed' && (
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    className="gap-1 bg-black/60 hover:bg-red-600/80 text-white border-white/20 backdrop-blur-md text-[10px] px-1.5 h-5"
+                                    onClick={handleRetry}
+                                    disabled={retrying}
+                                >
+                                    <RefreshCw size={9} className={retrying ? 'animate-spin' : ''}/>
+                                    {retrying ? 'Retrying...' : 'Retry'}
+                                </Button>
+                            )}
+
+                            {/* Fallback to MP4 indicator for non-success states */}
+                            {media.encoding_status !== 'success' && media.url && (
+                                <Badge
+                                    variant="outline"
+                                    className="gap-1 bg-black/60 text-yellow-300 border-yellow-500/30 backdrop-blur-md text-[10px] px-1.5 py-0 h-5"
+                                >
+                                    MP4 Fallback
+                                </Badge>
+                            )}
                         </div>
                     )}
                 </div>

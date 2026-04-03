@@ -162,6 +162,20 @@ func (_u *UserUpdate) SetNillableIsStaff(v *bool) *UserUpdate {
 	return _u
 }
 
+// SetRole sets the "role" field.
+func (_u *UserUpdate) SetRole(v user.Role) *UserUpdate {
+	_u.mutation.SetRole(v)
+	return _u
+}
+
+// SetNillableRole sets the "role" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableRole(v *user.Role) *UserUpdate {
+	if v != nil {
+		_u.SetRole(*v)
+	}
+	return _u
+}
+
 // SetIsSuperuser sets the "is_superuser" field.
 func (_u *UserUpdate) SetIsSuperuser(v bool) *UserUpdate {
 	_u.mutation.SetIsSuperuser(v)
@@ -817,6 +831,11 @@ func (_u *UserUpdate) check() error {
 			return &ValidationError{Name: "last_name", err: fmt.Errorf(`entity: validator failed for field "User.last_name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Role(); ok {
+		if err := user.RoleValidator(v); err != nil {
+			return &ValidationError{Name: "role", err: fmt.Errorf(`entity: validator failed for field "User.role": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Title(); ok {
 		if err := user.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "User.title": %w`, err)}
@@ -882,6 +901,9 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.IsStaff(); ok {
 		_spec.SetField(user.FieldIsStaff, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Role(); ok {
+		_spec.SetField(user.FieldRole, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.IsSuperuser(); ok {
 		_spec.SetField(user.FieldIsSuperuser, field.TypeBool, value)
@@ -1499,6 +1521,20 @@ func (_u *UserUpdateOne) SetIsStaff(v bool) *UserUpdateOne {
 func (_u *UserUpdateOne) SetNillableIsStaff(v *bool) *UserUpdateOne {
 	if v != nil {
 		_u.SetIsStaff(*v)
+	}
+	return _u
+}
+
+// SetRole sets the "role" field.
+func (_u *UserUpdateOne) SetRole(v user.Role) *UserUpdateOne {
+	_u.mutation.SetRole(v)
+	return _u
+}
+
+// SetNillableRole sets the "role" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableRole(v *user.Role) *UserUpdateOne {
+	if v != nil {
+		_u.SetRole(*v)
 	}
 	return _u
 }
@@ -2171,6 +2207,11 @@ func (_u *UserUpdateOne) check() error {
 			return &ValidationError{Name: "last_name", err: fmt.Errorf(`entity: validator failed for field "User.last_name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Role(); ok {
+		if err := user.RoleValidator(v); err != nil {
+			return &ValidationError{Name: "role", err: fmt.Errorf(`entity: validator failed for field "User.role": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Title(); ok {
 		if err := user.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "User.title": %w`, err)}
@@ -2253,6 +2294,9 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.IsStaff(); ok {
 		_spec.SetField(user.FieldIsStaff, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Role(); ok {
+		_spec.SetField(user.FieldRole, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.IsSuperuser(); ok {
 		_spec.SetField(user.FieldIsSuperuser, field.TypeBool, value)

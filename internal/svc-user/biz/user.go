@@ -15,6 +15,7 @@ import (
 	"github.com/origadmin/runtime/log"
 	"github.com/origadmin/toolkits/crypto/hash"
 	"origadmin/application/origcms/api/gen/v1/types"
+	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/svc-user/dto"
 )
 
@@ -102,4 +103,14 @@ func (uc *UserUseCase) VerifyPassword(ctx context.Context, userID int64, plainPa
 // HashPassword hashes a plain-text password.
 func (uc *UserUseCase) HashPassword(plainPassword string) (string, error) {
 	return uc.hasher.Hash(plainPassword)
+}
+
+// GetUserEntity returns the raw ent entity.User (for fields not in proto types, e.g. role).
+func (uc *UserUseCase) GetUserEntity(ctx context.Context, id int64) (*entity.User, error) {
+	return uc.repo.GetEntity(ctx, id)
+}
+
+// SetUserRole updates a user's role.
+func (uc *UserUseCase) SetUserRole(ctx context.Context, id int64, role string) error {
+	return uc.repo.SetUserRole(ctx, id, role)
 }

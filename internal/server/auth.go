@@ -88,15 +88,18 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Look up user by username
+	// Look up user by username (entity for role field)
 	u, err := h.uc.GetUserByUsername(c.Request.Context(), req.Username)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return
 	}
 
-	// DEBUG: 打印用户信息
-	slog.Info("user from GetUserByUsername", "id", u.Id, "username", u.Username, "is_staff", u.IsStaff)
+	// Get role from entity (types.User doesn't have role field)
+	userRole := "user"
+	if entUser, entErr := h.uc.GetUserEntity(c.Request.Context(), u.Id); entErr == nil && entUser.Role != "" {
+		userRole = entUser.Role
+	}
 
 	// Verify password
 	if err := h.uc.VerifyPassword(c.Request.Context(), u.Id, req.Password); err != nil {
@@ -104,7 +107,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.jwt.Generate(u.Id, u.Username, u.IsStaff)
+	token, err := h.jwt.Generate(u.Id, u.Username, u.IsStaff, userRole)
 	if err != nil {
 		slog.Error("failed to generate token", "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "token generation failed"})
@@ -151,7 +154,10 @@ func (h *AuthHandler) SignUp(c *gin.Context) {
 		return
 	}
 
-	token, err := h.jwt.Generate(created.Id, created.Username, created.IsStaff)
+	// First registered user becomes admin
+	_ = h.uc.SetUserRole(c.Request.Context(), created.Id, "admin")
+
+	token, err := h.jwt.Generate(created.Id, created.Username, created.IsStaff, "admin")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "token generation failed"})
 		return
@@ -205,6 +211,24 @@ func JWTMiddleware(jwtMgr *auth.Manager) gin.HandlerFunc {
 			return
 		}
 		c.Set("claims", claims)
+		c.Next()
+	}
+}
+
+// AdminMiddleware requires JWT + admin (or staff) role.
+func AdminMiddleware(jwtMgr *auth.Manager) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// First run standard JWT check
+		JWTMiddleware(jwtMgr)(c)
+		if c.IsAborted() {
+			return
+		}
+
+		claims, ok := c.MustGet("claims").(*auth.Claims)
+		if !ok || claims.Role != "admin" && !claims.IsStaff {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "admin access required"})
+			return
+		}
 		c.Next()
 	}
 }

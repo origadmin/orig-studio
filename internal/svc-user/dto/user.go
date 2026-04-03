@@ -10,6 +10,7 @@ import (
 
 	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/api/gen/v1/user"
+	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/helpers/repo"
 )
 
@@ -35,6 +36,12 @@ type UserRepo interface {
 	GetUserSetting(context.Context, int64) (*types.UserSetting, error)
 
 	UpdateUserStatus(context.Context, int64, int8) error
+
+	// GetEntity returns the raw ent entity (for fields not in proto types, e.g. role).
+	GetEntity(context.Context, int64) (*entity.User, error)
+
+	// SetUserRole updates a user's role directly via ent.
+	SetUserRole(context.Context, int64, string) error
 }
 
 // UserQueryOption specifies options for querying users.

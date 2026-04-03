@@ -29,6 +29,7 @@ func (User) Fields() []ent.Field {
 		field.String("last_name").Optional().MaxLen(150),
 		field.Bool("is_active").Default(true),
 		field.Bool("is_staff").Default(false),
+		field.Enum("role").Values("user", "admin", "editor").Default("user"),
 		field.Bool("is_superuser").Default(false),
 		field.Bool("is_approved").Optional(),
 		field.Bool("is_featured").Default(false),

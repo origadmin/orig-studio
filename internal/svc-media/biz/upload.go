@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
-	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -356,157 +355,8 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 	return createdMedia, nil
 }
 
-// ProcessMedia handles background tasks like thumbnail generation and multi-variant HLS transcoding.
-func (uc *UploadUseCase) ProcessMedia(
-	ctx context.Context,
-	mediaID int64,
-	mediaPath, contentType string,
-) {
-	// Base directory for data
-	baseDir := "./data/uploads"
-	fullPath := filepath.Join(baseDir, mediaPath)
-
-	// Update overall media status to processing
-	updateCtx, cancel := context.WithTimeout(context.Background(), 2*time.Hour)
-	defer cancel()
-
-	media, err := uc.mediaRepo.Get(updateCtx, mediaID)
-	if err != nil {
-		uc.log.Errorf("failed to get media %d for processing: %v", mediaID, err)
-		return
-	}
-
-	media.EncodingStatus = "processing"
-	_, _ = uc.mediaRepo.Update(updateCtx, media)
-
-	// 1. Generate Thumbnail
-	if media.Thumbnail == "" {
-		thumbDir := filepath.Join(baseDir, "thumbnails")
-		thumbFilename := fmt.Sprintf("%d.jpg", mediaID)
-		thumbPath := filepath.Join(thumbDir, thumbFilename)
-
-		if err := os.MkdirAll(thumbDir, 0o755); err != nil {
-			uc.log.Errorf("failed to create thumbnails directory: %v", err)
-		} else {
-			uc.log.Infof("generating thumbnail for media %d", mediaID)
-			err = ffmpeg.ExtractThumbnail(ctx, fullPath, thumbPath, "00:00:05")
-			if err != nil {
-				_ = ffmpeg.ExtractThumbnail(ctx, fullPath, thumbPath, "00:00:00")
-			}
-			media.Thumbnail = fmt.Sprintf("thumbnails/%s", thumbFilename)
-		}
-	}
-
-	// 2. Fetch Active Profiles and Create Tasks
-	profiles, err := uc.profileRepo.ListActive(updateCtx)
-	if err != nil {
-		uc.log.Errorf("failed to list active profiles for media %d: %v", mediaID, err)
-		return
-	}
-
-	tempWorkDir := filepath.Join(baseDir, "temp", fmt.Sprintf("%d", mediaID))
-	if err := os.MkdirAll(tempWorkDir, 0o755); err != nil {
-		uc.log.Errorf("failed to create temp work directory %s: %v", tempWorkDir, err)
-		return
-	}
-	defer os.RemoveAll(tempWorkDir) // clean up intermediate MP4s
-
-	var intermediateFiles []string
-	var tasks []*EncodingTask
-
-	for _, p := range profiles {
-		task := &EncodingTask{
-			MediaId:   mediaID,
-			ProfileId: p.Id,
-			Status:    "pending",
-			Progress:  0,
-		}
-		t, err := uc.encodingRepo.Create(updateCtx, task)
-		if err == nil {
-			tasks = append(tasks, t)
-		}
-	}
-
-	// 3. Variant Transcoding
-	for _, t := range tasks {
-		profile, err := uc.profileRepo.Get(updateCtx, t.ProfileId)
-		if err != nil {
-			continue
-		}
-
-		t.Status = "processing"
-		t.Progress = 10
-		_, _ = uc.encodingRepo.Update(updateCtx, t)
-		uc.mediaUseCase.Publish(mediaID, &EncodingEvent{MediaId: mediaID, Task: t})
-
-		variantPath := filepath.Join(
-			tempWorkDir,
-			fmt.Sprintf("variant_%d.%s", profile.Id, profile.Extension),
-		)
-		uc.log.Infof("encoding variant for profile %s", profile.Name)
-
-		err = ffmpeg.TranscodeToMP4(
-			updateCtx,
-			fullPath,
-			variantPath,
-			profile.Resolution,
-			profile.VideoCodec,
-			profile.AudioCodec,
-			profile.VideoBitrate,
-			profile.AudioBitrate,
-		)
-		if err != nil {
-			uc.log.Errorf("transcoding failed for profile %s: %v", profile.Name, err)
-			t.Status = "failed"
-			t.ErrorMessage = err.Error()
-			_, _ = uc.encodingRepo.Update(updateCtx, t)
-			uc.mediaUseCase.Publish(mediaID, &EncodingEvent{MediaId: mediaID, Task: t})
-			continue
-		}
-
-		t.Status = "success"
-		t.Progress = 100
-		t.OutputPath = variantPath
-		_, _ = uc.encodingRepo.Update(updateCtx, t)
-		uc.mediaUseCase.Publish(mediaID, &EncodingEvent{MediaId: mediaID, Task: t})
-		intermediateFiles = append(intermediateFiles, variantPath)
-	}
-
-	// 4. Packaging with ffmpeg HLS muxer
-	if len(intermediateFiles) > 0 {
-		hlsDir := filepath.Join(baseDir, "hls", fmt.Sprintf("%d", mediaID))
-		uc.log.Infof("packaging multi-variant HLS for media %d at %s", mediaID, hlsDir)
-
-		// Build variant info from successful profiles
-		var variants []ffmpeg.VariantInfo
-		for _, p := range profiles {
-			if p.Extension != "mp4" && p.Extension != "webm" {
-				continue
-			}
-			variants = append(variants, ffmpeg.VariantInfo{
-				Name:       p.Name,
-				Resolution: ffmpeg.ResolutionToSize(p.Resolution),
-				Bandwidth:  1_000_000, // fallback estimate
-			})
-		}
-
-		err = ffmpeg.MP4HLS(updateCtx, hlsDir, intermediateFiles, variants)
-		if err != nil {
-			uc.log.Errorf("HLS packaging failed for media %d: %v", mediaID, err)
-			media.EncodingStatus = "failed"
-		} else {
-			media.EncodingStatus = "success"
-			media.HlsFile = fmt.Sprintf("hls/%d/master.m3u8", mediaID)
-		}
-	} else {
-		media.EncodingStatus = "failed"
-	}
-
-	// Final update
-	if _, err := uc.mediaRepo.Update(updateCtx, media); err != nil {
-		uc.log.Errorf("failed to update media %d after processing: %v", mediaID, err)
-	}
-}
+// ProcessMedia removed: legacy sync transcoding method, replaced by Watermill-driven TranscodeHandler.
+// See transcode_handler.go for the new implementation.
 
 // AbortMultipartUpload cancels the upload and cleans up.
 func (uc *UploadUseCase) AbortMultipartUpload(ctx context.Context, uploadID string) error {
@@ -567,7 +417,10 @@ func (uc *UploadUseCase) RetryTranscode(ctx context.Context, mediaID int64) erro
 
 	// Only allow retry for failed media — do not interrupt in-progress tasks
 	if media.EncodingStatus != "failed" {
-		return fmt.Errorf("cannot retry media with status %q, only 'failed' allowed", media.EncodingStatus)
+		return fmt.Errorf(
+			"cannot retry media with status %q, only 'failed' allowed",
+			media.EncodingStatus,
+		)
 	}
 
 	// Validate that the source file still exists

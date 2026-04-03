@@ -109,6 +109,20 @@ func (_c *UserCreate) SetNillableIsStaff(v *bool) *UserCreate {
 	return _c
 }
 
+// SetRole sets the "role" field.
+func (_c *UserCreate) SetRole(v user.Role) *UserCreate {
+	_c.mutation.SetRole(v)
+	return _c
+}
+
+// SetNillableRole sets the "role" field if the given value is not nil.
+func (_c *UserCreate) SetNillableRole(v *user.Role) *UserCreate {
+	if v != nil {
+		_c.SetRole(*v)
+	}
+	return _c
+}
+
 // SetIsSuperuser sets the "is_superuser" field.
 func (_c *UserCreate) SetIsSuperuser(v bool) *UserCreate {
 	_c.mutation.SetIsSuperuser(v)
@@ -511,6 +525,10 @@ func (_c *UserCreate) defaults() {
 		v := user.DefaultIsStaff
 		_c.mutation.SetIsStaff(v)
 	}
+	if _, ok := _c.mutation.Role(); !ok {
+		v := user.DefaultRole
+		_c.mutation.SetRole(v)
+	}
 	if _, ok := _c.mutation.IsSuperuser(); !ok {
 		v := user.DefaultIsSuperuser
 		_c.mutation.SetIsSuperuser(v)
@@ -602,6 +620,14 @@ func (_c *UserCreate) check() error {
 	}
 	if _, ok := _c.mutation.IsStaff(); !ok {
 		return &ValidationError{Name: "is_staff", err: errors.New(`entity: missing required field "User.is_staff"`)}
+	}
+	if _, ok := _c.mutation.Role(); !ok {
+		return &ValidationError{Name: "role", err: errors.New(`entity: missing required field "User.role"`)}
+	}
+	if v, ok := _c.mutation.Role(); ok {
+		if err := user.RoleValidator(v); err != nil {
+			return &ValidationError{Name: "role", err: fmt.Errorf(`entity: validator failed for field "User.role": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.IsSuperuser(); !ok {
 		return &ValidationError{Name: "is_superuser", err: errors.New(`entity: missing required field "User.is_superuser"`)}
@@ -705,6 +731,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.IsStaff(); ok {
 		_spec.SetField(user.FieldIsStaff, field.TypeBool, value)
 		_node.IsStaff = value
+	}
+	if value, ok := _c.mutation.Role(); ok {
+		_spec.SetField(user.FieldRole, field.TypeEnum, value)
+		_node.Role = value
 	}
 	if value, ok := _c.mutation.IsSuperuser(); ok {
 		_spec.SetField(user.FieldIsSuperuser, field.TypeBool, value)

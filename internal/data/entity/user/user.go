@@ -3,6 +3,7 @@
 package user
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -30,6 +31,8 @@ const (
 	FieldIsActive = "is_active"
 	// FieldIsStaff holds the string denoting the is_staff field in the database.
 	FieldIsStaff = "is_staff"
+	// FieldRole holds the string denoting the role field in the database.
+	FieldRole = "role"
 	// FieldIsSuperuser holds the string denoting the is_superuser field in the database.
 	FieldIsSuperuser = "is_superuser"
 	// FieldIsApproved holds the string denoting the is_approved field in the database.
@@ -150,6 +153,7 @@ var Columns = []string{
 	FieldLastName,
 	FieldIsActive,
 	FieldIsStaff,
+	FieldRole,
 	FieldIsSuperuser,
 	FieldIsApproved,
 	FieldIsFeatured,
@@ -250,6 +254,33 @@ var (
 	DefaultDateAdded func() time.Time
 )
 
+// Role defines the type for the "role" enum field.
+type Role string
+
+// RoleUser is the default value of the Role enum.
+const DefaultRole = RoleUser
+
+// Role values.
+const (
+	RoleUser   Role = "user"
+	RoleAdmin  Role = "admin"
+	RoleEditor Role = "editor"
+)
+
+func (r Role) String() string {
+	return string(r)
+}
+
+// RoleValidator is a validator for the "role" field enum values. It is called by the builders before save.
+func RoleValidator(r Role) error {
+	switch r {
+	case RoleUser, RoleAdmin, RoleEditor:
+		return nil
+	default:
+		return fmt.Errorf("user: invalid enum value for role field: %q", r)
+	}
+}
+
 // OrderOption defines the ordering options for the User queries.
 type OrderOption func(*sql.Selector)
 
@@ -296,6 +327,11 @@ func ByIsActive(opts ...sql.OrderTermOption) OrderOption {
 // ByIsStaff orders the results by the is_staff field.
 func ByIsStaff(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsStaff, opts...).ToFunc()
+}
+
+// ByRole orders the results by the role field.
+func ByRole(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRole, opts...).ToFunc()
 }
 
 // ByIsSuperuser orders the results by the is_superuser field.

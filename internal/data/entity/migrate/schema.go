@@ -643,6 +643,7 @@ var (
 		{Name: "last_name", Type: field.TypeString, Nullable: true, Size: 150},
 		{Name: "is_active", Type: field.TypeBool, Default: true},
 		{Name: "is_staff", Type: field.TypeBool, Default: false},
+		{Name: "role", Type: field.TypeEnum, Enums: []string{"user", "admin", "editor"}, Default: "user"},
 		{Name: "is_superuser", Type: field.TypeBool, Default: false},
 		{Name: "is_approved", Type: field.TypeBool, Nullable: true},
 		{Name: "is_featured", Type: field.TypeBool, Default: false},
@@ -670,13 +671,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "users_user_files_favorite_user",
-				Columns:    []*schema.Column{UsersUserColumns[25]},
+				Columns:    []*schema.Column{UsersUserColumns[26]},
 				RefColumns: []*schema.Column{FilesFavoriteColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "users_user_files_like_user",
-				Columns:    []*schema.Column{UsersUserColumns[26]},
+				Columns:    []*schema.Column{UsersUserColumns[27]},
 				RefColumns: []*schema.Column{FilesLikeColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -705,7 +706,7 @@ var (
 			{
 				Name:    "user_date_added",
 				Unique:  false,
-				Columns: []*schema.Column{UsersUserColumns[23]},
+				Columns: []*schema.Column{UsersUserColumns[24]},
 			},
 		},
 	}

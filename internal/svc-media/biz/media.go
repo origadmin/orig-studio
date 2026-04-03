@@ -40,7 +40,11 @@ type MediaRepo interface {
 	// CountByEncodingStatus returns per-status media counts using a single GROUP BY query.
 	CountByEncodingStatus(ctx context.Context) (*StatusCounts, error)
 	// ListFilteredByEncodingStatus returns a paginated list of media matching the given encoding statuses.
-	ListFilteredByEncodingStatus(ctx context.Context, statuses []string, page, pageSize int) ([]*Media, int, error)
+	ListFilteredByEncodingStatus(
+		ctx context.Context,
+		statuses []string,
+		page, pageSize int,
+	) ([]*Media, int, error)
 }
 
 // EncodeProfile represents an encoding preset.
@@ -89,7 +93,12 @@ type EncodingTaskRepo interface {
 	// DeleteByMedia deletes all encoding tasks for a given media ID.
 	DeleteByMedia(ctx context.Context, mediaID int64) error
 	// ListFlat returns a paginated flat list of tasks filtered by status/media_id.
-	ListFlat(ctx context.Context, status string, mediaId *int64, offset, limit int) ([]*EncodingTask, int, error)
+	ListFlat(
+		ctx context.Context,
+		status string,
+		mediaId *int64,
+		offset, limit int,
+	) ([]*EncodingTask, int, error)
 	// CountByStatus returns per-status counts from the encoding_task table (NOT the media table).
 	CountByStatus(ctx context.Context) (*StatusCounts, error)
 }
@@ -104,7 +113,12 @@ type MediaUseCase struct {
 	subs map[int64][]chan *EncodingEvent
 }
 
-func NewMediaUseCase(repo MediaRepo, profileRepo EncodeProfileRepo, encodingRepo EncodingTaskRepo, logger log.Logger) *MediaUseCase {
+func NewMediaUseCase(
+	repo MediaRepo,
+	profileRepo EncodeProfileRepo,
+	encodingRepo EncodingTaskRepo,
+	logger log.Logger,
+) *MediaUseCase {
 	return &MediaUseCase{
 		repo:         repo,
 		profileRepo:  profileRepo,
@@ -118,7 +132,10 @@ func (uc *MediaUseCase) GetMedia(ctx context.Context, id int64) (*Media, error) 
 	return uc.repo.Get(ctx, id)
 }
 
-func (uc *MediaUseCase) ListMedias(ctx context.Context, opts ...*dto.MediaQueryOption) ([]*Media, int32, error) {
+func (uc *MediaUseCase) ListMedias(
+	ctx context.Context,
+	opts ...*dto.MediaQueryOption,
+) ([]*Media, int32, error) {
 	return uc.repo.List(ctx, opts...)
 }
 
@@ -138,7 +155,10 @@ func (uc *MediaUseCase) IncrementViewCount(ctx context.Context, id int64) (int64
 	return uc.repo.IncrementViewCount(ctx, id)
 }
 
-func (uc *MediaUseCase) ListEncodingTasks(ctx context.Context, mediaId int64) ([]*EncodingTask, error) {
+func (uc *MediaUseCase) ListEncodingTasks(
+	ctx context.Context,
+	mediaId int64,
+) ([]*EncodingTask, error) {
 	return uc.encodingRepo.ListByMedia(ctx, mediaId)
 }
 
@@ -153,7 +173,11 @@ func (uc *MediaUseCase) RetryTask(ctx context.Context, taskID int) (*EncodingTas
 
 	// Only allow retrying failed or partial tasks
 	if task.Status != "failed" && task.Status != "partial" {
-		return nil, fmt.Errorf("cannot retry task %d with status %q (only 'failed' can be retried)", taskID, task.Status)
+		return nil, fmt.Errorf(
+			"cannot retry task %d with status %q (only 'failed' can be retried)",
+			taskID,
+			task.Status,
+		)
 	}
 
 	task.Status = "pending"
@@ -165,7 +189,12 @@ func (uc *MediaUseCase) RetryTask(ctx context.Context, taskID int) (*EncodingTas
 		return nil, fmt.Errorf("failed to reset task %d: %w", taskID, err)
 	}
 
-	uc.log.Infof("task %d (media=%d profile=%d) reset to pending for retry", taskID, updated.MediaId, updated.ProfileId)
+	uc.log.Infof(
+		"task %d (media=%d profile=%d) reset to pending for retry",
+		taskID,
+		updated.MediaId,
+		updated.ProfileId,
+	)
 	return updated, nil
 }
 
@@ -296,7 +325,10 @@ type StatusCounts struct {
 	Success    int `json:"success"`
 }
 
-func (uc *MediaUseCase) GetTranscodingStatus(ctx context.Context, filter *TranscodingStatusFilter) (*TranscodingStatus, error) {
+func (uc *MediaUseCase) GetTranscodingStatus(
+	ctx context.Context,
+	filter *TranscodingStatusFilter,
+) (*TranscodingStatus, error) {
 	if filter == nil {
 		filter = &TranscodingStatusFilter{Status: "active", Page: 1, PageSize: 20}
 	}
@@ -327,7 +359,12 @@ func (uc *MediaUseCase) GetTranscodingStatus(ctx context.Context, filter *Transc
 	listStatuses := statusesForFilter(filter.Status)
 
 	// 3. Fetch filtered media list with pagination (media-level, not task-level).
-	mediaList, total, err := uc.repo.ListFilteredByEncodingStatus(ctx, listStatuses, filter.Page, filter.PageSize)
+	mediaList, total, err := uc.repo.ListFilteredByEncodingStatus(
+		ctx,
+		listStatuses,
+		filter.Page,
+		filter.PageSize,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -352,7 +389,11 @@ func (uc *MediaUseCase) GetTranscodingStatus(ctx context.Context, filter *Transc
 
 // ListEncodingTasksFlat returns a flat, paginated list of encoding tasks (one row per task).
 // Used by the TranscodingStatus page for a pure task-centric view.
-func (uc *MediaUseCase) ListEncodingTasksFlat(ctx context.Context, filter *TranscodingStatusFilter, mediaID *int64) (*FlatTaskList, error) {
+func (uc *MediaUseCase) ListEncodingTasksFlat(
+	ctx context.Context,
+	filter *TranscodingStatusFilter,
+	mediaID *int64,
+) (*FlatTaskList, error) {
 	if filter == nil {
 		filter = &TranscodingStatusFilter{Status: "active", Page: 1, PageSize: 25}
 	}
@@ -419,7 +460,10 @@ func (uc *MediaUseCase) ListEncodingTasksFlat(ctx context.Context, filter *Trans
 // GetMediaVariants returns a comprehensive variant summary for a single media.
 // Used by media detail/management pages to show transcoding status and provide
 // playback URLs to the frontend.
-func (uc *MediaUseCase) GetMediaVariants(ctx context.Context, mediaID int64) (*MediaVariantSummary, error) {
+func (uc *MediaUseCase) GetMediaVariants(
+	ctx context.Context,
+	mediaID int64,
+) (*MediaVariantSummary, error) {
 	// 1. Load media
 	media, err := uc.repo.Get(ctx, mediaID)
 	if err != nil {
@@ -574,6 +618,7 @@ func parseFloat64(s string) (float64, error) {
 	_, err := fmt.Sscanf(s, "%f", &v)
 	return v, err
 }
+
 func statusesForFilter(status string) []string {
 	switch status {
 	case "processing":
@@ -599,7 +644,10 @@ func statusesForFilter(status string) []string {
 
 // Subscribe returns a channel that receives encoding events for a specific media.
 // Pass mediaID=0 to subscribe to all media events (dashboard use).
-func (uc *MediaUseCase) Subscribe(ctx context.Context, mediaID int64) (<-chan *EncodingEvent, func()) {
+func (uc *MediaUseCase) Subscribe(
+	ctx context.Context,
+	mediaID int64,
+) (<-chan *EncodingEvent, func()) {
 	uc.mu.Lock()
 	defer uc.mu.Unlock()
 
@@ -659,12 +707,18 @@ func (uc *MediaUseCase) GetEncodeProfile(ctx context.Context, id int) (*EncodePr
 }
 
 // CreateEncodeProfile creates a new encoding profile.
-func (uc *MediaUseCase) CreateEncodeProfile(ctx context.Context, profile *EncodeProfile) (*EncodeProfile, error) {
+func (uc *MediaUseCase) CreateEncodeProfile(
+	ctx context.Context,
+	profile *EncodeProfile,
+) (*EncodeProfile, error) {
 	return uc.profileRepo.Create(ctx, profile)
 }
 
 // UpdateEncodeProfile updates an existing encoding profile.
-func (uc *MediaUseCase) UpdateEncodeProfile(ctx context.Context, profile *EncodeProfile) (*EncodeProfile, error) {
+func (uc *MediaUseCase) UpdateEncodeProfile(
+	ctx context.Context,
+	profile *EncodeProfile,
+) (*EncodeProfile, error) {
 	return uc.profileRepo.Update(ctx, profile)
 }
 

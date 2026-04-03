@@ -111,6 +111,7 @@ func (r *userRepo) Create(
 		SetIsStaff(in.IsStaff).
 		SetIsSuperuser(in.IsSuperuser).
 		SetLogo(in.Avatar).
+		SetRole("user").
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -265,4 +266,14 @@ func convertUserToProfileProto(u *entity.User) *types.UserProfile {
 		Avatar: u.Logo,
 		Name:   u.Name,
 	}
+}
+
+// GetEntity returns the raw ent entity.User (for fields not in proto types, e.g. role).
+func (r *userRepo) GetEntity(ctx context.Context, id int64) (*entity.User, error) {
+	return r.db.User.Get(ctx, int(id))
+}
+
+// SetUserRole updates a user's role field directly.
+func (r *userRepo) SetUserRole(ctx context.Context, id int64, role string) error {
+	return r.db.User.UpdateOneID(int(id)).SetRole(role).Exec(ctx)
 }

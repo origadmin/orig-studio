@@ -53,7 +53,10 @@ func (r *encodeProfileRepo) Get(ctx context.Context, id int) (*biz.EncodeProfile
 	return convertEncodeProfileToBiz(item), nil
 }
 
-func (r *encodeProfileRepo) Create(ctx context.Context, profile *biz.EncodeProfile) (*biz.EncodeProfile, error) {
+func (r *encodeProfileRepo) Create(
+	ctx context.Context,
+	profile *biz.EncodeProfile,
+) (*biz.EncodeProfile, error) {
 	builder := r.db.EncodeProfile.Create().
 		SetName(profile.Name).
 		SetDescription(profile.Description).
@@ -77,7 +80,10 @@ func (r *encodeProfileRepo) Create(ctx context.Context, profile *biz.EncodeProfi
 	return convertEncodeProfileToBiz(item), nil
 }
 
-func (r *encodeProfileRepo) Update(ctx context.Context, profile *biz.EncodeProfile) (*biz.EncodeProfile, error) {
+func (r *encodeProfileRepo) Update(
+	ctx context.Context,
+	profile *biz.EncodeProfile,
+) (*biz.EncodeProfile, error) {
 	item, err := r.db.EncodeProfile.UpdateOneID(profile.Id).
 		SetName(profile.Name).
 		SetDescription(profile.Description).

@@ -17,6 +17,7 @@ type Claims struct {
 	UserID   int64  `json:"uid"`
 	Username string `json:"username"`
 	IsStaff  bool   `json:"is_staff"`
+	Role string `json:"role"`
 	jwt.RegisteredClaims
 }
 
@@ -37,12 +38,13 @@ func (m *Manager) TTL() time.Duration {
 }
 
 // Generate creates a signed JWT token for the given user.
-func (m *Manager) Generate(userID int64, username string, isStaff bool) (string, error) {
+func (m *Manager) Generate(userID int64, username string, isStaff bool, role string) (string, error) {
 	now := time.Now()
 	claims := Claims{
 		UserID:   userID,
 		Username: username,
 		IsStaff:  isStaff,
+		Role: role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(m.ttl)),

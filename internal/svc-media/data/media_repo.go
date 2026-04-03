@@ -248,7 +248,11 @@ func (r *mediaRepo) CountByEncodingStatus(ctx context.Context) (*biz.StatusCount
 }
 
 // ListFilteredByEncodingStatus returns a paginated list of media filtered by encoding status.
-func (r *mediaRepo) ListFilteredByEncodingStatus(ctx context.Context, statuses []string, page, pageSize int) ([]*types.Media, int, error) {
+func (r *mediaRepo) ListFilteredByEncodingStatus(
+	ctx context.Context,
+	statuses []string,
+	page, pageSize int,
+) ([]*types.Media, int, error) {
 	if len(statuses) == 0 {
 		return nil, 0, nil
 	}

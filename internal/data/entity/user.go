@@ -33,6 +33,8 @@ type User struct {
 	IsActive bool `json:"is_active,omitempty"`
 	// IsStaff holds the value of the "is_staff" field.
 	IsStaff bool `json:"is_staff,omitempty"`
+	// Role holds the value of the "role" field.
+	Role user.Role `json:"role,omitempty"`
 	// IsSuperuser holds the value of the "is_superuser" field.
 	IsSuperuser bool `json:"is_superuser,omitempty"`
 	// IsApproved holds the value of the "is_approved" field.
@@ -188,7 +190,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case user.FieldID, user.FieldMediaCount:
 			values[i] = new(sql.NullInt64)
-		case user.FieldUsername, user.FieldEmail, user.FieldPassword, user.FieldName, user.FieldFirstName, user.FieldLastName, user.FieldTitle, user.FieldDescription, user.FieldLogo, user.FieldLocation:
+		case user.FieldUsername, user.FieldEmail, user.FieldPassword, user.FieldName, user.FieldFirstName, user.FieldLastName, user.FieldRole, user.FieldTitle, user.FieldDescription, user.FieldLogo, user.FieldLocation:
 			values[i] = new(sql.NullString)
 		case user.FieldDateJoined, user.FieldDateAdded, user.FieldLastLogin:
 			values[i] = new(sql.NullTime)
@@ -264,6 +266,12 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field is_staff", values[i])
 			} else if value.Valid {
 				_m.IsStaff = value.Bool
+			}
+		case user.FieldRole:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field role", values[i])
+			} else if value.Valid {
+				_m.Role = user.Role(value.String)
 			}
 		case user.FieldIsSuperuser:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -479,6 +487,9 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("is_staff=")
 	builder.WriteString(fmt.Sprintf("%v", _m.IsStaff))
+	builder.WriteString(", ")
+	builder.WriteString("role=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Role))
 	builder.WriteString(", ")
 	builder.WriteString("is_superuser=")
 	builder.WriteString(fmt.Sprintf("%v", _m.IsSuperuser))

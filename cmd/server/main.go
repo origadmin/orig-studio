@@ -200,9 +200,13 @@ func main() {
 	uploadHandler := server.NewUploadHandler(uploadUC, jwtManager)
 	categoryHandler := server.NewCategoryHandler(db)
 	tagHandler := server.NewTagHandler(db)
-	commentHandler := server.NewCommentHandler(db)
-	playlistHandler := server.NewPlaylistHandler(db)
+	commentHandler := server.NewCommentHandler(db, jwtManager)
+	playlistHandler := server.NewPlaylistHandler(db, jwtManager)
 	feedHandler := server.NewFeedHandler(db)
+	favoriteHandler := server.NewFavoriteHandler(db, jwtManager)
+	likeHandler := server.NewLikeHandler(db, jwtManager)
+	notificationHandler := server.NewNotificationHandler(db, jwtManager)
+	channelHandler := server.NewChannelHandler(db, jwtManager)
 
 	// ── 5. Gin router ───────────────────────────────────────────────
 	if getEnv("GIN_MODE", "debug") == "release" {
@@ -241,6 +245,10 @@ func main() {
 		commentHandler,
 		playlistHandler,
 		feedHandler,
+		favoriteHandler,
+		likeHandler,
+		notificationHandler,
+		channelHandler,
 	)
 
 	// ── 6. Start server ─────────────────────────────────────────────

@@ -14,7 +14,7 @@
 | [M0](#m0-架构准备) | 架构准备 | 锁定服务边界、前端目录重构、废弃 svc-portal | 3 天 | ✅ 已完成 (2026-03-31) |
 | [M1](#m1-基础闭环) | 基础闭环 | 单体模式跑通 + 用户认证 + 前端框架 | 2 周 | ✅ 已完成 (2026-04-03) |
 | [M2](#m2-媒体上传与播放) | 媒体上传与播放 | 文件上传 + 基础视频播放（无转码） | 4 周 | ✅ 已完成 (2026-04-03) |
-| [M3](#m3-视频转码与-hls) | 视频转码与 HLS | Watermill GoChannel 异步转码 + Bento4 HLS + 前端 HLS.js | 4 周 | 🔶 部分完成 (ffmpeg/Bento4 helpers + encode profile + ProcessMedia 逻辑存在; Watermill pubsub 集成待完成) |
+| [M3](#m3-视频转码与-hls) | 视频转码与 HLS | Watermill GoChannel 异步转码 + ffmpeg HLS muxer + 前端 HLS.js | 4 周 | ✅ 已完成 (2026-04-04) |
 | [M4](#m4-完整内容管理) | 完整内容管理 | 评论/收藏/频道/RBAC 权限 | 12 周 | 🔲 未开始 |
 | [M5](#m5-生产就绪) | 生产就绪 | 监控/搜索/对象存储/可观测性 | 20 周 | 🔲 未开始 |
 
@@ -403,7 +403,7 @@ go build ./...
 > 转码执行层定义 `TranscodeWorker` 接口，CE 使用 `goroutineWorker`（goroutine pool + `semaphore.Weighted` 控制并发）。
 > 参考 backend 的 pubsub 模式：`svc-user/service/user.go` 注入 `message.Publisher` 发布事件。
 >
-> **消息流**：
+> **消息流**（✅ 已实现 2026-04-04）：
 > ```
 > CompleteMultipartUpload → publisher.Publish("media.encode.request", msg)
 >                         ↓
@@ -415,18 +415,20 @@ go build ./...
 >                         ↓
 >               goroutine pool (semaphore limits concurrent ffmpeg)
 >                         ↓
->               ffmpeg TranscodeToMP4 → Bento4 MP4HLS → 更新 DB 状态
+>               ffmpeg TranscodeToHLS (direct HLS output, one-pass)
 >                         ↓
 >               publisher.Publish("media.encode.progress", event)
 >                         ↓
 >               SSE 推送到前端（复用 MediaUseCase.Subscribe 现有机制）
 > ```
 >
-> **现有代码审计**（2026-04-03）：
-> - ✅ `internal/helpers/ffmpeg/` — ffprobe/ffmpeg/Bento4 调用封装完整
-> - ✅ `svc-media/biz/media.go` — EncodeProfile/EncodingTask/EncodingEvent 定义 + Subscribe/Publish
-> - ✅ `svc-media/biz/upload.go` — ProcessMedia 完整四步流程（缩略图 → Profiles → TranscodeToMP4 → Bento4 MP4HLS）
-> - ✅ `svc-media/data/encoding_task_repo.go` — EncodingTask CRUD
+> **实现状态**（2026-04-04 更新）：
+> - ✅ `internal/helpers/ffmpeg/` — ffprobe/ffmpeg 封装完整，TranscodeToHLS 直接 HLS 输出
+> - ✅ `internal/helpers/ffmpeg/bento4.go` — GenerateMasterPlaylist 纯 Go 实现
+> - ✅ `svc-media/biz/transcode_handler.go` — Watermill handler，7步流水线，并行提交+结果收集
+> - ✅ `svc-media/biz/transcode_worker.go` — TranscodeWorker 接口 + goroutineWorker (semaphore)
+> - ✅ `svc-media/biz/media.go` — EncodeProfile/EncodingTask/EncodingEvent + Subscribe/Publish/SSE
+> - ✅ `svc-media/data/encoding_task_repo.go` — EncodingTask CRUD + CountByStatus
 > - ✅ `svc-media/data/encode_profile_repo.go` — EncodeProfile CRUD
 > - ✅ `svc-media/data/seed.go` — 22 个预置 profile（h264/h265 240p-1080p）
 > - ✅ `internal/pubsub/pubsub.go` — Topic 常量定义框架（仅 user 事件，需添加 media 事件）
@@ -488,57 +490,63 @@ curl http://localhost:9090/media/encoded/$MEDIA_ID/master.m3u8
 
 ---
 
-### T3.2 HLS 播放前端
+### T3.2 HLS 播放前端 ✅ 已完成 (2026-04-04)
 
-**任务清单**：
-- [ ] 引入 `hls.js` 依赖（`bun add hls.js`）
-- [ ] 实现 `HLSPlayer` 组件（`web/src/components/HLSPlayer.tsx`）
-  - 自动检测 HLS 支持（iOS 原生 / hls.js fallback）
-  - 支持品质切换（360p/720p/自动）
-  - 播放/暂停/进度条/全屏/音量控制
-  - 加载中 Skeleton 占位
-- [ ] 媒体播放页替换 HTML5 原生 video 为 HLSPlayer
-- [ ] 当 encoding_status 为 `processing` 时显示"转码中"状态
-- [ ] 当 encoding_status 为 `failed` 时显示原始文件 fallback 播放器
+> 实际实现：hls.js v1.6.15 已集成，Watch.tsx 包含完整 HLS 播放器 + 品质切换 + 编码状态增强 UI。
+
+**前端 HLS 播放（`web/src/pages/home/Watch.tsx`）**：
+- [x] 引入 `hls.js` 依赖（`hls.js ^1.6.15`，已在 package.json）
+- [x] 实现 HLS 播放核心逻辑（hls.js → Safari native → MP4 fallback 三级降级）
+- [x] **品质切换 UI**（Settings 图标按钮 + 下拉菜单）：AUTO / 多分辨率选项，实时同步当前品质
+- [x] **编码状态增强显示**：
+  - `processing`：旋转 Loader 图标 + "Transcoding..."
+  - `failed`：警告三角 + **Retry 按钮**（调用 retryTranscode API）+ "MP4 Fallback" 标识
+  - `pending`：眼睛图标 + "Queued"
+  - `partial`：眼睛图标 + "Partial"
+  - `success`：无覆盖（正常播放）
+- [x] HLS 实例管理（ref 持有 + cleanup 防内存泄漏 + worker 启用 + 低延迟模式）
+- [x] 变体数据获取（GET /:id/variants → 过滤成功项 → 按分辨率降序排列）
 
 **测试方案**：
 1. 上传 MP4 视频
-2. 等待转码完成（通过 encoding_status 轮询或 WebSocket）
+2. 等待转码完成（通过 encoding_status 轮询或 SSE）
 3. 进入播放页，HLSPlayer 正常加载 master.m3u8
-4. 切换画质（360p/720p）正常工作
+4. 点击 Settings 品质按钮，切换 360p/720p/1080p/AUTO 正常工作
 5. 在 iOS Safari 中验证原生 HLS 播放
+6. 转码中视频显示 "Transcoding..." + MP4 fallback
+7. 失败视频显示 "Failed" + Retry 按钮
 
 **验收标准**：
 - ✅ 转码完成后使用 HLS 播放（不再使用原始 MP4）
-- ✅ 支持画质手动切换
-- ✅ 支持自适应码率（网络差自动降码率）
-- ✅ 转码中状态友好提示
-- ✅ iOS Safari 原生 HLS 正常播放
+- ✅ **支持手动品质切换（Settings 按钮 + 下拉菜单）**
+- ✅ 支持自适应码率（AUTO 模式下 hls.js 自动选择）
+- ✅ **转码中有友好 UI（状态 Badge + MP4 Fallback 标识）**
+- ✅ **失败状态有重试按钮（Retry → API → reload）**
+- ✅ iOS Safari 可播放（原生 HLS fallback）
 
 ---
 
-### T3.3 编码状态实时推送（可选 WebSocket）
+### T3.3 编码状态实时推送 ✅ 已完成 (2026-04-04)
 
-**任务清单**：
-- [ ] 在 svc-media 添加 WebSocket 端点（`/ws/media/:id/status`）
-- [ ] 转码状态变更时推送 WebSocket 消息给订阅客户端
-- [ ] 前端播放页订阅 WebSocket，实时更新 encoding_status
+> 实现方式：SSE (`GET /api/v1/media/transcoding/events`) + `useTranscoding` hook（前端）
 
 **验收标准**：
 - ✅ 上传后前端自动感知转码进度，无需手动刷新
+
+> **Note**: SSE endpoint implemented in `server/media.go:transcodingEvents()`, Watermill publisher in `TranscodeHandler` pushes events on each task status change. Frontend `useTranscoding` hook subscribes to SSE stream.
 
 ---
 
 ### M3 整体验收检查清单
 
 ```
-[ ] 上传 MP4 后自动触发转码
-[ ] encoding_status 状态机正确流转
-[ ] 生成 master.m3u8 和多分辨率 HLS 文件
-[ ] 前端使用 HLS.js 自适应播放
-[ ] 支持手动切换画质
-[ ] 转码中/失败状态有友好 UI 提示
-[ ] iOS Safari 可播放
+[x] 上传 MP4 后自动触发转码
+[x] encoding_status 状态机正确流转
+[x] 生成 master.m3u8 和多分辨率 HLS 文件
+[x] 前端使用 HLS.js 自适应播放 (Watch.tsx)
+[x] 支持手动切换画质 (Settings button + quality menu)
+[x] 转码中/失败状态有友好 UI (Badge + Retry + MP4 fallback)
+[x] iOS Safari 可播放 (native HLS fallback)
 ```
 
 ---

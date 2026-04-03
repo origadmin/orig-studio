@@ -114,7 +114,12 @@ type MediaHandler struct {
 	uploadUC *biz.UploadUseCase
 }
 
-func NewMediaHandler(client *entity.Client, jwtMgr *auth.Manager, uc *biz.MediaUseCase, uploadUC *biz.UploadUseCase) *MediaHandler {
+func NewMediaHandler(
+	client *entity.Client,
+	jwtMgr *auth.Manager,
+	uc *biz.MediaUseCase,
+	uploadUC *biz.UploadUseCase,
+) *MediaHandler {
 	return &MediaHandler{client: client, jwtMgr: jwtMgr, uc: uc, uploadUC: uploadUC}
 }
 
@@ -129,10 +134,24 @@ func (h *MediaHandler) Register(group *gin.RouterGroup) {
 		// 1. Static/Fixed routes MUST come before parameter routes
 		media.GET("/transcoding/status", h.getTranscodingStatus())
 		media.GET("/transcoding/events", h.transcodingEvents())
-		media.GET("/encoding/tasks", h.getEncodingTasksFlat())                       // flat task list for TranscodingStatus page
-		media.GET("/:id/variants", h.getMediaVariants())                             // variant summary for media management page
-		media.POST("/retry", JWTMiddleware(h.jwtMgr), h.retryTaskByID())             // retry by task_id
-		media.POST("/retry-all-failed", JWTMiddleware(h.jwtMgr), h.retryAllFailed()) // retry all failed tasks
+		media.GET(
+			"/encoding/tasks",
+			h.getEncodingTasksFlat(),
+		) // flat task list for TranscodingStatus page
+		media.GET(
+			"/:id/variants",
+			h.getMediaVariants(),
+		) // variant summary for media management page
+		media.POST(
+			"/retry",
+			JWTMiddleware(h.jwtMgr),
+			h.retryTaskByID(),
+		) // retry by task_id
+		media.POST(
+			"/retry-all-failed",
+			JWTMiddleware(h.jwtMgr),
+			h.retryAllFailed(),
+		) // retry all failed tasks
 
 		profiles := media.Group("/profiles")
 		{
@@ -358,11 +377,14 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 		// Store in 'uploads' sub-dir to match Register routes
 		relativePath := "uploads/" + newFilename
 		filePath := filepath.Join(UploadDir, "uploads", newFilename)
-		_ = os.MkdirAll(filepath.Dir(filePath), 0755)
+		_ = os.MkdirAll(filepath.Dir(filePath), 0o755)
 
 		out, err := os.Create(filePath)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file: " + err.Error()})
+			c.JSON(
+				http.StatusInternalServerError,
+				gin.H{"error": "Failed to save file: " + err.Error()},
+			)
 			return
 		}
 		defer out.Close()
@@ -423,7 +445,10 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 		m, err := create.Save(ctx)
 		if err != nil {
 			os.Remove(filePath)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save media record: " + err.Error()})
+			c.JSON(
+				http.StatusInternalServerError,
+				gin.H{"error": "Failed to save media record: " + err.Error()},
+			)
 			return
 		}
 
@@ -599,7 +624,8 @@ func (h *MediaHandler) retryTranscode() gin.HandlerFunc {
 
 		if err := h.uploadUC.RetryTranscode(c.Request.Context(), id); err != nil {
 			statusCode := http.StatusInternalServerError
-			if strings.Contains(err.Error(), "cannot retry") || strings.Contains(err.Error(), "not found") {
+			if strings.Contains(err.Error(), "cannot retry") ||
+				strings.Contains(err.Error(), "not found") {
 				statusCode = http.StatusBadRequest
 			}
 			c.JSON(statusCode, gin.H{"error": err.Error()})
@@ -621,7 +647,8 @@ func (h *MediaHandler) getTranscodingStatus() gin.HandlerFunc {
 		if p, err := strconv.Atoi(c.DefaultQuery("page", "1")); err == nil && p >= 1 {
 			filter.Page = p
 		}
-		if ps, err := strconv.Atoi(c.DefaultQuery("page_size", "20")); err == nil && ps >= 1 && ps <= 100 {
+		if ps, err := strconv.Atoi(c.DefaultQuery("page_size", "20")); err == nil && ps >= 1 &&
+			ps <= 100 {
 			filter.PageSize = ps
 		}
 
@@ -684,7 +711,8 @@ func (h *MediaHandler) getEncodingTasksFlat() gin.HandlerFunc {
 		if p, err := strconv.Atoi(c.DefaultQuery("page", "1")); err == nil && p >= 1 {
 			filter.Page = p
 		}
-		if ps, err := strconv.Atoi(c.DefaultQuery("page_size", "25")); err == nil && ps >= 1 && ps <= 100 {
+		if ps, err := strconv.Atoi(c.DefaultQuery("page_size", "25")); err == nil && ps >= 1 &&
+			ps <= 100 {
 			filter.PageSize = ps
 		}
 
@@ -740,14 +768,18 @@ func (h *MediaHandler) retryTaskByID() gin.HandlerFunc {
 		}
 		taskID, err := strconv.Atoi(taskIDStr)
 		if err != nil || taskID <= 0 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid task_id: must be a positive integer"})
+			c.JSON(
+				http.StatusBadRequest,
+				gin.H{"error": "invalid task_id: must be a positive integer"},
+			)
 			return
 		}
 
 		task, err := h.uc.RetryTask(c.Request.Context(), taskID)
 		if err != nil {
 			statusCode := http.StatusInternalServerError
-			if strings.Contains(err.Error(), "cannot retry") || strings.Contains(err.Error(), "not found") {
+			if strings.Contains(err.Error(), "cannot retry") ||
+				strings.Contains(err.Error(), "not found") {
 				statusCode = http.StatusUnprocessableEntity
 			}
 			c.JSON(statusCode, gin.H{"error": err.Error()})
