@@ -7,19 +7,37 @@ import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {useSearch, Link} from '@tanstack/react-router';
 import {
     ThumbsUp, ThumbsDown, Share2, MessageCircle,
-    MoreHorizontal, UserPlus, Eye, Loader2, Settings, RefreshCw, AlertTriangle
+    MoreHorizontal, UserPlus, Eye, Loader2, Settings, RefreshCw, AlertTriangle, Heart, HeartOff
 } from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Badge} from '@/components/ui/badge';
 import {Card, CardContent} from '@/components/ui/card';
 import {Skeleton} from '@/components/ui/skeleton';
+import {Textarea} from '@/components/ui/textarea';
 import {formatViews, formatDate, formatDuration} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
 import {type Media, type VariantInfo} from '@/lib/api/media';
 import {mediaApi} from '@/lib/api/media';
+import {commentApi} from '@/lib/api/comment';
+import {likeApi} from '@/lib/api/like';
+import {favoriteApi} from '@/lib/api/favorite';
 import {useMediaDetail, useMediaList} from '@/hooks/queries';
 import Hls from 'hls.js';
+
+// Comment component interface
+interface Comment {
+    id: string;
+    content_id?: string;
+    media_id?: string;
+    user_id: string;
+    username: string;
+    parent_id?: string;
+    body: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+}
 
 const WatchPage = () => {
     const {t} = useTranslation();
@@ -34,6 +52,20 @@ const WatchPage = () => {
     const [showQualityMenu, setShowQualityMenu] = useState(false);
     const [retrying, setRetrying] = useState(false);
 
+    // Comments state
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [isLoadingComments, setIsLoadingComments] = useState(false);
+    const [commentText, setCommentText] = useState('');
+    const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
+    // Like and favorite state
+    const [isLiked, setIsLiked] = useState(false);
+    const [isFavorited, setIsFavorited] = useState(false);
+    const [likeCount, setLikeCount] = useState(0);
+    const [favoriteCount, setFavoriteCount] = useState(0);
+    const [isLoadingLike, setIsLoadingLike] = useState(false);
+    const [isLoadingFavorite, setIsLoadingFavorite] = useState(false);
+
     const {data: recData} = useMediaList({
         page_size: 10,
         category_id: media?.edges?.category?.id || undefined,
@@ -43,6 +75,110 @@ const WatchPage = () => {
     const recommendations = recData?.list?.filter(m => m.id !== Number(id)) || [];
     const loading = isMediaLoading;
     const error = mediaError ? t('watch.failedToLoad') : null;
+
+    // Fetch comments for the media
+    useEffect(() => {
+        if (!media) return;
+
+        const fetchComments = async () => {
+            setIsLoadingComments(true);
+            try {
+                const response = await commentApi.getAll({media_id: id});
+                setComments(response?.list || []);
+            } catch (err) {
+                console.error('Failed to fetch comments:', err);
+            } finally {
+                setIsLoadingComments(false);
+            }
+        };
+
+        fetchComments();
+    }, [media, id]);
+
+    // Fetch like and favorite status
+    useEffect(() => {
+        if (!media) return;
+
+        // Initialize counts from media data
+        setLikeCount(media.like_count || 0);
+        setFavoriteCount(media.favorite_count || 0);
+
+        // Check user's like and favorite status
+        const checkLikeStatus = async () => {
+            try {
+                const response = await likeApi.getStatus({media_id: id});
+                setIsLiked(response?.is_liked || false);
+            } catch (err) {
+                // Ignore errors for unauthenticated users
+            }
+        };
+
+        const checkFavoriteStatus = async () => {
+            try {
+                const response = await favoriteApi.getStatus({media_id: id});
+                setIsFavorited(response?.is_favorited || false);
+            } catch (err) {
+                // Ignore errors for unauthenticated users
+            }
+        };
+
+        checkLikeStatus();
+        checkFavoriteStatus();
+    }, [media, id]);
+
+    // Handle comment submission
+    const handleSubmitComment = async () => {
+        if (!commentText.trim() || !media) return;
+
+        setIsSubmittingComment(true);
+        try {
+            await commentApi.create({
+                media_id: id,
+                body: commentText
+            });
+
+            // Clear input and refresh comments
+            setCommentText('');
+            const response = await commentApi.getAll({media_id: id});
+            setComments(response?.list || []);
+        } catch (err) {
+            console.error('Failed to submit comment:', err);
+        } finally {
+            setIsSubmittingComment(false);
+        }
+    };
+
+    // Handle like toggle
+    const handleLikeToggle = async () => {
+        if (!media) return;
+
+        setIsLoadingLike(true);
+        try {
+            await likeApi.toggle({media_id: id});
+            setIsLiked(!isLiked);
+            setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
+        } catch (err) {
+            console.error('Failed to toggle like:', err);
+        } finally {
+            setIsLoadingLike(false);
+        }
+    };
+
+    // Handle favorite toggle
+    const handleFavoriteToggle = async () => {
+        if (!media) return;
+
+        setIsLoadingFavorite(true);
+        try {
+            await favoriteApi.toggle({media_id: id});
+            setIsFavorited(!isFavorited);
+            setFavoriteCount(prev => isFavorited ? prev - 1 : prev + 1);
+        } catch (err) {
+            console.error('Failed to toggle favorite:', err);
+        } finally {
+            setIsLoadingFavorite(false);
+        }
+    };
 
     // Fetch variants for quality switcher (only for successfully transcoded videos)
     useEffect(() => {
@@ -350,24 +486,44 @@ const WatchPage = () => {
                                       className="font-bold text-gray-900 dark:text-white hover:text-blue-600 transition-colors">
                                     {user?.nickname || user?.username || 'Unknown Gopher'}
                                 </Link>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">1.2M {t('watch.subscribers')}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">1.2M {t('common.subscribers')}</p>
                             </div>
                             <Button
                                 className="ml-4 rounded-full bg-gray-900 dark:bg-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200">
-                                {t('watch.subscribe')}
+                                {t('common.subscribe')}
                             </Button>
                         </div>
 
-                        <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full p-1">
-                            <Button variant="ghost"
-                                    className="rounded-l-full gap-2 px-4 hover:bg-gray-200 dark:hover:bg-gray-700">
-                                <ThumbsUp className="w-5 h-5"/>
-                                <span className="text-sm font-medium">{formatViews(media.like_count)}</span>
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full p-1">
+                                <Button
+                                    variant="ghost"
+                                    className={`rounded-l-full gap-2 px-4 hover:bg-gray-200 dark:hover:bg-gray-700 ${isLiked ? 'text-blue-600' : ''}`}
+                                    onClick={handleLikeToggle}
+                                    disabled={isLoadingLike}
+                                >
+                                    <ThumbsUp className="w-5 h-5"/>
+                                    <span className="text-sm font-medium">{formatViews(likeCount)}</span>
+                                </Button>
+                                <div className="w-[1px] h-6 bg-gray-300 dark:bg-gray-600"/>
+                                <Button variant="ghost"
+                                        className="rounded-r-full px-4 hover:bg-gray-200 dark:hover:bg-gray-700">
+                                    <ThumbsDown className="w-5 h-5"/>
+                                </Button>
+                            </div>
+                            <Button
+                                variant="ghost"
+                                className={`gap-2 hover:bg-gray-200 dark:hover:bg-gray-700 ${isFavorited ? 'text-red-600' : ''}`}
+                                onClick={handleFavoriteToggle}
+                                disabled={isLoadingFavorite}
+                            >
+                                {isFavorited ? <Heart className="w-5 h-5 fill-current"/> :
+                                    <HeartOff className="w-5 h-5"/>}
+                                <span className="text-sm font-medium">{formatViews(favoriteCount)}</span>
                             </Button>
-                            <div className="w-[1px] h-6 bg-gray-300 dark:bg-gray-600"/>
-                            <Button variant="ghost"
-                                    className="rounded-r-full px-4 hover:bg-gray-200 dark:hover:bg-gray-700">
-                                <ThumbsDown className="w-5 h-5"/>
+                            <Button variant="ghost" className="gap-2 hover:bg-gray-200 dark:hover:bg-gray-700">
+                                <Share2 className="w-5 h-5"/>
+                                <span className="text-sm font-medium">{t('common.share')}</span>
                             </Button>
                         </div>
                     </div>
@@ -389,6 +545,77 @@ const WatchPage = () => {
                             </p>
                         </CardContent>
                     </Card>
+
+                    {/* Comments Section */}
+                    <div className="mt-8 space-y-6">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                            {t('watch.comments')} ({comments.length})
+                        </h3>
+
+                        {/* Comment Form */}
+                        <Card className="border-none shadow-md rounded-xl">
+                            <CardContent className="p-4">
+                                <Textarea
+                                    placeholder={t('watch.addComment')}
+                                    value={commentText}
+                                    onChange={(e) => setCommentText(e.target.value)}
+                                    className="min-h-[100px] resize-none"
+                                />
+                                <div className="mt-4 flex justify-end">
+                                    <Button
+                                        onClick={handleSubmitComment}
+                                        disabled={isSubmittingComment || !commentText.trim()}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                                    >
+                                        {isSubmittingComment ? t('common.submitting') : t('watch.postComment')}
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Comments List */}
+                        <div className="space-y-4">
+                            {isLoadingComments ? (
+                                <div className="animate-pulse space-y-4">
+                                    {Array.from({length: 3}).map((_, i) => (
+                                        <div key={i} className="flex gap-3">
+                                            <Skeleton className="h-10 w-10 rounded-full"/>
+                                            <div className="flex-1 space-y-2">
+                                                <Skeleton className="h-4 w-1/4"/>
+                                                <Skeleton className="h-3 w-full"/>
+                                                <Skeleton className="h-3 w-3/4"/>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : comments.length === 0 ? (
+                                <p className="text-gray-500 dark:text-gray-400">
+                                    {t('watch.noComments')}
+                                </p>
+                            ) : (
+                                comments.map((comment) => (
+                                    <div key={comment.id} className="flex gap-3">
+                                        <Avatar className="h-10 w-10">
+                                            <AvatarFallback>{comment.username?.[0] || 'U'}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-bold text-gray-900 dark:text-white">
+                                                    {comment.username}
+                                                </span>
+                                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                    {formatDate(comment.created_at)}
+                                                </span>
+                                            </div>
+                                            <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">
+                                                {comment.body}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
 

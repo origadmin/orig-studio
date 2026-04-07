@@ -21,6 +21,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"origadmin/application/origcms/internal/auth"
+	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 	"origadmin/application/origcms/internal/svc-media/biz"
 	"origadmin/application/origcms/internal/svc-media/dto"
 )
@@ -105,17 +106,19 @@ func computeFileMD5(r io.Reader) (string, error) {
 
 // MediaHandler handles media requests.
 type MediaHandler struct {
-	jwtMgr   *auth.Manager
-	uc       *biz.MediaUseCase
-	uploadUC *biz.UploadUseCase
+	jwtMgr         *auth.Manager
+	uc             *biz.MediaUseCase
+	uploadUC       *biz.UploadUseCase
+	likeFavoriteUC *contentbiz.LikeFavoriteUseCase
 }
 
 func NewMediaHandler(
 	jwtMgr *auth.Manager,
 	uc *biz.MediaUseCase,
 	uploadUC *biz.UploadUseCase,
+	likeFavoriteUC *contentbiz.LikeFavoriteUseCase,
 ) *MediaHandler {
-	return &MediaHandler{jwtMgr: jwtMgr, uc: uc, uploadUC: uploadUC}
+	return &MediaHandler{jwtMgr: jwtMgr, uc: uc, uploadUC: uploadUC, likeFavoriteUC: likeFavoriteUC}
 }
 
 func (h *MediaHandler) Register(group *gin.RouterGroup) {
@@ -168,6 +171,11 @@ func (h *MediaHandler) Register(group *gin.RouterGroup) {
 		media.DELETE("/:id", JWTMiddleware(h.jwtMgr), h.deleteMedia())
 		media.GET("/:id/tasks", h.listEncodingTasks())
 		media.POST("/:id/retry", JWTMiddleware(h.jwtMgr), h.retryTranscode())
+		// Like and favorite routes
+		media.POST("/:id/like", JWTMiddleware(h.jwtMgr), h.toggleLike())
+		media.GET("/:id/like", h.getLikeStatus())
+		media.POST("/:id/favorite", JWTMiddleware(h.jwtMgr), h.toggleFavorite())
+		media.GET("/:id/favorite", h.getFavoriteStatus())
 	}
 }
 
@@ -851,6 +859,114 @@ func (h *MediaHandler) deleteEncodeProfile() gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "deleted"})
+	}
+}
+
+// --- Like and Favorite Functions ---
+
+func (h *MediaHandler) toggleLike() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		claims, ok := c.MustGet("claims").(*auth.Claims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			return
+		}
+
+		_, err = h.likeFavoriteUC.ToggleLike(ctx, int(claims.UserID), id, "like")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "like toggled"})
+	}
+}
+
+func (h *MediaHandler) getLikeStatus() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			return
+		}
+
+		var userID int
+		if claims, ok := c.Get("claims"); ok {
+			userID = int(claims.(*auth.Claims).UserID)
+		}
+
+		stats, err := h.likeFavoriteUC.GetMediaStats(ctx, userID, id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"is_liked":   stats.UserLikeType == "like",
+			"like_count": stats.LikeCount,
+		})
+	}
+}
+
+func (h *MediaHandler) toggleFavorite() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		claims, ok := c.MustGet("claims").(*auth.Claims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			return
+		}
+
+		_, err = h.likeFavoriteUC.ToggleFavorite(ctx, int(claims.UserID), id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "favorite toggled"})
+	}
+}
+
+func (h *MediaHandler) getFavoriteStatus() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			return
+		}
+
+		var userID int
+		if claims, ok := c.Get("claims"); ok {
+			userID = int(claims.(*auth.Claims).UserID)
+		}
+
+		stats, err := h.likeFavoriteUC.GetMediaStats(ctx, userID, id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"is_favorited":   stats.IsFavorited,
+			"favorite_count": stats.FavoriteCount,
+		})
 	}
 }
 

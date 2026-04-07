@@ -94,10 +94,20 @@
   },
   "watch": {
     "nextUp": "Next Up",
+    "nextVideos": "Next Videos",
+    "noRecommendations": "No recommended videos",
     "favorite": "Favorite",
     "favorited": "Favorited",
     "share": "Share",
-    "subscriberCount": "{{count}} subscribers"
+    "subscriberCount": "{{count}} subscribers",
+    "views": "views",
+    "noDescription": "No description",
+    "failedToLoad": "Failed to load",
+    "transcoding": "Transcoding...",
+    "failed": "Failed",
+    "optimizing": "Queued",
+    "partial": "Partial",
+    "subscribers": "subscribers"
   },
   "channel": {
     "manageChannel": "Manage Channel",
