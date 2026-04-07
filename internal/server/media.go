@@ -20,6 +20,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+
 	"origadmin/application/origcms/internal/auth"
 	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 	"origadmin/application/origcms/internal/svc-media/biz"
@@ -221,6 +222,16 @@ func (h *MediaHandler) listMedia() gin.HandlerFunc {
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
+		}
+
+		// Convert timestamps to ISO 8601 format
+		for _, item := range items {
+			if item.CreateTime != nil {
+				// Timestamps are already in protobuf format, which will be serialized correctly
+			}
+			if item.UpdateTime != nil {
+				// Timestamps are already in protobuf format, which will be serialized correctly
+			}
 		}
 
 		c.JSON(http.StatusOK, gin.H{

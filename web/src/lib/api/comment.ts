@@ -19,8 +19,13 @@ export const commentApi = {
         api.get<Comment[]>("/comments", params),
     get: (id: string) => api.get<Comment>(`/comments/${id}`),
     create: (data: { media_id?: string; content_id?: string; parent_id?: string; body: string }) =>
-        api.post<Comment>("/comments", data),
+        api.post<Comment>("/comments", {
+            text: data.body,
+            media_id: data.media_id,
+            content_id: data.content_id,
+            parent_id: data.parent_id
+        }),
     update: (id: string, data: { body: string }) =>
-        api.put<Comment>(`/comments/${id}`, data),
+        api.put<Comment>(`/comments/${id}`, {text: data.body}),
     delete: (id: string) => api.del<void>(`/comments/${id}`),
 };

@@ -24,6 +24,16 @@ const MyVideos = () => {
     const [page, setPage] = React.useState(1);
     const pageSize = 12;
 
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
+
+    const getFullUrl = (path?: string) => {
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        const base = API_BASE_URL.replace(/\/$/, '');
+        const sep = path.startsWith('/') ? '' : '/';
+        return `${base}${sep}${path}`;
+    };
+
     const {data, isLoading} = useMediaList({
         page,
         page_size: pageSize,
@@ -32,9 +42,21 @@ const MyVideos = () => {
 
     const deleteMutation = useDeleteMedia();
 
+    const mediaList = data?.list || [];
+
     const handleDelete = async (id: number) => {
         if (window.confirm('确定要删除这个视频吗？')) {
             await deleteMutation.mutateAsync(id.toString());
+            // 检查当前页面是否还有数据
+            if (mediaList.length === 1) {
+                if (page > 1) {
+                    // 如果当前页面只有一条数据且不是第一页，则切换到上一页
+                    setPage(page - 1);
+                } else if (data?.total > 0) {
+                    // 如果是第一页且总数据大于0，则重新加载当前页
+                    setPage(1);
+                }
+            }
         }
     };
 
@@ -45,8 +67,6 @@ const MyVideos = () => {
             </div>
         );
     }
-
-    const mediaList = data?.list || [];
 
     return (
         <div className="space-y-6">
@@ -86,7 +106,7 @@ const MyVideos = () => {
                             <div className="relative aspect-video bg-gray-100 dark:bg-gray-800">
                                 {item.thumbnail ? (
                                     <img
-                                        src={item.thumbnail}
+                                        src={getFullUrl(item.thumbnail)}
                                         alt={item.title}
                                         className="w-full h-full object-cover"
                                     />

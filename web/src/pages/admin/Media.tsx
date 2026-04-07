@@ -64,7 +64,7 @@ import {Label} from "@/components/ui/label";
 import {mediaApi, type Media, type MediaVariantSummary} from '@/lib/api/media';
 import {useAdminMediaList, useUpdateMedia, useDeleteMedia} from '@/hooks/queries';
 import {UploadComponent} from '@/components/upload/UploadComponent';
-import {formatFileSize} from '@/lib/format';
+import {formatFileSize, formatDate} from '@/lib/format';
 
 export default function MediaPage() {
     // Read incoming search term from URL params (e.g. from TranscodingStatus link)
@@ -456,7 +456,7 @@ export default function MediaPage() {
                                         <TableCell
                                             className="text-sm text-slate-500">{media.edges?.user?.[0]?.nickname || media.edges?.user?.[0]?.username || '-'}</TableCell>
                                         <TableCell
-                                            className="text-sm text-slate-500">{new Date(media.created_at).toLocaleDateString()}</TableCell>
+                                            className="text-sm text-slate-500">{formatDate(media.created_at)}</TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>

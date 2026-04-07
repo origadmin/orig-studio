@@ -29,6 +29,7 @@ const LatestPage = lazy(() => import('../pages/home/Latest'));
 const TagsPage = lazy(() => import('../pages/home/Tags'));
 const MembersPage = lazy(() => import('../pages/home/Members'));
 const AboutPage = lazy(() => import('../pages/home/About'));
+const TestPage = lazy(() => import('../pages/test'));
 
 // Auth pages
 const SignInPage = lazy(() => import('../pages/auth/SignIn/index'));
@@ -41,6 +42,7 @@ const FavoritesPage = lazy(() => import('../pages/home/me/Favorites'));
 const NotificationsPage = lazy(() => import('../pages/home/me/Notifications'));
 const HistoryPage = lazy(() => import('../pages/home/me/History'));
 const PlaylistsPage = lazy(() => import('../pages/home/me/Playlists'));
+const SubscriptionsPage = lazy(() => import('../pages/home/Subscriptions'));
 
 // Admin pages
 const AdminDashboard = lazy(() => import('../pages/admin/Dashboard'));
@@ -59,7 +61,7 @@ const AdminTranscodingStatus = lazy(() => import('../pages/admin/TranscodingStat
 // ── Loading fallback ──────────────────────────────────────────────────────────
 
 const PageLoader = () => (
-    <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="flex items-center justify-center min-h-[60vh] bg-background text-foreground">
         <div className="animate-spin w-8 h-8 border-3 border-emerald-600 border-t-transparent rounded-full"/>
     </div>
 );
@@ -167,7 +169,18 @@ const channelRoute = createRoute({
 const profileRoute = createRoute({
     getParentRoute: () => portalLayoutRoute,
     path: '/u/$id',
+    validateParams: (params: Record<string, unknown>) => {
+        return {
+            id: String(params.id),
+        };
+    },
     component: () => <Lazy><ProfilePage/></Lazy>,
+});
+
+const testRoute = createRoute({
+    getParentRoute: () => portalLayoutRoute,
+    path: '/test',
+    component: () => <Lazy><TestPage/></Lazy>,
 });
 
 // ── Auth routes ──
@@ -228,6 +241,12 @@ const playlistsRoute = createRoute({
     getParentRoute: () => meLayoutRoute,
     path: '/me/playlists',
     component: () => <Lazy><PlaylistsPage/></Lazy>,
+});
+
+const subscriptionsRoute = createRoute({
+    getParentRoute: () => meLayoutRoute,
+    path: '/me/subscriptions',
+    component: () => <Lazy><SubscriptionsPage/></Lazy>,
 });
 
 // ── Admin routes ──
@@ -326,6 +345,7 @@ const routeTree = rootRoute.addChildren([
         searchRoute,
         channelRoute,
         profileRoute,
+        testRoute,
         meLayoutRoute.addChildren([
             uploadRoute,
             myVideosRoute,
@@ -333,6 +353,7 @@ const routeTree = rootRoute.addChildren([
             notificationsRoute,
             historyRoute,
             playlistsRoute,
+            subscriptionsRoute,
         ]),
     ]),
     signInRoute,

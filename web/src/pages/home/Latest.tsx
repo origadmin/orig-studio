@@ -6,64 +6,61 @@
 import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {Link} from '@tanstack/react-router';
 import {Clock, Play, Eye} from 'lucide-react';
-import {MediaItem} from '@/types/media';
+import {Button} from '@/components/ui/button';
 import {formatDuration, formatViews, formatDate} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
-
-// TODO: replace with API call
-function generateMockData(startId: number, count: number): MediaItem[] {
-    const titles = [
-        'Go 微服务架构实战', 'React 18 新特性详解', 'Kubernetes 入门到精通',
-        'TypeScript 高级类型编程', 'Docker 容器化部署', 'Python 数据分析',
-        'AWS 云服务实践', 'Vue 3 组合式 API', 'Redis 缓存策略',
-        'GraphQL API 设计', 'Nginx 高性能配置', 'CI/CD 流水线搭建',
-        'Rust 系统编程入门', 'MongoDB 文档数据库', 'Linux 运维指南',
-        'Electron 桌面应用开发', 'WebAssembly 前沿探索', '微前端架构实践',
-        'Prometheus 监控体系', 'gRPC 服务通信',
-    ];
-    const authors = ['Gopher Expert', 'React Master', 'DevOps Pro', 'TS Guru', 'Data Scientist', 'Cloud Expert', 'Vue Master', 'Full Stack'];
-    const tagPool = ['Go', 'React', 'Docker', 'K8s', 'TypeScript', 'Python', 'AWS', 'Vue', 'Redis', 'GraphQL'];
-
-    return Array.from({length: count}, (_, i) => {
-        const idx = (startId + i - 1) % titles.length;
-        const daysAgo = startId + i - 1;
-        const date = new Date();
-        date.setDate(date.getDate() - daysAgo);
-        return {
-            id: startId + i,
-            title: titles[idx],
-            description: `深入了解 ${titles[idx]} 的核心概念和最佳实践。`,
-            thumbnail: `https://images.unsplash.com/photo-${1517694712202 + idx % 3}141592653?auto=format&fit=crop&q=80&w=400&h=225`,
-            duration: 1800 + Math.floor(Math.random() * 5400),
-            view_count: Math.floor(Math.random() * 500000) + 1000,
-            create_time: date.toISOString().split('T')[0],
-            user_id: (idx % 8) + 1,
-            author_name: authors[idx % authors.length],
-            author_avatar: `https://images.unsplash.com/photo-${1535713875002 + (idx % 5) * 7}0000?auto=format&fit=crop&q=80&w=100`,
-            tags: [tagPool[idx % tagPool.length], tagPool[(idx + 3) % tagPool.length]],
-        };
-    });
-}
+import {useMediaList, useCategoryList} from '@/hooks/queries';
+import {getFullUrl} from '@/lib/utils';
+import ErrorPage from '@/components/common/ErrorPage';
 
 const PAGE_SIZE = 12;
 
 const LatestPage = () => {
     const {t} = useTranslation();
-    const [items, setItems] = useState<MediaItem[]>(() => generateMockData(0, PAGE_SIZE));
+    const [page, setPage] = useState(1);
+    const [items, setItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
+    const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
     const sentinelRef = useRef<HTMLDivElement>(null);
 
+    // 获取分类列表
+    const {data: categories} = useCategoryList();
+
+    const {data, isLoading, error} = useMediaList({
+        page,
+        page_size: PAGE_SIZE,
+        status: 'active',
+        sort: 'created_at',
+        order: 'desc',
+        category_id: activeCategoryId || undefined
+    });
+
+    // 当分类切换时重置页面和数据
+    useEffect(() => {
+        setPage(1);
+        setItems([]);
+        setHasMore(true);
+    }, [activeCategoryId]);
+
+    // Load initial data and append when page changes
+    useEffect(() => {
+        if (data?.list && data.list.length > 0) {
+            if (page === 1) {
+                setItems(data.list);
+            } else {
+                setItems(prev => [...prev, ...data.list]);
+            }
+            setHasMore(data.list.length === PAGE_SIZE);
+        } else if (page > 1) {
+            setHasMore(false);
+        }
+    }, [data, page]);
+
     const loadMore = useCallback(() => {
-        if (loading || !hasMore) return;
-        setLoading(true);
-        setTimeout(() => {
-            const newItems = generateMockData(items.length, PAGE_SIZE);
-            setItems(prev => [...prev, ...newItems]);
-            setLoading(false);
-            if (items.length + PAGE_SIZE >= 60) setHasMore(false);
-        }, 600);
-    }, [loading, hasMore, items.length]);
+        if (isLoading || !hasMore) return;
+        setPage(prev => prev + 1);
+    }, [isLoading, hasMore]);
 
     useEffect(() => {
         const el = sentinelRef.current;
@@ -78,6 +75,11 @@ const LatestPage = () => {
         return () => observer.disconnect();
     }, [loadMore]);
 
+
+    if (error && items.length === 0) {
+        return <ErrorPage message={error.message || t('common.error')}/>;
+    }
+
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-3">
@@ -85,13 +87,32 @@ const LatestPage = () => {
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('latest.title')}</h1>
             </div>
 
+            {/* 分类标签 */}
+            <section className="flex flex-wrap gap-2 mb-6">
+                <Button
+                    variant={activeCategoryId === null ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setActiveCategoryId(null)}
+                    className={activeCategoryId === null ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+                >{t('home.all')}</Button>
+                {categories?.map((cat) => (
+                    <Button
+                        key={cat.id}
+                        variant={activeCategoryId === cat.id ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setActiveCategoryId(cat.id)}
+                        className={activeCategoryId === cat.id ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+                    >{cat.name}</Button>
+                ))}
+            </section>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                 {items.map((media) => (
                     <Link key={media.id} to="/watch" search={{v: String(media.id)}} className="group">
                         <div
                             className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
                             <div className="relative aspect-video overflow-hidden">
-                                <img src={media.thumbnail} alt={media.title}
+                                <img src={getFullUrl(media.thumbnail)} alt={media.title}
                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                                 <div
                                     className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-1.5 py-0.5 rounded">
@@ -110,15 +131,16 @@ const LatestPage = () => {
                                     {media.title}
                                 </h3>
                                 <div className="flex items-center gap-2 mb-1">
-                                    <img src={media.author_avatar} alt={media.author_name}
+                                    <img src={getFullUrl(media.edges?.user?.[0]?.avatar)}
+                                         alt={media.edges?.user?.[0]?.username}
                                          className="w-5 h-5 rounded-full object-cover"/>
                                     <span
-                                        className="text-xs text-gray-500 dark:text-gray-400">{media.author_name}</span>
+                                        className="text-xs text-gray-500 dark:text-gray-400">{media.edges?.user?.[0]?.username || 'Unknown'}</span>
                                 </div>
                                 <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
                                     <span className="flex items-center gap-1"><Eye
                                         size={12}/>{formatViews(media.view_count)}</span>
-                                    <span>{formatDate(media.create_time)}</span>
+                                    <span>{formatDate(media.created_at)}</span>
                                 </div>
                             </div>
                         </div>
@@ -127,7 +149,7 @@ const LatestPage = () => {
             </div>
 
             <div ref={sentinelRef} className="flex flex-col items-center py-8">
-                {loading && (
+                {isLoading && (
                     <div className="flex items-center gap-3 text-gray-400">
                         <div
                             className="animate-spin w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full"/>
@@ -136,6 +158,9 @@ const LatestPage = () => {
                 )}
                 {!hasMore && items.length > 0 && (
                     <p className="text-sm text-gray-400 py-4">— {t('common.allLoaded')} —</p>
+                )}
+                {error && items.length > 0 && (
+                    <p className="text-sm text-red-500 py-4">{t('common.error')}</p>
                 )}
             </div>
         </div>

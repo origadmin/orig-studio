@@ -27,6 +27,7 @@ import {
     Loader2, Radio, CheckCircle2,
     Clock, XCircle, Video
 } from "lucide-react";
+import {formatDate} from "../../lib/format";
 
 // ─── Types ─────────────────────────────────────────────
 
@@ -68,27 +69,7 @@ function mediaLink(mediaId: number): string {
 
 const formatTime = (ts?: any): string => {
     if (!ts) return "--";
-    if (typeof ts === "object" && ts !== null && "seconds" in ts) {
-        const sec = typeof ts.seconds === "string" ? parseInt(ts.seconds, 10) : ts.seconds;
-        const d = new Date((sec || 0) * 1000);
-        if (!isNaN(d.getTime())) return d.toLocaleString("zh-CN", {
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit"
-        });
-        return "--";
-    }
-    if (typeof ts === "string" || typeof ts === "number") {
-        const d = new Date(ts);
-        if (!isNaN(d.getTime())) return d.toLocaleString("zh-CN", {
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit"
-        });
-    }
-    return String(ts);
+    return formatDate(ts);
 };
 
 // ─── Status helpers ───────────────────────────────────
@@ -199,9 +180,16 @@ function TaskRow({
                     </span>
                 )}
                 {isSkipped && task.error_message && (
-                    <span className="text-xs text-red-500 block truncate max-w-[260px]" title={task.error_message}>
-                        {task.error_message}
-                    </span>
+                    <div className="space-y-1">
+                        <span className="text-xs text-red-500 block truncate max-w-[260px]" title={task.error_message}>
+                            {task.error_message}
+                        </span>
+                        {profileName(task) === 'preview' && (
+                            <span className="text-xs text-blue-500 block">
+                                Preview generation failed. This may be due to invalid input file or missing dependencies.
+                            </span>
+                        )}
+                    </div>
                 )}
                 {isSuccess && !task.output_path && (
                     <span className="text-xs text-emerald-600">✓ Completed</span>

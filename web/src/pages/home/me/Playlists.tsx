@@ -5,40 +5,28 @@
 
 import React, {useState} from 'react';
 import {Link} from '@tanstack/react-router';
-import {ListVideo, Plus, MoreVertical, Play, Video} from 'lucide-react';
+import {ListVideo, Plus, MoreVertical, Play, Video, Loader2} from 'lucide-react';
+import {Button} from '@/components/ui/button';
 import {useTranslation} from 'react-i18next';
-
-interface PlaylistInfo {
-    id: number;
-    title: string;
-    description: string;
-    cover: string;
-    count: number;
-    updatedAt: string;
-    visibility: 'public' | 'private' | 'unlisted';
-}
-
-const mockPlaylists: PlaylistInfo[] = [
-    {
-        id: 1, title: 'Go 学习路线', description: '从入门到精通的 Go 语言学习资源',
-        cover: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=400&h=225',
-        count: 8, updatedAt: '2024-03-15', visibility: 'public',
-    },
-    {
-        id: 2, title: 'DevOps 工具链', description: 'Docker, K8s, CI/CD 相关视频合集',
-        cover: 'https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?auto=format&fit=crop&q=80&w=400&h=225',
-        count: 12, updatedAt: '2024-03-12', visibility: 'public',
-    },
-    {
-        id: 3, title: '周末充电', description: '周末想看的视频收藏',
-        cover: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=400&h=225',
-        count: 5, updatedAt: '2024-03-10', visibility: 'private',
-    },
-];
+import {useAuth} from '@/hooks/useAuth';
+import {useQuery} from '@tanstack/react-query';
+import {playlistApi} from '@/lib/api/playlist';
+import {formatDate} from '@/lib/format';
 
 const PlaylistsPage = () => {
     const {t} = useTranslation();
-    const [playlists] = useState(mockPlaylists);
+    const {user} = useAuth();
+
+    const {data, isLoading, error} = useQuery({
+        queryKey: ['playlists', user?.id],
+        queryFn: async () => {
+            if (!user) throw new Error('User not logged in');
+            return await playlistApi.getAll(user.id);
+        },
+        enabled: !!user
+    });
+
+    const playlists = data || [];
 
     const visibilityLabel = (v: string) => {
         const map: Record<string, string> = {
@@ -47,6 +35,34 @@ const PlaylistsPage = () => {
             unlisted: t('common.unlisted')
         };
         return map[v] || v;
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"/>
+            </div>
+        );
+    }
+
+    if (error || !user) {
+        return (
+            <div className="text-center py-20 text-gray-400">
+                <ListVideo size={48} className="mx-auto mb-3 opacity-30"/>
+                <p className="text-lg mb-1">{t('playlists.empty')}</p>
+                <p className="text-sm">{t('playlists.emptyDesc')}</p>
+            </div>
+        );
+    }
+
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
+
+    const getFullUrl = (path?: string) => {
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        const base = API_BASE_URL.replace(/\/$/, '');
+        const sep = path.startsWith('/') ? '' : '/';
+        return `${base}${sep}${path}`;
     };
 
     return (
@@ -58,10 +74,10 @@ const PlaylistsPage = () => {
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('playlists.title')}</h1>
                     <span className="text-sm text-gray-500">{t('playlists.listCount', {count: playlists.length})}</span>
                 </div>
-                <button
+                <Button
                     className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors">
                     <Plus size={16}/> {t('playlists.newList')}
-                </button>
+                </Button>
             </div>
 
             {/* 播放列表卡片 */}
@@ -73,23 +89,23 @@ const PlaylistsPage = () => {
                             className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all group"
                         >
                             {/* 封面 */}
-                            <div className="relative aspect-video overflow-hidden">
-                                <img src={pl.cover} alt={pl.title}
-                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                            <div className="relative aspect-video overflow-hidden bg-gray-100 dark:bg-gray-700">
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <ListVideo size={48} className="text-gray-300 dark:text-gray-600"/>
+                                </div>
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"/>
                                 <div className="absolute bottom-3 left-3 flex items-center gap-2">
                                     <Video size={14} className="text-white/80"/>
-                                    <span className="text-white text-sm">{pl.count} {t('common.videos_count')}</span>
+                                    <span
+                                        className="text-white text-sm">{pl.media_ids?.length || 0} {t('common.videos_count')}</span>
                                 </div>
                                 <div className="absolute top-3 right-3">
                                     <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                        pl.visibility === 'public'
+                                        pl.is_public
                                             ? 'bg-emerald-500/80 text-white'
-                                            : pl.visibility === 'private'
-                                                ? 'bg-gray-600/80 text-white'
-                                                : 'bg-yellow-500/80 text-white'
+                                            : 'bg-gray-600/80 text-white'
                                     }`}>
-                                        {visibilityLabel(pl.visibility)}
+                                        {visibilityLabel(pl.is_public ? 'public' : 'private')}
                                     </span>
                                 </div>
                                 {/* 播放全部按钮 */}
@@ -104,10 +120,10 @@ const PlaylistsPage = () => {
                             {/* 信息 */}
                             <div className="p-4">
                                 <h3 className="font-semibold text-gray-900 dark:text-white mb-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                                    {pl.title}
+                                    {pl.name}
                                 </h3>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{pl.description}</p>
-                                <p className="text-xs text-gray-400 mt-2">{t('playlists.updated', {date: pl.updatedAt})}</p>
+                                <p className="text-xs text-gray-400 mt-2">{t('playlists.updated', {date: formatDate(pl.updated_at)})}</p>
                             </div>
                         </div>
                     ))}

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
@@ -19,83 +19,65 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {MoreHorizontal, Search, Eye, Trash2, MessageCircle, ThumbsUp, Flag, Ban} from 'lucide-react';
+import {MoreHorizontal, Search, Eye, Trash2, MessageCircle, ThumbsUp, Flag, Ban, Loader2} from 'lucide-react';
+import {commentApi} from '@/lib/api/comment';
 
-// 模拟数据
-const mockComments = [
-    {
-        id: 1,
-        user: {name: '用户A', avatar: '', username: 'user_a'},
-        media: {title: 'Python 入门教程', id: 1},
-        content: '讲解得非常清楚，感谢up主！',
-        likes: 156,
-        replies: 23,
-        status: 'approved',
-        isSpam: false,
-        createdAt: '2024-05-20 14:30'
-    },
-    {
-        id: 2,
-        user: {name: '用户B', avatar: '', username: 'user_b'},
-        media: {title: 'React 高级教程', id: 2},
-        content: '这个视频太好了，收藏了！',
-        likes: 89,
-        replies: 12,
-        status: 'approved',
-        isSpam: false,
-        createdAt: '2024-05-20 13:15'
-    },
-    {
-        id: 3,
-        user: {name: '用户C', avatar: '', username: 'user_c'},
-        media: {title: '机器学习实战', id: 3},
-        content: '请问这个代码在哪里下载？',
-        likes: 34,
-        replies: 5,
-        status: 'pending',
-        isSpam: false,
-        createdAt: '2024-05-20 12:00'
-    },
-    {
-        id: 4,
-        user: {name: '垃圾用户', avatar: '', username: 'spam_user'},
-        media: {title: 'Go 语言教程', id: 4},
-        content: '点击这里获取免费礼物！http://spam.com',
-        likes: 0,
-        replies: 0,
-        status: 'reported',
-        isSpam: true,
-        createdAt: '2024-05-20 11:45'
-    },
-    {
-        id: 5,
-        user: {name: '用户D', avatar: '', username: 'user_d'},
-        media: {title: 'Docker 教程', id: 5},
-        content: '终于找到讲得这么细的了',
-        likes: 67,
-        replies: 8,
-        status: 'approved',
-        isSpam: false,
-        createdAt: '2024-05-20 10:30'
-    },
-    {
-        id: 6,
-        user: {name: '用户E', avatar: '', username: 'user_e'},
-        media: {title: 'Kubernetes 入门', id: 6},
-        content: '支持up主，期待更多内容',
-        likes: 45,
-        replies: 3,
-        status: 'approved',
-        isSpam: false,
-        createdAt: '2024-05-20 09:15'
-    },
-];
+interface Comment {
+    id: number;
+    user: { name: string; avatar: string; username: string };
+    media: { title: string; id: number };
+    content: string;
+    likes: number;
+    replies: number;
+    status: string;
+    isSpam: boolean;
+    createdAt: string;
+}
 
 const Comments: React.FC = () => {
     const {t} = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
-    const [comments] = useState(mockComments);
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Fetch comments from API
+    useEffect(() => {
+        const fetchComments = async () => {
+            try {
+                setLoading(true);
+                const response = await commentApi.getAll({});
+                // Map API response to our comment interface
+                const mappedComments = (response || []).map((comment: any) => ({
+                    id: comment.id,
+                    user: {
+                        name: comment.username || 'Unknown User',
+                        avatar: comment.avatar || '',
+                        username: comment.username || 'unknown'
+                    },
+                    media: {
+                        title: comment.media?.title || 'Unknown Media',
+                        id: comment.media_id || 0
+                    },
+                    content: comment.body || comment.text || '',
+                    likes: comment.like_count || 0,
+                    replies: comment.reply_count || 0,
+                    status: comment.status || 'approved',
+                    isSpam: comment.is_spam || false,
+                    createdAt: comment.created_at || new Date().toISOString()
+                }));
+                setComments(mappedComments);
+            } catch (err) {
+                setError(t('common.error'));
+                console.error('Failed to fetch comments:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchComments();
+    }, [t]);
 
     const filteredComments = comments.filter(comment => {
         const matchesSearch = comment.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -124,6 +106,23 @@ const Comments: React.FC = () => {
         };
         return <Badge variant={variants[status] || 'outline'}>{labels[status] || status}</Badge>;
     };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"/>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="text-center py-20 text-gray-400">
+                <p className="text-lg mb-1">{t('common.loading')}</p>
+                <p className="text-sm">{error}</p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">

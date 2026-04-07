@@ -77,7 +77,7 @@ const mockVideos = [
 ];
 
 const ChannelPage = () => {
-    const {id} = useParams({from: '/c/$id'});
+    const {id} = useParams();
     const {t} = useTranslation();
     const [channel] = useState(mockChannel);
     const [videos] = useState(mockVideos);

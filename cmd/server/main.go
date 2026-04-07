@@ -31,6 +31,7 @@ import (
 	_ "github.com/sqlite3ent/sqlite3"
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/data/entity/migrate"
 	confhelper "origadmin/application/origcms/internal/helpers/conf"
 	"origadmin/application/origcms/internal/pubsub"
 	"origadmin/application/origcms/internal/server"
@@ -99,7 +100,7 @@ func main() {
 
 	ctx := context.Background()
 	// AutoMigrate all schemas in the unified entity
-	if err := db.Schema.Create(ctx); err != nil {
+	if err := db.Schema.Create(ctx, migrate.WithForeignKeys(false)); err != nil {
 		log.Fatalf("ent AutoMigrate failed: %v", err)
 	}
 	log.Info("database migration complete")

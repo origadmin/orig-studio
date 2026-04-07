@@ -1,34 +1,86 @@
 import React from 'react';
-import {Film, Users, Eye, Heart, BarChart3, TrendingUp, TrendingDown} from 'lucide-react';
+import {Film, Users, Eye, Heart, BarChart3, TrendingUp, TrendingDown, Loader2} from 'lucide-react';
+import {Button} from '@/components/ui/button';
+import {useTranslation} from 'react-i18next';
+import {useQuery} from '@tanstack/react-query';
+import {statsApi} from '@/lib/api/stats';
 
 const Dashboard = () => {
+    const {t} = useTranslation();
+
+    const {data, isLoading, error} = useQuery({
+        queryKey: ['admin', 'stats'],
+        queryFn: async () => {
+            return await statsApi.getDashboardStats();
+        }
+    });
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"/>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="text-center py-20 text-gray-400">
+                <p className="text-lg mb-1">{t('common.loading')}</p>
+                <p className="text-sm">{error.message}</p>
+            </div>
+        );
+    }
+
+    const stats = data || {
+        total_medias: 0,
+        total_users: 0,
+        total_views: 0,
+        total_likes: 0,
+        trending_content: []
+    };
+
+    const formatNumber = (num: number) => {
+        if (num >= 1000000) {
+            return (num / 1000000).toFixed(1) + 'M';
+        } else if (num >= 1000) {
+            return (num / 1000).toFixed(1) + 'k';
+        }
+        return num.toString();
+    };
+
     return (
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Platform Overview</h1>
-                    <p className="text-slate-500 text-sm mt-1">Real-time statistics for your media platform.</p>
+                    <h1 className="text-2xl font-bold text-slate-900">{t('admin.dashboard')}</h1>
+                    <p className="text-slate-500 text-sm mt-1">{t('admin.dashboardDesc')}</p>
                 </div>
                 <div className="flex gap-2">
-                    <button
-                        className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold hover:bg-gray-50 shadow-sm transition-colors">Export
-                        Report
-                    </button>
-                    <button
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-sm transition-colors">Manage
-                        Content
-                    </button>
+                    <Button
+                        variant="outline"
+                        className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold hover:bg-gray-50 shadow-sm transition-colors">
+                        {t('admin.exportReport') || 'Export Report'}
+                    </Button>
+                    <Button
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-sm transition-colors">
+                        {t('admin.manageContent') || 'Manage Content'}
+                    </Button>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard icon={<Film className="text-blue-500"/>} label="Total Medias" value="1,248"
+                <StatCard icon={<Film className="text-blue-500"/>} label={t('admin.totalMedia') || 'Total Medias'}
+                          value={formatNumber(stats.total_medias)}
                           trend="+12% from last week"/>
-                <StatCard icon={<Users className="text-green-500"/>} label="Total Users" value="48.2k"
+                <StatCard icon={<Users className="text-green-500"/>} label={t('admin.totalUsers') || 'Total Users'}
+                          value={formatNumber(stats.total_users)}
                           trend="+5.4% from last month"/>
-                <StatCard icon={<Eye className="text-purple-500"/>} label="Total Views" value="2.4M"
+                <StatCard icon={<Eye className="text-purple-500"/>} label={t('admin.totalViews') || 'Total Views'}
+                          value={formatNumber(stats.total_views)}
                           trend="+18.2% from last month"/>
-                <StatCard icon={<Heart className="text-rose-500"/>} label="Likes Given" value="184k"
+                <StatCard icon={<Heart className="text-rose-500"/>} label={t('admin.totalLikes') || 'Likes Given'}
+                          value={formatNumber(stats.total_likes)}
                           trend="+3.1% from last month"/>
             </div>
 
@@ -37,12 +89,12 @@ const Dashboard = () => {
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-slate-900 flex items-center gap-2">
                             <BarChart3 size={20} className="text-slate-400"/>
-                            Growth Analytics
+                            {t('admin.growthAnalytics') || 'Growth Analytics'}
                         </h3>
                         <select className="text-sm border-none bg-gray-50 rounded-lg p-1.5 focus:ring-0 outline-none">
-                            <option>Last 30 days</option>
-                            <option>Last 6 months</option>
-                            <option>Last 12 months</option>
+                            <option>{t('admin.last30Days') || 'Last 30 days'}</option>
+                            <option>{t('admin.last6Months') || 'Last 6 months'}</option>
+                            <option>{t('admin.last12Months') || 'Last 12 months'}</option>
                         </select>
                     </div>
                     <div
@@ -52,13 +104,12 @@ const Dashboard = () => {
                 </div>
 
                 <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                    <h3 className="font-bold text-slate-900 mb-6">Trending Content</h3>
+                    <h3 className="font-bold text-slate-900 mb-6">{t('admin.trendingContent') || 'Trending Content'}</h3>
                     <div className="space-y-4">
-                        <TrendingItem title="Top 10 AI Tools 2024" views="84k" trend="up"/>
-                        <TrendingItem title="React Framework Comparison" views="62k" trend="up"/>
-                        <TrendingItem title="Docker Tutorial for Beginners" views="48k" trend="down"/>
-                        <TrendingItem title="Mastering Go Concurrency" views="36k" trend="up"/>
-                        <TrendingItem title="Tailwind CSS Best Practices" views="22k" trend="up"/>
+                        {stats.trending_content.map((item: any, index: number) => (
+                            <TrendingItem key={index} title={item.title} views={formatNumber(item.views)}
+                                          trend={item.trend}/>
+                        ))}
                     </div>
                 </div>
             </div>

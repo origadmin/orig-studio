@@ -7,7 +7,7 @@ import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {useSearch, Link} from '@tanstack/react-router';
 import {
     ThumbsUp, ThumbsDown, Share2, MessageCircle,
-    MoreHorizontal, UserPlus, Eye, Loader2, Settings, RefreshCw, AlertTriangle, Heart, HeartOff
+    MoreHorizontal, UserPlus, Eye, Loader2, Settings, RefreshCw, AlertTriangle, Heart, HeartOff, Edit, Trash2, FileText
 } from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
@@ -22,49 +22,49 @@ import {mediaApi} from '@/lib/api/media';
 import {commentApi} from '@/lib/api/comment';
 import {likeApi} from '@/lib/api/like';
 import {favoriteApi} from '@/lib/api/favorite';
-import {useMediaDetail, useMediaList} from '@/hooks/queries';
+import {useMediaDetail, useMediaList, useDeleteMedia} from '@/hooks/queries';
+import {useAuth} from '@/hooks/useAuth';
+import {getFullUrl} from '@/lib/utils';
+import ErrorPage from '@/components/common/ErrorPage';
+import SubscribeButton from '@/components/common/SubscribeButton';
+import CommentSection from '@/components/common/CommentSection';
+import InteractionBar from '@/components/common/InteractionBar';
+import VideoPreview from '@/components/common/VideoPreview';
+import SubtitleSelector from '@/components/common/SubtitleSelector';
+import SubtitlePlayer from '@/components/common/SubtitlePlayer';
 import Hls from 'hls.js';
 
-// Comment component interface
-interface Comment {
-    id: string;
-    content_id?: string;
-    media_id?: string;
-    user_id: string;
-    username: string;
-    parent_id?: string;
-    body: string;
-    status: string;
-    created_at: string;
-    updated_at: string;
-}
+
 
 const WatchPage = () => {
     const {t} = useTranslation();
-    const {v: id} = useSearch({strict: false});
+    const {v: rawId} = useSearch({strict: false});
+    // 清理 id，移除可能的引号
+    const id = rawId ? String(rawId).replace(/"/g, '') : '';
     const {data: media, isLoading: isMediaLoading, error: mediaError} = useMediaDetail(id as string);
+    const {user} = useAuth();
     const videoRef = useRef<HTMLVideoElement>(null);
     const hlsRef = useRef<Hls | null>(null);
+    const deleteMutation = useDeleteMedia();
 
     // Quality switcher state
     const [variants, setVariants] = useState<VariantInfo[]>([]);
     const [currentLevel, setCurrentLevel] = useState(-1); // -1 = auto
     const [showQualityMenu, setShowQualityMenu] = useState(false);
     const [retrying, setRetrying] = useState(false);
-
-    // Comments state
-    const [comments, setComments] = useState<Comment[]>([]);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [selectedSubtitle, setSelectedSubtitle] = useState<any>(null);
+    const [comments, setComments] = useState<any[]>([]);
     const [isLoadingComments, setIsLoadingComments] = useState(false);
     const [commentText, setCommentText] = useState('');
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-
-    // Like and favorite state
-    const [isLiked, setIsLiked] = useState(false);
-    const [isFavorited, setIsFavorited] = useState(false);
     const [likeCount, setLikeCount] = useState(0);
-    const [favoriteCount, setFavoriteCount] = useState(0);
+    const [isLiked, setIsLiked] = useState(false);
     const [isLoadingLike, setIsLoadingLike] = useState(false);
+    const [favoriteCount, setFavoriteCount] = useState(0);
+    const [isFavorited, setIsFavorited] = useState(false);
     const [isLoadingFavorite, setIsLoadingFavorite] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const {data: recData} = useMediaList({
         page_size: 10,
@@ -106,7 +106,7 @@ const WatchPage = () => {
         // Check user's like and favorite status
         const checkLikeStatus = async () => {
             try {
-                const response = await likeApi.getStatus({media_id: id});
+                const response = await likeApi.getStatus(id);
                 setIsLiked(response?.is_liked || false);
             } catch (err) {
                 // Ignore errors for unauthenticated users
@@ -154,7 +154,7 @@ const WatchPage = () => {
 
         setIsLoadingLike(true);
         try {
-            await likeApi.toggle({media_id: id});
+            await likeApi.toggle(id);
             setIsLiked(!isLiked);
             setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
         } catch (err) {
@@ -177,6 +177,19 @@ const WatchPage = () => {
             console.error('Failed to toggle favorite:', err);
         } finally {
             setIsLoadingFavorite(false);
+        }
+    };
+
+    // Handle media deletion
+    const handleDeleteMedia = async () => {
+        if (!media) return;
+
+        try {
+            await deleteMutation.mutateAsync(id);
+            // Redirect to home page after deletion
+            window.location.href = '/';
+        } catch (err) {
+            console.error('Failed to delete media:', err);
         }
     };
 
@@ -215,14 +228,6 @@ const WatchPage = () => {
         if (!media || !videoRef.current) return;
 
         const video = videoRef.current;
-        const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || "http://localhost:9090";
-        const getFullUrl = (path?: string) => {
-            if (!path) return '';
-            if (path.startsWith('http')) return path;
-            const base = API_BASE_URL.replace(/\/$/, '');
-            const sep = path.startsWith('/') ? '' : '/';
-            return `${base}${sep}${path}`;
-        };
 
         const hlsUrl = media.hls_file ? getFullUrl(media.hls_file) : null;
         const originalUrl = getFullUrl(media.url);
@@ -232,6 +237,13 @@ const WatchPage = () => {
             hlsRef.current.destroy();
             hlsRef.current = null;
         }
+
+        // Add timeupdate event listener
+        const handleTimeUpdate = () => {
+            setCurrentTime(video.currentTime);
+        };
+
+        video.addEventListener('timeupdate', handleTimeUpdate);
 
         if (hlsUrl && Hls.isSupported()) {
             const hls = new Hls({
@@ -259,6 +271,7 @@ const WatchPage = () => {
             return () => {
                 hls.destroy();
                 hlsRef.current = null;
+                video.removeEventListener('timeupdate', handleTimeUpdate);
             };
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
             // Native HLS support (Safari)
@@ -267,6 +280,10 @@ const WatchPage = () => {
             // Fallback to original MP4
             video.src = originalUrl;
         }
+
+        return () => {
+            video.removeEventListener('timeupdate', handleTimeUpdate);
+        };
     }, [media]);
 
     // Quality level switch handler
@@ -328,31 +345,19 @@ const WatchPage = () => {
     }
 
     if (error || !media) {
-        return (
-            <div className="py-20 text-center space-y-4">
-                <div className="text-red-500 text-lg">{error || "Video not found"}</div>
-                <Link to="/">
-                    <Button variant="outline">{t('common.backToHome')}</Button>
-                </Link>
-            </div>
-        );
+        return <ErrorPage
+            statusCode={404}
+            title={error || t('watch.videoNotFound')}
+            message={t('error.404Message')}
+        />;
     }
 
-    const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || "http://localhost:9090";
 
-    const getFullUrl = (path?: string) => {
-        if (!path) return '';
-        if (path.startsWith('http')) return path;
-        const base = API_BASE_URL.replace(/\/$/, '');
-        const sep = path.startsWith('/') ? '' : '/';
-        return `${base}${sep}${path}`;
-    };
-
-    const user = media.edges?.user?.[0];
+    const mediaUser = media.edges?.user?.[0];
     const isProcessing = media.encoding_status !== 'success';
 
     return (
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col lg:flex-row gap-6 relative">
             {/* Main Content: Player & Details */}
             <div className="flex-1 min-w-0">
                 {/* Player Container */}
@@ -366,9 +371,24 @@ const WatchPage = () => {
                         Your browser does not support the video tag.
                     </video>
 
+                    {/* Subtitle Player */}
+                    {selectedSubtitle && selectedSubtitle.file_path && (
+                        <SubtitlePlayer
+                            subtitleUrl={getFullUrl(selectedSubtitle.file_path)}
+                            currentTime={currentTime}
+                        />
+                    )}
+
                     {/* Quality Switcher — only when HLS has multiple levels or variants available */}
-                    {(variants.length > 0 || (hlsRef.current && (hlsRef.current.levels?.length ?? 0) > 1)) && (
-                        <div className="absolute bottom-16 right-3 z-10">
+                    <div className="absolute bottom-16 right-3 z-10 flex gap-2">
+                        {/* Subtitle Selector */}
+                        <SubtitleSelector
+                            mediaId={id}
+                            onSubtitleChange={setSelectedSubtitle}
+                        />
+
+                        {/* Quality Selector */}
+                        {(variants.length > 0 || (hlsRef.current && (hlsRef.current.levels?.length ?? 0) > 1)) && (
                             <div className="relative">
                                 <Button
                                     variant="secondary"
@@ -417,8 +437,8 @@ const WatchPage = () => {
                                     </div>
                                 )}
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
 
                     {/* Encoding Status Indicator */}
                     {isProcessing && (
@@ -466,6 +486,19 @@ const WatchPage = () => {
                     )}
                 </div>
 
+                {/* Video Preview */}
+                {media.preview_file_path && (
+                    <div className="mt-4">
+                        <VideoPreview
+                            previewFile={getFullUrl(media.preview_file_path)}
+                            duration={media.duration}
+                            currentTime={currentTime}
+                            width={800}
+                            height={450}
+                        />
+                    </div>
+                )}
+
                 {/* Video Info */}
                 <div className="mt-6 space-y-4">
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white line-clamp-2">
@@ -474,57 +507,55 @@ const WatchPage = () => {
 
                     <div
                         className="flex flex-wrap items-center justify-between gap-4 py-2 border-b dark:border-gray-800">
-                        <div className="flex items-center gap-4">
-                            <Link to="/u/$id" params={{id: String(media.user_id)}}>
-                                <Avatar className="h-12 w-12 ring-2 ring-gray-100 dark:ring-gray-800">
-                                    <AvatarImage src={user?.avatar}/>
-                                    <AvatarFallback>{user?.username?.[0] || 'U'}</AvatarFallback>
-                                </Avatar>
-                            </Link>
-                            <div>
-                                <Link to="/u/$id" params={{id: String(media.user_id)}}
-                                      className="font-bold text-gray-900 dark:text-white hover:text-blue-600 transition-colors">
-                                    {user?.nickname || user?.username || 'Unknown Gopher'}
+                        <div className="flex flex-col gap-3">
+                            <div className="flex items-center gap-4">
+                                <Link to={`/members?u=${media.user_id}`}>
+                                    <Avatar className="h-12 w-12 ring-2 ring-gray-100 dark:ring-gray-800">
+                                        <AvatarImage src={mediaUser?.avatar} loading="lazy"/>
+                                        <AvatarFallback>{mediaUser?.username?.[0] || 'U'}</AvatarFallback>
+                                    </Avatar>
                                 </Link>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">1.2M {t('common.subscribers')}</p>
+                                <div>
+                                    <Link to={`/members?u=${media.user_id}`}
+                                          className="font-bold text-gray-900 dark:text-white hover:text-blue-600 transition-colors">
+                                        {mediaUser?.nickname || mediaUser?.username || media?.username || 'Unknown User'}
+                                    </Link>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatViews(mediaUser?.subscriber_count || 0)} {t('common.subscribers')}</p>
+                                </div>
+                                <SubscribeButton
+                                    userId={media.user_id.toString()}
+                                    className="ml-4 rounded-full"
+                                />
                             </div>
-                            <Button
-                                className="ml-4 rounded-full bg-gray-900 dark:bg-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200">
-                                {t('common.subscribe')}
-                            </Button>
+
+                            {/* Media owner controls */}
+                            {user && media && user.id === media.user_id && (
+                                <div className="flex items-center gap-2 flex-nowrap">
+                                    <Button variant="secondary" size="sm"
+                                            className="gap-1 text-xs h-8 px-3 flex-shrink-0">
+                                        <Edit className="w-3.5 h-3.5"/>
+                                        <span>{t('common.edit')}</span>
+                                    </Button>
+                                    <Button variant="secondary" size="sm"
+                                            className="gap-1 text-xs h-8 px-3 flex-shrink-0">
+                                        <FileText className="w-3.5 h-3.5"/>
+                                        <span>{t('common.subtitles')}</span>
+                                    </Button>
+                                    <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        className="gap-1 text-xs h-8 px-3 flex-shrink-0"
+                                        onClick={() => setShowDeleteConfirm(true)}
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5"/>
+                                        <span>{t('common.delete')}</span>
+                                    </Button>
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full p-1">
-                                <Button
-                                    variant="ghost"
-                                    className={`rounded-l-full gap-2 px-4 hover:bg-gray-200 dark:hover:bg-gray-700 ${isLiked ? 'text-blue-600' : ''}`}
-                                    onClick={handleLikeToggle}
-                                    disabled={isLoadingLike}
-                                >
-                                    <ThumbsUp className="w-5 h-5"/>
-                                    <span className="text-sm font-medium">{formatViews(likeCount)}</span>
-                                </Button>
-                                <div className="w-[1px] h-6 bg-gray-300 dark:bg-gray-600"/>
-                                <Button variant="ghost"
-                                        className="rounded-r-full px-4 hover:bg-gray-200 dark:hover:bg-gray-700">
-                                    <ThumbsDown className="w-5 h-5"/>
-                                </Button>
-                            </div>
-                            <Button
-                                variant="ghost"
-                                className={`gap-2 hover:bg-gray-200 dark:hover:bg-gray-700 ${isFavorited ? 'text-red-600' : ''}`}
-                                onClick={handleFavoriteToggle}
-                                disabled={isLoadingFavorite}
-                            >
-                                {isFavorited ? <Heart className="w-5 h-5 fill-current"/> :
-                                    <HeartOff className="w-5 h-5"/>}
-                                <span className="text-sm font-medium">{formatViews(favoriteCount)}</span>
-                            </Button>
-                            <Button variant="ghost" className="gap-2 hover:bg-gray-200 dark:hover:bg-gray-700">
-                                <Share2 className="w-5 h-5"/>
-                                <span className="text-sm font-medium">{t('common.share')}</span>
-                            </Button>
+                            <InteractionBar mediaId={id}/>
                         </div>
                     </div>
 
@@ -547,74 +578,8 @@ const WatchPage = () => {
                     </Card>
 
                     {/* Comments Section */}
-                    <div className="mt-8 space-y-6">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                            {t('watch.comments')} ({comments.length})
-                        </h3>
-
-                        {/* Comment Form */}
-                        <Card className="border-none shadow-md rounded-xl">
-                            <CardContent className="p-4">
-                                <Textarea
-                                    placeholder={t('watch.addComment')}
-                                    value={commentText}
-                                    onChange={(e) => setCommentText(e.target.value)}
-                                    className="min-h-[100px] resize-none"
-                                />
-                                <div className="mt-4 flex justify-end">
-                                    <Button
-                                        onClick={handleSubmitComment}
-                                        disabled={isSubmittingComment || !commentText.trim()}
-                                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                                    >
-                                        {isSubmittingComment ? t('common.submitting') : t('watch.postComment')}
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Comments List */}
-                        <div className="space-y-4">
-                            {isLoadingComments ? (
-                                <div className="animate-pulse space-y-4">
-                                    {Array.from({length: 3}).map((_, i) => (
-                                        <div key={i} className="flex gap-3">
-                                            <Skeleton className="h-10 w-10 rounded-full"/>
-                                            <div className="flex-1 space-y-2">
-                                                <Skeleton className="h-4 w-1/4"/>
-                                                <Skeleton className="h-3 w-full"/>
-                                                <Skeleton className="h-3 w-3/4"/>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : comments.length === 0 ? (
-                                <p className="text-gray-500 dark:text-gray-400">
-                                    {t('watch.noComments')}
-                                </p>
-                            ) : (
-                                comments.map((comment) => (
-                                    <div key={comment.id} className="flex gap-3">
-                                        <Avatar className="h-10 w-10">
-                                            <AvatarFallback>{comment.username?.[0] || 'U'}</AvatarFallback>
-                                        </Avatar>
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <span className="font-bold text-gray-900 dark:text-white">
-                                                    {comment.username}
-                                                </span>
-                                                <span className="text-xs text-gray-500 dark:text-gray-400">
-                                                    {formatDate(comment.created_at)}
-                                                </span>
-                                            </div>
-                                            <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">
-                                                {comment.body}
-                                            </p>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
+                    <div className="mt-8">
+                        <CommentSection mediaId={id}/>
                     </div>
                 </div>
             </div>
@@ -646,6 +611,7 @@ const WatchPage = () => {
                                         <img
                                             src={recThumb}
                                             alt={item.title}
+                                            loading="lazy"
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                         />
                                         <div
@@ -670,6 +636,35 @@ const WatchPage = () => {
                     )}
                 </div>
             </div>
+
+            {/* Custom Delete Confirmation Dialog */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl p-6 max-w-md w-full">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{t('common.delete')}</h3>
+                        <p className="text-gray-600 dark:text-gray-400 mb-4">{t('watch.confirmDelete') || 'Are you sure you want to delete this video? This action cannot be undone.'}</p>
+                        <div className="flex justify-end gap-2">
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => setShowDeleteConfirm(false)}
+                            >
+                                {t('common.cancel')}
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => {
+                                    setShowDeleteConfirm(false);
+                                    handleDeleteMedia();
+                                }}
+                            >
+                                {t('common.delete')}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

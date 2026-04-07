@@ -195,7 +195,12 @@ func (uc *MediaUseCase) DeleteMedia(ctx context.Context, id int64) error {
 		return err
 	}
 
-	// Delete from DB first
+	// Delete encoding tasks first to avoid foreign key constraint
+	if err := uc.encodingRepo.DeleteByMedia(ctx, id); err != nil {
+		uc.log.Warnf("failed to delete encoding tasks for media %d: %v", id, err)
+	}
+
+	// Delete from DB
 	if err := uc.repo.Delete(ctx, id); err != nil {
 		return err
 	}
