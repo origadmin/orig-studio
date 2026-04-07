@@ -8,7 +8,7 @@ import {Button} from "../../components/ui/button";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "../../components/ui/table";
 import {Card, CardContent, CardHeader, CardTitle} from "../../components/ui/card";
 import {Badge} from "../../components/ui/badge";
-import {PlusCircle, Edit, Trash2} from "lucide-react";
+import {PlusCircle, Edit, Trash2, CheckCircle, XCircle} from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -19,12 +19,22 @@ import {
 } from "../../components/ui/dialog";
 import {Input} from "../../components/ui/input";
 import {Label} from "../../components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "../../components/ui/select";
+import {Checkbox} from "../../components/ui/checkbox";
 
 export default function TranscodingProfiles() {
     const [profiles, setProfiles] = useState<EncodeProfile[]>([]);
     const [loading, setLoading] = useState(true);
     const [editingProfile, setEditingProfile] = useState<Partial<EncodeProfile> | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [selectedCodec, setSelectedCodec] = useState('h264');
+    const [selectedResolutions, setSelectedResolutions] = useState<string[]>(['240', '360', '480', '720', '1080']);
 
     const fetchProfiles = async () => {
         try {
@@ -69,22 +79,26 @@ export default function TranscodingProfiles() {
     };
 
     const handleActivateRecommended = async () => {
-        if (!confirm("This will activate h264 and h265 profiles for 240p, 360p, 480p, 720p, and 1080p resolutions. Continue?")) return;
-        try {
-            // Activate multiple profiles at once
-            const profilesToActivate = [
-                'h264-240', 'h264-360', 'h264-480', 'h264-720', 'h264-1080',
-                'h265-240', 'h265-360', 'h265-480', 'h265-720', 'h265-1080'
-            ];
+        if (selectedResolutions.length === 0) {
+            alert("Please select at least one resolution");
+            return;
+        }
 
+        if (!confirm(`This will activate ${selectedCodec.toUpperCase()} profiles for the selected resolutions. Continue?`)) return;
+        try {
+            // Activate selected profiles
+            const profilesToActivate = selectedResolutions.map(res => `${selectedCodec}-${res}`);
+
+            let activatedCount = 0;
             for (const name of profilesToActivate) {
                 const profile = profiles.find(p => p.name === name);
                 if (profile) {
                     await mediaApi.updateProfile(profile.id, {...profile, is_active: true});
+                    activatedCount++;
                 }
             }
 
-            alert("Successfully activated recommended encoding profiles!");
+            alert(`Successfully activated ${activatedCount} encoding profiles!`);
             fetchProfiles();
         } catch (error) {
             console.error("Failed to activate profiles:", error);
@@ -94,63 +108,99 @@ export default function TranscodingProfiles() {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h2 className="text-3xl font-bold tracking-tight">Encoding Profiles</h2>
-                <div className="flex gap-2">
-                    <Button variant="outline" onClick={handleActivateRecommended}>
-                        Activate Recommended (10 profiles)
-                    </Button>
-                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                        <DialogTrigger asChild>
-                            <Button onClick={() => setEditingProfile({is_active: true})}>
-                                <PlusCircle className="mr-2 h-4 w-4"/>
-                                Add Profile
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>{editingProfile?.id ? "Edit Profile" : "Add Profile"}</DialogTitle>
-                            </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="name" className="text-right">Name</Label>
-                                    <Input id="name" value={editingProfile?.name || ""}
-                                           onChange={(e) => setEditingProfile({
-                                               ...editingProfile,
-                                               name: e.target.value
-                                           })} className="col-span-3"/>
+                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                    <div className="flex gap-2">
+                        <Select value={selectedCodec} onValueChange={setSelectedCodec}>
+                            <SelectTrigger className="w-[120px]">
+                                <SelectValue placeholder="Codec"/>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="h264">H.264</SelectItem>
+                                <SelectItem value="h265">H.265</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <div className="flex flex-wrap gap-2">
+                            {['240', '360', '480', '720', '1080'].map((res) => (
+                                <div key={res} className="flex items-center space-x-1">
+                                    <Checkbox
+                                        id={`res-${res}`}
+                                        checked={selectedResolutions.includes(res)}
+                                        onCheckedChange={(checked) => {
+                                            if (checked) {
+                                                setSelectedResolutions([...selectedResolutions, res]);
+                                            } else {
+                                                setSelectedResolutions(selectedResolutions.filter(r => r !== res));
+                                            }
+                                        }}
+                                    />
+                                    <label htmlFor={`res-${res}`}
+                                           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        {res}p
+                                    </label>
                                 </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="res" className="text-right">Resolution</Label>
-                                    <Input id="res" placeholder="1920x1080" value={editingProfile?.resolution || ""}
-                                           onChange={(e) => setEditingProfile({
-                                               ...editingProfile,
-                                               resolution: e.target.value
-                                           })} className="col-span-3"/>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button variant="outline" onClick={handleActivateRecommended}>
+                            Activate Selected
+                        </Button>
+                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button onClick={() => setEditingProfile({is_active: true})}>
+                                    <PlusCircle className="mr-2 h-4 w-4"/>
+                                    Add Profile
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>{editingProfile?.id ? "Edit Profile" : "Add Profile"}</DialogTitle>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                    <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label htmlFor="name" className="text-right">Name</Label>
+                                        <Input id="name" value={editingProfile?.name || ""}
+                                               onChange={(e) => setEditingProfile({
+                                                   ...editingProfile,
+                                                   name: e.target.value
+                                               })} className="col-span-3"/>
+                                    </div>
+                                    <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label htmlFor="res" className="text-right">Resolution</Label>
+                                        <Input id="res" placeholder="1920x1080" value={editingProfile?.resolution || ""}
+                                               onChange={(e) => setEditingProfile({
+                                                   ...editingProfile,
+                                                   resolution: e.target.value
+                                               })} className="col-span-3"/>
+                                    </div>
+                                    <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label htmlFor="vcodec" className="text-right">Video Codec</Label>
+                                        <Input id="vcodec" placeholder="libx264"
+                                               value={editingProfile?.video_codec || ""}
+                                               onChange={(e) => setEditingProfile({
+                                                   ...editingProfile,
+                                                   video_codec: e.target.value
+                                               })} className="col-span-3"/>
+                                    </div>
+                                    <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label htmlFor="vbitrate" className="text-right">Video Bitrate</Label>
+                                        <Input id="vbitrate" placeholder="5000k"
+                                               value={editingProfile?.video_bitrate || ""}
+                                               onChange={(e) => setEditingProfile({
+                                                   ...editingProfile,
+                                                   video_bitrate: e.target.value
+                                               })} className="col-span-3"/>
+                                    </div>
                                 </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="vcodec" className="text-right">Video Codec</Label>
-                                    <Input id="vcodec" placeholder="libx264" value={editingProfile?.video_codec || ""}
-                                           onChange={(e) => setEditingProfile({
-                                               ...editingProfile,
-                                               video_codec: e.target.value
-                                           })} className="col-span-3"/>
-                                </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="vbitrate" className="text-right">Video Bitrate</Label>
-                                    <Input id="vbitrate" placeholder="5000k" value={editingProfile?.video_bitrate || ""}
-                                           onChange={(e) => setEditingProfile({
-                                               ...editingProfile,
-                                               video_bitrate: e.target.value
-                                           })} className="col-span-3"/>
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                                <Button onClick={handleSave}>Save</Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
+                                <DialogFooter>
+                                    <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                                    <Button onClick={handleSave}>Save</Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                 </div>
             </div>
 

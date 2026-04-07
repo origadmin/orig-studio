@@ -1,5 +1,6 @@
 import {useQuery, useMutation, useQueryClient, useInfiniteQuery} from '@tanstack/react-query';
 import {mediaApi, type Media} from '@/lib/api/media';
+import {categoryApi, type Category} from '@/lib/api/category';
 
 /**
  * keys factory
@@ -88,13 +89,15 @@ export function useAdminMediaList(params: {
  * useMediaDetail: Fetch single media details
  */
 export function useMediaDetail(id: string | null) {
+    // Remove quotes from id if present
+    const cleanId = id ? id.replace(/^"|"$/g, '') : null;
     return useQuery({
-        queryKey: mediaKeys.detail(id!),
+        queryKey: mediaKeys.detail(cleanId!),
         queryFn: async () => {
-            const res = await mediaApi.get(id!);
+            const res = await mediaApi.get(cleanId!);
             return res;
         },
-        enabled: !!id,
+        enabled: !!cleanId,
     });
 }
 
@@ -121,6 +124,19 @@ export function useUpdateMedia() {
             mediaApi.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: mediaKeys.all});
+        },
+    });
+}
+
+/**
+ * useCategoryList: Fetch all categories
+ */
+export function useCategoryList() {
+    return useQuery({
+        queryKey: ['categories'],
+        queryFn: async () => {
+            const res = await categoryApi.getAll();
+            return res;
         },
     });
 }

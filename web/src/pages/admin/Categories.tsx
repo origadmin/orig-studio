@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
@@ -19,45 +19,37 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye} from 'lucide-react';
-
-// 模拟数据
-const mockCategories = [
-    {id: 1, name: '科技', slug: 'tech', description: 'Technology videos', mediaCount: 156, order: 1, status: 'active'},
-    {id: 2, name: '音乐', slug: 'music', description: 'Music videos', mediaCount: 89, order: 2, status: 'active'},
-    {id: 3, name: '游戏', slug: 'gaming', description: 'Gaming content', mediaCount: 234, order: 3, status: 'active'},
-    {
-        id: 4,
-        name: '教育',
-        slug: 'education',
-        description: 'Educational videos',
-        mediaCount: 67,
-        order: 4,
-        status: 'active'
-    },
-    {
-        id: 5,
-        name: '娱乐',
-        slug: 'entertainment',
-        description: 'Entertainment',
-        mediaCount: 312,
-        order: 5,
-        status: 'active'
-    },
-    {id: 6, name: '体育', slug: 'sports', description: 'Sports videos', mediaCount: 45, order: 6, status: 'inactive'},
-];
+import {categoryApi} from '@/lib/api/category';
 
 const Categories: React.FC = () => {
     const {t} = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
-    const [categories] = useState(mockCategories);
+    const [categories, setCategories] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                setLoading(true);
+                const response = await categoryApi.getAll();
+                setCategories(response || []);
+            } catch (error) {
+                console.error('Failed to fetch categories:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCategories();
+    }, []);
 
     const filteredCategories = categories.filter(cat =>
         cat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cat.description.toLowerCase().includes(searchTerm.toLowerCase())
+        (cat.description && cat.description.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
-    const activeCount = categories.filter(c => c.status === 'active').length;
-    const totalMedia = categories.reduce((sum, c) => sum + c.mediaCount, 0);
+    const activeCount = categories.filter(c => c.status === 'active' || c.status === 'Enabled').length;
+    const totalMedia = categories.reduce((sum, c) => sum + (c.media_count || 0), 0);
 
     return (
         <div className="space-y-6">
@@ -83,7 +75,7 @@ const Categories: React.FC = () => {
                 </Card>
                 <Card>
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-blue-600">5</div>
+                        <div className="text-2xl font-bold text-blue-600">{Math.min(categories.length, 5)}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.topCategories')}</p>
                     </CardContent>
                 </Card>
@@ -112,64 +104,78 @@ const Categories: React.FC = () => {
                     <CardTitle>{t('admin.categoryList')}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>ID</TableHead>
-                                <TableHead>{t('admin.name')}</TableHead>
-                                <TableHead>Slug</TableHead>
-                                <TableHead>{t('admin.description')}</TableHead>
-                                <TableHead className="text-right">{t('admin.mediaCount')}</TableHead>
-                                <TableHead>{t('admin.order')}</TableHead>
-                                <TableHead>{t('admin.status')}</TableHead>
-                                <TableHead className="text-right">{t('admin.actions')}</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredCategories.map((category) => (
-                                <TableRow key={category.id}>
-                                    <TableCell className="font-medium">{category.id}</TableCell>
-                                    <TableCell>{category.name}</TableCell>
-                                    <TableCell>
-                                        <code className="text-xs bg-muted px-2 py-1 rounded">{category.slug}</code>
-                                    </TableCell>
-                                    <TableCell className="text-muted-foreground max-w-[200px] truncate">
-                                        {category.description}
-                                    </TableCell>
-                                    <TableCell className="text-right">{category.mediaCount}</TableCell>
-                                    <TableCell>{category.order}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={category.status === 'active' ? 'default' : 'secondary'}>
-                                            {category.status === 'active' ? t('admin.enabled') : t('admin.disabled')}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="sm">
-                                                    <MoreHorizontal className="h-4 w-4"/>
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem>
-                                                    <Eye className="mr-2 h-4 w-4"/>
-                                                    {t('admin.view')}
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    <Edit className="mr-2 h-4 w-4"/>
-                                                    {t('admin.edit')}
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem className="text-red-600">
-                                                    <Trash2 className="mr-2 h-4 w-4"/>
-                                                    {t('admin.delete')}
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
+                    {loading ? (
+                        <div className="py-12 text-center">
+                            <div
+                                className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full mx-auto"/>
+                        </div>
+                    ) : (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>ID</TableHead>
+                                    <TableHead>{t('admin.name')}</TableHead>
+                                    <TableHead>Slug</TableHead>
+                                    <TableHead>{t('admin.description')}</TableHead>
+                                    <TableHead className="text-right">{t('admin.mediaCount')}</TableHead>
+                                    <TableHead>{t('admin.order')}</TableHead>
+                                    <TableHead>{t('admin.status')}</TableHead>
+                                    <TableHead className="text-right">{t('admin.actions')}</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredCategories.length > 0 ? filteredCategories.map((category) => (
+                                    <TableRow key={category.id}>
+                                        <TableCell className="font-medium">{category.id}</TableCell>
+                                        <TableCell>{category.name}</TableCell>
+                                        <TableCell>
+                                            <code className="text-xs bg-muted px-2 py-1 rounded">{category.slug}</code>
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground max-w-[200px] truncate">
+                                            {category.description || '-'}
+                                        </TableCell>
+                                        <TableCell className="text-right">{category.media_count || 0}</TableCell>
+                                        <TableCell>{category.order || 0}</TableCell>
+                                        <TableCell>
+                                            <Badge
+                                                variant={(category.status === 'active' || category.status === 'Enabled') ? 'default' : 'secondary'}>
+                                                {(category.status === 'active' || category.status === 'Enabled') ? t('admin.enabled') : t('admin.disabled')}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="sm">
+                                                        <MoreHorizontal className="h-4 w-4"/>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem>
+                                                        <Eye className="mr-2 h-4 w-4"/>
+                                                        {t('admin.view')}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem>
+                                                        <Edit className="mr-2 h-4 w-4"/>
+                                                        {t('admin.edit')}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem className="text-red-600">
+                                                        <Trash2 className="mr-2 h-4 w-4"/>
+                                                        {t('admin.delete')}
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={8} className="text-center py-8">
+                                            {t('admin.noCategoriesFound') || "No categories found"}
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    )}
                 </CardContent>
             </Card>
         </div>

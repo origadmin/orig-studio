@@ -19,6 +19,7 @@ const VideoCard = ({video}: { video: MediaItem }) => {
                 <img
                     src={video.thumbnail || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800'}
                     alt={video.title}
+                    loading="lazy"
                     className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700 ease-in-out"
                 />
 
@@ -64,6 +65,7 @@ const VideoCard = ({video}: { video: MediaItem }) => {
                         <img
                             src={video.author_avatar || `https://i.pravatar.cc/100?u=${video.user_id}`}
                             alt={video.author_name}
+                            loading="lazy"
                             className="object-cover w-full h-full"
                         />
                     </div>
@@ -77,7 +79,7 @@ const VideoCard = ({video}: { video: MediaItem }) => {
                                                                            className="text-blue-500"/> {formatViews(video.view_count)}</span>
                             <span>•</span>
                             <span className="flex items-center gap-1"><Calendar size={12}
-                                                                                className="text-blue-500"/> {new Date(video.create_time).toLocaleDateString('zh-CN')}</span>
+                                                                                className="text-blue-500"/> {formatDate(video.create_time)}</span>
                         </div>
                     </div>
                 </div>

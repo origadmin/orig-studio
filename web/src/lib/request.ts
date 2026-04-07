@@ -42,25 +42,39 @@ const processQueue = (error: ApiError | null, token: string | null = null) => {
     failedQueue = [];
 };
 
-export const getAccessToken = () => accessToken;
+// 确保每次获取token时都从localStorage读取最新值
+export const getAccessToken = () => {
+    accessToken = localStorage.getItem(TOKEN_KEY);
+    return accessToken;
+};
+
+// 获取刷新token
+export const getRefreshToken = () => {
+    return localStorage.getItem('origcms_refresh_token');
+};
 
 /** Called by useAuth.login() after a successful signin/signup */
 export const setAuth = (token: Token) => {
     accessToken = token.access_token;
     localStorage.setItem(TOKEN_KEY, token.access_token);
+    if (token.refresh_token) {
+        localStorage.setItem('origcms_refresh_token', token.refresh_token);
+    }
     localStorage.setItem("token_expires_at", String(Date.now() + token.expires_in * 1000));
 };
 
 export const clearAuth = () => {
     accessToken = null;
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem('origcms_refresh_token');
     localStorage.removeItem(USER_KEY);
     localStorage.removeItem("token_expires_at");
 };
 
 export const isTokenExpired = (): boolean => {
+    const token = localStorage.getItem(TOKEN_KEY);
     const expiresAt = localStorage.getItem("token_expires_at");
-    if (!expiresAt) return false; // no expiry tracked → assume valid
+    if (!token || !expiresAt) return true; // no token or expiry → assume expired
     return Date.now() > parseInt(expiresAt, 10);
 };
 
@@ -77,8 +91,9 @@ function createRequest() {
     // 请求拦截器：带上 token（如果有）
     request.interceptors.request.use(
         (config) => {
-            if (accessToken && !isTokenExpired()) {
-                config.headers.Authorization = `Bearer ${accessToken}`;
+            const token = localStorage.getItem(TOKEN_KEY);
+            if (token && !isTokenExpired()) {
+                config.headers.Authorization = `Bearer ${token}`;
             }
             return config;
         },
@@ -102,13 +117,21 @@ function createRequest() {
                 return Promise.reject(error);
             }
 
-            // 其余 401：清 token，跳登录
-            if (!isRefreshing) {
-                isRefreshing = true;
-                clearAuth();
-                processQueue(error, null);
-                isRefreshing = false;
-                window.location.href = "/auth/signin";
+            // 检查是否真的是认证失败（token 无效或过期）
+            // 避免因为其他原因导致的 401 错误（如权限不足）而清除 token
+            const errorMessage = error.response?.data?.message;
+            if (errorMessage && (errorMessage.includes('token') || errorMessage.includes('Token') || errorMessage.includes('authentication'))) {
+                // 其余 401：清 token，跳登录
+                if (!isRefreshing) {
+                    isRefreshing = true;
+                    clearAuth();
+                    processQueue(error, null);
+                    isRefreshing = false;
+                    window.location.href = "/auth/signin";
+                }
+            } else {
+                // 其他 401 错误（如权限不足），不清除 token
+                return Promise.reject(error);
             }
 
             return new Promise((_, reject) => {
@@ -123,12 +146,12 @@ function createRequest() {
     return request;
 }
 
-let requestPromise: ReturnType<typeof createRequest> | null = null;
+let requestInstance: ReturnType<typeof createRequest> | null = null;
 const getRequest = () => {
-    if (!requestPromise) {
-        requestPromise = createRequest();
+    if (!requestInstance) {
+        requestInstance = createRequest();
     }
-    return requestPromise;
+    return requestInstance;
 };
 
 // 请求方法
@@ -145,7 +168,7 @@ async function fetchApi<T>(
     method: Method = "GET",
     options: RequestOptions = {}
 ): Promise<T> {
-    const request = await getRequest();
+    const request = getRequest();
 
     // 构建 URL 参数
     const searchParams = new URLSearchParams();

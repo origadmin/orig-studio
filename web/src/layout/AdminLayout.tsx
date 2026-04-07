@@ -49,7 +49,7 @@ const AdminLayout = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
+        <div className="min-h-screen bg-background flex">
             {/* Sidebar */}
             <aside className="w-64 bg-slate-900 text-white flex-shrink-0 flex flex-col">
                 <div className="p-6">
@@ -81,13 +81,13 @@ const AdminLayout = () => {
 
             {/* Main Content */}
             <div className="flex-grow flex flex-col min-w-0">
-                <header className="h-16 bg-white border-b flex items-center justify-between px-8">
-                    <h2 className="text-lg font-semibold text-gray-800">Backstage Control</h2>
+                <header className="h-16 bg-card border-b flex items-center justify-between px-8">
+                    <h2 className="text-lg font-semibold text-foreground">Backstage Control</h2>
                     <div className="flex items-center space-x-4">
                         <div
                             className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">A
                         </div>
-                        <span className="text-sm font-medium">Administrator</span>
+                        <span className="text-sm font-medium text-foreground">Administrator</span>
                     </div>
                 </header>
                 <main className="flex-grow p-8 overflow-auto">

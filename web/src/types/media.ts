@@ -8,7 +8,7 @@ export interface MediaItem {
     encoding_status?: 'pending' | 'processing' | 'success' | 'failed';
     duration: number;
     view_count: number;
-    create_time: string;
+    create_time: string | { seconds: number; nanos: number };
     user_id: number;
     author_name: string;
     author_avatar?: string;
