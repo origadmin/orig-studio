@@ -87,21 +87,21 @@ const Sidebar: React.FC<SidebarProps> = ({
 
     // ── 渲染区段 ──
 
-    const NavSection: React.FC<{ title?: string; items: NavItem[] }> = ({title, items}) => (
-        <div className="space-y-0.5">
+    const NavSection: React.FC<{ title?: string; items: NavItem[]; isFirst?: boolean }> = ({title, items, isFirst}) => (
+        <div className={`${isFirst ? 'space-y-0' : 'space-y-0.5'} ${isFirst ? 'mt-0' : ''}`}>
             {title && !collapsed && (
                 <p className="px-3 pt-4 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                     {title}
                 </p>
             )}
             {collapsed && title && <div className="my-2 mx-3 border-t border-gray-100 dark:border-gray-800"/>}
-            {items.map((item) => (
+            {items.map((item, index) => (
                 <Link
                     key={item.to}
                     to={item.to}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all group ${
+                    className={`flex items-center gap-3 px-3 rounded-lg transition-all group ${
                         collapsed ? 'justify-center' : ''
-                    } ${
+                    } ${isFirst && index === 0 ? 'pt-2 pb-2' : 'py-2'} ${
                         isActive(item.to)
                             ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-medium'
                             : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200'
@@ -120,14 +120,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 
     return (
         <aside
-            className={`fixed left-0 top-14 bottom-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 z-40 transition-all duration-300 overflow-hidden ${
+            className={`fixed left-0 top-0 bottom-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 z-20 transition-all duration-300 overflow-hidden ${
                 collapsed ? 'w-[60px]' : 'w-[220px]'
             }`}
         >
-            <div className="h-full flex flex-col overflow-y-auto py-2 scrollbar-thin">
+            <div className="h-full flex flex-col overflow-y-auto pt-0 pb-2 scrollbar-thin">
                 {/* 浏览 */}
-                <div className={collapsed ? 'px-2' : 'px-2'}>
-                    <NavSection items={browseItems}/>
+                <div className={`pt-0 mt-0 ${collapsed ? 'px-2' : 'px-2'}`}>
+                    <NavSection items={browseItems} isFirst={true}/>
                 </div>
 
                 {/* 我的 - 仅登录可见 */}

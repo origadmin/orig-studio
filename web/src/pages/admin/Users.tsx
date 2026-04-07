@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {userApi} from '@/lib/api/user';
 import {useTranslation} from 'react-i18next';
+import {getFullUrl} from '@/lib/utils';
 
 export default function UsersPage() {
     const {t} = useTranslation();
@@ -74,15 +75,7 @@ export default function UsersPage() {
             : <Badge variant="secondary">{t('admin.inactive') || "Inactive"}</Badge>;
     };
 
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
 
-    const getFullUrl = (path?: string) => {
-        if (!path) return '';
-        if (path.startsWith('http')) return path;
-        const base = API_BASE_URL.replace(/\/$/, '');
-        const sep = path.startsWith('/') ? '' : '/';
-        return `${base}${sep}${path}`;
-    };
 
     return (
         <div className="space-y-6">

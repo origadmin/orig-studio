@@ -12,6 +12,7 @@ import {useAuth} from '@/hooks/useAuth';
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {formatDuration, formatDate} from '@/lib/format';
 import {historyApi} from '@/lib/api/history';
+import {getFullUrl} from '@/lib/utils';
 
 const HistoryPage = () => {
     const {t} = useTranslation();
@@ -100,15 +101,7 @@ const HistoryPage = () => {
         );
     }
 
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
 
-    const getFullUrl = (path?: string) => {
-        if (!path) return '';
-        if (path.startsWith('http')) return path;
-        const base = API_BASE_URL.replace(/\/$/, '');
-        const sep = path.startsWith('/') ? '' : '/';
-        return `${base}${sep}${path}`;
-    };
 
     return (
         <div className="space-y-6">

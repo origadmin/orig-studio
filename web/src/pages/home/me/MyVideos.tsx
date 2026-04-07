@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import {Link} from '@tanstack/react-router';
 import {formatRelativeTime, formatDuration} from '@/lib/format';
+import {getFullUrl} from '@/lib/utils';
 
 const MyVideos = () => {
     const {t} = useTranslation();
@@ -24,15 +25,7 @@ const MyVideos = () => {
     const [page, setPage] = React.useState(1);
     const pageSize = 12;
 
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
 
-    const getFullUrl = (path?: string) => {
-        if (!path) return '';
-        if (path.startsWith('http')) return path;
-        const base = API_BASE_URL.replace(/\/$/, '');
-        const sep = path.startsWith('/') ? '' : '/';
-        return `${base}${sep}${path}`;
-    };
 
     const {data, isLoading} = useMediaList({
         page,

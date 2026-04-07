@@ -11,6 +11,7 @@ import {formatDuration, formatViews} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
 import {categoryApi} from '@/lib/api/category';
 import {useMediaList} from '@/hooks/queries';
+import {getFullUrl} from '@/lib/utils';
 
 const CategoriesPage = () => {
     const {t} = useTranslation();
@@ -36,15 +37,7 @@ const CategoriesPage = () => {
         fetchCategories();
     }, [t]);
 
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
 
-    const getFullUrl = (path?: string) => {
-        if (!path) return '';
-        if (path.startsWith('http')) return path;
-        const base = API_BASE_URL.replace(/\/$/, '');
-        const sep = path.startsWith('/') ? '' : '/';
-        return `${base}${sep}${path}`;
-    };
 
     if (loading) {
         return (
