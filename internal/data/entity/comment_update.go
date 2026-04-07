@@ -32,33 +32,6 @@ func (_u *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
 	return _u
 }
 
-// SetParentID sets the "parent_id" field.
-func (_u *CommentUpdate) SetParentID(v int) *CommentUpdate {
-	_u.mutation.ResetParentID()
-	_u.mutation.SetParentID(v)
-	return _u
-}
-
-// SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableParentID(v *int) *CommentUpdate {
-	if v != nil {
-		_u.SetParentID(*v)
-	}
-	return _u
-}
-
-// AddParentID adds value to the "parent_id" field.
-func (_u *CommentUpdate) AddParentID(v int) *CommentUpdate {
-	_u.mutation.AddParentID(v)
-	return _u
-}
-
-// ClearParentID clears the value of the "parent_id" field.
-func (_u *CommentUpdate) ClearParentID() *CommentUpdate {
-	_u.mutation.ClearParentID()
-	return _u
-}
-
 // SetText sets the "text" field.
 func (_u *CommentUpdate) SetText(v string) *CommentUpdate {
 	_u.mutation.SetText(v)
@@ -257,15 +230,6 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.ParentID(); ok {
-		_spec.SetField(comment.FieldParentID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedParentID(); ok {
-		_spec.AddField(comment.FieldParentID, field.TypeInt, value)
-	}
-	if _u.mutation.ParentIDCleared() {
-		_spec.ClearField(comment.FieldParentID, field.TypeInt)
-	}
 	if value, ok := _u.mutation.Text(); ok {
 		_spec.SetField(comment.FieldText, field.TypeString, value)
 	}
@@ -427,33 +391,6 @@ type CommentUpdateOne struct {
 	hooks     []Hook
 	mutation  *CommentMutation
 	modifiers []func(*sql.UpdateBuilder)
-}
-
-// SetParentID sets the "parent_id" field.
-func (_u *CommentUpdateOne) SetParentID(v int) *CommentUpdateOne {
-	_u.mutation.ResetParentID()
-	_u.mutation.SetParentID(v)
-	return _u
-}
-
-// SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableParentID(v *int) *CommentUpdateOne {
-	if v != nil {
-		_u.SetParentID(*v)
-	}
-	return _u
-}
-
-// AddParentID adds value to the "parent_id" field.
-func (_u *CommentUpdateOne) AddParentID(v int) *CommentUpdateOne {
-	_u.mutation.AddParentID(v)
-	return _u
-}
-
-// ClearParentID clears the value of the "parent_id" field.
-func (_u *CommentUpdateOne) ClearParentID() *CommentUpdateOne {
-	_u.mutation.ClearParentID()
-	return _u
 }
 
 // SetText sets the "text" field.
@@ -683,15 +620,6 @@ func (_u *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err er
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := _u.mutation.ParentID(); ok {
-		_spec.SetField(comment.FieldParentID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedParentID(); ok {
-		_spec.AddField(comment.FieldParentID, field.TypeInt, value)
-	}
-	if _u.mutation.ParentIDCleared() {
-		_spec.ClearField(comment.FieldParentID, field.TypeInt)
 	}
 	if value, ok := _u.mutation.Text(); ok {
 		_spec.SetField(comment.FieldText, field.TypeString, value)

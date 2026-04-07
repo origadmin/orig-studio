@@ -5,14 +5,13 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/svc-content/biz"
 )
 
 // CommentHandler handles /api/v1/comments routes.
 type CommentHandler struct {
-	uc *biz.CommentUseCase
+	uc  *biz.CommentUseCase
 	jwt *auth.Manager
 }
 
@@ -91,8 +90,8 @@ func (h *CommentHandler) listMediaComments(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"list":  items,
-		"total": total,
+		"list":     items,
+		"total":    total,
 		"media_id": mediaId,
 	})
 }
@@ -156,7 +155,13 @@ func (h *CommentHandler) updateComment(c *gin.Context) {
 		return
 	}
 
-	comment, err := h.uc.UpdateComment(c.Request.Context(), id, int(claims.UserID), claims.IsStaff, input.Text)
+	comment, err := h.uc.UpdateComment(
+		c.Request.Context(),
+		id,
+		int(claims.UserID),
+		claims.IsStaff,
+		input.Text,
+	)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

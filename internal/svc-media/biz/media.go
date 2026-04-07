@@ -13,7 +13,6 @@ import (
 
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/go-kratos/kratos/v2/log"
-
 	"origadmin/application/origcms/api/gen/v1/types" // Import the generated Media type
 	"origadmin/application/origcms/internal/pubsub"
 	"origadmin/application/origcms/internal/svc-media/dto"
@@ -114,8 +113,8 @@ type MediaUseCase struct {
 	repo         MediaRepo
 	profileRepo  EncodeProfileRepo
 	encodingRepo EncodingTaskRepo
-	storage   Storage
-	publisher message.Publisher
+	storage      Storage
+	publisher    message.Publisher
 	log          *log.Helper
 
 	mu   sync.RWMutex
@@ -134,8 +133,8 @@ func NewMediaUseCase(
 		repo:         repo,
 		profileRepo:  profileRepo,
 		encodingRepo: encodingRepo,
-		storage:   storage,
-		publisher: publisher,
+		storage:      storage,
+		publisher:    publisher,
 		log:          log.NewHelper(log.With(logger, "module", "media.biz")),
 		subs:         make(map[int64][]chan *EncodingEvent),
 	}
@@ -250,7 +249,6 @@ func (uc *MediaUseCase) UpdateMediaState(ctx context.Context, id int64, state st
 	_, err = uc.repo.Update(ctx, m)
 	return err
 }
-
 
 func (uc *MediaUseCase) ListEncodingTasks(
 	ctx context.Context,

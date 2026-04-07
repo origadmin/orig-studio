@@ -56,11 +56,6 @@ func IDLTE(id int) predicate.Comment {
 	return predicate.Comment(sql.FieldLTE(FieldID, id))
 }
 
-// ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
-func ParentID(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldEQ(FieldParentID, v))
-}
-
 // Text applies equality check predicate on the "text" field. It's identical to TextEQ.
 func Text(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldText, v))
@@ -74,56 +69,6 @@ func UID(v uuid.UUID) predicate.Comment {
 // AddDate applies equality check predicate on the "add_date" field. It's identical to AddDateEQ.
 func AddDate(v time.Time) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldAddDate, v))
-}
-
-// ParentIDEQ applies the EQ predicate on the "parent_id" field.
-func ParentIDEQ(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldEQ(FieldParentID, v))
-}
-
-// ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
-func ParentIDNEQ(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldNEQ(FieldParentID, v))
-}
-
-// ParentIDIn applies the In predicate on the "parent_id" field.
-func ParentIDIn(vs ...int) predicate.Comment {
-	return predicate.Comment(sql.FieldIn(FieldParentID, vs...))
-}
-
-// ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
-func ParentIDNotIn(vs ...int) predicate.Comment {
-	return predicate.Comment(sql.FieldNotIn(FieldParentID, vs...))
-}
-
-// ParentIDGT applies the GT predicate on the "parent_id" field.
-func ParentIDGT(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldGT(FieldParentID, v))
-}
-
-// ParentIDGTE applies the GTE predicate on the "parent_id" field.
-func ParentIDGTE(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldGTE(FieldParentID, v))
-}
-
-// ParentIDLT applies the LT predicate on the "parent_id" field.
-func ParentIDLT(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldLT(FieldParentID, v))
-}
-
-// ParentIDLTE applies the LTE predicate on the "parent_id" field.
-func ParentIDLTE(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldLTE(FieldParentID, v))
-}
-
-// ParentIDIsNil applies the IsNil predicate on the "parent_id" field.
-func ParentIDIsNil() predicate.Comment {
-	return predicate.Comment(sql.FieldIsNull(FieldParentID))
-}
-
-// ParentIDNotNil applies the NotNil predicate on the "parent_id" field.
-func ParentIDNotNil() predicate.Comment {
-	return predicate.Comment(sql.FieldNotNull(FieldParentID))
 }
 
 // TextEQ applies the EQ predicate on the "text" field.
