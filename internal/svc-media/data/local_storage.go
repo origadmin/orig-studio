@@ -21,13 +21,50 @@ type localStorage struct {
 	log     *log.Helper
 }
 
-// NewLocalStorage .
+// NewLocalStorage creates a new local storage backend.
 func NewLocalStorage(baseDir string, logger log.Logger) biz.Storage {
 	return &localStorage{
 		baseDir: baseDir,
-		log:     log.NewHelper(logger),
+		log: log.NewHelper(log.With(logger, "module", "media.storage.local")),
 	}
 }
+
+// Direct storage implementation
+
+func (s *localStorage) Upload(ctx context.Context, key string, r io.Reader, size int64, contentType string) (string, error) {
+	finalPath := filepath.Join(s.baseDir, key)
+	if err := os.MkdirAll(filepath.Dir(finalPath), 0755); err != nil {
+		return "", err
+	}
+
+	f, err := os.Create(finalPath)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	if _, err := io.Copy(f, r); err != nil {
+		return "", err
+	}
+
+	return key, nil
+}
+
+func (s *localStorage) Download(ctx context.Context, key string) (io.ReadCloser, error) {
+	return os.Open(filepath.Join(s.baseDir, key))
+}
+
+func (s *localStorage) Delete(ctx context.Context, key string) error {
+	return os.Remove(filepath.Join(s.baseDir, key))
+}
+
+func (s *localStorage) GetURL(ctx context.Context, key string) (string, error) {
+	// For local storage, we just return the key/path. 
+	// The web server should serve it via a static route.
+	return "/" + key, nil
+}
+
+// Multipart upload implementation
 
 func (s *localStorage) StorePart(ctx context.Context, uploadID string, partNumber int, data []byte) (string, error) {
 	tempPath := filepath.Join(s.baseDir, "temp", uploadID)
@@ -42,7 +79,6 @@ func (s *localStorage) StorePart(ctx context.Context, uploadID string, partNumbe
 		return "", err
 	}
 
-	// For local storage, we can use the part number as an etag for simplicity.
 	return fmt.Sprintf("part_%d_etag", partNumber), nil
 }
 

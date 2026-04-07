@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
+	"origadmin/application/origcms/internal/data/entity/user"
 	"strings"
 	"time"
 
@@ -18,13 +19,17 @@ type Like struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// MediaID holds the value of the "media_id" field.
+	MediaID int `json:"media_id,omitempty"`
+	// UserID holds the value of the "user_id" field.
+	UserID int `json:"user_id,omitempty"`
+	// LikeType holds the value of the "like_type" field.
+	LikeType string `json:"like_type,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the LikeQuery when eager-loading is set.
 	Edges        LikeEdges `json:"edges"`
-	media_likes  *int
-	user_likes   *int
 	selectValues sql.SelectValues
 }
 
@@ -33,7 +38,7 @@ type LikeEdges struct {
 	// Media holds the value of the media edge.
 	Media *Media `json:"media,omitempty"`
 	// User holds the value of the user edge.
-	User []*User `json:"user,omitempty"`
+	User *User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -51,10 +56,12 @@ func (e LikeEdges) MediaOrErr() (*Media, error) {
 }
 
 // UserOrErr returns the User value or an error if the edge
-// was not loaded in eager-loading.
-func (e LikeEdges) UserOrErr() ([]*User, error) {
-	if e.loadedTypes[1] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e LikeEdges) UserOrErr() (*User, error) {
+	if e.User != nil {
 		return e.User, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "user"}
 }
@@ -64,14 +71,12 @@ func (*Like) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case like.FieldID:
+		case like.FieldID, like.FieldMediaID, like.FieldUserID:
 			values[i] = new(sql.NullInt64)
+		case like.FieldLikeType:
+			values[i] = new(sql.NullString)
 		case like.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
-		case like.ForeignKeys[0]: // media_likes
-			values[i] = new(sql.NullInt64)
-		case like.ForeignKeys[1]: // user_likes
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -93,25 +98,29 @@ func (_m *Like) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
+		case like.FieldMediaID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field media_id", values[i])
+			} else if value.Valid {
+				_m.MediaID = int(value.Int64)
+			}
+		case like.FieldUserID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field user_id", values[i])
+			} else if value.Valid {
+				_m.UserID = int(value.Int64)
+			}
+		case like.FieldLikeType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field like_type", values[i])
+			} else if value.Valid {
+				_m.LikeType = value.String
+			}
 		case like.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
-			}
-		case like.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field media_likes", value)
-			} else if value.Valid {
-				_m.media_likes = new(int)
-				*_m.media_likes = int(value.Int64)
-			}
-		case like.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_likes", value)
-			} else if value.Valid {
-				_m.user_likes = new(int)
-				*_m.user_likes = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -159,6 +168,15 @@ func (_m *Like) String() string {
 	var builder strings.Builder
 	builder.WriteString("Like(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	builder.WriteString("media_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MediaID))
+	builder.WriteString(", ")
+	builder.WriteString("user_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(", ")
+	builder.WriteString("like_type=")
+	builder.WriteString(_m.LikeType)
+	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')

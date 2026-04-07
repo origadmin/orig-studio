@@ -11,6 +11,7 @@ import (
 
 	kratosLog "github.com/go-kratos/kratos/v2/log"
 
+	"origadmin/application/origcms/internal/helpers/repo"
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/runtime/log"
 	"github.com/origadmin/toolkits/crypto/hash"
@@ -113,4 +114,10 @@ func (uc *UserUseCase) GetUserEntity(ctx context.Context, id int64) (*entity.Use
 // SetUserRole updates a user's role.
 func (uc *UserUseCase) SetUserRole(ctx context.Context, id int64, role string) error {
 	return uc.repo.SetUserRole(ctx, id, role)
+}
+
+func (uc *UserUseCase) CountUsers(ctx context.Context) (int, error) {
+	// For now, list with 0 limit to get count if List returns total
+	_, total, err := uc.repo.List(ctx, &dto.UserQueryOption{QueryOption: repo.QueryOption{PageSize: 1}})
+	return int(total), err
 }

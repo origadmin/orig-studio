@@ -35,6 +35,12 @@ type MediaQueryOption struct {
 	UserID     *int64
 	CategoryID *int64
 	Status     *int32
+	// Added for Gin handler parity
+	State      string
+	MediaType  string
+	Featured   *bool
+	OrderBy    string
+	Descending bool
 }
 
 // MediaCreateOption specifies options for creating media.

@@ -84,7 +84,7 @@ func init() {
 	channelFields := schema.Channel{}.Fields()
 	_ = channelFields
 	// channelDescTitle is the schema descriptor for title field.
-	channelDescTitle := channelFields[0].Descriptor()
+	channelDescTitle := channelFields[1].Descriptor()
 	// channel.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	channel.TitleValidator = func() func(string) error {
 		validators := channelDescTitle.Validators
@@ -101,22 +101,26 @@ func init() {
 			return nil
 		}
 	}()
+	// channelDescSlug is the schema descriptor for slug field.
+	channelDescSlug := channelFields[2].Descriptor()
+	// channel.SlugValidator is a validator for the "slug" field. It is called by the builders before save.
+	channel.SlugValidator = channelDescSlug.Validators[0].(func(string) error)
 	// channelDescFriendlyToken is the schema descriptor for friendly_token field.
-	channelDescFriendlyToken := channelFields[2].Descriptor()
+	channelDescFriendlyToken := channelFields[4].Descriptor()
 	// channel.FriendlyTokenValidator is a validator for the "friendly_token" field. It is called by the builders before save.
 	channel.FriendlyTokenValidator = channelDescFriendlyToken.Validators[0].(func(string) error)
 	// channelDescBannerLogo is the schema descriptor for banner_logo field.
-	channelDescBannerLogo := channelFields[3].Descriptor()
+	channelDescBannerLogo := channelFields[5].Descriptor()
 	// channel.BannerLogoValidator is a validator for the "banner_logo" field. It is called by the builders before save.
 	channel.BannerLogoValidator = channelDescBannerLogo.Validators[0].(func(string) error)
 	// channelDescAddDate is the schema descriptor for add_date field.
-	channelDescAddDate := channelFields[4].Descriptor()
+	channelDescAddDate := channelFields[6].Descriptor()
 	// channel.DefaultAddDate holds the default value on creation for the add_date field.
 	channel.DefaultAddDate = channelDescAddDate.Default.(func() time.Time)
 	commentFields := schema.Comment{}.Fields()
 	_ = commentFields
 	// commentDescAddDate is the schema descriptor for add_date field.
-	commentDescAddDate := commentFields[2].Descriptor()
+	commentDescAddDate := commentFields[3].Descriptor()
 	// comment.DefaultAddDate holds the default value on creation for the add_date field.
 	comment.DefaultAddDate = commentDescAddDate.Default.(func() time.Time)
 	encodeprofileFields := schema.EncodeProfile{}.Fields()
@@ -198,13 +202,19 @@ func init() {
 	favoriteFields := schema.Favorite{}.Fields()
 	_ = favoriteFields
 	// favoriteDescCreatedAt is the schema descriptor for created_at field.
-	favoriteDescCreatedAt := favoriteFields[0].Descriptor()
+	favoriteDescCreatedAt := favoriteFields[2].Descriptor()
 	// favorite.DefaultCreatedAt holds the default value on creation for the created_at field.
 	favorite.DefaultCreatedAt = favoriteDescCreatedAt.Default.(func() time.Time)
 	likeFields := schema.Like{}.Fields()
 	_ = likeFields
+	// likeDescLikeType is the schema descriptor for like_type field.
+	likeDescLikeType := likeFields[2].Descriptor()
+	// like.DefaultLikeType holds the default value on creation for the like_type field.
+	like.DefaultLikeType = likeDescLikeType.Default.(string)
+	// like.LikeTypeValidator is a validator for the "like_type" field. It is called by the builders before save.
+	like.LikeTypeValidator = likeDescLikeType.Validators[0].(func(string) error)
 	// likeDescCreatedAt is the schema descriptor for created_at field.
-	likeDescCreatedAt := likeFields[0].Descriptor()
+	likeDescCreatedAt := likeFields[3].Descriptor()
 	// like.DefaultCreatedAt holds the default value on creation for the created_at field.
 	like.DefaultCreatedAt = likeDescCreatedAt.Default.(func() time.Time)
 	mediaFields := schema.Media{}.Fields()
@@ -336,11 +346,11 @@ func init() {
 	// media.DefaultReportedTimes holds the default value on creation for the reported_times field.
 	media.DefaultReportedTimes = mediaDescReportedTimes.Default.(int)
 	// mediaDescCreatedAt is the schema descriptor for created_at field.
-	mediaDescCreatedAt := mediaFields[34].Descriptor()
+	mediaDescCreatedAt := mediaFields[36].Descriptor()
 	// media.DefaultCreatedAt holds the default value on creation for the created_at field.
 	media.DefaultCreatedAt = mediaDescCreatedAt.Default.(func() time.Time)
 	// mediaDescUpdatedAt is the schema descriptor for updated_at field.
-	mediaDescUpdatedAt := mediaFields[35].Descriptor()
+	mediaDescUpdatedAt := mediaFields[37].Descriptor()
 	// media.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	media.DefaultUpdatedAt = mediaDescUpdatedAt.Default.(func() time.Time)
 	// media.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -348,11 +358,11 @@ func init() {
 	mediaplaylistFields := schema.MediaPlaylist{}.Fields()
 	_ = mediaplaylistFields
 	// mediaplaylistDescOrdering is the schema descriptor for ordering field.
-	mediaplaylistDescOrdering := mediaplaylistFields[0].Descriptor()
+	mediaplaylistDescOrdering := mediaplaylistFields[2].Descriptor()
 	// mediaplaylist.DefaultOrdering holds the default value on creation for the ordering field.
 	mediaplaylist.DefaultOrdering = mediaplaylistDescOrdering.Default.(int)
 	// mediaplaylistDescActionDate is the schema descriptor for action_date field.
-	mediaplaylistDescActionDate := mediaplaylistFields[1].Descriptor()
+	mediaplaylistDescActionDate := mediaplaylistFields[3].Descriptor()
 	// mediaplaylist.DefaultActionDate holds the default value on creation for the action_date field.
 	mediaplaylist.DefaultActionDate = mediaplaylistDescActionDate.Default.(func() time.Time)
 	notificationFields := schema.Notification{}.Fields()
@@ -371,6 +381,14 @@ func init() {
 	notification.DefaultMethod = notificationDescMethod.Default.(string)
 	// notification.MethodValidator is a validator for the "method" field. It is called by the builders before save.
 	notification.MethodValidator = notificationDescMethod.Validators[0].(func(string) error)
+	// notificationDescIsRead is the schema descriptor for is_read field.
+	notificationDescIsRead := notificationFields[4].Descriptor()
+	// notification.DefaultIsRead holds the default value on creation for the is_read field.
+	notification.DefaultIsRead = notificationDescIsRead.Default.(bool)
+	// notificationDescCreatedAt is the schema descriptor for created_at field.
+	notificationDescCreatedAt := notificationFields[5].Descriptor()
+	// notification.DefaultCreatedAt holds the default value on creation for the created_at field.
+	notification.DefaultCreatedAt = notificationDescCreatedAt.Default.(func() time.Time)
 	playlistFields := schema.Playlist{}.Fields()
 	_ = playlistFields
 	// playlistDescTitle is the schema descriptor for title field.
@@ -395,8 +413,12 @@ func init() {
 	playlistDescFriendlyToken := playlistFields[2].Descriptor()
 	// playlist.FriendlyTokenValidator is a validator for the "friendly_token" field. It is called by the builders before save.
 	playlist.FriendlyTokenValidator = playlistDescFriendlyToken.Validators[0].(func(string) error)
+	// playlistDescPrivacy is the schema descriptor for privacy field.
+	playlistDescPrivacy := playlistFields[5].Descriptor()
+	// playlist.DefaultPrivacy holds the default value on creation for the privacy field.
+	playlist.DefaultPrivacy = playlistDescPrivacy.Default.(int)
 	// playlistDescAddDate is the schema descriptor for add_date field.
-	playlistDescAddDate := playlistFields[5].Descriptor()
+	playlistDescAddDate := playlistFields[6].Descriptor()
 	// playlist.DefaultAddDate holds the default value on creation for the add_date field.
 	playlist.DefaultAddDate = playlistDescAddDate.Default.(func() time.Time)
 	tagFields := schema.Tag{}.Fields()

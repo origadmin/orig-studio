@@ -459,6 +459,34 @@ func (_c *MediaCreate) SetUserID(v int) *MediaCreate {
 	return _c
 }
 
+// SetCategoryID sets the "category_id" field.
+func (_c *MediaCreate) SetCategoryID(v int) *MediaCreate {
+	_c.mutation.SetCategoryID(v)
+	return _c
+}
+
+// SetNillableCategoryID sets the "category_id" field if the given value is not nil.
+func (_c *MediaCreate) SetNillableCategoryID(v *int) *MediaCreate {
+	if v != nil {
+		_c.SetCategoryID(*v)
+	}
+	return _c
+}
+
+// SetChannelID sets the "channel_id" field.
+func (_c *MediaCreate) SetChannelID(v int) *MediaCreate {
+	_c.mutation.SetChannelID(v)
+	return _c
+}
+
+// SetNillableChannelID sets the "channel_id" field if the given value is not nil.
+func (_c *MediaCreate) SetNillableChannelID(v *int) *MediaCreate {
+	if v != nil {
+		_c.SetChannelID(*v)
+	}
+	return _c
+}
+
 // SetPublishedAt sets the "published_at" field.
 func (_c *MediaCreate) SetPublishedAt(v time.Time) *MediaCreate {
 	_c.mutation.SetPublishedAt(v)
@@ -506,20 +534,6 @@ func (_c *MediaCreate) SetUser(v *User) *MediaCreate {
 	return _c.SetUserID(v.ID)
 }
 
-// SetCategoryID sets the "category" edge to the Category entity by ID.
-func (_c *MediaCreate) SetCategoryID(id int) *MediaCreate {
-	_c.mutation.SetCategoryID(id)
-	return _c
-}
-
-// SetNillableCategoryID sets the "category" edge to the Category entity by ID if the given value is not nil.
-func (_c *MediaCreate) SetNillableCategoryID(id *int) *MediaCreate {
-	if id != nil {
-		_c = _c.SetCategoryID(*id)
-	}
-	return _c
-}
-
 // SetCategory sets the "category" edge to the Category entity.
 func (_c *MediaCreate) SetCategory(v *Category) *MediaCreate {
 	return _c.SetCategoryID(v.ID)
@@ -540,19 +554,9 @@ func (_c *MediaCreate) AddComments(v ...*Comment) *MediaCreate {
 	return _c.AddCommentIDs(ids...)
 }
 
-// AddChannelIDs adds the "channels" edge to the Channel entity by IDs.
-func (_c *MediaCreate) AddChannelIDs(ids ...int) *MediaCreate {
-	_c.mutation.AddChannelIDs(ids...)
-	return _c
-}
-
-// AddChannels adds the "channels" edges to the Channel entity.
-func (_c *MediaCreate) AddChannels(v ...*Channel) *MediaCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddChannelIDs(ids...)
+// SetChannel sets the "channel" edge to the Channel entity.
+func (_c *MediaCreate) SetChannel(v *Channel) *MediaCreate {
+	return _c.SetChannelID(v.ID)
 }
 
 // AddPlaylistIDs adds the "playlists" edge to the MediaPlaylist entity by IDs.
@@ -1093,15 +1097,15 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.category_media = &nodes[0]
+		_node.CategoryID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.CommentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   media.CommentsTable,
-			Columns: media.CommentsPrimaryKey,
+			Columns: []string{media.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
@@ -1112,12 +1116,12 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.ChannelsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ChannelIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   media.ChannelsTable,
-			Columns: media.ChannelsPrimaryKey,
+			Table:   media.ChannelTable,
+			Columns: []string{media.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),
@@ -1126,6 +1130,7 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.ChannelID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.PlaylistsIDs(); len(nodes) > 0 {

@@ -22,6 +22,18 @@ type FavoriteCreate struct {
 	hooks    []Hook
 }
 
+// SetMediaID sets the "media_id" field.
+func (_c *FavoriteCreate) SetMediaID(v int) *FavoriteCreate {
+	_c.mutation.SetMediaID(v)
+	return _c
+}
+
+// SetUserID sets the "user_id" field.
+func (_c *FavoriteCreate) SetUserID(v int) *FavoriteCreate {
+	_c.mutation.SetUserID(v)
+	return _c
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_c *FavoriteCreate) SetCreatedAt(v time.Time) *FavoriteCreate {
 	_c.mutation.SetCreatedAt(v)
@@ -36,38 +48,14 @@ func (_c *FavoriteCreate) SetNillableCreatedAt(v *time.Time) *FavoriteCreate {
 	return _c
 }
 
-// SetMediaID sets the "media" edge to the Media entity by ID.
-func (_c *FavoriteCreate) SetMediaID(id int) *FavoriteCreate {
-	_c.mutation.SetMediaID(id)
-	return _c
-}
-
-// SetNillableMediaID sets the "media" edge to the Media entity by ID if the given value is not nil.
-func (_c *FavoriteCreate) SetNillableMediaID(id *int) *FavoriteCreate {
-	if id != nil {
-		_c = _c.SetMediaID(*id)
-	}
-	return _c
-}
-
 // SetMedia sets the "media" edge to the Media entity.
 func (_c *FavoriteCreate) SetMedia(v *Media) *FavoriteCreate {
 	return _c.SetMediaID(v.ID)
 }
 
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_c *FavoriteCreate) AddUserIDs(ids ...int) *FavoriteCreate {
-	_c.mutation.AddUserIDs(ids...)
-	return _c
-}
-
-// AddUser adds the "user" edges to the User entity.
-func (_c *FavoriteCreate) AddUser(v ...*User) *FavoriteCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddUserIDs(ids...)
+// SetUser sets the "user" edge to the User entity.
+func (_c *FavoriteCreate) SetUser(v *User) *FavoriteCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // Mutation returns the FavoriteMutation object of the builder.
@@ -113,8 +101,20 @@ func (_c *FavoriteCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *FavoriteCreate) check() error {
+	if _, ok := _c.mutation.MediaID(); !ok {
+		return &ValidationError{Name: "media_id", err: errors.New(`entity: missing required field "Favorite.media_id"`)}
+	}
+	if _, ok := _c.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`entity: missing required field "Favorite.user_id"`)}
+	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "Favorite.created_at"`)}
+	}
+	if len(_c.mutation.MediaIDs()) == 0 {
+		return &ValidationError{Name: "media", err: errors.New(`entity: missing required edge "Favorite.media"`)}
+	}
+	if len(_c.mutation.UserIDs()) == 0 {
+		return &ValidationError{Name: "user", err: errors.New(`entity: missing required edge "Favorite.user"`)}
 	}
 	return nil
 }
@@ -160,13 +160,13 @@ func (_c *FavoriteCreate) createSpec() (*Favorite, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.media_favorites = &nodes[0]
+		_node.MediaID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   favorite.UserTable,
 			Columns: []string{favorite.UserColumn},
 			Bidi:    false,
@@ -177,6 +177,7 @@ func (_c *FavoriteCreate) createSpec() (*Favorite, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

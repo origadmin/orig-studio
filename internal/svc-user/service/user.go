@@ -196,6 +196,12 @@ func (s *UserService) Login(
 		return nil, err
 	}
 
+	// Get user entity to access role field
+	userEnt, err := s.uc.GetUserEntity(ctx, userInfo.Id)
+	if err != nil {
+		return nil, err
+	}
+
 	// Verify password
 	err = s.uc.VerifyPassword(ctx, userInfo.Id, req.GetPassword())
 	if err != nil {
@@ -203,7 +209,7 @@ func (s *UserService) Login(
 	}
 
 	// Generate JWT token
-	token, err := s.jwtMgr.Generate(userInfo.Id, userInfo.Username, userInfo.IsStaff)
+	token, err := s.jwtMgr.Generate(userInfo.Id, userInfo.Username, userInfo.IsStaff, string(userEnt.Role))
 	if err != nil {
 		s.log.Errorf("Failed to generate JWT token: %v", err)
 		return nil, errors.InternalServer("TOKEN_GENERATION_FAILED", "Failed to generate token")

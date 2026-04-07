@@ -3,6 +3,8 @@
 package notification
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -20,6 +22,10 @@ const (
 	FieldMethod = "method"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
+	// FieldIsRead holds the string denoting the is_read field in the database.
+	FieldIsRead = "is_read"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the notification in the database.
@@ -38,6 +44,8 @@ var Columns = []string{
 	FieldNotify,
 	FieldMethod,
 	FieldUserID,
+	FieldIsRead,
+	FieldCreatedAt,
 }
 
 var (
@@ -65,6 +73,10 @@ var (
 	DefaultMethod string
 	// MethodValidator is a validator for the "method" field. It is called by the builders before save.
 	MethodValidator func(string) error
+	// DefaultIsRead holds the default value on creation for the "is_read" field.
+	DefaultIsRead bool
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
 )
 
 // OrderOption defines the ordering options for the Notification queries.
@@ -93,6 +105,16 @@ func ByMethod(opts ...sql.OrderTermOption) OrderOption {
 // ByUserID orders the results by the user_id field.
 func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
+// ByIsRead orders the results by the is_read field.
+func ByIsRead(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsRead, opts...).ToFunc()
+}
+
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
 }
 
 // ByUserCount orders the results by user count.

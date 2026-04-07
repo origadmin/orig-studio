@@ -14,6 +14,10 @@ const (
 	Label = "favorite"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldMediaID holds the string denoting the media_id field in the database.
+	FieldMediaID = "media_id"
+	// FieldUserID holds the string denoting the user_id field in the database.
+	FieldUserID = "user_id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// EdgeMedia holds the string denoting the media edge name in mutations.
@@ -28,38 +32,28 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "media" package.
 	MediaInverseTable = "media"
 	// MediaColumn is the table column denoting the media relation/edge.
-	MediaColumn = "media_favorites"
+	MediaColumn = "media_id"
 	// UserTable is the table that holds the user relation/edge.
-	UserTable = "users_user"
+	UserTable = "files_favorite"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users_user"
 	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "favorite_user"
+	UserColumn = "user_id"
 )
 
 // Columns holds all SQL columns for favorite fields.
 var Columns = []string{
 	FieldID,
+	FieldMediaID,
+	FieldUserID,
 	FieldCreatedAt,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "files_favorite"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"media_favorites",
-	"user_favorites",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -79,6 +73,16 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByMediaID orders the results by the media_id field.
+func ByMediaID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMediaID, opts...).ToFunc()
+}
+
+// ByUserID orders the results by the user_id field.
+func ByUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
 // ByCreatedAt orders the results by the created_at field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
@@ -91,17 +95,10 @@ func ByMediaField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByUserCount orders the results by user count.
-func ByUserCount(opts ...sql.OrderTermOption) OrderOption {
+// ByUserField orders the results by user field.
+func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newUserStep(), opts...)
-	}
-}
-
-// ByUser orders the results by user terms.
-func ByUser(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUserStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newMediaStep() *sqlgraph.Step {
@@ -115,6 +112,6 @@ func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, UserTable, UserColumn),
+		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 	)
 }

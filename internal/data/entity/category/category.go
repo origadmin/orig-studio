@@ -71,7 +71,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "media" package.
 	MediaInverseTable = "media"
 	// MediaColumn is the table column denoting the media relation/edge.
-	MediaColumn = "category_media"
+	MediaColumn = "category_id"
 	// ParentTable is the table that holds the parent relation/edge.
 	ParentTable = "categories"
 	// ParentColumn is the table column denoting the parent relation/edge.

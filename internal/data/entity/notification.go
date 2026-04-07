@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -24,6 +25,10 @@ type Notification struct {
 	Method string `json:"method,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID int `json:"user_id,omitempty"`
+	// IsRead holds the value of the "is_read" field.
+	IsRead bool `json:"is_read,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the NotificationQuery when eager-loading is set.
 	Edges        NotificationEdges `json:"edges"`
@@ -53,12 +58,14 @@ func (*Notification) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case notification.FieldNotify:
+		case notification.FieldNotify, notification.FieldIsRead:
 			values[i] = new(sql.NullBool)
 		case notification.FieldID, notification.FieldUserID:
 			values[i] = new(sql.NullInt64)
 		case notification.FieldAction, notification.FieldMethod:
 			values[i] = new(sql.NullString)
+		case notification.FieldCreatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -103,6 +110,18 @@ func (_m *Notification) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
 				_m.UserID = int(value.Int64)
+			}
+		case notification.FieldIsRead:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_read", values[i])
+			} else if value.Valid {
+				_m.IsRead = value.Bool
+			}
+		case notification.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				_m.CreatedAt = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -156,6 +175,12 @@ func (_m *Notification) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(", ")
+	builder.WriteString("is_read=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsRead))
+	builder.WriteString(", ")
+	builder.WriteString("created_at=")
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

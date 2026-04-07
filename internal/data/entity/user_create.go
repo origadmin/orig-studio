@@ -850,10 +850,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	}
 	if nodes := _c.mutation.CommentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   user.CommentsTable,
-			Columns: user.CommentsPrimaryKey,
+			Columns: []string{user.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),

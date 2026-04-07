@@ -56,6 +56,11 @@ func IDLTE(id int) predicate.Comment {
 	return predicate.Comment(sql.FieldLTE(FieldID, id))
 }
 
+// ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
+func ParentID(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldParentID, v))
+}
+
 // Text applies equality check predicate on the "text" field. It's identical to TextEQ.
 func Text(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldText, v))
@@ -71,14 +76,54 @@ func AddDate(v time.Time) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldAddDate, v))
 }
 
-// MediaID applies equality check predicate on the "media_id" field. It's identical to MediaIDEQ.
-func MediaID(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldEQ(FieldMediaID, v))
+// ParentIDEQ applies the EQ predicate on the "parent_id" field.
+func ParentIDEQ(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldParentID, v))
 }
 
-// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldEQ(FieldUserID, v))
+// ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
+func ParentIDNEQ(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldNEQ(FieldParentID, v))
+}
+
+// ParentIDIn applies the In predicate on the "parent_id" field.
+func ParentIDIn(vs ...int) predicate.Comment {
+	return predicate.Comment(sql.FieldIn(FieldParentID, vs...))
+}
+
+// ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
+func ParentIDNotIn(vs ...int) predicate.Comment {
+	return predicate.Comment(sql.FieldNotIn(FieldParentID, vs...))
+}
+
+// ParentIDGT applies the GT predicate on the "parent_id" field.
+func ParentIDGT(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldGT(FieldParentID, v))
+}
+
+// ParentIDGTE applies the GTE predicate on the "parent_id" field.
+func ParentIDGTE(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldGTE(FieldParentID, v))
+}
+
+// ParentIDLT applies the LT predicate on the "parent_id" field.
+func ParentIDLT(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldLT(FieldParentID, v))
+}
+
+// ParentIDLTE applies the LTE predicate on the "parent_id" field.
+func ParentIDLTE(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldLTE(FieldParentID, v))
+}
+
+// ParentIDIsNil applies the IsNil predicate on the "parent_id" field.
+func ParentIDIsNil() predicate.Comment {
+	return predicate.Comment(sql.FieldIsNull(FieldParentID))
+}
+
+// ParentIDNotNil applies the NotNil predicate on the "parent_id" field.
+func ParentIDNotNil() predicate.Comment {
+	return predicate.Comment(sql.FieldNotNull(FieldParentID))
 }
 
 // TextEQ applies the EQ predicate on the "text" field.
@@ -226,92 +271,12 @@ func AddDateLTE(v time.Time) predicate.Comment {
 	return predicate.Comment(sql.FieldLTE(FieldAddDate, v))
 }
 
-// MediaIDEQ applies the EQ predicate on the "media_id" field.
-func MediaIDEQ(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldEQ(FieldMediaID, v))
-}
-
-// MediaIDNEQ applies the NEQ predicate on the "media_id" field.
-func MediaIDNEQ(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldNEQ(FieldMediaID, v))
-}
-
-// MediaIDIn applies the In predicate on the "media_id" field.
-func MediaIDIn(vs ...int) predicate.Comment {
-	return predicate.Comment(sql.FieldIn(FieldMediaID, vs...))
-}
-
-// MediaIDNotIn applies the NotIn predicate on the "media_id" field.
-func MediaIDNotIn(vs ...int) predicate.Comment {
-	return predicate.Comment(sql.FieldNotIn(FieldMediaID, vs...))
-}
-
-// MediaIDGT applies the GT predicate on the "media_id" field.
-func MediaIDGT(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldGT(FieldMediaID, v))
-}
-
-// MediaIDGTE applies the GTE predicate on the "media_id" field.
-func MediaIDGTE(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldGTE(FieldMediaID, v))
-}
-
-// MediaIDLT applies the LT predicate on the "media_id" field.
-func MediaIDLT(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldLT(FieldMediaID, v))
-}
-
-// MediaIDLTE applies the LTE predicate on the "media_id" field.
-func MediaIDLTE(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldLTE(FieldMediaID, v))
-}
-
-// UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldEQ(FieldUserID, v))
-}
-
-// UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldNEQ(FieldUserID, v))
-}
-
-// UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int) predicate.Comment {
-	return predicate.Comment(sql.FieldIn(FieldUserID, vs...))
-}
-
-// UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int) predicate.Comment {
-	return predicate.Comment(sql.FieldNotIn(FieldUserID, vs...))
-}
-
-// UserIDGT applies the GT predicate on the "user_id" field.
-func UserIDGT(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldGT(FieldUserID, v))
-}
-
-// UserIDGTE applies the GTE predicate on the "user_id" field.
-func UserIDGTE(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldGTE(FieldUserID, v))
-}
-
-// UserIDLT applies the LT predicate on the "user_id" field.
-func UserIDLT(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldLT(FieldUserID, v))
-}
-
-// UserIDLTE applies the LTE predicate on the "user_id" field.
-func UserIDLTE(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldLTE(FieldUserID, v))
-}
-
 // HasMedia applies the HasEdge predicate on the "media" edge.
 func HasMedia() predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, MediaTable, MediaPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, MediaTable, MediaColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -334,7 +299,7 @@ func HasUser() predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, UserTable, UserPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -352,12 +317,35 @@ func HasUserWith(preds ...predicate.User) predicate.Comment {
 	})
 }
 
+// HasParent applies the HasEdge predicate on the "parent" edge.
+func HasParent() predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ParentTable, ParentColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
+func HasParentWith(preds ...predicate.Comment) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		step := newParentStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasReplies applies the HasEdge predicate on the "replies" edge.
 func HasReplies() predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, RepliesTable, RepliesPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, RepliesTable, RepliesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

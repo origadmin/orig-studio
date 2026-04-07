@@ -31,6 +31,34 @@ func (_u *MediaPlaylistUpdate) Where(ps ...predicate.MediaPlaylist) *MediaPlayli
 	return _u
 }
 
+// SetPlaylistID sets the "playlist_id" field.
+func (_u *MediaPlaylistUpdate) SetPlaylistID(v int) *MediaPlaylistUpdate {
+	_u.mutation.SetPlaylistID(v)
+	return _u
+}
+
+// SetNillablePlaylistID sets the "playlist_id" field if the given value is not nil.
+func (_u *MediaPlaylistUpdate) SetNillablePlaylistID(v *int) *MediaPlaylistUpdate {
+	if v != nil {
+		_u.SetPlaylistID(*v)
+	}
+	return _u
+}
+
+// SetMediaID sets the "media_id" field.
+func (_u *MediaPlaylistUpdate) SetMediaID(v int) *MediaPlaylistUpdate {
+	_u.mutation.SetMediaID(v)
+	return _u
+}
+
+// SetNillableMediaID sets the "media_id" field if the given value is not nil.
+func (_u *MediaPlaylistUpdate) SetNillableMediaID(v *int) *MediaPlaylistUpdate {
+	if v != nil {
+		_u.SetMediaID(*v)
+	}
+	return _u
+}
+
 // SetOrdering sets the "ordering" field.
 func (_u *MediaPlaylistUpdate) SetOrdering(v int) *MediaPlaylistUpdate {
 	_u.mutation.ResetOrdering()
@@ -66,34 +94,14 @@ func (_u *MediaPlaylistUpdate) SetNillableActionDate(v *time.Time) *MediaPlaylis
 	return _u
 }
 
-// AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_u *MediaPlaylistUpdate) AddMediumIDs(ids ...int) *MediaPlaylistUpdate {
-	_u.mutation.AddMediumIDs(ids...)
-	return _u
+// SetMedia sets the "media" edge to the Media entity.
+func (_u *MediaPlaylistUpdate) SetMedia(v *Media) *MediaPlaylistUpdate {
+	return _u.SetMediaID(v.ID)
 }
 
-// AddMedia adds the "media" edges to the Media entity.
-func (_u *MediaPlaylistUpdate) AddMedia(v ...*Media) *MediaPlaylistUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddMediumIDs(ids...)
-}
-
-// AddPlaylistIDs adds the "playlist" edge to the Playlist entity by IDs.
-func (_u *MediaPlaylistUpdate) AddPlaylistIDs(ids ...int) *MediaPlaylistUpdate {
-	_u.mutation.AddPlaylistIDs(ids...)
-	return _u
-}
-
-// AddPlaylist adds the "playlist" edges to the Playlist entity.
-func (_u *MediaPlaylistUpdate) AddPlaylist(v ...*Playlist) *MediaPlaylistUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddPlaylistIDs(ids...)
+// SetPlaylist sets the "playlist" edge to the Playlist entity.
+func (_u *MediaPlaylistUpdate) SetPlaylist(v *Playlist) *MediaPlaylistUpdate {
+	return _u.SetPlaylistID(v.ID)
 }
 
 // Mutation returns the MediaPlaylistMutation object of the builder.
@@ -101,46 +109,16 @@ func (_u *MediaPlaylistUpdate) Mutation() *MediaPlaylistMutation {
 	return _u.mutation
 }
 
-// ClearMedia clears all "media" edges to the Media entity.
+// ClearMedia clears the "media" edge to the Media entity.
 func (_u *MediaPlaylistUpdate) ClearMedia() *MediaPlaylistUpdate {
 	_u.mutation.ClearMedia()
 	return _u
 }
 
-// RemoveMediumIDs removes the "media" edge to Media entities by IDs.
-func (_u *MediaPlaylistUpdate) RemoveMediumIDs(ids ...int) *MediaPlaylistUpdate {
-	_u.mutation.RemoveMediumIDs(ids...)
-	return _u
-}
-
-// RemoveMedia removes "media" edges to Media entities.
-func (_u *MediaPlaylistUpdate) RemoveMedia(v ...*Media) *MediaPlaylistUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveMediumIDs(ids...)
-}
-
-// ClearPlaylist clears all "playlist" edges to the Playlist entity.
+// ClearPlaylist clears the "playlist" edge to the Playlist entity.
 func (_u *MediaPlaylistUpdate) ClearPlaylist() *MediaPlaylistUpdate {
 	_u.mutation.ClearPlaylist()
 	return _u
-}
-
-// RemovePlaylistIDs removes the "playlist" edge to Playlist entities by IDs.
-func (_u *MediaPlaylistUpdate) RemovePlaylistIDs(ids ...int) *MediaPlaylistUpdate {
-	_u.mutation.RemovePlaylistIDs(ids...)
-	return _u
-}
-
-// RemovePlaylist removes "playlist" edges to Playlist entities.
-func (_u *MediaPlaylistUpdate) RemovePlaylist(v ...*Playlist) *MediaPlaylistUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemovePlaylistIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -170,6 +148,17 @@ func (_u *MediaPlaylistUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *MediaPlaylistUpdate) check() error {
+	if _u.mutation.MediaCleared() && len(_u.mutation.MediaIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "MediaPlaylist.media"`)
+	}
+	if _u.mutation.PlaylistCleared() && len(_u.mutation.PlaylistIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "MediaPlaylist.playlist"`)
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *MediaPlaylistUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *MediaPlaylistUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -177,6 +166,9 @@ func (_u *MediaPlaylistUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *
 }
 
 func (_u *MediaPlaylistUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(mediaplaylist.Table, mediaplaylist.Columns, sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -196,7 +188,7 @@ func (_u *MediaPlaylistUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   mediaplaylist.MediaTable,
 			Columns: []string{mediaplaylist.MediaColumn},
@@ -204,28 +196,12 @@ func (_u *MediaPlaylistUpdate) sqlSave(ctx context.Context) (_node int, err erro
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedMediaIDs(); len(nodes) > 0 && !_u.mutation.MediaCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   mediaplaylist.MediaTable,
-			Columns: []string{mediaplaylist.MediaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   mediaplaylist.MediaTable,
 			Columns: []string{mediaplaylist.MediaColumn},
@@ -241,7 +217,7 @@ func (_u *MediaPlaylistUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	}
 	if _u.mutation.PlaylistCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   mediaplaylist.PlaylistTable,
 			Columns: []string{mediaplaylist.PlaylistColumn},
@@ -249,28 +225,12 @@ func (_u *MediaPlaylistUpdate) sqlSave(ctx context.Context) (_node int, err erro
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedPlaylistIDs(); len(nodes) > 0 && !_u.mutation.PlaylistCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   mediaplaylist.PlaylistTable,
-			Columns: []string{mediaplaylist.PlaylistColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.PlaylistIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   mediaplaylist.PlaylistTable,
 			Columns: []string{mediaplaylist.PlaylistColumn},
@@ -304,6 +264,34 @@ type MediaPlaylistUpdateOne struct {
 	hooks     []Hook
 	mutation  *MediaPlaylistMutation
 	modifiers []func(*sql.UpdateBuilder)
+}
+
+// SetPlaylistID sets the "playlist_id" field.
+func (_u *MediaPlaylistUpdateOne) SetPlaylistID(v int) *MediaPlaylistUpdateOne {
+	_u.mutation.SetPlaylistID(v)
+	return _u
+}
+
+// SetNillablePlaylistID sets the "playlist_id" field if the given value is not nil.
+func (_u *MediaPlaylistUpdateOne) SetNillablePlaylistID(v *int) *MediaPlaylistUpdateOne {
+	if v != nil {
+		_u.SetPlaylistID(*v)
+	}
+	return _u
+}
+
+// SetMediaID sets the "media_id" field.
+func (_u *MediaPlaylistUpdateOne) SetMediaID(v int) *MediaPlaylistUpdateOne {
+	_u.mutation.SetMediaID(v)
+	return _u
+}
+
+// SetNillableMediaID sets the "media_id" field if the given value is not nil.
+func (_u *MediaPlaylistUpdateOne) SetNillableMediaID(v *int) *MediaPlaylistUpdateOne {
+	if v != nil {
+		_u.SetMediaID(*v)
+	}
+	return _u
 }
 
 // SetOrdering sets the "ordering" field.
@@ -341,34 +329,14 @@ func (_u *MediaPlaylistUpdateOne) SetNillableActionDate(v *time.Time) *MediaPlay
 	return _u
 }
 
-// AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_u *MediaPlaylistUpdateOne) AddMediumIDs(ids ...int) *MediaPlaylistUpdateOne {
-	_u.mutation.AddMediumIDs(ids...)
-	return _u
+// SetMedia sets the "media" edge to the Media entity.
+func (_u *MediaPlaylistUpdateOne) SetMedia(v *Media) *MediaPlaylistUpdateOne {
+	return _u.SetMediaID(v.ID)
 }
 
-// AddMedia adds the "media" edges to the Media entity.
-func (_u *MediaPlaylistUpdateOne) AddMedia(v ...*Media) *MediaPlaylistUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddMediumIDs(ids...)
-}
-
-// AddPlaylistIDs adds the "playlist" edge to the Playlist entity by IDs.
-func (_u *MediaPlaylistUpdateOne) AddPlaylistIDs(ids ...int) *MediaPlaylistUpdateOne {
-	_u.mutation.AddPlaylistIDs(ids...)
-	return _u
-}
-
-// AddPlaylist adds the "playlist" edges to the Playlist entity.
-func (_u *MediaPlaylistUpdateOne) AddPlaylist(v ...*Playlist) *MediaPlaylistUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddPlaylistIDs(ids...)
+// SetPlaylist sets the "playlist" edge to the Playlist entity.
+func (_u *MediaPlaylistUpdateOne) SetPlaylist(v *Playlist) *MediaPlaylistUpdateOne {
+	return _u.SetPlaylistID(v.ID)
 }
 
 // Mutation returns the MediaPlaylistMutation object of the builder.
@@ -376,46 +344,16 @@ func (_u *MediaPlaylistUpdateOne) Mutation() *MediaPlaylistMutation {
 	return _u.mutation
 }
 
-// ClearMedia clears all "media" edges to the Media entity.
+// ClearMedia clears the "media" edge to the Media entity.
 func (_u *MediaPlaylistUpdateOne) ClearMedia() *MediaPlaylistUpdateOne {
 	_u.mutation.ClearMedia()
 	return _u
 }
 
-// RemoveMediumIDs removes the "media" edge to Media entities by IDs.
-func (_u *MediaPlaylistUpdateOne) RemoveMediumIDs(ids ...int) *MediaPlaylistUpdateOne {
-	_u.mutation.RemoveMediumIDs(ids...)
-	return _u
-}
-
-// RemoveMedia removes "media" edges to Media entities.
-func (_u *MediaPlaylistUpdateOne) RemoveMedia(v ...*Media) *MediaPlaylistUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveMediumIDs(ids...)
-}
-
-// ClearPlaylist clears all "playlist" edges to the Playlist entity.
+// ClearPlaylist clears the "playlist" edge to the Playlist entity.
 func (_u *MediaPlaylistUpdateOne) ClearPlaylist() *MediaPlaylistUpdateOne {
 	_u.mutation.ClearPlaylist()
 	return _u
-}
-
-// RemovePlaylistIDs removes the "playlist" edge to Playlist entities by IDs.
-func (_u *MediaPlaylistUpdateOne) RemovePlaylistIDs(ids ...int) *MediaPlaylistUpdateOne {
-	_u.mutation.RemovePlaylistIDs(ids...)
-	return _u
-}
-
-// RemovePlaylist removes "playlist" edges to Playlist entities.
-func (_u *MediaPlaylistUpdateOne) RemovePlaylist(v ...*Playlist) *MediaPlaylistUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemovePlaylistIDs(ids...)
 }
 
 // Where appends a list predicates to the MediaPlaylistUpdate builder.
@@ -458,6 +396,17 @@ func (_u *MediaPlaylistUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *MediaPlaylistUpdateOne) check() error {
+	if _u.mutation.MediaCleared() && len(_u.mutation.MediaIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "MediaPlaylist.media"`)
+	}
+	if _u.mutation.PlaylistCleared() && len(_u.mutation.PlaylistIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "MediaPlaylist.playlist"`)
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *MediaPlaylistUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *MediaPlaylistUpdateOne {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -465,6 +414,9 @@ func (_u *MediaPlaylistUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)
 }
 
 func (_u *MediaPlaylistUpdateOne) sqlSave(ctx context.Context) (_node *MediaPlaylist, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(mediaplaylist.Table, mediaplaylist.Columns, sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -501,7 +453,7 @@ func (_u *MediaPlaylistUpdateOne) sqlSave(ctx context.Context) (_node *MediaPlay
 	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   mediaplaylist.MediaTable,
 			Columns: []string{mediaplaylist.MediaColumn},
@@ -509,28 +461,12 @@ func (_u *MediaPlaylistUpdateOne) sqlSave(ctx context.Context) (_node *MediaPlay
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedMediaIDs(); len(nodes) > 0 && !_u.mutation.MediaCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   mediaplaylist.MediaTable,
-			Columns: []string{mediaplaylist.MediaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   mediaplaylist.MediaTable,
 			Columns: []string{mediaplaylist.MediaColumn},
@@ -546,7 +482,7 @@ func (_u *MediaPlaylistUpdateOne) sqlSave(ctx context.Context) (_node *MediaPlay
 	}
 	if _u.mutation.PlaylistCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   mediaplaylist.PlaylistTable,
 			Columns: []string{mediaplaylist.PlaylistColumn},
@@ -554,28 +490,12 @@ func (_u *MediaPlaylistUpdateOne) sqlSave(ctx context.Context) (_node *MediaPlay
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedPlaylistIDs(); len(nodes) > 0 && !_u.mutation.PlaylistCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   mediaplaylist.PlaylistTable,
-			Columns: []string{mediaplaylist.PlaylistColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.PlaylistIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   mediaplaylist.PlaylistTable,
 			Columns: []string{mediaplaylist.PlaylistColumn},

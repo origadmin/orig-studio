@@ -14,64 +14,74 @@ const (
 	Label = "comment"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldParentID holds the string denoting the parent_id field in the database.
+	FieldParentID = "parent_id"
 	// FieldText holds the string denoting the text field in the database.
 	FieldText = "text"
 	// FieldUID holds the string denoting the uid field in the database.
 	FieldUID = "uid"
 	// FieldAddDate holds the string denoting the add_date field in the database.
 	FieldAddDate = "add_date"
-	// FieldMediaID holds the string denoting the media_id field in the database.
-	FieldMediaID = "media_id"
-	// FieldUserID holds the string denoting the user_id field in the database.
-	FieldUserID = "user_id"
 	// EdgeMedia holds the string denoting the media edge name in mutations.
 	EdgeMedia = "media"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
+	// EdgeParent holds the string denoting the parent edge name in mutations.
+	EdgeParent = "parent"
 	// EdgeReplies holds the string denoting the replies edge name in mutations.
 	EdgeReplies = "replies"
 	// Table holds the table name of the comment in the database.
 	Table = "files_comment"
-	// MediaTable is the table that holds the media relation/edge. The primary key declared below.
-	MediaTable = "media_comments"
+	// MediaTable is the table that holds the media relation/edge.
+	MediaTable = "files_comment"
 	// MediaInverseTable is the table name for the Media entity.
 	// It exists in this package in order to avoid circular dependency with the "media" package.
 	MediaInverseTable = "media"
-	// UserTable is the table that holds the user relation/edge. The primary key declared below.
-	UserTable = "user_comments"
+	// MediaColumn is the table column denoting the media relation/edge.
+	MediaColumn = "media_comments"
+	// UserTable is the table that holds the user relation/edge.
+	UserTable = "files_comment"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users_user"
-	// RepliesTable is the table that holds the replies relation/edge. The primary key declared below.
-	RepliesTable = "comment_replies"
+	// UserColumn is the table column denoting the user relation/edge.
+	UserColumn = "user_comments"
+	// ParentTable is the table that holds the parent relation/edge.
+	ParentTable = "files_comment"
+	// ParentColumn is the table column denoting the parent relation/edge.
+	ParentColumn = "comment_replies"
+	// RepliesTable is the table that holds the replies relation/edge.
+	RepliesTable = "files_comment"
+	// RepliesColumn is the table column denoting the replies relation/edge.
+	RepliesColumn = "comment_replies"
 )
 
 // Columns holds all SQL columns for comment fields.
 var Columns = []string{
 	FieldID,
+	FieldParentID,
 	FieldText,
 	FieldUID,
 	FieldAddDate,
-	FieldMediaID,
-	FieldUserID,
 }
 
-var (
-	// MediaPrimaryKey and MediaColumn2 are the table columns denoting the
-	// primary key for the media relation (M2M).
-	MediaPrimaryKey = []string{"media_id", "comment_id"}
-	// UserPrimaryKey and UserColumn2 are the table columns denoting the
-	// primary key for the user relation (M2M).
-	UserPrimaryKey = []string{"user_id", "comment_id"}
-	// RepliesPrimaryKey and RepliesColumn2 are the table columns denoting the
-	// primary key for the replies relation (M2M).
-	RepliesPrimaryKey = []string{"comment_id", "reply_id"}
-)
+// ForeignKeys holds the SQL foreign-keys that are owned by the "files_comment"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"comment_replies",
+	"media_comments",
+	"user_comments",
+}
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -91,6 +101,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByParentID orders the results by the parent_id field.
+func ByParentID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldParentID, opts...).ToFunc()
+}
+
 // ByText orders the results by the text field.
 func ByText(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldText, opts...).ToFunc()
@@ -106,41 +121,24 @@ func ByAddDate(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAddDate, opts...).ToFunc()
 }
 
-// ByMediaID orders the results by the media_id field.
-func ByMediaID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldMediaID, opts...).ToFunc()
-}
-
-// ByUserID orders the results by the user_id field.
-func ByUserID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUserID, opts...).ToFunc()
-}
-
-// ByMediaCount orders the results by media count.
-func ByMediaCount(opts ...sql.OrderTermOption) OrderOption {
+// ByMediaField orders the results by media field.
+func ByMediaField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newMediaStep(), opts...)
+		sqlgraph.OrderByNeighborTerms(s, newMediaStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByMedia orders the results by media terms.
-func ByMedia(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByUserField orders the results by user field.
+func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newMediaStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByUserCount orders the results by user count.
-func ByUserCount(opts ...sql.OrderTermOption) OrderOption {
+// ByParentField orders the results by parent field.
+func ByParentField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newUserStep(), opts...)
-	}
-}
-
-// ByUser orders the results by user terms.
-func ByUser(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUserStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newParentStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -161,20 +159,27 @@ func newMediaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MediaInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, MediaTable, MediaPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.M2O, true, MediaTable, MediaColumn),
 	)
 }
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, UserTable, UserPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+	)
+}
+func newParentStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(Table, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ParentTable, ParentColumn),
 	)
 }
 func newRepliesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(Table, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, RepliesTable, RepliesPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, false, RepliesTable, RepliesColumn),
 	)
 }

@@ -23,9 +23,9 @@ import (
 	_ "github.com/lib/pq" // PostgreSQL driver
 
 	"github.com/origadmin/runtime"
+	_ "github.com/origadmin/runtime/config/envsource"
 	"github.com/origadmin/runtime/engine/bootstrap"
 	"github.com/origadmin/runtime/log"
-	_ "github.com/origadmin/runtime/config/envsource"
 	"github.com/origadmin/toolkits/crypto/hash"
 	hashtypes "github.com/origadmin/toolkits/crypto/hash/types"
 	_ "github.com/sqlite3ent/sqlite3"
@@ -38,6 +38,9 @@ import (
 	mediadata "origadmin/application/origcms/internal/svc-media/data"
 	"origadmin/application/origcms/internal/svc-user/biz"
 	"origadmin/application/origcms/internal/svc-user/data"
+
+	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
+	contentdata "origadmin/application/origcms/internal/svc-content/data"
 )
 
 var (
@@ -137,10 +140,15 @@ func main() {
 		log.Infof("reset %d media items from 'processing' back to 'pending' (service restart recovery)", resetCount)
 	}
 
-	mediaUC := mediabiz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, logger)
+	// ── 3b. Watermill GoChannel + Transcode Pipeline ─────────────────
+	wmLogger := watermill.NewStdLogger(true, true)
+	ps := pubsub.NewGoChannel(64, wmLogger)
 
 	uploadRepo := mediadata.NewUploadRepo(db, logger)
 	storage := mediadata.NewLocalStorage("./data/uploads", logger)
+
+	mediaUC := mediabiz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, storage, ps.Pub, logger)
+
 	uploadUC := mediabiz.NewUploadUseCase(
 		uploadRepo,
 		mediaRepo,
@@ -150,10 +158,6 @@ func main() {
 		storage,
 		logger,
 	)
-
-	// ── 3b. Watermill GoChannel + Transcode Pipeline ─────────────────
-	wmLogger := watermill.NewStdLogger(true, true)
-	ps := pubsub.NewGoChannel(64, wmLogger)
 
 	maxWorkers := int32(envInt("TRANSCODE_MAX_WORKERS", 3))
 	worker := mediabiz.NewGoroutineWorker(maxWorkers, log.NewHelper(log.With(logger, "module", "transcode.worker")))
@@ -193,20 +197,39 @@ func main() {
 	// Inject publisher into UploadUseCase for async encoding requests
 	uploadUC.SetPublisher(ps.Pub)
 
+	// ── 3c. svc-content layer ────────────────────────────────────────
+	contentDB := contentdata.NewData(db)
+	categoryRepo := contentdata.NewCategoryRepo(contentDB, logger)
+	tagRepo := contentdata.NewTagRepo(contentDB, logger)
+	commentRepo := contentdata.NewCommentRepo(contentDB, logger)
+	playlistRepo := contentdata.NewPlaylistRepo(contentDB, logger)
+	channelRepo := contentdata.NewChannelRepo(contentDB, logger)
+	feedRepo := contentdata.NewFeedRepo(contentDB, logger)
+	likeRepo := contentdata.NewLikeRepo(contentDB, logger)
+	favoriteRepo := contentdata.NewFavoriteRepo(contentDB, logger)
+	notificationRepo := contentdata.NewNotificationRepo(contentDB, logger)
+
+	categoryTagUC := contentbiz.NewCategoryTagUseCase(categoryRepo, tagRepo, logger)
+	commentUC := contentbiz.NewCommentUseCase(commentRepo, mediaUC, logger)
+	playlistChannelUC := contentbiz.NewPlaylistChannelUseCase(playlistRepo, channelRepo, logger)
+	feedUC := contentbiz.NewFeedUseCase(feedRepo, logger)
+	likeFavoriteUC := contentbiz.NewLikeFavoriteUseCase(likeRepo, favoriteRepo, mediaUC, logger)
+	notificationUC := contentbiz.NewNotificationUseCase(notificationRepo, logger)
+
 	// --- 4. Handlers (Monolith) ---
 	authHandler := server.NewAuthHandler(userUC, jwtManager)
-	userHandler := server.NewUserHandler(db)
-	mediaHandler := server.NewMediaHandler(db, jwtManager, mediaUC, uploadUC)
+	userHandler := server.NewUserHandler(userUC)
+	mediaHandler := server.NewMediaHandler(jwtManager, mediaUC, uploadUC)
 	uploadHandler := server.NewUploadHandler(uploadUC, jwtManager)
-	categoryHandler := server.NewCategoryHandler(db)
-	tagHandler := server.NewTagHandler(db)
-	commentHandler := server.NewCommentHandler(db, jwtManager)
-	playlistHandler := server.NewPlaylistHandler(db, jwtManager)
-	feedHandler := server.NewFeedHandler(db)
-	favoriteHandler := server.NewFavoriteHandler(db, jwtManager)
-	likeHandler := server.NewLikeHandler(db, jwtManager)
-	notificationHandler := server.NewNotificationHandler(db, jwtManager)
-	channelHandler := server.NewChannelHandler(db, jwtManager)
+	categoryHandler := server.NewCategoryHandler(categoryTagUC)
+	tagHandler := server.NewTagHandler(categoryTagUC)
+	commentHandler := server.NewCommentHandler(commentUC, jwtManager)
+	playlistHandler := server.NewPlaylistHandler(playlistChannelUC, jwtManager)
+	feedHandler := server.NewFeedHandler(feedUC)
+	favoriteHandler := server.NewFavoriteHandler(likeFavoriteUC, jwtManager)
+	likeHandler := server.NewLikeHandler(likeFavoriteUC, jwtManager)
+	notificationHandler := server.NewNotificationHandler(notificationUC, jwtManager)
+	channelHandler := server.NewChannelHandler(playlistChannelUC, jwtManager)
 
 	// ── 5. Gin router ───────────────────────────────────────────────
 	if getEnv("GIN_MODE", "debug") == "release" {

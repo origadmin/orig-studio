@@ -648,6 +648,46 @@ func (_u *MediaUpdate) SetNillableUserID(v *int) *MediaUpdate {
 	return _u
 }
 
+// SetCategoryID sets the "category_id" field.
+func (_u *MediaUpdate) SetCategoryID(v int) *MediaUpdate {
+	_u.mutation.SetCategoryID(v)
+	return _u
+}
+
+// SetNillableCategoryID sets the "category_id" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableCategoryID(v *int) *MediaUpdate {
+	if v != nil {
+		_u.SetCategoryID(*v)
+	}
+	return _u
+}
+
+// ClearCategoryID clears the value of the "category_id" field.
+func (_u *MediaUpdate) ClearCategoryID() *MediaUpdate {
+	_u.mutation.ClearCategoryID()
+	return _u
+}
+
+// SetChannelID sets the "channel_id" field.
+func (_u *MediaUpdate) SetChannelID(v int) *MediaUpdate {
+	_u.mutation.SetChannelID(v)
+	return _u
+}
+
+// SetNillableChannelID sets the "channel_id" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableChannelID(v *int) *MediaUpdate {
+	if v != nil {
+		_u.SetChannelID(*v)
+	}
+	return _u
+}
+
+// ClearChannelID clears the value of the "channel_id" field.
+func (_u *MediaUpdate) ClearChannelID() *MediaUpdate {
+	_u.mutation.ClearChannelID()
+	return _u
+}
+
 // SetPublishedAt sets the "published_at" field.
 func (_u *MediaUpdate) SetPublishedAt(v time.Time) *MediaUpdate {
 	_u.mutation.SetPublishedAt(v)
@@ -693,20 +733,6 @@ func (_u *MediaUpdate) SetUser(v *User) *MediaUpdate {
 	return _u.SetUserID(v.ID)
 }
 
-// SetCategoryID sets the "category" edge to the Category entity by ID.
-func (_u *MediaUpdate) SetCategoryID(id int) *MediaUpdate {
-	_u.mutation.SetCategoryID(id)
-	return _u
-}
-
-// SetNillableCategoryID sets the "category" edge to the Category entity by ID if the given value is not nil.
-func (_u *MediaUpdate) SetNillableCategoryID(id *int) *MediaUpdate {
-	if id != nil {
-		_u = _u.SetCategoryID(*id)
-	}
-	return _u
-}
-
 // SetCategory sets the "category" edge to the Category entity.
 func (_u *MediaUpdate) SetCategory(v *Category) *MediaUpdate {
 	return _u.SetCategoryID(v.ID)
@@ -727,19 +753,9 @@ func (_u *MediaUpdate) AddComments(v ...*Comment) *MediaUpdate {
 	return _u.AddCommentIDs(ids...)
 }
 
-// AddChannelIDs adds the "channels" edge to the Channel entity by IDs.
-func (_u *MediaUpdate) AddChannelIDs(ids ...int) *MediaUpdate {
-	_u.mutation.AddChannelIDs(ids...)
-	return _u
-}
-
-// AddChannels adds the "channels" edges to the Channel entity.
-func (_u *MediaUpdate) AddChannels(v ...*Channel) *MediaUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddChannelIDs(ids...)
+// SetChannel sets the "channel" edge to the Channel entity.
+func (_u *MediaUpdate) SetChannel(v *Channel) *MediaUpdate {
+	return _u.SetChannelID(v.ID)
 }
 
 // AddPlaylistIDs adds the "playlists" edge to the MediaPlaylist entity by IDs.
@@ -855,25 +871,10 @@ func (_u *MediaUpdate) RemoveComments(v ...*Comment) *MediaUpdate {
 	return _u.RemoveCommentIDs(ids...)
 }
 
-// ClearChannels clears all "channels" edges to the Channel entity.
-func (_u *MediaUpdate) ClearChannels() *MediaUpdate {
-	_u.mutation.ClearChannels()
+// ClearChannel clears the "channel" edge to the Channel entity.
+func (_u *MediaUpdate) ClearChannel() *MediaUpdate {
+	_u.mutation.ClearChannel()
 	return _u
-}
-
-// RemoveChannelIDs removes the "channels" edge to Channel entities by IDs.
-func (_u *MediaUpdate) RemoveChannelIDs(ids ...int) *MediaUpdate {
-	_u.mutation.RemoveChannelIDs(ids...)
-	return _u
-}
-
-// RemoveChannels removes "channels" edges to Channel entities.
-func (_u *MediaUpdate) RemoveChannels(v ...*Channel) *MediaUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveChannelIDs(ids...)
 }
 
 // ClearPlaylists clears all "playlists" edges to the MediaPlaylist entity.
@@ -1360,10 +1361,10 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.CommentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   media.CommentsTable,
-			Columns: media.CommentsPrimaryKey,
+			Columns: []string{media.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
@@ -1373,10 +1374,10 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if nodes := _u.mutation.RemovedCommentsIDs(); len(nodes) > 0 && !_u.mutation.CommentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   media.CommentsTable,
-			Columns: media.CommentsPrimaryKey,
+			Columns: []string{media.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
@@ -1389,10 +1390,10 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if nodes := _u.mutation.CommentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   media.CommentsTable,
-			Columns: media.CommentsPrimaryKey,
+			Columns: []string{media.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
@@ -1403,12 +1404,12 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.ChannelsCleared() {
+	if _u.mutation.ChannelCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   media.ChannelsTable,
-			Columns: media.ChannelsPrimaryKey,
+			Table:   media.ChannelTable,
+			Columns: []string{media.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),
@@ -1416,28 +1417,12 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedChannelsIDs(); len(nodes) > 0 && !_u.mutation.ChannelsCleared() {
+	if nodes := _u.mutation.ChannelIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   media.ChannelsTable,
-			Columns: media.ChannelsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.ChannelsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   media.ChannelsTable,
-			Columns: media.ChannelsPrimaryKey,
+			Table:   media.ChannelTable,
+			Columns: []string{media.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),
@@ -2304,6 +2289,46 @@ func (_u *MediaUpdateOne) SetNillableUserID(v *int) *MediaUpdateOne {
 	return _u
 }
 
+// SetCategoryID sets the "category_id" field.
+func (_u *MediaUpdateOne) SetCategoryID(v int) *MediaUpdateOne {
+	_u.mutation.SetCategoryID(v)
+	return _u
+}
+
+// SetNillableCategoryID sets the "category_id" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableCategoryID(v *int) *MediaUpdateOne {
+	if v != nil {
+		_u.SetCategoryID(*v)
+	}
+	return _u
+}
+
+// ClearCategoryID clears the value of the "category_id" field.
+func (_u *MediaUpdateOne) ClearCategoryID() *MediaUpdateOne {
+	_u.mutation.ClearCategoryID()
+	return _u
+}
+
+// SetChannelID sets the "channel_id" field.
+func (_u *MediaUpdateOne) SetChannelID(v int) *MediaUpdateOne {
+	_u.mutation.SetChannelID(v)
+	return _u
+}
+
+// SetNillableChannelID sets the "channel_id" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableChannelID(v *int) *MediaUpdateOne {
+	if v != nil {
+		_u.SetChannelID(*v)
+	}
+	return _u
+}
+
+// ClearChannelID clears the value of the "channel_id" field.
+func (_u *MediaUpdateOne) ClearChannelID() *MediaUpdateOne {
+	_u.mutation.ClearChannelID()
+	return _u
+}
+
 // SetPublishedAt sets the "published_at" field.
 func (_u *MediaUpdateOne) SetPublishedAt(v time.Time) *MediaUpdateOne {
 	_u.mutation.SetPublishedAt(v)
@@ -2349,20 +2374,6 @@ func (_u *MediaUpdateOne) SetUser(v *User) *MediaUpdateOne {
 	return _u.SetUserID(v.ID)
 }
 
-// SetCategoryID sets the "category" edge to the Category entity by ID.
-func (_u *MediaUpdateOne) SetCategoryID(id int) *MediaUpdateOne {
-	_u.mutation.SetCategoryID(id)
-	return _u
-}
-
-// SetNillableCategoryID sets the "category" edge to the Category entity by ID if the given value is not nil.
-func (_u *MediaUpdateOne) SetNillableCategoryID(id *int) *MediaUpdateOne {
-	if id != nil {
-		_u = _u.SetCategoryID(*id)
-	}
-	return _u
-}
-
 // SetCategory sets the "category" edge to the Category entity.
 func (_u *MediaUpdateOne) SetCategory(v *Category) *MediaUpdateOne {
 	return _u.SetCategoryID(v.ID)
@@ -2383,19 +2394,9 @@ func (_u *MediaUpdateOne) AddComments(v ...*Comment) *MediaUpdateOne {
 	return _u.AddCommentIDs(ids...)
 }
 
-// AddChannelIDs adds the "channels" edge to the Channel entity by IDs.
-func (_u *MediaUpdateOne) AddChannelIDs(ids ...int) *MediaUpdateOne {
-	_u.mutation.AddChannelIDs(ids...)
-	return _u
-}
-
-// AddChannels adds the "channels" edges to the Channel entity.
-func (_u *MediaUpdateOne) AddChannels(v ...*Channel) *MediaUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddChannelIDs(ids...)
+// SetChannel sets the "channel" edge to the Channel entity.
+func (_u *MediaUpdateOne) SetChannel(v *Channel) *MediaUpdateOne {
+	return _u.SetChannelID(v.ID)
 }
 
 // AddPlaylistIDs adds the "playlists" edge to the MediaPlaylist entity by IDs.
@@ -2511,25 +2512,10 @@ func (_u *MediaUpdateOne) RemoveComments(v ...*Comment) *MediaUpdateOne {
 	return _u.RemoveCommentIDs(ids...)
 }
 
-// ClearChannels clears all "channels" edges to the Channel entity.
-func (_u *MediaUpdateOne) ClearChannels() *MediaUpdateOne {
-	_u.mutation.ClearChannels()
+// ClearChannel clears the "channel" edge to the Channel entity.
+func (_u *MediaUpdateOne) ClearChannel() *MediaUpdateOne {
+	_u.mutation.ClearChannel()
 	return _u
-}
-
-// RemoveChannelIDs removes the "channels" edge to Channel entities by IDs.
-func (_u *MediaUpdateOne) RemoveChannelIDs(ids ...int) *MediaUpdateOne {
-	_u.mutation.RemoveChannelIDs(ids...)
-	return _u
-}
-
-// RemoveChannels removes "channels" edges to Channel entities.
-func (_u *MediaUpdateOne) RemoveChannels(v ...*Channel) *MediaUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveChannelIDs(ids...)
 }
 
 // ClearPlaylists clears all "playlists" edges to the MediaPlaylist entity.
@@ -3046,10 +3032,10 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	}
 	if _u.mutation.CommentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   media.CommentsTable,
-			Columns: media.CommentsPrimaryKey,
+			Columns: []string{media.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
@@ -3059,10 +3045,10 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	}
 	if nodes := _u.mutation.RemovedCommentsIDs(); len(nodes) > 0 && !_u.mutation.CommentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   media.CommentsTable,
-			Columns: media.CommentsPrimaryKey,
+			Columns: []string{media.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
@@ -3075,10 +3061,10 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	}
 	if nodes := _u.mutation.CommentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   media.CommentsTable,
-			Columns: media.CommentsPrimaryKey,
+			Columns: []string{media.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
@@ -3089,12 +3075,12 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.ChannelsCleared() {
+	if _u.mutation.ChannelCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   media.ChannelsTable,
-			Columns: media.ChannelsPrimaryKey,
+			Table:   media.ChannelTable,
+			Columns: []string{media.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),
@@ -3102,28 +3088,12 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedChannelsIDs(); len(nodes) > 0 && !_u.mutation.ChannelsCleared() {
+	if nodes := _u.mutation.ChannelIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   media.ChannelsTable,
-			Columns: media.ChannelsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.ChannelsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   media.ChannelsTable,
-			Columns: media.ChannelsPrimaryKey,
+			Table:   media.ChannelTable,
+			Columns: []string{media.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),

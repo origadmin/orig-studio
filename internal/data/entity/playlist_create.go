@@ -52,6 +52,20 @@ func (_c *PlaylistCreate) SetUserID(v int) *PlaylistCreate {
 	return _c
 }
 
+// SetPrivacy sets the "privacy" field.
+func (_c *PlaylistCreate) SetPrivacy(v int) *PlaylistCreate {
+	_c.mutation.SetPrivacy(v)
+	return _c
+}
+
+// SetNillablePrivacy sets the "privacy" field if the given value is not nil.
+func (_c *PlaylistCreate) SetNillablePrivacy(v *int) *PlaylistCreate {
+	if v != nil {
+		_c.SetPrivacy(*v)
+	}
+	return _c
+}
+
 // SetAddDate sets the "add_date" field.
 func (_c *PlaylistCreate) SetAddDate(v time.Time) *PlaylistCreate {
 	_c.mutation.SetAddDate(v)
@@ -116,6 +130,10 @@ func (_c *PlaylistCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *PlaylistCreate) defaults() {
+	if _, ok := _c.mutation.Privacy(); !ok {
+		v := playlist.DefaultPrivacy
+		_c.mutation.SetPrivacy(v)
+	}
 	if _, ok := _c.mutation.AddDate(); !ok {
 		v := playlist.DefaultAddDate()
 		_c.mutation.SetAddDate(v)
@@ -148,6 +166,9 @@ func (_c *PlaylistCreate) check() error {
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`entity: missing required field "Playlist.user_id"`)}
+	}
+	if _, ok := _c.mutation.Privacy(); !ok {
+		return &ValidationError{Name: "privacy", err: errors.New(`entity: missing required field "Playlist.privacy"`)}
 	}
 	if _, ok := _c.mutation.AddDate(); !ok {
 		return &ValidationError{Name: "add_date", err: errors.New(`entity: missing required field "Playlist.add_date"`)}
@@ -200,6 +221,10 @@ func (_c *PlaylistCreate) createSpec() (*Playlist, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UserID(); ok {
 		_spec.SetField(playlist.FieldUserID, field.TypeInt, value)
 		_node.UserID = value
+	}
+	if value, ok := _c.mutation.Privacy(); ok {
+		_spec.SetField(playlist.FieldPrivacy, field.TypeInt, value)
+		_node.Privacy = value
 	}
 	if value, ok := _c.mutation.AddDate(); ok {
 		_spec.SetField(playlist.FieldAddDate, field.TypeTime, value)

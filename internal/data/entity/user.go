@@ -69,10 +69,8 @@ type User struct {
 	LastLogin time.Time `json:"last_login,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges         UserEdges `json:"edges"`
-	favorite_user *int
-	like_user     *int
-	selectValues  sql.SelectValues
+	Edges        UserEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -194,10 +192,6 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case user.FieldDateJoined, user.FieldDateAdded, user.FieldLastLogin:
 			values[i] = new(sql.NullTime)
-		case user.ForeignKeys[0]: // favorite_user
-			values[i] = new(sql.NullInt64)
-		case user.ForeignKeys[1]: // like_user
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -368,20 +362,6 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field last_login", values[i])
 			} else if value.Valid {
 				_m.LastLogin = value.Time
-			}
-		case user.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field favorite_user", value)
-			} else if value.Valid {
-				_m.favorite_user = new(int)
-				*_m.favorite_user = int(value.Int64)
-			}
-		case user.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field like_user", value)
-			} else if value.Valid {
-				_m.like_user = new(int)
-				*_m.like_user = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])

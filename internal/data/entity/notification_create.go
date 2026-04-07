@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/user"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -57,6 +58,34 @@ func (_c *NotificationCreate) SetNillableMethod(v *string) *NotificationCreate {
 // SetUserID sets the "user_id" field.
 func (_c *NotificationCreate) SetUserID(v int) *NotificationCreate {
 	_c.mutation.SetUserID(v)
+	return _c
+}
+
+// SetIsRead sets the "is_read" field.
+func (_c *NotificationCreate) SetIsRead(v bool) *NotificationCreate {
+	_c.mutation.SetIsRead(v)
+	return _c
+}
+
+// SetNillableIsRead sets the "is_read" field if the given value is not nil.
+func (_c *NotificationCreate) SetNillableIsRead(v *bool) *NotificationCreate {
+	if v != nil {
+		_c.SetIsRead(*v)
+	}
+	return _c
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (_c *NotificationCreate) SetCreatedAt(v time.Time) *NotificationCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (_c *NotificationCreate) SetNillableCreatedAt(v *time.Time) *NotificationCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
+	}
 	return _c
 }
 
@@ -118,6 +147,14 @@ func (_c *NotificationCreate) defaults() {
 		v := notification.DefaultMethod
 		_c.mutation.SetMethod(v)
 	}
+	if _, ok := _c.mutation.IsRead(); !ok {
+		v := notification.DefaultIsRead
+		_c.mutation.SetIsRead(v)
+	}
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		v := notification.DefaultCreatedAt()
+		_c.mutation.SetCreatedAt(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -143,6 +180,12 @@ func (_c *NotificationCreate) check() error {
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`entity: missing required field "Notification.user_id"`)}
+	}
+	if _, ok := _c.mutation.IsRead(); !ok {
+		return &ValidationError{Name: "is_read", err: errors.New(`entity: missing required field "Notification.is_read"`)}
+	}
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "Notification.created_at"`)}
 	}
 	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`entity: missing required edge "Notification.user"`)}
@@ -188,6 +231,14 @@ func (_c *NotificationCreate) createSpec() (*Notification, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.UserID(); ok {
 		_spec.SetField(notification.FieldUserID, field.TypeInt, value)
 		_node.UserID = value
+	}
+	if value, ok := _c.mutation.IsRead(); ok {
+		_spec.SetField(notification.FieldIsRead, field.TypeBool, value)
+		_node.IsRead = value
+	}
+	if value, ok := _c.mutation.CreatedAt(); ok {
+		_spec.SetField(notification.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

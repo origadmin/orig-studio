@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/media"
+	"origadmin/application/origcms/internal/data/entity/user"
 	"strings"
 	"time"
 
@@ -18,14 +19,16 @@ type Favorite struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// MediaID holds the value of the "media_id" field.
+	MediaID int `json:"media_id,omitempty"`
+	// UserID holds the value of the "user_id" field.
+	UserID int `json:"user_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FavoriteQuery when eager-loading is set.
-	Edges           FavoriteEdges `json:"edges"`
-	media_favorites *int
-	user_favorites  *int
-	selectValues    sql.SelectValues
+	Edges        FavoriteEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // FavoriteEdges holds the relations/edges for other nodes in the graph.
@@ -33,7 +36,7 @@ type FavoriteEdges struct {
 	// Media holds the value of the media edge.
 	Media *Media `json:"media,omitempty"`
 	// User holds the value of the user edge.
-	User []*User `json:"user,omitempty"`
+	User *User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -51,10 +54,12 @@ func (e FavoriteEdges) MediaOrErr() (*Media, error) {
 }
 
 // UserOrErr returns the User value or an error if the edge
-// was not loaded in eager-loading.
-func (e FavoriteEdges) UserOrErr() ([]*User, error) {
-	if e.loadedTypes[1] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e FavoriteEdges) UserOrErr() (*User, error) {
+	if e.User != nil {
 		return e.User, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "user"}
 }
@@ -64,14 +69,10 @@ func (*Favorite) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case favorite.FieldID:
+		case favorite.FieldID, favorite.FieldMediaID, favorite.FieldUserID:
 			values[i] = new(sql.NullInt64)
 		case favorite.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
-		case favorite.ForeignKeys[0]: // media_favorites
-			values[i] = new(sql.NullInt64)
-		case favorite.ForeignKeys[1]: // user_favorites
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -93,25 +94,23 @@ func (_m *Favorite) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
+		case favorite.FieldMediaID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field media_id", values[i])
+			} else if value.Valid {
+				_m.MediaID = int(value.Int64)
+			}
+		case favorite.FieldUserID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field user_id", values[i])
+			} else if value.Valid {
+				_m.UserID = int(value.Int64)
+			}
 		case favorite.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
-			}
-		case favorite.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field media_favorites", value)
-			} else if value.Valid {
-				_m.media_favorites = new(int)
-				*_m.media_favorites = int(value.Int64)
-			}
-		case favorite.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_favorites", value)
-			} else if value.Valid {
-				_m.user_favorites = new(int)
-				*_m.user_favorites = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -159,6 +158,12 @@ func (_m *Favorite) String() string {
 	var builder strings.Builder
 	builder.WriteString("Favorite(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	builder.WriteString("media_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MediaID))
+	builder.WriteString(", ")
+	builder.WriteString("user_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')

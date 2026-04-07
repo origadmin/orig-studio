@@ -5,15 +5,16 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/api/gen/v1/types"
+	"origadmin/application/origcms/internal/svc-user/biz"
 )
 
 type UserHandler struct {
-	client *entity.Client
+	uc *biz.UserUseCase
 }
 
-func NewUserHandler(client *entity.Client) *UserHandler {
-	return &UserHandler{client: client}
+func NewUserHandler(uc *biz.UserUseCase) *UserHandler {
+	return &UserHandler{uc: uc}
 }
 
 func (h *UserHandler) Register(group *gin.RouterGroup) {
@@ -21,39 +22,31 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 	{
 		// List users
 		users.GET("", func(c *gin.Context) {
-			limit := 20
-			offset := 0
-			if l := c.Query("limit"); l != "" {
-				if n, err := strconv.Atoi(l); err == nil {
-					limit = n
-				}
-			}
-			if o := c.Query("offset"); o != "" {
-				if n, err := strconv.Atoi(o); err == nil {
-					offset = n
-				}
-			}
+			limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+			page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 
-			users, err := h.client.User.Query().Limit(limit).Offset(offset).All(c.Request.Context())
+			items, total, err := h.uc.ListUsers(c.Request.Context())
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 
 			c.JSON(http.StatusOK, gin.H{
-				"list":  users,
-				"total": len(users),
+				"list":  items,
+				"total": total,
+				"page":  page,
+				"limit": limit,
 			})
 		})
 
 		// Get user by ID
 		users.GET("/:id", func(c *gin.Context) {
-			id, err := strconv.Atoi(c.Param("id"))
+			id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 				return
 			}
-			u, err := h.client.User.Get(c.Request.Context(), id)
+			u, err := h.uc.GetUser(c.Request.Context(), id)
 			if err != nil {
 				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 				return
@@ -64,9 +57,9 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 		// Create user
 		users.POST("", func(c *gin.Context) {
 			var input struct {
-				Username string `json:"username"`
-				Email    string `json:"email"`
-				Password string `json:"password"`
+				Username string `json:"username" binding:"required"`
+				Email    string `json:"email" binding:"required,email"`
+				Password string `json:"password" binding:"required,min=6"`
 				Name     string `json:"name"`
 			}
 			if err := c.ShouldBindJSON(&input); err != nil {
@@ -74,12 +67,12 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 				return
 			}
 
-			u, err := h.client.User.Create().
-				SetUsername(input.Username).
-				SetEmail(input.Email).
-				SetName(input.Name).
-				SetPassword(input.Password).
-				Save(c.Request.Context())
+			hashedPassword, _ := h.uc.HashPassword(input.Password)
+			u, err := h.uc.CreateUser(c.Request.Context(), &types.User{
+				Username: input.Username,
+				Email:    input.Email,
+				Nickname: input.Name, // Use Name as Nickname if Name is not in User
+			}, hashedPassword)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
@@ -90,12 +83,12 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 
 		// Delete user
 		users.DELETE("/:id", func(c *gin.Context) {
-			id, err := strconv.Atoi(c.Param("id"))
+			id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 				return
 			}
-			err = h.client.User.DeleteOneID(id).Exec(c.Request.Context())
+			err = h.uc.DeleteUser(c.Request.Context(), id)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return

@@ -108,6 +108,27 @@ func (_u *PlaylistUpdate) AddUserID(v int) *PlaylistUpdate {
 	return _u
 }
 
+// SetPrivacy sets the "privacy" field.
+func (_u *PlaylistUpdate) SetPrivacy(v int) *PlaylistUpdate {
+	_u.mutation.ResetPrivacy()
+	_u.mutation.SetPrivacy(v)
+	return _u
+}
+
+// SetNillablePrivacy sets the "privacy" field if the given value is not nil.
+func (_u *PlaylistUpdate) SetNillablePrivacy(v *int) *PlaylistUpdate {
+	if v != nil {
+		_u.SetPrivacy(*v)
+	}
+	return _u
+}
+
+// AddPrivacy adds value to the "privacy" field.
+func (_u *PlaylistUpdate) AddPrivacy(v int) *PlaylistUpdate {
+	_u.mutation.AddPrivacy(v)
+	return _u
+}
+
 // SetAddDate sets the "add_date" field.
 func (_u *PlaylistUpdate) SetAddDate(v time.Time) *PlaylistUpdate {
 	_u.mutation.SetAddDate(v)
@@ -240,6 +261,12 @@ func (_u *PlaylistUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
 		_spec.AddField(playlist.FieldUserID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Privacy(); ok {
+		_spec.SetField(playlist.FieldPrivacy, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedPrivacy(); ok {
+		_spec.AddField(playlist.FieldPrivacy, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddDate(); ok {
 		_spec.SetField(playlist.FieldAddDate, field.TypeTime, value)
@@ -385,6 +412,27 @@ func (_u *PlaylistUpdateOne) SetNillableUserID(v *int) *PlaylistUpdateOne {
 // AddUserID adds value to the "user_id" field.
 func (_u *PlaylistUpdateOne) AddUserID(v int) *PlaylistUpdateOne {
 	_u.mutation.AddUserID(v)
+	return _u
+}
+
+// SetPrivacy sets the "privacy" field.
+func (_u *PlaylistUpdateOne) SetPrivacy(v int) *PlaylistUpdateOne {
+	_u.mutation.ResetPrivacy()
+	_u.mutation.SetPrivacy(v)
+	return _u
+}
+
+// SetNillablePrivacy sets the "privacy" field if the given value is not nil.
+func (_u *PlaylistUpdateOne) SetNillablePrivacy(v *int) *PlaylistUpdateOne {
+	if v != nil {
+		_u.SetPrivacy(*v)
+	}
+	return _u
+}
+
+// AddPrivacy adds value to the "privacy" field.
+func (_u *PlaylistUpdateOne) AddPrivacy(v int) *PlaylistUpdateOne {
+	_u.mutation.AddPrivacy(v)
 	return _u
 }
 
@@ -550,6 +598,12 @@ func (_u *PlaylistUpdateOne) sqlSave(ctx context.Context) (_node *Playlist, err 
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
 		_spec.AddField(playlist.FieldUserID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Privacy(); ok {
+		_spec.SetField(playlist.FieldPrivacy, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedPrivacy(); ok {
+		_spec.AddField(playlist.FieldPrivacy, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddDate(); ok {
 		_spec.SetField(playlist.FieldAddDate, field.TypeTime, value)

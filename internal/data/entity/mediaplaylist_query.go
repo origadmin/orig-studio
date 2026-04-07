@@ -4,7 +4,6 @@ package entity
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 	"origadmin/application/origcms/internal/data/entity/media"
@@ -80,7 +79,7 @@ func (_q *MediaPlaylistQuery) QueryMedia() *MediaQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(mediaplaylist.Table, mediaplaylist.FieldID, selector),
 			sqlgraph.To(media.Table, media.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, mediaplaylist.MediaTable, mediaplaylist.MediaColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, mediaplaylist.MediaTable, mediaplaylist.MediaColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -102,7 +101,7 @@ func (_q *MediaPlaylistQuery) QueryPlaylist() *PlaylistQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(mediaplaylist.Table, mediaplaylist.FieldID, selector),
 			sqlgraph.To(playlist.Table, playlist.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, mediaplaylist.PlaylistTable, mediaplaylist.PlaylistColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, mediaplaylist.PlaylistTable, mediaplaylist.PlaylistColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -339,12 +338,12 @@ func (_q *MediaPlaylistQuery) WithPlaylist(opts ...func(*PlaylistQuery)) *MediaP
 // Example:
 //
 //	var v []struct {
-//		Ordering int `json:"ordering,omitempty"`
+//		PlaylistID int `json:"playlist_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.MediaPlaylist.Query().
-//		GroupBy(mediaplaylist.FieldOrdering).
+//		GroupBy(mediaplaylist.FieldPlaylistID).
 //		Aggregate(entity.Count()).
 //		Scan(ctx, &v)
 func (_q *MediaPlaylistQuery) GroupBy(field string, fields ...string) *MediaPlaylistGroupBy {
@@ -362,11 +361,11 @@ func (_q *MediaPlaylistQuery) GroupBy(field string, fields ...string) *MediaPlay
 // Example:
 //
 //	var v []struct {
-//		Ordering int `json:"ordering,omitempty"`
+//		PlaylistID int `json:"playlist_id,omitempty"`
 //	}
 //
 //	client.MediaPlaylist.Query().
-//		Select(mediaplaylist.FieldOrdering).
+//		Select(mediaplaylist.FieldPlaylistID).
 //		Scan(ctx, &v)
 func (_q *MediaPlaylistQuery) Select(fields ...string) *MediaPlaylistSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
@@ -442,16 +441,14 @@ func (_q *MediaPlaylistQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 		return nodes, nil
 	}
 	if query := _q.withMedia; query != nil {
-		if err := _q.loadMedia(ctx, query, nodes,
-			func(n *MediaPlaylist) { n.Edges.Media = []*Media{} },
-			func(n *MediaPlaylist, e *Media) { n.Edges.Media = append(n.Edges.Media, e) }); err != nil {
+		if err := _q.loadMedia(ctx, query, nodes, nil,
+			func(n *MediaPlaylist, e *Media) { n.Edges.Media = e }); err != nil {
 			return nil, err
 		}
 	}
 	if query := _q.withPlaylist; query != nil {
-		if err := _q.loadPlaylist(ctx, query, nodes,
-			func(n *MediaPlaylist) { n.Edges.Playlist = []*Playlist{} },
-			func(n *MediaPlaylist, e *Playlist) { n.Edges.Playlist = append(n.Edges.Playlist, e) }); err != nil {
+		if err := _q.loadPlaylist(ctx, query, nodes, nil,
+			func(n *MediaPlaylist, e *Playlist) { n.Edges.Playlist = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -459,64 +456,60 @@ func (_q *MediaPlaylistQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 }
 
 func (_q *MediaPlaylistQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes []*MediaPlaylist, init func(*MediaPlaylist), assign func(*MediaPlaylist, *Media)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*MediaPlaylist)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*MediaPlaylist)
 	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
+		fk := nodes[i].MediaID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
 		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.withFKs = true
-	query.Where(predicate.Media(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(mediaplaylist.MediaColumn), fks...))
-	}))
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(media.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.media_playlist_media
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "media_playlist_media" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "media_playlist_media" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "media_id" returned %v`, n.ID)
 		}
-		assign(node, n)
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
 	}
 	return nil
 }
 func (_q *MediaPlaylistQuery) loadPlaylist(ctx context.Context, query *PlaylistQuery, nodes []*MediaPlaylist, init func(*MediaPlaylist), assign func(*MediaPlaylist, *Playlist)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*MediaPlaylist)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*MediaPlaylist)
 	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
+		fk := nodes[i].PlaylistID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
 		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.withFKs = true
-	query.Where(predicate.Playlist(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(mediaplaylist.PlaylistColumn), fks...))
-	}))
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(playlist.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.media_playlist_playlist
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "media_playlist_playlist" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "media_playlist_playlist" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "playlist_id" returned %v`, n.ID)
 		}
-		assign(node, n)
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
 	}
 	return nil
 }
@@ -548,6 +541,12 @@ func (_q *MediaPlaylistQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != mediaplaylist.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withMedia != nil {
+			_spec.Node.AddColumnOnce(mediaplaylist.FieldMediaID)
+		}
+		if _q.withPlaylist != nil {
+			_spec.Node.AddColumnOnce(mediaplaylist.FieldPlaylistID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

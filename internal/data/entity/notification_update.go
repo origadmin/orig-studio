@@ -9,6 +9,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"origadmin/application/origcms/internal/data/entity/user"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -89,6 +90,34 @@ func (_u *NotificationUpdate) SetNillableUserID(v *int) *NotificationUpdate {
 // AddUserID adds value to the "user_id" field.
 func (_u *NotificationUpdate) AddUserID(v int) *NotificationUpdate {
 	_u.mutation.AddUserID(v)
+	return _u
+}
+
+// SetIsRead sets the "is_read" field.
+func (_u *NotificationUpdate) SetIsRead(v bool) *NotificationUpdate {
+	_u.mutation.SetIsRead(v)
+	return _u
+}
+
+// SetNillableIsRead sets the "is_read" field if the given value is not nil.
+func (_u *NotificationUpdate) SetNillableIsRead(v *bool) *NotificationUpdate {
+	if v != nil {
+		_u.SetIsRead(*v)
+	}
+	return _u
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (_u *NotificationUpdate) SetCreatedAt(v time.Time) *NotificationUpdate {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (_u *NotificationUpdate) SetNillableCreatedAt(v *time.Time) *NotificationUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
 	return _u
 }
 
@@ -207,6 +236,12 @@ func (_u *NotificationUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
 		_spec.AddField(notification.FieldUserID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.IsRead(); ok {
+		_spec.SetField(notification.FieldIsRead, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(notification.FieldCreatedAt, field.TypeTime, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -335,6 +370,34 @@ func (_u *NotificationUpdateOne) SetNillableUserID(v *int) *NotificationUpdateOn
 // AddUserID adds value to the "user_id" field.
 func (_u *NotificationUpdateOne) AddUserID(v int) *NotificationUpdateOne {
 	_u.mutation.AddUserID(v)
+	return _u
+}
+
+// SetIsRead sets the "is_read" field.
+func (_u *NotificationUpdateOne) SetIsRead(v bool) *NotificationUpdateOne {
+	_u.mutation.SetIsRead(v)
+	return _u
+}
+
+// SetNillableIsRead sets the "is_read" field if the given value is not nil.
+func (_u *NotificationUpdateOne) SetNillableIsRead(v *bool) *NotificationUpdateOne {
+	if v != nil {
+		_u.SetIsRead(*v)
+	}
+	return _u
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (_u *NotificationUpdateOne) SetCreatedAt(v time.Time) *NotificationUpdateOne {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (_u *NotificationUpdateOne) SetNillableCreatedAt(v *time.Time) *NotificationUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
 	return _u
 }
 
@@ -483,6 +546,12 @@ func (_u *NotificationUpdateOne) sqlSave(ctx context.Context) (_node *Notificati
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
 		_spec.AddField(notification.FieldUserID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.IsRead(); ok {
+		_spec.SetField(notification.FieldIsRead, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(notification.FieldCreatedAt, field.TypeTime, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

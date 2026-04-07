@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"time"
 )
 
 type Notification struct {
@@ -24,12 +25,16 @@ func (Notification) Fields() []ent.Field {
 		field.Bool("notify").Default(false),
 		field.String("method").MaxLen(20).Default("email"),
 		field.Int("user_id"),
+		field.Bool("is_read").Default(false),
+		field.Time("created_at").Default(time.Now),
 	}
 }
 
 func (Notification) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("user_id"),
+		index.Fields("created_at"),
+		index.Fields("is_read"),
 	}
 }
 

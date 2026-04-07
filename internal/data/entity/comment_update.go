@@ -32,6 +32,33 @@ func (_u *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
 	return _u
 }
 
+// SetParentID sets the "parent_id" field.
+func (_u *CommentUpdate) SetParentID(v int) *CommentUpdate {
+	_u.mutation.ResetParentID()
+	_u.mutation.SetParentID(v)
+	return _u
+}
+
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (_u *CommentUpdate) SetNillableParentID(v *int) *CommentUpdate {
+	if v != nil {
+		_u.SetParentID(*v)
+	}
+	return _u
+}
+
+// AddParentID adds value to the "parent_id" field.
+func (_u *CommentUpdate) AddParentID(v int) *CommentUpdate {
+	_u.mutation.AddParentID(v)
+	return _u
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (_u *CommentUpdate) ClearParentID() *CommentUpdate {
+	_u.mutation.ClearParentID()
+	return _u
+}
+
 // SetText sets the "text" field.
 func (_u *CommentUpdate) SetText(v string) *CommentUpdate {
 	_u.mutation.SetText(v)
@@ -74,76 +101,45 @@ func (_u *CommentUpdate) SetNillableAddDate(v *time.Time) *CommentUpdate {
 	return _u
 }
 
-// SetMediaID sets the "media_id" field.
-func (_u *CommentUpdate) SetMediaID(v int) *CommentUpdate {
-	_u.mutation.ResetMediaID()
-	_u.mutation.SetMediaID(v)
+// SetMediaID sets the "media" edge to the Media entity by ID.
+func (_u *CommentUpdate) SetMediaID(id int) *CommentUpdate {
+	_u.mutation.SetMediaID(id)
 	return _u
 }
 
-// SetNillableMediaID sets the "media_id" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableMediaID(v *int) *CommentUpdate {
-	if v != nil {
-		_u.SetMediaID(*v)
+// SetMedia sets the "media" edge to the Media entity.
+func (_u *CommentUpdate) SetMedia(v *Media) *CommentUpdate {
+	return _u.SetMediaID(v.ID)
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (_u *CommentUpdate) SetUserID(id int) *CommentUpdate {
+	_u.mutation.SetUserID(id)
+	return _u
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (_u *CommentUpdate) SetUser(v *User) *CommentUpdate {
+	return _u.SetUserID(v.ID)
+}
+
+// SetParentID sets the "parent" edge to the Comment entity by ID.
+func (_u *CommentUpdate) SetParentID(id int) *CommentUpdate {
+	_u.mutation.SetParentID(id)
+	return _u
+}
+
+// SetNillableParentID sets the "parent" edge to the Comment entity by ID if the given value is not nil.
+func (_u *CommentUpdate) SetNillableParentID(id *int) *CommentUpdate {
+	if id != nil {
+		_u = _u.SetParentID(*id)
 	}
 	return _u
 }
 
-// AddMediaID adds value to the "media_id" field.
-func (_u *CommentUpdate) AddMediaID(v int) *CommentUpdate {
-	_u.mutation.AddMediaID(v)
-	return _u
-}
-
-// SetUserID sets the "user_id" field.
-func (_u *CommentUpdate) SetUserID(v int) *CommentUpdate {
-	_u.mutation.ResetUserID()
-	_u.mutation.SetUserID(v)
-	return _u
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableUserID(v *int) *CommentUpdate {
-	if v != nil {
-		_u.SetUserID(*v)
-	}
-	return _u
-}
-
-// AddUserID adds value to the "user_id" field.
-func (_u *CommentUpdate) AddUserID(v int) *CommentUpdate {
-	_u.mutation.AddUserID(v)
-	return _u
-}
-
-// AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_u *CommentUpdate) AddMediumIDs(ids ...int) *CommentUpdate {
-	_u.mutation.AddMediumIDs(ids...)
-	return _u
-}
-
-// AddMedia adds the "media" edges to the Media entity.
-func (_u *CommentUpdate) AddMedia(v ...*Media) *CommentUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddMediumIDs(ids...)
-}
-
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *CommentUpdate) AddUserIDs(ids ...int) *CommentUpdate {
-	_u.mutation.AddUserIDs(ids...)
-	return _u
-}
-
-// AddUser adds the "user" edges to the User entity.
-func (_u *CommentUpdate) AddUser(v ...*User) *CommentUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddUserIDs(ids...)
+// SetParent sets the "parent" edge to the Comment entity.
+func (_u *CommentUpdate) SetParent(v *Comment) *CommentUpdate {
+	return _u.SetParentID(v.ID)
 }
 
 // AddReplyIDs adds the "replies" edge to the Comment entity by IDs.
@@ -166,46 +162,22 @@ func (_u *CommentUpdate) Mutation() *CommentMutation {
 	return _u.mutation
 }
 
-// ClearMedia clears all "media" edges to the Media entity.
+// ClearMedia clears the "media" edge to the Media entity.
 func (_u *CommentUpdate) ClearMedia() *CommentUpdate {
 	_u.mutation.ClearMedia()
 	return _u
 }
 
-// RemoveMediumIDs removes the "media" edge to Media entities by IDs.
-func (_u *CommentUpdate) RemoveMediumIDs(ids ...int) *CommentUpdate {
-	_u.mutation.RemoveMediumIDs(ids...)
-	return _u
-}
-
-// RemoveMedia removes "media" edges to Media entities.
-func (_u *CommentUpdate) RemoveMedia(v ...*Media) *CommentUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveMediumIDs(ids...)
-}
-
-// ClearUser clears all "user" edges to the User entity.
+// ClearUser clears the "user" edge to the User entity.
 func (_u *CommentUpdate) ClearUser() *CommentUpdate {
 	_u.mutation.ClearUser()
 	return _u
 }
 
-// RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (_u *CommentUpdate) RemoveUserIDs(ids ...int) *CommentUpdate {
-	_u.mutation.RemoveUserIDs(ids...)
+// ClearParent clears the "parent" edge to the Comment entity.
+func (_u *CommentUpdate) ClearParent() *CommentUpdate {
+	_u.mutation.ClearParent()
 	return _u
-}
-
-// RemoveUser removes "user" edges to User entities.
-func (_u *CommentUpdate) RemoveUser(v ...*User) *CommentUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveUserIDs(ids...)
 }
 
 // ClearReplies clears all "replies" edges to the Comment entity.
@@ -256,6 +228,17 @@ func (_u *CommentUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *CommentUpdate) check() error {
+	if _u.mutation.MediaCleared() && len(_u.mutation.MediaIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "Comment.media"`)
+	}
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "Comment.user"`)
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *CommentUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CommentUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -263,6 +246,9 @@ func (_u *CommentUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Commen
 }
 
 func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(comment.Table, comment.Columns, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -270,6 +256,15 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.ParentID(); ok {
+		_spec.SetField(comment.FieldParentID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedParentID(); ok {
+		_spec.AddField(comment.FieldParentID, field.TypeInt, value)
+	}
+	if _u.mutation.ParentIDCleared() {
+		_spec.ClearField(comment.FieldParentID, field.TypeInt)
 	}
 	if value, ok := _u.mutation.Text(); ok {
 		_spec.SetField(comment.FieldText, field.TypeString, value)
@@ -280,53 +275,25 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddDate(); ok {
 		_spec.SetField(comment.FieldAddDate, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.MediaID(); ok {
-		_spec.SetField(comment.FieldMediaID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedMediaID(); ok {
-		_spec.AddField(comment.FieldMediaID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(comment.FieldUserID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(comment.FieldUserID, field.TypeInt, value)
-	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   comment.MediaTable,
-			Columns: comment.MediaPrimaryKey,
+			Columns: []string{comment.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedMediaIDs(); len(nodes) > 0 && !_u.mutation.MediaCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   comment.MediaTable,
-			Columns: comment.MediaPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   comment.MediaTable,
-			Columns: comment.MediaPrimaryKey,
+			Columns: []string{comment.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
@@ -339,39 +306,23 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   comment.UserTable,
-			Columns: comment.UserPrimaryKey,
+			Columns: []string{comment.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedUserIDs(); len(nodes) > 0 && !_u.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   comment.UserTable,
-			Columns: comment.UserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   comment.UserTable,
-			Columns: comment.UserPrimaryKey,
+			Columns: []string{comment.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
@@ -382,13 +333,42 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.ParentCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   comment.ParentTable,
+			Columns: []string{comment.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   comment.ParentTable,
+			Columns: []string{comment.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _u.mutation.RepliesCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   comment.RepliesTable,
-			Columns: comment.RepliesPrimaryKey,
-			Bidi:    true,
+			Columns: []string{comment.RepliesColumn},
+			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
 			},
@@ -397,11 +377,11 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if nodes := _u.mutation.RemovedRepliesIDs(); len(nodes) > 0 && !_u.mutation.RepliesCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   comment.RepliesTable,
-			Columns: comment.RepliesPrimaryKey,
-			Bidi:    true,
+			Columns: []string{comment.RepliesColumn},
+			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
 			},
@@ -413,11 +393,11 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if nodes := _u.mutation.RepliesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   comment.RepliesTable,
-			Columns: comment.RepliesPrimaryKey,
-			Bidi:    true,
+			Columns: []string{comment.RepliesColumn},
+			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
 			},
@@ -447,6 +427,33 @@ type CommentUpdateOne struct {
 	hooks     []Hook
 	mutation  *CommentMutation
 	modifiers []func(*sql.UpdateBuilder)
+}
+
+// SetParentID sets the "parent_id" field.
+func (_u *CommentUpdateOne) SetParentID(v int) *CommentUpdateOne {
+	_u.mutation.ResetParentID()
+	_u.mutation.SetParentID(v)
+	return _u
+}
+
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (_u *CommentUpdateOne) SetNillableParentID(v *int) *CommentUpdateOne {
+	if v != nil {
+		_u.SetParentID(*v)
+	}
+	return _u
+}
+
+// AddParentID adds value to the "parent_id" field.
+func (_u *CommentUpdateOne) AddParentID(v int) *CommentUpdateOne {
+	_u.mutation.AddParentID(v)
+	return _u
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (_u *CommentUpdateOne) ClearParentID() *CommentUpdateOne {
+	_u.mutation.ClearParentID()
+	return _u
 }
 
 // SetText sets the "text" field.
@@ -491,76 +498,45 @@ func (_u *CommentUpdateOne) SetNillableAddDate(v *time.Time) *CommentUpdateOne {
 	return _u
 }
 
-// SetMediaID sets the "media_id" field.
-func (_u *CommentUpdateOne) SetMediaID(v int) *CommentUpdateOne {
-	_u.mutation.ResetMediaID()
-	_u.mutation.SetMediaID(v)
+// SetMediaID sets the "media" edge to the Media entity by ID.
+func (_u *CommentUpdateOne) SetMediaID(id int) *CommentUpdateOne {
+	_u.mutation.SetMediaID(id)
 	return _u
 }
 
-// SetNillableMediaID sets the "media_id" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableMediaID(v *int) *CommentUpdateOne {
-	if v != nil {
-		_u.SetMediaID(*v)
+// SetMedia sets the "media" edge to the Media entity.
+func (_u *CommentUpdateOne) SetMedia(v *Media) *CommentUpdateOne {
+	return _u.SetMediaID(v.ID)
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (_u *CommentUpdateOne) SetUserID(id int) *CommentUpdateOne {
+	_u.mutation.SetUserID(id)
+	return _u
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (_u *CommentUpdateOne) SetUser(v *User) *CommentUpdateOne {
+	return _u.SetUserID(v.ID)
+}
+
+// SetParentID sets the "parent" edge to the Comment entity by ID.
+func (_u *CommentUpdateOne) SetParentID(id int) *CommentUpdateOne {
+	_u.mutation.SetParentID(id)
+	return _u
+}
+
+// SetNillableParentID sets the "parent" edge to the Comment entity by ID if the given value is not nil.
+func (_u *CommentUpdateOne) SetNillableParentID(id *int) *CommentUpdateOne {
+	if id != nil {
+		_u = _u.SetParentID(*id)
 	}
 	return _u
 }
 
-// AddMediaID adds value to the "media_id" field.
-func (_u *CommentUpdateOne) AddMediaID(v int) *CommentUpdateOne {
-	_u.mutation.AddMediaID(v)
-	return _u
-}
-
-// SetUserID sets the "user_id" field.
-func (_u *CommentUpdateOne) SetUserID(v int) *CommentUpdateOne {
-	_u.mutation.ResetUserID()
-	_u.mutation.SetUserID(v)
-	return _u
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableUserID(v *int) *CommentUpdateOne {
-	if v != nil {
-		_u.SetUserID(*v)
-	}
-	return _u
-}
-
-// AddUserID adds value to the "user_id" field.
-func (_u *CommentUpdateOne) AddUserID(v int) *CommentUpdateOne {
-	_u.mutation.AddUserID(v)
-	return _u
-}
-
-// AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_u *CommentUpdateOne) AddMediumIDs(ids ...int) *CommentUpdateOne {
-	_u.mutation.AddMediumIDs(ids...)
-	return _u
-}
-
-// AddMedia adds the "media" edges to the Media entity.
-func (_u *CommentUpdateOne) AddMedia(v ...*Media) *CommentUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddMediumIDs(ids...)
-}
-
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *CommentUpdateOne) AddUserIDs(ids ...int) *CommentUpdateOne {
-	_u.mutation.AddUserIDs(ids...)
-	return _u
-}
-
-// AddUser adds the "user" edges to the User entity.
-func (_u *CommentUpdateOne) AddUser(v ...*User) *CommentUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddUserIDs(ids...)
+// SetParent sets the "parent" edge to the Comment entity.
+func (_u *CommentUpdateOne) SetParent(v *Comment) *CommentUpdateOne {
+	return _u.SetParentID(v.ID)
 }
 
 // AddReplyIDs adds the "replies" edge to the Comment entity by IDs.
@@ -583,46 +559,22 @@ func (_u *CommentUpdateOne) Mutation() *CommentMutation {
 	return _u.mutation
 }
 
-// ClearMedia clears all "media" edges to the Media entity.
+// ClearMedia clears the "media" edge to the Media entity.
 func (_u *CommentUpdateOne) ClearMedia() *CommentUpdateOne {
 	_u.mutation.ClearMedia()
 	return _u
 }
 
-// RemoveMediumIDs removes the "media" edge to Media entities by IDs.
-func (_u *CommentUpdateOne) RemoveMediumIDs(ids ...int) *CommentUpdateOne {
-	_u.mutation.RemoveMediumIDs(ids...)
-	return _u
-}
-
-// RemoveMedia removes "media" edges to Media entities.
-func (_u *CommentUpdateOne) RemoveMedia(v ...*Media) *CommentUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveMediumIDs(ids...)
-}
-
-// ClearUser clears all "user" edges to the User entity.
+// ClearUser clears the "user" edge to the User entity.
 func (_u *CommentUpdateOne) ClearUser() *CommentUpdateOne {
 	_u.mutation.ClearUser()
 	return _u
 }
 
-// RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (_u *CommentUpdateOne) RemoveUserIDs(ids ...int) *CommentUpdateOne {
-	_u.mutation.RemoveUserIDs(ids...)
+// ClearParent clears the "parent" edge to the Comment entity.
+func (_u *CommentUpdateOne) ClearParent() *CommentUpdateOne {
+	_u.mutation.ClearParent()
 	return _u
-}
-
-// RemoveUser removes "user" edges to User entities.
-func (_u *CommentUpdateOne) RemoveUser(v ...*User) *CommentUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveUserIDs(ids...)
 }
 
 // ClearReplies clears all "replies" edges to the Comment entity.
@@ -686,6 +638,17 @@ func (_u *CommentUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *CommentUpdateOne) check() error {
+	if _u.mutation.MediaCleared() && len(_u.mutation.MediaIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "Comment.media"`)
+	}
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "Comment.user"`)
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *CommentUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CommentUpdateOne {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -693,6 +656,9 @@ func (_u *CommentUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Com
 }
 
 func (_u *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(comment.Table, comment.Columns, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -718,6 +684,15 @@ func (_u *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err er
 			}
 		}
 	}
+	if value, ok := _u.mutation.ParentID(); ok {
+		_spec.SetField(comment.FieldParentID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedParentID(); ok {
+		_spec.AddField(comment.FieldParentID, field.TypeInt, value)
+	}
+	if _u.mutation.ParentIDCleared() {
+		_spec.ClearField(comment.FieldParentID, field.TypeInt)
+	}
 	if value, ok := _u.mutation.Text(); ok {
 		_spec.SetField(comment.FieldText, field.TypeString, value)
 	}
@@ -727,53 +702,25 @@ func (_u *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err er
 	if value, ok := _u.mutation.AddDate(); ok {
 		_spec.SetField(comment.FieldAddDate, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.MediaID(); ok {
-		_spec.SetField(comment.FieldMediaID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedMediaID(); ok {
-		_spec.AddField(comment.FieldMediaID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(comment.FieldUserID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(comment.FieldUserID, field.TypeInt, value)
-	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   comment.MediaTable,
-			Columns: comment.MediaPrimaryKey,
+			Columns: []string{comment.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedMediaIDs(); len(nodes) > 0 && !_u.mutation.MediaCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   comment.MediaTable,
-			Columns: comment.MediaPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   comment.MediaTable,
-			Columns: comment.MediaPrimaryKey,
+			Columns: []string{comment.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
@@ -786,39 +733,23 @@ func (_u *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err er
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   comment.UserTable,
-			Columns: comment.UserPrimaryKey,
+			Columns: []string{comment.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedUserIDs(); len(nodes) > 0 && !_u.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   comment.UserTable,
-			Columns: comment.UserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   comment.UserTable,
-			Columns: comment.UserPrimaryKey,
+			Columns: []string{comment.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
@@ -829,13 +760,42 @@ func (_u *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.ParentCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   comment.ParentTable,
+			Columns: []string{comment.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   comment.ParentTable,
+			Columns: []string{comment.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _u.mutation.RepliesCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   comment.RepliesTable,
-			Columns: comment.RepliesPrimaryKey,
-			Bidi:    true,
+			Columns: []string{comment.RepliesColumn},
+			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
 			},
@@ -844,11 +804,11 @@ func (_u *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err er
 	}
 	if nodes := _u.mutation.RemovedRepliesIDs(); len(nodes) > 0 && !_u.mutation.RepliesCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   comment.RepliesTable,
-			Columns: comment.RepliesPrimaryKey,
-			Bidi:    true,
+			Columns: []string{comment.RepliesColumn},
+			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
 			},
@@ -860,11 +820,11 @@ func (_u *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err er
 	}
 	if nodes := _u.mutation.RepliesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   comment.RepliesTable,
-			Columns: comment.RepliesPrimaryKey,
-			Bidi:    true,
+			Columns: []string{comment.RepliesColumn},
+			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
 			},

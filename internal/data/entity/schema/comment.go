@@ -6,13 +6,14 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -26,15 +27,11 @@ func (Comment) Fields() []ent.Field {
 		field.Text("text"),
 		field.UUID("uid", uuid.New()).Unique(),
 		field.Time("add_date").Default(time.Now),
-		field.Int("media_id"),
-		field.Int("user_id"),
 	}
 }
 
 func (Comment) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("media_id"),
-		index.Fields("user_id"),
 		index.Fields("add_date"),
 	}
 }
@@ -48,8 +45,8 @@ func (Comment) Annotations() []schema.Annotation {
 
 func (Comment) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("media", Media.Type).Ref("comments").Required(),
-		edge.From("user", User.Type).Ref("comments").Required(),
-		edge.To("replies", Comment.Type),
+		edge.From("media", Media.Type).Ref("comments").Required().Unique(),
+		edge.From("user", User.Type).Ref("comments").Required().Unique(),
+		edge.To("replies", Comment.Type).From("parent").Unique(),
 	}
 }

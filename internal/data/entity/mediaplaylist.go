@@ -4,7 +4,9 @@ package entity
 
 import (
 	"fmt"
+	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
+	"origadmin/application/origcms/internal/data/entity/playlist"
 	"strings"
 	"time"
 
@@ -17,6 +19,10 @@ type MediaPlaylist struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// PlaylistID holds the value of the "playlist_id" field.
+	PlaylistID int `json:"playlist_id,omitempty"`
+	// MediaID holds the value of the "media_id" field.
+	MediaID int `json:"media_id,omitempty"`
 	// Ordering holds the value of the "ordering" field.
 	Ordering int `json:"ordering,omitempty"`
 	// ActionDate holds the value of the "action_date" field.
@@ -31,28 +37,32 @@ type MediaPlaylist struct {
 // MediaPlaylistEdges holds the relations/edges for other nodes in the graph.
 type MediaPlaylistEdges struct {
 	// Media holds the value of the media edge.
-	Media []*Media `json:"media,omitempty"`
+	Media *Media `json:"media,omitempty"`
 	// Playlist holds the value of the playlist edge.
-	Playlist []*Playlist `json:"playlist,omitempty"`
+	Playlist *Playlist `json:"playlist,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
 }
 
 // MediaOrErr returns the Media value or an error if the edge
-// was not loaded in eager-loading.
-func (e MediaPlaylistEdges) MediaOrErr() ([]*Media, error) {
-	if e.loadedTypes[0] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MediaPlaylistEdges) MediaOrErr() (*Media, error) {
+	if e.Media != nil {
 		return e.Media, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: media.Label}
 	}
 	return nil, &NotLoadedError{edge: "media"}
 }
 
 // PlaylistOrErr returns the Playlist value or an error if the edge
-// was not loaded in eager-loading.
-func (e MediaPlaylistEdges) PlaylistOrErr() ([]*Playlist, error) {
-	if e.loadedTypes[1] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MediaPlaylistEdges) PlaylistOrErr() (*Playlist, error) {
+	if e.Playlist != nil {
 		return e.Playlist, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: playlist.Label}
 	}
 	return nil, &NotLoadedError{edge: "playlist"}
 }
@@ -62,7 +72,7 @@ func (*MediaPlaylist) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case mediaplaylist.FieldID, mediaplaylist.FieldOrdering:
+		case mediaplaylist.FieldID, mediaplaylist.FieldPlaylistID, mediaplaylist.FieldMediaID, mediaplaylist.FieldOrdering:
 			values[i] = new(sql.NullInt64)
 		case mediaplaylist.FieldActionDate:
 			values[i] = new(sql.NullTime)
@@ -89,6 +99,18 @@ func (_m *MediaPlaylist) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
+		case mediaplaylist.FieldPlaylistID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field playlist_id", values[i])
+			} else if value.Valid {
+				_m.PlaylistID = int(value.Int64)
+			}
+		case mediaplaylist.FieldMediaID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field media_id", values[i])
+			} else if value.Valid {
+				_m.MediaID = int(value.Int64)
+			}
 		case mediaplaylist.FieldOrdering:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field ordering", values[i])
@@ -154,6 +176,12 @@ func (_m *MediaPlaylist) String() string {
 	var builder strings.Builder
 	builder.WriteString("MediaPlaylist(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	builder.WriteString("playlist_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PlaylistID))
+	builder.WriteString(", ")
+	builder.WriteString("media_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MediaID))
+	builder.WriteString(", ")
 	builder.WriteString("ordering=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Ordering))
 	builder.WriteString(", ")

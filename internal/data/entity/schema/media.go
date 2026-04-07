@@ -57,7 +57,8 @@ func (Media) Fields() []ent.Field {
 		field.Int("reported_times").Default(0),
 		field.JSON("tags", []string{}).Optional(),
 		field.Int("user_id"),
-		// category_id 由 edge 自动管理，不需显式定义
+		field.Int("category_id").Optional(),
+		field.Int("channel_id").Optional(),
 		field.Time("published_at").Optional(),
 		field.Time("created_at").Default(time.Now),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
@@ -83,9 +84,9 @@ func (Media) Indexes() []ent.Index {
 func (Media) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).Ref("media").Field("user_id").Required().Unique(),
-		edge.From("category", Category.Type).Ref("media").Unique(),
+		edge.From("category", Category.Type).Ref("media").Field("category_id").Unique(),
 		edge.To("comments", Comment.Type),
-		edge.From("channels", Channel.Type).Ref("media"),
+		edge.From("channel", Channel.Type).Ref("media").Field("channel_id").Unique(),
 		edge.To("playlists", MediaPlaylist.Type),
 		edge.To("tags_rel", MediaTag.Type),
 		edge.To("favorites", Favorite.Type),

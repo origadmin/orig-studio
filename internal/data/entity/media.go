@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/category"
+	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"strings"
@@ -86,6 +87,10 @@ type Media struct {
 	Tags []string `json:"tags,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID int `json:"user_id,omitempty"`
+	// CategoryID holds the value of the "category_id" field.
+	CategoryID int `json:"category_id,omitempty"`
+	// ChannelID holds the value of the "channel_id" field.
+	ChannelID int `json:"channel_id,omitempty"`
 	// PublishedAt holds the value of the "published_at" field.
 	PublishedAt time.Time `json:"published_at,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -95,9 +100,7 @@ type Media struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MediaQuery when eager-loading is set.
 	Edges                MediaEdges `json:"edges"`
-	category_media       *int
 	media_category_media *int
-	media_playlist_media *int
 	media_tag_media      *int
 	selectValues         sql.SelectValues
 }
@@ -110,8 +113,8 @@ type MediaEdges struct {
 	Category *Category `json:"category,omitempty"`
 	// Comments holds the value of the comments edge.
 	Comments []*Comment `json:"comments,omitempty"`
-	// Channels holds the value of the channels edge.
-	Channels []*Channel `json:"channels,omitempty"`
+	// Channel holds the value of the channel edge.
+	Channel *Channel `json:"channel,omitempty"`
 	// Playlists holds the value of the playlists edge.
 	Playlists []*MediaPlaylist `json:"playlists,omitempty"`
 	// TagsRel holds the value of the tags_rel edge.
@@ -158,13 +161,15 @@ func (e MediaEdges) CommentsOrErr() ([]*Comment, error) {
 	return nil, &NotLoadedError{edge: "comments"}
 }
 
-// ChannelsOrErr returns the Channels value or an error if the edge
-// was not loaded in eager-loading.
-func (e MediaEdges) ChannelsOrErr() ([]*Channel, error) {
-	if e.loadedTypes[3] {
-		return e.Channels, nil
+// ChannelOrErr returns the Channel value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MediaEdges) ChannelOrErr() (*Channel, error) {
+	if e.Channel != nil {
+		return e.Channel, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: channel.Label}
 	}
-	return nil, &NotLoadedError{edge: "channels"}
+	return nil, &NotLoadedError{edge: "channel"}
 }
 
 // PlaylistsOrErr returns the Playlists value or an error if the edge
@@ -221,19 +226,15 @@ func (*Media) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case media.FieldAllowDownload, media.FieldEnableComments, media.FieldFeatured, media.FieldIsReviewed:
 			values[i] = new(sql.NullBool)
-		case media.FieldID, media.FieldDuration, media.FieldWidth, media.FieldHeight, media.FieldPrivacy, media.FieldViewCount, media.FieldLikeCount, media.FieldDislikeCount, media.FieldCommentCount, media.FieldFavoriteCount, media.FieldDownloadCount, media.FieldReportedTimes, media.FieldUserID:
+		case media.FieldID, media.FieldDuration, media.FieldWidth, media.FieldHeight, media.FieldPrivacy, media.FieldViewCount, media.FieldLikeCount, media.FieldDislikeCount, media.FieldCommentCount, media.FieldFavoriteCount, media.FieldDownloadCount, media.FieldReportedTimes, media.FieldUserID, media.FieldCategoryID, media.FieldChannelID:
 			values[i] = new(sql.NullInt64)
 		case media.FieldTitle, media.FieldDescription, media.FieldFriendlyToken, media.FieldUUID, media.FieldType, media.FieldURL, media.FieldHlsFile, media.FieldThumbnail, media.FieldPoster, media.FieldPreviewFilePath, media.FieldSize, media.FieldMimeType, media.FieldMd5sum, media.FieldExtension, media.FieldEncodingStatus, media.FieldState:
 			values[i] = new(sql.NullString)
 		case media.FieldPublishedAt, media.FieldCreatedAt, media.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case media.ForeignKeys[0]: // category_media
+		case media.ForeignKeys[0]: // media_category_media
 			values[i] = new(sql.NullInt64)
-		case media.ForeignKeys[1]: // media_category_media
-			values[i] = new(sql.NullInt64)
-		case media.ForeignKeys[2]: // media_playlist_media
-			values[i] = new(sql.NullInt64)
-		case media.ForeignKeys[3]: // media_tag_media
+		case media.ForeignKeys[1]: // media_tag_media
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -456,6 +457,18 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UserID = int(value.Int64)
 			}
+		case media.FieldCategoryID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field category_id", values[i])
+			} else if value.Valid {
+				_m.CategoryID = int(value.Int64)
+			}
+		case media.FieldChannelID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field channel_id", values[i])
+			} else if value.Valid {
+				_m.ChannelID = int(value.Int64)
+			}
 		case media.FieldPublishedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field published_at", values[i])
@@ -476,26 +489,12 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 			}
 		case media.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field category_media", value)
-			} else if value.Valid {
-				_m.category_media = new(int)
-				*_m.category_media = int(value.Int64)
-			}
-		case media.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field media_category_media", value)
 			} else if value.Valid {
 				_m.media_category_media = new(int)
 				*_m.media_category_media = int(value.Int64)
 			}
-		case media.ForeignKeys[2]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field media_playlist_media", value)
-			} else if value.Valid {
-				_m.media_playlist_media = new(int)
-				*_m.media_playlist_media = int(value.Int64)
-			}
-		case media.ForeignKeys[3]:
+		case media.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field media_tag_media", value)
 			} else if value.Valid {
@@ -530,9 +529,9 @@ func (_m *Media) QueryComments() *CommentQuery {
 	return NewMediaClient(_m.config).QueryComments(_m)
 }
 
-// QueryChannels queries the "channels" edge of the Media entity.
-func (_m *Media) QueryChannels() *ChannelQuery {
-	return NewMediaClient(_m.config).QueryChannels(_m)
+// QueryChannel queries the "channel" edge of the Media entity.
+func (_m *Media) QueryChannel() *ChannelQuery {
+	return NewMediaClient(_m.config).QueryChannel(_m)
 }
 
 // QueryPlaylists queries the "playlists" edge of the Media entity.
@@ -681,6 +680,12 @@ func (_m *Media) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(", ")
+	builder.WriteString("category_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CategoryID))
+	builder.WriteString(", ")
+	builder.WriteString("channel_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ChannelID))
 	builder.WriteString(", ")
 	builder.WriteString("published_at=")
 	builder.WriteString(_m.PublishedAt.Format(time.ANSIC))

@@ -59,19 +59,58 @@ func (r *mediaRepo) List(
 	if opt.CategoryID != nil {
 		query = query.Where(media.HasCategoryWith(category.ID(int(*opt.CategoryID))))
 	}
-	if opt.Status != nil {
-		// Map integer status to string state if needed, or use directly if it's already a string in your business logic.
-		// Assuming status 1 = active for now, or just converting to string.
+	if opt.State != "" {
+		query = query.Where(media.StateEQ(opt.State))
+	} else if opt.Status != nil {
 		state := fmt.Sprintf("%d", *opt.Status)
 		query = query.Where(media.StateEQ(state))
+	} else {
+		query = query.Where(media.StateEQ("active"))
+	}
+
+	if opt.MediaType != "" {
+		query = query.Where(media.TypeEQ(opt.MediaType))
 	}
 	if opt.Keyword != "" {
 		query = query.Where(media.TitleContains(opt.Keyword))
+	}
+	if opt.Featured != nil {
+		query = query.Where(media.FeaturedEQ(*opt.Featured))
 	}
 
 	total, err := query.Count(ctx)
 	if err != nil {
 		return nil, 0, err
+	}
+
+	// Apply sorting
+	orderBy := opt.OrderBy
+	if orderBy == "" {
+		orderBy = "created_at"
+	}
+	desc := opt.Descending
+
+	switch orderBy {
+	case "title":
+		if desc {
+			query = query.Order(entity.Desc(media.FieldTitle))
+		} else {
+			query = query.Order(entity.Asc(media.FieldTitle))
+		}
+	case "view_count":
+		if desc {
+			query = query.Order(entity.Desc(media.FieldViewCount))
+		} else {
+			query = query.Order(entity.Asc(media.FieldViewCount))
+		}
+	case "created_at":
+		fallthrough
+	default:
+		if desc {
+			query = query.Order(entity.Desc(media.FieldCreatedAt))
+		} else {
+			query = query.Order(entity.Asc(media.FieldCreatedAt))
+		}
 	}
 
 	if opt.Page < 1 {
@@ -84,6 +123,8 @@ func (r *mediaRepo) List(
 	offset := (opt.Page - 1) * opt.PageSize
 	items, err := query.Offset(int(offset)).
 		Limit(int(opt.PageSize)).
+		WithUser().
+		WithCategory().
 		All(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -206,12 +247,39 @@ func (r *mediaRepo) GetCategory(ctx context.Context, id int64) (*types.Category,
 }
 
 func (r *mediaRepo) IncrementViewCount(ctx context.Context, id int64) (int64, error) {
-	m, err := r.db.Media.UpdateOneID(int(id)).AddViewCount(1).Save(ctx)
+	m, err := r.db.Media.UpdateOneID(int(id)).
+		AddViewCount(1).
+		Save(ctx)
 	if err != nil {
 		return 0, err
 	}
 	return m.ViewCount, nil
 }
+
+func (r *mediaRepo) UpdateCommentCount(ctx context.Context, id int64, delta int) error {
+	return r.db.Media.UpdateOneID(int(id)).
+		AddCommentCount(int64(delta)).
+		Exec(ctx)
+}
+
+func (r *mediaRepo) UpdateLikeCount(ctx context.Context, id int64, delta int) error {
+	return r.db.Media.UpdateOneID(int(id)).
+		AddLikeCount(int64(delta)).
+		Exec(ctx)
+}
+
+func (r *mediaRepo) UpdateDislikeCount(ctx context.Context, id int64, delta int) error {
+	return r.db.Media.UpdateOneID(int(id)).
+		AddDislikeCount(int64(delta)).
+		Exec(ctx)
+}
+
+func (r *mediaRepo) UpdateFavoriteCount(ctx context.Context, id int64, delta int) error {
+	return r.db.Media.UpdateOneID(int(id)).
+		AddFavoriteCount(int64(delta)).
+		Exec(ctx)
+}
+
 
 // CountByEncodingStatus returns per-status media counts using a single GROUP BY query.
 func (r *mediaRepo) CountByEncodingStatus(ctx context.Context) (*biz.StatusCounts, error) {

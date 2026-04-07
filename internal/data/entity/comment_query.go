@@ -28,7 +28,9 @@ type CommentQuery struct {
 	predicates  []predicate.Comment
 	withMedia   *MediaQuery
 	withUser    *UserQuery
+	withParent  *CommentQuery
 	withReplies *CommentQuery
+	withFKs     bool
 	modifiers   []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -80,7 +82,7 @@ func (_q *CommentQuery) QueryMedia() *MediaQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(comment.Table, comment.FieldID, selector),
 			sqlgraph.To(media.Table, media.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, comment.MediaTable, comment.MediaPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.MediaTable, comment.MediaColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -102,7 +104,29 @@ func (_q *CommentQuery) QueryUser() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(comment.Table, comment.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, comment.UserTable, comment.UserPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.UserTable, comment.UserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryParent chains the current query on the "parent" edge.
+func (_q *CommentQuery) QueryParent() *CommentQuery {
+	query := (&CommentClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, selector),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.ParentTable, comment.ParentColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -124,7 +148,7 @@ func (_q *CommentQuery) QueryReplies() *CommentQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(comment.Table, comment.FieldID, selector),
 			sqlgraph.To(comment.Table, comment.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, comment.RepliesTable, comment.RepliesPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, comment.RepliesTable, comment.RepliesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -326,6 +350,7 @@ func (_q *CommentQuery) Clone() *CommentQuery {
 		predicates:  append([]predicate.Comment{}, _q.predicates...),
 		withMedia:   _q.withMedia.Clone(),
 		withUser:    _q.withUser.Clone(),
+		withParent:  _q.withParent.Clone(),
 		withReplies: _q.withReplies.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
@@ -356,6 +381,17 @@ func (_q *CommentQuery) WithUser(opts ...func(*UserQuery)) *CommentQuery {
 	return _q
 }
 
+// WithParent tells the query-builder to eager-load the nodes that are connected to
+// the "parent" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *CommentQuery) WithParent(opts ...func(*CommentQuery)) *CommentQuery {
+	query := (&CommentClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withParent = query
+	return _q
+}
+
 // WithReplies tells the query-builder to eager-load the nodes that are connected to
 // the "replies" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *CommentQuery) WithReplies(opts ...func(*CommentQuery)) *CommentQuery {
@@ -373,12 +409,12 @@ func (_q *CommentQuery) WithReplies(opts ...func(*CommentQuery)) *CommentQuery {
 // Example:
 //
 //	var v []struct {
-//		Text string `json:"text,omitempty"`
+//		ParentID int `json:"parent_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Comment.Query().
-//		GroupBy(comment.FieldText).
+//		GroupBy(comment.FieldParentID).
 //		Aggregate(entity.Count()).
 //		Scan(ctx, &v)
 func (_q *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy {
@@ -396,11 +432,11 @@ func (_q *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 // Example:
 //
 //	var v []struct {
-//		Text string `json:"text,omitempty"`
+//		ParentID int `json:"parent_id,omitempty"`
 //	}
 //
 //	client.Comment.Query().
-//		Select(comment.FieldText).
+//		Select(comment.FieldParentID).
 //		Scan(ctx, &v)
 func (_q *CommentQuery) Select(fields ...string) *CommentSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
@@ -444,13 +480,21 @@ func (_q *CommentQuery) prepareQuery(ctx context.Context) error {
 func (_q *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comment, error) {
 	var (
 		nodes       = []*Comment{}
+		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			_q.withMedia != nil,
 			_q.withUser != nil,
+			_q.withParent != nil,
 			_q.withReplies != nil,
 		}
 	)
+	if _q.withMedia != nil || _q.withUser != nil || _q.withParent != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, comment.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Comment).scanValues(nil, columns)
 	}
@@ -473,16 +517,20 @@ func (_q *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 		return nodes, nil
 	}
 	if query := _q.withMedia; query != nil {
-		if err := _q.loadMedia(ctx, query, nodes,
-			func(n *Comment) { n.Edges.Media = []*Media{} },
-			func(n *Comment, e *Media) { n.Edges.Media = append(n.Edges.Media, e) }); err != nil {
+		if err := _q.loadMedia(ctx, query, nodes, nil,
+			func(n *Comment, e *Media) { n.Edges.Media = e }); err != nil {
 			return nil, err
 		}
 	}
 	if query := _q.withUser; query != nil {
-		if err := _q.loadUser(ctx, query, nodes,
-			func(n *Comment) { n.Edges.User = []*User{} },
-			func(n *Comment, e *User) { n.Edges.User = append(n.Edges.User, e) }); err != nil {
+		if err := _q.loadUser(ctx, query, nodes, nil,
+			func(n *Comment, e *User) { n.Edges.User = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withParent; query != nil {
+		if err := _q.loadParent(ctx, query, nodes, nil,
+			func(n *Comment, e *Comment) { n.Edges.Parent = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -497,185 +545,129 @@ func (_q *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 }
 
 func (_q *CommentQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes []*Comment, init func(*Comment), assign func(*Comment, *Media)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Comment)
-	nids := make(map[int]map[*Comment]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Comment)
+	for i := range nodes {
+		if nodes[i].media_comments == nil {
+			continue
 		}
+		fk := *nodes[i].media_comments
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(comment.MediaTable)
-		s.Join(joinT).On(s.C(media.FieldID), joinT.C(comment.MediaPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(comment.MediaPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(comment.MediaPrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
+	if len(ids) == 0 {
+		return nil
 	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Comment]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Media](ctx, query, qr, query.inters)
+	query.Where(media.IDIn(ids...))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected "media" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "media_comments" returned %v`, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
 	return nil
 }
 func (_q *CommentQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Comment, init func(*Comment), assign func(*Comment, *User)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Comment)
-	nids := make(map[int]map[*Comment]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Comment)
+	for i := range nodes {
+		if nodes[i].user_comments == nil {
+			continue
 		}
+		fk := *nodes[i].user_comments
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(comment.UserTable)
-		s.Join(joinT).On(s.C(user.FieldID), joinT.C(comment.UserPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(comment.UserPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(comment.UserPrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
+	if len(ids) == 0 {
+		return nil
 	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Comment]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*User](ctx, query, qr, query.inters)
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected "user" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "user_comments" returned %v`, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *CommentQuery) loadParent(ctx context.Context, query *CommentQuery, nodes []*Comment, init func(*Comment), assign func(*Comment, *Comment)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Comment)
+	for i := range nodes {
+		if nodes[i].comment_replies == nil {
+			continue
+		}
+		fk := *nodes[i].comment_replies
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(comment.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "comment_replies" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
 	return nil
 }
 func (_q *CommentQuery) loadReplies(ctx context.Context, query *CommentQuery, nodes []*Comment, init func(*Comment), assign func(*Comment, *Comment)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Comment)
-	nids := make(map[int]map[*Comment]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Comment)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
 		if init != nil {
-			init(node)
+			init(nodes[i])
 		}
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(comment.RepliesTable)
-		s.Join(joinT).On(s.C(comment.FieldID), joinT.C(comment.RepliesPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(comment.RepliesPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(comment.RepliesPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Comment]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Comment](ctx, query, qr, query.inters)
+	query.withFKs = true
+	query.Where(predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(comment.RepliesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		fk := n.comment_replies
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "comment_replies" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected "replies" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "comment_replies" returned %v for node %v`, *fk, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
-		}
+		assign(node, n)
 	}
 	return nil
 }

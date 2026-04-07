@@ -22,6 +22,32 @@ type LikeCreate struct {
 	hooks    []Hook
 }
 
+// SetMediaID sets the "media_id" field.
+func (_c *LikeCreate) SetMediaID(v int) *LikeCreate {
+	_c.mutation.SetMediaID(v)
+	return _c
+}
+
+// SetUserID sets the "user_id" field.
+func (_c *LikeCreate) SetUserID(v int) *LikeCreate {
+	_c.mutation.SetUserID(v)
+	return _c
+}
+
+// SetLikeType sets the "like_type" field.
+func (_c *LikeCreate) SetLikeType(v string) *LikeCreate {
+	_c.mutation.SetLikeType(v)
+	return _c
+}
+
+// SetNillableLikeType sets the "like_type" field if the given value is not nil.
+func (_c *LikeCreate) SetNillableLikeType(v *string) *LikeCreate {
+	if v != nil {
+		_c.SetLikeType(*v)
+	}
+	return _c
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_c *LikeCreate) SetCreatedAt(v time.Time) *LikeCreate {
 	_c.mutation.SetCreatedAt(v)
@@ -36,38 +62,14 @@ func (_c *LikeCreate) SetNillableCreatedAt(v *time.Time) *LikeCreate {
 	return _c
 }
 
-// SetMediaID sets the "media" edge to the Media entity by ID.
-func (_c *LikeCreate) SetMediaID(id int) *LikeCreate {
-	_c.mutation.SetMediaID(id)
-	return _c
-}
-
-// SetNillableMediaID sets the "media" edge to the Media entity by ID if the given value is not nil.
-func (_c *LikeCreate) SetNillableMediaID(id *int) *LikeCreate {
-	if id != nil {
-		_c = _c.SetMediaID(*id)
-	}
-	return _c
-}
-
 // SetMedia sets the "media" edge to the Media entity.
 func (_c *LikeCreate) SetMedia(v *Media) *LikeCreate {
 	return _c.SetMediaID(v.ID)
 }
 
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_c *LikeCreate) AddUserIDs(ids ...int) *LikeCreate {
-	_c.mutation.AddUserIDs(ids...)
-	return _c
-}
-
-// AddUser adds the "user" edges to the User entity.
-func (_c *LikeCreate) AddUser(v ...*User) *LikeCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddUserIDs(ids...)
+// SetUser sets the "user" edge to the User entity.
+func (_c *LikeCreate) SetUser(v *User) *LikeCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // Mutation returns the LikeMutation object of the builder.
@@ -105,6 +107,10 @@ func (_c *LikeCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *LikeCreate) defaults() {
+	if _, ok := _c.mutation.LikeType(); !ok {
+		v := like.DefaultLikeType
+		_c.mutation.SetLikeType(v)
+	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := like.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
@@ -113,8 +119,28 @@ func (_c *LikeCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *LikeCreate) check() error {
+	if _, ok := _c.mutation.MediaID(); !ok {
+		return &ValidationError{Name: "media_id", err: errors.New(`entity: missing required field "Like.media_id"`)}
+	}
+	if _, ok := _c.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`entity: missing required field "Like.user_id"`)}
+	}
+	if _, ok := _c.mutation.LikeType(); !ok {
+		return &ValidationError{Name: "like_type", err: errors.New(`entity: missing required field "Like.like_type"`)}
+	}
+	if v, ok := _c.mutation.LikeType(); ok {
+		if err := like.LikeTypeValidator(v); err != nil {
+			return &ValidationError{Name: "like_type", err: fmt.Errorf(`entity: validator failed for field "Like.like_type": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "Like.created_at"`)}
+	}
+	if len(_c.mutation.MediaIDs()) == 0 {
+		return &ValidationError{Name: "media", err: errors.New(`entity: missing required edge "Like.media"`)}
+	}
+	if len(_c.mutation.UserIDs()) == 0 {
+		return &ValidationError{Name: "user", err: errors.New(`entity: missing required edge "Like.user"`)}
 	}
 	return nil
 }
@@ -142,6 +168,10 @@ func (_c *LikeCreate) createSpec() (*Like, *sqlgraph.CreateSpec) {
 		_node = &Like{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(like.Table, sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt))
 	)
+	if value, ok := _c.mutation.LikeType(); ok {
+		_spec.SetField(like.FieldLikeType, field.TypeString, value)
+		_node.LikeType = value
+	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(like.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -160,13 +190,13 @@ func (_c *LikeCreate) createSpec() (*Like, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.media_likes = &nodes[0]
+		_node.MediaID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   like.UserTable,
 			Columns: []string{like.UserColumn},
 			Bidi:    false,
@@ -177,6 +207,7 @@ func (_c *LikeCreate) createSpec() (*Like, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

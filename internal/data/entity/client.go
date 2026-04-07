@@ -659,7 +659,7 @@ func (c *ChannelClient) QueryMedia(_m *Channel) *MediaQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(channel.Table, channel.FieldID, id),
 			sqlgraph.To(media.Table, media.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, channel.MediaTable, channel.MediaPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, channel.MediaTable, channel.MediaColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -808,7 +808,7 @@ func (c *CommentClient) QueryMedia(_m *Comment) *MediaQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(comment.Table, comment.FieldID, id),
 			sqlgraph.To(media.Table, media.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, comment.MediaTable, comment.MediaPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.MediaTable, comment.MediaColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -824,7 +824,23 @@ func (c *CommentClient) QueryUser(_m *Comment) *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(comment.Table, comment.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, comment.UserTable, comment.UserPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.UserTable, comment.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryParent queries the parent edge of a Comment.
+func (c *CommentClient) QueryParent(_m *Comment) *CommentQuery {
+	query := (&CommentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, id),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.ParentTable, comment.ParentColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -840,7 +856,7 @@ func (c *CommentClient) QueryReplies(_m *Comment) *CommentQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(comment.Table, comment.FieldID, id),
 			sqlgraph.To(comment.Table, comment.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, comment.RepliesTable, comment.RepliesPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, comment.RepliesTable, comment.RepliesColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1319,7 +1335,7 @@ func (c *FavoriteClient) QueryUser(_m *Favorite) *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(favorite.Table, favorite.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, favorite.UserTable, favorite.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, favorite.UserTable, favorite.UserColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1484,7 +1500,7 @@ func (c *LikeClient) QueryUser(_m *Like) *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(like.Table, like.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, like.UserTable, like.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, like.UserTable, like.UserColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1665,7 +1681,7 @@ func (c *MediaClient) QueryComments(_m *Media) *CommentQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(media.Table, media.FieldID, id),
 			sqlgraph.To(comment.Table, comment.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, media.CommentsTable, media.CommentsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, media.CommentsTable, media.CommentsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1673,15 +1689,15 @@ func (c *MediaClient) QueryComments(_m *Media) *CommentQuery {
 	return query
 }
 
-// QueryChannels queries the channels edge of a Media.
-func (c *MediaClient) QueryChannels(_m *Media) *ChannelQuery {
+// QueryChannel queries the channel edge of a Media.
+func (c *MediaClient) QueryChannel(_m *Media) *ChannelQuery {
 	query := (&ChannelClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(media.Table, media.FieldID, id),
 			sqlgraph.To(channel.Table, channel.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, media.ChannelsTable, media.ChannelsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, media.ChannelTable, media.ChannelColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -2075,7 +2091,7 @@ func (c *MediaPlaylistClient) QueryMedia(_m *MediaPlaylist) *MediaQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(mediaplaylist.Table, mediaplaylist.FieldID, id),
 			sqlgraph.To(media.Table, media.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, mediaplaylist.MediaTable, mediaplaylist.MediaColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, mediaplaylist.MediaTable, mediaplaylist.MediaColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -2091,7 +2107,7 @@ func (c *MediaPlaylistClient) QueryPlaylist(_m *MediaPlaylist) *PlaylistQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(mediaplaylist.Table, mediaplaylist.FieldID, id),
 			sqlgraph.To(playlist.Table, playlist.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, mediaplaylist.PlaylistTable, mediaplaylist.PlaylistColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, mediaplaylist.PlaylistTable, mediaplaylist.PlaylistColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -3033,7 +3049,7 @@ func (c *UserClient) QueryComments(_m *User) *CommentQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(comment.Table, comment.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.CommentsTable, user.CommentsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CommentsTable, user.CommentsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil

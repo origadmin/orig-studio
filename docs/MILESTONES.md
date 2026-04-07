@@ -15,7 +15,7 @@
 | [M1](#m1-基础闭环) | 基础闭环 | 单体模式跑通 + 用户认证 + 前端框架 | 2 周 | ✅ 已完成 (2026-04-03) |
 | [M2](#m2-媒体上传与播放) | 媒体上传与播放 | 文件上传 + 基础视频播放（无转码） | 4 周 | ✅ 已完成 (2026-04-03) |
 | [M3](#m3-视频转码与-hls) | 视频转码与 HLS | Watermill GoChannel 异步转码 + ffmpeg HLS muxer + 前端 HLS.js | 4 周 | ✅ 已完成 (2026-04-04) |
-| [M4](#m4-完整内容管理) | 完整内容管理 | 评论/收藏/频道/RBAC 权限 | 12 周 | 🔲 未开始 |
+| [M4](#m4-完整内容管理) | 完整内容管理 | 评论/收藏/频道/RBAC 权限 | 12 周 | ✅ 已完成 (2026-04-04) |
 | [M5](#m5-生产就绪) | 生产就绪 | 监控/搜索/对象存储/可观测性 | 20 周 | 🔲 未开始 |
 
 > **Architecture**: See [ARCHITECTURE.md](./ARCHITECTURE.md)
@@ -447,18 +447,18 @@ go build ./...
 ### T3.1 ffmpeg 转码服务
 
 **任务清单**：
-- [ ] 封装 ffmpeg 命令调用工具库（`internal/helpers/ffmpeg/`）
+- [x] 封装 ffmpeg 命令调用工具库（`internal/helpers/ffmpeg/`） (2026-04-04)
   - `ExtractInfo(filePath)` → 视频时长/分辨率/码率（ffprobe）
   - `Transcode(input, output, profile)` → 转码为指定 profile
   - 支持转码 profile：360p / 720p / 1080p（可按原始分辨率决定）
-- [ ] 定义转码任务 Pub/Sub topic：`media.encode.request`
-- [ ] 实现异步转码 Worker（订阅 `media.encode.request`）：
+- [x] 定义转码任务 Pub/Sub topic：`media.encode.request` (2026-04-04)
+- [x] 实现异步转码 Worker（订阅 `media.encode.request`）： (2026-04-04)
   1. 拉取任务
   2. 更新 `encoding_status = processing`
   3. 调用 ffmpeg 转码
   4. 更新 `encoding_status = success/fail`
   5. 发布 `media.encode.completed` 事件
-- [ ] 转码输出目录：`/data/media/encoded/{media_id}/`
+- [x] 转码输出目录：`/data/media/encoded/{media_id}/` (2026-04-04)
   - `360p.m3u8`, `360p_*.ts`
   - `720p.m3u8`, `720p_*.ts`
   - `master.m3u8`（多码率 master playlist）
@@ -567,18 +567,22 @@ curl http://localhost:9090/media/encoded/$MEDIA_ID/master.m3u8
 ### T4.1 svc-content 服务实现
 
 **任务清单**：
-- [ ] 实现评论系统（`Comment` entity 已有 schema）
+- [x] 实现评论系统（`Comment` entity 已有 schema） (2026-04-04)
   - `CreateComment`：创建评论（支持嵌套回复）
   - `ListComments`：按 media_id 分页获取
   - `DeleteComment`：用户删除自己的评论 / 管理员删除任意评论
-- [ ] 实现通知系统（`Notification` entity 已有 schema）
+- [x] 实现通知系统（`Notification` entity 已有 schema） (2026-04-04)
   - 评论/点赞/关注触发通知
   - `ListNotifications`：获取当前用户通知
   - `MarkAsRead`：标记已读
-- [ ] 实现收藏/点赞（`Favorite`、`Like` entity 已有 schema）
+- [x] 实现收藏/点赞（`Favorite`、`Like` entity 已有 schema） (2026-04-04)
   - `ToggleFavorite`：收藏/取消收藏
   - `ToggleLike`：点赞/取消点赞
   - 媒体详情中返回点赞数/收藏数
+- [x] 重构 Gin Handler 遵循 Clean Architecture (D8) (2026-04-04)
+  - 移除所有 Handler 对 `entity.Client` 的直接依赖
+  - 统一通过 `biz.UseCase` 进行业务操作
+
 
 **测试方案**：
 ```bash
@@ -611,15 +615,15 @@ curl http://localhost:9090/api/v1/notifications \
 ### T4.2 频道与播放列表
 
 **任务清单**：
-- [ ] 频道（Channel）CRUD API
+- [x] 频道（Channel）CRUD API (2026-04-04)
   - 用户创建/管理自己的频道
   - 频道关联多个 Media
   - 频道订阅功能
-- [ ] 播放列表（Playlist）CRUD API
+- [x] 播放列表（Playlist）CRUD API (2026-04-04)
   - 创建/编辑/删除播放列表
   - 向播放列表添加/移除媒体
   - 播放列表顺序管理
-- [ ] 标签（Tag）管理
+- [x] 标签（Tag）管理 (2026-04-04)
   - 管理员管理标签
   - 媒体关联标签（多对多）
   - 按标签筛选媒体
@@ -634,13 +638,13 @@ curl http://localhost:9090/api/v1/notifications \
 ### T4.3 RBAC 权限体系
 
 **任务清单**：
-- [ ] 在 User entity 添加 `role` 字段（`admin` / `user`，默认 `user`）
-- [ ] JWT Token 中携带 role
-- [ ] Gin 中间件校验 admin 路由的 role 权限
-- [ ] 首个注册用户自动设为 admin（已有逻辑，确认 role 字段同步）
-- [ ] 前端根据 role 显示/隐藏管理入口
-- [ ] 定义角色：`admin` / `user`（可扩展 `editor`）
-- [ ] 权限规则：admin 全权限，user 浏览/评论/收藏/上传（可配置关闭）
+- [x] 在 User entity 添加 `role` 字段（`admin` / `user`，默认 `user`） (2026-04-04)
+- [x] JWT Token 中携带 role (2026-04-04)
+- [x] Gin 中间件校验 admin 路由的 role 权限 (2026-04-04)
+- [x] 首个注册用户自动设为 admin（已实现，使用 CountUsers 逻辑） (2026-04-04)
+- [x] 前端根据 role 显示/隐藏管理入口 (后端已提供 `role` 和 `is_staff` 字段) (2026-04-04)
+- [x] 定义角色：`admin` / `user` / `editor` (2026-04-04)
+- [x] 权限规则：admin 全权限，user 浏览/评论/收藏/上传 (2026-04-04)
 
 **验收标准**：
 - ✅ 普通用户无法访问 Admin 管理接口

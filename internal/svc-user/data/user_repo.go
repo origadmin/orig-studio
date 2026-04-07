@@ -275,5 +275,5 @@ func (r *userRepo) GetEntity(ctx context.Context, id int64) (*entity.User, error
 
 // SetUserRole updates a user's role field directly.
 func (r *userRepo) SetUserRole(ctx context.Context, id int64, role string) error {
-	return r.db.User.UpdateOneID(int(id)).SetRole(role).Exec(ctx)
+	return r.db.User.UpdateOneID(int(id)).SetRole(user.Role(role)).Exec(ctx)
 }

@@ -80,6 +80,10 @@ const (
 	FieldTags = "tags"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
+	// FieldCategoryID holds the string denoting the category_id field in the database.
+	FieldCategoryID = "category_id"
+	// FieldChannelID holds the string denoting the channel_id field in the database.
+	FieldChannelID = "channel_id"
 	// FieldPublishedAt holds the string denoting the published_at field in the database.
 	FieldPublishedAt = "published_at"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -92,8 +96,8 @@ const (
 	EdgeCategory = "category"
 	// EdgeComments holds the string denoting the comments edge name in mutations.
 	EdgeComments = "comments"
-	// EdgeChannels holds the string denoting the channels edge name in mutations.
-	EdgeChannels = "channels"
+	// EdgeChannel holds the string denoting the channel edge name in mutations.
+	EdgeChannel = "channel"
 	// EdgePlaylists holds the string denoting the playlists edge name in mutations.
 	EdgePlaylists = "playlists"
 	// EdgeTagsRel holds the string denoting the tags_rel edge name in mutations.
@@ -119,17 +123,21 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "category" package.
 	CategoryInverseTable = "categories"
 	// CategoryColumn is the table column denoting the category relation/edge.
-	CategoryColumn = "category_media"
-	// CommentsTable is the table that holds the comments relation/edge. The primary key declared below.
-	CommentsTable = "media_comments"
+	CategoryColumn = "category_id"
+	// CommentsTable is the table that holds the comments relation/edge.
+	CommentsTable = "files_comment"
 	// CommentsInverseTable is the table name for the Comment entity.
 	// It exists in this package in order to avoid circular dependency with the "comment" package.
 	CommentsInverseTable = "files_comment"
-	// ChannelsTable is the table that holds the channels relation/edge. The primary key declared below.
-	ChannelsTable = "channel_media"
-	// ChannelsInverseTable is the table name for the Channel entity.
+	// CommentsColumn is the table column denoting the comments relation/edge.
+	CommentsColumn = "media_comments"
+	// ChannelTable is the table that holds the channel relation/edge.
+	ChannelTable = "media"
+	// ChannelInverseTable is the table name for the Channel entity.
 	// It exists in this package in order to avoid circular dependency with the "channel" package.
-	ChannelsInverseTable = "users_channel"
+	ChannelInverseTable = "users_channel"
+	// ChannelColumn is the table column denoting the channel relation/edge.
+	ChannelColumn = "channel_id"
 	// PlaylistsTable is the table that holds the playlists relation/edge.
 	PlaylistsTable = "files_playlistmedia"
 	// PlaylistsInverseTable is the table name for the MediaPlaylist entity.
@@ -150,14 +158,14 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "favorite" package.
 	FavoritesInverseTable = "files_favorite"
 	// FavoritesColumn is the table column denoting the favorites relation/edge.
-	FavoritesColumn = "media_favorites"
+	FavoritesColumn = "media_id"
 	// LikesTable is the table that holds the likes relation/edge.
 	LikesTable = "files_like"
 	// LikesInverseTable is the table name for the Like entity.
 	// It exists in this package in order to avoid circular dependency with the "like" package.
 	LikesInverseTable = "files_like"
 	// LikesColumn is the table column denoting the likes relation/edge.
-	LikesColumn = "media_likes"
+	LikesColumn = "media_id"
 	// TasksTable is the table that holds the tasks relation/edge.
 	TasksTable = "encoding_tasks"
 	// TasksInverseTable is the table name for the EncodingTask entity.
@@ -203,6 +211,8 @@ var Columns = []string{
 	FieldReportedTimes,
 	FieldTags,
 	FieldUserID,
+	FieldCategoryID,
+	FieldChannelID,
 	FieldPublishedAt,
 	FieldCreatedAt,
 	FieldUpdatedAt,
@@ -211,20 +221,9 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "media"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"category_media",
 	"media_category_media",
-	"media_playlist_media",
 	"media_tag_media",
 }
-
-var (
-	// CommentsPrimaryKey and CommentsColumn2 are the table columns denoting the
-	// primary key for the comments relation (M2M).
-	CommentsPrimaryKey = []string{"media_id", "comment_id"}
-	// ChannelsPrimaryKey and ChannelsColumn2 are the table columns denoting the
-	// primary key for the channels relation (M2M).
-	ChannelsPrimaryKey = []string{"channel_id", "media_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -484,6 +483,16 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
+// ByCategoryID orders the results by the category_id field.
+func ByCategoryID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCategoryID, opts...).ToFunc()
+}
+
+// ByChannelID orders the results by the channel_id field.
+func ByChannelID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldChannelID, opts...).ToFunc()
+}
+
 // ByPublishedAt orders the results by the published_at field.
 func ByPublishedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPublishedAt, opts...).ToFunc()
@@ -527,17 +536,10 @@ func ByComments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByChannelsCount orders the results by channels count.
-func ByChannelsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByChannelField orders the results by channel field.
+func ByChannelField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newChannelsStep(), opts...)
-	}
-}
-
-// ByChannels orders the results by channels terms.
-func ByChannels(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newChannelsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newChannelStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -628,14 +630,14 @@ func newCommentsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CommentsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, CommentsTable, CommentsPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, false, CommentsTable, CommentsColumn),
 	)
 }
-func newChannelsStep() *sqlgraph.Step {
+func newChannelStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ChannelsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, ChannelsTable, ChannelsPrimaryKey...),
+		sqlgraph.To(ChannelInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ChannelTable, ChannelColumn),
 	)
 }
 func newPlaylistsStep() *sqlgraph.Step {

@@ -17,7 +17,6 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/uuid"
-
 	"origadmin/application/origcms/internal/helpers/ffmpeg"
 	"origadmin/application/origcms/internal/pubsub"
 )
@@ -71,13 +70,6 @@ type UploadRepo interface {
 	DeleteExpiredSessions(ctx context.Context, now time.Time) ([]string, error)
 }
 
-// Storage defines the interface for storing and merging file parts.
-type Storage interface {
-	StorePart(ctx context.Context, uploadID string, partNumber int, data []byte) (string, error)
-	MergeParts(ctx context.Context, uploadID string, totalParts int, finalPath string) error
-	DeleteParts(ctx context.Context, uploadID string) error
-}
-
 type UploadUseCase struct {
 	repo         UploadRepo
 	mediaRepo    MediaRepo
@@ -85,7 +77,7 @@ type UploadUseCase struct {
 	encodingRepo EncodingTaskRepo
 	mediaUseCase *MediaUseCase
 	storage      Storage
-	publisher message.Publisher // Watermill publisher for async encoding
+	publisher    message.Publisher // Watermill publisher for async encoding
 	chunkSize    int
 	log          *log.Helper
 	mu           sync.Mutex

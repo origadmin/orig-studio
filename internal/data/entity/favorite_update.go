@@ -31,6 +31,34 @@ func (_u *FavoriteUpdate) Where(ps ...predicate.Favorite) *FavoriteUpdate {
 	return _u
 }
 
+// SetMediaID sets the "media_id" field.
+func (_u *FavoriteUpdate) SetMediaID(v int) *FavoriteUpdate {
+	_u.mutation.SetMediaID(v)
+	return _u
+}
+
+// SetNillableMediaID sets the "media_id" field if the given value is not nil.
+func (_u *FavoriteUpdate) SetNillableMediaID(v *int) *FavoriteUpdate {
+	if v != nil {
+		_u.SetMediaID(*v)
+	}
+	return _u
+}
+
+// SetUserID sets the "user_id" field.
+func (_u *FavoriteUpdate) SetUserID(v int) *FavoriteUpdate {
+	_u.mutation.SetUserID(v)
+	return _u
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_u *FavoriteUpdate) SetNillableUserID(v *int) *FavoriteUpdate {
+	if v != nil {
+		_u.SetUserID(*v)
+	}
+	return _u
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_u *FavoriteUpdate) SetCreatedAt(v time.Time) *FavoriteUpdate {
 	_u.mutation.SetCreatedAt(v)
@@ -45,38 +73,14 @@ func (_u *FavoriteUpdate) SetNillableCreatedAt(v *time.Time) *FavoriteUpdate {
 	return _u
 }
 
-// SetMediaID sets the "media" edge to the Media entity by ID.
-func (_u *FavoriteUpdate) SetMediaID(id int) *FavoriteUpdate {
-	_u.mutation.SetMediaID(id)
-	return _u
-}
-
-// SetNillableMediaID sets the "media" edge to the Media entity by ID if the given value is not nil.
-func (_u *FavoriteUpdate) SetNillableMediaID(id *int) *FavoriteUpdate {
-	if id != nil {
-		_u = _u.SetMediaID(*id)
-	}
-	return _u
-}
-
 // SetMedia sets the "media" edge to the Media entity.
 func (_u *FavoriteUpdate) SetMedia(v *Media) *FavoriteUpdate {
 	return _u.SetMediaID(v.ID)
 }
 
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *FavoriteUpdate) AddUserIDs(ids ...int) *FavoriteUpdate {
-	_u.mutation.AddUserIDs(ids...)
-	return _u
-}
-
-// AddUser adds the "user" edges to the User entity.
-func (_u *FavoriteUpdate) AddUser(v ...*User) *FavoriteUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddUserIDs(ids...)
+// SetUser sets the "user" edge to the User entity.
+func (_u *FavoriteUpdate) SetUser(v *User) *FavoriteUpdate {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the FavoriteMutation object of the builder.
@@ -90,25 +94,10 @@ func (_u *FavoriteUpdate) ClearMedia() *FavoriteUpdate {
 	return _u
 }
 
-// ClearUser clears all "user" edges to the User entity.
+// ClearUser clears the "user" edge to the User entity.
 func (_u *FavoriteUpdate) ClearUser() *FavoriteUpdate {
 	_u.mutation.ClearUser()
 	return _u
-}
-
-// RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (_u *FavoriteUpdate) RemoveUserIDs(ids ...int) *FavoriteUpdate {
-	_u.mutation.RemoveUserIDs(ids...)
-	return _u
-}
-
-// RemoveUser removes "user" edges to User entities.
-func (_u *FavoriteUpdate) RemoveUser(v ...*User) *FavoriteUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveUserIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -138,6 +127,17 @@ func (_u *FavoriteUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *FavoriteUpdate) check() error {
+	if _u.mutation.MediaCleared() && len(_u.mutation.MediaIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "Favorite.media"`)
+	}
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "Favorite.user"`)
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *FavoriteUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *FavoriteUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -145,6 +145,9 @@ func (_u *FavoriteUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Favor
 }
 
 func (_u *FavoriteUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(favorite.Table, favorite.Columns, sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -187,37 +190,21 @@ func (_u *FavoriteUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   favorite.UserTable,
 			Columns: []string{favorite.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedUserIDs(); len(nodes) > 0 && !_u.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   favorite.UserTable,
-			Columns: []string{favorite.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   favorite.UserTable,
 			Columns: []string{favorite.UserColumn},
 			Bidi:    false,
@@ -252,6 +239,34 @@ type FavoriteUpdateOne struct {
 	modifiers []func(*sql.UpdateBuilder)
 }
 
+// SetMediaID sets the "media_id" field.
+func (_u *FavoriteUpdateOne) SetMediaID(v int) *FavoriteUpdateOne {
+	_u.mutation.SetMediaID(v)
+	return _u
+}
+
+// SetNillableMediaID sets the "media_id" field if the given value is not nil.
+func (_u *FavoriteUpdateOne) SetNillableMediaID(v *int) *FavoriteUpdateOne {
+	if v != nil {
+		_u.SetMediaID(*v)
+	}
+	return _u
+}
+
+// SetUserID sets the "user_id" field.
+func (_u *FavoriteUpdateOne) SetUserID(v int) *FavoriteUpdateOne {
+	_u.mutation.SetUserID(v)
+	return _u
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_u *FavoriteUpdateOne) SetNillableUserID(v *int) *FavoriteUpdateOne {
+	if v != nil {
+		_u.SetUserID(*v)
+	}
+	return _u
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_u *FavoriteUpdateOne) SetCreatedAt(v time.Time) *FavoriteUpdateOne {
 	_u.mutation.SetCreatedAt(v)
@@ -266,38 +281,14 @@ func (_u *FavoriteUpdateOne) SetNillableCreatedAt(v *time.Time) *FavoriteUpdateO
 	return _u
 }
 
-// SetMediaID sets the "media" edge to the Media entity by ID.
-func (_u *FavoriteUpdateOne) SetMediaID(id int) *FavoriteUpdateOne {
-	_u.mutation.SetMediaID(id)
-	return _u
-}
-
-// SetNillableMediaID sets the "media" edge to the Media entity by ID if the given value is not nil.
-func (_u *FavoriteUpdateOne) SetNillableMediaID(id *int) *FavoriteUpdateOne {
-	if id != nil {
-		_u = _u.SetMediaID(*id)
-	}
-	return _u
-}
-
 // SetMedia sets the "media" edge to the Media entity.
 func (_u *FavoriteUpdateOne) SetMedia(v *Media) *FavoriteUpdateOne {
 	return _u.SetMediaID(v.ID)
 }
 
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *FavoriteUpdateOne) AddUserIDs(ids ...int) *FavoriteUpdateOne {
-	_u.mutation.AddUserIDs(ids...)
-	return _u
-}
-
-// AddUser adds the "user" edges to the User entity.
-func (_u *FavoriteUpdateOne) AddUser(v ...*User) *FavoriteUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddUserIDs(ids...)
+// SetUser sets the "user" edge to the User entity.
+func (_u *FavoriteUpdateOne) SetUser(v *User) *FavoriteUpdateOne {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the FavoriteMutation object of the builder.
@@ -311,25 +302,10 @@ func (_u *FavoriteUpdateOne) ClearMedia() *FavoriteUpdateOne {
 	return _u
 }
 
-// ClearUser clears all "user" edges to the User entity.
+// ClearUser clears the "user" edge to the User entity.
 func (_u *FavoriteUpdateOne) ClearUser() *FavoriteUpdateOne {
 	_u.mutation.ClearUser()
 	return _u
-}
-
-// RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (_u *FavoriteUpdateOne) RemoveUserIDs(ids ...int) *FavoriteUpdateOne {
-	_u.mutation.RemoveUserIDs(ids...)
-	return _u
-}
-
-// RemoveUser removes "user" edges to User entities.
-func (_u *FavoriteUpdateOne) RemoveUser(v ...*User) *FavoriteUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveUserIDs(ids...)
 }
 
 // Where appends a list predicates to the FavoriteUpdate builder.
@@ -372,6 +348,17 @@ func (_u *FavoriteUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *FavoriteUpdateOne) check() error {
+	if _u.mutation.MediaCleared() && len(_u.mutation.MediaIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "Favorite.media"`)
+	}
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "Favorite.user"`)
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *FavoriteUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *FavoriteUpdateOne {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -379,6 +366,9 @@ func (_u *FavoriteUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Fa
 }
 
 func (_u *FavoriteUpdateOne) sqlSave(ctx context.Context) (_node *Favorite, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(favorite.Table, favorite.Columns, sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -438,37 +428,21 @@ func (_u *FavoriteUpdateOne) sqlSave(ctx context.Context) (_node *Favorite, err 
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   favorite.UserTable,
 			Columns: []string{favorite.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedUserIDs(); len(nodes) > 0 && !_u.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   favorite.UserTable,
-			Columns: []string{favorite.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   favorite.UserTable,
 			Columns: []string{favorite.UserColumn},
 			Bidi:    false,

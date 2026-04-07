@@ -23,6 +23,20 @@ type CommentCreate struct {
 	hooks    []Hook
 }
 
+// SetParentID sets the "parent_id" field.
+func (_c *CommentCreate) SetParentID(v int) *CommentCreate {
+	_c.mutation.SetParentID(v)
+	return _c
+}
+
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (_c *CommentCreate) SetNillableParentID(v *int) *CommentCreate {
+	if v != nil {
+		_c.SetParentID(*v)
+	}
+	return _c
+}
+
 // SetText sets the "text" field.
 func (_c *CommentCreate) SetText(v string) *CommentCreate {
 	_c.mutation.SetText(v)
@@ -49,46 +63,45 @@ func (_c *CommentCreate) SetNillableAddDate(v *time.Time) *CommentCreate {
 	return _c
 }
 
-// SetMediaID sets the "media_id" field.
-func (_c *CommentCreate) SetMediaID(v int) *CommentCreate {
-	_c.mutation.SetMediaID(v)
+// SetMediaID sets the "media" edge to the Media entity by ID.
+func (_c *CommentCreate) SetMediaID(id int) *CommentCreate {
+	_c.mutation.SetMediaID(id)
 	return _c
 }
 
-// SetUserID sets the "user_id" field.
-func (_c *CommentCreate) SetUserID(v int) *CommentCreate {
-	_c.mutation.SetUserID(v)
+// SetMedia sets the "media" edge to the Media entity.
+func (_c *CommentCreate) SetMedia(v *Media) *CommentCreate {
+	return _c.SetMediaID(v.ID)
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (_c *CommentCreate) SetUserID(id int) *CommentCreate {
+	_c.mutation.SetUserID(id)
 	return _c
 }
 
-// AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_c *CommentCreate) AddMediumIDs(ids ...int) *CommentCreate {
-	_c.mutation.AddMediumIDs(ids...)
+// SetUser sets the "user" edge to the User entity.
+func (_c *CommentCreate) SetUser(v *User) *CommentCreate {
+	return _c.SetUserID(v.ID)
+}
+
+// SetParentID sets the "parent" edge to the Comment entity by ID.
+func (_c *CommentCreate) SetParentID(id int) *CommentCreate {
+	_c.mutation.SetParentID(id)
 	return _c
 }
 
-// AddMedia adds the "media" edges to the Media entity.
-func (_c *CommentCreate) AddMedia(v ...*Media) *CommentCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// SetNillableParentID sets the "parent" edge to the Comment entity by ID if the given value is not nil.
+func (_c *CommentCreate) SetNillableParentID(id *int) *CommentCreate {
+	if id != nil {
+		_c = _c.SetParentID(*id)
 	}
-	return _c.AddMediumIDs(ids...)
-}
-
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_c *CommentCreate) AddUserIDs(ids ...int) *CommentCreate {
-	_c.mutation.AddUserIDs(ids...)
 	return _c
 }
 
-// AddUser adds the "user" edges to the User entity.
-func (_c *CommentCreate) AddUser(v ...*User) *CommentCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddUserIDs(ids...)
+// SetParent sets the "parent" edge to the Comment entity.
+func (_c *CommentCreate) SetParent(v *Comment) *CommentCreate {
+	return _c.SetParentID(v.ID)
 }
 
 // AddReplyIDs adds the "replies" edge to the Comment entity by IDs.
@@ -158,12 +171,6 @@ func (_c *CommentCreate) check() error {
 	if _, ok := _c.mutation.AddDate(); !ok {
 		return &ValidationError{Name: "add_date", err: errors.New(`entity: missing required field "Comment.add_date"`)}
 	}
-	if _, ok := _c.mutation.MediaID(); !ok {
-		return &ValidationError{Name: "media_id", err: errors.New(`entity: missing required field "Comment.media_id"`)}
-	}
-	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`entity: missing required field "Comment.user_id"`)}
-	}
 	if len(_c.mutation.MediaIDs()) == 0 {
 		return &ValidationError{Name: "media", err: errors.New(`entity: missing required edge "Comment.media"`)}
 	}
@@ -196,6 +203,10 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		_node = &Comment{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(comment.Table, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt))
 	)
+	if value, ok := _c.mutation.ParentID(); ok {
+		_spec.SetField(comment.FieldParentID, field.TypeInt, value)
+		_node.ParentID = value
+	}
 	if value, ok := _c.mutation.Text(); ok {
 		_spec.SetField(comment.FieldText, field.TypeString, value)
 		_node.Text = value
@@ -208,20 +219,12 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		_spec.SetField(comment.FieldAddDate, field.TypeTime, value)
 		_node.AddDate = value
 	}
-	if value, ok := _c.mutation.MediaID(); ok {
-		_spec.SetField(comment.FieldMediaID, field.TypeInt, value)
-		_node.MediaID = value
-	}
-	if value, ok := _c.mutation.UserID(); ok {
-		_spec.SetField(comment.FieldUserID, field.TypeInt, value)
-		_node.UserID = value
-	}
 	if nodes := _c.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   comment.MediaTable,
-			Columns: comment.MediaPrimaryKey,
+			Columns: []string{comment.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
@@ -230,14 +233,15 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.media_comments = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   comment.UserTable,
-			Columns: comment.UserPrimaryKey,
+			Columns: []string{comment.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
@@ -246,15 +250,33 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.user_comments = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   comment.ParentTable,
+			Columns: []string{comment.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.comment_replies = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.RepliesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   comment.RepliesTable,
-			Columns: comment.RepliesPrimaryKey,
-			Bidi:    true,
+			Columns: []string{comment.RepliesColumn},
+			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
 			},
