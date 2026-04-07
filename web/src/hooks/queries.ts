@@ -89,8 +89,8 @@ export function useAdminMediaList(params: {
  * useMediaDetail: Fetch single media details
  */
 export function useMediaDetail(id: string | null) {
-    // Remove quotes from id if present
-    const cleanId = id ? id.replace(/^"|"$/g, '') : null;
+    // 彻底清理 id：移除任何引号、空格，并确保是纯数字字符串
+    const cleanId = id ? String(id).replace(/["']/g, '').trim() : null;
     return useQuery({
         queryKey: mediaKeys.detail(cleanId!),
         queryFn: async () => {

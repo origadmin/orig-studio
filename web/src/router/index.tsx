@@ -149,7 +149,11 @@ const aboutRoute = createRoute({
 const watchRoute = createRoute({
     getParentRoute: () => portalLayoutRoute,
     path: '/watch',
-    validateSearch: (search: Record<string, unknown>) => search as { v?: string },
+    validateSearch: (search: Record<string, unknown>) => {
+        // 清理 v 参数，移除引号和空格
+        const v = search.v ? String(search.v).replace(/["']/g, '').trim() : undefined;
+        return {v};
+    },
     component: () => <Lazy><WatchPage/></Lazy>,
 });
 

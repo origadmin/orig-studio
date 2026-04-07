@@ -3,21 +3,18 @@
  * 视频播放页 - 对接真实数据
  */
 
-import React, {useState, useEffect, useRef, useCallback} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useSearch, Link} from '@tanstack/react-router';
 import {
-    ThumbsUp, ThumbsDown, Share2, MessageCircle,
-    MoreHorizontal, UserPlus, Eye, Loader2, Settings, RefreshCw, AlertTriangle, Heart, HeartOff, Edit, Trash2, FileText
+    Loader2, RefreshCw, AlertTriangle, Edit, Trash2, FileText, Eye
 } from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Badge} from '@/components/ui/badge';
 import {Card, CardContent} from '@/components/ui/card';
 import {Skeleton} from '@/components/ui/skeleton';
-import {Textarea} from '@/components/ui/textarea';
 import {formatViews, formatDate, formatDuration} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
-import {type Media, type VariantInfo} from '@/lib/api/media';
 import {mediaApi} from '@/lib/api/media';
 import {commentApi} from '@/lib/api/comment';
 import {likeApi} from '@/lib/api/like';
@@ -30,30 +27,19 @@ import SubscribeButton from '@/components/common/SubscribeButton';
 import CommentSection from '@/components/common/CommentSection';
 import InteractionBar from '@/components/common/InteractionBar';
 import VideoPreview from '@/components/common/VideoPreview';
-import SubtitleSelector from '@/components/common/SubtitleSelector';
-import SubtitlePlayer from '@/components/common/SubtitlePlayer';
-import Hls from 'hls.js';
+import VideoPlayer from '@/components/common/VideoPlayer';
 
 
 
 const WatchPage = () => {
     const {t} = useTranslation();
-    const {v: rawId} = useSearch({strict: false});
-    // 清理 id，移除可能的引号
-    const id = rawId ? String(rawId).replace(/"/g, '') : '';
+    const {v: id} = useSearch({strict: false});
     const {data: media, isLoading: isMediaLoading, error: mediaError} = useMediaDetail(id as string);
     const {user} = useAuth();
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const hlsRef = useRef<Hls | null>(null);
     const deleteMutation = useDeleteMedia();
 
-    // Quality switcher state
-    const [variants, setVariants] = useState<VariantInfo[]>([]);
-    const [currentLevel, setCurrentLevel] = useState(-1); // -1 = auto
-    const [showQualityMenu, setShowQualityMenu] = useState(false);
     const [retrying, setRetrying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
-    const [selectedSubtitle, setSelectedSubtitle] = useState<any>(null);
     const [comments, setComments] = useState<any[]>([]);
     const [isLoadingComments, setIsLoadingComments] = useState(false);
     const [commentText, setCommentText] = useState('');
@@ -193,112 +179,8 @@ const WatchPage = () => {
         }
     };
 
-    // Fetch variants for quality switcher (only for successfully transcoded videos)
-    useEffect(() => {
-        if (!media || media.encoding_status !== 'success' && media.encoding_status !== 'partial') {
-            return;
-        }
-        const mediaId = Number(id);
-        if (!mediaId || mediaId <= 0) return;
-
-        mediaApi.getVariants(mediaId)
-            .then(res => {
-                if (res.data?.variants) {
-                    // Filter to only successful video variants for quality switching
-                    const successful = res.data.variants.filter(
-                        v => v.status === 'success' && (
-                            v.output_path?.includes('.m3u8') ||
-                            v.profile_name?.includes('playlist')
-                        )
-                    );
-                    // Sort by resolution descending (highest first)
-                    successful.sort((a, b) => {
-                        const parseRes = (r: string) => parseInt(r.replace(/\D/g, '')) || 0;
-                        return parseRes(b.resolution) - parseRes(a.resolution);
-                    });
-                    setVariants(successful);
-                }
-            })
-            .catch(() => { /* variants are optional */
-            });
-    }, [media?.id, media?.encoding_status, id]);
-
-    // HLS player setup with quality level control
-    useEffect(() => {
-        if (!media || !videoRef.current) return;
-
-        const video = videoRef.current;
-
-        const hlsUrl = media.hls_file ? getFullUrl(media.hls_file) : null;
-        const originalUrl = getFullUrl(media.url);
-
-        // Cleanup previous HLS instance
-        if (hlsRef.current) {
-            hlsRef.current.destroy();
-            hlsRef.current = null;
-        }
-
-        // Add timeupdate event listener
-        const handleTimeUpdate = () => {
-            setCurrentTime(video.currentTime);
-        };
-
-        video.addEventListener('timeupdate', handleTimeUpdate);
-
-        if (hlsUrl && Hls.isSupported()) {
-            const hls = new Hls({
-                enableWorker: true,
-                lowLatencyMode: true,
-            });
-            hls.loadSource(hlsUrl);
-            hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
-                video.play().catch(() => {
-                    // Autoplay might be blocked
-                    console.log("Autoplay blocked");
-                });
-                // Store available levels for quality switching
-                if (data.levels.length > 1) {
-                    setCurrentLevel(-1); // auto by default
-                }
-            });
-            // Track level changes for UI sync
-            hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
-                setCurrentLevel(data.level);
-            });
-            hlsRef.current = hls;
-
-            return () => {
-                hls.destroy();
-                hlsRef.current = null;
-                video.removeEventListener('timeupdate', handleTimeUpdate);
-            };
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            // Native HLS support (Safari)
-            video.src = hlsUrl || originalUrl;
-        } else {
-            // Fallback to original MP4
-            video.src = originalUrl;
-        }
-
-        return () => {
-            video.removeEventListener('timeupdate', handleTimeUpdate);
-        };
-    }, [media]);
-
-    // Quality level switch handler
-    const handleQualityChange = useCallback((levelIndex: number) => {
-        if (hlsRef.current) {
-            // Map variant index to HLS level (levels are ordered by HLS, usually descending bitrate)
-            // levelIndex -1 = auto, 0+ = specific level
-            hlsRef.current.currentLevel = levelIndex;
-            setCurrentLevel(levelIndex);
-        }
-        setShowQualityMenu(false);
-    }, []);
-
     // Retry transcoding handler
-    const handleRetry = useCallback(async () => {
+    const handleRetry = async () => {
         if (!media || retrying) return;
         setRetrying(true);
         try {
@@ -310,7 +192,7 @@ const WatchPage = () => {
         } finally {
             setRetrying(false);
         }
-    }, [media, retrying]);
+    };
 
     if (loading) {
         return (
@@ -360,89 +242,18 @@ const WatchPage = () => {
         <div className="flex flex-col lg:flex-row gap-6 relative">
             {/* Main Content: Player & Details */}
             <div className="flex-1 min-w-0">
-                {/* Player Container */}
-                <div className="bg-black rounded-2xl overflow-hidden aspect-video shadow-2xl relative group">
-                    <video
-                        ref={videoRef}
-                        controls
-                        className="w-full h-full"
-                        poster={media.poster ? getFullUrl(media.poster) : (media.thumbnail ? getFullUrl(media.thumbnail) : undefined)}
-                    >
-                        Your browser does not support the video tag.
-                    </video>
-
-                    {/* Subtitle Player */}
-                    {selectedSubtitle && selectedSubtitle.file_path && (
-                        <SubtitlePlayer
-                            subtitleUrl={getFullUrl(selectedSubtitle.file_path)}
-                            currentTime={currentTime}
-                        />
-                    )}
-
-                    {/* Quality Switcher — only when HLS has multiple levels or variants available */}
-                    <div className="absolute bottom-16 right-3 z-10 flex gap-2">
-                        {/* Subtitle Selector */}
-                        <SubtitleSelector
-                            mediaId={id}
-                            onSubtitleChange={setSelectedSubtitle}
-                        />
-
-                        {/* Quality Selector */}
-                        {(variants.length > 0 || (hlsRef.current && (hlsRef.current.levels?.length ?? 0) > 1)) && (
-                            <div className="relative">
-                                <Button
-                                    variant="secondary"
-                                    size="sm"
-                                    className="bg-black/70 hover:bg-black/90 text-white border-white/20 backdrop-blur-md text-xs gap-1.5 h-7 px-2"
-                                    onClick={() => setShowQualityMenu(!showQualityMenu)}
-                                >
-                                    <Settings size={12}/>
-                                    {currentLevel === -1 ? 'AUTO' :
-                                        variants[currentLevel]?.resolution || `${currentLevel}p`}
-                                </Button>
-                                {showQualityMenu && (
-                                    <div
-                                        className="absolute bottom-full right-0 mb-1 bg-black/90 backdrop-blur-md border border-white/20 rounded-lg overflow-hidden min-w-[120px] shadow-xl">
-                                        <button
-                                            className={`w-full text-left text-xs px-3 py-1.5 text-white hover:bg-white/10 transition-colors flex justify-between items-center ${currentLevel === -1 ? 'bg-blue-600/40 font-semibold' : ''}`}
-                                            onClick={() => handleQualityChange(-1)}
-                                        >
-                                            <span>AUTO</span>
-                                            {currentLevel === -1 && <span>✓</span>}
-                                        </button>
-                                        {hlsRef.current?.levels?.map((level, idx) => {
-                                            const width = level.width;
-                                            const height = level.height;
-                                            const label = height >= 720 ? `${height}p` : `${width}x${height}`;
-                                            return (
-                                                <button
-                                                    key={idx}
-                                                    className={`w-full text-left text-xs px-3 py-1.5 text-white hover:bg-white/10 transition-colors flex justify-between items-center ${currentLevel === idx ? 'bg-blue-600/40 font-semibold' : ''}`}
-                                                    onClick={() => handleQualityChange(idx)}
-                                                >
-                                                    <span>{label}</span>
-                                                    {currentLevel === idx && <span>✓</span>}
-                                                </button>
-                                            );
-                                        }) || variants.map((v, idx) => (
-                                            <button
-                                                key={v.task_id || idx}
-                                                className={`w-full text-left text-xs px-3 py-1.5 text-white hover:bg-white/10 transition-colors flex justify-between items-center ${currentLevel === idx ? 'bg-blue-600/40 font-semibold' : ''}`}
-                                                onClick={() => handleQualityChange(idx)}
-                                            >
-                                                <span>{v.profile_name || v.resolution}</span>
-                                                {v.status === 'success' && <span className="text-green-400">✓</span>}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-
+                {/* Player Container with new YouTube-style VideoPlayer */}
+                <div className="relative">
+                    <VideoPlayer
+                        src={media.url}
+                        hlsSrc={media.hls_file}
+                        poster={media.poster || media.thumbnail}
+                        onTimeUpdate={setCurrentTime}
+                    />
+                    
                     {/* Encoding Status Indicator */}
                     {isProcessing && (
-                        <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
+                        <div className="absolute top-3 left-3 z-20 flex items-center gap-2">
                             <Badge
                                 variant="secondary"
                                 className="gap-1 bg-black/60 text-white border-white/20 backdrop-blur-md text-[10px] px-1.5 py-0 h-5 whitespace-nowrap"

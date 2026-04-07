@@ -172,7 +172,11 @@ export const mediaApi = {
     }) => api.get<MediaListResponse>("/media", params as Record<string, unknown>),
 
     // 获取媒体详情（公开，自增播放量）
-    get: (id: number | string) => api.get<Media>(`/media/${id}`),
+    get: (id: number | string) => {
+        // 清理 id：移除引号和空格
+        const cleanId = String(id).replace(/["']/g, '').trim();
+        return api.get<Media>(`/media/${cleanId}`);
+    },
 
     // 管理端：获取所有媒体（包括未发布的）
     adminList: (params?: {

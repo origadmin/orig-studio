@@ -6,6 +6,7 @@ import React from 'react';
 import {Link} from '@tanstack/react-router';
 import {Play, Eye, Calendar} from 'lucide-react';
 import {Media} from '../../types';
+import {formatDate} from '@/lib/format';
 
 const VideoCard = ({video}: { video: Media }) => {
     return (
