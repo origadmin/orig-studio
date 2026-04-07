@@ -7,6 +7,7 @@ import {useTranslation} from 'react-i18next';
 import {useAuth} from '@/hooks/useAuth';
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {favoriteApi} from '@/lib/api/favorite';
+import {getFullUrl} from '@/lib/utils';
 
 const FavoritesPage = () => {
     const {t} = useTranslation();
@@ -49,15 +50,7 @@ const FavoritesPage = () => {
         );
     }
 
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
 
-    const getFullUrl = (path?: string) => {
-        if (!path) return '';
-        if (path.startsWith('http')) return path;
-        const base = API_BASE_URL.replace(/\/$/, '');
-        const sep = path.startsWith('/') ? '' : '/';
-        return `${base}${sep}${path}`;
-    };
 
     return (
         <div className="max-w-6xl mx-auto space-y-6">

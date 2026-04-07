@@ -12,6 +12,7 @@ import {useAuth} from '@/hooks/useAuth';
 import {useQuery} from '@tanstack/react-query';
 import {playlistApi} from '@/lib/api/playlist';
 import {formatDate} from '@/lib/format';
+import {getFullUrl} from '@/lib/utils';
 
 const PlaylistsPage = () => {
     const {t} = useTranslation();
@@ -55,15 +56,7 @@ const PlaylistsPage = () => {
         );
     }
 
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
 
-    const getFullUrl = (path?: string) => {
-        if (!path) return '';
-        if (path.startsWith('http')) return path;
-        const base = API_BASE_URL.replace(/\/$/, '');
-        const sep = path.startsWith('/') ? '' : '/';
-        return `${base}${sep}${path}`;
-    };
 
     return (
         <div className="space-y-6">
