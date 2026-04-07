@@ -25,7 +25,7 @@ type localStorage struct {
 func NewLocalStorage(baseDir string, logger log.Logger) biz.Storage {
 	return &localStorage{
 		baseDir: baseDir,
-		log: log.NewHelper(log.With(logger, "module", "media.storage.local")),
+		log:     log.NewHelper(log.With(logger, "module", "media.storage.local")),
 	}
 }
 
