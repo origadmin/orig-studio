@@ -17,7 +17,7 @@ type Claims struct {
 	UserID   int64  `json:"uid"`
 	Username string `json:"username"`
 	IsStaff  bool   `json:"is_staff"`
-	Role string `json:"role"`
+	Role     string `json:"role"`
 	jwt.RegisteredClaims
 }
 
@@ -49,7 +49,7 @@ func (m *Manager) Generate(
 		UserID:   userID,
 		Username: username,
 		IsStaff:  isStaff,
-		Role: role,
+		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(m.ttl)),

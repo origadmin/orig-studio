@@ -53,7 +53,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
             const commentMap = new Map<string, Comment>();
             const topLevelComments: Comment[] = [];
 
-            response.forEach(comment => {
+            // 从response.list获取评论数组
+            const commentsList = response?.list || [];
+            commentsList.forEach(comment => {
                 const formattedComment: Comment = {
                     ...comment,
                     replies: [],

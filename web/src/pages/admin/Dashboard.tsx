@@ -1,5 +1,5 @@
 import React from 'react';
-import {Film, Users, Eye, Heart, BarChart3, TrendingUp, TrendingDown, Loader2} from 'lucide-react';
+import {Film, Users, Eye, Heart, BarChart3, TrendingUp, TrendingDown, Loader2, MessageCircle} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {useTranslation} from 'react-i18next';
 import {useQuery} from '@tanstack/react-query';
@@ -11,7 +11,7 @@ const Dashboard = () => {
     const {data, isLoading, error} = useQuery({
         queryKey: ['admin', 'stats'],
         queryFn: async () => {
-            return await statsApi.getDashboardStats();
+            return await statsApi.getDashboard();
         }
     });
 
@@ -33,11 +33,11 @@ const Dashboard = () => {
     }
 
     const stats = data || {
-        total_medias: 0,
+        total_media: 0,
         total_users: 0,
         total_views: 0,
-        total_likes: 0,
-        trending_content: []
+        total_comments: 0,
+        top_media: []
     };
 
     const formatNumber = (num: number) => {
@@ -71,7 +71,7 @@ const Dashboard = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard icon={<Film className="text-blue-500"/>} label={t('admin.totalMedia') || 'Total Medias'}
-                          value={formatNumber(stats.total_medias)}
+                          value={formatNumber(stats.total_media)}
                           trend="+12% from last week"/>
                 <StatCard icon={<Users className="text-green-500"/>} label={t('admin.totalUsers') || 'Total Users'}
                           value={formatNumber(stats.total_users)}
@@ -79,8 +79,9 @@ const Dashboard = () => {
                 <StatCard icon={<Eye className="text-purple-500"/>} label={t('admin.totalViews') || 'Total Views'}
                           value={formatNumber(stats.total_views)}
                           trend="+18.2% from last month"/>
-                <StatCard icon={<Heart className="text-rose-500"/>} label={t('admin.totalLikes') || 'Likes Given'}
-                          value={formatNumber(stats.total_likes)}
+                <StatCard icon={<MessageCircle className="text-rose-500"/>}
+                          label={t('admin.totalComments') || 'Total Comments'}
+                          value={formatNumber(stats.total_comments)}
                           trend="+3.1% from last month"/>
             </div>
 
@@ -106,9 +107,9 @@ const Dashboard = () => {
                 <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                     <h3 className="font-bold text-slate-900 mb-6">{t('admin.trendingContent') || 'Trending Content'}</h3>
                     <div className="space-y-4">
-                        {stats.trending_content.map((item: any, index: number) => (
+                        {stats.top_media.map((item: any, index: number) => (
                             <TrendingItem key={index} title={item.title} views={formatNumber(item.views)}
-                                          trend={item.trend}/>
+                                          trend="up"/>
                         ))}
                     </div>
                 </div>

@@ -20,12 +20,12 @@ export interface FavoriteListResponse {
 }
 
 export const favoriteApi = {
-    toggle: (params: { media_id: string }) =>
-        api.post<ToggleFavoriteResponse>("/api/v1/media/:mediaId/favorite", {}, {params}),
-    getStatus: (params: { media_id: string }) =>
-        api.get<ToggleFavoriteResponse>("/api/v1/media/:mediaId/favorite", {params}),
+    toggle: (mediaId: string) =>
+        api.post<ToggleFavoriteResponse>(`/media/${mediaId}/favorite`),
+    getStatus: (mediaId: string) =>
+        api.get<ToggleFavoriteResponse>(`/media/${mediaId}/favorite`),
     list: () =>
-        api.get<FavoriteListResponse>("/api/v1/favorites"),
-    remove: (params: { media_id: string }) =>
-        api.del("/api/v1/favorites/:mediaId", {params}),
+        api.get<FavoriteListResponse>('/favorites'),
+    remove: (mediaId: string) =>
+        api.del(`/favorites/${mediaId}`),
 };

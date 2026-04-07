@@ -115,7 +115,7 @@ const WatchPage = () => {
 
         const checkFavoriteStatus = async () => {
             try {
-                const response = await favoriteApi.getStatus({media_id: id});
+                const response = await favoriteApi.getStatus(id);
                 setIsFavorited(response?.is_favorited || false);
             } catch (err) {
                 // Ignore errors for unauthenticated users
@@ -170,7 +170,7 @@ const WatchPage = () => {
 
         setIsLoadingFavorite(true);
         try {
-            await favoriteApi.toggle({media_id: id});
+            await favoriteApi.toggle(id);
             setIsFavorited(!isFavorited);
             setFavoriteCount(prev => isFavorited ? prev - 1 : prev + 1);
         } catch (err) {
