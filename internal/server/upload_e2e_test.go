@@ -24,6 +24,8 @@ import (
 	pb "origadmin/application/origcms/api/gen/v1/upload"
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/data/entity"
+	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
+	contentdata "origadmin/application/origcms/internal/svc-content/data"
 	"origadmin/application/origcms/internal/svc-media/biz"
 	"origadmin/application/origcms/internal/svc-media/data"
 )
@@ -65,11 +67,17 @@ func TestUploadE2E(t *testing.T) {
 		logger,
 	)
 
+	// Setup content layer dependencies
+	contentDB := contentdata.NewData(client)
+	likeRepo := contentdata.NewLikeRepo(contentDB, logger)
+	favoriteRepo := contentdata.NewFavoriteRepo(contentDB, logger)
+	likeFavoriteUC := contentbiz.NewLikeFavoriteUseCase(likeRepo, favoriteRepo, mediaUC, logger)
+
 	// Setup Router
 	router := gin.Default()
 	RegisterRoutes(router,
 		NewUploadHandler(uploadUC, jwtMgr),
-		NewMediaHandler(jwtMgr, mediaUC, uploadUC),
+		NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC),
 	)
 
 	// 2. Register & Login to get token
@@ -81,7 +89,7 @@ func TestUploadE2E(t *testing.T) {
 		SetUsername(username).
 		SetPassword(password).
 		SetEmail("test@example.com").
-		SetNickname("Test User").
+		SetName("Test User").
 		SetRole("admin").
 		Save(context.Background())
 	require.NoError(t, err)

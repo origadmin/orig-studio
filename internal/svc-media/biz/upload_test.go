@@ -5,12 +5,12 @@
 package biz
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 

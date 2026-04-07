@@ -219,7 +219,7 @@ func main() {
 	// --- 4. Handlers (Monolith) ---
 	authHandler := server.NewAuthHandler(userUC, jwtManager)
 	userHandler := server.NewUserHandler(userUC)
-	mediaHandler := server.NewMediaHandler(jwtManager, mediaUC, uploadUC)
+	mediaHandler := server.NewMediaHandler(jwtManager, mediaUC, uploadUC, likeFavoriteUC)
 	uploadHandler := server.NewUploadHandler(uploadUC, jwtManager)
 	categoryHandler := server.NewCategoryHandler(categoryTagUC)
 	tagHandler := server.NewTagHandler(categoryTagUC)

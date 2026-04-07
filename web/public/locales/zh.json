@@ -94,10 +94,20 @@
   },
   "watch": {
     "nextUp": "接下来播放",
+    "nextVideos": "推荐视频",
+    "noRecommendations": "暂无推荐视频",
     "favorite": "收藏",
     "favorited": "已收藏",
     "share": "分享",
-    "subscriberCount": "{{count}} 订阅者"
+    "subscriberCount": "{{count}} 订阅者",
+    "views": "观看次数",
+    "noDescription": "暂无描述",
+    "failedToLoad": "加载失败",
+    "transcoding": "转码中...",
+    "failed": "失败",
+    "optimizing": "排队中",
+    "partial": "部分完成",
+    "subscribers": "订阅者"
   },
   "channel": {
     "manageChannel": "管理频道",
