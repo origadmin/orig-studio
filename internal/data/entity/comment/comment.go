@@ -14,8 +14,6 @@ const (
 	Label = "comment"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldParentID holds the string denoting the parent_id field in the database.
-	FieldParentID = "parent_id"
 	// FieldText holds the string denoting the text field in the database.
 	FieldText = "text"
 	// FieldUID holds the string denoting the uid field in the database.
@@ -59,7 +57,6 @@ const (
 // Columns holds all SQL columns for comment fields.
 var Columns = []string{
 	FieldID,
-	FieldParentID,
 	FieldText,
 	FieldUID,
 	FieldAddDate,
@@ -99,11 +96,6 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByParentID orders the results by the parent_id field.
-func ByParentID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldParentID, opts...).ToFunc()
 }
 
 // ByText orders the results by the text field.

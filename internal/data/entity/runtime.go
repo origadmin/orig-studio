@@ -120,7 +120,7 @@ func init() {
 	commentFields := schema.Comment{}.Fields()
 	_ = commentFields
 	// commentDescAddDate is the schema descriptor for add_date field.
-	commentDescAddDate := commentFields[3].Descriptor()
+	commentDescAddDate := commentFields[2].Descriptor()
 	// comment.DefaultAddDate holds the default value on creation for the add_date field.
 	comment.DefaultAddDate = commentDescAddDate.Default.(func() time.Time)
 	encodeprofileFields := schema.EncodeProfile{}.Fields()

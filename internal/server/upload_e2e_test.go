@@ -16,13 +16,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	_ "github.com/sqlite3ent/sqlite3"
-
-	"github.com/go-kratos/kratos/v2/log"
-
 	pb "origadmin/application/origcms/api/gen/v1/upload"
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/data/entity"
@@ -57,7 +55,15 @@ func TestUploadE2E(t *testing.T) {
 	storage := data.NewLocalStorage("data/uploads", logger)
 	mediaUC := biz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, storage, nil, logger)
 
-	uploadUC := biz.NewUploadUseCase(uploadRepo, mediaRepo, profileRepo, taskRepo, mediaUC, storage, logger)
+	uploadUC := biz.NewUploadUseCase(
+		uploadRepo,
+		mediaRepo,
+		profileRepo,
+		taskRepo,
+		mediaUC,
+		storage,
+		logger,
+	)
 
 	// Setup Router
 	router := gin.Default()
@@ -118,7 +124,11 @@ func TestUploadE2E(t *testing.T) {
 		part1Data[i] = 'A'
 	}
 
-	req, _ = http.NewRequest("POST", fmt.Sprintf("/api/v1/uploads/%s/parts/1", uploadID), bytes.NewBuffer(part1Data))
+	req, _ = http.NewRequest(
+		"POST",
+		fmt.Sprintf("/api/v1/uploads/%s/parts/1", uploadID),
+		bytes.NewBuffer(part1Data),
+	)
 	req.Header.Set("Authorization", authHeader)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -141,7 +151,11 @@ func TestUploadE2E(t *testing.T) {
 	for i := range part2Data {
 		part2Data[i] = 'B'
 	}
-	req, _ = http.NewRequest("POST", fmt.Sprintf("/api/v1/uploads/%s/parts/2", uploadID), bytes.NewBuffer(part2Data))
+	req, _ = http.NewRequest(
+		"POST",
+		fmt.Sprintf("/api/v1/uploads/%s/parts/2", uploadID),
+		bytes.NewBuffer(part2Data),
+	)
 	req.Header.Set("Authorization", authHeader)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -153,7 +167,11 @@ func TestUploadE2E(t *testing.T) {
 		Sha256:   "dummy-sha256",
 	}
 	body, _ = json.Marshal(&completeReq)
-	req, _ = http.NewRequest("POST", fmt.Sprintf("/api/v1/uploads/%s/complete", uploadID), bytes.NewBuffer(body))
+	req, _ = http.NewRequest(
+		"POST",
+		fmt.Sprintf("/api/v1/uploads/%s/complete", uploadID),
+		bytes.NewBuffer(body),
+	)
 	req.Header.Set("Authorization", authHeader)
 	req.Header.Set("Content-Type", "application/json")
 	w = httptest.NewRecorder()

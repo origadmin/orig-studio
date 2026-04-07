@@ -139,7 +139,6 @@ var (
 	// FilesCommentColumns holds the columns for the "files_comment" table.
 	FilesCommentColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "parent_id", Type: field.TypeInt, Nullable: true},
 		{Name: "text", Type: field.TypeString, Size: 2147483647},
 		{Name: "uid", Type: field.TypeUUID, Unique: true},
 		{Name: "add_date", Type: field.TypeTime},
@@ -155,19 +154,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "files_comment_files_comment_replies",
-				Columns:    []*schema.Column{FilesCommentColumns[5]},
+				Columns:    []*schema.Column{FilesCommentColumns[4]},
 				RefColumns: []*schema.Column{FilesCommentColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "files_comment_media_comments",
-				Columns:    []*schema.Column{FilesCommentColumns[6]},
+				Columns:    []*schema.Column{FilesCommentColumns[5]},
 				RefColumns: []*schema.Column{MediaColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "files_comment_users_user_comments",
-				Columns:    []*schema.Column{FilesCommentColumns[7]},
+				Columns:    []*schema.Column{FilesCommentColumns[6]},
 				RefColumns: []*schema.Column{UsersUserColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -176,7 +175,7 @@ var (
 			{
 				Name:    "comment_add_date",
 				Unique:  false,
-				Columns: []*schema.Column{FilesCommentColumns[4]},
+				Columns: []*schema.Column{FilesCommentColumns[3]},
 			},
 		},
 	}

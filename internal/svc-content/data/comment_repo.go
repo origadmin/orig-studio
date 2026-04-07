@@ -134,8 +134,8 @@ func mapComment(ent *entity.Comment) *biz.Comment {
 		UpdatedAt: ent.AddDate, // Ent comment schema doesn't have updated_at yet?
 	}
 
-	if ent.ParentID != 0 {
-		pid := ent.ParentID
+	if ent.Edges.Parent != nil {
+		pid := ent.Edges.Parent.ID
 		c.ParentID = &pid
 	}
 	if ent.Edges.Media != nil {
@@ -143,13 +143,7 @@ func mapComment(ent *entity.Comment) *biz.Comment {
 	}
 	if ent.Edges.User != nil {
 		c.UserID = ent.Edges.User.ID
-		u := ent.Edges.User
-		c.User = &biz.User{
-			ID:       u.ID,
-			Username: u.Username,
-			Name:     u.Name,
-			Logo:     u.Logo,
-		}
+		c.User = ent.Edges.User
 	}
 	if len(ent.Edges.Replies) > 0 {
 		c.Replies = make([]*biz.Comment, len(ent.Edges.Replies))

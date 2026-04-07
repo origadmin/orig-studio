@@ -12,7 +12,6 @@ import (
 	"path/filepath"
 
 	"github.com/go-kratos/kratos/v2/log"
-
 	"origadmin/application/origcms/internal/svc-media/biz"
 )
 
@@ -31,9 +30,15 @@ func NewLocalStorage(baseDir string, logger log.Logger) biz.Storage {
 
 // Direct storage implementation
 
-func (s *localStorage) Upload(ctx context.Context, key string, r io.Reader, size int64, contentType string) (string, error) {
+func (s *localStorage) Upload(
+	ctx context.Context,
+	key string,
+	r io.Reader,
+	size int64,
+	contentType string,
+) (string, error) {
 	finalPath := filepath.Join(s.baseDir, key)
-	if err := os.MkdirAll(filepath.Dir(finalPath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(finalPath), 0o755); err != nil {
 		return "", err
 	}
 
@@ -59,34 +64,44 @@ func (s *localStorage) Delete(ctx context.Context, key string) error {
 }
 
 func (s *localStorage) GetURL(ctx context.Context, key string) (string, error) {
-	// For local storage, we just return the key/path. 
+	// For local storage, we just return the key/path.
 	// The web server should serve it via a static route.
 	return "/" + key, nil
 }
 
 // Multipart upload implementation
 
-func (s *localStorage) StorePart(ctx context.Context, uploadID string, partNumber int, data []byte) (string, error) {
+func (s *localStorage) StorePart(
+	ctx context.Context,
+	uploadID string,
+	partNumber int,
+	data []byte,
+) (string, error) {
 	tempPath := filepath.Join(s.baseDir, "temp", uploadID)
-	if err := os.MkdirAll(tempPath, 0755); err != nil {
+	if err := os.MkdirAll(tempPath, 0o755); err != nil {
 		return "", err
 	}
 
 	partFilename := fmt.Sprintf("part_%d", partNumber)
 	partFilePath := filepath.Join(tempPath, partFilename)
 
-	if err := os.WriteFile(partFilePath, data, 0644); err != nil {
+	if err := os.WriteFile(partFilePath, data, 0o644); err != nil {
 		return "", err
 	}
 
 	return fmt.Sprintf("part_%d_etag", partNumber), nil
 }
 
-func (s *localStorage) MergeParts(ctx context.Context, uploadID string, totalParts int, finalPath string) error {
+func (s *localStorage) MergeParts(
+	ctx context.Context,
+	uploadID string,
+	totalParts int,
+	finalPath string,
+) error {
 	tempPath := filepath.Join(s.baseDir, "temp", uploadID)
 	finalFilePath := filepath.Join(s.baseDir, finalPath)
 
-	if err := os.MkdirAll(filepath.Dir(finalFilePath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(finalFilePath), 0o755); err != nil {
 		return err
 	}
 

@@ -409,12 +409,12 @@ func (_q *CommentQuery) WithReplies(opts ...func(*CommentQuery)) *CommentQuery {
 // Example:
 //
 //	var v []struct {
-//		ParentID int `json:"parent_id,omitempty"`
+//		Text string `json:"text,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Comment.Query().
-//		GroupBy(comment.FieldParentID).
+//		GroupBy(comment.FieldText).
 //		Aggregate(entity.Count()).
 //		Scan(ctx, &v)
 func (_q *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy {
@@ -432,11 +432,11 @@ func (_q *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 // Example:
 //
 //	var v []struct {
-//		ParentID int `json:"parent_id,omitempty"`
+//		Text string `json:"text,omitempty"`
 //	}
 //
 //	client.Comment.Query().
-//		Select(comment.FieldParentID).
+//		Select(comment.FieldText).
 //		Scan(ctx, &v)
 func (_q *CommentQuery) Select(fields ...string) *CommentSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)

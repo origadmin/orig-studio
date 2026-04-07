@@ -20,8 +20,6 @@ type Comment struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// ParentID holds the value of the "parent_id" field.
-	ParentID int `json:"parent_id,omitempty"`
 	// Text holds the value of the "text" field.
 	Text string `json:"text,omitempty"`
 	// UID holds the value of the "uid" field.
@@ -99,7 +97,7 @@ func (*Comment) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case comment.FieldID, comment.FieldParentID:
+		case comment.FieldID:
 			values[i] = new(sql.NullInt64)
 		case comment.FieldText:
 			values[i] = new(sql.NullString)
@@ -134,12 +132,6 @@ func (_m *Comment) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
-		case comment.FieldParentID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
-			} else if value.Valid {
-				_m.ParentID = int(value.Int64)
-			}
 		case comment.FieldText:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field text", values[i])
@@ -235,9 +227,6 @@ func (_m *Comment) String() string {
 	var builder strings.Builder
 	builder.WriteString("Comment(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("parent_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ParentID))
-	builder.WriteString(", ")
 	builder.WriteString("text=")
 	builder.WriteString(_m.Text)
 	builder.WriteString(", ")

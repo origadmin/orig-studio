@@ -23,20 +23,6 @@ type CommentCreate struct {
 	hooks    []Hook
 }
 
-// SetParentID sets the "parent_id" field.
-func (_c *CommentCreate) SetParentID(v int) *CommentCreate {
-	_c.mutation.SetParentID(v)
-	return _c
-}
-
-// SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_c *CommentCreate) SetNillableParentID(v *int) *CommentCreate {
-	if v != nil {
-		_c.SetParentID(*v)
-	}
-	return _c
-}
-
 // SetText sets the "text" field.
 func (_c *CommentCreate) SetText(v string) *CommentCreate {
 	_c.mutation.SetText(v)
@@ -203,10 +189,6 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		_node = &Comment{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(comment.Table, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt))
 	)
-	if value, ok := _c.mutation.ParentID(); ok {
-		_spec.SetField(comment.FieldParentID, field.TypeInt, value)
-		_node.ParentID = value
-	}
 	if value, ok := _c.mutation.Text(); ok {
 		_spec.SetField(comment.FieldText, field.TypeString, value)
 		_node.Text = value
