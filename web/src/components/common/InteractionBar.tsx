@@ -30,8 +30,8 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId}) => {
 
     const fetchPlaylists = async () => {
         try {
-            const response = await playlistApi.getAll();
-            setPlaylists(response.map(p => ({id: p.id, name: p.name})));
+            const playlists = await playlistApi.getAll();
+            setPlaylists(playlists.map(p => ({id: p.id, name: p.name})));
         } catch (err) {
             console.error('Failed to fetch playlists:', err);
         }
@@ -39,9 +39,9 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId}) => {
 
     const fetchLikeStatus = async () => {
         try {
-            const response = await likeApi.getStatus(mediaId);
-            setLikeCount(response.count);
-            setIsLiked(response.is_liked);
+            const likeStatus = await likeApi.getStatus(mediaId);
+            setLikeCount(likeStatus.count);
+            setIsLiked(likeStatus.is_liked);
         } catch (err) {
             console.error('Failed to fetch like status:', err);
         }
@@ -50,9 +50,9 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId}) => {
     const handleLike = async () => {
         try {
             setIsLiking(true);
-            const response = await likeApi.toggle(mediaId);
-            setLikeCount(response.count);
-            setIsLiked(response.is_liked);
+            const likeStatus = await likeApi.toggle(mediaId);
+            setLikeCount(likeStatus.count);
+            setIsLiked(likeStatus.is_liked);
         } catch (err) {
             console.error('Failed to toggle like:', err);
         } finally {
@@ -63,12 +63,12 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId}) => {
     const handleShare = async () => {
         try {
             setIsSharing(true);
-            const response = await shareApi.getShareUrl(mediaId);
-            setShareUrl(response.url);
+            const shareResponse = await shareApi.getShareUrl(mediaId);
+            setShareUrl(shareResponse.url);
             setShowShareModal(true);
             // 复制分享链接到剪贴板
             if (navigator.clipboard) {
-                await navigator.clipboard.writeText(response.url);
+                await navigator.clipboard.writeText(shareResponse.url);
                 // 可以添加一个复制成功的提示
             }
         } catch (err) {

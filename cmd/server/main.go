@@ -231,6 +231,9 @@ func main() {
 	likeHandler := server.NewLikeHandler(likeFavoriteUC, jwtManager)
 	notificationHandler := server.NewNotificationHandler(notificationUC, jwtManager)
 	channelHandler := server.NewChannelHandler(playlistChannelUC, jwtManager)
+	shareHandler := server.NewShareHandler(likeFavoriteUC, jwtManager)
+	statsHandler := server.NewStatsHandler(mediaUC, likeFavoriteUC, jwtManager)
+	searchHandler := server.NewSearchHandler(mediaUC)
 
 	// ── 5. Gin router ───────────────────────────────────────────────
 	if getEnv("GIN_MODE", "debug") == "release" {
@@ -273,6 +276,9 @@ func main() {
 		likeHandler,
 		notificationHandler,
 		channelHandler,
+		shareHandler,
+		statsHandler,
+		searchHandler,
 	)
 
 	// ── 6. Start server ─────────────────────────────────────────────
