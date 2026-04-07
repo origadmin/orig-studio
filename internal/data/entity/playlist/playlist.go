@@ -24,6 +24,8 @@ const (
 	FieldUID = "uid"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
+	// FieldPrivacy holds the string denoting the privacy field in the database.
+	FieldPrivacy = "privacy"
 	// FieldAddDate holds the string denoting the add_date field in the database.
 	FieldAddDate = "add_date"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -45,13 +47,8 @@ var Columns = []string{
 	FieldFriendlyToken,
 	FieldUID,
 	FieldUserID,
+	FieldPrivacy,
 	FieldAddDate,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "files_playlist"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"media_playlist_playlist",
 }
 
 var (
@@ -67,11 +64,6 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
-			return true
-		}
-	}
 	return false
 }
 
@@ -80,6 +72,8 @@ var (
 	TitleValidator func(string) error
 	// FriendlyTokenValidator is a validator for the "friendly_token" field. It is called by the builders before save.
 	FriendlyTokenValidator func(string) error
+	// DefaultPrivacy holds the default value on creation for the "privacy" field.
+	DefaultPrivacy int
 	// DefaultAddDate holds the default value on creation for the "add_date" field.
 	DefaultAddDate func() time.Time
 )
@@ -115,6 +109,11 @@ func ByUID(opts ...sql.OrderTermOption) OrderOption {
 // ByUserID orders the results by the user_id field.
 func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
+// ByPrivacy orders the results by the privacy field.
+func ByPrivacy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPrivacy, opts...).ToFunc()
 }
 
 // ByAddDate orders the results by the add_date field.

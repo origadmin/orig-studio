@@ -81,6 +81,11 @@ func UserID(v int) predicate.Playlist {
 	return predicate.Playlist(sql.FieldEQ(FieldUserID, v))
 }
 
+// Privacy applies equality check predicate on the "privacy" field. It's identical to PrivacyEQ.
+func Privacy(v int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldEQ(FieldPrivacy, v))
+}
+
 // AddDate applies equality check predicate on the "add_date" field. It's identical to AddDateEQ.
 func AddDate(v time.Time) predicate.Playlist {
 	return predicate.Playlist(sql.FieldEQ(FieldAddDate, v))
@@ -359,6 +364,46 @@ func UserIDLT(v int) predicate.Playlist {
 // UserIDLTE applies the LTE predicate on the "user_id" field.
 func UserIDLTE(v int) predicate.Playlist {
 	return predicate.Playlist(sql.FieldLTE(FieldUserID, v))
+}
+
+// PrivacyEQ applies the EQ predicate on the "privacy" field.
+func PrivacyEQ(v int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldEQ(FieldPrivacy, v))
+}
+
+// PrivacyNEQ applies the NEQ predicate on the "privacy" field.
+func PrivacyNEQ(v int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldNEQ(FieldPrivacy, v))
+}
+
+// PrivacyIn applies the In predicate on the "privacy" field.
+func PrivacyIn(vs ...int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldIn(FieldPrivacy, vs...))
+}
+
+// PrivacyNotIn applies the NotIn predicate on the "privacy" field.
+func PrivacyNotIn(vs ...int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldNotIn(FieldPrivacy, vs...))
+}
+
+// PrivacyGT applies the GT predicate on the "privacy" field.
+func PrivacyGT(v int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldGT(FieldPrivacy, v))
+}
+
+// PrivacyGTE applies the GTE predicate on the "privacy" field.
+func PrivacyGTE(v int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldGTE(FieldPrivacy, v))
+}
+
+// PrivacyLT applies the LT predicate on the "privacy" field.
+func PrivacyLT(v int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldLT(FieldPrivacy, v))
+}
+
+// PrivacyLTE applies the LTE predicate on the "privacy" field.
+func PrivacyLTE(v int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldLTE(FieldPrivacy, v))
 }
 
 // AddDateEQ applies the EQ predicate on the "add_date" field.

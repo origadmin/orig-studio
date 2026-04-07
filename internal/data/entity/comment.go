@@ -5,6 +5,8 @@ package entity
 import (
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/media"
+	"origadmin/application/origcms/internal/data/entity/user"
 	"strings"
 	"time"
 
@@ -18,57 +20,75 @@ type Comment struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// ParentID holds the value of the "parent_id" field.
+	ParentID int `json:"parent_id,omitempty"`
 	// Text holds the value of the "text" field.
 	Text string `json:"text,omitempty"`
 	// UID holds the value of the "uid" field.
 	UID uuid.UUID `json:"uid,omitempty"`
 	// AddDate holds the value of the "add_date" field.
 	AddDate time.Time `json:"add_date,omitempty"`
-	// MediaID holds the value of the "media_id" field.
-	MediaID int `json:"media_id,omitempty"`
-	// UserID holds the value of the "user_id" field.
-	UserID int `json:"user_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CommentQuery when eager-loading is set.
-	Edges        CommentEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges           CommentEdges `json:"edges"`
+	comment_replies *int
+	media_comments  *int
+	user_comments   *int
+	selectValues    sql.SelectValues
 }
 
 // CommentEdges holds the relations/edges for other nodes in the graph.
 type CommentEdges struct {
 	// Media holds the value of the media edge.
-	Media []*Media `json:"media,omitempty"`
+	Media *Media `json:"media,omitempty"`
 	// User holds the value of the user edge.
-	User []*User `json:"user,omitempty"`
+	User *User `json:"user,omitempty"`
+	// Parent holds the value of the parent edge.
+	Parent *Comment `json:"parent,omitempty"`
 	// Replies holds the value of the replies edge.
 	Replies []*Comment `json:"replies,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // MediaOrErr returns the Media value or an error if the edge
-// was not loaded in eager-loading.
-func (e CommentEdges) MediaOrErr() ([]*Media, error) {
-	if e.loadedTypes[0] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e CommentEdges) MediaOrErr() (*Media, error) {
+	if e.Media != nil {
 		return e.Media, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: media.Label}
 	}
 	return nil, &NotLoadedError{edge: "media"}
 }
 
 // UserOrErr returns the User value or an error if the edge
-// was not loaded in eager-loading.
-func (e CommentEdges) UserOrErr() ([]*User, error) {
-	if e.loadedTypes[1] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e CommentEdges) UserOrErr() (*User, error) {
+	if e.User != nil {
 		return e.User, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "user"}
+}
+
+// ParentOrErr returns the Parent value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e CommentEdges) ParentOrErr() (*Comment, error) {
+	if e.Parent != nil {
+		return e.Parent, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: comment.Label}
+	}
+	return nil, &NotLoadedError{edge: "parent"}
 }
 
 // RepliesOrErr returns the Replies value or an error if the edge
 // was not loaded in eager-loading.
 func (e CommentEdges) RepliesOrErr() ([]*Comment, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.Replies, nil
 	}
 	return nil, &NotLoadedError{edge: "replies"}
@@ -79,7 +99,7 @@ func (*Comment) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case comment.FieldID, comment.FieldMediaID, comment.FieldUserID:
+		case comment.FieldID, comment.FieldParentID:
 			values[i] = new(sql.NullInt64)
 		case comment.FieldText:
 			values[i] = new(sql.NullString)
@@ -87,6 +107,12 @@ func (*Comment) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case comment.FieldUID:
 			values[i] = new(uuid.UUID)
+		case comment.ForeignKeys[0]: // comment_replies
+			values[i] = new(sql.NullInt64)
+		case comment.ForeignKeys[1]: // media_comments
+			values[i] = new(sql.NullInt64)
+		case comment.ForeignKeys[2]: // user_comments
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -108,6 +134,12 @@ func (_m *Comment) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
+		case comment.FieldParentID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
+			} else if value.Valid {
+				_m.ParentID = int(value.Int64)
+			}
 		case comment.FieldText:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field text", values[i])
@@ -126,17 +158,26 @@ func (_m *Comment) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.AddDate = value.Time
 			}
-		case comment.FieldMediaID:
+		case comment.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field media_id", values[i])
+				return fmt.Errorf("unexpected type %T for edge-field comment_replies", value)
 			} else if value.Valid {
-				_m.MediaID = int(value.Int64)
+				_m.comment_replies = new(int)
+				*_m.comment_replies = int(value.Int64)
 			}
-		case comment.FieldUserID:
+		case comment.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field user_id", values[i])
+				return fmt.Errorf("unexpected type %T for edge-field media_comments", value)
 			} else if value.Valid {
-				_m.UserID = int(value.Int64)
+				_m.media_comments = new(int)
+				*_m.media_comments = int(value.Int64)
+			}
+		case comment.ForeignKeys[2]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_comments", value)
+			} else if value.Valid {
+				_m.user_comments = new(int)
+				*_m.user_comments = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -159,6 +200,11 @@ func (_m *Comment) QueryMedia() *MediaQuery {
 // QueryUser queries the "user" edge of the Comment entity.
 func (_m *Comment) QueryUser() *UserQuery {
 	return NewCommentClient(_m.config).QueryUser(_m)
+}
+
+// QueryParent queries the "parent" edge of the Comment entity.
+func (_m *Comment) QueryParent() *CommentQuery {
+	return NewCommentClient(_m.config).QueryParent(_m)
 }
 
 // QueryReplies queries the "replies" edge of the Comment entity.
@@ -189,6 +235,9 @@ func (_m *Comment) String() string {
 	var builder strings.Builder
 	builder.WriteString("Comment(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	builder.WriteString("parent_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ParentID))
+	builder.WriteString(", ")
 	builder.WriteString("text=")
 	builder.WriteString(_m.Text)
 	builder.WriteString(", ")
@@ -197,12 +246,6 @@ func (_m *Comment) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("add_date=")
 	builder.WriteString(_m.AddDate.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("media_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.MediaID))
-	builder.WriteString(", ")
-	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteByte(')')
 	return builder.String()
 }

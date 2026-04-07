@@ -98,17 +98,19 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "channel" package.
 	ChannelsInverseTable = "users_channel"
 	// ChannelsColumn is the table column denoting the channels relation/edge.
-	ChannelsColumn = "user_channels"
+	ChannelsColumn = "user_id"
 	// PlaylistsTable is the table that holds the playlists relation/edge. The primary key declared below.
 	PlaylistsTable = "user_playlists"
 	// PlaylistsInverseTable is the table name for the Playlist entity.
 	// It exists in this package in order to avoid circular dependency with the "playlist" package.
 	PlaylistsInverseTable = "files_playlist"
-	// CommentsTable is the table that holds the comments relation/edge. The primary key declared below.
-	CommentsTable = "user_comments"
+	// CommentsTable is the table that holds the comments relation/edge.
+	CommentsTable = "files_comment"
 	// CommentsInverseTable is the table name for the Comment entity.
 	// It exists in this package in order to avoid circular dependency with the "comment" package.
 	CommentsInverseTable = "files_comment"
+	// CommentsColumn is the table column denoting the comments relation/edge.
+	CommentsColumn = "user_comments"
 	// NotificationsTable is the table that holds the notifications relation/edge. The primary key declared below.
 	NotificationsTable = "user_notifications"
 	// NotificationsInverseTable is the table name for the Notification entity.
@@ -132,14 +134,14 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "favorite" package.
 	FavoritesInverseTable = "files_favorite"
 	// FavoritesColumn is the table column denoting the favorites relation/edge.
-	FavoritesColumn = "user_favorites"
+	FavoritesColumn = "user_id"
 	// LikesTable is the table that holds the likes relation/edge.
 	LikesTable = "files_like"
 	// LikesInverseTable is the table name for the Like entity.
 	// It exists in this package in order to avoid circular dependency with the "like" package.
 	LikesInverseTable = "files_like"
 	// LikesColumn is the table column denoting the likes relation/edge.
-	LikesColumn = "user_likes"
+	LikesColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -172,20 +174,10 @@ var Columns = []string{
 	FieldLastLogin,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "users_user"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"favorite_user",
-	"like_user",
-}
-
 var (
 	// PlaylistsPrimaryKey and PlaylistsColumn2 are the table columns denoting the
 	// primary key for the playlists relation (M2M).
 	PlaylistsPrimaryKey = []string{"user_id", "playlist_id"}
-	// CommentsPrimaryKey and CommentsColumn2 are the table columns denoting the
-	// primary key for the comments relation (M2M).
-	CommentsPrimaryKey = []string{"user_id", "comment_id"}
 	// NotificationsPrimaryKey and NotificationsColumn2 are the table columns denoting the
 	// primary key for the notifications relation (M2M).
 	NotificationsPrimaryKey = []string{"user_id", "notification_id"}
@@ -198,11 +190,6 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -564,7 +551,7 @@ func newCommentsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CommentsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, CommentsTable, CommentsPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, false, CommentsTable, CommentsColumn),
 	)
 }
 func newNotificationsStep() *sqlgraph.Step {

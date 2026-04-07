@@ -6,13 +6,16 @@ package biz
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
 
+	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origcms/api/gen/v1/types" // Import the generated Media type
+	"origadmin/application/origcms/internal/pubsub"
 	"origadmin/application/origcms/internal/svc-media/dto"
 )
 
@@ -33,6 +36,10 @@ type MediaRepo interface {
 	Update(ctx context.Context, media *Media) (*Media, error)
 	Delete(ctx context.Context, id int64) error
 	IncrementViewCount(ctx context.Context, id int64) (int64, error)
+	UpdateCommentCount(ctx context.Context, id int64, delta int) error
+	UpdateLikeCount(ctx context.Context, id int64, delta int) error
+	UpdateDislikeCount(ctx context.Context, id int64, delta int) error
+	UpdateFavoriteCount(ctx context.Context, id int64, delta int) error
 	// ResetStaleProcessing resets media stuck in "processing" state back to "pending"
 	// and deletes their orphaned encoding tasks (which were interrupted by the restart).
 	// Called at startup to recover from service restarts.
@@ -107,6 +114,8 @@ type MediaUseCase struct {
 	repo         MediaRepo
 	profileRepo  EncodeProfileRepo
 	encodingRepo EncodingTaskRepo
+	storage   Storage
+	publisher message.Publisher
 	log          *log.Helper
 
 	mu   sync.RWMutex
@@ -117,12 +126,16 @@ func NewMediaUseCase(
 	repo MediaRepo,
 	profileRepo EncodeProfileRepo,
 	encodingRepo EncodingTaskRepo,
+	storage Storage,
+	publisher message.Publisher,
 	logger log.Logger,
 ) *MediaUseCase {
 	return &MediaUseCase{
 		repo:         repo,
 		profileRepo:  profileRepo,
 		encodingRepo: encodingRepo,
+		storage:   storage,
+		publisher: publisher,
 		log:          log.NewHelper(log.With(logger, "module", "media.biz")),
 		subs:         make(map[int64][]chan *EncodingEvent),
 	}
@@ -130,6 +143,13 @@ func NewMediaUseCase(
 
 func (uc *MediaUseCase) GetMedia(ctx context.Context, id int64) (*Media, error) {
 	return uc.repo.Get(ctx, id)
+}
+
+// CheckMedia verifies that a media record exists. Returns an error if not found.
+// Satisfies contentbiz.MediaUseCaseInterface without leaking *types.Media into the content layer.
+func (uc *MediaUseCase) CheckMedia(ctx context.Context, id int64) error {
+	_, err := uc.repo.Get(ctx, id)
+	return err
 }
 
 func (uc *MediaUseCase) ListMedias(
@@ -140,7 +160,29 @@ func (uc *MediaUseCase) ListMedias(
 }
 
 func (uc *MediaUseCase) CreateMedia(ctx context.Context, media *Media) (*Media, error) {
-	return uc.repo.Create(ctx, media)
+	created, err := uc.repo.Create(ctx, media)
+	if err != nil {
+		return nil, err
+	}
+
+	// Trigger transcoding for videos
+	if strings.HasPrefix(created.MimeType, "video/") && uc.publisher != nil {
+		payload, _ := json.Marshal(struct {
+			MediaID     int64  `json:"media_id"`
+			MediaPath   string `json:"media_path"`
+			ContentType string `json:"content_type"`
+		}{
+			MediaID:     created.Id,
+			MediaPath:   created.Url,
+			ContentType: created.MimeType,
+		})
+		msg := pubsub.NewMessage(payload)
+		if err := uc.publisher.Publish(pubsub.MediaEncodeRequestTopic, msg); err != nil {
+			uc.log.Errorf("failed to publish encode request for media %d: %v", created.Id, err)
+		}
+	}
+
+	return created, nil
 }
 
 func (uc *MediaUseCase) UpdateMedia(ctx context.Context, media *Media) (*Media, error) {
@@ -148,12 +190,67 @@ func (uc *MediaUseCase) UpdateMedia(ctx context.Context, media *Media) (*Media, 
 }
 
 func (uc *MediaUseCase) DeleteMedia(ctx context.Context, id int64) error {
-	return uc.repo.Delete(ctx, id)
+	m, err := uc.repo.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	// Delete from DB first
+	if err := uc.repo.Delete(ctx, id); err != nil {
+		return err
+	}
+
+	// Async cleanup of physical files
+	if uc.storage != nil && m.Url != "" {
+		go func() {
+			bgCtx := context.Background()
+			// Original file
+			if err := uc.storage.Delete(bgCtx, m.Url); err != nil {
+				uc.log.Warnf("failed to delete media file %s: %v", m.Url, err)
+			}
+			// Thumbnail
+			if m.Thumbnail != "" {
+				if err := uc.storage.Delete(bgCtx, m.Thumbnail); err != nil {
+					uc.log.Warnf("failed to delete thumbnail %s: %v", m.Thumbnail, err)
+				}
+			}
+			// Encoding tasks and their output files could also be cleaned here
+		}()
+	}
+
+	return nil
 }
 
 func (uc *MediaUseCase) IncrementViewCount(ctx context.Context, id int64) (int64, error) {
 	return uc.repo.IncrementViewCount(ctx, id)
 }
+
+func (uc *MediaUseCase) UpdateCommentCount(ctx context.Context, id int64, delta int) error {
+	return uc.repo.UpdateCommentCount(ctx, id, delta)
+}
+
+func (uc *MediaUseCase) UpdateLikeCount(ctx context.Context, id int64, delta int) error {
+	return uc.repo.UpdateLikeCount(ctx, id, delta)
+}
+
+func (uc *MediaUseCase) UpdateDislikeCount(ctx context.Context, id int64, delta int) error {
+	return uc.repo.UpdateDislikeCount(ctx, id, delta)
+}
+
+func (uc *MediaUseCase) UpdateFavoriteCount(ctx context.Context, id int64, delta int) error {
+	return uc.repo.UpdateFavoriteCount(ctx, id, delta)
+}
+
+func (uc *MediaUseCase) UpdateMediaState(ctx context.Context, id int64, state string) error {
+	m, err := uc.repo.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+	m.State = state
+	_, err = uc.repo.Update(ctx, m)
+	return err
+}
+
 
 func (uc *MediaUseCase) ListEncodingTasks(
 	ctx context.Context,

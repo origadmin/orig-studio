@@ -14,6 +14,10 @@ const (
 	Label = "media_playlist"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldPlaylistID holds the string denoting the playlist_id field in the database.
+	FieldPlaylistID = "playlist_id"
+	// FieldMediaID holds the string denoting the media_id field in the database.
+	FieldMediaID = "media_id"
 	// FieldOrdering holds the string denoting the ordering field in the database.
 	FieldOrdering = "ordering"
 	// FieldActionDate holds the string denoting the action_date field in the database.
@@ -25,24 +29,26 @@ const (
 	// Table holds the table name of the mediaplaylist in the database.
 	Table = "files_playlistmedia"
 	// MediaTable is the table that holds the media relation/edge.
-	MediaTable = "media"
+	MediaTable = "files_playlistmedia"
 	// MediaInverseTable is the table name for the Media entity.
 	// It exists in this package in order to avoid circular dependency with the "media" package.
 	MediaInverseTable = "media"
 	// MediaColumn is the table column denoting the media relation/edge.
-	MediaColumn = "media_playlist_media"
+	MediaColumn = "media_id"
 	// PlaylistTable is the table that holds the playlist relation/edge.
-	PlaylistTable = "files_playlist"
+	PlaylistTable = "files_playlistmedia"
 	// PlaylistInverseTable is the table name for the Playlist entity.
 	// It exists in this package in order to avoid circular dependency with the "playlist" package.
 	PlaylistInverseTable = "files_playlist"
 	// PlaylistColumn is the table column denoting the playlist relation/edge.
-	PlaylistColumn = "media_playlist_playlist"
+	PlaylistColumn = "playlist_id"
 )
 
 // Columns holds all SQL columns for mediaplaylist fields.
 var Columns = []string{
 	FieldID,
+	FieldPlaylistID,
+	FieldMediaID,
 	FieldOrdering,
 	FieldActionDate,
 }
@@ -83,6 +89,16 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByPlaylistID orders the results by the playlist_id field.
+func ByPlaylistID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPlaylistID, opts...).ToFunc()
+}
+
+// ByMediaID orders the results by the media_id field.
+func ByMediaID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMediaID, opts...).ToFunc()
+}
+
 // ByOrdering orders the results by the ordering field.
 func ByOrdering(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOrdering, opts...).ToFunc()
@@ -93,44 +109,30 @@ func ByActionDate(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldActionDate, opts...).ToFunc()
 }
 
-// ByMediaCount orders the results by media count.
-func ByMediaCount(opts ...sql.OrderTermOption) OrderOption {
+// ByMediaField orders the results by media field.
+func ByMediaField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newMediaStep(), opts...)
+		sqlgraph.OrderByNeighborTerms(s, newMediaStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByMedia orders the results by media terms.
-func ByMedia(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByPlaylistField orders the results by playlist field.
+func ByPlaylistField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newMediaStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByPlaylistCount orders the results by playlist count.
-func ByPlaylistCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPlaylistStep(), opts...)
-	}
-}
-
-// ByPlaylist orders the results by playlist terms.
-func ByPlaylist(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPlaylistStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newPlaylistStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newMediaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MediaInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, MediaTable, MediaColumn),
+		sqlgraph.Edge(sqlgraph.M2O, false, MediaTable, MediaColumn),
 	)
 }
 func newPlaylistStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PlaylistInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PlaylistTable, PlaylistColumn),
+		sqlgraph.Edge(sqlgraph.M2O, false, PlaylistTable, PlaylistColumn),
 	)
 }

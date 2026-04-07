@@ -28,6 +28,7 @@ func (Playlist) Fields() []ent.Field {
 		field.String("friendly_token").MaxLen(12).Unique(),
 		field.UUID("uid", uuid.New()).Unique(),
 		field.Int("user_id"),
+		field.Int("privacy").Default(1), // 1=public, 2=unlisted, 3=private
 		field.Time("add_date").Default(time.Now),
 	}
 }

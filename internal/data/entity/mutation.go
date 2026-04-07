@@ -1799,6 +1799,7 @@ type ChannelMutation struct {
 	typ            string
 	id             *int
 	title          *string
+	slug           *string
 	description    *string
 	friendly_token *string
 	banner_logo    *string
@@ -1912,6 +1913,42 @@ func (m *ChannelMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetUserID sets the "user_id" field.
+func (m *ChannelMutation) SetUserID(i int) {
+	m.user = &i
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *ChannelMutation) UserID() (r int, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the Channel entity.
+// If the Channel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChannelMutation) OldUserID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *ChannelMutation) ResetUserID() {
+	m.user = nil
+}
+
 // SetTitle sets the "title" field.
 func (m *ChannelMutation) SetTitle(s string) {
 	m.title = &s
@@ -1946,6 +1983,42 @@ func (m *ChannelMutation) OldTitle(ctx context.Context) (v string, err error) {
 // ResetTitle resets all changes to the "title" field.
 func (m *ChannelMutation) ResetTitle() {
 	m.title = nil
+}
+
+// SetSlug sets the "slug" field.
+func (m *ChannelMutation) SetSlug(s string) {
+	m.slug = &s
+}
+
+// Slug returns the value of the "slug" field in the mutation.
+func (m *ChannelMutation) Slug() (r string, exists bool) {
+	v := m.slug
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSlug returns the old "slug" field's value of the Channel entity.
+// If the Channel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChannelMutation) OldSlug(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSlug is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSlug requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSlug: %w", err)
+	}
+	return oldValue.Slug, nil
+}
+
+// ResetSlug resets all changes to the "slug" field.
+func (m *ChannelMutation) ResetSlug() {
+	m.slug = nil
 }
 
 // SetDescription sets the "description" field.
@@ -2092,27 +2165,15 @@ func (m *ChannelMutation) ResetAddDate() {
 	m.add_date = nil
 }
 
-// SetUserID sets the "user" edge to the User entity by id.
-func (m *ChannelMutation) SetUserID(id int) {
-	m.user = &id
-}
-
 // ClearUser clears the "user" edge to the User entity.
 func (m *ChannelMutation) ClearUser() {
 	m.cleareduser = true
+	m.clearedFields[channel.FieldUserID] = struct{}{}
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
 func (m *ChannelMutation) UserCleared() bool {
 	return m.cleareduser
-}
-
-// UserID returns the "user" edge ID in the mutation.
-func (m *ChannelMutation) UserID() (id int, exists bool) {
-	if m.user != nil {
-		return *m.user, true
-	}
-	return
 }
 
 // UserIDs returns the "user" edge IDs in the mutation.
@@ -2219,9 +2280,15 @@ func (m *ChannelMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ChannelMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 7)
+	if m.user != nil {
+		fields = append(fields, channel.FieldUserID)
+	}
 	if m.title != nil {
 		fields = append(fields, channel.FieldTitle)
+	}
+	if m.slug != nil {
+		fields = append(fields, channel.FieldSlug)
 	}
 	if m.description != nil {
 		fields = append(fields, channel.FieldDescription)
@@ -2243,8 +2310,12 @@ func (m *ChannelMutation) Fields() []string {
 // schema.
 func (m *ChannelMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case channel.FieldUserID:
+		return m.UserID()
 	case channel.FieldTitle:
 		return m.Title()
+	case channel.FieldSlug:
+		return m.Slug()
 	case channel.FieldDescription:
 		return m.Description()
 	case channel.FieldFriendlyToken:
@@ -2262,8 +2333,12 @@ func (m *ChannelMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *ChannelMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case channel.FieldUserID:
+		return m.OldUserID(ctx)
 	case channel.FieldTitle:
 		return m.OldTitle(ctx)
+	case channel.FieldSlug:
+		return m.OldSlug(ctx)
 	case channel.FieldDescription:
 		return m.OldDescription(ctx)
 	case channel.FieldFriendlyToken:
@@ -2281,12 +2356,26 @@ func (m *ChannelMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type.
 func (m *ChannelMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case channel.FieldUserID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
 	case channel.FieldTitle:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTitle(v)
+		return nil
+	case channel.FieldSlug:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSlug(v)
 		return nil
 	case channel.FieldDescription:
 		v, ok := value.(string)
@@ -2323,13 +2412,16 @@ func (m *ChannelMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *ChannelMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *ChannelMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -2365,8 +2457,14 @@ func (m *ChannelMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *ChannelMutation) ResetField(name string) error {
 	switch name {
+	case channel.FieldUserID:
+		m.ResetUserID()
+		return nil
 	case channel.FieldTitle:
 		m.ResetTitle()
+		return nil
+	case channel.FieldSlug:
+		m.ResetSlug()
 		return nil
 	case channel.FieldDescription:
 		m.ResetDescription()
@@ -2492,20 +2590,18 @@ type CommentMutation struct {
 	op             Op
 	typ            string
 	id             *int
+	parent_id      *int
+	addparent_id   *int
 	text           *string
 	uid            *uuid.UUID
 	add_date       *time.Time
-	media_id       *int
-	addmedia_id    *int
-	user_id        *int
-	adduser_id     *int
 	clearedFields  map[string]struct{}
-	media          map[int]struct{}
-	removedmedia   map[int]struct{}
+	media          *int
 	clearedmedia   bool
-	user           map[int]struct{}
-	removeduser    map[int]struct{}
+	user           *int
 	cleareduser    bool
+	parent         *int
+	clearedparent  bool
 	replies        map[int]struct{}
 	removedreplies map[int]struct{}
 	clearedreplies bool
@@ -2610,6 +2706,76 @@ func (m *CommentMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetParentID sets the "parent_id" field.
+func (m *CommentMutation) SetParentID(i int) {
+	m.parent_id = &i
+	m.addparent_id = nil
+}
+
+// ParentID returns the value of the "parent_id" field in the mutation.
+func (m *CommentMutation) ParentID() (r int, exists bool) {
+	v := m.parent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldParentID returns the old "parent_id" field's value of the Comment entity.
+// If the Comment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CommentMutation) OldParentID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldParentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldParentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldParentID: %w", err)
+	}
+	return oldValue.ParentID, nil
+}
+
+// AddParentID adds i to the "parent_id" field.
+func (m *CommentMutation) AddParentID(i int) {
+	if m.addparent_id != nil {
+		*m.addparent_id += i
+	} else {
+		m.addparent_id = &i
+	}
+}
+
+// AddedParentID returns the value that was added to the "parent_id" field in this mutation.
+func (m *CommentMutation) AddedParentID() (r int, exists bool) {
+	v := m.addparent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (m *CommentMutation) ClearParentID() {
+	m.parent_id = nil
+	m.addparent_id = nil
+	m.clearedFields[comment.FieldParentID] = struct{}{}
+}
+
+// ParentIDCleared returns if the "parent_id" field was cleared in this mutation.
+func (m *CommentMutation) ParentIDCleared() bool {
+	_, ok := m.clearedFields[comment.FieldParentID]
+	return ok
+}
+
+// ResetParentID resets all changes to the "parent_id" field.
+func (m *CommentMutation) ResetParentID() {
+	m.parent_id = nil
+	m.addparent_id = nil
+	delete(m.clearedFields, comment.FieldParentID)
 }
 
 // SetText sets the "text" field.
@@ -2720,126 +2886,9 @@ func (m *CommentMutation) ResetAddDate() {
 	m.add_date = nil
 }
 
-// SetMediaID sets the "media_id" field.
-func (m *CommentMutation) SetMediaID(i int) {
-	m.media_id = &i
-	m.addmedia_id = nil
-}
-
-// MediaID returns the value of the "media_id" field in the mutation.
-func (m *CommentMutation) MediaID() (r int, exists bool) {
-	v := m.media_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldMediaID returns the old "media_id" field's value of the Comment entity.
-// If the Comment object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CommentMutation) OldMediaID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldMediaID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldMediaID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldMediaID: %w", err)
-	}
-	return oldValue.MediaID, nil
-}
-
-// AddMediaID adds i to the "media_id" field.
-func (m *CommentMutation) AddMediaID(i int) {
-	if m.addmedia_id != nil {
-		*m.addmedia_id += i
-	} else {
-		m.addmedia_id = &i
-	}
-}
-
-// AddedMediaID returns the value that was added to the "media_id" field in this mutation.
-func (m *CommentMutation) AddedMediaID() (r int, exists bool) {
-	v := m.addmedia_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetMediaID resets all changes to the "media_id" field.
-func (m *CommentMutation) ResetMediaID() {
-	m.media_id = nil
-	m.addmedia_id = nil
-}
-
-// SetUserID sets the "user_id" field.
-func (m *CommentMutation) SetUserID(i int) {
-	m.user_id = &i
-	m.adduser_id = nil
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *CommentMutation) UserID() (r int, exists bool) {
-	v := m.user_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the Comment entity.
-// If the Comment object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CommentMutation) OldUserID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// AddUserID adds i to the "user_id" field.
-func (m *CommentMutation) AddUserID(i int) {
-	if m.adduser_id != nil {
-		*m.adduser_id += i
-	} else {
-		m.adduser_id = &i
-	}
-}
-
-// AddedUserID returns the value that was added to the "user_id" field in this mutation.
-func (m *CommentMutation) AddedUserID() (r int, exists bool) {
-	v := m.adduser_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *CommentMutation) ResetUserID() {
-	m.user_id = nil
-	m.adduser_id = nil
-}
-
-// AddMediumIDs adds the "media" edge to the Media entity by ids.
-func (m *CommentMutation) AddMediumIDs(ids ...int) {
-	if m.media == nil {
-		m.media = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.media[ids[i]] = struct{}{}
-	}
+// SetMediaID sets the "media" edge to the Media entity by id.
+func (m *CommentMutation) SetMediaID(id int) {
+	m.media = &id
 }
 
 // ClearMedia clears the "media" edge to the Media entity.
@@ -2852,29 +2901,20 @@ func (m *CommentMutation) MediaCleared() bool {
 	return m.clearedmedia
 }
 
-// RemoveMediumIDs removes the "media" edge to the Media entity by IDs.
-func (m *CommentMutation) RemoveMediumIDs(ids ...int) {
-	if m.removedmedia == nil {
-		m.removedmedia = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.media, ids[i])
-		m.removedmedia[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedMedia returns the removed IDs of the "media" edge to the Media entity.
-func (m *CommentMutation) RemovedMediaIDs() (ids []int) {
-	for id := range m.removedmedia {
-		ids = append(ids, id)
+// MediaID returns the "media" edge ID in the mutation.
+func (m *CommentMutation) MediaID() (id int, exists bool) {
+	if m.media != nil {
+		return *m.media, true
 	}
 	return
 }
 
 // MediaIDs returns the "media" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// MediaID instead. It exists only for internal usage by the builders.
 func (m *CommentMutation) MediaIDs() (ids []int) {
-	for id := range m.media {
-		ids = append(ids, id)
+	if id := m.media; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -2883,17 +2923,11 @@ func (m *CommentMutation) MediaIDs() (ids []int) {
 func (m *CommentMutation) ResetMedia() {
 	m.media = nil
 	m.clearedmedia = false
-	m.removedmedia = nil
 }
 
-// AddUserIDs adds the "user" edge to the User entity by ids.
-func (m *CommentMutation) AddUserIDs(ids ...int) {
-	if m.user == nil {
-		m.user = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.user[ids[i]] = struct{}{}
-	}
+// SetUserID sets the "user" edge to the User entity by id.
+func (m *CommentMutation) SetUserID(id int) {
+	m.user = &id
 }
 
 // ClearUser clears the "user" edge to the User entity.
@@ -2906,29 +2940,20 @@ func (m *CommentMutation) UserCleared() bool {
 	return m.cleareduser
 }
 
-// RemoveUserIDs removes the "user" edge to the User entity by IDs.
-func (m *CommentMutation) RemoveUserIDs(ids ...int) {
-	if m.removeduser == nil {
-		m.removeduser = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.user, ids[i])
-		m.removeduser[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedUser returns the removed IDs of the "user" edge to the User entity.
-func (m *CommentMutation) RemovedUserIDs() (ids []int) {
-	for id := range m.removeduser {
-		ids = append(ids, id)
+// UserID returns the "user" edge ID in the mutation.
+func (m *CommentMutation) UserID() (id int, exists bool) {
+	if m.user != nil {
+		return *m.user, true
 	}
 	return
 }
 
 // UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
 func (m *CommentMutation) UserIDs() (ids []int) {
-	for id := range m.user {
-		ids = append(ids, id)
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -2937,7 +2962,45 @@ func (m *CommentMutation) UserIDs() (ids []int) {
 func (m *CommentMutation) ResetUser() {
 	m.user = nil
 	m.cleareduser = false
-	m.removeduser = nil
+}
+
+// SetParentID sets the "parent" edge to the Comment entity by id.
+func (m *CommentMutation) SetParentID(id int) {
+	m.parent = &id
+}
+
+// ClearParent clears the "parent" edge to the Comment entity.
+func (m *CommentMutation) ClearParent() {
+	m.clearedparent = true
+}
+
+// ParentCleared reports if the "parent" edge to the Comment entity was cleared.
+func (m *CommentMutation) ParentCleared() bool {
+	return m.clearedparent
+}
+
+// ParentID returns the "parent" edge ID in the mutation.
+func (m *CommentMutation) ParentID() (id int, exists bool) {
+	if m.parent != nil {
+		return *m.parent, true
+	}
+	return
+}
+
+// ParentIDs returns the "parent" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ParentID instead. It exists only for internal usage by the builders.
+func (m *CommentMutation) ParentIDs() (ids []int) {
+	if id := m.parent; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetParent resets all changes to the "parent" edge.
+func (m *CommentMutation) ResetParent() {
+	m.parent = nil
+	m.clearedparent = false
 }
 
 // AddReplyIDs adds the "replies" edge to the Comment entity by ids.
@@ -3028,7 +3091,10 @@ func (m *CommentMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CommentMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 4)
+	if m.parent_id != nil {
+		fields = append(fields, comment.FieldParentID)
+	}
 	if m.text != nil {
 		fields = append(fields, comment.FieldText)
 	}
@@ -3038,12 +3104,6 @@ func (m *CommentMutation) Fields() []string {
 	if m.add_date != nil {
 		fields = append(fields, comment.FieldAddDate)
 	}
-	if m.media_id != nil {
-		fields = append(fields, comment.FieldMediaID)
-	}
-	if m.user_id != nil {
-		fields = append(fields, comment.FieldUserID)
-	}
 	return fields
 }
 
@@ -3052,16 +3112,14 @@ func (m *CommentMutation) Fields() []string {
 // schema.
 func (m *CommentMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case comment.FieldParentID:
+		return m.ParentID()
 	case comment.FieldText:
 		return m.Text()
 	case comment.FieldUID:
 		return m.UID()
 	case comment.FieldAddDate:
 		return m.AddDate()
-	case comment.FieldMediaID:
-		return m.MediaID()
-	case comment.FieldUserID:
-		return m.UserID()
 	}
 	return nil, false
 }
@@ -3071,16 +3129,14 @@ func (m *CommentMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *CommentMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case comment.FieldParentID:
+		return m.OldParentID(ctx)
 	case comment.FieldText:
 		return m.OldText(ctx)
 	case comment.FieldUID:
 		return m.OldUID(ctx)
 	case comment.FieldAddDate:
 		return m.OldAddDate(ctx)
-	case comment.FieldMediaID:
-		return m.OldMediaID(ctx)
-	case comment.FieldUserID:
-		return m.OldUserID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Comment field %s", name)
 }
@@ -3090,6 +3146,13 @@ func (m *CommentMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type.
 func (m *CommentMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case comment.FieldParentID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetParentID(v)
+		return nil
 	case comment.FieldText:
 		v, ok := value.(string)
 		if !ok {
@@ -3111,20 +3174,6 @@ func (m *CommentMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAddDate(v)
 		return nil
-	case comment.FieldMediaID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetMediaID(v)
-		return nil
-	case comment.FieldUserID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
 	}
 	return fmt.Errorf("unknown Comment field %s", name)
 }
@@ -3133,11 +3182,8 @@ func (m *CommentMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *CommentMutation) AddedFields() []string {
 	var fields []string
-	if m.addmedia_id != nil {
-		fields = append(fields, comment.FieldMediaID)
-	}
-	if m.adduser_id != nil {
-		fields = append(fields, comment.FieldUserID)
+	if m.addparent_id != nil {
+		fields = append(fields, comment.FieldParentID)
 	}
 	return fields
 }
@@ -3147,10 +3193,8 @@ func (m *CommentMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *CommentMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case comment.FieldMediaID:
-		return m.AddedMediaID()
-	case comment.FieldUserID:
-		return m.AddedUserID()
+	case comment.FieldParentID:
+		return m.AddedParentID()
 	}
 	return nil, false
 }
@@ -3160,19 +3204,12 @@ func (m *CommentMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *CommentMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case comment.FieldMediaID:
+	case comment.FieldParentID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddMediaID(v)
-		return nil
-	case comment.FieldUserID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddUserID(v)
+		m.AddParentID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Comment numeric field %s", name)
@@ -3181,7 +3218,11 @@ func (m *CommentMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *CommentMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(comment.FieldParentID) {
+		fields = append(fields, comment.FieldParentID)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -3194,6 +3235,11 @@ func (m *CommentMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *CommentMutation) ClearField(name string) error {
+	switch name {
+	case comment.FieldParentID:
+		m.ClearParentID()
+		return nil
+	}
 	return fmt.Errorf("unknown Comment nullable field %s", name)
 }
 
@@ -3201,6 +3247,9 @@ func (m *CommentMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *CommentMutation) ResetField(name string) error {
 	switch name {
+	case comment.FieldParentID:
+		m.ResetParentID()
+		return nil
 	case comment.FieldText:
 		m.ResetText()
 		return nil
@@ -3210,24 +3259,21 @@ func (m *CommentMutation) ResetField(name string) error {
 	case comment.FieldAddDate:
 		m.ResetAddDate()
 		return nil
-	case comment.FieldMediaID:
-		m.ResetMediaID()
-		return nil
-	case comment.FieldUserID:
-		m.ResetUserID()
-		return nil
 	}
 	return fmt.Errorf("unknown Comment field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *CommentMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.media != nil {
 		edges = append(edges, comment.EdgeMedia)
 	}
 	if m.user != nil {
 		edges = append(edges, comment.EdgeUser)
+	}
+	if m.parent != nil {
+		edges = append(edges, comment.EdgeParent)
 	}
 	if m.replies != nil {
 		edges = append(edges, comment.EdgeReplies)
@@ -3240,17 +3286,17 @@ func (m *CommentMutation) AddedEdges() []string {
 func (m *CommentMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case comment.EdgeMedia:
-		ids := make([]ent.Value, 0, len(m.media))
-		for id := range m.media {
-			ids = append(ids, id)
+		if id := m.media; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	case comment.EdgeUser:
-		ids := make([]ent.Value, 0, len(m.user))
-		for id := range m.user {
-			ids = append(ids, id)
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
+	case comment.EdgeParent:
+		if id := m.parent; id != nil {
+			return []ent.Value{*id}
+		}
 	case comment.EdgeReplies:
 		ids := make([]ent.Value, 0, len(m.replies))
 		for id := range m.replies {
@@ -3263,13 +3309,7 @@ func (m *CommentMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *CommentMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
-	if m.removedmedia != nil {
-		edges = append(edges, comment.EdgeMedia)
-	}
-	if m.removeduser != nil {
-		edges = append(edges, comment.EdgeUser)
-	}
+	edges := make([]string, 0, 4)
 	if m.removedreplies != nil {
 		edges = append(edges, comment.EdgeReplies)
 	}
@@ -3280,18 +3320,6 @@ func (m *CommentMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *CommentMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case comment.EdgeMedia:
-		ids := make([]ent.Value, 0, len(m.removedmedia))
-		for id := range m.removedmedia {
-			ids = append(ids, id)
-		}
-		return ids
-	case comment.EdgeUser:
-		ids := make([]ent.Value, 0, len(m.removeduser))
-		for id := range m.removeduser {
-			ids = append(ids, id)
-		}
-		return ids
 	case comment.EdgeReplies:
 		ids := make([]ent.Value, 0, len(m.removedreplies))
 		for id := range m.removedreplies {
@@ -3304,12 +3332,15 @@ func (m *CommentMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *CommentMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedmedia {
 		edges = append(edges, comment.EdgeMedia)
 	}
 	if m.cleareduser {
 		edges = append(edges, comment.EdgeUser)
+	}
+	if m.clearedparent {
+		edges = append(edges, comment.EdgeParent)
 	}
 	if m.clearedreplies {
 		edges = append(edges, comment.EdgeReplies)
@@ -3325,6 +3356,8 @@ func (m *CommentMutation) EdgeCleared(name string) bool {
 		return m.clearedmedia
 	case comment.EdgeUser:
 		return m.cleareduser
+	case comment.EdgeParent:
+		return m.clearedparent
 	case comment.EdgeReplies:
 		return m.clearedreplies
 	}
@@ -3335,6 +3368,15 @@ func (m *CommentMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *CommentMutation) ClearEdge(name string) error {
 	switch name {
+	case comment.EdgeMedia:
+		m.ClearMedia()
+		return nil
+	case comment.EdgeUser:
+		m.ClearUser()
+		return nil
+	case comment.EdgeParent:
+		m.ClearParent()
+		return nil
 	}
 	return fmt.Errorf("unknown Comment unique edge %s", name)
 }
@@ -3348,6 +3390,9 @@ func (m *CommentMutation) ResetEdge(name string) error {
 		return nil
 	case comment.EdgeUser:
 		m.ResetUser()
+		return nil
+	case comment.EdgeParent:
+		m.ResetParent()
 		return nil
 	case comment.EdgeReplies:
 		m.ResetReplies()
@@ -5339,8 +5384,7 @@ type FavoriteMutation struct {
 	clearedFields map[string]struct{}
 	media         *int
 	clearedmedia  bool
-	user          map[int]struct{}
-	removeduser   map[int]struct{}
+	user          *int
 	cleareduser   bool
 	done          bool
 	oldValue      func(context.Context) (*Favorite, error)
@@ -5445,6 +5489,78 @@ func (m *FavoriteMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetMediaID sets the "media_id" field.
+func (m *FavoriteMutation) SetMediaID(i int) {
+	m.media = &i
+}
+
+// MediaID returns the value of the "media_id" field in the mutation.
+func (m *FavoriteMutation) MediaID() (r int, exists bool) {
+	v := m.media
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMediaID returns the old "media_id" field's value of the Favorite entity.
+// If the Favorite object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FavoriteMutation) OldMediaID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMediaID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMediaID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMediaID: %w", err)
+	}
+	return oldValue.MediaID, nil
+}
+
+// ResetMediaID resets all changes to the "media_id" field.
+func (m *FavoriteMutation) ResetMediaID() {
+	m.media = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *FavoriteMutation) SetUserID(i int) {
+	m.user = &i
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *FavoriteMutation) UserID() (r int, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the Favorite entity.
+// If the Favorite object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FavoriteMutation) OldUserID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *FavoriteMutation) ResetUserID() {
+	m.user = nil
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *FavoriteMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -5481,27 +5597,15 @@ func (m *FavoriteMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetMediaID sets the "media" edge to the Media entity by id.
-func (m *FavoriteMutation) SetMediaID(id int) {
-	m.media = &id
-}
-
 // ClearMedia clears the "media" edge to the Media entity.
 func (m *FavoriteMutation) ClearMedia() {
 	m.clearedmedia = true
+	m.clearedFields[favorite.FieldMediaID] = struct{}{}
 }
 
 // MediaCleared reports if the "media" edge to the Media entity was cleared.
 func (m *FavoriteMutation) MediaCleared() bool {
 	return m.clearedmedia
-}
-
-// MediaID returns the "media" edge ID in the mutation.
-func (m *FavoriteMutation) MediaID() (id int, exists bool) {
-	if m.media != nil {
-		return *m.media, true
-	}
-	return
 }
 
 // MediaIDs returns the "media" edge IDs in the mutation.
@@ -5520,19 +5624,10 @@ func (m *FavoriteMutation) ResetMedia() {
 	m.clearedmedia = false
 }
 
-// AddUserIDs adds the "user" edge to the User entity by ids.
-func (m *FavoriteMutation) AddUserIDs(ids ...int) {
-	if m.user == nil {
-		m.user = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.user[ids[i]] = struct{}{}
-	}
-}
-
 // ClearUser clears the "user" edge to the User entity.
 func (m *FavoriteMutation) ClearUser() {
 	m.cleareduser = true
+	m.clearedFields[favorite.FieldUserID] = struct{}{}
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
@@ -5540,29 +5635,12 @@ func (m *FavoriteMutation) UserCleared() bool {
 	return m.cleareduser
 }
 
-// RemoveUserIDs removes the "user" edge to the User entity by IDs.
-func (m *FavoriteMutation) RemoveUserIDs(ids ...int) {
-	if m.removeduser == nil {
-		m.removeduser = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.user, ids[i])
-		m.removeduser[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedUser returns the removed IDs of the "user" edge to the User entity.
-func (m *FavoriteMutation) RemovedUserIDs() (ids []int) {
-	for id := range m.removeduser {
-		ids = append(ids, id)
-	}
-	return
-}
-
 // UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
 func (m *FavoriteMutation) UserIDs() (ids []int) {
-	for id := range m.user {
-		ids = append(ids, id)
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -5571,7 +5649,6 @@ func (m *FavoriteMutation) UserIDs() (ids []int) {
 func (m *FavoriteMutation) ResetUser() {
 	m.user = nil
 	m.cleareduser = false
-	m.removeduser = nil
 }
 
 // Where appends a list predicates to the FavoriteMutation builder.
@@ -5608,7 +5685,13 @@ func (m *FavoriteMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FavoriteMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 3)
+	if m.media != nil {
+		fields = append(fields, favorite.FieldMediaID)
+	}
+	if m.user != nil {
+		fields = append(fields, favorite.FieldUserID)
+	}
 	if m.created_at != nil {
 		fields = append(fields, favorite.FieldCreatedAt)
 	}
@@ -5620,6 +5703,10 @@ func (m *FavoriteMutation) Fields() []string {
 // schema.
 func (m *FavoriteMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case favorite.FieldMediaID:
+		return m.MediaID()
+	case favorite.FieldUserID:
+		return m.UserID()
 	case favorite.FieldCreatedAt:
 		return m.CreatedAt()
 	}
@@ -5631,6 +5718,10 @@ func (m *FavoriteMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *FavoriteMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case favorite.FieldMediaID:
+		return m.OldMediaID(ctx)
+	case favorite.FieldUserID:
+		return m.OldUserID(ctx)
 	case favorite.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	}
@@ -5642,6 +5733,20 @@ func (m *FavoriteMutation) OldField(ctx context.Context, name string) (ent.Value
 // type.
 func (m *FavoriteMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case favorite.FieldMediaID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMediaID(v)
+		return nil
+	case favorite.FieldUserID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
 	case favorite.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -5656,13 +5761,16 @@ func (m *FavoriteMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *FavoriteMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *FavoriteMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -5698,6 +5806,12 @@ func (m *FavoriteMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *FavoriteMutation) ResetField(name string) error {
 	switch name {
+	case favorite.FieldMediaID:
+		m.ResetMediaID()
+		return nil
+	case favorite.FieldUserID:
+		m.ResetUserID()
+		return nil
 	case favorite.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
@@ -5726,11 +5840,9 @@ func (m *FavoriteMutation) AddedIDs(name string) []ent.Value {
 			return []ent.Value{*id}
 		}
 	case favorite.EdgeUser:
-		ids := make([]ent.Value, 0, len(m.user))
-		for id := range m.user {
-			ids = append(ids, id)
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	}
 	return nil
 }
@@ -5738,23 +5850,12 @@ func (m *FavoriteMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *FavoriteMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.removeduser != nil {
-		edges = append(edges, favorite.EdgeUser)
-	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *FavoriteMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case favorite.EdgeUser:
-		ids := make([]ent.Value, 0, len(m.removeduser))
-		for id := range m.removeduser {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
@@ -5789,6 +5890,9 @@ func (m *FavoriteMutation) ClearEdge(name string) error {
 	case favorite.EdgeMedia:
 		m.ClearMedia()
 		return nil
+	case favorite.EdgeUser:
+		m.ClearUser()
+		return nil
 	}
 	return fmt.Errorf("unknown Favorite unique edge %s", name)
 }
@@ -5813,12 +5917,12 @@ type LikeMutation struct {
 	op            Op
 	typ           string
 	id            *int
+	like_type     *string
 	created_at    *time.Time
 	clearedFields map[string]struct{}
 	media         *int
 	clearedmedia  bool
-	user          map[int]struct{}
-	removeduser   map[int]struct{}
+	user          *int
 	cleareduser   bool
 	done          bool
 	oldValue      func(context.Context) (*Like, error)
@@ -5923,6 +6027,114 @@ func (m *LikeMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetMediaID sets the "media_id" field.
+func (m *LikeMutation) SetMediaID(i int) {
+	m.media = &i
+}
+
+// MediaID returns the value of the "media_id" field in the mutation.
+func (m *LikeMutation) MediaID() (r int, exists bool) {
+	v := m.media
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMediaID returns the old "media_id" field's value of the Like entity.
+// If the Like object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LikeMutation) OldMediaID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMediaID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMediaID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMediaID: %w", err)
+	}
+	return oldValue.MediaID, nil
+}
+
+// ResetMediaID resets all changes to the "media_id" field.
+func (m *LikeMutation) ResetMediaID() {
+	m.media = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *LikeMutation) SetUserID(i int) {
+	m.user = &i
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *LikeMutation) UserID() (r int, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the Like entity.
+// If the Like object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LikeMutation) OldUserID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *LikeMutation) ResetUserID() {
+	m.user = nil
+}
+
+// SetLikeType sets the "like_type" field.
+func (m *LikeMutation) SetLikeType(s string) {
+	m.like_type = &s
+}
+
+// LikeType returns the value of the "like_type" field in the mutation.
+func (m *LikeMutation) LikeType() (r string, exists bool) {
+	v := m.like_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLikeType returns the old "like_type" field's value of the Like entity.
+// If the Like object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LikeMutation) OldLikeType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLikeType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLikeType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLikeType: %w", err)
+	}
+	return oldValue.LikeType, nil
+}
+
+// ResetLikeType resets all changes to the "like_type" field.
+func (m *LikeMutation) ResetLikeType() {
+	m.like_type = nil
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *LikeMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -5959,27 +6171,15 @@ func (m *LikeMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetMediaID sets the "media" edge to the Media entity by id.
-func (m *LikeMutation) SetMediaID(id int) {
-	m.media = &id
-}
-
 // ClearMedia clears the "media" edge to the Media entity.
 func (m *LikeMutation) ClearMedia() {
 	m.clearedmedia = true
+	m.clearedFields[like.FieldMediaID] = struct{}{}
 }
 
 // MediaCleared reports if the "media" edge to the Media entity was cleared.
 func (m *LikeMutation) MediaCleared() bool {
 	return m.clearedmedia
-}
-
-// MediaID returns the "media" edge ID in the mutation.
-func (m *LikeMutation) MediaID() (id int, exists bool) {
-	if m.media != nil {
-		return *m.media, true
-	}
-	return
 }
 
 // MediaIDs returns the "media" edge IDs in the mutation.
@@ -5998,19 +6198,10 @@ func (m *LikeMutation) ResetMedia() {
 	m.clearedmedia = false
 }
 
-// AddUserIDs adds the "user" edge to the User entity by ids.
-func (m *LikeMutation) AddUserIDs(ids ...int) {
-	if m.user == nil {
-		m.user = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.user[ids[i]] = struct{}{}
-	}
-}
-
 // ClearUser clears the "user" edge to the User entity.
 func (m *LikeMutation) ClearUser() {
 	m.cleareduser = true
+	m.clearedFields[like.FieldUserID] = struct{}{}
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
@@ -6018,29 +6209,12 @@ func (m *LikeMutation) UserCleared() bool {
 	return m.cleareduser
 }
 
-// RemoveUserIDs removes the "user" edge to the User entity by IDs.
-func (m *LikeMutation) RemoveUserIDs(ids ...int) {
-	if m.removeduser == nil {
-		m.removeduser = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.user, ids[i])
-		m.removeduser[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedUser returns the removed IDs of the "user" edge to the User entity.
-func (m *LikeMutation) RemovedUserIDs() (ids []int) {
-	for id := range m.removeduser {
-		ids = append(ids, id)
-	}
-	return
-}
-
 // UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
 func (m *LikeMutation) UserIDs() (ids []int) {
-	for id := range m.user {
-		ids = append(ids, id)
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -6049,7 +6223,6 @@ func (m *LikeMutation) UserIDs() (ids []int) {
 func (m *LikeMutation) ResetUser() {
 	m.user = nil
 	m.cleareduser = false
-	m.removeduser = nil
 }
 
 // Where appends a list predicates to the LikeMutation builder.
@@ -6086,7 +6259,16 @@ func (m *LikeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LikeMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 4)
+	if m.media != nil {
+		fields = append(fields, like.FieldMediaID)
+	}
+	if m.user != nil {
+		fields = append(fields, like.FieldUserID)
+	}
+	if m.like_type != nil {
+		fields = append(fields, like.FieldLikeType)
+	}
 	if m.created_at != nil {
 		fields = append(fields, like.FieldCreatedAt)
 	}
@@ -6098,6 +6280,12 @@ func (m *LikeMutation) Fields() []string {
 // schema.
 func (m *LikeMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case like.FieldMediaID:
+		return m.MediaID()
+	case like.FieldUserID:
+		return m.UserID()
+	case like.FieldLikeType:
+		return m.LikeType()
 	case like.FieldCreatedAt:
 		return m.CreatedAt()
 	}
@@ -6109,6 +6297,12 @@ func (m *LikeMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *LikeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case like.FieldMediaID:
+		return m.OldMediaID(ctx)
+	case like.FieldUserID:
+		return m.OldUserID(ctx)
+	case like.FieldLikeType:
+		return m.OldLikeType(ctx)
 	case like.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	}
@@ -6120,6 +6314,27 @@ func (m *LikeMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *LikeMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case like.FieldMediaID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMediaID(v)
+		return nil
+	case like.FieldUserID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case like.FieldLikeType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLikeType(v)
+		return nil
 	case like.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -6134,13 +6349,16 @@ func (m *LikeMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *LikeMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *LikeMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -6176,6 +6394,15 @@ func (m *LikeMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *LikeMutation) ResetField(name string) error {
 	switch name {
+	case like.FieldMediaID:
+		m.ResetMediaID()
+		return nil
+	case like.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case like.FieldLikeType:
+		m.ResetLikeType()
+		return nil
 	case like.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
@@ -6204,11 +6431,9 @@ func (m *LikeMutation) AddedIDs(name string) []ent.Value {
 			return []ent.Value{*id}
 		}
 	case like.EdgeUser:
-		ids := make([]ent.Value, 0, len(m.user))
-		for id := range m.user {
-			ids = append(ids, id)
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	}
 	return nil
 }
@@ -6216,23 +6441,12 @@ func (m *LikeMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *LikeMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.removeduser != nil {
-		edges = append(edges, like.EdgeUser)
-	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *LikeMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case like.EdgeUser:
-		ids := make([]ent.Value, 0, len(m.removeduser))
-		for id := range m.removeduser {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
@@ -6266,6 +6480,9 @@ func (m *LikeMutation) ClearEdge(name string) error {
 	switch name {
 	case like.EdgeMedia:
 		m.ClearMedia()
+		return nil
+	case like.EdgeUser:
+		m.ClearUser()
 		return nil
 	}
 	return fmt.Errorf("unknown Like unique edge %s", name)
@@ -6346,9 +6563,8 @@ type MediaMutation struct {
 	comments          map[int]struct{}
 	removedcomments   map[int]struct{}
 	clearedcomments   bool
-	channels          map[int]struct{}
-	removedchannels   map[int]struct{}
-	clearedchannels   bool
+	channel           *int
+	clearedchannel    bool
 	playlists         map[int]struct{}
 	removedplaylists  map[int]struct{}
 	clearedplaylists  bool
@@ -8047,6 +8263,104 @@ func (m *MediaMutation) ResetUserID() {
 	m.user = nil
 }
 
+// SetCategoryID sets the "category_id" field.
+func (m *MediaMutation) SetCategoryID(i int) {
+	m.category = &i
+}
+
+// CategoryID returns the value of the "category_id" field in the mutation.
+func (m *MediaMutation) CategoryID() (r int, exists bool) {
+	v := m.category
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCategoryID returns the old "category_id" field's value of the Media entity.
+// If the Media object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaMutation) OldCategoryID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCategoryID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCategoryID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCategoryID: %w", err)
+	}
+	return oldValue.CategoryID, nil
+}
+
+// ClearCategoryID clears the value of the "category_id" field.
+func (m *MediaMutation) ClearCategoryID() {
+	m.category = nil
+	m.clearedFields[media.FieldCategoryID] = struct{}{}
+}
+
+// CategoryIDCleared returns if the "category_id" field was cleared in this mutation.
+func (m *MediaMutation) CategoryIDCleared() bool {
+	_, ok := m.clearedFields[media.FieldCategoryID]
+	return ok
+}
+
+// ResetCategoryID resets all changes to the "category_id" field.
+func (m *MediaMutation) ResetCategoryID() {
+	m.category = nil
+	delete(m.clearedFields, media.FieldCategoryID)
+}
+
+// SetChannelID sets the "channel_id" field.
+func (m *MediaMutation) SetChannelID(i int) {
+	m.channel = &i
+}
+
+// ChannelID returns the value of the "channel_id" field in the mutation.
+func (m *MediaMutation) ChannelID() (r int, exists bool) {
+	v := m.channel
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChannelID returns the old "channel_id" field's value of the Media entity.
+// If the Media object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaMutation) OldChannelID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChannelID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChannelID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChannelID: %w", err)
+	}
+	return oldValue.ChannelID, nil
+}
+
+// ClearChannelID clears the value of the "channel_id" field.
+func (m *MediaMutation) ClearChannelID() {
+	m.channel = nil
+	m.clearedFields[media.FieldChannelID] = struct{}{}
+}
+
+// ChannelIDCleared returns if the "channel_id" field was cleared in this mutation.
+func (m *MediaMutation) ChannelIDCleared() bool {
+	_, ok := m.clearedFields[media.FieldChannelID]
+	return ok
+}
+
+// ResetChannelID resets all changes to the "channel_id" field.
+func (m *MediaMutation) ResetChannelID() {
+	m.channel = nil
+	delete(m.clearedFields, media.FieldChannelID)
+}
+
 // SetPublishedAt sets the "published_at" field.
 func (m *MediaMutation) SetPublishedAt(t time.Time) {
 	m.published_at = &t
@@ -8195,27 +8509,15 @@ func (m *MediaMutation) ResetUser() {
 	m.cleareduser = false
 }
 
-// SetCategoryID sets the "category" edge to the Category entity by id.
-func (m *MediaMutation) SetCategoryID(id int) {
-	m.category = &id
-}
-
 // ClearCategory clears the "category" edge to the Category entity.
 func (m *MediaMutation) ClearCategory() {
 	m.clearedcategory = true
+	m.clearedFields[media.FieldCategoryID] = struct{}{}
 }
 
 // CategoryCleared reports if the "category" edge to the Category entity was cleared.
 func (m *MediaMutation) CategoryCleared() bool {
-	return m.clearedcategory
-}
-
-// CategoryID returns the "category" edge ID in the mutation.
-func (m *MediaMutation) CategoryID() (id int, exists bool) {
-	if m.category != nil {
-		return *m.category, true
-	}
-	return
+	return m.CategoryIDCleared() || m.clearedcategory
 }
 
 // CategoryIDs returns the "category" edge IDs in the mutation.
@@ -8288,58 +8590,31 @@ func (m *MediaMutation) ResetComments() {
 	m.removedcomments = nil
 }
 
-// AddChannelIDs adds the "channels" edge to the Channel entity by ids.
-func (m *MediaMutation) AddChannelIDs(ids ...int) {
-	if m.channels == nil {
-		m.channels = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.channels[ids[i]] = struct{}{}
-	}
+// ClearChannel clears the "channel" edge to the Channel entity.
+func (m *MediaMutation) ClearChannel() {
+	m.clearedchannel = true
+	m.clearedFields[media.FieldChannelID] = struct{}{}
 }
 
-// ClearChannels clears the "channels" edge to the Channel entity.
-func (m *MediaMutation) ClearChannels() {
-	m.clearedchannels = true
+// ChannelCleared reports if the "channel" edge to the Channel entity was cleared.
+func (m *MediaMutation) ChannelCleared() bool {
+	return m.ChannelIDCleared() || m.clearedchannel
 }
 
-// ChannelsCleared reports if the "channels" edge to the Channel entity was cleared.
-func (m *MediaMutation) ChannelsCleared() bool {
-	return m.clearedchannels
-}
-
-// RemoveChannelIDs removes the "channels" edge to the Channel entity by IDs.
-func (m *MediaMutation) RemoveChannelIDs(ids ...int) {
-	if m.removedchannels == nil {
-		m.removedchannels = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.channels, ids[i])
-		m.removedchannels[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedChannels returns the removed IDs of the "channels" edge to the Channel entity.
-func (m *MediaMutation) RemovedChannelsIDs() (ids []int) {
-	for id := range m.removedchannels {
-		ids = append(ids, id)
+// ChannelIDs returns the "channel" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ChannelID instead. It exists only for internal usage by the builders.
+func (m *MediaMutation) ChannelIDs() (ids []int) {
+	if id := m.channel; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
 
-// ChannelsIDs returns the "channels" edge IDs in the mutation.
-func (m *MediaMutation) ChannelsIDs() (ids []int) {
-	for id := range m.channels {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetChannels resets all changes to the "channels" edge.
-func (m *MediaMutation) ResetChannels() {
-	m.channels = nil
-	m.clearedchannels = false
-	m.removedchannels = nil
+// ResetChannel resets all changes to the "channel" edge.
+func (m *MediaMutation) ResetChannel() {
+	m.channel = nil
+	m.clearedchannel = false
 }
 
 // AddPlaylistIDs adds the "playlists" edge to the MediaPlaylist entity by ids.
@@ -8646,7 +8921,7 @@ func (m *MediaMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MediaMutation) Fields() []string {
-	fields := make([]string, 0, 36)
+	fields := make([]string, 0, 38)
 	if m.title != nil {
 		fields = append(fields, media.FieldTitle)
 	}
@@ -8746,6 +9021,12 @@ func (m *MediaMutation) Fields() []string {
 	if m.user != nil {
 		fields = append(fields, media.FieldUserID)
 	}
+	if m.category != nil {
+		fields = append(fields, media.FieldCategoryID)
+	}
+	if m.channel != nil {
+		fields = append(fields, media.FieldChannelID)
+	}
 	if m.published_at != nil {
 		fields = append(fields, media.FieldPublishedAt)
 	}
@@ -8829,6 +9110,10 @@ func (m *MediaMutation) Field(name string) (ent.Value, bool) {
 		return m.Tags()
 	case media.FieldUserID:
 		return m.UserID()
+	case media.FieldCategoryID:
+		return m.CategoryID()
+	case media.FieldChannelID:
+		return m.ChannelID()
 	case media.FieldPublishedAt:
 		return m.PublishedAt()
 	case media.FieldCreatedAt:
@@ -8910,6 +9195,10 @@ func (m *MediaMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldTags(ctx)
 	case media.FieldUserID:
 		return m.OldUserID(ctx)
+	case media.FieldCategoryID:
+		return m.OldCategoryID(ctx)
+	case media.FieldChannelID:
+		return m.OldChannelID(ctx)
 	case media.FieldPublishedAt:
 		return m.OldPublishedAt(ctx)
 	case media.FieldCreatedAt:
@@ -9156,6 +9445,20 @@ func (m *MediaMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUserID(v)
 		return nil
+	case media.FieldCategoryID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCategoryID(v)
+		return nil
+	case media.FieldChannelID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChannelID(v)
+		return nil
 	case media.FieldPublishedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -9378,6 +9681,12 @@ func (m *MediaMutation) ClearedFields() []string {
 	if m.FieldCleared(media.FieldTags) {
 		fields = append(fields, media.FieldTags)
 	}
+	if m.FieldCleared(media.FieldCategoryID) {
+		fields = append(fields, media.FieldCategoryID)
+	}
+	if m.FieldCleared(media.FieldChannelID) {
+		fields = append(fields, media.FieldChannelID)
+	}
 	if m.FieldCleared(media.FieldPublishedAt) {
 		fields = append(fields, media.FieldPublishedAt)
 	}
@@ -9430,6 +9739,12 @@ func (m *MediaMutation) ClearField(name string) error {
 		return nil
 	case media.FieldTags:
 		m.ClearTags()
+		return nil
+	case media.FieldCategoryID:
+		m.ClearCategoryID()
+		return nil
+	case media.FieldChannelID:
+		m.ClearChannelID()
 		return nil
 	case media.FieldPublishedAt:
 		m.ClearPublishedAt()
@@ -9541,6 +9856,12 @@ func (m *MediaMutation) ResetField(name string) error {
 	case media.FieldUserID:
 		m.ResetUserID()
 		return nil
+	case media.FieldCategoryID:
+		m.ResetCategoryID()
+		return nil
+	case media.FieldChannelID:
+		m.ResetChannelID()
+		return nil
 	case media.FieldPublishedAt:
 		m.ResetPublishedAt()
 		return nil
@@ -9566,8 +9887,8 @@ func (m *MediaMutation) AddedEdges() []string {
 	if m.comments != nil {
 		edges = append(edges, media.EdgeComments)
 	}
-	if m.channels != nil {
-		edges = append(edges, media.EdgeChannels)
+	if m.channel != nil {
+		edges = append(edges, media.EdgeChannel)
 	}
 	if m.playlists != nil {
 		edges = append(edges, media.EdgePlaylists)
@@ -9605,12 +9926,10 @@ func (m *MediaMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case media.EdgeChannels:
-		ids := make([]ent.Value, 0, len(m.channels))
-		for id := range m.channels {
-			ids = append(ids, id)
+	case media.EdgeChannel:
+		if id := m.channel; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	case media.EdgePlaylists:
 		ids := make([]ent.Value, 0, len(m.playlists))
 		for id := range m.playlists {
@@ -9651,9 +9970,6 @@ func (m *MediaMutation) RemovedEdges() []string {
 	if m.removedcomments != nil {
 		edges = append(edges, media.EdgeComments)
 	}
-	if m.removedchannels != nil {
-		edges = append(edges, media.EdgeChannels)
-	}
 	if m.removedplaylists != nil {
 		edges = append(edges, media.EdgePlaylists)
 	}
@@ -9679,12 +9995,6 @@ func (m *MediaMutation) RemovedIDs(name string) []ent.Value {
 	case media.EdgeComments:
 		ids := make([]ent.Value, 0, len(m.removedcomments))
 		for id := range m.removedcomments {
-			ids = append(ids, id)
-		}
-		return ids
-	case media.EdgeChannels:
-		ids := make([]ent.Value, 0, len(m.removedchannels))
-		for id := range m.removedchannels {
 			ids = append(ids, id)
 		}
 		return ids
@@ -9734,8 +10044,8 @@ func (m *MediaMutation) ClearedEdges() []string {
 	if m.clearedcomments {
 		edges = append(edges, media.EdgeComments)
 	}
-	if m.clearedchannels {
-		edges = append(edges, media.EdgeChannels)
+	if m.clearedchannel {
+		edges = append(edges, media.EdgeChannel)
 	}
 	if m.clearedplaylists {
 		edges = append(edges, media.EdgePlaylists)
@@ -9765,8 +10075,8 @@ func (m *MediaMutation) EdgeCleared(name string) bool {
 		return m.clearedcategory
 	case media.EdgeComments:
 		return m.clearedcomments
-	case media.EdgeChannels:
-		return m.clearedchannels
+	case media.EdgeChannel:
+		return m.clearedchannel
 	case media.EdgePlaylists:
 		return m.clearedplaylists
 	case media.EdgeTagsRel:
@@ -9791,6 +10101,9 @@ func (m *MediaMutation) ClearEdge(name string) error {
 	case media.EdgeCategory:
 		m.ClearCategory()
 		return nil
+	case media.EdgeChannel:
+		m.ClearChannel()
+		return nil
 	}
 	return fmt.Errorf("unknown Media unique edge %s", name)
 }
@@ -9808,8 +10121,8 @@ func (m *MediaMutation) ResetEdge(name string) error {
 	case media.EdgeComments:
 		m.ResetComments()
 		return nil
-	case media.EdgeChannels:
-		m.ResetChannels()
+	case media.EdgeChannel:
+		m.ResetChannel()
 		return nil
 	case media.EdgePlaylists:
 		m.ResetPlaylists()
@@ -10280,11 +10593,9 @@ type MediaPlaylistMutation struct {
 	addordering     *int
 	action_date     *time.Time
 	clearedFields   map[string]struct{}
-	media           map[int]struct{}
-	removedmedia    map[int]struct{}
+	media           *int
 	clearedmedia    bool
-	playlist        map[int]struct{}
-	removedplaylist map[int]struct{}
+	playlist        *int
 	clearedplaylist bool
 	done            bool
 	oldValue        func(context.Context) (*MediaPlaylist, error)
@@ -10389,6 +10700,78 @@ func (m *MediaPlaylistMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetPlaylistID sets the "playlist_id" field.
+func (m *MediaPlaylistMutation) SetPlaylistID(i int) {
+	m.playlist = &i
+}
+
+// PlaylistID returns the value of the "playlist_id" field in the mutation.
+func (m *MediaPlaylistMutation) PlaylistID() (r int, exists bool) {
+	v := m.playlist
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlaylistID returns the old "playlist_id" field's value of the MediaPlaylist entity.
+// If the MediaPlaylist object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaPlaylistMutation) OldPlaylistID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlaylistID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlaylistID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlaylistID: %w", err)
+	}
+	return oldValue.PlaylistID, nil
+}
+
+// ResetPlaylistID resets all changes to the "playlist_id" field.
+func (m *MediaPlaylistMutation) ResetPlaylistID() {
+	m.playlist = nil
+}
+
+// SetMediaID sets the "media_id" field.
+func (m *MediaPlaylistMutation) SetMediaID(i int) {
+	m.media = &i
+}
+
+// MediaID returns the value of the "media_id" field in the mutation.
+func (m *MediaPlaylistMutation) MediaID() (r int, exists bool) {
+	v := m.media
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMediaID returns the old "media_id" field's value of the MediaPlaylist entity.
+// If the MediaPlaylist object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaPlaylistMutation) OldMediaID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMediaID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMediaID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMediaID: %w", err)
+	}
+	return oldValue.MediaID, nil
+}
+
+// ResetMediaID resets all changes to the "media_id" field.
+func (m *MediaPlaylistMutation) ResetMediaID() {
+	m.media = nil
+}
+
 // SetOrdering sets the "ordering" field.
 func (m *MediaPlaylistMutation) SetOrdering(i int) {
 	m.ordering = &i
@@ -10481,19 +10864,10 @@ func (m *MediaPlaylistMutation) ResetActionDate() {
 	m.action_date = nil
 }
 
-// AddMediumIDs adds the "media" edge to the Media entity by ids.
-func (m *MediaPlaylistMutation) AddMediumIDs(ids ...int) {
-	if m.media == nil {
-		m.media = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.media[ids[i]] = struct{}{}
-	}
-}
-
 // ClearMedia clears the "media" edge to the Media entity.
 func (m *MediaPlaylistMutation) ClearMedia() {
 	m.clearedmedia = true
+	m.clearedFields[mediaplaylist.FieldMediaID] = struct{}{}
 }
 
 // MediaCleared reports if the "media" edge to the Media entity was cleared.
@@ -10501,29 +10875,12 @@ func (m *MediaPlaylistMutation) MediaCleared() bool {
 	return m.clearedmedia
 }
 
-// RemoveMediumIDs removes the "media" edge to the Media entity by IDs.
-func (m *MediaPlaylistMutation) RemoveMediumIDs(ids ...int) {
-	if m.removedmedia == nil {
-		m.removedmedia = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.media, ids[i])
-		m.removedmedia[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedMedia returns the removed IDs of the "media" edge to the Media entity.
-func (m *MediaPlaylistMutation) RemovedMediaIDs() (ids []int) {
-	for id := range m.removedmedia {
-		ids = append(ids, id)
-	}
-	return
-}
-
 // MediaIDs returns the "media" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// MediaID instead. It exists only for internal usage by the builders.
 func (m *MediaPlaylistMutation) MediaIDs() (ids []int) {
-	for id := range m.media {
-		ids = append(ids, id)
+	if id := m.media; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -10532,22 +10889,12 @@ func (m *MediaPlaylistMutation) MediaIDs() (ids []int) {
 func (m *MediaPlaylistMutation) ResetMedia() {
 	m.media = nil
 	m.clearedmedia = false
-	m.removedmedia = nil
-}
-
-// AddPlaylistIDs adds the "playlist" edge to the Playlist entity by ids.
-func (m *MediaPlaylistMutation) AddPlaylistIDs(ids ...int) {
-	if m.playlist == nil {
-		m.playlist = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.playlist[ids[i]] = struct{}{}
-	}
 }
 
 // ClearPlaylist clears the "playlist" edge to the Playlist entity.
 func (m *MediaPlaylistMutation) ClearPlaylist() {
 	m.clearedplaylist = true
+	m.clearedFields[mediaplaylist.FieldPlaylistID] = struct{}{}
 }
 
 // PlaylistCleared reports if the "playlist" edge to the Playlist entity was cleared.
@@ -10555,29 +10902,12 @@ func (m *MediaPlaylistMutation) PlaylistCleared() bool {
 	return m.clearedplaylist
 }
 
-// RemovePlaylistIDs removes the "playlist" edge to the Playlist entity by IDs.
-func (m *MediaPlaylistMutation) RemovePlaylistIDs(ids ...int) {
-	if m.removedplaylist == nil {
-		m.removedplaylist = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.playlist, ids[i])
-		m.removedplaylist[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedPlaylist returns the removed IDs of the "playlist" edge to the Playlist entity.
-func (m *MediaPlaylistMutation) RemovedPlaylistIDs() (ids []int) {
-	for id := range m.removedplaylist {
-		ids = append(ids, id)
-	}
-	return
-}
-
 // PlaylistIDs returns the "playlist" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PlaylistID instead. It exists only for internal usage by the builders.
 func (m *MediaPlaylistMutation) PlaylistIDs() (ids []int) {
-	for id := range m.playlist {
-		ids = append(ids, id)
+	if id := m.playlist; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -10586,7 +10916,6 @@ func (m *MediaPlaylistMutation) PlaylistIDs() (ids []int) {
 func (m *MediaPlaylistMutation) ResetPlaylist() {
 	m.playlist = nil
 	m.clearedplaylist = false
-	m.removedplaylist = nil
 }
 
 // Where appends a list predicates to the MediaPlaylistMutation builder.
@@ -10623,7 +10952,13 @@ func (m *MediaPlaylistMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MediaPlaylistMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 4)
+	if m.playlist != nil {
+		fields = append(fields, mediaplaylist.FieldPlaylistID)
+	}
+	if m.media != nil {
+		fields = append(fields, mediaplaylist.FieldMediaID)
+	}
 	if m.ordering != nil {
 		fields = append(fields, mediaplaylist.FieldOrdering)
 	}
@@ -10638,6 +10973,10 @@ func (m *MediaPlaylistMutation) Fields() []string {
 // schema.
 func (m *MediaPlaylistMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case mediaplaylist.FieldPlaylistID:
+		return m.PlaylistID()
+	case mediaplaylist.FieldMediaID:
+		return m.MediaID()
 	case mediaplaylist.FieldOrdering:
 		return m.Ordering()
 	case mediaplaylist.FieldActionDate:
@@ -10651,6 +10990,10 @@ func (m *MediaPlaylistMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *MediaPlaylistMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case mediaplaylist.FieldPlaylistID:
+		return m.OldPlaylistID(ctx)
+	case mediaplaylist.FieldMediaID:
+		return m.OldMediaID(ctx)
 	case mediaplaylist.FieldOrdering:
 		return m.OldOrdering(ctx)
 	case mediaplaylist.FieldActionDate:
@@ -10664,6 +11007,20 @@ func (m *MediaPlaylistMutation) OldField(ctx context.Context, name string) (ent.
 // type.
 func (m *MediaPlaylistMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case mediaplaylist.FieldPlaylistID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlaylistID(v)
+		return nil
+	case mediaplaylist.FieldMediaID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMediaID(v)
+		return nil
 	case mediaplaylist.FieldOrdering:
 		v, ok := value.(int)
 		if !ok {
@@ -10742,6 +11099,12 @@ func (m *MediaPlaylistMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *MediaPlaylistMutation) ResetField(name string) error {
 	switch name {
+	case mediaplaylist.FieldPlaylistID:
+		m.ResetPlaylistID()
+		return nil
+	case mediaplaylist.FieldMediaID:
+		m.ResetMediaID()
+		return nil
 	case mediaplaylist.FieldOrdering:
 		m.ResetOrdering()
 		return nil
@@ -10769,17 +11132,13 @@ func (m *MediaPlaylistMutation) AddedEdges() []string {
 func (m *MediaPlaylistMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case mediaplaylist.EdgeMedia:
-		ids := make([]ent.Value, 0, len(m.media))
-		for id := range m.media {
-			ids = append(ids, id)
+		if id := m.media; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	case mediaplaylist.EdgePlaylist:
-		ids := make([]ent.Value, 0, len(m.playlist))
-		for id := range m.playlist {
-			ids = append(ids, id)
+		if id := m.playlist; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	}
 	return nil
 }
@@ -10787,32 +11146,12 @@ func (m *MediaPlaylistMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *MediaPlaylistMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.removedmedia != nil {
-		edges = append(edges, mediaplaylist.EdgeMedia)
-	}
-	if m.removedplaylist != nil {
-		edges = append(edges, mediaplaylist.EdgePlaylist)
-	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *MediaPlaylistMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case mediaplaylist.EdgeMedia:
-		ids := make([]ent.Value, 0, len(m.removedmedia))
-		for id := range m.removedmedia {
-			ids = append(ids, id)
-		}
-		return ids
-	case mediaplaylist.EdgePlaylist:
-		ids := make([]ent.Value, 0, len(m.removedplaylist))
-		for id := range m.removedplaylist {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
@@ -10844,6 +11183,12 @@ func (m *MediaPlaylistMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *MediaPlaylistMutation) ClearEdge(name string) error {
 	switch name {
+	case mediaplaylist.EdgeMedia:
+		m.ClearMedia()
+		return nil
+	case mediaplaylist.EdgePlaylist:
+		m.ClearPlaylist()
+		return nil
 	}
 	return fmt.Errorf("unknown MediaPlaylist unique edge %s", name)
 }
@@ -11313,6 +11658,8 @@ type NotificationMutation struct {
 	method        *string
 	user_id       *int
 	adduser_id    *int
+	is_read       *bool
+	created_at    *time.Time
 	clearedFields map[string]struct{}
 	user          map[int]struct{}
 	removeduser   map[int]struct{}
@@ -11584,6 +11931,78 @@ func (m *NotificationMutation) ResetUserID() {
 	m.adduser_id = nil
 }
 
+// SetIsRead sets the "is_read" field.
+func (m *NotificationMutation) SetIsRead(b bool) {
+	m.is_read = &b
+}
+
+// IsRead returns the value of the "is_read" field in the mutation.
+func (m *NotificationMutation) IsRead() (r bool, exists bool) {
+	v := m.is_read
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsRead returns the old "is_read" field's value of the Notification entity.
+// If the Notification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationMutation) OldIsRead(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsRead is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsRead requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsRead: %w", err)
+	}
+	return oldValue.IsRead, nil
+}
+
+// ResetIsRead resets all changes to the "is_read" field.
+func (m *NotificationMutation) ResetIsRead() {
+	m.is_read = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *NotificationMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *NotificationMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Notification entity.
+// If the Notification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *NotificationMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
 // AddUserIDs adds the "user" edge to the User entity by ids.
 func (m *NotificationMutation) AddUserIDs(ids ...int) {
 	if m.user == nil {
@@ -11672,7 +12091,7 @@ func (m *NotificationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *NotificationMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 6)
 	if m.action != nil {
 		fields = append(fields, notification.FieldAction)
 	}
@@ -11684,6 +12103,12 @@ func (m *NotificationMutation) Fields() []string {
 	}
 	if m.user_id != nil {
 		fields = append(fields, notification.FieldUserID)
+	}
+	if m.is_read != nil {
+		fields = append(fields, notification.FieldIsRead)
+	}
+	if m.created_at != nil {
+		fields = append(fields, notification.FieldCreatedAt)
 	}
 	return fields
 }
@@ -11701,6 +12126,10 @@ func (m *NotificationMutation) Field(name string) (ent.Value, bool) {
 		return m.Method()
 	case notification.FieldUserID:
 		return m.UserID()
+	case notification.FieldIsRead:
+		return m.IsRead()
+	case notification.FieldCreatedAt:
+		return m.CreatedAt()
 	}
 	return nil, false
 }
@@ -11718,6 +12147,10 @@ func (m *NotificationMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldMethod(ctx)
 	case notification.FieldUserID:
 		return m.OldUserID(ctx)
+	case notification.FieldIsRead:
+		return m.OldIsRead(ctx)
+	case notification.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Notification field %s", name)
 }
@@ -11754,6 +12187,20 @@ func (m *NotificationMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUserID(v)
+		return nil
+	case notification.FieldIsRead:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsRead(v)
+		return nil
+	case notification.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Notification field %s", name)
@@ -11830,6 +12277,12 @@ func (m *NotificationMutation) ResetField(name string) error {
 		return nil
 	case notification.FieldUserID:
 		m.ResetUserID()
+		return nil
+	case notification.FieldIsRead:
+		m.ResetIsRead()
+		return nil
+	case notification.FieldCreatedAt:
+		m.ResetCreatedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Notification field %s", name)
@@ -11931,6 +12384,8 @@ type PlaylistMutation struct {
 	uid            *uuid.UUID
 	user_id        *int
 	adduser_id     *int
+	privacy        *int
+	addprivacy     *int
 	add_date       *time.Time
 	clearedFields  map[string]struct{}
 	user           map[int]struct{}
@@ -12239,6 +12694,62 @@ func (m *PlaylistMutation) ResetUserID() {
 	m.adduser_id = nil
 }
 
+// SetPrivacy sets the "privacy" field.
+func (m *PlaylistMutation) SetPrivacy(i int) {
+	m.privacy = &i
+	m.addprivacy = nil
+}
+
+// Privacy returns the value of the "privacy" field in the mutation.
+func (m *PlaylistMutation) Privacy() (r int, exists bool) {
+	v := m.privacy
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPrivacy returns the old "privacy" field's value of the Playlist entity.
+// If the Playlist object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlaylistMutation) OldPrivacy(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPrivacy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPrivacy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPrivacy: %w", err)
+	}
+	return oldValue.Privacy, nil
+}
+
+// AddPrivacy adds i to the "privacy" field.
+func (m *PlaylistMutation) AddPrivacy(i int) {
+	if m.addprivacy != nil {
+		*m.addprivacy += i
+	} else {
+		m.addprivacy = &i
+	}
+}
+
+// AddedPrivacy returns the value that was added to the "privacy" field in this mutation.
+func (m *PlaylistMutation) AddedPrivacy() (r int, exists bool) {
+	v := m.addprivacy
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPrivacy resets all changes to the "privacy" field.
+func (m *PlaylistMutation) ResetPrivacy() {
+	m.privacy = nil
+	m.addprivacy = nil
+}
+
 // SetAddDate sets the "add_date" field.
 func (m *PlaylistMutation) SetAddDate(t time.Time) {
 	m.add_date = &t
@@ -12363,7 +12874,7 @@ func (m *PlaylistMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PlaylistMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.title != nil {
 		fields = append(fields, playlist.FieldTitle)
 	}
@@ -12378,6 +12889,9 @@ func (m *PlaylistMutation) Fields() []string {
 	}
 	if m.user_id != nil {
 		fields = append(fields, playlist.FieldUserID)
+	}
+	if m.privacy != nil {
+		fields = append(fields, playlist.FieldPrivacy)
 	}
 	if m.add_date != nil {
 		fields = append(fields, playlist.FieldAddDate)
@@ -12400,6 +12914,8 @@ func (m *PlaylistMutation) Field(name string) (ent.Value, bool) {
 		return m.UID()
 	case playlist.FieldUserID:
 		return m.UserID()
+	case playlist.FieldPrivacy:
+		return m.Privacy()
 	case playlist.FieldAddDate:
 		return m.AddDate()
 	}
@@ -12421,6 +12937,8 @@ func (m *PlaylistMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldUID(ctx)
 	case playlist.FieldUserID:
 		return m.OldUserID(ctx)
+	case playlist.FieldPrivacy:
+		return m.OldPrivacy(ctx)
 	case playlist.FieldAddDate:
 		return m.OldAddDate(ctx)
 	}
@@ -12467,6 +12985,13 @@ func (m *PlaylistMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUserID(v)
 		return nil
+	case playlist.FieldPrivacy:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPrivacy(v)
+		return nil
 	case playlist.FieldAddDate:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -12485,6 +13010,9 @@ func (m *PlaylistMutation) AddedFields() []string {
 	if m.adduser_id != nil {
 		fields = append(fields, playlist.FieldUserID)
 	}
+	if m.addprivacy != nil {
+		fields = append(fields, playlist.FieldPrivacy)
+	}
 	return fields
 }
 
@@ -12495,6 +13023,8 @@ func (m *PlaylistMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case playlist.FieldUserID:
 		return m.AddedUserID()
+	case playlist.FieldPrivacy:
+		return m.AddedPrivacy()
 	}
 	return nil, false
 }
@@ -12510,6 +13040,13 @@ func (m *PlaylistMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddUserID(v)
+		return nil
+	case playlist.FieldPrivacy:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPrivacy(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Playlist numeric field %s", name)
@@ -12552,6 +13089,9 @@ func (m *PlaylistMutation) ResetField(name string) error {
 		return nil
 	case playlist.FieldUserID:
 		m.ResetUserID()
+		return nil
+	case playlist.FieldPrivacy:
+		m.ResetPrivacy()
 		return nil
 	case playlist.FieldAddDate:
 		m.ResetAddDate()

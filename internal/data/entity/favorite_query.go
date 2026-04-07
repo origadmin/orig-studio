@@ -4,7 +4,6 @@ package entity
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 	"origadmin/application/origcms/internal/data/entity/favorite"
@@ -28,7 +27,6 @@ type FavoriteQuery struct {
 	predicates []predicate.Favorite
 	withMedia  *MediaQuery
 	withUser   *UserQuery
-	withFKs    bool
 	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -102,7 +100,7 @@ func (_q *FavoriteQuery) QueryUser() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(favorite.Table, favorite.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, favorite.UserTable, favorite.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, favorite.UserTable, favorite.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -339,12 +337,12 @@ func (_q *FavoriteQuery) WithUser(opts ...func(*UserQuery)) *FavoriteQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		MediaID int `json:"media_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Favorite.Query().
-//		GroupBy(favorite.FieldCreatedAt).
+//		GroupBy(favorite.FieldMediaID).
 //		Aggregate(entity.Count()).
 //		Scan(ctx, &v)
 func (_q *FavoriteQuery) GroupBy(field string, fields ...string) *FavoriteGroupBy {
@@ -362,11 +360,11 @@ func (_q *FavoriteQuery) GroupBy(field string, fields ...string) *FavoriteGroupB
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		MediaID int `json:"media_id,omitempty"`
 //	}
 //
 //	client.Favorite.Query().
-//		Select(favorite.FieldCreatedAt).
+//		Select(favorite.FieldMediaID).
 //		Scan(ctx, &v)
 func (_q *FavoriteQuery) Select(fields ...string) *FavoriteSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
@@ -410,19 +408,12 @@ func (_q *FavoriteQuery) prepareQuery(ctx context.Context) error {
 func (_q *FavoriteQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Favorite, error) {
 	var (
 		nodes       = []*Favorite{}
-		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
 			_q.withMedia != nil,
 			_q.withUser != nil,
 		}
 	)
-	if _q.withMedia != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, favorite.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Favorite).scanValues(nil, columns)
 	}
@@ -451,9 +442,8 @@ func (_q *FavoriteQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Fav
 		}
 	}
 	if query := _q.withUser; query != nil {
-		if err := _q.loadUser(ctx, query, nodes,
-			func(n *Favorite) { n.Edges.User = []*User{} },
-			func(n *Favorite, e *User) { n.Edges.User = append(n.Edges.User, e) }); err != nil {
+		if err := _q.loadUser(ctx, query, nodes, nil,
+			func(n *Favorite, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -464,10 +454,7 @@ func (_q *FavoriteQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Favorite)
 	for i := range nodes {
-		if nodes[i].media_favorites == nil {
-			continue
-		}
-		fk := *nodes[i].media_favorites
+		fk := nodes[i].MediaID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -484,7 +471,7 @@ func (_q *FavoriteQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "media_favorites" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "media_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -493,33 +480,31 @@ func (_q *FavoriteQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes
 	return nil
 }
 func (_q *FavoriteQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Favorite, init func(*Favorite), assign func(*Favorite, *User)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Favorite)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Favorite)
 	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
+		fk := nodes[i].UserID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
 		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.withFKs = true
-	query.Where(predicate.User(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(favorite.UserColumn), fks...))
-	}))
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.favorite_user
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "favorite_user" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "favorite_user" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
 		}
-		assign(node, n)
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
 	}
 	return nil
 }
@@ -551,6 +536,12 @@ func (_q *FavoriteQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != favorite.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withMedia != nil {
+			_spec.Node.AddColumnOnce(favorite.FieldMediaID)
+		}
+		if _q.withUser != nil {
+			_spec.Node.AddColumnOnce(favorite.FieldUserID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

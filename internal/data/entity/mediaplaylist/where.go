@@ -55,6 +55,16 @@ func IDLTE(id int) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldLTE(FieldID, id))
 }
 
+// PlaylistID applies equality check predicate on the "playlist_id" field. It's identical to PlaylistIDEQ.
+func PlaylistID(v int) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldEQ(FieldPlaylistID, v))
+}
+
+// MediaID applies equality check predicate on the "media_id" field. It's identical to MediaIDEQ.
+func MediaID(v int) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldEQ(FieldMediaID, v))
+}
+
 // Ordering applies equality check predicate on the "ordering" field. It's identical to OrderingEQ.
 func Ordering(v int) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldEQ(FieldOrdering, v))
@@ -63,6 +73,46 @@ func Ordering(v int) predicate.MediaPlaylist {
 // ActionDate applies equality check predicate on the "action_date" field. It's identical to ActionDateEQ.
 func ActionDate(v time.Time) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldEQ(FieldActionDate, v))
+}
+
+// PlaylistIDEQ applies the EQ predicate on the "playlist_id" field.
+func PlaylistIDEQ(v int) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldEQ(FieldPlaylistID, v))
+}
+
+// PlaylistIDNEQ applies the NEQ predicate on the "playlist_id" field.
+func PlaylistIDNEQ(v int) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldNEQ(FieldPlaylistID, v))
+}
+
+// PlaylistIDIn applies the In predicate on the "playlist_id" field.
+func PlaylistIDIn(vs ...int) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldIn(FieldPlaylistID, vs...))
+}
+
+// PlaylistIDNotIn applies the NotIn predicate on the "playlist_id" field.
+func PlaylistIDNotIn(vs ...int) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldNotIn(FieldPlaylistID, vs...))
+}
+
+// MediaIDEQ applies the EQ predicate on the "media_id" field.
+func MediaIDEQ(v int) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldEQ(FieldMediaID, v))
+}
+
+// MediaIDNEQ applies the NEQ predicate on the "media_id" field.
+func MediaIDNEQ(v int) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldNEQ(FieldMediaID, v))
+}
+
+// MediaIDIn applies the In predicate on the "media_id" field.
+func MediaIDIn(vs ...int) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldIn(FieldMediaID, vs...))
+}
+
+// MediaIDNotIn applies the NotIn predicate on the "media_id" field.
+func MediaIDNotIn(vs ...int) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldNotIn(FieldMediaID, vs...))
 }
 
 // OrderingEQ applies the EQ predicate on the "ordering" field.
@@ -150,7 +200,7 @@ func HasMedia() predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, MediaTable, MediaColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, MediaTable, MediaColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -173,7 +223,7 @@ func HasPlaylist() predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PlaylistTable, PlaylistColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, PlaylistTable, PlaylistColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

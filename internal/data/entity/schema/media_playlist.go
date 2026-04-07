@@ -20,6 +20,8 @@ type MediaPlaylist struct {
 
 func (MediaPlaylist) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int("playlist_id"),
+		field.Int("media_id"),
 		field.Int("ordering").Default(1),
 		field.Time("action_date").Default(time.Now),
 	}
@@ -34,7 +36,7 @@ func (MediaPlaylist) Annotations() []schema.Annotation {
 
 func (MediaPlaylist) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("media", Media.Type),
-		edge.To("playlist", Playlist.Type),
+		edge.To("media", Media.Type).Field("media_id").Unique().Required(),
+		edge.To("playlist", Playlist.Type).Field("playlist_id").Unique().Required(),
 	}
 }

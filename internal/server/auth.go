@@ -98,7 +98,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	// Get role from entity (types.User doesn't have role field)
 	userRole := "user"
 	if entUser, entErr := h.uc.GetUserEntity(c.Request.Context(), u.Id); entErr == nil && entUser.Role != "" {
-		userRole = entUser.Role
+		userRole = string(entUser.Role)
 	}
 
 	// Verify password
@@ -133,12 +133,15 @@ func (h *AuthHandler) SignUp(c *gin.Context) {
 		return
 	}
 
+	count, _ := h.uc.CountUsers(c.Request.Context())
+	isFirstUser := count == 0
+
 	newUser := &types.User{
-		Username:   req.Username,
-		Nickname:  req.Nickname,
-		Email:     req.Email,
-		Status:    1,
-		IsStaff:   true, // 第一个注册的用户自动成为管理员
+		Username: req.Username,
+		Nickname: req.Nickname,
+		Email:    req.Email,
+		Status:   1,
+		IsStaff:  isFirstUser,
 	}
 
 	created, err := func() (*types.User, error) {
@@ -154,10 +157,13 @@ func (h *AuthHandler) SignUp(c *gin.Context) {
 		return
 	}
 
-	// First registered user becomes admin
-	_ = h.uc.SetUserRole(c.Request.Context(), created.Id, "admin")
+	userRole := "user"
+	if isFirstUser {
+		userRole = "admin"
+		_ = h.uc.SetUserRole(c.Request.Context(), created.Id, "admin")
+	}
 
-	token, err := h.jwt.Generate(created.Id, created.Username, created.IsStaff, "admin")
+	token, err := h.jwt.Generate(created.Id, created.Username, created.IsStaff, userRole)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "token generation failed"})
 		return
@@ -195,42 +201,6 @@ func (h *AuthHandler) Me(c *gin.Context) {
 // Logout godoc: POST /api/v1/auth/logout (stateless: client discards token)
 func (h *AuthHandler) Logout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "logged out"})
-}
-
-// JWTMiddleware validates Bearer token and injects claims into context.
-func JWTMiddleware(jwtMgr *auth.Manager) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		header := c.GetHeader("Authorization")
-		if len(header) < 8 || header[:7] != "Bearer " {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing or invalid Authorization header"})
-			return
-		}
-		claims, err := jwtMgr.Parse(header[7:])
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token: " + err.Error()})
-			return
-		}
-		c.Set("claims", claims)
-		c.Next()
-	}
-}
-
-// AdminMiddleware requires JWT + admin (or staff) role.
-func AdminMiddleware(jwtMgr *auth.Manager) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// First run standard JWT check
-		JWTMiddleware(jwtMgr)(c)
-		if c.IsAborted() {
-			return
-		}
-
-		claims, ok := c.MustGet("claims").(*auth.Claims)
-		if !ok || claims.Role != "admin" && !claims.IsStaff {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "admin access required"})
-			return
-		}
-		c.Next()
-	}
 }
 
 // HealthHandler returns a simple health check response.

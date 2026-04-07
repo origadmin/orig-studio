@@ -28,13 +28,14 @@ type Playlist struct {
 	UID uuid.UUID `json:"uid,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID int `json:"user_id,omitempty"`
+	// Privacy holds the value of the "privacy" field.
+	Privacy int `json:"privacy,omitempty"`
 	// AddDate holds the value of the "add_date" field.
 	AddDate time.Time `json:"add_date,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PlaylistQuery when eager-loading is set.
-	Edges                   PlaylistEdges `json:"edges"`
-	media_playlist_playlist *int
-	selectValues            sql.SelectValues
+	Edges        PlaylistEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // PlaylistEdges holds the relations/edges for other nodes in the graph.
@@ -60,7 +61,7 @@ func (*Playlist) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case playlist.FieldID, playlist.FieldUserID:
+		case playlist.FieldID, playlist.FieldUserID, playlist.FieldPrivacy:
 			values[i] = new(sql.NullInt64)
 		case playlist.FieldTitle, playlist.FieldDescription, playlist.FieldFriendlyToken:
 			values[i] = new(sql.NullString)
@@ -68,8 +69,6 @@ func (*Playlist) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case playlist.FieldUID:
 			values[i] = new(uuid.UUID)
-		case playlist.ForeignKeys[0]: // media_playlist_playlist
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -121,18 +120,17 @@ func (_m *Playlist) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UserID = int(value.Int64)
 			}
+		case playlist.FieldPrivacy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field privacy", values[i])
+			} else if value.Valid {
+				_m.Privacy = int(value.Int64)
+			}
 		case playlist.FieldAddDate:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field add_date", values[i])
 			} else if value.Valid {
 				_m.AddDate = value.Time
-			}
-		case playlist.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field media_playlist_playlist", value)
-			} else if value.Valid {
-				_m.media_playlist_playlist = new(int)
-				*_m.media_playlist_playlist = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -189,6 +187,9 @@ func (_m *Playlist) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(", ")
+	builder.WriteString("privacy=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Privacy))
 	builder.WriteString(", ")
 	builder.WriteString("add_date=")
 	builder.WriteString(_m.AddDate.Format(time.ANSIC))

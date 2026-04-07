@@ -21,7 +21,9 @@ type Channel struct {
 
 func (Channel) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int("user_id"),
 		field.String("title").NotEmpty().MaxLen(90),
+		field.String("slug").MaxLen(100).Unique(),
 		field.Text("description"),
 		field.String("friendly_token").MaxLen(12).Unique(),
 		field.String("banner_logo").MaxLen(500),
@@ -31,7 +33,9 @@ func (Channel) Fields() []ent.Field {
 
 func (Channel) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("user_id"),
 		index.Fields("title"),
+		index.Fields("slug"),
 		index.Fields("friendly_token"),
 		index.Fields("add_date"),
 	}
@@ -46,7 +50,7 @@ func (Channel) Annotations() []schema.Annotation {
 
 func (Channel) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).Ref("channels").Unique().Required(),
+		edge.From("user", User.Type).Ref("channels").Field("user_id").Unique().Required(),
 		edge.To("media", Media.Type),
 	}
 }

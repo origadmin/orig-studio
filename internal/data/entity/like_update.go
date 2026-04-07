@@ -31,6 +31,48 @@ func (_u *LikeUpdate) Where(ps ...predicate.Like) *LikeUpdate {
 	return _u
 }
 
+// SetMediaID sets the "media_id" field.
+func (_u *LikeUpdate) SetMediaID(v int) *LikeUpdate {
+	_u.mutation.SetMediaID(v)
+	return _u
+}
+
+// SetNillableMediaID sets the "media_id" field if the given value is not nil.
+func (_u *LikeUpdate) SetNillableMediaID(v *int) *LikeUpdate {
+	if v != nil {
+		_u.SetMediaID(*v)
+	}
+	return _u
+}
+
+// SetUserID sets the "user_id" field.
+func (_u *LikeUpdate) SetUserID(v int) *LikeUpdate {
+	_u.mutation.SetUserID(v)
+	return _u
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_u *LikeUpdate) SetNillableUserID(v *int) *LikeUpdate {
+	if v != nil {
+		_u.SetUserID(*v)
+	}
+	return _u
+}
+
+// SetLikeType sets the "like_type" field.
+func (_u *LikeUpdate) SetLikeType(v string) *LikeUpdate {
+	_u.mutation.SetLikeType(v)
+	return _u
+}
+
+// SetNillableLikeType sets the "like_type" field if the given value is not nil.
+func (_u *LikeUpdate) SetNillableLikeType(v *string) *LikeUpdate {
+	if v != nil {
+		_u.SetLikeType(*v)
+	}
+	return _u
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_u *LikeUpdate) SetCreatedAt(v time.Time) *LikeUpdate {
 	_u.mutation.SetCreatedAt(v)
@@ -45,38 +87,14 @@ func (_u *LikeUpdate) SetNillableCreatedAt(v *time.Time) *LikeUpdate {
 	return _u
 }
 
-// SetMediaID sets the "media" edge to the Media entity by ID.
-func (_u *LikeUpdate) SetMediaID(id int) *LikeUpdate {
-	_u.mutation.SetMediaID(id)
-	return _u
-}
-
-// SetNillableMediaID sets the "media" edge to the Media entity by ID if the given value is not nil.
-func (_u *LikeUpdate) SetNillableMediaID(id *int) *LikeUpdate {
-	if id != nil {
-		_u = _u.SetMediaID(*id)
-	}
-	return _u
-}
-
 // SetMedia sets the "media" edge to the Media entity.
 func (_u *LikeUpdate) SetMedia(v *Media) *LikeUpdate {
 	return _u.SetMediaID(v.ID)
 }
 
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *LikeUpdate) AddUserIDs(ids ...int) *LikeUpdate {
-	_u.mutation.AddUserIDs(ids...)
-	return _u
-}
-
-// AddUser adds the "user" edges to the User entity.
-func (_u *LikeUpdate) AddUser(v ...*User) *LikeUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddUserIDs(ids...)
+// SetUser sets the "user" edge to the User entity.
+func (_u *LikeUpdate) SetUser(v *User) *LikeUpdate {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the LikeMutation object of the builder.
@@ -90,25 +108,10 @@ func (_u *LikeUpdate) ClearMedia() *LikeUpdate {
 	return _u
 }
 
-// ClearUser clears all "user" edges to the User entity.
+// ClearUser clears the "user" edge to the User entity.
 func (_u *LikeUpdate) ClearUser() *LikeUpdate {
 	_u.mutation.ClearUser()
 	return _u
-}
-
-// RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (_u *LikeUpdate) RemoveUserIDs(ids ...int) *LikeUpdate {
-	_u.mutation.RemoveUserIDs(ids...)
-	return _u
-}
-
-// RemoveUser removes "user" edges to User entities.
-func (_u *LikeUpdate) RemoveUser(v ...*User) *LikeUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveUserIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -138,6 +141,22 @@ func (_u *LikeUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *LikeUpdate) check() error {
+	if v, ok := _u.mutation.LikeType(); ok {
+		if err := like.LikeTypeValidator(v); err != nil {
+			return &ValidationError{Name: "like_type", err: fmt.Errorf(`entity: validator failed for field "Like.like_type": %w`, err)}
+		}
+	}
+	if _u.mutation.MediaCleared() && len(_u.mutation.MediaIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "Like.media"`)
+	}
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "Like.user"`)
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *LikeUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *LikeUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -145,6 +164,9 @@ func (_u *LikeUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *LikeUpdat
 }
 
 func (_u *LikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(like.Table, like.Columns, sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -152,6 +174,9 @@ func (_u *LikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.LikeType(); ok {
+		_spec.SetField(like.FieldLikeType, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(like.FieldCreatedAt, field.TypeTime, value)
@@ -187,37 +212,21 @@ func (_u *LikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   like.UserTable,
 			Columns: []string{like.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedUserIDs(); len(nodes) > 0 && !_u.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   like.UserTable,
-			Columns: []string{like.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   like.UserTable,
 			Columns: []string{like.UserColumn},
 			Bidi:    false,
@@ -252,6 +261,48 @@ type LikeUpdateOne struct {
 	modifiers []func(*sql.UpdateBuilder)
 }
 
+// SetMediaID sets the "media_id" field.
+func (_u *LikeUpdateOne) SetMediaID(v int) *LikeUpdateOne {
+	_u.mutation.SetMediaID(v)
+	return _u
+}
+
+// SetNillableMediaID sets the "media_id" field if the given value is not nil.
+func (_u *LikeUpdateOne) SetNillableMediaID(v *int) *LikeUpdateOne {
+	if v != nil {
+		_u.SetMediaID(*v)
+	}
+	return _u
+}
+
+// SetUserID sets the "user_id" field.
+func (_u *LikeUpdateOne) SetUserID(v int) *LikeUpdateOne {
+	_u.mutation.SetUserID(v)
+	return _u
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_u *LikeUpdateOne) SetNillableUserID(v *int) *LikeUpdateOne {
+	if v != nil {
+		_u.SetUserID(*v)
+	}
+	return _u
+}
+
+// SetLikeType sets the "like_type" field.
+func (_u *LikeUpdateOne) SetLikeType(v string) *LikeUpdateOne {
+	_u.mutation.SetLikeType(v)
+	return _u
+}
+
+// SetNillableLikeType sets the "like_type" field if the given value is not nil.
+func (_u *LikeUpdateOne) SetNillableLikeType(v *string) *LikeUpdateOne {
+	if v != nil {
+		_u.SetLikeType(*v)
+	}
+	return _u
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_u *LikeUpdateOne) SetCreatedAt(v time.Time) *LikeUpdateOne {
 	_u.mutation.SetCreatedAt(v)
@@ -266,38 +317,14 @@ func (_u *LikeUpdateOne) SetNillableCreatedAt(v *time.Time) *LikeUpdateOne {
 	return _u
 }
 
-// SetMediaID sets the "media" edge to the Media entity by ID.
-func (_u *LikeUpdateOne) SetMediaID(id int) *LikeUpdateOne {
-	_u.mutation.SetMediaID(id)
-	return _u
-}
-
-// SetNillableMediaID sets the "media" edge to the Media entity by ID if the given value is not nil.
-func (_u *LikeUpdateOne) SetNillableMediaID(id *int) *LikeUpdateOne {
-	if id != nil {
-		_u = _u.SetMediaID(*id)
-	}
-	return _u
-}
-
 // SetMedia sets the "media" edge to the Media entity.
 func (_u *LikeUpdateOne) SetMedia(v *Media) *LikeUpdateOne {
 	return _u.SetMediaID(v.ID)
 }
 
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *LikeUpdateOne) AddUserIDs(ids ...int) *LikeUpdateOne {
-	_u.mutation.AddUserIDs(ids...)
-	return _u
-}
-
-// AddUser adds the "user" edges to the User entity.
-func (_u *LikeUpdateOne) AddUser(v ...*User) *LikeUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddUserIDs(ids...)
+// SetUser sets the "user" edge to the User entity.
+func (_u *LikeUpdateOne) SetUser(v *User) *LikeUpdateOne {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the LikeMutation object of the builder.
@@ -311,25 +338,10 @@ func (_u *LikeUpdateOne) ClearMedia() *LikeUpdateOne {
 	return _u
 }
 
-// ClearUser clears all "user" edges to the User entity.
+// ClearUser clears the "user" edge to the User entity.
 func (_u *LikeUpdateOne) ClearUser() *LikeUpdateOne {
 	_u.mutation.ClearUser()
 	return _u
-}
-
-// RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (_u *LikeUpdateOne) RemoveUserIDs(ids ...int) *LikeUpdateOne {
-	_u.mutation.RemoveUserIDs(ids...)
-	return _u
-}
-
-// RemoveUser removes "user" edges to User entities.
-func (_u *LikeUpdateOne) RemoveUser(v ...*User) *LikeUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveUserIDs(ids...)
 }
 
 // Where appends a list predicates to the LikeUpdate builder.
@@ -372,6 +384,22 @@ func (_u *LikeUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *LikeUpdateOne) check() error {
+	if v, ok := _u.mutation.LikeType(); ok {
+		if err := like.LikeTypeValidator(v); err != nil {
+			return &ValidationError{Name: "like_type", err: fmt.Errorf(`entity: validator failed for field "Like.like_type": %w`, err)}
+		}
+	}
+	if _u.mutation.MediaCleared() && len(_u.mutation.MediaIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "Like.media"`)
+	}
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "Like.user"`)
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *LikeUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *LikeUpdateOne {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -379,6 +407,9 @@ func (_u *LikeUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *LikeUp
 }
 
 func (_u *LikeUpdateOne) sqlSave(ctx context.Context) (_node *Like, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(like.Table, like.Columns, sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -403,6 +434,9 @@ func (_u *LikeUpdateOne) sqlSave(ctx context.Context) (_node *Like, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.LikeType(); ok {
+		_spec.SetField(like.FieldLikeType, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(like.FieldCreatedAt, field.TypeTime, value)
@@ -438,37 +472,21 @@ func (_u *LikeUpdateOne) sqlSave(ctx context.Context) (_node *Like, err error) {
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   like.UserTable,
 			Columns: []string{like.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedUserIDs(); len(nodes) > 0 && !_u.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   like.UserTable,
-			Columns: []string{like.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   like.UserTable,
 			Columns: []string{like.UserColumn},
 			Bidi:    false,

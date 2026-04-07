@@ -5,20 +5,20 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	cm "origadmin/application/origcms/internal/data/entity/comment"
+
 	"origadmin/application/origcms/internal/auth"
-	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/svc-content/biz"
 )
 
 // CommentHandler handles /api/v1/comments routes.
 type CommentHandler struct {
-	client *entity.Client
+	uc *biz.CommentUseCase
 	jwt *auth.Manager
 }
 
 // NewCommentHandler creates a new CommentHandler.
-func NewCommentHandler(client *entity.Client, jwt *auth.Manager) *CommentHandler {
-	return &CommentHandler{client: client, jwt: jwt}
+func NewCommentHandler(uc *biz.CommentUseCase, jwt *auth.Manager) *CommentHandler {
+	return &CommentHandler{uc: uc, jwt: jwt}
 }
 
 func (h *CommentHandler) Register(group *gin.RouterGroup) {
@@ -42,39 +42,28 @@ func (h *CommentHandler) Register(group *gin.RouterGroup) {
 // listComments returns all comments with optional media_id filter and pagination.
 // GET /comments?media_id=123&page=1&page_size=20
 func (h *CommentHandler) listComments(c *gin.Context) {
-	limit := 20
-	page := 1
-	if l := c.Query("page_size"); l != "" {
-		if n, err := strconv.Atoi(l); err == nil && n > 0 && n <= 100 {
-			limit = n
-		}
-	}
-	if p := c.Query("page"); p != "" {
-		if n, err := strconv.Atoi(p); err == nil && n > 0 {
-			page = n
-		}
-	}
-	offset := (page - 1) * limit
+	limit, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	mediaID, _ := strconv.Atoi(c.Query("media_id"))
 
-	query := h.client.Comment.Query().
-		Limit(limit).
-		Offset(offset).
-		Order(entity.Desc(cm.FieldAddDate))
+	var items []*biz.Comment
+	var total int
+	var err error
 
-	// Filter by media_id if provided
-	if mediaIdStr := c.Query("media_id"); mediaIdStr != "" {
-		if mediaId, err := strconv.Atoi(mediaIdStr); err == nil {
-			query.Where(cm.MediaIDEQ(mediaId))
-		}
+	if mediaID > 0 {
+		items, total, err = h.uc.ListMediaComments(c.Request.Context(), mediaID, page, limit)
+	} else {
+		// items, total, err = h.uc.ListAll(c.Request.Context(), page, limit)
+		// For now, listComments without media_id is not fully implemented in UseCase
+		c.JSON(http.StatusBadRequest, gin.H{"error": "media_id is required"})
+		return
 	}
 
-	items, err := query.All(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	total, _ := h.client.Comment.Query().Count(c.Request.Context())
 	c.JSON(http.StatusOK, gin.H{
 		"list":  items,
 		"total": total,
@@ -92,26 +81,18 @@ func (h *CommentHandler) listMediaComments(c *gin.Context) {
 		return
 	}
 
-	comments, err := h.client.Comment.Query().
-		Where(cm.MediaIDEQ(mediaId)).
-		WithUser().
-		WithReplies(func(rq *entity.CommentQuery) {
-			rq.WithUser()
-		}).
-		Order(entity.Asc(cm.FieldAddDate)).
-		All(c.Request.Context())
+	limit, _ := strconv.Atoi(c.DefaultQuery("page_size", "100"))
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+
+	items, total, err := h.uc.ListMediaComments(c.Request.Context(), mediaId, page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	count, _ := h.client.Comment.Query().
-		Where(cm.MediaIDEQ(mediaId)).
-		Count(c.Request.Context())
-
 	c.JSON(http.StatusOK, gin.H{
-		"list":     comments,
-		"total":    count,
+		"list":  items,
+		"total": total,
 		"media_id": mediaId,
 	})
 }
@@ -136,50 +117,20 @@ func (h *CommentHandler) createComment(c *gin.Context) {
 		return
 	}
 
-	comment, err := h.client.Comment.Create().
-		SetText(input.Text).
-		SetMediaID(input.MediaID).
-		SetUserID(int(claims.UserID)).
-		Save(c.Request.Context())
+	comment := &biz.Comment{
+		Text:     input.Text,
+		MediaID:  input.MediaID,
+		UserID:   int(claims.UserID),
+		ParentID: input.ParentID,
+	}
+
+	created, err := h.uc.CreateComment(c.Request.Context(), comment)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Handle nested reply: set parent edge if parent_id provided
-	if input.ParentID != nil && *input.ParentID > 0 {
-		parent, pErr := h.client.Comment.Get(c.Request.Context(), *input.ParentID)
-		if pErr == nil && parent.MediaID == input.MediaID {
-			h.client.Comment.UpdateOne(comment).AddReplies(parent).Exec(c.Request.Context())
-		}
-	}
-
-	// Update media comment count
-	h.client.Media.UpdateOneID(input.MediaID).
-		AddCommentCount(1).
-		Save(c.Request.Context())
-
-	// Load user for response
-	comment, _ = h.client.Comment.Query().
-		Where(cm.IDEQ(comment.ID)).
-		WithUser().
-		Only(c.Request.Context())
-
-	// Notify media owner about new comment (if commenter is not the owner)
-	go func() {
-		bgCtx := context.Background()
-		media, mErr := h.client.Media.Get(bgCtx, input.MediaID)
-		if mErr == nil && media.UserID != int(claims.UserID) {
-			h.client.Notification.Create().
-				SetAction("new_comment").
-				SetNotify(false).
-				SetMethod("comment").
-				SetUserID(media.UserID).
-				Save(bgCtx)
-		}
-	}()
-
-	c.JSON(http.StatusCreated, comment)
+	c.JSON(http.StatusCreated, created)
 }
 
 // updateComment updates a comment text. Only author or admin can update.
@@ -197,20 +148,6 @@ func (h *CommentHandler) updateComment(c *gin.Context) {
 		return
 	}
 
-	comment, err := h.client.Comment.Get(c.Request.Context(), id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "comment not found"})
-		return
-	}
-
-	isAuthor := comment.UserID == int(claims.UserID)
-	isAdmin := claims.IsStaff
-
-	if !isAuthor && !isAdmin {
-		c.JSON(http.StatusForbidden, gin.H{"error": "can only update own comments"})
-		return
-	}
-
 	var input struct {
 		Text string `json:"text" binding:"required"`
 	}
@@ -219,18 +156,11 @@ func (h *CommentHandler) updateComment(c *gin.Context) {
 		return
 	}
 
-	comment, err = h.client.Comment.UpdateOneID(id).
-		SetText(input.Text).
-		Save(c.Request.Context())
+	comment, err := h.uc.UpdateComment(c.Request.Context(), id, int(claims.UserID), claims.IsStaff, input.Text)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	comment, _ = h.client.Comment.Query().
-		Where(cm.IDEQ(id)).
-		WithUser().
-		Only(c.Request.Context())
 
 	c.JSON(http.StatusOK, comment)
 }
@@ -250,28 +180,7 @@ func (h *CommentHandler) deleteComment(c *gin.Context) {
 		return
 	}
 
-	comment, err := h.client.Comment.Get(c.Request.Context(), id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "comment not found"})
-		return
-	}
-
-	isAuthor := comment.UserID == int(claims.UserID)
-	isAdmin := claims.IsStaff
-
-	if !isAuthor && !isAdmin {
-		c.JSON(http.StatusForbidden, gin.H{"error": "can only delete own comments"})
-		return
-	}
-
-	// Update media comment count
-	if comment.MediaID > 0 {
-		h.client.Media.UpdateOneID(comment.MediaID).
-			AddCommentCount(-1).
-			Save(c.Request.Context())
-	}
-
-	err = h.client.Comment.DeleteOneID(id).Exec(c.Request.Context())
+	err = h.uc.DeleteComment(c.Request.Context(), id, int(claims.UserID), claims.IsStaff)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

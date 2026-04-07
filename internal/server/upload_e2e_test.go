@@ -54,14 +54,17 @@ func TestUploadE2E(t *testing.T) {
 	mediaRepo := data.NewMediaRepo(client)
 	profileRepo := data.NewEncodeProfileRepo(client)
 	taskRepo := data.NewEncodingTaskRepo(client)
-	mediaUC := biz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, logger)
 	storage := data.NewLocalStorage("data/uploads", logger)
+	mediaUC := biz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, storage, nil, logger)
 
 	uploadUC := biz.NewUploadUseCase(uploadRepo, mediaRepo, profileRepo, taskRepo, mediaUC, storage, logger)
 
 	// Setup Router
 	router := gin.Default()
-	RegisterRoutes(router, client, jwtMgr, uploadUC, mediaUC)
+	RegisterRoutes(router,
+		NewUploadHandler(uploadUC, jwtMgr),
+		NewMediaHandler(jwtMgr, mediaUC, uploadUC),
+	)
 
 	// 2. Register & Login to get token
 	username := "testuser"
@@ -72,12 +75,13 @@ func TestUploadE2E(t *testing.T) {
 		SetUsername(username).
 		SetPassword(password).
 		SetEmail("test@example.com").
-		SetName("Test User").
+		SetNickname("Test User").
+		SetRole("admin").
 		Save(context.Background())
 	require.NoError(t, err)
 
 	// Generate Token manually for testing (simulating a login)
-	token, err := jwtMgr.Generate(int64(user.ID), username, true)
+	token, err := jwtMgr.Generate(int64(user.ID), username, true, "admin")
 	require.NoError(t, err)
 	authHeader := "Bearer " + token
 

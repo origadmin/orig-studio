@@ -5,8 +5,10 @@
 package biz
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -84,6 +86,19 @@ func (m *MockMediaRepo) Delete(ctx context.Context, id int64) error { return nil
 func (m *MockMediaRepo) IncrementViewCount(ctx context.Context, id int64) (int64, error) {
 	return 0, nil
 }
+func (m *MockMediaRepo) UpdateCommentCount(ctx context.Context, id int64, delta int) error { return nil }
+func (m *MockMediaRepo) UpdateLikeCount(ctx context.Context, id int64, delta int) error    { return nil }
+func (m *MockMediaRepo) UpdateDislikeCount(ctx context.Context, id int64, delta int) error { return nil }
+func (m *MockMediaRepo) UpdateFavoriteCount(ctx context.Context, id int64, delta int) error {
+	return nil
+}
+func (m *MockMediaRepo) ResetStaleProcessing(ctx context.Context) (int, error) { return 0, nil }
+func (m *MockMediaRepo) CountByEncodingStatus(ctx context.Context) (*StatusCounts, error) {
+	return &StatusCounts{}, nil
+}
+func (m *MockMediaRepo) ListFilteredByEncodingStatus(ctx context.Context, statuses []string, page, pageSize int) ([]*Media, int, error) {
+	return nil, 0, nil
+}
 
 // MockEncodeProfileRepo
 type MockEncodeProfileRepo struct {
@@ -126,6 +141,72 @@ func (m *MockEncodingTaskRepo) Get(ctx context.Context, id int) (*EncodingTask, 
 func (m *MockEncodingTaskRepo) ListByMedia(ctx context.Context, mediaId int64) ([]*EncodingTask, error) {
 	return nil, nil
 }
+func (m *MockEncodingTaskRepo) DeleteByMedia(ctx context.Context, mediaID int64) error { return nil }
+func (m *MockEncodingTaskRepo) ListFlat(ctx context.Context, status string, mediaId *int64, offset, limit int) ([]*EncodingTask, int, error) {
+	return nil, 0, nil
+}
+func (m *MockEncodingTaskRepo) CountByStatus(ctx context.Context) (*StatusCounts, error) {
+	return &StatusCounts{}, nil
+}
+
+// Simple storage implementation for test to avoid dependency on data package
+type testStorage struct {
+	baseDir string
+}
+
+func (s *testStorage) Upload(ctx context.Context, key string, r io.Reader, size int64, contentType string) (string, error) {
+	dest := filepath.Join(s.baseDir, key)
+	_ = os.MkdirAll(filepath.Dir(dest), 0o755)
+	f, _ := os.Create(dest)
+	defer f.Close()
+	io.Copy(f, r)
+	return key, nil
+}
+
+func (s *testStorage) Download(ctx context.Context, key string) (io.ReadCloser, error) {
+	return os.Open(filepath.Join(s.baseDir, key))
+}
+
+func (s *testStorage) Delete(ctx context.Context, key string) error {
+	return os.Remove(filepath.Join(s.baseDir, key))
+}
+
+func (s *testStorage) GetURL(ctx context.Context, key string) (string, error) {
+	return "/" + key, nil
+}
+
+func (s *testStorage) StorePart(
+	ctx context.Context,
+	uploadID string,
+	partNumber int,
+	data []byte,
+) (string, error) {
+	path := filepath.Join(s.baseDir, uploadID, fmt.Sprintf("part_%d", partNumber))
+	_ = os.MkdirAll(filepath.Dir(path), 0o755)
+	_ = os.WriteFile(path, data, 0o644)
+	return "etag", nil
+}
+
+func (s *testStorage) MergeParts(
+	ctx context.Context,
+	uploadID string,
+	totalParts int,
+	finalPath string,
+) error {
+	dest := filepath.Join(s.baseDir, finalPath)
+	_ = os.MkdirAll(filepath.Dir(dest), 0o755)
+	f, _ := os.Create(dest)
+	defer f.Close()
+	for i := 1; i <= totalParts; i++ {
+		p, _ := os.ReadFile(filepath.Join(s.baseDir, uploadID, fmt.Sprintf("part_%d", i)))
+		f.Write(p)
+	}
+	return nil
+}
+
+func (s *testStorage) DeleteParts(ctx context.Context, uploadID string) error {
+	return os.RemoveAll(filepath.Join(s.baseDir, uploadID))
+}
 
 func TestUploadWorkflow(t *testing.T) {
 	// Setup
@@ -140,7 +221,7 @@ func TestUploadWorkflow(t *testing.T) {
 	mediaRepo := new(MockMediaRepo)
 	profileRepo := new(MockEncodeProfileRepo)
 	taskRepo := new(MockEncodingTaskRepo)
-	mediaUC := NewMediaUseCase(mediaRepo, profileRepo, taskRepo, logger)
+	mediaUC := NewMediaUseCase(mediaRepo, profileRepo, taskRepo, storage, nil, logger)
 
 	uc := NewUploadUseCase(repo, mediaRepo, profileRepo, taskRepo, mediaUC, storage, logger)
 	uc.chunkSize = 10 // Small chunk size for testing
@@ -196,42 +277,4 @@ func TestUploadWorkflow(t *testing.T) {
 	finalFilePath := filepath.Join(tempDir, "uploads", uploadID+".txt")
 	content, _ := os.ReadFile(finalFilePath)
 	assert.Equal(t, "0123456789abcdefghijfinal", string(content))
-}
-
-// Simple storage implementation for test to avoid dependency on data package
-type testStorage struct {
-	baseDir string
-}
-
-func (s *testStorage) StorePart(
-	ctx context.Context,
-	uploadID string,
-	partNumber int,
-	data []byte,
-) (string, error) {
-	path := filepath.Join(s.baseDir, uploadID, fmt.Sprintf("part_%d", partNumber))
-	_ = os.MkdirAll(filepath.Dir(path), 0o755)
-	_ = os.WriteFile(path, data, 0o644)
-	return "etag", nil
-}
-
-func (s *testStorage) MergeParts(
-	ctx context.Context,
-	uploadID string,
-	totalParts int,
-	finalPath string,
-) error {
-	dest := filepath.Join(s.baseDir, finalPath)
-	_ = os.MkdirAll(filepath.Dir(dest), 0o755)
-	f, _ := os.Create(dest)
-	defer f.Close()
-	for i := 1; i <= totalParts; i++ {
-		p, _ := os.ReadFile(filepath.Join(s.baseDir, uploadID, fmt.Sprintf("part_%d", i)))
-		f.Write(p)
-	}
-	return nil
-}
-
-func (s *testStorage) DeleteParts(ctx context.Context, uploadID string) error {
-	return os.RemoveAll(filepath.Join(s.baseDir, uploadID))
 }

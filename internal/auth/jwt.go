@@ -38,7 +38,12 @@ func (m *Manager) TTL() time.Duration {
 }
 
 // Generate creates a signed JWT token for the given user.
-func (m *Manager) Generate(userID int64, username string, isStaff bool, role string) (string, error) {
+func (m *Manager) Generate(
+	userID int64,
+	username string,
+	isStaff bool,
+	role string,
+) (string, error) {
 	now := time.Now()
 	claims := Claims{
 		UserID:   userID,

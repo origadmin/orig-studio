@@ -22,9 +22,21 @@ type ChannelCreate struct {
 	hooks    []Hook
 }
 
+// SetUserID sets the "user_id" field.
+func (_c *ChannelCreate) SetUserID(v int) *ChannelCreate {
+	_c.mutation.SetUserID(v)
+	return _c
+}
+
 // SetTitle sets the "title" field.
 func (_c *ChannelCreate) SetTitle(v string) *ChannelCreate {
 	_c.mutation.SetTitle(v)
+	return _c
+}
+
+// SetSlug sets the "slug" field.
+func (_c *ChannelCreate) SetSlug(v string) *ChannelCreate {
+	_c.mutation.SetSlug(v)
 	return _c
 }
 
@@ -57,12 +69,6 @@ func (_c *ChannelCreate) SetNillableAddDate(v *time.Time) *ChannelCreate {
 	if v != nil {
 		_c.SetAddDate(*v)
 	}
-	return _c
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_c *ChannelCreate) SetUserID(id int) *ChannelCreate {
-	_c.mutation.SetUserID(id)
 	return _c
 }
 
@@ -129,12 +135,23 @@ func (_c *ChannelCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *ChannelCreate) check() error {
+	if _, ok := _c.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`entity: missing required field "Channel.user_id"`)}
+	}
 	if _, ok := _c.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`entity: missing required field "Channel.title"`)}
 	}
 	if v, ok := _c.mutation.Title(); ok {
 		if err := channel.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Channel.title": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Slug(); !ok {
+		return &ValidationError{Name: "slug", err: errors.New(`entity: missing required field "Channel.slug"`)}
+	}
+	if v, ok := _c.mutation.Slug(); ok {
+		if err := channel.SlugValidator(v); err != nil {
+			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "Channel.slug": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
@@ -192,6 +209,10 @@ func (_c *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 		_spec.SetField(channel.FieldTitle, field.TypeString, value)
 		_node.Title = value
 	}
+	if value, ok := _c.mutation.Slug(); ok {
+		_spec.SetField(channel.FieldSlug, field.TypeString, value)
+		_node.Slug = value
+	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(channel.FieldDescription, field.TypeString, value)
 		_node.Description = value
@@ -222,15 +243,15 @@ func (_c *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_channels = &nodes[0]
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   channel.MediaTable,
-			Columns: channel.MediaPrimaryKey,
+			Columns: []string{channel.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),

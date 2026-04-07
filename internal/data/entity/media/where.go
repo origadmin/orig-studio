@@ -215,6 +215,16 @@ func UserID(v int) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldUserID, v))
 }
 
+// CategoryID applies equality check predicate on the "category_id" field. It's identical to CategoryIDEQ.
+func CategoryID(v int) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldCategoryID, v))
+}
+
+// ChannelID applies equality check predicate on the "channel_id" field. It's identical to ChannelIDEQ.
+func ChannelID(v int) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldChannelID, v))
+}
+
 // PublishedAt applies equality check predicate on the "published_at" field. It's identical to PublishedAtEQ.
 func PublishedAt(v time.Time) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldPublishedAt, v))
@@ -1890,6 +1900,66 @@ func UserIDNotIn(vs ...int) predicate.Media {
 	return predicate.Media(sql.FieldNotIn(FieldUserID, vs...))
 }
 
+// CategoryIDEQ applies the EQ predicate on the "category_id" field.
+func CategoryIDEQ(v int) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldCategoryID, v))
+}
+
+// CategoryIDNEQ applies the NEQ predicate on the "category_id" field.
+func CategoryIDNEQ(v int) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldCategoryID, v))
+}
+
+// CategoryIDIn applies the In predicate on the "category_id" field.
+func CategoryIDIn(vs ...int) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldCategoryID, vs...))
+}
+
+// CategoryIDNotIn applies the NotIn predicate on the "category_id" field.
+func CategoryIDNotIn(vs ...int) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldCategoryID, vs...))
+}
+
+// CategoryIDIsNil applies the IsNil predicate on the "category_id" field.
+func CategoryIDIsNil() predicate.Media {
+	return predicate.Media(sql.FieldIsNull(FieldCategoryID))
+}
+
+// CategoryIDNotNil applies the NotNil predicate on the "category_id" field.
+func CategoryIDNotNil() predicate.Media {
+	return predicate.Media(sql.FieldNotNull(FieldCategoryID))
+}
+
+// ChannelIDEQ applies the EQ predicate on the "channel_id" field.
+func ChannelIDEQ(v int) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldChannelID, v))
+}
+
+// ChannelIDNEQ applies the NEQ predicate on the "channel_id" field.
+func ChannelIDNEQ(v int) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldChannelID, v))
+}
+
+// ChannelIDIn applies the In predicate on the "channel_id" field.
+func ChannelIDIn(vs ...int) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldChannelID, vs...))
+}
+
+// ChannelIDNotIn applies the NotIn predicate on the "channel_id" field.
+func ChannelIDNotIn(vs ...int) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldChannelID, vs...))
+}
+
+// ChannelIDIsNil applies the IsNil predicate on the "channel_id" field.
+func ChannelIDIsNil() predicate.Media {
+	return predicate.Media(sql.FieldIsNull(FieldChannelID))
+}
+
+// ChannelIDNotNil applies the NotNil predicate on the "channel_id" field.
+func ChannelIDNotNil() predicate.Media {
+	return predicate.Media(sql.FieldNotNull(FieldChannelID))
+}
+
 // PublishedAtEQ applies the EQ predicate on the "published_at" field.
 func PublishedAtEQ(v time.Time) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldPublishedAt, v))
@@ -2071,7 +2141,7 @@ func HasComments() predicate.Media {
 	return predicate.Media(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, CommentsTable, CommentsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, CommentsTable, CommentsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -2089,21 +2159,21 @@ func HasCommentsWith(preds ...predicate.Comment) predicate.Media {
 	})
 }
 
-// HasChannels applies the HasEdge predicate on the "channels" edge.
-func HasChannels() predicate.Media {
+// HasChannel applies the HasEdge predicate on the "channel" edge.
+func HasChannel() predicate.Media {
 	return predicate.Media(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, ChannelsTable, ChannelsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, ChannelTable, ChannelColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasChannelsWith applies the HasEdge predicate on the "channels" edge with a given conditions (other predicates).
-func HasChannelsWith(preds ...predicate.Channel) predicate.Media {
+// HasChannelWith applies the HasEdge predicate on the "channel" edge with a given conditions (other predicates).
+func HasChannelWith(preds ...predicate.Channel) predicate.Media {
 	return predicate.Media(func(s *sql.Selector) {
-		step := newChannelsStep()
+		step := newChannelStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

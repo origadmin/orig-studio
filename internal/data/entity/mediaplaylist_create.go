@@ -22,6 +22,18 @@ type MediaPlaylistCreate struct {
 	hooks    []Hook
 }
 
+// SetPlaylistID sets the "playlist_id" field.
+func (_c *MediaPlaylistCreate) SetPlaylistID(v int) *MediaPlaylistCreate {
+	_c.mutation.SetPlaylistID(v)
+	return _c
+}
+
+// SetMediaID sets the "media_id" field.
+func (_c *MediaPlaylistCreate) SetMediaID(v int) *MediaPlaylistCreate {
+	_c.mutation.SetMediaID(v)
+	return _c
+}
+
 // SetOrdering sets the "ordering" field.
 func (_c *MediaPlaylistCreate) SetOrdering(v int) *MediaPlaylistCreate {
 	_c.mutation.SetOrdering(v)
@@ -50,34 +62,14 @@ func (_c *MediaPlaylistCreate) SetNillableActionDate(v *time.Time) *MediaPlaylis
 	return _c
 }
 
-// AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_c *MediaPlaylistCreate) AddMediumIDs(ids ...int) *MediaPlaylistCreate {
-	_c.mutation.AddMediumIDs(ids...)
-	return _c
+// SetMedia sets the "media" edge to the Media entity.
+func (_c *MediaPlaylistCreate) SetMedia(v *Media) *MediaPlaylistCreate {
+	return _c.SetMediaID(v.ID)
 }
 
-// AddMedia adds the "media" edges to the Media entity.
-func (_c *MediaPlaylistCreate) AddMedia(v ...*Media) *MediaPlaylistCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddMediumIDs(ids...)
-}
-
-// AddPlaylistIDs adds the "playlist" edge to the Playlist entity by IDs.
-func (_c *MediaPlaylistCreate) AddPlaylistIDs(ids ...int) *MediaPlaylistCreate {
-	_c.mutation.AddPlaylistIDs(ids...)
-	return _c
-}
-
-// AddPlaylist adds the "playlist" edges to the Playlist entity.
-func (_c *MediaPlaylistCreate) AddPlaylist(v ...*Playlist) *MediaPlaylistCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddPlaylistIDs(ids...)
+// SetPlaylist sets the "playlist" edge to the Playlist entity.
+func (_c *MediaPlaylistCreate) SetPlaylist(v *Playlist) *MediaPlaylistCreate {
+	return _c.SetPlaylistID(v.ID)
 }
 
 // Mutation returns the MediaPlaylistMutation object of the builder.
@@ -127,11 +119,23 @@ func (_c *MediaPlaylistCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *MediaPlaylistCreate) check() error {
+	if _, ok := _c.mutation.PlaylistID(); !ok {
+		return &ValidationError{Name: "playlist_id", err: errors.New(`entity: missing required field "MediaPlaylist.playlist_id"`)}
+	}
+	if _, ok := _c.mutation.MediaID(); !ok {
+		return &ValidationError{Name: "media_id", err: errors.New(`entity: missing required field "MediaPlaylist.media_id"`)}
+	}
 	if _, ok := _c.mutation.Ordering(); !ok {
 		return &ValidationError{Name: "ordering", err: errors.New(`entity: missing required field "MediaPlaylist.ordering"`)}
 	}
 	if _, ok := _c.mutation.ActionDate(); !ok {
 		return &ValidationError{Name: "action_date", err: errors.New(`entity: missing required field "MediaPlaylist.action_date"`)}
+	}
+	if len(_c.mutation.MediaIDs()) == 0 {
+		return &ValidationError{Name: "media", err: errors.New(`entity: missing required edge "MediaPlaylist.media"`)}
+	}
+	if len(_c.mutation.PlaylistIDs()) == 0 {
+		return &ValidationError{Name: "playlist", err: errors.New(`entity: missing required edge "MediaPlaylist.playlist"`)}
 	}
 	return nil
 }
@@ -169,7 +173,7 @@ func (_c *MediaPlaylistCreate) createSpec() (*MediaPlaylist, *sqlgraph.CreateSpe
 	}
 	if nodes := _c.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   mediaplaylist.MediaTable,
 			Columns: []string{mediaplaylist.MediaColumn},
@@ -181,11 +185,12 @@ func (_c *MediaPlaylistCreate) createSpec() (*MediaPlaylist, *sqlgraph.CreateSpe
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.MediaID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.PlaylistIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   mediaplaylist.PlaylistTable,
 			Columns: []string{mediaplaylist.PlaylistColumn},
@@ -197,6 +202,7 @@ func (_c *MediaPlaylistCreate) createSpec() (*MediaPlaylist, *sqlgraph.CreateSpe
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.PlaylistID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -55,9 +55,59 @@ func IDLTE(id int) predicate.Favorite {
 	return predicate.Favorite(sql.FieldLTE(FieldID, id))
 }
 
+// MediaID applies equality check predicate on the "media_id" field. It's identical to MediaIDEQ.
+func MediaID(v int) predicate.Favorite {
+	return predicate.Favorite(sql.FieldEQ(FieldMediaID, v))
+}
+
+// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
+func UserID(v int) predicate.Favorite {
+	return predicate.Favorite(sql.FieldEQ(FieldUserID, v))
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Favorite {
 	return predicate.Favorite(sql.FieldEQ(FieldCreatedAt, v))
+}
+
+// MediaIDEQ applies the EQ predicate on the "media_id" field.
+func MediaIDEQ(v int) predicate.Favorite {
+	return predicate.Favorite(sql.FieldEQ(FieldMediaID, v))
+}
+
+// MediaIDNEQ applies the NEQ predicate on the "media_id" field.
+func MediaIDNEQ(v int) predicate.Favorite {
+	return predicate.Favorite(sql.FieldNEQ(FieldMediaID, v))
+}
+
+// MediaIDIn applies the In predicate on the "media_id" field.
+func MediaIDIn(vs ...int) predicate.Favorite {
+	return predicate.Favorite(sql.FieldIn(FieldMediaID, vs...))
+}
+
+// MediaIDNotIn applies the NotIn predicate on the "media_id" field.
+func MediaIDNotIn(vs ...int) predicate.Favorite {
+	return predicate.Favorite(sql.FieldNotIn(FieldMediaID, vs...))
+}
+
+// UserIDEQ applies the EQ predicate on the "user_id" field.
+func UserIDEQ(v int) predicate.Favorite {
+	return predicate.Favorite(sql.FieldEQ(FieldUserID, v))
+}
+
+// UserIDNEQ applies the NEQ predicate on the "user_id" field.
+func UserIDNEQ(v int) predicate.Favorite {
+	return predicate.Favorite(sql.FieldNEQ(FieldUserID, v))
+}
+
+// UserIDIn applies the In predicate on the "user_id" field.
+func UserIDIn(vs ...int) predicate.Favorite {
+	return predicate.Favorite(sql.FieldIn(FieldUserID, vs...))
+}
+
+// UserIDNotIn applies the NotIn predicate on the "user_id" field.
+func UserIDNotIn(vs ...int) predicate.Favorite {
+	return predicate.Favorite(sql.FieldNotIn(FieldUserID, vs...))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -128,7 +178,7 @@ func HasUser() predicate.Favorite {
 	return predicate.Favorite(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, UserTable, UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

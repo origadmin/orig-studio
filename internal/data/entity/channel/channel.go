@@ -14,8 +14,12 @@ const (
 	Label = "channel"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldUserID holds the string denoting the user_id field in the database.
+	FieldUserID = "user_id"
 	// FieldTitle holds the string denoting the title field in the database.
 	FieldTitle = "title"
+	// FieldSlug holds the string denoting the slug field in the database.
+	FieldSlug = "slug"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 	// FieldFriendlyToken holds the string denoting the friendly_token field in the database.
@@ -36,45 +40,32 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users_user"
 	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "user_channels"
-	// MediaTable is the table that holds the media relation/edge. The primary key declared below.
-	MediaTable = "channel_media"
+	UserColumn = "user_id"
+	// MediaTable is the table that holds the media relation/edge.
+	MediaTable = "media"
 	// MediaInverseTable is the table name for the Media entity.
 	// It exists in this package in order to avoid circular dependency with the "media" package.
 	MediaInverseTable = "media"
+	// MediaColumn is the table column denoting the media relation/edge.
+	MediaColumn = "channel_id"
 )
 
 // Columns holds all SQL columns for channel fields.
 var Columns = []string{
 	FieldID,
+	FieldUserID,
 	FieldTitle,
+	FieldSlug,
 	FieldDescription,
 	FieldFriendlyToken,
 	FieldBannerLogo,
 	FieldAddDate,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "users_channel"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"user_channels",
-}
-
-var (
-	// MediaPrimaryKey and MediaColumn2 are the table columns denoting the
-	// primary key for the media relation (M2M).
-	MediaPrimaryKey = []string{"channel_id", "media_id"}
-)
-
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -84,6 +75,8 @@ func ValidColumn(column string) bool {
 var (
 	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	TitleValidator func(string) error
+	// SlugValidator is a validator for the "slug" field. It is called by the builders before save.
+	SlugValidator func(string) error
 	// FriendlyTokenValidator is a validator for the "friendly_token" field. It is called by the builders before save.
 	FriendlyTokenValidator func(string) error
 	// BannerLogoValidator is a validator for the "banner_logo" field. It is called by the builders before save.
@@ -100,9 +93,19 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByUserID orders the results by the user_id field.
+func ByUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
 // ByTitle orders the results by the title field.
 func ByTitle(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTitle, opts...).ToFunc()
+}
+
+// BySlug orders the results by the slug field.
+func BySlug(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSlug, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.
@@ -156,6 +159,6 @@ func newMediaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MediaInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, MediaTable, MediaPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, false, MediaTable, MediaColumn),
 	)
 }

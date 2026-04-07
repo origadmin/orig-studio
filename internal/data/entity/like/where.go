@@ -55,9 +55,129 @@ func IDLTE(id int) predicate.Like {
 	return predicate.Like(sql.FieldLTE(FieldID, id))
 }
 
+// MediaID applies equality check predicate on the "media_id" field. It's identical to MediaIDEQ.
+func MediaID(v int) predicate.Like {
+	return predicate.Like(sql.FieldEQ(FieldMediaID, v))
+}
+
+// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
+func UserID(v int) predicate.Like {
+	return predicate.Like(sql.FieldEQ(FieldUserID, v))
+}
+
+// LikeType applies equality check predicate on the "like_type" field. It's identical to LikeTypeEQ.
+func LikeType(v string) predicate.Like {
+	return predicate.Like(sql.FieldEQ(FieldLikeType, v))
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Like {
 	return predicate.Like(sql.FieldEQ(FieldCreatedAt, v))
+}
+
+// MediaIDEQ applies the EQ predicate on the "media_id" field.
+func MediaIDEQ(v int) predicate.Like {
+	return predicate.Like(sql.FieldEQ(FieldMediaID, v))
+}
+
+// MediaIDNEQ applies the NEQ predicate on the "media_id" field.
+func MediaIDNEQ(v int) predicate.Like {
+	return predicate.Like(sql.FieldNEQ(FieldMediaID, v))
+}
+
+// MediaIDIn applies the In predicate on the "media_id" field.
+func MediaIDIn(vs ...int) predicate.Like {
+	return predicate.Like(sql.FieldIn(FieldMediaID, vs...))
+}
+
+// MediaIDNotIn applies the NotIn predicate on the "media_id" field.
+func MediaIDNotIn(vs ...int) predicate.Like {
+	return predicate.Like(sql.FieldNotIn(FieldMediaID, vs...))
+}
+
+// UserIDEQ applies the EQ predicate on the "user_id" field.
+func UserIDEQ(v int) predicate.Like {
+	return predicate.Like(sql.FieldEQ(FieldUserID, v))
+}
+
+// UserIDNEQ applies the NEQ predicate on the "user_id" field.
+func UserIDNEQ(v int) predicate.Like {
+	return predicate.Like(sql.FieldNEQ(FieldUserID, v))
+}
+
+// UserIDIn applies the In predicate on the "user_id" field.
+func UserIDIn(vs ...int) predicate.Like {
+	return predicate.Like(sql.FieldIn(FieldUserID, vs...))
+}
+
+// UserIDNotIn applies the NotIn predicate on the "user_id" field.
+func UserIDNotIn(vs ...int) predicate.Like {
+	return predicate.Like(sql.FieldNotIn(FieldUserID, vs...))
+}
+
+// LikeTypeEQ applies the EQ predicate on the "like_type" field.
+func LikeTypeEQ(v string) predicate.Like {
+	return predicate.Like(sql.FieldEQ(FieldLikeType, v))
+}
+
+// LikeTypeNEQ applies the NEQ predicate on the "like_type" field.
+func LikeTypeNEQ(v string) predicate.Like {
+	return predicate.Like(sql.FieldNEQ(FieldLikeType, v))
+}
+
+// LikeTypeIn applies the In predicate on the "like_type" field.
+func LikeTypeIn(vs ...string) predicate.Like {
+	return predicate.Like(sql.FieldIn(FieldLikeType, vs...))
+}
+
+// LikeTypeNotIn applies the NotIn predicate on the "like_type" field.
+func LikeTypeNotIn(vs ...string) predicate.Like {
+	return predicate.Like(sql.FieldNotIn(FieldLikeType, vs...))
+}
+
+// LikeTypeGT applies the GT predicate on the "like_type" field.
+func LikeTypeGT(v string) predicate.Like {
+	return predicate.Like(sql.FieldGT(FieldLikeType, v))
+}
+
+// LikeTypeGTE applies the GTE predicate on the "like_type" field.
+func LikeTypeGTE(v string) predicate.Like {
+	return predicate.Like(sql.FieldGTE(FieldLikeType, v))
+}
+
+// LikeTypeLT applies the LT predicate on the "like_type" field.
+func LikeTypeLT(v string) predicate.Like {
+	return predicate.Like(sql.FieldLT(FieldLikeType, v))
+}
+
+// LikeTypeLTE applies the LTE predicate on the "like_type" field.
+func LikeTypeLTE(v string) predicate.Like {
+	return predicate.Like(sql.FieldLTE(FieldLikeType, v))
+}
+
+// LikeTypeContains applies the Contains predicate on the "like_type" field.
+func LikeTypeContains(v string) predicate.Like {
+	return predicate.Like(sql.FieldContains(FieldLikeType, v))
+}
+
+// LikeTypeHasPrefix applies the HasPrefix predicate on the "like_type" field.
+func LikeTypeHasPrefix(v string) predicate.Like {
+	return predicate.Like(sql.FieldHasPrefix(FieldLikeType, v))
+}
+
+// LikeTypeHasSuffix applies the HasSuffix predicate on the "like_type" field.
+func LikeTypeHasSuffix(v string) predicate.Like {
+	return predicate.Like(sql.FieldHasSuffix(FieldLikeType, v))
+}
+
+// LikeTypeEqualFold applies the EqualFold predicate on the "like_type" field.
+func LikeTypeEqualFold(v string) predicate.Like {
+	return predicate.Like(sql.FieldEqualFold(FieldLikeType, v))
+}
+
+// LikeTypeContainsFold applies the ContainsFold predicate on the "like_type" field.
+func LikeTypeContainsFold(v string) predicate.Like {
+	return predicate.Like(sql.FieldContainsFold(FieldLikeType, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -128,7 +248,7 @@ func HasUser() predicate.Like {
 	return predicate.Like(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, UserTable, UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

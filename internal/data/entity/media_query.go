@@ -36,7 +36,7 @@ type MediaQuery struct {
 	withUser      *UserQuery
 	withCategory  *CategoryQuery
 	withComments  *CommentQuery
-	withChannels  *ChannelQuery
+	withChannel   *ChannelQuery
 	withPlaylists *MediaPlaylistQuery
 	withTagsRel   *MediaTagQuery
 	withFavorites *FavoriteQuery
@@ -138,7 +138,7 @@ func (_q *MediaQuery) QueryComments() *CommentQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(media.Table, media.FieldID, selector),
 			sqlgraph.To(comment.Table, comment.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, media.CommentsTable, media.CommentsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, media.CommentsTable, media.CommentsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -146,8 +146,8 @@ func (_q *MediaQuery) QueryComments() *CommentQuery {
 	return query
 }
 
-// QueryChannels chains the current query on the "channels" edge.
-func (_q *MediaQuery) QueryChannels() *ChannelQuery {
+// QueryChannel chains the current query on the "channel" edge.
+func (_q *MediaQuery) QueryChannel() *ChannelQuery {
 	query := (&ChannelClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -160,7 +160,7 @@ func (_q *MediaQuery) QueryChannels() *ChannelQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(media.Table, media.FieldID, selector),
 			sqlgraph.To(channel.Table, channel.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, media.ChannelsTable, media.ChannelsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, media.ChannelTable, media.ChannelColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -473,7 +473,7 @@ func (_q *MediaQuery) Clone() *MediaQuery {
 		withUser:      _q.withUser.Clone(),
 		withCategory:  _q.withCategory.Clone(),
 		withComments:  _q.withComments.Clone(),
-		withChannels:  _q.withChannels.Clone(),
+		withChannel:   _q.withChannel.Clone(),
 		withPlaylists: _q.withPlaylists.Clone(),
 		withTagsRel:   _q.withTagsRel.Clone(),
 		withFavorites: _q.withFavorites.Clone(),
@@ -519,14 +519,14 @@ func (_q *MediaQuery) WithComments(opts ...func(*CommentQuery)) *MediaQuery {
 	return _q
 }
 
-// WithChannels tells the query-builder to eager-load the nodes that are connected to
-// the "channels" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *MediaQuery) WithChannels(opts ...func(*ChannelQuery)) *MediaQuery {
+// WithChannel tells the query-builder to eager-load the nodes that are connected to
+// the "channel" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *MediaQuery) WithChannel(opts ...func(*ChannelQuery)) *MediaQuery {
 	query := (&ChannelClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withChannels = query
+	_q.withChannel = query
 	return _q
 }
 
@@ -668,7 +668,7 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 			_q.withUser != nil,
 			_q.withCategory != nil,
 			_q.withComments != nil,
-			_q.withChannels != nil,
+			_q.withChannel != nil,
 			_q.withPlaylists != nil,
 			_q.withTagsRel != nil,
 			_q.withFavorites != nil,
@@ -676,9 +676,6 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 			_q.withTasks != nil,
 		}
 	)
-	if _q.withCategory != nil {
-		withFKs = true
-	}
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, media.ForeignKeys...)
 	}
@@ -722,10 +719,9 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 			return nil, err
 		}
 	}
-	if query := _q.withChannels; query != nil {
-		if err := _q.loadChannels(ctx, query, nodes,
-			func(n *Media) { n.Edges.Channels = []*Channel{} },
-			func(n *Media, e *Channel) { n.Edges.Channels = append(n.Edges.Channels, e) }); err != nil {
+	if query := _q.withChannel; query != nil {
+		if err := _q.loadChannel(ctx, query, nodes, nil,
+			func(n *Media, e *Channel) { n.Edges.Channel = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -800,10 +796,7 @@ func (_q *MediaQuery) loadCategory(ctx context.Context, query *CategoryQuery, no
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Media)
 	for i := range nodes {
-		if nodes[i].category_media == nil {
-			continue
-		}
-		fk := *nodes[i].category_media
+		fk := nodes[i].CategoryID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -820,7 +813,7 @@ func (_q *MediaQuery) loadCategory(ctx context.Context, query *CategoryQuery, no
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "category_media" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "category_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -829,123 +822,61 @@ func (_q *MediaQuery) loadCategory(ctx context.Context, query *CategoryQuery, no
 	return nil
 }
 func (_q *MediaQuery) loadComments(ctx context.Context, query *CommentQuery, nodes []*Media, init func(*Media), assign func(*Media, *Comment)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Media)
-	nids := make(map[int]map[*Media]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Media)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
 		if init != nil {
-			init(node)
+			init(nodes[i])
 		}
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(media.CommentsTable)
-		s.Join(joinT).On(s.C(comment.FieldID), joinT.C(media.CommentsPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(media.CommentsPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(media.CommentsPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Media]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Comment](ctx, query, qr, query.inters)
+	query.withFKs = true
+	query.Where(predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(media.CommentsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		fk := n.media_comments
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "media_comments" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected "comments" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "media_comments" returned %v for node %v`, *fk, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
-		}
+		assign(node, n)
 	}
 	return nil
 }
-func (_q *MediaQuery) loadChannels(ctx context.Context, query *ChannelQuery, nodes []*Media, init func(*Media), assign func(*Media, *Channel)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Media)
-	nids := make(map[int]map[*Media]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
+func (_q *MediaQuery) loadChannel(ctx context.Context, query *ChannelQuery, nodes []*Media, init func(*Media), assign func(*Media, *Channel)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Media)
+	for i := range nodes {
+		fk := nodes[i].ChannelID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
 		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(media.ChannelsTable)
-		s.Join(joinT).On(s.C(channel.FieldID), joinT.C(media.ChannelsPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(media.ChannelsPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(media.ChannelsPrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
+	if len(ids) == 0 {
+		return nil
 	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Media]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Channel](ctx, query, qr, query.inters)
+	query.Where(channel.IDIn(ids...))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected "channels" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "channel_id" returned %v`, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
 	return nil
@@ -1022,7 +953,9 @@ func (_q *MediaQuery) loadFavorites(ctx context.Context, query *FavoriteQuery, n
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(favorite.FieldMediaID)
+	}
 	query.Where(predicate.Favorite(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(media.FavoritesColumn), fks...))
 	}))
@@ -1031,13 +964,10 @@ func (_q *MediaQuery) loadFavorites(ctx context.Context, query *FavoriteQuery, n
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.media_favorites
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "media_favorites" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.MediaID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "media_favorites" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "media_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -1053,7 +983,9 @@ func (_q *MediaQuery) loadLikes(ctx context.Context, query *LikeQuery, nodes []*
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(like.FieldMediaID)
+	}
 	query.Where(predicate.Like(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(media.LikesColumn), fks...))
 	}))
@@ -1062,13 +994,10 @@ func (_q *MediaQuery) loadLikes(ctx context.Context, query *LikeQuery, nodes []*
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.media_likes
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "media_likes" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.MediaID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "media_likes" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "media_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -1135,6 +1064,12 @@ func (_q *MediaQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if _q.withUser != nil {
 			_spec.Node.AddColumnOnce(media.FieldUserID)
+		}
+		if _q.withCategory != nil {
+			_spec.Node.AddColumnOnce(media.FieldCategoryID)
+		}
+		if _q.withChannel != nil {
+			_spec.Node.AddColumnOnce(media.FieldChannelID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

@@ -22,10 +22,8 @@ import (
 	"github.com/google/uuid"
 
 	"origadmin/application/origcms/internal/auth"
-	"origadmin/application/origcms/internal/data/entity"
-	entitycategory "origadmin/application/origcms/internal/data/entity/category"
-	entitymedia "origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/svc-media/biz"
+	"origadmin/application/origcms/internal/svc-media/dto"
 )
 
 // UploadDir is the directory where uploaded media files are stored.
@@ -108,19 +106,17 @@ func computeFileMD5(r io.Reader) (string, error) {
 
 // MediaHandler handles media requests.
 type MediaHandler struct {
-	client   *entity.Client
 	jwtMgr   *auth.Manager
 	uc       *biz.MediaUseCase
 	uploadUC *biz.UploadUseCase
 }
 
 func NewMediaHandler(
-	client *entity.Client,
 	jwtMgr *auth.Manager,
 	uc *biz.MediaUseCase,
 	uploadUC *biz.UploadUseCase,
 ) *MediaHandler {
-	return &MediaHandler{client: client, jwtMgr: jwtMgr, uc: uc, uploadUC: uploadUC}
+	return &MediaHandler{jwtMgr: jwtMgr, uc: uc, uploadUC: uploadUC}
 }
 
 func (h *MediaHandler) Register(group *gin.RouterGroup) {
@@ -184,84 +180,37 @@ func (h *MediaHandler) listMedia() gin.HandlerFunc {
 
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
-		if page < 1 {
-			page = 1
-		}
-		if pageSize < 1 || pageSize > 100 {
-			pageSize = 20
-		}
 
-		query := h.client.Media.Query()
-
-		if state := c.Query("state"); state != "" {
-			query = query.Where(entitymedia.StateEQ(state))
-		} else {
-			query = query.Where(entitymedia.StateEQ("active"))
+		opt := &dto.MediaQueryOption{
+			State:      c.Query("state"),
+			MediaType:  c.Query("type"),
+			OrderBy:    c.DefaultQuery("order_by", "created_at"),
+			Descending: c.DefaultQuery("descending", "true") == "true",
 		}
-
-		if mediaType := c.Query("type"); mediaType != "" {
-			query = query.Where(entitymedia.TypeEQ(mediaType))
-		}
+		opt.Page = int32(page)
+		opt.PageSize = int32(pageSize)
+		opt.Keyword = c.Query("keyword")
 
 		if userIDStr := c.Query("user_id"); userIDStr != "" {
 			if userID, err := strconv.Atoi(userIDStr); err == nil {
-				query = query.Where(entitymedia.UserIDEQ(userID))
+				v := int64(userID)
+				opt.UserID = &v
 			}
 		}
 
 		if catIDStr := c.Query("category_id"); catIDStr != "" {
 			if catID, err := strconv.Atoi(catIDStr); err == nil {
-				query = query.Where(entitymedia.HasCategoryWith(entitycategory.IDEQ(catID)))
+				v := int64(catID)
+				opt.CategoryID = &v
 			}
-		}
-
-		if keyword := c.Query("keyword"); keyword != "" {
-			query = query.Where(entitymedia.TitleContains(keyword))
 		}
 
 		if c.Query("featured") == "true" {
-			query = query.Where(entitymedia.FeaturedEQ(true))
+			v := true
+			opt.Featured = &v
 		}
 
-		total, err := query.Count(ctx)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		orderBy := c.DefaultQuery("order_by", "created_at")
-		desc := c.DefaultQuery("descending", "true") == "true"
-
-		switch orderBy {
-		case "title":
-			if desc {
-				query = query.Order(entity.Desc("title"))
-			} else {
-				query = query.Order(entity.Asc("title"))
-			}
-		case "view_count":
-			if desc {
-				query = query.Order(entity.Desc("view_count"))
-			} else {
-				query = query.Order(entity.Asc("view_count"))
-			}
-		case "created_at":
-			fallthrough
-		default:
-			if desc {
-				query = query.Order(entity.Desc("created_at"))
-			} else {
-				query = query.Order(entity.Asc("created_at"))
-			}
-		}
-
-		offset := (page - 1) * pageSize
-		items, err := query.
-			Limit(pageSize).
-			Offset(offset).
-			WithUser().
-			WithCategory().
-			All(ctx)
+		items, total, err := h.uc.ListMedias(ctx, opt)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -286,11 +235,7 @@ func (h *MediaHandler) getMedia() gin.HandlerFunc {
 			return
 		}
 
-		m, err := h.client.Media.Query().
-			Where(entitymedia.ID(id)).
-			WithUser().
-			WithCategory().
-			Only(ctx)
+		m, err := h.uc.GetMedia(ctx, int64(id))
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Media not found"})
 			return
@@ -298,7 +243,7 @@ func (h *MediaHandler) getMedia() gin.HandlerFunc {
 
 		go func() {
 			bgCtx := context.Background()
-			h.client.Media.UpdateOneID(id).AddViewCount(1).Exec(bgCtx)
+			h.uc.IncrementViewCount(bgCtx, int64(id))
 		}()
 
 		c.JSON(http.StatusOK, m)
@@ -308,8 +253,6 @@ func (h *MediaHandler) getMedia() gin.HandlerFunc {
 func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		client := h.client
-
 		claims, ok := c.MustGet("claims").(*auth.Claims)
 		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
@@ -423,26 +366,24 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 
 		privacy, _ := strconv.Atoi(privacyStr)
 
-		create := client.Media.Create().
-			SetTitle(title).
-			SetDescription(description).
-			SetType(mediaType).
-			SetURL(fileURL).
-			SetUserID(int(claims.UserID)).
-			SetState("active").
-			SetEncodingStatus("pending").
-			SetMimeType(mimeType).
-			SetMd5sum(fileMD5).
-			SetSize(strconv.FormatInt(written, 10)).
-			SetExtension(strings.TrimPrefix(ext, ".")).
-			SetPrivacy(privacy).
-			SetTags(tags)
-
-		if categoryID > 0 {
-			create.SetCategoryID(categoryID)
+		m := &biz.Media{
+			Title:          title,
+			Description:    description,
+			Type:           mediaType,
+			Url:            fileURL,
+			UserId:         int64(claims.UserID),
+			State:          "active",
+			EncodingStatus: "pending",
+			MimeType:       mimeType,
+			Md5Sum:         fileMD5,
+			Size:           written,
+			Extension:      strings.TrimPrefix(ext, "."),
+			Privacy:        int32(privacy),
+			Tags:           tags,
+			CategoryId:     int64(categoryID),
 		}
 
-		m, err := create.Save(ctx)
+		created, err := h.uc.CreateMedia(ctx, m)
 		if err != nil {
 			os.Remove(filePath)
 			c.JSON(
@@ -452,16 +393,10 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 			return
 		}
 
-		// Note: Media processing is triggered via Watermill message in
-		// UploadUseCase.CompleteMultipartUpload, NOT here.
+		// Re-fetch to get user and category details
+		created, _ = h.uc.GetMedia(ctx, created.Id)
 
-		m, _ = client.Media.Query().
-			Where(entitymedia.ID(m.ID)).
-			WithUser().
-			WithCategory().
-			Only(ctx)
-
-		c.JSON(http.StatusCreated, m)
+		c.JSON(http.StatusCreated, created)
 	}
 }
 
@@ -479,7 +414,6 @@ type updateMediaRequest struct {
 func (h *MediaHandler) updateMedia() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		client := h.client
 
 		claims, ok := c.MustGet("claims").(*auth.Claims)
 		if !ok {
@@ -493,13 +427,13 @@ func (h *MediaHandler) updateMedia() gin.HandlerFunc {
 			return
 		}
 
-		m, err := client.Media.Get(ctx, id)
+		m, err := h.uc.GetMedia(ctx, int64(id))
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Media not found"})
 			return
 		}
 
-		if m.UserID != int(claims.UserID) && !claims.IsStaff {
+		if m.UserId != int64(claims.UserID) && !claims.IsStaff {
 			c.JSON(http.StatusForbidden, gin.H{"error": "you can only edit your own media"})
 			return
 		}
@@ -510,45 +444,36 @@ func (h *MediaHandler) updateMedia() gin.HandlerFunc {
 			return
 		}
 
-		update := client.Media.UpdateOneID(id)
-
 		if req.Title != "" {
-			update.SetTitle(req.Title)
+			m.Title = req.Title
 		}
 		if req.Description != "" {
-			update.SetDescription(req.Description)
+			m.Description = req.Description
 		}
 		if req.CategoryID != nil {
-			if *req.CategoryID > 0 {
-				update.SetCategoryID(*req.CategoryID)
-			} else {
-				update.ClearCategory()
-			}
+			m.CategoryId = int64(*req.CategoryID)
 		}
 		if req.Tags != nil {
-			update.SetTags(req.Tags)
+			m.Tags = req.Tags
 		}
 		if req.Privacy != nil {
-			update.SetPrivacy(*req.Privacy)
+			m.Privacy = int32(*req.Privacy)
 		}
 		if req.State != nil {
-			update.SetState(*req.State)
+			m.State = *req.State
 		}
 		if req.Featured != nil {
-			update.SetFeatured(*req.Featured)
+			m.Featured = *req.Featured
 		}
 
-		updated, err := update.Save(ctx)
+		updated, err := h.uc.UpdateMedia(ctx, m)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		updated, _ = client.Media.Query().
-			Where(entitymedia.ID(id)).
-			WithUser().
-			WithCategory().
-			Only(ctx)
+		// Re-fetch to get full details
+		updated, _ = h.uc.GetMedia(ctx, int64(id))
 
 		c.JSON(http.StatusOK, updated)
 	}
@@ -557,7 +482,6 @@ func (h *MediaHandler) updateMedia() gin.HandlerFunc {
 func (h *MediaHandler) deleteMedia() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		client := h.client
 
 		claims, ok := c.MustGet("claims").(*auth.Claims)
 		if !ok {
@@ -571,23 +495,23 @@ func (h *MediaHandler) deleteMedia() gin.HandlerFunc {
 			return
 		}
 
-		m, err := client.Media.Get(ctx, id)
+		m, err := h.uc.GetMedia(ctx, int64(id))
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Media not found"})
 			return
 		}
 
-		if m.UserID != int(claims.UserID) && !claims.IsStaff {
+		if m.UserId != int64(claims.UserID) && !claims.IsStaff {
 			c.JSON(http.StatusForbidden, gin.H{"error": "you can only delete your own media"})
 			return
 		}
 
-		if m.URL != "" {
-			filename := filepath.Base(m.URL)
+		if m.Url != "" {
+			filename := filepath.Base(m.Url)
 			_ = os.Remove(filepath.Join(UploadDir, "uploads", filename))
 		}
 
-		if err := client.Media.DeleteOneID(id).Exec(ctx); err != nil {
+		if err := h.uc.DeleteMedia(ctx, int64(id)); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}

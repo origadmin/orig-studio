@@ -31,6 +31,20 @@ func (_u *ChannelUpdate) Where(ps ...predicate.Channel) *ChannelUpdate {
 	return _u
 }
 
+// SetUserID sets the "user_id" field.
+func (_u *ChannelUpdate) SetUserID(v int) *ChannelUpdate {
+	_u.mutation.SetUserID(v)
+	return _u
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableUserID(v *int) *ChannelUpdate {
+	if v != nil {
+		_u.SetUserID(*v)
+	}
+	return _u
+}
+
 // SetTitle sets the "title" field.
 func (_u *ChannelUpdate) SetTitle(v string) *ChannelUpdate {
 	_u.mutation.SetTitle(v)
@@ -41,6 +55,20 @@ func (_u *ChannelUpdate) SetTitle(v string) *ChannelUpdate {
 func (_u *ChannelUpdate) SetNillableTitle(v *string) *ChannelUpdate {
 	if v != nil {
 		_u.SetTitle(*v)
+	}
+	return _u
+}
+
+// SetSlug sets the "slug" field.
+func (_u *ChannelUpdate) SetSlug(v string) *ChannelUpdate {
+	_u.mutation.SetSlug(v)
+	return _u
+}
+
+// SetNillableSlug sets the "slug" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableSlug(v *string) *ChannelUpdate {
+	if v != nil {
+		_u.SetSlug(*v)
 	}
 	return _u
 }
@@ -98,12 +126,6 @@ func (_u *ChannelUpdate) SetNillableAddDate(v *time.Time) *ChannelUpdate {
 	if v != nil {
 		_u.SetAddDate(*v)
 	}
-	return _u
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_u *ChannelUpdate) SetUserID(id int) *ChannelUpdate {
-	_u.mutation.SetUserID(id)
 	return _u
 }
 
@@ -193,6 +215,11 @@ func (_u *ChannelUpdate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Channel.title": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Slug(); ok {
+		if err := channel.SlugValidator(v); err != nil {
+			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "Channel.slug": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.FriendlyToken(); ok {
 		if err := channel.FriendlyTokenValidator(v); err != nil {
 			return &ValidationError{Name: "friendly_token", err: fmt.Errorf(`entity: validator failed for field "Channel.friendly_token": %w`, err)}
@@ -229,6 +256,9 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(channel.FieldTitle, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Slug(); ok {
+		_spec.SetField(channel.FieldSlug, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(channel.FieldDescription, field.TypeString, value)
@@ -273,10 +303,10 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   channel.MediaTable,
-			Columns: channel.MediaPrimaryKey,
+			Columns: []string{channel.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
@@ -286,10 +316,10 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if nodes := _u.mutation.RemovedMediaIDs(); len(nodes) > 0 && !_u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   channel.MediaTable,
-			Columns: channel.MediaPrimaryKey,
+			Columns: []string{channel.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
@@ -302,10 +332,10 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if nodes := _u.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   channel.MediaTable,
-			Columns: channel.MediaPrimaryKey,
+			Columns: []string{channel.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
@@ -338,6 +368,20 @@ type ChannelUpdateOne struct {
 	modifiers []func(*sql.UpdateBuilder)
 }
 
+// SetUserID sets the "user_id" field.
+func (_u *ChannelUpdateOne) SetUserID(v int) *ChannelUpdateOne {
+	_u.mutation.SetUserID(v)
+	return _u
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableUserID(v *int) *ChannelUpdateOne {
+	if v != nil {
+		_u.SetUserID(*v)
+	}
+	return _u
+}
+
 // SetTitle sets the "title" field.
 func (_u *ChannelUpdateOne) SetTitle(v string) *ChannelUpdateOne {
 	_u.mutation.SetTitle(v)
@@ -348,6 +392,20 @@ func (_u *ChannelUpdateOne) SetTitle(v string) *ChannelUpdateOne {
 func (_u *ChannelUpdateOne) SetNillableTitle(v *string) *ChannelUpdateOne {
 	if v != nil {
 		_u.SetTitle(*v)
+	}
+	return _u
+}
+
+// SetSlug sets the "slug" field.
+func (_u *ChannelUpdateOne) SetSlug(v string) *ChannelUpdateOne {
+	_u.mutation.SetSlug(v)
+	return _u
+}
+
+// SetNillableSlug sets the "slug" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableSlug(v *string) *ChannelUpdateOne {
+	if v != nil {
+		_u.SetSlug(*v)
 	}
 	return _u
 }
@@ -405,12 +463,6 @@ func (_u *ChannelUpdateOne) SetNillableAddDate(v *time.Time) *ChannelUpdateOne {
 	if v != nil {
 		_u.SetAddDate(*v)
 	}
-	return _u
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_u *ChannelUpdateOne) SetUserID(id int) *ChannelUpdateOne {
-	_u.mutation.SetUserID(id)
 	return _u
 }
 
@@ -513,6 +565,11 @@ func (_u *ChannelUpdateOne) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Channel.title": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Slug(); ok {
+		if err := channel.SlugValidator(v); err != nil {
+			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "Channel.slug": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.FriendlyToken(); ok {
 		if err := channel.FriendlyTokenValidator(v); err != nil {
 			return &ValidationError{Name: "friendly_token", err: fmt.Errorf(`entity: validator failed for field "Channel.friendly_token": %w`, err)}
@@ -567,6 +624,9 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(channel.FieldTitle, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.Slug(); ok {
+		_spec.SetField(channel.FieldSlug, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(channel.FieldDescription, field.TypeString, value)
 	}
@@ -610,10 +670,10 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   channel.MediaTable,
-			Columns: channel.MediaPrimaryKey,
+			Columns: []string{channel.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
@@ -623,10 +683,10 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 	}
 	if nodes := _u.mutation.RemovedMediaIDs(); len(nodes) > 0 && !_u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   channel.MediaTable,
-			Columns: channel.MediaPrimaryKey,
+			Columns: []string{channel.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
@@ -639,10 +699,10 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 	}
 	if nodes := _u.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   channel.MediaTable,
-			Columns: channel.MediaPrimaryKey,
+			Columns: []string{channel.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
