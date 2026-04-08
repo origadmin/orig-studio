@@ -36,18 +36,37 @@ const VISIBLE_QUICK_LINKS = 4;
 
 interface HeaderProps {
     onToggleSidebar?: () => void;
+    onOpenMobileSidebar?: () => void;
     sidebarCollapsed?: boolean;
 }
 
 /* ── Component ───────────────────────────────────────────────────────────── */
 
-const Header: React.FC<HeaderProps> = ({onToggleSidebar, sidebarCollapsed}) => {
+const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, sidebarCollapsed}) => {
     const {t} = useTranslation();
     const [search, setSearch] = useState('');
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
     const userMenuRef = useRef<HTMLDivElement>(null);
     const moreMenuRef = useRef<HTMLDivElement>(null);
+
+    // 检测移动端
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    // 菜单按钮点击处理
+    const handleMenuClick = () => {
+        if (isMobile && onOpenMobileSidebar) {
+            onOpenMobileSidebar();
+        } else if (onToggleSidebar) {
+            onToggleSidebar();
+        }
+    };
     const navigate = useNavigate();
     const location = useLocation();
     const {isAuthenticated, user, logout, isAdmin} = useAuth();
@@ -100,10 +119,20 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, sidebarCollapsed}) => {
             className="fixed top-0 left-0 right-0 h-14 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 z-50">
             <div className="h-full flex items-center px-4 gap-3">
                 {/* 左侧: 汉堡菜单 + Logo */}
+                {/* 移动端菜单按钮 */}
+                <button
+                    onClick={handleMenuClick}
+                    className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors shrink-0 md:hidden"
+                    title={t('nav.menu')}
+                >
+                    <Menu size={20}/>
+                </button>
+
+                {/* 桌面端Sidebar折叠按钮 */}
                 <button
                     onClick={onToggleSidebar}
-                    className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors shrink-0"
-                    title={sidebarCollapsed ? t('nav.expandMenu') : t('nav.collapseMenu')}
+                    className="hidden md:flex p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors shrink-0"
+                    title={sidebarCollapsed ? t('nav.expand') : t('nav.collapse')}
                 >
                     <Menu size={20}/>
                 </button>

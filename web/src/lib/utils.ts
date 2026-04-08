@@ -6,8 +6,8 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
 }
 
-export const getFullUrl = (path?: string): string => {
-    if (!path) return '';
+export const getFullUrl = (path?: string): string | undefined => {
+    if (!path) return undefined;
     if (path.startsWith('http')) return path;
     const base = config.api.baseUrl.replace(/\/$/, '');
     const sep = path.startsWith('/') ? '' : '/';

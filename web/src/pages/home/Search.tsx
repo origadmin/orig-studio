@@ -68,7 +68,7 @@ const SearchPage = () => {
                           className="flex flex-col md:flex-row gap-8 group p-4 rounded-3xl hover:bg-slate-50 dark:hover:bg-gray-800 transition-all">
                         <div
                             className="relative w-full md:w-80 aspect-video bg-slate-200 rounded-2xl overflow-hidden shrink-0 border border-slate-100 dark:border-gray-700 shadow-lg">
-                            <img src={getFullUrl(item.thumbnail)}
+                            <img src={item.thumbnail ? getFullUrl(item.thumbnail) : undefined}
                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                  alt={item.title}/>
                             <div

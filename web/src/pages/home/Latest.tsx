@@ -112,7 +112,7 @@ const LatestPage = () => {
                         <div
                             className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
                             <div className="relative aspect-video overflow-hidden">
-                                <img src={getFullUrl(media.thumbnail)} alt={media.title}
+                                <img src={media.thumbnail ? getFullUrl(media.thumbnail) : undefined} alt={media.title}
                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                                 <div
                                     className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-1.5 py-0.5 rounded">
@@ -131,7 +131,8 @@ const LatestPage = () => {
                                     {media.title}
                                 </h3>
                                 <div className="flex items-center gap-2 mb-1">
-                                    <img src={getFullUrl(media.edges?.user?.[0]?.avatar)}
+                                    <img
+                                        src={media.edges?.user?.[0]?.avatar ? getFullUrl(media.edges.user[0].avatar) : undefined}
                                          alt={media.edges?.user?.[0]?.username}
                                          className="w-5 h-5 rounded-full object-cover"/>
                                     <span

@@ -21,7 +21,7 @@ import {likeApi} from '@/lib/api/like';
 import {favoriteApi} from '@/lib/api/favorite';
 import {useMediaDetail, useMediaList, useDeleteMedia} from '@/hooks/queries';
 import {useAuth} from '@/hooks/useAuth';
-import {getFullUrl} from '@/lib/utils';
+import {getImageUrl, handleImageError} from '@/lib/imageUtils';
 import ErrorPage from '@/components/common/ErrorPage';
 import SubscribeButton from '@/components/common/SubscribeButton';
 import CommentSection from '@/components/common/CommentSection';
@@ -301,7 +301,7 @@ const WatchPage = () => {
                 {media.preview_file_path && (
                     <div className="mt-4">
                         <VideoPreview
-                            previewFile={getFullUrl(media.preview_file_path)}
+                            previewFile={getImageUrl(media.preview_file_path, 'thumbnail')}
                             duration={media.duration}
                             currentTime={currentTime}
                             width={800}
@@ -322,7 +322,8 @@ const WatchPage = () => {
                             <div className="flex items-center gap-4">
                                 <Link to={`/members?u=${media.user_id}`}>
                                     <Avatar className="h-12 w-12 ring-2 ring-gray-100 dark:ring-gray-800">
-                                        <AvatarImage src={mediaUser?.avatar} loading="lazy"/>
+                                        <AvatarImage src={getImageUrl(mediaUser?.avatar, 'avatar')} loading="lazy"
+                                                     onError={(e) => handleImageError(e, 'avatar')}/>
                                         <AvatarFallback>{mediaUser?.username?.[0] || 'U'}</AvatarFallback>
                                     </Avatar>
                                 </Link>
@@ -407,9 +408,7 @@ const WatchPage = () => {
                     ) : (
                         recommendations.map((item) => {
                             const recUser = item.edges?.user?.[0];
-                            const recThumb = item.thumbnail
-                                ? getFullUrl(item.thumbnail)
-                                : 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=400&h=225';
+                            const recThumb = getImageUrl(item.thumbnail, 'thumbnail');
 
                             return (
                                 <Link
@@ -423,6 +422,7 @@ const WatchPage = () => {
                                             src={recThumb}
                                             alt={item.title}
                                             loading="lazy"
+                                            onError={(e) => handleImageError(e, 'thumbnail')}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                         />
                                         <div

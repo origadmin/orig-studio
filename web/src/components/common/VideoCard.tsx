@@ -7,6 +7,7 @@ import {Link} from '@tanstack/react-router';
 import {Play, Eye, Calendar} from 'lucide-react';
 import {Media} from '../../types';
 import {formatDate} from '@/lib/format';
+import {getImageUrl, handleImageError} from '@/lib/imageUtils';
 
 const VideoCard = ({video}: { video: Media }) => {
     return (
@@ -14,9 +15,10 @@ const VideoCard = ({video}: { video: Media }) => {
             className="group cursor-pointer rounded-[2rem] bg-white border border-gray-100 hover:border-blue-100 transition-all overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 duration-500 ease-out">
             <Link to="/watch" search={{v: String(video.id)}} className="block relative aspect-video overflow-hidden">
                 <img
-                    src={video.thumbnail || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800'}
+                    src={getImageUrl(video.thumbnail, 'thumbnail')}
                     alt={video.title}
                     loading="lazy"
+                    onError={(e) => handleImageError(e, 'thumbnail')}
                     className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700 ease-in-out"
                 />
                 <div
@@ -41,9 +43,10 @@ const VideoCard = ({video}: { video: Media }) => {
                     <div
                         className="w-10 h-10 rounded-2xl bg-blue-50 overflow-hidden ring-2 ring-white shadow-sm shrink-0 border border-blue-100 group-hover:rotate-6 transition-transform">
                         <img
-                            src={video.author_avatar || `https://i.pravatar.cc/100?u=${video.user_id}`}
+                            src={getImageUrl(video.author_avatar, 'avatar')}
                             alt={video.author_name}
                             loading="lazy"
+                            onError={(e) => handleImageError(e, 'avatar')}
                             className="object-cover w-full h-full"
                         />
                     </div>
