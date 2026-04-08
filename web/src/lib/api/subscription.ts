@@ -27,7 +27,7 @@ export const subscriptionApi = {
     subscribe: (userId: string) => api.post<void>(`/users/${userId}/subscribe`),
 
     // 取消订阅
-    unsubscribe: (userId: string) => api.delete<void>(`/users/${userId}/subscribe`),
+    unsubscribe: (userId: string) => api.del<void>(`/users/${userId}/subscribe`),
 
     // 获取订阅列表
     getSubscriptions: (params?: { page?: number; page_size?: number; keyword?: string }) =>

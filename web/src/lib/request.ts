@@ -3,9 +3,14 @@
 
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
-const API_PREFIX = "/api/v1";
-const REQUEST_TIMEOUT = 30000;
+// Use relative path by default, let rsbuild proxy handle the actual URL
+const getApiBaseUrl = (): string => {
+    return '';
+};
+
+export const API_BASE_URL = getApiBaseUrl();
+export const API_PREFIX = "/api/v1";
+export const REQUEST_TIMEOUT = 30000;
 
 interface Token {
     access_token: string;

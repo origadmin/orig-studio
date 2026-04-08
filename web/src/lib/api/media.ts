@@ -1,6 +1,6 @@
 // API 客户端 - 媒体模块
 // 类型定义对齐后端 ent entity JSON 输出
-import {api, getAccessToken} from "../request";
+import {api, getAccessToken, API_BASE_URL} from "../request";
 
 // Media 对齐后端 entity.Media JSON 序列化字段
 export interface Media {
@@ -207,7 +207,7 @@ export const mediaApi = {
         if (metadata.tags?.length) formData.append("tags", metadata.tags.join(","));
         if (metadata.privacy) formData.append("privacy", String(metadata.privacy));
 
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
+        // 使用从request.ts导入的API_BASE_URL
         const token = getAccessToken();
 
         return new Promise<{ data: Media }>((resolve, reject) => {
@@ -242,7 +242,7 @@ export const mediaApi = {
             xhr.addEventListener("error", () => reject(new Error("Network error")));
             xhr.addEventListener("abort", () => reject(new Error("Upload aborted")));
 
-            xhr.open("POST", `${API_BASE_URL}/api/v1/media/upload`);
+            xhr.open("POST", `${API_BASE_URL}/media/upload`);
             if (token) {
                 xhr.setRequestHeader("Authorization", `Bearer ${token}`);
             }
@@ -286,8 +286,7 @@ export const mediaApi = {
 
     // SSE 订阅地址
     getSSEUrl: (mediaId?: number) => {
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
-        return `${API_BASE_URL}/api/v1/media/transcoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
+        return `${API_BASE_URL}/media/transcoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
     },
 
     // Retry transcoding for a failed/stuck media item (legacy — media-level)
@@ -296,8 +295,7 @@ export const mediaApi = {
 
     // Per-task retry: reset a single failed task to pending
     retryTask: (taskId: number) => {
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
-        return fetch(`${API_BASE_URL}/api/v1/media/retry?task_id=${taskId}`, {
+        return fetch(`${API_BASE_URL}/media/retry?task_id=${taskId}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -312,8 +310,7 @@ export const mediaApi = {
 
     // Bulk retry all failed tasks for a media
     retryAllFailed: (mediaId: number) => {
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9090";
-        return fetch(`${API_BASE_URL}/api/v1/media/retry-all-failed?media_id=${mediaId}`, {
+        return fetch(`${API_BASE_URL}/media/retry-all-failed?media_id=${mediaId}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -321,6 +318,12 @@ export const mediaApi = {
             },
         }).then((r) => !r.ok ? r.json().then((e) => Promise.reject(e)) : r.json());
     },
+
+    // 获取分享链接
+    getShareUrl: (mediaId: string) => api.get<{ url: string }>(`/media/${mediaId}/share`),
+
+    // 记录分享事件
+    share: (mediaId: string) => api.post<{ success: boolean }>(`/media/${mediaId}/share`),
 };
 
 // MediaVariantSummary is the aggregated transcoding status for a single media.

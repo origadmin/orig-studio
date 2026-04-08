@@ -1,13 +1,21 @@
 import {subscriptionApi, mediaApi, commentApi, userApi} from './api';
 
-// Mock fetch
-global.fetch = jest.fn();
+// Mock request module
+jest.mock('./request', () => ({
+    api: {
+        get: jest.fn(),
+        post: jest.fn(),
+        del: jest.fn(),
+    },
+    getAccessToken: jest.fn(),
+}));
 
-const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>;
+// Import the mocked functions
+import {api, getAccessToken} from './request';
 
 describe('API Tests', () => {
     beforeEach(() => {
-        mockFetch.mockClear();
+        jest.clearAllMocks();
     });
 
     describe('Subscription API', () => {
@@ -17,47 +25,25 @@ describe('API Tests', () => {
                 subscriber_count: 0
             };
 
-            mockFetch.mockResolvedValueOnce({
-                ok: true,
-                json: async () => mockResponse
-            } as Response);
+            (api.get as jest.Mock).mockResolvedValueOnce(mockResponse);
 
             const result = await subscriptionApi.getStatus('1');
             expect(result).toEqual(mockResponse);
-            expect(mockFetch).toHaveBeenCalledWith('http://localhost:9090/api/v1/users/1/subscription', {
-                method: 'GET',
-                headers: expect.any(Object)
-            });
+            expect(api.get).toHaveBeenCalledWith('/users/1/subscription');
         });
 
         test('subscribe should return success', async () => {
-            const mockResponse = {success: true};
-
-            mockFetch.mockResolvedValueOnce({
-                ok: true,
-                json: async () => mockResponse
-            } as Response);
+            (api.post as jest.Mock).mockResolvedValueOnce(undefined);
 
             await subscriptionApi.subscribe('1');
-            expect(mockFetch).toHaveBeenCalledWith('http://localhost:9090/api/v1/users/1/subscribe', {
-                method: 'POST',
-                headers: expect.any(Object)
-            });
+            expect(api.post).toHaveBeenCalledWith('/users/1/subscribe');
         });
 
         test('unsubscribe should return success', async () => {
-            const mockResponse = {success: true};
-
-            mockFetch.mockResolvedValueOnce({
-                ok: true,
-                json: async () => mockResponse
-            } as Response);
+            (api.del as jest.Mock).mockResolvedValueOnce(undefined);
 
             await subscriptionApi.unsubscribe('1');
-            expect(mockFetch).toHaveBeenCalledWith('http://localhost:9090/api/v1/users/1/subscribe', {
-                method: 'DELETE',
-                headers: expect.any(Object)
-            });
+            expect(api.del).toHaveBeenCalledWith('/users/1/subscribe');
         });
     });
 
@@ -67,39 +53,38 @@ describe('API Tests', () => {
                 url: 'https://localhost:9090/watch?v=1'
             };
 
-            mockFetch.mockResolvedValueOnce({
-                ok: true,
-                json: async () => mockResponse
-            } as Response);
+            (api.get as jest.Mock).mockResolvedValueOnce(mockResponse);
 
             const result = await mediaApi.getShareUrl('1');
             expect(result).toEqual(mockResponse);
+            expect(api.get).toHaveBeenCalledWith('/media/1/share');
         });
 
         test('share should return success', async () => {
             const mockResponse = {success: true};
 
-            mockFetch.mockResolvedValueOnce({
-                ok: true,
-                json: async () => mockResponse
-            } as Response);
+            (api.post as jest.Mock).mockResolvedValueOnce(mockResponse);
 
             const result = await mediaApi.share('1');
             expect(result).toEqual(mockResponse);
+            expect(api.post).toHaveBeenCalledWith('/media/1/share');
         });
     });
 
     describe('Comment API', () => {
         test('getAll should return comments', async () => {
-            const mockResponse = [];
+            const mockResponse = {
+                list: [],
+                total: 0,
+                page: 1,
+                limit: 20
+            };
 
-            mockFetch.mockResolvedValueOnce({
-                ok: true,
-                json: async () => mockResponse
-            } as Response);
+            (api.get as jest.Mock).mockResolvedValueOnce(mockResponse);
 
             const result = await commentApi.getAll({media_id: '1'});
             expect(result).toEqual(mockResponse);
+            expect(api.get).toHaveBeenCalledWith('/comments', {media_id: '1'});
         });
     });
 });
