@@ -22,17 +22,40 @@ export default defineConfig({
             '@': path.resolve(__dirname, './src'),
         },
     },
+    output: {
+        assetPrefix: '/', // Ensure resources load with absolute paths in nested routes
+    },
     server: {
         port: 18080,
-        historyApiFallback: true, // 确保客户端路由能正确回退到 index.html
+        historyApiFallback: true, // Ensure client-side routes correctly fallback to index.html
         proxy: {
             '/api': {
                 target: 'http://localhost:9090',
                 changeOrigin: true,
             },
+            '/thumbnails': {
+                target: 'http://localhost:9090',
+                changeOrigin: true,
+            },
+            '/uploads': {
+                target: 'http://localhost:9090',
+                changeOrigin: true,
+            },
+            '/hls': {
+                target: 'http://localhost:9090',
+                changeOrigin: true,
+            },
+        },
+        // Configure public directory to ensure static resources are handled correctly
+        publicDir: {
+            name: 'public',
+            copyOnBuild: true,
         },
     },
-    output: {
-        assetPrefix: '/', // 确保嵌套路由下的资源加载使用绝对路径
+    // Configure CSS to ensure URLs are not parsed as modules
+    tools: {
+        cssLoader: {
+            url: false, // Completely disable URL parsing in CSS
+        },
     },
 });

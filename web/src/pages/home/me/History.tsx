@@ -131,7 +131,8 @@ const HistoryPage = () => {
                     >
                         {/* 缩略图 */}
                         <div className="relative w-40 shrink-0 aspect-video rounded-lg overflow-hidden">
-                            <img src={getFullUrl(item.media?.thumbnail)} alt={item.media?.title}
+                            <img src={item.media?.thumbnail ? getFullUrl(item.media.thumbnail) : undefined}
+                                 alt={item.media?.title}
                                  className="w-full h-full object-cover"/>
                             <div
                                 className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1 py-0.5 rounded">

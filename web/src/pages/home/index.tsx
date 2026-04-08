@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
- * 首页 - 信息流 + 无限滚动 (对接真实 API)
+ * Home Page - Feed + Infinite Scroll (Connected to Real API)
  */
 
 import React, {useState, useEffect, useRef, useCallback} from 'react';
@@ -12,78 +12,68 @@ import {formatDuration, formatViews, formatDate} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
 import {mediaApi, type Media} from '@/lib/api/media';
 import {API_BASE_URL} from '@/lib/request';
+import {getImageUrl, handleImageError} from '@/lib/imageUtils';
 import {useInfiniteMediaList, useMediaList} from '@/hooks/queries';
 import HorizontalScroll from '@/components/common/HorizontalScroll';
 
 const categories = [
-    {id: 1, name: '技术'},
-    {id: 2, name: '编程'},
-    {id: 3, name: '运维'},
-    {id: 4, name: '数据科学'},
-    {id: 5, name: '云计算'},
-    {id: 6, name: '前端'},
-    {id: 7, name: '职业'}
+    {id: 1, name: 'Technology'},
+    {id: 2, name: 'Programming'},
+    {id: 3, name: 'Design'},
+    {id: 4, name: 'Lifestyle'},
+    {id: 5, name: 'Entertainment'},
 ];
-
-const PAGE_SIZE = 12;
 
 const HomePage = () => {
     const {t} = useTranslation();
     const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
-    const sentinelRef = useRef<HTMLDivElement>(null);
 
-    // 精选视频（最多10条）
+    // Featured videos
     const {data: featuredData} = useMediaList({
-        page_size: 10,
-        status: 'active',
-        sort_by: 'featured'
+        page: 1,
+        page_size: 6,
+        featured: true,
     });
     const featuredVideos = featuredData?.list || [];
 
-    // 推荐视频（最多10条）
+    // Recommended videos
     const {data: recommendedData} = useMediaList({
-        page_size: 10,
-        status: 'active',
-        sort_by: 'recommended'
+        page: 1,
+        page_size: 8,
     });
     const recommendedVideos = recommendedData?.list || [];
 
-    // 最新视频（无限滚动）
+    // Infinite scroll video list
     const {
         data,
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
-        status,
-        isLoading
     } = useInfiniteMediaList({
-        page_size: PAGE_SIZE,
-        category_id: activeCategoryId || undefined,
-        status: 'active',
-        sort_by: 'latest'
+        page_size: 12,
     });
 
-    const items = data ? data.pages.flatMap(page => Array.isArray(page) ? page : (page.list || [])) : [];
-    const hasMore = hasNextPage;
-    const loading = isLoading;
+    const items = data?.pages.flatMap(page => page.list).filter(Boolean) || [];
 
-    // Load more callback
-    const loadMore = useCallback(() => {
-        if (isFetchingNextPage || !hasNextPage) return;
-        fetchNextPage();
-    }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
+    // Infinite scroll
+    const sentinelRef = useRef<HTMLDivElement>(null);
 
-    // 滚动监听
     useEffect(() => {
-        const el = sentinelRef.current;
-        if (!el) return;
-        const obs = new IntersectionObserver(([e]) => {
-            if (e.isIntersecting) loadMore();
-        }, {rootMargin: '200px'});
-        obs.observe(el);
-        return () => obs.disconnect();
-    }, [loadMore]);
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+                    fetchNextPage();
+                }
+            },
+            {threshold: 0.1}
+        );
 
+        if (sentinelRef.current) {
+            observer.observe(sentinelRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     return (
         <div className="space-y-8">
@@ -91,8 +81,9 @@ const HomePage = () => {
             <section
                 className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white">
                 <div
-                    className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-20"/>
-                <div className="relative px-6 py-8 flex items-center">
+                    className="absolute inset-0 bg-cover bg-center opacity-20"
+                    style={{backgroundImage: 'url(/assets/images/cover-placeholder.svg)'}}/>
+                <div className="relative px-6 py-6 flex items-center">
                     <div className="max-w-xl">
                         <Badge className="bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 mb-4">
                             <TrendingUp className="w-3 h-3 mr-1"/> {t('home.heroBadge')}
@@ -115,7 +106,7 @@ const HomePage = () => {
                 </div>
             </section>
 
-            {/* 精选视频 */}
+            {/* Featured Videos */}
             <section className="mb-12">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -129,23 +120,22 @@ const HomePage = () => {
                 </div>
                 <HorizontalScroll>
                     {featuredVideos.map(media => {
-                        const user = media.edges?.user?.[0];
-                        // 处理缩略图路径，如果不是绝对路径则拼接 BaseURL
-                        const thumbUrl = media.thumbnail
-                            ? (media.thumbnail.startsWith('http') ? media.thumbnail : `${API_BASE_URL}${media.thumbnail.startsWith('/') ? '' : '/'}${media.thumbnail}`)
-                            : 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=400&h=225';
+                        const user = media?.edges?.user?.[0];
+                        // Handle thumbnail path
+                        const thumbUrl = getImageUrl(media?.thumbnail, 'thumbnail');
 
                         return (
-                            <Link key={media.id} to="/watch" search={{v: String(media.id)}}
+                            <Link key={media?.id} to="/watch" search={{v: String(media?.id)}}
                                   className="group w-64 flex-shrink-0">
                                 <div
                                     className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
                                     <div className="relative aspect-video overflow-hidden">
-                                        <img src={thumbUrl} alt={media.title}
+                                        <img src={thumbUrl} alt={media?.title}
+                                             onError={(e) => handleImageError(e, 'thumbnail')}
                                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                                         <div
                                             className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-1.5 py-0.5 rounded">
-                                            {formatDuration(media.duration)}
+                                            {formatDuration(media?.duration || 0)}
                                         </div>
                                         <div
                                             className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -157,12 +147,13 @@ const HomePage = () => {
                                     </div>
                                     <div className="p-3">
                                         <h3 className="font-medium text-gray-900 dark:text-white text-sm line-clamp-2 mb-1.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                                            {media.title}
+                                            {media?.title || 'Untitled'}
                                         </h3>
                                         <div className="flex items-center gap-2 mb-1">
                                             <img
-                                                src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.username || 'U'}`}
+                                                src={getImageUrl(user?.avatar, 'avatar')}
                                                 alt={user?.username}
+                                                onError={(e) => handleImageError(e, 'avatar')}
                                                 className="w-5 h-5 rounded-full object-cover"/>
                                             <span
                                                 className="text-xs text-gray-500 dark:text-gray-400">{user?.nickname || user?.username || 'Unknown'}</span>
@@ -170,18 +161,17 @@ const HomePage = () => {
                                         <div
                                             className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
                                                 <span className="flex items-center gap-1"><Eye
-                                                    size={12}/>{formatViews(media.view_count)}</span>
+                                                    size={12}/>{formatViews(media?.view_count || 0)}</span>
                                         </div>
                                     </div>
                                 </div>
                             </Link>
                         );
-                    })
-                    }
+                    })}
                 </HorizontalScroll>
             </section>
 
-            {/* 推荐视频 */}
+            {/* Recommended Videos */}
             <section className="mb-12">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
@@ -194,23 +184,22 @@ const HomePage = () => {
                 </div>
                 <HorizontalScroll>
                     {recommendedVideos.map(media => {
-                        const user = media.edges?.user?.[0];
-                        // 处理缩略图路径，如果不是绝对路径则拼接 BaseURL
-                        const thumbUrl = media.thumbnail
-                            ? (media.thumbnail.startsWith('http') ? media.thumbnail : `${API_BASE_URL}${media.thumbnail.startsWith('/') ? '' : '/'}${media.thumbnail}`)
-                            : 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=400&h=225';
+                        const user = media?.edges?.user?.[0];
+                        // Handle thumbnail path
+                        const thumbUrl = getImageUrl(media?.thumbnail, 'thumbnail');
 
                         return (
-                            <Link key={media.id} to="/watch" search={{v: String(media.id)}}
+                            <Link key={media?.id} to="/watch" search={{v: String(media?.id)}}
                                   className="group w-64 flex-shrink-0">
                                 <div
                                     className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
                                     <div className="relative aspect-video overflow-hidden">
-                                        <img src={thumbUrl} alt={media.title}
+                                        <img src={thumbUrl} alt={media?.title}
+                                             onError={(e) => handleImageError(e, 'thumbnail')}
                                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                                         <div
                                             className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-1.5 py-0.5 rounded">
-                                            {formatDuration(media.duration)}
+                                            {formatDuration(media?.duration || 0)}
                                         </div>
                                         <div
                                             className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -222,12 +211,13 @@ const HomePage = () => {
                                     </div>
                                     <div className="p-3">
                                         <h3 className="font-medium text-gray-900 dark:text-white text-sm line-clamp-2 mb-1.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                                            {media.title}
+                                            {media?.title || 'Untitled'}
                                         </h3>
                                         <div className="flex items-center gap-2 mb-1">
                                             <img
-                                                src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.username || 'U'}`}
+                                                src={getImageUrl(user?.avatar, 'avatar')}
                                                 alt={user?.username}
+                                                onError={(e) => handleImageError(e, 'avatar')}
                                                 className="w-5 h-5 rounded-full object-cover"/>
                                             <span
                                                 className="text-xs text-gray-500 dark:text-gray-400">{user?.nickname || user?.username || 'Unknown'}</span>
@@ -235,18 +225,17 @@ const HomePage = () => {
                                         <div
                                             className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
                                                 <span className="flex items-center gap-1"><Eye
-                                                    size={12}/>{formatViews(media.view_count)}</span>
+                                                    size={12}/>{formatViews(media?.view_count || 0)}</span>
                                         </div>
                                     </div>
                                 </div>
                             </Link>
                         );
-                    })
-                    }
+                    })}
                 </HorizontalScroll>
             </section>
 
-            {/* 最新视频 */}
+            {/* Latest Videos */}
             <section className="mb-12">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
@@ -260,30 +249,29 @@ const HomePage = () => {
                     </Link>
                 </div>
 
-                {/* 视频网格 */}
-                {items.length === 0 && !loading ? (
+                {/* Video Grid */}
+                {items.length === 0 && !isFetchingNextPage ? (
                     <div className="py-20 text-center text-gray-500">
                         <p>{t('common.noData')}</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                         {items.map(media => {
-                            const user = media.edges?.user?.[0];
-                            // 处理缩略图路径，如果不是绝对路径则拼接 BaseURL
-                            const thumbUrl = media.thumbnail
-                                ? (media.thumbnail.startsWith('http') ? media.thumbnail : `${API_BASE_URL}${media.thumbnail.startsWith('/') ? '' : '/'}${media.thumbnail}`)
-                                : 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=400&h=225';
+                            const user = media?.edges?.user?.[0];
+                            // Handle thumbnail path
+                            const thumbUrl = getImageUrl(media?.thumbnail, 'thumbnail');
 
                             return (
-                                <Link key={media.id} to="/watch" search={{v: String(media.id)}} className="group">
+                                <Link key={media?.id} to="/watch" search={{v: String(media?.id)}} className="group">
                                     <div
                                         className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
                                         <div className="relative aspect-video overflow-hidden">
-                                            <img src={thumbUrl} alt={media.title}
+                                            <img src={thumbUrl} alt={media?.title}
+                                                 onError={(e) => handleImageError(e, 'thumbnail')}
                                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                                             <div
                                                 className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-1.5 py-0.5 rounded">
-                                                {formatDuration(media.duration)}
+                                                {formatDuration(media?.duration || 0)}
                                             </div>
                                             <div
                                                 className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -295,12 +283,13 @@ const HomePage = () => {
                                         </div>
                                         <div className="p-3">
                                             <h3 className="font-medium text-gray-900 dark:text-white text-sm line-clamp-2 mb-1.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                                                {media.title}
+                                                {media?.title || 'Untitled'}
                                             </h3>
                                             <div className="flex items-center gap-2 mb-1">
                                                 <img
-                                                    src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.username || 'U'}`}
+                                                    src={getImageUrl(user?.avatar, 'avatar')}
                                                     alt={user?.username}
+                                                    onError={(e) => handleImageError(e, 'avatar')}
                                                     className="w-5 h-5 rounded-full object-cover"/>
                                                 <span
                                                     className="text-xs text-gray-500 dark:text-gray-400">{user?.nickname || user?.username || 'Unknown'}</span>
@@ -308,11 +297,11 @@ const HomePage = () => {
                                             <div
                                                 className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
                                                 <span className="flex items-center gap-1"><Eye
-                                                    size={12}/>{formatViews(media.view_count)}</span>
-                                                <span>{formatDate(media.created_at)}</span>
+                                                    size={12}/>{formatViews(media?.view_count || 0)}</span>
+                                                <span>{formatDate(media?.created_at || new Date().toISOString())}</span>
                                             </div>
                                             <div className="flex flex-wrap gap-1 mt-2">
-                                                {media.tags?.slice(0, 2).map((tag: string, tIdx: number) => (
+                                                {media?.tags?.slice(0, 2).map((tag: string, tIdx: number) => (
                                                     <Badge key={`${tag}-${tIdx}`} variant="secondary"
                                                            className="text-xs">{tag}</Badge>
                                                 ))}
@@ -326,7 +315,7 @@ const HomePage = () => {
                 )}
             </section>
 
-            {/* 无限滚动哨兵 */}
+            {/* Infinite Scroll Sentinel */}
             <div ref={sentinelRef} className="flex flex-col items-center py-8">
                 {isFetchingNextPage && (
                     <div className="flex items-center gap-3 text-gray-400 py-2">

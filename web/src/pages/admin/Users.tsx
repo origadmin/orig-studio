@@ -200,7 +200,8 @@ export default function UsersPage() {
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="w-10 h-10">
-                                                    <AvatarImage src={getFullUrl(user.avatar)}/>
+                                                    <AvatarImage
+                                                        src={user.avatar ? getFullUrl(user.avatar) : undefined}/>
                                                     <AvatarFallback>{user.nickname ? user.nickname.charAt(0) : user.username.charAt(0)}</AvatarFallback>
                                                 </Avatar>
                                                 <div>

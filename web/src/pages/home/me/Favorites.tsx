@@ -70,7 +70,8 @@ const FavoritesPage = () => {
                                 <div
                                     className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1">
                                     <div className="relative aspect-video">
-                                        <img src={getFullUrl(video.thumbnail)} alt={video.title}
+                                        <img src={video.thumbnail ? getFullUrl(video.thumbnail) : undefined}
+                                             alt={video.title}
                                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"/>
                                         <div
                                             className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">{formatDuration(video.duration)}</div>

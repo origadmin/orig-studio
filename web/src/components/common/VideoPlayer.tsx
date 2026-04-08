@@ -60,9 +60,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         const video = videoRef.current;
         if (!video) return;
 
-        const fullSrc = hlsSrc ? getFullUrl(hlsSrc) : getFullUrl(src);
+        const fullHlsSrc = hlsSrc ? getFullUrl(hlsSrc) : undefined;
+        const fullSrc = getFullUrl(src);
 
-        if (hlsSrc && Hls.isSupported()) {
+        if (hlsSrc && fullHlsSrc && Hls.isSupported()) {
             if (hlsRef.current) {
                 hlsRef.current.destroy();
             }
@@ -70,13 +71,13 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 enableWorker: true,
                 lowLatencyMode: true,
             });
-            hls.loadSource(fullSrc);
+            hls.loadSource(fullHlsSrc);
             hls.attachMedia(video);
             hlsRef.current = hls;
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        } else if (video.canPlayType('application/vnd.apple.mpegurl') && fullHlsSrc) {
+            video.src = fullHlsSrc;
+        } else if (fullSrc) {
             video.src = fullSrc;
-        } else {
-            video.src = getFullUrl(src);
         }
 
         return () => {

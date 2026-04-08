@@ -98,7 +98,7 @@ const MembersPage = () => {
                     >
                         <div className="flex items-center gap-3">
                             <img
-                                src={getFullUrl(member.avatar)}
+                                src={member.avatar ? getFullUrl(member.avatar) : undefined}
                                 alt={member.username}
                                 className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100 dark:ring-gray-700 group-hover:ring-emerald-200 dark:group-hover:ring-emerald-800 transition-all"
                             />

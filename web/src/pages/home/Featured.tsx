@@ -69,7 +69,7 @@ const FeaturedPage = () => {
                         className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-gray-900 to-gray-800 dark:from-gray-800 dark:to-gray-900">
                         <div className="flex flex-col md:flex-row">
                             <div className="relative aspect-video md:w-[480px] shrink-0">
-                                <img src={getFullUrl(item.thumbnail)} alt={item.title}
+                                <img src={item.thumbnail ? getFullUrl(item.thumbnail) : undefined} alt={item.title}
                                      className="w-full h-full object-cover"/>
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"/>
                                 <div
@@ -94,7 +94,8 @@ const FeaturedPage = () => {
                                 </h2>
                                 <p className="text-gray-300 text-sm mb-4 line-clamp-2">{item.description || t('watch.noDescription')}</p>
                                 <div className="flex items-center gap-3">
-                                    <img src={getFullUrl(item.edges?.user?.[0]?.avatar)}
+                                    <img
+                                        src={item.edges?.user?.[0]?.avatar ? getFullUrl(item.edges.user[0].avatar) : undefined}
                                          alt={item.edges?.user?.[0]?.username}
                                          className="w-8 h-8 rounded-full"/>
                                     <span
@@ -116,7 +117,7 @@ const FeaturedPage = () => {
                         <div
                             className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
                             <div className="relative aspect-video overflow-hidden">
-                                <img src={getFullUrl(item.thumbnail)} alt={item.title}
+                                <img src={item.thumbnail ? getFullUrl(item.thumbnail) : undefined} alt={item.title}
                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                                 <div
                                     className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">

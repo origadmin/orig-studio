@@ -81,7 +81,7 @@ const CategoriesPage = () => {
                                 >
                                     <div className="relative aspect-video overflow-hidden">
                                         <img
-                                            src={getFullUrl(media.thumbnail)}
+                                            src={media.thumbnail ? getFullUrl(media.thumbnail) : undefined}
                                             alt={media.title}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                         />
@@ -106,7 +106,7 @@ const CategoriesPage = () => {
                                         </h3>
                                         <div className="flex items-center gap-2 mb-1">
                                             <img
-                                                src={getFullUrl(media.edges?.user?.[0]?.avatar)}
+                                                src={media.edges?.user?.[0]?.avatar ? getFullUrl(media.edges.user[0].avatar) : undefined}
                                                 alt={media.edges?.user?.[0]?.username}
                                                 className="w-5 h-5 rounded-full object-cover"
                                             />

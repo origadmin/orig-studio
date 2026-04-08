@@ -10,7 +10,7 @@ import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {formatDuration, formatViews, formatDate} from '@/lib/format';
 import {userApi} from '@/lib/api/user';
 import {mediaApi} from '@/lib/api/media';
-import {getFullUrl} from '@/lib/utils';
+import {getImageUrl, handleImageError} from '@/lib/imageUtils';
 import ErrorPage from '@/components/common/ErrorPage';
 import SubscribeButton from '@/components/common/SubscribeButton';
 
@@ -75,12 +75,13 @@ const ProfilePage = () => {
                 <>
                     <div className="relative">
                         <div className="h-48 md:h-64 rounded-2xl bg-cover bg-center"
-                             style={{backgroundImage: `url(${user.cover || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=1200'})`}}/>
+                             style={{backgroundImage: `url(${getImageUrl(user.cover, 'cover')})`}}/>
                         <div className="absolute -bottom-16 left-6 flex items-end gap-6">
                             <Avatar className="w-32 h-32 border-4 border-white dark:border-gray-900 shadow-lg">
                                 <AvatarImage
-                                    src={user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200'}
-                                    loading="lazy"/>
+                                    src={getImageUrl(user.avatar, 'avatar')}
+                                    loading="lazy"
+                                    onError={(e) => handleImageError(e, 'avatar')}/>
                                 <AvatarFallback
                                     className="text-3xl">{user.username ? user.username.charAt(0) : 'U'}</AvatarFallback>
                             </Avatar>
@@ -157,7 +158,9 @@ const ProfilePage = () => {
                                             <div
                                                 className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1">
                                                 <div className="relative aspect-video">
-                                                    <img src={video.thumbnail} alt={video.title} loading="lazy"
+                                                    <img src={getImageUrl(video.thumbnail, 'thumbnail')}
+                                                         alt={video.title} loading="lazy"
+                                                         onError={(e) => handleImageError(e, 'thumbnail')}
                                                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"/>
                                                     <div
                                                         className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">{formatDuration(video.duration || 0)}</div>
