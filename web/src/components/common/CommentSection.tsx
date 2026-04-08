@@ -1,12 +1,13 @@
 import React, {useState, useEffect} from 'react';
-import {MessageCircle, ThumbsUp, Send, Loader2} from 'lucide-react';
+import {MessageCircle, ThumbsUp, Send, Loader2, LogIn} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {formatDate, formatViews} from '@/lib/format';
 import {commentApi} from '@/lib/api/comment';
-import {likeApi} from '@/lib/api/like';
+import {useAuth} from '@/hooks/useAuth';
+import {useNavigate} from '@tanstack/react-router';
 import ErrorPage from '@/components/common/ErrorPage';
 
 interface CommentSectionProps {
@@ -31,6 +32,8 @@ interface Comment {
 
 const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
     const {t} = useTranslation();
+    const {isAuthenticated} = useAuth();
+    const navigate = useNavigate();
     const [comments, setComments] = useState<Comment[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -85,6 +88,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
 
     const handleSubmitComment = async () => {
         if (!commentText.trim()) return;
+        if (!isAuthenticated) {
+            navigate({to: '/auth/signin'});
+            return;
+        }
 
         try {
             setIsSubmitting(true);
@@ -101,6 +108,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
 
     const handleSubmitReply = async (parentId: string) => {
         if (!replyText.trim()) return;
+        if (!isAuthenticated) {
+            navigate({to: '/auth/signin'});
+            return;
+        }
 
         try {
             setIsSubmittingReply(true);
@@ -160,31 +171,50 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                     </div>
                     {replyingTo === comment.id && (
                         <div className="mt-3 space-y-2">
-                            <Textarea
-                                placeholder={t('watch.addComment')}
-                                value={replyText}
-                                onChange={(e) => setReplyText(e.target.value)}
-                                className="min-h-[80px]"
-                            />
-                            <div className="flex justify-end">
-                                <Button
-                                    onClick={() => handleSubmitReply(comment.id)}
-                                    disabled={isSubmittingReply || !replyText.trim()}
-                                    className="bg-blue-600 hover:bg-blue-700"
-                                >
-                                    {isSubmittingReply ? (
-                                        <>
-                                            <Loader2 className="w-4 h-4 mr-2 animate-spin"/>
-                                            {t('common.submitting')}
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Send className="w-4 h-4 mr-2"/>
-                                            {t('watch.postComment')}
-                                        </>
-                                    )}
-                                </Button>
-                            </div>
+                            {isAuthenticated ? (
+                                <>
+                                    <Textarea
+                                        placeholder={t('watch.addComment')}
+                                        value={replyText}
+                                        onChange={(e) => setReplyText(e.target.value)}
+                                        className="min-h-[80px]"
+                                    />
+                                    <div className="flex justify-end">
+                                        <Button
+                                            onClick={() => handleSubmitReply(comment.id)}
+                                            disabled={isSubmittingReply || !replyText.trim()}
+                                            className="bg-blue-600 hover:bg-blue-700"
+                                        >
+                                            {isSubmittingReply ? (
+                                                <>
+                                                    <Loader2 className="w-4 h-4 mr-2 animate-spin"/>
+                                                    {t('common.submitting')}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Send className="w-4 h-4 mr-2"/>
+                                                    {t('watch.postComment')}
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-center">
+                                    <p className="text-gray-600 dark:text-gray-300 mb-2">
+                                        {t('watch.pleaseLoginToReply') || 'Please log in to reply'}
+                                    </p>
+                                    <Button
+                                        onClick={() => navigate({to: '/auth/signin'})}
+                                        variant="default"
+                                        size="sm"
+                                        className="bg-blue-600 hover:bg-blue-700"
+                                    >
+                                        <LogIn className="w-4 h-4 mr-2"/>
+                                        {t('auth.signin') || 'Sign In'}
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -217,31 +247,49 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
 
             {/* Comment Form */}
             <div className="space-y-4">
-                <Textarea
-                    placeholder={t('watch.addComment')}
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    className="min-h-[100px]"
-                />
-                <div className="flex justify-end">
-                    <Button
-                        onClick={handleSubmitComment}
-                        disabled={isSubmitting || !commentText.trim()}
-                        className="bg-blue-600 hover:bg-blue-700"
-                    >
-                        {isSubmitting ? (
-                            <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin"/>
-                                {t('common.submitting')}
-                            </>
-                        ) : (
-                            <>
-                                <Send className="w-4 h-4 mr-2"/>
-                                {t('watch.postComment')}
-                            </>
-                        )}
-                    </Button>
-                </div>
+                {isAuthenticated ? (
+                    <>
+                        <Textarea
+                            placeholder={t('watch.addComment')}
+                            value={commentText}
+                            onChange={(e) => setCommentText(e.target.value)}
+                            className="min-h-[100px]"
+                        />
+                        <div className="flex justify-end">
+                            <Button
+                                onClick={handleSubmitComment}
+                                disabled={isSubmitting || !commentText.trim()}
+                                className="bg-blue-600 hover:bg-blue-700"
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin"/>
+                                        {t('common.submitting')}
+                                    </>
+                                ) : (
+                                    <>
+                                        <Send className="w-4 h-4 mr-2"/>
+                                        {t('watch.postComment')}
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                    </>
+                ) : (
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 text-center">
+                        <LogIn className="w-12 h-12 mx-auto mb-4 text-gray-400"/>
+                        <p className="text-gray-600 dark:text-gray-300 mb-4">
+                            {t('watch.pleaseLoginToComment') || 'Please log in to add a comment'}
+                        </p>
+                        <Button
+                            onClick={() => navigate({to: '/auth/signin'})}
+                            className="bg-blue-600 hover:bg-blue-700"
+                        >
+                            <LogIn className="w-4 h-4 mr-2"/>
+                            {t('auth.signin') || 'Sign In'}
+                        </Button>
+                    </div>
+                )}
             </div>
 
             {/* Comments List */}

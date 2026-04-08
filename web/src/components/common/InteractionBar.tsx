@@ -1,11 +1,14 @@
 import React, {useState, useEffect} from 'react';
-import {ThumbsUp, Share2, MessageCircle, Loader2, Save, Download} from 'lucide-react';
+import {ThumbsUp, ThumbsDown, Share2, MessageCircle, Loader2, Save, Download, LogIn} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {Button} from '@/components/ui/button';
 import {formatViews} from '@/lib/format';
 import {likeApi} from '@/lib/api/like';
 import {shareApi} from '@/lib/api/share';
 import {playlistApi} from '@/lib/api/playlist';
+import {useAuth} from '@/hooks/useAuth';
+import {useNavigate} from '@tanstack/react-router';
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription} from '@/components/ui/dialog';
 
 interface InteractionBarProps {
     mediaId: string;
@@ -13,12 +16,18 @@ interface InteractionBarProps {
 
 const InteractionBar: React.FC<InteractionBarProps> = ({mediaId}) => {
     const {t} = useTranslation();
+    const {isAuthenticated} = useAuth();
+    const navigate = useNavigate();
     const [likeCount, setLikeCount] = useState(0);
+    const [dislikeCount, setDislikeCount] = useState(0);
     const [isLiked, setIsLiked] = useState(false);
+    const [isDisliked, setIsDisliked] = useState(false);
     const [isLiking, setIsLiking] = useState(false);
+    const [isDisliking, setIsDisliking] = useState(false);
     const [isSharing, setIsSharing] = useState(false);
     const [shareUrl, setShareUrl] = useState('');
     const [showShareModal, setShowShareModal] = useState(false);
+    const [showLoginDialog, setShowLoginDialog] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [showSaveModal, setShowSaveModal] = useState(false);
     const [playlists, setPlaylists] = useState<{ id: string, name: string }[]>([]);
@@ -40,23 +49,50 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId}) => {
     const fetchLikeStatus = async () => {
         try {
             const likeStatus = await likeApi.getStatus(mediaId);
-            setLikeCount(likeStatus.count);
+            setLikeCount(likeStatus.like_count);
+            setDislikeCount(likeStatus.dislike_count);
             setIsLiked(likeStatus.is_liked);
+            setIsDisliked(likeStatus.is_disliked);
         } catch (err) {
             console.error('Failed to fetch like status:', err);
         }
     };
 
     const handleLike = async () => {
+        if (!isAuthenticated) {
+            setShowLoginDialog(true);
+            return;
+        }
         try {
             setIsLiking(true);
             const likeStatus = await likeApi.toggle(mediaId);
-            setLikeCount(likeStatus.count);
+            setLikeCount(likeStatus.like_count);
+            setDislikeCount(likeStatus.dislike_count);
             setIsLiked(likeStatus.is_liked);
+            setIsDisliked(likeStatus.is_disliked);
         } catch (err) {
             console.error('Failed to toggle like:', err);
         } finally {
             setIsLiking(false);
+        }
+    };
+
+    const handleDislike = async () => {
+        if (!isAuthenticated) {
+            setShowLoginDialog(true);
+            return;
+        }
+        try {
+            setIsDisliking(true);
+            const likeStatus = await likeApi.toggleDislike(mediaId);
+            setLikeCount(likeStatus.like_count);
+            setDislikeCount(likeStatus.dislike_count);
+            setIsLiked(likeStatus.is_liked);
+            setIsDisliked(likeStatus.is_disliked);
+        } catch (err) {
+            console.error('Failed to toggle dislike:', err);
+        } finally {
+            setIsDisliking(false);
         }
     };
 
@@ -79,6 +115,10 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId}) => {
     };
 
     const handleSave = async () => {
+        if (!isAuthenticated) {
+            setShowLoginDialog(true);
+            return;
+        }
         try {
             setIsSaving(true);
             await fetchPlaylists();
@@ -120,16 +160,31 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId}) => {
             {/* Like Button */}
             <Button
                 variant="ghost"
-                className={`flex items-center gap-2 ${isLiked ? 'text-red-500' : 'text-gray-600 dark:text-gray-300'}`}
+                className={`flex items-center gap-2 ${isLiked ? 'text-blue-500' : 'text-gray-600 dark:text-gray-300'}`}
                 onClick={handleLike}
                 disabled={isLiking}
             >
                 {isLiking ? (
                     <Loader2 className="w-4 h-4 animate-spin"/>
                 ) : (
-                    <ThumbsUp className={`w-5 h-5 ${isLiked ? 'fill-red-500' : ''}`}/>
+                    <ThumbsUp className={`w-5 h-5 ${isLiked ? 'fill-blue-500' : ''}`}/>
                 )}
                 <span>{formatViews(likeCount)}</span>
+            </Button>
+
+            {/* Dislike Button */}
+            <Button
+                variant="ghost"
+                className={`flex items-center gap-2 ${isDisliked ? 'text-red-500' : 'text-gray-600 dark:text-gray-300'}`}
+                onClick={handleDislike}
+                disabled={isDisliking}
+            >
+                {isDisliking ? (
+                    <Loader2 className="w-4 h-4 animate-spin"/>
+                ) : (
+                    <ThumbsDown className={`w-5 h-5 ${isDisliked ? 'fill-red-500' : ''}`}/>
+                )}
+                <span>{formatViews(dislikeCount)}</span>
             </Button>
 
             {/* Comment Button */}
@@ -259,6 +314,40 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId}) => {
                     </div>
                 </div>
             )}
+
+            {/* Login Required Dialog */}
+            <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <LogIn className="w-5 h-5"/>
+                            {t('auth.loginRequired') || 'Login Required'}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {t('watch.pleaseLoginToInteract') || 'Please log in to like, dislike, or save videos.'}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-end gap-3 mt-4">
+                        <Button
+                            variant="default"
+                            onClick={() => setShowLoginDialog(false)}
+                        >
+                            {t('common.cancel') || 'Cancel'}
+                        </Button>
+                        <Button
+                            variant="default"
+                            className="bg-blue-600 hover:bg-blue-700"
+                            onClick={() => {
+                                setShowLoginDialog(false);
+                                navigate({to: '/auth/signin'});
+                            }}
+                        >
+                            <LogIn className="w-4 h-4 mr-2"/>
+                            {t('auth.signin') || 'Sign In'}
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

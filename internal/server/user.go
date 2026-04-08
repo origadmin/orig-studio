@@ -6,15 +6,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"origadmin/application/origcms/api/gen/v1/types"
+	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/svc-user/biz"
 )
 
 type UserHandler struct {
-	uc *biz.UserUseCase
+	uc  *biz.UserUseCase
+	jwt *auth.Manager
 }
 
-func NewUserHandler(uc *biz.UserUseCase) *UserHandler {
-	return &UserHandler{uc: uc}
+func NewUserHandler(uc *biz.UserUseCase, jwt *auth.Manager) *UserHandler {
+	return &UserHandler{uc: uc, jwt: jwt}
 }
 
 func (h *UserHandler) Register(group *gin.RouterGroup) {
@@ -95,5 +97,80 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 			}
 			c.JSON(http.StatusOK, gin.H{"message": "deleted"})
 		})
+
+		// Subscription routes
+		users.GET("/:id/subscription", func(c *gin.Context) {
+			userId, err := strconv.ParseInt(c.Param("id"), 10, 64)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+				return
+			}
+
+			var currentUserId int64 = 0
+			if claims, ok := c.Get("claims"); ok {
+				currentUserId = claims.(*auth.Claims).UserID
+			}
+
+			isSubscribed := false
+			if currentUserId > 0 && currentUserId != userId {
+				isSubscribed = false
+			}
+
+			c.JSON(http.StatusOK, gin.H{
+				"is_subscribed":    isSubscribed,
+				"subscriber_count": 0,
+			})
+		})
+
+		users.POST("/:id/subscribe", JWTMiddleware(h.jwt), func(c *gin.Context) {
+			_, err := strconv.ParseInt(c.Param("id"), 10, 64)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+				return
+			}
+
+			_, exists := c.Get("claims")
+			if !exists {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{"success": true})
+		})
+
+		users.DELETE("/:id/subscribe", JWTMiddleware(h.jwt), func(c *gin.Context) {
+			_, err := strconv.ParseInt(c.Param("id"), 10, 64)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+				return
+			}
+
+			_, exists := c.Get("claims")
+			if !exists {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{"success": true})
+		})
 	}
+
+	// Subscriptions and followers routes
+	group.GET("/subscriptions", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"list":      []interface{}{},
+			"total":     0,
+			"page":      1,
+			"page_size": 20,
+		})
+	})
+
+	group.GET("/followers", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"list":      []interface{}{},
+			"total":     0,
+			"page":      1,
+			"page_size": 20,
+		})
+	})
 }

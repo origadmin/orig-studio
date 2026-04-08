@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {Button} from '@/components/ui/button';
 import {UserPlus} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
-import {subscriptionApi} from '@/lib/api/subscription';
+import {subscriptionApi} from '../../lib/api';
 
 interface SubscribeButtonProps {
     userId: string;
@@ -19,19 +19,23 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [subscriberCount, setSubscriberCount] = useState(initialSubscriberCount);
     const [loading, setLoading] = useState(false);
+    const [initialLoading, setInitialLoading] = useState(true);
 
     useEffect(() => {
-        const checkSubscription = async () => {
+        const fetchStatus = async () => {
             try {
-                const status = await subscriptionApi.getStatus(userId);
-                setIsSubscribed(status.is_subscribed);
-                setSubscriberCount(status.subscriber_count);
+                const response = await subscriptionApi.getStatus(userId);
+                setIsSubscribed(response.is_subscribed);
+                if (response.subscriber_count !== undefined) {
+                    setSubscriberCount(response.subscriber_count);
+                }
             } catch (err) {
-                console.error('Failed to check subscription status:', err);
+                console.error('Failed to fetch subscription status:', err);
+            } finally {
+                setInitialLoading(false);
             }
         };
-
-        checkSubscription();
+        fetchStatus();
     }, [userId]);
 
     const handleSubscribe = async () => {
@@ -39,18 +43,28 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
             setLoading(true);
             if (isSubscribed) {
                 await subscriptionApi.unsubscribe(userId);
+                setIsSubscribed(false);
                 setSubscriberCount(prev => Math.max(0, prev - 1));
             } else {
                 await subscriptionApi.subscribe(userId);
+                setIsSubscribed(true);
                 setSubscriberCount(prev => prev + 1);
             }
-            setIsSubscribed(!isSubscribed);
         } catch (err) {
             console.error('Failed to toggle subscription:', err);
         } finally {
             setLoading(false);
         }
     };
+
+    if (initialLoading) {
+        return (
+            <Button disabled className={className}>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"/>
+                {t('common.loading')}
+            </Button>
+        );
+    }
 
     return (
         <Button

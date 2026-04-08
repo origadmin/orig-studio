@@ -38,6 +38,9 @@ export type {Playlist, PlaylistDetail} from "./api/playlist";
 export {searchApi} from "./api/search";
 export type {SearchResponse} from "./api/search";
 
+export {subscriptionApi} from "./api/subscription";
+export type {SubscriptionStatus, SubscriptionListResponse} from "./api/subscription";
+
 // Stats API
 export const statsApi = {
     get: () => api.get<{ users: number; media: number; content: number; storage: string; views: number }>("/stats"),

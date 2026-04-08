@@ -174,9 +174,13 @@ func (h *MediaHandler) Register(group *gin.RouterGroup) {
 		media.POST("/:id/retry", JWTMiddleware(h.jwtMgr), h.retryTranscode())
 		// Like and favorite routes
 		media.POST("/:id/like", JWTMiddleware(h.jwtMgr), h.toggleLike())
+		media.POST("/:id/dislike", JWTMiddleware(h.jwtMgr), h.toggleDislike())
 		media.GET("/:id/like", h.getLikeStatus())
 		media.POST("/:id/favorite", JWTMiddleware(h.jwtMgr), h.toggleFavorite())
 		media.GET("/:id/favorite", h.getFavoriteStatus())
+		// Share routes
+		media.GET("/:id/share", h.getShareUrl())
+		media.POST("/:id/share", JWTMiddleware(h.jwtMgr), h.recordShare())
 	}
 }
 
@@ -890,13 +894,48 @@ func (h *MediaHandler) toggleLike() gin.HandlerFunc {
 			return
 		}
 
-		_, err = h.likeFavoriteUC.ToggleLike(ctx, int(claims.UserID), id, "like")
+		stats, err := h.likeFavoriteUC.ToggleLike(ctx, int(claims.UserID), id, "like")
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "like toggled"})
+		c.JSON(http.StatusOK, gin.H{
+			"is_liked":      stats.UserLikeType == "like",
+			"is_disliked":   stats.UserLikeType == "dislike",
+			"like_count":    stats.LikeCount,
+			"dislike_count": stats.DislikeCount,
+		})
+	}
+}
+
+func (h *MediaHandler) toggleDislike() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		claims, ok := c.MustGet("claims").(*auth.Claims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			return
+		}
+
+		stats, err := h.likeFavoriteUC.ToggleLike(ctx, int(claims.UserID), id, "dislike")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"is_liked":      stats.UserLikeType == "like",
+			"is_disliked":   stats.UserLikeType == "dislike",
+			"like_count":    stats.LikeCount,
+			"dislike_count": stats.DislikeCount,
+		})
 	}
 }
 
@@ -922,8 +961,10 @@ func (h *MediaHandler) getLikeStatus() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"is_liked":   stats.UserLikeType == "like",
-			"like_count": stats.LikeCount,
+			"is_liked":      stats.UserLikeType == "like",
+			"is_disliked":   stats.UserLikeType == "dislike",
+			"like_count":    stats.LikeCount,
+			"dislike_count": stats.DislikeCount,
 		})
 	}
 }
@@ -943,13 +984,16 @@ func (h *MediaHandler) toggleFavorite() gin.HandlerFunc {
 			return
 		}
 
-		_, err = h.likeFavoriteUC.ToggleFavorite(ctx, int(claims.UserID), id)
+		stats, err := h.likeFavoriteUC.ToggleFavorite(ctx, int(claims.UserID), id)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "favorite toggled"})
+		c.JSON(http.StatusOK, gin.H{
+			"success":      true,
+			"is_favorited": stats.IsFavorited,
+		})
 	}
 }
 
@@ -975,8 +1019,8 @@ func (h *MediaHandler) getFavoriteStatus() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"is_favorited":   stats.IsFavorited,
-			"favorite_count": stats.FavoriteCount,
+			"success":      true,
+			"is_favorited": stats.IsFavorited,
 		})
 	}
 }
@@ -1007,4 +1051,50 @@ func mimeToExt(mimeType string) string {
 		return ext
 	}
 	return ""
+}
+
+// --- Share Functions ---
+
+func (h *MediaHandler) getShareUrl() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			return
+		}
+
+		// Build share URL - assuming the frontend is at /watch/:id
+		shareUrl := c.Request.Host + "/watch?v=" + strconv.Itoa(id)
+		// Add https:// if not present
+		if len(shareUrl) > 0 && shareUrl[0] != 'h' {
+			shareUrl = "https://" + shareUrl
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"url": shareUrl,
+		})
+	}
+}
+
+func (h *MediaHandler) recordShare() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		_, exists := c.Get("claims")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+
+		_, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			return
+		}
+
+		// TODO: Implement share count increment in the future
+		// For now, just return success
+
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+		})
+	}
 }
