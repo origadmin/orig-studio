@@ -54,7 +54,11 @@ type CategoryTagUseCase struct {
 	log          *log.Helper
 }
 
-func NewCategoryTagUseCase(catRepo CategoryRepo, tagRepo TagRepo, logger log.Logger) *CategoryTagUseCase {
+func NewCategoryTagUseCase(
+	catRepo CategoryRepo,
+	tagRepo TagRepo,
+	logger log.Logger,
+) *CategoryTagUseCase {
 	return &CategoryTagUseCase{
 		categoryRepo: catRepo,
 		tagRepo:      tagRepo,
@@ -78,7 +82,10 @@ func (uc *CategoryTagUseCase) DeleteCategory(ctx context.Context, id int) error 
 	return uc.categoryRepo.Delete(ctx, id)
 }
 
-func (uc *CategoryTagUseCase) ListTags(ctx context.Context, page, pageSize int) ([]*Tag, int, error) {
+func (uc *CategoryTagUseCase) ListTags(
+	ctx context.Context,
+	page, pageSize int,
+) ([]*Tag, int, error) {
 	return uc.tagRepo.ListAll(ctx, page, pageSize)
 }
 

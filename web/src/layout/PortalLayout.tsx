@@ -89,11 +89,11 @@ const PortalLayout = () => {
 
             {/* Main Content */}
             <main
-                className={`pt-14 min-h-screen transition-all duration-300 bg-gray-50 dark:bg-gray-950 relative z-20 ${
+                className={`pt-14 min-h-screen transition-all duration-300 bg-gray-50 dark:bg-gray-950 relative z-10 ${
                     sidebarCollapsed ? 'md:ml-[60px]' : 'md:ml-[220px]'
                 }`}
             >
-                <div className="p-4 md:p-6 lg:p-8 max-w-[1600px]">
+                <div className="p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto">
                     <Outlet/>
                 </div>
             </main>
