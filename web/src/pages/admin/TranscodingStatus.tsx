@@ -10,7 +10,7 @@
 import {useEffect, useState, useCallback} from "react";
 import {useLocation, useNavigate} from "@tanstack/react-router";
 import {mediaApi} from "../../lib/api/media";
-import {getAccessToken} from "../../lib/request";
+import {getAccessToken, API_BASE_URL} from "../../lib/request";
 import {useTranscoding} from "../../hooks/useTranscoding";
 import {Badge} from "../../components/ui/badge";
 import {Button} from "../../components/ui/button";
@@ -59,8 +59,6 @@ interface EncodingTaskListResponse {
 }
 
 // ─── Helpers ──────────────────────────────────────────
-
-const getApiBaseUrl = () => (import.meta as any).env?.VITE_API_BASE_URL || "http://localhost:9090";
 
 /** Build link to Media page that searches for this media ID */
 function mediaLink(mediaId: number): string {
@@ -272,9 +270,9 @@ export default function TranscodingStatus() {
     const handleRetryTask = async (taskId: number) => {
         setRetryingTaskId(taskId);
         try {
-            const base = getApiBaseUrl();
+            const base = API_BASE_URL;
             const token = getAccessToken();
-            const resp = await fetch(`${base}/api/v1/media/retry?task_id=${taskId}`, {
+            const resp = await fetch(`${base}/media/retry?task_id=${taskId}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

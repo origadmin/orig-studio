@@ -11,6 +11,7 @@ import {Badge} from '@/components/ui/badge';
 import {formatDuration, formatViews, formatDate} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
 import {mediaApi, type Media} from '@/lib/api/media';
+import {API_BASE_URL} from '@/lib/request';
 import {useInfiniteMediaList, useMediaList} from '@/hooks/queries';
 import HorizontalScroll from '@/components/common/HorizontalScroll';
 
@@ -83,7 +84,6 @@ const HomePage = () => {
         return () => obs.disconnect();
     }, [loadMore]);
 
-    const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || "http://localhost:9090";
 
     return (
         <div className="space-y-8">

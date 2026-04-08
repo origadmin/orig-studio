@@ -1,10 +1,11 @@
 import type {Config} from './types';
+import {API_BASE_URL, API_PREFIX, REQUEST_TIMEOUT} from '../lib/request';
 
 const config: Config = {
     api: {
-        baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:9090',
-        prefix: '/api/v1',
-        timeout: 30000,
+        baseUrl: API_BASE_URL,
+        prefix: API_PREFIX,
+        timeout: REQUEST_TIMEOUT,
     },
     app: {
         name: 'OrigCMS',

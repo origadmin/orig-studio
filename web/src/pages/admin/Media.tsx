@@ -62,6 +62,7 @@ import {
 } from "@/components/ui/select";
 import {Label} from "@/components/ui/label";
 import {mediaApi, type Media, type MediaVariantSummary} from '@/lib/api/media';
+import {API_BASE_URL} from '@/lib/request';
 import {useAdminMediaList, useUpdateMedia, useDeleteMedia} from '@/hooks/queries';
 import {UploadComponent} from '@/components/upload/UploadComponent';
 import {formatFileSize, formatDate} from '@/lib/format';
@@ -244,7 +245,7 @@ export default function MediaPage() {
     const resolvePreview = (path?: string) => {
         if (!path) return "";
         if (path.startsWith("http")) return path;
-        const base = (import.meta as any).env.VITE_API_BASE_URL || "http://localhost:9090";
+        const base = API_BASE_URL;
         return `${base}${path.startsWith("/") ? "" : "/"}${path}`;
     };
 
@@ -393,7 +394,7 @@ export default function MediaPage() {
                                                     className="w-16 h-10 bg-slate-100 rounded overflow-hidden shrink-0 flex items-center justify-center">
                                                     {media.thumbnail ? (
                                                         <img
-                                                            src={media.thumbnail.startsWith('http') ? media.thumbnail : `${(import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:9090'}${media.thumbnail.startsWith('/') ? '' : '/'}${media.thumbnail}`}
+                                                            src={media.thumbnail.startsWith('http') ? media.thumbnail : `${API_BASE_URL}${media.thumbnail.startsWith('/') ? '' : '/'}${media.thumbnail}`}
                                                             alt="" className="w-full h-full object-cover"/>
                                                     ) : (
                                                         media.type === 'video' ?

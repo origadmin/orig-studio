@@ -1,4 +1,4 @@
-import {api, getAccessToken} from "../request";
+import {api, getAccessToken, API_BASE_URL} from "../request";
 
 export const DEFAULT_CHUNK_SIZE = 5 * 1024 * 1024; // 5 MB fallback
 export const MAX_CONCURRENT_CHUNKS = 3; // 并发上传数
@@ -52,7 +52,6 @@ export interface UploadCallbacks {
 
 // --- API layer ---
 
-const getApiBaseUrl = () => import.meta.env.VITE_API_BASE_URL || 'http://localhost:9090';
 const getToken = () => getAccessToken();
 
 interface InitiateResponse {
@@ -97,7 +96,7 @@ async function uploadPart(
     signal?: AbortSignal,
 ): Promise<UploadPartResponse> {
     const res = await fetch(
-        `${getApiBaseUrl()}/api/v1/uploads/${uploadId}/parts/${partNumber}`,
+        `${API_BASE_URL}/uploads/${uploadId}/parts/${partNumber}`,
         {
             method: 'POST',
             headers: {

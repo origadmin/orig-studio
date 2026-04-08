@@ -64,6 +64,14 @@ export const getCurrentUser = async (): Promise<CurrentUser> => {
     return api.get<CurrentUser>("/auth/me");
 };
 
+// API 对象（用于测试兼容性）
+export const authApi = {
+    login: signIn,
+    register: signUp,
+    logout: signOut,
+    getCurrentUser,
+};
+
 // 检查是否已认证
 export const isAuthenticated = (): boolean => {
     const token = getAccessToken();
