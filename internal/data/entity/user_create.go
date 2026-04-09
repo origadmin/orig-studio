@@ -14,6 +14,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/playlist"
+	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/tag"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
@@ -482,6 +483,36 @@ func (_c *UserCreate) AddLikes(v ...*Like) *UserCreate {
 	return _c.AddLikeIDs(ids...)
 }
 
+// AddSubscriptionIDs adds the "subscriptions" edge to the Subscription entity by IDs.
+func (_c *UserCreate) AddSubscriptionIDs(ids ...int) *UserCreate {
+	_c.mutation.AddSubscriptionIDs(ids...)
+	return _c
+}
+
+// AddSubscriptions adds the "subscriptions" edges to the Subscription entity.
+func (_c *UserCreate) AddSubscriptions(v ...*Subscription) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddSubscriptionIDs(ids...)
+}
+
+// AddSubscriberIDs adds the "subscribers" edge to the Subscription entity by IDs.
+func (_c *UserCreate) AddSubscriberIDs(ids ...int) *UserCreate {
+	_c.mutation.AddSubscriberIDs(ids...)
+	return _c
+}
+
+// AddSubscribers adds the "subscribers" edges to the Subscription entity.
+func (_c *UserCreate) AddSubscribers(v ...*Subscription) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddSubscriberIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_c *UserCreate) Mutation() *UserMutation {
 	return _c.mutation
@@ -937,6 +968,38 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SubscriptionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SubscriptionsTable,
+			Columns: []string{user.SubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SubscribersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SubscribersTable,
+			Columns: []string{user.SubscribersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -832,6 +832,9 @@ func (_q *MediaQuery) loadComments(ctx context.Context, query *CommentQuery, nod
 		}
 	}
 	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(comment.FieldMediaID)
+	}
 	query.Where(predicate.Comment(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(media.CommentsColumn), fks...))
 	}))
@@ -840,13 +843,10 @@ func (_q *MediaQuery) loadComments(ctx context.Context, query *CommentQuery, nod
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.media_comments
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "media_comments" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.MediaID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "media_comments" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "media_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

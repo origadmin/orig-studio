@@ -15,16 +15,32 @@ export interface Comment {
 }
 
 export const commentApi = {
-    getAll: (params?: { media_id?: string; content_id?: string }) =>
-        api.get<Comment[]>("/comments", params),
+    getAll: (params?: { media_id?: string; content_id?: string }) => {
+        const queryParams: any = {};
+        if (params?.media_id) {
+            queryParams.media_id = parseInt(params.media_id, 10);
+        }
+        if (params?.content_id) {
+            queryParams.content_id = parseInt(params.content_id, 10);
+        }
+        return api.get<Comment[]>("/comments", queryParams);
+    },
     get: (id: string) => api.get<Comment>(`/comments/${id}`),
-    create: (data: { media_id?: string; content_id?: string; parent_id?: string; body: string }) =>
-        api.post<Comment>("/comments", {
-            text: data.body,
-            media_id: data.media_id,
-            content_id: data.content_id,
-            parent_id: data.parent_id
-        }),
+    create: (data: { media_id?: string; content_id?: string; parent_id?: string; body: string }) => {
+        const requestData: any = {
+            text: data.body
+        };
+        if (data.media_id) {
+            requestData.media_id = parseInt(data.media_id, 10);
+        }
+        if (data.content_id) {
+            requestData.content_id = parseInt(data.content_id, 10);
+        }
+        if (data.parent_id) {
+            requestData.parent_id = parseInt(data.parent_id, 10);
+        }
+        return api.post<Comment>("/comments", requestData);
+    },
     update: (id: string, data: { body: string }) =>
         api.put<Comment>(`/comments/${id}`, {text: data.body}),
     delete: (id: string) => api.del<void>(`/comments/${id}`),

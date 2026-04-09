@@ -25,14 +25,18 @@ type Comment struct {
 func (Comment) Fields() []ent.Field {
 	return []ent.Field{
 		field.Text("text"),
-		field.UUID("uid", uuid.New()).Unique(),
+		field.UUID("uid", uuid.New()).Unique().Default(uuid.New),
 		field.Time("add_date").Default(time.Now),
+		field.Int("media_id").StorageKey("media_comments"),
+		field.Int("user_id").StorageKey("user_comments"),
 	}
 }
 
 func (Comment) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("add_date"),
+		index.Fields("media_id"),
+		index.Fields("user_id"),
 	}
 }
 
@@ -45,8 +49,18 @@ func (Comment) Annotations() []schema.Annotation {
 
 func (Comment) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("media", Media.Type).Ref("comments").Required().Unique(),
-		edge.From("user", User.Type).Ref("comments").Required().Unique(),
-		edge.To("replies", Comment.Type).From("parent").Unique(),
+		edge.From("media", Media.Type).
+			Ref("comments").
+			Field("media_id").
+			Unique().
+			Required(),
+		edge.From("user", User.Type).
+			Ref("comments").
+			Field("user_id").
+			Unique().
+			Required(),
+		edge.To("replies", Comment.Type).
+			From("parent").
+			Unique(),
 	}
 }

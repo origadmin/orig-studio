@@ -16,6 +16,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/playlist"
 	"origadmin/application/origcms/internal/data/entity/predicate"
+	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/tag"
 	"origadmin/application/origcms/internal/data/entity/user"
 
@@ -42,6 +43,8 @@ type UserQuery struct {
 	withTags          *TagQuery
 	withFavorites     *FavoriteQuery
 	withLikes         *LikeQuery
+	withSubscriptions *SubscriptionQuery
+	withSubscribers   *SubscriptionQuery
 	modifiers         []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -277,6 +280,50 @@ func (_q *UserQuery) QueryLikes() *LikeQuery {
 	return query
 }
 
+// QuerySubscriptions chains the current query on the "subscriptions" edge.
+func (_q *UserQuery) QuerySubscriptions() *SubscriptionQuery {
+	query := (&SubscriptionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(subscription.Table, subscription.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SubscriptionsTable, user.SubscriptionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySubscribers chains the current query on the "subscribers" edge.
+func (_q *UserQuery) QuerySubscribers() *SubscriptionQuery {
+	query := (&SubscriptionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(subscription.Table, subscription.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SubscribersTable, user.SubscribersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first User entity from the query.
 // Returns a *NotFoundError when no User was found.
 func (_q *UserQuery) First(ctx context.Context) (*User, error) {
@@ -478,6 +525,8 @@ func (_q *UserQuery) Clone() *UserQuery {
 		withTags:          _q.withTags.Clone(),
 		withFavorites:     _q.withFavorites.Clone(),
 		withLikes:         _q.withLikes.Clone(),
+		withSubscriptions: _q.withSubscriptions.Clone(),
+		withSubscribers:   _q.withSubscribers.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -584,6 +633,28 @@ func (_q *UserQuery) WithLikes(opts ...func(*LikeQuery)) *UserQuery {
 	return _q
 }
 
+// WithSubscriptions tells the query-builder to eager-load the nodes that are connected to
+// the "subscriptions" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithSubscriptions(opts ...func(*SubscriptionQuery)) *UserQuery {
+	query := (&SubscriptionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSubscriptions = query
+	return _q
+}
+
+// WithSubscribers tells the query-builder to eager-load the nodes that are connected to
+// the "subscribers" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithSubscribers(opts ...func(*SubscriptionQuery)) *UserQuery {
+	query := (&SubscriptionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSubscribers = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -662,7 +733,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [9]bool{
+		loadedTypes = [11]bool{
 			_q.withMedia != nil,
 			_q.withChannels != nil,
 			_q.withPlaylists != nil,
@@ -672,6 +743,8 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			_q.withTags != nil,
 			_q.withFavorites != nil,
 			_q.withLikes != nil,
+			_q.withSubscriptions != nil,
+			_q.withSubscribers != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -755,6 +828,20 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadLikes(ctx, query, nodes,
 			func(n *User) { n.Edges.Likes = []*Like{} },
 			func(n *User, e *Like) { n.Edges.Likes = append(n.Edges.Likes, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSubscriptions; query != nil {
+		if err := _q.loadSubscriptions(ctx, query, nodes,
+			func(n *User) { n.Edges.Subscriptions = []*Subscription{} },
+			func(n *User, e *Subscription) { n.Edges.Subscriptions = append(n.Edges.Subscriptions, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSubscribers; query != nil {
+		if err := _q.loadSubscribers(ctx, query, nodes,
+			func(n *User) { n.Edges.Subscribers = []*Subscription{} },
+			func(n *User, e *Subscription) { n.Edges.Subscribers = append(n.Edges.Subscribers, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -894,6 +981,9 @@ func (_q *UserQuery) loadComments(ctx context.Context, query *CommentQuery, node
 		}
 	}
 	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(comment.FieldUserID)
+	}
 	query.Where(predicate.Comment(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.CommentsColumn), fks...))
 	}))
@@ -902,13 +992,10 @@ func (_q *UserQuery) loadComments(ctx context.Context, query *CommentQuery, node
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_comments
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_comments" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.UserID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_comments" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -1122,6 +1209,66 @@ func (_q *UserQuery) loadLikes(ctx context.Context, query *LikeQuery, nodes []*U
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadSubscriptions(ctx context.Context, query *SubscriptionQuery, nodes []*User, init func(*User), assign func(*User, *Subscription)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(subscription.FieldSubscriberID)
+	}
+	query.Where(predicate.Subscription(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.SubscriptionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.SubscriberID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "subscriber_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadSubscribers(ctx context.Context, query *SubscriptionQuery, nodes []*User, init func(*User), assign func(*User, *Subscription)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(subscription.FieldChannelID)
+	}
+	query.Where(predicate.Subscription(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.SubscribersColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ChannelID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "channel_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

@@ -78,9 +78,16 @@ export const clearAuth = () => {
 
 export const isTokenExpired = (): boolean => {
     const token = localStorage.getItem(TOKEN_KEY);
-    const expiresAt = localStorage.getItem("token_expires_at");
-    if (!token || !expiresAt) return true; // no token or expiry → assume expired
-    return Date.now() > parseInt(expiresAt, 10);
+    if (!token) return true;
+
+    try {
+        // 解析 JWT token 来获取 exp 字段
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (!payload.exp) return true;
+        return Date.now() > payload.exp * 1000;
+    } catch {
+        return true;
+    }
 };
 
 // 创建 Axios 实例

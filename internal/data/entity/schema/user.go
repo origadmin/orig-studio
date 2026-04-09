@@ -77,5 +77,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("tags", Tag.Type),
 		edge.To("favorites", Favorite.Type),
 		edge.To("likes", Like.Type),
+		edge.To("subscriptions", Subscription.Type),
+		edge.To("subscribers", Subscription.Type),
 	}
 }

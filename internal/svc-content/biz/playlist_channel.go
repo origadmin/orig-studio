@@ -44,6 +44,7 @@ type PlaylistRepo interface {
 	ListAll(ctx context.Context, page, pageSize int) ([]*Playlist, int, error)
 	AddMedia(ctx context.Context, playlistID, mediaID int) error
 	RemoveMedia(ctx context.Context, playlistID, mediaID int) error
+	ReorderMedia(ctx context.Context, playlistID int, mediaOrders map[int]int) error
 }
 
 // ChannelRepo defines storage operations for channels.
@@ -123,6 +124,28 @@ func (uc *PlaylistChannelUseCase) AddMediaToPlaylist(ctx context.Context, playli
 		return fmt.Errorf("permission denied")
 	}
 	return uc.playlistRepo.AddMedia(ctx, playlistID, mediaID)
+}
+
+func (uc *PlaylistChannelUseCase) RemoveMediaFromPlaylist(ctx context.Context, playlistID, mediaID int, userID int, isAdmin bool) error {
+	existing, err := uc.playlistRepo.Get(ctx, playlistID)
+	if err != nil {
+		return err
+	}
+	if existing.UserID != userID && !isAdmin {
+		return fmt.Errorf("permission denied")
+	}
+	return uc.playlistRepo.RemoveMedia(ctx, playlistID, mediaID)
+}
+
+func (uc *PlaylistChannelUseCase) ReorderMediaInPlaylist(ctx context.Context, playlistID int, mediaOrders map[int]int, userID int, isAdmin bool) error {
+	existing, err := uc.playlistRepo.Get(ctx, playlistID)
+	if err != nil {
+		return err
+	}
+	if existing.UserID != userID && !isAdmin {
+		return fmt.Errorf("permission denied")
+	}
+	return uc.playlistRepo.ReorderMedia(ctx, playlistID, mediaOrders)
 }
 
 // Channel methods

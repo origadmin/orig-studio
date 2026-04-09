@@ -147,6 +147,22 @@ func (r *playlistRepo) RemoveMedia(ctx context.Context, playlistID, mediaID int)
 	return err
 }
 
+func (r *playlistRepo) ReorderMedia(ctx context.Context, playlistID int, mediaOrders map[int]int) error {
+	for mediaID, newOrder := range mediaOrders {
+		err := r.data.db.MediaPlaylist.Update().
+			Where(
+				mediaplaylist.PlaylistIDEQ(playlistID),
+				mediaplaylist.MediaIDEQ(mediaID),
+			).
+			SetOrdering(newOrder).
+			Exec(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (r *channelRepo) Create(ctx context.Context, ch *biz.Channel) (*biz.Channel, error) {
 	ent, err := r.data.db.Channel.Create().
 		SetTitle(ch.Title).

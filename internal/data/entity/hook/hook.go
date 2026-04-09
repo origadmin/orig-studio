@@ -164,6 +164,18 @@ func (f PlaylistFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Val
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.PlaylistMutation", m)
 }
 
+// The SubscriptionFunc type is an adapter to allow the use of ordinary
+// function as Subscription mutator.
+type SubscriptionFunc func(context.Context, *entity.SubscriptionMutation) (entity.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SubscriptionFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Value, error) {
+	if mv, ok := m.(*entity.SubscriptionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.SubscriptionMutation", m)
+}
+
 // The TagFunc type is an adapter to allow the use of ordinary
 // function as Tag mutator.
 type TagFunc func(context.Context, *entity.TagMutation) (entity.Value, error)

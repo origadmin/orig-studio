@@ -35,6 +35,14 @@ func (_c *CommentCreate) SetUID(v uuid.UUID) *CommentCreate {
 	return _c
 }
 
+// SetNillableUID sets the "uid" field if the given value is not nil.
+func (_c *CommentCreate) SetNillableUID(v *uuid.UUID) *CommentCreate {
+	if v != nil {
+		_c.SetUID(*v)
+	}
+	return _c
+}
+
 // SetAddDate sets the "add_date" field.
 func (_c *CommentCreate) SetAddDate(v time.Time) *CommentCreate {
 	_c.mutation.SetAddDate(v)
@@ -49,21 +57,21 @@ func (_c *CommentCreate) SetNillableAddDate(v *time.Time) *CommentCreate {
 	return _c
 }
 
-// SetMediaID sets the "media" edge to the Media entity by ID.
-func (_c *CommentCreate) SetMediaID(id int) *CommentCreate {
-	_c.mutation.SetMediaID(id)
+// SetMediaID sets the "media_id" field.
+func (_c *CommentCreate) SetMediaID(v int) *CommentCreate {
+	_c.mutation.SetMediaID(v)
+	return _c
+}
+
+// SetUserID sets the "user_id" field.
+func (_c *CommentCreate) SetUserID(v int) *CommentCreate {
+	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetMedia sets the "media" edge to the Media entity.
 func (_c *CommentCreate) SetMedia(v *Media) *CommentCreate {
 	return _c.SetMediaID(v.ID)
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_c *CommentCreate) SetUserID(id int) *CommentCreate {
-	_c.mutation.SetUserID(id)
-	return _c
 }
 
 // SetUser sets the "user" edge to the User entity.
@@ -140,6 +148,10 @@ func (_c *CommentCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *CommentCreate) defaults() {
+	if _, ok := _c.mutation.UID(); !ok {
+		v := comment.DefaultUID()
+		_c.mutation.SetUID(v)
+	}
 	if _, ok := _c.mutation.AddDate(); !ok {
 		v := comment.DefaultAddDate()
 		_c.mutation.SetAddDate(v)
@@ -156,6 +168,12 @@ func (_c *CommentCreate) check() error {
 	}
 	if _, ok := _c.mutation.AddDate(); !ok {
 		return &ValidationError{Name: "add_date", err: errors.New(`entity: missing required field "Comment.add_date"`)}
+	}
+	if _, ok := _c.mutation.MediaID(); !ok {
+		return &ValidationError{Name: "media_id", err: errors.New(`entity: missing required field "Comment.media_id"`)}
+	}
+	if _, ok := _c.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`entity: missing required field "Comment.user_id"`)}
 	}
 	if len(_c.mutation.MediaIDs()) == 0 {
 		return &ValidationError{Name: "media", err: errors.New(`entity: missing required edge "Comment.media"`)}
@@ -215,7 +233,7 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.media_comments = &nodes[0]
+		_node.MediaID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
@@ -232,7 +250,7 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_comments = &nodes[0]
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {

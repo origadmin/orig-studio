@@ -71,6 +71,16 @@ func AddDate(v time.Time) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldAddDate, v))
 }
 
+// MediaID applies equality check predicate on the "media_id" field. It's identical to MediaIDEQ.
+func MediaID(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldMediaID, v))
+}
+
+// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
+func UserID(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldUserID, v))
+}
+
 // TextEQ applies the EQ predicate on the "text" field.
 func TextEQ(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldText, v))
@@ -214,6 +224,46 @@ func AddDateLT(v time.Time) predicate.Comment {
 // AddDateLTE applies the LTE predicate on the "add_date" field.
 func AddDateLTE(v time.Time) predicate.Comment {
 	return predicate.Comment(sql.FieldLTE(FieldAddDate, v))
+}
+
+// MediaIDEQ applies the EQ predicate on the "media_id" field.
+func MediaIDEQ(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldMediaID, v))
+}
+
+// MediaIDNEQ applies the NEQ predicate on the "media_id" field.
+func MediaIDNEQ(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldNEQ(FieldMediaID, v))
+}
+
+// MediaIDIn applies the In predicate on the "media_id" field.
+func MediaIDIn(vs ...int) predicate.Comment {
+	return predicate.Comment(sql.FieldIn(FieldMediaID, vs...))
+}
+
+// MediaIDNotIn applies the NotIn predicate on the "media_id" field.
+func MediaIDNotIn(vs ...int) predicate.Comment {
+	return predicate.Comment(sql.FieldNotIn(FieldMediaID, vs...))
+}
+
+// UserIDEQ applies the EQ predicate on the "user_id" field.
+func UserIDEQ(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldUserID, v))
+}
+
+// UserIDNEQ applies the NEQ predicate on the "user_id" field.
+func UserIDNEQ(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldNEQ(FieldUserID, v))
+}
+
+// UserIDIn applies the In predicate on the "user_id" field.
+func UserIDIn(vs ...int) predicate.Comment {
+	return predicate.Comment(sql.FieldIn(FieldUserID, vs...))
+}
+
+// UserIDNotIn applies the NotIn predicate on the "user_id" field.
+func UserIDNotIn(vs ...int) predicate.Comment {
+	return predicate.Comment(sql.FieldNotIn(FieldUserID, vs...))
 }
 
 // HasMedia applies the HasEdge predicate on the "media" edge.

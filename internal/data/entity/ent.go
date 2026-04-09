@@ -19,6 +19,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/mediatag"
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/playlist"
+	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/tag"
 	"origadmin/application/origcms/internal/data/entity/uploadsession"
 	"origadmin/application/origcms/internal/data/entity/user"
@@ -101,6 +102,7 @@ func checkColumn(t, c string) error {
 			mediatag.Table:      mediatag.ValidColumn,
 			notification.Table:  notification.ValidColumn,
 			playlist.Table:      playlist.ValidColumn,
+			subscription.Table:  subscription.ValidColumn,
 			tag.Table:           tag.ValidColumn,
 			uploadsession.Table: uploadsession.ValidColumn,
 			user.Table:          user.ValidColumn,

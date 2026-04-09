@@ -24,23 +24,36 @@ func NewPlaylistHandler(uc *biz.PlaylistChannelUseCase, jwt *auth.Manager) *Play
 func (h *PlaylistHandler) Register(group *gin.RouterGroup) {
 	playlists := group.Group("/playlists")
 	{
-		// Public read routes
+		// ================================
+		// 1. STATIC ROUTES (NO PARAMETERS)
+		// ================================
+		// Collection Route
 		playlists.GET("", h.listPlaylists)
-		playlists.GET("/:id", h.getPlaylist)
 
 		// Protected write routes
 		protected := playlists.Group("")
 		protected.Use(JWTMiddleware(h.jwt))
 		{
 			protected.POST("", h.createPlaylist)
-			protected.PUT("/:id", h.updatePlaylist)
-			protected.DELETE("/:id", h.deletePlaylist)
-			// Media management within playlist
-			protected.POST("/:id/media", h.addMedia)
-			protected.DELETE("/:id/media/:mediaId", h.removeMedia)
-
-			// User's playlists
+			// User's playlists (MUST be BEFORE :id parameter route!)
 			protected.GET("/my", h.myPlaylists)
+		}
+
+		// ================================
+		// 2. PARAMETER ROUTES (WITH :id)
+		// ================================
+		playlists.GET("/:id", h.getPlaylist)
+
+		// Protected parameter routes
+		protectedParam := playlists.Group("")
+		protectedParam.Use(JWTMiddleware(h.jwt))
+		{
+			protectedParam.PUT("/:id", h.updatePlaylist)
+			protectedParam.DELETE("/:id", h.deletePlaylist)
+			// Media management within playlist
+			protectedParam.POST("/:id/media", h.addMedia)
+			protectedParam.DELETE("/:id/media/:mediaId", h.removeMedia)
+			protectedParam.PUT("/:id/reorder", h.reorderMedia)
 		}
 	}
 }
@@ -241,23 +254,61 @@ func (h *PlaylistHandler) addMedia(c *gin.Context) {
 
 // removeMedia removes a media item from a playlist.
 func (h *PlaylistHandler) removeMedia(c *gin.Context) {
-	_, exists := c.Get("claims")
+	val, exists := c.Get("claims")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
+	claims := val.(*auth.Claims)
 
-	_, err := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid playlist ID"})
 		return
 	}
-	_, err = strconv.Atoi(c.Param("mediaId"))
+	mediaId, err := strconv.Atoi(c.Param("mediaId"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid media ID"})
 		return
 	}
 
-	// removeMedia not fully implemented in UseCase yet
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "not implemented in UseCase"})
+	err = h.uc.RemoveMediaFromPlaylist(c.Request.Context(), id, mediaId, int(claims.UserID), claims.IsStaff)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "media removed from playlist"})
+}
+
+// reorderMedia reorders media items in a playlist.
+func (h *PlaylistHandler) reorderMedia(c *gin.Context) {
+	val, exists := c.Get("claims")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	claims := val.(*auth.Claims)
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid playlist ID"})
+		return
+	}
+
+	var input struct {
+		MediaOrders map[int]int `json:"media_orders" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = h.uc.ReorderMediaInPlaylist(c.Request.Context(), id, input.MediaOrders, int(claims.UserID), claims.IsStaff)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true})
 }

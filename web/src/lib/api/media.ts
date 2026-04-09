@@ -1,4 +1,5 @@
 // API 客户端 - 媒体模块
+// 对应后端 /api/v1/media 路径
 // 类型定义对齐后端 ent entity JSON 输出
 import {api, getAccessToken, API_BASE_URL} from "../request";
 
@@ -156,6 +157,68 @@ export interface EncodingTaskListResponse {
     items: (EncodingTask & { profile_name?: string })[];
 }
 
+// ==================== Encoding Module ====================
+export const encodingApi = {
+    // 获取转码状态统计
+    getStatus: () => api.get<{
+        processing_count: number;
+        pending_count: number;
+        failed_count: number;
+        success_count: number;
+    }>("/media/encoding/status"),
+
+    // 获取转码事件流（SSE）
+    getSSEUrl: (mediaId?: number) => {
+        return `${API_BASE_URL}/media/encoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
+    },
+
+    // 获取所有转码任务（扁平列表）
+    getTasks: (params?: {
+        status?: string;
+        page?: number;
+        page_size?: number;
+        media_id?: number;
+    }) => api.get<EncodingTaskListResponse>("/media/encoding/tasks", params as Record<string, unknown>),
+
+    // 重试单个任务
+    retryTask: (taskId: number) => {
+        return fetch(`${API_BASE_URL}/media/encoding/retry?task_id=${taskId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...(getAccessToken() ? {Authorization: `Bearer ${getAccessToken()}`} : {}),
+            },
+        }).then((r) => !r.ok ? r.json().then((e) => Promise.reject(e)) : r.json());
+    },
+
+    // 重试所有失败任务
+    retryAllFailed: (mediaId?: number) => {
+        const url = mediaId
+            ? `${API_BASE_URL}/media/encoding/retry-all?media_id=${mediaId}`
+            : `${API_BASE_URL}/media/encoding/retry-all`;
+        return fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...(getAccessToken() ? {Authorization: `Bearer ${getAccessToken()}`} : {}),
+            },
+        }).then((r) => !r.ok ? r.json().then((e) => Promise.reject(e)) : r.json());
+    },
+
+    // 编码配置管理
+    profiles: {
+        list: () => api.get<{ profiles: EncodeProfile[] }>("/media/encoding/profiles"),
+        get: (id: number) => api.get<{ profile: EncodeProfile }>(`/media/encoding/profiles/${id}`),
+        create: (data: Partial<EncodeProfile>) => api.post<{
+            profile: EncodeProfile
+        }>("/media/encoding/profiles", data),
+        update: (id: number, data: Partial<EncodeProfile>) =>
+            api.put<{ profile: EncodeProfile }>(`/media/encoding/profiles/${id}`, data),
+        delete: (id: number) => api.del<void>(`/media/encoding/profiles/${id}`),
+    },
+};
+
+// ==================== Media API ====================
 export const mediaApi = {
     // 获取媒体列表（公开，默认只返回 active 状态）
     list: (params?: {
@@ -173,7 +236,6 @@ export const mediaApi = {
 
     // 获取媒体详情（公开，自增播放量）
     get: (id: number | string) => {
-        // 清理 id：移除引号和空格
         const cleanId = String(id).replace(/["']/g, '').trim();
         return api.get<Media>(`/media/${cleanId}`);
     },
@@ -187,7 +249,7 @@ export const mediaApi = {
         keyword?: string;
     }) => api.get<MediaListResponse>("/media", params as Record<string, unknown>),
 
-    // 上传媒体文件（需要 JWT，支持进度回调，使用 XHR 支持 onUploadProgress）
+    // 上传媒体文件（需要 JWT，支持进度回调）
     upload: (
         file: File,
         metadata: {
@@ -207,7 +269,6 @@ export const mediaApi = {
         if (metadata.tags?.length) formData.append("tags", metadata.tags.join(","));
         if (metadata.privacy) formData.append("privacy", String(metadata.privacy));
 
-        // 使用从request.ts导入的API_BASE_URL
         const token = getAccessToken();
 
         return new Promise<{ data: Media }>((resolve, reject) => {
@@ -257,72 +318,44 @@ export const mediaApi = {
     // 删除媒体（需要 JWT + owner 权限）
     delete: (id: number | string) => api.del<void>(`/media/${id}`),
 
-    // 转码预设管理
-    listProfiles: () => api.get<{ profiles: EncodeProfile[] }>("/media/profiles"),
-    getProfile: (id: number) => api.get<{ profile: EncodeProfile }>(`/media/profiles/${id}`),
-    createProfile: (data: Partial<EncodeProfile>) => api.post<{ profile: EncodeProfile }>("/media/profiles", data),
-    updateProfile: (id: number, data: Partial<EncodeProfile>) => api.put<{
-        profile: EncodeProfile
-    }>(`/media/profiles/${id}`, data),
-    deleteProfile: (id: number) => api.del<void>(`/media/profiles/${id}`),
+    // 文件操作
+    download: (id: number | string) => api.get<{ download_url: string }>(`/media/${id}/download`),
+    stream: (id: number | string) => api.get<{ stream_url: string }>(`/media/${id}/stream`),
+    getThumbnail: (id: number | string) => api.get<{ thumbnail_url: string }>(`/media/${id}/thumbnail`),
 
-    // Transcoding status — filtered + paginated (grouped by media, for media management page)
+    // 转码相关（单个媒体）
+    encoding: {
+        // 获取媒体转码任务
+        getTasks: (mediaId: number | string) =>
+            api.get<{ tasks: EncodingTask[] }>(`/media/${mediaId}/encoding/tasks`),
+
+        // 获取媒体转码变体
+        getVariants: (mediaId: number | string) =>
+            api.get<MediaVariantSummary>(`/media/${mediaId}/encoding/variants`),
+
+        // 重试媒体转码
+        retry: (mediaId: number | string) =>
+            api.post<{ message: string; media_id: number }>(`/media/${mediaId}/encoding/retry`),
+    },
+
+    // 旧版转码状态（兼容）
     getTranscodingStatus: (params?: {
         status?: string;
         page?: number;
         page_size?: number;
-    }) => api.get<TranscodingStatusResponse>("/media/transcoding/status", params as Record<string, unknown>),
+    }) => api.get<TranscodingStatusResponse>("/media/encoding/status", params as Record<string, unknown>),
 
-    // Flat encoding task list — one row per task (for TranscodingStatus page)
-    getEncodingTasks: (params?: {
-        status?: string;
-        page?: number;
-        page_size?: number;
-        media_id?: number;
-    }) => api.get<EncodingTaskListResponse>("/media/encoding/tasks", params as Record<string, unknown>),
-
-    // List tasks for a specific media
-    listTasks: (mediaId: number) => api.get<{ tasks: EncodingTask[] }>(`/media/${mediaId}/tasks`),
-
-    // SSE 订阅地址
-    getSSEUrl: (mediaId?: number) => {
-        return `${API_BASE_URL}/media/transcoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
-    },
-
-    // Retry transcoding for a failed/stuck media item (legacy — media-level)
-    retryTranscode: (mediaId: number) =>
-        api.post<{ message: string; media_id: number }>(`/media/${mediaId}/retry`),
-
-    // Per-task retry: reset a single failed task to pending
-    retryTask: (taskId: number) => {
-        return fetch(`${API_BASE_URL}/media/retry?task_id=${taskId}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                ...(getAccessToken() ? {Authorization: `Bearer ${getAccessToken()}`} : {}),
-            },
-        }).then((r) => !r.ok ? r.json().then((e) => Promise.reject(e)) : r.json());
-    },
-
-    // Media variant summary (for media management page)
-    getVariants: (mediaId: number) =>
-        api.get<MediaVariantSummary>(`/media/${mediaId}/variants`),
-
-    // Bulk retry all failed tasks for a media
-    retryAllFailed: (mediaId: number) => {
-        return fetch(`${API_BASE_URL}/media/retry-all-failed?media_id=${mediaId}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                ...(getAccessToken() ? {Authorization: `Bearer ${getAccessToken()}`} : {}),
-            },
-        }).then((r) => !r.ok ? r.json().then((e) => Promise.reject(e)) : r.json());
-    },
-
-    // 获取分享链接
-    getShareUrl: (mediaId: string) => api.get<{ url: string }>(`/media/${mediaId}/share`),
-
-    // 记录分享事件
+    // 获取分享链接（含社交媒体集成）
+    getShareUrl: (mediaId: string, title?: string) =>
+        api.get<{
+            url: string;
+            title: string;
+            twitter: string;
+            facebook: string;
+            linkedin: string;
+            whatsapp: string;
+            telegram: string;
+        }>(`/media/${mediaId}/share`, title ? {title} : {}),
     share: (mediaId: string) => api.post<{ success: boolean }>(`/media/${mediaId}/share`),
 };
 
@@ -354,4 +387,46 @@ export interface VariantInfo {
     error_message?: string;
 }
 
-
+// 为了保持向后兼容，导出 encodingApi 的方法到 mediaApi
+// 这些将在未来版本中移除
+export const legacyMediaApi = {
+    // 旧版路径 - 将在未来版本中移除
+    listProfiles: () => api.get<{ profiles: EncodeProfile[] }>("/media/profiles"),
+    getProfile: (id: number) => api.get<{ profile: EncodeProfile }>(`/media/profiles/${id}`),
+    createProfile: (data: Partial<EncodeProfile>) => api.post<{ profile: EncodeProfile }>("/media/profiles", data),
+    updateProfile: (id: number, data: Partial<EncodeProfile>) =>
+        api.put<{ profile: EncodeProfile }>(`/media/profiles/${id}`, data),
+    deleteProfile: (id: number) => api.del<void>(`/media/profiles/${id}`),
+    getEncodingTasks: (params?: {
+        status?: string;
+        page?: number;
+        page_size?: number;
+        media_id?: number;
+    }) => api.get<EncodingTaskListResponse>("/media/encoding/tasks", params as Record<string, unknown>),
+    listTasks: (mediaId: number) => api.get<{ tasks: EncodingTask[] }>(`/media/${mediaId}/tasks`),
+    retryTranscode: (mediaId: number) =>
+        api.post<{ message: string; media_id: number }>(`/media/${mediaId}/retry`),
+    retryTask: (taskId: number) => {
+        return fetch(`${API_BASE_URL}/media/retry?task_id=${taskId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...(getAccessToken() ? {Authorization: `Bearer ${getAccessToken()}`} : {}),
+            },
+        }).then((r) => !r.ok ? r.json().then((e) => Promise.reject(e)) : r.json());
+    },
+    retryAllFailed: (mediaId: number) => {
+        return fetch(`${API_BASE_URL}/media/retry-all-failed?media_id=${mediaId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...(getAccessToken() ? {Authorization: `Bearer ${getAccessToken()}`} : {}),
+            },
+        }).then((r) => !r.ok ? r.json().then((e) => Promise.reject(e)) : r.json());
+    },
+    getVariants: (mediaId: number) =>
+        api.get<MediaVariantSummary>(`/media/${mediaId}/variants`),
+    getSSEUrl: (mediaId?: number) => {
+        return `${API_BASE_URL}/media/transcoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
+    },
+};

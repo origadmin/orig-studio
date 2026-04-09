@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -24,8 +25,19 @@ func (h *ShareHandler) Register(group *gin.RouterGroup) {
 	// Share routes are now defined in media.go with consistent :id parameter
 }
 
-// getShareUrl returns the share URL for a media item.
-// GET /media/:mediaId/share → {"url": string}
+// SocialShareLinks contains all social media share links
+type SocialShareLinks struct {
+	Url      string `json:"url"`
+	Title    string `json:"title"`
+	Twitter  string `json:"twitter"`
+	Facebook string `json:"facebook"`
+	LinkedIn string `json:"linkedin"`
+	WhatsApp string `json:"whatsapp"`
+	Telegram string `json:"telegram"`
+}
+
+// getShareUrl returns the share URL and social media links for a media item.
+// GET /media/:mediaId/share → {"url": string, "twitter": string, ...}
 func (h *ShareHandler) getShareUrl(c *gin.Context) {
 	mediaId, err := strconv.Atoi(c.Param("mediaId"))
 	if err != nil {
@@ -41,9 +53,23 @@ func (h *ShareHandler) getShareUrl(c *gin.Context) {
 		shareUrl = "https://" + shareUrl
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"url": shareUrl,
-	})
+	// Get title from query or use default
+	title := c.DefaultQuery("title", "Check out this video!")
+	encodedUrl := url.QueryEscape(shareUrl)
+	encodedTitle := url.QueryEscape(title)
+
+	// Generate social media share links
+	socialLinks := SocialShareLinks{
+		Url:      shareUrl,
+		Title:    title,
+		Twitter:  "https://twitter.com/intent/tweet?url=" + encodedUrl + "&text=" + encodedTitle,
+		Facebook: "https://www.facebook.com/sharer/sharer.php?u=" + encodedUrl,
+		LinkedIn: "https://www.linkedin.com/sharing/share-offsite/?url=" + encodedUrl,
+		WhatsApp: "https://wa.me/?text=" + encodedTitle + "%20" + encodedUrl,
+		Telegram: "https://t.me/share/url?url=" + encodedUrl + "&text=" + encodedTitle,
+	}
+
+	c.JSON(http.StatusOK, socialLinks)
 }
 
 // recordShare records a share event.

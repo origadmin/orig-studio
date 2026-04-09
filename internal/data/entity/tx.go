@@ -38,6 +38,8 @@ type Tx struct {
 	Notification *NotificationClient
 	// Playlist is the client for interacting with the Playlist builders.
 	Playlist *PlaylistClient
+	// Subscription is the client for interacting with the Subscription builders.
+	Subscription *SubscriptionClient
 	// Tag is the client for interacting with the Tag builders.
 	Tag *TagClient
 	// UploadSession is the client for interacting with the UploadSession builders.
@@ -188,6 +190,7 @@ func (tx *Tx) init() {
 	tx.MediaTag = NewMediaTagClient(tx.config)
 	tx.Notification = NewNotificationClient(tx.config)
 	tx.Playlist = NewPlaylistClient(tx.config)
+	tx.Subscription = NewSubscriptionClient(tx.config)
 	tx.Tag = NewTagClient(tx.config)
 	tx.UploadSession = NewUploadSessionClient(tx.config)
 	tx.User = NewUserClient(tx.config)

@@ -489,7 +489,7 @@ func (_q *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 			_q.withReplies != nil,
 		}
 	)
-	if _q.withMedia != nil || _q.withUser != nil || _q.withParent != nil {
+	if _q.withParent != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -548,10 +548,7 @@ func (_q *CommentQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes 
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Comment)
 	for i := range nodes {
-		if nodes[i].media_comments == nil {
-			continue
-		}
-		fk := *nodes[i].media_comments
+		fk := nodes[i].MediaID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -568,7 +565,7 @@ func (_q *CommentQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes 
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "media_comments" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "media_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -580,10 +577,7 @@ func (_q *CommentQuery) loadUser(ctx context.Context, query *UserQuery, nodes []
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Comment)
 	for i := range nodes {
-		if nodes[i].user_comments == nil {
-			continue
-		}
-		fk := *nodes[i].user_comments
+		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -600,7 +594,7 @@ func (_q *CommentQuery) loadUser(ctx context.Context, query *UserQuery, nodes []
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_comments" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -699,6 +693,12 @@ func (_q *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != comment.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withMedia != nil {
+			_spec.Node.AddColumnOnce(comment.FieldMediaID)
+		}
+		if _q.withUser != nil {
+			_spec.Node.AddColumnOnce(comment.FieldUserID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

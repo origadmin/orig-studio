@@ -21,6 +21,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/playlist"
 	"origadmin/application/origcms/internal/data/entity/predicate"
+	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/tag"
 	"origadmin/application/origcms/internal/data/entity/uploadsession"
 	"origadmin/application/origcms/internal/data/entity/user"
@@ -435,6 +436,33 @@ func (f TraversePlaylist) Traverse(ctx context.Context, q entity.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *entity.PlaylistQuery", q)
 }
 
+// The SubscriptionFunc type is an adapter to allow the use of ordinary function as a Querier.
+type SubscriptionFunc func(context.Context, *entity.SubscriptionQuery) (entity.Value, error)
+
+// Query calls f(ctx, q).
+func (f SubscriptionFunc) Query(ctx context.Context, q entity.Query) (entity.Value, error) {
+	if q, ok := q.(*entity.SubscriptionQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *entity.SubscriptionQuery", q)
+}
+
+// The TraverseSubscription type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseSubscription func(context.Context, *entity.SubscriptionQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseSubscription) Intercept(next entity.Querier) entity.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseSubscription) Traverse(ctx context.Context, q entity.Query) error {
+	if q, ok := q.(*entity.SubscriptionQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *entity.SubscriptionQuery", q)
+}
+
 // The TagFunc type is an adapter to allow the use of ordinary function as a Querier.
 type TagFunc func(context.Context, *entity.TagQuery) (entity.Value, error)
 
@@ -545,6 +573,8 @@ func NewQuery(q entity.Query) (Query, error) {
 		return &query[*entity.NotificationQuery, predicate.Notification, notification.OrderOption]{typ: entity.TypeNotification, tq: q}, nil
 	case *entity.PlaylistQuery:
 		return &query[*entity.PlaylistQuery, predicate.Playlist, playlist.OrderOption]{typ: entity.TypePlaylist, tq: q}, nil
+	case *entity.SubscriptionQuery:
+		return &query[*entity.SubscriptionQuery, predicate.Subscription, subscription.OrderOption]{typ: entity.TypeSubscription, tq: q}, nil
 	case *entity.TagQuery:
 		return &query[*entity.TagQuery, predicate.Tag, tag.OrderOption]{typ: entity.TypeTag, tq: q}, nil
 	case *entity.UploadSessionQuery:

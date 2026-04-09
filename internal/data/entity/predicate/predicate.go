@@ -45,6 +45,9 @@ type Notification func(*sql.Selector)
 // Playlist is the predicate function for playlist builders.
 type Playlist func(*sql.Selector)
 
+// Subscription is the predicate function for subscription builders.
+type Subscription func(*sql.Selector)
+
 // Tag is the predicate function for tag builders.
 type Tag func(*sql.Selector)
 
