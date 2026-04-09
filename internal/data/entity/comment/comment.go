@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 )
 
 const (
@@ -20,6 +21,10 @@ const (
 	FieldUID = "uid"
 	// FieldAddDate holds the string denoting the add_date field in the database.
 	FieldAddDate = "add_date"
+	// FieldMediaID holds the string denoting the media_id field in the database.
+	FieldMediaID = "media_comments"
+	// FieldUserID holds the string denoting the user_id field in the database.
+	FieldUserID = "user_comments"
 	// EdgeMedia holds the string denoting the media edge name in mutations.
 	EdgeMedia = "media"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -60,14 +65,14 @@ var Columns = []string{
 	FieldText,
 	FieldUID,
 	FieldAddDate,
+	FieldMediaID,
+	FieldUserID,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "files_comment"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"comment_replies",
-	"media_comments",
-	"user_comments",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -86,6 +91,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultUID holds the default value on creation for the "uid" field.
+	DefaultUID func() uuid.UUID
 	// DefaultAddDate holds the default value on creation for the "add_date" field.
 	DefaultAddDate func() time.Time
 )
@@ -111,6 +118,16 @@ func ByUID(opts ...sql.OrderTermOption) OrderOption {
 // ByAddDate orders the results by the add_date field.
 func ByAddDate(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAddDate, opts...).ToFunc()
+}
+
+// ByMediaID orders the results by the media_id field.
+func ByMediaID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMediaID, opts...).ToFunc()
+}
+
+// ByUserID orders the results by the user_id field.
+func ByUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
 // ByMediaField orders the results by media field.

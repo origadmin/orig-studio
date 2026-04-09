@@ -42,6 +42,14 @@ type UserRepo interface {
 
 	// SetUserRole updates a user's role directly via ent.
 	SetUserRole(context.Context, int64, string) error
+
+	// Subscription methods
+	IsSubscribed(ctx context.Context, subscriberID, channelID int) (bool, error)
+	GetSubscriberCount(ctx context.Context, channelID int) (int, error)
+	Subscribe(ctx context.Context, subscriberID, channelID int) error
+	Unsubscribe(ctx context.Context, subscriberID, channelID int) error
+	GetSubscriptions(ctx context.Context, subscriberID int, page, pageSize int) ([]*types.User, int, error)
+	GetSubscribers(ctx context.Context, channelID int, page, pageSize int) ([]*types.User, int, error)
 }
 
 // UserQueryOption specifies options for querying users.

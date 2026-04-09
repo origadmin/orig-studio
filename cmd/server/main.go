@@ -42,6 +42,7 @@ import (
 
 	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 	contentdata "origadmin/application/origcms/internal/svc-content/data"
+	systemdata "origadmin/application/origcms/internal/svc-system/data"
 )
 
 var (
@@ -235,6 +236,13 @@ func main() {
 	statsHandler := server.NewStatsHandler(mediaUC, likeFavoriteUC, jwtManager)
 	searchHandler := server.NewSearchHandler(mediaUC)
 
+	// Me handler for /me routes
+	meHandler := server.NewMeHandler(userUC, likeFavoriteUC, playlistChannelUC, jwtManager)
+
+	// System handler with stats
+	statsRepo := systemdata.NewStatsRepo(db)
+	systemHandler := server.NewSystemHandler(jwtManager, statsRepo)
+
 	// ── 5. Gin router ───────────────────────────────────────────────
 	if getEnv("GIN_MODE", "debug") == "release" {
 		gin.SetMode(gin.ReleaseMode)
@@ -279,6 +287,8 @@ func main() {
 		shareHandler,
 		statsHandler,
 		searchHandler,
+		meHandler,
+		systemHandler,
 	)
 
 	// ── 6. Start server ─────────────────────────────────────────────

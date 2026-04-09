@@ -13,6 +13,7 @@ import (
 
 	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"origadmin/application/origcms/internal/svc-user/dto"
 )
@@ -276,4 +277,124 @@ func (r *userRepo) GetEntity(ctx context.Context, id int64) (*entity.User, error
 // SetUserRole updates a user's role field directly.
 func (r *userRepo) SetUserRole(ctx context.Context, id int64, role string) error {
 	return r.db.User.UpdateOneID(int(id)).SetRole(user.Role(role)).Exec(ctx)
+}
+
+// ==================== Subscription Methods ====================
+
+// IsSubscribed checks if a user is subscribed to a channel
+func (r *userRepo) IsSubscribed(ctx context.Context, subscriberID, channelID int) (bool, error) {
+	count, err := r.db.Subscription.Query().
+		Where(
+			subscription.SubscriberID(subscriberID),
+			subscription.ChannelID(channelID),
+		).
+		Count(ctx)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+// GetSubscriberCount gets the number of subscribers for a channel
+func (r *userRepo) GetSubscriberCount(ctx context.Context, channelID int) (int, error) {
+	count, err := r.db.Subscription.Query().
+		Where(subscription.ChannelID(channelID)).
+		Count(ctx)
+	return count, err
+}
+
+// Subscribe adds a subscription
+func (r *userRepo) Subscribe(ctx context.Context, subscriberID, channelID int) error {
+	// Check if already subscribed
+	exists, err := r.IsSubscribed(ctx, subscriberID, channelID)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return nil // Already subscribed, no error
+	}
+
+	_, err = r.db.Subscription.Create().
+		SetSubscriberID(subscriberID).
+		SetChannelID(channelID).
+		Save(ctx)
+	return err
+}
+
+// Unsubscribe removes a subscription
+func (r *userRepo) Unsubscribe(ctx context.Context, subscriberID, channelID int) error {
+	// Check if subscription exists
+	exists, err := r.IsSubscribed(ctx, subscriberID, channelID)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return nil // Not subscribed, nothing to do
+	}
+
+	_, err = r.db.Subscription.Delete().
+		Where(
+			subscription.SubscriberID(subscriberID),
+			subscription.ChannelID(channelID),
+		).
+		Exec(ctx)
+	return err
+}
+
+// GetSubscriptions gets all channels a user is subscribed to
+func (r *userRepo) GetSubscriptions(ctx context.Context, subscriberID int, page, pageSize int) ([]*types.User, int, error) {
+	subs, err := r.db.Subscription.Query().
+		Where(subscription.SubscriberID(subscriberID)).
+		WithChannel().
+		Offset((page - 1) * pageSize).
+		Limit(pageSize).
+		All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	total, err := r.db.Subscription.Query().
+		Where(subscription.SubscriberID(subscriberID)).
+		Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	result := make([]*types.User, len(subs))
+	for i, sub := range subs {
+		if channel := sub.Edges.Channel; channel != nil {
+			result[i] = convertUserToProto(channel)
+		}
+	}
+
+	return result, total, nil
+}
+
+// GetSubscribers gets all subscribers for a channel
+func (r *userRepo) GetSubscribers(ctx context.Context, channelID int, page, pageSize int) ([]*types.User, int, error) {
+	subs, err := r.db.Subscription.Query().
+		Where(subscription.ChannelID(channelID)).
+		WithSubscriber().
+		Offset((page - 1) * pageSize).
+		Limit(pageSize).
+		All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	total, err := r.db.Subscription.Query().
+		Where(subscription.ChannelID(channelID)).
+		Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	result := make([]*types.User, len(subs))
+	for i, sub := range subs {
+		if subscriber := sub.Edges.Subscriber; subscriber != nil {
+			result[i] = convertUserToProto(subscriber)
+		}
+	}
+
+	return result, total, nil
 }

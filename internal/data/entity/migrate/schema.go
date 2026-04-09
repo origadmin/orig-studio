@@ -177,6 +177,16 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{FilesCommentColumns[3]},
 			},
+			{
+				Name:    "comment_media_comments",
+				Unique:  false,
+				Columns: []*schema.Column{FilesCommentColumns[5]},
+			},
+			{
+				Name:    "comment_user_comments",
+				Unique:  false,
+				Columns: []*schema.Column{FilesCommentColumns[6]},
+			},
 		},
 	}
 	// EncodeProfilesColumns holds the columns for the "encode_profiles" table.
@@ -601,6 +611,55 @@ var (
 			},
 		},
 	}
+	// SubscriptionsSubscriptionColumns holds the columns for the "subscriptions_subscription" table.
+	SubscriptionsSubscriptionColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "subscriber_id", Type: field.TypeInt},
+		{Name: "channel_id", Type: field.TypeInt},
+	}
+	// SubscriptionsSubscriptionTable holds the schema information for the "subscriptions_subscription" table.
+	SubscriptionsSubscriptionTable = &schema.Table{
+		Name:       "subscriptions_subscription",
+		Columns:    SubscriptionsSubscriptionColumns,
+		PrimaryKey: []*schema.Column{SubscriptionsSubscriptionColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "subscriptions_subscription_users_user_subscriptions",
+				Columns:    []*schema.Column{SubscriptionsSubscriptionColumns[2]},
+				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "subscriptions_subscription_users_user_subscribers",
+				Columns:    []*schema.Column{SubscriptionsSubscriptionColumns[3]},
+				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "subscription_subscriber_id_channel_id",
+				Unique:  true,
+				Columns: []*schema.Column{SubscriptionsSubscriptionColumns[2], SubscriptionsSubscriptionColumns[3]},
+			},
+			{
+				Name:    "subscription_subscriber_id",
+				Unique:  false,
+				Columns: []*schema.Column{SubscriptionsSubscriptionColumns[2]},
+			},
+			{
+				Name:    "subscription_channel_id",
+				Unique:  false,
+				Columns: []*schema.Column{SubscriptionsSubscriptionColumns[3]},
+			},
+			{
+				Name:    "subscription_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{SubscriptionsSubscriptionColumns[1]},
+			},
+		},
+	}
 	// FilesTagColumns holds the columns for the "files_tag" table.
 	FilesTagColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -839,6 +898,7 @@ var (
 		FilesMediaTagsTable,
 		UsersNotificationTable,
 		FilesPlaylistTable,
+		SubscriptionsSubscriptionTable,
 		FilesTagTable,
 		UploadSessionsTable,
 		UsersUserTable,
@@ -897,6 +957,11 @@ func init() {
 	}
 	FilesPlaylistTable.Annotation = &entsql.Annotation{
 		Table: "files_playlist",
+	}
+	SubscriptionsSubscriptionTable.ForeignKeys[0].RefTable = UsersUserTable
+	SubscriptionsSubscriptionTable.ForeignKeys[1].RefTable = UsersUserTable
+	SubscriptionsSubscriptionTable.Annotation = &entsql.Annotation{
+		Table: "subscriptions_subscription",
 	}
 	FilesTagTable.ForeignKeys[0].RefTable = FilesMediaTagsTable
 	FilesTagTable.Annotation = &entsql.Annotation{

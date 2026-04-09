@@ -93,9 +93,13 @@ type UserEdges struct {
 	Favorites []*Favorite `json:"favorites,omitempty"`
 	// Likes holds the value of the likes edge.
 	Likes []*Like `json:"likes,omitempty"`
+	// Subscriptions holds the value of the subscriptions edge.
+	Subscriptions []*Subscription `json:"subscriptions,omitempty"`
+	// Subscribers holds the value of the subscribers edge.
+	Subscribers []*Subscription `json:"subscribers,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [9]bool
+	loadedTypes [11]bool
 }
 
 // MediaOrErr returns the Media value or an error if the edge
@@ -177,6 +181,24 @@ func (e UserEdges) LikesOrErr() ([]*Like, error) {
 		return e.Likes, nil
 	}
 	return nil, &NotLoadedError{edge: "likes"}
+}
+
+// SubscriptionsOrErr returns the Subscriptions value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) SubscriptionsOrErr() ([]*Subscription, error) {
+	if e.loadedTypes[9] {
+		return e.Subscriptions, nil
+	}
+	return nil, &NotLoadedError{edge: "subscriptions"}
+}
+
+// SubscribersOrErr returns the Subscribers value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) SubscribersOrErr() ([]*Subscription, error) {
+	if e.loadedTypes[10] {
+		return e.Subscribers, nil
+	}
+	return nil, &NotLoadedError{edge: "subscribers"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -419,6 +441,16 @@ func (_m *User) QueryFavorites() *FavoriteQuery {
 // QueryLikes queries the "likes" edge of the User entity.
 func (_m *User) QueryLikes() *LikeQuery {
 	return NewUserClient(_m.config).QueryLikes(_m)
+}
+
+// QuerySubscriptions queries the "subscriptions" edge of the User entity.
+func (_m *User) QuerySubscriptions() *SubscriptionQuery {
+	return NewUserClient(_m.config).QuerySubscriptions(_m)
+}
+
+// QuerySubscribers queries the "subscribers" edge of the User entity.
+func (_m *User) QuerySubscribers() *SubscriptionQuery {
+	return NewUserClient(_m.config).QuerySubscribers(_m)
 }
 
 // Update returns a builder for updating this User.

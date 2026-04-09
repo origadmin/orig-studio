@@ -2,7 +2,8 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-import {useState, useCallback} from 'react';
+import {useState, useCallback, useEffect} from 'react';
+import {isTokenExpired, clearAuth} from '@/lib/request';
 
 export interface User {
     id: number;
@@ -46,29 +47,70 @@ export function getStoredUser(): User | null {
  * State is initialised from localStorage so it survives page refresh.
  */
 export function useAuth(): UseAuthReturn {
-    const [token, setToken] = useState<string | null>(() => getStoredToken());
-    const [user, setUser] = useState<User | null>(() => getStoredUser());
+    const [token, setToken] = useState<string | null>(() => {
+        const storedToken = getStoredToken();
+        if (storedToken && isTokenExpired()) {
+            clearAuth();
+            return null;
+        }
+        return storedToken;
+    });
+
+    const [user, setUser] = useState<User | null>(() => {
+        const storedToken = getStoredToken();
+        if (storedToken && isTokenExpired()) {
+            return null;
+        }
+        return getStoredUser();
+    });
 
     const login = useCallback((newToken: string, newUser: User) => {
         localStorage.setItem(TOKEN_KEY, newToken);
         localStorage.setItem(USER_KEY, JSON.stringify(newUser));
+
+        // 同时设置 token_expires_at 以保持一致性
+        try {
+            const payload = JSON.parse(atob(newToken.split('.')[1]));
+            if (payload.exp) {
+                localStorage.setItem("token_expires_at", String(payload.exp * 1000));
+            }
+        } catch {
+            // 忽略解析错误
+        }
+        
         setToken(newToken);
         setUser(newUser);
     }, []);
 
     const logout = useCallback(() => {
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(USER_KEY);
+        clearAuth();
         setToken(null);
         setUser(null);
     }, []);
+
+    // Periodically check token expiry
+    useEffect(() => {
+        const checkToken = () => {
+            if (token && isTokenExpired()) {
+                logout();
+            }
+        };
+
+        // Check on mount
+        checkToken();
+
+        // Check every minute
+        const interval = setInterval(checkToken, 60000);
+
+        return () => clearInterval(interval);
+    }, [token, logout]);
 
     const isAdmin = user?.roles?.includes('admin') ?? false;
 
     return {
         user,
         token,
-        isAuthenticated: !!token && !!user,
+        isAuthenticated: !!token && !!user && !isTokenExpired(),
         isAdmin,
         login,
         logout,

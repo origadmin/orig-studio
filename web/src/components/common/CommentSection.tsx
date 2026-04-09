@@ -95,12 +95,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
 
         try {
             setIsSubmitting(true);
+            setError(null);
             await commentApi.create({media_id: mediaId, body: commentText});
             setCommentText('');
             // 重新获取评论
             await fetchComments();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to submit comment:', err);
+            setError(err.message || 'Failed to submit comment');
         } finally {
             setIsSubmitting(false);
         }
@@ -115,13 +117,15 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
 
         try {
             setIsSubmittingReply(true);
+            setError(null);
             await commentApi.create({media_id: mediaId, parent_id: parentId, body: replyText});
             setReplyText('');
             setReplyingTo(null);
             // 重新获取评论
             await fetchComments();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to submit reply:', err);
+            setError(err.message || 'Failed to submit reply');
         } finally {
             setIsSubmittingReply(false);
         }

@@ -1,5 +1,14 @@
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ * Media module - handles media CRUD, upload, and interactions (likes/favorites/shares)
+ *
+ * API paths:
+ * - /api/v1/medias              - media collection
+ * - /api/v1/medias/upload       - file upload
+ * - /api/v1/medias/:id          - single media
+ * - /api/v1/medias/:id/likes     - like operations
+ * - /api/v1/medias/:id/favorites - favorite operations
+ * - /api/v1/medias/:id/shares    - share operations
  */
 
 // Package server provides HTTP handlers for media CRUD + upload.
@@ -128,30 +137,15 @@ func (h *MediaHandler) Register(group *gin.RouterGroup) {
 		slog.Warn("failed to create upload directory", "err", err)
 	}
 
-	media := group.Group("/media")
+	media := group.Group("/medias")
 	{
-		// 1. Static/Fixed routes MUST come before parameter routes
-		media.GET("/transcoding/status", h.getTranscodingStatus())
-		media.GET("/transcoding/events", h.transcodingEvents())
-		media.GET(
-			"/encoding/tasks",
-			h.getEncodingTasksFlat(),
-		) // flat task list for TranscodingStatus page
-		media.GET(
-			"/:id/variants",
-			h.getMediaVariants(),
-		) // variant summary for media management page
-		media.POST(
-			"/retry",
-			JWTMiddleware(h.jwtMgr),
-			h.retryTaskByID(),
-		) // retry by task_id
-		media.POST(
-			"/retry-all-failed",
-			JWTMiddleware(h.jwtMgr),
-			h.retryAllFailed(),
-		) // retry all failed tasks
+		// ================================
+		// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST
+		// ================================
+		// Upload
+		media.POST("/upload", JWTMiddleware(h.jwtMgr), h.uploadMedia())
 
+		// Encoding Profiles (Subgroup)
 		profiles := media.Group("/profiles")
 		{
 			profiles.GET("", h.listEncodeProfiles())
@@ -161,26 +155,49 @@ func (h *MediaHandler) Register(group *gin.RouterGroup) {
 			profiles.DELETE("/:profile_id", JWTMiddleware(h.jwtMgr), h.deleteEncodeProfile())
 		}
 
-		media.POST("/upload", JWTMiddleware(h.jwtMgr), h.uploadMedia())
+		// Transcoding & Encoding Status
+		encoding := media.Group("/encoding")
+		{
+			encoding.GET("/status", h.getTranscodingStatus())
+			encoding.GET("/tasks", h.getEncodingTasksFlat())
+			encoding.POST("/retry", JWTMiddleware(h.jwtMgr), h.retryTaskByID())
+			encoding.POST("/retry-failed", JWTMiddleware(h.jwtMgr), h.retryAllFailed())
+		}
 
-		// 2. Collection routes
+		// Collection Route
 		media.GET("", h.listMedia())
 
-		// 3. Parameter routes (/:id)
+		// ================================
+		// 2. NESTED RESOURCE ROUTES (WITH :id) - MUST BE BEFORE MAIN :id ROUTES
+		// ================================
+		// Media Variants
+		media.GET("/:id/variants", h.getMediaVariants())
+
+		// Media Tasks & Retry
+		media.GET("/:id/tasks", h.listEncodingTasks())
+		media.POST("/:id/tasks/:taskId/retry", JWTMiddleware(h.jwtMgr), h.retryTranscode())
+
+		// Like & Dislike
+		media.GET("/:id/likes", h.getLikeStatus())
+		media.POST("/:id/likes", JWTMiddleware(h.jwtMgr), h.toggleLike())
+		media.DELETE("/:id/likes", JWTMiddleware(h.jwtMgr), h.toggleDislike())
+
+		// Favorite
+		media.GET("/:id/favorites", h.getFavoriteStatus())
+		media.POST("/:id/favorites", JWTMiddleware(h.jwtMgr), h.toggleFavorite())
+		media.DELETE("/:id/favorites", JWTMiddleware(h.jwtMgr), h.toggleFavorite())
+
+		// Share
+		media.GET("/:id/shares", h.getShareUrl())
+		media.POST("/:id/shares", JWTMiddleware(h.jwtMgr), h.recordShare())
+
+		// ================================
+		// 3. MAIN RESOURCE PARAMETER ROUTES (WITH :id) - MUST BE LAST
+		// ================================
+		// Media CRUD Operations
 		media.GET("/:id", h.getMedia())
 		media.PUT("/:id", JWTMiddleware(h.jwtMgr), h.updateMedia())
 		media.DELETE("/:id", JWTMiddleware(h.jwtMgr), h.deleteMedia())
-		media.GET("/:id/tasks", h.listEncodingTasks())
-		media.POST("/:id/retry", JWTMiddleware(h.jwtMgr), h.retryTranscode())
-		// Like and favorite routes
-		media.POST("/:id/like", JWTMiddleware(h.jwtMgr), h.toggleLike())
-		media.POST("/:id/dislike", JWTMiddleware(h.jwtMgr), h.toggleDislike())
-		media.GET("/:id/like", h.getLikeStatus())
-		media.POST("/:id/favorite", JWTMiddleware(h.jwtMgr), h.toggleFavorite())
-		media.GET("/:id/favorite", h.getFavoriteStatus())
-		// Share routes
-		media.GET("/:id/share", h.getShareUrl())
-		media.POST("/:id/share", JWTMiddleware(h.jwtMgr), h.recordShare())
 	}
 }
 
@@ -224,7 +241,7 @@ func (h *MediaHandler) listMedia() gin.HandlerFunc {
 
 		items, total, err := h.uc.ListMedias(ctx, opt)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Fail(c, ErrInternal, err.Error())
 			return
 		}
 
@@ -238,8 +255,8 @@ func (h *MediaHandler) listMedia() gin.HandlerFunc {
 			}
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"list":      items,
+		OK(c, gin.H{
+			"items":     items,
 			"total":     total,
 			"page":      page,
 			"page_size": pageSize,
@@ -253,13 +270,13 @@ func (h *MediaHandler) getMedia() gin.HandlerFunc {
 
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
 		m, err := h.uc.GetMedia(ctx, int64(id))
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Media not found"})
+			Fail(c, ErrMediaNotFound, "Media not found")
 			return
 		}
 
@@ -268,7 +285,7 @@ func (h *MediaHandler) getMedia() gin.HandlerFunc {
 			h.uc.IncrementViewCount(bgCtx, int64(id))
 		}()
 
-		c.JSON(http.StatusOK, m)
+		OK(c, m)
 	}
 }
 
@@ -277,7 +294,7 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 		ctx := c.Request.Context()
 		claims, ok := c.MustGet("claims").(*auth.Claims)
 		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			Fail(c, ErrUnauthorized, "unauthorized")
 			return
 		}
 
@@ -285,7 +302,7 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 
 		file, header, err := c.Request.FormFile("file")
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get file from request"})
+			Fail(c, ErrBadRequest, "Failed to get file from request")
 			return
 		}
 		defer file.Close()
@@ -307,17 +324,13 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 		mediaType := detectMediaType(mimeType)
 
 		if !isMIMEAllowed(mimeType, mediaType) {
-			c.JSON(http.StatusUnsupportedMediaType, gin.H{
-				"error": fmt.Sprintf("File type %s is not allowed for %s", mimeType, mediaType),
-			})
+			Fail(c, ErrBadRequest, fmt.Sprintf("File type %s is not allowed for %s", mimeType, mediaType))
 			return
 		}
 
 		maxSize := maxUploadSizeByType(mediaType)
 		if header.Size > maxSize {
-			c.JSON(http.StatusRequestEntityTooLarge, gin.H{
-				"error": fmt.Sprintf("File too large for %s (max %d bytes)", mediaType, maxSize),
-			})
+			Fail(c, ErrBadRequest, fmt.Sprintf("File too large for %s (max %d bytes)", mediaType, maxSize))
 			return
 		}
 
@@ -346,10 +359,7 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 
 		out, err := os.Create(filePath)
 		if err != nil {
-			c.JSON(
-				http.StatusInternalServerError,
-				gin.H{"error": "Failed to save file: " + err.Error()},
-			)
+			Fail(c, ErrInternal, "Failed to save file: "+err.Error())
 			return
 		}
 		defer out.Close()
@@ -357,7 +367,7 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 		written, err := io.Copy(out, file)
 		if err != nil {
 			os.Remove(filePath)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to write file"})
+			Fail(c, ErrInternal, "Failed to write file")
 			return
 		}
 
@@ -408,17 +418,14 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 		created, err := h.uc.CreateMedia(ctx, m)
 		if err != nil {
 			os.Remove(filePath)
-			c.JSON(
-				http.StatusInternalServerError,
-				gin.H{"error": "Failed to save media record: " + err.Error()},
-			)
+			Fail(c, ErrInternal, "Failed to save media record: "+err.Error())
 			return
 		}
 
 		// Re-fetch to get user and category details
 		created, _ = h.uc.GetMedia(ctx, created.Id)
 
-		c.JSON(http.StatusCreated, created)
+		c.JSON(http.StatusCreated, Response[interface{}]{Code: 0, Message: "ok", Data: created})
 	}
 }
 
@@ -439,30 +446,30 @@ func (h *MediaHandler) updateMedia() gin.HandlerFunc {
 
 		claims, ok := c.MustGet("claims").(*auth.Claims)
 		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			Fail(c, ErrUnauthorized, "unauthorized")
 			return
 		}
 
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
 		m, err := h.uc.GetMedia(ctx, int64(id))
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Media not found"})
+			Fail(c, ErrMediaNotFound, "Media not found")
 			return
 		}
 
 		if m.UserId != int64(claims.UserID) && !claims.IsStaff {
-			c.JSON(http.StatusForbidden, gin.H{"error": "you can only edit your own media"})
+			Fail(c, ErrForbidden, "you can only edit your own media")
 			return
 		}
 
 		var req updateMediaRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			Fail(c, ErrBadRequest, err.Error())
 			return
 		}
 
@@ -490,14 +497,14 @@ func (h *MediaHandler) updateMedia() gin.HandlerFunc {
 
 		updated, err := h.uc.UpdateMedia(ctx, m)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Fail(c, ErrInternal, err.Error())
 			return
 		}
 
 		// Re-fetch to get full details
 		updated, _ = h.uc.GetMedia(ctx, int64(id))
 
-		c.JSON(http.StatusOK, updated)
+		OK(c, updated)
 	}
 }
 
@@ -507,24 +514,24 @@ func (h *MediaHandler) deleteMedia() gin.HandlerFunc {
 
 		claims, ok := c.MustGet("claims").(*auth.Claims)
 		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			Fail(c, ErrUnauthorized, "unauthorized")
 			return
 		}
 
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
 		m, err := h.uc.GetMedia(ctx, int64(id))
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Media not found"})
+			Fail(c, ErrMediaNotFound, "Media not found")
 			return
 		}
 
 		if m.UserId != int64(claims.UserID) && !claims.IsStaff {
-			c.JSON(http.StatusForbidden, gin.H{"error": "you can only delete your own media"})
+			Fail(c, ErrForbidden, "you can only delete your own media")
 			return
 		}
 
@@ -534,11 +541,11 @@ func (h *MediaHandler) deleteMedia() gin.HandlerFunc {
 		}
 
 		if err := h.uc.DeleteMedia(ctx, int64(id)); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Fail(c, ErrInternal, err.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "deleted"})
+		OK(c, gin.H{"message": "deleted"})
 	}
 }
 
@@ -546,17 +553,17 @@ func (h *MediaHandler) listEncodingTasks() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
 		tasks, err := h.uc.ListEncodingTasks(c.Request.Context(), id)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Fail(c, ErrInternal, err.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, tasks)
+		OK(c, tasks)
 	}
 }
 
@@ -564,21 +571,21 @@ func (h *MediaHandler) retryTranscode() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid media ID"})
+			Fail(c, ErrBadRequest, "invalid media ID")
 			return
 		}
 
 		if err := h.uploadUC.RetryTranscode(c.Request.Context(), id); err != nil {
-			statusCode := http.StatusInternalServerError
 			if strings.Contains(err.Error(), "cannot retry") ||
 				strings.Contains(err.Error(), "not found") {
-				statusCode = http.StatusBadRequest
+				Fail(c, ErrBadRequest, err.Error())
+			} else {
+				Fail(c, ErrInternal, err.Error())
 			}
-			c.JSON(statusCode, gin.H{"error": err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "transcode retry initiated", "media_id": id})
+		OK(c, gin.H{"message": "transcode retry initiated", "media_id": id})
 	}
 }
 
@@ -600,7 +607,7 @@ func (h *MediaHandler) getTranscodingStatus() gin.HandlerFunc {
 
 		status, err := h.uc.GetTranscodingStatus(c.Request.Context(), filter)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Fail(c, ErrInternal, err.Error())
 			return
 		}
 
@@ -631,7 +638,7 @@ func (h *MediaHandler) getTranscodingStatus() gin.HandlerFunc {
 			})
 		}
 
-		c.JSON(http.StatusOK, gin.H{
+		OK(c, gin.H{
 			"processing_count": status.ProcessingCount,
 			"pending_count":    status.PendingCount,
 			"failed_count":     status.FailedCount,
@@ -672,11 +679,11 @@ func (h *MediaHandler) getEncodingTasksFlat() gin.HandlerFunc {
 
 		result, err := h.uc.ListEncodingTasksFlat(c.Request.Context(), filter, mediaID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Fail(c, ErrInternal, err.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, result)
+		OK(c, result)
 	}
 }
 
@@ -686,21 +693,21 @@ func (h *MediaHandler) getMediaVariants() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 		if err != nil || id <= 0 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid media ID"})
+			Fail(c, ErrBadRequest, "invalid media ID")
 			return
 		}
 
 		summary, err := h.uc.GetMediaVariants(c.Request.Context(), id)
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
-				c.JSON(http.StatusNotFound, gin.H{"error": "media not found"})
+				Fail(c, ErrMediaNotFound, "media not found")
 				return
 			}
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Fail(c, ErrInternal, err.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, summary)
+		OK(c, summary)
 	}
 }
 
@@ -709,30 +716,27 @@ func (h *MediaHandler) retryTaskByID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		taskIDStr := c.Query("task_id")
 		if taskIDStr == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "task_id is required"})
+			Fail(c, ErrBadRequest, "task_id is required")
 			return
 		}
 		taskID, err := strconv.Atoi(taskIDStr)
 		if err != nil || taskID <= 0 {
-			c.JSON(
-				http.StatusBadRequest,
-				gin.H{"error": "invalid task_id: must be a positive integer"},
-			)
+			Fail(c, ErrBadRequest, "invalid task_id: must be a positive integer")
 			return
 		}
 
 		task, err := h.uc.RetryTask(c.Request.Context(), taskID)
 		if err != nil {
-			statusCode := http.StatusInternalServerError
 			if strings.Contains(err.Error(), "cannot retry") ||
 				strings.Contains(err.Error(), "not found") {
-				statusCode = http.StatusUnprocessableEntity
+				Fail(c, ErrBadRequest, err.Error())
+			} else {
+				Fail(c, ErrInternal, err.Error())
 			}
-			c.JSON(statusCode, gin.H{"error": err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "retry queued", "task": task})
+		OK(c, gin.H{"message": "retry queued", "task": task})
 	}
 }
 
@@ -743,18 +747,18 @@ func (h *MediaHandler) retryAllFailed() gin.HandlerFunc {
 		var mediaID int64
 		if mediaIdStr != "" {
 			if _, err := fmt.Sscanf(mediaIdStr, "%d", &mediaID); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "invalid media_id"})
+				Fail(c, ErrBadRequest, "invalid media_id")
 				return
 			}
 		}
 
 		count, err := h.uc.RetryAllFailedTasks(c.Request.Context(), mediaID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Fail(c, ErrInternal, err.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "retry initiated", "retried_count": count})
+		OK(c, gin.H{"message": "retry initiated", "retried_count": count})
 	}
 }
 
@@ -801,10 +805,10 @@ func (h *MediaHandler) listEncodeProfiles() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		profiles, err := h.uc.ListEncodeProfiles(c.Request.Context())
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Fail(c, ErrInternal, err.Error())
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"profiles": profiles})
+		OK(c, gin.H{"profiles": profiles})
 	}
 }
 
@@ -812,15 +816,15 @@ func (h *MediaHandler) getEncodeProfile() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("profile_id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Profile ID"})
+			Fail(c, ErrBadRequest, "Invalid Profile ID")
 			return
 		}
 		p, err := h.uc.GetEncodeProfile(c.Request.Context(), id)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Profile not found"})
+			Fail(c, ErrNotFound, "Profile not found")
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"profile": p})
+		OK(c, gin.H{"profile": p})
 	}
 }
 
@@ -828,15 +832,15 @@ func (h *MediaHandler) createEncodeProfile() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var profile biz.EncodeProfile
 		if err := c.ShouldBindJSON(&profile); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			Fail(c, ErrBadRequest, err.Error())
 			return
 		}
 		p, err := h.uc.CreateEncodeProfile(c.Request.Context(), &profile)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Fail(c, ErrInternal, err.Error())
 			return
 		}
-		c.JSON(http.StatusCreated, gin.H{"profile": p})
+		c.JSON(http.StatusCreated, Response[interface{}]{Code: 0, Message: "ok", Data: gin.H{"profile": p}})
 	}
 }
 
@@ -844,21 +848,21 @@ func (h *MediaHandler) updateEncodeProfile() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("profile_id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Profile ID"})
+			Fail(c, ErrBadRequest, "Invalid Profile ID")
 			return
 		}
 		var profile biz.EncodeProfile
 		if err := c.ShouldBindJSON(&profile); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			Fail(c, ErrBadRequest, err.Error())
 			return
 		}
 		profile.Id = id
 		p, err := h.uc.UpdateEncodeProfile(c.Request.Context(), &profile)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Fail(c, ErrInternal, err.Error())
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"profile": p})
+		OK(c, gin.H{"profile": p})
 	}
 }
 
@@ -866,14 +870,14 @@ func (h *MediaHandler) deleteEncodeProfile() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("profile_id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Profile ID"})
+			Fail(c, ErrBadRequest, "Invalid Profile ID")
 			return
 		}
 		if err := h.uc.DeleteEncodeProfile(c.Request.Context(), id); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Fail(c, ErrInternal, err.Error())
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "deleted"})
+		OK(c, gin.H{"message": "deleted"})
 	}
 }
 
@@ -884,23 +888,23 @@ func (h *MediaHandler) toggleLike() gin.HandlerFunc {
 		ctx := c.Request.Context()
 		claims, ok := c.MustGet("claims").(*auth.Claims)
 		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			Fail(c, ErrUnauthorized, "unauthorized")
 			return
 		}
 
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
 		stats, err := h.likeFavoriteUC.ToggleLike(ctx, int(claims.UserID), id, "like")
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Fail(c, ErrInternal, err.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
+		OK(c, gin.H{
 			"is_liked":      stats.UserLikeType == "like",
 			"is_disliked":   stats.UserLikeType == "dislike",
 			"like_count":    stats.LikeCount,
@@ -914,23 +918,23 @@ func (h *MediaHandler) toggleDislike() gin.HandlerFunc {
 		ctx := c.Request.Context()
 		claims, ok := c.MustGet("claims").(*auth.Claims)
 		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			Fail(c, ErrUnauthorized, "unauthorized")
 			return
 		}
 
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
 		stats, err := h.likeFavoriteUC.ToggleLike(ctx, int(claims.UserID), id, "dislike")
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Fail(c, ErrInternal, err.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
+		OK(c, gin.H{
 			"is_liked":      stats.UserLikeType == "like",
 			"is_disliked":   stats.UserLikeType == "dislike",
 			"like_count":    stats.LikeCount,
@@ -945,7 +949,7 @@ func (h *MediaHandler) getLikeStatus() gin.HandlerFunc {
 
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
@@ -956,11 +960,11 @@ func (h *MediaHandler) getLikeStatus() gin.HandlerFunc {
 
 		stats, err := h.likeFavoriteUC.GetMediaStats(ctx, userID, id)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Fail(c, ErrInternal, err.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
+		OK(c, gin.H{
 			"is_liked":      stats.UserLikeType == "like",
 			"is_disliked":   stats.UserLikeType == "dislike",
 			"like_count":    stats.LikeCount,
@@ -974,23 +978,23 @@ func (h *MediaHandler) toggleFavorite() gin.HandlerFunc {
 		ctx := c.Request.Context()
 		claims, ok := c.MustGet("claims").(*auth.Claims)
 		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			Fail(c, ErrUnauthorized, "unauthorized")
 			return
 		}
 
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
 		stats, err := h.likeFavoriteUC.ToggleFavorite(ctx, int(claims.UserID), id)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Fail(c, ErrInternal, err.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
+		OK(c, gin.H{
 			"success":      true,
 			"is_favorited": stats.IsFavorited,
 		})
@@ -1003,7 +1007,7 @@ func (h *MediaHandler) getFavoriteStatus() gin.HandlerFunc {
 
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
@@ -1014,11 +1018,11 @@ func (h *MediaHandler) getFavoriteStatus() gin.HandlerFunc {
 
 		stats, err := h.likeFavoriteUC.GetMediaStats(ctx, userID, id)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Fail(c, ErrInternal, err.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
+		OK(c, gin.H{
 			"success":      true,
 			"is_favorited": stats.IsFavorited,
 		})
@@ -1059,7 +1063,7 @@ func (h *MediaHandler) getShareUrl() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
@@ -1070,7 +1074,7 @@ func (h *MediaHandler) getShareUrl() gin.HandlerFunc {
 			shareUrl = "https://" + shareUrl
 		}
 
-		c.JSON(http.StatusOK, gin.H{
+		OK(c, gin.H{
 			"url": shareUrl,
 		})
 	}
@@ -1080,20 +1084,20 @@ func (h *MediaHandler) recordShare() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		_, exists := c.Get("claims")
 		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			Fail(c, ErrUnauthorized, "unauthorized")
 			return
 		}
 
 		_, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
 		// TODO: Implement share count increment in the future
 		// For now, just return success
 
-		c.JSON(http.StatusOK, gin.H{
+		OK(c, gin.H{
 			"success": true,
 		})
 	}

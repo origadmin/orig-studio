@@ -27,13 +27,18 @@ func (h *NotificationHandler) Register(group *gin.RouterGroup) {
 		// Protected routes — all notification operations require auth
 		notifs.Use(JWTMiddleware(h.jwt))
 
+		// ================================
+		// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST
+		// ================================
 		notifs.GET("", h.listNotifications)
-		notifs.POST("/:id/read", h.markAsRead)
+		notifs.POST("", h.createNotification)
 		notifs.POST("/read-all", h.markAllRead)
 		notifs.GET("/unread-count", h.unreadCount)
 
-		// Admin: create notification (internal use or admin)
-		notifs.POST("", h.createNotification)
+		// ================================
+		// 2. PARAMETER ROUTES (WITH :id) - MUST BE LAST
+		// ================================
+		notifs.POST("/:id/read", h.markAsRead)
 	}
 }
 
@@ -42,7 +47,7 @@ func (h *NotificationHandler) Register(group *gin.RouterGroup) {
 func (h *NotificationHandler) listNotifications(c *gin.Context) {
 	val, exists := c.Get("claims")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		Fail(c, ErrUnauthorized, "unauthorized")
 		return
 	}
 	claims := val.(*auth.Claims)
@@ -52,16 +57,18 @@ func (h *NotificationHandler) listNotifications(c *gin.Context) {
 
 	items, total, err := h.uc.ListUserNotifications(c.Request.Context(), int(claims.UserID), page, limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		Fail(c, ErrInternal, err.Error())
 		return
 	}
 
 	unread, _ := h.uc.GetUnreadCount(c.Request.Context(), int(claims.UserID))
 
-	c.JSON(http.StatusOK, gin.H{
-		"list":   items,
-		"total":  total,
-		"unread": unread,
+	OK(c, gin.H{
+		"items":        items,
+		"total":        total,
+		"unread_count": unread,
+		"page":         page,
+		"page_size":    limit,
 	})
 }
 
@@ -75,7 +82,7 @@ func (h *NotificationHandler) createNotification(c *gin.Context) {
 		UserID int    `json:"user_id"` // optional; defaults to current user
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		Fail(c, ErrBadRequest, err.Error())
 		return
 	}
 
@@ -83,7 +90,7 @@ func (h *NotificationHandler) createNotification(c *gin.Context) {
 	if targetUserID == 0 {
 		val, ok := c.Get("claims")
 		if !ok || val == nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "user_id required"})
+			Fail(c, ErrBadRequest, "user_id required")
 			return
 		}
 		claims := val.(*auth.Claims)
@@ -99,69 +106,69 @@ func (h *NotificationHandler) createNotification(c *gin.Context) {
 
 	created, err := h.uc.CreateNotification(c.Request.Context(), n)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		Fail(c, ErrInternal, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, created)
+	c.JSON(http.StatusCreated, Response[interface{}]{Code: 0, Message: "ok", Data: created})
 }
 
 // markAsRead marks a specific notification as read.
 func (h *NotificationHandler) markAsRead(c *gin.Context) {
 	val, exists := c.Get("claims")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		Fail(c, ErrUnauthorized, "unauthorized")
 		return
 	}
 	claims := val.(*auth.Claims)
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		Fail(c, ErrBadRequest, "Invalid ID")
 		return
 	}
 
 	err = h.uc.MarkAsRead(c.Request.Context(), id, int(claims.UserID))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		Fail(c, ErrInternal, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "marked as read"})
+	OK(c, gin.H{"message": "marked as read"})
 }
 
 // markAllRead marks all notifications as read for the current user.
 func (h *NotificationHandler) markAllRead(c *gin.Context) {
 	val, exists := c.Get("claims")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		Fail(c, ErrUnauthorized, "unauthorized")
 		return
 	}
 	claims := val.(*auth.Claims)
 
 	err := h.uc.MarkAllAsRead(c.Request.Context(), int(claims.UserID))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		Fail(c, ErrInternal, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "all marked as read"})
+	OK(c, gin.H{"message": "all marked as read"})
 }
 
 // unreadCount returns the count of unread notifications for the current user.
 func (h *NotificationHandler) unreadCount(c *gin.Context) {
 	val, exists := c.Get("claims")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		Fail(c, ErrUnauthorized, "unauthorized")
 		return
 	}
 	claims := val.(*auth.Claims)
 
 	count, err := h.uc.GetUnreadCount(c.Request.Context(), int(claims.UserID))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		Fail(c, ErrInternal, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"unread_count": count})
+	OK(c, gin.H{"unread_count": count})
 }

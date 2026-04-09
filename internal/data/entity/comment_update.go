@@ -74,21 +74,37 @@ func (_u *CommentUpdate) SetNillableAddDate(v *time.Time) *CommentUpdate {
 	return _u
 }
 
-// SetMediaID sets the "media" edge to the Media entity by ID.
-func (_u *CommentUpdate) SetMediaID(id int) *CommentUpdate {
-	_u.mutation.SetMediaID(id)
+// SetMediaID sets the "media_id" field.
+func (_u *CommentUpdate) SetMediaID(v int) *CommentUpdate {
+	_u.mutation.SetMediaID(v)
+	return _u
+}
+
+// SetNillableMediaID sets the "media_id" field if the given value is not nil.
+func (_u *CommentUpdate) SetNillableMediaID(v *int) *CommentUpdate {
+	if v != nil {
+		_u.SetMediaID(*v)
+	}
+	return _u
+}
+
+// SetUserID sets the "user_id" field.
+func (_u *CommentUpdate) SetUserID(v int) *CommentUpdate {
+	_u.mutation.SetUserID(v)
+	return _u
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_u *CommentUpdate) SetNillableUserID(v *int) *CommentUpdate {
+	if v != nil {
+		_u.SetUserID(*v)
+	}
 	return _u
 }
 
 // SetMedia sets the "media" edge to the Media entity.
 func (_u *CommentUpdate) SetMedia(v *Media) *CommentUpdate {
 	return _u.SetMediaID(v.ID)
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_u *CommentUpdate) SetUserID(id int) *CommentUpdate {
-	_u.mutation.SetUserID(id)
-	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
@@ -435,21 +451,37 @@ func (_u *CommentUpdateOne) SetNillableAddDate(v *time.Time) *CommentUpdateOne {
 	return _u
 }
 
-// SetMediaID sets the "media" edge to the Media entity by ID.
-func (_u *CommentUpdateOne) SetMediaID(id int) *CommentUpdateOne {
-	_u.mutation.SetMediaID(id)
+// SetMediaID sets the "media_id" field.
+func (_u *CommentUpdateOne) SetMediaID(v int) *CommentUpdateOne {
+	_u.mutation.SetMediaID(v)
+	return _u
+}
+
+// SetNillableMediaID sets the "media_id" field if the given value is not nil.
+func (_u *CommentUpdateOne) SetNillableMediaID(v *int) *CommentUpdateOne {
+	if v != nil {
+		_u.SetMediaID(*v)
+	}
+	return _u
+}
+
+// SetUserID sets the "user_id" field.
+func (_u *CommentUpdateOne) SetUserID(v int) *CommentUpdateOne {
+	_u.mutation.SetUserID(v)
+	return _u
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_u *CommentUpdateOne) SetNillableUserID(v *int) *CommentUpdateOne {
+	if v != nil {
+		_u.SetUserID(*v)
+	}
 	return _u
 }
 
 // SetMedia sets the "media" edge to the Media entity.
 func (_u *CommentUpdateOne) SetMedia(v *Media) *CommentUpdateOne {
 	return _u.SetMediaID(v.ID)
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_u *CommentUpdateOne) SetUserID(id int) *CommentUpdateOne {
-	_u.mutation.SetUserID(id)
-	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.

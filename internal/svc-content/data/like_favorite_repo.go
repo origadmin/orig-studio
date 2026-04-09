@@ -36,15 +36,12 @@ func NewFavoriteRepo(data *Data, logger log.Logger) biz.FavoriteRepo {
 }
 
 // ─── Like repo ───────────────────────────────────────────────────────────────
-//
-// NOTE: The Like entity schema has no UserID/MediaID/LikeType fields.
-// Relationships are stored as edges (media M2O, user O2M).
-// LikeType is not persisted — all likes are treated as "like".
 
 func (r *likeRepo) Create(ctx context.Context, userID, mediaID int, likeType string) (*biz.Like, error) {
 	ent, err := r.data.db.Like.Create().
 		SetMediaID(mediaID).
 		SetUserID(userID).
+		SetLikeType(likeType).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -53,7 +50,7 @@ func (r *likeRepo) Create(ctx context.Context, userID, mediaID int, likeType str
 		ID:        ent.ID,
 		UserID:    userID,
 		MediaID:   mediaID,
-		LikeType:  likeType, // returned as-is; not stored in schema
+		LikeType: ent.LikeType,
 		CreatedAt: ent.CreatedAt,
 	}, nil
 }
@@ -69,25 +66,27 @@ func (r *likeRepo) Delete(ctx context.Context, userID, mediaID int) error {
 }
 
 func (r *likeRepo) GetStatus(ctx context.Context, userID, mediaID int) (string, error) {
-	exists, err := r.data.db.Like.Query().
+	ent, err := r.data.db.Like.Query().
 		Where(
 			like.HasMediaWith(media.IDEQ(mediaID)),
 			like.HasUserWith(user.IDEQ(userID)),
 		).
-		Exist(ctx)
+		Only(ctx)
 	if err != nil {
+		if entity.IsNotFound(err) {
+			return "none", nil
+		}
 		return "none", err
 	}
-	if exists {
-		return "like", nil
-	}
-	return "none", nil
+	return ent.LikeType, nil
 }
 
 func (r *likeRepo) CountByMedia(ctx context.Context, mediaID int, likeType string) (int64, error) {
-	// LikeType is not stored in schema; count all likes for the media.
 	count, err := r.data.db.Like.Query().
-		Where(like.HasMediaWith(media.IDEQ(mediaID))).
+		Where(
+			like.HasMediaWith(media.IDEQ(mediaID)),
+			like.LikeTypeEQ(likeType),
+		).
 		Count(ctx)
 	return int64(count), err
 }

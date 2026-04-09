@@ -11,7 +11,6 @@ import (
 
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/comment"
-	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/svc-content/biz"
 )
 
@@ -20,7 +19,6 @@ type commentRepo struct {
 	log  *log.Helper
 }
 
-// Data is a wrapper for ent client, similar to other services.
 type Data struct {
 	db *entity.Client
 }
@@ -76,7 +74,7 @@ func (r *commentRepo) Delete(ctx context.Context, id int) error {
 }
 
 func (r *commentRepo) ListByMedia(ctx context.Context, mediaID int, page, pageSize int) ([]*biz.Comment, int, error) {
-	query := r.data.db.Comment.Query().Where(comment.HasMediaWith(media.IDEQ(mediaID)))
+	query := r.data.db.Comment.Query().Where(comment.MediaIDEQ(mediaID))
 	total, err := query.Count(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -130,19 +128,17 @@ func mapComment(ent *entity.Comment) *biz.Comment {
 		ID:        ent.ID,
 		UID:       ent.UID,
 		Text:      ent.Text,
+		MediaID:   ent.MediaID,
+		UserID:    ent.UserID,
 		AddDate:   ent.AddDate,
-		UpdatedAt: ent.AddDate, // Ent comment schema doesn't have updated_at yet?
+		UpdatedAt: ent.AddDate,
 	}
 
 	if ent.Edges.Parent != nil {
 		pid := ent.Edges.Parent.ID
 		c.ParentID = &pid
 	}
-	if ent.Edges.Media != nil {
-		c.MediaID = ent.Edges.Media.ID
-	}
 	if ent.Edges.User != nil {
-		c.UserID = ent.Edges.User.ID
 		c.User = ent.Edges.User
 	}
 	if len(ent.Edges.Replies) > 0 {

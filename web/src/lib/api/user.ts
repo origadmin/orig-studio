@@ -34,6 +34,18 @@ export interface UpdateUserRequest {
     status?: string;
 }
 
+export interface SubscriptionStatusResponse {
+    is_subscribed: boolean;
+    subscriber_count: number;
+}
+
+export interface SubscriptionListResponse {
+    list: User[];
+    total: number;
+    page: number;
+    page_size: number;
+}
+
 export const userApi = {
     // 获取用户列表
     list: (params?: { page?: number; page_size?: number; keyword?: string; status?: string }) =>
@@ -54,4 +66,26 @@ export const userApi = {
     // 更新用户状态
     updateStatus: (id: string, status: string) =>
         api.patch<User>(`/users/${id}/status`, {status}),
+
+    // ==================== Subscription APIs ====================
+
+    // 获取订阅状态
+    getSubscriptionStatus: (userId: string) =>
+        api.get<SubscriptionStatusResponse>(`/users/${userId}/subscription`),
+
+    // 订阅用户/频道
+    subscribe: (userId: string) =>
+        api.post<{ success: boolean }>(`/users/${userId}/subscribe`),
+
+    // 取消订阅
+    unsubscribe: (userId: string) =>
+        api.del<{ success: boolean }>(`/users/${userId}/subscribe`),
+
+    // 获取我的订阅列表
+    getSubscriptions: (params?: { page?: number; page_size?: number }) =>
+        api.get<SubscriptionListResponse>("/subscriptions", params),
+
+    // 获取我的粉丝列表
+    getFollowers: (params?: { page?: number; page_size?: number }) =>
+        api.get<SubscriptionListResponse>("/followers", params),
 };

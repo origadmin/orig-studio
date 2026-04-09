@@ -121,3 +121,38 @@ func (uc *UserUseCase) CountUsers(ctx context.Context) (int, error) {
 	_, total, err := uc.repo.List(ctx, &dto.UserQueryOption{QueryOption: repo.QueryOption{PageSize: 1}})
 	return int(total), err
 }
+
+// ==================== Subscription Methods ====================
+
+// IsSubscribed checks if a user is subscribed to a channel
+func (uc *UserUseCase) IsSubscribed(ctx context.Context, subscriberID, channelID int) (bool, error) {
+	return uc.repo.IsSubscribed(ctx, subscriberID, channelID)
+}
+
+// GetSubscriberCount gets the number of subscribers for a channel
+func (uc *UserUseCase) GetSubscriberCount(ctx context.Context, channelID int) (int, error) {
+	return uc.repo.GetSubscriberCount(ctx, channelID)
+}
+
+// Subscribe adds a subscription
+func (uc *UserUseCase) Subscribe(ctx context.Context, subscriberID, channelID int) error {
+	if subscriberID == channelID {
+		return nil // Can't subscribe to yourself
+	}
+	return uc.repo.Subscribe(ctx, subscriberID, channelID)
+}
+
+// Unsubscribe removes a subscription
+func (uc *UserUseCase) Unsubscribe(ctx context.Context, subscriberID, channelID int) error {
+	return uc.repo.Unsubscribe(ctx, subscriberID, channelID)
+}
+
+// GetSubscriptions gets all channels a user is subscribed to
+func (uc *UserUseCase) GetSubscriptions(ctx context.Context, subscriberID int, page, pageSize int) ([]*types.User, int, error) {
+	return uc.repo.GetSubscriptions(ctx, subscriberID, page, pageSize)
+}
+
+// GetSubscribers gets all subscribers for a channel
+func (uc *UserUseCase) GetSubscribers(ctx context.Context, channelID int, page, pageSize int) ([]*types.User, int, error) {
+	return uc.repo.GetSubscribers(ctx, channelID, page, pageSize)
+}

@@ -15,10 +15,13 @@ import (
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/playlist"
 	"origadmin/application/origcms/internal/data/entity/schema"
+	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/tag"
 	"origadmin/application/origcms/internal/data/entity/uploadsession"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -119,6 +122,10 @@ func init() {
 	channel.DefaultAddDate = channelDescAddDate.Default.(func() time.Time)
 	commentFields := schema.Comment{}.Fields()
 	_ = commentFields
+	// commentDescUID is the schema descriptor for uid field.
+	commentDescUID := commentFields[1].Descriptor()
+	// comment.DefaultUID holds the default value on creation for the uid field.
+	comment.DefaultUID = commentDescUID.Default.(func() uuid.UUID)
 	// commentDescAddDate is the schema descriptor for add_date field.
 	commentDescAddDate := commentFields[2].Descriptor()
 	// comment.DefaultAddDate holds the default value on creation for the add_date field.
@@ -421,6 +428,12 @@ func init() {
 	playlistDescAddDate := playlistFields[6].Descriptor()
 	// playlist.DefaultAddDate holds the default value on creation for the add_date field.
 	playlist.DefaultAddDate = playlistDescAddDate.Default.(func() time.Time)
+	subscriptionFields := schema.Subscription{}.Fields()
+	_ = subscriptionFields
+	// subscriptionDescCreatedAt is the schema descriptor for created_at field.
+	subscriptionDescCreatedAt := subscriptionFields[2].Descriptor()
+	// subscription.DefaultCreatedAt holds the default value on creation for the created_at field.
+	subscription.DefaultCreatedAt = subscriptionDescCreatedAt.Default.(func() time.Time)
 	tagFields := schema.Tag{}.Fields()
 	_ = tagFields
 	// tagDescTitle is the schema descriptor for title field.
