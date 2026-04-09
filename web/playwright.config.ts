@@ -24,7 +24,7 @@ export default defineConfig({
     ],
     // 使用 Rsbuild dev server (端口 18080)
     webServer: {
-        command: 'npm run dev',
+        command: 'bun run dev',
         url: 'http://localhost:18080',
         reuseExistingServer: !process.env.CI,
         timeout: 120 * 1000,

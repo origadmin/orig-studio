@@ -18,7 +18,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/svc-content/biz"
 )
@@ -202,7 +201,12 @@ func (h *ChannelHandler) UpdateChannel(c *gin.Context) {
 		BannerLogo:  input.BannerLogo,
 	}
 
-	updated, err := h.uc.UpdateChannel(c.Request.Context(), chItem, int(claims.UserID), claims.IsStaff)
+	updated, err := h.uc.UpdateChannel(
+		c.Request.Context(),
+		chItem,
+		int(claims.UserID),
+		claims.IsStaff,
+	)
 	if err != nil {
 		Fail(c, ErrInternal, err.Error())
 		return
@@ -258,7 +262,13 @@ func (h *ChannelHandler) AddMedia(c *gin.Context) {
 		return
 	}
 
-	err = h.uc.AddMediaToChannel(c.Request.Context(), id, input.MediaID, int(claims.UserID), claims.IsStaff)
+	err = h.uc.AddMediaToChannel(
+		c.Request.Context(),
+		id,
+		input.MediaID,
+		int(claims.UserID),
+		claims.IsStaff,
+	)
 	if err != nil {
 		Fail(c, ErrInternal, err.Error())
 		return
@@ -291,7 +301,13 @@ func (h *ChannelHandler) RemoveMedia(c *gin.Context) {
 		return
 	}
 
-	err = h.uc.RemoveMediaFromChannel(c.Request.Context(), id, mediaId, int(claims.UserID), claims.IsStaff)
+	err = h.uc.RemoveMediaFromChannel(
+		c.Request.Context(),
+		id,
+		mediaId,
+		int(claims.UserID),
+		claims.IsStaff,
+	)
 	if err != nil {
 		Fail(c, ErrInternal, err.Error())
 		return

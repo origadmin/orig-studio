@@ -29,7 +29,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-
 	"origadmin/application/origcms/internal/auth"
 	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 	"origadmin/application/origcms/internal/svc-media/biz"
@@ -324,13 +323,21 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 		mediaType := detectMediaType(mimeType)
 
 		if !isMIMEAllowed(mimeType, mediaType) {
-			Fail(c, ErrBadRequest, fmt.Sprintf("File type %s is not allowed for %s", mimeType, mediaType))
+			Fail(
+				c,
+				ErrBadRequest,
+				fmt.Sprintf("File type %s is not allowed for %s", mimeType, mediaType),
+			)
 			return
 		}
 
 		maxSize := maxUploadSizeByType(mediaType)
 		if header.Size > maxSize {
-			Fail(c, ErrBadRequest, fmt.Sprintf("File too large for %s (max %d bytes)", mediaType, maxSize))
+			Fail(
+				c,
+				ErrBadRequest,
+				fmt.Sprintf("File too large for %s (max %d bytes)", mediaType, maxSize),
+			)
 			return
 		}
 
@@ -840,7 +847,10 @@ func (h *MediaHandler) createEncodeProfile() gin.HandlerFunc {
 			Fail(c, ErrInternal, err.Error())
 			return
 		}
-		c.JSON(http.StatusCreated, Response[interface{}]{Code: 0, Message: "ok", Data: gin.H{"profile": p}})
+		c.JSON(
+			http.StatusCreated,
+			Response[interface{}]{Code: 0, Message: "ok", Data: gin.H{"profile": p}},
+		)
 	}
 }
 
