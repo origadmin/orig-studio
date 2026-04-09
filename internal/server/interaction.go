@@ -16,7 +16,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/svc-content/biz"
 )
@@ -30,7 +29,10 @@ type InteractionHandler struct {
 
 // NewInteractionHandler creates a new InteractionHandler
 // DEPRECATED: Use resource-specific handlers instead
-func NewInteractionHandler(jwtMgr *auth.Manager, likeFavoriteUC *biz.LikeFavoriteUseCase) *InteractionHandler {
+func NewInteractionHandler(
+	jwtMgr *auth.Manager,
+	likeFavoriteUC *biz.LikeFavoriteUseCase,
+) *InteractionHandler {
 	return &InteractionHandler{
 		jwtMgr:         jwtMgr,
 		likeFavoriteUC: likeFavoriteUC,

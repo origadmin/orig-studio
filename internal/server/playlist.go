@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/svc-content/biz"
 )
@@ -104,7 +103,12 @@ func (h *PlaylistHandler) myPlaylists(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 
-	items, total, err := h.uc.ListUserPlaylists(c.Request.Context(), int(claims.UserID), page, limit)
+	items, total, err := h.uc.ListUserPlaylists(
+		c.Request.Context(),
+		int(claims.UserID),
+		page,
+		limit,
+	)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -239,7 +243,13 @@ func (h *PlaylistHandler) addMedia(c *gin.Context) {
 		return
 	}
 
-	err = h.uc.AddMediaToPlaylist(c.Request.Context(), id, input.MediaID, int(claims.UserID), claims.IsStaff)
+	err = h.uc.AddMediaToPlaylist(
+		c.Request.Context(),
+		id,
+		input.MediaID,
+		int(claims.UserID),
+		claims.IsStaff,
+	)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -272,7 +282,13 @@ func (h *PlaylistHandler) removeMedia(c *gin.Context) {
 		return
 	}
 
-	err = h.uc.RemoveMediaFromPlaylist(c.Request.Context(), id, mediaId, int(claims.UserID), claims.IsStaff)
+	err = h.uc.RemoveMediaFromPlaylist(
+		c.Request.Context(),
+		id,
+		mediaId,
+		int(claims.UserID),
+		claims.IsStaff,
+	)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -304,7 +320,13 @@ func (h *PlaylistHandler) reorderMedia(c *gin.Context) {
 		return
 	}
 
-	err = h.uc.ReorderMediaInPlaylist(c.Request.Context(), id, input.MediaOrders, int(claims.UserID), claims.IsStaff)
+	err = h.uc.ReorderMediaInPlaylist(
+		c.Request.Context(),
+		id,
+		input.MediaOrders,
+		int(claims.UserID),
+		claims.IsStaff,
+	)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

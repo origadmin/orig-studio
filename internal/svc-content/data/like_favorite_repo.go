@@ -32,12 +32,19 @@ func NewLikeRepo(data *Data, logger log.Logger) biz.LikeRepo {
 }
 
 func NewFavoriteRepo(data *Data, logger log.Logger) biz.FavoriteRepo {
-	return &favoriteRepo{data: data, log: log.NewHelper(log.With(logger, "module", "favorite.data"))}
+	return &favoriteRepo{
+		data: data,
+		log:  log.NewHelper(log.With(logger, "module", "favorite.data")),
+	}
 }
 
 // ─── Like repo ───────────────────────────────────────────────────────────────
 
-func (r *likeRepo) Create(ctx context.Context, userID, mediaID int, likeType string) (*biz.Like, error) {
+func (r *likeRepo) Create(
+	ctx context.Context,
+	userID, mediaID int,
+	likeType string,
+) (*biz.Like, error) {
 	ent, err := r.data.db.Like.Create().
 		SetMediaID(mediaID).
 		SetUserID(userID).
@@ -50,7 +57,7 @@ func (r *likeRepo) Create(ctx context.Context, userID, mediaID int, likeType str
 		ID:        ent.ID,
 		UserID:    userID,
 		MediaID:   mediaID,
-		LikeType: ent.LikeType,
+		LikeType:  ent.LikeType,
 		CreatedAt: ent.CreatedAt,
 	}, nil
 }

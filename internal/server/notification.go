@@ -55,7 +55,12 @@ func (h *NotificationHandler) listNotifications(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 
-	items, total, err := h.uc.ListUserNotifications(c.Request.Context(), int(claims.UserID), page, limit)
+	items, total, err := h.uc.ListUserNotifications(
+		c.Request.Context(),
+		int(claims.UserID),
+		page,
+		limit,
+	)
 	if err != nil {
 		Fail(c, ErrInternal, err.Error())
 		return

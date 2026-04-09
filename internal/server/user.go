@@ -278,7 +278,12 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 			page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 			pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 
-			list, total, err := h.uc.GetSubscriptions(c.Request.Context(), int(userID), page, pageSize)
+			list, total, err := h.uc.GetSubscriptions(
+				c.Request.Context(),
+				int(userID),
+				page,
+				pageSize,
+			)
 			if err != nil {
 				Fail(c, ErrInternal, err.Error())
 				return
@@ -315,7 +320,12 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 			page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 			pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 
-			list, total, err := h.uc.GetSubscribers(c.Request.Context(), int(userID), page, pageSize)
+			list, total, err := h.uc.GetSubscribers(
+				c.Request.Context(),
+				int(userID),
+				page,
+				pageSize,
+			)
 			if err != nil {
 				Fail(c, ErrInternal, err.Error())
 				return
