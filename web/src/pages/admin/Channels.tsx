@@ -118,7 +118,8 @@ const Channels: React.FC = () => {
         return <Badge variant={variants[status] || 'outline'}>{labels[status] || status}</Badge>;
     };
 
-    const formatNumber = (num: number) => {
+    const formatNumber = (num: number | undefined | null) => {
+        if (num === undefined || num === null) return '0';
         if (num >= 10000) return (num / 10000).toFixed(1) + t('common.wan');
         return num.toString();
     };

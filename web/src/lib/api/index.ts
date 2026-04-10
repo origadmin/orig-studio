@@ -2,16 +2,25 @@
 // 对应后端 /api/v1/* 路径
 
 // ==================== Core ====================
-export {api, getAccessToken, setAuth, clearAuth} from "./request";
-export type {Token, ApiError} from "./request";
+export {api, getAccessToken, setAuth, clearAuth} from "../request";
+export type {Token, ApiError, ApiResponse} from "../request";
 
 // ==================== Auth ====================
-export {signIn, signUp, signOut, refreshToken, getCurrentUser, isAuthenticated} from "./auth";
+export {signIn, signUp, signOut, refreshToken, getCurrentUser, isAuthenticated, authApi} from "./auth";
 export type {CurrentUser} from "./auth";
 
 // ==================== Users ====================
 export {userApi} from "./user";
-export type {User, UserListResponse, CreateUserRequest, UpdateUserRequest} from "./user";
+export type {
+    User,
+    UserListResponse,
+    CreateUserRequest,
+    UpdateUserRequest,
+    UpdateProfileRequest,
+    ChangePasswordRequest,
+    SubscriptionStatusResponse,
+    SubscriptionListResponse
+} from "./user";
 
 // ==================== Media ====================
 export {mediaApi, encodingApi, legacyMediaApi} from "./media";
@@ -24,6 +33,9 @@ export type {
     EncodingTask,
     TranscodingStatusResponse,
     MediaVariantSummary,
+    LikeResponse,
+    FavoriteResponse,
+    ShareResponse,
 } from "./media";
 
 // ==================== Content ====================
@@ -50,38 +62,35 @@ export type {Playlist, PlaylistListResponse, CreatePlaylistRequest, UpdatePlayli
 export {searchApi} from "./search";
 export type {SearchResponse} from "./search";
 
-// ==================== Interactions (New Module) ====================
-export {
-    interactionApi,
-    likeApi,
-    favoriteApi,
-    subscriptionApi,
-    shareApi,
-} from "./interaction";
-export type {
-    LikeResponse,
-    LikeStatusBatchResponse,
-    Favorite,
-    ToggleFavoriteResponse,
-    FavoriteListResponse,
-    SubscriptionStatus,
-    SubscriptionListResponse,
-    ShareResponse,
-} from "./interaction";
+// ==================== Notifications ====================
+export {notificationApi} from "./notification";
+export type {Notification, NotificationListResponse} from "./notification";
 
-// ==================== System (New Module) ====================
-export {systemApi, statsApi, settingsApi} from "./system";
+// ==================== Interactions (Legacy - use mediaApi instead) ====================
+export {likeApi} from "./like";
+export {favoriteApi} from "./favorite";
+export {shareApi} from "./share";
+export {subscriptionApi} from "./subscription";
+export type {
+    SubscriptionStatus,
+    SubscriptionListResponse as SubscriptionList,
+} from "./subscription";
+
+// ==================== Stats ====================
+export {statsApi} from "./stats";
 export type {
     DashboardStats,
     MediaStats,
     UserStats,
-    TrafficStatsItem,
-    TrafficStatsResponse,
+} from "./stats";
+
+// ==================== System ====================
+export {systemApi, settingsApi} from "./system";
+export type {
     SystemSettings,
     UpdateSettingsRequest,
 } from "./system";
 
-// ==================== Legacy Compatibility ====================
-// 为了保持向后兼容，保留旧的导出
-export {statsApi as legacyStatsApi} from "./stats";
-export type {Stats} from "./stats";
+// ==================== History ====================
+export {historyApi} from "./history";
+export type {HistoryItem, HistoryListResponse} from "./history";

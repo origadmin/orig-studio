@@ -131,7 +131,8 @@ const Playlists: React.FC = () => {
         );
     };
 
-    const formatNumber = (num: number) => {
+    const formatNumber = (num: number | undefined | null) => {
+        if (num === undefined || num === null) return '0';
         if (num >= 10000) return (num / 10000).toFixed(1) + t('common.wan');
         return num.toString();
     };

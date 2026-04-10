@@ -228,8 +228,6 @@ func main() {
 	commentHandler := server.NewCommentHandler(commentUC, jwtManager)
 	playlistHandler := server.NewPlaylistHandler(playlistChannelUC, jwtManager)
 	feedHandler := server.NewFeedHandler(feedUC)
-	favoriteHandler := server.NewFavoriteHandler(likeFavoriteUC, jwtManager)
-	likeHandler := server.NewLikeHandler(likeFavoriteUC, jwtManager)
 	notificationHandler := server.NewNotificationHandler(notificationUC, jwtManager)
 	channelHandler := server.NewChannelHandler(playlistChannelUC, jwtManager)
 	shareHandler := server.NewShareHandler(likeFavoriteUC, jwtManager)
@@ -280,8 +278,6 @@ func main() {
 		commentHandler,
 		playlistHandler,
 		feedHandler,
-		favoriteHandler,
-		likeHandler,
 		notificationHandler,
 		channelHandler,
 		shareHandler,

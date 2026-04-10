@@ -242,3 +242,131 @@ message Playlist {
   // playlist.field.media_count
   int64 media_count = 10 [json_name = "media_count"];
 }
+
+// Channel is the model entity for Channel.
+message Channel {
+  // ID of the ent.
+  int64 id = 1 [json_name = "id"];
+  // create_time.field.comment
+  google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
+  // update_time.field.comment
+  google.protobuf.Timestamp update_time = 3 [json_name = "update_time"];
+  // channel.field.title
+  string title = 4 [json_name = "title"];
+  // channel.field.description
+  string description = 5 [json_name = "description"];
+  // channel.field.banner_logo
+  string banner_logo = 6 [json_name = "banner_logo"];
+  // channel.field.user_id
+  int64 user_id = 7 [json_name = "user_id"];
+  // channel.field.friendly_token
+  string friendly_token = 8 [json_name = "friendly_token"];
+  // channel.field.subscriber_count
+  int64 subscriber_count = 9 [json_name = "subscriber_count"];
+  // channel.field.media_count
+  int64 media_count = 10 [json_name = "media_count"];
+}
+
+// Subtitle is the model entity for Subtitle.
+message Subtitle {
+  // ID of the ent.
+  int64 id = 1 [json_name = "id"];
+  // create_time.field.comment
+  google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
+  // subtitle.field.media_id
+  int64 media_id = 3 [json_name = "media_id"];
+  // subtitle.field.language
+  string language = 4 [json_name = "language"];
+  // subtitle.field.file_url
+  string file_url = 5 [json_name = "file_url"];
+  // subtitle.field.label
+  string label = 6 [json_name = "label"];
+}
+
+// MediaVariant is the model entity for MediaVariant (encoding output).
+message MediaVariant {
+  // ID of the ent.
+  int64 id = 1 [json_name = "id"];
+  // media_variant.field.media_id
+  int64 media_id = 2 [json_name = "media_id"];
+  // media_variant.field.profile_id
+  int64 profile_id = 3 [json_name = "profile_id"];
+  // media_variant.field.resolution
+  string resolution = 4 [json_name = "resolution"];
+  // media_variant.field.url
+  string url = 5 [json_name = "url"];
+  // media_variant.field.size
+  int64 size = 6 [json_name = "size"];
+  // media_variant.field.status
+  string status = 7 [json_name = "status"];
+}
+
+// MediaMetadata is the model entity for MediaMetadata.
+message MediaMetadata {
+  // ID of the ent.
+  int64 id = 1 [json_name = "id"];
+  // media_metadata.field.media_id
+  int64 media_id = 2 [json_name = "media_id"];
+  // media_metadata.field.duration
+  int32 duration = 3 [json_name = "duration"];
+  // media_metadata.field.bitrate
+  int64 bitrate = 4 [json_name = "bitrate"];
+  // media_metadata.field.video_codec
+  string video_codec = 5 [json_name = "video_codec"];
+  // media_metadata.field.audio_codec
+  string audio_codec = 6 [json_name = "audio_codec"];
+  // media_metadata.field.frame_rate
+  float frame_rate = 7 [json_name = "frame_rate"];
+  // media_metadata.field.width
+  int32 width = 8 [json_name = "width"];
+  // media_metadata.field.height
+  int32 height = 9 [json_name = "height"];
+}
+
+// HistoryItem is the model entity for watch history.
+message HistoryItem {
+  // ID of the ent.
+  int64 id = 1 [json_name = "id"];
+  // create_time.field.comment
+  google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
+  // history_item.field.user_id
+  int64 user_id = 3 [json_name = "user_id"];
+  // history_item.field.media_id
+  int64 media_id = 4 [json_name = "media_id"];
+  // history_item.field.progress
+  int32 progress = 5 [json_name = "progress"];
+  // history_item.field.duration
+  int32 duration = 6 [json_name = "duration"];
+  // history_item.field.is_finished
+  bool is_finished = 7 [json_name = "is_finished"];
+  // history_item.field.last_watched_at
+  google.protobuf.Timestamp last_watched_at = 8 [json_name = "last_watched_at"];
+}
+
+// Review is the model entity for content review.
+message Review {
+  // ID of the ent.
+  int64 id = 1 [json_name = "id"];
+  // create_time.field.comment
+  google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
+  // update_time.field.comment
+  google.protobuf.Timestamp update_time = 3 [json_name = "update_time"];
+  // review.field.media_id
+  int64 media_id = 4 [json_name = "media_id"];
+  // review.field.reviewer_id
+  int64 reviewer_id = 5 [json_name = "reviewer_id"];
+  // review.field.status
+  string status = 6 [json_name = "status"];
+  // review.field.reason
+  string reason = 7 [json_name = "reason"];
+  // review.field.notes
+  string notes = 8 [json_name = "notes"];
+}
+
+// StatPoint is a single data point for statistics.
+message StatPoint {
+  // stat_point.field.date
+  string date = 1 [json_name = "date"];
+  // stat_point.field.value
+  int64 value = 2 [json_name = "value"];
+}

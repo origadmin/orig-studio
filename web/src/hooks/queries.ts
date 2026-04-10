@@ -25,12 +25,15 @@ export function useMediaList(params: {
     type?: string;
     category_id?: number | null;
     user_id?: string | number;
+    keyword?: string;
+    search?: string;
 }) {
     return useQuery({
         queryKey: mediaKeys.list(params),
         queryFn: async () => {
             const res = await mediaApi.list({
                 ...params,
+                keyword: params.search || params.keyword,
                 category_id: params.category_id || undefined,
                 user_id: params.user_id ? Number(params.user_id) : undefined
             });
@@ -63,7 +66,7 @@ export function useInfiniteMediaList(params: {
         initialPageParam: 1,
         getNextPageParam: (lastPage, allPages) => {
             const size = params.page_size || 20;
-            const items = lastPage.list || (Array.isArray(lastPage) ? lastPage : []);
+            const items = lastPage.items || [];
             return items.length === size ? allPages.length + 1 : undefined;
         },
     });

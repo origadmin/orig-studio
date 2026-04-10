@@ -273,35 +273,37 @@ POST   /api/v1/channels/:id/subscription         # 订阅
 DELETE /api/v1/channels/:id/subscription         # 取消订阅
 ```
 
-#### 🎬 媒体模块 `/medias`
+#### 🎬 媒体模块
 
 ```
+# 媒体列表和上传
 GET    /api/v1/medias                            # 媒体列表
-POST   /api/v1/medias/upload                     # 上传文件（静态路由，优先）
-GET    /api/v1/medias                            # 媒体列表
+POST   /api/v1/medias/upload                     # 上传文件
 POST   /api/v1/medias                            # 创建媒体记录
-GET    /api/v1/medias/:id                        # 媒体详情
-PUT    /api/v1/medias/:id                        # 更新媒体
-DELETE /api/v1/medias/:id                        # 删除媒体
-POST   /api/v1/medias/:id/view                   # 增加播放量
-GET    /api/v1/medias/:id/stream                 # 流媒体播放
-GET    /api/v1/medias/:id/download               # 下载
-GET    /api/v1/medias/:id/thumbnail              # 缩略图
-GET    /api/v1/medias/:id/tasks                  # 该媒体的转码任务
-GET    /api/v1/medias/:id/variants               # 可用变体
-POST   /api/v1/medias/:id/tasks/:taskId/retry    # 重试单个转码任务
-GET    /api/v1/medias/:id/likes                  # 点赞列表（附带数量）
-POST   /api/v1/medias/:id/likes                  # 点赞/取消点赞（toggle）
-DELETE /api/v1/medias/:id/likes                  # 取消点赞（明确删除）
-GET    /api/v1/medias/:id/favorites              # 收藏列表
-POST   /api/v1/medias/:id/favorites              # 收藏/取消收藏（toggle）
-DELETE /api/v1/medias/:id/favorites              # 取消收藏（明确删除）
-GET    /api/v1/medias/:id/shares                 # 分享统计
-POST   /api/v1/medias/:id/shares                 # 创建分享记录
-GET    /api/v1/medias/:id/comments               # 媒体评论列表
-GET    /api/v1/medias/:id/subtitles              # 字幕列表
-POST   /api/v1/medias/:id/subtitles              # 上传字幕
-GET    /api/v1/medias/:id/metadata               # 媒体元数据
+
+# 单个媒体资源（使用单数形式避免路由冲突）
+GET    /api/v1/media/:id                        # 媒体详情
+PUT    /api/v1/media/:id                        # 更新媒体
+DELETE /api/v1/media/:id                        # 删除媒体
+POST   /api/v1/media/:id/view                   # 增加播放量
+GET    /api/v1/media/:id/stream                 # 流媒体播放
+GET    /api/v1/media/:id/download               # 下载
+GET    /api/v1/media/:id/thumbnail              # 缩略图
+GET    /api/v1/media/:id/tasks                  # 该媒体的转码任务
+GET    /api/v1/media/:id/variants               # 可用变体
+POST   /api/v1/media/:id/tasks/:taskId/retry    # 重试单个转码任务
+GET    /api/v1/media/:id/likes                  # 点赞列表（附带数量）
+POST   /api/v1/media/:id/likes                  # 点赞/取消点赞（toggle）
+DELETE /api/v1/media/:id/likes                  # 取消点赞（明确删除）
+GET    /api/v1/media/:id/favorites              # 收藏列表
+POST   /api/v1/media/:id/favorites              # 收藏/取消收藏（toggle）
+DELETE /api/v1/media/:id/favorites              # 取消收藏（明确删除）
+GET    /api/v1/media/:id/shares                 # 分享统计
+POST   /api/v1/media/:id/shares                 # 创建分享记录
+GET    /api/v1/media/:id/comments               # 媒体评论列表
+GET    /api/v1/media/:id/subtitles              # 字幕列表
+POST   /api/v1/media/:id/subtitles              # 上传字幕
+GET    /api/v1/media/:id/metadata               # 媒体元数据
 ```
 
 #### 📋 播放列表模块 `/playlists`
@@ -347,6 +349,24 @@ GET    /api/v1/search                            # 综合搜索（?q=keyword&typ
 GET    /api/v1/search/suggestions                # 搜索建议/自动补全
 ```
 
+#### 🎞️ 编码模块 `/encoding`
+
+```
+# 转码状态和任务
+GET    /api/v1/encoding/status                   # 转码状态统计
+GET    /api/v1/encoding/tasks                    # 编码任务列表
+GET    /api/v1/encoding/events                   # 转码事件流（SSE）
+POST   /api/v1/encoding/retry                    # 重试单个任务
+POST   /api/v1/encoding/retry-all-failed         # 重试所有失败任务
+
+# 编码配置
+GET    /api/v1/encoding/profiles                 # 编码配置列表
+GET    /api/v1/encoding/profiles/:profile_id     # 编码配置详情
+POST   /api/v1/encoding/profiles                 # 创建编码配置
+PUT    /api/v1/encoding/profiles/:profile_id     # 更新编码配置
+DELETE /api/v1/encoding/profiles/:profile_id     # 删除编码配置
+```
+
 #### 🏷️ 分类 & 标签模块
 
 ```
@@ -372,18 +392,18 @@ GET    /api/v1/admin/stats/medias
 GET    /api/v1/admin/stats/users
 GET    /api/v1/admin/stats/traffic
 
-# 转码管理（全局视角，区别于 /medias/:id/tasks）
-GET    /api/v1/admin/encoding/tasks
-GET    /api/v1/admin/encoding/status
-POST   /api/v1/admin/encoding/retry-failed       # 重试所有失败
-POST   /api/v1/admin/encoding/tasks/:taskId/retry
+# 转码管理（全局视角，区别于 /media/:id/tasks）
+GET    /api/v1/encoding/tasks                    # 编码任务列表
+GET    /api/v1/encoding/status                   # 转码状态统计
+POST   /api/v1/encoding/retry-all-failed         # 重试所有失败任务
+POST   /api/v1/encoding/retry                    # 重试单个任务
 
 # 转码配置
-GET    /api/v1/admin/encoding/profiles
-POST   /api/v1/admin/encoding/profiles
-GET    /api/v1/admin/encoding/profiles/:id
-PUT    /api/v1/admin/encoding/profiles/:id
-DELETE /api/v1/admin/encoding/profiles/:id
+GET    /api/v1/encoding/profiles                 # 编码配置列表
+POST   /api/v1/encoding/profiles                 # 创建编码配置
+GET    /api/v1/encoding/profiles/:profile_id     # 编码配置详情
+PUT    /api/v1/encoding/profiles/:profile_id     # 更新编码配置
+DELETE /api/v1/encoding/profiles/:profile_id     # 删除编码配置
 
 # 内容审核
 GET    /api/v1/admin/review/pending

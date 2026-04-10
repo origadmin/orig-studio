@@ -3,7 +3,7 @@
  * 视频播放页 - 对接真实数据
  */
 
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {useSearch, Link} from '@tanstack/react-router';
 import {
     Loader2, RefreshCw, AlertTriangle, Edit, Trash2, FileText, Eye
@@ -17,8 +17,6 @@ import {formatViews, formatDate, formatDuration} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
 import {mediaApi} from '@/lib/api/media';
 import {commentApi} from '@/lib/api/comment';
-import {likeApi} from '@/lib/api/like';
-import {favoriteApi} from '@/lib/api/favorite';
 import {useMediaDetail, useMediaList, useDeleteMedia} from '@/hooks/queries';
 import {useAuth} from '@/hooks/useAuth';
 import {getImageUrl, handleImageError} from '@/lib/imageUtils';
@@ -29,8 +27,6 @@ import InteractionBar from '@/components/common/InteractionBar';
 import VideoPreview from '@/components/common/VideoPreview';
 import VideoPlayer from '@/components/common/VideoPlayer';
 
-
-
 const WatchPage = () => {
     const {t} = useTranslation();
     const {v: id} = useSearch({strict: false});
@@ -40,16 +36,6 @@ const WatchPage = () => {
 
     const [retrying, setRetrying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
-    const [comments, setComments] = useState<any[]>([]);
-    const [isLoadingComments, setIsLoadingComments] = useState(false);
-    const [commentText, setCommentText] = useState('');
-    const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-    const [likeCount, setLikeCount] = useState(0);
-    const [isLiked, setIsLiked] = useState(false);
-    const [isLoadingLike, setIsLoadingLike] = useState(false);
-    const [favoriteCount, setFavoriteCount] = useState(0);
-    const [isFavorited, setIsFavorited] = useState(false);
-    const [isLoadingFavorite, setIsLoadingFavorite] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const {data: recData} = useMediaList({
@@ -58,120 +44,16 @@ const WatchPage = () => {
         status: 'active'
     });
 
-    const recommendations = recData?.list?.filter(m => m.id !== Number(id)) || [];
+    const recommendations = recData?.items?.filter(m => m.id !== Number(id)) || [];
     const loading = isMediaLoading;
     const error = mediaError ? t('watch.failedToLoad') : null;
-
-    // Fetch comments for the media
-    useEffect(() => {
-        if (!media) return;
-
-        const fetchComments = async () => {
-            setIsLoadingComments(true);
-            try {
-                const response = await commentApi.getAll({media_id: id});
-                setComments(response?.list || []);
-            } catch (err) {
-                console.error('Failed to fetch comments:', err);
-            } finally {
-                setIsLoadingComments(false);
-            }
-        };
-
-        fetchComments();
-    }, [media, id]);
-
-    // Fetch like and favorite status
-    useEffect(() => {
-        if (!media) return;
-
-        // Initialize counts from media data
-        setLikeCount(media.like_count || 0);
-        setFavoriteCount(media.favorite_count || 0);
-
-        // Check user's like and favorite status
-        const checkLikeStatus = async () => {
-            try {
-                const response = await likeApi.getStatus(id);
-                setIsLiked(response?.is_liked || false);
-            } catch (err) {
-                // Ignore errors for unauthenticated users
-            }
-        };
-
-        const checkFavoriteStatus = async () => {
-            try {
-                const response = await favoriteApi.getStatus(id);
-                setIsFavorited(response?.is_favorited || false);
-            } catch (err) {
-                // Ignore errors for unauthenticated users
-            }
-        };
-
-        checkLikeStatus();
-        checkFavoriteStatus();
-    }, [media, id]);
-
-    // Handle comment submission
-    const handleSubmitComment = async () => {
-        if (!commentText.trim() || !media) return;
-
-        setIsSubmittingComment(true);
-        try {
-            await commentApi.create({
-                media_id: id,
-                body: commentText
-            });
-
-            // Clear input and refresh comments
-            setCommentText('');
-            const response = await commentApi.getAll({media_id: id});
-            setComments(response?.list || []);
-        } catch (err) {
-            console.error('Failed to submit comment:', err);
-        } finally {
-            setIsSubmittingComment(false);
-        }
-    };
-
-    // Handle like toggle
-    const handleLikeToggle = async () => {
-        if (!media) return;
-
-        setIsLoadingLike(true);
-        try {
-            await likeApi.toggle(id);
-            setIsLiked(!isLiked);
-            setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
-        } catch (err) {
-            console.error('Failed to toggle like:', err);
-        } finally {
-            setIsLoadingLike(false);
-        }
-    };
-
-    // Handle favorite toggle
-    const handleFavoriteToggle = async () => {
-        if (!media) return;
-
-        setIsLoadingFavorite(true);
-        try {
-            await favoriteApi.toggle(id);
-            setIsFavorited(!isFavorited);
-            setFavoriteCount(prev => isFavorited ? prev - 1 : prev + 1);
-        } catch (err) {
-            console.error('Failed to toggle favorite:', err);
-        } finally {
-            setIsLoadingFavorite(false);
-        }
-    };
 
     // Handle media deletion
     const handleDeleteMedia = async () => {
         if (!media) return;
 
         try {
-            await deleteMutation.mutateAsync(id);
+            await deleteMutation.mutateAsync(id as string);
             // Redirect to home page after deletion
             window.location.href = '/';
         } catch (err) {
@@ -184,7 +66,7 @@ const WatchPage = () => {
         if (!media || retrying) return;
         setRetrying(true);
         try {
-            await mediaApi.retryTranscode(media.id);
+            await mediaApi.encoding.retry(media.id);
             // Reload the page data after a short delay to show processing state
             setTimeout(() => window.location.reload(), 1000);
         } catch {
@@ -233,7 +115,6 @@ const WatchPage = () => {
             message={t('error.404Message')}
         />;
     }
-
 
     const mediaUser = media.edges?.user?.[0];
     const isProcessing = media.encoding_status !== 'success';
@@ -335,13 +216,13 @@ const WatchPage = () => {
                                     <p className="text-xs text-gray-500 dark:text-gray-400">{formatViews(mediaUser?.subscriber_count || 0)} {t('common.subscribers')}</p>
                                 </div>
                                 <SubscribeButton
-                                    userId={media.user_id.toString()}
+                                    userId={media.user_id?.toString() || ''}
                                     className="ml-4 rounded-full"
                                 />
                             </div>
 
                             {/* Media owner controls */}
-                            {user && media && user.id === media.user_id && (
+                            {user && media && user.id === media.user_id?.toString() && (
                                 <div className="flex items-center gap-2 flex-nowrap">
                                     <Button variant="secondary" size="sm"
                                             className="gap-1 text-xs h-8 px-3 flex-shrink-0">
@@ -366,8 +247,11 @@ const WatchPage = () => {
                             )}
                         </div>
 
-                        <div className="flex items-center gap-4">
-                            <InteractionBar mediaId={id}/>
+                        <div className="flex items-center">
+                            <InteractionBar
+                                mediaId={id as string}
+                                commentCount={media.comment_count}
+                            />
                         </div>
                     </div>
 
@@ -391,7 +275,7 @@ const WatchPage = () => {
 
                     {/* Comments Section */}
                     <div className="mt-8">
-                        <CommentSection mediaId={id}/>
+                        <CommentSection mediaId={id as string}/>
                     </div>
                 </div>
             </div>

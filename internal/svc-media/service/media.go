@@ -344,7 +344,7 @@ func (s *MediaService) SSEHandler(w stdhttp.ResponseWriter, r *stdhttp.Request) 
 	}
 }
 
-// TranscodingStatusHTTPHandler handles GET /api/v1/media/transcoding/status with query parameters.
+// TranscodingStatusHTTPHandler handles GET /api/v1/medias/transcoding/status with query parameters.
 // This bypasses the gRPC gateway to properly pass status/page/page_size from query string.
 func (s *MediaService) TranscodingStatusHTTPHandler(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 	filter := &biz.TranscodingStatusFilter{
@@ -411,7 +411,7 @@ func (s *MediaService) TranscodingStatusHTTPHandler(w stdhttp.ResponseWriter, r 
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
-// RetryTaskHTTPHandler handles POST /api/v1/media/retry with query parameter task_id.
+// RetryTaskHTTPHandler handles POST /api/v1/medias/encoding/retry with query parameter task_id.
 // Resets a single failed encoding task to "pending" for re-processing.
 // Query params:
 //   - task_id (required): the encoding task ID to retry
@@ -456,7 +456,7 @@ func (s *MediaService) RetryTaskHTTPHandler(w stdhttp.ResponseWriter, r *stdhttp
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
-// RetryAllFailedHTTPHandler handles POST /api/v1/media/retry-all-failed with query parameter media_id.
+// RetryAllFailedHTTPHandler handles POST /api/v1/medias/encoding/retry-all-failed with query parameter media_id.
 // Resets all failed tasks for a media back to "pending".
 func (s *MediaService) RetryAllFailedHTTPHandler(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 	if r.Method != stdhttp.MethodPost {
@@ -497,13 +497,13 @@ func writeRetryError(w stdhttp.ResponseWriter, message string, code int) {
 	})
 }
 
-// MediaVariantsHTTPHandler handles GET /api/v1/media/{id}/variants
+// MediaVariantsHTTPHandler handles GET /api/v1/medias/{id}/variants
 // Returns aggregated transcoding status for a single media, including all variant details.
 // This is the API that the "media management" page uses to display transcoding overview.
 func (s *MediaService) MediaVariantsHTTPHandler(w stdhttp.ResponseWriter, r *stdhttp.Request) {
-	// Extract media ID from URL path: /api/v1/media/{id}/variants
+	// Extract media ID from URL path: /api/v1/medias/{id}/variants
 	var mediaID int64
-	_, err := fmt.Sscanf(r.URL.Path, "/api/v1/media/%d/variants", &mediaID)
+	_, err := fmt.Sscanf(r.URL.Path, "/api/v1/medias/%d/variants", &mediaID)
 	if err != nil || mediaID <= 0 {
 		writeRetryError(w, "invalid media ID in path", 400)
 		return

@@ -15,10 +15,12 @@ option objc_class_prefix = "OrigCMSUser";
 
 // The user service definition.
 service UserService {
+  // ========== Auth Module (moved from /users to /auth) ==========
+  
   // Login authenticates a user and returns JWT tokens.
   rpc Login(LoginRequest) returns (LoginResponse) {
     option (google.api.http) = {
-      post: "/api/v1/users/login"
+      post: "/api/v1/auth/login"
       body: "*"
     };
   }
@@ -26,10 +28,103 @@ service UserService {
   // Logout invalidates the current session.
   rpc Logout(LogoutRequest) returns (LogoutResponse) {
     option (google.api.http) = {
-      post: "/api/v1/users/logout"
+      post: "/api/v1/auth/logout"
       body: "*"
     };
   }
+
+  // RefreshToken refreshes the access token using a refresh token.
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/refresh"
+      body: "*"
+    };
+  }
+
+  // Register creates a new user account.
+  rpc Register(RegisterRequest) returns (RegisterResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/register"
+      body: "*"
+    };
+  }
+
+  // ForgotPassword initiates password reset process.
+  rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/forgot-password"
+      body: "*"
+    };
+  }
+
+  // ResetPassword resets user password with token.
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/reset-password"
+      body: "*"
+    };
+  }
+
+  // GetCurrentUser returns the current authenticated user (moved from /auth/me to /me).
+  // This is kept for backward compatibility, use MeService for new code.
+  rpc GetCurrentUser(GetCurrentUserRequest) returns (GetCurrentUserResponse) {
+    option (google.api.http) = {get: "/api/v1/auth/me"};
+  }
+
+  // ========== Me Module (Current User) ==========
+
+  // GetMe returns the current user's information.
+  rpc GetMe(GetMeRequest) returns (GetMeResponse) {
+    option (google.api.http) = {get: "/api/v1/me"};
+  }
+
+  // UpdateMe updates the current user's information.
+  rpc UpdateMe(UpdateMeRequest) returns (UpdateMeResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/me"
+      body: "*"
+    };
+  }
+
+  // UpdateMyPassword updates the current user's password.
+  rpc UpdateMyPassword(UpdateMyPasswordRequest) returns (UpdateMyPasswordResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/me/password"
+      body: "*"
+    };
+  }
+
+  // GetMyPlaylists returns the current user's playlists.
+  rpc GetMyPlaylists(GetMyPlaylistsRequest) returns (GetMyPlaylistsResponse) {
+    option (google.api.http) = {get: "/api/v1/me/playlists"};
+  }
+
+  // GetMyFavorites returns the current user's favorites.
+  rpc GetMyFavorites(GetMyFavoritesRequest) returns (GetMyFavoritesResponse) {
+    option (google.api.http) = {get: "/api/v1/me/favorites"};
+  }
+
+  // GetMyLikes returns the current user's likes.
+  rpc GetMyLikes(GetMyLikesRequest) returns (GetMyLikesResponse) {
+    option (google.api.http) = {get: "/api/v1/me/likes"};
+  }
+
+  // GetMySubscriptions returns the current user's channel subscriptions.
+  rpc GetMySubscriptions(GetMySubscriptionsRequest) returns (GetMySubscriptionsResponse) {
+    option (google.api.http) = {get: "/api/v1/me/subscriptions"};
+  }
+
+  // GetMyHistory returns the current user's watch history.
+  rpc GetMyHistory(GetMyHistoryRequest) returns (GetMyHistoryResponse) {
+    option (google.api.http) = {get: "/api/v1/me/history"};
+  }
+
+  // GetMyStats returns the current user's statistics.
+  rpc GetMyStats(GetMyStatsRequest) returns (GetMyStatsResponse) {
+    option (google.api.http) = {get: "/api/v1/me/stats"};
+  }
+
+  // ========== User Resource Module ==========
 
   // ListUsers returns a list of users.
   rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
@@ -65,7 +160,7 @@ service UserService {
   // UpdateUserStatus updates a user's status.
   rpc UpdateUserStatus(UpdateUserStatusRequest) returns (UpdateUserStatusResponse) {
     option (google.api.http) = {
-      put: "/api/v1/users/{id}/status"
+      patch: "/api/v1/users/{id}/status"
       body: "*"
     };
   }
@@ -98,7 +193,258 @@ service UserService {
   rpc ListUserRoles(ListUserRolesRequest) returns (ListUserRolesResponse) {
     option (google.api.http) = {get: "/api/v1/users/{id}/roles"};
   }
+
+  // GetUserStats returns statistics for a user.
+  rpc GetUserStats(GetUserStatsRequest) returns (GetUserStatsResponse) {
+    option (google.api.http) = {get: "/api/v1/users/{id}/stats"};
+  }
+
+  // GetUserPlaylists returns public playlists for a user.
+  rpc GetUserPlaylists(GetUserPlaylistsRequest) returns (GetUserPlaylistsResponse) {
+    option (google.api.http) = {get: "/api/v1/users/{id}/playlists"};
+  }
+
+  // GetUserFollowers returns followers for a user.
+  rpc GetUserFollowers(GetUserFollowersRequest) returns (GetUserFollowersResponse) {
+    option (google.api.http) = {get: "/api/v1/users/{id}/followers"};
+  }
 }
+
+// ========== Auth Messages ==========
+
+// LoginRequest is the request message for user login.
+message LoginRequest {
+  // The username or email.
+  string username = 1 [json_name = "username"];
+  // The plain text password.
+  string password = 2 [json_name = "password"];
+}
+
+// LoginResponse is the response message for user login.
+message LoginResponse {
+  // The access token.
+  string access_token = 1 [json_name = "access_token"];
+  // The refresh token.
+  string refresh_token = 2 [json_name = "refresh_token"];
+  // Token expiration timestamp.
+  int64 expires_at = 3 [json_name = "expires_at"];
+  // The user info.
+  api.v1.services.types.User user = 4 [json_name = "user"];
+}
+
+// LogoutRequest is the request message for user logout.
+message LogoutRequest {
+  // The access token to invalidate.
+  string access_token = 1 [json_name = "access_token"];
+}
+
+// LogoutResponse is the response message for user logout.
+message LogoutResponse {
+  // Whether the logout was successful.
+  bool success = 1 [json_name = "success"];
+}
+
+// RefreshTokenRequest is the request message for refreshing token.
+message RefreshTokenRequest {
+  // The refresh token.
+  string refresh_token = 1 [json_name = "refresh_token"];
+}
+
+// RefreshTokenResponse is the response message for refreshing token.
+message RefreshTokenResponse {
+  // The new access token.
+  string access_token = 1 [json_name = "access_token"];
+  // The new refresh token (optional, may be same as input).
+  string refresh_token = 2 [json_name = "refresh_token"];
+  // Token expiration timestamp.
+  int64 expires_at = 3 [json_name = "expires_at"];
+}
+
+// RegisterRequest is the request message for user registration.
+message RegisterRequest {
+  // The username.
+  string username = 1 [json_name = "username"];
+  // The email.
+  string email = 2 [json_name = "email"];
+  // The password.
+  string password = 3 [json_name = "password"];
+  // Optional display name.
+  string nickname = 4 [json_name = "nickname"];
+}
+
+// RegisterResponse is the response message for user registration.
+message RegisterResponse {
+  // The created user.
+  api.v1.services.types.User user = 1 [json_name = "user"];
+  // The access token.
+  string access_token = 2 [json_name = "access_token"];
+  // The refresh token.
+  string refresh_token = 3 [json_name = "refresh_token"];
+  // Token expiration timestamp.
+  int64 expires_at = 4 [json_name = "expires_at"];
+}
+
+// ForgotPasswordRequest is the request message for forgot password.
+message ForgotPasswordRequest {
+  // The email address.
+  string email = 1 [json_name = "email"];
+}
+
+// ForgotPasswordResponse is the response message for forgot password.
+message ForgotPasswordResponse {
+  // Whether the request was successful.
+  bool success = 1 [json_name = "success"];
+  // Message to display to user.
+  string message = 2 [json_name = "message"];
+}
+
+// ResetPasswordRequest is the request message for resetting password.
+message ResetPasswordRequest {
+  // The reset token.
+  string token = 1 [json_name = "token"];
+  // The new password.
+  string password = 2 [json_name = "password"];
+}
+
+// ResetPasswordResponse is the response message for resetting password.
+message ResetPasswordResponse {
+  // Whether the reset was successful.
+  bool success = 1 [json_name = "success"];
+}
+
+// GetCurrentUserRequest is the request message for getting current user.
+message GetCurrentUserRequest {}
+
+// GetCurrentUserResponse is the response message for getting current user.
+message GetCurrentUserResponse {
+  // The current user.
+  api.v1.services.types.User user = 1 [json_name = "user"];
+}
+
+// ========== Me Messages ==========
+
+// GetMeRequest is the request message for getting current user info.
+message GetMeRequest {}
+
+// GetMeResponse is the response message for getting current user info.
+message GetMeResponse {
+  // The current user.
+  api.v1.services.types.User user = 1 [json_name = "user"];
+}
+
+// UpdateMeRequest is the request message for updating current user.
+message UpdateMeRequest {
+  // The user fields to update.
+  string nickname = 1 [json_name = "nickname"];
+  string avatar = 2 [json_name = "avatar"];
+  string bio = 3 [json_name = "bio"];
+  string email = 4 [json_name = "email"];
+  string phone = 5 [json_name = "phone"];
+}
+
+// UpdateMeResponse is the response message for updating current user.
+message UpdateMeResponse {
+  // The updated user.
+  api.v1.services.types.User user = 1 [json_name = "user"];
+}
+
+// UpdateMyPasswordRequest is the request message for updating password.
+message UpdateMyPasswordRequest {
+  // The current password.
+  string current_password = 1 [json_name = "current_password"];
+  // The new password.
+  string new_password = 2 [json_name = "new_password"];
+}
+
+// UpdateMyPasswordResponse is the response message for updating password.
+message UpdateMyPasswordResponse {
+  // Whether the update was successful.
+  bool success = 1 [json_name = "success"];
+}
+
+// GetMyPlaylistsRequest is the request message for getting my playlists.
+message GetMyPlaylistsRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+}
+
+// GetMyPlaylistsResponse is the response message for getting my playlists.
+message GetMyPlaylistsResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Playlist playlists = 2 [json_name = "playlists"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+// GetMyFavoritesRequest is the request message for getting my favorites.
+message GetMyFavoritesRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+}
+
+// GetMyFavoritesResponse is the response message for getting my favorites.
+message GetMyFavoritesResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Media medias = 2 [json_name = "medias"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+// GetMyLikesRequest is the request message for getting my likes.
+message GetMyLikesRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+}
+
+// GetMyLikesResponse is the response message for getting my likes.
+message GetMyLikesResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Like likes = 2 [json_name = "likes"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+// GetMySubscriptionsRequest is the request message for getting my subscriptions.
+message GetMySubscriptionsRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+}
+
+// GetMySubscriptionsResponse is the response message for getting my subscriptions.
+message GetMySubscriptionsResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Channel channels = 2 [json_name = "channels"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+// GetMyHistoryRequest is the request message for getting my history.
+message GetMyHistoryRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+}
+
+// GetMyHistoryResponse is the response message for getting my history.
+message GetMyHistoryResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.HistoryItem items = 2 [json_name = "items"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+// GetMyStatsRequest is the request message for getting my stats.
+message GetMyStatsRequest {}
+
+// GetMyStatsResponse is the response message for getting my stats.
+message GetMyStatsResponse {
+  int32 total_views = 1 [json_name = "total_views"];
+  int32 total_likes = 2 [json_name = "total_likes"];
+  int32 total_medias = 3 [json_name = "total_medias"];
+  int32 total_followers = 4 [json_name = "total_followers"];
+  int32 total_following = 5 [json_name = "total_following"];
+}
+
+// ========== User Resource Messages ==========
 
 // ListUsersRequest is the request message for listing users.
 message ListUsersRequest {
@@ -259,34 +605,45 @@ message ListUserRolesResponse {
   repeated api.v1.services.types.Role roles = 2 [json_name = "roles"];
 }
 
-// LoginRequest is the request message for user login.
-message LoginRequest {
-  // The username or email.
-  string username = 1 [json_name = "username"];
-  // The plain text password.
-  string password = 2 [json_name = "password"];
+// GetUserStatsRequest is the request message for getting user stats.
+message GetUserStatsRequest {
+  int64 id = 1;
 }
 
-// LoginResponse is the response message for user login.
-message LoginResponse {
-  // The access token.
-  string access_token = 1 [json_name = "access_token"];
-  // The refresh token.
-  string refresh_token = 2 [json_name = "refresh_token"];
-  // Token expiration timestamp.
-  int64 expires_at = 3 [json_name = "expires_at"];
-  // The user info.
-  api.v1.services.types.User user = 4 [json_name = "user"];
+// GetUserStatsResponse is the response message for getting user stats.
+message GetUserStatsResponse {
+  int32 total_views = 1 [json_name = "total_views"];
+  int32 total_likes = 2 [json_name = "total_likes"];
+  int32 total_medias = 3 [json_name = "total_medias"];
+  int32 total_followers = 4 [json_name = "total_followers"];
 }
 
-// LogoutRequest is the request message for user logout.
-message LogoutRequest {
-  // The access token to invalidate.
-  string access_token = 1 [json_name = "access_token"];
+// GetUserPlaylistsRequest is the request message for getting user playlists.
+message GetUserPlaylistsRequest {
+  int64 id = 1;
+  int32 page = 2 [json_name = "page"];
+  int32 page_size = 3 [json_name = "page_size"];
 }
 
-// LogoutResponse is the response message for user logout.
-message LogoutResponse {
-  // Whether the logout was successful.
-  bool success = 1 [json_name = "success"];
+// GetUserPlaylistsResponse is the response message for getting user playlists.
+message GetUserPlaylistsResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Playlist playlists = 2 [json_name = "playlists"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+// GetUserFollowersRequest is the request message for getting user followers.
+message GetUserFollowersRequest {
+  int64 id = 1;
+  int32 page = 2 [json_name = "page"];
+  int32 page_size = 3 [json_name = "page_size"];
+}
+
+// GetUserFollowersResponse is the response message for getting user followers.
+message GetUserFollowersResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.User followers = 2 [json_name = "followers"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
 }

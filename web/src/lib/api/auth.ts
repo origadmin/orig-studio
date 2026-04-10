@@ -55,13 +55,13 @@ export const refreshToken = async (): Promise<Token> => {
     return api.post<Token>("/auth/refresh", {refresh_token});
 };
 
-// 获取当前用户
+// 获取当前用户 - 使用 /me 路径
 export const getCurrentUser = async (): Promise<CurrentUser> => {
     const token = getAccessToken();
     if (!token || isTokenExpired()) {
         throw new Error("Not authenticated");
     }
-    return api.get<CurrentUser>("/auth/me");
+    return api.get<CurrentUser>("/me");
 };
 
 // API 对象（用于测试兼容性）

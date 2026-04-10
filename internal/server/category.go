@@ -20,15 +20,10 @@ func NewCategoryHandler(uc *biz.CategoryTagUseCase) *CategoryHandler {
 func (h *CategoryHandler) Register(group *gin.RouterGroup) {
 	categories := group.Group("/categories")
 	{
+		// ================================  
+		// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST
+		// ================================
 		categories.GET("", h.listCategories())
-		categories.GET("/:id", func(c *gin.Context) {
-			_, _ = strconv.Atoi(c.Param("id"))
-			// UseCase GetCategory implementation needed?
-			// cat, err := h.uc.GetCategory(c.Request.Context(), id)
-			// For now, CategoryHandler refactoring is minimal.
-			c.JSON(http.StatusNotImplemented, gin.H{"error": "not implemented in UseCase"})
-		})
-
 		categories.POST("", func(c *gin.Context) {
 			var input struct {
 				Name        string `json:"name"`
@@ -49,6 +44,17 @@ func (h *CategoryHandler) Register(group *gin.RouterGroup) {
 			}
 
 			c.JSON(http.StatusCreated, cat)
+		})
+
+		// ================================  
+		// 2. PARAMETER ROUTES (WITH :id) - MUST BE LAST
+		// ================================
+		categories.GET("/:id", func(c *gin.Context) {
+			_, _ = strconv.Atoi(c.Param("id"))
+			// UseCase GetCategory implementation needed?
+			// cat, err := h.uc.GetCategory(c.Request.Context(), id)
+			// For now, CategoryHandler refactoring is minimal.
+			c.JSON(http.StatusNotImplemented, gin.H{"error": "not implemented in UseCase"})
 		})
 
 		categories.DELETE("/:id", func(c *gin.Context) {

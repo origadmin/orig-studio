@@ -12,6 +12,13 @@ export const API_BASE_URL = getApiBaseUrl();
 export const API_PREFIX = "/api/v1";
 export const REQUEST_TIMEOUT = 30000;
 
+// 统一响应格式接口
+export interface ApiResponse<T> {
+    code: number;
+    message: string;
+    data: T;
+}
+
 interface Token {
     access_token: string;
     expires_in: number;
@@ -112,9 +119,31 @@ function createRequest() {
         (error) => Promise.reject(error)
     );
 
-    // 响应拦截器：401 → 清 token，跳登录
+    // 响应拦截器：处理统一响应格式和 401 错误
     request.interceptors.response.use(
-        (response) => response,
+        (response) => {
+            // 适配新的统一响应格式 {code, message, data}
+            // 如果响应包含 code 和 data 字段，返回 data 部分
+            const data = response.data;
+            if (data && typeof data === 'object' && 'code' in data && 'data' in data) {
+                // 检查是否成功响应 (code === 0)
+                if (data.code !== 0) {
+                    // 业务错误，抛出异常
+                    return Promise.reject({
+                        response: {
+                            data: {
+                                code: data.code,
+                                message: data.message || 'Request failed',
+                            }
+                        }
+                    });
+                }
+                // 返回 data 部分
+                return {...response, data: data.data};
+            }
+            // 原始格式，直接返回
+            return response;
+        },
         async (error) => {
             const originalRequest = error.config;
 
@@ -219,9 +248,15 @@ async function fetchApi<T>(
 
 export const api = {
     get: <T>(url: string, params?: Record<string, unknown>) => fetchApi<T>(url, "GET", {params}),
-    post: <T, B = unknown>(url: string, body?: B) => fetchApi<T>(url, "POST", {body}),
-    put: <T, B = unknown>(url: string, body?: B) => fetchApi<T>(url, "PUT", {body}),
-    patch: <T, B = unknown>(url: string, body?: B) => fetchApi<T>(url, "PATCH", {body}),
+    post: <T, B = unknown>(url: string, body?: B, options?: {
+        params?: Record<string, unknown>
+    }) => fetchApi<T>(url, "POST", {body, ...options}),
+    put: <T, B = unknown>(url: string, body?: B, options?: {
+        params?: Record<string, unknown>
+    }) => fetchApi<T>(url, "PUT", {body, ...options}),
+    patch: <T, B = unknown>(url: string, body?: B, options?: {
+        params?: Record<string, unknown>
+    }) => fetchApi<T>(url, "PATCH", {body, ...options}),
     del: <T>(url: string, params?: Record<string, unknown>) => fetchApi<T>(url, "DELETE", {params}),
 };
 

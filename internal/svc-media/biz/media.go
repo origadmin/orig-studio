@@ -264,8 +264,7 @@ func (uc *MediaUseCase) ListEncodingTasks(
 }
 
 // RetryTask resets a failed/partial encoding task back to "pending" so it can be re-processed.
-// This only resets the task state; the actual re-processing must be triggered by
-// publishing a new encode request or by the caller invoking the TranscodeHandler.
+// It re-publishes the media encode request with the specific task ID to trigger processing.
 func (uc *MediaUseCase) RetryTask(ctx context.Context, taskID int) (*EncodingTask, error) {
 	task, err := uc.encodingRepo.Get(ctx, taskID)
 	if err != nil {
@@ -273,34 +272,63 @@ func (uc *MediaUseCase) RetryTask(ctx context.Context, taskID int) (*EncodingTas
 	}
 
 	// Only allow retrying failed or partial tasks
-	if task.Status != "failed" && task.Status != "partial" {
+	if task.Status != "failed" && task.Status != "partial" && task.Status != "skipped" {
 		return nil, fmt.Errorf(
-			"cannot retry task %d with status %q (only 'failed' can be retried)",
+			"cannot retry task %d with status %q (only 'failed', 'partial', or 'skipped' can be retried)",
 			taskID,
 			task.Status,
 		)
 	}
 
+	// Update task status, progress and clear error message BEFORE publishing
 	task.Status = "pending"
 	task.Progress = 0
 	task.ErrorMessage = ""
+	if _, err := uc.encodingRepo.Update(ctx, task); err != nil {
+		uc.log.Errorf("failed to reset task %d status in DB for retry: %v", taskID, err)
+		return nil, fmt.Errorf("update task status: %w", err)
+	}
 
-	updated, err := uc.encodingRepo.Update(ctx, task)
+	// Get media to re-publish encode request
+	media, err := uc.repo.Get(ctx, task.MediaId)
 	if err != nil {
-		return nil, fmt.Errorf("failed to reset task %d: %w", taskID, err)
+		uc.log.Warnf("failed to get media %d for retry: %v", task.MediaId, err)
+		return nil, err
+	}
+
+	// Re-publish encode request with specific task ID to trigger processing
+	if uc.publisher != nil {
+		payload, _ := json.Marshal(struct {
+			MediaID     int64  `json:"media_id"`
+			MediaPath   string `json:"media_path"`
+			ContentType string `json:"content_type"`
+			TaskID      int    `json:"task_id"`
+		}{
+			MediaID:     media.Id,
+			MediaPath:   media.Url,
+			ContentType: media.MimeType,
+			TaskID:      taskID,
+		})
+		msg := pubsub.NewMessage(payload)
+		if err := uc.publisher.Publish(pubsub.MediaEncodeRequestTopic, msg); err != nil {
+			uc.log.Errorf("failed to re-publish encode request for media %d: %v", media.Id, err)
+		} else {
+			uc.log.Infof("re-published encode request for media %d with task ID %d", media.Id, taskID)
+		}
 	}
 
 	uc.log.Infof(
-		"task %d (media=%d profile=%d) reset to pending for retry",
+		"task %d (media=%d profile=%d) queued for retry with specific task ID",
 		taskID,
-		updated.MediaId,
-		updated.ProfileId,
+		task.MediaId,
+		task.ProfileId,
 	)
-	return updated, nil
+	return task, nil
 }
 
 // RetryAllFailedTasks resets all failed tasks for a given media back to "pending".
 // Returns the count of tasks that were reset.
+// It re-publishes the media encode request to trigger processing, but only the pending tasks will be processed.
 func (uc *MediaUseCase) RetryAllFailedTasks(ctx context.Context, mediaID int64) (int, error) {
 	tasks, err := uc.encodingRepo.ListByMedia(ctx, mediaID)
 	if err != nil {
@@ -309,7 +337,7 @@ func (uc *MediaUseCase) RetryAllFailedTasks(ctx context.Context, mediaID int64) 
 
 	resetCount := 0
 	for _, t := range tasks {
-		if t.Status != "failed" && t.Status != "partial" {
+		if t.Status != "failed" && t.Status != "partial" && t.Status != "skipped" {
 			continue
 		}
 		t.Status = "pending"
@@ -322,7 +350,35 @@ func (uc *MediaUseCase) RetryAllFailedTasks(ctx context.Context, mediaID int64) 
 		resetCount++
 	}
 
-	uc.log.Infof("reset %d failed tasks for media %d to pending", resetCount, mediaID)
+	if resetCount > 0 {
+		// Get media to re-publish encode request
+		media, err := uc.repo.Get(ctx, mediaID)
+		if err != nil {
+			uc.log.Warnf("failed to get media %d for retry: %v", mediaID, err)
+			return resetCount, nil
+		}
+
+		// Re-publish encode request to trigger processing
+		if uc.publisher != nil {
+			payload, _ := json.Marshal(struct {
+				MediaID     int64  `json:"media_id"`
+				MediaPath   string `json:"media_path"`
+				ContentType string `json:"content_type"`
+			}{
+				MediaID:     media.Id,
+				MediaPath:   media.Url,
+				ContentType: media.MimeType,
+			})
+			msg := pubsub.NewMessage(payload)
+			if err := uc.publisher.Publish(pubsub.MediaEncodeRequestTopic, msg); err != nil {
+				uc.log.Errorf("failed to re-publish encode request for media %d: %v", media.Id, err)
+			} else {
+				uc.log.Infof("re-published encode request for media %d", media.Id)
+			}
+		}
+	}
+
+	uc.log.Infof("reset %d failed tasks for media %d to pending and re-queued", resetCount, mediaID)
 	return resetCount, nil
 }
 

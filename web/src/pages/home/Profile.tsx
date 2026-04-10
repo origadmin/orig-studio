@@ -92,7 +92,7 @@ const ProfilePage = () => {
                                     className="w-4 h-4 mr-2"/>{t('common.editProfile')}</Button>
                             ) : (
                                 <SubscribeButton
-                                    userId={user.id.toString()}
+                                    userId={user.id?.toString() || ''}
                                     initialSubscriberCount={user.subscriber_count || 0}
                                     className="bg-white dark:bg-gray-800"
                                 />

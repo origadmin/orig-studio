@@ -109,6 +109,8 @@ func TranscodeToMP4(
 	vcodec := "libx264"
 	if videoCodec == "h265" || videoCodec == "hevc" {
 		vcodec = "libx265"
+	} else if videoCodec == "vp9" {
+		vcodec = "libvpx-vp9"
 	}
 
 	args := []string{
@@ -176,6 +178,8 @@ func TranscodeToHLS(
 	vcodec := "libx264"
 	if videoCodec == "h265" || videoCodec == "hevc" {
 		vcodec = "libx265"
+	} else if videoCodec == "vp9" {
+		vcodec = "libvpx-vp9"
 	}
 
 	segmentPattern := filepath.Join(outputDir, "segment_%03d.ts")

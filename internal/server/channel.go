@@ -41,7 +41,6 @@ func (h *ChannelHandler) Register(group *gin.RouterGroup) {
 		// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST
 		// ================================
 		channels.GET("", h.ListChannels)
-		channels.GET("/user/:userId", h.GetUserChannels)
 
 		// ================================
 		// 2. NESTED RESOURCE ROUTES
@@ -58,8 +57,8 @@ func (h *ChannelHandler) Register(group *gin.RouterGroup) {
 		{
 			protected.POST("", h.CreateChannel)
 			// Media management within channel
-			protected.POST("/:id/media", h.AddMedia)
-			protected.DELETE("/:id/media/:mediaId", h.RemoveMedia)
+			protected.POST("/:id/medias", h.AddMedia)
+			protected.DELETE("/:id/medias/:mediaId", h.RemoveMedia)
 		}
 
 		// ================================

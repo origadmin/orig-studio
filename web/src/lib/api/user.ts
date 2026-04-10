@@ -13,7 +13,7 @@ export interface User {
 }
 
 export interface UserListResponse {
-    list: User[];
+    items: User[];
     total: number;
     page: number;
     page_size: number;
@@ -34,13 +34,25 @@ export interface UpdateUserRequest {
     status?: string;
 }
 
+export interface UpdateProfileRequest {
+    nickname?: string;
+    email?: string;
+    avatar?: string;
+    bio?: string;
+}
+
+export interface ChangePasswordRequest {
+    old_password: string;
+    new_password: string;
+}
+
 export interface SubscriptionStatusResponse {
     is_subscribed: boolean;
     subscriber_count: number;
 }
 
 export interface SubscriptionListResponse {
-    list: User[];
+    items: User[];
     total: number;
     page: number;
     page_size: number;
@@ -67,6 +79,18 @@ export const userApi = {
     updateStatus: (id: string, status: string) =>
         api.patch<User>(`/users/${id}/status`, {status}),
 
+    // ==================== 当前用户 APIs (使用 /me 路径) ====================
+
+    // 获取当前用户信息 - 使用 /me 路径
+    getMe: () => api.get<User>("/me"),
+
+    // 更新当前用户信息 - 使用 /me 路径
+    updateMe: (data: UpdateProfileRequest) => api.put<User>("/me", data),
+
+    // 修改密码 - 使用 /me/password 路径
+    changePassword: (data: ChangePasswordRequest) =>
+        api.post<void>("/me/password", data),
+
     // ==================== Subscription APIs ====================
 
     // 获取订阅状态
@@ -89,3 +113,5 @@ export const userApi = {
     getFollowers: (params?: { page?: number; page_size?: number }) =>
         api.get<SubscriptionListResponse>("/followers", params),
 };
+
+export default userApi;

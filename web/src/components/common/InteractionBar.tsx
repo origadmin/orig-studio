@@ -1,75 +1,127 @@
 import React, {useState, useEffect} from 'react';
-import {ThumbsUp, ThumbsDown, Share2, MessageCircle, Loader2, Save, Download, LogIn} from 'lucide-react';
+import {
+    ThumbsUp,
+    ThumbsDown,
+    Share2,
+    MessageCircle,
+    Loader2,
+    Bookmark,
+    Download,
+    LogIn,
+    Check,
+    Link2
+} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {Button} from '@/components/ui/button';
 import {formatViews} from '@/lib/format';
-import {likeApi} from '@/lib/api/like';
-import {shareApi} from '@/lib/api/share';
+import {mediaApi, LikeResponse, FavoriteResponse, ShareResponse} from '@/lib/api/media';
 import {playlistApi} from '@/lib/api/playlist';
 import {useAuth} from '@/hooks/useAuth';
 import {useNavigate} from '@tanstack/react-router';
-import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription} from '@/components/ui/dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription
+} from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface InteractionBarProps {
     mediaId: string;
+    commentCount?: number;
+    onCommentClick?: () => void;
 }
 
-const InteractionBar: React.FC<InteractionBarProps> = ({mediaId}) => {
+const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, commentCount = 0, onCommentClick}) => {
     const {t} = useTranslation();
     const {isAuthenticated} = useAuth();
     const navigate = useNavigate();
+
+    // Like state
     const [likeCount, setLikeCount] = useState(0);
     const [dislikeCount, setDislikeCount] = useState(0);
     const [isLiked, setIsLiked] = useState(false);
     const [isDisliked, setIsDisliked] = useState(false);
     const [isLiking, setIsLiking] = useState(false);
     const [isDisliking, setIsDisliking] = useState(false);
+
+    // Favorite state
+    const [favoriteCount, setFavoriteCount] = useState(0);
+    const [isFavorited, setIsFavorited] = useState(false);
+    const [isFavoriting, setIsFavoriting] = useState(false);
+
+    // Share state
     const [isSharing, setIsSharing] = useState(false);
-    const [shareUrl, setShareUrl] = useState('');
+    const [shareData, setShareData] = useState<ShareResponse | null>(null);
     const [showShareModal, setShowShareModal] = useState(false);
-    const [showLoginDialog, setShowLoginDialog] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    // Save/Playlist state
     const [isSaving, setIsSaving] = useState(false);
     const [showSaveModal, setShowSaveModal] = useState(false);
-    const [playlists, setPlaylists] = useState<{ id: string, name: string }[]>([]);
+    const [playlists, setPlaylists] = useState<{ id: string; name: string }[]>([]);
+
+    // Download state
     const [isDownloading, setIsDownloading] = useState(false);
 
+    // Login dialog
+    const [showLoginDialog, setShowLoginDialog] = useState(false);
+    const [loginAction, setLoginAction] = useState<string>('');
+
+    // Fetch initial status
     useEffect(() => {
-        fetchLikeStatus();
+        if (!mediaId) return;
+
+        const fetchStatus = async () => {
+            try {
+                // Fetch like status
+                const likeStatus: LikeResponse = await mediaApi.likes.getStatus(mediaId);
+                setLikeCount(likeStatus.like_count);
+                setDislikeCount(likeStatus.dislike_count);
+                setIsLiked(likeStatus.is_liked);
+                setIsDisliked(likeStatus.is_disliked);
+            } catch (err) {
+                console.error('Failed to fetch like status:', err);
+            }
+
+            try {
+                // Fetch favorite status
+                const favStatus: FavoriteResponse = await mediaApi.favorites.getStatus(mediaId);
+                setFavoriteCount(favStatus.favorite_count);
+                setIsFavorited(favStatus.is_favorited);
+            } catch (err) {
+                console.error('Failed to fetch favorite status:', err);
+            }
+        };
+
+        fetchStatus();
     }, [mediaId]);
 
-    const fetchPlaylists = async () => {
-        try {
-            const playlists = await playlistApi.getAll();
-            setPlaylists(playlists.map(p => ({id: p.id, name: p.name})));
-        } catch (err) {
-            console.error('Failed to fetch playlists:', err);
+    const requireAuth = (action: string): boolean => {
+        if (!isAuthenticated) {
+            setLoginAction(action);
+            setShowLoginDialog(true);
+            return false;
         }
-    };
-
-    const fetchLikeStatus = async () => {
-        try {
-            const likeStatus = await likeApi.getStatus(mediaId);
-            setLikeCount(likeStatus.like_count);
-            setDislikeCount(likeStatus.dislike_count);
-            setIsLiked(likeStatus.is_liked);
-            setIsDisliked(likeStatus.is_disliked);
-        } catch (err) {
-            console.error('Failed to fetch like status:', err);
-        }
+        return true;
     };
 
     const handleLike = async () => {
-        if (!isAuthenticated) {
-            setShowLoginDialog(true);
-            return;
-        }
+        if (!requireAuth('like')) return;
+
         try {
             setIsLiking(true);
-            const likeStatus = await likeApi.toggle(mediaId);
-            setLikeCount(likeStatus.like_count);
-            setDislikeCount(likeStatus.dislike_count);
-            setIsLiked(likeStatus.is_liked);
-            setIsDisliked(likeStatus.is_disliked);
+            const response: LikeResponse = await mediaApi.likes.toggle(mediaId);
+            setLikeCount(response.like_count);
+            setDislikeCount(response.dislike_count);
+            setIsLiked(response.is_liked);
+            setIsDisliked(response.is_disliked);
         } catch (err) {
             console.error('Failed to toggle like:', err);
         } finally {
@@ -78,17 +130,15 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId}) => {
     };
 
     const handleDislike = async () => {
-        if (!isAuthenticated) {
-            setShowLoginDialog(true);
-            return;
-        }
+        if (!requireAuth('dislike')) return;
+
         try {
             setIsDisliking(true);
-            const likeStatus = await likeApi.toggleDislike(mediaId);
-            setLikeCount(likeStatus.like_count);
-            setDislikeCount(likeStatus.dislike_count);
-            setIsLiked(likeStatus.is_liked);
-            setIsDisliked(likeStatus.is_disliked);
+            const response: LikeResponse = await mediaApi.likes.toggleDislike(mediaId);
+            setLikeCount(response.like_count);
+            setDislikeCount(response.dislike_count);
+            setIsLiked(response.is_liked);
+            setIsDisliked(response.is_disliked);
         } catch (err) {
             console.error('Failed to toggle dislike:', err);
         } finally {
@@ -96,35 +146,72 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId}) => {
         }
     };
 
+    const handleFavorite = async () => {
+        if (!requireAuth('favorite')) return;
+
+        try {
+            setIsFavoriting(true);
+            const response: FavoriteResponse = await mediaApi.favorites.toggle(mediaId);
+            setFavoriteCount(response.favorite_count);
+            setIsFavorited(response.is_favorited);
+        } catch (err) {
+            console.error('Failed to toggle favorite:', err);
+        } finally {
+            setIsFavoriting(false);
+        }
+    };
+
     const handleShare = async () => {
         try {
             setIsSharing(true);
-            const shareResponse = await shareApi.getShareUrl(mediaId);
-            setShareUrl(shareResponse.url);
+            const response: ShareResponse = await mediaApi.shares.getShareUrl(mediaId);
+            setShareData(response);
             setShowShareModal(true);
-            // 复制分享链接到剪贴板
-            if (navigator.clipboard) {
-                await navigator.clipboard.writeText(shareResponse.url);
-                // 可以添加一个复制成功的提示
-            }
         } catch (err) {
-            console.error('Failed to get share url:', err);
+            console.error('Failed to get share URL:', err);
         } finally {
             setIsSharing(false);
         }
     };
 
-    const handleSave = async () => {
+    const handleCopyLink = async () => {
+        if (shareData?.url) {
+            try {
+                await navigator.clipboard.writeText(shareData.url);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
+        }
+    };
+
+    const handleNativeShare = async () => {
+        if (navigator.share && shareData) {
+            try {
+                await navigator.share({
+                    title: shareData.title,
+                    url: shareData.url,
+                });
+            } catch (err) {
+                // User cancelled or share failed
+            }
+        }
+    };
+
+    const fetchPlaylists = async () => {
         if (!isAuthenticated) {
+            setLoginAction('save');
             setShowLoginDialog(true);
             return;
         }
         try {
             setIsSaving(true);
-            await fetchPlaylists();
+            const response = await playlistApi.getAll();
+            setPlaylists(response.map((p: any) => ({id: p.id, name: p.name})));
             setShowSaveModal(true);
         } catch (err) {
-            console.error('Failed to save to playlist:', err);
+            console.error('Failed to fetch playlists:', err);
         } finally {
             setIsSaving(false);
         }
@@ -134,7 +221,6 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId}) => {
         try {
             await playlistApi.addMedia(playlistId, mediaId);
             setShowSaveModal(false);
-            // 可以添加一个保存成功的提示
         } catch (err) {
             console.error('Failed to add to playlist:', err);
         }
@@ -143,177 +229,281 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId}) => {
     const handleDownload = async () => {
         try {
             setIsDownloading(true);
-            // 这里应该调用下载 API 或者直接打开下载链接
-            // 由于没有直接的下载 API，我们可以模拟一个下载过程
-            setTimeout(() => {
-                setIsDownloading(false);
-                // 可以添加一个下载成功的提示
-            }, 1000);
+            const response = await mediaApi.download(mediaId);
+            if (response.download_url) {
+                window.open(response.download_url, '_blank');
+            }
         } catch (err) {
             console.error('Failed to download:', err);
+        } finally {
             setIsDownloading(false);
         }
     };
 
     return (
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 flex-wrap">
             {/* Like Button */}
+            <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`flex items-center gap-2 rounded-none px-4 ${
+                        isLiked ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'text-gray-700 dark:text-gray-300'
+                    }`}
+                    onClick={handleLike}
+                    disabled={isLiking}
+                >
+                    {isLiking ? (
+                        <Loader2 className="w-4 h-4 animate-spin"/>
+                    ) : (
+                        <ThumbsUp className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`}/>
+                    )}
+                    <span className="font-medium">{formatViews(likeCount)}</span>
+                </Button>
+                <div className="w-px h-4 bg-gray-300 dark:bg-gray-600"/>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`flex items-center rounded-none px-3 ${
+                        isDisliked ? 'text-red-600 bg-red-50 dark:bg-red-900/20' : 'text-gray-700 dark:text-gray-300'
+                    }`}
+                    onClick={handleDislike}
+                    disabled={isDisliking}
+                >
+                    {isDisliking ? (
+                        <Loader2 className="w-4 h-4 animate-spin"/>
+                    ) : (
+                        <ThumbsDown className={`w-4 h-4 ${isDisliked ? 'fill-current' : ''}`}/>
+                    )}
+                </Button>
+            </div>
+
+            {/* Favorite Button */}
             <Button
                 variant="ghost"
-                className={`flex items-center gap-2 ${isLiked ? 'text-blue-500' : 'text-gray-600 dark:text-gray-300'}`}
-                onClick={handleLike}
-                disabled={isLiking}
+                size="sm"
+                className={`flex items-center gap-2 rounded-full px-4 ${
+                    isFavorited ? 'text-green-600 bg-green-50 dark:bg-green-900/20' : 'text-gray-700 dark:text-gray-300'
+                }`}
+                onClick={handleFavorite}
+                disabled={isFavoriting}
             >
-                {isLiking ? (
+                {isFavoriting ? (
                     <Loader2 className="w-4 h-4 animate-spin"/>
                 ) : (
-                    <ThumbsUp className={`w-5 h-5 ${isLiked ? 'fill-blue-500' : ''}`}/>
+                    <Bookmark className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`}/>
                 )}
-                <span>{formatViews(likeCount)}</span>
-            </Button>
-
-            {/* Dislike Button */}
-            <Button
-                variant="ghost"
-                className={`flex items-center gap-2 ${isDisliked ? 'text-red-500' : 'text-gray-600 dark:text-gray-300'}`}
-                onClick={handleDislike}
-                disabled={isDisliking}
-            >
-                {isDisliking ? (
-                    <Loader2 className="w-4 h-4 animate-spin"/>
-                ) : (
-                    <ThumbsDown className={`w-5 h-5 ${isDisliked ? 'fill-red-500' : ''}`}/>
-                )}
-                <span>{formatViews(dislikeCount)}</span>
-            </Button>
-
-            {/* Comment Button */}
-            <Button
-                variant="ghost"
-                className="flex items-center gap-2 text-gray-600 dark:text-gray-300"
-            >
-                <MessageCircle className="w-5 h-5"/>
-                <span>{t('watch.comments')}</span>
+                <span
+                    className="font-medium">{isFavorited ? t('watch.saved') || 'Saved' : t('watch.save') || 'Save'}</span>
             </Button>
 
             {/* Share Button */}
             <Button
                 variant="ghost"
-                className="flex items-center gap-2 text-gray-600 dark:text-gray-300"
+                size="sm"
+                className="flex items-center gap-2 rounded-full px-4 text-gray-700 dark:text-gray-300"
                 onClick={handleShare}
                 disabled={isSharing}
             >
                 {isSharing ? (
                     <Loader2 className="w-4 h-4 animate-spin"/>
                 ) : (
-                    <Share2 className="w-5 h-5"/>
+                    <Share2 className="w-4 h-4"/>
                 )}
-                <span>{t('watch.share')}</span>
+                <span className="font-medium">{t('watch.share')}</span>
             </Button>
 
-            {/* Save to Playlist Button */}
+            {/* Comment Button */}
             <Button
                 variant="ghost"
-                className="flex items-center gap-2 text-gray-600 dark:text-gray-300"
-                onClick={handleSave}
-                disabled={isSaving}
+                size="sm"
+                className="flex items-center gap-2 rounded-full px-4 text-gray-700 dark:text-gray-300"
+                onClick={onCommentClick}
             >
-                {isSaving ? (
-                    <Loader2 className="w-4 h-4 animate-spin"/>
-                ) : (
-                    <Save className="w-5 h-5"/>
-                )}
-                <span>{t('watch.save')}</span>
+                <MessageCircle className="w-4 h-4"/>
+                <span className="font-medium">{formatViews(commentCount)}</span>
             </Button>
 
-            {/* Download Button */}
-            <Button
-                variant="ghost"
-                className="flex items-center gap-2 text-gray-600 dark:text-gray-300"
-                onClick={handleDownload}
-                disabled={isDownloading}
-            >
-                {isDownloading ? (
-                    <Loader2 className="w-4 h-4 animate-spin"/>
-                ) : (
-                    <Download className="w-5 h-5"/>
-                )}
-                <span>{t('watch.download')}</span>
-            </Button>
+            {/* More Actions Dropdown */}
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="rounded-full px-3 text-gray-700 dark:text-gray-300"
+                    >
+                        <span className="sr-only">More actions</span>
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                        </svg>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={fetchPlaylists}>
+                        <Bookmark className="w-4 h-4 mr-2"/>
+                        {t('watch.saveToPlaylist') || 'Save to playlist'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDownload} disabled={isDownloading}>
+                        <Download className="w-4 h-4 mr-2"/>
+                        {isDownloading ? t('common.loading') : (t('watch.download') || 'Download')}
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Share Modal */}
-            {showShareModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
-                        <h3 className="text-lg font-bold mb-4">{t('watch.shareVideo')}</h3>
-                        <div className="mb-4">
-                            <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{t('watch.shareLink')}</p>
-                            <div className="flex gap-2">
+            <Dialog open={showShareModal} onOpenChange={setShowShareModal}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>{t('watch.shareVideo') || 'Share Video'}</DialogTitle>
+                        <DialogDescription>
+                            {t('watch.shareDescription') || 'Share this video with your friends'}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        {/* Share Link */}
+                        <div className="flex items-center gap-2">
+                            <div
+                                className="flex-1 flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                                <Link2 className="w-4 h-4 text-gray-500"/>
                                 <input
                                     type="text"
-                                    value={shareUrl}
+                                    value={shareData?.url || ''}
                                     readOnly
-                                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-900"
+                                    className="flex-1 bg-transparent text-sm text-gray-700 dark:text-gray-300 outline-none"
                                 />
-                                <Button
-                                    variant="default"
-                                    className="bg-blue-600 hover:bg-blue-700"
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(shareUrl);
-                                    }}
-                                >
-                                    {t('watch.copyLink')}
-                                </Button>
                             </div>
-                        </div>
-                        <div className="flex justify-end">
                             <Button
-                                variant="default"
-                                className="bg-gray-600 hover:bg-gray-700"
-                                onClick={() => setShowShareModal(false)}
+                                size="sm"
+                                onClick={handleCopyLink}
+                                className={copied ? 'bg-green-600 hover:bg-green-700' : 'bg-emerald-600 hover:bg-emerald-700'}
                             >
-                                {t('common.close')}
+                                {copied ? <Check className="w-4 h-4"/> : t('watch.copyLink') || 'Copy'}
                             </Button>
                         </div>
-                    </div>
-                </div>
-            )}
 
-            {/* Save to Playlist Modal */}
-            {showSaveModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
-                        <h3 className="text-lg font-bold mb-4">{t('watch.saveToPlaylist')}</h3>
-                        <div className="mb-4">
-                            {playlists.length > 0 ? (
-                                <div className="space-y-2">
-                                    {playlists.map(playlist => (
-                                        <Button
-                                            key={playlist.id}
-                                            variant="default"
-                                            className="w-full justify-start"
-                                            onClick={() => handleAddToPlaylist(playlist.id)}
-                                        >
-                                            {playlist.name}
-                                        </Button>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-sm text-gray-600 dark:text-gray-300">{t('watch.noPlaylists')}</p>
+                        {/* Social Share Buttons */}
+                        <div className="grid grid-cols-5 gap-2">
+                            {shareData?.twitter && (
+                                <a
+                                    href={shareData.twitter}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                >
+                                    <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
+                                        <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                        </svg>
+                                    </div>
+                                    <span className="text-xs text-gray-600 dark:text-gray-400">X</span>
+                                </a>
+                            )}
+                            {shareData?.facebook && (
+                                <a
+                                    href={shareData.facebook}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                >
+                                    <div
+                                        className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                                        <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                        </svg>
+                                    </div>
+                                    <span className="text-xs text-gray-600 dark:text-gray-400">Facebook</span>
+                                </a>
+                            )}
+                            {shareData?.whatsapp && (
+                                <a
+                                    href={shareData.whatsapp}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                >
+                                    <div
+                                        className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                                        <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                                        </svg>
+                                    </div>
+                                    <span className="text-xs text-gray-600 dark:text-gray-400">WhatsApp</span>
+                                </a>
+                            )}
+                            {shareData?.telegram && (
+                                <a
+                                    href={shareData.telegram}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                >
+                                    <div
+                                        className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                                        <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                                        </svg>
+                                    </div>
+                                    <span className="text-xs text-gray-600 dark:text-gray-400">Telegram</span>
+                                </a>
+                            )}
+                            {navigator.share && (
+                                <button
+                                    onClick={handleNativeShare}
+                                    className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                >
+                                    <div
+                                        className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                        <Share2 className="w-5 h-5 text-gray-700 dark:text-gray-300"/>
+                                    </div>
+                                    <span className="text-xs text-gray-600 dark:text-gray-400">More</span>
+                                </button>
                             )}
                         </div>
-                        <div className="flex justify-end">
-                            <Button
-                                variant="default"
-                                className="bg-gray-600 hover:bg-gray-700"
-                                onClick={() => setShowSaveModal(false)}
-                            >
-                                {t('common.close')}
-                            </Button>
-                        </div>
                     </div>
-                </div>
-            )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Save to Playlist Modal */}
+            <Dialog open={showSaveModal} onOpenChange={setShowSaveModal}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('watch.saveToPlaylist') || 'Save to Playlist'}</DialogTitle>
+                        <DialogDescription>
+                            {t('watch.selectPlaylist') || 'Select a playlist to save this video'}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-2 mt-4">
+                        {playlists.length > 0 ? (
+                            playlists.map(playlist => (
+                                <Button
+                                    key={playlist.id}
+                                    variant="outline"
+                                    className="w-full justify-start"
+                                    onClick={() => handleAddToPlaylist(playlist.id)}
+                                >
+                                    <Bookmark className="w-4 h-4 mr-2"/>
+                                    {playlist.name}
+                                </Button>
+                            ))
+                        ) : (
+                            <div className="text-center py-4">
+                                <p className="text-sm text-gray-500 mb-4">{t('watch.noPlaylists') || 'No playlists found'}</p>
+                                <Button
+                                    onClick={() => navigate({to: '/me/playlists'})}
+                                    className="bg-emerald-600 hover:bg-emerald-700"
+                                >
+                                    {t('watch.createPlaylist') || 'Create Playlist'}
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             {/* Login Required Dialog */}
             <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
@@ -324,19 +514,21 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId}) => {
                             {t('auth.loginRequired') || 'Login Required'}
                         </DialogTitle>
                         <DialogDescription>
-                            {t('watch.pleaseLoginToInteract') || 'Please log in to like, dislike, or save videos.'}
+                            {loginAction === 'like' && (t('watch.loginToLike') || 'Please login to like this video')}
+                            {loginAction === 'dislike' && (t('watch.loginToDislike') || 'Please login to dislike this video')}
+                            {loginAction === 'favorite' && (t('watch.loginToFavorite') || 'Please login to save this video')}
+                            {loginAction === 'save' && (t('watch.loginToSave') || 'Please login to save to playlist')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex justify-end gap-3 mt-4">
                         <Button
-                            variant="default"
+                            variant="outline"
                             onClick={() => setShowLoginDialog(false)}
                         >
                             {t('common.cancel') || 'Cancel'}
                         </Button>
                         <Button
-                            variant="default"
-                            className="bg-blue-600 hover:bg-blue-700"
+                            className="bg-emerald-600 hover:bg-emerald-700"
                             onClick={() => {
                                 setShowLoginDialog(false);
                                 navigate({to: '/auth/signin'});
