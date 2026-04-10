@@ -95,15 +95,23 @@ async function uploadPart(
     data: Blob,
     signal?: AbortSignal,
 ): Promise<UploadPartResponse> {
-    // 使用 api.post 而不是直接 fetch，确保添加 /api/v1 前缀
-    const formData = new FormData();
-    formData.append('part', data);
-
-    return api.post<UploadPartResponse>(`/uploads/${uploadId}/parts/${partNumber}`, formData, {
+    // 直接发送二进制数据，不使用 FormData
+    // 后端使用 c.GetRawData() 读取原始请求体
+    const response = await fetch(`${API_BASE_URL}/api/v1/uploads/${uploadId}/parts/${partNumber}`, {
+        method: 'POST',
         headers: {
-            'Content-Type': 'multipart/form-data'
-        }
+            'Authorization': `Bearer ${getToken()}`,
+            'Content-Type': 'application/octet-stream',
+        },
+        body: data,
+        signal,
     });
+
+    if (!response.ok) {
+        throw new Error(`Upload part failed: ${response.statusText}`);
+    }
+
+    return response.json();
 }
 
 // 查询已上传分片 (断点续传)

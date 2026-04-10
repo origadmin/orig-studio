@@ -128,6 +128,11 @@ func (s *localStorage) MergeParts(
 		partFile.Close()
 	}
 
+	// Ensure all data is written to disk before closing
+	if err := destFile.Sync(); err != nil {
+		return fmt.Errorf("failed to sync file to disk: %w", err)
+	}
+
 	return nil
 }
 

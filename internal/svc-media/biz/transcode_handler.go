@@ -202,14 +202,8 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 			return fmt.Errorf("task %d does not belong to media %d", *req.TaskID, mediaID)
 		}
 
-		// 重置任务状态为 pending
-		existingTask.Status = "pending"
-		existingTask.Progress = 0
-		existingTask.ErrorMessage = ""
-		if _, err := h.encodingRepo.Update(procCtx, existingTask); err != nil {
-			h.logger.Warnf("failed to reset task %d for retry: %v", existingTask.Id, err)
-		}
-
+		// 任务状态已经在 RetryTask 中被重置为 pending，这里不需要再次重置
+		// 只需要将任务加入处理队列
 		tasks = append(tasks, existingTask)
 		h.logger.Infof("processing specific task %d (media=%d)", existingTask.Id, mediaID)
 	} else {
@@ -456,14 +450,19 @@ func (h *TranscodeHandler) waitForOutput(
 		return nil // unknown type, nothing to wait for
 	}
 
-	// 等待任务开始执行（状态变为 processing）
+	// 等待任务开始执行（状态变为 processing 或 failed）
 	maxWaitForStart := 120 // 最多等待 10 分钟（5s interval）
 	for i := 0; i < maxWaitForStart; i++ {
 		// 检查任务状态
 		currentTask, err := h.encodingRepo.Get(context.Background(), task.Id)
-		if err == nil && currentTask != nil && currentTask.Status == "processing" {
-			h.logger.Infof("task %d has started processing, beginning file wait", task.Id)
-			break
+		if err == nil && currentTask != nil {
+			if currentTask.Status == "processing" {
+				h.logger.Infof("task %d has started processing, beginning file wait", task.Id)
+				break
+			} else if currentTask.Status == "failed" {
+				h.logger.Warnf("task %d failed during execution: %s", task.Id, currentTask.ErrorMessage)
+				return fmt.Errorf("task %d failed: %s", task.Id, currentTask.ErrorMessage)
+			}
 		}
 		time.Sleep(5 * time.Second)
 		if i == maxWaitForStart-1 {
@@ -476,6 +475,13 @@ func (h *TranscodeHandler) waitForOutput(
 
 	// Update progress during waiting
 	for i := 0; i < maxAttempts; i++ {
+		// Check task status first
+		currentTask, err := h.encodingRepo.Get(context.Background(), task.Id)
+		if err == nil && currentTask != nil && currentTask.Status == "failed" {
+			h.logger.Warnf("task %d failed during file wait: %s", task.Id, currentTask.ErrorMessage)
+			return fmt.Errorf("task %d failed: %s", task.Id, currentTask.ErrorMessage)
+		}
+
 		// Calculate progress: 10% to 90% over maxAttempts
 		// Add a small random offset to make progress unique per task
 		offset := task.Id % 10
