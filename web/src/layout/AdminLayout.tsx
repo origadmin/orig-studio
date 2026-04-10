@@ -97,18 +97,12 @@ const AdminLayout = () => {
             {/* Sidebar */}
             <aside
                 className={`${sidebarCollapsed ? 'w-16' : 'w-64'} bg-slate-900 text-white flex-shrink-0 flex flex-col transition-all duration-300`}>
-                <div className="p-6 flex items-center justify-between">
+                <div className="p-6 flex items-center">
                     {!sidebarCollapsed && (
                         <Link to="/admin" className="text-xl font-bold tracking-tight text-blue-400">
                             OrigCMS Admin
                         </Link>
                     )}
-                    <button
-                        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                        className="text-slate-400 hover:text-white transition-colors"
-                    >
-                        {sidebarCollapsed ? <ChevronRight size={20}/> : <ChevronLeft size={20}/>}
-                    </button>
                 </div>
                 <nav className="flex-grow px-4 space-y-2">
                     {menuItems.map((item) => (
@@ -137,9 +131,21 @@ const AdminLayout = () => {
             <div className="flex-grow flex flex-col min-w-0">
                 <header className="h-16 bg-card border-b flex items-center justify-between px-8">
                     <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                            className="flex flex-col items-center justify-center gap-1 p-1 text-muted-foreground hover:text-foreground transition-colors"
+                            title={sidebarCollapsed ? '展开' : '缩放'}
+                        >
+                            <div className="w-4 h-0.5 bg-current rounded"></div>
+                            <div className="w-4 h-0.5 bg-current rounded"></div>
+                            <div className="w-4 h-0.5 bg-current rounded"></div>
+                        </button>
+                        <span className="text-muted-foreground">|</span>
                         {breadcrumbs.map((crumb, index) => (
                             <React.Fragment key={crumb.path}>
-                                {index > 0 && <Separator orientation="vertical" className="h-4"/>}
+                                {index > 0 && (
+                                    <span className="text-muted-foreground"> {'>'} </span>
+                                )}
                                 <Link
                                     to={crumb.path}
                                     className={`flex items-center gap-1 text-sm ${

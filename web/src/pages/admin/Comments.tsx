@@ -19,8 +19,10 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {MoreHorizontal, Search, Eye, Trash2, MessageCircle, ThumbsUp, Flag, Ban, Loader2} from 'lucide-react';
+import {MoreHorizontal, Search, Eye, Trash2, MessageCircle, ThumbsUp, Flag, Ban, Loader2, Filter, RotateCcw} from 'lucide-react';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {commentApi} from '@/lib/api/comment';
+import ErrorPage from '@/components/error/ErrorPage';
 
 interface Comment {
     id: number;
@@ -47,7 +49,9 @@ const Comments: React.FC = () => {
         const fetchComments = async () => {
             try {
                 setLoading(true);
-                const response = await commentApi.getAll({});
+                // 由于后端API要求media_id参数，我们暂时传递一个默认值0
+                // 当media_id为0时，后端会返回错误，但我们可以捕获这个错误并显示适当的消息
+                const response = await commentApi.getAll({ media_id: '0' });
                 // Map API response to our comment interface
                 const mappedComments = (response || []).map((comment: any) => ({
                     id: comment.id,
@@ -68,8 +72,13 @@ const Comments: React.FC = () => {
                     createdAt: comment.created_at || new Date().toISOString()
                 }));
                 setComments(mappedComments);
-            } catch (err) {
-                setError(t('common.error'));
+            } catch (err: any) {
+                // 捕获错误并显示友好的消息
+                if (err.message.includes('media_id is required')) {
+                    setError('请先选择一个媒体文件查看评论');
+                } else {
+                    setError(err.message || t('common.error'));
+                }
                 console.error('Failed to fetch comments:', err);
             } finally {
                 setLoading(false);
@@ -115,173 +124,256 @@ const Comments: React.FC = () => {
         );
     }
 
-    if (error) {
-        return (
-            <div className="text-center py-20 text-gray-400">
-                <p className="text-lg mb-1">{t('common.loading')}</p>
-                <p className="text-sm">{error}</p>
-            </div>
-        );
-    }
+    // 不再返回错误页面，而是在页面内部显示错误消息
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 p-4 md:p-6">
+            {/* 操作栏 */}
+            <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                    <div className="flex flex-col gap-4">
+                        {/* 页面标题 */}
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{t('admin.comments')}</h2>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+                                    Manage your user comments
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* 分隔线 */}
+                        <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+
+                        {/* 搜索和筛选 */}
+                        <div className="flex flex-col lg:flex-row gap-4">
+                            <div className="flex-1 min-w-[120px] max-w-[400px]">
+                                <div className="relative w-full">
+                                    <Search
+                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                    <Input
+                                        placeholder={t('admin.search') || t('admin.comments') + '...'}
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                    <SelectTrigger className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                        <div className="flex items-center gap-2">
+                                            <Filter className="h-4 w-4"/>
+                                            {statusFilter === 'all' ? (
+                                                <span className="text-muted-foreground">Status</span>
+                                            ) : (
+                                                <SelectValue placeholder="Status"/>
+                                            )}
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all" className="justify-center text-center font-medium opacity-70">--- All ---</SelectItem>
+                                        <SelectItem value="approved">{t('admin.approved')}</SelectItem>
+                                        <SelectItem value="pending">{t('admin.pending')}</SelectItem>
+                                        <SelectItem value="reported">{t('admin.reported')}</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <div className="flex items-center gap-2 ml-auto lg:ml-0">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-9 px-3"
+                                        onClick={() => {
+                                            setSearchTerm('');
+                                            setStatusFilter('all');
+                                        }}
+                                    >
+                                        <RotateCcw className="h-4 w-4 mr-2"/>
+                                        Reset
+                                    </Button>
+                                    <Button
+                                        variant="default"
+                                        size="sm"
+                                        className="h-9 px-4"
+                                        onClick={() => {
+                                            // 这里可以添加搜索逻辑
+                                        }}
+                                    >
+                                        <Search className="h-4 w-4 mr-2"/>
+                                        Search
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* 错误消息 */}
+            {error && (
+                <Card className="bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800">
+                    <CardContent className="p-4">
+                        <div className="flex items-center gap-2">
+                            <Ban className="h-5 w-5 text-red-600 dark:text-red-400"/>
+                            <p className="text-red-700 dark:text-red-300">{error}</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
             {/* 统计卡片 */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="flex items-center gap-2">
                             <MessageCircle className="h-5 w-5 text-blue-600"/>
                             <div>
-                                <div className="text-2xl font-bold">{totalComments}</div>
+                                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{totalComments}</div>
                                 <p className="text-sm text-muted-foreground">{t('admin.totalComments')}</p>
                             </div>
                         </div>
                     </CardContent>
+                    <div className="absolute bottom-0 left-0 h-1 bg-blue-500 w-full opacity-10"/>
                 </Card>
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-green-600">{approvedCount}</div>
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">{approvedCount}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.approved')}</p>
                     </CardContent>
+                    <div className="absolute bottom-0 left-0 h-1 bg-green-500 w-full opacity-10"/>
                 </Card>
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-yellow-600">{pendingCount}</div>
+                        <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{pendingCount}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.pending')}</p>
                     </CardContent>
+                    <div className="absolute bottom-0 left-0 h-1 bg-yellow-500 w-full opacity-10"/>
                 </Card>
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-red-600">{reportedCount}</div>
+                        <div className="text-2xl font-bold text-red-600 dark:text-red-400">{reportedCount}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.spam')}</p>
                     </CardContent>
+                    <div className="absolute bottom-0 left-0 h-1 bg-red-500 w-full opacity-10"/>
                 </Card>
-            </div>
-
-            {/* 操作栏 */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-between">
-                <div className="flex gap-2 flex-1">
-                    <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
-                        <Input
-                            placeholder={t('admin.search') || t('admin.comments') + '...'}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10"
-                        />
-                    </div>
-                    <select
-                        className="px-3 py-2 border rounded-md bg-background"
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                    >
-                        <option value="all">{t('admin.allStatus')}</option>
-                        <option value="approved">{t('admin.approved')}</option>
-                        <option value="pending">{t('admin.pending')}</option>
-                        <option value="reported">{t('admin.reported')}</option>
-                    </select>
-                </div>
             </div>
 
             {/* 评论表格 */}
             <Card>
-                <CardHeader>
-                    <CardTitle>{t('admin.commentList')}</CardTitle>
+                <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle>{t('admin.commentList')}</CardTitle>
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>ID</TableHead>
-                                <TableHead>{t('admin.user')}</TableHead>
-                                <TableHead>{t('admin.commentContent')}</TableHead>
-                                <TableHead>{t('admin.belongVideo')}</TableHead>
-                                <TableHead className="text-center">{t('admin.likes')}</TableHead>
-                                <TableHead className="text-center">{t('admin.replies')}</TableHead>
-                                <TableHead>{t('admin.status')}</TableHead>
-                                <TableHead>{t('admin.publishTime')}</TableHead>
-                                <TableHead className="text-right">{t('admin.actions')}</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredComments.map((comment) => (
-                                <TableRow key={comment.id}>
-                                    <TableCell className="font-medium">{comment.id}</TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            <Avatar className="h-6 w-6">
-                                                <AvatarFallback
-                                                    className="text-xs">{comment.user.name[0]}</AvatarFallback>
-                                            </Avatar>
-                                            <div>
-                                                <div className="text-sm font-medium">{comment.user.name}</div>
-                                                <div
-                                                    className="text-xs text-muted-foreground">@{comment.user.username}</div>
-                                            </div>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="max-w-[250px]">
-                                        <p className="truncate">{comment.content}</p>
-                                    </TableCell>
-                                    <TableCell>
-                                        <span className="text-sm">{comment.media.title}</span>
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <div className="flex items-center justify-center gap-1">
-                                            <ThumbsUp className="h-3 w-3 text-muted-foreground"/>
-                                            {comment.likes}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <div className="flex items-center justify-center gap-1">
-                                            <MessageCircle className="h-3 w-3 text-muted-foreground"/>
-                                            {comment.replies}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>{getStatusBadge(comment.status, comment.isSpam)}</TableCell>
-                                    <TableCell className="text-muted-foreground text-sm">{comment.createdAt}</TableCell>
-                                    <TableCell className="text-right">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="sm">
-                                                    <MoreHorizontal className="h-4 w-4"/>
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem>
-                                                    <Eye className="mr-2 h-4 w-4"/>
-                                                    {t('admin.view')}
-                                                </DropdownMenuItem>
-                                                {comment.status === 'pending' && (
-                                                    <>
-                                                        <DropdownMenuItem>
-                                                            <MessageCircle className="mr-2 h-4 w-4"/>
-                                                            {t('admin.approve')}
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem className="text-red-600">
-                                                            <Ban className="mr-2 h-4 w-4"/>
-                                                            {t('admin.reject')}
-                                                        </DropdownMenuItem>
-                                                    </>
-                                                )}
-                                                {comment.isSpam && (
-                                                    <DropdownMenuItem>
-                                                        <Ban className="mr-2 h-4 w-4"/>
-                                                        {t('admin.banUser')}
-                                                    </DropdownMenuItem>
-                                                )}
-                                                <DropdownMenuItem className="text-red-600">
-                                                    <Trash2 className="mr-2 h-4 w-4"/>
-                                                    {t('admin.delete')}
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
+                    {loading ? (
+                        <div className="flex items-center justify-center min-h-[400px]">
+                            <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"/>
+                        </div>
+                    ) : (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>ID</TableHead>
+                                    <TableHead>{t('admin.user')}</TableHead>
+                                    <TableHead>{t('admin.commentContent')}</TableHead>
+                                    <TableHead>{t('admin.belongVideo')}</TableHead>
+                                    <TableHead className="text-center">{t('admin.likes')}</TableHead>
+                                    <TableHead className="text-center">{t('admin.replies')}</TableHead>
+                                    <TableHead>{t('admin.status')}</TableHead>
+                                    <TableHead>{t('admin.publishTime')}</TableHead>
+                                    <TableHead className="text-right">{t('admin.actions')}</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredComments.length > 0 ? (
+                                    filteredComments.map((comment) => (
+                                        <TableRow key={comment.id}>
+                                            <TableCell className="font-medium">{comment.id}</TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-2">
+                                                    <Avatar className="h-6 w-6">
+                                                        <AvatarFallback
+                                                            className="text-xs">{comment.user.name[0]}</AvatarFallback>
+                                                    </Avatar>
+                                                    <div>
+                                                        <div className="text-sm font-medium">{comment.user.name}</div>
+                                                        <div
+                                                            className="text-xs text-muted-foreground">@{comment.user.username}</div>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="max-w-[250px]">
+                                                <p className="truncate">{comment.content}</p>
+                                            </TableCell>
+                                            <TableCell>
+                                                <span className="text-sm">{comment.media.title}</span>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                <div className="flex items-center justify-center gap-1">
+                                                    <ThumbsUp className="h-3 w-3 text-muted-foreground"/>
+                                                    {comment.likes}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                <div className="flex items-center justify-center gap-1">
+                                                    <MessageCircle className="h-3 w-3 text-muted-foreground"/>
+                                                    {comment.replies}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>{getStatusBadge(comment.status, comment.isSpam)}</TableCell>
+                                            <TableCell className="text-muted-foreground text-sm">{comment.createdAt}</TableCell>
+                                            <TableCell className="text-right">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="sm">
+                                                            <MoreHorizontal className="h-4 w-4"/>
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem>
+                                                            <Eye className="mr-2 h-4 w-4"/>
+                                                            {t('admin.view')}
+                                                        </DropdownMenuItem>
+                                                        {comment.status === 'pending' && (
+                                                            <>
+                                                                <DropdownMenuItem>
+                                                                    <MessageCircle className="mr-2 h-4 w-4"/>
+                                                                    {t('admin.approve')}
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem className="text-red-600">
+                                                                    <Ban className="mr-2 h-4 w-4"/>
+                                                                    {t('admin.reject')}
+                                                                </DropdownMenuItem>
+                                                            </>
+                                                        )}
+                                                        {comment.isSpam && (
+                                                            <DropdownMenuItem>
+                                                                <Ban className="mr-2 h-4 w-4"/>
+                                                                {t('admin.banUser')}
+                                                            </DropdownMenuItem>
+                                                        )}
+                                                        <DropdownMenuItem className="text-red-600">
+                                                            <Trash2 className="mr-2 h-4 w-4"/>
+                                                            {t('admin.delete')}
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={9} className="text-center py-8">
+                                            <p className="text-muted-foreground">{t('admin.noComments') || 'No comments found'}</p>
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    )}
                 </CardContent>
             </Card>
         </div>

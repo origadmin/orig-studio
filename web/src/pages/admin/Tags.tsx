@@ -18,7 +18,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, Hash} from 'lucide-react';
+import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, Hash, Filter, RotateCcw} from 'lucide-react';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 
 // 模拟数据
 const mockTags = [
@@ -55,72 +56,138 @@ const Tags: React.FC = () => {
     const totalMedia = tags.reduce((sum, t) => sum + t.mediaCount, 0);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 p-4 md:p-6">
+            {/* 操作栏 */}
+            <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                    <div className="flex flex-col gap-4">
+                        {/* 页面标题 */}
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{t('admin.tags')}</h2>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+                                    Manage your content tags
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* 分隔线 */}
+                        <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+
+                        {/* 搜索和筛选 */}
+                        <div className="flex flex-col lg:flex-row gap-4">
+                            <div className="flex-1 min-w-[120px] max-w-[400px]">
+                                <div className="relative w-full">
+                                    <Search
+                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                    <Input
+                                        placeholder={t('admin.search') || t('admin.tags') + '...'}
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Select value={trendingFilter} onValueChange={setTrendingFilter}>
+                                    <SelectTrigger className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                        <div className="flex items-center gap-2">
+                                            <Filter className="h-4 w-4"/>
+                                            {trendingFilter === 'all' ? (
+                                                <span className="text-muted-foreground">Trending</span>
+                                            ) : (
+                                                <SelectValue placeholder="Trending"/>
+                                            )}
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all" className="justify-center text-center font-medium opacity-70">--- All ---</SelectItem>
+                                        <SelectItem value="trending">{t('admin.trending')}</SelectItem>
+                                        <SelectItem value="normal">{t('admin.normalTag')}</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <div className="flex items-center gap-2 ml-auto lg:ml-0">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-9 px-3"
+                                        onClick={() => {
+                                            setSearchTerm('');
+                                            setTrendingFilter('all');
+                                        }}
+                                    >
+                                        <RotateCcw className="h-4 w-4 mr-2"/>
+                                        Reset
+                                    </Button>
+                                    <Button
+                                        variant="default"
+                                        size="sm"
+                                        className="h-9 px-4"
+                                        onClick={() => {
+                                            // 这里可以添加搜索逻辑
+                                        }}
+                                    >
+                                        <Search className="h-4 w-4 mr-2"/>
+                                        Search
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
             {/* 统计卡片 */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="flex items-center gap-2">
                             <Hash className="h-5 w-5 text-purple-600"/>
                             <div>
-                                <div className="text-2xl font-bold">{totalTags}</div>
+                                <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{totalTags}</div>
                                 <p className="text-sm text-muted-foreground">{t('admin.tagTotal')}</p>
                             </div>
                         </div>
                     </CardContent>
+                    <div className="absolute bottom-0 left-0 h-1 bg-purple-500 w-full opacity-10"/>
                 </Card>
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-green-600">{activeTags}</div>
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">{activeTags}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.activeTags')}</p>
                     </CardContent>
+                    <div className="absolute bottom-0 left-0 h-1 bg-green-500 w-full opacity-10"/>
                 </Card>
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-orange-500">{trendingTags}</div>
+                        <div className="text-2xl font-bold text-orange-500 dark:text-orange-400">{trendingTags}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.trendingTags')}</p>
                     </CardContent>
+                    <div className="absolute bottom-0 left-0 h-1 bg-orange-500 w-full opacity-10"/>
                 </Card>
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold">{totalMedia}</div>
+                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{totalMedia}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.relatedMedia')}</p>
                     </CardContent>
+                    <div className="absolute bottom-0 left-0 h-1 bg-blue-500 w-full opacity-10"/>
                 </Card>
-            </div>
-
-            {/* 操作栏 */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-between">
-                <div className="flex gap-2 flex-1">
-                    <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
-                        <Input
-                            placeholder={t('admin.search') || t('admin.tags') + '...'}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10"
-                        />
-                    </div>
-                    <select
-                        className="px-3 py-2 border rounded-md bg-background"
-                        value={trendingFilter}
-                        onChange={(e) => setTrendingFilter(e.target.value)}
-                    >
-                        <option value="all">{t('admin.all')}</option>
-                        <option value="trending">{t('admin.trending')}</option>
-                        <option value="normal">{t('admin.normalTag')}</option>
-                    </select>
-                </div>
-                <Button>
-                    <Plus className="mr-2 h-4 w-4"/>
-                    {t('admin.newTag')}
-                </Button>
             </div>
 
             {/* 标签表格 */}
             <Card>
-                <CardHeader>
-                    <CardTitle>{t('admin.tagList')}</CardTitle>
+                <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle>{t('admin.tagList')}</CardTitle>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button>
+                                <Plus className="mr-2 h-4 w-4"/>
+                                {t('admin.newTag')}
+                            </Button>
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <Table>

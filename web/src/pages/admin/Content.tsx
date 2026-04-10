@@ -4,7 +4,8 @@
  */
 
 import {useState} from 'react';
-import {Search, Plus, FileText, MoreVertical, Trash2, Edit, Eye} from 'lucide-react';
+import {Search, Plus, FileText, MoreVertical, Trash2, Edit, Eye, Filter} from 'lucide-react';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Badge} from '@/components/ui/badge';
@@ -91,47 +92,74 @@ export default function ContentPage() {
     };
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold text-slate-900">Content Management</h2>
-                    <p className="text-slate-500 text-sm mt-1">Manage articles, pages, and static content</p>
-                </div>
-                <Button className="bg-blue-600 hover:bg-blue-700">
-                    <Plus className="w-4 h-4 mr-2"/>
-                    Create Content
-                </Button>
-            </div>
+        <div className="space-y-4 p-4 md:p-6">
+            {/* 操作栏 */}
+            <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                    <div className="flex flex-col gap-4">
+                        {/* 页面标题 */}
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">Content Management</h2>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+                                    Manage articles, pages, and static content
+                                </p>
+                            </div>
+                        </div>
 
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4">
-                <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"/>
-                    <Input
-                        placeholder="Search content..."
-                        className="pl-10"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-                <select
-                    className="h-10 px-3 rounded-md border border-input bg-background text-sm"
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                    <option value="all">All Status</option>
-                    <option value="published">Published</option>
-                    <option value="draft">Draft</option>
-                    <option value="archived">Archived</option>
-                </select>
-            </div>
+                        {/* 分隔线 */}
+                        <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+
+                        {/* 搜索和筛选 */}
+                        <div className="flex flex-col lg:flex-row gap-4">
+                            <div className="flex-1 min-w-0">
+                                <div className="relative w-full">
+                                    <Search
+                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                    <Input
+                                        placeholder="Search content..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="pl-10 h-10 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                    <SelectTrigger className="w-[140px] h-10 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                        <div className="flex items-center gap-2">
+                                            <Filter className="h-4 w-4"/>
+                                            <SelectValue placeholder="All Status"/>
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Status</SelectItem>
+                                        <SelectItem value="published">Published</SelectItem>
+                                        <SelectItem value="draft">Draft</SelectItem>
+                                        <SelectItem value="archived">Archived</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* Content Table */}
             <Card>
-                <CardHeader>
-                    <CardTitle>All Content</CardTitle>
-                    <CardDescription>Manage your articles and pages</CardDescription>
+                <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle>All Content</CardTitle>
+                            <CardDescription>Manage your articles and pages</CardDescription>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button className="bg-blue-600 hover:bg-blue-700">
+                                <Plus className="w-4 h-4 mr-2"/>
+                                Create Content
+                            </Button>
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <Table>

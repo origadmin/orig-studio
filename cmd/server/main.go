@@ -122,11 +122,13 @@ func main() {
 	userRepo := data.NewUserRepo(db)
 	userUC := biz.NewUserUseCase(userRepo, hasher, logger)
 
-	jwtSigningKey, _, jwtTTL := cfg.GetJWTConfig()
+	jwtSigningKey, _, jwtTTL, refreshTokenTTL := cfg.GetJWTConfig()
 	jwtExpire := parseDuration(jwtTTL, 3600*time.Second)
+	refreshTokenExpire := parseDuration(refreshTokenTTL, 720*time.Hour)
 	jwtManager := auth.NewManager(
 		jwtSigningKey,
 		jwtExpire,
+		refreshTokenExpire,
 	)
 
 	// svc-media initialization
@@ -342,13 +344,13 @@ func (c *Config) GetDefaultDB() (dialect, source string) {
 }
 
 // GetJWTConfig returns the first JWT authn config found.
-func (c *Config) GetJWTConfig() (signingKey, signingMethod, accessTokenTTL string) {
+func (c *Config) GetJWTConfig() (signingKey, signingMethod, accessTokenTTL, refreshTokenTTL string) {
 	for _, cfg := range c.Security.Authn.Configs {
 		if cfg.Type == "jwt" {
-			return cfg.JWT.SigningKey, cfg.JWT.SigningMethod, cfg.JWT.AccessTokenTTL
+			return cfg.JWT.SigningKey, cfg.JWT.SigningMethod, cfg.JWT.AccessTokenTTL, cfg.JWT.RefreshTokenTTL
 		}
 	}
-	return "change-me-in-production", "HS256", "3600s"
+	return "change-me-in-production", "HS256", "3600s", "720h"
 }
 
 // openDB opens an ent client using entity.Open.

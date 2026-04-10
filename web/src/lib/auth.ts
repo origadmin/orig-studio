@@ -35,7 +35,11 @@ export async function signOut() {
 
 // 刷新 Token
 export async function refreshToken(): Promise<Token> {
-    const response = await api.post<Token>("/auth/refresh", {});
+    const refresh_token = localStorage.getItem('origcms_refresh_token');
+    if (!refresh_token) {
+        throw new Error("No refresh token");
+    }
+    const response = await api.post<Token>("/auth/refresh", {refresh_token});
     setAuth(response);
     return response;
 }

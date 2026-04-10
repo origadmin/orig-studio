@@ -71,7 +71,7 @@ const PortalLayout = () => {
                     marginLeft: isDesktop ? (sidebarCollapsed ? 72 : 240) : 0
                 }}
             >
-                <div className="p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto">
+                <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
                     <Outlet/>
                 </div>
             </main>

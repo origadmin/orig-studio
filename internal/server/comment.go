@@ -53,10 +53,8 @@ func (h *CommentHandler) listComments(c *gin.Context) {
 	if mediaID > 0 {
 		items, total, err = h.uc.ListMediaComments(c.Request.Context(), mediaID, page, limit)
 	} else {
-		// items, total, err = h.uc.ListAll(c.Request.Context(), page, limit)
-		// For now, listComments without media_id is not fully implemented in UseCase
-		c.JSON(http.StatusBadRequest, gin.H{"error": "media_id is required"})
-		return
+		// For admin page, return all comments when no media_id is provided
+		items, total, err = h.uc.ListAll(c.Request.Context(), page, limit)
 	}
 
 	if err != nil {

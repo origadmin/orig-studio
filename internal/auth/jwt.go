@@ -23,13 +23,18 @@ type Claims struct {
 
 // Manager handles JWT signing and parsing.
 type Manager struct {
-	secret []byte
-	ttl    time.Duration
+	secret         []byte
+	ttl            time.Duration
+	refreshTokenTTL time.Duration
 }
 
 // NewManager creates a new JWT Manager.
-func NewManager(secret string, ttl time.Duration) *Manager {
-	return &Manager{secret: []byte(secret), ttl: ttl}
+func NewManager(secret string, ttl time.Duration, refreshTokenTTL time.Duration) *Manager {
+	return &Manager{
+		secret:         []byte(secret),
+		ttl:            ttl,
+		refreshTokenTTL: refreshTokenTTL,
+	}
 }
 
 // TTL returns the token time-to-live duration.
@@ -54,6 +59,30 @@ func (m *Manager) Generate(
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(m.ttl)),
 			Issuer:    "origcms",
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(m.secret)
+}
+
+// GenerateRefreshToken creates a signed refresh token for the given user.
+func (m *Manager) GenerateRefreshToken(
+	userID int64,
+	username string,
+	isStaff bool,
+	role string,
+) (string, error) {
+	now := time.Now()
+	claims := Claims{
+		UserID:   userID,
+		Username: username,
+		IsStaff:  isStaff,
+		Role:     role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(m.refreshTokenTTL)),
+			Issuer:    "origcms",
+			Subject:   "refresh",
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

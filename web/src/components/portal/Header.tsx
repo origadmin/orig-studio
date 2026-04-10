@@ -131,10 +131,12 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                 {/* 桌面端Sidebar折叠按钮 */}
                 <button
                     onClick={onToggleSidebar}
-                    className="hidden md:flex p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors shrink-0"
+                    className="hidden md:flex w-8 h-8 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors shrink-0 flex-col items-center justify-center gap-1"
                     title={sidebarCollapsed ? t('nav.expand') : t('nav.collapse')}
                 >
-                    <Menu size={20}/>
+                    <div className="w-4 h-0.5 bg-gray-500 rounded"></div>
+                    <div className="w-4 h-0.5 bg-gray-500 rounded"></div>
+                    <div className="w-4 h-0.5 bg-gray-500 rounded"></div>
                 </button>
 
                 <Link to="/" className="flex items-center gap-2 shrink-0">

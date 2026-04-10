@@ -19,7 +19,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {MoreHorizontal, Search, Edit, Trash2, Eye, PlayCircle, Lock, Globe, User} from 'lucide-react';
+import {MoreHorizontal, Search, Edit, Trash2, Eye, PlayCircle, Lock, Globe, User, Filter, RotateCcw} from 'lucide-react';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 
 // 模拟数据
 const mockPlaylists = [
@@ -138,73 +139,139 @@ const Playlists: React.FC = () => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 p-4 md:p-6">
+            {/* 操作栏 */}
+            <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                    <div className="flex flex-col gap-4">
+                        {/* 页面标题 */}
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{t('admin.playlists')}</h2>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+                                    Manage your playlists
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* 分隔线 */}
+                        <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+
+                        {/* 搜索和筛选 */}
+                        <div className="flex flex-col lg:flex-row gap-4">
+                            <div className="flex-1 min-w-[120px] max-w-[400px]">
+                                <div className="relative w-full">
+                                    <Search
+                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                    <Input
+                                        placeholder={t('admin.search') || t('admin.playlists') + '...'}
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Select value={visibilityFilter} onValueChange={setVisibilityFilter}>
+                                    <SelectTrigger className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                        <div className="flex items-center gap-2">
+                                            <Filter className="h-4 w-4"/>
+                                            {visibilityFilter === 'all' ? (
+                                                <span className="text-muted-foreground">Visibility</span>
+                                            ) : (
+                                                <SelectValue placeholder="Visibility"/>
+                                            )}
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all" className="justify-center text-center font-medium opacity-70">--- All ---</SelectItem>
+                                        <SelectItem value="public">{t('admin.pub')}</SelectItem>
+                                        <SelectItem value="private">{t('admin.priv')}</SelectItem>
+                                        <SelectItem value="unlisted">{t('admin.unlisted')}</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <div className="flex items-center gap-2 ml-auto lg:ml-0">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-9 px-3"
+                                        onClick={() => {
+                                            setSearchTerm('');
+                                            setVisibilityFilter('all');
+                                        }}
+                                    >
+                                        <RotateCcw className="h-4 w-4 mr-2"/>
+                                        Reset
+                                    </Button>
+                                    <Button
+                                        variant="default"
+                                        size="sm"
+                                        className="h-9 px-4"
+                                        onClick={() => {
+                                            // 这里可以添加搜索逻辑
+                                        }}
+                                    >
+                                        <Search className="h-4 w-4 mr-2"/>
+                                        Search
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
             {/* 统计卡片 */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="flex items-center gap-2">
                             <PlayCircle className="h-5 w-5 text-indigo-600"/>
                             <div>
-                                <div className="text-2xl font-bold">{totalPlaylists}</div>
+                                <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{totalPlaylists}</div>
                                 <p className="text-sm text-muted-foreground">{t('admin.playlistTotal')}</p>
                             </div>
                         </div>
                     </CardContent>
+                    <div className="absolute bottom-0 left-0 h-1 bg-indigo-500 w-full opacity-10"/>
                 </Card>
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-green-600">{publicCount}</div>
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">{publicCount}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.publicLists')}</p>
                     </CardContent>
+                    <div className="absolute bottom-0 left-0 h-1 bg-green-500 w-full opacity-10"/>
                 </Card>
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-yellow-600">{privateCount}</div>
+                        <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{privateCount}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.privateLists')}</p>
                     </CardContent>
+                    <div className="absolute bottom-0 left-0 h-1 bg-yellow-500 w-full opacity-10"/>
                 </Card>
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold">{formatNumber(totalViews)}</div>
+                        <div className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">{formatNumber(totalViews)}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.totalViews')}</p>
                     </CardContent>
+                    <div className="absolute bottom-0 left-0 h-1 bg-cyan-500 w-full opacity-10"/>
                 </Card>
-            </div>
-
-            {/* 操作栏 */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-between">
-                <div className="flex gap-2 flex-1">
-                    <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
-                        <Input
-                            placeholder={t('admin.search') || t('admin.playlists') + '...'}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10"
-                        />
-                    </div>
-                    <select
-                        className="px-3 py-2 border rounded-md bg-background"
-                        value={visibilityFilter}
-                        onChange={(e) => setVisibilityFilter(e.target.value)}
-                    >
-                        <option value="all">{t('admin.allVisibility')}</option>
-                        <option value="public">{t('admin.pub')}</option>
-                        <option value="private">{t('admin.priv')}</option>
-                        <option value="unlisted">{t('admin.unlisted')}</option>
-                    </select>
-                </div>
-                <Button>
-                    <PlayCircle className="mr-2 h-4 w-4"/>
-                    {t('admin.newPlaylist')}
-                </Button>
             </div>
 
             {/* 播放列表表格 */}
             <Card>
-                <CardHeader>
-                    <CardTitle>{t('admin.playlistList')}</CardTitle>
+                <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle>{t('admin.playlistList')}</CardTitle>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button>
+                                <PlayCircle className="mr-2 h-4 w-4"/>
+                                {t('admin.newPlaylist')}
+                            </Button>
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <Table>

@@ -17,12 +17,13 @@ import {
     Video,
     ExternalLink,
     RotateCcw,
-    Loader2
+    Loader2,
+    Filter
 } from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Badge} from '@/components/ui/badge';
-import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
+import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
 import {
     Table,
     TableBody,
@@ -269,103 +270,160 @@ export default function MediaPage() {
     };
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold text-slate-900">媒体管理</h2>
-                    <p className="text-slate-500 text-sm mt-1">在这里集中管理所有的视频与图片资源</p>
-                </div>
-                <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setUploadDialogOpen(true)}>
-                    <Upload className="w-4 h-4 mr-2"/>
-                    上传媒体
-                </Button>
-            </div>
+            <div className="space-y-4 p-4 md:p-6">
+                {/* ═══ Header ════════════════════════════════ */}
+                <Card className="overflow-hidden">
+                    <CardContent className="p-6">
+                        <div className="flex flex-col gap-4">
+                            {/* 页面标题 */}
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div>
+                                    <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">媒体管理</h2>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">在这里集中管理所有的视频与图片资源</p>
+                                </div>
+                            </div>
 
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4">
-                <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"/>
-                    <Input
-                        placeholder="搜索媒体..."
-                        className="pl-10"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="所有状态"/>
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">所有状态</SelectItem>
-                        <SelectItem value="active">已发布 (Active)</SelectItem>
-                        <SelectItem value="draft">草稿 (Draft)</SelectItem>
-                        <SelectItem value="deleted">已删除 (Deleted)</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
+                            {/* 分隔线 */}
+                            <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+
+                            {/* 搜索和筛选 */}
+                            <div className="flex flex-col lg:flex-row gap-4">
+                                <div className="flex-1 min-w-[120px] max-w-[400px]">
+                                    <div className="relative w-full">
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                        <Input
+                                            placeholder="搜索媒体..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                        <SelectTrigger className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                            <div className="flex items-center gap-2">
+                                                <Filter className="h-4 w-4"/>
+                                                {statusFilter === 'all' ? (
+                                                    <span className="text-muted-foreground">Status</span>
+                                                ) : (
+                                                    <SelectValue placeholder="Status"/>
+                                                )}
+                                            </div>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all" className="justify-center text-center font-medium opacity-70">--- All ---</SelectItem>
+                                            <SelectItem value="active">已发布 (Active)</SelectItem>
+                                            <SelectItem value="draft">草稿 (Draft)</SelectItem>
+                                            <SelectItem value="deleted">已删除 (Deleted)</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <div className="flex items-center gap-2 ml-auto lg:ml-0">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-9 px-3"
+                                            onClick={() => {
+                                                setSearchTerm('');
+                                                setStatusFilter('all');
+                                            }}
+                                        >
+                                            <RotateCcw className="h-4 w-4 mr-2"/>
+                                            Reset
+                                        </Button>
+                                        <Button
+                                            variant="default"
+                                            size="sm"
+                                            className="h-9 px-4"
+                                            onClick={() => {
+                                                // 这里可以添加搜索逻辑
+                                            }}
+                                        >
+                                            <Search className="h-4 w-4 mr-2"/>
+                                            Search
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-slate-500">媒体总数</p>
-                                <p className="text-2xl font-bold">{mediaList.length}</p>
+                                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{mediaList.length}</p>
                             </div>
                             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                                 <Video className="w-6 h-6 text-blue-600"/>
                             </div>
                         </div>
+                        <div className="absolute bottom-0 left-0 h-1 bg-blue-500 w-full opacity-10"/>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-slate-500">视频</p>
-                                <p className="text-2xl font-bold">{mediaList.filter(m => m.type === 'video').length}</p>
+                                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{mediaList.filter(m => m.type === 'video').length}</p>
                             </div>
                             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                                 <Play className="w-6 h-6 text-purple-600"/>
                             </div>
                         </div>
+                        <div className="absolute bottom-0 left-0 h-1 bg-purple-500 w-full opacity-10"/>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-slate-500">图片</p>
-                                <p className="text-2xl font-bold">{mediaList.filter(m => m.type === 'image' || !m.type).length}</p>
+                                <p className="text-2xl font-bold text-green-600 dark:text-green-400">{mediaList.filter(m => m.type === 'image' || !m.type).length}</p>
                             </div>
                             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                                 <ImageIcon className="w-6 h-6 text-green-600"/>
                             </div>
                         </div>
+                        <div className="absolute bottom-0 left-0 h-1 bg-green-500 w-full opacity-10"/>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-slate-500">总播放量</p>
-                                <p className="text-2xl font-bold">{formatViews(mediaList.reduce((acc, m) => acc + (m.view_count || 0), 0))}</p>
+                                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{formatViews(mediaList.reduce((acc, m) => acc + (m.view_count || 0), 0))}</p>
                             </div>
                             <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
                                 <Eye className="w-6 h-6 text-orange-600"/>
                             </div>
                         </div>
+                        <div className="absolute bottom-0 left-0 h-1 bg-orange-500 w-full opacity-10"/>
                     </CardContent>
                 </Card>
             </div>
 
             {/* Media Table */}
             <Card>
-                <CardHeader>
-                    <CardTitle>所有媒体</CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between gap-4">
+                    <div>
+                        <CardTitle>所有媒体</CardTitle>
+                        <CardDescription>
+                            {filteredMedia.length} 条媒体记录
+                        </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button onClick={() => setUploadDialogOpen(true)}>
+                            <Upload className="w-4 h-4 mr-2"/>
+                            上传媒体
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     {loading ? (
