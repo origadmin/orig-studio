@@ -23,7 +23,9 @@ export const commentApi = {
         if (params?.content_id) {
             queryParams.content_id = parseInt(params.content_id, 10);
         }
-        return api.get<Comment[]>("/comments", queryParams);
+        // Only pass params if there are any
+        const hasParams = Object.keys(queryParams).length > 0;
+        return api.get<Comment[]>('/comments', hasParams ? queryParams : {});
     },
     get: (id: string) => api.get<Comment>(`/comments/${id}`),
     create: (data: { media_id?: string; content_id?: string; parent_id?: string; body: string }) => {

@@ -4,12 +4,14 @@
  */
 
 import {useState, useEffect} from 'react';
-import {Search, Plus, User, MoreVertical, Trash2, Edit, Shield, Mail, Eye} from 'lucide-react';
+import {Search, Plus, User, MoreVertical, Trash2, Edit, Shield, Mail, Eye, RotateCcw} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Badge} from '@/components/ui/badge';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {Filter} from 'lucide-react';
 import {
     Table,
     TableBody,
@@ -78,103 +80,163 @@ export default function UsersPage() {
 
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold text-slate-900">{t('admin.users')}</h2>
-                    <p className="text-slate-500 text-sm mt-1">{t('admin.manageUsers') || "Manage users, roles, and permissions"}</p>
-                </div>
-                <Button className="bg-blue-600 hover:bg-blue-700">
-                    <Plus className="w-4 h-4 mr-2"/>
-                    {t('admin.addUser') || "Add User"}
-                </Button>
-            </div>
+        <div className="space-y-4 p-4 md:p-6">
+            {/* 操作栏 */}
+            <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                    <div className="flex flex-col gap-4">
+                        {/* 页面标题 */}
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{t('admin.users')}</h2>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+                                    {t('admin.manageUsers') || "Manage users, roles, and permissions"}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* 分隔线 */}
+                        <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+
+                        {/* 搜索和筛选 */}
+                        <div className="flex flex-col lg:flex-row gap-4">
+                            <div className="flex-1 min-w-[120px] max-w-[400px]">
+                                <div className="relative w-full">
+                                    <Search
+                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                    <Input
+                                        placeholder={t('admin.search') || "Search users..."}
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Select value={roleFilter} onValueChange={setRoleFilter}>
+                                    <SelectTrigger className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                        <div className="flex items-center gap-2">
+                                            <Filter className="h-4 w-4"/>
+                                            {roleFilter === 'all' ? (
+                                                <span className="text-muted-foreground">Roles</span>
+                                            ) : (
+                                                <SelectValue placeholder="Roles"/>
+                                            )}
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all" className="justify-center text-center font-medium opacity-70">--- All ---</SelectItem>
+                                        <SelectItem value="admin">{t('admin.admin') || "Admin"}</SelectItem>
+                                        <SelectItem value="editor">{t('admin.editor') || "Editor"}</SelectItem>
+                                        <SelectItem value="user">{t('admin.user') || "User"}</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <div className="flex items-center gap-2 ml-auto lg:ml-0">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-9 px-3"
+                                        onClick={() => {
+                                            setSearchTerm('');
+                                            setRoleFilter('all');
+                                        }}
+                                    >
+                                        <RotateCcw className="h-4 w-4 mr-2"/>
+                                        Reset
+                                    </Button>
+                                    <Button
+                                        variant="default"
+                                        size="sm"
+                                        className="h-9 px-4"
+                                        onClick={() => {
+                                            // 这里可以添加搜索逻辑
+                                        }}
+                                    >
+                                        <Search className="h-4 w-4 mr-2"/>
+                                        Search
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-slate-500">{t('admin.totalUsers') || "Total Users"}</p>
-                                <p className="text-2xl font-bold">{users.length}</p>
+                                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{users.length}</p>
                             </div>
                             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                                 <User className="w-6 h-6 text-blue-600"/>
                             </div>
                         </div>
                     </CardContent>
+                    <div className="absolute bottom-0 left-0 h-1 bg-blue-500 w-full opacity-10"/>
                 </Card>
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-slate-500">{t('admin.activeUsers') || "Active Users"}</p>
-                                <p className="text-2xl font-bold">{users.filter(u => u.status === 'active').length}</p>
+                                <p className="text-2xl font-bold text-green-600 dark:text-green-400">{users.filter(u => u.status === 'active').length}</p>
                             </div>
                             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                                 <Shield className="w-6 h-6 text-green-600"/>
                             </div>
                         </div>
                     </CardContent>
+                    <div className="absolute bottom-0 left-0 h-1 bg-green-500 w-full opacity-10"/>
                 </Card>
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-slate-500">{t('admin.admins') || "Admins"}</p>
-                                <p className="text-2xl font-bold">{users.filter(u => u.role === 'admin').length}</p>
+                                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{users.filter(u => u.role === 'admin').length}</p>
                             </div>
                             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                                 <Shield className="w-6 h-6 text-purple-600"/>
                             </div>
                         </div>
                     </CardContent>
+                    <div className="absolute bottom-0 left-0 h-1 bg-purple-500 w-full opacity-10"/>
                 </Card>
-                <Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-slate-500">{t('admin.editors') || "Editors"}</p>
-                                <p className="text-2xl font-bold">{users.filter(u => u.role === 'editor').length}</p>
+                                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{users.filter(u => u.role === 'editor').length}</p>
                             </div>
                             <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
                                 <Edit className="w-6 h-6 text-orange-600"/>
                             </div>
                         </div>
                     </CardContent>
+                    <div className="absolute bottom-0 left-0 h-1 bg-orange-500 w-full opacity-10"/>
                 </Card>
-            </div>
-
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4">
-                <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"/>
-                    <Input
-                        placeholder={t('admin.search') || "Search users..."}
-                        className="pl-10"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-                <select
-                    className="h-10 px-3 rounded-md border border-input bg-background text-sm"
-                    value={roleFilter}
-                    onChange={(e) => setRoleFilter(e.target.value)}
-                >
-                    <option value="all">{t('admin.allRoles') || "All Roles"}</option>
-                    <option value="admin">{t('admin.admin') || "Admin"}</option>
-                    <option value="editor">{t('admin.editor') || "Editor"}</option>
-                    <option value="user">{t('admin.user') || "User"}</option>
-                </select>
             </div>
 
             {/* Users Table */}
             <Card>
-                <CardHeader>
-                    <CardTitle>{t('admin.allUsers') || "All Users"}</CardTitle>
-                    <CardDescription>{t('admin.manageUserAccounts') || "Manage user accounts and permissions"}</CardDescription>
+                <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle>{t('admin.allUsers') || "All Users"}</CardTitle>
+                            <CardDescription>{t('admin.manageUserAccounts') || "Manage user accounts and permissions"}</CardDescription>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button className="bg-blue-600 hover:bg-blue-700">
+                                <Plus className="w-4 h-4 mr-2"/>
+                                {t('admin.addUser') || "Add User"}
+                            </Button>
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     {loading ? (

@@ -19,7 +19,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, UserPlus, Users} from 'lucide-react';
+import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, UserPlus, Users, Filter, Loader2, RotateCcw} from 'lucide-react';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 
 // 模拟数据
 const mockChannels = [
@@ -125,73 +126,162 @@ const Channels: React.FC = () => {
     };
 
     return (
-        <div className="space-y-6">
-            {/* 统计卡片 */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card>
-                    <CardContent className="pt-6">
-                        <div className="flex items-center gap-2">
-                            <Users className="h-5 w-5 text-blue-600"/>
+        <div className="space-y-4 p-4 md:p-6">
+            {/* 操作栏 */}
+            <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                    <div className="flex flex-col gap-4">
+                        {/* 页面标题 */}
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
-                                <div className="text-2xl font-bold">{channels.length}</div>
-                                <p className="text-sm text-muted-foreground">{t('admin.channelTotal')}</p>
+                                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{t('admin.channels')}</h2>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+                                    Manage your content channels
+                                </p>
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="pt-6">
-                        <div className="text-2xl font-bold">{formatNumber(totalSubscribers)}</div>
-                        <p className="text-sm text-muted-foreground">{t('admin.totalSubscribers')}</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-green-600">{verifiedCount}</div>
-                        <p className="text-sm text-muted-foreground">{t('admin.verifiedChannels')}</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-yellow-600">{pendingCount}</div>
-                        <p className="text-sm text-muted-foreground">{t('admin.pending')}</p>
-                    </CardContent>
-                </Card>
-            </div>
 
-            {/* 操作栏 */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-between">
-                <div className="flex gap-2 flex-1">
-                    <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
-                        <Input
-                            placeholder={t('admin.search') || t('admin.channels') + '...'}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10"
-                        />
+                        {/* 分隔线 */}
+                        <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+
+                        {/* 搜索和筛选 */}
+                        <div className="flex flex-col lg:flex-row gap-4">
+                            <div className="flex-1 min-w-[120px] max-w-[400px]">
+                                <div className="relative w-full">
+                                    <Search
+                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                    <Input
+                                        placeholder={t('admin.search') || t('admin.channels') + '...'}
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                    <SelectTrigger className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                        <div className="flex items-center gap-2">
+                                            <Filter className="h-4 w-4"/>
+                                            {statusFilter === 'all' ? (
+                                                <span className="text-muted-foreground">Status</span>
+                                            ) : (
+                                                <SelectValue placeholder="Status"/>
+                                            )}
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all" className="justify-center text-center font-medium opacity-70">--- All ---</SelectItem>
+                                        <SelectItem value="verified">{t('common.verified')}</SelectItem>
+                                        <SelectItem value="active">{t('admin.normal')}</SelectItem>
+                                        <SelectItem value="pending">{t('admin.pending')}</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <div className="flex items-center gap-2 ml-auto lg:ml-0">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-9 px-3"
+                                        onClick={() => {
+                                            setSearchTerm('');
+                                            setStatusFilter('all');
+                                        }}
+                                    >
+                                        <RotateCcw className="h-4 w-4 mr-2"/>
+                                        Reset
+                                    </Button>
+                                    <Button
+                                        variant="default"
+                                        size="sm"
+                                        className="h-9 px-4"
+                                        onClick={() => {
+                                            // 这里可以添加搜索逻辑
+                                        }}
+                                    >
+                                        <Search className="h-4 w-4 mr-2"/>
+                                        Search
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <select
-                        className="px-3 py-2 border rounded-md bg-background"
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                    >
-                        <option value="all">{t('admin.allStatus')}</option>
-                        <option value="verified">{t('common.verified')}</option>
-                        <option value="active">{t('admin.normal')}</option>
-                        <option value="pending">{t('admin.pending')}</option>
-                    </select>
-                </div>
-                <Button>
-                    <Plus className="mr-2 h-4 w-4"/>
-                    {t('admin.newChannel')}
-                </Button>
+                </CardContent>
+            </Card>
+
+            {/* 统计卡片 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                    <CardContent className="pt-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-slate-500">{t('admin.channelTotal')}</p>
+                                <p className="text-2xl font-bold text-blue-600">{channels.length}</p>
+                            </div>
+                            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <Users className="w-6 h-6 text-blue-600"/>
+                            </div>
+                        </div>
+                        <div className="absolute bottom-0 left-0 h-1 bg-blue-500 w-full opacity-10"/>
+                    </CardContent>
+                </Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                    <CardContent className="pt-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-slate-500">{t('admin.totalSubscribers')}</p>
+                                <p className="text-2xl font-bold text-purple-600">{formatNumber(totalSubscribers)}</p>
+                            </div>
+                            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <UserPlus className="w-6 h-6 text-purple-600"/>
+                            </div>
+                        </div>
+                        <div className="absolute bottom-0 left-0 h-1 bg-purple-500 w-full opacity-10"/>
+                    </CardContent>
+                </Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                    <CardContent className="pt-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-slate-500">{t('admin.verifiedChannels')}</p>
+                                <p className="text-2xl font-bold text-green-600">{verifiedCount}</p>
+                            </div>
+                            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <Eye className="w-6 h-6 text-green-600"/>
+                            </div>
+                        </div>
+                        <div className="absolute bottom-0 left-0 h-1 bg-green-500 w-full opacity-10"/>
+                    </CardContent>
+                </Card>
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                    <CardContent className="pt-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-slate-500">{t('admin.pending')}</p>
+                                <p className="text-2xl font-bold text-yellow-600">{pendingCount}</p>
+                            </div>
+                            <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                                <Loader2 className="w-6 h-6 text-yellow-600"/>
+                            </div>
+                        </div>
+                        <div className="absolute bottom-0 left-0 h-1 bg-yellow-500 w-full opacity-10"/>
+                    </CardContent>
+                </Card>
             </div>
 
             {/* 频道表格 */}
             <Card>
-                <CardHeader>
-                    <CardTitle>{t('admin.channelList')}</CardTitle>
+                <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle>{t('admin.channelList')}</CardTitle>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button>
+                                <Plus className="mr-2 h-4 w-4"/>
+                                {t('admin.newChannel')}
+                            </Button>
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <Table>

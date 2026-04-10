@@ -38,7 +38,7 @@ import {
 import {
     PlusCircle, Edit, Trash2, CheckCircle, XCircle, Play, Pause,
     Search, Filter, MoreVertical, Download, Upload, Copy,
-    Trash, CheckSquare, Square, ArrowUpDown, ChevronDown, ChevronUp
+    Trash, CheckSquare, Square, ArrowUpDown, ChevronDown, ChevronUp, RotateCcw
 } from "lucide-react";
 import {Separator} from "../../components/ui/separator";
 
@@ -306,370 +306,195 @@ export default function TranscodingProfiles() {
 
 
     return (
-        <div className="space-y-6">
-            {/* 页面标题和操作区域 */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight">Encoding Profiles</h2>
-                    <p className="text-sm text-muted-foreground mt-1">
-                        Manage and configure your video encoding presets
-                    </p>
-                </div>
-                <div className="flex items-center gap-2">
-                    {selectedRows.length > 0 && (
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">
-                                {selectedRows.length} selected
-                            </span>
-                            <Separator orientation="vertical" className="h-6"/>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handleBatchActivate}
-                            >
-                                <Play className="h-4 w-4 mr-1"/>
-                                Activate
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handleBatchDeactivate}
-                            >
-                                <Pause className="h-4 w-4 mr-1"/>
-                                Deactivate
-                            </Button>
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={handleBatchDelete}
-                            >
-                                <Trash className="h-4 w-4 mr-1"/>
-                                Delete
-                            </Button>
-                            <Separator orientation="vertical" className="h-6"/>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setSelectedRows([])}
-                            >
-                                Clear
-                            </Button>
-                        </div>
-                    )}
-                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                        <DialogTrigger asChild>
-                            <Button onClick={() => setEditingProfile({is_active: true})}>
-                                <PlusCircle className="mr-2 h-4 w-4"/>
-                                Add Profile
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-lg">
-                            <DialogHeader>
-                                <DialogTitle>{editingProfile?.id ? "Edit Profile" : "Add Profile"}</DialogTitle>
-                                <DialogDescription>
-                                    {editingProfile?.id ? "Update the profile settings" : "Create a new transcoding profile"}
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="name" className="text-right">Name <span
-                                        className="text-destructive">*</span></Label>
-                                    <Input id="name" value={editingProfile?.name || ""}
-                                           onChange={(e) => setEditingProfile({
-                                               ...editingProfile,
-                                               name: e.target.value
-                                           })} className="col-span-3"/>
-                                </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="extension" className="text-right">Extension <span
-                                        className="text-destructive">*</span></Label>
-                                    <Select
-                                        value={editingProfile?.extension || ""}
-                                        onValueChange={(value) => setEditingProfile({
-                                            ...editingProfile,
-                                            extension: value
-                                        })}
-                                    >
-                                        <SelectTrigger className="col-span-3">
-                                            <SelectValue placeholder="Select extension"/>
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="mp4">MP4</SelectItem>
-                                            <SelectItem value="webm">WebM</SelectItem>
-                                            <SelectItem value="mkv">Matroska</SelectItem>
-                                            <SelectItem value="mov">QuickTime</SelectItem>
-                                            <SelectItem value="gif">GIF</SelectItem>
-                                            <SelectItem value="avi">AVI</SelectItem>
-                                            <SelectItem value="flv">FLV</SelectItem>
-                                            <SelectItem value="wmv">WMV</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="res" className="text-right">Resolution</Label>
-                                    <Select
-                                        value={editingProfile?.resolution?.split('x')[1] || editingProfile?.resolution || ""}
-                                        onValueChange={(value) => {
-                                            // 根据高度自动选择完整分辨率
-                                            const resolutionMap: Record<string, string> = {
-                                                '240': '426x240',
-                                                '360': '640x360',
-                                                '480': '854x480',
-                                                '720': '1280x720',
-                                                '1080': '1920x1080',
-                                                '1440': '2560x1440',
-                                                '2160': '3840x2160'
-                                            };
-                                            const fullResolution = resolutionMap[value] || value;
-                                            setEditingProfile({...editingProfile, resolution: fullResolution});
-                                        }}
-                                    >
-                                        <SelectTrigger className="col-span-3">
-                                            <SelectValue placeholder="Select resolution"/>
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="240">240</SelectItem>
-                                            <SelectItem value="360">360</SelectItem>
-                                            <SelectItem value="480">480</SelectItem>
-                                            <SelectItem value="720">720</SelectItem>
-                                            <SelectItem value="1080">1080</SelectItem>
-                                            <SelectItem value="1440">1440</SelectItem>
-                                            <SelectItem value="2160">2160 (4K)</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="vcodec" className="text-right">Video Codec</Label>
-                                    <Select
-                                        value={editingProfile?.video_codec || ""}
-                                        onValueChange={(value) => setEditingProfile({
-                                            ...editingProfile,
-                                            video_codec: value
-                                        })}
-                                    >
-                                        <SelectTrigger className="col-span-3">
-                                            <SelectValue placeholder="Select video codec"/>
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="libx264">libx264 (H.264)</SelectItem>
-                                            <SelectItem value="libx265">libx265 (H.265/HEVC)</SelectItem>
-                                            <SelectItem value="libvpx-vp9">libvpx-vp9 (VP9)</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <div className="col-span-4">
+        <div className="space-y-6 p-4 md:p-6">
+            {/* ═══ Header ════════════════════════════════ */}
+            <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                    <div className="flex flex-col gap-4">
+                        {/* 页面标题和操作区域 */}
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">Encoding Profiles</h2>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+                                    Manage and configure your video encoding presets
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                {selectedRows.length > 0 && (
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm text-muted-foreground">
+                                            {selectedRows.length} selected
+                                        </span>
+                                        <Separator orientation="vertical" className="h-6"/>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleBatchActivate}
+                                        >
+                                            <Play className="h-4 w-4 mr-1"/>
+                                            Activate
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleBatchDeactivate}
+                                        >
+                                            <Pause className="h-4 w-4 mr-1"/>
+                                            Deactivate
+                                        </Button>
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            onClick={handleBatchDelete}
+                                        >
+                                            <Trash className="h-4 w-4 mr-1"/>
+                                            Delete
+                                        </Button>
+                                        <Separator orientation="vertical" className="h-6"/>
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-                                            className="w-full flex items-center justify-center gap-1 text-sm text-muted-foreground"
+                                            onClick={() => setSelectedRows([])}
                                         >
-                                            {showAdvancedOptions ? <ChevronUp className="h-4 w-4"/> :
-                                                <ChevronDown className="h-4 w-4"/>}
-                                            {showAdvancedOptions ? "Hide Advanced Options" : "Show Advanced Options"}
+                                            Clear
                                         </Button>
                                     </div>
-                                </div>
-                                {showAdvancedOptions && (
-                                    <>
-                                        <div className="grid grid-cols-4 items-center gap-4">
-                                            <Label htmlFor="vbitrate" className="text-right">Video Bitrate</Label>
-                                            <Select
-                                                value={editingProfile?.video_bitrate || ""}
-                                                onValueChange={(value) => setEditingProfile({
-                                                    ...editingProfile,
-                                                    video_bitrate: value
-                                                })}
-                                            >
-                                                <SelectTrigger className="col-span-3">
-                                                    <SelectValue placeholder="Select video bitrate"/>
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="200k">200k</SelectItem>
-                                                    <SelectItem value="400k">400k</SelectItem>
-                                                    <SelectItem value="800k">800k</SelectItem>
-                                                    <SelectItem value="1500k">1500k</SelectItem>
-                                                    <SelectItem value="3000k">3000k</SelectItem>
-                                                    <SelectItem value="5000k">5000k</SelectItem>
-                                                    <SelectItem value="8000k">8000k</SelectItem>
-                                                    <SelectItem value="12000k">12000k</SelectItem>
-                                                    <SelectItem value="16000k">16000k</SelectItem>
-                                                    <SelectItem value="25000k">25000k</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="grid grid-cols-4 items-center gap-4">
-                                            <Label htmlFor="acodec" className="text-right">Audio Codec</Label>
-                                            <Select
-                                                value={editingProfile?.audio_codec || ""}
-                                                onValueChange={(value) => setEditingProfile({
-                                                    ...editingProfile,
-                                                    audio_codec: value
-                                                })}
-                                            >
-                                                <SelectTrigger className="col-span-3">
-                                                    <SelectValue placeholder="Select audio codec"/>
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="aac">aac</SelectItem>
-                                                    <SelectItem value="mp3">mp3</SelectItem>
-                                                    <SelectItem value="opus">opus</SelectItem>
-                                                    <SelectItem value="vorbis">vorbis</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="grid grid-cols-4 items-center gap-4">
-                                            <Label htmlFor="abitrate" className="text-right">Audio Bitrate</Label>
-                                            <Select
-                                                value={editingProfile?.audio_bitrate || ""}
-                                                onValueChange={(value) => setEditingProfile({
-                                                    ...editingProfile,
-                                                    audio_bitrate: value
-                                                })}
-                                            >
-                                                <SelectTrigger className="col-span-3">
-                                                    <SelectValue placeholder="Select audio bitrate"/>
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="64k">64k</SelectItem>
-                                                    <SelectItem value="96k">96k</SelectItem>
-                                                    <SelectItem value="128k">128k</SelectItem>
-                                                    <SelectItem value="192k">192k</SelectItem>
-                                                    <SelectItem value="256k">256k</SelectItem>
-                                                    <SelectItem value="320k">320k</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </>
                                 )}
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="active" className="text-right">Active</Label>
-                                    <div className="col-span-3 flex items-center">
-                                        <Checkbox
-                                            id="active"
-                                            checked={editingProfile?.is_active ?? true}
-                                            onCheckedChange={(checked) => setEditingProfile({
-                                                ...editingProfile,
-                                                is_active: checked
-                                            })}
-                                        />
-                                        <label htmlFor="active" className="ml-2 text-sm font-medium leading-none">
-                                            Enable this profile
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                                <Button onClick={handleSave}>Save</Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-                </div>
-            </div>
-            {/* 搜索和筛选区域 */}
-            <Card>
-                <CardContent className="pt-6">
-                    <div className="flex flex-col lg:flex-row gap-3">
-                        <div className="flex-1 lg:max-w-xs">
-                            <div className="relative">
-                                <Search
-                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
-                                <Input
-                                    placeholder="Search..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10 h-9"
-                                />
                             </div>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                            <Select value={extensionFilter} onValueChange={setExtensionFilter}>
-                                <SelectTrigger className="w-[130px] h-9">
-                                    <div className="flex items-center gap-2">
-                                        <Filter className="h-4 w-4"/>
-                                        <SelectValue placeholder="Extension"/>
-                                    </div>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="-">-</SelectItem>
-                                    {availableExtensions.map(ext => {
-                                        const getExtensionDisplayName = (e: string) => {
-                                            switch (e.toLowerCase()) {
-                                                case 'mp4':
-                                                    return 'MP4';
-                                                case 'webm':
-                                                    return 'WebM';
-                                                case 'mkv':
-                                                    return 'Matroska';
-                                                case 'mov':
-                                                    return 'QuickTime';
-                                                case 'gif':
-                                                    return 'GIF';
-                                                case 'avi':
-                                                    return 'AVI';
-                                                case 'flv':
-                                                    return 'FLV';
-                                                case 'wmv':
-                                                    return 'WMV';
-                                                default:
-                                                    return e.toUpperCase();
-                                            }
-                                        };
-                                        return (
-                                            <SelectItem key={ext} value={ext}>
-                                                {getExtensionDisplayName(ext)}
+
+                        {/* 分隔线 */}
+                        <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+
+                        {/* 搜索和筛选 */}
+                        <div className="flex flex-col lg:flex-row gap-4">
+                            <div className="flex-1 min-w-[120px] max-w-[400px]">
+                                <div className="relative w-full">
+                                    <Search
+                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                    <Input
+                                        placeholder="Search..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Select value={extensionFilter} onValueChange={setExtensionFilter}>
+                                    <SelectTrigger className="w-[130px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                        <div className="flex items-center gap-2">
+                                            <Filter className="h-4 w-4"/>
+                                            <SelectValue placeholder="Extension"/>
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="-" className="justify-center text-center font-medium opacity-70">--- All ---</SelectItem>
+                                        {availableExtensions.map(ext => {
+                                            const getExtensionDisplayName = (e: string) => {
+                                                switch (e.toLowerCase()) {
+                                                    case 'mp4':
+                                                        return 'MP4';
+                                                    case 'webm':
+                                                        return 'WebM';
+                                                    case 'mkv':
+                                                        return 'Matroska';
+                                                    case 'mov':
+                                                        return 'QuickTime';
+                                                    case 'gif':
+                                                        return 'GIF';
+                                                    case 'avi':
+                                                        return 'AVI';
+                                                    case 'flv':
+                                                        return 'FLV';
+                                                    case 'wmv':
+                                                        return 'WMV';
+                                                    default:
+                                                        return e.toUpperCase();
+                                                }
+                                            };
+                                            return (
+                                                <SelectItem key={ext} value={ext}>
+                                                    {getExtensionDisplayName(ext)}
+                                                </SelectItem>
+                                            );
+                                        })}
+                                    </SelectContent>
+                                </Select>
+                                <Select value={resolutionFilter} onValueChange={setResolutionFilter}>
+                                    <SelectTrigger className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                        <div className="flex items-center gap-2">
+                                            <Filter className="h-4 w-4"/>
+                                            <SelectValue placeholder="Resolution"/>
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="-" className="justify-center text-center font-medium opacity-70">--- All ---</SelectItem>
+                                        {availableResolutions.map(res => (
+                                            <SelectItem key={res} value={res}>
+                                                {res}
                                             </SelectItem>
-                                        );
-                                    })}
-                                </SelectContent>
-                            </Select>
-                            <Select value={resolutionFilter} onValueChange={setResolutionFilter}>
-                                <SelectTrigger className="w-[140px] h-9">
-                                    <div className="flex items-center gap-2">
-                                        <Filter className="h-4 w-4"/>
-                                        <SelectValue placeholder="Resolution"/>
-                                    </div>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="-">-</SelectItem>
-                                    {availableResolutions.map(res => (
-                                        <SelectItem key={res} value={res}>
-                                            {res}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <Select value={codecFilter} onValueChange={setCodecFilter}>
-                                <SelectTrigger className="w-[120px] h-9">
-                                    <div className="flex items-center gap-2">
-                                        <Filter className="h-4 w-4"/>
-                                        <SelectValue placeholder="Codec"/>
-                                    </div>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="-">-</SelectItem>
-                                    {availableCodecs.map(codec => (
-                                        <SelectItem key={codec} value={codec}>
-                                            {codec.toUpperCase()}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                <SelectTrigger className="w-[120px] h-9">
-                                    <div className="flex items-center gap-2">
-                                        <Filter className="h-4 w-4"/>
-                                        <SelectValue placeholder="Status"/>
-                                    </div>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="-">-</SelectItem>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="inactive">Inactive</SelectItem>
-                                </SelectContent>
-                            </Select>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <Select value={codecFilter} onValueChange={setCodecFilter}>
+                                    <SelectTrigger className="w-[120px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                        <div className="flex items-center gap-2">
+                                            <Filter className="h-4 w-4"/>
+                                            <SelectValue placeholder="Codec"/>
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="-" className="justify-center text-center font-medium opacity-70">--- All ---</SelectItem>
+                                        {availableCodecs.map(codec => (
+                                            <SelectItem key={codec} value={codec}>
+                                                {codec.toUpperCase()}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                    <SelectTrigger className="w-[120px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                        <div className="flex items-center gap-2">
+                                            <Filter className="h-4 w-4"/>
+                                            <SelectValue placeholder="Status"/>
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="-" className="justify-center text-center font-medium opacity-70">--- All ---</SelectItem>
+                                        <SelectItem value="active">Active</SelectItem>
+                                        <SelectItem value="inactive">Inactive</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <div className="flex items-center gap-2 ml-auto lg:ml-0">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-9 px-3"
+                                        onClick={() => {
+                                            setSearchQuery('');
+                                            setStatusFilter('');
+                                            setCodecFilter('');
+                                            setExtensionFilter('');
+                                            setResolutionFilter('');
+                                        }}
+                                    >
+                                        <RotateCcw className="h-4 w-4 mr-2"/>
+                                        Reset
+                                    </Button>
+                                    <Button
+                                        variant="default"
+                                        size="sm"
+                                        className="h-9 px-4"
+                                        onClick={() => {
+                                            // 这里可以添加搜索逻辑
+                                        }}
+                                    >
+                                        <Search className="h-4 w-4 mr-2"/>
+                                        Search
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </CardContent>
@@ -686,6 +511,216 @@ export default function TranscodingProfiles() {
                             </CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
+                            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button onClick={() => setEditingProfile({is_active: true})}>
+                                        <PlusCircle className="mr-2 h-4 w-4"/>
+                                        Add Profile
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-lg">
+                                    <DialogHeader>
+                                        <DialogTitle>{editingProfile?.id ? "Edit Profile" : "Add Profile"}</DialogTitle>
+                                        <DialogDescription>
+                                            {editingProfile?.id ? "Update the profile settings" : "Create a new transcoding profile"}
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="grid gap-4 py-4">
+                                        <div className="grid grid-cols-4 items-center gap-4">
+                                            <Label htmlFor="name" className="text-right">Name <span
+                                                className="text-destructive">*</span></Label>
+                                            <Input id="name" value={editingProfile?.name || ""}
+                                                   onChange={(e) => setEditingProfile({
+                                                       ...editingProfile,
+                                                       name: e.target.value
+                                                   })} className="col-span-3"/>
+                                        </div>
+                                        <div className="grid grid-cols-4 items-center gap-4">
+                                            <Label htmlFor="extension" className="text-right">Extension <span
+                                                className="text-destructive">*</span></Label>
+                                            <Select
+                                                value={editingProfile?.extension || ""}
+                                                onValueChange={(value) => setEditingProfile({
+                                                    ...editingProfile,
+                                                    extension: value
+                                                })}
+                                            >
+                                                <SelectTrigger className="col-span-3">
+                                                    <SelectValue placeholder="Select extension"/>
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="mp4">MP4</SelectItem>
+                                                    <SelectItem value="webm">WebM</SelectItem>
+                                                    <SelectItem value="mkv">Matroska</SelectItem>
+                                                    <SelectItem value="mov">QuickTime</SelectItem>
+                                                    <SelectItem value="gif">GIF</SelectItem>
+                                                    <SelectItem value="avi">AVI</SelectItem>
+                                                    <SelectItem value="flv">FLV</SelectItem>
+                                                    <SelectItem value="wmv">WMV</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="grid grid-cols-4 items-center gap-4">
+                                            <Label htmlFor="res" className="text-right">Resolution</Label>
+                                            <Select
+                                                value={editingProfile?.resolution?.split('x')[1] || editingProfile?.resolution || ""}
+                                                onValueChange={(value) => {
+                                                    // 根据高度自动选择完整分辨率
+                                                    const resolutionMap: Record<string, string> = {
+                                                        '240': '426x240',
+                                                        '360': '640x360',
+                                                        '480': '854x480',
+                                                        '720': '1280x720',
+                                                        '1080': '1920x1080',
+                                                        '1440': '2560x1440',
+                                                        '2160': '3840x2160'
+                                                    };
+                                                    const fullResolution = resolutionMap[value] || value;
+                                                    setEditingProfile({...editingProfile, resolution: fullResolution});
+                                                }}
+                                            >
+                                                <SelectTrigger className="col-span-3">
+                                                    <SelectValue placeholder="Select resolution"/>
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="240">240</SelectItem>
+                                                    <SelectItem value="360">360</SelectItem>
+                                                    <SelectItem value="480">480</SelectItem>
+                                                    <SelectItem value="720">720</SelectItem>
+                                                    <SelectItem value="1080">1080</SelectItem>
+                                                    <SelectItem value="1440">1440</SelectItem>
+                                                    <SelectItem value="2160">2160 (4K)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="grid grid-cols-4 items-center gap-4">
+                                            <Label htmlFor="vcodec" className="text-right">Video Codec</Label>
+                                            <Select
+                                                value={editingProfile?.video_codec || ""}
+                                                onValueChange={(value) => setEditingProfile({
+                                                    ...editingProfile,
+                                                    video_codec: value
+                                                })}
+                                            >
+                                                <SelectTrigger className="col-span-3">
+                                                    <SelectValue placeholder="Select video codec"/>
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="libx264">libx264 (H.264)</SelectItem>
+                                                    <SelectItem value="libx265">libx265 (H.265/HEVC)</SelectItem>
+                                                    <SelectItem value="libvpx-vp9">libvpx-vp9 (VP9)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="grid grid-cols-4 items-center gap-4">
+                                            <div className="col-span-4">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                                                    className="w-full flex items-center justify-center gap-1 text-sm text-muted-foreground"
+                                                >
+                                                    {showAdvancedOptions ? <ChevronUp className="h-4 w-4"/> :
+                                                        <ChevronDown className="h-4 w-4"/>}
+                                                    {showAdvancedOptions ? "Hide Advanced Options" : "Show Advanced Options"}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        {showAdvancedOptions && (
+                                            <>
+                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                    <Label htmlFor="vbitrate" className="text-right">Video Bitrate</Label>
+                                                    <Select
+                                                        value={editingProfile?.video_bitrate || ""}
+                                                        onValueChange={(value) => setEditingProfile({
+                                                            ...editingProfile,
+                                                            video_bitrate: value
+                                                        })}
+                                                    >
+                                                        <SelectTrigger className="col-span-3">
+                                                            <SelectValue placeholder="Select video bitrate"/>
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="200k">200k</SelectItem>
+                                                            <SelectItem value="400k">400k</SelectItem>
+                                                            <SelectItem value="800k">800k</SelectItem>
+                                                            <SelectItem value="1500k">1500k</SelectItem>
+                                                            <SelectItem value="3000k">3000k</SelectItem>
+                                                            <SelectItem value="5000k">5000k</SelectItem>
+                                                            <SelectItem value="8000k">8000k</SelectItem>
+                                                            <SelectItem value="12000k">12000k</SelectItem>
+                                                            <SelectItem value="16000k">16000k</SelectItem>
+                                                            <SelectItem value="25000k">25000k</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                    <Label htmlFor="acodec" className="text-right">Audio Codec</Label>
+                                                    <Select
+                                                        value={editingProfile?.audio_codec || ""}
+                                                        onValueChange={(value) => setEditingProfile({
+                                                            ...editingProfile,
+                                                            audio_codec: value
+                                                        })}
+                                                    >
+                                                        <SelectTrigger className="col-span-3">
+                                                            <SelectValue placeholder="Select audio codec"/>
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="aac">aac</SelectItem>
+                                                            <SelectItem value="mp3">mp3</SelectItem>
+                                                            <SelectItem value="opus">opus</SelectItem>
+                                                            <SelectItem value="vorbis">vorbis</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                    <Label htmlFor="abitrate" className="text-right">Audio Bitrate</Label>
+                                                    <Select
+                                                        value={editingProfile?.audio_bitrate || ""}
+                                                        onValueChange={(value) => setEditingProfile({
+                                                            ...editingProfile,
+                                                            audio_bitrate: value
+                                                        })}
+                                                    >
+                                                        <SelectTrigger className="col-span-3">
+                                                            <SelectValue placeholder="Select audio bitrate"/>
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="64k">64k</SelectItem>
+                                                            <SelectItem value="96k">96k</SelectItem>
+                                                            <SelectItem value="128k">128k</SelectItem>
+                                                            <SelectItem value="192k">192k</SelectItem>
+                                                            <SelectItem value="256k">256k</SelectItem>
+                                                            <SelectItem value="320k">320k</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </>
+                                        )}
+                                        <div className="grid grid-cols-4 items-center gap-4">
+                                            <Label htmlFor="active" className="text-right">Active</Label>
+                                            <div className="col-span-3 flex items-center">
+                                                <Checkbox
+                                                    id="active"
+                                                    checked={editingProfile?.is_active ?? true}
+                                                    onCheckedChange={(checked) => setEditingProfile({
+                                                        ...editingProfile,
+                                                        is_active: checked
+                                                    })}
+                                                />
+                                                <label htmlFor="active" className="ml-2 text-sm font-medium leading-none">
+                                                    Enable this profile
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <DialogFooter>
+                                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                                        <Button onClick={handleSave}>Save</Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline" size="sm">

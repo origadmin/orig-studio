@@ -111,7 +111,7 @@ function createRequest() {
     request.interceptors.request.use(
         (config) => {
             const token = localStorage.getItem(TOKEN_KEY);
-            if (token && !isTokenExpired()) {
+            if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
             }
             return config;
@@ -153,7 +153,7 @@ function createRequest() {
             }
 
             // auth 接口返回 401 不做重定向（登录失败正常错误）
-            const authUrls = ["/auth/signin", "/auth/signup"];
+            const authUrls = ["/auth/signin", "/auth/signup", "/auth/refresh"];
             if (authUrls.some((url) => originalRequest.url?.includes(url))) {
                 return Promise.reject(error);
             }
@@ -162,25 +162,60 @@ function createRequest() {
             // 避免因为其他原因导致的 401 错误（如权限不足）而清除 token
             const errorMessage = error.response?.data?.message;
             if (errorMessage && (errorMessage.includes('token') || errorMessage.includes('Token') || errorMessage.includes('authentication'))) {
-                // 其余 401：清 token，跳登录
+                // 尝试使用 refresh token 刷新
                 if (!isRefreshing) {
                     isRefreshing = true;
-                    clearAuth();
-                    processQueue(error, null);
-                    isRefreshing = false;
-                    window.location.href = "/auth/signin";
+                    
+                    try {
+                        const refreshToken = getRefreshToken();
+                        if (refreshToken) {
+                            // 调用 refresh token 接口
+                            const response = await axios.post<Token>(`${API_BASE_URL}${API_PREFIX}/auth/refresh`, {
+                                refresh_token: refreshToken
+                            });
+                            
+                            // 保存新 token
+                            setAuth(response.data);
+                            
+                            // 更新请求头并重新发送原始请求
+                            originalRequest.headers.Authorization = `Bearer ${response.data.access_token}`;
+                            
+                            // 处理队列中的请求
+                            processQueue(null, response.data.access_token);
+                            
+                            // 重新发送原始请求
+                            return request(originalRequest);
+                        } else {
+                            // 没有 refresh token，清 token 跳登录
+                            clearAuth();
+                            window.location.href = "/auth/signin";
+                            return Promise.reject(error);
+                        }
+                    } catch (refreshError) {
+                        // refresh token 失败，清 token 跳登录
+                        clearAuth();
+                        processQueue(refreshError as ApiError, null);
+                        window.location.href = "/auth/signin";
+                        return Promise.reject(refreshError);
+                    } finally {
+                        isRefreshing = false;
+                    }
+                } else {
+                    // 正在刷新 token，加入队列等待
+                    return new Promise((resolve, reject) => {
+                        failedQueue.push({
+                            resolve: (token: string) => {
+                                originalRequest.headers.Authorization = `Bearer ${token}`;
+                                resolve(request(originalRequest));
+                            },
+                            reject
+                        });
+                    });
                 }
             } else {
                 // 其他 401 错误（如权限不足），不清除 token
                 return Promise.reject(error);
             }
-
-            return new Promise((_, reject) => {
-                failedQueue.push({
-                    resolve: () => {
-                    }, reject
-                });
-            });
         }
     );
 
@@ -221,6 +256,9 @@ async function fetchApi<T>(
                 } else {
                     searchParams.set(key, String(value));
                 }
+            } else if (value === 0 || value === "0") {
+                // 特殊处理0值，确保0能被正确添加到URL参数中
+                searchParams.set(key, String(value));
             }
         });
     }

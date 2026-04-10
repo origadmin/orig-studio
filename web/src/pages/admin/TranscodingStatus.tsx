@@ -193,9 +193,9 @@ function TaskRow({
                                 <span
                                     className="text-[10px] tabular-nums font-bold text-slate-600 dark:text-slate-400">{task.progress}%</span>
                             </div>
-                            <div className="h-1.5 w-full bg-sky-100 dark:bg-sky-950/30 rounded-full overflow-hidden">
+                            <div className="h-2.5 w-full bg-sky-100 dark:bg-sky-950/30 rounded-full overflow-hidden">
                                 <div
-                                    className="h-full bg-sky-500 transition-all duration-500 ease-out animate-pulse"
+                                    className="h-full bg-sky-600 transition-all duration-500 ease-out animate-pulse"
                                     style={{width: `${task.progress}%`}}
                                 />
                             </div>
@@ -210,9 +210,9 @@ function TaskRow({
                                     className="text-[10px] tabular-nums font-bold text-emerald-600 dark:text-emerald-400">100%</span>
                             </div>
                             <div
-                                className="h-1.5 w-full bg-emerald-100 dark:bg-emerald-950/30 rounded-full overflow-hidden">
+                                className="h-2.5 w-full bg-emerald-100 dark:bg-emerald-950/30 rounded-full overflow-hidden">
                                 <div
-                                    className="h-full bg-emerald-500"
+                                    className="h-full bg-emerald-600"
                                     style={{width: '100%'}}
                                 />
                             </div>
@@ -225,7 +225,7 @@ function TaskRow({
                                     className="text-[10px] font-bold uppercase tracking-tight">{task.status === 'pending' ? 'Queued' : 'Waiting'}</span>
                                 <span className="text-[10px] tabular-nums font-bold">0%</span>
                             </div>
-                            <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"/>
+                            <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"/>
                         </div>
                     )}
                 </TableCell>
@@ -233,7 +233,7 @@ function TaskRow({
                 {/* STATUS */}
                 <TableCell className="w-[120px]">
                     <span
-                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border whitespace-nowrap ${badgeStyle[st.color] ?? badgeStyle.slate}`}>
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${badgeStyle[st.color] ?? badgeStyle.slate}`}>
                         <StIcon className="w-3 h-3 shrink-0"/>
                         {st.label}
                     </span>
@@ -242,11 +242,11 @@ function TaskRow({
                 {/* HAS FILE */}
                 <TableCell className="w-[80px]">
                     {task.output_path ? (
-                        <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-200">
+                        <Badge variant="outline" className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 border-emerald-200">
                             Yes
                         </Badge>
                     ) : (
-                        <Badge variant="outline" className="text-muted-foreground">
+                        <Badge variant="outline" className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-300 border-slate-200">
                             No
                         </Badge>
                     )}
@@ -822,7 +822,7 @@ export default function TranscodingStatus() {
     }
 
     return (
-        <div className="space-y-4 p-4 md:p-6 max-w-7xl mx-auto">
+        <div className="space-y-6 p-4 md:p-6">
             {/* ═══ Header ════════════════════════════════ */}
             <Card className="overflow-hidden">
                 <CardContent className="p-6">
@@ -882,7 +882,7 @@ export default function TranscodingStatus() {
                                     onValueChange={(val) => setPendingProfileFilter(val === 'all' ? '' : val)}
                                 >
                                     <SelectTrigger
-                                        className="w-[140px] h-9 focus:ring-1 focus:ring-ring focus:ring-offset-0">
+                                        className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
                                             <SelectValue placeholder="Profile"/>
@@ -891,7 +891,7 @@ export default function TranscodingStatus() {
                                     <SelectContent>
                                         <SelectItem value="all"
                                                     className="justify-center text-center font-medium opacity-70">
-                                            - All -
+                                            --- All ---
                                         </SelectItem>
                                         {availableProfiles.map(profile => (
                                             <SelectItem key={profile} value={profile}>
@@ -914,7 +914,7 @@ export default function TranscodingStatus() {
                                     <SelectContent>
                                         <SelectItem value="all"
                                                     className="justify-center text-center font-medium opacity-70">
-                                            - All -
+                                            --- All ---
                                         </SelectItem>
                                         <SelectItem value="pending">Pending</SelectItem>
                                         <SelectItem value="processing">Processing</SelectItem>
@@ -937,7 +937,7 @@ export default function TranscodingStatus() {
                                     <SelectContent>
                                         <SelectItem value="all"
                                                     className="justify-center text-center font-medium opacity-70">
-                                            - All -
+                                            --- All ---
                                         </SelectItem>
                                         <SelectItem value="h264-240">H264 240p</SelectItem>
                                         <SelectItem value="h264-360">H264 360p</SelectItem>
@@ -1010,7 +1010,7 @@ export default function TranscodingStatus() {
                         {
                             label: "Failed",
                             value: totalStats.failed,
-                            color: "red",
+                            color: "rose",
                             icon: XCircle,
                             desc: "Tasks requiring attention"
                         },
@@ -1043,8 +1043,8 @@ export default function TranscodingStatus() {
                         key={t.value}
                         variant={activeTab === t.value ? "default" : "outline"}
                         size="sm"
-                        className={`rounded-full px-4 py-1.5 ${activeTab === t.value ? 'bg-primary text-white' : 'bg-white border border-gray-300 text-gray-700'}`}
-                        onClick={() => setActiveTab(t.value)}
+                        className="rounded-full px-4 py-1.5"
+                        onClick={() => handleTabChange(t.value)}
                     >
                         {t.label}
                         <span className="ml-2 tabular-nums text-xs opacity-60">({t.count})</span>

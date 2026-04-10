@@ -52,7 +52,9 @@ export const refreshToken = async (): Promise<Token> => {
     if (!refresh_token) {
         throw new Error("No refresh token");
     }
-    return api.post<Token>("/auth/refresh", {refresh_token});
+    const response = await api.post<Token>("/auth/refresh", {refresh_token});
+    setAuth(response);
+    return response;
 };
 
 // 获取当前用户 - 使用 /me 路径

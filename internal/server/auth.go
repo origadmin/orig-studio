@@ -60,10 +60,11 @@ type RegisterRequest struct {
 // TokenResponse is the response body for successful auth.
 // Fields match the frontend Token interface in request.ts.
 type TokenResponse struct {
-	AccessToken string     `json:"access_token"`
-	TokenType   string     `json:"token_type"`
-	ExpiresIn   int64      `json:"expires_in"` // seconds, matches JWT TTL
-	User        *LoginUser `json:"user"`
+	AccessToken  string     `json:"access_token"`
+	RefreshToken string     `json:"refresh_token"`
+	TokenType    string     `json:"token_type"`
+	ExpiresIn    int64      `json:"expires_in"` // seconds, matches JWT TTL
+	User         *LoginUser `json:"user"`
 }
 
 // LoginUser 是登录响应中返回的用户信息，包含前端需要的 is_staff 字段
@@ -110,6 +111,14 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	// Generate refresh token
+	refreshToken, err := h.jwt.GenerateRefreshToken(u.Id, u.Username, u.IsStaff, userRole)
+	if err != nil {
+		slog.Error("failed to generate refresh token", "err", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "refresh token generation failed"})
+		return
+	}
+
 	// 返回简化版用户信息，确保包含 is_staff 字段
 	loginUser := &LoginUser{
 		Id:       u.Id,
@@ -120,7 +129,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 	c.JSON(
 		http.StatusOK,
-		TokenResponse{AccessToken: token, TokenType: "Bearer", ExpiresIn: 86400, User: loginUser},
+		TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: 86400, User: loginUser},
 	)
 }
 
@@ -225,10 +234,19 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
+	// Generate new refresh token
+	refreshToken, err := h.jwt.GenerateRefreshToken(claims.UserID, claims.Username, claims.IsStaff, claims.Role)
+	if err != nil {
+		slog.Error("failed to generate refresh token", "err", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "refresh token generation failed"})
+		return
+	}
+
 	c.JSON(http.StatusOK, TokenResponse{
-		AccessToken: token,
-		TokenType:   "Bearer",
-		ExpiresIn:   86400,
+		AccessToken:  token,
+		RefreshToken: refreshToken,
+		TokenType:    "Bearer",
+		ExpiresIn:    86400,
 	})
 }
 

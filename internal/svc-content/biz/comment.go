@@ -119,3 +119,7 @@ func (uc *CommentUseCase) ListMediaComments(ctx context.Context, mediaID int, pa
 func (uc *CommentUseCase) GetComment(ctx context.Context, id int) (*Comment, error) {
 	return uc.repo.Get(ctx, id)
 }
+
+func (uc *CommentUseCase) ListAll(ctx context.Context, page, pageSize int) ([]*Comment, int, error) {
+	return uc.repo.ListAll(ctx, page, pageSize)
+}

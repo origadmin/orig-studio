@@ -10,26 +10,29 @@
 │ 侧边栏        │ 主内容区                                                     │
 │               │                                                              │
 │ - Dashboard   │ ┌──────────────────────────────────────────────────────────┐ │
-│ - Users       │ │ 页面标题：Encoding Status                               │ │
-│ - Media       │ │ 页面描述：Manage and monitor encoding tasks             │ │
-│ - **Encoding**│ ├──────────────────────────────────────────────────────────┤ │
-│   - Status    │ │ 状态概览卡片                                            │ │
-│   - Tasks     │ │ ┌─────────┬─────────┬─────────┬─────────┬─────────┐    │ │
-│   - Profiles  │ │ │ 总任务  │ 待处理  │ 处理中  │ 已完成  │ 失败    │    │ │
-│ - Settings    │ │ │ 100     │ 5       │ 3       │ 80      │ 12      │    │ │
-│               │ │ └─────────┴─────────┴─────────┴─────────┴─────────┘    │ │
+│ - Users       │ │ 统一工具栏                                                │ │
+│ - Media       │ │ ┌──────────────────────────────────────────────────────┐ │ │
+│ - **Encoding**│ │ │ 页面标题：Transcoding Status                         │ │ │
+│   - Status    │ │ │ 页面描述：Live monitoring of video processing workflows│ │ │
+│   - Tasks     │ │ │ 连接状态：CONNECTED/DISCONNECTED                   │ │ │
+│   - Profiles  │ │ └──────────────────────────────────────────────────────┘ │ │
+│ - Settings    │ │ 搜索框和筛选控件                                         │ │
 │               │ ├──────────────────────────────────────────────────────────┤ │
-│               │ │ 操作按钮：                                              │ │
-│               │ │ [刷新状态] [重试失败任务] [导出报告]                     │ │
+│               │ │ 状态概览卡片                                            │ │
+│               │ │ ┌─────────┬─────────┬─────────┬─────────┐              │ │
+│               │ │ │ 总任务  │ 排队    │ 已完成  │ 失败    │              │ │
+│               │ │ │ 100     │ 5       │ 80      │ 12      │              │ │
+│               │ │ └─────────┴─────────┴─────────┴─────────┘              │ │
+│               │ ├──────────────────────────────────────────────────────────┤ │
+│               │ │ 状态标签页（椭圆形按钮）                                 │ │
+│               │ │ ┌──────┬──────┬──────┬──────┐                         │ │
+│               │ │ │ 全部 │ 排队 │ 完成 │ 失败 │                         │ │
+│               │ │ └──────┴──────┴──────┴──────┘                         │ │
 │               │ ├──────────────────────────────────────────────────────────┤ │
 │               │ │ 编码任务列表                                            │ │
 │               │ │ ┌──────────────────────────────────────────────────────┐ │ │
-│               │ │ │ 搜索框                                              │ │ │
-│               │ │ ├──────────────────────────────────────────────────────┤ │ │
-│               │ │ │ 状态筛选：[全部] [待处理] [处理中] [已完成] [失败]   │ │ │
-│               │ │ ├──────────────────────────────────────────────────────┤ │ │
-│               │ │ │ 表格：任务ID | 媒体文件 | 状态 | 开始时间 | 完成时间 │ │ │
-│               │ │ │       | 进度 | 操作                                  │ │ │
+│               │ │ │ 表格：选择框 | MEDIA | PROFILE | PROGRESS | STATUS │ │ │
+│               │ │ │       | OUTPUT | TIME | ACTION                      │ │ │
 │               │ │ └──────────────────────────────────────────────────────┘ │ │
 │               │ ├──────────────────────────────────────────────────────────┤ │
 │               │ │ 分页控件                                                │ │
@@ -42,88 +45,68 @@
 ### 2.1 状态概览卡片
 
 ```tsx
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
-  <Card>
-    <CardContent className="p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-500">总任务数</p>
-          <p className="text-2xl font-bold">100</p>
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+  <Card className="relative overflow-hidden border-none shadow-sm bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
+    <CardContent className="p-5">
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
+          <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Active Jobs</p>
+          <h3 className="text-3xl font-bold tabular-nums text-sky-600 dark:text-sky-400">100</h3>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Total tasks registered</p>
         </div>
-        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-          <TasksIcon className="h-5 w-5 text-blue-600" />
+        <div className="p-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/30 text-sky-500 dark:text-sky-400">
+          <Video className="h-6 w-6" />
         </div>
       </div>
+      <div className="absolute bottom-0 left-0 h-1 bg-sky-500 w-full opacity-10" />
     </CardContent>
   </Card>
   
-  <Card>
-    <CardContent className="p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-500">待处理</p>
-          <p className="text-2xl font-bold text-yellow-600">5</p>
+  <Card className="relative overflow-hidden border-none shadow-sm bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
+    <CardContent className="p-5">
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
+          <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">In Queue</p>
+          <h3 className="text-3xl font-bold tabular-nums text-amber-600 dark:text-amber-400">5</h3>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Tasks waiting for worker</p>
         </div>
-        <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
-          <ClockIcon className="h-5 w-5 text-yellow-600" />
+        <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 text-amber-500 dark:text-amber-400">
+          <Clock className="h-6 w-6" />
         </div>
       </div>
+      <div className="absolute bottom-0 left-0 h-1 bg-amber-500 w-full opacity-10" />
     </CardContent>
   </Card>
   
-  <Card>
-    <CardContent className="p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-500">处理中</p>
-          <p className="text-2xl font-bold text-blue-600">3</p>
+  <Card className="relative overflow-hidden border-none shadow-sm bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
+    <CardContent className="p-5">
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
+          <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Completed</p>
+          <h3 className="text-3xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400">80</h3>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Successfully finished</p>
         </div>
-        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-          <LoaderIcon className="h-5 w-5 text-blue-600 animate-spin" />
+        <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 dark:text-emerald-400">
+          <CheckCircle2 className="h-6 w-6" />
         </div>
       </div>
+      <div className="absolute bottom-0 left-0 h-1 bg-emerald-500 w-full opacity-10" />
     </CardContent>
   </Card>
   
-  <Card>
-    <CardContent className="p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-500">已完成</p>
-          <p className="text-2xl font-bold text-green-600">80</p>
+  <Card className="relative overflow-hidden border-none shadow-sm bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
+    <CardContent className="p-5">
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
+          <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Failed</p>
+          <h3 className="text-3xl font-bold tabular-nums text-red-600 dark:text-red-400">12</h3>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Tasks requiring attention</p>
         </div>
-        <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-          <CheckIcon className="h-5 w-5 text-green-600" />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-  
-  <Card>
-    <CardContent className="p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-500">失败</p>
-          <p className="text-2xl font-bold text-red-600">12</p>
-        </div>
-        <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-          <XIcon className="h-5 w-5 text-red-600" />
+        <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-950/30 text-red-500 dark:text-red-400">
+          <XCircle className="h-6 w-6" />
         </div>
       </div>
-    </CardContent>
-  </Card>
-  
-  <Card>
-    <CardContent className="p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-500">断开连接</p>
-          <p className="text-2xl font-bold text-purple-600">2</p>
-        </div>
-        <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-          <WifiOffIcon className="h-5 w-5 text-purple-600" />
-        </div>
-      </div>
+      <div className="absolute bottom-0 left-0 h-1 bg-red-500 w-full opacity-10" />
     </CardContent>
   </Card>
 </div>
@@ -132,214 +115,216 @@
 ### 2.2 操作按钮 (Toolbar 位置)
 
 ```tsx
-<div className="bg-white rounded-lg border shadow-sm">
-  {/* Toolbar - 标题和操作按钮 */}
-  <div className="p-4 border-b flex items-center justify-between">
-    <div>
-      <h2 className="text-xl font-semibold text-gray-900">编码任务</h2>
-      <p className="text-sm text-gray-500">管理和监控编码任务</p>
-    </div>
-    <div className="flex flex-wrap gap-3">
-      <Button onClick={refreshStatus}>
-        <RefreshCwIcon className="mr-2 h-4 w-4" />
-        刷新状态
-      </Button>
-      <Button variant="default" className="bg-yellow-600 hover:bg-yellow-700">
-        <RotateCcwIcon className="mr-2 h-4 w-4" />
-        重试失败任务
-      </Button>
-      <Button variant="default" className="bg-indigo-600 hover:bg-indigo-700">
-        <DownloadIcon className="mr-2 h-4 w-4" />
-        导出报告
-      </Button>
-    </div>
-  </div>
-  
-  {/* 搜索和筛选 */}
-  <div className="p-4 border-b">
-    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div className="relative w-full md:w-64">
-        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <Input 
-          placeholder="搜索任务..." 
-          className="pl-10"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+<Card>
+  <CardContent className="p-6">
+    <div className="space-y-4">
+      {/* 页面标题和状态 */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">Transcoding Status</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-2">
+            <span className="inline-block w-2 h-2 rounded-full bg-sky-500 animate-pulse"/>
+            Live monitoring of video processing workflows
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="gap-2 text-[11px] font-bold px-3 py-1 border-2 text-emerald-500 border-emerald-100 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-900">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"/>
+            CONNECTED
+          </Badge>
+        </div>
       </div>
-      <div className="flex flex-wrap gap-2">
-        <Button 
-          variant={statusFilter === 'all' ? 'default' : 'secondary'}
-          onClick={() => setStatusFilter('all')}
-        >
-          全部
-        </Button>
-        <Button 
-          variant={statusFilter === 'pending' ? 'default' : 'secondary'}
-          className={statusFilter === 'pending' ? 'bg-yellow-600 hover:bg-yellow-700' : ''}
-          onClick={() => setStatusFilter('pending')}
-        >
-          待处理
-        </Button>
-        <Button 
-          variant={statusFilter === 'processing' ? 'default' : 'secondary'}
-          className={statusFilter === 'processing' ? 'bg-blue-600 hover:bg-blue-700' : ''}
-          onClick={() => setStatusFilter('processing')}
-        >
-          处理中
-        </Button>
-        <Button 
-          variant={statusFilter === 'completed' ? 'default' : 'secondary'}
-          className={statusFilter === 'completed' ? 'bg-green-600 hover:bg-green-700' : ''}
-          onClick={() => setStatusFilter('completed')}
-        >
-          已完成
-        </Button>
-        <Button 
-          variant={statusFilter === 'failed' ? 'default' : 'secondary'}
-          className={statusFilter === 'failed' ? 'bg-red-600 hover:bg-red-700' : ''}
-          onClick={() => setStatusFilter('failed')}
-        >
-          失败
-        </Button>
-        <Button 
-          variant={statusFilter === 'disconnected' ? 'default' : 'secondary'}
-          className={statusFilter === 'disconnected' ? 'bg-purple-600 hover:bg-purple-700' : ''}
-          onClick={() => setStatusFilter('disconnected')}
-        >
-          断开连接
-        </Button>
+
+      {/* 分隔线 */}
+      <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+
+      {/* 搜索和筛选 */}
+      <div className="flex flex-col lg:flex-row gap-4">
+        <div className="flex-1 min-w-0">
+          <div className="relative w-full">
+            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+            <Input
+              placeholder="Search tasks by media ID, profile, or status..."
+              className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+            />
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Select>
+            <SelectTrigger className="w-[140px] h-9 focus:ring-1 focus:ring-ring focus:ring-offset-0">
+              <div className="flex items-center gap-2">
+                <FilterIcon className="h-4 w-4"/>
+                <SelectValue placeholder="Profile"/>
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="justify-center text-center font-medium opacity-70">--- All ---</SelectItem>
+              <SelectItem value="h264-240">H264 240p</SelectItem>
+              <SelectItem value="h264-360">H264 360p</SelectItem>
+              <SelectItem value="h264-480">H264 480p</SelectItem>
+              <SelectItem value="h264-720">H264 720p</SelectItem>
+              <SelectItem value="h264-1080">H264 1080p</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="default" size="sm" className="h-9 px-4">
+            <SearchIcon className="h-4 w-4 mr-2"/>
+            Search
+          </Button>
+        </div>
       </div>
     </div>
-  </div>
+  </CardContent>
+</Card>
 ```
 
 ### 2.3 编码任务列表
 
 ```tsx
-  {/* 表格 */}
-  <div className="overflow-x-auto">
-    <table className="w-full">
-      <thead className="bg-gray-50">
-        <tr>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            任务 ID
-          </th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            媒体文件
-          </th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            状态
-          </th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            开始时间
-          </th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            完成时间
-          </th>
-          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            进度
-          </th>
-          <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-            操作
-          </th>
-        </tr>
-      </thead>
-      <tbody className="bg-white divide-y divide-gray-200">
-        {tasks.map((task) => (
-          <tr key={task.id}>
-            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-              {task.id}
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-              {task.mediaName}
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap">
-              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                task.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                task.status === 'processing' ? 'bg-blue-100 text-blue-800' :
-                task.status === 'completed' ? 'bg-green-100 text-green-800' :
-                task.status === 'failed' ? 'bg-red-100 text-red-800' :
-                'bg-purple-100 text-purple-800'
-              }`}>
-                {task.status === 'disconnected' ? '断开连接' : task.status}
-              </span>
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-              {task.startTime}
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-              {task.endTime || '-'}
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap">
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div 
-                  className={`h-2.5 rounded-full ${
-                    task.status === 'processing' ? 'bg-blue-600' :
-                    task.status === 'completed' ? 'bg-green-600' :
-                    task.status === 'failed' ? 'bg-red-600' :
-                    task.status === 'disconnected' ? 'bg-purple-600' :
-                    'bg-yellow-600'
-                  }`} 
-                  style={{ width: `${task.progress}%` }}
-                ></div>
+<Card>
+  <CardHeader className="pb-3">
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <CardTitle>Task List</CardTitle>
+        <CardDescription>
+          {filteredTasks.length} task{filteredTasks.length !== 1 ? 's' : ''} found
+        </CardDescription>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        {selectedRows.length > 0 && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              {selectedRows.length} selected
+            </span>
+            <Separator orientation="vertical" className="h-6"/>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleBatchRetry}
+            >
+              <RotateCcw className="h-4 w-4 mr-1"/>
+              Retry All
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedRows([])}
+            >
+              <XCircle className="h-4 w-4 mr-1"/>
+              Clear
+            </Button>
+          </div>
+        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Settings className="h-4 w-4 mr-2"/>
+              Options
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Batch Actions</DropdownMenuLabel>
+            <DropdownMenuSeparator/>
+            <DropdownMenuItem>
+              <Download className="h-4 w-4 mr-2"/>
+              Export Tasks
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+  </CardHeader>
+  <CardContent className="px-0">
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow className="border-b hover:bg-transparent bg-muted/50">
+            <TableHead className="w-[50px]">
+              <Checkbox
+                checked={filteredTasks.length > 0 && selectedRows.length === filteredTasks.length}
+                onCheckedChange={toggleSelectAll}
+                aria-label="Select all"
+              />
+            </TableHead>
+            <TableHead
+              className="w-[200px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">MEDIA</TableHead>
+            <TableHead
+              className="w-[120px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer hover:bg-muted/80"
+              onClick={() => handleSort('profile_id')}
+            >
+              <div className="flex items-center gap-1">
+                PROFILE
+                <ArrowUpDown className="h-3 w-3"/>
               </div>
-              <span className="text-xs text-gray-500 mt-1 block">
-                {task.progress}%
-              </span>
-            </td>
-            <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => retryTask(task.id)}
-                className="text-blue-600 hover:text-blue-900"
-              >
-                重试
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => viewTaskDetails(task.id)}
-                className="text-gray-600 hover:text-gray-900 ml-2"
-              >
-                详情
-              </Button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-  
-  {/* 分页 */}
-  <div className="p-4 border-t flex items-center justify-between">
-    <div className="text-sm text-gray-700">
-      显示 {((currentPage - 1) * pageSize) + 1} 到 {Math.min(currentPage * pageSize, totalTasks)} 条，共 {totalTasks} 条
+            </TableHead>
+            <TableHead
+              className="w-[120px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer hover:bg-muted/80"
+              onClick={() => handleSort('progress')}
+            >
+              <div className="flex items-center gap-1">
+                PROGRESS
+                <ArrowUpDown className="h-3 w-3"/>
+              </div>
+            </TableHead>
+            <TableHead
+              className="w-[120px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer hover:bg-muted/80"
+              onClick={() => handleSort('status')}
+            >
+              <div className="flex items-center gap-1">
+                STATUS
+                <ArrowUpDown className="h-3 w-3"/>
+              </div>
+            </TableHead>
+            <TableHead
+              className="w-[80px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">OUTPUT</TableHead>
+            <TableHead
+              className="w-[120px] py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer hover:bg-muted/80"
+              onClick={() => handleSort('update_time' as any)}
+            >
+              <div className="flex items-center justify-end gap-1">
+                TIME
+                <ArrowUpDown className="h-3 w-3"/>
+              </div>
+            </TableHead>
+            <TableHead
+              className="w-[180px] py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              ACTION
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredTasks.map((task) => (
+            <TaskRow key={task.id}
+                     task={task}
+                     onRetry={() => handleRetryTask(task.id)}
+                     isRetrying={retryingTaskId === task.id}
+                     isSelected={selectedRows.includes(task.id)}
+                     onToggleSelect={() => toggleSelectRow(task.id)}
+            />
+          ))}
+        </TableBody>
+      </Table>
     </div>
-    <div className="flex items-center gap-2">
-      <Button 
-        variant="secondary" 
-        size="sm"
-        onClick={() => setCurrentPage(currentPage - 1)}
-        disabled={currentPage === 1}
-      >
-        上一页
+  </CardContent>
+</Card>
+
+{/* 分页控件 */}
+{data && data.total_filtered > data.page_size && (
+  <div className="flex items-center justify-between pt-1 text-xs text-muted-foreground">
+    <span className="tabular-nums">
+      Page {data.page} of {totalPages} · {data.total_filtered} total
+    </span>
+    <div className="flex gap-1.5">
+      <Button variant="outline" size="sm" className="h-8 text-xs px-3"
+              disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
+        ← Previous
       </Button>
-      <span className="text-sm text-gray-700">
-        {currentPage} / {Math.ceil(totalTasks / pageSize)}
-      </span>
-      <Button 
-        variant="secondary" 
-        size="sm"
-        onClick={() => setCurrentPage(currentPage + 1)}
-        disabled={currentPage >= Math.ceil(totalTasks / pageSize)}
-      >
-        下一页
+      <Button variant="outline" size="sm" className="h-8 text-xs px-3"
+              disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>
+        Next →
       </Button>
     </div>
   </div>
-</div>
+)
 ```
 
 ## 3. 数据结构
@@ -631,6 +616,23 @@ const viewTaskDetails = (taskId: number) => {
 - **大小**：默认使用标准主按钮大小（`h-10`）
 - **一致性**：所有添加按钮应使用相同的样式，确保在不同页面和场景中保持一致
 
+### 6.10 标签页样式（椭圆形按钮）
+
+#### 标准样式
+- **按钮类型**：使用 `Button` 组件，`variant` 根据激活状态切换
+- **激活状态**：`variant="default"`，使用主按钮样式
+- **非激活状态**：`variant="outline"`，使用次要按钮样式
+- **形状**：`rounded-full`，实现椭圆形按钮效果
+- **大小**：`size="sm"`，`px-4 py-1.5`
+- **间距**：按钮之间 `gap-2`
+- **一致性**：所有标签页按钮应使用相同的样式，确保在不同页面和场景中保持一致
+
+#### 统一规范
+- **位置**：位于状态概览卡片和任务表格之间
+- **内容**：包含标签文本和数量，数量使用 `text-xs opacity-60` 样式
+- **交互**：点击切换标签，激活状态显示主按钮样式
+- **一致性**：所有标签页应使用相同的样式和交互规则，确保在不同页面和场景中保持一致
+
 ### 6.10 ACTION 按钮样式
 
 #### 标准样式
@@ -665,14 +667,83 @@ const viewTaskDetails = (taskId: number) => {
 
 #### 标准布局
 - **左侧**：页面标题和描述
-- **右侧**：操作按钮组（添加按钮、刷新按钮等）
 - **搜索和筛选**：位于工具栏下方，单独一行
+- **Options 按钮**：位于搜索和筛选区域的右侧，包含上传、添加等操作按钮
 - **批量操作**：位于搜索和筛选区域的左侧
 - **一致性**：所有工具栏应使用相同的布局规则，确保在不同页面和场景中保持一致
 
 #### 响应式布局
-- **桌面端**：水平排列，标题左对齐，按钮右对齐
-- **移动端**：垂直排列，标题在上，按钮在下
+- **桌面端**：水平排列，标题左对齐，Options 按钮右对齐
+- **移动端**：垂直排列，标题在上，Options 按钮在下
 - **间距**：组件之间保持 `gap-4` 的间距
 - **一致性**：所有工具栏应使用相同的响应式布局规则，确保在不同页面和场景中保持一致
+
+#### Options 按钮位置标准
+- **参考页面**：/admin/transcoding/status 页面
+- **位置**：搜索和筛选区域的右侧，与筛选控件在同一行
+- **布局**：使用 `flex items-center gap-2 ml-auto lg:ml-0` 确保按钮在右侧
+- **示例**：上传媒体按钮、添加配置文件按钮等应放置在该位置
+- **一致性**：所有页面的操作按钮都应遵循此布局规则
+
+## 7. 样式修复说明
+
+### 7.1 修复的问题
+
+1. **卡片颜色问题**：
+   - Total Subscribers 卡片：图标和底部色条缺少颜色
+   - Active Users 卡片：图标和底部色条缺少颜色
+   - 趋势指示颜色：下降趋势显示灰色而非红色，缺少持平趋势指示
+
+2. **布局问题**：
+   - TranscodingProfiles 页面：布局被破坏，Dialog 组件结束后缺少正确的闭合标签
+   - 上传媒体按钮位置：位置不正确，需要统一到 Options 位置
+
+3. **样式一致性问题**：
+   - 各页面搜索和筛选样式不一致
+   - 表格显示总记录数问题
+
+### 7.2 修复方案
+
+1. **卡片颜色修复**：
+   - 为 StatCard 组件添加颜色映射，确保图标和底部色条正确显示对应颜色
+   - 修复趋势指示颜色：上升趋势绿色，下降趋势红色，持平趋势灰色
+   - 确保颜色类正确应用到图标上
+
+2. **布局修复**：
+   - 修复 TranscodingProfiles 页面的布局问题，确保 Dialog 组件正确闭合
+   - 统一上传媒体按钮位置到 Options 位置
+   - 确保所有页面的搜索和筛选区域与 Transcoding Status 页面保持一致
+
+3. **样式一致性修复**：
+   - 统一所有页面的 Card 样式
+   - 统一搜索和筛选组件的样式
+   - 确保表格显示总记录数
+
+### 7.3 注意事项
+
+1. **样式与逻辑分离**：
+   - 所有修复仅涉及样式变更，不修改任何业务逻辑
+   - 确保样式修复不会影响现有功能
+
+2. **颜色规范**：
+   - 使用 Tailwind CSS 的默认颜色类（如 pink, cyan, amber 等）
+   - 确保颜色类正确应用到图标和底部色条
+
+3. **布局一致性**：
+   - 以 Transcoding Status 页面为标准，统一所有页面的布局
+   - 确保操作按钮位置一致
+
+4. **构建验证**：
+   - 所有修复完成后运行 `npm run build` 确保没有引入错误
+   - 确保代码编译成功，无语法错误
+
+### 7.4 修复后的效果
+
+- Total Subscribers 卡片：粉色图标和底部色条
+- Active Users 卡片：青色图标和底部色条
+- Total Revenue 卡片：琥珀色图标和底部色条
+- 所有卡片的趋势指示颜色正确
+- 所有页面的布局和样式保持一致
+- 上传媒体按钮位置统一到 Options 位置
+- 表格显示总记录数
 
