@@ -7,6 +7,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
 	"origadmin/application/origcms/internal/svc-media/dto"
 )
 
@@ -15,30 +16,63 @@ type mockMediaRepo struct {
 	mock.Mock
 }
 
-func (m *mockMediaRepo) Create(ctx context.Context, media *Media) (*Media, error) { return nil, nil }
+func (m *mockMediaRepo) Create(
+	ctx context.Context,
+	media *Media,
+) (*Media, error) {
+	return nil, nil
+}
 func (m *mockMediaRepo) Get(ctx context.Context, id int64) (*Media, error) {
 	args := m.Called(ctx, id)
 	return args.Get(0).(*Media), args.Error(1)
 }
-func (m *mockMediaRepo) List(ctx context.Context, opts ...*dto.MediaQueryOption) ([]*Media, int32, error) {
+
+func (m *mockMediaRepo) List(
+	ctx context.Context,
+	opts ...*dto.MediaQueryOption,
+) ([]*Media, int32, error) {
 	return nil, 0, nil
 }
-func (m *mockMediaRepo) Update(ctx context.Context, media *Media) (*Media, error)          { return nil, nil }
-func (m *mockMediaRepo) Delete(ctx context.Context, id int64) error                        { return nil }
+
+func (m *mockMediaRepo) Update(
+	ctx context.Context,
+	media *Media,
+) (*Media, error) {
+	return nil, nil
+}
+func (m *mockMediaRepo) Delete(ctx context.Context, id int64) error { return nil }
 func (m *mockMediaRepo) IncrementViewCount(ctx context.Context, id int64) (int64, error) {
 	return 0, nil
 }
-func (m *mockMediaRepo) UpdateCommentCount(ctx context.Context, id int64, delta int) error { return nil }
-func (m *mockMediaRepo) UpdateLikeCount(ctx context.Context, id int64, delta int) error    { return nil }
-func (m *mockMediaRepo) UpdateDislikeCount(ctx context.Context, id int64, delta int) error { return nil }
+
+func (m *mockMediaRepo) UpdateCommentCount(ctx context.Context, id int64, delta int) error {
+	return nil
+}
+
+func (m *mockMediaRepo) UpdateLikeCount(
+	ctx context.Context,
+	id int64,
+	delta int,
+) error {
+	return nil
+}
+func (m *mockMediaRepo) UpdateDislikeCount(ctx context.Context, id int64, delta int) error {
+	return nil
+}
+
 func (m *mockMediaRepo) UpdateFavoriteCount(ctx context.Context, id int64, delta int) error {
 	return nil
 }
-func (m *mockMediaRepo) ResetStaleProcessing(ctx context.Context) (int, error)             { return 0, nil }
+func (m *mockMediaRepo) ResetStaleProcessing(ctx context.Context) (int, error) { return 0, nil }
 func (m *mockMediaRepo) CountByEncodingStatus(ctx context.Context) (*StatusCounts, error) {
 	return nil, nil
 }
-func (m *mockMediaRepo) ListFilteredByEncodingStatus(ctx context.Context, statuses []string, page, pageSize int) ([]*Media, int, error) {
+
+func (m *mockMediaRepo) ListFilteredByEncodingStatus(
+	ctx context.Context,
+	statuses []string,
+	page, pageSize int,
+) ([]*Media, int, error) {
 	return nil, 0, nil
 }
 
@@ -47,24 +81,49 @@ type mockEncodingTaskRepo struct {
 	mock.Mock
 }
 
-func (m *mockEncodingTaskRepo) Create(ctx context.Context, task *EncodingTask) (*EncodingTask, error) {
+func (m *mockEncodingTaskRepo) Create(
+	ctx context.Context,
+	task *EncodingTask,
+) (*EncodingTask, error) {
 	return nil, nil
 }
-func (m *mockEncodingTaskRepo) Update(ctx context.Context, task *EncodingTask) (*EncodingTask, error) {
+
+func (m *mockEncodingTaskRepo) Update(
+	ctx context.Context,
+	task *EncodingTask,
+) (*EncodingTask, error) {
 	args := m.Called(ctx, task)
 	return args.Get(0).(*EncodingTask), args.Error(1)
 }
+
 func (m *mockEncodingTaskRepo) Get(ctx context.Context, id int) (*EncodingTask, error) {
 	args := m.Called(ctx, id)
 	return args.Get(0).(*EncodingTask), args.Error(1)
 }
-func (m *mockEncodingTaskRepo) ListByMedia(ctx context.Context, mediaId int64) ([]*EncodingTask, error) {
+
+func (m *mockEncodingTaskRepo) ListByMedia(
+	ctx context.Context,
+	mediaId int64,
+) ([]*EncodingTask, error) {
 	return nil, nil
 }
-func (m *mockEncodingTaskRepo) DeleteByMedia(ctx context.Context, mediaID int64) error { return nil }
-func (m *mockEncodingTaskRepo) ListFlat(ctx context.Context, status string, mediaId *int64, offset, limit int) ([]*EncodingTask, int, error) {
+
+func (m *mockEncodingTaskRepo) DeleteByMedia(
+	ctx context.Context,
+	mediaID int64,
+) error {
+	return nil
+}
+
+func (m *mockEncodingTaskRepo) ListFlat(
+	ctx context.Context,
+	status string,
+	mediaId *int64,
+	offset, limit int,
+) ([]*EncodingTask, int, error) {
 	return nil, 0, nil
 }
+
 func (m *mockEncodingTaskRepo) CountByStatus(ctx context.Context) (*StatusCounts, error) {
 	return nil, nil
 }

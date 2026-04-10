@@ -252,71 +252,70 @@ function TaskRow({
                     )}
                 </TableCell>
 
-                {/* Time + Actions */}
-                <TableCell className="w-[180px]">
-                    <div className="flex items-center justify-between gap-2">
-                        <span className="text-[11px] text-muted-foreground tabular-nums whitespace-nowrap">
-                            {formatTime(task.update_time || task.created_at)}
-                        </span>
-                        <div className="flex items-center gap-1">
-                            {canRetry && (
-                                <Button variant="ghost" size="sm"
-                                        className="h-7 text-[11px] px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/20 transition-all"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setShowError(!showError);
-                                        }}>
-                                    <AlertCircle className="w-3 h-3 mr-1"/>
-                                    {showError ? '收起' : '详情'}
+                {/* Time */}
+                <TableCell className="w-[120px] text-right">
+                    <span className="text-[11px] text-muted-foreground tabular-nums whitespace-nowrap">
+                        {formatTime(task.update_time || task.created_at)}
+                    </span>
+                </TableCell>
+
+                {/* Action */}
+                <TableCell className="w-[180px] text-right">
+                    <div className="flex items-center justify-end gap-1">
+                        {canRetry && (
+                            <Button variant="ghost" size="icon" className="h-6 w-6"
+                                    title={showError ? 'Hide Details' : 'Show Details'}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setShowError(!showError);
+                                    }}>
+                                <AlertCircle className="h-3 w-3"/>
+                            </Button>
+                        )}
+                        {canRetry && (
+                            <Button variant="ghost" size="icon" className="h-6 w-6" title="Retry"
+                                    disabled={isRetrying}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onRetry();
+                                    }}>
+                                {isRetrying
+                                    ? <Loader2 className="w-3 h-3 animate-spin"/>
+                                    : <RotateCcw className="w-3 h-3"/>}
+                            </Button>
+                        )}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-6 w-6" title="More Actions">
+                                    <MoreVertical className="h-3 w-3"/>
                                 </Button>
-                            )}
-                            {canRetry && (
-                                <Button variant="ghost" size="sm"
-                                        className="h-7 text-[11px] px-2 text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-950/20 transition-all"
-                                        disabled={isRetrying}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onRetry();
-                                        }}>
-                                    {isRetrying
-                                        ? <Loader2 className="w-3 h-3 animate-spin mr-1"/>
-                                        : <RotateCcw className="w-3 h-3 mr-1"/>}
-                                    重试
-                                </Button>
-                            )}
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7">
-                                        <MoreVertical className="h-4 w-4"/>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                    <DropdownMenuSeparator/>
-                                    {task.output_path && (
-                                        <DropdownMenuItem>
-                                            <Download className="h-4 w-4 mr-2"/>
-                                            Download Output
-                                        </DropdownMenuItem>
-                                    )}
-                                    <DropdownMenuItem className="text-destructive focus:text-destructive">
-                                        <Trash2 className="h-4 w-4 mr-2"/>
-                                        Delete Task
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuSeparator/>
+                                {task.output_path && (
+                                    <DropdownMenuItem>
+                                        <Download className="h-4 w-4 mr-2"/>
+                                        Download Output
                                     </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
+                                )}
+                                <DropdownMenuItem className="text-destructive focus:text-destructive">
+                                    <Trash2 className="h-4 w-4 mr-2"/>
+                                    Delete Task
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </TableCell>
             </TableRow>
             {/* Error message row */}
             {showError && (isSkipped || isFailed) && task.error_message && (
                 <TableRow>
-                    <TableCell colSpan={8}
+                    <TableCell colSpan={9}
                                className="bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-800">
                         <div className="p-4">
                             <div className="flex items-start gap-3">
-                                <div className="flex-shrink-0 mt-0.5">
+                                <div className="flex-shrink-0">
                                     <div
                                         className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                                         <svg className="w-4 h-4 text-red-600 dark:text-red-400" fill="none"
@@ -327,8 +326,8 @@ function TaskRow({
                                     </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                    <div className="flex items-start gap-2 mb-2">
+                                        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mt-0.5">
                                             {isFailed ? 'Encoding Failed' : 'Task Skipped'}
                                         </h4>
                                         <span
@@ -825,37 +824,163 @@ export default function TranscodingStatus() {
     return (
         <div className="space-y-4 p-4 md:p-6 max-w-7xl mx-auto">
             {/* ═══ Header ════════════════════════════════ */}
-            <div
-                className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6 border-slate-200 dark:border-slate-800">
-                <div>
-                    <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">Transcoding
-                        Status</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-2">
-                        <span className="inline-block w-2 h-2 rounded-full bg-sky-500 animate-pulse"/>
-                        Live monitoring of video processing workflows
-                    </p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <Badge variant="outline"
-                           className={`gap-2 text-[11px] font-bold px-3 py-1 border-2 ${sseStatus.connected ? "text-emerald-500 border-emerald-100 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-900" : "text-slate-400 border-slate-100 bg-slate-50/50 dark:bg-slate-900/20 dark:border-slate-800"}`}>
-                        <div
-                            className={`w-1.5 h-1.5 rounded-full ${sseStatus.connected ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-300"}`}/>
-                        {sseStatus.connected ? "CONNECTED" : "DISCONNECTED"}
-                    </Badge>
-                    {urlMediaId && (
-                        <Badge variant="secondary"
-                               className="gap-1.5 text-[11px] font-bold px-3 py-1 bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400 border border-sky-200 dark:border-sky-800">
-                            <Film className="w-3 h-3"/>
-                            MEDIA ID: #{urlMediaId}
-                            <button onClick={clearMediaFilter}
-                                    className="ml-1 hover:bg-sky-200 dark:hover:bg-sky-900 rounded-full p-0.5 transition-colors"
-                                    title="Clear filter">
-                                <XCircle className="w-3 h-3"/>
-                            </button>
-                        </Badge>
-                    )}
-                </div>
-            </div>
+            <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                    <div className="flex flex-col gap-4">
+                        {/* 页面标题和状态 */}
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">Transcoding
+                                    Status</h2>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-2">
+                                    <span className="inline-block w-2 h-2 rounded-full bg-sky-500 animate-pulse"/>
+                                    Live monitoring of video processing workflows
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <Badge variant="outline"
+                                       className={`gap-2 text-[11px] font-bold px-3 py-1 border-2 ${sseStatus.connected ? "text-emerald-500 border-emerald-100 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-900" : "text-slate-400 border-slate-100 bg-slate-50/50 dark:bg-slate-900/20 dark:border-slate-800"}`}>
+                                    <div
+                                        className={`w-1.5 h-1.5 rounded-full ${sseStatus.connected ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-300"}`}/>
+                                    {sseStatus.connected ? "CONNECTED" : "DISCONNECTED"}
+                                </Badge>
+                                {urlMediaId && (
+                                    <Badge variant="secondary"
+                                           className="gap-1.5 text-[11px] font-bold px-3 py-1 bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400 border border-sky-200 dark:border-sky-800">
+                                        <Film className="w-3 h-3"/>
+                                        MEDIA ID: #{urlMediaId}
+                                        <button onClick={clearMediaFilter}
+                                                className="ml-1 hover:bg-sky-200 dark:hover:bg-sky-900 rounded-full p-0.5 transition-colors"
+                                                title="Clear filter">
+                                            <XCircle className="w-3 h-3"/>
+                                        </button>
+                                    </Badge>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* 分隔线 */}
+                        <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+
+                        {/* 搜索和筛选 */}
+                        <div className="flex flex-col lg:flex-row gap-4">
+                            <div className="flex-1 min-w-0">
+                                <div className="relative w-full">
+                                    <Search
+                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                    <Input
+                                        placeholder="Search tasks by media ID, profile, or status..."
+                                        value={pendingSearchQuery}
+                                        onChange={(e) => setPendingSearchQuery(e.target.value)}
+                                        className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Select
+                                    value={pendingProfileFilter}
+                                    onValueChange={(val) => setPendingProfileFilter(val === 'all' ? '' : val)}
+                                >
+                                    <SelectTrigger
+                                        className="w-[140px] h-9 focus:ring-1 focus:ring-ring focus:ring-offset-0">
+                                        <div className="flex items-center gap-2">
+                                            <Filter className="h-4 w-4"/>
+                                            <SelectValue placeholder="Profile"/>
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all"
+                                                    className="justify-center text-center font-medium opacity-70">
+                                            - All -
+                                        </SelectItem>
+                                        {availableProfiles.map(profile => (
+                                            <SelectItem key={profile} value={profile}>
+                                                {profile.toUpperCase()}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <Select
+                                    value={pendingStatusFilter}
+                                    onValueChange={(val) => setPendingStatusFilter(val === 'all' ? '' : (val as StatusFilter))}
+                                >
+                                    <SelectTrigger
+                                        className="w-[140px] h-9 focus:ring-1 focus:ring-ring focus:ring-offset-0">
+                                        <div className="flex items-center gap-2">
+                                            <Filter className="h-4 w-4"/>
+                                            <SelectValue placeholder="Status"/>
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all"
+                                                    className="justify-center text-center font-medium opacity-70">
+                                            - All -
+                                        </SelectItem>
+                                        <SelectItem value="pending">Pending</SelectItem>
+                                        <SelectItem value="processing">Processing</SelectItem>
+                                        <SelectItem value="success">Success</SelectItem>
+                                        <SelectItem value="failed">Failed</SelectItem>
+                                        <SelectItem value="skipped">Skipped</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <Select
+                                    value={pendingChunkFilter}
+                                    onValueChange={(val) => setPendingChunkFilter(val === 'all' ? '' : val)}
+                                >
+                                    <SelectTrigger
+                                        className="w-[140px] h-9 focus:ring-1 focus:ring-ring focus:ring-offset-0">
+                                        <div className="flex items-center gap-2">
+                                            <Filter className="h-4 w-4"/>
+                                            <SelectValue placeholder="Chunk"/>
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all"
+                                                    className="justify-center text-center font-medium opacity-70">
+                                            - All -
+                                        </SelectItem>
+                                        <SelectItem value="h264-240">H264 240p</SelectItem>
+                                        <SelectItem value="h264-360">H264 360p</SelectItem>
+                                        <SelectItem value="h264-480">H264 480p</SelectItem>
+                                        <SelectItem value="h264-720">H264 720p</SelectItem>
+                                        <SelectItem value="h264-1080">H264 1080p</SelectItem>
+                                        <SelectItem value="h265-240">H265 240p</SelectItem>
+                                        <SelectItem value="h265-360">H265 360p</SelectItem>
+                                        <SelectItem value="h265-480">H265 480p</SelectItem>
+                                        <SelectItem value="h265-720">H265 720p</SelectItem>
+                                        <SelectItem value="h265-1080">H265 1080p</SelectItem>
+                                        <SelectItem value="vp9-240">VP9 240p</SelectItem>
+                                        <SelectItem value="vp9-360">VP9 360p</SelectItem>
+                                        <SelectItem value="vp9-480">VP9 480p</SelectItem>
+                                        <SelectItem value="vp9-720">VP9 720p</SelectItem>
+                                        <SelectItem value="vp9-1080">VP9 1080p</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <div className="flex items-center gap-2 ml-auto lg:ml-0">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-9 px-3"
+                                        onClick={handleReset}
+                                    >
+                                        <RotateCcw className="h-4 w-4 mr-2"/>
+                                        Reset
+                                    </Button>
+                                    <Button
+                                        variant="default"
+                                        size="sm"
+                                        className="h-9 px-4"
+                                        onClick={handleSearch}
+                                    >
+                                        <Search className="h-4 w-4 mr-2"/>
+                                        Search
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* ═══ Stats Cards ════════════════════════════ */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -885,7 +1010,7 @@ export default function TranscodingStatus() {
                         {
                             label: "Failed",
                             value: totalStats.failed,
-                            color: "rose",
+                            color: "red",
                             icon: XCircle,
                             desc: "Tasks requiring attention"
                         },
@@ -911,139 +1036,21 @@ export default function TranscodingStatus() {
                 }
             </div>
 
-            {/* ═══ Search and Filters ═══════════════════════ */}
-            <Card>
-                <CardContent className="pt-6">
-                    <div className="flex flex-col lg:flex-row gap-4">
-                        <div className="flex-1">
-                            <div className="relative">
-                                <Search
-                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
-                                <Input
-                                    placeholder="Search tasks by media ID, profile, or status..."
-                                    value={pendingSearchQuery}
-                                    onChange={(e) => setPendingSearchQuery(e.target.value)}
-                                    className="pl-10 h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
-                                />
-                            </div>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-2">
-                            <Select
-                                value={pendingProfileFilter}
-                                onValueChange={(val) => setPendingProfileFilter(val === 'all' ? '' : val)}
-                            >
-                                <SelectTrigger
-                                    className="w-[140px] h-9 focus:ring-1 focus:ring-ring focus:ring-offset-0">
-                                    <div className="flex items-center gap-2">
-                                        <Filter className="h-4 w-4"/>
-                                        <SelectValue placeholder="Profile"/>
-                                    </div>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all"
-                                                className="justify-center text-center font-medium opacity-70">
-                                        - All -
-                                    </SelectItem>
-                                    {availableProfiles.map(profile => (
-                                        <SelectItem key={profile} value={profile}>
-                                            {profile.toUpperCase()}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <Select
-                                value={pendingStatusFilter}
-                                onValueChange={(val) => setPendingStatusFilter(val === 'all' ? '' : (val as StatusFilter))}
-                            >
-                                <SelectTrigger
-                                    className="w-[140px] h-9 focus:ring-1 focus:ring-ring focus:ring-offset-0">
-                                    <div className="flex items-center gap-2">
-                                        <Filter className="h-4 w-4"/>
-                                        <SelectValue placeholder="Status"/>
-                                    </div>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all"
-                                                className="justify-center text-center font-medium opacity-70">
-                                        - All -
-                                    </SelectItem>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="processing">Processing</SelectItem>
-                                    <SelectItem value="success">Success</SelectItem>
-                                    <SelectItem value="failed">Failed</SelectItem>
-                                    <SelectItem value="skipped">Skipped</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <Select
-                                value={pendingChunkFilter}
-                                onValueChange={(val) => setPendingChunkFilter(val === 'all' ? '' : val)}
-                            >
-                                <SelectTrigger
-                                    className="w-[140px] h-9 focus:ring-1 focus:ring-ring focus:ring-offset-0">
-                                    <div className="flex items-center gap-2">
-                                        <Filter className="h-4 w-4"/>
-                                        <SelectValue placeholder="Chunk"/>
-                                    </div>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all"
-                                                className="justify-center text-center font-medium opacity-70">
-                                        - All -
-                                    </SelectItem>
-                                    <SelectItem value="h264-240">H264 240p</SelectItem>
-                                    <SelectItem value="h264-360">H264 360p</SelectItem>
-                                    <SelectItem value="h264-480">H264 480p</SelectItem>
-                                    <SelectItem value="h264-720">H264 720p</SelectItem>
-                                    <SelectItem value="h264-1080">H264 1080p</SelectItem>
-                                    <SelectItem value="h265-240">H265 240p</SelectItem>
-                                    <SelectItem value="h265-360">H265 360p</SelectItem>
-                                    <SelectItem value="h265-480">H265 480p</SelectItem>
-                                    <SelectItem value="h265-720">H265 720p</SelectItem>
-                                    <SelectItem value="h265-1080">H265 1080p</SelectItem>
-                                    <SelectItem value="vp9-240">VP9 240p</SelectItem>
-                                    <SelectItem value="vp9-360">VP9 360p</SelectItem>
-                                    <SelectItem value="vp9-480">VP9 480p</SelectItem>
-                                    <SelectItem value="vp9-720">VP9 720p</SelectItem>
-                                    <SelectItem value="vp9-1080">VP9 1080p</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <div className="flex items-center gap-2 ml-auto lg:ml-0">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-9 px-3"
-                                    onClick={handleReset}
-                                >
-                                    <RotateCcw className="h-4 w-4 mr-2"/>
-                                    Reset
-                                </Button>
-                                <Button
-                                    variant="default"
-                                    size="sm"
-                                    className="h-9 px-4"
-                                    onClick={handleSearch}
-                                >
-                                    <Search className="h-4 w-4 mr-2"/>
-                                    Search
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
             {/* ═══ Tabs ═════════════════════════════════ */}
-            <Tabs value={activeTab} onValueChange={handleTabChange}>
-                <TabsList className="h-10 w-full justify-start bg-muted/50 p-1">
-                    {tabs.map((t) => (
-                        <TabsTrigger key={t.value} value={t.value}
-                                     className="text-sm px-4 h-8 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                            {t.label}
-                            <span className="ml-2 tabular-nums text-xs opacity-60">({t.count})</span>
-                        </TabsTrigger>
-                    ))}
-                </TabsList>
-            </Tabs>
+            <div className="flex flex-wrap gap-2 my-4">
+                {tabs.map((t) => (
+                    <Button
+                        key={t.value}
+                        variant={activeTab === t.value ? "default" : "outline"}
+                        size="sm"
+                        className={`rounded-full px-4 py-1.5 ${activeTab === t.value ? 'bg-primary text-white' : 'bg-white border border-gray-300 text-gray-700'}`}
+                        onClick={() => setActiveTab(t.value)}
+                    >
+                        {t.label}
+                        <span className="ml-2 tabular-nums text-xs opacity-60">({t.count})</span>
+                    </Button>
+                ))}
+            </div>
 
             {/* ═══ Task Table ═════════════════════════════ */}
             <Card>
@@ -1055,7 +1062,7 @@ export default function TranscodingStatus() {
                                 {filteredTasks.length} task{filteredTasks.length !== 1 ? 's' : ''} found
                             </CardDescription>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                             {selectedRows.length > 0 && (
                                 <div className="flex items-center gap-2">
                                     <span className="text-sm text-muted-foreground">
@@ -1084,7 +1091,7 @@ export default function TranscodingStatus() {
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline" size="sm">
                                         <Settings className="h-4 w-4 mr-2"/>
-                                        Actions
+                                        Options
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
@@ -1163,13 +1170,17 @@ export default function TranscodingStatus() {
                                         <TableHead
                                             className="w-[80px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">OUTPUT</TableHead>
                                         <TableHead
-                                            className="w-[180px] py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer hover:bg-muted/80"
+                                            className="w-[120px] py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer hover:bg-muted/80"
                                             onClick={() => handleSort('update_time' as any)}
                                         >
                                             <div className="flex items-center justify-end gap-1">
-                                                TIME / ACTION
+                                                TIME
                                                 <ArrowUpDown className="h-3 w-3"/>
                                             </div>
+                                        </TableHead>
+                                        <TableHead
+                                            className="w-[180px] py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                            ACTION
                                         </TableHead>
                                     </TableRow>
                                 </TableHeader>

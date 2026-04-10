@@ -145,7 +145,7 @@ func (h *MeHandler) UpdatePassword(c *gin.Context) {
 	// 	Fail(c, ErrInternal, "Failed to hash password")
 	// 	return
 	// }
-	// 
+	//
 	// if err := h.userUC.UpdatePassword(c.Request.Context(), claims.UserID, hashedPassword); err != nil {
 	// 	Fail(c, ErrInternal, err.Error())
 	// 	return
@@ -225,7 +225,12 @@ func (h *MeHandler) GetSubscriptions(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 
-	list, total, err := h.userUC.GetSubscriptions(c.Request.Context(), int(claims.UserID), page, pageSize)
+	list, total, err := h.userUC.GetSubscriptions(
+		c.Request.Context(),
+		int(claims.UserID),
+		page,
+		pageSize,
+	)
 	if err != nil {
 		Fail(c, ErrInternal, err.Error())
 		return
