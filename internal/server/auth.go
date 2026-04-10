@@ -13,13 +13,12 @@ import (
 	"log/slog"
 	"net/http"
 
-	"origadmin/application/origcms/internal/auth"
-	"origadmin/application/origcms/internal/svc-user/biz"
-	"origadmin/application/origcms/internal/svc-user/dto"
-
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/api/gen/v1/types"
+	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/svc-user/biz"
+	"origadmin/application/origcms/internal/svc-user/dto"
 )
 
 // AuthHandler handles /api/v1/auth/* routes.
@@ -93,7 +92,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	// Get role from entity (types.User doesn't have role field)
 	userRole := "user"
-	if entUser, entErr := h.uc.GetUserEntity(c.Request.Context(), u.Id); entErr == nil && entUser.Role != "" {
+	if entUser, entErr := h.uc.GetUserEntity(c.Request.Context(), u.Id); entErr == nil &&
+		entUser.Role != "" {
 		userRole = string(entUser.Role)
 	}
 
@@ -118,7 +118,10 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		Email:    u.Email,
 		IsStaff:  u.IsStaff,
 	}
-	c.JSON(http.StatusOK, TokenResponse{AccessToken: token, TokenType: "Bearer", ExpiresIn: 86400, User: loginUser})
+	c.JSON(
+		http.StatusOK,
+		TokenResponse{AccessToken: token, TokenType: "Bearer", ExpiresIn: 86400, User: loginUser},
+	)
 }
 
 // RegisterUser godoc: POST /api/v1/auth/register
@@ -173,7 +176,10 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 		Email:    created.Email,
 		IsStaff:  created.IsStaff,
 	}
-	c.JSON(http.StatusCreated, TokenResponse{AccessToken: token, TokenType: "Bearer", ExpiresIn: 86400, User: loginUser})
+	c.JSON(
+		http.StatusCreated,
+		TokenResponse{AccessToken: token, TokenType: "Bearer", ExpiresIn: 86400, User: loginUser},
+	)
 }
 
 // Me godoc: GET /api/v1/auth/me  (requires JWT)

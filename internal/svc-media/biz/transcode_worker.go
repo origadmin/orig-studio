@@ -156,7 +156,11 @@ func executeTranscodeJob(ctx context.Context, job TranscodeJob, logger *log.Help
 		return executeVideoHLSJob(ctx, job, logger)
 
 	default:
-		logger.Infof("skipping unsupported profile %s (extension=%s)", profile.Name, profile.Extension)
+		logger.Infof(
+			"skipping unsupported profile %s (extension=%s)",
+			profile.Name,
+			profile.Extension,
+		)
 		return nil
 	}
 }
@@ -177,7 +181,11 @@ func executeVideoHLSJob(ctx context.Context, job TranscodeJob, logger *log.Helpe
 	profile := job.Profile
 
 	if ffmpeg.IsSkipResolution(profile.Resolution) {
-		logger.Infof("skipping profile %s (resolution=%q is not transcodable)", profile.Name, profile.Resolution)
+		logger.Infof(
+			"skipping profile %s (resolution=%q is not transcodable)",
+			profile.Name,
+			profile.Resolution,
+		)
 		return fmt.Errorf("non-transcodable resolution: %s", profile.Resolution)
 	}
 
@@ -199,7 +207,12 @@ func executeVideoHLSJob(ctx context.Context, job TranscodeJob, logger *log.Helpe
 		return fmt.Errorf("direct HLS transcode failed for profile %s: %w", profile.Name, err)
 	}
 
-	logger.Infof("[HLS] complete: media=%d profile=%s → %s/index.m3u8", job.MediaID, profile.Name, job.OutputDir)
+	logger.Infof(
+		"[HLS] complete: media=%d profile=%s → %s/index.m3u8",
+		job.MediaID,
+		profile.Name,
+		job.OutputDir,
+	)
 	return nil
 }
 
@@ -261,7 +274,11 @@ func GenerateThumbnail(ctx context.Context, inputPath, outputDir, filename strin
 	err := ffmpeg.ExtractThumbnail(ctx, inputPath, thumbPath, "00:00:05")
 	if err != nil {
 		if err2 := ffmpeg.ExtractThumbnail(ctx, inputPath, thumbPath, "00:00:00"); err2 != nil {
-			return "", fmt.Errorf("thumbnail extraction failed: %w (fallback also failed: %v)", err, err2)
+			return "", fmt.Errorf(
+				"thumbnail extraction failed: %w (fallback also failed: %v)",
+				err,
+				err2,
+			)
 		}
 	}
 

@@ -155,7 +155,8 @@ func (h *AdminHandler) getAllEncodingTasks() gin.HandlerFunc {
 		if p, err := strconv.Atoi(c.DefaultQuery("page", "1")); err == nil && p >= 1 {
 			filter.Page = p
 		}
-		if ps, err := strconv.Atoi(c.DefaultQuery("page_size", "25")); err == nil && ps >= 1 && ps <= 100 {
+		if ps, err := strconv.Atoi(c.DefaultQuery("page_size", "25")); err == nil && ps >= 1 &&
+			ps <= 100 {
 			filter.PageSize = ps
 		}
 
