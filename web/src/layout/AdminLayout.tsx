@@ -96,13 +96,15 @@ const AdminLayout = () => {
         <div className="min-h-screen bg-background flex">
             {/* Sidebar */}
             <aside
-                className={`${sidebarCollapsed ? 'w-16' : 'w-64'} bg-slate-900 text-white flex-shrink-0 flex flex-col transition-all duration-300`}>
-                <div className="p-6 flex items-center">
-                    {!sidebarCollapsed && (
-                        <Link to="/admin" className="text-xl font-bold tracking-tight text-blue-400">
-                            OrigCMS Admin
-                        </Link>
-                    )}
+                className={`${sidebarCollapsed ? 'w-20' : 'w-64'} bg-slate-900 text-white flex-shrink-0 flex flex-col transition-all duration-300 ease-in-out`}>
+                <div className="p-6 flex items-center justify-center">
+                    <Link to="/admin" className={`flex items-center transition-all duration-300 ease-in-out ${sidebarCollapsed ? 'w-8 h-8' : 'w-full'}`}>
+                        {sidebarCollapsed ? (
+                            <div className="w-8 h-8 bg-blue-400 rounded flex items-center justify-center text-white font-bold">OC</div>
+                        ) : (
+                            <span className="text-xl font-bold tracking-tight text-blue-400">OrigCMS Admin</span>
+                        )}
+                    </Link>
                 </div>
                 <nav className="flex-grow px-4 space-y-2">
                     {menuItems.map((item) => (
@@ -130,7 +132,7 @@ const AdminLayout = () => {
             {/* Main Content */}
             <div className="flex-grow flex flex-col min-w-0">
                 <header className="h-16 bg-card border-b flex items-center justify-between px-8">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 -ml-4">
                         <button
                             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
                             className="flex flex-col items-center justify-center gap-1 p-1 text-muted-foreground hover:text-foreground transition-colors"
@@ -189,13 +191,13 @@ const NavItem = ({to, icon, label, exact = false, collapsed = false}: {
     return (
         <Link
             to={to}
-            className={`flex items-center ${collapsed ? 'justify-center px-2' : 'space-x-3 px-4'} py-3 rounded-lg transition-all ${
+            className={`flex items-center ${collapsed ? 'justify-center w-12 h-12 mx-auto' : 'space-x-3 px-4'} py-3 rounded-lg transition-all duration-300 ease-in-out ${
                 isActive ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
             }`}
             title={collapsed ? label : undefined}
         >
             {icon}
-            {!collapsed && <span className="font-medium text-sm">{label}</span>}
+            <span className={`font-medium text-sm transition-all duration-300 ease-in-out ${collapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>{label}</span>
         </Link>
     );
 };
