@@ -249,7 +249,7 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 
 	// Define final path (should be configurable)
 	ext := filepath.Ext(session.Filename)
-	finalPath := fmt.Sprintf("uploads/%s%s", uploadID, ext)
+	finalPath := fmt.Sprintf("%s%s", uploadID, ext)
 
 	if err := uc.storage.MergeParts(ctx, uploadID, session.TotalParts, finalPath); err != nil {
 		return nil, err

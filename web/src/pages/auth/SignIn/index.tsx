@@ -9,6 +9,7 @@ import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} f
 
 interface AuthResponse {
     access_token: string;
+    refresh_token?: string;
     token_type: string;
     expires_in: number;
     user: {
@@ -36,6 +37,7 @@ export default function SignInPage() {
             const res = await api.post<AuthResponse>("/auth/signin", {username, password});
             setAuth({
                 access_token: res.access_token,
+                refresh_token: res.refresh_token,
                 expires_in: res.expires_in,
                 token_type: res.token_type,
             });

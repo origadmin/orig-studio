@@ -146,14 +146,15 @@ func executeTranscodeJob(ctx context.Context, job TranscodeJob, logger *log.Help
 		}
 	}
 
+	var execErr error
 	switch {
 	case IsPreviewProfile(profile):
 		// GIF preview generation
-		return executePreviewJob(ctx, job, logger)
+		execErr = executePreviewJob(ctx, job, logger)
 
 	case IsVideoProfile(profile):
 		// Direct HLS transcoding (no intermediate MP4)
-		return executeVideoHLSJob(ctx, job, logger)
+		execErr = executeVideoHLSJob(ctx, job, logger)
 
 	default:
 		logger.Infof(
@@ -163,6 +164,24 @@ func executeTranscodeJob(ctx context.Context, job TranscodeJob, logger *log.Help
 		)
 		return nil
 	}
+
+	// If execution failed, update task status to failed
+	if execErr != nil && job.EncodingRepo != nil {
+		task, err := job.EncodingRepo.Get(ctx, int(job.TaskID))
+		if err == nil && task != nil {
+			task.Status = "failed"
+			task.ErrorMessage = execErr.Error()
+			task.Progress = 0
+			if _, err := job.EncodingRepo.Update(ctx, task); err != nil {
+				logger.Warnf("failed to update task %d status to failed: %v", job.TaskID, err)
+			}
+			if job.MediaUC != nil {
+				job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
+			}
+		}
+	}
+
+	return execErr
 }
 
 // IsVideoProfile returns true if this is a standard video transcoding profile.

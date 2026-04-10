@@ -711,7 +711,7 @@ export default function MediaPage() {
                             )}
 
                             {/* Variant list */}
-                            {variantData.variants.length > 0 && (
+                            {variantData.variants && variantData.variants.length > 0 && (
                                 <div className="space-y-1.5">
                                     <p className="text-sm font-medium flex items-center gap-2">
                                         各清晰度任务
