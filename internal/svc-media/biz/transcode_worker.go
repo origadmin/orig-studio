@@ -22,12 +22,15 @@ import (
 
 // TranscodeJob represents a single transcoding job for one profile of one media.
 type TranscodeJob struct {
-	MediaID   int64
-	TaskID    int64
-	Profile   *EncodeProfile
-	InputPath string // source video file path
-	OutputDir string // final output directory (e.g., hls/{uuid}/{profile_name}/)
-	UUID      string // media UUID for path construction
+	MediaID      int64
+	TaskID       int64
+	Profile      *EncodeProfile
+	InputPath    string // source video file path
+	OutputDir    string // final output directory (e.g., hls/{uuid}/{profile_name}/)
+	UUID         string // media UUID for path construction
+	EncodingRepo EncodingTaskRepo
+	MediaUC      *MediaUseCase
+	Logger       *log.Helper
 }
 
 // WorkerPoolStatus reports the current state of the worker pool.
@@ -75,6 +78,12 @@ func (w *goroutineWorker) Submit(ctx context.Context, job TranscodeJob) error {
 	w.pendingCount.Add(-1)
 	w.activeCount.Add(1)
 
+	// Use job's logger if available, otherwise use worker's logger
+	logger := w.logger
+	if job.Logger != nil {
+		logger = job.Logger
+	}
+
 	go func() {
 		defer func() {
 			w.activeCount.Add(-1)
@@ -84,8 +93,8 @@ func (w *goroutineWorker) Submit(ctx context.Context, job TranscodeJob) error {
 		jobCtx, cancel := context.WithTimeout(ctx, w.jobTimeout)
 		defer cancel()
 
-		if err := executeTranscodeJob(jobCtx, job, w.logger); err != nil {
-			w.logger.Errorf("transcode job failed: media=%d profile=%s err=%v",
+		if err := executeTranscodeJob(jobCtx, job, logger); err != nil {
+			logger.Errorf("transcode job failed: media=%d profile=%s err=%v",
 				job.MediaID, job.Profile.Name, err)
 		}
 	}()
@@ -121,6 +130,21 @@ func (w *goroutineWorker) Shutdown(ctx context.Context) error {
 // For preview/GIF profile: generates animated GIF preview into previews/{uuid}.gif.
 func executeTranscodeJob(ctx context.Context, job TranscodeJob, logger *log.Helper) error {
 	profile := job.Profile
+
+	// Update task status to processing when we actually start executing
+	if job.EncodingRepo != nil {
+		task, err := job.EncodingRepo.Get(ctx, int(job.TaskID))
+		if err == nil && task != nil {
+			task.Status = "processing"
+			task.Progress = 10
+			if _, err := job.EncodingRepo.Update(ctx, task); err != nil {
+				logger.Warnf("failed to update task %d status: %v", job.TaskID, err)
+			}
+			if job.MediaUC != nil {
+				job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
+			}
+		}
+	}
 
 	switch {
 	case IsPreviewProfile(profile):

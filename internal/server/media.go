@@ -136,39 +136,40 @@ func (h *MediaHandler) Register(group *gin.RouterGroup) {
 		slog.Warn("failed to create upload directory", "err", err)
 	}
 
-	media := group.Group("/medias")
+	// ================================
+	// 1. 独立的固定路径 - 不会与可变路径冲突
+	// ================================
+
+	// Media 上传
+	group.POST("/medias/upload", JWTMiddleware(h.jwtMgr), h.uploadMedia())
+
+	// Media 列表
+	group.GET("/medias", h.listMedia())
+
+	// Encoding Profiles - 独立路径，避免与 /medias/:id 冲突
+	group.GET("/encoding/profiles", h.listEncodeProfiles())
+	group.GET("/encoding/profiles/:profile_id", h.getEncodeProfile())
+	group.POST("/encoding/profiles", JWTMiddleware(h.jwtMgr), h.createEncodeProfile())
+	group.PUT("/encoding/profiles/:profile_id", JWTMiddleware(h.jwtMgr), h.updateEncodeProfile())
+	group.DELETE("/encoding/profiles/:profile_id", JWTMiddleware(h.jwtMgr), h.deleteEncodeProfile())
+
+	// Transcoding & Encoding Status - 独立路径
+	group.GET("/encoding/status", h.getTranscodingStatus())
+	group.GET("/encoding/tasks", h.getEncodingTasksFlat())
+	group.GET("/encoding/events", h.transcodingEvents())
+	group.POST("/encoding/retry", JWTMiddleware(h.jwtMgr), h.retryTaskByID())
+	group.POST("/encoding/retry-all-failed", JWTMiddleware(h.jwtMgr), h.retryAllFailed())
+
+	// ================================
+	// 2. Media 资源路径 - 包含可变参数
+	// ================================
+	media := group.Group("/media")
 	{
-		// ================================
-		// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST
-		// ================================
-		// Upload
-		media.POST("/upload", JWTMiddleware(h.jwtMgr), h.uploadMedia())
+		// Media CRUD Operations
+		media.GET("/:id", h.getMedia())
+		media.PUT("/:id", JWTMiddleware(h.jwtMgr), h.updateMedia())
+		media.DELETE("/:id", JWTMiddleware(h.jwtMgr), h.deleteMedia())
 
-		// Encoding Profiles (Subgroup)
-		profiles := media.Group("/profiles")
-		{
-			profiles.GET("", h.listEncodeProfiles())
-			profiles.GET("/:profile_id", h.getEncodeProfile())
-			profiles.POST("", JWTMiddleware(h.jwtMgr), h.createEncodeProfile())
-			profiles.PUT("/:profile_id", JWTMiddleware(h.jwtMgr), h.updateEncodeProfile())
-			profiles.DELETE("/:profile_id", JWTMiddleware(h.jwtMgr), h.deleteEncodeProfile())
-		}
-
-		// Transcoding & Encoding Status
-		encoding := media.Group("/encoding")
-		{
-			encoding.GET("/status", h.getTranscodingStatus())
-			encoding.GET("/tasks", h.getEncodingTasksFlat())
-			encoding.POST("/retry", JWTMiddleware(h.jwtMgr), h.retryTaskByID())
-			encoding.POST("/retry-failed", JWTMiddleware(h.jwtMgr), h.retryAllFailed())
-		}
-
-		// Collection Route
-		media.GET("", h.listMedia())
-
-		// ================================
-		// 2. NESTED RESOURCE ROUTES (WITH :id) - MUST BE BEFORE MAIN :id ROUTES
-		// ================================
 		// Media Variants
 		media.GET("/:id/variants", h.getMediaVariants())
 
@@ -189,14 +190,6 @@ func (h *MediaHandler) Register(group *gin.RouterGroup) {
 		// Share
 		media.GET("/:id/shares", h.getShareUrl())
 		media.POST("/:id/shares", JWTMiddleware(h.jwtMgr), h.recordShare())
-
-		// ================================
-		// 3. MAIN RESOURCE PARAMETER ROUTES (WITH :id) - MUST BE LAST
-		// ================================
-		// Media CRUD Operations
-		media.GET("/:id", h.getMedia())
-		media.PUT("/:id", JWTMiddleware(h.jwtMgr), h.updateMedia())
-		media.DELETE("/:id", JWTMiddleware(h.jwtMgr), h.deleteMedia())
 	}
 }
 

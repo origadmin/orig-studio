@@ -13,10 +13,11 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/svc-user/biz"
 	"origadmin/application/origcms/internal/svc-user/dto"
+
+	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/api/gen/v1/types"
 )
@@ -35,16 +36,11 @@ func NewAuthHandler(uc *biz.UserUseCase, jwt *auth.Manager) *AuthHandler {
 func (h *AuthHandler) Register(group *gin.RouterGroup) {
 	authGroup := group.Group("/auth")
 	{
+		// Public auth routes
 		authGroup.POST("/signin", h.Login)
-		authGroup.POST("/signup", h.SignUp)
+		authGroup.POST("/signup", h.RegisterUser)
+		authGroup.POST("/refresh", h.RefreshToken)
 		authGroup.POST("/signout", h.Logout)
-
-		// Protected auth routes
-		protected := authGroup.Group("")
-		protected.Use(JWTMiddleware(h.jwt))
-		{
-			protected.GET("/me", h.Me)
-		}
 	}
 }
 
@@ -65,10 +61,10 @@ type RegisterRequest struct {
 // TokenResponse is the response body for successful auth.
 // Fields match the frontend Token interface in request.ts.
 type TokenResponse struct {
-	AccessToken string      `json:"access_token"`
-	TokenType   string      `json:"token_type"`
-	ExpiresIn   int64       `json:"expires_in"` // seconds, matches JWT TTL
-	User        *LoginUser  `json:"user"`
+	AccessToken string     `json:"access_token"`
+	TokenType   string     `json:"token_type"`
+	ExpiresIn   int64      `json:"expires_in"` // seconds, matches JWT TTL
+	User        *LoginUser `json:"user"`
 }
 
 // LoginUser 是登录响应中返回的用户信息，包含前端需要的 is_staff 字段
@@ -125,8 +121,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, TokenResponse{AccessToken: token, TokenType: "Bearer", ExpiresIn: 86400, User: loginUser})
 }
 
-// SignUp godoc: POST /api/v1/auth/signup
-func (h *AuthHandler) SignUp(c *gin.Context) {
+// RegisterUser godoc: POST /api/v1/auth/register
+func (h *AuthHandler) RegisterUser(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -196,6 +192,38 @@ func (h *AuthHandler) Me(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, u)
+}
+
+// RefreshToken godoc: POST /api/v1/auth/refresh
+func (h *AuthHandler) RefreshToken(c *gin.Context) {
+	var req struct {
+		RefreshToken string `json:"refresh_token" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Parse the refresh token to get claims
+	claims, err := h.jwt.Parse(req.RefreshToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid refresh token"})
+		return
+	}
+
+	// Generate new access token
+	token, err := h.jwt.Generate(claims.UserID, claims.Username, claims.IsStaff, claims.Role)
+	if err != nil {
+		slog.Error("failed to generate token", "err", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "token generation failed"})
+		return
+	}
+
+	c.JSON(http.StatusOK, TokenResponse{
+		AccessToken: token,
+		TokenType:   "Bearer",
+		ExpiresIn:   86400,
+	})
 }
 
 // Logout godoc: POST /api/v1/auth/logout (stateless: client discards token)

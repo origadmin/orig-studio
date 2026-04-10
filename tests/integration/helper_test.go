@@ -14,12 +14,14 @@ import (
 	"testing"
 	"time"
 
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/origadmin/toolkits/crypto/hash"
 	hashtypes "github.com/origadmin/toolkits/crypto/hash/types"
 
+	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/migrate"
@@ -225,7 +227,11 @@ func (ts *TestServer) createTestUsers(ctx context.Context, t *testing.T, userUC 
 
 	for _, u := range users {
 		hashedPassword, _ := userUC.HashPassword(u.password)
-		created, err := userUC.CreateUser(ctx, nil, hashedPassword)
+		created, err := userUC.CreateUser(ctx, &types.User{
+			Username: u.username,
+			Email:    u.username + "@example.com",
+			IsStaff:  u.isStaff,
+		}, hashedPassword)
 		if err != nil {
 			t.Fatalf("failed to create test user %s: %v", u.username, err)
 		}

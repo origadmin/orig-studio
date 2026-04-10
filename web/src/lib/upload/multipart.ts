@@ -95,23 +95,15 @@ async function uploadPart(
     data: Blob,
     signal?: AbortSignal,
 ): Promise<UploadPartResponse> {
-    const res = await fetch(
-        `${API_BASE_URL}/uploads/${uploadId}/parts/${partNumber}`,
-        {
-            method: 'POST',
-            headers: {
-                ...(getToken() ? {Authorization: `Bearer ${getToken()}`} : {}),
-                // Content-Type will be set automatically for blob
-            },
-            body: data,
-            signal,
-        },
-    );
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({error: `HTTP ${res.status}`}));
-        throw new Error(err.error || `Upload part failed: ${res.status}`);
-    }
-    return res.json();
+    // 使用 api.post 而不是直接 fetch，确保添加 /api/v1 前缀
+    const formData = new FormData();
+    formData.append('part', data);
+
+    return api.post<UploadPartResponse>(`/uploads/${uploadId}/parts/${partNumber}`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
 }
 
 // 查询已上传分片 (断点续传)

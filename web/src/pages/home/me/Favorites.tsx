@@ -24,7 +24,7 @@ const FavoritesPage = () => {
     });
 
     const deleteMutation = useMutation({
-        mutationFn: (mediaId: number) => favoriteApi.remove({media_id: mediaId.toString()}),
+        mutationFn: (mediaId: number) => favoriteApi.remove({media_id: mediaId?.toString() || ''}),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['favorites', user?.id]});
         }

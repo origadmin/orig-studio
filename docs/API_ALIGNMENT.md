@@ -10,16 +10,17 @@
 
 | 功能 | 前端路径 | 后端路径 | 状态 | 备注 |
 |------|---------|---------|------|------|
-| 媒体列表 | `/media` | `/medias` | ❌ 不匹配 | 前端需修改为复数形式 |
-| 媒体详情 | `/media/:id` | `/medias/:id` | ❌ 不匹配 | 前端需修改为复数形式 |
-| 媒体上传 | `/media/upload` | `/medias/upload` | ❌ 不匹配 | 前端需修改为复数形式 |
-| 媒体更新 | `/media/:id` | `/medias/:id` | ❌ 不匹配 | 前端需修改为复数形式 |
-| 媒体删除 | `/media/:id` | `/medias/:id` | ❌ 不匹配 | 前端需修改为复数形式 |
-| 点赞 | `/media/:id/like` | `/medias/:id/likes` | ❌ 不匹配 | 前端需修改为复数形式 |
-| 收藏 | `/media/:id/favorite` | `/medias/:id/favorites` | ❌ 不匹配 | 前端需修改为复数形式 |
-| 分享 | `/media/:id/share` | `/medias/:id/shares` | ❌ 不匹配 | 前端需修改为复数形式 |
-| 转码状态 | `/media/encoding/status` | `/medias/encoding/status` | ❌ 不匹配 | 前端需修改为复数形式 |
-| 转码任务 | `/media/encoding/tasks` | `/medias/encoding/tasks` | ❌ 不匹配 | 前端需修改为复数形式 |
+| 媒体列表 | `/media` | `/medias` | ⚠️ 部分匹配 | 前端需修改为 `/medias` |
+| 媒体上传 | `/media/upload` | `/medias/upload` | ⚠️ 部分匹配 | 前端需修改为 `/medias/upload` |
+| 媒体详情 | `/media/:id` | `/media/:id` | ✅ 匹配 | - |
+| 媒体更新 | `/media/:id` | `/media/:id` | ✅ 匹配 | - |
+| 媒体删除 | `/media/:id` | `/media/:id` | ✅ 匹配 | - |
+| 点赞 | `/media/:id/like` | `/media/:id/likes` | ⚠️ 部分匹配 | 前端需修改为 `/media/:id/likes` |
+| 收藏 | `/media/:id/favorite` | `/media/:id/favorites` | ⚠️ 部分匹配 | 前端需修改为 `/media/:id/favorites` |
+| 分享 | `/media/:id/share` | `/media/:id/shares` | ⚠️ 部分匹配 | 前端需修改为 `/media/:id/shares` |
+| 转码状态 | `/media/encoding/status` | `/encoding/status` | ❌ 不匹配 | 前端需修改为 `/encoding/status` |
+| 转码任务 | `/media/encoding/tasks` | `/encoding/tasks` | ❌ 不匹配 | 前端需修改为 `/encoding/tasks` |
+| 编码配置 | `/media/encoding/profiles` | `/encoding/profiles` | ❌ 不匹配 | 前端需修改为 `/encoding/profiles` |
 
 ### 1.2 通知相关 API
 

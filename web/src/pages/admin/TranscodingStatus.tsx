@@ -1,20 +1,21 @@
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  *
- * Transcoding Status Page — Flat task list
+ * Transcoding Status Page — Enhanced with better UI/UX
  *
  * Each row = one encoding task (one profile for one media).
  * Supports filtering by status and media_id (from URL param).
  */
 
-import {useEffect, useState, useCallback} from "react";
+import {useEffect, useState, useCallback, useMemo} from "react";
 import {useLocation, useNavigate} from "@tanstack/react-router";
-import {mediaApi} from "../../lib/api/media";
-import {getAccessToken, API_BASE_URL} from "../../lib/request";
+import {mediaApi, encodingApi} from "../../lib/api/media";
+import {API_BASE_URL} from "../../lib/request";
+import {useAuth} from "../../hooks/useAuth";
 import {useTranscoding} from "../../hooks/useTranscoding";
 import {Badge} from "../../components/ui/badge";
 import {Button} from "../../components/ui/button";
-import {Card, CardContent, CardHeader, CardTitle} from "../../components/ui/card";
+import {Card, CardContent, CardHeader, CardTitle, CardDescription} from "../../components/ui/card";
 import {Progress} from "../../components/ui/progress";
 import {Skeleton} from "../../components/ui/skeleton";
 import {
@@ -22,16 +23,30 @@ import {
     TableHead, TableHeader
 } from "../../components/ui/table";
 import {Tabs, TabsList, TabsTrigger} from "../../components/ui/tabs";
+import {Input} from "../../components/ui/input";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../../components/ui/select";
+import {Checkbox} from "../../components/ui/checkbox";
+import {Separator} from "../../components/ui/separator";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "../../components/ui/dropdown-menu";
 import {
     Film, ExternalLink, RotateCcw,
     Loader2, Radio, CheckCircle2,
-    Clock, XCircle, Video
+    Clock, XCircle, Video, Search,
+    Filter, MoreVertical, Trash2, Play,
+    Pause, Settings, ArrowUpDown, Download, AlertCircle
 } from "lucide-react";
 import {formatDate} from "../../lib/format";
 
 // ─── Types ─────────────────────────────────────────────
 
-type StatusFilter = "all" | "pending" | "success" | "skipped";
+type StatusFilter = "all" | "pending" | "processing" | "success" | "failed" | "skipped";
 
 interface EncodingTask {
     id: number;
@@ -73,10 +88,11 @@ const formatTime = (ts?: any): string => {
 // ─── Status helpers ───────────────────────────────────
 
 const statusMap: Record<string, { color: string; icon: typeof CheckCircle2; label: string }> = {
-    processing: {color: "blue", icon: Loader2, label: "转码中"},
-    pending: {color: "yellow", icon: Clock, label: "排队中"},
-    success: {color: "green", icon: CheckCircle2, label: "完成"},
-    skipped: {color: "red", icon: XCircle, label: "失败"},
+    processing: {color: "sky", icon: Loader2, label: "转码中"},
+    pending: {color: "amber", icon: Clock, label: "排队中"},
+    success: {color: "emerald", icon: CheckCircle2, label: "完成"},
+    skipped: {color: "rose", icon: AlertCircle, label: "跳过"},
+    failed: {color: "rose", icon: XCircle, label: "失败"},
 };
 
 function getStatus(s: string) {
@@ -99,11 +115,11 @@ function profileName(task: EncodingTask): string {
 // ─── Color map for status badges ──────────────────────
 
 const badgeStyle: Record<string, string> = {
-    blue: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800",
-    yellow: "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800",
-    green: "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800",
-    red: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800",
-    slate: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
+    sky: "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/30 dark:text-sky-400 dark:border-sky-800",
+    amber: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800",
+    emerald: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800",
+    rose: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-800",
+    slate: "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
 };
 
 // ─── Task Row Component ──────────────────────────────
@@ -112,111 +128,246 @@ function TaskRow({
                      task,
                      onRetry,
                      isRetrying,
+                     isSelected,
+                     onToggleSelect,
                  }: {
     task: EncodingTask;
     onRetry: () => void;
     isRetrying: boolean;
+    isSelected: boolean;
+    onToggleSelect: () => void;
 }) {
     const st = getStatus(task.status);
     const StIcon = st.icon;
+    const [showError, setShowError] = useState(false);
 
     const isProcessing = task.status === "processing";
     const isSkipped = task.status === "skipped";
+    const isFailed = task.status === "failed";
     const isSuccess = task.status === "success";
-    const canRetry = isSkipped;
+    const canRetry = isSkipped || isFailed;
 
     return (
-        <TableRow className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
-            {/* Media */}
-            <TableCell className="w-[220px]">
-                <a href={mediaLink(task.media_id)}
-                   className="group/media inline-flex items-center gap-2.5 text-sm font-medium text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400">
-                    <span
-                        className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 group-hover/media:bg-blue-50 dark:group-hover/media:bg-blue-950/30 transition-colors">
-                        <Video
-                            className="w-3.5 h-3.5 text-slate-400 group-hover/media:text-blue-500 transition-colors"/>
-                    </span>
-                    <div className="min-w-0">
-                        <span className="block truncate max-w-[140px]">#{task.media_id}</span>
-                    </div>
-                    <ExternalLink
-                        className="w-3 h-3 opacity-0 group-hover/media:opacity-100 text-blue-500 shrink-0 transition-opacity"/>
-                </a>
-            </TableCell>
-
-            {/* Profile */}
-            <TableCell className="w-[120px]">
-                <Badge variant="outline"
-                       className="font-mono text-[11px] px-2 py-0 h-6 border-dashed border-slate-300 dark:border-slate-600">
-                    {profileName(task)}
-                </Badge>
-            </TableCell>
-
-            {/* Status */}
-            <TableCell className="w-[100px]">
-                <span
-                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border whitespace-nowrap ${badgeStyle[st.color] ?? badgeStyle.slate}`}>
-                    <StIcon className="w-3 h-3 shrink-0"/>
-                    {st.label}
-                </span>
-            </TableCell>
-
-            {/* Detail: Progress / Error / Output */}
-            <TableCell className="min-w-[200px] max-w-[280px]">
-                {isProcessing && (
-                    <div className="flex items-center gap-3">
-                        <Progress value={task.progress} className="h-1.5 flex-1"/>
+        <>
+            <TableRow
+                className={`group hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors ${isSelected ? 'bg-muted/30' : ''}`}>
+                <TableCell className="w-[50px]">
+                    <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={onToggleSelect}
+                        aria-label={`Select task ${task.id}`}
+                    />
+                </TableCell>
+                {/* ENCODING */}
+                <TableCell className="w-[200px]">
+                    <a href={mediaLink(task.media_id)}
+                       className="group/media inline-flex items-center gap-2.5 text-sm font-medium text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400">
                         <span
-                            className="text-[11px] tabular-nums text-muted-foreground w-8 text-right">{task.progress}%</span>
-                    </div>
-                )}
-                {isSuccess && task.output_path && (
-                    <span
-                        className="text-[11px] text-emerald-600 dark:text-emerald-400 bg-emerald-50/80 dark:bg-emerald-950/20 px-2 py-1 rounded font-mono block truncate"
-                        title={task.output_path}>
-                        {task.output_path.split("/").pop() || task.output_path}
-                    </span>
-                )}
-                {isSkipped && task.error_message && (
-                    <div className="space-y-1">
-                        <span className="text-xs text-red-500 block truncate max-w-[260px]" title={task.error_message}>
-                            {task.error_message}
+                            className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 group-hover/media:bg-blue-50 dark:group-hover/media:bg-blue-950/30 transition-colors">
+                            <Video
+                                className="w-3.5 h-3.5 text-slate-400 group-hover/media:text-blue-500 transition-colors"/>
                         </span>
-                        {profileName(task) === 'preview' && (
-                            <span className="text-xs text-blue-500 block">
-                                Preview generation failed. This may be due to invalid input file or missing dependencies.
-                            </span>
-                        )}
-                    </div>
-                )}
-                {isSuccess && !task.output_path && (
-                    <span className="text-xs text-emerald-600">✓ Completed</span>
-                )}
-            </TableCell>
+                        <div className="min-w-0">
+                            <span className="block truncate max-w-[140px]">#{task.media_id}</span>
+                        </div>
+                        <ExternalLink
+                            className="w-3 h-3 opacity-0 group-hover/media:opacity-100 text-blue-500 shrink-0 transition-opacity"/>
+                    </a>
+                </TableCell>
 
-            {/* Time + Actions */}
-            <TableCell className="w-[180px]">
-                <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] text-muted-foreground tabular-nums whitespace-nowrap">
-                        {formatTime(task.update_time || task.created_at)}
-                    </span>
-                    {canRetry && (
-                        <Button variant="ghost" size="sm"
-                                className="h-7 text-[11px] px-2 text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-950/20 opacity-0 group-hover:opacity-100 transition-opacity"
-                                disabled={isRetrying}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onRetry();
-                                }}>
-                            {isRetrying
-                                ? <Loader2 className="w-3 h-3 animate-spin mr-1"/>
-                                : <RotateCcw className="w-3 h-3 mr-1"/>}
-                            重试
-                        </Button>
+                {/* PROFILE */}
+                <TableCell className="w-[120px]">
+                    <Badge variant="outline"
+                           className="font-mono text-[11px] px-2 py-0 h-6 border-dashed border-slate-300 dark:border-slate-600">
+                        {profileName(task)}
+                    </Badge>
+                </TableCell>
+
+                {/* PROGRESS */}
+                <TableCell className="w-[120px]">
+                    {isProcessing && (
+                        <div className="flex flex-col gap-1.5">
+                            <div className="flex items-center justify-between">
+                                <span
+                                    className="text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-tight">Processing</span>
+                                <span
+                                    className="text-[10px] tabular-nums font-bold text-slate-600 dark:text-slate-400">{task.progress}%</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-sky-100 dark:bg-sky-950/30 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-sky-500 transition-all duration-500 ease-out animate-pulse"
+                                    style={{width: `${task.progress}%`}}
+                                />
+                            </div>
+                        </div>
                     )}
-                </div>
-            </TableCell>
-        </TableRow>
+                    {isSuccess && (
+                        <div className="flex flex-col gap-1.5">
+                            <div className="flex items-center justify-between">
+                                <span
+                                    className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-tight">Completed</span>
+                                <span
+                                    className="text-[10px] tabular-nums font-bold text-emerald-600 dark:text-emerald-400">100%</span>
+                            </div>
+                            <div
+                                className="h-1.5 w-full bg-emerald-100 dark:bg-emerald-950/30 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-emerald-500"
+                                    style={{width: '100%'}}
+                                />
+                            </div>
+                        </div>
+                    )}
+                    {!isProcessing && !isSuccess && (
+                        <div className="flex flex-col gap-1.5 opacity-40">
+                            <div className="flex items-center justify-between">
+                                <span
+                                    className="text-[10px] font-bold uppercase tracking-tight">{task.status === 'pending' ? 'Queued' : 'Waiting'}</span>
+                                <span className="text-[10px] tabular-nums font-bold">0%</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"/>
+                        </div>
+                    )}
+                </TableCell>
+
+                {/* STATUS */}
+                <TableCell className="w-[120px]">
+                    <span
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border whitespace-nowrap ${badgeStyle[st.color] ?? badgeStyle.slate}`}>
+                        <StIcon className="w-3 h-3 shrink-0"/>
+                        {st.label}
+                    </span>
+                </TableCell>
+
+                {/* HAS FILE */}
+                <TableCell className="w-[80px]">
+                    {task.output_path ? (
+                        <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-200">
+                            Yes
+                        </Badge>
+                    ) : (
+                        <Badge variant="outline" className="text-muted-foreground">
+                            No
+                        </Badge>
+                    )}
+                </TableCell>
+
+                {/* Time + Actions */}
+                <TableCell className="w-[180px]">
+                    <div className="flex items-center justify-between gap-2">
+                        <span className="text-[11px] text-muted-foreground tabular-nums whitespace-nowrap">
+                            {formatTime(task.update_time || task.created_at)}
+                        </span>
+                        <div className="flex items-center gap-1">
+                            {canRetry && (
+                                <Button variant="ghost" size="sm"
+                                        className="h-7 text-[11px] px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/20 transition-all"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setShowError(!showError);
+                                        }}>
+                                    <AlertCircle className="w-3 h-3 mr-1"/>
+                                    {showError ? '收起' : '详情'}
+                                </Button>
+                            )}
+                            {canRetry && (
+                                <Button variant="ghost" size="sm"
+                                        className="h-7 text-[11px] px-2 text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-950/20 transition-all"
+                                        disabled={isRetrying}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onRetry();
+                                        }}>
+                                    {isRetrying
+                                        ? <Loader2 className="w-3 h-3 animate-spin mr-1"/>
+                                        : <RotateCcw className="w-3 h-3 mr-1"/>}
+                                    重试
+                                </Button>
+                            )}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7">
+                                        <MoreVertical className="h-4 w-4"/>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                    <DropdownMenuSeparator/>
+                                    {task.output_path && (
+                                        <DropdownMenuItem>
+                                            <Download className="h-4 w-4 mr-2"/>
+                                            Download Output
+                                        </DropdownMenuItem>
+                                    )}
+                                    <DropdownMenuItem className="text-destructive focus:text-destructive">
+                                        <Trash2 className="h-4 w-4 mr-2"/>
+                                        Delete Task
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    </div>
+                </TableCell>
+            </TableRow>
+            {/* Error message row */}
+            {showError && (isSkipped || isFailed) && task.error_message && (
+                <TableRow>
+                    <TableCell colSpan={8}
+                               className="bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-800">
+                        <div className="p-4">
+                            <div className="flex items-start gap-3">
+                                <div className="flex-shrink-0 mt-0.5">
+                                    <div
+                                        className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                                        <svg className="w-4 h-4 text-red-600 dark:text-red-400" fill="none"
+                                             viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                            {isFailed ? 'Encoding Failed' : 'Task Skipped'}
+                                        </h4>
+                                        <span
+                                            className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                                                isFailed
+                                                    ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                                                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                                            }`}>
+                                            {task.status}
+                                        </span>
+                                    </div>
+                                    <div className="bg-gray-900 dark:bg-black rounded-lg p-3 overflow-auto max-h-40">
+                                        <pre
+                                            className="text-xs font-mono text-gray-300 whitespace-pre-wrap break-words">
+                                            {task.error_message}
+                                        </pre>
+                                    </div>
+                                    {profileName(task) === 'preview' && (
+                                        <div
+                                            className="mt-3 flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                                            <svg
+                                                className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            <p className="text-xs text-blue-700 dark:text-blue-300">
+                                                Preview generation failed. This may be due to invalid input file or
+                                                missing dependencies.
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </TableCell>
+                </TableRow>
+            )}
+        </>
     );
 }
 
@@ -226,6 +377,7 @@ export default function TranscodingStatus() {
     const location = useLocation();
     const navigate = useNavigate();
     const urlMediaId = new URLSearchParams(location.search).get("media_id");
+    const {token, isAuthenticated} = useAuth();
 
     const [data, setData] = useState<EncodingTaskListResponse | null>(null);
     const [loading, setLoading] = useState(true);
@@ -233,12 +385,54 @@ export default function TranscodingStatus() {
     const [page, setPage] = useState(1);
     const [retryingTaskId, setRetryingTaskId] = useState<number | null>(null);
 
+    // Applied states (used for filtering/fetching)
+    // Initially empty string to show placeholder
+    const [searchQuery, setSearchQuery] = useState('');
+    const [profileFilter, setProfileFilter] = useState<string>('');
+    const [statusFilter, setStatusFilter] = useState<StatusFilter | ''>('');
+    const [chunkFilter, setChunkFilter] = useState<string>('');
+
+    // Pending states (used in the UI inputs)
+    const [pendingSearchQuery, setPendingSearchQuery] = useState('');
+    const [pendingProfileFilter, setPendingProfileFilter] = useState<string>('');
+    const [pendingStatusFilter, setPendingStatusFilter] = useState<StatusFilter | ''>('');
+    const [pendingChunkFilter, setPendingChunkFilter] = useState<string>('');
+
+    const [selectedRows, setSelectedRows] = useState<number[]>([]);
+    const [sortConfig, setSortConfig] = useState<{ key: keyof EncodingTask, direction: 'asc' | 'desc' } | null>(null);
+    const [totalStats, setTotalStats] = useState<{
+        total: number;
+        pending: number;
+        success: number;
+        failed: number;
+    }>({
+        total: 0,
+        pending: 0,
+        success: 0,
+        failed: 0,
+    });
+
     const {lastEvent, sseStatus} = useTranscoding(undefined);
 
-    const fetchTasks = useCallback(async (filter: StatusFilter, pageNum: number, mediaId?: string | null) => {
+    // Fetch total stats from /encoding/status endpoint
+    const fetchTotalStats = useCallback(async () => {
         try {
-            const response = await mediaApi.getEncodingTasks({
-                status: filter,
+            const response = await encodingApi.getStatus();
+            setTotalStats({
+                total: response.processing_count + response.pending_count + response.success_count + response.failed_count,
+                pending: response.pending_count,
+                success: response.success_count,
+                failed: response.failed_count
+            });
+        } catch (error) {
+            console.error("Failed to fetch total stats:", error);
+        }
+    }, []);
+
+    const fetchTasks = useCallback(async (filter: StatusFilter | '', pageNum: number, mediaId?: string | null) => {
+        try {
+            const response = await encodingApi.getTasks({
+                status: filter === '' ? 'all' : filter,
                 page: pageNum,
                 page_size: 25,
                 media_id: mediaId ? parseInt(mediaId, 10) : undefined,
@@ -251,49 +445,350 @@ export default function TranscodingStatus() {
         }
     }, []);
 
+    // Search and Reset handlers
+    const handleSearch = () => {
+        setSearchQuery(pendingSearchQuery);
+        setProfileFilter(pendingProfileFilter);
+        setStatusFilter(pendingStatusFilter);
+        setChunkFilter(pendingChunkFilter);
+        if (pendingStatusFilter !== '') {
+            setActiveTab(pendingStatusFilter as StatusFilter);
+        } else {
+            setActiveTab('all');
+        }
+        setPage(1);
+        setLoading(true);
+        fetchTasks(pendingStatusFilter, 1, urlMediaId);
+    };
+
+    const handleReset = () => {
+        setPendingSearchQuery('');
+        setPendingProfileFilter('');
+        setPendingStatusFilter('');
+        setPendingChunkFilter('');
+
+        setSearchQuery('');
+        setProfileFilter('');
+        setStatusFilter('');
+        setChunkFilter('');
+        setActiveTab('all');
+        setPage(1);
+        setLoading(true);
+        fetchTasks('', 1, urlMediaId);
+    };
+
+
+    // Fetch tasks on component mount
     useEffect(() => {
         setLoading(true);
-        fetchTasks(activeTab, page, urlMediaId);
-    }, [activeTab, page, urlMediaId, fetchTasks]);
+        fetchTasks(statusFilter, page, urlMediaId);
+    }, []);
 
-    // SSE-driven refresh
+    // Fetch total stats on component mount
+    useEffect(() => {
+        fetchTotalStats();
+        // Refresh total stats every 60 seconds
+        const interval = setInterval(fetchTotalStats, 60000);
+        return () => clearInterval(interval);
+    }, [fetchTotalStats]);
+
+
+    // SSE 事件处理 - 只更新变化的数据
     useEffect(() => {
         if (!lastEvent) return;
         if (urlMediaId && lastEvent.media_id !== parseInt(urlMediaId, 10)) return;
-        if (activeTab === "all" || activeTab === "pending") {
-            const debounce = setTimeout(() => fetchTasks(activeTab, page, urlMediaId), 500);
-            return () => clearTimeout(debounce);
+
+        // 优化：只更新变化的任务，而不是整个列表
+        setData(prev => {
+            if (!prev) return prev;
+
+            const updatedItems = prev.items.map(task => {
+                if (task.id === lastEvent.task_id) {
+                    return {
+                        ...task,
+                        status: lastEvent.status,
+                        progress: lastEvent.progress,
+                        update_time: new Date().toISOString()
+                    };
+                }
+                return task;
+            });
+
+            // 更新统计数据
+            const pendingCount = updatedItems.filter(t => t.status === 'pending').length;
+            const successCount = updatedItems.filter(t => t.status === 'success').length;
+            const failedCount = updatedItems.filter(t => t.status === 'failed' || t.status === 'skipped').length;
+            const processingCount = updatedItems.filter(t => t.status === 'processing').length;
+
+            return {
+                ...prev,
+                items: updatedItems,
+                pending_count: pendingCount,
+                success_count: successCount,
+                failed_count: failedCount,
+                processing_count: processingCount
+            };
+        });
+    }, [lastEvent, urlMediaId]);
+
+    // 智能轮询：只有当 SSE 断开时才进行轮询
+    useEffect(() => {
+        let interval: NodeJS.Timeout | null = null;
+
+        if (!sseStatus.connected) {
+            interval = setInterval(() => {
+                fetchTasks(statusFilter, page, urlMediaId);
+            }, 30000); // SSE 断开时每 30 秒轮询一次
         }
-    }, [lastEvent, activeTab, page, urlMediaId, fetchTasks]);
+
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [sseStatus.connected, statusFilter, page, urlMediaId, fetchTasks]);
+
+    // 筛选和排序逻辑
+    const filteredTasks = useMemo(() => {
+        if (!data?.items) return [];
+        let result = [...data.items];
+
+        // 搜索筛选
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            result = result.filter(t =>
+                t.media_id.toString().includes(query) ||
+                profileName(t).toLowerCase().includes(query) ||
+                t.status.toLowerCase().includes(query)
+            );
+        }
+
+        // 编码配置筛选
+        if (profileFilter !== '') {
+            result = result.filter(t => profileName(t).includes(profileFilter));
+        }
+
+        // 分块配置筛选
+        if (chunkFilter !== '') {
+            result = result.filter(t => profileName(t) === chunkFilter);
+        }
+
+        // 排序
+        if (sortConfig) {
+            result.sort((a, b) => {
+                const aVal = a[sortConfig.key];
+                const bVal = b[sortConfig.key];
+
+                if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        return result;
+    }, [data?.items, searchQuery, profileFilter, chunkFilter, sortConfig]);
+
+    // 获取所有可用的配置
+    const availableProfiles = useMemo(() => {
+        if (!data?.items) return [];
+        const profiles = new Set<string>();
+        data.items.forEach(t => {
+            const name = profileName(t);
+            if (name.includes('h264')) profiles.add('h264');
+            if (name.includes('h265')) profiles.add('h265');
+            if (name.includes('vp9')) profiles.add('vp9');
+            if (name.includes('preview')) profiles.add('preview');
+        });
+        return Array.from(profiles);
+    }, [data?.items]);
+
+    const handleSort = (key: keyof EncodingTask) => {
+        setSortConfig(current => {
+            if (current?.key === key) {
+                return {key, direction: current.direction === 'asc' ? 'desc' : 'asc'};
+            }
+            return {key, direction: 'asc'};
+        });
+    };
+
+    // 批量选择
+    const toggleSelectAll = () => {
+        if (selectedRows.length === filteredTasks.length) {
+            setSelectedRows([]);
+        } else {
+            setSelectedRows(filteredTasks.map(t => t.id));
+        }
+    };
+
+    const toggleSelectRow = (id: number) => {
+        setSelectedRows(prev =>
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        );
+    };
+
+    // 批量操作
+    const handleBatchRetry = async () => {
+        // 立即更新本地任务状态，提供更好的用户体验
+        setData(prev => {
+            if (!prev) return prev;
+
+            const updatedItems = prev.items.map(task => {
+                if (selectedRows.includes(task.id)) {
+                    return {
+                        ...task,
+                        status: "pending",
+                        progress: 0,
+                        update_time: new Date().toISOString()
+                    };
+                }
+                return task;
+            });
+
+            // 更新统计数据
+            const pendingCount = updatedItems.filter(t => t.status === 'pending').length;
+            const successCount = updatedItems.filter(t => t.status === 'success').length;
+            const failedCount = updatedItems.filter(t => t.status === 'failed' || t.status === 'skipped').length;
+            const processingCount = updatedItems.filter(t => t.status === 'processing').length;
+
+            return {
+                ...prev,
+                items: updatedItems,
+                pending_count: pendingCount,
+                success_count: successCount,
+                failed_count: failedCount,
+                processing_count: processingCount
+            };
+        });
+
+        for (const id of selectedRows) {
+            setRetryingTaskId(id);
+            try {
+                await encodingApi.retryTask(id);
+            } catch (err: any) {
+                console.error("Retry task failed:", err.message);
+                // 出错时恢复任务状态
+                setData(prev => {
+                    if (!prev) return prev;
+
+                    const updatedItems = prev.items.map(task => {
+                        if (task.id === id) {
+                            return {
+                                ...task,
+                                status: "failed",
+                                progress: 0,
+                                update_time: new Date().toISOString()
+                            };
+                        }
+                        return task;
+                    });
+
+                    // 更新统计数据
+                    const pendingCount = updatedItems.filter(t => t.status === 'pending').length;
+                    const successCount = updatedItems.filter(t => t.status === 'success').length;
+                    const failedCount = updatedItems.filter(t => t.status === 'failed' || t.status === 'skipped').length;
+                    const processingCount = updatedItems.filter(t => t.status === 'processing').length;
+
+                    return {
+                        ...prev,
+                        items: updatedItems,
+                        pending_count: pendingCount,
+                        success_count: successCount,
+                        failed_count: failedCount,
+                        processing_count: processingCount
+                    };
+                });
+            }
+        }
+        setRetryingTaskId(null);
+        setSelectedRows([]);
+        // 不再立即刷新，依赖 SSE 事件更新
+    };
 
     // Retry handler
     const handleRetryTask = async (taskId: number) => {
         setRetryingTaskId(taskId);
-        try {
-            const base = API_BASE_URL;
-            const token = getAccessToken();
-            const resp = await fetch(`${base}/media/retry?task_id=${taskId}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    ...(token ? {Authorization: `Bearer ${token}`} : {}),
-                },
+
+        // 立即更新本地任务状态，提供更好的用户体验
+        setData(prev => {
+            if (!prev) return prev;
+
+            const updatedItems = prev.items.map(task => {
+                if (task.id === taskId) {
+                    return {
+                        ...task,
+                        status: "pending",
+                        progress: 0,
+                        update_time: new Date().toISOString()
+                    };
+                }
+                return task;
             });
-            if (!resp.ok) {
-                const err = await resp.json();
-                throw new Error(err.error || "Retry failed");
-            }
-            setTimeout(() => fetchTasks(activeTab, page, urlMediaId), 1000);
+
+            // 更新统计数据
+            const pendingCount = updatedItems.filter(t => t.status === 'pending').length;
+            const successCount = updatedItems.filter(t => t.status === 'success').length;
+            const failedCount = updatedItems.filter(t => t.status === 'failed' || t.status === 'skipped').length;
+            const processingCount = updatedItems.filter(t => t.status === 'processing').length;
+
+            return {
+                ...prev,
+                items: updatedItems,
+                pending_count: pendingCount,
+                success_count: successCount,
+                failed_count: failedCount,
+                processing_count: processingCount
+            };
+        });
+        
+        try {
+            await encodingApi.retryTask(taskId);
+            // 不再立即刷新，依赖 SSE 事件更新
         } catch (err: any) {
             console.error("Retry task failed:", err.message);
+            // 出错时恢复任务状态
+            setData(prev => {
+                if (!prev) return prev;
+
+                const updatedItems = prev.items.map(task => {
+                    if (task.id === taskId) {
+                        return {
+                            ...task,
+                            status: "failed",
+                            progress: 0,
+                            update_time: new Date().toISOString()
+                        };
+                    }
+                    return task;
+                });
+
+                // 更新统计数据
+                const pendingCount = updatedItems.filter(t => t.status === 'pending').length;
+                const successCount = updatedItems.filter(t => t.status === 'success').length;
+                const failedCount = updatedItems.filter(t => t.status === 'failed' || t.status === 'skipped').length;
+                const processingCount = updatedItems.filter(t => t.status === 'processing').length;
+
+                return {
+                    ...prev,
+                    items: updatedItems,
+                    pending_count: pendingCount,
+                    success_count: successCount,
+                    failed_count: failedCount,
+                    processing_count: processingCount
+                };
+            });
         } finally {
             setRetryingTaskId(null);
         }
     };
 
     const handleTabChange = (value: string) => {
-        setActiveTab(value as StatusFilter);
+        const newStatus = value as StatusFilter;
+        setActiveTab(newStatus);
+        const filterVal = newStatus === 'all' ? '' : newStatus;
+        setPendingStatusFilter(filterVal);
+        setStatusFilter(filterVal);
         setPage(1);
+        setSelectedRows([]);
+        setLoading(true);
+        fetchTasks(filterVal, 1, urlMediaId);
     };
 
     const clearMediaFilter = () => {
@@ -310,42 +805,52 @@ export default function TranscodingStatus() {
         {value: "skipped", label: "失败", count: data?.failed_count ?? 0},
     ];
 
+    const totalPages = Math.ceil((data?.total_filtered ?? 0) / (data?.page_size ?? 25));
+
     // ─── Loading skeleton ─────────────────────────────
     if (loading && !data) {
         return (
-            <div className="space-y-4 p-4 md:p-6 max-w-6xl mx-auto">
+            <div className="space-y-4 p-4 md:p-6 max-w-7xl mx-auto">
                 <Skeleton className="h-7 w-48"/>
-                <Skeleton className="h-24 w-full rounded-xl"/>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    {[1, 2, 3, 4].map(i => (
+                        <Skeleton key={i} className="h-24 w-full rounded-xl"/>
+                    ))}
+                </div>
                 <Card><CardContent className="pt-4"><Skeleton className="h-48 w-full"/></CardContent></Card>
             </div>
         );
     }
 
-    const totalPages = Math.ceil((data?.total_filtered ?? 0) / (data?.page_size ?? 25));
-
     return (
-        <div className="space-y-4 p-4 md:p-6 max-w-6xl mx-auto">
-
+        <div className="space-y-4 p-4 md:p-6 max-w-7xl mx-auto">
             {/* ═══ Header ════════════════════════════════ */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div
+                className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6 border-slate-200 dark:border-slate-800">
                 <div>
-                    <h2 className="text-xl font-bold tracking-tight">Transcoding Tasks</h2>
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                        Monitor and manage all encoding tasks across media
+                    <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">Transcoding
+                        Status</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-2">
+                        <span className="inline-block w-2 h-2 rounded-full bg-sky-500 animate-pulse"/>
+                        Live monitoring of video processing workflows
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="gap-1.5 text-xs">
-                        <Radio
-                            className={`h-3 w-3 ${sseStatus.connected ? "text-green-500" : "text-muted-foreground"}`}/>
-                        {sseStatus.connected ? "Live" : "Offline"}
+                <div className="flex items-center gap-3">
+                    <Badge variant="outline"
+                           className={`gap-2 text-[11px] font-bold px-3 py-1 border-2 ${sseStatus.connected ? "text-emerald-500 border-emerald-100 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-900" : "text-slate-400 border-slate-100 bg-slate-50/50 dark:bg-slate-900/20 dark:border-slate-800"}`}>
+                        <div
+                            className={`w-1.5 h-1.5 rounded-full ${sseStatus.connected ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-300"}`}/>
+                        {sseStatus.connected ? "CONNECTED" : "DISCONNECTED"}
                     </Badge>
                     {urlMediaId && (
-                        <Badge variant="secondary" className="gap-1 text-xs">
+                        <Badge variant="secondary"
+                               className="gap-1.5 text-[11px] font-bold px-3 py-1 bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400 border border-sky-200 dark:border-sky-800">
                             <Film className="w-3 h-3"/>
-                            #{urlMediaId}
-                            <button onClick={clearMediaFilter} className="ml-1 hover:text-destructive leading-none"
-                                    title="Clear filter">×
+                            MEDIA ID: #{urlMediaId}
+                            <button onClick={clearMediaFilter}
+                                    className="ml-1 hover:bg-sky-200 dark:hover:bg-sky-900 rounded-full p-0.5 transition-colors"
+                                    title="Clear filter">
+                                <XCircle className="w-3 h-3"/>
                             </button>
                         </Badge>
                     )}
@@ -353,30 +858,188 @@ export default function TranscodingStatus() {
             </div>
 
             {/* ═══ Stats Cards ════════════════════════════ */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                {[
-                    {label: "Total", value: data?.total_filtered ?? 0, color: "text-slate-700 dark:text-slate-300"},
-                    {label: "Pending", value: data?.pending_count ?? 0, color: "text-amber-600 dark:text-amber-400"},
-                    {label: "Done", value: data?.success_count ?? 0, color: "text-emerald-600 dark:text-emerald-400"},
-                    {label: "Failed", value: data?.failed_count ?? 0, color: "text-red-600 dark:text-red-400"},
-                ].map((card) => (
-                    <div key={card.label} className="rounded-lg border bg-card p-3 flex items-center justify-between">
-                        <div>
-                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">{card.label}</p>
-                            <p className={`text-lg font-bold tabular-nums ${card.color}`}>{card.value}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {
+                    [
+                        {
+                            label: "Active Jobs",
+                            value: totalStats.total,
+                            color: "sky",
+                            icon: Video,
+                            desc: "Total tasks registered"
+                        },
+                        {
+                            label: "In Queue",
+                            value: totalStats.pending,
+                            color: "amber",
+                            icon: Clock,
+                            desc: "Tasks waiting for worker"
+                        },
+                        {
+                            label: "Completed",
+                            value: totalStats.success,
+                            color: "emerald",
+                            icon: CheckCircle2,
+                            desc: "Successfully finished"
+                        },
+                        {
+                            label: "Failed",
+                            value: totalStats.failed,
+                            color: "rose",
+                            icon: XCircle,
+                            desc: "Tasks requiring attention"
+                        },
+                    ].map((card, index) => (
+                        <Card key={card.label}
+                              className="relative overflow-hidden border-none shadow-sm bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
+                            <CardContent className="p-5">
+                                <div className="flex items-start justify-between">
+                                    <div className="space-y-1">
+                                        <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">{card.label}</p>
+                                        <h3 className={`text-3xl font-bold tabular-nums text-${card.color}-600 dark:text-${card.color}-400`}>{card.value}</h3>
+                                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{card.desc}</p>
+                                    </div>
+                                    <div
+                                        className={`p-2.5 rounded-xl bg-${card.color}-50 dark:bg-${card.color}-950/30 text-${card.color}-500 dark:text-${card.color}-400`}>
+                                        <card.icon className="h-6 w-6"/>
+                                    </div>
+                                </div>
+                                <div className={`absolute bottom-0 left-0 h-1 bg-${card.color}-500 w-full opacity-10`}/>
+                            </CardContent>
+                        </Card>
+                    ))
+                }
+            </div>
+
+            {/* ═══ Search and Filters ═══════════════════════ */}
+            <Card>
+                <CardContent className="pt-6">
+                    <div className="flex flex-col lg:flex-row gap-4">
+                        <div className="flex-1">
+                            <div className="relative">
+                                <Search
+                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                <Input
+                                    placeholder="Search tasks by media ID, profile, or status..."
+                                    value={pendingSearchQuery}
+                                    onChange={(e) => setPendingSearchQuery(e.target.value)}
+                                    className="pl-10 h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Select
+                                value={pendingProfileFilter}
+                                onValueChange={(val) => setPendingProfileFilter(val === 'all' ? '' : val)}
+                            >
+                                <SelectTrigger
+                                    className="w-[140px] h-9 focus:ring-1 focus:ring-ring focus:ring-offset-0">
+                                    <div className="flex items-center gap-2">
+                                        <Filter className="h-4 w-4"/>
+                                        <SelectValue placeholder="Profile"/>
+                                    </div>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all"
+                                                className="justify-center text-center font-medium opacity-70">
+                                        - All -
+                                    </SelectItem>
+                                    {availableProfiles.map(profile => (
+                                        <SelectItem key={profile} value={profile}>
+                                            {profile.toUpperCase()}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Select
+                                value={pendingStatusFilter}
+                                onValueChange={(val) => setPendingStatusFilter(val === 'all' ? '' : (val as StatusFilter))}
+                            >
+                                <SelectTrigger
+                                    className="w-[140px] h-9 focus:ring-1 focus:ring-ring focus:ring-offset-0">
+                                    <div className="flex items-center gap-2">
+                                        <Filter className="h-4 w-4"/>
+                                        <SelectValue placeholder="Status"/>
+                                    </div>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all"
+                                                className="justify-center text-center font-medium opacity-70">
+                                        - All -
+                                    </SelectItem>
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="processing">Processing</SelectItem>
+                                    <SelectItem value="success">Success</SelectItem>
+                                    <SelectItem value="failed">Failed</SelectItem>
+                                    <SelectItem value="skipped">Skipped</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Select
+                                value={pendingChunkFilter}
+                                onValueChange={(val) => setPendingChunkFilter(val === 'all' ? '' : val)}
+                            >
+                                <SelectTrigger
+                                    className="w-[140px] h-9 focus:ring-1 focus:ring-ring focus:ring-offset-0">
+                                    <div className="flex items-center gap-2">
+                                        <Filter className="h-4 w-4"/>
+                                        <SelectValue placeholder="Chunk"/>
+                                    </div>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all"
+                                                className="justify-center text-center font-medium opacity-70">
+                                        - All -
+                                    </SelectItem>
+                                    <SelectItem value="h264-240">H264 240p</SelectItem>
+                                    <SelectItem value="h264-360">H264 360p</SelectItem>
+                                    <SelectItem value="h264-480">H264 480p</SelectItem>
+                                    <SelectItem value="h264-720">H264 720p</SelectItem>
+                                    <SelectItem value="h264-1080">H264 1080p</SelectItem>
+                                    <SelectItem value="h265-240">H265 240p</SelectItem>
+                                    <SelectItem value="h265-360">H265 360p</SelectItem>
+                                    <SelectItem value="h265-480">H265 480p</SelectItem>
+                                    <SelectItem value="h265-720">H265 720p</SelectItem>
+                                    <SelectItem value="h265-1080">H265 1080p</SelectItem>
+                                    <SelectItem value="vp9-240">VP9 240p</SelectItem>
+                                    <SelectItem value="vp9-360">VP9 360p</SelectItem>
+                                    <SelectItem value="vp9-480">VP9 480p</SelectItem>
+                                    <SelectItem value="vp9-720">VP9 720p</SelectItem>
+                                    <SelectItem value="vp9-1080">VP9 1080p</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <div className="flex items-center gap-2 ml-auto lg:ml-0">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-9 px-3"
+                                    onClick={handleReset}
+                                >
+                                    <RotateCcw className="h-4 w-4 mr-2"/>
+                                    Reset
+                                </Button>
+                                <Button
+                                    variant="default"
+                                    size="sm"
+                                    className="h-9 px-4"
+                                    onClick={handleSearch}
+                                >
+                                    <Search className="h-4 w-4 mr-2"/>
+                                    Search
+                                </Button>
+                            </div>
                         </div>
                     </div>
-                ))}
-            </div>
+                </CardContent>
+            </Card>
 
             {/* ═══ Tabs ═════════════════════════════════ */}
             <Tabs value={activeTab} onValueChange={handleTabChange}>
-                <TabsList className="h-8 w-full justify-start bg-muted/50">
+                <TabsList className="h-10 w-full justify-start bg-muted/50 p-1">
                     {tabs.map((t) => (
                         <TabsTrigger key={t.value} value={t.value}
-                                     className="text-xs px-3 h-7 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                                     className="text-sm px-4 h-8 data-[state=active]:bg-background data-[state=active]:shadow-sm">
                             {t.label}
-                            <span className="ml-1.5 tabular-nums text-[11px] opacity-60">({t.count})</span>
+                            <span className="ml-2 tabular-nums text-xs opacity-60">({t.count})</span>
                         </TabsTrigger>
                     ))}
                 </TabsList>
@@ -384,40 +1047,145 @@ export default function TranscodingStatus() {
 
             {/* ═══ Task Table ═════════════════════════════ */}
             <Card>
-                <CardContent className="pt-4 pb-0">
-                    {!data?.items?.length ? (
-                        <div className="py-12 text-center">
-                            <Film className="w-10 h-10 mx-auto mb-2 opacity-15"/>
-                            <p className="text-sm text-muted-foreground">
-                                No tasks found{urlMediaId ? ` for Media #${urlMediaId}` : ""}
+                <CardHeader className="pb-3">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <CardTitle>Task List</CardTitle>
+                            <CardDescription>
+                                {filteredTasks.length} task{filteredTasks.length !== 1 ? 's' : ''} found
+                            </CardDescription>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {selectedRows.length > 0 && (
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-muted-foreground">
+                                        {selectedRows.length} selected
+                                    </span>
+                                    <Separator orientation="vertical" className="h-6"/>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleBatchRetry}
+                                    >
+                                        <RotateCcw className="h-4 w-4 mr-1"/>
+                                        Retry All
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setSelectedRows([])}
+                                    >
+                                        <XCircle className="h-4 w-4 mr-1"/>
+                                        Clear
+                                    </Button>
+                                </div>
+                            )}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="sm">
+                                        <Settings className="h-4 w-4 mr-2"/>
+                                        Actions
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Batch Actions</DropdownMenuLabel>
+                                    <DropdownMenuSeparator/>
+                                    <DropdownMenuItem>
+                                        <Download className="h-4 w-4 mr-2"/>
+                                        Export Tasks
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="px-0">
+                    {!filteredTasks?.length ? (
+                        <div className="py-16 text-center space-y-4">
+                            <Film className="w-16 h-16 mx-auto mb-4 opacity-15"/>
+                            <h3 className="text-lg font-medium">No transcoding tasks found</h3>
+                            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                                {urlMediaId
+                                    ? `No transcoding tasks found for Media #${urlMediaId}. Try uploading a new media file to start transcoding.`
+                                    : searchQuery || profileFilter !== ''
+                                        ? "No tasks match your search criteria. Try adjusting your filters."
+                                        : "No transcoding tasks found. Upload media files to generate encoding tasks."}
                             </p>
+                            {!urlMediaId && !searchQuery && profileFilter === '' && (
+                                <Button variant="default" size="sm" className="mt-2"
+                                        onClick={() => navigate('/admin/media')}>
+                                    <Video className="w-4 h-4 mr-2"/>
+                                    Go to Media Library
+                                </Button>
+                            )}
                         </div>
                     ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="border-b hover:bg-transparent">
-                                    <TableHead
-                                        className="w-[220px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Media</TableHead>
-                                    <TableHead
-                                        className="w-[120px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Profile</TableHead>
-                                    <TableHead
-                                        className="w-[100px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Status</TableHead>
-                                    <TableHead
-                                        className="py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Detail</TableHead>
-                                    <TableHead
-                                        className="w-[180px] py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Time
-                                        / Action</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {data.items.map((task) => (
-                                    <TaskRow key={task.id}
-                                             task={task}
-                                             onRetry={() => handleRetryTask(task.id)}
-                                             isRetrying={retryingTaskId === task.id}/>
-                                ))}
-                            </TableBody>
-                        </Table>
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="border-b hover:bg-transparent bg-muted/50">
+                                        <TableHead className="w-[50px]">
+                                            <Checkbox
+                                                checked={filteredTasks.length > 0 && selectedRows.length === filteredTasks.length}
+                                                onCheckedChange={toggleSelectAll}
+                                                aria-label="Select all"
+                                            />
+                                        </TableHead>
+                                        <TableHead
+                                            className="w-[200px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">MEDIA</TableHead>
+                                        <TableHead
+                                            className="w-[120px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer hover:bg-muted/80"
+                                            onClick={() => handleSort('profile_id')}
+                                        >
+                                            <div className="flex items-center gap-1">
+                                                PROFILE
+                                                <ArrowUpDown className="h-3 w-3"/>
+                                            </div>
+                                        </TableHead>
+                                        <TableHead
+                                            className="w-[120px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer hover:bg-muted/80"
+                                            onClick={() => handleSort('progress')}
+                                        >
+                                            <div className="flex items-center gap-1">
+                                                PROGRESS
+                                                <ArrowUpDown className="h-3 w-3"/>
+                                            </div>
+                                        </TableHead>
+                                        <TableHead
+                                            className="w-[120px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer hover:bg-muted/80"
+                                            onClick={() => handleSort('status')}
+                                        >
+                                            <div className="flex items-center gap-1">
+                                                STATUS
+                                                <ArrowUpDown className="h-3 w-3"/>
+                                            </div>
+                                        </TableHead>
+                                        <TableHead
+                                            className="w-[80px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">OUTPUT</TableHead>
+                                        <TableHead
+                                            className="w-[180px] py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer hover:bg-muted/80"
+                                            onClick={() => handleSort('update_time' as any)}
+                                        >
+                                            <div className="flex items-center justify-end gap-1">
+                                                TIME / ACTION
+                                                <ArrowUpDown className="h-3 w-3"/>
+                                            </div>
+                                        </TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {filteredTasks.map((task) => (
+                                        <TaskRow key={task.id}
+                                                 task={task}
+                                                 onRetry={() => handleRetryTask(task.id)}
+                                                 isRetrying={retryingTaskId === task.id}
+                                                 isSelected={selectedRows.includes(task.id)}
+                                                 onToggleSelect={() => toggleSelectRow(task.id)}
+                                        />
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
                     )}
                 </CardContent>
             </Card>
@@ -429,11 +1197,11 @@ export default function TranscodingStatus() {
                         Page {data.page} of {totalPages} · {data.total_filtered} total
                     </span>
                     <div className="flex gap-1.5">
-                        <Button variant="outline" size="sm" className="h-7 text-xs px-2"
+                        <Button variant="outline" size="sm" className="h-8 text-xs px-3"
                                 disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
-                            ← Prev
+                            ← Previous
                         </Button>
-                        <Button variant="outline" size="sm" className="h-7 text-xs px-2"
+                        <Button variant="outline" size="sm" className="h-8 text-xs px-3"
                                 disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>
                             Next →
                         </Button>

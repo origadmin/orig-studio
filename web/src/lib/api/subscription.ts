@@ -7,7 +7,7 @@ export interface SubscriptionStatus {
 }
 
 export interface SubscriptionListResponse {
-    list: {
+    items: {
         id: string;
         user_id: string;
         username: string;
@@ -37,3 +37,5 @@ export const subscriptionApi = {
     getFollowers: (params?: { page?: number; page_size?: number; keyword?: string }) =>
         api.get<SubscriptionListResponse>("/followers", params),
 };
+
+export default subscriptionApi;

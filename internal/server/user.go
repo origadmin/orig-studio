@@ -363,6 +363,35 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 			OK(c, gin.H{"user_id": userID, "stats": gin.H{}})
 		})
 
+		// User channels
+		users.GET("/:id/channels", func(c *gin.Context) {
+			id := c.Param("id")
+			// Handle "me" as special case
+			if id == "me" {
+				if _, ok := c.Get("claims"); !ok {
+					Fail(c, ErrUnauthorized, "unauthorized")
+					return
+				}
+			} else {
+				_, err := strconv.ParseInt(id, 10, 64)
+				if err != nil {
+					Fail(c, ErrBadRequest, "Invalid ID")
+					return
+				}
+			}
+
+			limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
+			page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+
+			// TODO: Implement ListUserChannels
+			OK(c, gin.H{
+				"items":     []interface{}{},
+				"total":     0,
+				"page":      page,
+				"page_size": limit,
+			})
+		})
+
 		// ================================
 		// 3. PARAMETER ROUTES (WITH :id) - MUST BE LAST
 		// ================================

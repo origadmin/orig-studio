@@ -26,6 +26,7 @@ type MediaEncodeRequest struct {
 	MediaID     int64  `json:"media_id"`
 	MediaPath   string `json:"media_path"`
 	ContentType string `json:"content_type"`
+	TaskID      *int   `json:"task_id,omitempty"` // 可选：只重试特定任务
 }
 
 // MediaEncodeEvent is the payload for progress/completion messages.
@@ -153,7 +154,7 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		}
 	}
 
-	// --- Step 3: Fetch active profiles and create encoding tasks ---
+	// --- Step 3: Fetch active profiles and get or create encoding tasks ---
 	profiles, err := h.profileRepo.ListActive(procCtx)
 	if err != nil {
 		return fmt.Errorf("list profiles: %w", err)
@@ -173,21 +174,80 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 
 	allProfiles := append(videoProfiles, previewProfiles...)
 
-	// Create tasks in DB for all applicable profiles
+	// Get existing tasks for this media
+	existingTasks, err := h.encodingRepo.ListByMedia(procCtx, mediaID)
+	if err != nil {
+		h.logger.Warnf("failed to get existing tasks for media %d: %v", mediaID, err)
+		existingTasks = nil
+	}
+
+	// Create a map of profile ID to existing task for quick lookup
+	existingTaskMap := make(map[int]*EncodingTask)
+	for _, t := range existingTasks {
+		existingTaskMap[t.ProfileId] = t
+	}
+
+	// Get or create tasks in DB for all applicable profiles
 	var tasks []*EncodingTask
-	for _, p := range allProfiles {
-		task := &EncodingTask{
-			MediaId:   mediaID,
-			ProfileId: p.Id,
-			Status:    "pending",
-			Progress:  0,
-		}
-		t, err := h.encodingRepo.Create(procCtx, task)
+
+	// 如果指定了 TaskID，说明是特定任务的重试
+	if req.TaskID != nil {
+		// 直接获取该任务，而不依赖 allProfiles (可能该 profile 已被设置为不活跃，但任务仍需处理)
+		existingTask, err := h.encodingRepo.Get(procCtx, *req.TaskID)
 		if err != nil {
-			h.logger.Warnf("failed to create encoding task for profile %s: %v", p.Name, err)
-			continue
+			return fmt.Errorf("get encoding task %d: %w", *req.TaskID, err)
 		}
-		tasks = append(tasks, t)
+
+		if existingTask.MediaId != mediaID {
+			return fmt.Errorf("task %d does not belong to media %d", *req.TaskID, mediaID)
+		}
+
+		// 重置任务状态为 pending
+		existingTask.Status = "pending"
+		existingTask.Progress = 0
+		existingTask.ErrorMessage = ""
+		if _, err := h.encodingRepo.Update(procCtx, existingTask); err != nil {
+			h.logger.Warnf("failed to reset task %d for retry: %v", existingTask.Id, err)
+		}
+
+		tasks = append(tasks, existingTask)
+		h.logger.Infof("processing specific task %d (media=%d)", existingTask.Id, mediaID)
+	} else {
+		// 没有指定 TaskID，处理所有需要处理的任务（初始上传或重试所有失败）
+		for _, p := range allProfiles {
+			// Check if there's an existing task for this profile
+			if existingTask, exists := existingTaskMap[p.Id]; exists {
+				// If task is already successful, skip it
+				if existingTask.Status == "success" {
+					h.logger.Infof("skipping already successful task %d for profile %s (media=%d)", existingTask.Id, p.Name, mediaID)
+					continue
+				}
+				// Only process tasks that are already in pending state (for retries)
+				// Do NOT reset other states - let them remain as is
+				if existingTask.Status == "pending" {
+					tasks = append(tasks, existingTask)
+					h.logger.Infof("processing pending task %d for profile %s (media=%d)", existingTask.Id, p.Name, mediaID)
+					continue
+				}
+				// For non-pending, non-success tasks, skip them
+				h.logger.Infof("skipping task %d with status %s for profile %s (media=%d)", existingTask.Id, existingTask.Status, p.Name, mediaID)
+				continue
+			}
+
+			// Create a new task if no existing task found (this is for initial upload)
+			task := &EncodingTask{
+				MediaId:   mediaID,
+				ProfileId: p.Id,
+				Status:    "pending",
+				Progress:  0,
+			}
+			t, err := h.encodingRepo.Create(procCtx, task)
+			if err != nil {
+				h.logger.Warnf("failed to create encoding task for profile %s: %v", p.Name, err)
+				continue
+			}
+			tasks = append(tasks, t)
+		}
 	}
 
 	if len(tasks) == 0 {
@@ -214,14 +274,6 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 			continue
 		}
 
-		// Mark task as processing
-		t.Status = "processing"
-		t.Progress = 10
-		if _, err := h.encodingRepo.Update(procCtx, t); err != nil {
-			h.logger.Warnf("failed to update task %d status: %v", t.Id, err)
-		}
-		h.mediaUC.Publish(mediaID, &EncodingEvent{MediaId: mediaID, Task: t})
-
 		// Determine output directory based on profile type
 		var outputDir string
 		if IsVideoProfile(profile) {
@@ -231,17 +283,22 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 			outputDir = hlsBaseDir // executePreviewJob will navigate up to previews/
 		}
 
+		// 创建局部变量，避免闭包问题
+		task := t
 		job := TranscodeJob{
-			MediaID:   mediaID,
-			TaskID:    int64(t.Id),
-			Profile:   profile,
-			InputPath: fullPath,
-			OutputDir: outputDir,
-			UUID:      mediaUUID,
+			MediaID:      mediaID,
+			TaskID:       int64(task.Id),
+			Profile:      profile,
+			InputPath:    fullPath,
+			OutputDir:    outputDir,
+			UUID:         mediaUUID,
+			EncodingRepo: h.encodingRepo,
+			MediaUC:      h.mediaUC,
+			Logger:       h.logger,
 		}
 
 		wg.Add(1)
-		go func(task *EncodingTask) {
+		go func() {
 			defer wg.Done()
 
 			result := transcodeResult{taskID: task.Id}
@@ -258,7 +315,7 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 			}
 
 			resultsCh <- result
-		}(t)
+		}()
 	}
 
 	// Close channel after all goroutines finish
@@ -267,26 +324,14 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		close(resultsCh)
 	}()
 
-	// --- Step 6: Collect results and determine final state ---
-	type taskOutcome struct {
-		task        *EncodingTask
-		variantInfo *ffmpeg.VariantInfo // only set for successful video profiles
-		isPreview   bool
-	}
-
-	var videoOutcomes []taskOutcome
-	var previewOutcomes []taskOutcome
-
+	// --- Step 6: Collect and update processing results ---
 	for result := range resultsCh {
 		t, _ := h.encodingRepo.Get(procCtx, result.taskID)
 		if t == nil {
 			continue
 		}
 
-		// Get profile info for this task
 		profile, _ := h.profileRepo.Get(procCtx, t.ProfileId)
-		outcome := taskOutcome{task: t, isPreview: IsPreviewProfile(profile)}
-
 		if result.err != nil {
 			t.Status = "failed"
 			t.ErrorMessage = result.err.Error()
@@ -294,30 +339,23 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		} else {
 			t.Status = "success"
 			t.Progress = 100
+			t.ErrorMessage = ""
 
-			if IsVideoProfile(profile) {
-				// Store HLS path: hls/{uuid}/{profile_name}/index.m3u8
-				relativePlaylist := fmt.Sprintf("%s/%s/index.m3u8", mediaUUID, profile.Name)
-				t.OutputPath = relativePlaylist
-
-				outcome.variantInfo = &ffmpeg.VariantInfo{
-					Path:       fmt.Sprintf("%s/index.m3u8", profile.Name), // relative within hlsBaseDir
-					Bandwidth:  estimateBandwidth(profile),
-					Resolution: ffmpeg.ResolutionToSize(profile.Resolution),
-					Name:       profile.Name,
+			if profile != nil {
+				if IsVideoProfile(profile) {
+					t.OutputPath = fmt.Sprintf("%s/%s/index.m3u8", mediaUUID, profile.Name)
+				} else if IsPreviewProfile(profile) {
+					t.OutputPath = fmt.Sprintf("previews/%s.gif", mediaUUID)
 				}
-			} else if IsPreviewProfile(profile) {
-				// Store GIF path: previews/{uuid}.gif
-				t.OutputPath = fmt.Sprintf("previews/%s.gif", mediaUUID)
 			}
 		}
 
 		if _, err := h.encodingRepo.Update(procCtx, t); err != nil {
 			h.logger.Warnf("failed to update task %d: %v", t.Id, err)
 		}
-		h.mediaUC.Publish(mediaID, &EncodingEvent{MediaId: mediaID, Task: t})
 
-		// Publish progress event
+		// Notify frontend of task change
+		h.mediaUC.Publish(mediaID, &EncodingEvent{MediaId: mediaID, Task: t})
 		h.publishEvent(ctx, &MediaEncodeEvent{
 			MediaID:  mediaID,
 			Task:     t,
@@ -325,66 +363,70 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 			Progress: t.Progress,
 			Error:    t.ErrorMessage,
 		})
-
-		if outcome.isPreview {
-			previewOutcomes = append(previewOutcomes, outcome)
-		} else {
-			videoOutcomes = append(videoOutcomes, outcome)
-		}
 	}
 
-	// --- Determine final status based on VIDEO tasks only ---
+	// --- Step 7: Consolidate overall media status based on ALL tasks ---
+	allTasks, err := h.encodingRepo.ListByMedia(procCtx, mediaID)
+	if err != nil {
+		return fmt.Errorf("failed to fetch all tasks for status update: %w", err)
+	}
+
 	videoSuccessCount := 0
 	videoFailedCount := 0
+	videoTotalCount := 0
 	var variantInfos []ffmpeg.VariantInfo
 
-	for _, o := range videoOutcomes {
-		if o.task.Status == "success" {
+	for _, t := range allTasks {
+		profile, _ := h.profileRepo.Get(procCtx, t.ProfileId)
+		if profile == nil || IsPreviewProfile(profile) {
+			continue
+		}
+
+		videoTotalCount++
+		if t.Status == "success" {
 			videoSuccessCount++
-			if o.variantInfo != nil {
-				variantInfos = append(variantInfos, *o.variantInfo)
-			}
-		} else {
+			variantInfos = append(variantInfos, ffmpeg.VariantInfo{
+				Path:       fmt.Sprintf("%s/index.m3u8", profile.Name),
+				Bandwidth:  estimateBandwidth(profile),
+				Resolution: ffmpeg.ResolutionToSize(profile.Resolution),
+				Name:       profile.Name,
+			})
+		} else if t.Status == "failed" {
 			videoFailedCount++
 		}
 	}
 
+	// Update overall media encoding status
 	switch {
-	case len(videoOutcomes) == 0:
-		// No video profiles at all (only preview?) — treat as success
+	case videoTotalCount == 0:
+		media.EncodingStatus = "success" // No video to process
+	case videoSuccessCount == videoTotalCount:
 		media.EncodingStatus = "success"
-	case videoSuccessCount == len(videoOutcomes):
-		// All video tasks succeeded
-		media.EncodingStatus = "success"
-	case videoSuccessCount > 0 && videoFailedCount > 0:
-		// Partial: some succeeded, some failed — content is partially playable
+	case videoSuccessCount > 0:
 		media.EncodingStatus = "partial"
 	default:
-		// All video tasks failed
 		media.EncodingStatus = "failed"
 	}
 
-	// --- Generate master playlist if we have successful video variants ---
+	// Regenerate master playlist if we have any successful variants
 	if len(variantInfos) > 0 {
 		masterRelPath := fmt.Sprintf("hls/%s/master.m3u8", mediaUUID)
 		if _, err := GenerateMasterPlaylist(hlsBaseDir, variantInfos); err != nil {
-			h.logger.Errorf("master playlist generation failed for media %d: %v", mediaID, err)
-			// Don't change status — variants are still individually playable
+			h.logger.Errorf("master playlist generation failed: %v", err)
 		} else {
 			media.HlsFile = masterRelPath
-			h.logger.Infof("HLS master ready: media=%d → %s", mediaID, masterRelPath)
 		}
 	} else if videoFailedCount > 0 && videoSuccessCount == 0 {
-		// Clean up empty HLS directory
 		os.RemoveAll(hlsBaseDir)
+		media.HlsFile = ""
 	}
 
 	// Final media update
 	if _, err := h.mediaRepo.Update(procCtx, media); err != nil {
-		h.logger.Errorf("failed to update media %d final status: %v", mediaID, err)
+		h.logger.Errorf("failed to update media final status: %v", err)
 	}
 
-	// Publish completion event
+	// Final completion notification
 	h.publishEvent(ctx, &MediaEncodeEvent{
 		MediaID: mediaID,
 		Status:  media.EncodingStatus,
@@ -404,7 +446,7 @@ func (h *TranscodeHandler) waitForOutput(
 	result *transcodeResult,
 ) error {
 	var expectedFile string
-	maxAttempts := 120 // max 10 min wait per task (5s interval)
+	maxAttempts := 240 // max 20 min wait per task (5s interval)
 
 	if IsVideoProfile(job.Profile) {
 		expectedFile = filepath.Join(job.OutputDir, "index.m3u8")
@@ -414,7 +456,38 @@ func (h *TranscodeHandler) waitForOutput(
 		return nil // unknown type, nothing to wait for
 	}
 
+	// 等待任务开始执行（状态变为 processing）
+	maxWaitForStart := 120 // 最多等待 10 分钟（5s interval）
+	for i := 0; i < maxWaitForStart; i++ {
+		// 检查任务状态
+		currentTask, err := h.encodingRepo.Get(context.Background(), task.Id)
+		if err == nil && currentTask != nil && currentTask.Status == "processing" {
+			h.logger.Infof("task %d has started processing, beginning file wait", task.Id)
+			break
+		}
+		time.Sleep(5 * time.Second)
+		if i == maxWaitForStart-1 {
+			return fmt.Errorf("task %d did not start processing within timeout", task.Id)
+		}
+	}
+
+	// 初始延迟：给转码任务时间开始生成文件
+	time.Sleep(10 * time.Second)
+
+	// Update progress during waiting
 	for i := 0; i < maxAttempts; i++ {
+		// Calculate progress: 10% to 90% over maxAttempts
+		// Add a small random offset to make progress unique per task
+		offset := task.Id % 10
+		progress := 10 + (i * 80 / maxAttempts) + offset
+		if progress > 90 {
+			progress = 90
+		}
+		task.Progress = progress
+		if _, err := h.encodingRepo.Update(context.Background(), task); err != nil {
+			h.logger.Warnf("failed to update task %d progress: %v", task.Id, err)
+		}
+
 		time.Sleep(5 * time.Second)
 		if _, err := os.Stat(expectedFile); err == nil {
 			return nil // file exists

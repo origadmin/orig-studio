@@ -42,6 +42,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
 } from "@/components/ui/dialog";
 import {
     AlertDialog,
@@ -103,7 +104,7 @@ export default function MediaPage() {
     const updateMutation = useUpdateMedia();
     const deleteMutation = useDeleteMedia();
 
-    const mediaList = mediaData?.list || (Array.isArray(mediaData) ? mediaData : []) as Media[];
+    const mediaList = mediaData?.items || (Array.isArray(mediaData) ? mediaData : []) as Media[];
 
     const filteredMedia = mediaList.filter((item: Media) => {
         const matchesSearch = item.title?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -127,8 +128,8 @@ export default function MediaPage() {
         return `${minutes}:${String(secs).padStart(2, '0')}`;
     };
 
-    const formatViews = (count: number) => {
-        if (!count) return '0';
+    const formatViews = (count: number | undefined | null) => {
+        if (count === undefined || count === null || count === 0) return '0';
         if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
         if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
         return count.toString();
@@ -184,7 +185,7 @@ export default function MediaPage() {
     // Show transcoding variant details for a media
     const handleShowVariants = async (media: Media) => {
         try {
-            const data = await mediaApi.getVariants(media.id);
+            const data = await mediaApi.encoding.getVariants(media.id);
             setVariantData(data as unknown as MediaVariantSummary);
             setVariantDetailOpen(true);
         } catch (err: any) {
@@ -196,7 +197,7 @@ export default function MediaPage() {
     const handleRetryAllFailed = async (mediaId: number) => {
         setRetryingAllId(mediaId);
         try {
-            await mediaApi.retryAllFailed(mediaId);
+            await encodingApi.retryAllFailed(mediaId);
             // Refresh variant detail if open, or just refresh the list
             if (variantData?.media_id === mediaId) {
                 handleShowVariants({id: mediaId} as Media);
@@ -457,7 +458,7 @@ export default function MediaPage() {
                                         <TableCell
                                             className="text-sm text-slate-500">{media.edges?.user?.[0]?.nickname || media.edges?.user?.[0]?.username || '-'}</TableCell>
                                         <TableCell
-                                            className="text-sm text-slate-500">{formatDate(media.created_at)}</TableCell>
+                                            className="text-sm text-slate-500">{formatDate(media.create_time)}</TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
@@ -502,6 +503,9 @@ export default function MediaPage() {
                 <DialogContent className="max-w-4xl">
                     <DialogHeader>
                         <DialogTitle>上传媒体文件</DialogTitle>
+                        <DialogDescription>
+                            上传视频或音频文件到媒体库
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="py-4">
                         <UploadComponent
@@ -520,6 +524,9 @@ export default function MediaPage() {
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>编辑媒体信息</DialogTitle>
+                        <DialogDescription>
+                            更新媒体文件的基本信息
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
@@ -591,6 +598,9 @@ export default function MediaPage() {
                                 </Badge>
                             )}
                         </DialogTitle>
+                        <DialogDescription>
+                            查看媒体文件的转码状态和详细信息
+                        </DialogDescription>
                     </DialogHeader>
 
                     {variantData && (

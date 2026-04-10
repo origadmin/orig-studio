@@ -2,7 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-import React from 'react';
+import React, {useState} from 'react';
 import {Outlet, Link, useRouterState} from '@tanstack/react-router';
 import {
     LayoutDashboard,
@@ -16,12 +16,18 @@ import {
     MessageSquare,
     PlayCircle,
     Cpu,
-    Activity
+    Activity,
+    ChevronLeft,
+    ChevronRight,
+    Home
 } from 'lucide-react';
 import {useTranslation} from 'react-i18next';
+import {Separator} from '@/components/ui/separator';
 
 const AdminLayout = () => {
     const {t} = useTranslation();
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const routerState = useRouterState();
 
     const menuItems = [
         {id: "dashboard", icon: LayoutDashboard, label: t('admin.dashboard'), path: "/admin"},
@@ -48,14 +54,61 @@ const AdminLayout = () => {
         {id: "settings", icon: Settings, label: t('admin.settings'), path: "/admin/settings"},
     ];
 
+    // 生成面包屑路径
+    const getBreadcrumbs = () => {
+        const path = routerState.location.pathname;
+        const breadcrumbs = [
+            {label: "首页", path: "/admin", icon: Home}
+        ];
+
+        if (path.startsWith("/admin/media")) {
+            breadcrumbs.push({label: "Media", path: "/admin/media"});
+        } else if (path.startsWith("/admin/transcoding/profiles")) {
+            breadcrumbs.push({label: "Media", path: "/admin/media"});
+            breadcrumbs.push({label: "Encode profiles", path: "/admin/transcoding/profiles"});
+        } else if (path.startsWith("/admin/transcoding/status")) {
+            breadcrumbs.push({label: "Media", path: "/admin/media"});
+            breadcrumbs.push({label: "Transcoding status", path: "/admin/transcoding/status"});
+        } else if (path.startsWith("/admin/users")) {
+            breadcrumbs.push({label: "Users", path: "/admin/users"});
+        } else if (path.startsWith("/admin/categories")) {
+            breadcrumbs.push({label: "Categories", path: "/admin/categories"});
+        } else if (path.startsWith("/admin/channels")) {
+            breadcrumbs.push({label: "Channels", path: "/admin/channels"});
+        } else if (path.startsWith("/admin/tags")) {
+            breadcrumbs.push({label: "Tags", path: "/admin/tags"});
+        } else if (path.startsWith("/admin/comments")) {
+            breadcrumbs.push({label: "Comments", path: "/admin/comments"});
+        } else if (path.startsWith("/admin/playlists")) {
+            breadcrumbs.push({label: "Playlists", path: "/admin/playlists"});
+        } else if (path.startsWith("/admin/content")) {
+            breadcrumbs.push({label: "Content", path: "/admin/content"});
+        } else if (path.startsWith("/admin/settings")) {
+            breadcrumbs.push({label: "Settings", path: "/admin/settings"});
+        }
+
+        return breadcrumbs;
+    };
+
+    const breadcrumbs = getBreadcrumbs();
+
     return (
         <div className="min-h-screen bg-background flex">
             {/* Sidebar */}
-            <aside className="w-64 bg-slate-900 text-white flex-shrink-0 flex flex-col">
-                <div className="p-6">
-                    <Link to="/admin" className="text-xl font-bold tracking-tight text-blue-400">
-                        OrigCMS Admin
-                    </Link>
+            <aside
+                className={`${sidebarCollapsed ? 'w-16' : 'w-64'} bg-slate-900 text-white flex-shrink-0 flex flex-col transition-all duration-300`}>
+                <div className="p-6 flex items-center justify-between">
+                    {!sidebarCollapsed && (
+                        <Link to="/admin" className="text-xl font-bold tracking-tight text-blue-400">
+                            OrigCMS Admin
+                        </Link>
+                    )}
+                    <button
+                        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                        className="text-slate-400 hover:text-white transition-colors"
+                    >
+                        {sidebarCollapsed ? <ChevronRight size={20}/> : <ChevronLeft size={20}/>}
+                    </button>
                 </div>
                 <nav className="flex-grow px-4 space-y-2">
                     {menuItems.map((item) => (
@@ -65,16 +118,17 @@ const AdminLayout = () => {
                             icon={<item.icon size={20}/>}
                             label={item.label}
                             exact={item.path === "/admin"}
+                            collapsed={sidebarCollapsed}
                         />
                     ))}
                 </nav>
                 <div className="p-6 border-t border-slate-800">
                     <Link
                         to="/"
-                        className="flex items-center space-x-3 text-slate-400 hover:text-white transition-colors"
+                        className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-3'} text-slate-400 hover:text-white transition-colors`}
                     >
                         <LogOut size={20}/>
-                        <span>Exit Admin</span>
+                        {!sidebarCollapsed && <span>Exit Admin</span>}
                     </Link>
                 </div>
             </aside>
@@ -82,7 +136,24 @@ const AdminLayout = () => {
             {/* Main Content */}
             <div className="flex-grow flex flex-col min-w-0">
                 <header className="h-16 bg-card border-b flex items-center justify-between px-8">
-                    <h2 className="text-lg font-semibold text-foreground">Backstage Control</h2>
+                    <div className="flex items-center gap-2">
+                        {breadcrumbs.map((crumb, index) => (
+                            <React.Fragment key={crumb.path}>
+                                {index > 0 && <Separator orientation="vertical" className="h-4"/>}
+                                <Link
+                                    to={crumb.path}
+                                    className={`flex items-center gap-1 text-sm ${
+                                        index === breadcrumbs.length - 1
+                                            ? 'text-foreground font-medium'
+                                            : 'text-muted-foreground hover:text-foreground'
+                                    }`}
+                                >
+                                    {crumb.icon && <crumb.icon size={14}/>}
+                                    <span>{crumb.label}</span>
+                                </Link>
+                            </React.Fragment>
+                        ))}
+                    </div>
                     <div className="flex items-center space-x-4">
                         <div
                             className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">A
@@ -98,11 +169,12 @@ const AdminLayout = () => {
     );
 };
 
-const NavItem = ({to, icon, label, exact = false}: {
+const NavItem = ({to, icon, label, exact = false, collapsed = false}: {
     to: string;
     icon: React.ReactNode;
     label: string;
-    exact?: boolean
+    exact?: boolean;
+    collapsed?: boolean;
 }) => {
     const state = useRouterState();
     const isActive = exact
@@ -111,12 +183,13 @@ const NavItem = ({to, icon, label, exact = false}: {
     return (
         <Link
             to={to}
-            className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
+            className={`flex items-center ${collapsed ? 'justify-center px-2' : 'space-x-3 px-4'} py-3 rounded-lg transition-all ${
                 isActive ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
             }`}
+            title={collapsed ? label : undefined}
         >
             {icon}
-            <span className="font-medium text-sm">{label}</span>
+            {!collapsed && <span className="font-medium text-sm">{label}</span>}
         </Link>
     );
 };

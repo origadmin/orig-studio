@@ -24,6 +24,7 @@ func (h *SearchHandler) Register(group *gin.RouterGroup) {
 	search := group.Group("/search")
 	{
 		search.GET("", h.search)
+		search.GET("/suggestions", h.suggestions)
 	}
 }
 
@@ -68,4 +69,45 @@ func (h *SearchHandler) search(c *gin.Context) {
 
 func boolPtr(b bool) *bool {
 	return &b
+}
+
+// suggestions returns search suggestions based on query
+// GET /search/suggestions?q=keyword&limit=10
+func (h *SearchHandler) suggestions(c *gin.Context) {
+	keyword := c.Query("q")
+	limitStr := c.DefaultQuery("limit", "10")
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit < 1 || limit > 20 {
+		limit = 10
+	}
+
+	if keyword == "" {
+		c.JSON(http.StatusOK, gin.H{"suggestions": []string{}})
+		return
+	}
+
+	// Get media titles as suggestions
+	opts := &dto.MediaQueryOption{
+		QueryOption: repo.QueryOption{
+			Page:     1,
+			PageSize: int32(limit),
+			Keyword:  keyword,
+		},
+	}
+
+	medias, _, err := h.mediaUC.ListMedias(c.Request.Context(), opts)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"suggestions": []string{}})
+		return
+	}
+
+	suggestions := make([]string, 0, len(medias))
+	for _, m := range medias {
+		if m.Title != "" {
+			suggestions = append(suggestions, m.Title)
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"suggestions": suggestions})
 }

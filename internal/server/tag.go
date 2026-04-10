@@ -20,16 +20,10 @@ func NewTagHandler(uc *biz.CategoryTagUseCase) *TagHandler {
 func (h *TagHandler) Register(group *gin.RouterGroup) {
 	tags := group.Group("/tags")
 	{
+		// ================================  
+		// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST
+		// ================================
 		tags.GET("", h.listTags())
-		tags.GET("/:id", func(c *gin.Context) {
-			_, _ = strconv.Atoi(c.Param("id"))
-			// UseCase GetTag implementation needed?
-			c.JSON(http.StatusNotImplemented, gin.H{"error": "not implemented in UseCase"})
-		})
-
-		// GET /tags/:tag_id/media — list media by tag
-		tags.GET("/:id/media", h.getMediaByTag())
-
 		tags.POST("", func(c *gin.Context) {
 			var input struct {
 				Title string `json:"title"`
@@ -48,6 +42,21 @@ func (h *TagHandler) Register(group *gin.RouterGroup) {
 			}
 
 			c.JSON(http.StatusCreated, t)
+		})
+
+		// ================================  
+		// 2. NESTED RESOURCE ROUTES (WITH :id) - MUST BE BEFORE MAIN :id ROUTES
+		// ================================
+		// GET /tags/:tag_id/media — list media by tag
+		tags.GET("/:id/media", h.getMediaByTag())
+
+		// ================================  
+		// 3. MAIN RESOURCE PARAMETER ROUTES (WITH :id) - MUST BE LAST
+		// ================================
+		tags.GET("/:id", func(c *gin.Context) {
+			_, _ = strconv.Atoi(c.Param("id"))
+			// UseCase GetTag implementation needed?
+			c.JSON(http.StatusNotImplemented, gin.H{"error": "not implemented in UseCase"})
 		})
 
 		tags.DELETE("/:id", func(c *gin.Context) {

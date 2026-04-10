@@ -56,7 +56,7 @@ export function MediaEditDialog({open, onOpenChange, media, onSuccess}: MediaEdi
         setLoading(true);
         try {
             const tags = formData.tags.split(',').map(t => t.trim()).filter(Boolean);
-            await mediaApi.update(media.id.toString(), {
+            await mediaApi.update(media.id?.toString() || '', {
                 title: formData.title,
                 description: formData.description,
                 tags,

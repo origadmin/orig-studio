@@ -39,7 +39,7 @@ const MyVideos = () => {
 
     const handleDelete = async (id: number) => {
         if (window.confirm('确定要删除这个视频吗？')) {
-            await deleteMutation.mutateAsync(id.toString());
+            await deleteMutation.mutateAsync(id?.toString() || '');
             // 检查当前页面是否还有数据
             if (mediaList.length === 1) {
                 if (page > 1) {
@@ -115,7 +115,7 @@ const MyVideos = () => {
                                 <div
                                     className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                     <Button size="sm" variant="secondary" className="h-8 w-8 p-0 rounded-full" asChild>
-                                        <Link to="/watch" search={{v: item.id.toString()}}>
+                                        <Link to="/watch" search={{v: item.id?.toString() || ''}}>
                                             <ExternalLink className="w-4 h-4"/>
                                         </Link>
                                     </Button>

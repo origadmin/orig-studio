@@ -1,28 +1,49 @@
 import React, {useState, useEffect} from 'react';
 import {Button} from '@/components/ui/button';
-import {UserPlus} from 'lucide-react';
+import {UserPlus, UserCheck, Loader2} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
-import {subscriptionApi} from '../../lib/api';
+import {subscriptionApi} from '@/lib/api/subscription';
+import {useAuth} from '@/hooks/useAuth';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 
 interface SubscribeButtonProps {
     userId: string;
     initialSubscriberCount?: number;
     className?: string;
+    size?: 'sm' | 'default' | 'lg';
+    variant?: 'default' | 'outline';
 }
 
 const SubscribeButton: React.FC<SubscribeButtonProps> = ({
                                                              userId,
                                                              initialSubscriberCount = 0,
-                                                             className = ''
+                                                             className = '',
+                                                             size = 'default',
+                                                             variant = 'default'
                                                          }) => {
     const {t} = useTranslation();
+    const {isAuthenticated, user} = useAuth();
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [subscriberCount, setSubscriberCount] = useState(initialSubscriberCount);
     const [loading, setLoading] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
+    const [showLoginDialog, setShowLoginDialog] = useState(false);
+
+    // 检查是否是当前用户自己
+    const isSelf = user?.id === userId;
 
     useEffect(() => {
         const fetchStatus = async () => {
+            if (!isAuthenticated || isSelf) {
+                setInitialLoading(false);
+                return;
+            }
             try {
                 const response = await subscriptionApi.getStatus(userId);
                 setIsSubscribed(response.is_subscribed);
@@ -36,9 +57,18 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
             }
         };
         fetchStatus();
-    }, [userId]);
+    }, [userId, isAuthenticated, isSelf]);
 
     const handleSubscribe = async () => {
+        if (!isAuthenticated) {
+            setShowLoginDialog(true);
+            return;
+        }
+
+        if (isSelf) {
+            return; // 不能订阅自己
+        }
+
         try {
             setLoading(true);
             if (isSubscribed) {
@@ -59,33 +89,88 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
 
     if (initialLoading) {
         return (
-            <Button disabled className={className}>
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"/>
+            <Button
+                disabled
+                size={size}
+                variant="outline"
+                className={className}
+            >
+                <Loader2 className="w-4 h-4 animate-spin mr-2"/>
                 {t('common.loading')}
             </Button>
         );
     }
 
+    // 如果是自己，显示编辑按钮或不显示
+    if (isSelf) {
+        return (
+            <Button
+                size={size}
+                variant="outline"
+                className={className}
+                disabled
+            >
+                <UserCheck className="w-4 h-4 mr-2"/>
+                {t('common.you') || 'You'}
+            </Button>
+        );
+    }
+
+    const buttonVariant = isSubscribed ? 'outline' : 'default';
+    const buttonClass = isSubscribed
+        ? 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+        : 'bg-red-600 hover:bg-red-700 text-white';
+
     return (
-        <Button
-            onClick={handleSubscribe}
-            disabled={loading}
-            className={`${className} ${isSubscribed ? 'bg-gray-800 hover:bg-gray-700' : 'bg-red-600 hover:bg-red-700'}`}
-        >
-            {loading ? (
-                <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"/>
-                    {t('common.loading')}
-                </>
-            ) : isSubscribed ? (
-                <>
-                    <UserPlus className="w-4 h-4 mr-2"/>
-                    {t('common.subscribed')}
-                </>
-            ) : (
-                t('common.subscribe')
-            )}
-        </Button>
+        <>
+            <Button
+                onClick={handleSubscribe}
+                disabled={loading}
+                size={size}
+                variant={buttonVariant}
+                className={`${className} ${buttonClass}`}
+            >
+                {loading ? (
+                    <>
+                        <Loader2 className="w-4 h-4 animate-spin mr-2"/>
+                        {t('common.loading')}
+                    </>
+                ) : isSubscribed ? (
+                    <>
+                        <UserCheck className="w-4 h-4 mr-2"/>
+                        {t('common.subscribed')}
+                    </>
+                ) : (
+                    <>
+                        <UserPlus className="w-4 h-4 mr-2"/>
+                        {t('common.subscribe')}
+                    </>
+                )}
+            </Button>
+
+            {/* Login Dialog */}
+            <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('auth.loginRequired') || 'Login Required'}</DialogTitle>
+                        <DialogDescription>
+                            {t('auth.loginToSubscribe') || 'Please login to subscribe to this channel.'}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-end gap-3 mt-4">
+                        <Button variant="outline" onClick={() => setShowLoginDialog(false)}>
+                            {t('common.cancel')}
+                        </Button>
+                        <Button
+                            className="bg-emerald-600 hover:bg-emerald-700"
+                            onClick={() => window.location.href = '/auth/signin'}
+                        >
+                            {t('auth.signin')}
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </>
     );
 };
 
