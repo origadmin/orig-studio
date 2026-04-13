@@ -147,8 +147,6 @@ func SetupTestServer(t *testing.T) *TestServer {
 	commentHandler := server.NewCommentHandler(commentUC, jwtMgr)
 	playlistHandler := server.NewPlaylistHandler(playlistChannelUC, jwtMgr)
 	feedHandler := server.NewFeedHandler(feedUC)
-	favoriteHandler := server.NewFavoriteHandler(likeFavoriteUC, jwtMgr)
-	likeHandler := server.NewLikeHandler(likeFavoriteUC, jwtMgr)
 	notificationHandler := server.NewNotificationHandler(notificationUC, jwtMgr)
 	channelHandler := server.NewChannelHandler(playlistChannelUC, jwtMgr)
 	shareHandler := server.NewShareHandler(likeFavoriteUC, jwtMgr)
@@ -182,8 +180,6 @@ func SetupTestServer(t *testing.T) *TestServer {
 		commentHandler,
 		playlistHandler,
 		feedHandler,
-		favoriteHandler,
-		likeHandler,
 		notificationHandler,
 		channelHandler,
 		shareHandler,
