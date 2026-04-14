@@ -445,14 +445,14 @@ func (_u *UserUpdate) ClearLastLogin() *UserUpdate {
 }
 
 // AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_u *UserUpdate) AddMediumIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) AddMediumIDs(ids ...string) *UserUpdate {
 	_u.mutation.AddMediumIDs(ids...)
 	return _u
 }
 
 // AddMedia adds the "media" edges to the Media entity.
 func (_u *UserUpdate) AddMedia(v ...*Media) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -460,14 +460,14 @@ func (_u *UserUpdate) AddMedia(v ...*Media) *UserUpdate {
 }
 
 // AddChannelIDs adds the "channels" edge to the Channel entity by IDs.
-func (_u *UserUpdate) AddChannelIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) AddChannelIDs(ids ...string) *UserUpdate {
 	_u.mutation.AddChannelIDs(ids...)
 	return _u
 }
 
 // AddChannels adds the "channels" edges to the Channel entity.
 func (_u *UserUpdate) AddChannels(v ...*Channel) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -475,14 +475,14 @@ func (_u *UserUpdate) AddChannels(v ...*Channel) *UserUpdate {
 }
 
 // AddPlaylistIDs adds the "playlists" edge to the Playlist entity by IDs.
-func (_u *UserUpdate) AddPlaylistIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) AddPlaylistIDs(ids ...string) *UserUpdate {
 	_u.mutation.AddPlaylistIDs(ids...)
 	return _u
 }
 
 // AddPlaylists adds the "playlists" edges to the Playlist entity.
 func (_u *UserUpdate) AddPlaylists(v ...*Playlist) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -490,14 +490,14 @@ func (_u *UserUpdate) AddPlaylists(v ...*Playlist) *UserUpdate {
 }
 
 // AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
-func (_u *UserUpdate) AddCommentIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) AddCommentIDs(ids ...string) *UserUpdate {
 	_u.mutation.AddCommentIDs(ids...)
 	return _u
 }
 
 // AddComments adds the "comments" edges to the Comment entity.
 func (_u *UserUpdate) AddComments(v ...*Comment) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -520,14 +520,14 @@ func (_u *UserUpdate) AddNotifications(v ...*Notification) *UserUpdate {
 }
 
 // AddCategoryIDs adds the "categories" edge to the Category entity by IDs.
-func (_u *UserUpdate) AddCategoryIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) AddCategoryIDs(ids ...string) *UserUpdate {
 	_u.mutation.AddCategoryIDs(ids...)
 	return _u
 }
 
 // AddCategories adds the "categories" edges to the Category entity.
 func (_u *UserUpdate) AddCategories(v ...*Category) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -550,14 +550,14 @@ func (_u *UserUpdate) AddTags(v ...*Tag) *UserUpdate {
 }
 
 // AddFavoriteIDs adds the "favorites" edge to the Favorite entity by IDs.
-func (_u *UserUpdate) AddFavoriteIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) AddFavoriteIDs(ids ...string) *UserUpdate {
 	_u.mutation.AddFavoriteIDs(ids...)
 	return _u
 }
 
 // AddFavorites adds the "favorites" edges to the Favorite entity.
 func (_u *UserUpdate) AddFavorites(v ...*Favorite) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -565,14 +565,14 @@ func (_u *UserUpdate) AddFavorites(v ...*Favorite) *UserUpdate {
 }
 
 // AddLikeIDs adds the "likes" edge to the Like entity by IDs.
-func (_u *UserUpdate) AddLikeIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) AddLikeIDs(ids ...string) *UserUpdate {
 	_u.mutation.AddLikeIDs(ids...)
 	return _u
 }
 
 // AddLikes adds the "likes" edges to the Like entity.
 func (_u *UserUpdate) AddLikes(v ...*Like) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -580,14 +580,14 @@ func (_u *UserUpdate) AddLikes(v ...*Like) *UserUpdate {
 }
 
 // AddSubscriptionIDs adds the "subscriptions" edge to the Subscription entity by IDs.
-func (_u *UserUpdate) AddSubscriptionIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) AddSubscriptionIDs(ids ...string) *UserUpdate {
 	_u.mutation.AddSubscriptionIDs(ids...)
 	return _u
 }
 
 // AddSubscriptions adds the "subscriptions" edges to the Subscription entity.
 func (_u *UserUpdate) AddSubscriptions(v ...*Subscription) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -595,14 +595,14 @@ func (_u *UserUpdate) AddSubscriptions(v ...*Subscription) *UserUpdate {
 }
 
 // AddSubscriberIDs adds the "subscribers" edge to the Subscription entity by IDs.
-func (_u *UserUpdate) AddSubscriberIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) AddSubscriberIDs(ids ...string) *UserUpdate {
 	_u.mutation.AddSubscriberIDs(ids...)
 	return _u
 }
 
 // AddSubscribers adds the "subscribers" edges to the Subscription entity.
 func (_u *UserUpdate) AddSubscribers(v ...*Subscription) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -621,14 +621,14 @@ func (_u *UserUpdate) ClearMedia() *UserUpdate {
 }
 
 // RemoveMediumIDs removes the "media" edge to Media entities by IDs.
-func (_u *UserUpdate) RemoveMediumIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) RemoveMediumIDs(ids ...string) *UserUpdate {
 	_u.mutation.RemoveMediumIDs(ids...)
 	return _u
 }
 
 // RemoveMedia removes "media" edges to Media entities.
 func (_u *UserUpdate) RemoveMedia(v ...*Media) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -642,14 +642,14 @@ func (_u *UserUpdate) ClearChannels() *UserUpdate {
 }
 
 // RemoveChannelIDs removes the "channels" edge to Channel entities by IDs.
-func (_u *UserUpdate) RemoveChannelIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) RemoveChannelIDs(ids ...string) *UserUpdate {
 	_u.mutation.RemoveChannelIDs(ids...)
 	return _u
 }
 
 // RemoveChannels removes "channels" edges to Channel entities.
 func (_u *UserUpdate) RemoveChannels(v ...*Channel) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -663,14 +663,14 @@ func (_u *UserUpdate) ClearPlaylists() *UserUpdate {
 }
 
 // RemovePlaylistIDs removes the "playlists" edge to Playlist entities by IDs.
-func (_u *UserUpdate) RemovePlaylistIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) RemovePlaylistIDs(ids ...string) *UserUpdate {
 	_u.mutation.RemovePlaylistIDs(ids...)
 	return _u
 }
 
 // RemovePlaylists removes "playlists" edges to Playlist entities.
 func (_u *UserUpdate) RemovePlaylists(v ...*Playlist) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -684,14 +684,14 @@ func (_u *UserUpdate) ClearComments() *UserUpdate {
 }
 
 // RemoveCommentIDs removes the "comments" edge to Comment entities by IDs.
-func (_u *UserUpdate) RemoveCommentIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) RemoveCommentIDs(ids ...string) *UserUpdate {
 	_u.mutation.RemoveCommentIDs(ids...)
 	return _u
 }
 
 // RemoveComments removes "comments" edges to Comment entities.
 func (_u *UserUpdate) RemoveComments(v ...*Comment) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -726,14 +726,14 @@ func (_u *UserUpdate) ClearCategories() *UserUpdate {
 }
 
 // RemoveCategoryIDs removes the "categories" edge to Category entities by IDs.
-func (_u *UserUpdate) RemoveCategoryIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) RemoveCategoryIDs(ids ...string) *UserUpdate {
 	_u.mutation.RemoveCategoryIDs(ids...)
 	return _u
 }
 
 // RemoveCategories removes "categories" edges to Category entities.
 func (_u *UserUpdate) RemoveCategories(v ...*Category) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -768,14 +768,14 @@ func (_u *UserUpdate) ClearFavorites() *UserUpdate {
 }
 
 // RemoveFavoriteIDs removes the "favorites" edge to Favorite entities by IDs.
-func (_u *UserUpdate) RemoveFavoriteIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) RemoveFavoriteIDs(ids ...string) *UserUpdate {
 	_u.mutation.RemoveFavoriteIDs(ids...)
 	return _u
 }
 
 // RemoveFavorites removes "favorites" edges to Favorite entities.
 func (_u *UserUpdate) RemoveFavorites(v ...*Favorite) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -789,14 +789,14 @@ func (_u *UserUpdate) ClearLikes() *UserUpdate {
 }
 
 // RemoveLikeIDs removes the "likes" edge to Like entities by IDs.
-func (_u *UserUpdate) RemoveLikeIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) RemoveLikeIDs(ids ...string) *UserUpdate {
 	_u.mutation.RemoveLikeIDs(ids...)
 	return _u
 }
 
 // RemoveLikes removes "likes" edges to Like entities.
 func (_u *UserUpdate) RemoveLikes(v ...*Like) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -810,14 +810,14 @@ func (_u *UserUpdate) ClearSubscriptions() *UserUpdate {
 }
 
 // RemoveSubscriptionIDs removes the "subscriptions" edge to Subscription entities by IDs.
-func (_u *UserUpdate) RemoveSubscriptionIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) RemoveSubscriptionIDs(ids ...string) *UserUpdate {
 	_u.mutation.RemoveSubscriptionIDs(ids...)
 	return _u
 }
 
 // RemoveSubscriptions removes "subscriptions" edges to Subscription entities.
 func (_u *UserUpdate) RemoveSubscriptions(v ...*Subscription) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -831,14 +831,14 @@ func (_u *UserUpdate) ClearSubscribers() *UserUpdate {
 }
 
 // RemoveSubscriberIDs removes the "subscribers" edge to Subscription entities by IDs.
-func (_u *UserUpdate) RemoveSubscriberIDs(ids ...int) *UserUpdate {
+func (_u *UserUpdate) RemoveSubscriberIDs(ids ...string) *UserUpdate {
 	_u.mutation.RemoveSubscriberIDs(ids...)
 	return _u
 }
 
 // RemoveSubscribers removes "subscribers" edges to Subscription entities.
 func (_u *UserUpdate) RemoveSubscribers(v ...*Subscription) *UserUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -937,7 +937,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeString))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -1055,7 +1055,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1068,7 +1068,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1084,7 +1084,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1100,7 +1100,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.ChannelsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1113,7 +1113,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.ChannelsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1129,7 +1129,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.ChannelsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1145,7 +1145,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: user.PlaylistsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1158,7 +1158,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: user.PlaylistsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1174,7 +1174,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: user.PlaylistsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1190,7 +1190,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1203,7 +1203,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1219,7 +1219,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1280,7 +1280,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.CategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1293,7 +1293,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.CategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1309,7 +1309,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.CategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1370,7 +1370,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.FavoritesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1383,7 +1383,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.FavoritesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1399,7 +1399,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.FavoritesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1415,7 +1415,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.LikesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1428,7 +1428,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.LikesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1444,7 +1444,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.LikesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1460,7 +1460,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.SubscriptionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1473,7 +1473,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.SubscriptionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1489,7 +1489,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.SubscriptionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1505,7 +1505,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.SubscribersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1518,7 +1518,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.SubscribersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1534,7 +1534,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.SubscribersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1970,14 +1970,14 @@ func (_u *UserUpdateOne) ClearLastLogin() *UserUpdateOne {
 }
 
 // AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_u *UserUpdateOne) AddMediumIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) AddMediumIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.AddMediumIDs(ids...)
 	return _u
 }
 
 // AddMedia adds the "media" edges to the Media entity.
 func (_u *UserUpdateOne) AddMedia(v ...*Media) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -1985,14 +1985,14 @@ func (_u *UserUpdateOne) AddMedia(v ...*Media) *UserUpdateOne {
 }
 
 // AddChannelIDs adds the "channels" edge to the Channel entity by IDs.
-func (_u *UserUpdateOne) AddChannelIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) AddChannelIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.AddChannelIDs(ids...)
 	return _u
 }
 
 // AddChannels adds the "channels" edges to the Channel entity.
 func (_u *UserUpdateOne) AddChannels(v ...*Channel) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2000,14 +2000,14 @@ func (_u *UserUpdateOne) AddChannels(v ...*Channel) *UserUpdateOne {
 }
 
 // AddPlaylistIDs adds the "playlists" edge to the Playlist entity by IDs.
-func (_u *UserUpdateOne) AddPlaylistIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) AddPlaylistIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.AddPlaylistIDs(ids...)
 	return _u
 }
 
 // AddPlaylists adds the "playlists" edges to the Playlist entity.
 func (_u *UserUpdateOne) AddPlaylists(v ...*Playlist) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2015,14 +2015,14 @@ func (_u *UserUpdateOne) AddPlaylists(v ...*Playlist) *UserUpdateOne {
 }
 
 // AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
-func (_u *UserUpdateOne) AddCommentIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) AddCommentIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.AddCommentIDs(ids...)
 	return _u
 }
 
 // AddComments adds the "comments" edges to the Comment entity.
 func (_u *UserUpdateOne) AddComments(v ...*Comment) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2045,14 +2045,14 @@ func (_u *UserUpdateOne) AddNotifications(v ...*Notification) *UserUpdateOne {
 }
 
 // AddCategoryIDs adds the "categories" edge to the Category entity by IDs.
-func (_u *UserUpdateOne) AddCategoryIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) AddCategoryIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.AddCategoryIDs(ids...)
 	return _u
 }
 
 // AddCategories adds the "categories" edges to the Category entity.
 func (_u *UserUpdateOne) AddCategories(v ...*Category) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2075,14 +2075,14 @@ func (_u *UserUpdateOne) AddTags(v ...*Tag) *UserUpdateOne {
 }
 
 // AddFavoriteIDs adds the "favorites" edge to the Favorite entity by IDs.
-func (_u *UserUpdateOne) AddFavoriteIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) AddFavoriteIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.AddFavoriteIDs(ids...)
 	return _u
 }
 
 // AddFavorites adds the "favorites" edges to the Favorite entity.
 func (_u *UserUpdateOne) AddFavorites(v ...*Favorite) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2090,14 +2090,14 @@ func (_u *UserUpdateOne) AddFavorites(v ...*Favorite) *UserUpdateOne {
 }
 
 // AddLikeIDs adds the "likes" edge to the Like entity by IDs.
-func (_u *UserUpdateOne) AddLikeIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) AddLikeIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.AddLikeIDs(ids...)
 	return _u
 }
 
 // AddLikes adds the "likes" edges to the Like entity.
 func (_u *UserUpdateOne) AddLikes(v ...*Like) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2105,14 +2105,14 @@ func (_u *UserUpdateOne) AddLikes(v ...*Like) *UserUpdateOne {
 }
 
 // AddSubscriptionIDs adds the "subscriptions" edge to the Subscription entity by IDs.
-func (_u *UserUpdateOne) AddSubscriptionIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) AddSubscriptionIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.AddSubscriptionIDs(ids...)
 	return _u
 }
 
 // AddSubscriptions adds the "subscriptions" edges to the Subscription entity.
 func (_u *UserUpdateOne) AddSubscriptions(v ...*Subscription) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2120,14 +2120,14 @@ func (_u *UserUpdateOne) AddSubscriptions(v ...*Subscription) *UserUpdateOne {
 }
 
 // AddSubscriberIDs adds the "subscribers" edge to the Subscription entity by IDs.
-func (_u *UserUpdateOne) AddSubscriberIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) AddSubscriberIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.AddSubscriberIDs(ids...)
 	return _u
 }
 
 // AddSubscribers adds the "subscribers" edges to the Subscription entity.
 func (_u *UserUpdateOne) AddSubscribers(v ...*Subscription) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2146,14 +2146,14 @@ func (_u *UserUpdateOne) ClearMedia() *UserUpdateOne {
 }
 
 // RemoveMediumIDs removes the "media" edge to Media entities by IDs.
-func (_u *UserUpdateOne) RemoveMediumIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveMediumIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.RemoveMediumIDs(ids...)
 	return _u
 }
 
 // RemoveMedia removes "media" edges to Media entities.
 func (_u *UserUpdateOne) RemoveMedia(v ...*Media) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2167,14 +2167,14 @@ func (_u *UserUpdateOne) ClearChannels() *UserUpdateOne {
 }
 
 // RemoveChannelIDs removes the "channels" edge to Channel entities by IDs.
-func (_u *UserUpdateOne) RemoveChannelIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveChannelIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.RemoveChannelIDs(ids...)
 	return _u
 }
 
 // RemoveChannels removes "channels" edges to Channel entities.
 func (_u *UserUpdateOne) RemoveChannels(v ...*Channel) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2188,14 +2188,14 @@ func (_u *UserUpdateOne) ClearPlaylists() *UserUpdateOne {
 }
 
 // RemovePlaylistIDs removes the "playlists" edge to Playlist entities by IDs.
-func (_u *UserUpdateOne) RemovePlaylistIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) RemovePlaylistIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.RemovePlaylistIDs(ids...)
 	return _u
 }
 
 // RemovePlaylists removes "playlists" edges to Playlist entities.
 func (_u *UserUpdateOne) RemovePlaylists(v ...*Playlist) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2209,14 +2209,14 @@ func (_u *UserUpdateOne) ClearComments() *UserUpdateOne {
 }
 
 // RemoveCommentIDs removes the "comments" edge to Comment entities by IDs.
-func (_u *UserUpdateOne) RemoveCommentIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveCommentIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.RemoveCommentIDs(ids...)
 	return _u
 }
 
 // RemoveComments removes "comments" edges to Comment entities.
 func (_u *UserUpdateOne) RemoveComments(v ...*Comment) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2251,14 +2251,14 @@ func (_u *UserUpdateOne) ClearCategories() *UserUpdateOne {
 }
 
 // RemoveCategoryIDs removes the "categories" edge to Category entities by IDs.
-func (_u *UserUpdateOne) RemoveCategoryIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveCategoryIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.RemoveCategoryIDs(ids...)
 	return _u
 }
 
 // RemoveCategories removes "categories" edges to Category entities.
 func (_u *UserUpdateOne) RemoveCategories(v ...*Category) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2293,14 +2293,14 @@ func (_u *UserUpdateOne) ClearFavorites() *UserUpdateOne {
 }
 
 // RemoveFavoriteIDs removes the "favorites" edge to Favorite entities by IDs.
-func (_u *UserUpdateOne) RemoveFavoriteIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveFavoriteIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.RemoveFavoriteIDs(ids...)
 	return _u
 }
 
 // RemoveFavorites removes "favorites" edges to Favorite entities.
 func (_u *UserUpdateOne) RemoveFavorites(v ...*Favorite) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2314,14 +2314,14 @@ func (_u *UserUpdateOne) ClearLikes() *UserUpdateOne {
 }
 
 // RemoveLikeIDs removes the "likes" edge to Like entities by IDs.
-func (_u *UserUpdateOne) RemoveLikeIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveLikeIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.RemoveLikeIDs(ids...)
 	return _u
 }
 
 // RemoveLikes removes "likes" edges to Like entities.
 func (_u *UserUpdateOne) RemoveLikes(v ...*Like) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2335,14 +2335,14 @@ func (_u *UserUpdateOne) ClearSubscriptions() *UserUpdateOne {
 }
 
 // RemoveSubscriptionIDs removes the "subscriptions" edge to Subscription entities by IDs.
-func (_u *UserUpdateOne) RemoveSubscriptionIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveSubscriptionIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.RemoveSubscriptionIDs(ids...)
 	return _u
 }
 
 // RemoveSubscriptions removes "subscriptions" edges to Subscription entities.
 func (_u *UserUpdateOne) RemoveSubscriptions(v ...*Subscription) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2356,14 +2356,14 @@ func (_u *UserUpdateOne) ClearSubscribers() *UserUpdateOne {
 }
 
 // RemoveSubscriberIDs removes the "subscribers" edge to Subscription entities by IDs.
-func (_u *UserUpdateOne) RemoveSubscriberIDs(ids ...int) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveSubscriberIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.RemoveSubscriberIDs(ids...)
 	return _u
 }
 
 // RemoveSubscribers removes "subscribers" edges to Subscription entities.
 func (_u *UserUpdateOne) RemoveSubscribers(v ...*Subscription) *UserUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2475,7 +2475,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeString))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`entity: missing "User.id" for update`)}
@@ -2610,7 +2610,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -2623,7 +2623,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -2639,7 +2639,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -2655,7 +2655,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.ChannelsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -2668,7 +2668,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.ChannelsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -2684,7 +2684,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.ChannelsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -2700,7 +2700,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: user.PlaylistsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -2713,7 +2713,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: user.PlaylistsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -2729,7 +2729,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: user.PlaylistsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -2745,7 +2745,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -2758,7 +2758,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -2774,7 +2774,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -2835,7 +2835,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.CategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -2848,7 +2848,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.CategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -2864,7 +2864,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.CategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -2925,7 +2925,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.FavoritesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -2938,7 +2938,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.FavoritesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -2954,7 +2954,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.FavoritesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -2970,7 +2970,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.LikesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -2983,7 +2983,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.LikesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -2999,7 +2999,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.LikesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -3015,7 +3015,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.SubscriptionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -3028,7 +3028,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.SubscriptionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -3044,7 +3044,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.SubscriptionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -3060,7 +3060,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.SubscribersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -3073,7 +3073,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.SubscribersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -3089,7 +3089,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.SubscribersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

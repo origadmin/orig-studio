@@ -1,10 +1,7 @@
 package e2e
 
 import (
-	"encoding/json"
-	"net/http"
 	"testing"
-	"time"
 )
 
 // TestE2E tests end-to-end functionality

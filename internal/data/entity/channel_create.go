@@ -23,7 +23,7 @@ type ChannelCreate struct {
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *ChannelCreate) SetUserID(v int) *ChannelCreate {
+func (_c *ChannelCreate) SetUserID(v string) *ChannelCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
@@ -46,9 +46,9 @@ func (_c *ChannelCreate) SetDescription(v string) *ChannelCreate {
 	return _c
 }
 
-// SetFriendlyToken sets the "friendly_token" field.
-func (_c *ChannelCreate) SetFriendlyToken(v string) *ChannelCreate {
-	_c.mutation.SetFriendlyToken(v)
+// SetShortToken sets the "short_token" field.
+func (_c *ChannelCreate) SetShortToken(v string) *ChannelCreate {
+	_c.mutation.SetShortToken(v)
 	return _c
 }
 
@@ -72,20 +72,34 @@ func (_c *ChannelCreate) SetNillableAddDate(v *time.Time) *ChannelCreate {
 	return _c
 }
 
+// SetID sets the "id" field.
+func (_c *ChannelCreate) SetID(v string) *ChannelCreate {
+	_c.mutation.SetID(v)
+	return _c
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (_c *ChannelCreate) SetNillableID(v *string) *ChannelCreate {
+	if v != nil {
+		_c.SetID(*v)
+	}
+	return _c
+}
+
 // SetUser sets the "user" edge to the User entity.
 func (_c *ChannelCreate) SetUser(v *User) *ChannelCreate {
 	return _c.SetUserID(v.ID)
 }
 
 // AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_c *ChannelCreate) AddMediumIDs(ids ...int) *ChannelCreate {
+func (_c *ChannelCreate) AddMediumIDs(ids ...string) *ChannelCreate {
 	_c.mutation.AddMediumIDs(ids...)
 	return _c
 }
 
 // AddMedia adds the "media" edges to the Media entity.
 func (_c *ChannelCreate) AddMedia(v ...*Media) *ChannelCreate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -131,6 +145,10 @@ func (_c *ChannelCreate) defaults() {
 		v := channel.DefaultAddDate()
 		_c.mutation.SetAddDate(v)
 	}
+	if _, ok := _c.mutation.ID(); !ok {
+		v := channel.DefaultID()
+		_c.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -157,12 +175,12 @@ func (_c *ChannelCreate) check() error {
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`entity: missing required field "Channel.description"`)}
 	}
-	if _, ok := _c.mutation.FriendlyToken(); !ok {
-		return &ValidationError{Name: "friendly_token", err: errors.New(`entity: missing required field "Channel.friendly_token"`)}
+	if _, ok := _c.mutation.ShortToken(); !ok {
+		return &ValidationError{Name: "short_token", err: errors.New(`entity: missing required field "Channel.short_token"`)}
 	}
-	if v, ok := _c.mutation.FriendlyToken(); ok {
-		if err := channel.FriendlyTokenValidator(v); err != nil {
-			return &ValidationError{Name: "friendly_token", err: fmt.Errorf(`entity: validator failed for field "Channel.friendly_token": %w`, err)}
+	if v, ok := _c.mutation.ShortToken(); ok {
+		if err := channel.ShortTokenValidator(v); err != nil {
+			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Channel.short_token": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.BannerLogo(); !ok {
@@ -175,6 +193,11 @@ func (_c *ChannelCreate) check() error {
 	}
 	if _, ok := _c.mutation.AddDate(); !ok {
 		return &ValidationError{Name: "add_date", err: errors.New(`entity: missing required field "Channel.add_date"`)}
+	}
+	if v, ok := _c.mutation.ID(); ok {
+		if err := channel.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`entity: validator failed for field "Channel.id": %w`, err)}
+		}
 	}
 	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`entity: missing required edge "Channel.user"`)}
@@ -193,8 +216,13 @@ func (_c *ChannelCreate) sqlSave(ctx context.Context) (*Channel, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(string); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected Channel.ID type: %T", _spec.ID.Value)
+		}
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
@@ -203,8 +231,12 @@ func (_c *ChannelCreate) sqlSave(ctx context.Context) (*Channel, error) {
 func (_c *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Channel{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(channel.Table, sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(channel.Table, sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString))
 	)
+	if id, ok := _c.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := _c.mutation.Title(); ok {
 		_spec.SetField(channel.FieldTitle, field.TypeString, value)
 		_node.Title = value
@@ -217,9 +249,9 @@ func (_c *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 		_spec.SetField(channel.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
-	if value, ok := _c.mutation.FriendlyToken(); ok {
-		_spec.SetField(channel.FieldFriendlyToken, field.TypeString, value)
-		_node.FriendlyToken = value
+	if value, ok := _c.mutation.ShortToken(); ok {
+		_spec.SetField(channel.FieldShortToken, field.TypeString, value)
+		_node.ShortToken = value
 	}
 	if value, ok := _c.mutation.BannerLogo(); ok {
 		_spec.SetField(channel.FieldBannerLogo, field.TypeString, value)
@@ -237,7 +269,7 @@ func (_c *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 			Columns: []string{channel.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -254,7 +286,7 @@ func (_c *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 			Columns: []string{channel.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -310,10 +342,6 @@ func (_c *ChannelCreateBulk) Save(ctx context.Context) ([]*Channel, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

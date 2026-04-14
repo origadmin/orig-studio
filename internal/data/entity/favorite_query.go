@@ -132,8 +132,8 @@ func (_q *FavoriteQuery) FirstX(ctx context.Context) *Favorite {
 
 // FirstID returns the first Favorite ID from the query.
 // Returns a *NotFoundError when no Favorite ID was found.
-func (_q *FavoriteQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *FavoriteQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -145,7 +145,7 @@ func (_q *FavoriteQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *FavoriteQuery) FirstIDX(ctx context.Context) int {
+func (_q *FavoriteQuery) FirstIDX(ctx context.Context) string {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -183,8 +183,8 @@ func (_q *FavoriteQuery) OnlyX(ctx context.Context) *Favorite {
 // OnlyID is like Only, but returns the only Favorite ID in the query.
 // Returns a *NotSingularError when more than one Favorite ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *FavoriteQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *FavoriteQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -200,7 +200,7 @@ func (_q *FavoriteQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *FavoriteQuery) OnlyIDX(ctx context.Context) int {
+func (_q *FavoriteQuery) OnlyIDX(ctx context.Context) string {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -228,7 +228,7 @@ func (_q *FavoriteQuery) AllX(ctx context.Context) []*Favorite {
 }
 
 // IDs executes the query and returns a list of Favorite IDs.
-func (_q *FavoriteQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (_q *FavoriteQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
@@ -240,7 +240,7 @@ func (_q *FavoriteQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *FavoriteQuery) IDsX(ctx context.Context) []int {
+func (_q *FavoriteQuery) IDsX(ctx context.Context) []string {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -337,7 +337,7 @@ func (_q *FavoriteQuery) WithUser(opts ...func(*UserQuery)) *FavoriteQuery {
 // Example:
 //
 //	var v []struct {
-//		MediaID int `json:"media_id,omitempty"`
+//		MediaID string `json:"media_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -360,7 +360,7 @@ func (_q *FavoriteQuery) GroupBy(field string, fields ...string) *FavoriteGroupB
 // Example:
 //
 //	var v []struct {
-//		MediaID int `json:"media_id,omitempty"`
+//		MediaID string `json:"media_id,omitempty"`
 //	}
 //
 //	client.Favorite.Query().
@@ -451,8 +451,8 @@ func (_q *FavoriteQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Fav
 }
 
 func (_q *FavoriteQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes []*Favorite, init func(*Favorite), assign func(*Favorite, *Media)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Favorite)
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Favorite)
 	for i := range nodes {
 		fk := nodes[i].MediaID
 		if _, ok := nodeids[fk]; !ok {
@@ -480,8 +480,8 @@ func (_q *FavoriteQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes
 	return nil
 }
 func (_q *FavoriteQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Favorite, init func(*Favorite), assign func(*Favorite, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Favorite)
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Favorite)
 	for i := range nodes {
 		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
@@ -522,7 +522,7 @@ func (_q *FavoriteQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (_q *FavoriteQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(favorite.Table, favorite.Columns, sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(favorite.Table, favorite.Columns, sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeString))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

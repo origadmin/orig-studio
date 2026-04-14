@@ -31,6 +31,7 @@ import (
 	"github.com/google/uuid"
 
 	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/data/enums"
 	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 	"origadmin/application/origcms/internal/svc-media/biz"
 	"origadmin/application/origcms/internal/svc-media/dto"
@@ -155,7 +156,6 @@ func (h *MediaHandler) Register(group *gin.RouterGroup) {
 	group.DELETE("/encoding/profiles/:profile_id", JWTMiddleware(h.jwtMgr), h.deleteEncodeProfile())
 
 	// Transcoding & Encoding Status - 独立路径
-	group.GET("/encoding/status", h.getTranscodingStatus())
 	group.GET("/encoding/tasks", h.getEncodingTasksFlat())
 	group.GET("/encoding/events", h.transcodingEvents())
 	group.POST("/encoding/retry", JWTMiddleware(h.jwtMgr), h.retryTaskByID())
@@ -192,6 +192,38 @@ func (h *MediaHandler) Register(group *gin.RouterGroup) {
 		media.GET("/:id/shares", h.getShareUrl())
 		media.POST("/:id/shares", JWTMiddleware(h.jwtMgr), h.recordShare())
 	}
+
+	// ================================
+	// 3. Medias 资源路径 - 兼容前端请求
+	// ================================
+	medias := group.Group("/medias")
+	{
+		// Media CRUD Operations
+		medias.GET("/:id", h.getMedia())
+		medias.PUT("/:id", JWTMiddleware(h.jwtMgr), h.updateMedia())
+		medias.DELETE("/:id", JWTMiddleware(h.jwtMgr), h.deleteMedia())
+
+		// Media Variants
+		medias.GET("/:id/variants", h.getMediaVariants())
+
+		// Media Tasks & Retry
+		medias.GET("/:id/tasks", h.listEncodingTasks())
+		medias.POST("/:id/tasks/:taskId/retry", JWTMiddleware(h.jwtMgr), h.retryTranscode())
+
+		// Like & Dislike
+		medias.GET("/:id/likes", h.getLikeStatus())
+		medias.POST("/:id/likes", JWTMiddleware(h.jwtMgr), h.toggleLike())
+		medias.DELETE("/:id/likes", JWTMiddleware(h.jwtMgr), h.toggleDislike())
+
+		// Favorite
+		medias.GET("/:id/favorites", h.getFavoriteStatus())
+		medias.POST("/:id/favorites", JWTMiddleware(h.jwtMgr), h.toggleFavorite())
+		medias.DELETE("/:id/favorites", JWTMiddleware(h.jwtMgr), h.toggleFavorite())
+
+		// Share
+		medias.GET("/:id/shares", h.getShareUrl())
+		medias.POST("/:id/shares", JWTMiddleware(h.jwtMgr), h.recordShare())
+	}
 }
 
 // --- List Media ---
@@ -214,17 +246,11 @@ func (h *MediaHandler) listMedia() gin.HandlerFunc {
 		opt.Keyword = c.Query("keyword")
 
 		if userIDStr := c.Query("user_id"); userIDStr != "" {
-			if userID, err := strconv.Atoi(userIDStr); err == nil {
-				v := int64(userID)
-				opt.UserID = &v
-			}
+			opt.UserID = &userIDStr
 		}
 
 		if catIDStr := c.Query("category_id"); catIDStr != "" {
-			if catID, err := strconv.Atoi(catIDStr); err == nil {
-				v := int64(catID)
-				opt.CategoryID = &v
-			}
+			opt.CategoryID = &catIDStr
 		}
 
 		if c.Query("featured") == "true" {
@@ -261,13 +287,13 @@ func (h *MediaHandler) getMedia() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
+		idStr := c.Param("id")
+		if idStr == "" {
 			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
-		m, err := h.uc.GetMedia(ctx, int64(id))
+		m, err := h.uc.GetMedia(ctx, idStr)
 		if err != nil {
 			Fail(c, ErrMediaNotFound, "Media not found")
 			return
@@ -275,7 +301,7 @@ func (h *MediaHandler) getMedia() gin.HandlerFunc {
 
 		go func() {
 			bgCtx := context.Background()
-			h.uc.IncrementViewCount(bgCtx, int64(id))
+			h.uc.IncrementViewCount(bgCtx, idStr)
 		}()
 
 		OK(c, m)
@@ -377,17 +403,17 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 		title := c.PostForm("title")
 		description := c.PostForm("description")
 		categoryIDStr := c.PostForm("category_id")
-		tagsStr := c.PostForm("tags")
-		privacyStr := c.DefaultPostForm("privacy", "1")
+	tagsStr := c.PostForm("tags")
+	privacyStr := c.DefaultPostForm("privacy", "1")
 
-		if title == "" {
-			title = strings.TrimSuffix(header.Filename, ext)
-		}
+	if title == "" {
+		title = strings.TrimSuffix(header.Filename, ext)
+	}
 
-		var categoryID int
-		if categoryIDStr != "" {
-			categoryID, _ = strconv.Atoi(categoryIDStr)
-		}
+	var categoryID int
+	if categoryIDStr != "" {
+		categoryID, _ = strconv.Atoi(categoryIDStr)
+	}
 
 		var tags []string
 		if tagsStr != "" {
@@ -404,7 +430,7 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 			Description:    description,
 			Type:           mediaType,
 			Url:            fileURL,
-			UserId:         int64(claims.UserID),
+			UserId:         claims.UserID,
 			State:          "active",
 			EncodingStatus: "pending",
 			MimeType:       mimeType,
@@ -413,7 +439,7 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 			Extension:      strings.TrimPrefix(ext, "."),
 			Privacy:        int32(privacy),
 			Tags:           tags,
-			CategoryId:     int64(categoryID),
+			CategoryId:     strconv.Itoa(categoryID),
 		}
 
 		created, err := h.uc.CreateMedia(ctx, m)
@@ -451,19 +477,19 @@ func (h *MediaHandler) updateMedia() gin.HandlerFunc {
 			return
 		}
 
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
+		idStr := c.Param("id")
+		if idStr == "" {
 			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
-		m, err := h.uc.GetMedia(ctx, int64(id))
+		m, err := h.uc.GetMedia(ctx, idStr)
 		if err != nil {
 			Fail(c, ErrMediaNotFound, "Media not found")
 			return
 		}
 
-		if m.UserId != int64(claims.UserID) && !claims.IsStaff {
+		if m.UserId != claims.UserID && !claims.IsStaff {
 			Fail(c, ErrForbidden, "you can only edit your own media")
 			return
 		}
@@ -481,7 +507,7 @@ func (h *MediaHandler) updateMedia() gin.HandlerFunc {
 			m.Description = req.Description
 		}
 		if req.CategoryID != nil {
-			m.CategoryId = int64(*req.CategoryID)
+			m.CategoryId = strconv.Itoa(*req.CategoryID)
 		}
 		if req.Tags != nil {
 			m.Tags = req.Tags
@@ -503,7 +529,7 @@ func (h *MediaHandler) updateMedia() gin.HandlerFunc {
 		}
 
 		// Re-fetch to get full details
-		updated, _ = h.uc.GetMedia(ctx, int64(id))
+		updated, _ = h.uc.GetMedia(ctx, idStr)
 
 		OK(c, updated)
 	}
@@ -519,19 +545,19 @@ func (h *MediaHandler) deleteMedia() gin.HandlerFunc {
 			return
 		}
 
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
+		idStr := c.Param("id")
+		if idStr == "" {
 			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
-		m, err := h.uc.GetMedia(ctx, int64(id))
+		m, err := h.uc.GetMedia(ctx, idStr)
 		if err != nil {
 			Fail(c, ErrMediaNotFound, "Media not found")
 			return
 		}
 
-		if m.UserId != int64(claims.UserID) && !claims.IsStaff {
+		if m.UserId != claims.UserID && !claims.IsStaff {
 			Fail(c, ErrForbidden, "you can only delete your own media")
 			return
 		}
@@ -541,7 +567,7 @@ func (h *MediaHandler) deleteMedia() gin.HandlerFunc {
 			_ = os.Remove(filepath.Join(UploadDir, "uploads", filename))
 		}
 
-		if err := h.uc.DeleteMedia(ctx, int64(id)); err != nil {
+		if err := h.uc.DeleteMedia(ctx, idStr); err != nil {
 			Fail(c, ErrInternal, err.Error())
 			return
 		}
@@ -552,13 +578,13 @@ func (h *MediaHandler) deleteMedia() gin.HandlerFunc {
 
 func (h *MediaHandler) listEncodingTasks() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-		if err != nil {
+		idStr := c.Param("id")
+		if idStr == "" {
 			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
-		tasks, err := h.uc.ListEncodingTasks(c.Request.Context(), id)
+		tasks, err := h.uc.ListEncodingTasks(c.Request.Context(), idStr)
 		if err != nil {
 			Fail(c, ErrInternal, err.Error())
 			return
@@ -570,13 +596,13 @@ func (h *MediaHandler) listEncodingTasks() gin.HandlerFunc {
 
 func (h *MediaHandler) retryTranscode() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-		if err != nil {
+		idStr := c.Param("id")
+		if idStr == "" {
 			Fail(c, ErrBadRequest, "invalid media ID")
 			return
 		}
 
-		if err := h.uploadUC.RetryTranscode(c.Request.Context(), id); err != nil {
+		if err := h.uploadUC.RetryTranscode(c.Request.Context(), idStr); err != nil {
 			if strings.Contains(err.Error(), "cannot retry") ||
 				strings.Contains(err.Error(), "not found") {
 				Fail(c, ErrBadRequest, err.Error())
@@ -586,80 +612,52 @@ func (h *MediaHandler) retryTranscode() gin.HandlerFunc {
 			return
 		}
 
-		OK(c, gin.H{"message": "transcode retry initiated", "media_id": id})
-	}
-}
-
-func (h *MediaHandler) getTranscodingStatus() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		filter := &biz.TranscodingStatusFilter{
-			Status:   c.DefaultQuery("status", "active"),
-			Page:     1,
-			PageSize: 20,
-		}
-
-		if p, err := strconv.Atoi(c.DefaultQuery("page", "1")); err == nil && p >= 1 {
-			filter.Page = p
-		}
-		if ps, err := strconv.Atoi(c.DefaultQuery("page_size", "20")); err == nil && ps >= 1 &&
-			ps <= 100 {
-			filter.PageSize = ps
-		}
-
-		status, err := h.uc.GetTranscodingStatus(c.Request.Context(), filter)
-		if err != nil {
-			Fail(c, ErrInternal, err.Error())
-			return
-		}
-
-		// Build clean response to avoid protobuf field leakage.
-		items := make([]gin.H, 0, len(status.Items))
-		for _, item := range status.Items {
-			m := item.Media
-			items = append(items, gin.H{
-				"media": gin.H{
-					"id":              m.Id,
-					"title":           m.Title,
-					"description":     m.Description,
-					"type":            m.Type,
-					"url":             m.Url,
-					"thumbnail":       m.Thumbnail,
-					"hls_file":        m.HlsFile,
-					"encoding_status": m.EncodingStatus,
-					"duration":        m.Duration,
-					"size":            m.Size,
-					"mime_type":       m.MimeType,
-					"user_id":         m.UserId,
-					"view_count":      m.ViewCount,
-					"like_count":      m.LikeCount,
-					"create_time":     m.CreateTime,
-					"update_time":     m.UpdateTime,
-				},
-				"tasks": item.Tasks,
-			})
-		}
-
-		OK(c, gin.H{
-			"processing_count": status.ProcessingCount,
-			"pending_count":    status.PendingCount,
-			"failed_count":     status.FailedCount,
-			"success_count":    status.SuccessCount,
-			"total_filtered":   status.TotalFiltered,
-			"page":             status.Page,
-			"page_size":        status.PageSize,
-			"items":            items,
-		})
+		OK(c, gin.H{"message": "transcode retry initiated", "media_id": idStr})
 	}
 }
 
 // getEncodingTasksFlat returns a flat, paginated list of encoding tasks (one row per task).
-// Query params: status, page, page_size, media_id
+// Query params: status, page, page_size, media_id, only_stats, profile_filter, chunk_filter, search_query
+// When only_stats=true, returns only statistics without items list (for cards)
 func (h *MediaHandler) getEncodingTasksFlat() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		status := c.Query("status")
+
+		// Determine filter type based on status
+		var filterType biz.FilterType
+		var specificStatus string
+
+		switch status {
+		case "":
+			filterType = biz.FilterTypeAll
+		case "active":
+			filterType = biz.FilterTypeActive
+		case "all":
+			filterType = biz.FilterTypeAll
+		default:
+			// Validate specific status
+			parsedStatus := enums.ParseEncodingTaskStatus(status)
+			if parsedStatus == enums.EncodingTaskStatusUnknown {
+				Fail(c, ErrBadRequest, "Invalid status parameter")
+				return
+			}
+			filterType = biz.FilterTypeSpecific
+			specificStatus = status
+		}
+
 		filter := &biz.TranscodingStatusFilter{
-			Status:   c.DefaultQuery("status", "all"),
-			Page:     1,
-			PageSize: 25,
+			FilterType:    filterType,
+			Status:        specificStatus,
+			Page:          1,
+			PageSize:      25,
+			OnlyStats:     false,
+			ProfileFilter: c.Query("profile"),
+			ChunkFilter:   c.Query("chunk"),
+			SearchQuery:   c.Query("search"),
+		}
+
+		if os := c.Query("only_stats"); os == "true" {
+			filter.OnlyStats = true
 		}
 
 		if p, err := strconv.Atoi(c.DefaultQuery("page", "1")); err == nil && p >= 1 {
@@ -670,15 +668,12 @@ func (h *MediaHandler) getEncodingTasksFlat() gin.HandlerFunc {
 			filter.PageSize = ps
 		}
 
-		var mediaID *int64
+		var mediaIDStr *string
 		if m := c.Query("media_id"); m != "" {
-			var id int64
-			if _, err := fmt.Sscanf(m, "%d", &id); err == nil && id > 0 {
-				mediaID = &id
-			}
+			mediaIDStr = &m
 		}
 
-		result, err := h.uc.ListEncodingTasksFlat(c.Request.Context(), filter, mediaID)
+		result, err := h.uc.ListEncodingTasksFlat(c.Request.Context(), filter, mediaIDStr)
 		if err != nil {
 			Fail(c, ErrInternal, err.Error())
 			return
@@ -692,13 +687,13 @@ func (h *MediaHandler) getEncodingTasksFlat() gin.HandlerFunc {
 // Used by the media management page to show variant details.
 func (h *MediaHandler) getMediaVariants() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-		if err != nil || id <= 0 {
+		idStr := c.Param("id")
+		if idStr == "" {
 			Fail(c, ErrBadRequest, "invalid media ID")
 			return
 		}
 
-		summary, err := h.uc.GetMediaVariants(c.Request.Context(), id)
+		summary, err := h.uc.GetMediaVariantsByUUID(c.Request.Context(), idStr)
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
 				Fail(c, ErrMediaNotFound, "media not found")
@@ -726,7 +721,7 @@ func (h *MediaHandler) retryTaskByID() gin.HandlerFunc {
 			return
 		}
 
-		task, err := h.uc.RetryTask(c.Request.Context(), taskID)
+		task, err := h.uc.RetryTask(c.Request.Context(), taskIDStr)
 		if err != nil {
 			if strings.Contains(err.Error(), "cannot retry") ||
 				strings.Contains(err.Error(), "not found") {
@@ -745,15 +740,8 @@ func (h *MediaHandler) retryTaskByID() gin.HandlerFunc {
 func (h *MediaHandler) retryAllFailed() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mediaIdStr := c.Query("media_id")
-		var mediaID int64
-		if mediaIdStr != "" {
-			if _, err := fmt.Sscanf(mediaIdStr, "%d", &mediaID); err != nil {
-				Fail(c, ErrBadRequest, "invalid media_id")
-				return
-			}
-		}
 
-		count, err := h.uc.RetryAllFailedTasks(c.Request.Context(), mediaID)
+		count, err := h.uc.RetryAllFailedTasks(c.Request.Context(), mediaIdStr)
 		if err != nil {
 			Fail(c, ErrInternal, err.Error())
 			return
@@ -765,11 +753,7 @@ func (h *MediaHandler) retryAllFailed() gin.HandlerFunc {
 
 func (h *MediaHandler) transcodingEvents() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		mediaIdStr := c.Query("media_id")
-		var mediaID int64
-		if mediaIdStr != "" {
-			fmt.Sscanf(mediaIdStr, "%d", &mediaID)
-		}
+		mediaID := c.Query("media_id")
 
 		c.Writer.Header().Set("Content-Type", "text/event-stream")
 		c.Writer.Header().Set("Cache-Control", "no-cache")
@@ -792,7 +776,6 @@ func (h *MediaHandler) transcodingEvents() gin.HandlerFunc {
 					"media_id": ev.MediaId,
 					"task_id":  ev.Task.Id,
 					"status":   ev.Task.Status,
-					"progress": ev.Task.Progress,
 				})
 				return true
 			}
@@ -896,13 +879,13 @@ func (h *MediaHandler) toggleLike() gin.HandlerFunc {
 			return
 		}
 
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
+		id := c.Param("id")
+		if id == "" {
 			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
-		stats, err := h.likeFavoriteUC.ToggleLike(ctx, int(claims.UserID), id, "like")
+		stats, err := h.likeFavoriteUC.ToggleLike(ctx, claims.UserID, id, "like")
 		if err != nil {
 			Fail(c, ErrInternal, err.Error())
 			return
@@ -926,13 +909,13 @@ func (h *MediaHandler) toggleDislike() gin.HandlerFunc {
 			return
 		}
 
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
+		id := c.Param("id")
+		if id == "" {
 			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
-		stats, err := h.likeFavoriteUC.ToggleLike(ctx, int(claims.UserID), id, "dislike")
+		stats, err := h.likeFavoriteUC.ToggleLike(ctx, claims.UserID, id, "dislike")
 		if err != nil {
 			Fail(c, ErrInternal, err.Error())
 			return
@@ -951,15 +934,15 @@ func (h *MediaHandler) getLikeStatus() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
+		id := c.Param("id")
+		if id == "" {
 			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
-		var userID int
+		var userID string
 		if claims, ok := c.Get("claims"); ok {
-			userID = int(claims.(*auth.Claims).UserID)
+			userID = claims.(*auth.Claims).UserID
 		}
 
 		stats, err := h.likeFavoriteUC.GetMediaStats(ctx, userID, id)
@@ -986,13 +969,13 @@ func (h *MediaHandler) toggleFavorite() gin.HandlerFunc {
 			return
 		}
 
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
+		id := c.Param("id")
+		if id == "" {
 			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
-		stats, err := h.likeFavoriteUC.ToggleFavorite(ctx, int(claims.UserID), id)
+		stats, err := h.likeFavoriteUC.ToggleFavorite(ctx, claims.UserID, id)
 		if err != nil {
 			Fail(c, ErrInternal, err.Error())
 			return
@@ -1009,15 +992,15 @@ func (h *MediaHandler) getFavoriteStatus() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
+		id := c.Param("id")
+		if id == "" {
 			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
-		var userID int
+		var userID string
 		if claims, ok := c.Get("claims"); ok {
-			userID = int(claims.(*auth.Claims).UserID)
+			userID = claims.(*auth.Claims).UserID
 		}
 
 		stats, err := h.likeFavoriteUC.GetMediaStats(ctx, userID, id)
@@ -1065,14 +1048,14 @@ func mimeToExt(mimeType string) string {
 
 func (h *MediaHandler) getShareUrl() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
+		id := c.Param("id")
+		if id == "" {
 			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}
 
 		// Build share URL - assuming the frontend is at /watch/:id
-		shareUrl := c.Request.Host + "/watch?v=" + strconv.Itoa(id)
+		shareUrl := c.Request.Host + "/watch?v=" + id
 		// Add https:// if not present
 		if len(shareUrl) > 0 && shareUrl[0] != 'h' {
 			shareUrl = "https://" + shareUrl
@@ -1092,8 +1075,8 @@ func (h *MediaHandler) recordShare() gin.HandlerFunc {
 			return
 		}
 
-		_, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
+		id := c.Param("id")
+		if id == "" {
 			Fail(c, ErrBadRequest, "Invalid ID")
 			return
 		}

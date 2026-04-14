@@ -31,13 +31,13 @@ func (_u *SubscriptionUpdate) Where(ps ...predicate.Subscription) *SubscriptionU
 }
 
 // SetSubscriberID sets the "subscriber_id" field.
-func (_u *SubscriptionUpdate) SetSubscriberID(v int) *SubscriptionUpdate {
+func (_u *SubscriptionUpdate) SetSubscriberID(v string) *SubscriptionUpdate {
 	_u.mutation.SetSubscriberID(v)
 	return _u
 }
 
 // SetNillableSubscriberID sets the "subscriber_id" field if the given value is not nil.
-func (_u *SubscriptionUpdate) SetNillableSubscriberID(v *int) *SubscriptionUpdate {
+func (_u *SubscriptionUpdate) SetNillableSubscriberID(v *string) *SubscriptionUpdate {
 	if v != nil {
 		_u.SetSubscriberID(*v)
 	}
@@ -45,13 +45,13 @@ func (_u *SubscriptionUpdate) SetNillableSubscriberID(v *int) *SubscriptionUpdat
 }
 
 // SetChannelID sets the "channel_id" field.
-func (_u *SubscriptionUpdate) SetChannelID(v int) *SubscriptionUpdate {
+func (_u *SubscriptionUpdate) SetChannelID(v string) *SubscriptionUpdate {
 	_u.mutation.SetChannelID(v)
 	return _u
 }
 
 // SetNillableChannelID sets the "channel_id" field if the given value is not nil.
-func (_u *SubscriptionUpdate) SetNillableChannelID(v *int) *SubscriptionUpdate {
+func (_u *SubscriptionUpdate) SetNillableChannelID(v *string) *SubscriptionUpdate {
 	if v != nil {
 		_u.SetChannelID(*v)
 	}
@@ -147,7 +147,7 @@ func (_u *SubscriptionUpdate) sqlSave(ctx context.Context) (_node int, err error
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(subscription.Table, subscription.Columns, sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(subscription.Table, subscription.Columns, sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -166,7 +166,7 @@ func (_u *SubscriptionUpdate) sqlSave(ctx context.Context) (_node int, err error
 			Columns: []string{subscription.SubscriberColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -179,7 +179,7 @@ func (_u *SubscriptionUpdate) sqlSave(ctx context.Context) (_node int, err error
 			Columns: []string{subscription.SubscriberColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -195,7 +195,7 @@ func (_u *SubscriptionUpdate) sqlSave(ctx context.Context) (_node int, err error
 			Columns: []string{subscription.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -208,7 +208,7 @@ func (_u *SubscriptionUpdate) sqlSave(ctx context.Context) (_node int, err error
 			Columns: []string{subscription.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -239,13 +239,13 @@ type SubscriptionUpdateOne struct {
 }
 
 // SetSubscriberID sets the "subscriber_id" field.
-func (_u *SubscriptionUpdateOne) SetSubscriberID(v int) *SubscriptionUpdateOne {
+func (_u *SubscriptionUpdateOne) SetSubscriberID(v string) *SubscriptionUpdateOne {
 	_u.mutation.SetSubscriberID(v)
 	return _u
 }
 
 // SetNillableSubscriberID sets the "subscriber_id" field if the given value is not nil.
-func (_u *SubscriptionUpdateOne) SetNillableSubscriberID(v *int) *SubscriptionUpdateOne {
+func (_u *SubscriptionUpdateOne) SetNillableSubscriberID(v *string) *SubscriptionUpdateOne {
 	if v != nil {
 		_u.SetSubscriberID(*v)
 	}
@@ -253,13 +253,13 @@ func (_u *SubscriptionUpdateOne) SetNillableSubscriberID(v *int) *SubscriptionUp
 }
 
 // SetChannelID sets the "channel_id" field.
-func (_u *SubscriptionUpdateOne) SetChannelID(v int) *SubscriptionUpdateOne {
+func (_u *SubscriptionUpdateOne) SetChannelID(v string) *SubscriptionUpdateOne {
 	_u.mutation.SetChannelID(v)
 	return _u
 }
 
 // SetNillableChannelID sets the "channel_id" field if the given value is not nil.
-func (_u *SubscriptionUpdateOne) SetNillableChannelID(v *int) *SubscriptionUpdateOne {
+func (_u *SubscriptionUpdateOne) SetNillableChannelID(v *string) *SubscriptionUpdateOne {
 	if v != nil {
 		_u.SetChannelID(*v)
 	}
@@ -368,7 +368,7 @@ func (_u *SubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Subscripti
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(subscription.Table, subscription.Columns, sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(subscription.Table, subscription.Columns, sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`entity: missing "Subscription.id" for update`)}
@@ -404,7 +404,7 @@ func (_u *SubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Subscripti
 			Columns: []string{subscription.SubscriberColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -417,7 +417,7 @@ func (_u *SubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Subscripti
 			Columns: []string{subscription.SubscriberColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -433,7 +433,7 @@ func (_u *SubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Subscripti
 			Columns: []string{subscription.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -446,7 +446,7 @@ func (_u *SubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Subscripti
 			Columns: []string{subscription.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

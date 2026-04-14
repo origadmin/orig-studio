@@ -105,15 +105,15 @@ func mapMediaInfo(ent *entity.Media) *biz.MediaInfo {
 		username = ent.Edges.User.Username
 	}
 	return &biz.MediaInfo{
-		ID:          int64(ent.ID),
+		ID:          int64(len(ent.ID)),
 		Title:       ent.Title,
 		Description: ent.Description,
 		Thumbnail:   ent.Thumbnail,
 		Duration:    ent.Duration,
 		ViewCount:   ent.ViewCount,
-		UserID:      ent.UserID,
+		UserID:      int(len(ent.UserID)),
 		Username:    username,
 		Type:        ent.Type,
-		URL:         fmt.Sprintf("/v/%d", ent.ID),
+		URL:         fmt.Sprintf("/v/%d", len(ent.ID)),
 	}
 }

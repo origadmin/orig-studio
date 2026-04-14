@@ -142,7 +142,7 @@ export interface TranscodingStatusResponse {
     partial_count: number;
     failed_count: number;
     success_count: number;
-    total_filtered: number;
+    total: number;
     page: number;
     page_size: number;
     items: TranscodingMediaItem[];
@@ -159,7 +159,7 @@ export interface EncodingTaskListResponse {
     partial_count: number;
     failed_count: number;
     success_count: number;
-    total_filtered: number;
+    total: number;
     page: number;
     page_size: number;
     items: (EncodingTask & { profile_name?: string })[];
@@ -190,14 +190,6 @@ export interface ShareResponse {
 
 // ==================== Encoding Module ====================
 export const encodingApi = {
-    // 获取转码状态统计
-    getStatus: () => api.get<{
-        processing_count: number;
-        pending_count: number;
-        failed_count: number;
-        success_count: number;
-    }>("/encoding/status"),
-
     // 获取转码事件流（SSE）
     getSSEUrl: (mediaId?: number) => {
         // 使用相对路径，让前端代理处理
@@ -205,11 +197,15 @@ export const encodingApi = {
     },
 
     // 获取所有转码任务（扁平列表）
+    // 当 status=all 时，返回完整统计
+    // 当 status 为其他值时，返回过滤后的统计
+    // 当 only_stats=true 时，只返回统计，不返回任务列表
     getTasks: (params?: {
         status?: string;
         page?: number;
         page_size?: number;
         media_id?: number;
+        only_stats?: boolean;
     }) => api.get<EncodingTaskListResponse>("/encoding/tasks", params as Record<string, unknown>),
 
     // 重试单个任务
@@ -258,7 +254,7 @@ export const mediaApi = {
     // 获取媒体详情（公开，自增播放量）
     get: (id: number | string) => {
         const cleanId = String(id).replace(/["']/g, '').trim();
-        return api.get<Media>(`/media/${cleanId}`);
+        return api.get<Media>(`/medias/${cleanId}`);
     },
 
     // 管理端：获取所有媒体（包括未发布的）
@@ -336,29 +332,29 @@ export const mediaApi = {
 
     // 更新媒体（需要 JWT + owner 权限）
     update: (id: number | string, data: UpdateMediaRequest) =>
-        api.put<Media>(`/media/${id}`, data),
+        api.put<Media>(`/medias/${id}`, data),
 
     // 删除媒体（需要 JWT + owner 权限）
-    delete: (id: number | string) => api.del<void>(`/media/${id}`),
+    delete: (id: number | string) => api.del<void>(`/medias/${id}`),
 
     // 文件操作
-    download: (id: number | string) => api.get<{ download_url: string }>(`/media/${id}/download`),
-    stream: (id: number | string) => api.get<{ stream_url: string }>(`/media/${id}/stream`),
-    getThumbnail: (id: number | string) => api.get<{ thumbnail_url: string }>(`/media/${id}/thumbnail`),
+    download: (id: number | string) => api.get<{ download_url: string }>(`/medias/${id}/download`),
+    stream: (id: number | string) => api.get<{ stream_url: string }>(`/medias/${id}/stream`),
+    getThumbnail: (id: number | string) => api.get<{ thumbnail_url: string }>(`/medias/${id}/thumbnail`),
 
     // 转码相关（单个媒体）
     encoding: {
         // 获取媒体转码任务
         getTasks: (mediaId: number | string) =>
-            api.get<{ tasks: EncodingTask[] }>(`/media/${mediaId}/tasks`),
+            api.get<{ tasks: EncodingTask[] }>(`/medias/${mediaId}/tasks`),
 
         // 获取媒体转码变体
         getVariants: (mediaId: number | string) =>
-            api.get<MediaVariantSummary>(`/media/${mediaId}/variants`),
+            api.get<MediaVariantSummary>(`/medias/${mediaId}/variants`),
 
         // 重试媒体转码
         retry: (mediaId: number | string) =>
-            api.post<{ message: string; media_id: number }>(`/media/${mediaId}/tasks/:taskId/retry`),
+            api.post<{ message: string; media_id: number }>(`/medias/${mediaId}/tasks/:taskId/retry`),
     },
 
     // 旧版转码状态（兼容）
@@ -378,33 +374,33 @@ export const mediaApi = {
     likes: {
         // 获取点赞状态
         getStatus: (mediaId: string | number) =>
-            api.get<LikeResponse>(`/media/${mediaId}/likes`),
+            api.get<LikeResponse>(`/medias/${mediaId}/likes`),
         // 点赞/取消点赞
         toggle: (mediaId: string | number) =>
-            api.post<LikeResponse>(`/media/${mediaId}/likes`),
+            api.post<LikeResponse>(`/medias/${mediaId}/likes`),
         // 点踩/取消点踩
         toggleDislike: (mediaId: string | number) =>
-            api.post<LikeResponse>(`/media/${mediaId}/dislikes`),
+            api.post<LikeResponse>(`/medias/${mediaId}/dislikes`),
     },
 
     // ==================== 收藏 API ====================
     favorites: {
         // 获取收藏状态
         getStatus: (mediaId: string | number) =>
-            api.get<FavoriteResponse>(`/media/${mediaId}/favorites`),
+            api.get<FavoriteResponse>(`/medias/${mediaId}/favorites`),
         // 收藏/取消收藏
         toggle: (mediaId: string | number) =>
-            api.post<FavoriteResponse>(`/media/${mediaId}/favorites`),
+            api.post<FavoriteResponse>(`/medias/${mediaId}/favorites`),
     },
 
     // ==================== 分享 API ====================
     shares: {
         // 获取分享链接
         getShareUrl: (mediaId: string | number, title?: string) =>
-            api.get<ShareResponse>(`/media/${mediaId}/shares`, title ? {title} : {}),
+            api.get<ShareResponse>(`/medias/${mediaId}/shares`, title ? {title} : {}),
         // 分享视频（增加分享计数）
         share: (mediaId: string | number) =>
-            api.post<{ success: boolean }>(`/media/${mediaId}/shares`),
+            api.post<{ success: boolean }>(`/medias/${mediaId}/shares`),
     },
 };
 
@@ -452,9 +448,9 @@ export const legacyMediaApi = {
         page_size?: number;
         media_id?: number;
     }) => api.get<EncodingTaskListResponse>("/encoding/tasks", params as Record<string, unknown>),
-    listTasks: (mediaId: number) => api.get<{ tasks: EncodingTask[] }>(`/media/${mediaId}/tasks`),
+    listTasks: (mediaId: number) => api.get<{ tasks: EncodingTask[] }>(`/medias/${mediaId}/tasks`),
     retryTranscode: (mediaId: number) =>
-        api.post<{ message: string; media_id: number }>(`/media/${mediaId}/tasks/:taskId/retry`),
+        api.post<{ message: string; media_id: number }>(`/medias/${mediaId}/tasks/:taskId/retry`),
     retryTask: (taskId: number) => {
         return fetch(`${API_BASE_URL}/encoding/retry?task_id=${taskId}`, {
             method: "POST",
@@ -474,7 +470,7 @@ export const legacyMediaApi = {
         }).then((r) => !r.ok ? r.json().then((e) => Promise.reject(e)) : r.json());
     },
     getVariants: (mediaId: number) =>
-        api.get<MediaVariantSummary>(`/media/${mediaId}/variants`),
+        api.get<MediaVariantSummary>(`/medias/${mediaId}/variants`),
     getSSEUrl: (mediaId?: number) => {
         return `${API_BASE_URL}/encoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
     },

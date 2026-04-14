@@ -417,7 +417,7 @@ func (_q *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, err
 func (_q *TagQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *User)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[int]*Tag)
-	nids := make(map[int]map[*Tag]struct{})
+	nids := make(map[string]map[*Tag]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -450,7 +450,7 @@ func (_q *TagQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Tag
 			}
 			spec.Assign = func(columns []string, values []any) error {
 				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				inValue := values[1].(*sql.NullString).String
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Tag]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])

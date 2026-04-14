@@ -6,7 +6,6 @@ package server
 
 import (
 	"errors"
-	"strings"
 	stdhttp "net/http"
 
 	"github.com/google/wire"

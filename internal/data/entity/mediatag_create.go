@@ -21,14 +21,14 @@ type MediaTagCreate struct {
 }
 
 // AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_c *MediaTagCreate) AddMediumIDs(ids ...int) *MediaTagCreate {
+func (_c *MediaTagCreate) AddMediumIDs(ids ...string) *MediaTagCreate {
 	_c.mutation.AddMediumIDs(ids...)
 	return _c
 }
 
 // AddMedia adds the "media" edges to the Media entity.
 func (_c *MediaTagCreate) AddMedia(v ...*Media) *MediaTagCreate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -118,7 +118,7 @@ func (_c *MediaTagCreate) createSpec() (*MediaTag, *sqlgraph.CreateSpec) {
 			Columns: []string{mediatag.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

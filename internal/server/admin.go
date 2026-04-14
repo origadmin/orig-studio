@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/svc-media/biz"
 )
 
@@ -146,8 +147,23 @@ func (h *AdminHandler) getTrafficStats() gin.HandlerFunc {
 
 func (h *AdminHandler) getAllEncodingTasks() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		status := c.Query("status")
+
+		// Validate status parameter
+		if status != "" {
+			if status == "active" || status == "all" {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid status parameter"})
+				return
+			}
+			parsedStatus := enums.ParseEncodingTaskStatus(status)
+			if parsedStatus == enums.EncodingTaskStatusUnknown {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid status parameter"})
+				return
+			}
+		}
+
 		filter := &biz.TranscodingStatusFilter{
-			Status:   c.DefaultQuery("status", "all"),
+			Status:   status,
 			Page:     1,
 			PageSize: 25,
 		}
@@ -195,13 +211,12 @@ func (h *AdminHandler) getEncodingStatus() gin.HandlerFunc {
 func (h *AdminHandler) retryTask() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		taskIDStr := c.Param("taskId")
-		taskID, err := strconv.Atoi(taskIDStr)
-		if err != nil || taskID <= 0 {
+		if taskIDStr == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
 			return
 		}
 
-		task, err := h.mediaUC.RetryTask(c.Request.Context(), taskID)
+		task, err := h.mediaUC.RetryTask(c.Request.Context(), taskIDStr)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -213,15 +228,9 @@ func (h *AdminHandler) retryTask() gin.HandlerFunc {
 
 func (h *AdminHandler) retryAllFailedTasks() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var mediaID int64
-		if mediaIdStr := c.Query("media_id"); mediaIdStr != "" {
-			if _, err := fmt.Sscanf(mediaIdStr, "%d", &mediaID); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid media ID"})
-				return
-			}
-		}
+		mediaIDStr := c.Query("media_id")
 
-		count, err := h.mediaUC.RetryAllFailedTasks(c.Request.Context(), mediaID)
+		count, err := h.mediaUC.RetryAllFailedTasks(c.Request.Context(), mediaIDStr)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

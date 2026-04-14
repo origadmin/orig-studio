@@ -32,13 +32,13 @@ func (_u *FavoriteUpdate) Where(ps ...predicate.Favorite) *FavoriteUpdate {
 }
 
 // SetMediaID sets the "media_id" field.
-func (_u *FavoriteUpdate) SetMediaID(v int) *FavoriteUpdate {
+func (_u *FavoriteUpdate) SetMediaID(v string) *FavoriteUpdate {
 	_u.mutation.SetMediaID(v)
 	return _u
 }
 
 // SetNillableMediaID sets the "media_id" field if the given value is not nil.
-func (_u *FavoriteUpdate) SetNillableMediaID(v *int) *FavoriteUpdate {
+func (_u *FavoriteUpdate) SetNillableMediaID(v *string) *FavoriteUpdate {
 	if v != nil {
 		_u.SetMediaID(*v)
 	}
@@ -46,13 +46,13 @@ func (_u *FavoriteUpdate) SetNillableMediaID(v *int) *FavoriteUpdate {
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *FavoriteUpdate) SetUserID(v int) *FavoriteUpdate {
+func (_u *FavoriteUpdate) SetUserID(v string) *FavoriteUpdate {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *FavoriteUpdate) SetNillableUserID(v *int) *FavoriteUpdate {
+func (_u *FavoriteUpdate) SetNillableUserID(v *string) *FavoriteUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -148,7 +148,7 @@ func (_u *FavoriteUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(favorite.Table, favorite.Columns, sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(favorite.Table, favorite.Columns, sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeString))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -167,7 +167,7 @@ func (_u *FavoriteUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{favorite.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -180,7 +180,7 @@ func (_u *FavoriteUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{favorite.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -196,7 +196,7 @@ func (_u *FavoriteUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{favorite.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -209,7 +209,7 @@ func (_u *FavoriteUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{favorite.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -240,13 +240,13 @@ type FavoriteUpdateOne struct {
 }
 
 // SetMediaID sets the "media_id" field.
-func (_u *FavoriteUpdateOne) SetMediaID(v int) *FavoriteUpdateOne {
+func (_u *FavoriteUpdateOne) SetMediaID(v string) *FavoriteUpdateOne {
 	_u.mutation.SetMediaID(v)
 	return _u
 }
 
 // SetNillableMediaID sets the "media_id" field if the given value is not nil.
-func (_u *FavoriteUpdateOne) SetNillableMediaID(v *int) *FavoriteUpdateOne {
+func (_u *FavoriteUpdateOne) SetNillableMediaID(v *string) *FavoriteUpdateOne {
 	if v != nil {
 		_u.SetMediaID(*v)
 	}
@@ -254,13 +254,13 @@ func (_u *FavoriteUpdateOne) SetNillableMediaID(v *int) *FavoriteUpdateOne {
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *FavoriteUpdateOne) SetUserID(v int) *FavoriteUpdateOne {
+func (_u *FavoriteUpdateOne) SetUserID(v string) *FavoriteUpdateOne {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *FavoriteUpdateOne) SetNillableUserID(v *int) *FavoriteUpdateOne {
+func (_u *FavoriteUpdateOne) SetNillableUserID(v *string) *FavoriteUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -369,7 +369,7 @@ func (_u *FavoriteUpdateOne) sqlSave(ctx context.Context) (_node *Favorite, err 
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(favorite.Table, favorite.Columns, sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(favorite.Table, favorite.Columns, sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeString))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`entity: missing "Favorite.id" for update`)}
@@ -405,7 +405,7 @@ func (_u *FavoriteUpdateOne) sqlSave(ctx context.Context) (_node *Favorite, err 
 			Columns: []string{favorite.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -418,7 +418,7 @@ func (_u *FavoriteUpdateOne) sqlSave(ctx context.Context) (_node *Favorite, err 
 			Columns: []string{favorite.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -434,7 +434,7 @@ func (_u *FavoriteUpdateOne) sqlSave(ctx context.Context) (_node *Favorite, err 
 			Columns: []string{favorite.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -447,7 +447,7 @@ func (_u *FavoriteUpdateOne) sqlSave(ctx context.Context) (_node *Favorite, err 
 			Columns: []string{favorite.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

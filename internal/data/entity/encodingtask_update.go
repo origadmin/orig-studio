@@ -6,10 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/encodeprofile"
 	"origadmin/application/origcms/internal/data/entity/encodingtask"
-	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/predicate"
+	"origadmin/application/origcms/internal/data/enums"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -32,13 +31,13 @@ func (_u *EncodingTaskUpdate) Where(ps ...predicate.EncodingTask) *EncodingTaskU
 }
 
 // SetMediaID sets the "media_id" field.
-func (_u *EncodingTaskUpdate) SetMediaID(v int) *EncodingTaskUpdate {
+func (_u *EncodingTaskUpdate) SetMediaID(v string) *EncodingTaskUpdate {
 	_u.mutation.SetMediaID(v)
 	return _u
 }
 
 // SetNillableMediaID sets the "media_id" field if the given value is not nil.
-func (_u *EncodingTaskUpdate) SetNillableMediaID(v *int) *EncodingTaskUpdate {
+func (_u *EncodingTaskUpdate) SetNillableMediaID(v *string) *EncodingTaskUpdate {
 	if v != nil {
 		_u.SetMediaID(*v)
 	}
@@ -47,6 +46,7 @@ func (_u *EncodingTaskUpdate) SetNillableMediaID(v *int) *EncodingTaskUpdate {
 
 // SetProfileID sets the "profile_id" field.
 func (_u *EncodingTaskUpdate) SetProfileID(v int) *EncodingTaskUpdate {
+	_u.mutation.ResetProfileID()
 	_u.mutation.SetProfileID(v)
 	return _u
 }
@@ -59,38 +59,23 @@ func (_u *EncodingTaskUpdate) SetNillableProfileID(v *int) *EncodingTaskUpdate {
 	return _u
 }
 
+// AddProfileID adds value to the "profile_id" field.
+func (_u *EncodingTaskUpdate) AddProfileID(v int) *EncodingTaskUpdate {
+	_u.mutation.AddProfileID(v)
+	return _u
+}
+
 // SetStatus sets the "status" field.
-func (_u *EncodingTaskUpdate) SetStatus(v string) *EncodingTaskUpdate {
+func (_u *EncodingTaskUpdate) SetStatus(v enums.EncodingTaskStatus) *EncodingTaskUpdate {
 	_u.mutation.SetStatus(v)
 	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *EncodingTaskUpdate) SetNillableStatus(v *string) *EncodingTaskUpdate {
+func (_u *EncodingTaskUpdate) SetNillableStatus(v *enums.EncodingTaskStatus) *EncodingTaskUpdate {
 	if v != nil {
 		_u.SetStatus(*v)
 	}
-	return _u
-}
-
-// SetProgress sets the "progress" field.
-func (_u *EncodingTaskUpdate) SetProgress(v int) *EncodingTaskUpdate {
-	_u.mutation.ResetProgress()
-	_u.mutation.SetProgress(v)
-	return _u
-}
-
-// SetNillableProgress sets the "progress" field if the given value is not nil.
-func (_u *EncodingTaskUpdate) SetNillableProgress(v *int) *EncodingTaskUpdate {
-	if v != nil {
-		_u.SetProgress(*v)
-	}
-	return _u
-}
-
-// AddProgress adds value to the "progress" field.
-func (_u *EncodingTaskUpdate) AddProgress(v int) *EncodingTaskUpdate {
-	_u.mutation.AddProgress(v)
 	return _u
 }
 
@@ -134,6 +119,20 @@ func (_u *EncodingTaskUpdate) ClearErrorMessage() *EncodingTaskUpdate {
 	return _u
 }
 
+// SetChunk sets the "chunk" field.
+func (_u *EncodingTaskUpdate) SetChunk(v bool) *EncodingTaskUpdate {
+	_u.mutation.SetChunk(v)
+	return _u
+}
+
+// SetNillableChunk sets the "chunk" field if the given value is not nil.
+func (_u *EncodingTaskUpdate) SetNillableChunk(v *bool) *EncodingTaskUpdate {
+	if v != nil {
+		_u.SetChunk(*v)
+	}
+	return _u
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_u *EncodingTaskUpdate) SetCreatedAt(v time.Time) *EncodingTaskUpdate {
 	_u.mutation.SetCreatedAt(v)
@@ -154,31 +153,9 @@ func (_u *EncodingTaskUpdate) SetUpdatedAt(v time.Time) *EncodingTaskUpdate {
 	return _u
 }
 
-// SetMedia sets the "media" edge to the Media entity.
-func (_u *EncodingTaskUpdate) SetMedia(v *Media) *EncodingTaskUpdate {
-	return _u.SetMediaID(v.ID)
-}
-
-// SetProfile sets the "profile" edge to the EncodeProfile entity.
-func (_u *EncodingTaskUpdate) SetProfile(v *EncodeProfile) *EncodingTaskUpdate {
-	return _u.SetProfileID(v.ID)
-}
-
 // Mutation returns the EncodingTaskMutation object of the builder.
 func (_u *EncodingTaskUpdate) Mutation() *EncodingTaskMutation {
 	return _u.mutation
-}
-
-// ClearMedia clears the "media" edge to the Media entity.
-func (_u *EncodingTaskUpdate) ClearMedia() *EncodingTaskUpdate {
-	_u.mutation.ClearMedia()
-	return _u
-}
-
-// ClearProfile clears the "profile" edge to the EncodeProfile entity.
-func (_u *EncodingTaskUpdate) ClearProfile() *EncodingTaskUpdate {
-	_u.mutation.ClearProfile()
-	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -219,6 +196,11 @@ func (_u *EncodingTaskUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *EncodingTaskUpdate) check() error {
+	if v, ok := _u.mutation.MediaID(); ok {
+		if err := encodingtask.MediaIDValidator(v); err != nil {
+			return &ValidationError{Name: "media_id", err: fmt.Errorf(`entity: validator failed for field "EncodingTask.media_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := encodingtask.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "EncodingTask.status": %w`, err)}
@@ -228,12 +210,6 @@ func (_u *EncodingTaskUpdate) check() error {
 		if err := encodingtask.OutputPathValidator(v); err != nil {
 			return &ValidationError{Name: "output_path", err: fmt.Errorf(`entity: validator failed for field "EncodingTask.output_path": %w`, err)}
 		}
-	}
-	if _u.mutation.MediaCleared() && len(_u.mutation.MediaIDs()) > 0 {
-		return errors.New(`entity: clearing a required unique edge "EncodingTask.media"`)
-	}
-	if _u.mutation.ProfileCleared() && len(_u.mutation.ProfileIDs()) > 0 {
-		return errors.New(`entity: clearing a required unique edge "EncodingTask.profile"`)
 	}
 	return nil
 }
@@ -248,7 +224,7 @@ func (_u *EncodingTaskUpdate) sqlSave(ctx context.Context) (_node int, err error
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(encodingtask.Table, encodingtask.Columns, sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(encodingtask.Table, encodingtask.Columns, sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeString))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -256,14 +232,17 @@ func (_u *EncodingTaskUpdate) sqlSave(ctx context.Context) (_node int, err error
 			}
 		}
 	}
+	if value, ok := _u.mutation.MediaID(); ok {
+		_spec.SetField(encodingtask.FieldMediaID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ProfileID(); ok {
+		_spec.SetField(encodingtask.FieldProfileID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedProfileID(); ok {
+		_spec.AddField(encodingtask.FieldProfileID, field.TypeInt, value)
+	}
 	if value, ok := _u.mutation.Status(); ok {
-		_spec.SetField(encodingtask.FieldStatus, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Progress(); ok {
-		_spec.SetField(encodingtask.FieldProgress, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedProgress(); ok {
-		_spec.AddField(encodingtask.FieldProgress, field.TypeInt, value)
+		_spec.SetField(encodingtask.FieldStatus, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.OutputPath(); ok {
 		_spec.SetField(encodingtask.FieldOutputPath, field.TypeString, value)
@@ -277,69 +256,14 @@ func (_u *EncodingTaskUpdate) sqlSave(ctx context.Context) (_node int, err error
 	if _u.mutation.ErrorMessageCleared() {
 		_spec.ClearField(encodingtask.FieldErrorMessage, field.TypeString)
 	}
+	if value, ok := _u.mutation.Chunk(); ok {
+		_spec.SetField(encodingtask.FieldChunk, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(encodingtask.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(encodingtask.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if _u.mutation.MediaCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   encodingtask.MediaTable,
-			Columns: []string{encodingtask.MediaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.MediaIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   encodingtask.MediaTable,
-			Columns: []string{encodingtask.MediaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.ProfileCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   encodingtask.ProfileTable,
-			Columns: []string{encodingtask.ProfileColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodeprofile.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.ProfileIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   encodingtask.ProfileTable,
-			Columns: []string{encodingtask.ProfileColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodeprofile.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -364,13 +288,13 @@ type EncodingTaskUpdateOne struct {
 }
 
 // SetMediaID sets the "media_id" field.
-func (_u *EncodingTaskUpdateOne) SetMediaID(v int) *EncodingTaskUpdateOne {
+func (_u *EncodingTaskUpdateOne) SetMediaID(v string) *EncodingTaskUpdateOne {
 	_u.mutation.SetMediaID(v)
 	return _u
 }
 
 // SetNillableMediaID sets the "media_id" field if the given value is not nil.
-func (_u *EncodingTaskUpdateOne) SetNillableMediaID(v *int) *EncodingTaskUpdateOne {
+func (_u *EncodingTaskUpdateOne) SetNillableMediaID(v *string) *EncodingTaskUpdateOne {
 	if v != nil {
 		_u.SetMediaID(*v)
 	}
@@ -379,6 +303,7 @@ func (_u *EncodingTaskUpdateOne) SetNillableMediaID(v *int) *EncodingTaskUpdateO
 
 // SetProfileID sets the "profile_id" field.
 func (_u *EncodingTaskUpdateOne) SetProfileID(v int) *EncodingTaskUpdateOne {
+	_u.mutation.ResetProfileID()
 	_u.mutation.SetProfileID(v)
 	return _u
 }
@@ -391,38 +316,23 @@ func (_u *EncodingTaskUpdateOne) SetNillableProfileID(v *int) *EncodingTaskUpdat
 	return _u
 }
 
+// AddProfileID adds value to the "profile_id" field.
+func (_u *EncodingTaskUpdateOne) AddProfileID(v int) *EncodingTaskUpdateOne {
+	_u.mutation.AddProfileID(v)
+	return _u
+}
+
 // SetStatus sets the "status" field.
-func (_u *EncodingTaskUpdateOne) SetStatus(v string) *EncodingTaskUpdateOne {
+func (_u *EncodingTaskUpdateOne) SetStatus(v enums.EncodingTaskStatus) *EncodingTaskUpdateOne {
 	_u.mutation.SetStatus(v)
 	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *EncodingTaskUpdateOne) SetNillableStatus(v *string) *EncodingTaskUpdateOne {
+func (_u *EncodingTaskUpdateOne) SetNillableStatus(v *enums.EncodingTaskStatus) *EncodingTaskUpdateOne {
 	if v != nil {
 		_u.SetStatus(*v)
 	}
-	return _u
-}
-
-// SetProgress sets the "progress" field.
-func (_u *EncodingTaskUpdateOne) SetProgress(v int) *EncodingTaskUpdateOne {
-	_u.mutation.ResetProgress()
-	_u.mutation.SetProgress(v)
-	return _u
-}
-
-// SetNillableProgress sets the "progress" field if the given value is not nil.
-func (_u *EncodingTaskUpdateOne) SetNillableProgress(v *int) *EncodingTaskUpdateOne {
-	if v != nil {
-		_u.SetProgress(*v)
-	}
-	return _u
-}
-
-// AddProgress adds value to the "progress" field.
-func (_u *EncodingTaskUpdateOne) AddProgress(v int) *EncodingTaskUpdateOne {
-	_u.mutation.AddProgress(v)
 	return _u
 }
 
@@ -466,6 +376,20 @@ func (_u *EncodingTaskUpdateOne) ClearErrorMessage() *EncodingTaskUpdateOne {
 	return _u
 }
 
+// SetChunk sets the "chunk" field.
+func (_u *EncodingTaskUpdateOne) SetChunk(v bool) *EncodingTaskUpdateOne {
+	_u.mutation.SetChunk(v)
+	return _u
+}
+
+// SetNillableChunk sets the "chunk" field if the given value is not nil.
+func (_u *EncodingTaskUpdateOne) SetNillableChunk(v *bool) *EncodingTaskUpdateOne {
+	if v != nil {
+		_u.SetChunk(*v)
+	}
+	return _u
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_u *EncodingTaskUpdateOne) SetCreatedAt(v time.Time) *EncodingTaskUpdateOne {
 	_u.mutation.SetCreatedAt(v)
@@ -486,31 +410,9 @@ func (_u *EncodingTaskUpdateOne) SetUpdatedAt(v time.Time) *EncodingTaskUpdateOn
 	return _u
 }
 
-// SetMedia sets the "media" edge to the Media entity.
-func (_u *EncodingTaskUpdateOne) SetMedia(v *Media) *EncodingTaskUpdateOne {
-	return _u.SetMediaID(v.ID)
-}
-
-// SetProfile sets the "profile" edge to the EncodeProfile entity.
-func (_u *EncodingTaskUpdateOne) SetProfile(v *EncodeProfile) *EncodingTaskUpdateOne {
-	return _u.SetProfileID(v.ID)
-}
-
 // Mutation returns the EncodingTaskMutation object of the builder.
 func (_u *EncodingTaskUpdateOne) Mutation() *EncodingTaskMutation {
 	return _u.mutation
-}
-
-// ClearMedia clears the "media" edge to the Media entity.
-func (_u *EncodingTaskUpdateOne) ClearMedia() *EncodingTaskUpdateOne {
-	_u.mutation.ClearMedia()
-	return _u
-}
-
-// ClearProfile clears the "profile" edge to the EncodeProfile entity.
-func (_u *EncodingTaskUpdateOne) ClearProfile() *EncodingTaskUpdateOne {
-	_u.mutation.ClearProfile()
-	return _u
 }
 
 // Where appends a list predicates to the EncodingTaskUpdate builder.
@@ -564,6 +466,11 @@ func (_u *EncodingTaskUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *EncodingTaskUpdateOne) check() error {
+	if v, ok := _u.mutation.MediaID(); ok {
+		if err := encodingtask.MediaIDValidator(v); err != nil {
+			return &ValidationError{Name: "media_id", err: fmt.Errorf(`entity: validator failed for field "EncodingTask.media_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := encodingtask.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "EncodingTask.status": %w`, err)}
@@ -573,12 +480,6 @@ func (_u *EncodingTaskUpdateOne) check() error {
 		if err := encodingtask.OutputPathValidator(v); err != nil {
 			return &ValidationError{Name: "output_path", err: fmt.Errorf(`entity: validator failed for field "EncodingTask.output_path": %w`, err)}
 		}
-	}
-	if _u.mutation.MediaCleared() && len(_u.mutation.MediaIDs()) > 0 {
-		return errors.New(`entity: clearing a required unique edge "EncodingTask.media"`)
-	}
-	if _u.mutation.ProfileCleared() && len(_u.mutation.ProfileIDs()) > 0 {
-		return errors.New(`entity: clearing a required unique edge "EncodingTask.profile"`)
 	}
 	return nil
 }
@@ -593,7 +494,7 @@ func (_u *EncodingTaskUpdateOne) sqlSave(ctx context.Context) (_node *EncodingTa
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(encodingtask.Table, encodingtask.Columns, sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(encodingtask.Table, encodingtask.Columns, sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeString))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`entity: missing "EncodingTask.id" for update`)}
@@ -618,14 +519,17 @@ func (_u *EncodingTaskUpdateOne) sqlSave(ctx context.Context) (_node *EncodingTa
 			}
 		}
 	}
+	if value, ok := _u.mutation.MediaID(); ok {
+		_spec.SetField(encodingtask.FieldMediaID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ProfileID(); ok {
+		_spec.SetField(encodingtask.FieldProfileID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedProfileID(); ok {
+		_spec.AddField(encodingtask.FieldProfileID, field.TypeInt, value)
+	}
 	if value, ok := _u.mutation.Status(); ok {
-		_spec.SetField(encodingtask.FieldStatus, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Progress(); ok {
-		_spec.SetField(encodingtask.FieldProgress, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedProgress(); ok {
-		_spec.AddField(encodingtask.FieldProgress, field.TypeInt, value)
+		_spec.SetField(encodingtask.FieldStatus, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.OutputPath(); ok {
 		_spec.SetField(encodingtask.FieldOutputPath, field.TypeString, value)
@@ -639,69 +543,14 @@ func (_u *EncodingTaskUpdateOne) sqlSave(ctx context.Context) (_node *EncodingTa
 	if _u.mutation.ErrorMessageCleared() {
 		_spec.ClearField(encodingtask.FieldErrorMessage, field.TypeString)
 	}
+	if value, ok := _u.mutation.Chunk(); ok {
+		_spec.SetField(encodingtask.FieldChunk, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(encodingtask.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(encodingtask.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if _u.mutation.MediaCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   encodingtask.MediaTable,
-			Columns: []string{encodingtask.MediaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.MediaIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   encodingtask.MediaTable,
-			Columns: []string{encodingtask.MediaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.ProfileCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   encodingtask.ProfileTable,
-			Columns: []string{encodingtask.ProfileColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodeprofile.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.ProfileIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   encodingtask.ProfileTable,
-			Columns: []string{encodingtask.ProfileColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodeprofile.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &EncodingTask{config: _u.config}

@@ -1,8 +1,10 @@
 package ffmpeg
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -14,6 +16,14 @@ var (
 	ffmpegPath  = "ffmpeg"
 	ffprobePath = "ffprobe"
 )
+
+// ProgressCallback is a callback function for reporting transcoding progress.
+// progress: 0-100 percentage
+// frame: current frame number
+// fps: frames per second
+// speed: transcoding speed (e.g., "1.5x")
+// time: current time in seconds
+type ProgressCallback func(progress int, frame int64, fps float64, speed string, time float64)
 
 func init() {
 	// 默认探索路径
@@ -216,6 +226,155 @@ func TranscodeToHLS(
 	return nil
 }
 
+// TranscodeToHLSWithProgress transcodes the input file to HLS with real-time progress reporting.
+// This is an enhanced version of TranscodeToHLS that provides progress updates via callback.
+func TranscodeToHLSWithProgress(
+	ctx context.Context,
+	inputPath string,
+	outputDir string,
+	profileName string,
+	resolution string,
+	videoCodec string,
+	audioCodec string,
+	videoBitrate string,
+	audioBitrate string,
+	duration float64,
+	progressCb ProgressCallback,
+) error {
+	if err := os.MkdirAll(outputDir, 0o755); err != nil {
+		return fmt.Errorf("failed to create HLS output directory: %w", err)
+	}
+
+	size := ResolutionToSize(resolution)
+
+	vcodec := "libx264"
+	if videoCodec == "h265" || videoCodec == "hevc" {
+		vcodec = "libx265"
+	} else if videoCodec == "vp9" {
+		vcodec = "libvpx-vp9"
+	}
+
+	segmentPattern := filepath.Join(outputDir, "segment_%03d.ts")
+	playlistPath := filepath.Join(outputDir, "index.m3u8")
+
+	args := []string{
+		"-progress", "pipe:1",
+		"-i", inputPath,
+		"-s", size,
+		"-c:v", vcodec,
+		"-c:a", "aac",
+		"-f", "hls",
+		"-hls_time", "6",
+		"-hls_list_size", "0",
+		"-hls_segment_filename", segmentPattern,
+	}
+
+	if videoBitrate != "" && videoBitrate != "auto" {
+		args = append(args, "-b:v", videoBitrate)
+	}
+	if audioBitrate != "" {
+		args = append(args, "-b:a", audioBitrate)
+	}
+
+	args = append(args, "-y", playlistPath)
+
+	cmd := exec.CommandContext(ctx, ffmpegPath, args...)
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return fmt.Errorf("failed to create stdout pipe: %w", err)
+	}
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return fmt.Errorf("failed to create stderr pipe: %w", err)
+	}
+
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("failed to start ffmpeg: %w", err)
+	}
+
+	progressDone := make(chan struct{})
+	go func() {
+		defer close(progressDone)
+		parseProgressOutput(stdout, duration, progressCb)
+	}()
+
+	errOutput, _ := io.ReadAll(stderr)
+
+	if err := cmd.Wait(); err != nil {
+		return fmt.Errorf("ffmpeg direct HLS transcoding failed for profile %s: %w, output: %s", profileName, err, string(errOutput))
+	}
+
+	<-progressDone
+
+	return nil
+}
+
+// parseProgressOutput parses ffmpeg progress output from the reader.
+// ffmpeg progress format:
+//
+//	frame=123
+//	fps=30.5
+//	total_time=4.05
+//	out_time_ms=4050000
+//	speed=1.23x
+//	progress=continue
+//	(empty line)
+func parseProgressOutput(reader io.Reader, duration float64, progressCb ProgressCallback) {
+	if progressCb == nil {
+		return
+	}
+
+	scanner := bufio.NewScanner(reader)
+	progressData := make(map[string]string)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		line = strings.TrimSpace(line)
+
+		if line == "" {
+			if len(progressData) > 0 {
+				frame := parseInt64(progressData["frame"])
+				fps := parseFloat64(progressData["fps"])
+				speed := progressData["speed"]
+				outTimeMs := parseInt64(progressData["out_time_ms"])
+				time := float64(outTimeMs) / 1000000.0
+
+				var progress int
+				if duration > 0 {
+					progress = int((time / duration) * 100)
+					if progress > 100 {
+						progress = 100
+					}
+				} else {
+					progress = 0
+				}
+
+				progressCb(progress, frame, fps, speed, time)
+
+				progressData = make(map[string]string)
+			}
+		} else {
+			parts := strings.SplitN(line, "=", 2)
+			if len(parts) == 2 {
+				progressData[parts[0]] = parts[1]
+			}
+		}
+	}
+}
+
+func parseInt64(s string) int64 {
+	var result int64
+	fmt.Sscanf(s, "%d", &result)
+	return result
+}
+
+func parseFloat64(s string) float64 {
+	var result float64
+	fmt.Sscanf(s, "%f", &result)
+	return result
+}
+
 // GenerateGIFPreview creates an animated GIF preview from the source video.
 // Used for hover thumbnails on progress bars and media list previews.
 // Output is written to outputPath (e.g., previews/{uuid}.gif).
@@ -230,8 +389,8 @@ func GenerateGIFPreview(ctx context.Context, inputPath, outputPath string, scale
 	// Step 1: Generate color palette
 	paletteArgs := []string{
 		"-i", inputPath,
-		"-vf", fmt.Sprintf("fps=10,scale=%s:flags=lanczos,palettegen", scale),
-		"-t", "5", // first 5 seconds only
+		"-vf", fmt.Sprintf("fps=5,scale=%s:flags=lanczos,palettegen", scale),
+		"-t", "3", // first 3 seconds only for faster generation
 		"-y",
 		palettePath,
 	}
@@ -244,8 +403,8 @@ func GenerateGIFPreview(ctx context.Context, inputPath, outputPath string, scale
 	gifArgs := []string{
 		"-i", inputPath,
 		"-i", palettePath,
-		"-lavfi", fmt.Sprintf("fps=10,scale=%s:flags=lanczos [x]; [x][1:v] paletteuse", scale),
-		"-t", "5",
+		"-lavfi", fmt.Sprintf("fps=5,scale=%s:flags=lanczos [x]; [x][1:v] paletteuse", scale),
+		"-t", "3",
 		"-y",
 		outputPath,
 	}
@@ -256,6 +415,52 @@ func GenerateGIFPreview(ctx context.Context, inputPath, outputPath string, scale
 
 	// Clean up temporary palette file
 	os.Remove(palettePath)
+
+	return nil
+}
+
+// GeneratePreviewFrames generates multiple preview frames from the video at fixed intervals.
+// This is used for progress bar preview when the user hovers over the timeline.
+// Output: {outputDir}/frame_001.jpg, frame_002.jpg, etc.
+func GeneratePreviewFrames(
+	ctx context.Context,
+	inputPath string,
+	outputDir string,
+	frameCount int,
+	scale string,
+) error {
+	if err := os.MkdirAll(outputDir, 0o755); err != nil {
+		return fmt.Errorf("failed to create preview frames directory: %w", err)
+	}
+
+	// Get video duration first to calculate frame interval
+	duration, err := GetVideoDuration(ctx, inputPath)
+	if err != nil {
+		return fmt.Errorf("failed to get video duration: %w", err)
+	}
+
+	// Calculate frame interval (in seconds)
+	interval := duration.Seconds() / float64(frameCount)
+	if interval < 1.0 {
+		interval = 1.0 // Minimum 1 second interval
+	}
+
+	// ffmpeg command to generate frames at fixed intervals
+	framePattern := filepath.Join(outputDir, "frame_%03d.jpg")
+
+	args := []string{
+		"-i", inputPath,
+		"-vf", fmt.Sprintf("fps=1/%f,scale=%s", interval, scale),
+		"-q:v", "3", // Quality 2-31, lower is better
+		"-y",
+		framePattern,
+	}
+
+	cmd := exec.CommandContext(ctx, ffmpegPath, args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("ffmpeg preview frames generation failed: %w, output: %s", err, string(output))
+	}
 
 	return nil
 }

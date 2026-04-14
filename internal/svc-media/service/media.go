@@ -116,11 +116,10 @@ func (s *MediaService) ListEncodingTasks(
 	result := make([]*types.EncodingTask, len(tasks))
 	for i, t := range tasks {
 		result[i] = &types.EncodingTask{
-			Id:           int32(t.Id),
+			Id:           t.Id,
 			MediaId:      t.MediaId,
-			ProfileId:    int32(t.ProfileId),
-			Status:       t.Status,
-			Progress:     int32(t.Progress),
+			ProfileId:    strconv.Itoa(t.ProfileId),
+			Status:       string(t.Status),
 			OutputPath:   t.OutputPath,
 			ErrorMessage: t.ErrorMessage,
 		}
@@ -128,43 +127,25 @@ func (s *MediaService) ListEncodingTasks(
 	return &media.ListEncodingTasksResponse{Tasks: result}, nil
 }
 
-func (s *MediaService) GetTranscodingStatus(
+// GetTranscodingStatus returns the overall encoding status of the system.
+func (s *MediaService) GetEncodingStatus(
 	ctx context.Context,
-	req *media.GetTranscodingStatusRequest,
-) (*media.GetTranscodingStatusResponse, error) {
+	req *media.GetEncodingStatusRequest,
+) (*media.GetEncodingStatusResponse, error) {
 	status, err := s.uc.GetTranscodingStatus(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	// Convert items
-	items := make([]*media.TranscodingMediaItem, len(status.Items))
-	for i, item := range status.Items {
-		tasks := make([]*types.EncodingTask, len(item.Tasks))
-		for j, t := range item.Tasks {
-			tasks[j] = &types.EncodingTask{
-				Id:           int32(t.Id),
-				MediaId:      t.MediaId,
-				ProfileId:    int32(t.ProfileId),
-				Status:       t.Status,
-				Progress:     int32(t.Progress),
-				OutputPath:   t.OutputPath,
-				ErrorMessage: t.ErrorMessage,
-			}
-		}
-
-		items[i] = &media.TranscodingMediaItem{
-			Media: item.Media,
-			Tasks: tasks,
-		}
-	}
-
-	return &media.GetTranscodingStatusResponse{
+	return &media.GetEncodingStatusResponse{
 		ProcessingCount: int32(status.ProcessingCount),
 		PendingCount:    int32(status.PendingCount),
 		FailedCount:     int32(status.FailedCount),
 		SuccessCount:    int32(status.SuccessCount),
-		Items:           items,
+		TotalFiltered:   0,
+		Page:            req.Page,
+		PageSize:        req.PageSize,
+		Items:           []*media.TranscodingMediaItem{},
 	}, nil
 }
 
@@ -181,7 +162,7 @@ func (s *MediaService) ListEncodeProfiles(
 	result := make([]*types.EncodeProfile, len(profiles))
 	for i, p := range profiles {
 		result[i] = &types.EncodeProfile{
-			Id:          int32(p.Id),
+			Id:          strconv.Itoa(p.Id),
 			Name:        p.Name,
 			Description: p.Description,
 			Extension:   p.Extension,
@@ -199,13 +180,14 @@ func (s *MediaService) GetEncodeProfile(
 	ctx context.Context,
 	req *media.GetEncodeProfileRequest,
 ) (*media.GetEncodeProfileResponse, error) {
-	p, err := s.uc.GetEncodeProfile(ctx, int(req.Id))
+	profileID, _ := strconv.Atoi(req.Id)
+	p, err := s.uc.GetEncodeProfile(ctx, profileID)
 	if err != nil {
 		return nil, err
 	}
 	return &media.GetEncodeProfileResponse{
 		Profile: &types.EncodeProfile{
-			Id:          int32(p.Id),
+			Id:          strconv.Itoa(p.Id),
 			Name:        p.Name,
 			Description: p.Description,
 			Extension:   p.Extension,
@@ -236,7 +218,7 @@ func (s *MediaService) CreateEncodeProfile(
 	}
 	return &media.CreateEncodeProfileResponse{
 		Profile: &types.EncodeProfile{
-			Id:          int32(p.Id),
+			Id:          strconv.Itoa(p.Id),
 			Name:        p.Name,
 			Description: p.Description,
 			Extension:   p.Extension,
@@ -253,8 +235,9 @@ func (s *MediaService) UpdateEncodeProfile(
 	ctx context.Context,
 	req *media.UpdateEncodeProfileRequest,
 ) (*media.UpdateEncodeProfileResponse, error) {
+	profileID, _ := strconv.Atoi(req.Profile.Id)
 	p, err := s.uc.UpdateEncodeProfile(ctx, &biz.EncodeProfile{
-		Id:          int(req.Profile.Id),
+		Id:          profileID,
 		Name:        req.Profile.Name,
 		Description: req.Profile.Description,
 		Extension:   req.Profile.Extension,
@@ -268,7 +251,7 @@ func (s *MediaService) UpdateEncodeProfile(
 	}
 	return &media.UpdateEncodeProfileResponse{
 		Profile: &types.EncodeProfile{
-			Id:          int32(p.Id),
+			Id:          strconv.Itoa(p.Id),
 			Name:        p.Name,
 			Description: p.Description,
 			Extension:   p.Extension,
@@ -285,11 +268,43 @@ func (s *MediaService) DeleteEncodeProfile(
 	ctx context.Context,
 	req *media.DeleteEncodeProfileRequest,
 ) (*media.DeleteEncodeProfileResponse, error) {
-	err := s.uc.DeleteEncodeProfile(ctx, int(req.Id))
+	profileID, _ := strconv.Atoi(req.Id)
+	err := s.uc.DeleteEncodeProfile(ctx, profileID)
 	if err != nil {
 		return nil, err
 	}
 	return &media.DeleteEncodeProfileResponse{}, nil
+}
+
+func (s *MediaService) GetMediaVariants(
+	ctx context.Context,
+	req *media.GetMediaVariantsRequest,
+) (*media.GetMediaVariantsResponse, error) {
+	// 直接使用 req.Id 作为 mediaID，因为 ID 是 UUID 格式
+	mediaIDStr := req.Id
+	
+	summary, err := s.uc.GetMediaVariantsByUUID(ctx, mediaIDStr)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return nil, errors.NotFound("MEDIA_NOT_FOUND", "Media not found")
+		}
+		return nil, err
+	}
+	
+	result := make([]*types.MediaVariant, len(summary.Variants))
+	for i, v := range summary.Variants {
+		result[i] = &types.MediaVariant{
+			Id:         strconv.Itoa(v.TaskID),
+			MediaId:    mediaIDStr,
+			ProfileId:  strconv.Itoa(v.ProfileID),
+			Resolution: v.Resolution,
+			Url:        v.OutputPath,
+			Size:       0,
+			Status:     string(v.Status),
+		}
+	}
+	
+	return &media.GetMediaVariantsResponse{Variants: result}, nil
 }
 
 // SSEHandler handles Server-Sent Events for transcoding progress.
@@ -310,7 +325,8 @@ func (s *MediaService) SSEHandler(w stdhttp.ResponseWriter, r *stdhttp.Request) 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	ctx := r.Context()
-	events, cleanup := s.uc.Subscribe(ctx, mediaID)
+	mediaIDStr := strconv.FormatInt(mediaID, 10)
+	events, cleanup := s.uc.Subscribe(ctx, mediaIDStr)
 	defer cleanup()
 
 	// Keep-alive ticker
@@ -333,66 +349,23 @@ func (s *MediaService) SSEHandler(w stdhttp.ResponseWriter, r *stdhttp.Request) 
 			}
 			fmt.Fprintf(
 				w,
-				"event: transcoding_progress\ndata: {\"media_id\": %d, \"task_id\": %d, \"status\": \"%s\", \"progress\": %d}\n\n",
+				"event: transcoding_progress\ndata: {\"media_id\": %s, \"task_id\": %s, \"status\": \"%s\"}\n\n",
 				ev.MediaId,
 				ev.Task.Id,
-				ev.Task.Status,
-				ev.Task.Progress,
+				string(ev.Task.Status),
 			)
 			flusher.Flush()
 		}
 	}
 }
 
-// TranscodingStatusHTTPHandler handles GET /api/v1/medias/transcoding/status with query parameters.
-// This bypasses the gRPC gateway to properly pass status/page/page_size from query string.
+// TranscodingStatusHTTPHandler handles GET /api/v1/medias/transcoding/status.
+// Returns aggregated encoding status counts.
 func (s *MediaService) TranscodingStatusHTTPHandler(w stdhttp.ResponseWriter, r *stdhttp.Request) {
-	filter := &biz.TranscodingStatusFilter{
-		Page:     1,
-		PageSize: 20,
-	}
-
-	if q := r.URL.Query().Get("status"); q != "" {
-		filter.Status = q
-	} else {
-		filter.Status = "active"
-	}
-	if p := r.URL.Query().Get("page"); p != "" {
-		if v, err := strconv.Atoi(p); err == nil && v > 0 {
-			filter.Page = v
-		}
-	}
-	if ps := r.URL.Query().Get("page_size"); ps != "" {
-		if v, err := strconv.Atoi(ps); err == nil && v > 0 && v <= 100 {
-			filter.PageSize = v
-		}
-	}
-
-	status, err := s.uc.GetTranscodingStatus(r.Context(), filter)
+	status, err := s.uc.GetTranscodingStatus(r.Context(), nil)
 	if err != nil {
 		stdhttp.Error(w, err.Error(), stdhttp.StatusInternalServerError)
 		return
-	}
-
-	// Convert to response
-	items := make([]*media.TranscodingMediaItem, len(status.Items))
-	for i, item := range status.Items {
-		tasks := make([]*types.EncodingTask, len(item.Tasks))
-		for j, t := range item.Tasks {
-			tasks[j] = &types.EncodingTask{
-				Id:           int32(t.Id),
-				MediaId:      t.MediaId,
-				ProfileId:    int32(t.ProfileId),
-				Status:       t.Status,
-				Progress:     int32(t.Progress),
-				OutputPath:   t.OutputPath,
-				ErrorMessage: t.ErrorMessage,
-			}
-		}
-		items[i] = &media.TranscodingMediaItem{
-			Media: item.Media,
-			Tasks: tasks,
-		}
 	}
 
 	resp := map[string]any{
@@ -400,10 +373,6 @@ func (s *MediaService) TranscodingStatusHTTPHandler(w stdhttp.ResponseWriter, r 
 		"pending_count":    status.PendingCount,
 		"failed_count":     status.FailedCount,
 		"success_count":    status.SuccessCount,
-		"total_filtered":   status.TotalFiltered,
-		"page":             status.Page,
-		"page_size":        status.PageSize,
-		"items":            items,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -433,7 +402,7 @@ func (s *MediaService) RetryTaskHTTPHandler(w stdhttp.ResponseWriter, r *stdhttp
 		return
 	}
 
-	task, err := s.uc.RetryTask(r.Context(), taskID)
+	task, err := s.uc.RetryTask(r.Context(), taskIDStr)
 	if err != nil {
 		writeRetryError(w, err.Error(), 422) // Unprocessable Entity
 		return
@@ -446,7 +415,6 @@ func (s *MediaService) RetryTaskHTTPHandler(w stdhttp.ResponseWriter, r *stdhttp
 			"media_id":      task.MediaId,
 			"profile_id":    task.ProfileId,
 			"status":        task.Status,
-			"progress":      task.Progress,
 			"error_message": task.ErrorMessage,
 		},
 	}
@@ -470,10 +438,7 @@ func (s *MediaService) RetryAllFailedHTTPHandler(w stdhttp.ResponseWriter, r *st
 		return
 	}
 
-	var mediaID int64
-	fmt.Sscanf(mediaIDStr, "%d", &mediaID)
-
-	count, err := s.uc.RetryAllFailedTasks(r.Context(), mediaID)
+	count, err := s.uc.RetryAllFailedTasks(r.Context(), mediaIDStr)
 	if err != nil {
 		writeRetryError(w, err.Error(), 500)
 		return
@@ -482,7 +447,7 @@ func (s *MediaService) RetryAllFailedHTTPHandler(w stdhttp.ResponseWriter, r *st
 	resp := map[string]any{
 		"success":     true,
 		"reset_count": count,
-		"media_id":    mediaID,
+		"media_id":    mediaIDStr,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -502,13 +467,22 @@ func writeRetryError(w stdhttp.ResponseWriter, message string, code int) {
 // This is the API that the "media management" page uses to display transcoding overview.
 func (s *MediaService) MediaVariantsHTTPHandler(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 	// Extract media ID from URL path: /api/v1/medias/{id}/variants
-	var mediaID int64
-	_, err := fmt.Sscanf(r.URL.Path, "/api/v1/medias/%d/variants", &mediaID)
-	if err != nil || mediaID <= 0 {
+	path := r.URL.Path
+	// Find the positions of "/medias/" and "/variants"
+	mediasIndex := strings.Index(path, "/medias/")
+	variantsIndex := strings.Index(path, "/variants")
+	if mediasIndex == -1 || variantsIndex == -1 || mediasIndex >= variantsIndex {
+		writeRetryError(w, "invalid media ID in path", 400)
+		return
+	}
+	// Extract the media ID
+	mediaIDStr := path[mediasIndex+8 : variantsIndex]
+	if mediaIDStr == "" {
 		writeRetryError(w, "invalid media ID in path", 400)
 		return
 	}
 
+	mediaID, _ := strconv.ParseInt(mediaIDStr, 10, 64)
 	summary, err := s.uc.GetMediaVariants(r.Context(), mediaID)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
@@ -552,11 +526,23 @@ func (s *MediaService) EncodingTasksHTTPHandler(w stdhttp.ResponseWriter, r *std
 			filter.PageSize = v
 		}
 	}
+	if pr := r.URL.Query().Get("profile"); pr != "" {
+		filter.ProfileFilter = pr
+	}
+	if ch := r.URL.Query().Get("chunk"); ch != "" {
+		filter.ChunkFilter = ch
+	}
+	if se := r.URL.Query().Get("search"); se != "" {
+		filter.SearchQuery = se
+	}
+	if os := r.URL.Query().Get("only_stats"); os == "true" {
+		filter.OnlyStats = true
+	}
 
 	var mediaID *int64
 	if m := r.URL.Query().Get("media_id"); m != "" {
-		var id int64
-		if _, err := fmt.Sscanf(m, "%d", &id); err == nil && id > 0 {
+		id, err := strconv.ParseInt(m, 10, 64)
+		if err == nil && id > 0 {
 			mediaID = &id
 		}
 	}

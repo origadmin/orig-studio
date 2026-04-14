@@ -47,7 +47,7 @@ func (r *playlistRepo) Create(ctx context.Context, p *biz.Playlist) (*biz.Playli
 	return mapPlaylist(ent), nil
 }
 
-func (r *playlistRepo) Get(ctx context.Context, id int) (*biz.Playlist, error) {
+func (r *playlistRepo) Get(ctx context.Context, id string) (*biz.Playlist, error) {
 	ent, err := r.data.db.Playlist.Get(ctx, id)
 	if err != nil {
 		return nil, err
@@ -66,11 +66,11 @@ func (r *playlistRepo) Update(ctx context.Context, p *biz.Playlist) (*biz.Playli
 	return mapPlaylist(ent), nil
 }
 
-func (r *playlistRepo) Delete(ctx context.Context, id int) error {
+func (r *playlistRepo) Delete(ctx context.Context, id string) error {
 	return r.data.db.Playlist.DeleteOneID(id).Exec(ctx)
 }
 
-func (r *playlistRepo) ListByUser(ctx context.Context, userID int, page, pageSize int) ([]*biz.Playlist, int, error) {
+func (r *playlistRepo) ListByUser(ctx context.Context, userID string, page, pageSize int) ([]*biz.Playlist, int, error) {
 	query := r.data.db.Playlist.Query().Where(playlist.UserIDEQ(userID))
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -110,7 +110,7 @@ func (r *playlistRepo) ListAll(ctx context.Context, page, pageSize int) ([]*biz.
 	return res, total, nil
 }
 
-func (r *playlistRepo) AddMedia(ctx context.Context, playlistID, mediaID int) error {
+func (r *playlistRepo) AddMedia(ctx context.Context, playlistID, mediaID string) error {
 	// Check if already in playlist
 	exists, _ := r.data.db.MediaPlaylist.Query().
 		Where(
@@ -138,7 +138,7 @@ func (r *playlistRepo) AddMedia(ctx context.Context, playlistID, mediaID int) er
 		Exec(ctx)
 }
 
-func (r *playlistRepo) RemoveMedia(ctx context.Context, playlistID, mediaID int) error {
+func (r *playlistRepo) RemoveMedia(ctx context.Context, playlistID, mediaID string) error {
 	_, err := r.data.db.MediaPlaylist.Delete().
 		Where(
 			mediaplaylist.PlaylistIDEQ(playlistID),
@@ -147,7 +147,7 @@ func (r *playlistRepo) RemoveMedia(ctx context.Context, playlistID, mediaID int)
 	return err
 }
 
-func (r *playlistRepo) ReorderMedia(ctx context.Context, playlistID int, mediaOrders map[int]int) error {
+func (r *playlistRepo) ReorderMedia(ctx context.Context, playlistID string, mediaOrders map[string]int) error {
 	for mediaID, newOrder := range mediaOrders {
 		err := r.data.db.MediaPlaylist.Update().
 			Where(
@@ -176,7 +176,7 @@ func (r *channelRepo) Create(ctx context.Context, ch *biz.Channel) (*biz.Channel
 	return mapChannel(ent), nil
 }
 
-func (r *channelRepo) Get(ctx context.Context, id int) (*biz.Channel, error) {
+func (r *channelRepo) Get(ctx context.Context, id string) (*biz.Channel, error) {
 	ent, err := r.data.db.Channel.Get(ctx, id)
 	if err != nil {
 		return nil, err
@@ -204,11 +204,11 @@ func (r *channelRepo) Update(ctx context.Context, ch *biz.Channel) (*biz.Channel
 	return mapChannel(ent), nil
 }
 
-func (r *channelRepo) Delete(ctx context.Context, id int) error {
+func (r *channelRepo) Delete(ctx context.Context, id string) error {
 	return r.data.db.Channel.DeleteOneID(id).Exec(ctx)
 }
 
-func (r *channelRepo) ListByUser(ctx context.Context, userID int, page, pageSize int) ([]*biz.Channel, int, error) {
+func (r *channelRepo) ListByUser(ctx context.Context, userID string, page, pageSize int) ([]*biz.Channel, int, error) {
 	query := r.data.db.Channel.Query().Where(channel.UserIDEQ(userID))
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -248,13 +248,13 @@ func (r *channelRepo) ListAll(ctx context.Context, page, pageSize int) ([]*biz.C
 	return res, total, nil
 }
 
-func (r *channelRepo) AddMedia(ctx context.Context, channelID, mediaID int) error {
+func (r *channelRepo) AddMedia(ctx context.Context, channelID, mediaID string) error {
 	return r.data.db.Media.UpdateOneID(mediaID).
 		SetChannelID(channelID).
 		Exec(ctx)
 }
 
-func (r *channelRepo) RemoveMedia(ctx context.Context, channelID, mediaID int) error {
+func (r *channelRepo) RemoveMedia(ctx context.Context, channelID, mediaID string) error {
 	return r.data.db.Media.UpdateOneID(mediaID).
 		ClearChannel().
 		Exec(ctx)
@@ -278,7 +278,7 @@ func mapChannel(ent *entity.Channel) *biz.Channel {
 		Title:         ent.Title,
 		Description:   ent.Description,
 		BannerLogo:    ent.BannerLogo,
-		FriendlyToken: ent.FriendlyToken,
+		FriendlyToken: ent.Slug,
 		UserID:        ent.UserID,
 		CreatedAt:     ent.AddDate,
 	}

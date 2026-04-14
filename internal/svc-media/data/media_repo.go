@@ -32,9 +32,9 @@ func NewMediaRepo(db *entity.Client) biz.MediaRepo {
 
 func (r *mediaRepo) Get(
 	ctx context.Context,
-	id int64,
+	id string,
 ) (*types.Media, error) {
-	m, err := r.db.Media.Get(ctx, int(id))
+	m, err := r.db.Media.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -54,10 +54,10 @@ func (r *mediaRepo) List(
 
 	// Apply filters
 	if opt.UserID != nil {
-		query = query.Where(media.UserIDEQ(int(*opt.UserID)))
+		query = query.Where(media.UserIDEQ(*opt.UserID))
 	}
 	if opt.CategoryID != nil {
-		query = query.Where(media.HasCategoryWith(category.ID(int(*opt.CategoryID))))
+		query = query.Where(media.HasCategoryWith(category.ID(*opt.CategoryID)))
 	}
 	if opt.State != "" {
 		query = query.Where(media.StateEQ(opt.State))
@@ -157,12 +157,11 @@ func (r *mediaRepo) Create(
 	if in.Duration > 0 {
 		create = create.SetDuration(int(in.Duration))
 	}
-	if in.UserId > 0 {
-		create = create.SetUserID(int(in.UserId))
+	if in.UserId != "" {
+		create = create.SetUserID(in.UserId)
 	}
-	if in.CategoryId > 0 {
-		v := int(in.CategoryId)
-		create = create.SetNillableCategoryID(&v)
+	if in.CategoryId != "" {
+		create = create.SetNillableCategoryID(&in.CategoryId)
 	}
 
 	m, err := create.Save(ctx)
@@ -172,11 +171,46 @@ func (r *mediaRepo) Create(
 	return convertMediaToProto(m), nil
 }
 
+// CreateWithEntity creates a new media and returns both entity.Media and types.Media.
+func (r *mediaRepo) CreateWithEntity(
+	ctx context.Context,
+	in *types.Media,
+) (*entity.Media, *types.Media, error) {
+	create := r.db.Media.Create().
+		SetTitle(in.Title).
+		SetURL(in.Url).
+		SetType(in.Type).
+		SetMimeType(in.MimeType).
+		SetSize(fmt.Sprintf("%d", in.Size))
+
+	if in.Description != "" {
+		create = create.SetDescription(in.Description)
+	}
+	if in.Thumbnail != "" {
+		create = create.SetThumbnail(in.Thumbnail)
+	}
+	if in.Duration > 0 {
+		create = create.SetDuration(int(in.Duration))
+	}
+	if in.UserId != "" {
+		create = create.SetUserID(in.UserId)
+	}
+	if in.CategoryId != "" {
+		create = create.SetNillableCategoryID(&in.CategoryId)
+	}
+
+	m, err := create.Save(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	return m, convertMediaToProto(m), nil
+}
+
 func (r *mediaRepo) Update(
 	ctx context.Context,
 	in *types.Media,
 ) (*types.Media, error) {
-	update := r.db.Media.UpdateOneID(int(in.Id)).
+	update := r.db.Media.UpdateOneID(in.Id).
 		SetTitle(in.Title).
 		SetMimeType(in.MimeType).
 		SetSize(fmt.Sprintf("%d", in.Size))
@@ -199,9 +233,8 @@ func (r *mediaRepo) Update(
 	if in.Duration > 0 {
 		update = update.SetDuration(int(in.Duration))
 	}
-	if in.CategoryId > 0 {
-		v := int(in.CategoryId)
-		update = update.SetNillableCategoryID(&v)
+	if in.CategoryId != "" {
+		update = update.SetNillableCategoryID(&in.CategoryId)
 	}
 
 	m, err := update.Save(ctx)
@@ -211,8 +244,8 @@ func (r *mediaRepo) Update(
 	return convertMediaToProto(m), nil
 }
 
-func (r *mediaRepo) Delete(ctx context.Context, id int64) error {
-	return r.db.Media.DeleteOneID(int(id)).Exec(ctx)
+func (r *mediaRepo) Delete(ctx context.Context, id string) error {
+	return r.db.Media.DeleteOneID(id).Exec(ctx)
 }
 
 func (r *mediaRepo) ListCategories(
@@ -238,16 +271,16 @@ func (r *mediaRepo) ListCategories(
 	return result, int32(total), nil
 }
 
-func (r *mediaRepo) GetCategory(ctx context.Context, id int64) (*types.Category, error) {
-	c, err := r.db.Category.Get(ctx, int(id))
+func (r *mediaRepo) GetCategory(ctx context.Context, id string) (*types.Category, error) {
+	c, err := r.db.Category.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	return convertCategoryToProto(c), nil
 }
 
-func (r *mediaRepo) IncrementViewCount(ctx context.Context, id int64) (int64, error) {
-	m, err := r.db.Media.UpdateOneID(int(id)).
+func (r *mediaRepo) IncrementViewCount(ctx context.Context, id string) (int64, error) {
+	m, err := r.db.Media.UpdateOneID(id).
 		AddViewCount(1).
 		Save(ctx)
 	if err != nil {
@@ -256,26 +289,26 @@ func (r *mediaRepo) IncrementViewCount(ctx context.Context, id int64) (int64, er
 	return m.ViewCount, nil
 }
 
-func (r *mediaRepo) UpdateCommentCount(ctx context.Context, id int64, delta int) error {
-	return r.db.Media.UpdateOneID(int(id)).
+func (r *mediaRepo) UpdateCommentCount(ctx context.Context, id string, delta int) error {
+	return r.db.Media.UpdateOneID(id).
 		AddCommentCount(int64(delta)).
 		Exec(ctx)
 }
 
-func (r *mediaRepo) UpdateLikeCount(ctx context.Context, id int64, delta int) error {
-	return r.db.Media.UpdateOneID(int(id)).
+func (r *mediaRepo) UpdateLikeCount(ctx context.Context, id string, delta int) error {
+	return r.db.Media.UpdateOneID(id).
 		AddLikeCount(int64(delta)).
 		Exec(ctx)
 }
 
-func (r *mediaRepo) UpdateDislikeCount(ctx context.Context, id int64, delta int) error {
-	return r.db.Media.UpdateOneID(int(id)).
+func (r *mediaRepo) UpdateDislikeCount(ctx context.Context, id string, delta int) error {
+	return r.db.Media.UpdateOneID(id).
 		AddDislikeCount(int64(delta)).
 		Exec(ctx)
 }
 
-func (r *mediaRepo) UpdateFavoriteCount(ctx context.Context, id int64, delta int) error {
-	return r.db.Media.UpdateOneID(int(id)).
+func (r *mediaRepo) UpdateFavoriteCount(ctx context.Context, id string, delta int) error {
+	return r.db.Media.UpdateOneID(id).
 		AddFavoriteCount(int64(delta)).
 		Exec(ctx)
 }
@@ -376,7 +409,7 @@ func (r *mediaRepo) ResetStaleProcessing(ctx context.Context) (int, error) {
 			).
 			Exec(ctx)
 		if err != nil {
-			return 0, fmt.Errorf("delete orphaned tasks for media %d: %w", m.ID, err)
+			return 0, fmt.Errorf("delete orphaned tasks for media %s: %w", m.ID, err)
 		}
 	}
 
@@ -398,7 +431,7 @@ func convertMediaToProto(m *entity.Media) *types.Media {
 	_, _ = fmt.Sscanf(m.Size, "%d", &size)
 
 	return &types.Media{
-		Id:             int64(m.ID),
+		Id:             m.ID,
 		Title:          m.Title,
 		Description:    m.Description,
 		Type:           m.Type,
@@ -412,7 +445,7 @@ func convertMediaToProto(m *entity.Media) *types.Media {
 		MimeType:       m.MimeType,
 		ViewCount:      m.ViewCount,
 		LikeCount:      m.LikeCount,
-		UserId:         int64(m.UserID),
+		UserId:         m.UserID,
 		CreateTime:     timestamppb.New(m.CreatedAt),
 	}
 }
@@ -420,7 +453,7 @@ func convertMediaToProto(m *entity.Media) *types.Media {
 // convertCategoryToProto converts entity.Category → proto types.Category.
 func convertCategoryToProto(c *entity.Category) *types.Category {
 	return &types.Category{
-		Id:          int64(c.ID),
+		Id:          c.ID,
 		Name:        c.Name,
 		Slug:        c.Slug,
 		Description: c.Description,

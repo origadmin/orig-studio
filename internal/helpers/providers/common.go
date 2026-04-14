@@ -74,5 +74,5 @@ func ProvideServers(app *runtime.App) *transportv1.Servers {
 
 // ProvideJWTManager provides a JWT manager instance with default config.
 func ProvideJWTManager() *auth.Manager {
-	return auth.NewManager(DefaultJWTSecret, DefaultJWTTL)
+	return auth.NewManager(DefaultJWTSecret, DefaultJWTTL, DefaultJWTTL*3)
 }

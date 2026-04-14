@@ -11,48 +11,58 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Category {
+func ID(id string) predicate.Category {
 	return predicate.Category(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Category {
+func IDEQ(id string) predicate.Category {
 	return predicate.Category(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Category {
+func IDNEQ(id string) predicate.Category {
 	return predicate.Category(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Category {
+func IDIn(ids ...string) predicate.Category {
 	return predicate.Category(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Category {
+func IDNotIn(ids ...string) predicate.Category {
 	return predicate.Category(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Category {
+func IDGT(id string) predicate.Category {
 	return predicate.Category(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Category {
+func IDGTE(id string) predicate.Category {
 	return predicate.Category(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Category {
+func IDLT(id string) predicate.Category {
 	return predicate.Category(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Category {
+func IDLTE(id string) predicate.Category {
 	return predicate.Category(sql.FieldLTE(FieldID, id))
+}
+
+// IDEqualFold applies the EqualFold predicate on the ID field.
+func IDEqualFold(id string) predicate.Category {
+	return predicate.Category(sql.FieldEqualFold(FieldID, id))
+}
+
+// IDContainsFold applies the ContainsFold predicate on the ID field.
+func IDContainsFold(id string) predicate.Category {
+	return predicate.Category(sql.FieldContainsFold(FieldID, id))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
@@ -91,7 +101,7 @@ func Color(v string) predicate.Category {
 }
 
 // ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
-func ParentID(v int) predicate.Category {
+func ParentID(v string) predicate.Category {
 	return predicate.Category(sql.FieldEQ(FieldParentID, v))
 }
 
@@ -126,7 +136,7 @@ func IdentityProvider(v string) predicate.Category {
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int) predicate.Category {
+func UserID(v string) predicate.Category {
 	return predicate.Category(sql.FieldEQ(FieldUserID, v))
 }
 
@@ -656,23 +666,58 @@ func ColorContainsFold(v string) predicate.Category {
 }
 
 // ParentIDEQ applies the EQ predicate on the "parent_id" field.
-func ParentIDEQ(v int) predicate.Category {
+func ParentIDEQ(v string) predicate.Category {
 	return predicate.Category(sql.FieldEQ(FieldParentID, v))
 }
 
 // ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
-func ParentIDNEQ(v int) predicate.Category {
+func ParentIDNEQ(v string) predicate.Category {
 	return predicate.Category(sql.FieldNEQ(FieldParentID, v))
 }
 
 // ParentIDIn applies the In predicate on the "parent_id" field.
-func ParentIDIn(vs ...int) predicate.Category {
+func ParentIDIn(vs ...string) predicate.Category {
 	return predicate.Category(sql.FieldIn(FieldParentID, vs...))
 }
 
 // ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
-func ParentIDNotIn(vs ...int) predicate.Category {
+func ParentIDNotIn(vs ...string) predicate.Category {
 	return predicate.Category(sql.FieldNotIn(FieldParentID, vs...))
+}
+
+// ParentIDGT applies the GT predicate on the "parent_id" field.
+func ParentIDGT(v string) predicate.Category {
+	return predicate.Category(sql.FieldGT(FieldParentID, v))
+}
+
+// ParentIDGTE applies the GTE predicate on the "parent_id" field.
+func ParentIDGTE(v string) predicate.Category {
+	return predicate.Category(sql.FieldGTE(FieldParentID, v))
+}
+
+// ParentIDLT applies the LT predicate on the "parent_id" field.
+func ParentIDLT(v string) predicate.Category {
+	return predicate.Category(sql.FieldLT(FieldParentID, v))
+}
+
+// ParentIDLTE applies the LTE predicate on the "parent_id" field.
+func ParentIDLTE(v string) predicate.Category {
+	return predicate.Category(sql.FieldLTE(FieldParentID, v))
+}
+
+// ParentIDContains applies the Contains predicate on the "parent_id" field.
+func ParentIDContains(v string) predicate.Category {
+	return predicate.Category(sql.FieldContains(FieldParentID, v))
+}
+
+// ParentIDHasPrefix applies the HasPrefix predicate on the "parent_id" field.
+func ParentIDHasPrefix(v string) predicate.Category {
+	return predicate.Category(sql.FieldHasPrefix(FieldParentID, v))
+}
+
+// ParentIDHasSuffix applies the HasSuffix predicate on the "parent_id" field.
+func ParentIDHasSuffix(v string) predicate.Category {
+	return predicate.Category(sql.FieldHasSuffix(FieldParentID, v))
 }
 
 // ParentIDIsNil applies the IsNil predicate on the "parent_id" field.
@@ -683,6 +728,16 @@ func ParentIDIsNil() predicate.Category {
 // ParentIDNotNil applies the NotNil predicate on the "parent_id" field.
 func ParentIDNotNil() predicate.Category {
 	return predicate.Category(sql.FieldNotNull(FieldParentID))
+}
+
+// ParentIDEqualFold applies the EqualFold predicate on the "parent_id" field.
+func ParentIDEqualFold(v string) predicate.Category {
+	return predicate.Category(sql.FieldEqualFold(FieldParentID, v))
+}
+
+// ParentIDContainsFold applies the ContainsFold predicate on the "parent_id" field.
+func ParentIDContainsFold(v string) predicate.Category {
+	return predicate.Category(sql.FieldContainsFold(FieldParentID, v))
 }
 
 // SequenceEQ applies the EQ predicate on the "sequence" field.
@@ -901,23 +956,58 @@ func IdentityProviderContainsFold(v string) predicate.Category {
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int) predicate.Category {
+func UserIDEQ(v string) predicate.Category {
 	return predicate.Category(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int) predicate.Category {
+func UserIDNEQ(v string) predicate.Category {
 	return predicate.Category(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int) predicate.Category {
+func UserIDIn(vs ...string) predicate.Category {
 	return predicate.Category(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int) predicate.Category {
+func UserIDNotIn(vs ...string) predicate.Category {
 	return predicate.Category(sql.FieldNotIn(FieldUserID, vs...))
+}
+
+// UserIDGT applies the GT predicate on the "user_id" field.
+func UserIDGT(v string) predicate.Category {
+	return predicate.Category(sql.FieldGT(FieldUserID, v))
+}
+
+// UserIDGTE applies the GTE predicate on the "user_id" field.
+func UserIDGTE(v string) predicate.Category {
+	return predicate.Category(sql.FieldGTE(FieldUserID, v))
+}
+
+// UserIDLT applies the LT predicate on the "user_id" field.
+func UserIDLT(v string) predicate.Category {
+	return predicate.Category(sql.FieldLT(FieldUserID, v))
+}
+
+// UserIDLTE applies the LTE predicate on the "user_id" field.
+func UserIDLTE(v string) predicate.Category {
+	return predicate.Category(sql.FieldLTE(FieldUserID, v))
+}
+
+// UserIDContains applies the Contains predicate on the "user_id" field.
+func UserIDContains(v string) predicate.Category {
+	return predicate.Category(sql.FieldContains(FieldUserID, v))
+}
+
+// UserIDHasPrefix applies the HasPrefix predicate on the "user_id" field.
+func UserIDHasPrefix(v string) predicate.Category {
+	return predicate.Category(sql.FieldHasPrefix(FieldUserID, v))
+}
+
+// UserIDHasSuffix applies the HasSuffix predicate on the "user_id" field.
+func UserIDHasSuffix(v string) predicate.Category {
+	return predicate.Category(sql.FieldHasSuffix(FieldUserID, v))
 }
 
 // UserIDIsNil applies the IsNil predicate on the "user_id" field.
@@ -928,6 +1018,16 @@ func UserIDIsNil() predicate.Category {
 // UserIDNotNil applies the NotNil predicate on the "user_id" field.
 func UserIDNotNil() predicate.Category {
 	return predicate.Category(sql.FieldNotNull(FieldUserID))
+}
+
+// UserIDEqualFold applies the EqualFold predicate on the "user_id" field.
+func UserIDEqualFold(v string) predicate.Category {
+	return predicate.Category(sql.FieldEqualFold(FieldUserID, v))
+}
+
+// UserIDContainsFold applies the ContainsFold predicate on the "user_id" field.
+func UserIDContainsFold(v string) predicate.Category {
+	return predicate.Category(sql.FieldContainsFold(FieldUserID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

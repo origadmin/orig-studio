@@ -4,9 +4,11 @@ import (
 	"time"
 
 	"entgo.io/ent"
-	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+
+	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origcms/internal/helpers/idutil"
 )
 
 // EncodingTask holds the schema definition for the EncodingTask entity.
@@ -17,22 +19,17 @@ type EncodingTask struct {
 // Fields of the EncodingTask.
 func (EncodingTask) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("media_id"),
+		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.DefaultUUIDv7()), // UUIDv7 for distributed system
+		field.String("media_id").MaxLen(36),    // UUID for distributed system
 		field.Int("profile_id"),
-		field.String("status").MaxLen(20).Default("pending"), // pending, processing, success, failed
-		field.Int("progress").Default(0),                     // 0-100
+		field.Enum("status").
+			GoType(enums.EncodingTaskStatusUnknown).
+			Default(string(enums.EncodingTaskStatusPending)),
 		field.String("output_path").MaxLen(512).Optional(),
 		field.Text("error_message").Optional(),
+		field.Bool("chunk").Default(false),
 		field.Time("created_at").Default(time.Now),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
-	}
-}
-
-// Edges of the EncodingTask.
-func (EncodingTask) Edges() []ent.Edge {
-	return []ent.Edge{
-		edge.From("media", Media.Type).Ref("tasks").Field("media_id").Required().Unique(),
-		edge.From("profile", EncodeProfile.Type).Ref("tasks").Field("profile_id").Required().Unique(),
 	}
 }
 

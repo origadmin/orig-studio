@@ -22,13 +22,13 @@ type SubscriptionCreate struct {
 }
 
 // SetSubscriberID sets the "subscriber_id" field.
-func (_c *SubscriptionCreate) SetSubscriberID(v int) *SubscriptionCreate {
+func (_c *SubscriptionCreate) SetSubscriberID(v string) *SubscriptionCreate {
 	_c.mutation.SetSubscriberID(v)
 	return _c
 }
 
 // SetChannelID sets the "channel_id" field.
-func (_c *SubscriptionCreate) SetChannelID(v int) *SubscriptionCreate {
+func (_c *SubscriptionCreate) SetChannelID(v string) *SubscriptionCreate {
 	_c.mutation.SetChannelID(v)
 	return _c
 }
@@ -43,6 +43,20 @@ func (_c *SubscriptionCreate) SetCreatedAt(v time.Time) *SubscriptionCreate {
 func (_c *SubscriptionCreate) SetNillableCreatedAt(v *time.Time) *SubscriptionCreate {
 	if v != nil {
 		_c.SetCreatedAt(*v)
+	}
+	return _c
+}
+
+// SetID sets the "id" field.
+func (_c *SubscriptionCreate) SetID(v string) *SubscriptionCreate {
+	_c.mutation.SetID(v)
+	return _c
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillableID(v *string) *SubscriptionCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }
@@ -96,6 +110,10 @@ func (_c *SubscriptionCreate) defaults() {
 		v := subscription.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.ID(); !ok {
+		v := subscription.DefaultID()
+		_c.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -108,6 +126,11 @@ func (_c *SubscriptionCreate) check() error {
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "Subscription.created_at"`)}
+	}
+	if v, ok := _c.mutation.ID(); ok {
+		if err := subscription.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`entity: validator failed for field "Subscription.id": %w`, err)}
+		}
 	}
 	if len(_c.mutation.SubscriberIDs()) == 0 {
 		return &ValidationError{Name: "subscriber", err: errors.New(`entity: missing required edge "Subscription.subscriber"`)}
@@ -129,8 +152,13 @@ func (_c *SubscriptionCreate) sqlSave(ctx context.Context) (*Subscription, error
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(string); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected Subscription.ID type: %T", _spec.ID.Value)
+		}
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
@@ -139,8 +167,12 @@ func (_c *SubscriptionCreate) sqlSave(ctx context.Context) (*Subscription, error
 func (_c *SubscriptionCreate) createSpec() (*Subscription, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Subscription{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(subscription.Table, sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(subscription.Table, sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString))
 	)
+	if id, ok := _c.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(subscription.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -153,7 +185,7 @@ func (_c *SubscriptionCreate) createSpec() (*Subscription, *sqlgraph.CreateSpec)
 			Columns: []string{subscription.SubscriberColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -170,7 +202,7 @@ func (_c *SubscriptionCreate) createSpec() (*Subscription, *sqlgraph.CreateSpec)
 			Columns: []string{subscription.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -227,10 +259,6 @@ func (_c *SubscriptionCreateBulk) Save(ctx context.Context) ([]*Subscription, er
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

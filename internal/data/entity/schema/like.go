@@ -13,6 +13,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"time"
+
+	"origadmin/application/origcms/internal/helpers/idutil"
 )
 
 type Like struct {
@@ -21,8 +23,9 @@ type Like struct {
 
 func (Like) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("media_id"),
-		field.Int("user_id"),
+		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.DefaultUUIDv7()), // UUIDv7 for distributed system
+		field.String("media_id"),
+		field.String("user_id"),
 		field.String("like_type").MaxLen(10).Default("like"), // like or dislike
 		field.Time("created_at").Default(time.Now),
 	}

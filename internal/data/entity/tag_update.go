@@ -79,14 +79,14 @@ func (_u *TagUpdate) SetNillableListingsThumbnail(v *string) *TagUpdate {
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *TagUpdate) AddUserIDs(ids ...int) *TagUpdate {
+func (_u *TagUpdate) AddUserIDs(ids ...string) *TagUpdate {
 	_u.mutation.AddUserIDs(ids...)
 	return _u
 }
 
 // AddUser adds the "user" edges to the User entity.
 func (_u *TagUpdate) AddUser(v ...*User) *TagUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -105,14 +105,14 @@ func (_u *TagUpdate) ClearUser() *TagUpdate {
 }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (_u *TagUpdate) RemoveUserIDs(ids ...int) *TagUpdate {
+func (_u *TagUpdate) RemoveUserIDs(ids ...string) *TagUpdate {
 	_u.mutation.RemoveUserIDs(ids...)
 	return _u
 }
 
 // RemoveUser removes "user" edges to User entities.
 func (_u *TagUpdate) RemoveUser(v ...*User) *TagUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -199,7 +199,7 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: tag.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -212,7 +212,7 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: tag.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -228,7 +228,7 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: tag.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -308,14 +308,14 @@ func (_u *TagUpdateOne) SetNillableListingsThumbnail(v *string) *TagUpdateOne {
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *TagUpdateOne) AddUserIDs(ids ...int) *TagUpdateOne {
+func (_u *TagUpdateOne) AddUserIDs(ids ...string) *TagUpdateOne {
 	_u.mutation.AddUserIDs(ids...)
 	return _u
 }
 
 // AddUser adds the "user" edges to the User entity.
 func (_u *TagUpdateOne) AddUser(v ...*User) *TagUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -334,14 +334,14 @@ func (_u *TagUpdateOne) ClearUser() *TagUpdateOne {
 }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (_u *TagUpdateOne) RemoveUserIDs(ids ...int) *TagUpdateOne {
+func (_u *TagUpdateOne) RemoveUserIDs(ids ...string) *TagUpdateOne {
 	_u.mutation.RemoveUserIDs(ids...)
 	return _u
 }
 
 // RemoveUser removes "user" edges to User entities.
 func (_u *TagUpdateOne) RemoveUser(v ...*User) *TagUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -458,7 +458,7 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 			Columns: tag.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -471,7 +471,7 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 			Columns: tag.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -487,7 +487,7 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 			Columns: tag.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

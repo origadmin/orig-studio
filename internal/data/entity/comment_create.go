@@ -13,7 +13,6 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // CommentCreate is the builder for creating a Comment entity.
@@ -26,20 +25,6 @@ type CommentCreate struct {
 // SetText sets the "text" field.
 func (_c *CommentCreate) SetText(v string) *CommentCreate {
 	_c.mutation.SetText(v)
-	return _c
-}
-
-// SetUID sets the "uid" field.
-func (_c *CommentCreate) SetUID(v uuid.UUID) *CommentCreate {
-	_c.mutation.SetUID(v)
-	return _c
-}
-
-// SetNillableUID sets the "uid" field if the given value is not nil.
-func (_c *CommentCreate) SetNillableUID(v *uuid.UUID) *CommentCreate {
-	if v != nil {
-		_c.SetUID(*v)
-	}
 	return _c
 }
 
@@ -58,14 +43,28 @@ func (_c *CommentCreate) SetNillableAddDate(v *time.Time) *CommentCreate {
 }
 
 // SetMediaID sets the "media_id" field.
-func (_c *CommentCreate) SetMediaID(v int) *CommentCreate {
+func (_c *CommentCreate) SetMediaID(v string) *CommentCreate {
 	_c.mutation.SetMediaID(v)
 	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *CommentCreate) SetUserID(v int) *CommentCreate {
+func (_c *CommentCreate) SetUserID(v string) *CommentCreate {
 	_c.mutation.SetUserID(v)
+	return _c
+}
+
+// SetID sets the "id" field.
+func (_c *CommentCreate) SetID(v string) *CommentCreate {
+	_c.mutation.SetID(v)
+	return _c
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (_c *CommentCreate) SetNillableID(v *string) *CommentCreate {
+	if v != nil {
+		_c.SetID(*v)
+	}
 	return _c
 }
 
@@ -80,13 +79,13 @@ func (_c *CommentCreate) SetUser(v *User) *CommentCreate {
 }
 
 // SetParentID sets the "parent" edge to the Comment entity by ID.
-func (_c *CommentCreate) SetParentID(id int) *CommentCreate {
+func (_c *CommentCreate) SetParentID(id string) *CommentCreate {
 	_c.mutation.SetParentID(id)
 	return _c
 }
 
 // SetNillableParentID sets the "parent" edge to the Comment entity by ID if the given value is not nil.
-func (_c *CommentCreate) SetNillableParentID(id *int) *CommentCreate {
+func (_c *CommentCreate) SetNillableParentID(id *string) *CommentCreate {
 	if id != nil {
 		_c = _c.SetParentID(*id)
 	}
@@ -99,14 +98,14 @@ func (_c *CommentCreate) SetParent(v *Comment) *CommentCreate {
 }
 
 // AddReplyIDs adds the "replies" edge to the Comment entity by IDs.
-func (_c *CommentCreate) AddReplyIDs(ids ...int) *CommentCreate {
+func (_c *CommentCreate) AddReplyIDs(ids ...string) *CommentCreate {
 	_c.mutation.AddReplyIDs(ids...)
 	return _c
 }
 
 // AddReplies adds the "replies" edges to the Comment entity.
 func (_c *CommentCreate) AddReplies(v ...*Comment) *CommentCreate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -148,13 +147,13 @@ func (_c *CommentCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *CommentCreate) defaults() {
-	if _, ok := _c.mutation.UID(); !ok {
-		v := comment.DefaultUID()
-		_c.mutation.SetUID(v)
-	}
 	if _, ok := _c.mutation.AddDate(); !ok {
 		v := comment.DefaultAddDate()
 		_c.mutation.SetAddDate(v)
+	}
+	if _, ok := _c.mutation.ID(); !ok {
+		v := comment.DefaultID()
+		_c.mutation.SetID(v)
 	}
 }
 
@@ -162,9 +161,6 @@ func (_c *CommentCreate) defaults() {
 func (_c *CommentCreate) check() error {
 	if _, ok := _c.mutation.Text(); !ok {
 		return &ValidationError{Name: "text", err: errors.New(`entity: missing required field "Comment.text"`)}
-	}
-	if _, ok := _c.mutation.UID(); !ok {
-		return &ValidationError{Name: "uid", err: errors.New(`entity: missing required field "Comment.uid"`)}
 	}
 	if _, ok := _c.mutation.AddDate(); !ok {
 		return &ValidationError{Name: "add_date", err: errors.New(`entity: missing required field "Comment.add_date"`)}
@@ -174,6 +170,11 @@ func (_c *CommentCreate) check() error {
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`entity: missing required field "Comment.user_id"`)}
+	}
+	if v, ok := _c.mutation.ID(); ok {
+		if err := comment.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`entity: validator failed for field "Comment.id": %w`, err)}
+		}
 	}
 	if len(_c.mutation.MediaIDs()) == 0 {
 		return &ValidationError{Name: "media", err: errors.New(`entity: missing required edge "Comment.media"`)}
@@ -195,8 +196,13 @@ func (_c *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(string); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected Comment.ID type: %T", _spec.ID.Value)
+		}
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
@@ -205,15 +211,15 @@ func (_c *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Comment{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(comment.Table, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(comment.Table, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString))
 	)
+	if id, ok := _c.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := _c.mutation.Text(); ok {
 		_spec.SetField(comment.FieldText, field.TypeString, value)
 		_node.Text = value
-	}
-	if value, ok := _c.mutation.UID(); ok {
-		_spec.SetField(comment.FieldUID, field.TypeUUID, value)
-		_node.UID = value
 	}
 	if value, ok := _c.mutation.AddDate(); ok {
 		_spec.SetField(comment.FieldAddDate, field.TypeTime, value)
@@ -227,7 +233,7 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 			Columns: []string{comment.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -244,7 +250,7 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 			Columns: []string{comment.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -261,7 +267,7 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 			Columns: []string{comment.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -278,7 +284,7 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 			Columns: []string{comment.RepliesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -334,10 +340,6 @@ func (_c *CommentCreateBulk) Save(ctx context.Context) ([]*Comment, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

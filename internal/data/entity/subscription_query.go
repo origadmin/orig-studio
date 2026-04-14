@@ -131,8 +131,8 @@ func (_q *SubscriptionQuery) FirstX(ctx context.Context) *Subscription {
 
 // FirstID returns the first Subscription ID from the query.
 // Returns a *NotFoundError when no Subscription ID was found.
-func (_q *SubscriptionQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *SubscriptionQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -144,7 +144,7 @@ func (_q *SubscriptionQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *SubscriptionQuery) FirstIDX(ctx context.Context) int {
+func (_q *SubscriptionQuery) FirstIDX(ctx context.Context) string {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -182,8 +182,8 @@ func (_q *SubscriptionQuery) OnlyX(ctx context.Context) *Subscription {
 // OnlyID is like Only, but returns the only Subscription ID in the query.
 // Returns a *NotSingularError when more than one Subscription ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *SubscriptionQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *SubscriptionQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -199,7 +199,7 @@ func (_q *SubscriptionQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *SubscriptionQuery) OnlyIDX(ctx context.Context) int {
+func (_q *SubscriptionQuery) OnlyIDX(ctx context.Context) string {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -227,7 +227,7 @@ func (_q *SubscriptionQuery) AllX(ctx context.Context) []*Subscription {
 }
 
 // IDs executes the query and returns a list of Subscription IDs.
-func (_q *SubscriptionQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (_q *SubscriptionQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
@@ -239,7 +239,7 @@ func (_q *SubscriptionQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *SubscriptionQuery) IDsX(ctx context.Context) []int {
+func (_q *SubscriptionQuery) IDsX(ctx context.Context) []string {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -336,7 +336,7 @@ func (_q *SubscriptionQuery) WithChannel(opts ...func(*UserQuery)) *Subscription
 // Example:
 //
 //	var v []struct {
-//		SubscriberID int `json:"subscriber_id,omitempty"`
+//		SubscriberID string `json:"subscriber_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -359,7 +359,7 @@ func (_q *SubscriptionQuery) GroupBy(field string, fields ...string) *Subscripti
 // Example:
 //
 //	var v []struct {
-//		SubscriberID int `json:"subscriber_id,omitempty"`
+//		SubscriberID string `json:"subscriber_id,omitempty"`
 //	}
 //
 //	client.Subscription.Query().
@@ -450,8 +450,8 @@ func (_q *SubscriptionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 }
 
 func (_q *SubscriptionQuery) loadSubscriber(ctx context.Context, query *UserQuery, nodes []*Subscription, init func(*Subscription), assign func(*Subscription, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Subscription)
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Subscription)
 	for i := range nodes {
 		fk := nodes[i].SubscriberID
 		if _, ok := nodeids[fk]; !ok {
@@ -479,8 +479,8 @@ func (_q *SubscriptionQuery) loadSubscriber(ctx context.Context, query *UserQuer
 	return nil
 }
 func (_q *SubscriptionQuery) loadChannel(ctx context.Context, query *UserQuery, nodes []*Subscription, init func(*Subscription), assign func(*Subscription, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Subscription)
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Subscription)
 	for i := range nodes {
 		fk := nodes[i].ChannelID
 		if _, ok := nodeids[fk]; !ok {
@@ -521,7 +521,7 @@ func (_q *SubscriptionQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (_q *SubscriptionQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(subscription.Table, subscription.Columns, sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(subscription.Table, subscription.Columns, sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

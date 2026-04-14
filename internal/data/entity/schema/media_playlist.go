@@ -12,6 +12,8 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"time"
+
+	"origadmin/application/origcms/internal/helpers/idutil"
 )
 
 type MediaPlaylist struct {
@@ -20,8 +22,9 @@ type MediaPlaylist struct {
 
 func (MediaPlaylist) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("playlist_id"),
-		field.Int("media_id"),
+		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.DefaultUUIDv7()), // UUIDv7 for distributed system
+		field.String("playlist_id"),
+		field.String("media_id"),
 		field.Int("ordering").Default(1),
 		field.Time("action_date").Default(time.Now),
 	}

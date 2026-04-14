@@ -13,6 +13,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"time"
+
+	"origadmin/application/origcms/internal/helpers/idutil"
 )
 
 type Subscription struct {
@@ -21,8 +23,9 @@ type Subscription struct {
 
 func (Subscription) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("subscriber_id"),
-		field.Int("channel_id"),
+		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.DefaultUUIDv7()), // UUIDv7 for distributed system
+		field.String("subscriber_id"),
+		field.String("channel_id"),
 		field.Time("created_at").Default(time.Now),
 	}
 }

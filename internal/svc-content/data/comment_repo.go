@@ -51,7 +51,7 @@ func (r *commentRepo) Create(ctx context.Context, c *biz.Comment) (*biz.Comment,
 	return mapComment(ent), nil
 }
 
-func (r *commentRepo) Get(ctx context.Context, id int) (*biz.Comment, error) {
+func (r *commentRepo) Get(ctx context.Context, id string) (*biz.Comment, error) {
 	ent, err := r.data.db.Comment.Get(ctx, id)
 	if err != nil {
 		return nil, err
@@ -69,11 +69,11 @@ func (r *commentRepo) Update(ctx context.Context, c *biz.Comment) (*biz.Comment,
 	return mapComment(ent), nil
 }
 
-func (r *commentRepo) Delete(ctx context.Context, id int) error {
+func (r *commentRepo) Delete(ctx context.Context, id string) error {
 	return r.data.db.Comment.DeleteOneID(id).Exec(ctx)
 }
 
-func (r *commentRepo) ListByMedia(ctx context.Context, mediaID int, page, pageSize int) ([]*biz.Comment, int, error) {
+func (r *commentRepo) ListByMedia(ctx context.Context, mediaID string, page, pageSize int) ([]*biz.Comment, int, error) {
 	query := r.data.db.Comment.Query().Where(comment.MediaIDEQ(mediaID))
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -126,7 +126,6 @@ func (r *commentRepo) ListAll(ctx context.Context, page, pageSize int) ([]*biz.C
 func mapComment(ent *entity.Comment) *biz.Comment {
 	c := &biz.Comment{
 		ID:        ent.ID,
-		UID:       ent.UID,
 		Text:      ent.Text,
 		MediaID:   ent.MediaID,
 		UserID:    ent.UserID,

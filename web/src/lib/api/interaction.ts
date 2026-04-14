@@ -1,3 +1,9 @@
+// @deprecated 此文件已废弃，请直接使用以下替代方案：
+// - 点赞/收藏/分享: 使用 mediaApi (from './media')
+// - 订阅: 使用 channelApi (from './channel')
+// - 关注: 使用 userApi (from './user')
+// 保留此文件仅为向后兼容，新代码请勿使用
+
 // API 客户端 - 交互模块（点赞、收藏、订阅、分享）
 // 对应后端 /api/v1/interactions 路径
 import {api} from "../request";

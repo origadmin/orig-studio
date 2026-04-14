@@ -348,8 +348,8 @@ func (_q *UserQuery) FirstX(ctx context.Context) *User {
 
 // FirstID returns the first User ID from the query.
 // Returns a *NotFoundError when no User ID was found.
-func (_q *UserQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *UserQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -361,7 +361,7 @@ func (_q *UserQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *UserQuery) FirstIDX(ctx context.Context) int {
+func (_q *UserQuery) FirstIDX(ctx context.Context) string {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -399,8 +399,8 @@ func (_q *UserQuery) OnlyX(ctx context.Context) *User {
 // OnlyID is like Only, but returns the only User ID in the query.
 // Returns a *NotSingularError when more than one User ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *UserQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -416,7 +416,7 @@ func (_q *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *UserQuery) OnlyIDX(ctx context.Context) int {
+func (_q *UserQuery) OnlyIDX(ctx context.Context) string {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -444,7 +444,7 @@ func (_q *UserQuery) AllX(ctx context.Context) []*User {
 }
 
 // IDs executes the query and returns a list of User IDs.
-func (_q *UserQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (_q *UserQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
@@ -456,7 +456,7 @@ func (_q *UserQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *UserQuery) IDsX(ctx context.Context) []int {
+func (_q *UserQuery) IDsX(ctx context.Context) []string {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -850,7 +850,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 
 func (_q *UserQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes []*User, init func(*User), assign func(*User, *Media)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
+	nodeids := make(map[string]*User)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -881,7 +881,7 @@ func (_q *UserQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes []*
 }
 func (_q *UserQuery) loadChannels(ctx context.Context, query *ChannelQuery, nodes []*User, init func(*User), assign func(*User, *Channel)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
+	nodeids := make(map[string]*User)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -911,8 +911,8 @@ func (_q *UserQuery) loadChannels(ctx context.Context, query *ChannelQuery, node
 }
 func (_q *UserQuery) loadPlaylists(ctx context.Context, query *PlaylistQuery, nodes []*User, init func(*User), assign func(*User, *Playlist)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*User)
-	nids := make(map[int]map[*User]struct{})
+	byID := make(map[string]*User)
+	nids := make(map[string]map[*User]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -941,11 +941,11 @@ func (_q *UserQuery) loadPlaylists(ctx context.Context, query *PlaylistQuery, no
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(sql.NullString)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := values[0].(*sql.NullString).String
+				inValue := values[1].(*sql.NullString).String
 				if nids[inValue] == nil {
 					nids[inValue] = map[*User]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -972,7 +972,7 @@ func (_q *UserQuery) loadPlaylists(ctx context.Context, query *PlaylistQuery, no
 }
 func (_q *UserQuery) loadComments(ctx context.Context, query *CommentQuery, nodes []*User, init func(*User), assign func(*User, *Comment)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
+	nodeids := make(map[string]*User)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -1003,7 +1003,7 @@ func (_q *UserQuery) loadComments(ctx context.Context, query *CommentQuery, node
 }
 func (_q *UserQuery) loadNotifications(ctx context.Context, query *NotificationQuery, nodes []*User, init func(*User), assign func(*User, *Notification)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*User)
+	byID := make(map[string]*User)
 	nids := make(map[int]map[*User]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
@@ -1033,10 +1033,10 @@ func (_q *UserQuery) loadNotifications(ctx context.Context, query *NotificationQ
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(sql.NullString)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
+				outValue := values[0].(*sql.NullString).String
 				inValue := int(values[1].(*sql.NullInt64).Int64)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*User]struct{}{byID[outValue]: {}}
@@ -1064,7 +1064,7 @@ func (_q *UserQuery) loadNotifications(ctx context.Context, query *NotificationQ
 }
 func (_q *UserQuery) loadCategories(ctx context.Context, query *CategoryQuery, nodes []*User, init func(*User), assign func(*User, *Category)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
+	nodeids := make(map[string]*User)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -1095,7 +1095,7 @@ func (_q *UserQuery) loadCategories(ctx context.Context, query *CategoryQuery, n
 }
 func (_q *UserQuery) loadTags(ctx context.Context, query *TagQuery, nodes []*User, init func(*User), assign func(*User, *Tag)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*User)
+	byID := make(map[string]*User)
 	nids := make(map[int]map[*User]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
@@ -1125,10 +1125,10 @@ func (_q *UserQuery) loadTags(ctx context.Context, query *TagQuery, nodes []*Use
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(sql.NullString)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
+				outValue := values[0].(*sql.NullString).String
 				inValue := int(values[1].(*sql.NullInt64).Int64)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*User]struct{}{byID[outValue]: {}}
@@ -1156,7 +1156,7 @@ func (_q *UserQuery) loadTags(ctx context.Context, query *TagQuery, nodes []*Use
 }
 func (_q *UserQuery) loadFavorites(ctx context.Context, query *FavoriteQuery, nodes []*User, init func(*User), assign func(*User, *Favorite)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
+	nodeids := make(map[string]*User)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -1186,7 +1186,7 @@ func (_q *UserQuery) loadFavorites(ctx context.Context, query *FavoriteQuery, no
 }
 func (_q *UserQuery) loadLikes(ctx context.Context, query *LikeQuery, nodes []*User, init func(*User), assign func(*User, *Like)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
+	nodeids := make(map[string]*User)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -1216,7 +1216,7 @@ func (_q *UserQuery) loadLikes(ctx context.Context, query *LikeQuery, nodes []*U
 }
 func (_q *UserQuery) loadSubscriptions(ctx context.Context, query *SubscriptionQuery, nodes []*User, init func(*User), assign func(*User, *Subscription)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
+	nodeids := make(map[string]*User)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -1246,7 +1246,7 @@ func (_q *UserQuery) loadSubscriptions(ctx context.Context, query *SubscriptionQ
 }
 func (_q *UserQuery) loadSubscribers(ctx context.Context, query *SubscriptionQuery, nodes []*User, init func(*User), assign func(*User, *Subscription)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
+	nodeids := make(map[string]*User)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -1288,7 +1288,7 @@ func (_q *UserQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (_q *UserQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeString))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

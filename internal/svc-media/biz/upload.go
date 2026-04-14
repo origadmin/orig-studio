@@ -18,15 +18,17 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/uuid"
 
+	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/helpers/ffmpeg"
 	"origadmin/application/origcms/internal/pubsub"
 )
 
+// Upload status constants
 const (
-	StatusPending   = "pending"
-	StatusUploading = "uploading"
-	StatusCompleted = "completed"
-	StatusAborted   = "aborted"
+	StatusPending   = enums.UploadStatusPending
+	StatusUploading = enums.UploadStatusUploading
+	StatusCompleted = enums.UploadStatusCompleted
+	StatusAborted   = enums.UploadStatusAborted
 )
 
 // UploadSession represents an upload session for multipart uploads.
@@ -40,10 +42,10 @@ type UploadSession struct {
 	UploadedSize int64          `json:"uploaded_size"`
 	Title        string         `json:"title"`
 	Description  string         `json:"description"`
-	CategoryID   *int64         `json:"category_id"`
+	CategoryID   *string        `json:"category_id"`
 	Tags         []string       `json:"tags"`
-	UserID       *int64         `json:"user_id"`
-	Status       string         `json:"status"`
+	UserID       *string        `json:"user_id"`
+	Status       enums.UploadStatus `json:"status"`
 	Thumbnail    string         `json:"thumbnail"`
 	Parts        map[int]string `json:"parts"` // part_number -> etag
 	Sha256       string         `json:"sha256"`
@@ -62,8 +64,8 @@ type UploadRepo interface {
 	DeleteSession(ctx context.Context, uploadID string) error
 	ListSessions(
 		ctx context.Context,
-		userID int64,
-		status string,
+		userID string,
+		status enums.UploadStatus,
 		page, pageSize int,
 	) ([]*UploadSession, int, error)
 	// DeleteExpiredSessions finds and deletes sessions that have expired.
@@ -119,10 +121,10 @@ func (uc *UploadUseCase) InitiateMultipartUpload(
 	fileSize int64,
 	contentType string,
 	title, description string,
-	categoryID *int64,
+	categoryID *string,
 	tags []string,
 	thumbnail string,
-	userID *int64,
+	userID *string,
 ) (*UploadSession, error) {
 	uploadID := uuid.New().String()
 	totalParts := int(math.Ceil(float64(fileSize) / float64(uc.chunkSize)))
@@ -192,7 +194,7 @@ func (uc *UploadUseCase) UpdateUploadMetadata(
 	ctx context.Context,
 	uploadID string,
 	title, description string,
-	categoryID *int64,
+	categoryID *string,
 	tags []string,
 	thumbnail string,
 ) error {
@@ -227,7 +229,7 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 	uploadID string,
 	sha256 string,
 	title, description string,
-	categoryID *int64,
+	categoryID *string,
 	tags []string,
 	thumbnail string,
 ) (*Media, error) {
@@ -300,7 +302,7 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 		Thumbnail:      finalThumbnail,
 		Tags:           finalTags,
 		Duration:       int32(duration.Seconds()),
-		EncodingStatus: "pending",
+		EncodingStatus: string(enums.MediaEncodingStatusPending),
 	}
 	if finalCategoryID != nil {
 		media.CategoryId = *finalCategoryID
@@ -319,7 +321,7 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 		media.Type = "audio"
 	}
 
-	createdMedia, err := uc.mediaRepo.Create(ctx, media)
+	entityMedia, createdMedia, err := uc.mediaRepo.CreateWithEntity(ctx, media)
 	if err != nil {
 		return nil, err
 	}
@@ -335,13 +337,15 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 	// Background media processing (Thumbnail + HLS Transcoding)
 	if strings.HasPrefix(session.ContentType, "video/") {
 		payload, _ := json.Marshal(MediaEncodeRequest{
-			MediaID:     createdMedia.Id,
+			MediaID:     entityMedia.ID,
 			MediaPath:   finalPath,
 			ContentType: session.ContentType,
 		})
 		msg := pubsub.NewMessage(payload)
-		if err := uc.publisher.Publish(pubsub.MediaEncodeRequestTopic, msg); err != nil {
-			uc.log.Errorf("failed to publish encode request for media %d: %v", createdMedia.Id, err)
+		if uc.publisher != nil {
+			if err := uc.publisher.Publish(pubsub.MediaEncodeRequestTopic, msg); err != nil {
+				uc.log.Errorf("failed to publish encode request for media %s: %v", entityMedia.ID, err)
+			}
 		}
 	}
 
@@ -372,8 +376,8 @@ func (uc *UploadUseCase) GetSession(ctx context.Context, uploadID string) (*Uplo
 
 func (uc *UploadUseCase) ListSessions(
 	ctx context.Context,
-	userID int64,
-	status string,
+	userID string,
+	status enums.UploadStatus,
 	page, pageSize int,
 ) ([]*UploadSession, int, error) {
 	return uc.repo.ListSessions(ctx, userID, status, page, pageSize)
@@ -399,7 +403,7 @@ func (uc *UploadUseCase) CleanupExpiredSessions(ctx context.Context) error {
 // It validates the media state, cleans up old encoding tasks, resets the status,
 // and publishes a new encode request to the transcode pipeline.
 // Uses mutex to prevent concurrent retry of the same media.
-func (uc *UploadUseCase) RetryTranscode(ctx context.Context, mediaID int64) error {
+func (uc *UploadUseCase) RetryTranscode(ctx context.Context, mediaID string) error {
 	uc.mu.Lock()
 	defer uc.mu.Unlock()
 
@@ -409,7 +413,7 @@ func (uc *UploadUseCase) RetryTranscode(ctx context.Context, mediaID int64) erro
 	}
 
 	// Only allow retry for failed media — do not interrupt in-progress tasks
-	if media.EncodingStatus != "failed" {
+	if media.EncodingStatus != string(enums.MediaEncodingStatusFailed) {
 		return fmt.Errorf(
 			"cannot retry media with status %q, only 'failed' allowed",
 			media.EncodingStatus,
@@ -423,11 +427,11 @@ func (uc *UploadUseCase) RetryTranscode(ctx context.Context, mediaID int64) erro
 
 	// Delete old encoding tasks (they'll be recreated by the transcode handler)
 	if err := uc.encodingRepo.DeleteByMedia(ctx, mediaID); err != nil {
-		uc.log.Warnf("failed to delete old encoding tasks for media %d: %v", mediaID, err)
+		uc.log.Warnf("failed to delete old encoding tasks for media %s: %v", mediaID, err)
 	}
 
 	// Reset media status to pending
-	media.EncodingStatus = "pending"
+	media.EncodingStatus = string(enums.MediaEncodingStatusPending)
 	if _, err := uc.mediaRepo.Update(ctx, media); err != nil {
 		return fmt.Errorf("failed to reset media status: %w", err)
 	}
@@ -443,6 +447,6 @@ func (uc *UploadUseCase) RetryTranscode(ctx context.Context, mediaID int64) erro
 		return fmt.Errorf("failed to publish encode request: %w", err)
 	}
 
-	uc.log.Infof("retry transcoding requested for media %d", mediaID)
+	uc.log.Infof("retry transcoding requested for media %s", mediaID)
 	return nil
 }

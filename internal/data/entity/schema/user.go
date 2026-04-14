@@ -6,13 +6,15 @@
 package schema
 
 import (
+	"origadmin/application/origcms/internal/helpers/idutil"
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"time"
 )
 
 type User struct {
@@ -21,6 +23,7 @@ type User struct {
 
 func (User) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.DefaultUUIDv7()), // UUIDv7 for distributed system
 		field.String("username").NotEmpty().Unique().MaxLen(150),
 		field.String("email").NotEmpty().Unique().MaxLen(254),
 		field.String("password").MaxLen(256),

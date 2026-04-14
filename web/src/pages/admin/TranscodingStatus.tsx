@@ -9,7 +9,7 @@
 
 import {useEffect, useState, useCallback, useMemo} from "react";
 import {useLocation, useNavigate} from "@tanstack/react-router";
-import {mediaApi, encodingApi} from "../../lib/api/media";
+import {mediaApi, encodingApi, type EncodeProfile} from "../../lib/api/media";
 import {API_BASE_URL} from "../../lib/request";
 import {useAuth} from "../../hooks/useAuth";
 import {useTranscoding} from "../../hooks/useTranscoding";
@@ -54,7 +54,6 @@ interface EncodingTask {
     profile_id: number;
     profile_name?: string;
     status: string;
-    progress: number;
     output_path: string;
     error_message: string;
     created_at?: any;
@@ -150,6 +149,7 @@ function TaskRow({
     return (
         <>
             <TableRow
+                key={`task-${task.id}`}
                 className={`group hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors ${isSelected ? 'bg-muted/30' : ''}`}>
                 <TableCell className="w-[50px]">
                     <Checkbox
@@ -176,9 +176,9 @@ function TaskRow({
                 </TableCell>
 
                 {/* PROFILE */}
-                <TableCell className="w-[120px]">
+                <TableCell className="w-[120px] whitespace-nowrap">
                     <Badge variant="outline"
-                           className="font-mono text-[11px] px-2 py-0 h-6 border-dashed border-slate-300 dark:border-slate-600">
+                           className="font-mono text-[11px] px-2 py-0 h-6 border-dashed border-slate-300 dark:border-slate-600 whitespace-nowrap">
                         {profileName(task)}
                     </Badge>
                 </TableCell>
@@ -191,12 +191,12 @@ function TaskRow({
                                 <span
                                     className="text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-tight">Processing</span>
                                 <span
-                                    className="text-[10px] tabular-nums font-bold text-slate-600 dark:text-slate-400">{task.progress}%</span>
+                                    className="text-[10px] tabular-nums font-bold text-slate-600 dark:text-slate-400">50%</span>
                             </div>
                             <div className="h-2.5 w-full bg-sky-100 dark:bg-sky-950/30 rounded-full overflow-hidden">
                                 <div
                                     className="h-full bg-sky-600 transition-all duration-500 ease-out animate-pulse"
-                                    style={{width: `${task.progress}%`}}
+                                    style={{width: `50%`}}
                                 />
                             </div>
                         </div>
@@ -310,7 +310,7 @@ function TaskRow({
             </TableRow>
             {/* Error message row */}
             {showError && (isSkipped || isFailed) && task.error_message && (
-                <TableRow>
+                <TableRow key={`error-${task.id}`}>
                     <TableCell colSpan={9}
                                className="bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-800">
                         <div className="p-4">
@@ -378,20 +378,21 @@ export default function TranscodingStatus() {
     const urlMediaId = new URLSearchParams(location.search).get("media_id");
     const {token, isAuthenticated} = useAuth();
 
-    const [data, setData] = useState<EncodingTaskListResponse | null>(null);
+    // State for filtered tasks and stats (used for filter buttons and task list)
+    const [filteredData, setFilteredData] = useState<EncodingTaskListResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<StatusFilter>("all");
     const [page, setPage] = useState(1);
     const [retryingTaskId, setRetryingTaskId] = useState<number | null>(null);
+    const [encodeProfiles, setEncodeProfiles] = useState<EncodeProfile[]>([]);
 
-    // Applied states (used for filtering/fetching)
-    // Initially empty string to show placeholder
+    // Applied filters (used for fetching data)
     const [searchQuery, setSearchQuery] = useState('');
     const [profileFilter, setProfileFilter] = useState<string>('');
     const [statusFilter, setStatusFilter] = useState<StatusFilter | ''>('');
     const [chunkFilter, setChunkFilter] = useState<string>('');
 
-    // Pending states (used in the UI inputs)
+    // Pending filters (used in UI inputs)
     const [pendingSearchQuery, setPendingSearchQuery] = useState('');
     const [pendingProfileFilter, setPendingProfileFilter] = useState<string>('');
     const [pendingStatusFilter, setPendingStatusFilter] = useState<StatusFilter | ''>('');
@@ -399,6 +400,8 @@ export default function TranscodingStatus() {
 
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     const [sortConfig, setSortConfig] = useState<{ key: keyof EncodingTask, direction: 'asc' | 'desc' } | null>(null);
+    
+    // Total stats for card area (always complete, never filtered)
     const [totalStats, setTotalStats] = useState<{
         total: number;
         pending: number;
@@ -413,10 +416,12 @@ export default function TranscodingStatus() {
 
     const {lastEvent, sseStatus} = useTranscoding(undefined);
 
-    // Fetch total stats from /encoding/status endpoint
+    // Fetch total stats (card area) - always complete data
     const fetchTotalStats = useCallback(async () => {
         try {
-            const response = await encodingApi.getStatus();
+            const response = await encodingApi.getTasks({
+                only_stats: true
+            });
             setTotalStats({
                 total: response.processing_count + response.pending_count + response.success_count + response.failed_count,
                 pending: response.pending_count,
@@ -428,17 +433,52 @@ export default function TranscodingStatus() {
         }
     }, []);
 
-    const fetchTasks = useCallback(async (filter: StatusFilter | '', pageNum: number, mediaId?: string | null) => {
+    // Fetch encoding profiles for filter dropdown
+    const fetchEncodeProfiles = useCallback(async () => {
         try {
-            const response = await encodingApi.getTasks({
-                status: filter === '' ? 'all' : filter,
+            const response = await encodingApi.profiles.list();
+            setEncodeProfiles(response.profiles || []);
+        } catch (error) {
+            console.error("Failed to fetch encode profiles:", error);
+        }
+    }, []);
+
+    // Fetch filtered tasks and stats (filter buttons and task list)
+    const fetchFilteredTasks = useCallback(async (
+        status: StatusFilter | '', 
+        pageNum: number, 
+        mediaId?: string | null,
+        profile?: string,
+        chunk?: string,
+        search?: string
+    ) => {
+        try {
+            const params: any = {
                 page: pageNum,
                 page_size: 25,
-                media_id: mediaId ? parseInt(mediaId, 10) : undefined,
-            });
-            setData(response as unknown as EncodingTaskListResponse);
+            };
+            
+            if (status !== '') {
+                params.status = status;
+            }
+            
+            if (mediaId) {
+                params.media_id = parseInt(mediaId, 10);
+            }
+            if (profile && profile !== '') {
+                params.profile = profile;
+            }
+            if (chunk && chunk !== '') {
+                params.chunk = chunk;
+            }
+            if (search && search !== '') {
+                params.search = search;
+            }
+            
+            const response = await encodingApi.getTasks(params);
+            setFilteredData(response as unknown as EncodingTaskListResponse);
         } catch (error) {
-            console.error("Failed to fetch encoding tasks:", error);
+            console.error("Failed to fetch filtered tasks:", error);
         } finally {
             setLoading(false);
         }
@@ -457,7 +497,14 @@ export default function TranscodingStatus() {
         }
         setPage(1);
         setLoading(true);
-        fetchTasks(pendingStatusFilter, 1, urlMediaId);
+        fetchFilteredTasks(
+            pendingStatusFilter, 
+            1, 
+            urlMediaId, 
+            pendingProfileFilter, 
+            pendingChunkFilter, 
+            pendingSearchQuery
+        );
     };
 
     const handleReset = () => {
@@ -473,47 +520,73 @@ export default function TranscodingStatus() {
         setActiveTab('all');
         setPage(1);
         setLoading(true);
-        fetchTasks('', 1, urlMediaId);
+        fetchFilteredTasks('', 1, urlMediaId, '', '', '');
     };
 
+    // Handle tab change (status filter)
+    const handleTabChange = (filterVal: StatusFilter) => {
+        setActiveTab(filterVal);
+        const status = filterVal === 'all' ? '' : filterVal;
+        setStatusFilter(status);
+        setPendingStatusFilter(status);
+        setPage(1);
+        setSelectedRows([]);
+        setLoading(true);
+        fetchFilteredTasks(status, 1, urlMediaId, profileFilter, chunkFilter, searchQuery);
+    };
 
-    // Fetch tasks on component mount
+    // Fetch data on component mount
     useEffect(() => {
         setLoading(true);
-        fetchTasks(statusFilter, page, urlMediaId);
+        // Fetch total stats (card area) - only once on mount
+        fetchTotalStats();
+        // Fetch filtered tasks (initial state)
+        fetchFilteredTasks(statusFilter, page, urlMediaId, profileFilter, chunkFilter, searchQuery);
+        // Fetch encoding profiles
+        fetchEncodeProfiles();
     }, []);
 
-    // Fetch total stats on component mount
+    // Refresh total stats periodically (every 60 seconds)
     useEffect(() => {
-        fetchTotalStats();
-        // Refresh total stats every 60 seconds
         const interval = setInterval(fetchTotalStats, 60000);
         return () => clearInterval(interval);
     }, [fetchTotalStats]);
 
+    // Smart polling: only poll when SSE is disconnected
+    useEffect(() => {
+        let interval: NodeJS.Timeout | null = null;
 
-    // SSE 事件处理 - 只更新变化的数据
+        if (!sseStatus.connected) {
+            interval = setInterval(() => {
+                fetchFilteredTasks(statusFilter, page, urlMediaId, profileFilter, chunkFilter, searchQuery);
+            }, 30000); // Poll every 30 seconds when SSE is disconnected
+        }
+
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [sseStatus.connected, statusFilter, page, urlMediaId, profileFilter, chunkFilter, searchQuery, fetchFilteredTasks]);
+    // SSE event handling - only update changed data
     useEffect(() => {
         if (!lastEvent) return;
         if (urlMediaId && lastEvent.media_id !== parseInt(urlMediaId, 10)) return;
 
-        // 优化：只更新变化的任务，而不是整个列表
-        setData(prev => {
-            if (!prev) return prev;
+        // Optimization: only update changed tasks instead of entire list
+        setFilteredData(prev => {
+            if (!prev || !prev.items) return prev;
 
             const updatedItems = prev.items.map(task => {
                 if (task.id === lastEvent.task_id) {
                     return {
                         ...task,
                         status: lastEvent.status,
-                        progress: lastEvent.progress,
                         update_time: new Date().toISOString()
                     };
                 }
                 return task;
             });
 
-            // 更新统计数据
+            // Update statistics
             const pendingCount = updatedItems.filter(t => t.status === 'pending').length;
             const successCount = updatedItems.filter(t => t.status === 'success').length;
             const failedCount = updatedItems.filter(t => t.status === 'failed' || t.status === 'skipped').length;
@@ -530,74 +603,34 @@ export default function TranscodingStatus() {
         });
     }, [lastEvent, urlMediaId]);
 
-    // 智能轮询：只有当 SSE 断开时才进行轮询
-    useEffect(() => {
-        let interval: NodeJS.Timeout | null = null;
+    // Sort logic (filtering is handled by backend)
+const filteredTasks = useMemo(() => {
+    if (!filteredData?.items) return [];
+    
+    // Remove duplicates by id
+    const uniqueTasks = Array.from(new Map(filteredData.items.map(task => [task.id, task])).values());
+    
+    let result = [...uniqueTasks];
 
-        if (!sseStatus.connected) {
-            interval = setInterval(() => {
-                fetchTasks(statusFilter, page, urlMediaId);
-            }, 30000); // SSE 断开时每 30 秒轮询一次
-        }
+    // Sorting
+    if (sortConfig) {
+        result.sort((a, b) => {
+            const aVal = a[sortConfig.key];
+            const bVal = b[sortConfig.key];
 
-        return () => {
-            if (interval) clearInterval(interval);
-        };
-    }, [sseStatus.connected, statusFilter, page, urlMediaId, fetchTasks]);
+            if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+            if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+    }
 
-    // 筛选和排序逻辑
-    const filteredTasks = useMemo(() => {
-        if (!data?.items) return [];
-        let result = [...data.items];
-
-        // 搜索筛选
-        if (searchQuery) {
-            const query = searchQuery.toLowerCase();
-            result = result.filter(t =>
-                t.media_id.toString().includes(query) ||
-                profileName(t).toLowerCase().includes(query) ||
-                t.status.toLowerCase().includes(query)
-            );
-        }
-
-        // 编码配置筛选
-        if (profileFilter !== '') {
-            result = result.filter(t => profileName(t).includes(profileFilter));
-        }
-
-        // 分块配置筛选
-        if (chunkFilter !== '') {
-            result = result.filter(t => profileName(t) === chunkFilter);
-        }
-
-        // 排序
-        if (sortConfig) {
-            result.sort((a, b) => {
-                const aVal = a[sortConfig.key];
-                const bVal = b[sortConfig.key];
-
-                if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-                if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-                return 0;
-            });
-        }
-
-        return result;
-    }, [data?.items, searchQuery, profileFilter, chunkFilter, sortConfig]);
+    return result;
+}, [filteredData?.items, sortConfig]);
 
     // 获取所有可用的配置
     const availableProfiles = useMemo(() => {
-        if (!data?.items) return [];
-        const profiles = new Set<string>();
-        data.items.forEach(t => {
-            const name = profileName(t);
-            if (name.includes('h264')) profiles.add('h264');
-            if (name.includes('h265')) profiles.add('h265');
-            if (name.includes('vp9')) profiles.add('vp9');
-            if (name.includes('preview')) profiles.add('preview');
-        });
-        return Array.from(profiles);
-    }, [data?.items]);
+        return encodeProfiles.map(profile => profile.name).sort();
+    }, [encodeProfiles]);
 
     const handleSort = (key: keyof EncodingTask) => {
         setSortConfig(current => {
@@ -634,7 +667,6 @@ export default function TranscodingStatus() {
                     return {
                         ...task,
                         status: "pending",
-                        progress: 0,
                         update_time: new Date().toISOString()
                     };
                 }
@@ -672,7 +704,6 @@ export default function TranscodingStatus() {
                             return {
                                 ...task,
                                 status: "failed",
-                                progress: 0,
                                 update_time: new Date().toISOString()
                             };
                         }
@@ -714,7 +745,6 @@ export default function TranscodingStatus() {
                     return {
                         ...task,
                         status: "pending",
-                        progress: 0,
                         update_time: new Date().toISOString()
                     };
                 }
@@ -751,7 +781,6 @@ export default function TranscodingStatus() {
                         return {
                             ...task,
                             status: "failed",
-                            progress: 0,
                             update_time: new Date().toISOString()
                         };
                     }
@@ -778,36 +807,24 @@ export default function TranscodingStatus() {
         }
     };
 
-    const handleTabChange = (value: string) => {
-        const newStatus = value as StatusFilter;
-        setActiveTab(newStatus);
-        const filterVal = newStatus === 'all' ? '' : newStatus;
-        setPendingStatusFilter(filterVal);
-        setStatusFilter(filterVal);
-        setPage(1);
-        setSelectedRows([]);
-        setLoading(true);
-        fetchTasks(filterVal, 1, urlMediaId);
-    };
-
     const clearMediaFilter = () => {
         const params = new URLSearchParams(location.search);
         params.delete("media_id");
         navigate({search: params.toString()});
     };
 
-    // ─── Tab definitions ──
+    // Tab definitions
     const tabs: { value: StatusFilter; label: string; count: number }[] = [
-        {value: "all", label: "全部", count: data?.total_filtered ?? 0},
-        {value: "pending", label: "排队", count: data?.pending_count ?? 0},
-        {value: "success", label: "完成", count: data?.success_count ?? 0},
-        {value: "skipped", label: "失败", count: data?.failed_count ?? 0},
+        {value: "all", label: "全部", count: (filteredData?.pending_count || 0) + (filteredData?.processing_count || 0) + (filteredData?.success_count || 0) + (filteredData?.failed_count || 0)},
+        {value: "pending", label: "排队", count: filteredData?.pending_count ?? 0},
+        {value: "success", label: "完成", count: filteredData?.success_count ?? 0},
+        {value: "failed", label: "失败", count: filteredData?.failed_count ?? 0},
     ];
 
-    const totalPages = Math.ceil((data?.total_filtered ?? 0) / (data?.page_size ?? 25));
+    const totalPages = Math.ceil(((filteredData?.pending_count || 0) + (filteredData?.processing_count || 0) + (filteredData?.success_count || 0) + (filteredData?.failed_count || 0)) / (filteredData?.page_size ?? 25));
 
-    // ─── Loading skeleton ─────────────────────────────
-    if (loading && !data) {
+    // Loading skeleton
+    if (loading && !filteredData) {
         return (
             <div className="space-y-4 p-4 md:p-6 max-w-7xl mx-auto">
                 <Skeleton className="h-7 w-48"/>
@@ -939,21 +956,8 @@ export default function TranscodingStatus() {
                                                     className="justify-center text-center font-medium opacity-70">
                                             --- All ---
                                         </SelectItem>
-                                        <SelectItem value="h264-240">H264 240p</SelectItem>
-                                        <SelectItem value="h264-360">H264 360p</SelectItem>
-                                        <SelectItem value="h264-480">H264 480p</SelectItem>
-                                        <SelectItem value="h264-720">H264 720p</SelectItem>
-                                        <SelectItem value="h264-1080">H264 1080p</SelectItem>
-                                        <SelectItem value="h265-240">H265 240p</SelectItem>
-                                        <SelectItem value="h265-360">H265 360p</SelectItem>
-                                        <SelectItem value="h265-480">H265 480p</SelectItem>
-                                        <SelectItem value="h265-720">H265 720p</SelectItem>
-                                        <SelectItem value="h265-1080">H265 1080p</SelectItem>
-                                        <SelectItem value="vp9-240">VP9 240p</SelectItem>
-                                        <SelectItem value="vp9-360">VP9 360p</SelectItem>
-                                        <SelectItem value="vp9-480">VP9 480p</SelectItem>
-                                        <SelectItem value="vp9-720">VP9 720p</SelectItem>
-                                        <SelectItem value="vp9-1080">VP9 1080p</SelectItem>
+                                        <SelectItem value="true">True (Chunk)</SelectItem>
+                                        <SelectItem value="false">False (Full)</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <div className="flex items-center gap-2 ml-auto lg:ml-0">
@@ -1150,12 +1154,10 @@ export default function TranscodingStatus() {
                                             </div>
                                         </TableHead>
                                         <TableHead
-                                            className="w-[120px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer hover:bg-muted/80"
-                                            onClick={() => handleSort('progress')}
+                                            className="w-[120px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
                                         >
                                             <div className="flex items-center gap-1">
                                                 PROGRESS
-                                                <ArrowUpDown className="h-3 w-3"/>
                                             </div>
                                         </TableHead>
                                         <TableHead
@@ -1201,11 +1203,11 @@ export default function TranscodingStatus() {
                 </CardContent>
             </Card>
 
-            {/* ═══ Pagination ══════════════════════════════ */}
-            {data && data.total_filtered > data.page_size && (
+            {/* Pagination */}
+            {filteredData && ((filteredData.pending_count || 0) + (filteredData.processing_count || 0) + (filteredData.success_count || 0) + (filteredData.failed_count || 0)) > (filteredData.page_size ?? 25) && (
                 <div className="flex items-center justify-between pt-1 text-xs text-muted-foreground">
                     <span className="tabular-nums">
-                        Page {data.page} of {totalPages} · {data.total_filtered} total
+                        Page {filteredData.page} of {totalPages} · {((filteredData.pending_count || 0) + (filteredData.processing_count || 0) + (filteredData.success_count || 0) + (filteredData.failed_count || 0))} total
                     </span>
                     <div className="flex gap-1.5">
                         <Button variant="outline" size="sm" className="h-8 text-xs px-3"

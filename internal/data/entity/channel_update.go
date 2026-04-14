@@ -32,13 +32,13 @@ func (_u *ChannelUpdate) Where(ps ...predicate.Channel) *ChannelUpdate {
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *ChannelUpdate) SetUserID(v int) *ChannelUpdate {
+func (_u *ChannelUpdate) SetUserID(v string) *ChannelUpdate {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *ChannelUpdate) SetNillableUserID(v *int) *ChannelUpdate {
+func (_u *ChannelUpdate) SetNillableUserID(v *string) *ChannelUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -87,16 +87,16 @@ func (_u *ChannelUpdate) SetNillableDescription(v *string) *ChannelUpdate {
 	return _u
 }
 
-// SetFriendlyToken sets the "friendly_token" field.
-func (_u *ChannelUpdate) SetFriendlyToken(v string) *ChannelUpdate {
-	_u.mutation.SetFriendlyToken(v)
+// SetShortToken sets the "short_token" field.
+func (_u *ChannelUpdate) SetShortToken(v string) *ChannelUpdate {
+	_u.mutation.SetShortToken(v)
 	return _u
 }
 
-// SetNillableFriendlyToken sets the "friendly_token" field if the given value is not nil.
-func (_u *ChannelUpdate) SetNillableFriendlyToken(v *string) *ChannelUpdate {
+// SetNillableShortToken sets the "short_token" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableShortToken(v *string) *ChannelUpdate {
 	if v != nil {
-		_u.SetFriendlyToken(*v)
+		_u.SetShortToken(*v)
 	}
 	return _u
 }
@@ -135,14 +135,14 @@ func (_u *ChannelUpdate) SetUser(v *User) *ChannelUpdate {
 }
 
 // AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_u *ChannelUpdate) AddMediumIDs(ids ...int) *ChannelUpdate {
+func (_u *ChannelUpdate) AddMediumIDs(ids ...string) *ChannelUpdate {
 	_u.mutation.AddMediumIDs(ids...)
 	return _u
 }
 
 // AddMedia adds the "media" edges to the Media entity.
 func (_u *ChannelUpdate) AddMedia(v ...*Media) *ChannelUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -167,14 +167,14 @@ func (_u *ChannelUpdate) ClearMedia() *ChannelUpdate {
 }
 
 // RemoveMediumIDs removes the "media" edge to Media entities by IDs.
-func (_u *ChannelUpdate) RemoveMediumIDs(ids ...int) *ChannelUpdate {
+func (_u *ChannelUpdate) RemoveMediumIDs(ids ...string) *ChannelUpdate {
 	_u.mutation.RemoveMediumIDs(ids...)
 	return _u
 }
 
 // RemoveMedia removes "media" edges to Media entities.
 func (_u *ChannelUpdate) RemoveMedia(v ...*Media) *ChannelUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -220,9 +220,9 @@ func (_u *ChannelUpdate) check() error {
 			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "Channel.slug": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.FriendlyToken(); ok {
-		if err := channel.FriendlyTokenValidator(v); err != nil {
-			return &ValidationError{Name: "friendly_token", err: fmt.Errorf(`entity: validator failed for field "Channel.friendly_token": %w`, err)}
+	if v, ok := _u.mutation.ShortToken(); ok {
+		if err := channel.ShortTokenValidator(v); err != nil {
+			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Channel.short_token": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.BannerLogo(); ok {
@@ -246,7 +246,7 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(channel.Table, channel.Columns, sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(channel.Table, channel.Columns, sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -263,8 +263,8 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(channel.FieldDescription, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.FriendlyToken(); ok {
-		_spec.SetField(channel.FieldFriendlyToken, field.TypeString, value)
+	if value, ok := _u.mutation.ShortToken(); ok {
+		_spec.SetField(channel.FieldShortToken, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.BannerLogo(); ok {
 		_spec.SetField(channel.FieldBannerLogo, field.TypeString, value)
@@ -280,7 +280,7 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{channel.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -293,7 +293,7 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{channel.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -309,7 +309,7 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{channel.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -322,7 +322,7 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{channel.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -338,7 +338,7 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{channel.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -369,13 +369,13 @@ type ChannelUpdateOne struct {
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *ChannelUpdateOne) SetUserID(v int) *ChannelUpdateOne {
+func (_u *ChannelUpdateOne) SetUserID(v string) *ChannelUpdateOne {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *ChannelUpdateOne) SetNillableUserID(v *int) *ChannelUpdateOne {
+func (_u *ChannelUpdateOne) SetNillableUserID(v *string) *ChannelUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -424,16 +424,16 @@ func (_u *ChannelUpdateOne) SetNillableDescription(v *string) *ChannelUpdateOne 
 	return _u
 }
 
-// SetFriendlyToken sets the "friendly_token" field.
-func (_u *ChannelUpdateOne) SetFriendlyToken(v string) *ChannelUpdateOne {
-	_u.mutation.SetFriendlyToken(v)
+// SetShortToken sets the "short_token" field.
+func (_u *ChannelUpdateOne) SetShortToken(v string) *ChannelUpdateOne {
+	_u.mutation.SetShortToken(v)
 	return _u
 }
 
-// SetNillableFriendlyToken sets the "friendly_token" field if the given value is not nil.
-func (_u *ChannelUpdateOne) SetNillableFriendlyToken(v *string) *ChannelUpdateOne {
+// SetNillableShortToken sets the "short_token" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableShortToken(v *string) *ChannelUpdateOne {
 	if v != nil {
-		_u.SetFriendlyToken(*v)
+		_u.SetShortToken(*v)
 	}
 	return _u
 }
@@ -472,14 +472,14 @@ func (_u *ChannelUpdateOne) SetUser(v *User) *ChannelUpdateOne {
 }
 
 // AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_u *ChannelUpdateOne) AddMediumIDs(ids ...int) *ChannelUpdateOne {
+func (_u *ChannelUpdateOne) AddMediumIDs(ids ...string) *ChannelUpdateOne {
 	_u.mutation.AddMediumIDs(ids...)
 	return _u
 }
 
 // AddMedia adds the "media" edges to the Media entity.
 func (_u *ChannelUpdateOne) AddMedia(v ...*Media) *ChannelUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -504,14 +504,14 @@ func (_u *ChannelUpdateOne) ClearMedia() *ChannelUpdateOne {
 }
 
 // RemoveMediumIDs removes the "media" edge to Media entities by IDs.
-func (_u *ChannelUpdateOne) RemoveMediumIDs(ids ...int) *ChannelUpdateOne {
+func (_u *ChannelUpdateOne) RemoveMediumIDs(ids ...string) *ChannelUpdateOne {
 	_u.mutation.RemoveMediumIDs(ids...)
 	return _u
 }
 
 // RemoveMedia removes "media" edges to Media entities.
 func (_u *ChannelUpdateOne) RemoveMedia(v ...*Media) *ChannelUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -570,9 +570,9 @@ func (_u *ChannelUpdateOne) check() error {
 			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "Channel.slug": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.FriendlyToken(); ok {
-		if err := channel.FriendlyTokenValidator(v); err != nil {
-			return &ValidationError{Name: "friendly_token", err: fmt.Errorf(`entity: validator failed for field "Channel.friendly_token": %w`, err)}
+	if v, ok := _u.mutation.ShortToken(); ok {
+		if err := channel.ShortTokenValidator(v); err != nil {
+			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Channel.short_token": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.BannerLogo(); ok {
@@ -596,7 +596,7 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(channel.Table, channel.Columns, sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(channel.Table, channel.Columns, sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`entity: missing "Channel.id" for update`)}
@@ -630,8 +630,8 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(channel.FieldDescription, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.FriendlyToken(); ok {
-		_spec.SetField(channel.FieldFriendlyToken, field.TypeString, value)
+	if value, ok := _u.mutation.ShortToken(); ok {
+		_spec.SetField(channel.FieldShortToken, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.BannerLogo(); ok {
 		_spec.SetField(channel.FieldBannerLogo, field.TypeString, value)
@@ -647,7 +647,7 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 			Columns: []string{channel.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -660,7 +660,7 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 			Columns: []string{channel.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -676,7 +676,7 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 			Columns: []string{channel.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -689,7 +689,7 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 			Columns: []string{channel.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -705,7 +705,7 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 			Columns: []string{channel.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

@@ -10,24 +10,21 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 )
 
 // Playlist is the model entity for the Playlist schema.
 type Playlist struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
-	// FriendlyToken holds the value of the "friendly_token" field.
-	FriendlyToken string `json:"friendly_token,omitempty"`
-	// UID holds the value of the "uid" field.
-	UID uuid.UUID `json:"uid,omitempty"`
+	// ShortToken holds the value of the "short_token" field.
+	ShortToken string `json:"short_token,omitempty"`
 	// UserID holds the value of the "user_id" field.
-	UserID int `json:"user_id,omitempty"`
+	UserID string `json:"user_id,omitempty"`
 	// Privacy holds the value of the "privacy" field.
 	Privacy int `json:"privacy,omitempty"`
 	// AddDate holds the value of the "add_date" field.
@@ -61,14 +58,12 @@ func (*Playlist) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case playlist.FieldID, playlist.FieldUserID, playlist.FieldPrivacy:
+		case playlist.FieldPrivacy:
 			values[i] = new(sql.NullInt64)
-		case playlist.FieldTitle, playlist.FieldDescription, playlist.FieldFriendlyToken:
+		case playlist.FieldID, playlist.FieldTitle, playlist.FieldDescription, playlist.FieldShortToken, playlist.FieldUserID:
 			values[i] = new(sql.NullString)
 		case playlist.FieldAddDate:
 			values[i] = new(sql.NullTime)
-		case playlist.FieldUID:
-			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -85,11 +80,11 @@ func (_m *Playlist) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case playlist.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value.Valid {
+				_m.ID = value.String
 			}
-			_m.ID = int(value.Int64)
 		case playlist.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
@@ -102,23 +97,17 @@ func (_m *Playlist) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Description = value.String
 			}
-		case playlist.FieldFriendlyToken:
+		case playlist.FieldShortToken:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field friendly_token", values[i])
+				return fmt.Errorf("unexpected type %T for field short_token", values[i])
 			} else if value.Valid {
-				_m.FriendlyToken = value.String
-			}
-		case playlist.FieldUID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field uid", values[i])
-			} else if value != nil {
-				_m.UID = *value
+				_m.ShortToken = value.String
 			}
 		case playlist.FieldUserID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				_m.UserID = int(value.Int64)
+				_m.UserID = value.String
 			}
 		case playlist.FieldPrivacy:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -179,14 +168,11 @@ func (_m *Playlist) String() string {
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
 	builder.WriteString(", ")
-	builder.WriteString("friendly_token=")
-	builder.WriteString(_m.FriendlyToken)
-	builder.WriteString(", ")
-	builder.WriteString("uid=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UID))
+	builder.WriteString("short_token=")
+	builder.WriteString(_m.ShortToken)
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(_m.UserID)
 	builder.WriteString(", ")
 	builder.WriteString("privacy=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Privacy))

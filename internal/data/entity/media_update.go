@@ -9,7 +9,6 @@ import (
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
-	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
@@ -73,23 +72,23 @@ func (_u *MediaUpdate) ClearDescription() *MediaUpdate {
 	return _u
 }
 
-// SetFriendlyToken sets the "friendly_token" field.
-func (_u *MediaUpdate) SetFriendlyToken(v string) *MediaUpdate {
-	_u.mutation.SetFriendlyToken(v)
+// SetShortToken sets the "short_token" field.
+func (_u *MediaUpdate) SetShortToken(v string) *MediaUpdate {
+	_u.mutation.SetShortToken(v)
 	return _u
 }
 
-// SetNillableFriendlyToken sets the "friendly_token" field if the given value is not nil.
-func (_u *MediaUpdate) SetNillableFriendlyToken(v *string) *MediaUpdate {
+// SetNillableShortToken sets the "short_token" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableShortToken(v *string) *MediaUpdate {
 	if v != nil {
-		_u.SetFriendlyToken(*v)
+		_u.SetShortToken(*v)
 	}
 	return _u
 }
 
-// ClearFriendlyToken clears the value of the "friendly_token" field.
-func (_u *MediaUpdate) ClearFriendlyToken() *MediaUpdate {
-	_u.mutation.ClearFriendlyToken()
+// ClearShortToken clears the value of the "short_token" field.
+func (_u *MediaUpdate) ClearShortToken() *MediaUpdate {
+	_u.mutation.ClearShortToken()
 	return _u
 }
 
@@ -635,13 +634,13 @@ func (_u *MediaUpdate) ClearTags() *MediaUpdate {
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *MediaUpdate) SetUserID(v int) *MediaUpdate {
+func (_u *MediaUpdate) SetUserID(v string) *MediaUpdate {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *MediaUpdate) SetNillableUserID(v *int) *MediaUpdate {
+func (_u *MediaUpdate) SetNillableUserID(v *string) *MediaUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -649,13 +648,13 @@ func (_u *MediaUpdate) SetNillableUserID(v *int) *MediaUpdate {
 }
 
 // SetCategoryID sets the "category_id" field.
-func (_u *MediaUpdate) SetCategoryID(v int) *MediaUpdate {
+func (_u *MediaUpdate) SetCategoryID(v string) *MediaUpdate {
 	_u.mutation.SetCategoryID(v)
 	return _u
 }
 
 // SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (_u *MediaUpdate) SetNillableCategoryID(v *int) *MediaUpdate {
+func (_u *MediaUpdate) SetNillableCategoryID(v *string) *MediaUpdate {
 	if v != nil {
 		_u.SetCategoryID(*v)
 	}
@@ -669,13 +668,13 @@ func (_u *MediaUpdate) ClearCategoryID() *MediaUpdate {
 }
 
 // SetChannelID sets the "channel_id" field.
-func (_u *MediaUpdate) SetChannelID(v int) *MediaUpdate {
+func (_u *MediaUpdate) SetChannelID(v string) *MediaUpdate {
 	_u.mutation.SetChannelID(v)
 	return _u
 }
 
 // SetNillableChannelID sets the "channel_id" field if the given value is not nil.
-func (_u *MediaUpdate) SetNillableChannelID(v *int) *MediaUpdate {
+func (_u *MediaUpdate) SetNillableChannelID(v *string) *MediaUpdate {
 	if v != nil {
 		_u.SetChannelID(*v)
 	}
@@ -739,14 +738,14 @@ func (_u *MediaUpdate) SetCategory(v *Category) *MediaUpdate {
 }
 
 // AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
-func (_u *MediaUpdate) AddCommentIDs(ids ...int) *MediaUpdate {
+func (_u *MediaUpdate) AddCommentIDs(ids ...string) *MediaUpdate {
 	_u.mutation.AddCommentIDs(ids...)
 	return _u
 }
 
 // AddComments adds the "comments" edges to the Comment entity.
 func (_u *MediaUpdate) AddComments(v ...*Comment) *MediaUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -759,14 +758,14 @@ func (_u *MediaUpdate) SetChannel(v *Channel) *MediaUpdate {
 }
 
 // AddPlaylistIDs adds the "playlists" edge to the MediaPlaylist entity by IDs.
-func (_u *MediaUpdate) AddPlaylistIDs(ids ...int) *MediaUpdate {
+func (_u *MediaUpdate) AddPlaylistIDs(ids ...string) *MediaUpdate {
 	_u.mutation.AddPlaylistIDs(ids...)
 	return _u
 }
 
 // AddPlaylists adds the "playlists" edges to the MediaPlaylist entity.
 func (_u *MediaUpdate) AddPlaylists(v ...*MediaPlaylist) *MediaUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -789,14 +788,14 @@ func (_u *MediaUpdate) AddTagsRel(v ...*MediaTag) *MediaUpdate {
 }
 
 // AddFavoriteIDs adds the "favorites" edge to the Favorite entity by IDs.
-func (_u *MediaUpdate) AddFavoriteIDs(ids ...int) *MediaUpdate {
+func (_u *MediaUpdate) AddFavoriteIDs(ids ...string) *MediaUpdate {
 	_u.mutation.AddFavoriteIDs(ids...)
 	return _u
 }
 
 // AddFavorites adds the "favorites" edges to the Favorite entity.
 func (_u *MediaUpdate) AddFavorites(v ...*Favorite) *MediaUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -804,33 +803,18 @@ func (_u *MediaUpdate) AddFavorites(v ...*Favorite) *MediaUpdate {
 }
 
 // AddLikeIDs adds the "likes" edge to the Like entity by IDs.
-func (_u *MediaUpdate) AddLikeIDs(ids ...int) *MediaUpdate {
+func (_u *MediaUpdate) AddLikeIDs(ids ...string) *MediaUpdate {
 	_u.mutation.AddLikeIDs(ids...)
 	return _u
 }
 
 // AddLikes adds the "likes" edges to the Like entity.
 func (_u *MediaUpdate) AddLikes(v ...*Like) *MediaUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
 	return _u.AddLikeIDs(ids...)
-}
-
-// AddTaskIDs adds the "tasks" edge to the EncodingTask entity by IDs.
-func (_u *MediaUpdate) AddTaskIDs(ids ...int) *MediaUpdate {
-	_u.mutation.AddTaskIDs(ids...)
-	return _u
-}
-
-// AddTasks adds the "tasks" edges to the EncodingTask entity.
-func (_u *MediaUpdate) AddTasks(v ...*EncodingTask) *MediaUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddTaskIDs(ids...)
 }
 
 // Mutation returns the MediaMutation object of the builder.
@@ -857,14 +841,14 @@ func (_u *MediaUpdate) ClearComments() *MediaUpdate {
 }
 
 // RemoveCommentIDs removes the "comments" edge to Comment entities by IDs.
-func (_u *MediaUpdate) RemoveCommentIDs(ids ...int) *MediaUpdate {
+func (_u *MediaUpdate) RemoveCommentIDs(ids ...string) *MediaUpdate {
 	_u.mutation.RemoveCommentIDs(ids...)
 	return _u
 }
 
 // RemoveComments removes "comments" edges to Comment entities.
 func (_u *MediaUpdate) RemoveComments(v ...*Comment) *MediaUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -884,14 +868,14 @@ func (_u *MediaUpdate) ClearPlaylists() *MediaUpdate {
 }
 
 // RemovePlaylistIDs removes the "playlists" edge to MediaPlaylist entities by IDs.
-func (_u *MediaUpdate) RemovePlaylistIDs(ids ...int) *MediaUpdate {
+func (_u *MediaUpdate) RemovePlaylistIDs(ids ...string) *MediaUpdate {
 	_u.mutation.RemovePlaylistIDs(ids...)
 	return _u
 }
 
 // RemovePlaylists removes "playlists" edges to MediaPlaylist entities.
 func (_u *MediaUpdate) RemovePlaylists(v ...*MediaPlaylist) *MediaUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -926,14 +910,14 @@ func (_u *MediaUpdate) ClearFavorites() *MediaUpdate {
 }
 
 // RemoveFavoriteIDs removes the "favorites" edge to Favorite entities by IDs.
-func (_u *MediaUpdate) RemoveFavoriteIDs(ids ...int) *MediaUpdate {
+func (_u *MediaUpdate) RemoveFavoriteIDs(ids ...string) *MediaUpdate {
 	_u.mutation.RemoveFavoriteIDs(ids...)
 	return _u
 }
 
 // RemoveFavorites removes "favorites" edges to Favorite entities.
 func (_u *MediaUpdate) RemoveFavorites(v ...*Favorite) *MediaUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -947,39 +931,18 @@ func (_u *MediaUpdate) ClearLikes() *MediaUpdate {
 }
 
 // RemoveLikeIDs removes the "likes" edge to Like entities by IDs.
-func (_u *MediaUpdate) RemoveLikeIDs(ids ...int) *MediaUpdate {
+func (_u *MediaUpdate) RemoveLikeIDs(ids ...string) *MediaUpdate {
 	_u.mutation.RemoveLikeIDs(ids...)
 	return _u
 }
 
 // RemoveLikes removes "likes" edges to Like entities.
 func (_u *MediaUpdate) RemoveLikes(v ...*Like) *MediaUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveLikeIDs(ids...)
-}
-
-// ClearTasks clears all "tasks" edges to the EncodingTask entity.
-func (_u *MediaUpdate) ClearTasks() *MediaUpdate {
-	_u.mutation.ClearTasks()
-	return _u
-}
-
-// RemoveTaskIDs removes the "tasks" edge to EncodingTask entities by IDs.
-func (_u *MediaUpdate) RemoveTaskIDs(ids ...int) *MediaUpdate {
-	_u.mutation.RemoveTaskIDs(ids...)
-	return _u
-}
-
-// RemoveTasks removes "tasks" edges to EncodingTask entities.
-func (_u *MediaUpdate) RemoveTasks(v ...*EncodingTask) *MediaUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveTaskIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -1025,9 +988,9 @@ func (_u *MediaUpdate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Media.title": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.FriendlyToken(); ok {
-		if err := media.FriendlyTokenValidator(v); err != nil {
-			return &ValidationError{Name: "friendly_token", err: fmt.Errorf(`entity: validator failed for field "Media.friendly_token": %w`, err)}
+	if v, ok := _u.mutation.ShortToken(); ok {
+		if err := media.ShortTokenValidator(v); err != nil {
+			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Media.short_token": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.UUID(); ok {
@@ -1111,7 +1074,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(media.Table, media.Columns, sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(media.Table, media.Columns, sqlgraph.NewFieldSpec(media.FieldID, field.TypeString))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -1128,11 +1091,11 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(media.FieldDescription, field.TypeString)
 	}
-	if value, ok := _u.mutation.FriendlyToken(); ok {
-		_spec.SetField(media.FieldFriendlyToken, field.TypeString, value)
+	if value, ok := _u.mutation.ShortToken(); ok {
+		_spec.SetField(media.FieldShortToken, field.TypeString, value)
 	}
-	if _u.mutation.FriendlyTokenCleared() {
-		_spec.ClearField(media.FieldFriendlyToken, field.TypeString)
+	if _u.mutation.ShortTokenCleared() {
+		_spec.ClearField(media.FieldShortToken, field.TypeString)
 	}
 	if value, ok := _u.mutation.UUID(); ok {
 		_spec.SetField(media.FieldUUID, field.TypeString, value)
@@ -1309,7 +1272,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1322,7 +1285,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1338,7 +1301,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1351,7 +1314,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1367,7 +1330,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1380,7 +1343,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1396,7 +1359,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1412,7 +1375,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1425,7 +1388,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1441,7 +1404,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.PlaylistsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1454,7 +1417,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.PlaylistsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1470,7 +1433,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.PlaylistsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1531,7 +1494,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.FavoritesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1544,7 +1507,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.FavoritesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1560,7 +1523,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.FavoritesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1576,7 +1539,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.LikesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1589,7 +1552,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.LikesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1605,52 +1568,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.LikesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.TasksCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   media.TasksTable,
-			Columns: []string{media.TasksColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedTasksIDs(); len(nodes) > 0 && !_u.mutation.TasksCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   media.TasksTable,
-			Columns: []string{media.TasksColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.TasksIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   media.TasksTable,
-			Columns: []string{media.TasksColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1714,23 +1632,23 @@ func (_u *MediaUpdateOne) ClearDescription() *MediaUpdateOne {
 	return _u
 }
 
-// SetFriendlyToken sets the "friendly_token" field.
-func (_u *MediaUpdateOne) SetFriendlyToken(v string) *MediaUpdateOne {
-	_u.mutation.SetFriendlyToken(v)
+// SetShortToken sets the "short_token" field.
+func (_u *MediaUpdateOne) SetShortToken(v string) *MediaUpdateOne {
+	_u.mutation.SetShortToken(v)
 	return _u
 }
 
-// SetNillableFriendlyToken sets the "friendly_token" field if the given value is not nil.
-func (_u *MediaUpdateOne) SetNillableFriendlyToken(v *string) *MediaUpdateOne {
+// SetNillableShortToken sets the "short_token" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableShortToken(v *string) *MediaUpdateOne {
 	if v != nil {
-		_u.SetFriendlyToken(*v)
+		_u.SetShortToken(*v)
 	}
 	return _u
 }
 
-// ClearFriendlyToken clears the value of the "friendly_token" field.
-func (_u *MediaUpdateOne) ClearFriendlyToken() *MediaUpdateOne {
-	_u.mutation.ClearFriendlyToken()
+// ClearShortToken clears the value of the "short_token" field.
+func (_u *MediaUpdateOne) ClearShortToken() *MediaUpdateOne {
+	_u.mutation.ClearShortToken()
 	return _u
 }
 
@@ -2276,13 +2194,13 @@ func (_u *MediaUpdateOne) ClearTags() *MediaUpdateOne {
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *MediaUpdateOne) SetUserID(v int) *MediaUpdateOne {
+func (_u *MediaUpdateOne) SetUserID(v string) *MediaUpdateOne {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *MediaUpdateOne) SetNillableUserID(v *int) *MediaUpdateOne {
+func (_u *MediaUpdateOne) SetNillableUserID(v *string) *MediaUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -2290,13 +2208,13 @@ func (_u *MediaUpdateOne) SetNillableUserID(v *int) *MediaUpdateOne {
 }
 
 // SetCategoryID sets the "category_id" field.
-func (_u *MediaUpdateOne) SetCategoryID(v int) *MediaUpdateOne {
+func (_u *MediaUpdateOne) SetCategoryID(v string) *MediaUpdateOne {
 	_u.mutation.SetCategoryID(v)
 	return _u
 }
 
 // SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (_u *MediaUpdateOne) SetNillableCategoryID(v *int) *MediaUpdateOne {
+func (_u *MediaUpdateOne) SetNillableCategoryID(v *string) *MediaUpdateOne {
 	if v != nil {
 		_u.SetCategoryID(*v)
 	}
@@ -2310,13 +2228,13 @@ func (_u *MediaUpdateOne) ClearCategoryID() *MediaUpdateOne {
 }
 
 // SetChannelID sets the "channel_id" field.
-func (_u *MediaUpdateOne) SetChannelID(v int) *MediaUpdateOne {
+func (_u *MediaUpdateOne) SetChannelID(v string) *MediaUpdateOne {
 	_u.mutation.SetChannelID(v)
 	return _u
 }
 
 // SetNillableChannelID sets the "channel_id" field if the given value is not nil.
-func (_u *MediaUpdateOne) SetNillableChannelID(v *int) *MediaUpdateOne {
+func (_u *MediaUpdateOne) SetNillableChannelID(v *string) *MediaUpdateOne {
 	if v != nil {
 		_u.SetChannelID(*v)
 	}
@@ -2380,14 +2298,14 @@ func (_u *MediaUpdateOne) SetCategory(v *Category) *MediaUpdateOne {
 }
 
 // AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
-func (_u *MediaUpdateOne) AddCommentIDs(ids ...int) *MediaUpdateOne {
+func (_u *MediaUpdateOne) AddCommentIDs(ids ...string) *MediaUpdateOne {
 	_u.mutation.AddCommentIDs(ids...)
 	return _u
 }
 
 // AddComments adds the "comments" edges to the Comment entity.
 func (_u *MediaUpdateOne) AddComments(v ...*Comment) *MediaUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2400,14 +2318,14 @@ func (_u *MediaUpdateOne) SetChannel(v *Channel) *MediaUpdateOne {
 }
 
 // AddPlaylistIDs adds the "playlists" edge to the MediaPlaylist entity by IDs.
-func (_u *MediaUpdateOne) AddPlaylistIDs(ids ...int) *MediaUpdateOne {
+func (_u *MediaUpdateOne) AddPlaylistIDs(ids ...string) *MediaUpdateOne {
 	_u.mutation.AddPlaylistIDs(ids...)
 	return _u
 }
 
 // AddPlaylists adds the "playlists" edges to the MediaPlaylist entity.
 func (_u *MediaUpdateOne) AddPlaylists(v ...*MediaPlaylist) *MediaUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2430,14 +2348,14 @@ func (_u *MediaUpdateOne) AddTagsRel(v ...*MediaTag) *MediaUpdateOne {
 }
 
 // AddFavoriteIDs adds the "favorites" edge to the Favorite entity by IDs.
-func (_u *MediaUpdateOne) AddFavoriteIDs(ids ...int) *MediaUpdateOne {
+func (_u *MediaUpdateOne) AddFavoriteIDs(ids ...string) *MediaUpdateOne {
 	_u.mutation.AddFavoriteIDs(ids...)
 	return _u
 }
 
 // AddFavorites adds the "favorites" edges to the Favorite entity.
 func (_u *MediaUpdateOne) AddFavorites(v ...*Favorite) *MediaUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2445,33 +2363,18 @@ func (_u *MediaUpdateOne) AddFavorites(v ...*Favorite) *MediaUpdateOne {
 }
 
 // AddLikeIDs adds the "likes" edge to the Like entity by IDs.
-func (_u *MediaUpdateOne) AddLikeIDs(ids ...int) *MediaUpdateOne {
+func (_u *MediaUpdateOne) AddLikeIDs(ids ...string) *MediaUpdateOne {
 	_u.mutation.AddLikeIDs(ids...)
 	return _u
 }
 
 // AddLikes adds the "likes" edges to the Like entity.
 func (_u *MediaUpdateOne) AddLikes(v ...*Like) *MediaUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
 	return _u.AddLikeIDs(ids...)
-}
-
-// AddTaskIDs adds the "tasks" edge to the EncodingTask entity by IDs.
-func (_u *MediaUpdateOne) AddTaskIDs(ids ...int) *MediaUpdateOne {
-	_u.mutation.AddTaskIDs(ids...)
-	return _u
-}
-
-// AddTasks adds the "tasks" edges to the EncodingTask entity.
-func (_u *MediaUpdateOne) AddTasks(v ...*EncodingTask) *MediaUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddTaskIDs(ids...)
 }
 
 // Mutation returns the MediaMutation object of the builder.
@@ -2498,14 +2401,14 @@ func (_u *MediaUpdateOne) ClearComments() *MediaUpdateOne {
 }
 
 // RemoveCommentIDs removes the "comments" edge to Comment entities by IDs.
-func (_u *MediaUpdateOne) RemoveCommentIDs(ids ...int) *MediaUpdateOne {
+func (_u *MediaUpdateOne) RemoveCommentIDs(ids ...string) *MediaUpdateOne {
 	_u.mutation.RemoveCommentIDs(ids...)
 	return _u
 }
 
 // RemoveComments removes "comments" edges to Comment entities.
 func (_u *MediaUpdateOne) RemoveComments(v ...*Comment) *MediaUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2525,14 +2428,14 @@ func (_u *MediaUpdateOne) ClearPlaylists() *MediaUpdateOne {
 }
 
 // RemovePlaylistIDs removes the "playlists" edge to MediaPlaylist entities by IDs.
-func (_u *MediaUpdateOne) RemovePlaylistIDs(ids ...int) *MediaUpdateOne {
+func (_u *MediaUpdateOne) RemovePlaylistIDs(ids ...string) *MediaUpdateOne {
 	_u.mutation.RemovePlaylistIDs(ids...)
 	return _u
 }
 
 // RemovePlaylists removes "playlists" edges to MediaPlaylist entities.
 func (_u *MediaUpdateOne) RemovePlaylists(v ...*MediaPlaylist) *MediaUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2567,14 +2470,14 @@ func (_u *MediaUpdateOne) ClearFavorites() *MediaUpdateOne {
 }
 
 // RemoveFavoriteIDs removes the "favorites" edge to Favorite entities by IDs.
-func (_u *MediaUpdateOne) RemoveFavoriteIDs(ids ...int) *MediaUpdateOne {
+func (_u *MediaUpdateOne) RemoveFavoriteIDs(ids ...string) *MediaUpdateOne {
 	_u.mutation.RemoveFavoriteIDs(ids...)
 	return _u
 }
 
 // RemoveFavorites removes "favorites" edges to Favorite entities.
 func (_u *MediaUpdateOne) RemoveFavorites(v ...*Favorite) *MediaUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2588,39 +2491,18 @@ func (_u *MediaUpdateOne) ClearLikes() *MediaUpdateOne {
 }
 
 // RemoveLikeIDs removes the "likes" edge to Like entities by IDs.
-func (_u *MediaUpdateOne) RemoveLikeIDs(ids ...int) *MediaUpdateOne {
+func (_u *MediaUpdateOne) RemoveLikeIDs(ids ...string) *MediaUpdateOne {
 	_u.mutation.RemoveLikeIDs(ids...)
 	return _u
 }
 
 // RemoveLikes removes "likes" edges to Like entities.
 func (_u *MediaUpdateOne) RemoveLikes(v ...*Like) *MediaUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveLikeIDs(ids...)
-}
-
-// ClearTasks clears all "tasks" edges to the EncodingTask entity.
-func (_u *MediaUpdateOne) ClearTasks() *MediaUpdateOne {
-	_u.mutation.ClearTasks()
-	return _u
-}
-
-// RemoveTaskIDs removes the "tasks" edge to EncodingTask entities by IDs.
-func (_u *MediaUpdateOne) RemoveTaskIDs(ids ...int) *MediaUpdateOne {
-	_u.mutation.RemoveTaskIDs(ids...)
-	return _u
-}
-
-// RemoveTasks removes "tasks" edges to EncodingTask entities.
-func (_u *MediaUpdateOne) RemoveTasks(v ...*EncodingTask) *MediaUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveTaskIDs(ids...)
 }
 
 // Where appends a list predicates to the MediaUpdate builder.
@@ -2679,9 +2561,9 @@ func (_u *MediaUpdateOne) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Media.title": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.FriendlyToken(); ok {
-		if err := media.FriendlyTokenValidator(v); err != nil {
-			return &ValidationError{Name: "friendly_token", err: fmt.Errorf(`entity: validator failed for field "Media.friendly_token": %w`, err)}
+	if v, ok := _u.mutation.ShortToken(); ok {
+		if err := media.ShortTokenValidator(v); err != nil {
+			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Media.short_token": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.UUID(); ok {
@@ -2765,7 +2647,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(media.Table, media.Columns, sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(media.Table, media.Columns, sqlgraph.NewFieldSpec(media.FieldID, field.TypeString))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`entity: missing "Media.id" for update`)}
@@ -2799,11 +2681,11 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(media.FieldDescription, field.TypeString)
 	}
-	if value, ok := _u.mutation.FriendlyToken(); ok {
-		_spec.SetField(media.FieldFriendlyToken, field.TypeString, value)
+	if value, ok := _u.mutation.ShortToken(); ok {
+		_spec.SetField(media.FieldShortToken, field.TypeString, value)
 	}
-	if _u.mutation.FriendlyTokenCleared() {
-		_spec.ClearField(media.FieldFriendlyToken, field.TypeString)
+	if _u.mutation.ShortTokenCleared() {
+		_spec.ClearField(media.FieldShortToken, field.TypeString)
 	}
 	if value, ok := _u.mutation.UUID(); ok {
 		_spec.SetField(media.FieldUUID, field.TypeString, value)
@@ -2980,7 +2862,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -2993,7 +2875,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -3009,7 +2891,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -3022,7 +2904,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -3038,7 +2920,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -3051,7 +2933,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -3067,7 +2949,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -3083,7 +2965,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -3096,7 +2978,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -3112,7 +2994,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.PlaylistsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -3125,7 +3007,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.PlaylistsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -3141,7 +3023,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.PlaylistsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -3202,7 +3084,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.FavoritesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -3215,7 +3097,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.FavoritesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -3231,7 +3113,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.FavoritesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -3247,7 +3129,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.LikesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -3260,7 +3142,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.LikesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -3276,52 +3158,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.LikesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.TasksCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   media.TasksTable,
-			Columns: []string{media.TasksColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedTasksIDs(); len(nodes) > 0 && !_u.mutation.TasksCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   media.TasksTable,
-			Columns: []string{media.TasksColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.TasksIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   media.TasksTable,
-			Columns: []string{media.TasksColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

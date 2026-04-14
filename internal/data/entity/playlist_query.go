@@ -109,8 +109,8 @@ func (_q *PlaylistQuery) FirstX(ctx context.Context) *Playlist {
 
 // FirstID returns the first Playlist ID from the query.
 // Returns a *NotFoundError when no Playlist ID was found.
-func (_q *PlaylistQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *PlaylistQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -122,7 +122,7 @@ func (_q *PlaylistQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *PlaylistQuery) FirstIDX(ctx context.Context) int {
+func (_q *PlaylistQuery) FirstIDX(ctx context.Context) string {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -160,8 +160,8 @@ func (_q *PlaylistQuery) OnlyX(ctx context.Context) *Playlist {
 // OnlyID is like Only, but returns the only Playlist ID in the query.
 // Returns a *NotSingularError when more than one Playlist ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *PlaylistQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *PlaylistQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -177,7 +177,7 @@ func (_q *PlaylistQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *PlaylistQuery) OnlyIDX(ctx context.Context) int {
+func (_q *PlaylistQuery) OnlyIDX(ctx context.Context) string {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -205,7 +205,7 @@ func (_q *PlaylistQuery) AllX(ctx context.Context) []*Playlist {
 }
 
 // IDs executes the query and returns a list of Playlist IDs.
-func (_q *PlaylistQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (_q *PlaylistQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
@@ -217,7 +217,7 @@ func (_q *PlaylistQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *PlaylistQuery) IDsX(ctx context.Context) []int {
+func (_q *PlaylistQuery) IDsX(ctx context.Context) []string {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -411,8 +411,8 @@ func (_q *PlaylistQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pla
 
 func (_q *PlaylistQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Playlist, init func(*Playlist), assign func(*Playlist, *User)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Playlist)
-	nids := make(map[int]map[*Playlist]struct{})
+	byID := make(map[string]*Playlist)
+	nids := make(map[string]map[*Playlist]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -441,11 +441,11 @@ func (_q *PlaylistQuery) loadUser(ctx context.Context, query *UserQuery, nodes [
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(sql.NullString)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := values[0].(*sql.NullString).String
+				inValue := values[1].(*sql.NullString).String
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Playlist]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -484,7 +484,7 @@ func (_q *PlaylistQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (_q *PlaylistQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(playlist.Table, playlist.Columns, sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(playlist.Table, playlist.Columns, sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

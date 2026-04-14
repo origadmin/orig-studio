@@ -113,13 +113,13 @@ func (_c *CategoryCreate) SetNillableColor(v *string) *CategoryCreate {
 }
 
 // SetParentID sets the "parent_id" field.
-func (_c *CategoryCreate) SetParentID(v int) *CategoryCreate {
+func (_c *CategoryCreate) SetParentID(v string) *CategoryCreate {
 	_c.mutation.SetParentID(v)
 	return _c
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_c *CategoryCreate) SetNillableParentID(v *int) *CategoryCreate {
+func (_c *CategoryCreate) SetNillableParentID(v *string) *CategoryCreate {
 	if v != nil {
 		_c.SetParentID(*v)
 	}
@@ -211,13 +211,13 @@ func (_c *CategoryCreate) SetNillableIdentityProvider(v *string) *CategoryCreate
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *CategoryCreate) SetUserID(v int) *CategoryCreate {
+func (_c *CategoryCreate) SetUserID(v string) *CategoryCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_c *CategoryCreate) SetNillableUserID(v *int) *CategoryCreate {
+func (_c *CategoryCreate) SetNillableUserID(v *string) *CategoryCreate {
 	if v != nil {
 		_c.SetUserID(*v)
 	}
@@ -252,20 +252,34 @@ func (_c *CategoryCreate) SetNillableUpdatedAt(v *time.Time) *CategoryCreate {
 	return _c
 }
 
+// SetID sets the "id" field.
+func (_c *CategoryCreate) SetID(v string) *CategoryCreate {
+	_c.mutation.SetID(v)
+	return _c
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (_c *CategoryCreate) SetNillableID(v *string) *CategoryCreate {
+	if v != nil {
+		_c.SetID(*v)
+	}
+	return _c
+}
+
 // SetUser sets the "user" edge to the User entity.
 func (_c *CategoryCreate) SetUser(v *User) *CategoryCreate {
 	return _c.SetUserID(v.ID)
 }
 
 // AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_c *CategoryCreate) AddMediumIDs(ids ...int) *CategoryCreate {
+func (_c *CategoryCreate) AddMediumIDs(ids ...string) *CategoryCreate {
 	_c.mutation.AddMediumIDs(ids...)
 	return _c
 }
 
 // AddMedia adds the "media" edges to the Media entity.
 func (_c *CategoryCreate) AddMedia(v ...*Media) *CategoryCreate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -278,14 +292,14 @@ func (_c *CategoryCreate) SetParent(v *Category) *CategoryCreate {
 }
 
 // AddChildIDs adds the "children" edge to the Category entity by IDs.
-func (_c *CategoryCreate) AddChildIDs(ids ...int) *CategoryCreate {
+func (_c *CategoryCreate) AddChildIDs(ids ...string) *CategoryCreate {
 	_c.mutation.AddChildIDs(ids...)
 	return _c
 }
 
 // AddChildren adds the "children" edges to the Category entity.
 func (_c *CategoryCreate) AddChildren(v ...*Category) *CategoryCreate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -355,6 +369,10 @@ func (_c *CategoryCreate) defaults() {
 		v := category.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.ID(); !ok {
+		v := category.DefaultID()
+		_c.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -413,6 +431,11 @@ func (_c *CategoryCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`entity: missing required field "Category.updated_at"`)}
 	}
+	if v, ok := _c.mutation.ID(); ok {
+		if err := category.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`entity: validator failed for field "Category.id": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -427,8 +450,13 @@ func (_c *CategoryCreate) sqlSave(ctx context.Context) (*Category, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(string); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected Category.ID type: %T", _spec.ID.Value)
+		}
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
@@ -437,8 +465,12 @@ func (_c *CategoryCreate) sqlSave(ctx context.Context) (*Category, error) {
 func (_c *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Category{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(category.Table, sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(category.Table, sqlgraph.NewFieldSpec(category.FieldID, field.TypeString))
 	)
+	if id, ok := _c.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(category.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -507,7 +539,7 @@ func (_c *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 			Columns: []string{category.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -524,7 +556,7 @@ func (_c *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 			Columns: []string{category.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -540,7 +572,7 @@ func (_c *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 			Columns: []string{category.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -557,7 +589,7 @@ func (_c *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 			Columns: []string{category.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -613,10 +645,6 @@ func (_c *CategoryCreateBulk) Save(ctx context.Context) ([]*Category, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

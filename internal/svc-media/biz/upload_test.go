@@ -17,6 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/svc-media/dto"
 )
 
@@ -47,7 +48,7 @@ func (m *MockRepo) DeleteSession(ctx context.Context, uploadID string) error {
 func (m *MockRepo) ListSessions(
 	ctx context.Context,
 	userID int64,
-	status string,
+	status enums.UploadStatus,
 	page, pageSize int,
 ) ([]*UploadSession, int, error) {
 	return nil, 0, nil
@@ -141,10 +142,13 @@ func (m *MockEncodingTaskRepo) ListByMedia(ctx context.Context, mediaId int64) (
 	return nil, nil
 }
 func (m *MockEncodingTaskRepo) DeleteByMedia(ctx context.Context, mediaID int64) error { return nil }
-func (m *MockEncodingTaskRepo) ListFlat(ctx context.Context, status string, mediaId *int64, offset, limit int) ([]*EncodingTask, int, error) {
+func (m *MockEncodingTaskRepo) ListFlat(ctx context.Context, status string, mediaId *int64, profileFilter string, chunkFilter string, searchQuery string, offset, limit int) ([]*EncodingTask, int, error) {
 	return nil, 0, nil
 }
 func (m *MockEncodingTaskRepo) CountByStatus(ctx context.Context) (*StatusCounts, error) {
+	return &StatusCounts{}, nil
+}
+func (m *MockEncodingTaskRepo) CountByStatusWithFilter(ctx context.Context, status string, mediaId *int64, profileFilter string, chunkFilter string, searchQuery string) (*StatusCounts, error) {
 	return &StatusCounts{}, nil
 }
 

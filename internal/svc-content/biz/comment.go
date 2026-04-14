@@ -17,12 +17,12 @@ import (
 
 // Comment represents a comment on a media (biz layer).
 type Comment struct {
-	ID        int       `json:"id"`
+	ID        string    `json:"id"`
 	UID       uuid.UUID `json:"uid"`
 	Text      string    `json:"text"`
-	MediaID   int       `json:"media_id"`
-	UserID    int       `json:"user_id"`
-	ParentID  *int      `json:"parent_id,omitempty"`
+	MediaID   string    `json:"media_id"`
+	UserID    string    `json:"user_id"`
+	ParentID  *string   `json:"parent_id,omitempty"`
 	AddDate   time.Time `json:"add_date"`
 	UpdatedAt time.Time `json:"updated_at"`
 
@@ -34,10 +34,10 @@ type Comment struct {
 // CommentRepo defines the storage operations for comments.
 type CommentRepo interface {
 	Create(ctx context.Context, comment *Comment) (*Comment, error)
-	Get(ctx context.Context, id int) (*Comment, error)
+	Get(ctx context.Context, id string) (*Comment, error)
 	Update(ctx context.Context, comment *Comment) (*Comment, error)
-	Delete(ctx context.Context, id int) error
-	ListByMedia(ctx context.Context, mediaID int, page, pageSize int) ([]*Comment, int, error)
+	Delete(ctx context.Context, id string) error
+	ListByMedia(ctx context.Context, mediaID string, page, pageSize int) ([]*Comment, int, error)
 	ListAll(ctx context.Context, page, pageSize int) ([]*Comment, int, error)
 }
 
@@ -62,7 +62,7 @@ func (uc *CommentUseCase) CreateComment(ctx context.Context, c *Comment) (*Comme
 	}
 
 	// Verify media exists
-	if err := uc.mediaUC.CheckMedia(ctx, int64(c.MediaID)); err != nil {
+	if err := uc.mediaUC.CheckMedia(ctx, c.MediaID); err != nil {
 		return nil, fmt.Errorf("media not found: %w", err)
 	}
 
@@ -72,12 +72,12 @@ func (uc *CommentUseCase) CreateComment(ctx context.Context, c *Comment) (*Comme
 	}
 
 	// Update media comment count
-	_ = uc.mediaUC.UpdateCommentCount(ctx, int64(c.MediaID), 1)
+	_ = uc.mediaUC.UpdateCommentCount(ctx, c.MediaID, 1)
 
 	return created, nil
 }
 
-func (uc *CommentUseCase) UpdateComment(ctx context.Context, id int, userID int, isAdmin bool, text string) (*Comment, error) {
+func (uc *CommentUseCase) UpdateComment(ctx context.Context, id string, userID string, isAdmin bool, text string) (*Comment, error) {
 	comment, err := uc.repo.Get(ctx, id)
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func (uc *CommentUseCase) UpdateComment(ctx context.Context, id int, userID int,
 	return uc.repo.Update(ctx, comment)
 }
 
-func (uc *CommentUseCase) DeleteComment(ctx context.Context, id int, userID int, isAdmin bool) error {
+func (uc *CommentUseCase) DeleteComment(ctx context.Context, id string, userID string, isAdmin bool) error {
 	comment, err := uc.repo.Get(ctx, id)
 	if err != nil {
 		return err
@@ -107,16 +107,16 @@ func (uc *CommentUseCase) DeleteComment(ctx context.Context, id int, userID int,
 	}
 
 	// Update media comment count
-	_ = uc.mediaUC.UpdateCommentCount(ctx, int64(comment.MediaID), -1)
+	_ = uc.mediaUC.UpdateCommentCount(ctx, comment.MediaID, -1)
 
 	return nil
 }
 
-func (uc *CommentUseCase) ListMediaComments(ctx context.Context, mediaID int, page, pageSize int) ([]*Comment, int, error) {
+func (uc *CommentUseCase) ListMediaComments(ctx context.Context, mediaID string, page, pageSize int) ([]*Comment, int, error) {
 	return uc.repo.ListByMedia(ctx, mediaID, page, pageSize)
 }
 
-func (uc *CommentUseCase) GetComment(ctx context.Context, id int) (*Comment, error) {
+func (uc *CommentUseCase) GetComment(ctx context.Context, id string) (*Comment, error) {
 	return uc.repo.Get(ctx, id)
 }
 

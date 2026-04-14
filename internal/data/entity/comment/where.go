@@ -8,62 +8,66 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Comment {
+func ID(id string) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Comment {
+func IDEQ(id string) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Comment {
+func IDNEQ(id string) predicate.Comment {
 	return predicate.Comment(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Comment {
+func IDIn(ids ...string) predicate.Comment {
 	return predicate.Comment(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Comment {
+func IDNotIn(ids ...string) predicate.Comment {
 	return predicate.Comment(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Comment {
+func IDGT(id string) predicate.Comment {
 	return predicate.Comment(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Comment {
+func IDGTE(id string) predicate.Comment {
 	return predicate.Comment(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Comment {
+func IDLT(id string) predicate.Comment {
 	return predicate.Comment(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Comment {
+func IDLTE(id string) predicate.Comment {
 	return predicate.Comment(sql.FieldLTE(FieldID, id))
+}
+
+// IDEqualFold applies the EqualFold predicate on the ID field.
+func IDEqualFold(id string) predicate.Comment {
+	return predicate.Comment(sql.FieldEqualFold(FieldID, id))
+}
+
+// IDContainsFold applies the ContainsFold predicate on the ID field.
+func IDContainsFold(id string) predicate.Comment {
+	return predicate.Comment(sql.FieldContainsFold(FieldID, id))
 }
 
 // Text applies equality check predicate on the "text" field. It's identical to TextEQ.
 func Text(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldText, v))
-}
-
-// UID applies equality check predicate on the "uid" field. It's identical to UIDEQ.
-func UID(v uuid.UUID) predicate.Comment {
-	return predicate.Comment(sql.FieldEQ(FieldUID, v))
 }
 
 // AddDate applies equality check predicate on the "add_date" field. It's identical to AddDateEQ.
@@ -72,12 +76,12 @@ func AddDate(v time.Time) predicate.Comment {
 }
 
 // MediaID applies equality check predicate on the "media_id" field. It's identical to MediaIDEQ.
-func MediaID(v int) predicate.Comment {
+func MediaID(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldMediaID, v))
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int) predicate.Comment {
+func UserID(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldUserID, v))
 }
 
@@ -146,46 +150,6 @@ func TextContainsFold(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldContainsFold(FieldText, v))
 }
 
-// UIDEQ applies the EQ predicate on the "uid" field.
-func UIDEQ(v uuid.UUID) predicate.Comment {
-	return predicate.Comment(sql.FieldEQ(FieldUID, v))
-}
-
-// UIDNEQ applies the NEQ predicate on the "uid" field.
-func UIDNEQ(v uuid.UUID) predicate.Comment {
-	return predicate.Comment(sql.FieldNEQ(FieldUID, v))
-}
-
-// UIDIn applies the In predicate on the "uid" field.
-func UIDIn(vs ...uuid.UUID) predicate.Comment {
-	return predicate.Comment(sql.FieldIn(FieldUID, vs...))
-}
-
-// UIDNotIn applies the NotIn predicate on the "uid" field.
-func UIDNotIn(vs ...uuid.UUID) predicate.Comment {
-	return predicate.Comment(sql.FieldNotIn(FieldUID, vs...))
-}
-
-// UIDGT applies the GT predicate on the "uid" field.
-func UIDGT(v uuid.UUID) predicate.Comment {
-	return predicate.Comment(sql.FieldGT(FieldUID, v))
-}
-
-// UIDGTE applies the GTE predicate on the "uid" field.
-func UIDGTE(v uuid.UUID) predicate.Comment {
-	return predicate.Comment(sql.FieldGTE(FieldUID, v))
-}
-
-// UIDLT applies the LT predicate on the "uid" field.
-func UIDLT(v uuid.UUID) predicate.Comment {
-	return predicate.Comment(sql.FieldLT(FieldUID, v))
-}
-
-// UIDLTE applies the LTE predicate on the "uid" field.
-func UIDLTE(v uuid.UUID) predicate.Comment {
-	return predicate.Comment(sql.FieldLTE(FieldUID, v))
-}
-
 // AddDateEQ applies the EQ predicate on the "add_date" field.
 func AddDateEQ(v time.Time) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldAddDate, v))
@@ -227,43 +191,133 @@ func AddDateLTE(v time.Time) predicate.Comment {
 }
 
 // MediaIDEQ applies the EQ predicate on the "media_id" field.
-func MediaIDEQ(v int) predicate.Comment {
+func MediaIDEQ(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldMediaID, v))
 }
 
 // MediaIDNEQ applies the NEQ predicate on the "media_id" field.
-func MediaIDNEQ(v int) predicate.Comment {
+func MediaIDNEQ(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldNEQ(FieldMediaID, v))
 }
 
 // MediaIDIn applies the In predicate on the "media_id" field.
-func MediaIDIn(vs ...int) predicate.Comment {
+func MediaIDIn(vs ...string) predicate.Comment {
 	return predicate.Comment(sql.FieldIn(FieldMediaID, vs...))
 }
 
 // MediaIDNotIn applies the NotIn predicate on the "media_id" field.
-func MediaIDNotIn(vs ...int) predicate.Comment {
+func MediaIDNotIn(vs ...string) predicate.Comment {
 	return predicate.Comment(sql.FieldNotIn(FieldMediaID, vs...))
 }
 
+// MediaIDGT applies the GT predicate on the "media_id" field.
+func MediaIDGT(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldGT(FieldMediaID, v))
+}
+
+// MediaIDGTE applies the GTE predicate on the "media_id" field.
+func MediaIDGTE(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldGTE(FieldMediaID, v))
+}
+
+// MediaIDLT applies the LT predicate on the "media_id" field.
+func MediaIDLT(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldLT(FieldMediaID, v))
+}
+
+// MediaIDLTE applies the LTE predicate on the "media_id" field.
+func MediaIDLTE(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldLTE(FieldMediaID, v))
+}
+
+// MediaIDContains applies the Contains predicate on the "media_id" field.
+func MediaIDContains(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldContains(FieldMediaID, v))
+}
+
+// MediaIDHasPrefix applies the HasPrefix predicate on the "media_id" field.
+func MediaIDHasPrefix(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldHasPrefix(FieldMediaID, v))
+}
+
+// MediaIDHasSuffix applies the HasSuffix predicate on the "media_id" field.
+func MediaIDHasSuffix(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldHasSuffix(FieldMediaID, v))
+}
+
+// MediaIDEqualFold applies the EqualFold predicate on the "media_id" field.
+func MediaIDEqualFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEqualFold(FieldMediaID, v))
+}
+
+// MediaIDContainsFold applies the ContainsFold predicate on the "media_id" field.
+func MediaIDContainsFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldContainsFold(FieldMediaID, v))
+}
+
 // UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int) predicate.Comment {
+func UserIDEQ(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int) predicate.Comment {
+func UserIDNEQ(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int) predicate.Comment {
+func UserIDIn(vs ...string) predicate.Comment {
 	return predicate.Comment(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int) predicate.Comment {
+func UserIDNotIn(vs ...string) predicate.Comment {
 	return predicate.Comment(sql.FieldNotIn(FieldUserID, vs...))
+}
+
+// UserIDGT applies the GT predicate on the "user_id" field.
+func UserIDGT(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldGT(FieldUserID, v))
+}
+
+// UserIDGTE applies the GTE predicate on the "user_id" field.
+func UserIDGTE(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldGTE(FieldUserID, v))
+}
+
+// UserIDLT applies the LT predicate on the "user_id" field.
+func UserIDLT(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldLT(FieldUserID, v))
+}
+
+// UserIDLTE applies the LTE predicate on the "user_id" field.
+func UserIDLTE(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldLTE(FieldUserID, v))
+}
+
+// UserIDContains applies the Contains predicate on the "user_id" field.
+func UserIDContains(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldContains(FieldUserID, v))
+}
+
+// UserIDHasPrefix applies the HasPrefix predicate on the "user_id" field.
+func UserIDHasPrefix(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldHasPrefix(FieldUserID, v))
+}
+
+// UserIDHasSuffix applies the HasSuffix predicate on the "user_id" field.
+func UserIDHasSuffix(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldHasSuffix(FieldUserID, v))
+}
+
+// UserIDEqualFold applies the EqualFold predicate on the "user_id" field.
+func UserIDEqualFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEqualFold(FieldUserID, v))
+}
+
+// UserIDContainsFold applies the ContainsFold predicate on the "user_id" field.
+func UserIDContainsFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldContainsFold(FieldUserID, v))
 }
 
 // HasMedia applies the HasEdge predicate on the "media" edge.

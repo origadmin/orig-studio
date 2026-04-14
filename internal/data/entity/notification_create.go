@@ -90,14 +90,14 @@ func (_c *NotificationCreate) SetNillableCreatedAt(v *time.Time) *NotificationCr
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_c *NotificationCreate) AddUserIDs(ids ...int) *NotificationCreate {
+func (_c *NotificationCreate) AddUserIDs(ids ...string) *NotificationCreate {
 	_c.mutation.AddUserIDs(ids...)
 	return _c
 }
 
 // AddUser adds the "user" edges to the User entity.
 func (_c *NotificationCreate) AddUser(v ...*User) *NotificationCreate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -248,7 +248,7 @@ func (_c *NotificationCreate) createSpec() (*Notification, *sqlgraph.CreateSpec)
 			Columns: notification.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

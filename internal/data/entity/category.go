@@ -17,7 +17,7 @@ import (
 type Category struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Slug holds the value of the "slug" field.
@@ -33,7 +33,7 @@ type Category struct {
 	// Color holds the value of the "color" field.
 	Color string `json:"color,omitempty"`
 	// ParentID holds the value of the "parent_id" field.
-	ParentID int `json:"parent_id,omitempty"`
+	ParentID string `json:"parent_id,omitempty"`
 	// Sequence holds the value of the "sequence" field.
 	Sequence int `json:"sequence,omitempty"`
 	// Status holds the value of the "status" field.
@@ -47,7 +47,7 @@ type Category struct {
 	// IdentityProvider holds the value of the "identity_provider" field.
 	IdentityProvider string `json:"identity_provider,omitempty"`
 	// UserID holds the value of the "user_id" field.
-	UserID int `json:"user_id,omitempty"`
+	UserID string `json:"user_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -121,9 +121,9 @@ func (*Category) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case category.FieldIsGlobal, category.FieldIsRbacCategory:
 			values[i] = new(sql.NullBool)
-		case category.FieldID, category.FieldParentID, category.FieldSequence, category.FieldStatus, category.FieldMediaCount, category.FieldUserID:
+		case category.FieldSequence, category.FieldStatus, category.FieldMediaCount:
 			values[i] = new(sql.NullInt64)
-		case category.FieldName, category.FieldSlug, category.FieldDescription, category.FieldThumbnail, category.FieldListingsThumbnail, category.FieldIcon, category.FieldColor, category.FieldIdentityProvider:
+		case category.FieldID, category.FieldName, category.FieldSlug, category.FieldDescription, category.FieldThumbnail, category.FieldListingsThumbnail, category.FieldIcon, category.FieldColor, category.FieldParentID, category.FieldIdentityProvider, category.FieldUserID:
 			values[i] = new(sql.NullString)
 		case category.FieldCreatedAt, category.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -145,11 +145,11 @@ func (_m *Category) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case category.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value.Valid {
+				_m.ID = value.String
 			}
-			_m.ID = int(value.Int64)
 		case category.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -193,10 +193,10 @@ func (_m *Category) assignValues(columns []string, values []any) error {
 				_m.Color = value.String
 			}
 		case category.FieldParentID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
 			} else if value.Valid {
-				_m.ParentID = int(value.Int64)
+				_m.ParentID = value.String
 			}
 		case category.FieldSequence:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -235,10 +235,10 @@ func (_m *Category) assignValues(columns []string, values []any) error {
 				_m.IdentityProvider = value.String
 			}
 		case category.FieldUserID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				_m.UserID = int(value.Int64)
+				_m.UserID = value.String
 			}
 		case category.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -337,7 +337,7 @@ func (_m *Category) String() string {
 	builder.WriteString(_m.Color)
 	builder.WriteString(", ")
 	builder.WriteString("parent_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ParentID))
+	builder.WriteString(_m.ParentID)
 	builder.WriteString(", ")
 	builder.WriteString("sequence=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Sequence))
@@ -358,7 +358,7 @@ func (_m *Category) String() string {
 	builder.WriteString(_m.IdentityProvider)
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(_m.UserID)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))

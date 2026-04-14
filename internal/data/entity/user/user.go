@@ -257,6 +257,10 @@ var (
 	DefaultDateJoined func() time.Time
 	// DefaultDateAdded holds the default value on creation for the "date_added" field.
 	DefaultDateAdded func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() string
+	// IDValidator is a validator for the "id" field. It is called by the builders before save.
+	IDValidator func(string) error
 )
 
 // Role defines the type for the "role" enum field.

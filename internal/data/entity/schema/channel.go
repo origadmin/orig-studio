@@ -13,6 +13,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"time"
+
+	"origadmin/application/origcms/internal/helpers/idutil"
 )
 
 type Channel struct {
@@ -21,11 +23,12 @@ type Channel struct {
 
 func (Channel) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("user_id"),
+		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.DefaultUUIDv7()), // UUIDv7 for distributed system
+		field.String("user_id"),
 		field.String("title").NotEmpty().MaxLen(90),
 		field.String("slug").MaxLen(100).Unique(),
 		field.Text("description"),
-		field.String("friendly_token").MaxLen(12).Unique(),
+		field.String("short_token").MaxLen(12).Unique().DefaultFunc(idutil.DefaultShortID()),
 		field.String("banner_logo").MaxLen(500),
 		field.Time("add_date").Default(time.Now),
 	}
@@ -36,7 +39,7 @@ func (Channel) Indexes() []ent.Index {
 		index.Fields("user_id"),
 		index.Fields("title"),
 		index.Fields("slug"),
-		index.Fields("friendly_token"),
+		index.Fields("short_token"),
 		index.Fields("add_date"),
 	}
 }

@@ -412,7 +412,7 @@ func (_q *NotificationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 func (_q *NotificationQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Notification, init func(*Notification), assign func(*Notification, *User)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[int]*Notification)
-	nids := make(map[int]map[*Notification]struct{})
+	nids := make(map[string]map[*Notification]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -445,7 +445,7 @@ func (_q *NotificationQuery) loadUser(ctx context.Context, query *UserQuery, nod
 			}
 			spec.Assign = func(columns []string, values []any) error {
 				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				inValue := values[1].(*sql.NullString).String
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Notification]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])

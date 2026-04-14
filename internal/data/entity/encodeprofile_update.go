@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/encodeprofile"
-	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"time"
 
@@ -214,45 +213,9 @@ func (_u *EncodeProfileUpdate) SetUpdatedAt(v time.Time) *EncodeProfileUpdate {
 	return _u
 }
 
-// AddTaskIDs adds the "tasks" edge to the EncodingTask entity by IDs.
-func (_u *EncodeProfileUpdate) AddTaskIDs(ids ...int) *EncodeProfileUpdate {
-	_u.mutation.AddTaskIDs(ids...)
-	return _u
-}
-
-// AddTasks adds the "tasks" edges to the EncodingTask entity.
-func (_u *EncodeProfileUpdate) AddTasks(v ...*EncodingTask) *EncodeProfileUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddTaskIDs(ids...)
-}
-
 // Mutation returns the EncodeProfileMutation object of the builder.
 func (_u *EncodeProfileUpdate) Mutation() *EncodeProfileMutation {
 	return _u.mutation
-}
-
-// ClearTasks clears all "tasks" edges to the EncodingTask entity.
-func (_u *EncodeProfileUpdate) ClearTasks() *EncodeProfileUpdate {
-	_u.mutation.ClearTasks()
-	return _u
-}
-
-// RemoveTaskIDs removes the "tasks" edge to EncodingTask entities by IDs.
-func (_u *EncodeProfileUpdate) RemoveTaskIDs(ids ...int) *EncodeProfileUpdate {
-	_u.mutation.RemoveTaskIDs(ids...)
-	return _u
-}
-
-// RemoveTasks removes "tasks" edges to EncodingTask entities.
-func (_u *EncodeProfileUpdate) RemoveTasks(v ...*EncodingTask) *EncodeProfileUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveTaskIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -396,51 +359,6 @@ func (_u *EncodeProfileUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(encodeprofile.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if _u.mutation.TasksCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   encodeprofile.TasksTable,
-			Columns: []string{encodeprofile.TasksColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedTasksIDs(); len(nodes) > 0 && !_u.mutation.TasksCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   encodeprofile.TasksTable,
-			Columns: []string{encodeprofile.TasksColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.TasksIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   encodeprofile.TasksTable,
-			Columns: []string{encodeprofile.TasksColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -648,45 +566,9 @@ func (_u *EncodeProfileUpdateOne) SetUpdatedAt(v time.Time) *EncodeProfileUpdate
 	return _u
 }
 
-// AddTaskIDs adds the "tasks" edge to the EncodingTask entity by IDs.
-func (_u *EncodeProfileUpdateOne) AddTaskIDs(ids ...int) *EncodeProfileUpdateOne {
-	_u.mutation.AddTaskIDs(ids...)
-	return _u
-}
-
-// AddTasks adds the "tasks" edges to the EncodingTask entity.
-func (_u *EncodeProfileUpdateOne) AddTasks(v ...*EncodingTask) *EncodeProfileUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddTaskIDs(ids...)
-}
-
 // Mutation returns the EncodeProfileMutation object of the builder.
 func (_u *EncodeProfileUpdateOne) Mutation() *EncodeProfileMutation {
 	return _u.mutation
-}
-
-// ClearTasks clears all "tasks" edges to the EncodingTask entity.
-func (_u *EncodeProfileUpdateOne) ClearTasks() *EncodeProfileUpdateOne {
-	_u.mutation.ClearTasks()
-	return _u
-}
-
-// RemoveTaskIDs removes the "tasks" edge to EncodingTask entities by IDs.
-func (_u *EncodeProfileUpdateOne) RemoveTaskIDs(ids ...int) *EncodeProfileUpdateOne {
-	_u.mutation.RemoveTaskIDs(ids...)
-	return _u
-}
-
-// RemoveTasks removes "tasks" edges to EncodingTask entities.
-func (_u *EncodeProfileUpdateOne) RemoveTasks(v ...*EncodingTask) *EncodeProfileUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveTaskIDs(ids...)
 }
 
 // Where appends a list predicates to the EncodeProfileUpdate builder.
@@ -860,51 +742,6 @@ func (_u *EncodeProfileUpdateOne) sqlSave(ctx context.Context) (_node *EncodePro
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(encodeprofile.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if _u.mutation.TasksCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   encodeprofile.TasksTable,
-			Columns: []string{encodeprofile.TasksColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedTasksIDs(); len(nodes) > 0 && !_u.mutation.TasksCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   encodeprofile.TasksTable,
-			Columns: []string{encodeprofile.TasksColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.TasksIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   encodeprofile.TasksTable,
-			Columns: []string{encodeprofile.TasksColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &EncodeProfile{config: _u.config}

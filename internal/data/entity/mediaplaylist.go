@@ -18,11 +18,11 @@ import (
 type MediaPlaylist struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 	// PlaylistID holds the value of the "playlist_id" field.
-	PlaylistID int `json:"playlist_id,omitempty"`
+	PlaylistID string `json:"playlist_id,omitempty"`
 	// MediaID holds the value of the "media_id" field.
-	MediaID int `json:"media_id,omitempty"`
+	MediaID string `json:"media_id,omitempty"`
 	// Ordering holds the value of the "ordering" field.
 	Ordering int `json:"ordering,omitempty"`
 	// ActionDate holds the value of the "action_date" field.
@@ -30,7 +30,7 @@ type MediaPlaylist struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MediaPlaylistQuery when eager-loading is set.
 	Edges           MediaPlaylistEdges `json:"edges"`
-	media_playlists *int
+	media_playlists *string
 	selectValues    sql.SelectValues
 }
 
@@ -72,12 +72,14 @@ func (*MediaPlaylist) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case mediaplaylist.FieldID, mediaplaylist.FieldPlaylistID, mediaplaylist.FieldMediaID, mediaplaylist.FieldOrdering:
+		case mediaplaylist.FieldOrdering:
 			values[i] = new(sql.NullInt64)
+		case mediaplaylist.FieldID, mediaplaylist.FieldPlaylistID, mediaplaylist.FieldMediaID:
+			values[i] = new(sql.NullString)
 		case mediaplaylist.FieldActionDate:
 			values[i] = new(sql.NullTime)
 		case mediaplaylist.ForeignKeys[0]: // media_playlists
-			values[i] = new(sql.NullInt64)
+			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -94,22 +96,22 @@ func (_m *MediaPlaylist) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case mediaplaylist.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value.Valid {
+				_m.ID = value.String
 			}
-			_m.ID = int(value.Int64)
 		case mediaplaylist.FieldPlaylistID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field playlist_id", values[i])
 			} else if value.Valid {
-				_m.PlaylistID = int(value.Int64)
+				_m.PlaylistID = value.String
 			}
 		case mediaplaylist.FieldMediaID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field media_id", values[i])
 			} else if value.Valid {
-				_m.MediaID = int(value.Int64)
+				_m.MediaID = value.String
 			}
 		case mediaplaylist.FieldOrdering:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -124,11 +126,11 @@ func (_m *MediaPlaylist) assignValues(columns []string, values []any) error {
 				_m.ActionDate = value.Time
 			}
 		case mediaplaylist.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field media_playlists", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field media_playlists", values[i])
 			} else if value.Valid {
-				_m.media_playlists = new(int)
-				*_m.media_playlists = int(value.Int64)
+				_m.media_playlists = new(string)
+				*_m.media_playlists = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -177,10 +179,10 @@ func (_m *MediaPlaylist) String() string {
 	builder.WriteString("MediaPlaylist(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("playlist_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.PlaylistID))
+	builder.WriteString(_m.PlaylistID)
 	builder.WriteString(", ")
 	builder.WriteString("media_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.MediaID))
+	builder.WriteString(_m.MediaID)
 	builder.WriteString(", ")
 	builder.WriteString("ordering=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Ordering))

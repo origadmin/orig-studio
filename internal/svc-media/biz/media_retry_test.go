@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/svc-media/dto"
 )
 
@@ -119,12 +120,19 @@ func (m *mockEncodingTaskRepo) ListFlat(
 	ctx context.Context,
 	status string,
 	mediaId *int64,
+	profileFilter string,
+	chunkFilter string,
+	searchQuery string,
 	offset, limit int,
 ) ([]*EncodingTask, int, error) {
 	return nil, 0, nil
 }
 
 func (m *mockEncodingTaskRepo) CountByStatus(ctx context.Context) (*StatusCounts, error) {
+	return nil, nil
+}
+
+func (m *mockEncodingTaskRepo) CountByStatusWithFilter(ctx context.Context, status string, mediaId *int64, profileFilter string, chunkFilter string, searchQuery string) (*StatusCounts, error) {
 	return nil, nil
 }
 
@@ -172,7 +180,7 @@ func TestMediaUseCase_RetryTask_StatusUpdate(t *testing.T) {
 	// 3. Verify
 	assert.NoError(t, err)
 	assert.NotNil(t, updatedTask)
-	assert.Equal(t, "pending", originalTask.Status)
+	assert.Equal(t, enums.EncodingTaskStatusPending, originalTask.Status)
 	assert.Equal(t, 0, originalTask.Progress)
 	assert.Equal(t, "", originalTask.ErrorMessage)
 

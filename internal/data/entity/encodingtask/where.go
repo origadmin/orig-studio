@@ -4,75 +4,75 @@ package encodingtask
 
 import (
 	"origadmin/application/origcms/internal/data/entity/predicate"
+	"origadmin/application/origcms/internal/data/enums"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.EncodingTask {
+func ID(id string) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.EncodingTask {
+func IDEQ(id string) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.EncodingTask {
+func IDNEQ(id string) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.EncodingTask {
+func IDIn(ids ...string) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.EncodingTask {
+func IDNotIn(ids ...string) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.EncodingTask {
+func IDGT(id string) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.EncodingTask {
+func IDGTE(id string) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.EncodingTask {
+func IDLT(id string) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.EncodingTask {
+func IDLTE(id string) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldLTE(FieldID, id))
 }
 
+// IDEqualFold applies the EqualFold predicate on the ID field.
+func IDEqualFold(id string) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldEqualFold(FieldID, id))
+}
+
+// IDContainsFold applies the ContainsFold predicate on the ID field.
+func IDContainsFold(id string) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldContainsFold(FieldID, id))
+}
+
 // MediaID applies equality check predicate on the "media_id" field. It's identical to MediaIDEQ.
-func MediaID(v int) predicate.EncodingTask {
+func MediaID(v string) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldEQ(FieldMediaID, v))
 }
 
 // ProfileID applies equality check predicate on the "profile_id" field. It's identical to ProfileIDEQ.
 func ProfileID(v int) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldEQ(FieldProfileID, v))
-}
-
-// Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
-func Status(v string) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldEQ(FieldStatus, v))
-}
-
-// Progress applies equality check predicate on the "progress" field. It's identical to ProgressEQ.
-func Progress(v int) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldEQ(FieldProgress, v))
 }
 
 // OutputPath applies equality check predicate on the "output_path" field. It's identical to OutputPathEQ.
@@ -83,6 +83,11 @@ func OutputPath(v string) predicate.EncodingTask {
 // ErrorMessage applies equality check predicate on the "error_message" field. It's identical to ErrorMessageEQ.
 func ErrorMessage(v string) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldEQ(FieldErrorMessage, v))
+}
+
+// Chunk applies equality check predicate on the "chunk" field. It's identical to ChunkEQ.
+func Chunk(v bool) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldEQ(FieldChunk, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -96,23 +101,68 @@ func UpdatedAt(v time.Time) predicate.EncodingTask {
 }
 
 // MediaIDEQ applies the EQ predicate on the "media_id" field.
-func MediaIDEQ(v int) predicate.EncodingTask {
+func MediaIDEQ(v string) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldEQ(FieldMediaID, v))
 }
 
 // MediaIDNEQ applies the NEQ predicate on the "media_id" field.
-func MediaIDNEQ(v int) predicate.EncodingTask {
+func MediaIDNEQ(v string) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldNEQ(FieldMediaID, v))
 }
 
 // MediaIDIn applies the In predicate on the "media_id" field.
-func MediaIDIn(vs ...int) predicate.EncodingTask {
+func MediaIDIn(vs ...string) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldIn(FieldMediaID, vs...))
 }
 
 // MediaIDNotIn applies the NotIn predicate on the "media_id" field.
-func MediaIDNotIn(vs ...int) predicate.EncodingTask {
+func MediaIDNotIn(vs ...string) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldNotIn(FieldMediaID, vs...))
+}
+
+// MediaIDGT applies the GT predicate on the "media_id" field.
+func MediaIDGT(v string) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldGT(FieldMediaID, v))
+}
+
+// MediaIDGTE applies the GTE predicate on the "media_id" field.
+func MediaIDGTE(v string) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldGTE(FieldMediaID, v))
+}
+
+// MediaIDLT applies the LT predicate on the "media_id" field.
+func MediaIDLT(v string) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldLT(FieldMediaID, v))
+}
+
+// MediaIDLTE applies the LTE predicate on the "media_id" field.
+func MediaIDLTE(v string) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldLTE(FieldMediaID, v))
+}
+
+// MediaIDContains applies the Contains predicate on the "media_id" field.
+func MediaIDContains(v string) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldContains(FieldMediaID, v))
+}
+
+// MediaIDHasPrefix applies the HasPrefix predicate on the "media_id" field.
+func MediaIDHasPrefix(v string) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldHasPrefix(FieldMediaID, v))
+}
+
+// MediaIDHasSuffix applies the HasSuffix predicate on the "media_id" field.
+func MediaIDHasSuffix(v string) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldHasSuffix(FieldMediaID, v))
+}
+
+// MediaIDEqualFold applies the EqualFold predicate on the "media_id" field.
+func MediaIDEqualFold(v string) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldEqualFold(FieldMediaID, v))
+}
+
+// MediaIDContainsFold applies the ContainsFold predicate on the "media_id" field.
+func MediaIDContainsFold(v string) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldContainsFold(FieldMediaID, v))
 }
 
 // ProfileIDEQ applies the EQ predicate on the "profile_id" field.
@@ -135,109 +185,54 @@ func ProfileIDNotIn(vs ...int) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldNotIn(FieldProfileID, vs...))
 }
 
+// ProfileIDGT applies the GT predicate on the "profile_id" field.
+func ProfileIDGT(v int) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldGT(FieldProfileID, v))
+}
+
+// ProfileIDGTE applies the GTE predicate on the "profile_id" field.
+func ProfileIDGTE(v int) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldGTE(FieldProfileID, v))
+}
+
+// ProfileIDLT applies the LT predicate on the "profile_id" field.
+func ProfileIDLT(v int) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldLT(FieldProfileID, v))
+}
+
+// ProfileIDLTE applies the LTE predicate on the "profile_id" field.
+func ProfileIDLTE(v int) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldLTE(FieldProfileID, v))
+}
+
 // StatusEQ applies the EQ predicate on the "status" field.
-func StatusEQ(v string) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldEQ(FieldStatus, v))
+func StatusEQ(v enums.EncodingTaskStatus) predicate.EncodingTask {
+	vc := v
+	return predicate.EncodingTask(sql.FieldEQ(FieldStatus, vc))
 }
 
 // StatusNEQ applies the NEQ predicate on the "status" field.
-func StatusNEQ(v string) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldNEQ(FieldStatus, v))
+func StatusNEQ(v enums.EncodingTaskStatus) predicate.EncodingTask {
+	vc := v
+	return predicate.EncodingTask(sql.FieldNEQ(FieldStatus, vc))
 }
 
 // StatusIn applies the In predicate on the "status" field.
-func StatusIn(vs ...string) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldIn(FieldStatus, vs...))
+func StatusIn(vs ...enums.EncodingTaskStatus) predicate.EncodingTask {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EncodingTask(sql.FieldIn(FieldStatus, v...))
 }
 
 // StatusNotIn applies the NotIn predicate on the "status" field.
-func StatusNotIn(vs ...string) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldNotIn(FieldStatus, vs...))
-}
-
-// StatusGT applies the GT predicate on the "status" field.
-func StatusGT(v string) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldGT(FieldStatus, v))
-}
-
-// StatusGTE applies the GTE predicate on the "status" field.
-func StatusGTE(v string) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldGTE(FieldStatus, v))
-}
-
-// StatusLT applies the LT predicate on the "status" field.
-func StatusLT(v string) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldLT(FieldStatus, v))
-}
-
-// StatusLTE applies the LTE predicate on the "status" field.
-func StatusLTE(v string) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldLTE(FieldStatus, v))
-}
-
-// StatusContains applies the Contains predicate on the "status" field.
-func StatusContains(v string) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldContains(FieldStatus, v))
-}
-
-// StatusHasPrefix applies the HasPrefix predicate on the "status" field.
-func StatusHasPrefix(v string) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldHasPrefix(FieldStatus, v))
-}
-
-// StatusHasSuffix applies the HasSuffix predicate on the "status" field.
-func StatusHasSuffix(v string) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldHasSuffix(FieldStatus, v))
-}
-
-// StatusEqualFold applies the EqualFold predicate on the "status" field.
-func StatusEqualFold(v string) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldEqualFold(FieldStatus, v))
-}
-
-// StatusContainsFold applies the ContainsFold predicate on the "status" field.
-func StatusContainsFold(v string) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldContainsFold(FieldStatus, v))
-}
-
-// ProgressEQ applies the EQ predicate on the "progress" field.
-func ProgressEQ(v int) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldEQ(FieldProgress, v))
-}
-
-// ProgressNEQ applies the NEQ predicate on the "progress" field.
-func ProgressNEQ(v int) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldNEQ(FieldProgress, v))
-}
-
-// ProgressIn applies the In predicate on the "progress" field.
-func ProgressIn(vs ...int) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldIn(FieldProgress, vs...))
-}
-
-// ProgressNotIn applies the NotIn predicate on the "progress" field.
-func ProgressNotIn(vs ...int) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldNotIn(FieldProgress, vs...))
-}
-
-// ProgressGT applies the GT predicate on the "progress" field.
-func ProgressGT(v int) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldGT(FieldProgress, v))
-}
-
-// ProgressGTE applies the GTE predicate on the "progress" field.
-func ProgressGTE(v int) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldGTE(FieldProgress, v))
-}
-
-// ProgressLT applies the LT predicate on the "progress" field.
-func ProgressLT(v int) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldLT(FieldProgress, v))
-}
-
-// ProgressLTE applies the LTE predicate on the "progress" field.
-func ProgressLTE(v int) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldLTE(FieldProgress, v))
+func StatusNotIn(vs ...enums.EncodingTaskStatus) predicate.EncodingTask {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.EncodingTask(sql.FieldNotIn(FieldStatus, v...))
 }
 
 // OutputPathEQ applies the EQ predicate on the "output_path" field.
@@ -390,6 +385,16 @@ func ErrorMessageContainsFold(v string) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldContainsFold(FieldErrorMessage, v))
 }
 
+// ChunkEQ applies the EQ predicate on the "chunk" field.
+func ChunkEQ(v bool) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldEQ(FieldChunk, v))
+}
+
+// ChunkNEQ applies the NEQ predicate on the "chunk" field.
+func ChunkNEQ(v bool) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldNEQ(FieldChunk, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldEQ(FieldCreatedAt, v))
@@ -468,52 +473,6 @@ func UpdatedAtLT(v time.Time) predicate.EncodingTask {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldLTE(FieldUpdatedAt, v))
-}
-
-// HasMedia applies the HasEdge predicate on the "media" edge.
-func HasMedia() predicate.EncodingTask {
-	return predicate.EncodingTask(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, MediaTable, MediaColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasMediaWith applies the HasEdge predicate on the "media" edge with a given conditions (other predicates).
-func HasMediaWith(preds ...predicate.Media) predicate.EncodingTask {
-	return predicate.EncodingTask(func(s *sql.Selector) {
-		step := newMediaStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasProfile applies the HasEdge predicate on the "profile" edge.
-func HasProfile() predicate.EncodingTask {
-	return predicate.EncodingTask(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ProfileTable, ProfileColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasProfileWith applies the HasEdge predicate on the "profile" edge with a given conditions (other predicates).
-func HasProfileWith(preds ...predicate.EncodeProfile) predicate.EncodingTask {
-	return predicate.EncodingTask(func(s *sql.Selector) {
-		step := newProfileStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

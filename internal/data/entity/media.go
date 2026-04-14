@@ -20,13 +20,13 @@ import (
 type Media struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
-	// FriendlyToken holds the value of the "friendly_token" field.
-	FriendlyToken string `json:"friendly_token,omitempty"`
+	// ShortToken holds the value of the "short_token" field.
+	ShortToken string `json:"short_token,omitempty"`
 	// UUID holds the value of the "uuid" field.
 	UUID string `json:"uuid,omitempty"`
 	// Type holds the value of the "type" field.
@@ -86,11 +86,11 @@ type Media struct {
 	// Tags holds the value of the "tags" field.
 	Tags []string `json:"tags,omitempty"`
 	// UserID holds the value of the "user_id" field.
-	UserID int `json:"user_id,omitempty"`
+	UserID string `json:"user_id,omitempty"`
 	// CategoryID holds the value of the "category_id" field.
-	CategoryID int `json:"category_id,omitempty"`
+	CategoryID string `json:"category_id,omitempty"`
 	// ChannelID holds the value of the "channel_id" field.
-	ChannelID int `json:"channel_id,omitempty"`
+	ChannelID string `json:"channel_id,omitempty"`
 	// PublishedAt holds the value of the "published_at" field.
 	PublishedAt time.Time `json:"published_at,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -123,11 +123,9 @@ type MediaEdges struct {
 	Favorites []*Favorite `json:"favorites,omitempty"`
 	// Likes holds the value of the likes edge.
 	Likes []*Like `json:"likes,omitempty"`
-	// Tasks holds the value of the tasks edge.
-	Tasks []*EncodingTask `json:"tasks,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [9]bool
+	loadedTypes [8]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -208,15 +206,6 @@ func (e MediaEdges) LikesOrErr() ([]*Like, error) {
 	return nil, &NotLoadedError{edge: "likes"}
 }
 
-// TasksOrErr returns the Tasks value or an error if the edge
-// was not loaded in eager-loading.
-func (e MediaEdges) TasksOrErr() ([]*EncodingTask, error) {
-	if e.loadedTypes[8] {
-		return e.Tasks, nil
-	}
-	return nil, &NotLoadedError{edge: "tasks"}
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Media) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -226,9 +215,9 @@ func (*Media) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case media.FieldAllowDownload, media.FieldEnableComments, media.FieldFeatured, media.FieldIsReviewed:
 			values[i] = new(sql.NullBool)
-		case media.FieldID, media.FieldDuration, media.FieldWidth, media.FieldHeight, media.FieldPrivacy, media.FieldViewCount, media.FieldLikeCount, media.FieldDislikeCount, media.FieldCommentCount, media.FieldFavoriteCount, media.FieldDownloadCount, media.FieldReportedTimes, media.FieldUserID, media.FieldCategoryID, media.FieldChannelID:
+		case media.FieldDuration, media.FieldWidth, media.FieldHeight, media.FieldPrivacy, media.FieldViewCount, media.FieldLikeCount, media.FieldDislikeCount, media.FieldCommentCount, media.FieldFavoriteCount, media.FieldDownloadCount, media.FieldReportedTimes:
 			values[i] = new(sql.NullInt64)
-		case media.FieldTitle, media.FieldDescription, media.FieldFriendlyToken, media.FieldUUID, media.FieldType, media.FieldURL, media.FieldHlsFile, media.FieldThumbnail, media.FieldPoster, media.FieldPreviewFilePath, media.FieldSize, media.FieldMimeType, media.FieldMd5sum, media.FieldExtension, media.FieldEncodingStatus, media.FieldState:
+		case media.FieldID, media.FieldTitle, media.FieldDescription, media.FieldShortToken, media.FieldUUID, media.FieldType, media.FieldURL, media.FieldHlsFile, media.FieldThumbnail, media.FieldPoster, media.FieldPreviewFilePath, media.FieldSize, media.FieldMimeType, media.FieldMd5sum, media.FieldExtension, media.FieldEncodingStatus, media.FieldState, media.FieldUserID, media.FieldCategoryID, media.FieldChannelID:
 			values[i] = new(sql.NullString)
 		case media.FieldPublishedAt, media.FieldCreatedAt, media.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -252,11 +241,11 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case media.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value.Valid {
+				_m.ID = value.String
 			}
-			_m.ID = int(value.Int64)
 		case media.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
@@ -269,11 +258,11 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Description = value.String
 			}
-		case media.FieldFriendlyToken:
+		case media.FieldShortToken:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field friendly_token", values[i])
+				return fmt.Errorf("unexpected type %T for field short_token", values[i])
 			} else if value.Valid {
-				_m.FriendlyToken = value.String
+				_m.ShortToken = value.String
 			}
 		case media.FieldUUID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -452,22 +441,22 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 				}
 			}
 		case media.FieldUserID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				_m.UserID = int(value.Int64)
+				_m.UserID = value.String
 			}
 		case media.FieldCategoryID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field category_id", values[i])
 			} else if value.Valid {
-				_m.CategoryID = int(value.Int64)
+				_m.CategoryID = value.String
 			}
 		case media.FieldChannelID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field channel_id", values[i])
 			} else if value.Valid {
-				_m.ChannelID = int(value.Int64)
+				_m.ChannelID = value.String
 			}
 		case media.FieldPublishedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -554,11 +543,6 @@ func (_m *Media) QueryLikes() *LikeQuery {
 	return NewMediaClient(_m.config).QueryLikes(_m)
 }
 
-// QueryTasks queries the "tasks" edge of the Media entity.
-func (_m *Media) QueryTasks() *EncodingTaskQuery {
-	return NewMediaClient(_m.config).QueryTasks(_m)
-}
-
 // Update returns a builder for updating this Media.
 // Note that you need to call Media.Unwrap() before calling this method if this Media
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -588,8 +572,8 @@ func (_m *Media) String() string {
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
 	builder.WriteString(", ")
-	builder.WriteString("friendly_token=")
-	builder.WriteString(_m.FriendlyToken)
+	builder.WriteString("short_token=")
+	builder.WriteString(_m.ShortToken)
 	builder.WriteString(", ")
 	builder.WriteString("uuid=")
 	builder.WriteString(_m.UUID)
@@ -679,13 +663,13 @@ func (_m *Media) String() string {
 	builder.WriteString(fmt.Sprintf("%v", _m.Tags))
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(_m.UserID)
 	builder.WriteString(", ")
 	builder.WriteString("category_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.CategoryID))
+	builder.WriteString(_m.CategoryID)
 	builder.WriteString(", ")
 	builder.WriteString("channel_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ChannelID))
+	builder.WriteString(_m.ChannelID)
 	builder.WriteString(", ")
 	builder.WriteString("published_at=")
 	builder.WriteString(_m.PublishedAt.Format(time.ANSIC))

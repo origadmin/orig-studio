@@ -132,8 +132,8 @@ func (_q *LikeQuery) FirstX(ctx context.Context) *Like {
 
 // FirstID returns the first Like ID from the query.
 // Returns a *NotFoundError when no Like ID was found.
-func (_q *LikeQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *LikeQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -145,7 +145,7 @@ func (_q *LikeQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *LikeQuery) FirstIDX(ctx context.Context) int {
+func (_q *LikeQuery) FirstIDX(ctx context.Context) string {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -183,8 +183,8 @@ func (_q *LikeQuery) OnlyX(ctx context.Context) *Like {
 // OnlyID is like Only, but returns the only Like ID in the query.
 // Returns a *NotSingularError when more than one Like ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *LikeQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *LikeQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -200,7 +200,7 @@ func (_q *LikeQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *LikeQuery) OnlyIDX(ctx context.Context) int {
+func (_q *LikeQuery) OnlyIDX(ctx context.Context) string {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -228,7 +228,7 @@ func (_q *LikeQuery) AllX(ctx context.Context) []*Like {
 }
 
 // IDs executes the query and returns a list of Like IDs.
-func (_q *LikeQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (_q *LikeQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
@@ -240,7 +240,7 @@ func (_q *LikeQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *LikeQuery) IDsX(ctx context.Context) []int {
+func (_q *LikeQuery) IDsX(ctx context.Context) []string {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -337,7 +337,7 @@ func (_q *LikeQuery) WithUser(opts ...func(*UserQuery)) *LikeQuery {
 // Example:
 //
 //	var v []struct {
-//		MediaID int `json:"media_id,omitempty"`
+//		MediaID string `json:"media_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -360,7 +360,7 @@ func (_q *LikeQuery) GroupBy(field string, fields ...string) *LikeGroupBy {
 // Example:
 //
 //	var v []struct {
-//		MediaID int `json:"media_id,omitempty"`
+//		MediaID string `json:"media_id,omitempty"`
 //	}
 //
 //	client.Like.Query().
@@ -451,8 +451,8 @@ func (_q *LikeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Like, e
 }
 
 func (_q *LikeQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes []*Like, init func(*Like), assign func(*Like, *Media)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Like)
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Like)
 	for i := range nodes {
 		fk := nodes[i].MediaID
 		if _, ok := nodeids[fk]; !ok {
@@ -480,8 +480,8 @@ func (_q *LikeQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes []*
 	return nil
 }
 func (_q *LikeQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Like, init func(*Like), assign func(*Like, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Like)
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Like)
 	for i := range nodes {
 		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
@@ -522,7 +522,7 @@ func (_q *LikeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (_q *LikeQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(like.Table, like.Columns, sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(like.Table, like.Columns, sqlgraph.NewFieldSpec(like.FieldID, field.TypeString))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

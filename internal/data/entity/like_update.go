@@ -32,13 +32,13 @@ func (_u *LikeUpdate) Where(ps ...predicate.Like) *LikeUpdate {
 }
 
 // SetMediaID sets the "media_id" field.
-func (_u *LikeUpdate) SetMediaID(v int) *LikeUpdate {
+func (_u *LikeUpdate) SetMediaID(v string) *LikeUpdate {
 	_u.mutation.SetMediaID(v)
 	return _u
 }
 
 // SetNillableMediaID sets the "media_id" field if the given value is not nil.
-func (_u *LikeUpdate) SetNillableMediaID(v *int) *LikeUpdate {
+func (_u *LikeUpdate) SetNillableMediaID(v *string) *LikeUpdate {
 	if v != nil {
 		_u.SetMediaID(*v)
 	}
@@ -46,13 +46,13 @@ func (_u *LikeUpdate) SetNillableMediaID(v *int) *LikeUpdate {
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *LikeUpdate) SetUserID(v int) *LikeUpdate {
+func (_u *LikeUpdate) SetUserID(v string) *LikeUpdate {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *LikeUpdate) SetNillableUserID(v *int) *LikeUpdate {
+func (_u *LikeUpdate) SetNillableUserID(v *string) *LikeUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -167,7 +167,7 @@ func (_u *LikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(like.Table, like.Columns, sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(like.Table, like.Columns, sqlgraph.NewFieldSpec(like.FieldID, field.TypeString))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -189,7 +189,7 @@ func (_u *LikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{like.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -202,7 +202,7 @@ func (_u *LikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{like.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -218,7 +218,7 @@ func (_u *LikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{like.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -231,7 +231,7 @@ func (_u *LikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{like.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -262,13 +262,13 @@ type LikeUpdateOne struct {
 }
 
 // SetMediaID sets the "media_id" field.
-func (_u *LikeUpdateOne) SetMediaID(v int) *LikeUpdateOne {
+func (_u *LikeUpdateOne) SetMediaID(v string) *LikeUpdateOne {
 	_u.mutation.SetMediaID(v)
 	return _u
 }
 
 // SetNillableMediaID sets the "media_id" field if the given value is not nil.
-func (_u *LikeUpdateOne) SetNillableMediaID(v *int) *LikeUpdateOne {
+func (_u *LikeUpdateOne) SetNillableMediaID(v *string) *LikeUpdateOne {
 	if v != nil {
 		_u.SetMediaID(*v)
 	}
@@ -276,13 +276,13 @@ func (_u *LikeUpdateOne) SetNillableMediaID(v *int) *LikeUpdateOne {
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *LikeUpdateOne) SetUserID(v int) *LikeUpdateOne {
+func (_u *LikeUpdateOne) SetUserID(v string) *LikeUpdateOne {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *LikeUpdateOne) SetNillableUserID(v *int) *LikeUpdateOne {
+func (_u *LikeUpdateOne) SetNillableUserID(v *string) *LikeUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -410,7 +410,7 @@ func (_u *LikeUpdateOne) sqlSave(ctx context.Context) (_node *Like, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(like.Table, like.Columns, sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(like.Table, like.Columns, sqlgraph.NewFieldSpec(like.FieldID, field.TypeString))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`entity: missing "Like.id" for update`)}
@@ -449,7 +449,7 @@ func (_u *LikeUpdateOne) sqlSave(ctx context.Context) (_node *Like, err error) {
 			Columns: []string{like.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -462,7 +462,7 @@ func (_u *LikeUpdateOne) sqlSave(ctx context.Context) (_node *Like, err error) {
 			Columns: []string{like.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -478,7 +478,7 @@ func (_u *LikeUpdateOne) sqlSave(ctx context.Context) (_node *Like, err error) {
 			Columns: []string{like.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -491,7 +491,7 @@ func (_u *LikeUpdateOne) sqlSave(ctx context.Context) (_node *Like, err error) {
 			Columns: []string{like.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
