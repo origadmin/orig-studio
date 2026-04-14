@@ -69,7 +69,7 @@ type TokenResponse struct {
 
 // LoginUser 是登录响应中返回的用户信息，包含前端需要的 is_staff 字段
 type LoginUser struct {
-	Id       int64  `json:"id"`
+	Id       string `json:"id"`
 	Username string `json:"username"`
 	Nickname string `json:"nickname,omitempty"`
 	Email    string `json:"email,omitempty"`
@@ -93,18 +93,18 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	// Get role from entity (types.User doesn't have role field)
 	userRole := "user"
-	if entUser, entErr := h.uc.GetUserEntity(c.Request.Context(), u.Id); entErr == nil &&
+	if entUser, entErr := h.uc.GetUserEntity(c.Request.Context(), u.Uuid); entErr == nil &&
 		entUser.Role != "" {
 		userRole = string(entUser.Role)
 	}
 
 	// Verify password
-	if err := h.uc.VerifyPassword(c.Request.Context(), u.Id, req.Password); err != nil {
+	if err := h.uc.VerifyPassword(c.Request.Context(), u.Uuid, req.Password); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return
 	}
 
-	token, err := h.jwt.Generate(u.Id, u.Username, u.IsStaff, userRole)
+	token, err := h.jwt.Generate(u.Uuid, u.Username, u.IsStaff, userRole)
 	if err != nil {
 		slog.Error("failed to generate token", "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "token generation failed"})
@@ -112,7 +112,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	// Generate refresh token
-	refreshToken, err := h.jwt.GenerateRefreshToken(u.Id, u.Username, u.IsStaff, userRole)
+	refreshToken, err := h.jwt.GenerateRefreshToken(u.Uuid, u.Username, u.IsStaff, userRole)
 	if err != nil {
 		slog.Error("failed to generate refresh token", "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "refresh token generation failed"})
@@ -121,7 +121,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	// 返回简化版用户信息，确保包含 is_staff 字段
 	loginUser := &LoginUser{
-		Id:       u.Id,
+		Id:       u.Uuid,
 		Username: u.Username,
 		Nickname: u.Nickname,
 		Email:    u.Email,
@@ -129,7 +129,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 	c.JSON(
 		http.StatusOK,
-		TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: 86400, User: loginUser},
+		TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser},
 	)
 }
 
@@ -168,18 +168,26 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 	userRole := "user"
 	if isFirstUser {
 		userRole = "admin"
-		_ = h.uc.SetUserRole(c.Request.Context(), created.Id, "admin")
+		_ = h.uc.SetUserRole(c.Request.Context(), created.Uuid, "admin")
 	}
 
-	token, err := h.jwt.Generate(created.Id, created.Username, created.IsStaff, userRole)
+	token, err := h.jwt.Generate(created.Uuid, created.Username, created.IsStaff, userRole)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "token generation failed"})
 		return
 	}
 
+	// Generate refresh token
+	refreshToken, err := h.jwt.GenerateRefreshToken(created.Uuid, created.Username, created.IsStaff, userRole)
+	if err != nil {
+		slog.Error("failed to generate refresh token", "err", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "refresh token generation failed"})
+		return
+	}
+
 	// 返回简化版用户信息，确保包含 is_staff 字段
 	loginUser := &LoginUser{
-		Id:       created.Id,
+		Id:       created.Uuid,
 		Username: created.Username,
 		Nickname: created.Nickname,
 		Email:    created.Email,
@@ -187,7 +195,7 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 	}
 	c.JSON(
 		http.StatusCreated,
-		TokenResponse{AccessToken: token, TokenType: "Bearer", ExpiresIn: 86400, User: loginUser},
+		TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser},
 	)
 }
 
@@ -246,7 +254,7 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		AccessToken:  token,
 		RefreshToken: refreshToken,
 		TokenType:    "Bearer",
-		ExpiresIn:    86400,
+		ExpiresIn:    int64(h.jwt.TTL().Seconds()),
 	})
 }
 

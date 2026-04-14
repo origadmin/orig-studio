@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/encodingtask"
@@ -100,6 +101,7 @@ func (r *encodingTaskRepo) ListFlat(
 	status string,
 	mediaId *string,
 	profileFilter string,
+	profileID int,
 	chunkFilter string,
 	searchQuery string,
 	offset, limit int,
@@ -109,15 +111,12 @@ func (r *encodingTaskRepo) ListFlat(
 		// Special handling for active status: exclude success
 		if status == "active" {
 			query = query.Where(
-				encodingtask.StatusIn("pending", "processing", "partial", "failed", "skipped"),
+				encodingtask.StatusIn("pending", "processing", "partial", "failed"),
 			)
 		} else if status == "failed" {
-			// Special handling for failure statuses: "failed" includes both "failed" and "skipped"
-			query = query.Where(encodingtask.StatusIn("failed", "skipped"))
-		} else if status == "skipped" {
-			// For compatibility, "skipped" still returns only skipped tasks
-			query = query.Where(encodingtask.StatusEQ("skipped"))
-		} else {
+			// Only include failed tasks
+			query = query.Where(encodingtask.StatusEQ(enums.EncodingTaskStatus("failed")))
+		} else if status != "all" {
 			query = query.Where(encodingtask.StatusEQ(enums.EncodingTaskStatus(status)))
 		}
 	}
@@ -125,9 +124,9 @@ func (r *encodingTaskRepo) ListFlat(
 		query = query.Where(encodingtask.MediaIDEQ(*mediaId))
 	}
 
-	// Profile filter (partial match on profile name)
-	if profileFilter != "" {
-		// TODO: Add profile filter support when available
+	// Profile filter by profile ID
+	if profileID > 0 {
+		query = query.Where(encodingtask.ProfileIDEQ(profileID))
 	}
 
 	// Chunk filter (boolean: true/false)
@@ -176,6 +175,8 @@ func convertEncodingTaskToBiz(m *entity.EncodingTask) *biz.EncodingTask {
 		OutputPath:   m.OutputPath,
 		ErrorMessage: m.ErrorMessage,
 		Chunk:        m.Chunk,
+		CreateTime:   m.CreatedAt.Format(time.RFC3339),
+		UpdateTime:   m.UpdatedAt.Format(time.RFC3339),
 	}
 }
 
@@ -206,8 +207,7 @@ func (r *encodingTaskRepo) CountByStatus(ctx context.Context) (*biz.StatusCounts
 			counts.Pending = row.Count
 		case "partial":
 			counts.Partial = row.Count
-		case "skipped", "failed":
-			// "skipped" is our actual failure status; count it as Failed for UI display
+		case "failed":
 			counts.Failed += row.Count
 		case "success":
 			counts.Success = row.Count
@@ -222,6 +222,7 @@ func (r *encodingTaskRepo) CountByStatusWithFilter(
 	status string,
 	mediaId *string,
 	profileFilter string,
+	profileID int,
 	chunkFilter string,
 	searchQuery string,
 ) (*biz.StatusCounts, error) {
@@ -240,14 +241,11 @@ func (r *encodingTaskRepo) CountByStatusWithFilter(
 		// Special handling for active status: exclude success
 		if status == "active" {
 			baseQuery = baseQuery.Where(
-				encodingtask.StatusIn("pending", "processing", "partial", "failed", "skipped"),
+				encodingtask.StatusIn("pending", "processing", "partial", "failed"),
 			)
 		} else if status == "failed" {
-			// Special handling for failure statuses: "failed" includes both "failed" and "skipped"
-			baseQuery = baseQuery.Where(encodingtask.StatusIn("failed", "skipped"))
-		} else if status == "skipped" {
-			// For compatibility, "skipped" still returns only skipped tasks
-			baseQuery = baseQuery.Where(encodingtask.StatusEQ("skipped"))
+			// Only include failed tasks
+			baseQuery = baseQuery.Where(encodingtask.StatusEQ("failed"))
 		} else {
 			baseQuery = baseQuery.Where(encodingtask.StatusEQ(enums.EncodingTaskStatus(status)))
 		}
@@ -256,9 +254,9 @@ func (r *encodingTaskRepo) CountByStatusWithFilter(
 		baseQuery = baseQuery.Where(encodingtask.MediaIDEQ(*mediaId))
 	}
 
-	// Profile filter (partial match on profile name)
-	if profileFilter != "" {
-		// TODO: Add profile filter support when available
+	// Profile filter by profile ID
+	if profileID > 0 {
+		baseQuery = baseQuery.Where(encodingtask.ProfileIDEQ(profileID))
 	}
 
 	// Chunk filter (boolean: true/false)
@@ -313,8 +311,7 @@ func (r *encodingTaskRepo) CountByStatusWithFilter(
 			counts.Pending = row.Count
 		case "partial":
 			counts.Partial = row.Count
-		case "skipped", "failed":
-			// "skipped" is our actual failure status; count it as Failed for UI display
+		case "failed":
 			counts.Failed += row.Count
 		case "success":
 			counts.Success = row.Count

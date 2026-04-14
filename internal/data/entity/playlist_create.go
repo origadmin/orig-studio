@@ -39,6 +39,14 @@ func (_c *PlaylistCreate) SetShortToken(v string) *PlaylistCreate {
 	return _c
 }
 
+// SetNillableShortToken sets the "short_token" field if the given value is not nil.
+func (_c *PlaylistCreate) SetNillableShortToken(v *string) *PlaylistCreate {
+	if v != nil {
+		_c.SetShortToken(*v)
+	}
+	return _c
+}
+
 // SetUserID sets the "user_id" field.
 func (_c *PlaylistCreate) SetUserID(v string) *PlaylistCreate {
 	_c.mutation.SetUserID(v)
@@ -137,6 +145,10 @@ func (_c *PlaylistCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *PlaylistCreate) defaults() {
+	if _, ok := _c.mutation.ShortToken(); !ok {
+		v := playlist.DefaultShortToken()
+		_c.mutation.SetShortToken(v)
+	}
 	if _, ok := _c.mutation.Privacy(); !ok {
 		v := playlist.DefaultPrivacy
 		_c.mutation.SetPrivacy(v)

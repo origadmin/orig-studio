@@ -6,7 +6,6 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -176,12 +175,9 @@ func (h *AdminHandler) getAllEncodingTasks() gin.HandlerFunc {
 			filter.PageSize = ps
 		}
 
-		var mediaID *int64
+		var mediaID *string
 		if m := c.Query("media_id"); m != "" {
-			var id int64
-			if _, err := fmt.Sscanf(m, "%d", &id); err == nil && id > 0 {
-				mediaID = &id
-			}
+			mediaID = &m
 		}
 
 		result, err := h.mediaUC.ListEncodingTasksFlat(c.Request.Context(), filter, mediaID)

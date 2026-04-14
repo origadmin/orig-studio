@@ -14,26 +14,26 @@ import (
 
 // MediaRepo is a Media repository interface.
 type MediaRepo interface {
-	Get(context.Context, int64, ...*MediaQueryOption) (*types.Media, error)
+	Get(context.Context, string, ...*MediaQueryOption) (*types.Media, error)
 	List(context.Context, ...*MediaQueryOption) ([]*types.Media, int32, error)
 	Create(context.Context, *types.Media, ...*MediaCreateOption) (*types.Media, error)
 	Update(context.Context, *types.Media, ...*MediaUpdateOption) (*types.Media, error)
-	Delete(context.Context, int64) error
+	Delete(context.Context, string) error
 
 	// Category operations
 	ListCategories(context.Context, ...*CategoryQueryOption) ([]*types.Category, int32, error)
-	GetCategory(context.Context, int64) (*types.Category, error)
+	GetCategory(context.Context, string) (*types.Category, error)
 
 	// Increment views
-	IncrementViewCount(context.Context, int64) (int64, error)
+	IncrementViewCount(context.Context, string) (int64, error)
 }
 
 // MediaQueryOption specifies options for querying media.
 type MediaQueryOption struct {
 	repo.QueryOption
 	Type       *int32
-	UserID     *int64
-	CategoryID *int64
+	UserID     *string
+	CategoryID *string
 	Status     *int32
 	// Added for Gin handler parity
 	State      string
@@ -54,7 +54,7 @@ type MediaUpdateOption struct {
 // CategoryQueryOption specifies options for querying categories.
 type CategoryQueryOption struct {
 	repo.QueryOption
-	ParentID *int64
+	ParentID *string
 }
 
 // ListMediasRequestToQueryOption converts an API request to a query option object.

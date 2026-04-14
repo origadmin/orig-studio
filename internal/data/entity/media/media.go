@@ -20,8 +20,6 @@ const (
 	FieldDescription = "description"
 	// FieldShortToken holds the string denoting the short_token field in the database.
 	FieldShortToken = "short_token"
-	// FieldUUID holds the string denoting the uuid field in the database.
-	FieldUUID = "uuid"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
 	// FieldURL holds the string denoting the url field in the database.
@@ -172,7 +170,6 @@ var Columns = []string{
 	FieldTitle,
 	FieldDescription,
 	FieldShortToken,
-	FieldUUID,
 	FieldType,
 	FieldURL,
 	FieldHlsFile,
@@ -234,10 +231,10 @@ func ValidColumn(column string) bool {
 var (
 	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	TitleValidator func(string) error
+	// DefaultShortToken holds the default value on creation for the "short_token" field.
+	DefaultShortToken func() string
 	// ShortTokenValidator is a validator for the "short_token" field. It is called by the builders before save.
 	ShortTokenValidator func(string) error
-	// UUIDValidator is a validator for the "uuid" field. It is called by the builders before save.
-	UUIDValidator func(string) error
 	// DefaultType holds the default value on creation for the "type" field.
 	DefaultType string
 	// TypeValidator is a validator for the "type" field. It is called by the builders before save.
@@ -331,11 +328,6 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 // ByShortToken orders the results by the short_token field.
 func ByShortToken(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldShortToken, opts...).ToFunc()
-}
-
-// ByUUID orders the results by the uuid field.
-func ByUUID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUUID, opts...).ToFunc()
 }
 
 // ByType orders the results by the type field.

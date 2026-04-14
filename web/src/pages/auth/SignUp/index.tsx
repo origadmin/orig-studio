@@ -52,7 +52,7 @@ export default function SignUpPage() {
                 expires_in: res.expires_in,
                 token_type: res.token_type,
             });
-            login(res.access_token, {
+            login(res.access_token, res.refresh_token || '', {
                 id: res.user.id,
                 username: res.user.username,
                 displayName: res.user.nickname || res.user.username,

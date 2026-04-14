@@ -27,8 +27,6 @@ type Media struct {
 	Description string `json:"description,omitempty"`
 	// ShortToken holds the value of the "short_token" field.
 	ShortToken string `json:"short_token,omitempty"`
-	// UUID holds the value of the "uuid" field.
-	UUID string `json:"uuid,omitempty"`
 	// Type holds the value of the "type" field.
 	Type string `json:"type,omitempty"`
 	// URL holds the value of the "url" field.
@@ -217,7 +215,7 @@ func (*Media) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case media.FieldDuration, media.FieldWidth, media.FieldHeight, media.FieldPrivacy, media.FieldViewCount, media.FieldLikeCount, media.FieldDislikeCount, media.FieldCommentCount, media.FieldFavoriteCount, media.FieldDownloadCount, media.FieldReportedTimes:
 			values[i] = new(sql.NullInt64)
-		case media.FieldID, media.FieldTitle, media.FieldDescription, media.FieldShortToken, media.FieldUUID, media.FieldType, media.FieldURL, media.FieldHlsFile, media.FieldThumbnail, media.FieldPoster, media.FieldPreviewFilePath, media.FieldSize, media.FieldMimeType, media.FieldMd5sum, media.FieldExtension, media.FieldEncodingStatus, media.FieldState, media.FieldUserID, media.FieldCategoryID, media.FieldChannelID:
+		case media.FieldID, media.FieldTitle, media.FieldDescription, media.FieldShortToken, media.FieldType, media.FieldURL, media.FieldHlsFile, media.FieldThumbnail, media.FieldPoster, media.FieldPreviewFilePath, media.FieldSize, media.FieldMimeType, media.FieldMd5sum, media.FieldExtension, media.FieldEncodingStatus, media.FieldState, media.FieldUserID, media.FieldCategoryID, media.FieldChannelID:
 			values[i] = new(sql.NullString)
 		case media.FieldPublishedAt, media.FieldCreatedAt, media.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -263,12 +261,6 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field short_token", values[i])
 			} else if value.Valid {
 				_m.ShortToken = value.String
-			}
-		case media.FieldUUID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field uuid", values[i])
-			} else if value.Valid {
-				_m.UUID = value.String
 			}
 		case media.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -574,9 +566,6 @@ func (_m *Media) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("short_token=")
 	builder.WriteString(_m.ShortToken)
-	builder.WriteString(", ")
-	builder.WriteString("uuid=")
-	builder.WriteString(_m.UUID)
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(_m.Type)

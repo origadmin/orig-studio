@@ -14,7 +14,7 @@ import (
 
 // Claims is the JWT claims structure for origcms.
 type Claims struct {
-	UserID   int64  `json:"uid"`
+	UserID   string `json:"uid"`
 	Username string `json:"username"`
 	IsStaff  bool   `json:"is_staff"`
 	Role     string `json:"role"`
@@ -44,7 +44,7 @@ func (m *Manager) TTL() time.Duration {
 
 // Generate creates a signed JWT token for the given user.
 func (m *Manager) Generate(
-	userID int64,
+	userID string,
 	username string,
 	isStaff bool,
 	role string,
@@ -67,7 +67,7 @@ func (m *Manager) Generate(
 
 // GenerateRefreshToken creates a signed refresh token for the given user.
 func (m *Manager) GenerateRefreshToken(
-	userID int64,
+	userID string,
 	username string,
 	isStaff bool,
 	role string,

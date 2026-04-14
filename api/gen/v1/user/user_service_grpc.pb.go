@@ -21,6 +21,20 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	UserService_Login_FullMethodName              = "/api.v1.services.user.UserService/Login"
 	UserService_Logout_FullMethodName             = "/api.v1.services.user.UserService/Logout"
+	UserService_RefreshToken_FullMethodName       = "/api.v1.services.user.UserService/RefreshToken"
+	UserService_Register_FullMethodName           = "/api.v1.services.user.UserService/Register"
+	UserService_ForgotPassword_FullMethodName     = "/api.v1.services.user.UserService/ForgotPassword"
+	UserService_ResetPassword_FullMethodName      = "/api.v1.services.user.UserService/ResetPassword"
+	UserService_GetCurrentUser_FullMethodName     = "/api.v1.services.user.UserService/GetCurrentUser"
+	UserService_GetMe_FullMethodName              = "/api.v1.services.user.UserService/GetMe"
+	UserService_UpdateMe_FullMethodName           = "/api.v1.services.user.UserService/UpdateMe"
+	UserService_UpdateMyPassword_FullMethodName   = "/api.v1.services.user.UserService/UpdateMyPassword"
+	UserService_GetMyPlaylists_FullMethodName     = "/api.v1.services.user.UserService/GetMyPlaylists"
+	UserService_GetMyFavorites_FullMethodName     = "/api.v1.services.user.UserService/GetMyFavorites"
+	UserService_GetMyLikes_FullMethodName         = "/api.v1.services.user.UserService/GetMyLikes"
+	UserService_GetMySubscriptions_FullMethodName = "/api.v1.services.user.UserService/GetMySubscriptions"
+	UserService_GetMyHistory_FullMethodName       = "/api.v1.services.user.UserService/GetMyHistory"
+	UserService_GetMyStats_FullMethodName         = "/api.v1.services.user.UserService/GetMyStats"
 	UserService_ListUsers_FullMethodName          = "/api.v1.services.user.UserService/ListUsers"
 	UserService_GetUser_FullMethodName            = "/api.v1.services.user.UserService/GetUser"
 	UserService_CreateUser_FullMethodName         = "/api.v1.services.user.UserService/CreateUser"
@@ -31,6 +45,9 @@ const (
 	UserService_ChangeUserPassword_FullMethodName = "/api.v1.services.user.UserService/ChangeUserPassword"
 	UserService_VerifyPassword_FullMethodName     = "/api.v1.services.user.UserService/VerifyPassword"
 	UserService_ListUserRoles_FullMethodName      = "/api.v1.services.user.UserService/ListUserRoles"
+	UserService_GetUserStats_FullMethodName       = "/api.v1.services.user.UserService/GetUserStats"
+	UserService_GetUserPlaylists_FullMethodName   = "/api.v1.services.user.UserService/GetUserPlaylists"
+	UserService_GetUserFollowers_FullMethodName   = "/api.v1.services.user.UserService/GetUserFollowers"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -43,6 +60,35 @@ type UserServiceClient interface {
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	// Logout invalidates the current session.
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
+	// RefreshToken refreshes the access token using a refresh token.
+	RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
+	// Register creates a new user account.
+	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
+	// ForgotPassword initiates password reset process.
+	ForgotPassword(ctx context.Context, in *ForgotPasswordRequest, opts ...grpc.CallOption) (*ForgotPasswordResponse, error)
+	// ResetPassword resets user password with token.
+	ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*ResetPasswordResponse, error)
+	// GetCurrentUser returns the current authenticated user (moved from /auth/me to /me).
+	// This is kept for backward compatibility, use MeService for new code.
+	GetCurrentUser(ctx context.Context, in *GetCurrentUserRequest, opts ...grpc.CallOption) (*GetCurrentUserResponse, error)
+	// GetMe returns the current user's information.
+	GetMe(ctx context.Context, in *GetMeRequest, opts ...grpc.CallOption) (*GetMeResponse, error)
+	// UpdateMe updates the current user's information.
+	UpdateMe(ctx context.Context, in *UpdateMeRequest, opts ...grpc.CallOption) (*UpdateMeResponse, error)
+	// UpdateMyPassword updates the current user's password.
+	UpdateMyPassword(ctx context.Context, in *UpdateMyPasswordRequest, opts ...grpc.CallOption) (*UpdateMyPasswordResponse, error)
+	// GetMyPlaylists returns the current user's playlists.
+	GetMyPlaylists(ctx context.Context, in *GetMyPlaylistsRequest, opts ...grpc.CallOption) (*GetMyPlaylistsResponse, error)
+	// GetMyFavorites returns the current user's favorites.
+	GetMyFavorites(ctx context.Context, in *GetMyFavoritesRequest, opts ...grpc.CallOption) (*GetMyFavoritesResponse, error)
+	// GetMyLikes returns the current user's likes.
+	GetMyLikes(ctx context.Context, in *GetMyLikesRequest, opts ...grpc.CallOption) (*GetMyLikesResponse, error)
+	// GetMySubscriptions returns the current user's channel subscriptions.
+	GetMySubscriptions(ctx context.Context, in *GetMySubscriptionsRequest, opts ...grpc.CallOption) (*GetMySubscriptionsResponse, error)
+	// GetMyHistory returns the current user's watch history.
+	GetMyHistory(ctx context.Context, in *GetMyHistoryRequest, opts ...grpc.CallOption) (*GetMyHistoryResponse, error)
+	// GetMyStats returns the current user's statistics.
+	GetMyStats(ctx context.Context, in *GetMyStatsRequest, opts ...grpc.CallOption) (*GetMyStatsResponse, error)
 	// ListUsers returns a list of users.
 	ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error)
 	// GetUser returns a user by ID.
@@ -63,6 +109,12 @@ type UserServiceClient interface {
 	VerifyPassword(ctx context.Context, in *VerifyPasswordRequest, opts ...grpc.CallOption) (*VerifyPasswordResponse, error)
 	// ListUserRoles returns roles assigned to a user.
 	ListUserRoles(ctx context.Context, in *ListUserRolesRequest, opts ...grpc.CallOption) (*ListUserRolesResponse, error)
+	// GetUserStats returns statistics for a user.
+	GetUserStats(ctx context.Context, in *GetUserStatsRequest, opts ...grpc.CallOption) (*GetUserStatsResponse, error)
+	// GetUserPlaylists returns public playlists for a user.
+	GetUserPlaylists(ctx context.Context, in *GetUserPlaylistsRequest, opts ...grpc.CallOption) (*GetUserPlaylistsResponse, error)
+	// GetUserFollowers returns followers for a user.
+	GetUserFollowers(ctx context.Context, in *GetUserFollowersRequest, opts ...grpc.CallOption) (*GetUserFollowersResponse, error)
 }
 
 type userServiceClient struct {
@@ -87,6 +139,146 @@ func (c *userServiceClient) Logout(ctx context.Context, in *LogoutRequest, opts 
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(LogoutResponse)
 	err := c.cc.Invoke(ctx, UserService_Logout_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RefreshTokenResponse)
+	err := c.cc.Invoke(ctx, UserService_RefreshToken_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RegisterResponse)
+	err := c.cc.Invoke(ctx, UserService_Register_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) ForgotPassword(ctx context.Context, in *ForgotPasswordRequest, opts ...grpc.CallOption) (*ForgotPasswordResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ForgotPasswordResponse)
+	err := c.cc.Invoke(ctx, UserService_ForgotPassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*ResetPasswordResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ResetPasswordResponse)
+	err := c.cc.Invoke(ctx, UserService_ResetPassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetCurrentUser(ctx context.Context, in *GetCurrentUserRequest, opts ...grpc.CallOption) (*GetCurrentUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCurrentUserResponse)
+	err := c.cc.Invoke(ctx, UserService_GetCurrentUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetMe(ctx context.Context, in *GetMeRequest, opts ...grpc.CallOption) (*GetMeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMeResponse)
+	err := c.cc.Invoke(ctx, UserService_GetMe_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) UpdateMe(ctx context.Context, in *UpdateMeRequest, opts ...grpc.CallOption) (*UpdateMeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateMeResponse)
+	err := c.cc.Invoke(ctx, UserService_UpdateMe_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) UpdateMyPassword(ctx context.Context, in *UpdateMyPasswordRequest, opts ...grpc.CallOption) (*UpdateMyPasswordResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateMyPasswordResponse)
+	err := c.cc.Invoke(ctx, UserService_UpdateMyPassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetMyPlaylists(ctx context.Context, in *GetMyPlaylistsRequest, opts ...grpc.CallOption) (*GetMyPlaylistsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMyPlaylistsResponse)
+	err := c.cc.Invoke(ctx, UserService_GetMyPlaylists_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetMyFavorites(ctx context.Context, in *GetMyFavoritesRequest, opts ...grpc.CallOption) (*GetMyFavoritesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMyFavoritesResponse)
+	err := c.cc.Invoke(ctx, UserService_GetMyFavorites_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetMyLikes(ctx context.Context, in *GetMyLikesRequest, opts ...grpc.CallOption) (*GetMyLikesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMyLikesResponse)
+	err := c.cc.Invoke(ctx, UserService_GetMyLikes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetMySubscriptions(ctx context.Context, in *GetMySubscriptionsRequest, opts ...grpc.CallOption) (*GetMySubscriptionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMySubscriptionsResponse)
+	err := c.cc.Invoke(ctx, UserService_GetMySubscriptions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetMyHistory(ctx context.Context, in *GetMyHistoryRequest, opts ...grpc.CallOption) (*GetMyHistoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMyHistoryResponse)
+	err := c.cc.Invoke(ctx, UserService_GetMyHistory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetMyStats(ctx context.Context, in *GetMyStatsRequest, opts ...grpc.CallOption) (*GetMyStatsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMyStatsResponse)
+	err := c.cc.Invoke(ctx, UserService_GetMyStats_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -193,6 +385,36 @@ func (c *userServiceClient) ListUserRoles(ctx context.Context, in *ListUserRoles
 	return out, nil
 }
 
+func (c *userServiceClient) GetUserStats(ctx context.Context, in *GetUserStatsRequest, opts ...grpc.CallOption) (*GetUserStatsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUserStatsResponse)
+	err := c.cc.Invoke(ctx, UserService_GetUserStats_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetUserPlaylists(ctx context.Context, in *GetUserPlaylistsRequest, opts ...grpc.CallOption) (*GetUserPlaylistsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUserPlaylistsResponse)
+	err := c.cc.Invoke(ctx, UserService_GetUserPlaylists_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetUserFollowers(ctx context.Context, in *GetUserFollowersRequest, opts ...grpc.CallOption) (*GetUserFollowersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUserFollowersResponse)
+	err := c.cc.Invoke(ctx, UserService_GetUserFollowers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -203,6 +425,35 @@ type UserServiceServer interface {
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	// Logout invalidates the current session.
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
+	// RefreshToken refreshes the access token using a refresh token.
+	RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error)
+	// Register creates a new user account.
+	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
+	// ForgotPassword initiates password reset process.
+	ForgotPassword(context.Context, *ForgotPasswordRequest) (*ForgotPasswordResponse, error)
+	// ResetPassword resets user password with token.
+	ResetPassword(context.Context, *ResetPasswordRequest) (*ResetPasswordResponse, error)
+	// GetCurrentUser returns the current authenticated user (moved from /auth/me to /me).
+	// This is kept for backward compatibility, use MeService for new code.
+	GetCurrentUser(context.Context, *GetCurrentUserRequest) (*GetCurrentUserResponse, error)
+	// GetMe returns the current user's information.
+	GetMe(context.Context, *GetMeRequest) (*GetMeResponse, error)
+	// UpdateMe updates the current user's information.
+	UpdateMe(context.Context, *UpdateMeRequest) (*UpdateMeResponse, error)
+	// UpdateMyPassword updates the current user's password.
+	UpdateMyPassword(context.Context, *UpdateMyPasswordRequest) (*UpdateMyPasswordResponse, error)
+	// GetMyPlaylists returns the current user's playlists.
+	GetMyPlaylists(context.Context, *GetMyPlaylistsRequest) (*GetMyPlaylistsResponse, error)
+	// GetMyFavorites returns the current user's favorites.
+	GetMyFavorites(context.Context, *GetMyFavoritesRequest) (*GetMyFavoritesResponse, error)
+	// GetMyLikes returns the current user's likes.
+	GetMyLikes(context.Context, *GetMyLikesRequest) (*GetMyLikesResponse, error)
+	// GetMySubscriptions returns the current user's channel subscriptions.
+	GetMySubscriptions(context.Context, *GetMySubscriptionsRequest) (*GetMySubscriptionsResponse, error)
+	// GetMyHistory returns the current user's watch history.
+	GetMyHistory(context.Context, *GetMyHistoryRequest) (*GetMyHistoryResponse, error)
+	// GetMyStats returns the current user's statistics.
+	GetMyStats(context.Context, *GetMyStatsRequest) (*GetMyStatsResponse, error)
 	// ListUsers returns a list of users.
 	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
 	// GetUser returns a user by ID.
@@ -223,6 +474,12 @@ type UserServiceServer interface {
 	VerifyPassword(context.Context, *VerifyPasswordRequest) (*VerifyPasswordResponse, error)
 	// ListUserRoles returns roles assigned to a user.
 	ListUserRoles(context.Context, *ListUserRolesRequest) (*ListUserRolesResponse, error)
+	// GetUserStats returns statistics for a user.
+	GetUserStats(context.Context, *GetUserStatsRequest) (*GetUserStatsResponse, error)
+	// GetUserPlaylists returns public playlists for a user.
+	GetUserPlaylists(context.Context, *GetUserPlaylistsRequest) (*GetUserPlaylistsResponse, error)
+	// GetUserFollowers returns followers for a user.
+	GetUserFollowers(context.Context, *GetUserFollowersRequest) (*GetUserFollowersResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -238,6 +495,48 @@ func (UnimplementedUserServiceServer) Login(context.Context, *LoginRequest) (*Lo
 }
 func (UnimplementedUserServiceServer) Logout(context.Context, *LogoutRequest) (*LogoutResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Logout not implemented")
+}
+func (UnimplementedUserServiceServer) RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RefreshToken not implemented")
+}
+func (UnimplementedUserServiceServer) Register(context.Context, *RegisterRequest) (*RegisterResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Register not implemented")
+}
+func (UnimplementedUserServiceServer) ForgotPassword(context.Context, *ForgotPasswordRequest) (*ForgotPasswordResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ForgotPassword not implemented")
+}
+func (UnimplementedUserServiceServer) ResetPassword(context.Context, *ResetPasswordRequest) (*ResetPasswordResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ResetPassword not implemented")
+}
+func (UnimplementedUserServiceServer) GetCurrentUser(context.Context, *GetCurrentUserRequest) (*GetCurrentUserResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCurrentUser not implemented")
+}
+func (UnimplementedUserServiceServer) GetMe(context.Context, *GetMeRequest) (*GetMeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMe not implemented")
+}
+func (UnimplementedUserServiceServer) UpdateMe(context.Context, *UpdateMeRequest) (*UpdateMeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateMe not implemented")
+}
+func (UnimplementedUserServiceServer) UpdateMyPassword(context.Context, *UpdateMyPasswordRequest) (*UpdateMyPasswordResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateMyPassword not implemented")
+}
+func (UnimplementedUserServiceServer) GetMyPlaylists(context.Context, *GetMyPlaylistsRequest) (*GetMyPlaylistsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMyPlaylists not implemented")
+}
+func (UnimplementedUserServiceServer) GetMyFavorites(context.Context, *GetMyFavoritesRequest) (*GetMyFavoritesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMyFavorites not implemented")
+}
+func (UnimplementedUserServiceServer) GetMyLikes(context.Context, *GetMyLikesRequest) (*GetMyLikesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMyLikes not implemented")
+}
+func (UnimplementedUserServiceServer) GetMySubscriptions(context.Context, *GetMySubscriptionsRequest) (*GetMySubscriptionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMySubscriptions not implemented")
+}
+func (UnimplementedUserServiceServer) GetMyHistory(context.Context, *GetMyHistoryRequest) (*GetMyHistoryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMyHistory not implemented")
+}
+func (UnimplementedUserServiceServer) GetMyStats(context.Context, *GetMyStatsRequest) (*GetMyStatsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMyStats not implemented")
 }
 func (UnimplementedUserServiceServer) ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListUsers not implemented")
@@ -268,6 +567,15 @@ func (UnimplementedUserServiceServer) VerifyPassword(context.Context, *VerifyPas
 }
 func (UnimplementedUserServiceServer) ListUserRoles(context.Context, *ListUserRolesRequest) (*ListUserRolesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListUserRoles not implemented")
+}
+func (UnimplementedUserServiceServer) GetUserStats(context.Context, *GetUserStatsRequest) (*GetUserStatsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetUserStats not implemented")
+}
+func (UnimplementedUserServiceServer) GetUserPlaylists(context.Context, *GetUserPlaylistsRequest) (*GetUserPlaylistsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetUserPlaylists not implemented")
+}
+func (UnimplementedUserServiceServer) GetUserFollowers(context.Context, *GetUserFollowersRequest) (*GetUserFollowersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetUserFollowers not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -322,6 +630,258 @@ func _UserService_Logout_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).Logout(ctx, req.(*LogoutRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefreshTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).RefreshToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_RefreshToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).RefreshToken(ctx, req.(*RefreshTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).Register(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_Register_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).Register(ctx, req.(*RegisterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_ForgotPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ForgotPasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).ForgotPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_ForgotPassword_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).ForgotPassword(ctx, req.(*ForgotPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_ResetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResetPasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).ResetPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_ResetPassword_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).ResetPassword(ctx, req.(*ResetPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetCurrentUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCurrentUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetCurrentUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetCurrentUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetCurrentUser(ctx, req.(*GetCurrentUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetMe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetMe(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetMe_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetMe(ctx, req.(*GetMeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_UpdateMe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateMeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UpdateMe(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_UpdateMe_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UpdateMe(ctx, req.(*UpdateMeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_UpdateMyPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateMyPasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UpdateMyPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_UpdateMyPassword_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UpdateMyPassword(ctx, req.(*UpdateMyPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetMyPlaylists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMyPlaylistsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetMyPlaylists(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetMyPlaylists_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetMyPlaylists(ctx, req.(*GetMyPlaylistsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetMyFavorites_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMyFavoritesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetMyFavorites(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetMyFavorites_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetMyFavorites(ctx, req.(*GetMyFavoritesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetMyLikes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMyLikesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetMyLikes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetMyLikes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetMyLikes(ctx, req.(*GetMyLikesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetMySubscriptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMySubscriptionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetMySubscriptions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetMySubscriptions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetMySubscriptions(ctx, req.(*GetMySubscriptionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetMyHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMyHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetMyHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetMyHistory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetMyHistory(ctx, req.(*GetMyHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetMyStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMyStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetMyStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetMyStats_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetMyStats(ctx, req.(*GetMyStatsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -506,6 +1066,60 @@ func _UserService_ListUserRoles_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetUserStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetUserStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetUserStats_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetUserStats(ctx, req.(*GetUserStatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetUserPlaylists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserPlaylistsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetUserPlaylists(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetUserPlaylists_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetUserPlaylists(ctx, req.(*GetUserPlaylistsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetUserFollowers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserFollowersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetUserFollowers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetUserFollowers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetUserFollowers(ctx, req.(*GetUserFollowersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -520,6 +1134,62 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Logout",
 			Handler:    _UserService_Logout_Handler,
+		},
+		{
+			MethodName: "RefreshToken",
+			Handler:    _UserService_RefreshToken_Handler,
+		},
+		{
+			MethodName: "Register",
+			Handler:    _UserService_Register_Handler,
+		},
+		{
+			MethodName: "ForgotPassword",
+			Handler:    _UserService_ForgotPassword_Handler,
+		},
+		{
+			MethodName: "ResetPassword",
+			Handler:    _UserService_ResetPassword_Handler,
+		},
+		{
+			MethodName: "GetCurrentUser",
+			Handler:    _UserService_GetCurrentUser_Handler,
+		},
+		{
+			MethodName: "GetMe",
+			Handler:    _UserService_GetMe_Handler,
+		},
+		{
+			MethodName: "UpdateMe",
+			Handler:    _UserService_UpdateMe_Handler,
+		},
+		{
+			MethodName: "UpdateMyPassword",
+			Handler:    _UserService_UpdateMyPassword_Handler,
+		},
+		{
+			MethodName: "GetMyPlaylists",
+			Handler:    _UserService_GetMyPlaylists_Handler,
+		},
+		{
+			MethodName: "GetMyFavorites",
+			Handler:    _UserService_GetMyFavorites_Handler,
+		},
+		{
+			MethodName: "GetMyLikes",
+			Handler:    _UserService_GetMyLikes_Handler,
+		},
+		{
+			MethodName: "GetMySubscriptions",
+			Handler:    _UserService_GetMySubscriptions_Handler,
+		},
+		{
+			MethodName: "GetMyHistory",
+			Handler:    _UserService_GetMyHistory_Handler,
+		},
+		{
+			MethodName: "GetMyStats",
+			Handler:    _UserService_GetMyStats_Handler,
 		},
 		{
 			MethodName: "ListUsers",
@@ -560,6 +1230,18 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListUserRoles",
 			Handler:    _UserService_ListUserRoles_Handler,
+		},
+		{
+			MethodName: "GetUserStats",
+			Handler:    _UserService_GetUserStats_Handler,
+		},
+		{
+			MethodName: "GetUserPlaylists",
+			Handler:    _UserService_GetUserPlaylists_Handler,
+		},
+		{
+			MethodName: "GetUserFollowers",
+			Handler:    _UserService_GetUserFollowers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -25,7 +25,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// ListMediasRequest is the request message for listing medias.
 type ListMediasRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
@@ -34,8 +33,8 @@ type ListMediasRequest struct {
 	Keyword       string                 `protobuf:"bytes,4,opt,name=keyword,proto3" json:"keyword,omitempty"`
 	Type          *int32                 `protobuf:"varint,5,opt,name=type,proto3,oneof" json:"type,omitempty"`
 	Status        *int32                 `protobuf:"varint,6,opt,name=status,proto3,oneof" json:"status,omitempty"`
-	CategoryId    *int64                 `protobuf:"varint,7,opt,name=category_id,proto3,oneof" json:"category_id,omitempty"`
-	UserId        *int64                 `protobuf:"varint,8,opt,name=user_id,proto3,oneof" json:"user_id,omitempty"`
+	CategoryId    *string                `protobuf:"bytes,7,opt,name=category_id,proto3,oneof" json:"category_id,omitempty"`
+	UserId        *string                `protobuf:"bytes,8,opt,name=user_id,proto3,oneof" json:"user_id,omitempty"`
 	OrderBy       string                 `protobuf:"bytes,9,opt,name=order_by,proto3" json:"order_by,omitempty"`
 	Descending    bool                   `protobuf:"varint,10,opt,name=descending,proto3" json:"descending,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -114,18 +113,18 @@ func (x *ListMediasRequest) GetStatus() int32 {
 	return 0
 }
 
-func (x *ListMediasRequest) GetCategoryId() int64 {
+func (x *ListMediasRequest) GetCategoryId() string {
 	if x != nil && x.CategoryId != nil {
 		return *x.CategoryId
 	}
-	return 0
+	return ""
 }
 
-func (x *ListMediasRequest) GetUserId() int64 {
+func (x *ListMediasRequest) GetUserId() string {
 	if x != nil && x.UserId != nil {
 		return *x.UserId
 	}
-	return 0
+	return ""
 }
 
 func (x *ListMediasRequest) GetOrderBy() string {
@@ -142,7 +141,6 @@ func (x *ListMediasRequest) GetDescending() bool {
 	return false
 }
 
-// ListMediasResponse is the response message for listing medias.
 type ListMediasResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
@@ -219,10 +217,9 @@ func (x *ListMediasResponse) GetNextPageToken() string {
 	return ""
 }
 
-// GetMediaRequest is the request message for getting a media.
 type GetMediaRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -257,14 +254,13 @@ func (*GetMediaRequest) Descriptor() ([]byte, []int) {
 	return file_v1_media_media_service_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetMediaRequest) GetId() int64 {
+func (x *GetMediaRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
-// GetMediaResponse is the response message for getting a media.
 type GetMediaResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Media         *types.Media           `protobuf:"bytes,1,opt,name=media,proto3" json:"media,omitempty"`
@@ -309,7 +305,6 @@ func (x *GetMediaResponse) GetMedia() *types.Media {
 	return nil
 }
 
-// CreateMediaRequest is the request message for creating a media.
 type CreateMediaRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Media         *types.Media           `protobuf:"bytes,1,opt,name=media,proto3" json:"media,omitempty"`
@@ -354,7 +349,6 @@ func (x *CreateMediaRequest) GetMedia() *types.Media {
 	return nil
 }
 
-// CreateMediaResponse is the response message for creating a media.
 type CreateMediaResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Media         *types.Media           `protobuf:"bytes,1,opt,name=media,proto3" json:"media,omitempty"`
@@ -399,7 +393,6 @@ func (x *CreateMediaResponse) GetMedia() *types.Media {
 	return nil
 }
 
-// UpdateMediaRequest is the request message for updating a media.
 type UpdateMediaRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Media         *types.Media           `protobuf:"bytes,1,opt,name=media,proto3" json:"media,omitempty"`
@@ -452,7 +445,6 @@ func (x *UpdateMediaRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
-// UpdateMediaResponse is the response message for updating a media.
 type UpdateMediaResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Media         *types.Media           `protobuf:"bytes,1,opt,name=media,proto3" json:"media,omitempty"`
@@ -497,10 +489,9 @@ func (x *UpdateMediaResponse) GetMedia() *types.Media {
 	return nil
 }
 
-// DeleteMediaRequest is the request message for deleting a media.
 type DeleteMediaRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -535,14 +526,13 @@ func (*DeleteMediaRequest) Descriptor() ([]byte, []int) {
 	return file_v1_media_media_service_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *DeleteMediaRequest) GetId() int64 {
+func (x *DeleteMediaRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
-// DeleteMediaResponse is the response message for deleting a media.
 type DeleteMediaResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Empty         *emptypb.Empty         `protobuf:"bytes,1,opt,name=empty,proto3" json:"empty,omitempty"`
@@ -587,10 +577,9 @@ func (x *DeleteMediaResponse) GetEmpty() *emptypb.Empty {
 	return nil
 }
 
-// IncrementViewCountRequest is the request message for incrementing view count.
 type IncrementViewCountRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -625,14 +614,13 @@ func (*IncrementViewCountRequest) Descriptor() ([]byte, []int) {
 	return file_v1_media_media_service_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *IncrementViewCountRequest) GetId() int64 {
+func (x *IncrementViewCountRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
-// IncrementViewCountResponse is the response message for incrementing view count.
 type IncrementViewCountResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ViewCount     int64                  `protobuf:"varint,1,opt,name=view_count,proto3" json:"view_count,omitempty"`
@@ -677,23 +665,15 @@ func (x *IncrementViewCountResponse) GetViewCount() int64 {
 	return 0
 }
 
-// UploadMediaRequest is the request message for uploading a media file.
 type UploadMediaRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// The file title.
-	Title string `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	// The file description.
-	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	// The file type (video, image, audio).
-	Type string `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
-	// The file path on the server (set by server after upload).
-	FilePath string `protobuf:"bytes,4,opt,name=file_path,proto3" json:"file_path,omitempty"`
-	// The file size in bytes.
-	Size int64 `protobuf:"varint,5,opt,name=size,proto3" json:"size,omitempty"`
-	// The media duration in seconds (for video/audio).
-	Duration int32 `protobuf:"varint,6,opt,name=duration,proto3" json:"duration,omitempty"`
-	// The user ID who uploaded the file.
-	UserId        int64 `protobuf:"varint,7,opt,name=user_id,proto3" json:"user_id,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	FilePath      string                 `protobuf:"bytes,4,opt,name=file_path,proto3" json:"file_path,omitempty"`
+	Size          int64                  `protobuf:"varint,5,opt,name=size,proto3" json:"size,omitempty"`
+	Duration      int32                  `protobuf:"varint,6,opt,name=duration,proto3" json:"duration,omitempty"`
+	UserId        string                 `protobuf:"bytes,7,opt,name=user_id,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -770,14 +750,13 @@ func (x *UploadMediaRequest) GetDuration() int32 {
 	return 0
 }
 
-func (x *UploadMediaRequest) GetUserId() int64 {
+func (x *UploadMediaRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
-// UploadMediaResponse is the response message for uploading a media file.
 type UploadMediaResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Media         *types.Media           `protobuf:"bytes,1,opt,name=media,proto3" json:"media,omitempty"`
@@ -822,12 +801,2648 @@ func (x *UploadMediaResponse) GetMedia() *types.Media {
 	return nil
 }
 
+type GetMediaStreamRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaStreamRequest) Reset() {
+	*x = GetMediaStreamRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaStreamRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaStreamRequest) ProtoMessage() {}
+
+func (x *GetMediaStreamRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaStreamRequest.ProtoReflect.Descriptor instead.
+func (*GetMediaStreamRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *GetMediaStreamRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type GetMediaStreamResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StreamUrl     string                 `protobuf:"bytes,1,opt,name=stream_url,proto3" json:"stream_url,omitempty"`
+	Format        string                 `protobuf:"bytes,2,opt,name=format,proto3" json:"format,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaStreamResponse) Reset() {
+	*x = GetMediaStreamResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaStreamResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaStreamResponse) ProtoMessage() {}
+
+func (x *GetMediaStreamResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaStreamResponse.ProtoReflect.Descriptor instead.
+func (*GetMediaStreamResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *GetMediaStreamResponse) GetStreamUrl() string {
+	if x != nil {
+		return x.StreamUrl
+	}
+	return ""
+}
+
+func (x *GetMediaStreamResponse) GetFormat() string {
+	if x != nil {
+		return x.Format
+	}
+	return ""
+}
+
+type GetMediaDownloadRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaDownloadRequest) Reset() {
+	*x = GetMediaDownloadRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaDownloadRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaDownloadRequest) ProtoMessage() {}
+
+func (x *GetMediaDownloadRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaDownloadRequest.ProtoReflect.Descriptor instead.
+func (*GetMediaDownloadRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *GetMediaDownloadRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type GetMediaDownloadResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DownloadUrl   string                 `protobuf:"bytes,1,opt,name=download_url,proto3" json:"download_url,omitempty"`
+	Filename      string                 `protobuf:"bytes,2,opt,name=filename,proto3" json:"filename,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaDownloadResponse) Reset() {
+	*x = GetMediaDownloadResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaDownloadResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaDownloadResponse) ProtoMessage() {}
+
+func (x *GetMediaDownloadResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaDownloadResponse.ProtoReflect.Descriptor instead.
+func (*GetMediaDownloadResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *GetMediaDownloadResponse) GetDownloadUrl() string {
+	if x != nil {
+		return x.DownloadUrl
+	}
+	return ""
+}
+
+func (x *GetMediaDownloadResponse) GetFilename() string {
+	if x != nil {
+		return x.Filename
+	}
+	return ""
+}
+
+type GetMediaThumbnailRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaThumbnailRequest) Reset() {
+	*x = GetMediaThumbnailRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaThumbnailRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaThumbnailRequest) ProtoMessage() {}
+
+func (x *GetMediaThumbnailRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaThumbnailRequest.ProtoReflect.Descriptor instead.
+func (*GetMediaThumbnailRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *GetMediaThumbnailRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type GetMediaThumbnailResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ThumbnailUrl  string                 `protobuf:"bytes,1,opt,name=thumbnail_url,proto3" json:"thumbnail_url,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaThumbnailResponse) Reset() {
+	*x = GetMediaThumbnailResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaThumbnailResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaThumbnailResponse) ProtoMessage() {}
+
+func (x *GetMediaThumbnailResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaThumbnailResponse.ProtoReflect.Descriptor instead.
+func (*GetMediaThumbnailResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *GetMediaThumbnailResponse) GetThumbnailUrl() string {
+	if x != nil {
+		return x.ThumbnailUrl
+	}
+	return ""
+}
+
+type ListEncodingTasksRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MediaId       string                 `protobuf:"bytes,1,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEncodingTasksRequest) Reset() {
+	*x = ListEncodingTasksRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEncodingTasksRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEncodingTasksRequest) ProtoMessage() {}
+
+func (x *ListEncodingTasksRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEncodingTasksRequest.ProtoReflect.Descriptor instead.
+func (*ListEncodingTasksRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ListEncodingTasksRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+type ListEncodingTasksResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Tasks         []*types.EncodingTask  `protobuf:"bytes,1,rep,name=tasks,proto3" json:"tasks,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEncodingTasksResponse) Reset() {
+	*x = ListEncodingTasksResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEncodingTasksResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEncodingTasksResponse) ProtoMessage() {}
+
+func (x *ListEncodingTasksResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEncodingTasksResponse.ProtoReflect.Descriptor instead.
+func (*ListEncodingTasksResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ListEncodingTasksResponse) GetTasks() []*types.EncodingTask {
+	if x != nil {
+		return x.Tasks
+	}
+	return nil
+}
+
+type GetMediaVariantsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaVariantsRequest) Reset() {
+	*x = GetMediaVariantsRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaVariantsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaVariantsRequest) ProtoMessage() {}
+
+func (x *GetMediaVariantsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaVariantsRequest.ProtoReflect.Descriptor instead.
+func (*GetMediaVariantsRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *GetMediaVariantsRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type GetMediaVariantsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Variants      []*types.MediaVariant  `protobuf:"bytes,1,rep,name=variants,proto3" json:"variants,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaVariantsResponse) Reset() {
+	*x = GetMediaVariantsResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaVariantsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaVariantsResponse) ProtoMessage() {}
+
+func (x *GetMediaVariantsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaVariantsResponse.ProtoReflect.Descriptor instead.
+func (*GetMediaVariantsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *GetMediaVariantsResponse) GetVariants() []*types.MediaVariant {
+	if x != nil {
+		return x.Variants
+	}
+	return nil
+}
+
+type RetryEncodingTaskRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MediaId       string                 `protobuf:"bytes,1,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	TaskId        string                 `protobuf:"bytes,2,opt,name=task_id,proto3" json:"task_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RetryEncodingTaskRequest) Reset() {
+	*x = RetryEncodingTaskRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RetryEncodingTaskRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RetryEncodingTaskRequest) ProtoMessage() {}
+
+func (x *RetryEncodingTaskRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RetryEncodingTaskRequest.ProtoReflect.Descriptor instead.
+func (*RetryEncodingTaskRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *RetryEncodingTaskRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+func (x *RetryEncodingTaskRequest) GetTaskId() string {
+	if x != nil {
+		return x.TaskId
+	}
+	return ""
+}
+
+type RetryEncodingTaskResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Task          *types.EncodingTask    `protobuf:"bytes,1,opt,name=task,proto3" json:"task,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RetryEncodingTaskResponse) Reset() {
+	*x = RetryEncodingTaskResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RetryEncodingTaskResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RetryEncodingTaskResponse) ProtoMessage() {}
+
+func (x *RetryEncodingTaskResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RetryEncodingTaskResponse.ProtoReflect.Descriptor instead.
+func (*RetryEncodingTaskResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *RetryEncodingTaskResponse) GetTask() *types.EncodingTask {
+	if x != nil {
+		return x.Task
+	}
+	return nil
+}
+
+type GetEncodingStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        *string                `protobuf:"bytes,1,opt,name=user_id,proto3,oneof" json:"user_id,omitempty"`
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetEncodingStatusRequest) Reset() {
+	*x = GetEncodingStatusRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetEncodingStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetEncodingStatusRequest) ProtoMessage() {}
+
+func (x *GetEncodingStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetEncodingStatusRequest.ProtoReflect.Descriptor instead.
+func (*GetEncodingStatusRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *GetEncodingStatusRequest) GetUserId() string {
+	if x != nil && x.UserId != nil {
+		return *x.UserId
+	}
+	return ""
+}
+
+func (x *GetEncodingStatusRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *GetEncodingStatusRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetEncodingStatusRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type GetEncodingStatusResponse struct {
+	state           protoimpl.MessageState  `protogen:"open.v1"`
+	ProcessingCount int32                   `protobuf:"varint,1,opt,name=processing_count,proto3" json:"processing_count,omitempty"`
+	PendingCount    int32                   `protobuf:"varint,2,opt,name=pending_count,proto3" json:"pending_count,omitempty"`
+	FailedCount     int32                   `protobuf:"varint,3,opt,name=failed_count,proto3" json:"failed_count,omitempty"`
+	SuccessCount    int32                   `protobuf:"varint,4,opt,name=success_count,proto3" json:"success_count,omitempty"`
+	TotalFiltered   int32                   `protobuf:"varint,5,opt,name=total_filtered,proto3" json:"total_filtered,omitempty"`
+	Page            int32                   `protobuf:"varint,6,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize        int32                   `protobuf:"varint,7,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	Items           []*TranscodingMediaItem `protobuf:"bytes,8,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *GetEncodingStatusResponse) Reset() {
+	*x = GetEncodingStatusResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetEncodingStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetEncodingStatusResponse) ProtoMessage() {}
+
+func (x *GetEncodingStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetEncodingStatusResponse.ProtoReflect.Descriptor instead.
+func (*GetEncodingStatusResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *GetEncodingStatusResponse) GetProcessingCount() int32 {
+	if x != nil {
+		return x.ProcessingCount
+	}
+	return 0
+}
+
+func (x *GetEncodingStatusResponse) GetPendingCount() int32 {
+	if x != nil {
+		return x.PendingCount
+	}
+	return 0
+}
+
+func (x *GetEncodingStatusResponse) GetFailedCount() int32 {
+	if x != nil {
+		return x.FailedCount
+	}
+	return 0
+}
+
+func (x *GetEncodingStatusResponse) GetSuccessCount() int32 {
+	if x != nil {
+		return x.SuccessCount
+	}
+	return 0
+}
+
+func (x *GetEncodingStatusResponse) GetTotalFiltered() int32 {
+	if x != nil {
+		return x.TotalFiltered
+	}
+	return 0
+}
+
+func (x *GetEncodingStatusResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetEncodingStatusResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *GetEncodingStatusResponse) GetItems() []*TranscodingMediaItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type ListAllEncodingTasksRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Status        string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	MediaId       *string                `protobuf:"bytes,4,opt,name=media_id,proto3,oneof" json:"media_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAllEncodingTasksRequest) Reset() {
+	*x = ListAllEncodingTasksRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAllEncodingTasksRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAllEncodingTasksRequest) ProtoMessage() {}
+
+func (x *ListAllEncodingTasksRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAllEncodingTasksRequest.ProtoReflect.Descriptor instead.
+func (*ListAllEncodingTasksRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *ListAllEncodingTasksRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *ListAllEncodingTasksRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListAllEncodingTasksRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListAllEncodingTasksRequest) GetMediaId() string {
+	if x != nil && x.MediaId != nil {
+		return *x.MediaId
+	}
+	return ""
+}
+
+type ListAllEncodingTasksResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Tasks         []*types.EncodingTask  `protobuf:"bytes,2,rep,name=tasks,proto3" json:"tasks,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAllEncodingTasksResponse) Reset() {
+	*x = ListAllEncodingTasksResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAllEncodingTasksResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAllEncodingTasksResponse) ProtoMessage() {}
+
+func (x *ListAllEncodingTasksResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAllEncodingTasksResponse.ProtoReflect.Descriptor instead.
+func (*ListAllEncodingTasksResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *ListAllEncodingTasksResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListAllEncodingTasksResponse) GetTasks() []*types.EncodingTask {
+	if x != nil {
+		return x.Tasks
+	}
+	return nil
+}
+
+func (x *ListAllEncodingTasksResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListAllEncodingTasksResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type RetryAllFailedTasksRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MediaId       *string                `protobuf:"bytes,1,opt,name=media_id,proto3,oneof" json:"media_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RetryAllFailedTasksRequest) Reset() {
+	*x = RetryAllFailedTasksRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RetryAllFailedTasksRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RetryAllFailedTasksRequest) ProtoMessage() {}
+
+func (x *RetryAllFailedTasksRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RetryAllFailedTasksRequest.ProtoReflect.Descriptor instead.
+func (*RetryAllFailedTasksRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *RetryAllFailedTasksRequest) GetMediaId() string {
+	if x != nil && x.MediaId != nil {
+		return *x.MediaId
+	}
+	return ""
+}
+
+type RetryAllFailedTasksResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RetriedCount  int32                  `protobuf:"varint,1,opt,name=retried_count,proto3" json:"retried_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RetryAllFailedTasksResponse) Reset() {
+	*x = RetryAllFailedTasksResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RetryAllFailedTasksResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RetryAllFailedTasksResponse) ProtoMessage() {}
+
+func (x *RetryAllFailedTasksResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RetryAllFailedTasksResponse.ProtoReflect.Descriptor instead.
+func (*RetryAllFailedTasksResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *RetryAllFailedTasksResponse) GetRetriedCount() int32 {
+	if x != nil {
+		return x.RetriedCount
+	}
+	return 0
+}
+
+type TranscodingMediaItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Media         *types.Media           `protobuf:"bytes,1,opt,name=media,proto3" json:"media,omitempty"`
+	Tasks         []*types.EncodingTask  `protobuf:"bytes,2,rep,name=tasks,proto3" json:"tasks,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TranscodingMediaItem) Reset() {
+	*x = TranscodingMediaItem{}
+	mi := &file_v1_media_media_service_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TranscodingMediaItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TranscodingMediaItem) ProtoMessage() {}
+
+func (x *TranscodingMediaItem) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TranscodingMediaItem.ProtoReflect.Descriptor instead.
+func (*TranscodingMediaItem) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *TranscodingMediaItem) GetMedia() *types.Media {
+	if x != nil {
+		return x.Media
+	}
+	return nil
+}
+
+func (x *TranscodingMediaItem) GetTasks() []*types.EncodingTask {
+	if x != nil {
+		return x.Tasks
+	}
+	return nil
+}
+
+type GetMediaLikesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MediaId       string                 `protobuf:"bytes,1,opt,name=media_id,json=mediaId,proto3" json:"media_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaLikesRequest) Reset() {
+	*x = GetMediaLikesRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaLikesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaLikesRequest) ProtoMessage() {}
+
+func (x *GetMediaLikesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaLikesRequest.ProtoReflect.Descriptor instead.
+func (*GetMediaLikesRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *GetMediaLikesRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+type GetMediaLikesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	LikeCount     int64                  `protobuf:"varint,1,opt,name=like_count,proto3" json:"like_count,omitempty"`
+	DislikeCount  int64                  `protobuf:"varint,2,opt,name=dislike_count,proto3" json:"dislike_count,omitempty"`
+	IsLiked       bool                   `protobuf:"varint,3,opt,name=is_liked,proto3" json:"is_liked,omitempty"`
+	IsDisliked    bool                   `protobuf:"varint,4,opt,name=is_disliked,proto3" json:"is_disliked,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaLikesResponse) Reset() {
+	*x = GetMediaLikesResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaLikesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaLikesResponse) ProtoMessage() {}
+
+func (x *GetMediaLikesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaLikesResponse.ProtoReflect.Descriptor instead.
+func (*GetMediaLikesResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *GetMediaLikesResponse) GetLikeCount() int64 {
+	if x != nil {
+		return x.LikeCount
+	}
+	return 0
+}
+
+func (x *GetMediaLikesResponse) GetDislikeCount() int64 {
+	if x != nil {
+		return x.DislikeCount
+	}
+	return 0
+}
+
+func (x *GetMediaLikesResponse) GetIsLiked() bool {
+	if x != nil {
+		return x.IsLiked
+	}
+	return false
+}
+
+func (x *GetMediaLikesResponse) GetIsDisliked() bool {
+	if x != nil {
+		return x.IsDisliked
+	}
+	return false
+}
+
+type ToggleMediaLikeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MediaId       string                 `protobuf:"bytes,1,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"` // "like" or "dislike"
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ToggleMediaLikeRequest) Reset() {
+	*x = ToggleMediaLikeRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ToggleMediaLikeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ToggleMediaLikeRequest) ProtoMessage() {}
+
+func (x *ToggleMediaLikeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ToggleMediaLikeRequest.ProtoReflect.Descriptor instead.
+func (*ToggleMediaLikeRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *ToggleMediaLikeRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+func (x *ToggleMediaLikeRequest) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+type ToggleMediaLikeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IsLiked       bool                   `protobuf:"varint,1,opt,name=is_liked,proto3" json:"is_liked,omitempty"`
+	IsDisliked    bool                   `protobuf:"varint,2,opt,name=is_disliked,proto3" json:"is_disliked,omitempty"`
+	LikeCount     int64                  `protobuf:"varint,3,opt,name=like_count,proto3" json:"like_count,omitempty"`
+	DislikeCount  int64                  `protobuf:"varint,4,opt,name=dislike_count,proto3" json:"dislike_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ToggleMediaLikeResponse) Reset() {
+	*x = ToggleMediaLikeResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ToggleMediaLikeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ToggleMediaLikeResponse) ProtoMessage() {}
+
+func (x *ToggleMediaLikeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ToggleMediaLikeResponse.ProtoReflect.Descriptor instead.
+func (*ToggleMediaLikeResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *ToggleMediaLikeResponse) GetIsLiked() bool {
+	if x != nil {
+		return x.IsLiked
+	}
+	return false
+}
+
+func (x *ToggleMediaLikeResponse) GetIsDisliked() bool {
+	if x != nil {
+		return x.IsDisliked
+	}
+	return false
+}
+
+func (x *ToggleMediaLikeResponse) GetLikeCount() int64 {
+	if x != nil {
+		return x.LikeCount
+	}
+	return 0
+}
+
+func (x *ToggleMediaLikeResponse) GetDislikeCount() int64 {
+	if x != nil {
+		return x.DislikeCount
+	}
+	return 0
+}
+
+type DeleteMediaLikeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MediaId       string                 `protobuf:"bytes,1,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteMediaLikeRequest) Reset() {
+	*x = DeleteMediaLikeRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteMediaLikeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteMediaLikeRequest) ProtoMessage() {}
+
+func (x *DeleteMediaLikeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteMediaLikeRequest.ProtoReflect.Descriptor instead.
+func (*DeleteMediaLikeRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *DeleteMediaLikeRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+type DeleteMediaLikeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteMediaLikeResponse) Reset() {
+	*x = DeleteMediaLikeResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteMediaLikeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteMediaLikeResponse) ProtoMessage() {}
+
+func (x *DeleteMediaLikeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteMediaLikeResponse.ProtoReflect.Descriptor instead.
+func (*DeleteMediaLikeResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *DeleteMediaLikeResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type GetMediaFavoritesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MediaId       string                 `protobuf:"bytes,1,opt,name=media_id,json=mediaId,proto3" json:"media_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaFavoritesRequest) Reset() {
+	*x = GetMediaFavoritesRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaFavoritesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaFavoritesRequest) ProtoMessage() {}
+
+func (x *GetMediaFavoritesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaFavoritesRequest.ProtoReflect.Descriptor instead.
+func (*GetMediaFavoritesRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *GetMediaFavoritesRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+type GetMediaFavoritesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FavoriteCount int64                  `protobuf:"varint,1,opt,name=favorite_count,proto3" json:"favorite_count,omitempty"`
+	IsFavorited   bool                   `protobuf:"varint,2,opt,name=is_favorited,proto3" json:"is_favorited,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaFavoritesResponse) Reset() {
+	*x = GetMediaFavoritesResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaFavoritesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaFavoritesResponse) ProtoMessage() {}
+
+func (x *GetMediaFavoritesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaFavoritesResponse.ProtoReflect.Descriptor instead.
+func (*GetMediaFavoritesResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *GetMediaFavoritesResponse) GetFavoriteCount() int64 {
+	if x != nil {
+		return x.FavoriteCount
+	}
+	return 0
+}
+
+func (x *GetMediaFavoritesResponse) GetIsFavorited() bool {
+	if x != nil {
+		return x.IsFavorited
+	}
+	return false
+}
+
+type ToggleMediaFavoriteRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MediaId       string                 `protobuf:"bytes,1,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ToggleMediaFavoriteRequest) Reset() {
+	*x = ToggleMediaFavoriteRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[41]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ToggleMediaFavoriteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ToggleMediaFavoriteRequest) ProtoMessage() {}
+
+func (x *ToggleMediaFavoriteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[41]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ToggleMediaFavoriteRequest.ProtoReflect.Descriptor instead.
+func (*ToggleMediaFavoriteRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{41}
+}
+
+func (x *ToggleMediaFavoriteRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+type ToggleMediaFavoriteResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IsFavorited   bool                   `protobuf:"varint,1,opt,name=is_favorited,proto3" json:"is_favorited,omitempty"`
+	FavoriteCount int64                  `protobuf:"varint,2,opt,name=favorite_count,proto3" json:"favorite_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ToggleMediaFavoriteResponse) Reset() {
+	*x = ToggleMediaFavoriteResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[42]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ToggleMediaFavoriteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ToggleMediaFavoriteResponse) ProtoMessage() {}
+
+func (x *ToggleMediaFavoriteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[42]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ToggleMediaFavoriteResponse.ProtoReflect.Descriptor instead.
+func (*ToggleMediaFavoriteResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{42}
+}
+
+func (x *ToggleMediaFavoriteResponse) GetIsFavorited() bool {
+	if x != nil {
+		return x.IsFavorited
+	}
+	return false
+}
+
+func (x *ToggleMediaFavoriteResponse) GetFavoriteCount() int64 {
+	if x != nil {
+		return x.FavoriteCount
+	}
+	return 0
+}
+
+type DeleteMediaFavoriteRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MediaId       string                 `protobuf:"bytes,1,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteMediaFavoriteRequest) Reset() {
+	*x = DeleteMediaFavoriteRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[43]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteMediaFavoriteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteMediaFavoriteRequest) ProtoMessage() {}
+
+func (x *DeleteMediaFavoriteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[43]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteMediaFavoriteRequest.ProtoReflect.Descriptor instead.
+func (*DeleteMediaFavoriteRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{43}
+}
+
+func (x *DeleteMediaFavoriteRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+type DeleteMediaFavoriteResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteMediaFavoriteResponse) Reset() {
+	*x = DeleteMediaFavoriteResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[44]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteMediaFavoriteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteMediaFavoriteResponse) ProtoMessage() {}
+
+func (x *DeleteMediaFavoriteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[44]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteMediaFavoriteResponse.ProtoReflect.Descriptor instead.
+func (*DeleteMediaFavoriteResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{44}
+}
+
+func (x *DeleteMediaFavoriteResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type GetMediaSharesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MediaId       string                 `protobuf:"bytes,1,opt,name=media_id,json=mediaId,proto3" json:"media_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaSharesRequest) Reset() {
+	*x = GetMediaSharesRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[45]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaSharesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaSharesRequest) ProtoMessage() {}
+
+func (x *GetMediaSharesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[45]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaSharesRequest.ProtoReflect.Descriptor instead.
+func (*GetMediaSharesRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{45}
+}
+
+func (x *GetMediaSharesRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+type GetMediaSharesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ShareCount    int64                  `protobuf:"varint,1,opt,name=share_count,proto3" json:"share_count,omitempty"`
+	ShareUrl      string                 `protobuf:"bytes,2,opt,name=share_url,proto3" json:"share_url,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaSharesResponse) Reset() {
+	*x = GetMediaSharesResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[46]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaSharesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaSharesResponse) ProtoMessage() {}
+
+func (x *GetMediaSharesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[46]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaSharesResponse.ProtoReflect.Descriptor instead.
+func (*GetMediaSharesResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{46}
+}
+
+func (x *GetMediaSharesResponse) GetShareCount() int64 {
+	if x != nil {
+		return x.ShareCount
+	}
+	return 0
+}
+
+func (x *GetMediaSharesResponse) GetShareUrl() string {
+	if x != nil {
+		return x.ShareUrl
+	}
+	return ""
+}
+
+type CreateMediaShareRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MediaId       string                 `protobuf:"bytes,1,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	Platform      string                 `protobuf:"bytes,2,opt,name=platform,proto3" json:"platform,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateMediaShareRequest) Reset() {
+	*x = CreateMediaShareRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[47]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateMediaShareRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateMediaShareRequest) ProtoMessage() {}
+
+func (x *CreateMediaShareRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[47]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateMediaShareRequest.ProtoReflect.Descriptor instead.
+func (*CreateMediaShareRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{47}
+}
+
+func (x *CreateMediaShareRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+func (x *CreateMediaShareRequest) GetPlatform() string {
+	if x != nil {
+		return x.Platform
+	}
+	return ""
+}
+
+type CreateMediaShareResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	ShareUrl      string                 `protobuf:"bytes,2,opt,name=share_url,proto3" json:"share_url,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateMediaShareResponse) Reset() {
+	*x = CreateMediaShareResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[48]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateMediaShareResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateMediaShareResponse) ProtoMessage() {}
+
+func (x *CreateMediaShareResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[48]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateMediaShareResponse.ProtoReflect.Descriptor instead.
+func (*CreateMediaShareResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{48}
+}
+
+func (x *CreateMediaShareResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *CreateMediaShareResponse) GetShareUrl() string {
+	if x != nil {
+		return x.ShareUrl
+	}
+	return ""
+}
+
+type GetMediaCommentsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MediaId       string                 `protobuf:"bytes,1,opt,name=media_id,json=mediaId,proto3" json:"media_id,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaCommentsRequest) Reset() {
+	*x = GetMediaCommentsRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[49]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaCommentsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaCommentsRequest) ProtoMessage() {}
+
+func (x *GetMediaCommentsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[49]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaCommentsRequest.ProtoReflect.Descriptor instead.
+func (*GetMediaCommentsRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{49}
+}
+
+func (x *GetMediaCommentsRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+func (x *GetMediaCommentsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetMediaCommentsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type GetMediaCommentsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Comments      []*types.Comment       `protobuf:"bytes,2,rep,name=comments,proto3" json:"comments,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaCommentsResponse) Reset() {
+	*x = GetMediaCommentsResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[50]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaCommentsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaCommentsResponse) ProtoMessage() {}
+
+func (x *GetMediaCommentsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[50]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaCommentsResponse.ProtoReflect.Descriptor instead.
+func (*GetMediaCommentsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{50}
+}
+
+func (x *GetMediaCommentsResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *GetMediaCommentsResponse) GetComments() []*types.Comment {
+	if x != nil {
+		return x.Comments
+	}
+	return nil
+}
+
+func (x *GetMediaCommentsResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetMediaCommentsResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type GetMediaSubtitlesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MediaId       string                 `protobuf:"bytes,1,opt,name=media_id,json=mediaId,proto3" json:"media_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaSubtitlesRequest) Reset() {
+	*x = GetMediaSubtitlesRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[51]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaSubtitlesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaSubtitlesRequest) ProtoMessage() {}
+
+func (x *GetMediaSubtitlesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[51]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaSubtitlesRequest.ProtoReflect.Descriptor instead.
+func (*GetMediaSubtitlesRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{51}
+}
+
+func (x *GetMediaSubtitlesRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+type GetMediaSubtitlesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Subtitles     []*types.Subtitle      `protobuf:"bytes,1,rep,name=subtitles,proto3" json:"subtitles,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaSubtitlesResponse) Reset() {
+	*x = GetMediaSubtitlesResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[52]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaSubtitlesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaSubtitlesResponse) ProtoMessage() {}
+
+func (x *GetMediaSubtitlesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[52]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaSubtitlesResponse.ProtoReflect.Descriptor instead.
+func (*GetMediaSubtitlesResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{52}
+}
+
+func (x *GetMediaSubtitlesResponse) GetSubtitles() []*types.Subtitle {
+	if x != nil {
+		return x.Subtitles
+	}
+	return nil
+}
+
+type CreateMediaSubtitleRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MediaId       string                 `protobuf:"bytes,1,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	Language      string                 `protobuf:"bytes,2,opt,name=language,proto3" json:"language,omitempty"`
+	FileUrl       string                 `protobuf:"bytes,3,opt,name=file_url,proto3" json:"file_url,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateMediaSubtitleRequest) Reset() {
+	*x = CreateMediaSubtitleRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[53]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateMediaSubtitleRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateMediaSubtitleRequest) ProtoMessage() {}
+
+func (x *CreateMediaSubtitleRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[53]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateMediaSubtitleRequest.ProtoReflect.Descriptor instead.
+func (*CreateMediaSubtitleRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{53}
+}
+
+func (x *CreateMediaSubtitleRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+func (x *CreateMediaSubtitleRequest) GetLanguage() string {
+	if x != nil {
+		return x.Language
+	}
+	return ""
+}
+
+func (x *CreateMediaSubtitleRequest) GetFileUrl() string {
+	if x != nil {
+		return x.FileUrl
+	}
+	return ""
+}
+
+type CreateMediaSubtitleResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Subtitle      *types.Subtitle        `protobuf:"bytes,1,opt,name=subtitle,proto3" json:"subtitle,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateMediaSubtitleResponse) Reset() {
+	*x = CreateMediaSubtitleResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[54]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateMediaSubtitleResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateMediaSubtitleResponse) ProtoMessage() {}
+
+func (x *CreateMediaSubtitleResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[54]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateMediaSubtitleResponse.ProtoReflect.Descriptor instead.
+func (*CreateMediaSubtitleResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{54}
+}
+
+func (x *CreateMediaSubtitleResponse) GetSubtitle() *types.Subtitle {
+	if x != nil {
+		return x.Subtitle
+	}
+	return nil
+}
+
+type GetMediaMetadataRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MediaId       string                 `protobuf:"bytes,1,opt,name=media_id,json=mediaId,proto3" json:"media_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaMetadataRequest) Reset() {
+	*x = GetMediaMetadataRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[55]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaMetadataRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaMetadataRequest) ProtoMessage() {}
+
+func (x *GetMediaMetadataRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[55]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaMetadataRequest.ProtoReflect.Descriptor instead.
+func (*GetMediaMetadataRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{55}
+}
+
+func (x *GetMediaMetadataRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+type GetMediaMetadataResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Metadata      *types.MediaMetadata   `protobuf:"bytes,1,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaMetadataResponse) Reset() {
+	*x = GetMediaMetadataResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[56]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaMetadataResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaMetadataResponse) ProtoMessage() {}
+
+func (x *GetMediaMetadataResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[56]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaMetadataResponse.ProtoReflect.Descriptor instead.
+func (*GetMediaMetadataResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{56}
+}
+
+func (x *GetMediaMetadataResponse) GetMetadata() *types.MediaMetadata {
+	if x != nil {
+		return x.Metadata
+	}
+	return nil
+}
+
+type ListEncodeProfilesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEncodeProfilesRequest) Reset() {
+	*x = ListEncodeProfilesRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[57]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEncodeProfilesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEncodeProfilesRequest) ProtoMessage() {}
+
+func (x *ListEncodeProfilesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[57]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEncodeProfilesRequest.ProtoReflect.Descriptor instead.
+func (*ListEncodeProfilesRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{57}
+}
+
+type ListEncodeProfilesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Profiles      []*types.EncodeProfile `protobuf:"bytes,1,rep,name=profiles,proto3" json:"profiles,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEncodeProfilesResponse) Reset() {
+	*x = ListEncodeProfilesResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[58]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEncodeProfilesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEncodeProfilesResponse) ProtoMessage() {}
+
+func (x *ListEncodeProfilesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[58]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEncodeProfilesResponse.ProtoReflect.Descriptor instead.
+func (*ListEncodeProfilesResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{58}
+}
+
+func (x *ListEncodeProfilesResponse) GetProfiles() []*types.EncodeProfile {
+	if x != nil {
+		return x.Profiles
+	}
+	return nil
+}
+
+type GetEncodeProfileRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetEncodeProfileRequest) Reset() {
+	*x = GetEncodeProfileRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[59]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetEncodeProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetEncodeProfileRequest) ProtoMessage() {}
+
+func (x *GetEncodeProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[59]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetEncodeProfileRequest.ProtoReflect.Descriptor instead.
+func (*GetEncodeProfileRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{59}
+}
+
+func (x *GetEncodeProfileRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type GetEncodeProfileResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Profile       *types.EncodeProfile   `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetEncodeProfileResponse) Reset() {
+	*x = GetEncodeProfileResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[60]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetEncodeProfileResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetEncodeProfileResponse) ProtoMessage() {}
+
+func (x *GetEncodeProfileResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[60]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetEncodeProfileResponse.ProtoReflect.Descriptor instead.
+func (*GetEncodeProfileResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{60}
+}
+
+func (x *GetEncodeProfileResponse) GetProfile() *types.EncodeProfile {
+	if x != nil {
+		return x.Profile
+	}
+	return nil
+}
+
+type CreateEncodeProfileRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Profile       *types.EncodeProfile   `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateEncodeProfileRequest) Reset() {
+	*x = CreateEncodeProfileRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[61]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateEncodeProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateEncodeProfileRequest) ProtoMessage() {}
+
+func (x *CreateEncodeProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[61]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateEncodeProfileRequest.ProtoReflect.Descriptor instead.
+func (*CreateEncodeProfileRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{61}
+}
+
+func (x *CreateEncodeProfileRequest) GetProfile() *types.EncodeProfile {
+	if x != nil {
+		return x.Profile
+	}
+	return nil
+}
+
+type CreateEncodeProfileResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Profile       *types.EncodeProfile   `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateEncodeProfileResponse) Reset() {
+	*x = CreateEncodeProfileResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[62]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateEncodeProfileResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateEncodeProfileResponse) ProtoMessage() {}
+
+func (x *CreateEncodeProfileResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[62]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateEncodeProfileResponse.ProtoReflect.Descriptor instead.
+func (*CreateEncodeProfileResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{62}
+}
+
+func (x *CreateEncodeProfileResponse) GetProfile() *types.EncodeProfile {
+	if x != nil {
+		return x.Profile
+	}
+	return nil
+}
+
+type UpdateEncodeProfileRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Profile       *types.EncodeProfile   `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateEncodeProfileRequest) Reset() {
+	*x = UpdateEncodeProfileRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[63]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateEncodeProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateEncodeProfileRequest) ProtoMessage() {}
+
+func (x *UpdateEncodeProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[63]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateEncodeProfileRequest.ProtoReflect.Descriptor instead.
+func (*UpdateEncodeProfileRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{63}
+}
+
+func (x *UpdateEncodeProfileRequest) GetProfile() *types.EncodeProfile {
+	if x != nil {
+		return x.Profile
+	}
+	return nil
+}
+
+type UpdateEncodeProfileResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Profile       *types.EncodeProfile   `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateEncodeProfileResponse) Reset() {
+	*x = UpdateEncodeProfileResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[64]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateEncodeProfileResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateEncodeProfileResponse) ProtoMessage() {}
+
+func (x *UpdateEncodeProfileResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[64]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateEncodeProfileResponse.ProtoReflect.Descriptor instead.
+func (*UpdateEncodeProfileResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{64}
+}
+
+func (x *UpdateEncodeProfileResponse) GetProfile() *types.EncodeProfile {
+	if x != nil {
+		return x.Profile
+	}
+	return nil
+}
+
+type DeleteEncodeProfileRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteEncodeProfileRequest) Reset() {
+	*x = DeleteEncodeProfileRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[65]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteEncodeProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteEncodeProfileRequest) ProtoMessage() {}
+
+func (x *DeleteEncodeProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[65]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteEncodeProfileRequest.ProtoReflect.Descriptor instead.
+func (*DeleteEncodeProfileRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{65}
+}
+
+func (x *DeleteEncodeProfileRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type DeleteEncodeProfileResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Empty         *emptypb.Empty         `protobuf:"bytes,1,opt,name=empty,proto3" json:"empty,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteEncodeProfileResponse) Reset() {
+	*x = DeleteEncodeProfileResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[66]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteEncodeProfileResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteEncodeProfileResponse) ProtoMessage() {}
+
+func (x *DeleteEncodeProfileResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[66]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteEncodeProfileResponse.ProtoReflect.Descriptor instead.
+func (*DeleteEncodeProfileResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{66}
+}
+
+func (x *DeleteEncodeProfileResponse) GetEmpty() *emptypb.Empty {
+	if x != nil {
+		return x.Empty
+	}
+	return nil
+}
+
 type ListCategoriesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,proto3" json:"page_token,omitempty"`
-	ParentId      *int64                 `protobuf:"varint,4,opt,name=parent_id,proto3,oneof" json:"parent_id,omitempty"`
+	ParentId      *string                `protobuf:"bytes,4,opt,name=parent_id,proto3,oneof" json:"parent_id,omitempty"`
 	Status        *int32                 `protobuf:"varint,5,opt,name=status,proto3,oneof" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -835,7 +3450,7 @@ type ListCategoriesRequest struct {
 
 func (x *ListCategoriesRequest) Reset() {
 	*x = ListCategoriesRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[14]
+	mi := &file_v1_media_media_service_proto_msgTypes[67]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -847,7 +3462,7 @@ func (x *ListCategoriesRequest) String() string {
 func (*ListCategoriesRequest) ProtoMessage() {}
 
 func (x *ListCategoriesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[14]
+	mi := &file_v1_media_media_service_proto_msgTypes[67]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -860,7 +3475,7 @@ func (x *ListCategoriesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCategoriesRequest.ProtoReflect.Descriptor instead.
 func (*ListCategoriesRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{14}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{67}
 }
 
 func (x *ListCategoriesRequest) GetPage() int32 {
@@ -884,11 +3499,11 @@ func (x *ListCategoriesRequest) GetPageToken() string {
 	return ""
 }
 
-func (x *ListCategoriesRequest) GetParentId() int64 {
+func (x *ListCategoriesRequest) GetParentId() string {
 	if x != nil && x.ParentId != nil {
 		return *x.ParentId
 	}
-	return 0
+	return ""
 }
 
 func (x *ListCategoriesRequest) GetStatus() int32 {
@@ -911,7 +3526,7 @@ type ListCategoriesResponse struct {
 
 func (x *ListCategoriesResponse) Reset() {
 	*x = ListCategoriesResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[15]
+	mi := &file_v1_media_media_service_proto_msgTypes[68]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -923,7 +3538,7 @@ func (x *ListCategoriesResponse) String() string {
 func (*ListCategoriesResponse) ProtoMessage() {}
 
 func (x *ListCategoriesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[15]
+	mi := &file_v1_media_media_service_proto_msgTypes[68]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -936,7 +3551,7 @@ func (x *ListCategoriesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCategoriesResponse.ProtoReflect.Descriptor instead.
 func (*ListCategoriesResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{15}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{68}
 }
 
 func (x *ListCategoriesResponse) GetTotal() int32 {
@@ -976,14 +3591,14 @@ func (x *ListCategoriesResponse) GetNextPageToken() string {
 
 type GetCategoryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetCategoryRequest) Reset() {
 	*x = GetCategoryRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[16]
+	mi := &file_v1_media_media_service_proto_msgTypes[69]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -995,7 +3610,7 @@ func (x *GetCategoryRequest) String() string {
 func (*GetCategoryRequest) ProtoMessage() {}
 
 func (x *GetCategoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[16]
+	mi := &file_v1_media_media_service_proto_msgTypes[69]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1008,14 +3623,14 @@ func (x *GetCategoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCategoryRequest.ProtoReflect.Descriptor instead.
 func (*GetCategoryRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{16}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{69}
 }
 
-func (x *GetCategoryRequest) GetId() int64 {
+func (x *GetCategoryRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
 type GetCategoryResponse struct {
@@ -1027,7 +3642,7 @@ type GetCategoryResponse struct {
 
 func (x *GetCategoryResponse) Reset() {
 	*x = GetCategoryResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[17]
+	mi := &file_v1_media_media_service_proto_msgTypes[70]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1039,7 +3654,7 @@ func (x *GetCategoryResponse) String() string {
 func (*GetCategoryResponse) ProtoMessage() {}
 
 func (x *GetCategoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[17]
+	mi := &file_v1_media_media_service_proto_msgTypes[70]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1052,7 +3667,7 @@ func (x *GetCategoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCategoryResponse.ProtoReflect.Descriptor instead.
 func (*GetCategoryResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{17}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{70}
 }
 
 func (x *GetCategoryResponse) GetCategory() *types.Category {
@@ -1071,7 +3686,7 @@ type CreateCategoryRequest struct {
 
 func (x *CreateCategoryRequest) Reset() {
 	*x = CreateCategoryRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[18]
+	mi := &file_v1_media_media_service_proto_msgTypes[71]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1083,7 +3698,7 @@ func (x *CreateCategoryRequest) String() string {
 func (*CreateCategoryRequest) ProtoMessage() {}
 
 func (x *CreateCategoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[18]
+	mi := &file_v1_media_media_service_proto_msgTypes[71]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1096,7 +3711,7 @@ func (x *CreateCategoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCategoryRequest.ProtoReflect.Descriptor instead.
 func (*CreateCategoryRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{18}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{71}
 }
 
 func (x *CreateCategoryRequest) GetCategory() *types.Category {
@@ -1115,7 +3730,7 @@ type CreateCategoryResponse struct {
 
 func (x *CreateCategoryResponse) Reset() {
 	*x = CreateCategoryResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[19]
+	mi := &file_v1_media_media_service_proto_msgTypes[72]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1127,7 +3742,7 @@ func (x *CreateCategoryResponse) String() string {
 func (*CreateCategoryResponse) ProtoMessage() {}
 
 func (x *CreateCategoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[19]
+	mi := &file_v1_media_media_service_proto_msgTypes[72]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1140,7 +3755,7 @@ func (x *CreateCategoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCategoryResponse.ProtoReflect.Descriptor instead.
 func (*CreateCategoryResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{19}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{72}
 }
 
 func (x *CreateCategoryResponse) GetCategory() *types.Category {
@@ -1160,7 +3775,7 @@ type UpdateCategoryRequest struct {
 
 func (x *UpdateCategoryRequest) Reset() {
 	*x = UpdateCategoryRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[20]
+	mi := &file_v1_media_media_service_proto_msgTypes[73]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1172,7 +3787,7 @@ func (x *UpdateCategoryRequest) String() string {
 func (*UpdateCategoryRequest) ProtoMessage() {}
 
 func (x *UpdateCategoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[20]
+	mi := &file_v1_media_media_service_proto_msgTypes[73]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1185,7 +3800,7 @@ func (x *UpdateCategoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCategoryRequest.ProtoReflect.Descriptor instead.
 func (*UpdateCategoryRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{20}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{73}
 }
 
 func (x *UpdateCategoryRequest) GetCategory() *types.Category {
@@ -1211,7 +3826,7 @@ type UpdateCategoryResponse struct {
 
 func (x *UpdateCategoryResponse) Reset() {
 	*x = UpdateCategoryResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[21]
+	mi := &file_v1_media_media_service_proto_msgTypes[74]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1223,7 +3838,7 @@ func (x *UpdateCategoryResponse) String() string {
 func (*UpdateCategoryResponse) ProtoMessage() {}
 
 func (x *UpdateCategoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[21]
+	mi := &file_v1_media_media_service_proto_msgTypes[74]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1236,7 +3851,7 @@ func (x *UpdateCategoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCategoryResponse.ProtoReflect.Descriptor instead.
 func (*UpdateCategoryResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{21}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{74}
 }
 
 func (x *UpdateCategoryResponse) GetCategory() *types.Category {
@@ -1248,14 +3863,14 @@ func (x *UpdateCategoryResponse) GetCategory() *types.Category {
 
 type DeleteCategoryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DeleteCategoryRequest) Reset() {
 	*x = DeleteCategoryRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[22]
+	mi := &file_v1_media_media_service_proto_msgTypes[75]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1267,7 +3882,7 @@ func (x *DeleteCategoryRequest) String() string {
 func (*DeleteCategoryRequest) ProtoMessage() {}
 
 func (x *DeleteCategoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[22]
+	mi := &file_v1_media_media_service_proto_msgTypes[75]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1280,14 +3895,14 @@ func (x *DeleteCategoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCategoryRequest.ProtoReflect.Descriptor instead.
 func (*DeleteCategoryRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{22}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{75}
 }
 
-func (x *DeleteCategoryRequest) GetId() int64 {
+func (x *DeleteCategoryRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
 type DeleteCategoryResponse struct {
@@ -1299,7 +3914,7 @@ type DeleteCategoryResponse struct {
 
 func (x *DeleteCategoryResponse) Reset() {
 	*x = DeleteCategoryResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[23]
+	mi := &file_v1_media_media_service_proto_msgTypes[76]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1311,7 +3926,7 @@ func (x *DeleteCategoryResponse) String() string {
 func (*DeleteCategoryResponse) ProtoMessage() {}
 
 func (x *DeleteCategoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[23]
+	mi := &file_v1_media_media_service_proto_msgTypes[76]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1324,7 +3939,7 @@ func (x *DeleteCategoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCategoryResponse.ProtoReflect.Descriptor instead.
 func (*DeleteCategoryResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{23}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{76}
 }
 
 func (x *DeleteCategoryResponse) GetEmpty() *emptypb.Empty {
@@ -1347,7 +3962,7 @@ type ListTagsRequest struct {
 
 func (x *ListTagsRequest) Reset() {
 	*x = ListTagsRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[24]
+	mi := &file_v1_media_media_service_proto_msgTypes[77]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1359,7 +3974,7 @@ func (x *ListTagsRequest) String() string {
 func (*ListTagsRequest) ProtoMessage() {}
 
 func (x *ListTagsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[24]
+	mi := &file_v1_media_media_service_proto_msgTypes[77]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1372,7 +3987,7 @@ func (x *ListTagsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTagsRequest.ProtoReflect.Descriptor instead.
 func (*ListTagsRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{24}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{77}
 }
 
 func (x *ListTagsRequest) GetPage() int32 {
@@ -1423,7 +4038,7 @@ type ListTagsResponse struct {
 
 func (x *ListTagsResponse) Reset() {
 	*x = ListTagsResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[25]
+	mi := &file_v1_media_media_service_proto_msgTypes[78]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1435,7 +4050,7 @@ func (x *ListTagsResponse) String() string {
 func (*ListTagsResponse) ProtoMessage() {}
 
 func (x *ListTagsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[25]
+	mi := &file_v1_media_media_service_proto_msgTypes[78]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1448,7 +4063,7 @@ func (x *ListTagsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTagsResponse.ProtoReflect.Descriptor instead.
 func (*ListTagsResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{25}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{78}
 }
 
 func (x *ListTagsResponse) GetTotal() int32 {
@@ -1488,14 +4103,14 @@ func (x *ListTagsResponse) GetNextPageToken() string {
 
 type GetTagRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetTagRequest) Reset() {
 	*x = GetTagRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[26]
+	mi := &file_v1_media_media_service_proto_msgTypes[79]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1507,7 +4122,7 @@ func (x *GetTagRequest) String() string {
 func (*GetTagRequest) ProtoMessage() {}
 
 func (x *GetTagRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[26]
+	mi := &file_v1_media_media_service_proto_msgTypes[79]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1520,14 +4135,14 @@ func (x *GetTagRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTagRequest.ProtoReflect.Descriptor instead.
 func (*GetTagRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{26}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{79}
 }
 
-func (x *GetTagRequest) GetId() int64 {
+func (x *GetTagRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
 type GetTagResponse struct {
@@ -1539,7 +4154,7 @@ type GetTagResponse struct {
 
 func (x *GetTagResponse) Reset() {
 	*x = GetTagResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[27]
+	mi := &file_v1_media_media_service_proto_msgTypes[80]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1551,7 +4166,7 @@ func (x *GetTagResponse) String() string {
 func (*GetTagResponse) ProtoMessage() {}
 
 func (x *GetTagResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[27]
+	mi := &file_v1_media_media_service_proto_msgTypes[80]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1564,7 +4179,7 @@ func (x *GetTagResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTagResponse.ProtoReflect.Descriptor instead.
 func (*GetTagResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{27}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{80}
 }
 
 func (x *GetTagResponse) GetTag() *types.Tag {
@@ -1583,7 +4198,7 @@ type CreateTagRequest struct {
 
 func (x *CreateTagRequest) Reset() {
 	*x = CreateTagRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[28]
+	mi := &file_v1_media_media_service_proto_msgTypes[81]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1595,7 +4210,7 @@ func (x *CreateTagRequest) String() string {
 func (*CreateTagRequest) ProtoMessage() {}
 
 func (x *CreateTagRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[28]
+	mi := &file_v1_media_media_service_proto_msgTypes[81]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1608,7 +4223,7 @@ func (x *CreateTagRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTagRequest.ProtoReflect.Descriptor instead.
 func (*CreateTagRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{28}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{81}
 }
 
 func (x *CreateTagRequest) GetTag() *types.Tag {
@@ -1627,7 +4242,7 @@ type CreateTagResponse struct {
 
 func (x *CreateTagResponse) Reset() {
 	*x = CreateTagResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[29]
+	mi := &file_v1_media_media_service_proto_msgTypes[82]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1639,7 +4254,7 @@ func (x *CreateTagResponse) String() string {
 func (*CreateTagResponse) ProtoMessage() {}
 
 func (x *CreateTagResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[29]
+	mi := &file_v1_media_media_service_proto_msgTypes[82]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1652,7 +4267,7 @@ func (x *CreateTagResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTagResponse.ProtoReflect.Descriptor instead.
 func (*CreateTagResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{29}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{82}
 }
 
 func (x *CreateTagResponse) GetTag() *types.Tag {
@@ -1672,7 +4287,7 @@ type UpdateTagRequest struct {
 
 func (x *UpdateTagRequest) Reset() {
 	*x = UpdateTagRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[30]
+	mi := &file_v1_media_media_service_proto_msgTypes[83]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1684,7 +4299,7 @@ func (x *UpdateTagRequest) String() string {
 func (*UpdateTagRequest) ProtoMessage() {}
 
 func (x *UpdateTagRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[30]
+	mi := &file_v1_media_media_service_proto_msgTypes[83]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1697,7 +4312,7 @@ func (x *UpdateTagRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTagRequest.ProtoReflect.Descriptor instead.
 func (*UpdateTagRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{30}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{83}
 }
 
 func (x *UpdateTagRequest) GetTag() *types.Tag {
@@ -1723,7 +4338,7 @@ type UpdateTagResponse struct {
 
 func (x *UpdateTagResponse) Reset() {
 	*x = UpdateTagResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[31]
+	mi := &file_v1_media_media_service_proto_msgTypes[84]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1735,7 +4350,7 @@ func (x *UpdateTagResponse) String() string {
 func (*UpdateTagResponse) ProtoMessage() {}
 
 func (x *UpdateTagResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[31]
+	mi := &file_v1_media_media_service_proto_msgTypes[84]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1748,7 +4363,7 @@ func (x *UpdateTagResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTagResponse.ProtoReflect.Descriptor instead.
 func (*UpdateTagResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{31}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{84}
 }
 
 func (x *UpdateTagResponse) GetTag() *types.Tag {
@@ -1760,14 +4375,14 @@ func (x *UpdateTagResponse) GetTag() *types.Tag {
 
 type DeleteTagRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DeleteTagRequest) Reset() {
 	*x = DeleteTagRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[32]
+	mi := &file_v1_media_media_service_proto_msgTypes[85]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1779,7 +4394,7 @@ func (x *DeleteTagRequest) String() string {
 func (*DeleteTagRequest) ProtoMessage() {}
 
 func (x *DeleteTagRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[32]
+	mi := &file_v1_media_media_service_proto_msgTypes[85]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1792,14 +4407,14 @@ func (x *DeleteTagRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteTagRequest.ProtoReflect.Descriptor instead.
 func (*DeleteTagRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{32}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{85}
 }
 
-func (x *DeleteTagRequest) GetId() int64 {
+func (x *DeleteTagRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
 type DeleteTagResponse struct {
@@ -1811,7 +4426,7 @@ type DeleteTagResponse struct {
 
 func (x *DeleteTagResponse) Reset() {
 	*x = DeleteTagResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[33]
+	mi := &file_v1_media_media_service_proto_msgTypes[86]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1823,7 +4438,7 @@ func (x *DeleteTagResponse) String() string {
 func (*DeleteTagResponse) ProtoMessage() {}
 
 func (x *DeleteTagResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[33]
+	mi := &file_v1_media_media_service_proto_msgTypes[86]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1836,7 +4451,7 @@ func (x *DeleteTagResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteTagResponse.ProtoReflect.Descriptor instead.
 func (*DeleteTagResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{33}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{86}
 }
 
 func (x *DeleteTagResponse) GetEmpty() *emptypb.Empty {
@@ -1851,9 +4466,9 @@ type ListCommentsRequest struct {
 	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,proto3" json:"page_token,omitempty"`
-	MediaId       *int64                 `protobuf:"varint,4,opt,name=media_id,proto3,oneof" json:"media_id,omitempty"`
-	UserId        *int64                 `protobuf:"varint,5,opt,name=user_id,proto3,oneof" json:"user_id,omitempty"`
-	ParentId      *int64                 `protobuf:"varint,6,opt,name=parent_id,proto3,oneof" json:"parent_id,omitempty"`
+	MediaId       *string                `protobuf:"bytes,4,opt,name=media_id,proto3,oneof" json:"media_id,omitempty"`
+	UserId        *string                `protobuf:"bytes,5,opt,name=user_id,proto3,oneof" json:"user_id,omitempty"`
+	ParentId      *string                `protobuf:"bytes,6,opt,name=parent_id,proto3,oneof" json:"parent_id,omitempty"`
 	Status        *int32                 `protobuf:"varint,7,opt,name=status,proto3,oneof" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1861,7 +4476,7 @@ type ListCommentsRequest struct {
 
 func (x *ListCommentsRequest) Reset() {
 	*x = ListCommentsRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[34]
+	mi := &file_v1_media_media_service_proto_msgTypes[87]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1873,7 +4488,7 @@ func (x *ListCommentsRequest) String() string {
 func (*ListCommentsRequest) ProtoMessage() {}
 
 func (x *ListCommentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[34]
+	mi := &file_v1_media_media_service_proto_msgTypes[87]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1886,7 +4501,7 @@ func (x *ListCommentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCommentsRequest.ProtoReflect.Descriptor instead.
 func (*ListCommentsRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{34}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{87}
 }
 
 func (x *ListCommentsRequest) GetPage() int32 {
@@ -1910,25 +4525,25 @@ func (x *ListCommentsRequest) GetPageToken() string {
 	return ""
 }
 
-func (x *ListCommentsRequest) GetMediaId() int64 {
+func (x *ListCommentsRequest) GetMediaId() string {
 	if x != nil && x.MediaId != nil {
 		return *x.MediaId
 	}
-	return 0
+	return ""
 }
 
-func (x *ListCommentsRequest) GetUserId() int64 {
+func (x *ListCommentsRequest) GetUserId() string {
 	if x != nil && x.UserId != nil {
 		return *x.UserId
 	}
-	return 0
+	return ""
 }
 
-func (x *ListCommentsRequest) GetParentId() int64 {
+func (x *ListCommentsRequest) GetParentId() string {
 	if x != nil && x.ParentId != nil {
 		return *x.ParentId
 	}
-	return 0
+	return ""
 }
 
 func (x *ListCommentsRequest) GetStatus() int32 {
@@ -1951,7 +4566,7 @@ type ListCommentsResponse struct {
 
 func (x *ListCommentsResponse) Reset() {
 	*x = ListCommentsResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[35]
+	mi := &file_v1_media_media_service_proto_msgTypes[88]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1963,7 +4578,7 @@ func (x *ListCommentsResponse) String() string {
 func (*ListCommentsResponse) ProtoMessage() {}
 
 func (x *ListCommentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[35]
+	mi := &file_v1_media_media_service_proto_msgTypes[88]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1976,7 +4591,7 @@ func (x *ListCommentsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCommentsResponse.ProtoReflect.Descriptor instead.
 func (*ListCommentsResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{35}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{88}
 }
 
 func (x *ListCommentsResponse) GetTotal() int32 {
@@ -2016,14 +4631,14 @@ func (x *ListCommentsResponse) GetNextPageToken() string {
 
 type GetCommentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetCommentRequest) Reset() {
 	*x = GetCommentRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[36]
+	mi := &file_v1_media_media_service_proto_msgTypes[89]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2035,7 +4650,7 @@ func (x *GetCommentRequest) String() string {
 func (*GetCommentRequest) ProtoMessage() {}
 
 func (x *GetCommentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[36]
+	mi := &file_v1_media_media_service_proto_msgTypes[89]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2048,14 +4663,14 @@ func (x *GetCommentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCommentRequest.ProtoReflect.Descriptor instead.
 func (*GetCommentRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{36}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{89}
 }
 
-func (x *GetCommentRequest) GetId() int64 {
+func (x *GetCommentRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
 type GetCommentResponse struct {
@@ -2067,7 +4682,7 @@ type GetCommentResponse struct {
 
 func (x *GetCommentResponse) Reset() {
 	*x = GetCommentResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[37]
+	mi := &file_v1_media_media_service_proto_msgTypes[90]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2079,7 +4694,7 @@ func (x *GetCommentResponse) String() string {
 func (*GetCommentResponse) ProtoMessage() {}
 
 func (x *GetCommentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[37]
+	mi := &file_v1_media_media_service_proto_msgTypes[90]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2092,7 +4707,7 @@ func (x *GetCommentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCommentResponse.ProtoReflect.Descriptor instead.
 func (*GetCommentResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{37}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{90}
 }
 
 func (x *GetCommentResponse) GetComment() *types.Comment {
@@ -2111,7 +4726,7 @@ type CreateCommentRequest struct {
 
 func (x *CreateCommentRequest) Reset() {
 	*x = CreateCommentRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[38]
+	mi := &file_v1_media_media_service_proto_msgTypes[91]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2123,7 +4738,7 @@ func (x *CreateCommentRequest) String() string {
 func (*CreateCommentRequest) ProtoMessage() {}
 
 func (x *CreateCommentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[38]
+	mi := &file_v1_media_media_service_proto_msgTypes[91]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2136,7 +4751,7 @@ func (x *CreateCommentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCommentRequest.ProtoReflect.Descriptor instead.
 func (*CreateCommentRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{38}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{91}
 }
 
 func (x *CreateCommentRequest) GetComment() *types.Comment {
@@ -2155,7 +4770,7 @@ type CreateCommentResponse struct {
 
 func (x *CreateCommentResponse) Reset() {
 	*x = CreateCommentResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[39]
+	mi := &file_v1_media_media_service_proto_msgTypes[92]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2167,7 +4782,7 @@ func (x *CreateCommentResponse) String() string {
 func (*CreateCommentResponse) ProtoMessage() {}
 
 func (x *CreateCommentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[39]
+	mi := &file_v1_media_media_service_proto_msgTypes[92]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2180,7 +4795,7 @@ func (x *CreateCommentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCommentResponse.ProtoReflect.Descriptor instead.
 func (*CreateCommentResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{39}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{92}
 }
 
 func (x *CreateCommentResponse) GetComment() *types.Comment {
@@ -2200,7 +4815,7 @@ type UpdateCommentRequest struct {
 
 func (x *UpdateCommentRequest) Reset() {
 	*x = UpdateCommentRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[40]
+	mi := &file_v1_media_media_service_proto_msgTypes[93]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2212,7 +4827,7 @@ func (x *UpdateCommentRequest) String() string {
 func (*UpdateCommentRequest) ProtoMessage() {}
 
 func (x *UpdateCommentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[40]
+	mi := &file_v1_media_media_service_proto_msgTypes[93]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2225,7 +4840,7 @@ func (x *UpdateCommentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCommentRequest.ProtoReflect.Descriptor instead.
 func (*UpdateCommentRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{40}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{93}
 }
 
 func (x *UpdateCommentRequest) GetComment() *types.Comment {
@@ -2251,7 +4866,7 @@ type UpdateCommentResponse struct {
 
 func (x *UpdateCommentResponse) Reset() {
 	*x = UpdateCommentResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[41]
+	mi := &file_v1_media_media_service_proto_msgTypes[94]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2263,7 +4878,7 @@ func (x *UpdateCommentResponse) String() string {
 func (*UpdateCommentResponse) ProtoMessage() {}
 
 func (x *UpdateCommentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[41]
+	mi := &file_v1_media_media_service_proto_msgTypes[94]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2276,7 +4891,7 @@ func (x *UpdateCommentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCommentResponse.ProtoReflect.Descriptor instead.
 func (*UpdateCommentResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{41}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{94}
 }
 
 func (x *UpdateCommentResponse) GetComment() *types.Comment {
@@ -2288,14 +4903,14 @@ func (x *UpdateCommentResponse) GetComment() *types.Comment {
 
 type DeleteCommentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DeleteCommentRequest) Reset() {
 	*x = DeleteCommentRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[42]
+	mi := &file_v1_media_media_service_proto_msgTypes[95]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2307,7 +4922,7 @@ func (x *DeleteCommentRequest) String() string {
 func (*DeleteCommentRequest) ProtoMessage() {}
 
 func (x *DeleteCommentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[42]
+	mi := &file_v1_media_media_service_proto_msgTypes[95]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2320,14 +4935,14 @@ func (x *DeleteCommentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCommentRequest.ProtoReflect.Descriptor instead.
 func (*DeleteCommentRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{42}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{95}
 }
 
-func (x *DeleteCommentRequest) GetId() int64 {
+func (x *DeleteCommentRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
 type DeleteCommentResponse struct {
@@ -2339,7 +4954,7 @@ type DeleteCommentResponse struct {
 
 func (x *DeleteCommentResponse) Reset() {
 	*x = DeleteCommentResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[43]
+	mi := &file_v1_media_media_service_proto_msgTypes[96]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2351,7 +4966,7 @@ func (x *DeleteCommentResponse) String() string {
 func (*DeleteCommentResponse) ProtoMessage() {}
 
 func (x *DeleteCommentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[43]
+	mi := &file_v1_media_media_service_proto_msgTypes[96]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2364,7 +4979,7 @@ func (x *DeleteCommentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCommentResponse.ProtoReflect.Descriptor instead.
 func (*DeleteCommentResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{43}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{96}
 }
 
 func (x *DeleteCommentResponse) GetEmpty() *emptypb.Empty {
@@ -2374,326 +4989,30 @@ func (x *DeleteCommentResponse) GetEmpty() *emptypb.Empty {
 	return nil
 }
 
-type ToggleLikeRequest struct {
+type GetCommentRepliesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,proto3" json:"user_id,omitempty"`
-	MediaId       int64                  `protobuf:"varint,2,opt,name=media_id,proto3" json:"media_id,omitempty"`
-	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ToggleLikeRequest) Reset() {
-	*x = ToggleLikeRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[44]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ToggleLikeRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ToggleLikeRequest) ProtoMessage() {}
-
-func (x *ToggleLikeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[44]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ToggleLikeRequest.ProtoReflect.Descriptor instead.
-func (*ToggleLikeRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{44}
-}
-
-func (x *ToggleLikeRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-func (x *ToggleLikeRequest) GetMediaId() int64 {
-	if x != nil {
-		return x.MediaId
-	}
-	return 0
-}
-
-func (x *ToggleLikeRequest) GetType() string {
-	if x != nil {
-		return x.Type
-	}
-	return ""
-}
-
-type ToggleLikeResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Liked         bool                   `protobuf:"varint,1,opt,name=liked,proto3" json:"liked,omitempty"`
-	LikeCount     int64                  `protobuf:"varint,2,opt,name=like_count,proto3" json:"like_count,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ToggleLikeResponse) Reset() {
-	*x = ToggleLikeResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[45]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ToggleLikeResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ToggleLikeResponse) ProtoMessage() {}
-
-func (x *ToggleLikeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[45]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ToggleLikeResponse.ProtoReflect.Descriptor instead.
-func (*ToggleLikeResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{45}
-}
-
-func (x *ToggleLikeResponse) GetLiked() bool {
-	if x != nil {
-		return x.Liked
-	}
-	return false
-}
-
-func (x *ToggleLikeResponse) GetLikeCount() int64 {
-	if x != nil {
-		return x.LikeCount
-	}
-	return 0
-}
-
-type GetMediaLikesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	MediaId       int64                  `protobuf:"varint,1,opt,name=media_id,json=mediaId,proto3" json:"media_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetMediaLikesRequest) Reset() {
-	*x = GetMediaLikesRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[46]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetMediaLikesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetMediaLikesRequest) ProtoMessage() {}
-
-func (x *GetMediaLikesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[46]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetMediaLikesRequest.ProtoReflect.Descriptor instead.
-func (*GetMediaLikesRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{46}
-}
-
-func (x *GetMediaLikesRequest) GetMediaId() int64 {
-	if x != nil {
-		return x.MediaId
-	}
-	return 0
-}
-
-type GetMediaLikesResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	LikeCount     int64                  `protobuf:"varint,1,opt,name=like_count,proto3" json:"like_count,omitempty"`
-	DislikeCount  int64                  `protobuf:"varint,2,opt,name=dislike_count,proto3" json:"dislike_count,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetMediaLikesResponse) Reset() {
-	*x = GetMediaLikesResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[47]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetMediaLikesResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetMediaLikesResponse) ProtoMessage() {}
-
-func (x *GetMediaLikesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[47]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetMediaLikesResponse.ProtoReflect.Descriptor instead.
-func (*GetMediaLikesResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{47}
-}
-
-func (x *GetMediaLikesResponse) GetLikeCount() int64 {
-	if x != nil {
-		return x.LikeCount
-	}
-	return 0
-}
-
-func (x *GetMediaLikesResponse) GetDislikeCount() int64 {
-	if x != nil {
-		return x.DislikeCount
-	}
-	return 0
-}
-
-type GetUserLikesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetUserLikesRequest) Reset() {
-	*x = GetUserLikesRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[48]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetUserLikesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUserLikesRequest) ProtoMessage() {}
-
-func (x *GetUserLikesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[48]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUserLikesRequest.ProtoReflect.Descriptor instead.
-func (*GetUserLikesRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{48}
-}
-
-func (x *GetUserLikesRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-type GetUserLikesResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Likes         []*types.Like          `protobuf:"bytes,1,rep,name=likes,proto3" json:"likes,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetUserLikesResponse) Reset() {
-	*x = GetUserLikesResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[49]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetUserLikesResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUserLikesResponse) ProtoMessage() {}
-
-func (x *GetUserLikesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[49]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUserLikesResponse.ProtoReflect.Descriptor instead.
-func (*GetUserLikesResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{49}
-}
-
-func (x *GetUserLikesResponse) GetLikes() []*types.Like {
-	if x != nil {
-		return x.Likes
-	}
-	return nil
-}
-
-type GetFavoritesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,proto3" json:"user_id,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetFavoritesRequest) Reset() {
-	*x = GetFavoritesRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[50]
+func (x *GetCommentRepliesRequest) Reset() {
+	*x = GetCommentRepliesRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[97]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetFavoritesRequest) String() string {
+func (x *GetCommentRepliesRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetFavoritesRequest) ProtoMessage() {}
+func (*GetCommentRepliesRequest) ProtoMessage() {}
 
-func (x *GetFavoritesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[50]
+func (x *GetCommentRepliesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[97]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2704,56 +5023,57 @@ func (x *GetFavoritesRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetFavoritesRequest.ProtoReflect.Descriptor instead.
-func (*GetFavoritesRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{50}
+// Deprecated: Use GetCommentRepliesRequest.ProtoReflect.Descriptor instead.
+func (*GetCommentRepliesRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{97}
 }
 
-func (x *GetFavoritesRequest) GetUserId() int64 {
+func (x *GetCommentRepliesRequest) GetId() string {
 	if x != nil {
-		return x.UserId
+		return x.Id
 	}
-	return 0
+	return ""
 }
 
-func (x *GetFavoritesRequest) GetPage() int32 {
+func (x *GetCommentRepliesRequest) GetPage() int32 {
 	if x != nil {
 		return x.Page
 	}
 	return 0
 }
 
-func (x *GetFavoritesRequest) GetPageSize() int32 {
+func (x *GetCommentRepliesRequest) GetPageSize() int32 {
 	if x != nil {
 		return x.PageSize
 	}
 	return 0
 }
 
-type GetFavoritesResponse struct {
+type GetCommentRepliesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	Favorites     []*types.Favorite      `protobuf:"bytes,2,rep,name=favorites,proto3" json:"favorites,omitempty"`
-	Medias        []*types.Media         `protobuf:"bytes,3,rep,name=medias,proto3" json:"medias,omitempty"`
+	Replies       []*types.Comment       `protobuf:"bytes,2,rep,name=replies,proto3" json:"replies,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetFavoritesResponse) Reset() {
-	*x = GetFavoritesResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[51]
+func (x *GetCommentRepliesResponse) Reset() {
+	*x = GetCommentRepliesResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[98]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetFavoritesResponse) String() string {
+func (x *GetCommentRepliesResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetFavoritesResponse) ProtoMessage() {}
+func (*GetCommentRepliesResponse) ProtoMessage() {}
 
-func (x *GetFavoritesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[51]
+func (x *GetCommentRepliesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[98]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2764,55 +5084,62 @@ func (x *GetFavoritesResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetFavoritesResponse.ProtoReflect.Descriptor instead.
-func (*GetFavoritesResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{51}
+// Deprecated: Use GetCommentRepliesResponse.ProtoReflect.Descriptor instead.
+func (*GetCommentRepliesResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{98}
 }
 
-func (x *GetFavoritesResponse) GetTotal() int32 {
+func (x *GetCommentRepliesResponse) GetTotal() int32 {
 	if x != nil {
 		return x.Total
 	}
 	return 0
 }
 
-func (x *GetFavoritesResponse) GetFavorites() []*types.Favorite {
+func (x *GetCommentRepliesResponse) GetReplies() []*types.Comment {
 	if x != nil {
-		return x.Favorites
+		return x.Replies
 	}
 	return nil
 }
 
-func (x *GetFavoritesResponse) GetMedias() []*types.Media {
+func (x *GetCommentRepliesResponse) GetPage() int32 {
 	if x != nil {
-		return x.Medias
+		return x.Page
 	}
-	return nil
+	return 0
 }
 
-type ToggleFavoriteRequest struct {
+func (x *GetCommentRepliesResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type CreateCommentReplyRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,proto3" json:"user_id,omitempty"`
-	MediaId       int64                  `protobuf:"varint,2,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Comment       *types.Comment         `protobuf:"bytes,2,opt,name=comment,proto3" json:"comment,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ToggleFavoriteRequest) Reset() {
-	*x = ToggleFavoriteRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[52]
+func (x *CreateCommentReplyRequest) Reset() {
+	*x = CreateCommentReplyRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[99]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ToggleFavoriteRequest) String() string {
+func (x *CreateCommentReplyRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ToggleFavoriteRequest) ProtoMessage() {}
+func (*CreateCommentReplyRequest) ProtoMessage() {}
 
-func (x *ToggleFavoriteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[52]
+func (x *CreateCommentReplyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[99]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2823,143 +5150,47 @@ func (x *ToggleFavoriteRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ToggleFavoriteRequest.ProtoReflect.Descriptor instead.
-func (*ToggleFavoriteRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{52}
+// Deprecated: Use CreateCommentReplyRequest.ProtoReflect.Descriptor instead.
+func (*CreateCommentReplyRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{99}
 }
 
-func (x *ToggleFavoriteRequest) GetUserId() int64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-func (x *ToggleFavoriteRequest) GetMediaId() int64 {
-	if x != nil {
-		return x.MediaId
-	}
-	return 0
-}
-
-type ToggleFavoriteResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Favorited     bool                   `protobuf:"varint,1,opt,name=favorited,proto3" json:"favorited,omitempty"`
-	FavoriteCount int64                  `protobuf:"varint,2,opt,name=favorite_count,proto3" json:"favorite_count,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ToggleFavoriteResponse) Reset() {
-	*x = ToggleFavoriteResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[53]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ToggleFavoriteResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ToggleFavoriteResponse) ProtoMessage() {}
-
-func (x *ToggleFavoriteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[53]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ToggleFavoriteResponse.ProtoReflect.Descriptor instead.
-func (*ToggleFavoriteResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{53}
-}
-
-func (x *ToggleFavoriteResponse) GetFavorited() bool {
-	if x != nil {
-		return x.Favorited
-	}
-	return false
-}
-
-func (x *ToggleFavoriteResponse) GetFavoriteCount() int64 {
-	if x != nil {
-		return x.FavoriteCount
-	}
-	return 0
-}
-
-type RemoveFavoriteRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RemoveFavoriteRequest) Reset() {
-	*x = RemoveFavoriteRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[54]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RemoveFavoriteRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RemoveFavoriteRequest) ProtoMessage() {}
-
-func (x *RemoveFavoriteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[54]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RemoveFavoriteRequest.ProtoReflect.Descriptor instead.
-func (*RemoveFavoriteRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{54}
-}
-
-func (x *RemoveFavoriteRequest) GetId() int64 {
+func (x *CreateCommentReplyRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
-type RemoveFavoriteResponse struct {
+func (x *CreateCommentReplyRequest) GetComment() *types.Comment {
+	if x != nil {
+		return x.Comment
+	}
+	return nil
+}
+
+type CreateCommentReplyResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Empty         *emptypb.Empty         `protobuf:"bytes,1,opt,name=empty,proto3" json:"empty,omitempty"`
+	Reply         *types.Comment         `protobuf:"bytes,1,opt,name=reply,proto3" json:"reply,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *RemoveFavoriteResponse) Reset() {
-	*x = RemoveFavoriteResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[55]
+func (x *CreateCommentReplyResponse) Reset() {
+	*x = CreateCommentReplyResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[100]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RemoveFavoriteResponse) String() string {
+func (x *CreateCommentReplyResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RemoveFavoriteResponse) ProtoMessage() {}
+func (*CreateCommentReplyResponse) ProtoMessage() {}
 
-func (x *RemoveFavoriteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[55]
+func (x *CreateCommentReplyResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[100]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2970,21 +5201,21 @@ func (x *RemoveFavoriteResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use RemoveFavoriteResponse.ProtoReflect.Descriptor instead.
-func (*RemoveFavoriteResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{55}
+// Deprecated: Use CreateCommentReplyResponse.ProtoReflect.Descriptor instead.
+func (*CreateCommentReplyResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{100}
 }
 
-func (x *RemoveFavoriteResponse) GetEmpty() *emptypb.Empty {
+func (x *CreateCommentReplyResponse) GetReply() *types.Comment {
 	if x != nil {
-		return x.Empty
+		return x.Reply
 	}
 	return nil
 }
 
 type GetPlaylistsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,proto3" json:"user_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,proto3" json:"user_id,omitempty"`
 	IsPublic      *bool                  `protobuf:"varint,2,opt,name=is_public,proto3,oneof" json:"is_public,omitempty"`
 	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
@@ -2994,7 +5225,7 @@ type GetPlaylistsRequest struct {
 
 func (x *GetPlaylistsRequest) Reset() {
 	*x = GetPlaylistsRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[56]
+	mi := &file_v1_media_media_service_proto_msgTypes[101]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3006,7 +5237,7 @@ func (x *GetPlaylistsRequest) String() string {
 func (*GetPlaylistsRequest) ProtoMessage() {}
 
 func (x *GetPlaylistsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[56]
+	mi := &file_v1_media_media_service_proto_msgTypes[101]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3019,14 +5250,14 @@ func (x *GetPlaylistsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPlaylistsRequest.ProtoReflect.Descriptor instead.
 func (*GetPlaylistsRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{56}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{101}
 }
 
-func (x *GetPlaylistsRequest) GetUserId() int64 {
+func (x *GetPlaylistsRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
 func (x *GetPlaylistsRequest) GetIsPublic() bool {
@@ -3054,13 +5285,15 @@ type GetPlaylistsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
 	Playlists     []*types.Playlist      `protobuf:"bytes,2,rep,name=playlists,proto3" json:"playlists,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetPlaylistsResponse) Reset() {
 	*x = GetPlaylistsResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[57]
+	mi := &file_v1_media_media_service_proto_msgTypes[102]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3072,7 +5305,7 @@ func (x *GetPlaylistsResponse) String() string {
 func (*GetPlaylistsResponse) ProtoMessage() {}
 
 func (x *GetPlaylistsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[57]
+	mi := &file_v1_media_media_service_proto_msgTypes[102]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3085,7 +5318,7 @@ func (x *GetPlaylistsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPlaylistsResponse.ProtoReflect.Descriptor instead.
 func (*GetPlaylistsResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{57}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{102}
 }
 
 func (x *GetPlaylistsResponse) GetTotal() int32 {
@@ -3102,16 +5335,30 @@ func (x *GetPlaylistsResponse) GetPlaylists() []*types.Playlist {
 	return nil
 }
 
+func (x *GetPlaylistsResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetPlaylistsResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
 type GetPlaylistRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetPlaylistRequest) Reset() {
 	*x = GetPlaylistRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[58]
+	mi := &file_v1_media_media_service_proto_msgTypes[103]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3123,7 +5370,7 @@ func (x *GetPlaylistRequest) String() string {
 func (*GetPlaylistRequest) ProtoMessage() {}
 
 func (x *GetPlaylistRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[58]
+	mi := &file_v1_media_media_service_proto_msgTypes[103]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3136,14 +5383,14 @@ func (x *GetPlaylistRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPlaylistRequest.ProtoReflect.Descriptor instead.
 func (*GetPlaylistRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{58}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{103}
 }
 
-func (x *GetPlaylistRequest) GetId() int64 {
+func (x *GetPlaylistRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
 type GetPlaylistResponse struct {
@@ -3156,7 +5403,7 @@ type GetPlaylistResponse struct {
 
 func (x *GetPlaylistResponse) Reset() {
 	*x = GetPlaylistResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[59]
+	mi := &file_v1_media_media_service_proto_msgTypes[104]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3168,7 +5415,7 @@ func (x *GetPlaylistResponse) String() string {
 func (*GetPlaylistResponse) ProtoMessage() {}
 
 func (x *GetPlaylistResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[59]
+	mi := &file_v1_media_media_service_proto_msgTypes[104]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3181,7 +5428,7 @@ func (x *GetPlaylistResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPlaylistResponse.ProtoReflect.Descriptor instead.
 func (*GetPlaylistResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{59}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{104}
 }
 
 func (x *GetPlaylistResponse) GetPlaylist() *types.Playlist {
@@ -3207,7 +5454,7 @@ type CreatePlaylistRequest struct {
 
 func (x *CreatePlaylistRequest) Reset() {
 	*x = CreatePlaylistRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[60]
+	mi := &file_v1_media_media_service_proto_msgTypes[105]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3219,7 +5466,7 @@ func (x *CreatePlaylistRequest) String() string {
 func (*CreatePlaylistRequest) ProtoMessage() {}
 
 func (x *CreatePlaylistRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[60]
+	mi := &file_v1_media_media_service_proto_msgTypes[105]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3232,7 +5479,7 @@ func (x *CreatePlaylistRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreatePlaylistRequest.ProtoReflect.Descriptor instead.
 func (*CreatePlaylistRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{60}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{105}
 }
 
 func (x *CreatePlaylistRequest) GetPlaylist() *types.Playlist {
@@ -3251,7 +5498,7 @@ type CreatePlaylistResponse struct {
 
 func (x *CreatePlaylistResponse) Reset() {
 	*x = CreatePlaylistResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[61]
+	mi := &file_v1_media_media_service_proto_msgTypes[106]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3263,7 +5510,7 @@ func (x *CreatePlaylistResponse) String() string {
 func (*CreatePlaylistResponse) ProtoMessage() {}
 
 func (x *CreatePlaylistResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[61]
+	mi := &file_v1_media_media_service_proto_msgTypes[106]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3276,7 +5523,7 @@ func (x *CreatePlaylistResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreatePlaylistResponse.ProtoReflect.Descriptor instead.
 func (*CreatePlaylistResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{61}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{106}
 }
 
 func (x *CreatePlaylistResponse) GetPlaylist() *types.Playlist {
@@ -3296,7 +5543,7 @@ type UpdatePlaylistRequest struct {
 
 func (x *UpdatePlaylistRequest) Reset() {
 	*x = UpdatePlaylistRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[62]
+	mi := &file_v1_media_media_service_proto_msgTypes[107]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3308,7 +5555,7 @@ func (x *UpdatePlaylistRequest) String() string {
 func (*UpdatePlaylistRequest) ProtoMessage() {}
 
 func (x *UpdatePlaylistRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[62]
+	mi := &file_v1_media_media_service_proto_msgTypes[107]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3321,7 +5568,7 @@ func (x *UpdatePlaylistRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdatePlaylistRequest.ProtoReflect.Descriptor instead.
 func (*UpdatePlaylistRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{62}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{107}
 }
 
 func (x *UpdatePlaylistRequest) GetPlaylist() *types.Playlist {
@@ -3347,7 +5594,7 @@ type UpdatePlaylistResponse struct {
 
 func (x *UpdatePlaylistResponse) Reset() {
 	*x = UpdatePlaylistResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[63]
+	mi := &file_v1_media_media_service_proto_msgTypes[108]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3359,7 +5606,7 @@ func (x *UpdatePlaylistResponse) String() string {
 func (*UpdatePlaylistResponse) ProtoMessage() {}
 
 func (x *UpdatePlaylistResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[63]
+	mi := &file_v1_media_media_service_proto_msgTypes[108]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3372,7 +5619,7 @@ func (x *UpdatePlaylistResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdatePlaylistResponse.ProtoReflect.Descriptor instead.
 func (*UpdatePlaylistResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{63}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{108}
 }
 
 func (x *UpdatePlaylistResponse) GetPlaylist() *types.Playlist {
@@ -3384,14 +5631,14 @@ func (x *UpdatePlaylistResponse) GetPlaylist() *types.Playlist {
 
 type DeletePlaylistRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DeletePlaylistRequest) Reset() {
 	*x = DeletePlaylistRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[64]
+	mi := &file_v1_media_media_service_proto_msgTypes[109]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3403,7 +5650,7 @@ func (x *DeletePlaylistRequest) String() string {
 func (*DeletePlaylistRequest) ProtoMessage() {}
 
 func (x *DeletePlaylistRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[64]
+	mi := &file_v1_media_media_service_proto_msgTypes[109]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3416,14 +5663,14 @@ func (x *DeletePlaylistRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeletePlaylistRequest.ProtoReflect.Descriptor instead.
 func (*DeletePlaylistRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{64}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{109}
 }
 
-func (x *DeletePlaylistRequest) GetId() int64 {
+func (x *DeletePlaylistRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
 type DeletePlaylistResponse struct {
@@ -3435,7 +5682,7 @@ type DeletePlaylistResponse struct {
 
 func (x *DeletePlaylistResponse) Reset() {
 	*x = DeletePlaylistResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[65]
+	mi := &file_v1_media_media_service_proto_msgTypes[110]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3447,7 +5694,7 @@ func (x *DeletePlaylistResponse) String() string {
 func (*DeletePlaylistResponse) ProtoMessage() {}
 
 func (x *DeletePlaylistResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[65]
+	mi := &file_v1_media_media_service_proto_msgTypes[110]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3460,7 +5707,7 @@ func (x *DeletePlaylistResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeletePlaylistResponse.ProtoReflect.Descriptor instead.
 func (*DeletePlaylistResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{65}
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{110}
 }
 
 func (x *DeletePlaylistResponse) GetEmpty() *emptypb.Empty {
@@ -3470,29 +5717,29 @@ func (x *DeletePlaylistResponse) GetEmpty() *emptypb.Empty {
 	return nil
 }
 
-type AddToPlaylistRequest struct {
+type AddPlaylistMediaRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PlaylistId    int64                  `protobuf:"varint,1,opt,name=playlist_id,proto3" json:"playlist_id,omitempty"`
-	MediaId       int64                  `protobuf:"varint,2,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	PlaylistId    string                 `protobuf:"bytes,1,opt,name=playlist_id,proto3" json:"playlist_id,omitempty"`
+	MediaId       string                 `protobuf:"bytes,2,opt,name=media_id,proto3" json:"media_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *AddToPlaylistRequest) Reset() {
-	*x = AddToPlaylistRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[66]
+func (x *AddPlaylistMediaRequest) Reset() {
+	*x = AddPlaylistMediaRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[111]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *AddToPlaylistRequest) String() string {
+func (x *AddPlaylistMediaRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AddToPlaylistRequest) ProtoMessage() {}
+func (*AddPlaylistMediaRequest) ProtoMessage() {}
 
-func (x *AddToPlaylistRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[66]
+func (x *AddPlaylistMediaRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[111]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3503,47 +5750,47 @@ func (x *AddToPlaylistRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use AddToPlaylistRequest.ProtoReflect.Descriptor instead.
-func (*AddToPlaylistRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{66}
+// Deprecated: Use AddPlaylistMediaRequest.ProtoReflect.Descriptor instead.
+func (*AddPlaylistMediaRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{111}
 }
 
-func (x *AddToPlaylistRequest) GetPlaylistId() int64 {
+func (x *AddPlaylistMediaRequest) GetPlaylistId() string {
 	if x != nil {
 		return x.PlaylistId
 	}
-	return 0
+	return ""
 }
 
-func (x *AddToPlaylistRequest) GetMediaId() int64 {
+func (x *AddPlaylistMediaRequest) GetMediaId() string {
 	if x != nil {
 		return x.MediaId
 	}
-	return 0
+	return ""
 }
 
-type AddToPlaylistResponse struct {
+type AddPlaylistMediaResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	MediaCount    int64                  `protobuf:"varint,1,opt,name=media_count,proto3" json:"media_count,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *AddToPlaylistResponse) Reset() {
-	*x = AddToPlaylistResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[67]
+func (x *AddPlaylistMediaResponse) Reset() {
+	*x = AddPlaylistMediaResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[112]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *AddToPlaylistResponse) String() string {
+func (x *AddPlaylistMediaResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AddToPlaylistResponse) ProtoMessage() {}
+func (*AddPlaylistMediaResponse) ProtoMessage() {}
 
-func (x *AddToPlaylistResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[67]
+func (x *AddPlaylistMediaResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[112]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3554,41 +5801,41 @@ func (x *AddToPlaylistResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use AddToPlaylistResponse.ProtoReflect.Descriptor instead.
-func (*AddToPlaylistResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{67}
+// Deprecated: Use AddPlaylistMediaResponse.ProtoReflect.Descriptor instead.
+func (*AddPlaylistMediaResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{112}
 }
 
-func (x *AddToPlaylistResponse) GetMediaCount() int64 {
+func (x *AddPlaylistMediaResponse) GetMediaCount() int64 {
 	if x != nil {
 		return x.MediaCount
 	}
 	return 0
 }
 
-type RemoveFromPlaylistRequest struct {
+type ReorderPlaylistMediaRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PlaylistId    int64                  `protobuf:"varint,1,opt,name=playlist_id,proto3" json:"playlist_id,omitempty"`
-	MediaId       int64                  `protobuf:"varint,2,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	PlaylistId    string                 `protobuf:"bytes,1,opt,name=playlist_id,proto3" json:"playlist_id,omitempty"`
+	MediaIds      []string               `protobuf:"bytes,2,rep,name=media_ids,proto3" json:"media_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *RemoveFromPlaylistRequest) Reset() {
-	*x = RemoveFromPlaylistRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[68]
+func (x *ReorderPlaylistMediaRequest) Reset() {
+	*x = ReorderPlaylistMediaRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[113]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RemoveFromPlaylistRequest) String() string {
+func (x *ReorderPlaylistMediaRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RemoveFromPlaylistRequest) ProtoMessage() {}
+func (*ReorderPlaylistMediaRequest) ProtoMessage() {}
 
-func (x *RemoveFromPlaylistRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[68]
+func (x *ReorderPlaylistMediaRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[113]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3599,179 +5846,47 @@ func (x *RemoveFromPlaylistRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use RemoveFromPlaylistRequest.ProtoReflect.Descriptor instead.
-func (*RemoveFromPlaylistRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{68}
+// Deprecated: Use ReorderPlaylistMediaRequest.ProtoReflect.Descriptor instead.
+func (*ReorderPlaylistMediaRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{113}
 }
 
-func (x *RemoveFromPlaylistRequest) GetPlaylistId() int64 {
+func (x *ReorderPlaylistMediaRequest) GetPlaylistId() string {
 	if x != nil {
 		return x.PlaylistId
 	}
-	return 0
+	return ""
 }
 
-func (x *RemoveFromPlaylistRequest) GetMediaId() int64 {
+func (x *ReorderPlaylistMediaRequest) GetMediaIds() []string {
 	if x != nil {
-		return x.MediaId
-	}
-	return 0
-}
-
-type RemoveFromPlaylistResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	MediaCount    int64                  `protobuf:"varint,1,opt,name=media_count,proto3" json:"media_count,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RemoveFromPlaylistResponse) Reset() {
-	*x = RemoveFromPlaylistResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[69]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RemoveFromPlaylistResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RemoveFromPlaylistResponse) ProtoMessage() {}
-
-func (x *RemoveFromPlaylistResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[69]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RemoveFromPlaylistResponse.ProtoReflect.Descriptor instead.
-func (*RemoveFromPlaylistResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{69}
-}
-
-func (x *RemoveFromPlaylistResponse) GetMediaCount() int64 {
-	if x != nil {
-		return x.MediaCount
-	}
-	return 0
-}
-
-type ListEncodingTasksRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	MediaId       int64                  `protobuf:"varint,1,opt,name=media_id,proto3" json:"media_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListEncodingTasksRequest) Reset() {
-	*x = ListEncodingTasksRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[70]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListEncodingTasksRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListEncodingTasksRequest) ProtoMessage() {}
-
-func (x *ListEncodingTasksRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[70]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListEncodingTasksRequest.ProtoReflect.Descriptor instead.
-func (*ListEncodingTasksRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{70}
-}
-
-func (x *ListEncodingTasksRequest) GetMediaId() int64 {
-	if x != nil {
-		return x.MediaId
-	}
-	return 0
-}
-
-type ListEncodingTasksResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Tasks         []*types.EncodingTask  `protobuf:"bytes,1,rep,name=tasks,proto3" json:"tasks,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListEncodingTasksResponse) Reset() {
-	*x = ListEncodingTasksResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[71]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListEncodingTasksResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListEncodingTasksResponse) ProtoMessage() {}
-
-func (x *ListEncodingTasksResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[71]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListEncodingTasksResponse.ProtoReflect.Descriptor instead.
-func (*ListEncodingTasksResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{71}
-}
-
-func (x *ListEncodingTasksResponse) GetTasks() []*types.EncodingTask {
-	if x != nil {
-		return x.Tasks
+		return x.MediaIds
 	}
 	return nil
 }
 
-type GetTranscodingStatusRequest struct {
+type ReorderPlaylistMediaResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        *int64                 `protobuf:"varint,1,opt,name=user_id,proto3,oneof" json:"user_id,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetTranscodingStatusRequest) Reset() {
-	*x = GetTranscodingStatusRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[72]
+func (x *ReorderPlaylistMediaResponse) Reset() {
+	*x = ReorderPlaylistMediaResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[114]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetTranscodingStatusRequest) String() string {
+func (x *ReorderPlaylistMediaResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetTranscodingStatusRequest) ProtoMessage() {}
+func (*ReorderPlaylistMediaResponse) ProtoMessage() {}
 
-func (x *GetTranscodingStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[72]
+func (x *ReorderPlaylistMediaResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[114]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3782,45 +5897,207 @@ func (x *GetTranscodingStatusRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetTranscodingStatusRequest.ProtoReflect.Descriptor instead.
-func (*GetTranscodingStatusRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{72}
+// Deprecated: Use ReorderPlaylistMediaResponse.ProtoReflect.Descriptor instead.
+func (*ReorderPlaylistMediaResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{114}
 }
 
-func (x *GetTranscodingStatusRequest) GetUserId() int64 {
+func (x *ReorderPlaylistMediaResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type RemovePlaylistMediaRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PlaylistId    string                 `protobuf:"bytes,1,opt,name=playlist_id,proto3" json:"playlist_id,omitempty"`
+	MediaId       string                 `protobuf:"bytes,2,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemovePlaylistMediaRequest) Reset() {
+	*x = RemovePlaylistMediaRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[115]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemovePlaylistMediaRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemovePlaylistMediaRequest) ProtoMessage() {}
+
+func (x *RemovePlaylistMediaRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[115]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemovePlaylistMediaRequest.ProtoReflect.Descriptor instead.
+func (*RemovePlaylistMediaRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{115}
+}
+
+func (x *RemovePlaylistMediaRequest) GetPlaylistId() string {
+	if x != nil {
+		return x.PlaylistId
+	}
+	return ""
+}
+
+func (x *RemovePlaylistMediaRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+type RemovePlaylistMediaResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemovePlaylistMediaResponse) Reset() {
+	*x = RemovePlaylistMediaResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[116]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemovePlaylistMediaResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemovePlaylistMediaResponse) ProtoMessage() {}
+
+func (x *RemovePlaylistMediaResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[116]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemovePlaylistMediaResponse.ProtoReflect.Descriptor instead.
+func (*RemovePlaylistMediaResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{116}
+}
+
+func (x *RemovePlaylistMediaResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type ListChannelsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	Keyword       string                 `protobuf:"bytes,3,opt,name=keyword,proto3" json:"keyword,omitempty"`
+	UserId        *string                `protobuf:"bytes,4,opt,name=user_id,proto3,oneof" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListChannelsRequest) Reset() {
+	*x = ListChannelsRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[117]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListChannelsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListChannelsRequest) ProtoMessage() {}
+
+func (x *ListChannelsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[117]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListChannelsRequest.ProtoReflect.Descriptor instead.
+func (*ListChannelsRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{117}
+}
+
+func (x *ListChannelsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListChannelsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListChannelsRequest) GetKeyword() string {
+	if x != nil {
+		return x.Keyword
+	}
+	return ""
+}
+
+func (x *ListChannelsRequest) GetUserId() string {
 	if x != nil && x.UserId != nil {
 		return *x.UserId
 	}
-	return 0
+	return ""
 }
 
-type GetTranscodingStatusResponse struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	ProcessingCount int32                  `protobuf:"varint,1,opt,name=processing_count,proto3" json:"processing_count,omitempty"`
-	PendingCount    int32                  `protobuf:"varint,2,opt,name=pending_count,proto3" json:"pending_count,omitempty"`
-	FailedCount     int32                  `protobuf:"varint,3,opt,name=failed_count,proto3" json:"failed_count,omitempty"`
-	SuccessCount    int32                  `protobuf:"varint,4,opt,name=success_count,proto3" json:"success_count,omitempty"`
-	// List of media items with their encoding tasks
-	Items         []*TranscodingMediaItem `protobuf:"bytes,5,rep,name=items,proto3" json:"items,omitempty"`
+type ListChannelsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Channels      []*types.Channel       `protobuf:"bytes,2,rep,name=channels,proto3" json:"channels,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetTranscodingStatusResponse) Reset() {
-	*x = GetTranscodingStatusResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[73]
+func (x *ListChannelsResponse) Reset() {
+	*x = ListChannelsResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[118]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetTranscodingStatusResponse) String() string {
+func (x *ListChannelsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetTranscodingStatusResponse) ProtoMessage() {}
+func (*ListChannelsResponse) ProtoMessage() {}
 
-func (x *GetTranscodingStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[73]
+func (x *ListChannelsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[118]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3831,70 +6108,61 @@ func (x *GetTranscodingStatusResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetTranscodingStatusResponse.ProtoReflect.Descriptor instead.
-func (*GetTranscodingStatusResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{73}
+// Deprecated: Use ListChannelsResponse.ProtoReflect.Descriptor instead.
+func (*ListChannelsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{118}
 }
 
-func (x *GetTranscodingStatusResponse) GetProcessingCount() int32 {
+func (x *ListChannelsResponse) GetTotal() int32 {
 	if x != nil {
-		return x.ProcessingCount
+		return x.Total
 	}
 	return 0
 }
 
-func (x *GetTranscodingStatusResponse) GetPendingCount() int32 {
+func (x *ListChannelsResponse) GetChannels() []*types.Channel {
 	if x != nil {
-		return x.PendingCount
-	}
-	return 0
-}
-
-func (x *GetTranscodingStatusResponse) GetFailedCount() int32 {
-	if x != nil {
-		return x.FailedCount
-	}
-	return 0
-}
-
-func (x *GetTranscodingStatusResponse) GetSuccessCount() int32 {
-	if x != nil {
-		return x.SuccessCount
-	}
-	return 0
-}
-
-func (x *GetTranscodingStatusResponse) GetItems() []*TranscodingMediaItem {
-	if x != nil {
-		return x.Items
+		return x.Channels
 	}
 	return nil
 }
 
-// TranscodingMediaItem contains media info and its encoding tasks
-type TranscodingMediaItem struct {
+func (x *ListChannelsResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListChannelsResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type GetChannelRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Media         *types.Media           `protobuf:"bytes,1,opt,name=media,proto3" json:"media,omitempty"`
-	Tasks         []*types.EncodingTask  `protobuf:"bytes,2,rep,name=tasks,proto3" json:"tasks,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *TranscodingMediaItem) Reset() {
-	*x = TranscodingMediaItem{}
-	mi := &file_v1_media_media_service_proto_msgTypes[74]
+func (x *GetChannelRequest) Reset() {
+	*x = GetChannelRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[119]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *TranscodingMediaItem) String() string {
+func (x *GetChannelRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*TranscodingMediaItem) ProtoMessage() {}
+func (*GetChannelRequest) ProtoMessage() {}
 
-func (x *TranscodingMediaItem) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[74]
+func (x *GetChannelRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[119]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3905,171 +6173,40 @@ func (x *TranscodingMediaItem) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use TranscodingMediaItem.ProtoReflect.Descriptor instead.
-func (*TranscodingMediaItem) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{74}
+// Deprecated: Use GetChannelRequest.ProtoReflect.Descriptor instead.
+func (*GetChannelRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{119}
 }
 
-func (x *TranscodingMediaItem) GetMedia() *types.Media {
-	if x != nil {
-		return x.Media
-	}
-	return nil
-}
-
-func (x *TranscodingMediaItem) GetTasks() []*types.EncodingTask {
-	if x != nil {
-		return x.Tasks
-	}
-	return nil
-}
-
-type ListEncodeProfilesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListEncodeProfilesRequest) Reset() {
-	*x = ListEncodeProfilesRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[75]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListEncodeProfilesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListEncodeProfilesRequest) ProtoMessage() {}
-
-func (x *ListEncodeProfilesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[75]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListEncodeProfilesRequest.ProtoReflect.Descriptor instead.
-func (*ListEncodeProfilesRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{75}
-}
-
-type ListEncodeProfilesResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Profiles      []*types.EncodeProfile `protobuf:"bytes,1,rep,name=profiles,proto3" json:"profiles,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListEncodeProfilesResponse) Reset() {
-	*x = ListEncodeProfilesResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[76]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListEncodeProfilesResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListEncodeProfilesResponse) ProtoMessage() {}
-
-func (x *ListEncodeProfilesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[76]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListEncodeProfilesResponse.ProtoReflect.Descriptor instead.
-func (*ListEncodeProfilesResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{76}
-}
-
-func (x *ListEncodeProfilesResponse) GetProfiles() []*types.EncodeProfile {
-	if x != nil {
-		return x.Profiles
-	}
-	return nil
-}
-
-type GetEncodeProfileRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetEncodeProfileRequest) Reset() {
-	*x = GetEncodeProfileRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[77]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetEncodeProfileRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetEncodeProfileRequest) ProtoMessage() {}
-
-func (x *GetEncodeProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[77]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetEncodeProfileRequest.ProtoReflect.Descriptor instead.
-func (*GetEncodeProfileRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{77}
-}
-
-func (x *GetEncodeProfileRequest) GetId() int32 {
+func (x *GetChannelRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
-type GetEncodeProfileResponse struct {
+type GetChannelResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Profile       *types.EncodeProfile   `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	Channel       *types.Channel         `protobuf:"bytes,1,opt,name=channel,proto3" json:"channel,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetEncodeProfileResponse) Reset() {
-	*x = GetEncodeProfileResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[78]
+func (x *GetChannelResponse) Reset() {
+	*x = GetChannelResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[120]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetEncodeProfileResponse) String() string {
+func (x *GetChannelResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetEncodeProfileResponse) ProtoMessage() {}
+func (*GetChannelResponse) ProtoMessage() {}
 
-func (x *GetEncodeProfileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[78]
+func (x *GetChannelResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[120]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4080,40 +6217,40 @@ func (x *GetEncodeProfileResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetEncodeProfileResponse.ProtoReflect.Descriptor instead.
-func (*GetEncodeProfileResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{78}
+// Deprecated: Use GetChannelResponse.ProtoReflect.Descriptor instead.
+func (*GetChannelResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{120}
 }
 
-func (x *GetEncodeProfileResponse) GetProfile() *types.EncodeProfile {
+func (x *GetChannelResponse) GetChannel() *types.Channel {
 	if x != nil {
-		return x.Profile
+		return x.Channel
 	}
 	return nil
 }
 
-type CreateEncodeProfileRequest struct {
+type CreateChannelRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Profile       *types.EncodeProfile   `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	Channel       *types.Channel         `protobuf:"bytes,1,opt,name=channel,proto3" json:"channel,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CreateEncodeProfileRequest) Reset() {
-	*x = CreateEncodeProfileRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[79]
+func (x *CreateChannelRequest) Reset() {
+	*x = CreateChannelRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[121]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CreateEncodeProfileRequest) String() string {
+func (x *CreateChannelRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateEncodeProfileRequest) ProtoMessage() {}
+func (*CreateChannelRequest) ProtoMessage() {}
 
-func (x *CreateEncodeProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[79]
+func (x *CreateChannelRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[121]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4124,40 +6261,40 @@ func (x *CreateEncodeProfileRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateEncodeProfileRequest.ProtoReflect.Descriptor instead.
-func (*CreateEncodeProfileRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{79}
+// Deprecated: Use CreateChannelRequest.ProtoReflect.Descriptor instead.
+func (*CreateChannelRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{121}
 }
 
-func (x *CreateEncodeProfileRequest) GetProfile() *types.EncodeProfile {
+func (x *CreateChannelRequest) GetChannel() *types.Channel {
 	if x != nil {
-		return x.Profile
+		return x.Channel
 	}
 	return nil
 }
 
-type CreateEncodeProfileResponse struct {
+type CreateChannelResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Profile       *types.EncodeProfile   `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	Channel       *types.Channel         `protobuf:"bytes,1,opt,name=channel,proto3" json:"channel,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CreateEncodeProfileResponse) Reset() {
-	*x = CreateEncodeProfileResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[80]
+func (x *CreateChannelResponse) Reset() {
+	*x = CreateChannelResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[122]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CreateEncodeProfileResponse) String() string {
+func (x *CreateChannelResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateEncodeProfileResponse) ProtoMessage() {}
+func (*CreateChannelResponse) ProtoMessage() {}
 
-func (x *CreateEncodeProfileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[80]
+func (x *CreateChannelResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[122]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4168,40 +6305,41 @@ func (x *CreateEncodeProfileResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateEncodeProfileResponse.ProtoReflect.Descriptor instead.
-func (*CreateEncodeProfileResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{80}
+// Deprecated: Use CreateChannelResponse.ProtoReflect.Descriptor instead.
+func (*CreateChannelResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{122}
 }
 
-func (x *CreateEncodeProfileResponse) GetProfile() *types.EncodeProfile {
+func (x *CreateChannelResponse) GetChannel() *types.Channel {
 	if x != nil {
-		return x.Profile
+		return x.Channel
 	}
 	return nil
 }
 
-type UpdateEncodeProfileRequest struct {
+type UpdateChannelRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Profile       *types.EncodeProfile   `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	Channel       *types.Channel         `protobuf:"bytes,1,opt,name=channel,proto3" json:"channel,omitempty"`
+	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,proto3" json:"update_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdateEncodeProfileRequest) Reset() {
-	*x = UpdateEncodeProfileRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[81]
+func (x *UpdateChannelRequest) Reset() {
+	*x = UpdateChannelRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[123]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdateEncodeProfileRequest) String() string {
+func (x *UpdateChannelRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateEncodeProfileRequest) ProtoMessage() {}
+func (*UpdateChannelRequest) ProtoMessage() {}
 
-func (x *UpdateEncodeProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[81]
+func (x *UpdateChannelRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[123]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4212,84 +6350,47 @@ func (x *UpdateEncodeProfileRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateEncodeProfileRequest.ProtoReflect.Descriptor instead.
-func (*UpdateEncodeProfileRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{81}
+// Deprecated: Use UpdateChannelRequest.ProtoReflect.Descriptor instead.
+func (*UpdateChannelRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{123}
 }
 
-func (x *UpdateEncodeProfileRequest) GetProfile() *types.EncodeProfile {
+func (x *UpdateChannelRequest) GetChannel() *types.Channel {
 	if x != nil {
-		return x.Profile
+		return x.Channel
 	}
 	return nil
 }
 
-type UpdateEncodeProfileResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Profile       *types.EncodeProfile   `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateEncodeProfileResponse) Reset() {
-	*x = UpdateEncodeProfileResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[82]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateEncodeProfileResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateEncodeProfileResponse) ProtoMessage() {}
-
-func (x *UpdateEncodeProfileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[82]
+func (x *UpdateChannelRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateEncodeProfileResponse.ProtoReflect.Descriptor instead.
-func (*UpdateEncodeProfileResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{82}
-}
-
-func (x *UpdateEncodeProfileResponse) GetProfile() *types.EncodeProfile {
-	if x != nil {
-		return x.Profile
+		return x.UpdateMask
 	}
 	return nil
 }
 
-type DeleteEncodeProfileRequest struct {
+type UpdateChannelResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Channel       *types.Channel         `protobuf:"bytes,1,opt,name=channel,proto3" json:"channel,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DeleteEncodeProfileRequest) Reset() {
-	*x = DeleteEncodeProfileRequest{}
-	mi := &file_v1_media_media_service_proto_msgTypes[83]
+func (x *UpdateChannelResponse) Reset() {
+	*x = UpdateChannelResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[124]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DeleteEncodeProfileRequest) String() string {
+func (x *UpdateChannelResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteEncodeProfileRequest) ProtoMessage() {}
+func (*UpdateChannelResponse) ProtoMessage() {}
 
-func (x *DeleteEncodeProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[83]
+func (x *UpdateChannelResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[124]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4300,40 +6401,84 @@ func (x *DeleteEncodeProfileRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteEncodeProfileRequest.ProtoReflect.Descriptor instead.
-func (*DeleteEncodeProfileRequest) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{83}
+// Deprecated: Use UpdateChannelResponse.ProtoReflect.Descriptor instead.
+func (*UpdateChannelResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{124}
 }
 
-func (x *DeleteEncodeProfileRequest) GetId() int32 {
+func (x *UpdateChannelResponse) GetChannel() *types.Channel {
+	if x != nil {
+		return x.Channel
+	}
+	return nil
+}
+
+type DeleteChannelRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteChannelRequest) Reset() {
+	*x = DeleteChannelRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[125]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteChannelRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteChannelRequest) ProtoMessage() {}
+
+func (x *DeleteChannelRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[125]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteChannelRequest.ProtoReflect.Descriptor instead.
+func (*DeleteChannelRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{125}
+}
+
+func (x *DeleteChannelRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
-type DeleteEncodeProfileResponse struct {
+type DeleteChannelResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Empty         *emptypb.Empty         `protobuf:"bytes,1,opt,name=empty,proto3" json:"empty,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DeleteEncodeProfileResponse) Reset() {
-	*x = DeleteEncodeProfileResponse{}
-	mi := &file_v1_media_media_service_proto_msgTypes[84]
+func (x *DeleteChannelResponse) Reset() {
+	*x = DeleteChannelResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[126]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DeleteEncodeProfileResponse) String() string {
+func (x *DeleteChannelResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteEncodeProfileResponse) ProtoMessage() {}
+func (*DeleteChannelResponse) ProtoMessage() {}
 
-func (x *DeleteEncodeProfileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_media_media_service_proto_msgTypes[84]
+func (x *DeleteChannelResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[126]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4344,23 +6489,2463 @@ func (x *DeleteEncodeProfileResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteEncodeProfileResponse.ProtoReflect.Descriptor instead.
-func (*DeleteEncodeProfileResponse) Descriptor() ([]byte, []int) {
-	return file_v1_media_media_service_proto_rawDescGZIP(), []int{84}
+// Deprecated: Use DeleteChannelResponse.ProtoReflect.Descriptor instead.
+func (*DeleteChannelResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{126}
 }
 
-func (x *DeleteEncodeProfileResponse) GetEmpty() *emptypb.Empty {
+func (x *DeleteChannelResponse) GetEmpty() *emptypb.Empty {
 	if x != nil {
 		return x.Empty
 	}
 	return nil
 }
 
+type GetChannelMediasRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ChannelId     string                 `protobuf:"bytes,1,opt,name=channel_id,proto3" json:"channel_id,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetChannelMediasRequest) Reset() {
+	*x = GetChannelMediasRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[127]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetChannelMediasRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetChannelMediasRequest) ProtoMessage() {}
+
+func (x *GetChannelMediasRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[127]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetChannelMediasRequest.ProtoReflect.Descriptor instead.
+func (*GetChannelMediasRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{127}
+}
+
+func (x *GetChannelMediasRequest) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+func (x *GetChannelMediasRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetChannelMediasRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type GetChannelMediasResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Medias        []*types.Media         `protobuf:"bytes,2,rep,name=medias,proto3" json:"medias,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetChannelMediasResponse) Reset() {
+	*x = GetChannelMediasResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[128]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetChannelMediasResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetChannelMediasResponse) ProtoMessage() {}
+
+func (x *GetChannelMediasResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[128]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetChannelMediasResponse.ProtoReflect.Descriptor instead.
+func (*GetChannelMediasResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{128}
+}
+
+func (x *GetChannelMediasResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *GetChannelMediasResponse) GetMedias() []*types.Media {
+	if x != nil {
+		return x.Medias
+	}
+	return nil
+}
+
+func (x *GetChannelMediasResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetChannelMediasResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type AddChannelMediaRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ChannelId     string                 `protobuf:"bytes,1,opt,name=channel_id,proto3" json:"channel_id,omitempty"`
+	MediaId       string                 `protobuf:"bytes,2,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddChannelMediaRequest) Reset() {
+	*x = AddChannelMediaRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[129]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddChannelMediaRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddChannelMediaRequest) ProtoMessage() {}
+
+func (x *AddChannelMediaRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[129]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddChannelMediaRequest.ProtoReflect.Descriptor instead.
+func (*AddChannelMediaRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{129}
+}
+
+func (x *AddChannelMediaRequest) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+func (x *AddChannelMediaRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+type AddChannelMediaResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddChannelMediaResponse) Reset() {
+	*x = AddChannelMediaResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[130]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddChannelMediaResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddChannelMediaResponse) ProtoMessage() {}
+
+func (x *AddChannelMediaResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[130]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddChannelMediaResponse.ProtoReflect.Descriptor instead.
+func (*AddChannelMediaResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{130}
+}
+
+func (x *AddChannelMediaResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type RemoveChannelMediaRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ChannelId     string                 `protobuf:"bytes,1,opt,name=channel_id,proto3" json:"channel_id,omitempty"`
+	MediaId       string                 `protobuf:"bytes,2,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveChannelMediaRequest) Reset() {
+	*x = RemoveChannelMediaRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[131]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveChannelMediaRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveChannelMediaRequest) ProtoMessage() {}
+
+func (x *RemoveChannelMediaRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[131]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveChannelMediaRequest.ProtoReflect.Descriptor instead.
+func (*RemoveChannelMediaRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{131}
+}
+
+func (x *RemoveChannelMediaRequest) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+func (x *RemoveChannelMediaRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+type RemoveChannelMediaResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveChannelMediaResponse) Reset() {
+	*x = RemoveChannelMediaResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[132]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveChannelMediaResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveChannelMediaResponse) ProtoMessage() {}
+
+func (x *RemoveChannelMediaResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[132]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveChannelMediaResponse.ProtoReflect.Descriptor instead.
+func (*RemoveChannelMediaResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{132}
+}
+
+func (x *RemoveChannelMediaResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type GetChannelSubscribersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ChannelId     string                 `protobuf:"bytes,1,opt,name=channel_id,proto3" json:"channel_id,omitempty"`
+	CountOnly     bool                   `protobuf:"varint,2,opt,name=count_only,proto3" json:"count_only,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetChannelSubscribersRequest) Reset() {
+	*x = GetChannelSubscribersRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[133]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetChannelSubscribersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetChannelSubscribersRequest) ProtoMessage() {}
+
+func (x *GetChannelSubscribersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[133]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetChannelSubscribersRequest.ProtoReflect.Descriptor instead.
+func (*GetChannelSubscribersRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{133}
+}
+
+func (x *GetChannelSubscribersRequest) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+func (x *GetChannelSubscribersRequest) GetCountOnly() bool {
+	if x != nil {
+		return x.CountOnly
+	}
+	return false
+}
+
+func (x *GetChannelSubscribersRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetChannelSubscribersRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type GetChannelSubscribersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Count         int32                  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Subscribers   []*types.User          `protobuf:"bytes,3,rep,name=subscribers,proto3" json:"subscribers,omitempty"`
+	Page          int32                  `protobuf:"varint,4,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,5,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetChannelSubscribersResponse) Reset() {
+	*x = GetChannelSubscribersResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[134]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetChannelSubscribersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetChannelSubscribersResponse) ProtoMessage() {}
+
+func (x *GetChannelSubscribersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[134]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetChannelSubscribersResponse.ProtoReflect.Descriptor instead.
+func (*GetChannelSubscribersResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{134}
+}
+
+func (x *GetChannelSubscribersResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *GetChannelSubscribersResponse) GetCount() int32 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+func (x *GetChannelSubscribersResponse) GetSubscribers() []*types.User {
+	if x != nil {
+		return x.Subscribers
+	}
+	return nil
+}
+
+func (x *GetChannelSubscribersResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetChannelSubscribersResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type GetChannelSubscriptionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ChannelId     string                 `protobuf:"bytes,1,opt,name=channel_id,proto3" json:"channel_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetChannelSubscriptionRequest) Reset() {
+	*x = GetChannelSubscriptionRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[135]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetChannelSubscriptionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetChannelSubscriptionRequest) ProtoMessage() {}
+
+func (x *GetChannelSubscriptionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[135]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetChannelSubscriptionRequest.ProtoReflect.Descriptor instead.
+func (*GetChannelSubscriptionRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{135}
+}
+
+func (x *GetChannelSubscriptionRequest) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+type GetChannelSubscriptionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IsSubscribed  bool                   `protobuf:"varint,1,opt,name=is_subscribed,proto3" json:"is_subscribed,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetChannelSubscriptionResponse) Reset() {
+	*x = GetChannelSubscriptionResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[136]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetChannelSubscriptionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetChannelSubscriptionResponse) ProtoMessage() {}
+
+func (x *GetChannelSubscriptionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[136]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetChannelSubscriptionResponse.ProtoReflect.Descriptor instead.
+func (*GetChannelSubscriptionResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{136}
+}
+
+func (x *GetChannelSubscriptionResponse) GetIsSubscribed() bool {
+	if x != nil {
+		return x.IsSubscribed
+	}
+	return false
+}
+
+type SubscribeChannelRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ChannelId     string                 `protobuf:"bytes,1,opt,name=channel_id,proto3" json:"channel_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SubscribeChannelRequest) Reset() {
+	*x = SubscribeChannelRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[137]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubscribeChannelRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubscribeChannelRequest) ProtoMessage() {}
+
+func (x *SubscribeChannelRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[137]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubscribeChannelRequest.ProtoReflect.Descriptor instead.
+func (*SubscribeChannelRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{137}
+}
+
+func (x *SubscribeChannelRequest) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+type SubscribeChannelResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	IsSubscribed  bool                   `protobuf:"varint,2,opt,name=is_subscribed,proto3" json:"is_subscribed,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SubscribeChannelResponse) Reset() {
+	*x = SubscribeChannelResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[138]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubscribeChannelResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubscribeChannelResponse) ProtoMessage() {}
+
+func (x *SubscribeChannelResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[138]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubscribeChannelResponse.ProtoReflect.Descriptor instead.
+func (*SubscribeChannelResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{138}
+}
+
+func (x *SubscribeChannelResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *SubscribeChannelResponse) GetIsSubscribed() bool {
+	if x != nil {
+		return x.IsSubscribed
+	}
+	return false
+}
+
+type UnsubscribeChannelRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ChannelId     string                 `protobuf:"bytes,1,opt,name=channel_id,proto3" json:"channel_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnsubscribeChannelRequest) Reset() {
+	*x = UnsubscribeChannelRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[139]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnsubscribeChannelRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnsubscribeChannelRequest) ProtoMessage() {}
+
+func (x *UnsubscribeChannelRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[139]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnsubscribeChannelRequest.ProtoReflect.Descriptor instead.
+func (*UnsubscribeChannelRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{139}
+}
+
+func (x *UnsubscribeChannelRequest) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+type UnsubscribeChannelResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	IsSubscribed  bool                   `protobuf:"varint,2,opt,name=is_subscribed,proto3" json:"is_subscribed,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnsubscribeChannelResponse) Reset() {
+	*x = UnsubscribeChannelResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[140]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnsubscribeChannelResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnsubscribeChannelResponse) ProtoMessage() {}
+
+func (x *UnsubscribeChannelResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[140]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnsubscribeChannelResponse.ProtoReflect.Descriptor instead.
+func (*UnsubscribeChannelResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{140}
+}
+
+func (x *UnsubscribeChannelResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *UnsubscribeChannelResponse) GetIsSubscribed() bool {
+	if x != nil {
+		return x.IsSubscribed
+	}
+	return false
+}
+
+type SearchRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Q             string                 `protobuf:"bytes,1,opt,name=q,proto3" json:"q,omitempty"`
+	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"` // "all", "media", "channel", "playlist", "user"
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SearchRequest) Reset() {
+	*x = SearchRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[141]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SearchRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SearchRequest) ProtoMessage() {}
+
+func (x *SearchRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[141]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SearchRequest.ProtoReflect.Descriptor instead.
+func (*SearchRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{141}
+}
+
+func (x *SearchRequest) GetQ() string {
+	if x != nil {
+		return x.Q
+	}
+	return ""
+}
+
+func (x *SearchRequest) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *SearchRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *SearchRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type SearchResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Medias        []*types.Media         `protobuf:"bytes,2,rep,name=medias,proto3" json:"medias,omitempty"`
+	Channels      []*types.Channel       `protobuf:"bytes,3,rep,name=channels,proto3" json:"channels,omitempty"`
+	Playlists     []*types.Playlist      `protobuf:"bytes,4,rep,name=playlists,proto3" json:"playlists,omitempty"`
+	Users         []*types.User          `protobuf:"bytes,5,rep,name=users,proto3" json:"users,omitempty"`
+	Page          int32                  `protobuf:"varint,6,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,7,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SearchResponse) Reset() {
+	*x = SearchResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[142]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SearchResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SearchResponse) ProtoMessage() {}
+
+func (x *SearchResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[142]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SearchResponse.ProtoReflect.Descriptor instead.
+func (*SearchResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{142}
+}
+
+func (x *SearchResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *SearchResponse) GetMedias() []*types.Media {
+	if x != nil {
+		return x.Medias
+	}
+	return nil
+}
+
+func (x *SearchResponse) GetChannels() []*types.Channel {
+	if x != nil {
+		return x.Channels
+	}
+	return nil
+}
+
+func (x *SearchResponse) GetPlaylists() []*types.Playlist {
+	if x != nil {
+		return x.Playlists
+	}
+	return nil
+}
+
+func (x *SearchResponse) GetUsers() []*types.User {
+	if x != nil {
+		return x.Users
+	}
+	return nil
+}
+
+func (x *SearchResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *SearchResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type GetSearchSuggestionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Q             string                 `protobuf:"bytes,1,opt,name=q,proto3" json:"q,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSearchSuggestionsRequest) Reset() {
+	*x = GetSearchSuggestionsRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[143]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSearchSuggestionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSearchSuggestionsRequest) ProtoMessage() {}
+
+func (x *GetSearchSuggestionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[143]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSearchSuggestionsRequest.ProtoReflect.Descriptor instead.
+func (*GetSearchSuggestionsRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{143}
+}
+
+func (x *GetSearchSuggestionsRequest) GetQ() string {
+	if x != nil {
+		return x.Q
+	}
+	return ""
+}
+
+func (x *GetSearchSuggestionsRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type GetSearchSuggestionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Suggestions   []string               `protobuf:"bytes,1,rep,name=suggestions,proto3" json:"suggestions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSearchSuggestionsResponse) Reset() {
+	*x = GetSearchSuggestionsResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[144]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSearchSuggestionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSearchSuggestionsResponse) ProtoMessage() {}
+
+func (x *GetSearchSuggestionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[144]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSearchSuggestionsResponse.ProtoReflect.Descriptor instead.
+func (*GetSearchSuggestionsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{144}
+}
+
+func (x *GetSearchSuggestionsResponse) GetSuggestions() []string {
+	if x != nil {
+		return x.Suggestions
+	}
+	return nil
+}
+
+type GetDashboardStatsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetDashboardStatsRequest) Reset() {
+	*x = GetDashboardStatsRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[145]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDashboardStatsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDashboardStatsRequest) ProtoMessage() {}
+
+func (x *GetDashboardStatsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[145]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDashboardStatsRequest.ProtoReflect.Descriptor instead.
+func (*GetDashboardStatsRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{145}
+}
+
+type GetDashboardStatsResponse struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	TotalUsers     int32                  `protobuf:"varint,1,opt,name=total_users,proto3" json:"total_users,omitempty"`
+	TotalMedias    int32                  `protobuf:"varint,2,opt,name=total_medias,proto3" json:"total_medias,omitempty"`
+	TotalViews     int32                  `protobuf:"varint,3,opt,name=total_views,proto3" json:"total_views,omitempty"`
+	TotalChannels  int32                  `protobuf:"varint,4,opt,name=total_channels,proto3" json:"total_channels,omitempty"`
+	PendingReviews int32                  `protobuf:"varint,5,opt,name=pending_reviews,proto3" json:"pending_reviews,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *GetDashboardStatsResponse) Reset() {
+	*x = GetDashboardStatsResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[146]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDashboardStatsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDashboardStatsResponse) ProtoMessage() {}
+
+func (x *GetDashboardStatsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[146]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDashboardStatsResponse.ProtoReflect.Descriptor instead.
+func (*GetDashboardStatsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{146}
+}
+
+func (x *GetDashboardStatsResponse) GetTotalUsers() int32 {
+	if x != nil {
+		return x.TotalUsers
+	}
+	return 0
+}
+
+func (x *GetDashboardStatsResponse) GetTotalMedias() int32 {
+	if x != nil {
+		return x.TotalMedias
+	}
+	return 0
+}
+
+func (x *GetDashboardStatsResponse) GetTotalViews() int32 {
+	if x != nil {
+		return x.TotalViews
+	}
+	return 0
+}
+
+func (x *GetDashboardStatsResponse) GetTotalChannels() int32 {
+	if x != nil {
+		return x.TotalChannels
+	}
+	return 0
+}
+
+func (x *GetDashboardStatsResponse) GetPendingReviews() int32 {
+	if x != nil {
+		return x.PendingReviews
+	}
+	return 0
+}
+
+type GetMediaStatsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Period        string                 `protobuf:"bytes,1,opt,name=period,proto3" json:"period,omitempty"` // "day", "week", "month", "year"
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaStatsRequest) Reset() {
+	*x = GetMediaStatsRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[147]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaStatsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaStatsRequest) ProtoMessage() {}
+
+func (x *GetMediaStatsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[147]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaStatsRequest.ProtoReflect.Descriptor instead.
+func (*GetMediaStatsRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{147}
+}
+
+func (x *GetMediaStatsRequest) GetPeriod() string {
+	if x != nil {
+		return x.Period
+	}
+	return ""
+}
+
+type GetMediaStatsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TotalUploads  int32                  `protobuf:"varint,1,opt,name=total_uploads,proto3" json:"total_uploads,omitempty"`
+	TotalViews    int32                  `protobuf:"varint,2,opt,name=total_views,proto3" json:"total_views,omitempty"`
+	DailyStats    []*types.StatPoint     `protobuf:"bytes,3,rep,name=daily_stats,proto3" json:"daily_stats,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaStatsResponse) Reset() {
+	*x = GetMediaStatsResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[148]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaStatsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaStatsResponse) ProtoMessage() {}
+
+func (x *GetMediaStatsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[148]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaStatsResponse.ProtoReflect.Descriptor instead.
+func (*GetMediaStatsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{148}
+}
+
+func (x *GetMediaStatsResponse) GetTotalUploads() int32 {
+	if x != nil {
+		return x.TotalUploads
+	}
+	return 0
+}
+
+func (x *GetMediaStatsResponse) GetTotalViews() int32 {
+	if x != nil {
+		return x.TotalViews
+	}
+	return 0
+}
+
+func (x *GetMediaStatsResponse) GetDailyStats() []*types.StatPoint {
+	if x != nil {
+		return x.DailyStats
+	}
+	return nil
+}
+
+type GetUserStatsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Period        string                 `protobuf:"bytes,1,opt,name=period,proto3" json:"period,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserStatsRequest) Reset() {
+	*x = GetUserStatsRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[149]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserStatsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserStatsRequest) ProtoMessage() {}
+
+func (x *GetUserStatsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[149]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserStatsRequest.ProtoReflect.Descriptor instead.
+func (*GetUserStatsRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{149}
+}
+
+func (x *GetUserStatsRequest) GetPeriod() string {
+	if x != nil {
+		return x.Period
+	}
+	return ""
+}
+
+type GetUserStatsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TotalUsers    int32                  `protobuf:"varint,1,opt,name=total_users,proto3" json:"total_users,omitempty"`
+	NewUsers      int32                  `protobuf:"varint,2,opt,name=new_users,proto3" json:"new_users,omitempty"`
+	ActiveUsers   int32                  `protobuf:"varint,3,opt,name=active_users,proto3" json:"active_users,omitempty"`
+	DailyStats    []*types.StatPoint     `protobuf:"bytes,4,rep,name=daily_stats,proto3" json:"daily_stats,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserStatsResponse) Reset() {
+	*x = GetUserStatsResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[150]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserStatsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserStatsResponse) ProtoMessage() {}
+
+func (x *GetUserStatsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[150]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserStatsResponse.ProtoReflect.Descriptor instead.
+func (*GetUserStatsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{150}
+}
+
+func (x *GetUserStatsResponse) GetTotalUsers() int32 {
+	if x != nil {
+		return x.TotalUsers
+	}
+	return 0
+}
+
+func (x *GetUserStatsResponse) GetNewUsers() int32 {
+	if x != nil {
+		return x.NewUsers
+	}
+	return 0
+}
+
+func (x *GetUserStatsResponse) GetActiveUsers() int32 {
+	if x != nil {
+		return x.ActiveUsers
+	}
+	return 0
+}
+
+func (x *GetUserStatsResponse) GetDailyStats() []*types.StatPoint {
+	if x != nil {
+		return x.DailyStats
+	}
+	return nil
+}
+
+type GetTrafficStatsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Period        string                 `protobuf:"bytes,1,opt,name=period,proto3" json:"period,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetTrafficStatsRequest) Reset() {
+	*x = GetTrafficStatsRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[151]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTrafficStatsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTrafficStatsRequest) ProtoMessage() {}
+
+func (x *GetTrafficStatsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[151]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTrafficStatsRequest.ProtoReflect.Descriptor instead.
+func (*GetTrafficStatsRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{151}
+}
+
+func (x *GetTrafficStatsRequest) GetPeriod() string {
+	if x != nil {
+		return x.Period
+	}
+	return ""
+}
+
+type GetTrafficStatsResponse struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	TotalBandwidth int64                  `protobuf:"varint,1,opt,name=total_bandwidth,proto3" json:"total_bandwidth,omitempty"`
+	TotalRequests  int64                  `protobuf:"varint,2,opt,name=total_requests,proto3" json:"total_requests,omitempty"`
+	DailyStats     []*types.StatPoint     `protobuf:"bytes,3,rep,name=daily_stats,proto3" json:"daily_stats,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *GetTrafficStatsResponse) Reset() {
+	*x = GetTrafficStatsResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[152]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTrafficStatsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTrafficStatsResponse) ProtoMessage() {}
+
+func (x *GetTrafficStatsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[152]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTrafficStatsResponse.ProtoReflect.Descriptor instead.
+func (*GetTrafficStatsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{152}
+}
+
+func (x *GetTrafficStatsResponse) GetTotalBandwidth() int64 {
+	if x != nil {
+		return x.TotalBandwidth
+	}
+	return 0
+}
+
+func (x *GetTrafficStatsResponse) GetTotalRequests() int64 {
+	if x != nil {
+		return x.TotalRequests
+	}
+	return 0
+}
+
+func (x *GetTrafficStatsResponse) GetDailyStats() []*types.StatPoint {
+	if x != nil {
+		return x.DailyStats
+	}
+	return nil
+}
+
+type GetPendingReviewsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetPendingReviewsRequest) Reset() {
+	*x = GetPendingReviewsRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[153]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPendingReviewsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPendingReviewsRequest) ProtoMessage() {}
+
+func (x *GetPendingReviewsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[153]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPendingReviewsRequest.ProtoReflect.Descriptor instead.
+func (*GetPendingReviewsRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{153}
+}
+
+func (x *GetPendingReviewsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetPendingReviewsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type GetPendingReviewsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Items         []*types.Review        `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetPendingReviewsResponse) Reset() {
+	*x = GetPendingReviewsResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[154]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPendingReviewsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPendingReviewsResponse) ProtoMessage() {}
+
+func (x *GetPendingReviewsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[154]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPendingReviewsResponse.ProtoReflect.Descriptor instead.
+func (*GetPendingReviewsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{154}
+}
+
+func (x *GetPendingReviewsResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *GetPendingReviewsResponse) GetItems() []*types.Review {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *GetPendingReviewsResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetPendingReviewsResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type GetReviewHistoryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetReviewHistoryRequest) Reset() {
+	*x = GetReviewHistoryRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[155]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetReviewHistoryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetReviewHistoryRequest) ProtoMessage() {}
+
+func (x *GetReviewHistoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[155]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetReviewHistoryRequest.ProtoReflect.Descriptor instead.
+func (*GetReviewHistoryRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{155}
+}
+
+func (x *GetReviewHistoryRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetReviewHistoryRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type GetReviewHistoryResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Items         []*types.Review        `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetReviewHistoryResponse) Reset() {
+	*x = GetReviewHistoryResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[156]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetReviewHistoryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetReviewHistoryResponse) ProtoMessage() {}
+
+func (x *GetReviewHistoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[156]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetReviewHistoryResponse.ProtoReflect.Descriptor instead.
+func (*GetReviewHistoryResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{156}
+}
+
+func (x *GetReviewHistoryResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *GetReviewHistoryResponse) GetItems() []*types.Review {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *GetReviewHistoryResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetReviewHistoryResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type GetReviewRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetReviewRequest) Reset() {
+	*x = GetReviewRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[157]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetReviewRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetReviewRequest) ProtoMessage() {}
+
+func (x *GetReviewRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[157]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetReviewRequest.ProtoReflect.Descriptor instead.
+func (*GetReviewRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{157}
+}
+
+func (x *GetReviewRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type GetReviewResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Review        *types.Review          `protobuf:"bytes,1,opt,name=review,proto3" json:"review,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetReviewResponse) Reset() {
+	*x = GetReviewResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[158]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetReviewResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetReviewResponse) ProtoMessage() {}
+
+func (x *GetReviewResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[158]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetReviewResponse.ProtoReflect.Descriptor instead.
+func (*GetReviewResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{158}
+}
+
+func (x *GetReviewResponse) GetReview() *types.Review {
+	if x != nil {
+		return x.Review
+	}
+	return nil
+}
+
+type UpdateReviewRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Review        *types.Review          `protobuf:"bytes,1,opt,name=review,proto3" json:"review,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateReviewRequest) Reset() {
+	*x = UpdateReviewRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[159]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateReviewRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateReviewRequest) ProtoMessage() {}
+
+func (x *UpdateReviewRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[159]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateReviewRequest.ProtoReflect.Descriptor instead.
+func (*UpdateReviewRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{159}
+}
+
+func (x *UpdateReviewRequest) GetReview() *types.Review {
+	if x != nil {
+		return x.Review
+	}
+	return nil
+}
+
+type UpdateReviewResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Review        *types.Review          `protobuf:"bytes,1,opt,name=review,proto3" json:"review,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateReviewResponse) Reset() {
+	*x = UpdateReviewResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[160]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateReviewResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateReviewResponse) ProtoMessage() {}
+
+func (x *UpdateReviewResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[160]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateReviewResponse.ProtoReflect.Descriptor instead.
+func (*UpdateReviewResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{160}
+}
+
+func (x *UpdateReviewResponse) GetReview() *types.Review {
+	if x != nil {
+		return x.Review
+	}
+	return nil
+}
+
+type BatchUpdateReviewsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Ids           []string               `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	Reason        string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BatchUpdateReviewsRequest) Reset() {
+	*x = BatchUpdateReviewsRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[161]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BatchUpdateReviewsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BatchUpdateReviewsRequest) ProtoMessage() {}
+
+func (x *BatchUpdateReviewsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[161]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BatchUpdateReviewsRequest.ProtoReflect.Descriptor instead.
+func (*BatchUpdateReviewsRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{161}
+}
+
+func (x *BatchUpdateReviewsRequest) GetIds() []string {
+	if x != nil {
+		return x.Ids
+	}
+	return nil
+}
+
+func (x *BatchUpdateReviewsRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *BatchUpdateReviewsRequest) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+type BatchUpdateReviewsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UpdatedCount  int32                  `protobuf:"varint,1,opt,name=updated_count,proto3" json:"updated_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BatchUpdateReviewsResponse) Reset() {
+	*x = BatchUpdateReviewsResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[162]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BatchUpdateReviewsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BatchUpdateReviewsResponse) ProtoMessage() {}
+
+func (x *BatchUpdateReviewsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[162]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BatchUpdateReviewsResponse.ProtoReflect.Descriptor instead.
+func (*BatchUpdateReviewsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{162}
+}
+
+func (x *BatchUpdateReviewsResponse) GetUpdatedCount() int32 {
+	if x != nil {
+		return x.UpdatedCount
+	}
+	return 0
+}
+
+type GetSettingsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSettingsRequest) Reset() {
+	*x = GetSettingsRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[163]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSettingsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSettingsRequest) ProtoMessage() {}
+
+func (x *GetSettingsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[163]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSettingsRequest.ProtoReflect.Descriptor instead.
+func (*GetSettingsRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{163}
+}
+
+type GetSettingsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Settings      map[string]string      `protobuf:"bytes,1,rep,name=settings,proto3" json:"settings,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSettingsResponse) Reset() {
+	*x = GetSettingsResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[164]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSettingsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSettingsResponse) ProtoMessage() {}
+
+func (x *GetSettingsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[164]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSettingsResponse.ProtoReflect.Descriptor instead.
+func (*GetSettingsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{164}
+}
+
+func (x *GetSettingsResponse) GetSettings() map[string]string {
+	if x != nil {
+		return x.Settings
+	}
+	return nil
+}
+
+type UpdateSettingsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Settings      map[string]string      `protobuf:"bytes,1,rep,name=settings,proto3" json:"settings,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateSettingsRequest) Reset() {
+	*x = UpdateSettingsRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[165]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateSettingsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateSettingsRequest) ProtoMessage() {}
+
+func (x *UpdateSettingsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[165]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateSettingsRequest.ProtoReflect.Descriptor instead.
+func (*UpdateSettingsRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{165}
+}
+
+func (x *UpdateSettingsRequest) GetSettings() map[string]string {
+	if x != nil {
+		return x.Settings
+	}
+	return nil
+}
+
+type UpdateSettingsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Settings      map[string]string      `protobuf:"bytes,1,rep,name=settings,proto3" json:"settings,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateSettingsResponse) Reset() {
+	*x = UpdateSettingsResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[166]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateSettingsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateSettingsResponse) ProtoMessage() {}
+
+func (x *UpdateSettingsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[166]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateSettingsResponse.ProtoReflect.Descriptor instead.
+func (*UpdateSettingsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{166}
+}
+
+func (x *UpdateSettingsResponse) GetSettings() map[string]string {
+	if x != nil {
+		return x.Settings
+	}
+	return nil
+}
+
+type GetHomeContentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetHomeContentRequest) Reset() {
+	*x = GetHomeContentRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[167]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetHomeContentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetHomeContentRequest) ProtoMessage() {}
+
+func (x *GetHomeContentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[167]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetHomeContentRequest.ProtoReflect.Descriptor instead.
+func (*GetHomeContentRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{167}
+}
+
+func (x *GetHomeContentRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type GetHomeContentResponse struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Featured        []*types.Media         `protobuf:"bytes,1,rep,name=featured,proto3" json:"featured,omitempty"`
+	Recommended     []*types.Media         `protobuf:"bytes,2,rep,name=recommended,proto3" json:"recommended,omitempty"`
+	PopularChannels []*types.Channel       `protobuf:"bytes,3,rep,name=popular_channels,proto3" json:"popular_channels,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *GetHomeContentResponse) Reset() {
+	*x = GetHomeContentResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[168]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetHomeContentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetHomeContentResponse) ProtoMessage() {}
+
+func (x *GetHomeContentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[168]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetHomeContentResponse.ProtoReflect.Descriptor instead.
+func (*GetHomeContentResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{168}
+}
+
+func (x *GetHomeContentResponse) GetFeatured() []*types.Media {
+	if x != nil {
+		return x.Featured
+	}
+	return nil
+}
+
+func (x *GetHomeContentResponse) GetRecommended() []*types.Media {
+	if x != nil {
+		return x.Recommended
+	}
+	return nil
+}
+
+func (x *GetHomeContentResponse) GetPopularChannels() []*types.Channel {
+	if x != nil {
+		return x.PopularChannels
+	}
+	return nil
+}
+
+type GetTrendingContentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Period        string                 `protobuf:"bytes,1,opt,name=period,proto3" json:"period,omitempty"` // "day", "week", "month"
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetTrendingContentRequest) Reset() {
+	*x = GetTrendingContentRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[169]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTrendingContentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTrendingContentRequest) ProtoMessage() {}
+
+func (x *GetTrendingContentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[169]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTrendingContentRequest.ProtoReflect.Descriptor instead.
+func (*GetTrendingContentRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{169}
+}
+
+func (x *GetTrendingContentRequest) GetPeriod() string {
+	if x != nil {
+		return x.Period
+	}
+	return ""
+}
+
+func (x *GetTrendingContentRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type GetTrendingContentResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Medias        []*types.Media         `protobuf:"bytes,1,rep,name=medias,proto3" json:"medias,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetTrendingContentResponse) Reset() {
+	*x = GetTrendingContentResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[170]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTrendingContentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTrendingContentResponse) ProtoMessage() {}
+
+func (x *GetTrendingContentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[170]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTrendingContentResponse.ProtoReflect.Descriptor instead.
+func (*GetTrendingContentResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{170}
+}
+
+func (x *GetTrendingContentResponse) GetMedias() []*types.Media {
+	if x != nil {
+		return x.Medias
+	}
+	return nil
+}
+
+type GetSubscriptionFeedRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSubscriptionFeedRequest) Reset() {
+	*x = GetSubscriptionFeedRequest{}
+	mi := &file_v1_media_media_service_proto_msgTypes[171]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSubscriptionFeedRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSubscriptionFeedRequest) ProtoMessage() {}
+
+func (x *GetSubscriptionFeedRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[171]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSubscriptionFeedRequest.ProtoReflect.Descriptor instead.
+func (*GetSubscriptionFeedRequest) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{171}
+}
+
+func (x *GetSubscriptionFeedRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetSubscriptionFeedRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type GetSubscriptionFeedResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Medias        []*types.Media         `protobuf:"bytes,2,rep,name=medias,proto3" json:"medias,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSubscriptionFeedResponse) Reset() {
+	*x = GetSubscriptionFeedResponse{}
+	mi := &file_v1_media_media_service_proto_msgTypes[172]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSubscriptionFeedResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSubscriptionFeedResponse) ProtoMessage() {}
+
+func (x *GetSubscriptionFeedResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_media_media_service_proto_msgTypes[172]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSubscriptionFeedResponse.ProtoReflect.Descriptor instead.
+func (*GetSubscriptionFeedResponse) Descriptor() ([]byte, []int) {
+	return file_v1_media_media_service_proto_rawDescGZIP(), []int{172}
+}
+
+func (x *GetSubscriptionFeedResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *GetSubscriptionFeedResponse) GetMedias() []*types.Media {
+	if x != nil {
+		return x.Medias
+	}
+	return nil
+}
+
+func (x *GetSubscriptionFeedResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetSubscriptionFeedResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
 var File_v1_media_media_service_proto protoreflect.FileDescriptor
 
 const file_v1_media_media_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1cv1/media/media_service.proto\x12\x15api.v1.services.media\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a google/protobuf/field_mask.proto\x1a\x14v1/types/media.proto\"\xe7\x02\n" +
+	"\x1cv1/media/media_service.proto\x12\x15api.v1.services.media\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a google/protobuf/field_mask.proto\x1a\x14v1/types/media.proto\x1a\x13v1/types/user.proto\"\xe7\x02\n" +
 	"\x11ListMediasRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\x12\x1e\n" +
@@ -4370,8 +8955,8 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\akeyword\x18\x04 \x01(\tR\akeyword\x12\x17\n" +
 	"\x04type\x18\x05 \x01(\x05H\x00R\x04type\x88\x01\x01\x12\x1b\n" +
 	"\x06status\x18\x06 \x01(\x05H\x01R\x06status\x88\x01\x01\x12%\n" +
-	"\vcategory_id\x18\a \x01(\x03H\x02R\vcategory_id\x88\x01\x01\x12\x1d\n" +
-	"\auser_id\x18\b \x01(\x03H\x03R\auser_id\x88\x01\x01\x12\x1a\n" +
+	"\vcategory_id\x18\a \x01(\tH\x02R\vcategory_id\x88\x01\x01\x12\x1d\n" +
+	"\auser_id\x18\b \x01(\tH\x03R\auser_id\x88\x01\x01\x12\x1a\n" +
 	"\border_by\x18\t \x01(\tR\border_by\x12\x1e\n" +
 	"\n" +
 	"descending\x18\n" +
@@ -4389,7 +8974,7 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\x12(\n" +
 	"\x0fnext_page_token\x18\x05 \x01(\tR\x0fnext_page_token\"!\n" +
 	"\x0fGetMediaRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"F\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"F\n" +
 	"\x10GetMediaResponse\x122\n" +
 	"\x05media\x18\x01 \x01(\v2\x1c.api.v1.services.types.MediaR\x05media\"H\n" +
 	"\x12CreateMediaRequest\x122\n" +
@@ -4402,11 +8987,11 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\x13UpdateMediaResponse\x122\n" +
 	"\x05media\x18\x01 \x01(\v2\x1c.api.v1.services.types.MediaR\x05media\"$\n" +
 	"\x12DeleteMediaRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"C\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"C\n" +
 	"\x13DeleteMediaResponse\x12,\n" +
 	"\x05empty\x18\x01 \x01(\v2\x16.google.protobuf.EmptyR\x05empty\"+\n" +
 	"\x19IncrementViewCountRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"<\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"<\n" +
 	"\x1aIncrementViewCountResponse\x12\x1e\n" +
 	"\n" +
 	"view_count\x18\x01 \x01(\x03R\n" +
@@ -4418,16 +9003,170 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\tfile_path\x18\x04 \x01(\tR\tfile_path\x12\x12\n" +
 	"\x04size\x18\x05 \x01(\x03R\x04size\x12\x1a\n" +
 	"\bduration\x18\x06 \x01(\x05R\bduration\x12\x18\n" +
-	"\auser_id\x18\a \x01(\x03R\auser_id\"I\n" +
+	"\auser_id\x18\a \x01(\tR\auser_id\"I\n" +
 	"\x13UploadMediaResponse\x122\n" +
-	"\x05media\x18\x01 \x01(\v2\x1c.api.v1.services.types.MediaR\x05media\"\xc2\x01\n" +
+	"\x05media\x18\x01 \x01(\v2\x1c.api.v1.services.types.MediaR\x05media\"'\n" +
+	"\x15GetMediaStreamRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"P\n" +
+	"\x16GetMediaStreamResponse\x12\x1e\n" +
+	"\n" +
+	"stream_url\x18\x01 \x01(\tR\n" +
+	"stream_url\x12\x16\n" +
+	"\x06format\x18\x02 \x01(\tR\x06format\")\n" +
+	"\x17GetMediaDownloadRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"Z\n" +
+	"\x18GetMediaDownloadResponse\x12\"\n" +
+	"\fdownload_url\x18\x01 \x01(\tR\fdownload_url\x12\x1a\n" +
+	"\bfilename\x18\x02 \x01(\tR\bfilename\"*\n" +
+	"\x18GetMediaThumbnailRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"A\n" +
+	"\x19GetMediaThumbnailResponse\x12$\n" +
+	"\rthumbnail_url\x18\x01 \x01(\tR\rthumbnail_url\"6\n" +
+	"\x18ListEncodingTasksRequest\x12\x1a\n" +
+	"\bmedia_id\x18\x01 \x01(\tR\bmedia_id\"V\n" +
+	"\x19ListEncodingTasksResponse\x129\n" +
+	"\x05tasks\x18\x01 \x03(\v2#.api.v1.services.types.EncodingTaskR\x05tasks\")\n" +
+	"\x17GetMediaVariantsRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"[\n" +
+	"\x18GetMediaVariantsResponse\x12?\n" +
+	"\bvariants\x18\x01 \x03(\v2#.api.v1.services.types.MediaVariantR\bvariants\"P\n" +
+	"\x18RetryEncodingTaskRequest\x12\x1a\n" +
+	"\bmedia_id\x18\x01 \x01(\tR\bmedia_id\x12\x18\n" +
+	"\atask_id\x18\x02 \x01(\tR\atask_id\"T\n" +
+	"\x19RetryEncodingTaskResponse\x127\n" +
+	"\x04task\x18\x01 \x01(\v2#.api.v1.services.types.EncodingTaskR\x04task\"\x8f\x01\n" +
+	"\x18GetEncodingStatusRequest\x12\x1d\n" +
+	"\auser_id\x18\x01 \x01(\tH\x00R\auser_id\x88\x01\x01\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_sizeB\n" +
+	"\n" +
+	"\b_user_id\"\xd4\x02\n" +
+	"\x19GetEncodingStatusResponse\x12*\n" +
+	"\x10processing_count\x18\x01 \x01(\x05R\x10processing_count\x12$\n" +
+	"\rpending_count\x18\x02 \x01(\x05R\rpending_count\x12\"\n" +
+	"\ffailed_count\x18\x03 \x01(\x05R\ffailed_count\x12$\n" +
+	"\rsuccess_count\x18\x04 \x01(\x05R\rsuccess_count\x12&\n" +
+	"\x0etotal_filtered\x18\x05 \x01(\x05R\x0etotal_filtered\x12\x12\n" +
+	"\x04page\x18\x06 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\a \x01(\x05R\tpage_size\x12A\n" +
+	"\x05items\x18\b \x03(\v2+.api.v1.services.media.TranscodingMediaItemR\x05items\"\x95\x01\n" +
+	"\x1bListAllEncodingTasksRequest\x12\x16\n" +
+	"\x06status\x18\x01 \x01(\tR\x06status\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\tpage_size\x12\x1f\n" +
+	"\bmedia_id\x18\x04 \x01(\tH\x00R\bmedia_id\x88\x01\x01B\v\n" +
+	"\t_media_id\"\xa1\x01\n" +
+	"\x1cListAllEncodingTasksResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x129\n" +
+	"\x05tasks\x18\x02 \x03(\v2#.api.v1.services.types.EncodingTaskR\x05tasks\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"J\n" +
+	"\x1aRetryAllFailedTasksRequest\x12\x1f\n" +
+	"\bmedia_id\x18\x01 \x01(\tH\x00R\bmedia_id\x88\x01\x01B\v\n" +
+	"\t_media_id\"C\n" +
+	"\x1bRetryAllFailedTasksResponse\x12$\n" +
+	"\rretried_count\x18\x01 \x01(\x05R\rretried_count\"\x85\x01\n" +
+	"\x14TranscodingMediaItem\x122\n" +
+	"\x05media\x18\x01 \x01(\v2\x1c.api.v1.services.types.MediaR\x05media\x129\n" +
+	"\x05tasks\x18\x02 \x03(\v2#.api.v1.services.types.EncodingTaskR\x05tasks\"1\n" +
+	"\x14GetMediaLikesRequest\x12\x19\n" +
+	"\bmedia_id\x18\x01 \x01(\tR\amediaId\"\x9b\x01\n" +
+	"\x15GetMediaLikesResponse\x12\x1e\n" +
+	"\n" +
+	"like_count\x18\x01 \x01(\x03R\n" +
+	"like_count\x12$\n" +
+	"\rdislike_count\x18\x02 \x01(\x03R\rdislike_count\x12\x1a\n" +
+	"\bis_liked\x18\x03 \x01(\bR\bis_liked\x12 \n" +
+	"\vis_disliked\x18\x04 \x01(\bR\vis_disliked\"H\n" +
+	"\x16ToggleMediaLikeRequest\x12\x1a\n" +
+	"\bmedia_id\x18\x01 \x01(\tR\bmedia_id\x12\x12\n" +
+	"\x04type\x18\x02 \x01(\tR\x04type\"\x9d\x01\n" +
+	"\x17ToggleMediaLikeResponse\x12\x1a\n" +
+	"\bis_liked\x18\x01 \x01(\bR\bis_liked\x12 \n" +
+	"\vis_disliked\x18\x02 \x01(\bR\vis_disliked\x12\x1e\n" +
+	"\n" +
+	"like_count\x18\x03 \x01(\x03R\n" +
+	"like_count\x12$\n" +
+	"\rdislike_count\x18\x04 \x01(\x03R\rdislike_count\"4\n" +
+	"\x16DeleteMediaLikeRequest\x12\x1a\n" +
+	"\bmedia_id\x18\x01 \x01(\tR\bmedia_id\"3\n" +
+	"\x17DeleteMediaLikeResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"5\n" +
+	"\x18GetMediaFavoritesRequest\x12\x19\n" +
+	"\bmedia_id\x18\x01 \x01(\tR\amediaId\"g\n" +
+	"\x19GetMediaFavoritesResponse\x12&\n" +
+	"\x0efavorite_count\x18\x01 \x01(\x03R\x0efavorite_count\x12\"\n" +
+	"\fis_favorited\x18\x02 \x01(\bR\fis_favorited\"8\n" +
+	"\x1aToggleMediaFavoriteRequest\x12\x1a\n" +
+	"\bmedia_id\x18\x01 \x01(\tR\bmedia_id\"i\n" +
+	"\x1bToggleMediaFavoriteResponse\x12\"\n" +
+	"\fis_favorited\x18\x01 \x01(\bR\fis_favorited\x12&\n" +
+	"\x0efavorite_count\x18\x02 \x01(\x03R\x0efavorite_count\"8\n" +
+	"\x1aDeleteMediaFavoriteRequest\x12\x1a\n" +
+	"\bmedia_id\x18\x01 \x01(\tR\bmedia_id\"7\n" +
+	"\x1bDeleteMediaFavoriteResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"2\n" +
+	"\x15GetMediaSharesRequest\x12\x19\n" +
+	"\bmedia_id\x18\x01 \x01(\tR\amediaId\"X\n" +
+	"\x16GetMediaSharesResponse\x12 \n" +
+	"\vshare_count\x18\x01 \x01(\x03R\vshare_count\x12\x1c\n" +
+	"\tshare_url\x18\x02 \x01(\tR\tshare_url\"Q\n" +
+	"\x17CreateMediaShareRequest\x12\x1a\n" +
+	"\bmedia_id\x18\x01 \x01(\tR\bmedia_id\x12\x1a\n" +
+	"\bplatform\x18\x02 \x01(\tR\bplatform\"R\n" +
+	"\x18CreateMediaShareResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1c\n" +
+	"\tshare_url\x18\x02 \x01(\tR\tshare_url\"f\n" +
+	"\x17GetMediaCommentsRequest\x12\x19\n" +
+	"\bmedia_id\x18\x01 \x01(\tR\amediaId\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\tpage_size\"\x9e\x01\n" +
+	"\x18GetMediaCommentsResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x12:\n" +
+	"\bcomments\x18\x02 \x03(\v2\x1e.api.v1.services.types.CommentR\bcomments\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"5\n" +
+	"\x18GetMediaSubtitlesRequest\x12\x19\n" +
+	"\bmedia_id\x18\x01 \x01(\tR\amediaId\"Z\n" +
+	"\x19GetMediaSubtitlesResponse\x12=\n" +
+	"\tsubtitles\x18\x01 \x03(\v2\x1f.api.v1.services.types.SubtitleR\tsubtitles\"p\n" +
+	"\x1aCreateMediaSubtitleRequest\x12\x1a\n" +
+	"\bmedia_id\x18\x01 \x01(\tR\bmedia_id\x12\x1a\n" +
+	"\blanguage\x18\x02 \x01(\tR\blanguage\x12\x1a\n" +
+	"\bfile_url\x18\x03 \x01(\tR\bfile_url\"Z\n" +
+	"\x1bCreateMediaSubtitleResponse\x12;\n" +
+	"\bsubtitle\x18\x01 \x01(\v2\x1f.api.v1.services.types.SubtitleR\bsubtitle\"4\n" +
+	"\x17GetMediaMetadataRequest\x12\x19\n" +
+	"\bmedia_id\x18\x01 \x01(\tR\amediaId\"\\\n" +
+	"\x18GetMediaMetadataResponse\x12@\n" +
+	"\bmetadata\x18\x01 \x01(\v2$.api.v1.services.types.MediaMetadataR\bmetadata\"\x1b\n" +
+	"\x19ListEncodeProfilesRequest\"^\n" +
+	"\x1aListEncodeProfilesResponse\x12@\n" +
+	"\bprofiles\x18\x01 \x03(\v2$.api.v1.services.types.EncodeProfileR\bprofiles\")\n" +
+	"\x17GetEncodeProfileRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"Z\n" +
+	"\x18GetEncodeProfileResponse\x12>\n" +
+	"\aprofile\x18\x01 \x01(\v2$.api.v1.services.types.EncodeProfileR\aprofile\"\\\n" +
+	"\x1aCreateEncodeProfileRequest\x12>\n" +
+	"\aprofile\x18\x01 \x01(\v2$.api.v1.services.types.EncodeProfileR\aprofile\"]\n" +
+	"\x1bCreateEncodeProfileResponse\x12>\n" +
+	"\aprofile\x18\x01 \x01(\v2$.api.v1.services.types.EncodeProfileR\aprofile\"\\\n" +
+	"\x1aUpdateEncodeProfileRequest\x12>\n" +
+	"\aprofile\x18\x01 \x01(\v2$.api.v1.services.types.EncodeProfileR\aprofile\"]\n" +
+	"\x1bUpdateEncodeProfileResponse\x12>\n" +
+	"\aprofile\x18\x01 \x01(\v2$.api.v1.services.types.EncodeProfileR\aprofile\",\n" +
+	"\x1aDeleteEncodeProfileRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"K\n" +
+	"\x1bDeleteEncodeProfileResponse\x12,\n" +
+	"\x05empty\x18\x01 \x01(\v2\x16.google.protobuf.EmptyR\x05empty\"\xc2\x01\n" +
 	"\x15ListCategoriesRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\x12\x1e\n" +
 	"\n" +
 	"page_token\x18\x03 \x01(\tR\n" +
 	"page_token\x12!\n" +
-	"\tparent_id\x18\x04 \x01(\x03H\x00R\tparent_id\x88\x01\x01\x12\x1b\n" +
+	"\tparent_id\x18\x04 \x01(\tH\x00R\tparent_id\x88\x01\x01\x12\x1b\n" +
 	"\x06status\x18\x05 \x01(\x05H\x01R\x06status\x88\x01\x01B\f\n" +
 	"\n" +
 	"_parent_idB\t\n" +
@@ -4441,7 +9180,7 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\x12(\n" +
 	"\x0fnext_page_token\x18\x05 \x01(\tR\x0fnext_page_token\"$\n" +
 	"\x12GetCategoryRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"R\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"R\n" +
 	"\x13GetCategoryResponse\x12;\n" +
 	"\bcategory\x18\x01 \x01(\v2\x1f.api.v1.services.types.CategoryR\bcategory\"T\n" +
 	"\x15CreateCategoryRequest\x12;\n" +
@@ -4454,7 +9193,7 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\x16UpdateCategoryResponse\x12;\n" +
 	"\bcategory\x18\x01 \x01(\v2\x1f.api.v1.services.types.CategoryR\bcategory\"'\n" +
 	"\x15DeleteCategoryRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"F\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"F\n" +
 	"\x16DeleteCategoryResponse\x12,\n" +
 	"\x05empty\x18\x01 \x01(\v2\x16.google.protobuf.EmptyR\x05empty\"\xa5\x01\n" +
 	"\x0fListTagsRequest\x12\x12\n" +
@@ -4473,7 +9212,7 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\x12(\n" +
 	"\x0fnext_page_token\x18\x05 \x01(\tR\x0fnext_page_token\"\x1f\n" +
 	"\rGetTagRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\">\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\">\n" +
 	"\x0eGetTagResponse\x12,\n" +
 	"\x03tag\x18\x01 \x01(\v2\x1a.api.v1.services.types.TagR\x03tag\"@\n" +
 	"\x10CreateTagRequest\x12,\n" +
@@ -4486,7 +9225,7 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\x11UpdateTagResponse\x12,\n" +
 	"\x03tag\x18\x01 \x01(\v2\x1a.api.v1.services.types.TagR\x03tag\"\"\n" +
 	"\x10DeleteTagRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"A\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"A\n" +
 	"\x11DeleteTagResponse\x12,\n" +
 	"\x05empty\x18\x01 \x01(\v2\x16.google.protobuf.EmptyR\x05empty\"\x99\x02\n" +
 	"\x13ListCommentsRequest\x12\x12\n" +
@@ -4495,9 +9234,9 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\n" +
 	"page_token\x18\x03 \x01(\tR\n" +
 	"page_token\x12\x1f\n" +
-	"\bmedia_id\x18\x04 \x01(\x03H\x00R\bmedia_id\x88\x01\x01\x12\x1d\n" +
-	"\auser_id\x18\x05 \x01(\x03H\x01R\auser_id\x88\x01\x01\x12!\n" +
-	"\tparent_id\x18\x06 \x01(\x03H\x02R\tparent_id\x88\x01\x01\x12\x1b\n" +
+	"\bmedia_id\x18\x04 \x01(\tH\x00R\bmedia_id\x88\x01\x01\x12\x1d\n" +
+	"\auser_id\x18\x05 \x01(\tH\x01R\auser_id\x88\x01\x01\x12!\n" +
+	"\tparent_id\x18\x06 \x01(\tH\x02R\tparent_id\x88\x01\x01\x12\x1b\n" +
 	"\x06status\x18\a \x01(\x05H\x03R\x06status\x88\x01\x01B\v\n" +
 	"\t_media_idB\n" +
 	"\n" +
@@ -4512,7 +9251,7 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\x12(\n" +
 	"\x0fnext_page_token\x18\x05 \x01(\tR\x0fnext_page_token\"#\n" +
 	"\x11GetCommentRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"N\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"N\n" +
 	"\x12GetCommentResponse\x128\n" +
 	"\acomment\x18\x01 \x01(\v2\x1e.api.v1.services.types.CommentR\acomment\"P\n" +
 	"\x14CreateCommentRequest\x128\n" +
@@ -4525,59 +9264,37 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\x15UpdateCommentResponse\x128\n" +
 	"\acomment\x18\x01 \x01(\v2\x1e.api.v1.services.types.CommentR\acomment\"&\n" +
 	"\x14DeleteCommentRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"E\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"E\n" +
 	"\x15DeleteCommentResponse\x12,\n" +
-	"\x05empty\x18\x01 \x01(\v2\x16.google.protobuf.EmptyR\x05empty\"]\n" +
-	"\x11ToggleLikeRequest\x12\x18\n" +
-	"\auser_id\x18\x01 \x01(\x03R\auser_id\x12\x1a\n" +
-	"\bmedia_id\x18\x02 \x01(\x03R\bmedia_id\x12\x12\n" +
-	"\x04type\x18\x03 \x01(\tR\x04type\"J\n" +
-	"\x12ToggleLikeResponse\x12\x14\n" +
-	"\x05liked\x18\x01 \x01(\bR\x05liked\x12\x1e\n" +
-	"\n" +
-	"like_count\x18\x02 \x01(\x03R\n" +
-	"like_count\"1\n" +
-	"\x14GetMediaLikesRequest\x12\x19\n" +
-	"\bmedia_id\x18\x01 \x01(\x03R\amediaId\"]\n" +
-	"\x15GetMediaLikesResponse\x12\x1e\n" +
-	"\n" +
-	"like_count\x18\x01 \x01(\x03R\n" +
-	"like_count\x12$\n" +
-	"\rdislike_count\x18\x02 \x01(\x03R\rdislike_count\".\n" +
-	"\x13GetUserLikesRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\"I\n" +
-	"\x14GetUserLikesResponse\x121\n" +
-	"\x05likes\x18\x01 \x03(\v2\x1b.api.v1.services.types.LikeR\x05likes\"a\n" +
-	"\x13GetFavoritesRequest\x12\x18\n" +
-	"\auser_id\x18\x01 \x01(\x03R\auser_id\x12\x12\n" +
+	"\x05empty\x18\x01 \x01(\v2\x16.google.protobuf.EmptyR\x05empty\"\\\n" +
+	"\x18GetCommentRepliesRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1c\n" +
-	"\tpage_size\x18\x03 \x01(\x05R\tpage_size\"\xa1\x01\n" +
-	"\x14GetFavoritesResponse\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x05R\x05total\x12=\n" +
-	"\tfavorites\x18\x02 \x03(\v2\x1f.api.v1.services.types.FavoriteR\tfavorites\x124\n" +
-	"\x06medias\x18\x03 \x03(\v2\x1c.api.v1.services.types.MediaR\x06medias\"M\n" +
-	"\x15ToggleFavoriteRequest\x12\x18\n" +
-	"\auser_id\x18\x01 \x01(\x03R\auser_id\x12\x1a\n" +
-	"\bmedia_id\x18\x02 \x01(\x03R\bmedia_id\"^\n" +
-	"\x16ToggleFavoriteResponse\x12\x1c\n" +
-	"\tfavorited\x18\x01 \x01(\bR\tfavorited\x12&\n" +
-	"\x0efavorite_count\x18\x02 \x01(\x03R\x0efavorite_count\"'\n" +
-	"\x15RemoveFavoriteRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"F\n" +
-	"\x16RemoveFavoriteResponse\x12,\n" +
-	"\x05empty\x18\x01 \x01(\v2\x16.google.protobuf.EmptyR\x05empty\"\x92\x01\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\tpage_size\"\x9d\x01\n" +
+	"\x19GetCommentRepliesResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x128\n" +
+	"\areplies\x18\x02 \x03(\v2\x1e.api.v1.services.types.CommentR\areplies\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"e\n" +
+	"\x19CreateCommentReplyRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x128\n" +
+	"\acomment\x18\x02 \x01(\v2\x1e.api.v1.services.types.CommentR\acomment\"R\n" +
+	"\x1aCreateCommentReplyResponse\x124\n" +
+	"\x05reply\x18\x01 \x01(\v2\x1e.api.v1.services.types.CommentR\x05reply\"\x92\x01\n" +
 	"\x13GetPlaylistsRequest\x12\x18\n" +
-	"\auser_id\x18\x01 \x01(\x03R\auser_id\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tR\auser_id\x12!\n" +
 	"\tis_public\x18\x02 \x01(\bH\x00R\tis_public\x88\x01\x01\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_sizeB\f\n" +
 	"\n" +
-	"_is_public\"k\n" +
+	"_is_public\"\x9d\x01\n" +
 	"\x14GetPlaylistsResponse\x12\x14\n" +
 	"\x05total\x18\x01 \x01(\x05R\x05total\x12=\n" +
-	"\tplaylists\x18\x02 \x03(\v2\x1f.api.v1.services.types.PlaylistR\tplaylists\"$\n" +
+	"\tplaylists\x18\x02 \x03(\v2\x1f.api.v1.services.types.PlaylistR\tplaylists\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"$\n" +
 	"\x12GetPlaylistRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"\x88\x01\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\x88\x01\n" +
 	"\x13GetPlaylistResponse\x12;\n" +
 	"\bplaylist\x18\x01 \x01(\v2\x1f.api.v1.services.types.PlaylistR\bplaylist\x124\n" +
 	"\x06medias\x18\x02 \x03(\v2\x1c.api.v1.services.types.MediaR\x06medias\"T\n" +
@@ -4591,55 +9308,222 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\x16UpdatePlaylistResponse\x12;\n" +
 	"\bplaylist\x18\x01 \x01(\v2\x1f.api.v1.services.types.PlaylistR\bplaylist\"'\n" +
 	"\x15DeletePlaylistRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"F\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"F\n" +
 	"\x16DeletePlaylistResponse\x12,\n" +
-	"\x05empty\x18\x01 \x01(\v2\x16.google.protobuf.EmptyR\x05empty\"T\n" +
-	"\x14AddToPlaylistRequest\x12 \n" +
-	"\vplaylist_id\x18\x01 \x01(\x03R\vplaylist_id\x12\x1a\n" +
-	"\bmedia_id\x18\x02 \x01(\x03R\bmedia_id\"9\n" +
-	"\x15AddToPlaylistResponse\x12 \n" +
-	"\vmedia_count\x18\x01 \x01(\x03R\vmedia_count\"Y\n" +
-	"\x19RemoveFromPlaylistRequest\x12 \n" +
-	"\vplaylist_id\x18\x01 \x01(\x03R\vplaylist_id\x12\x1a\n" +
-	"\bmedia_id\x18\x02 \x01(\x03R\bmedia_id\">\n" +
-	"\x1aRemoveFromPlaylistResponse\x12 \n" +
-	"\vmedia_count\x18\x01 \x01(\x03R\vmedia_count\"6\n" +
-	"\x18ListEncodingTasksRequest\x12\x1a\n" +
-	"\bmedia_id\x18\x01 \x01(\x03R\bmedia_id\"V\n" +
-	"\x19ListEncodingTasksResponse\x129\n" +
-	"\x05tasks\x18\x01 \x03(\v2#.api.v1.services.types.EncodingTaskR\x05tasks\"H\n" +
-	"\x1bGetTranscodingStatusRequest\x12\x1d\n" +
-	"\auser_id\x18\x01 \x01(\x03H\x00R\auser_id\x88\x01\x01B\n" +
+	"\x05empty\x18\x01 \x01(\v2\x16.google.protobuf.EmptyR\x05empty\"W\n" +
+	"\x17AddPlaylistMediaRequest\x12 \n" +
+	"\vplaylist_id\x18\x01 \x01(\tR\vplaylist_id\x12\x1a\n" +
+	"\bmedia_id\x18\x02 \x01(\tR\bmedia_id\"<\n" +
+	"\x18AddPlaylistMediaResponse\x12 \n" +
+	"\vmedia_count\x18\x01 \x01(\x03R\vmedia_count\"]\n" +
+	"\x1bReorderPlaylistMediaRequest\x12 \n" +
+	"\vplaylist_id\x18\x01 \x01(\tR\vplaylist_id\x12\x1c\n" +
+	"\tmedia_ids\x18\x02 \x03(\tR\tmedia_ids\"8\n" +
+	"\x1cReorderPlaylistMediaResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"Z\n" +
+	"\x1aRemovePlaylistMediaRequest\x12 \n" +
+	"\vplaylist_id\x18\x01 \x01(\tR\vplaylist_id\x12\x1a\n" +
+	"\bmedia_id\x18\x02 \x01(\tR\bmedia_id\"7\n" +
+	"\x1bRemovePlaylistMediaResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"\x8c\x01\n" +
+	"\x13ListChannelsRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\x12\x18\n" +
+	"\akeyword\x18\x03 \x01(\tR\akeyword\x12\x1d\n" +
+	"\auser_id\x18\x04 \x01(\tH\x00R\auser_id\x88\x01\x01B\n" +
 	"\n" +
-	"\b_user_id\"\xfd\x01\n" +
-	"\x1cGetTranscodingStatusResponse\x12*\n" +
-	"\x10processing_count\x18\x01 \x01(\x05R\x10processing_count\x12$\n" +
-	"\rpending_count\x18\x02 \x01(\x05R\rpending_count\x12\"\n" +
-	"\ffailed_count\x18\x03 \x01(\x05R\ffailed_count\x12$\n" +
-	"\rsuccess_count\x18\x04 \x01(\x05R\rsuccess_count\x12A\n" +
-	"\x05items\x18\x05 \x03(\v2+.api.v1.services.media.TranscodingMediaItemR\x05items\"\x85\x01\n" +
-	"\x14TranscodingMediaItem\x122\n" +
-	"\x05media\x18\x01 \x01(\v2\x1c.api.v1.services.types.MediaR\x05media\x129\n" +
-	"\x05tasks\x18\x02 \x03(\v2#.api.v1.services.types.EncodingTaskR\x05tasks\"\x1b\n" +
-	"\x19ListEncodeProfilesRequest\"^\n" +
-	"\x1aListEncodeProfilesResponse\x12@\n" +
-	"\bprofiles\x18\x01 \x03(\v2$.api.v1.services.types.EncodeProfileR\bprofiles\")\n" +
-	"\x17GetEncodeProfileRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x05R\x02id\"Z\n" +
-	"\x18GetEncodeProfileResponse\x12>\n" +
-	"\aprofile\x18\x01 \x01(\v2$.api.v1.services.types.EncodeProfileR\aprofile\"\\\n" +
-	"\x1aCreateEncodeProfileRequest\x12>\n" +
-	"\aprofile\x18\x01 \x01(\v2$.api.v1.services.types.EncodeProfileR\aprofile\"]\n" +
-	"\x1bCreateEncodeProfileResponse\x12>\n" +
-	"\aprofile\x18\x01 \x01(\v2$.api.v1.services.types.EncodeProfileR\aprofile\"\\\n" +
-	"\x1aUpdateEncodeProfileRequest\x12>\n" +
-	"\aprofile\x18\x01 \x01(\v2$.api.v1.services.types.EncodeProfileR\aprofile\"]\n" +
-	"\x1bUpdateEncodeProfileResponse\x12>\n" +
-	"\aprofile\x18\x01 \x01(\v2$.api.v1.services.types.EncodeProfileR\aprofile\",\n" +
-	"\x1aDeleteEncodeProfileRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x05R\x02id\"K\n" +
-	"\x1bDeleteEncodeProfileResponse\x12,\n" +
-	"\x05empty\x18\x01 \x01(\v2\x16.google.protobuf.EmptyR\x05empty2\xba\x10\n" +
+	"\b_user_id\"\x9a\x01\n" +
+	"\x14ListChannelsResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x12:\n" +
+	"\bchannels\x18\x02 \x03(\v2\x1e.api.v1.services.types.ChannelR\bchannels\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"#\n" +
+	"\x11GetChannelRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"N\n" +
+	"\x12GetChannelResponse\x128\n" +
+	"\achannel\x18\x01 \x01(\v2\x1e.api.v1.services.types.ChannelR\achannel\"P\n" +
+	"\x14CreateChannelRequest\x128\n" +
+	"\achannel\x18\x01 \x01(\v2\x1e.api.v1.services.types.ChannelR\achannel\"Q\n" +
+	"\x15CreateChannelResponse\x128\n" +
+	"\achannel\x18\x01 \x01(\v2\x1e.api.v1.services.types.ChannelR\achannel\"\x8e\x01\n" +
+	"\x14UpdateChannelRequest\x128\n" +
+	"\achannel\x18\x01 \x01(\v2\x1e.api.v1.services.types.ChannelR\achannel\x12<\n" +
+	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\vupdate_mask\"Q\n" +
+	"\x15UpdateChannelResponse\x128\n" +
+	"\achannel\x18\x01 \x01(\v2\x1e.api.v1.services.types.ChannelR\achannel\"&\n" +
+	"\x14DeleteChannelRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"E\n" +
+	"\x15DeleteChannelResponse\x12,\n" +
+	"\x05empty\x18\x01 \x01(\v2\x16.google.protobuf.EmptyR\x05empty\"k\n" +
+	"\x17GetChannelMediasRequest\x12\x1e\n" +
+	"\n" +
+	"channel_id\x18\x01 \x01(\tR\n" +
+	"channel_id\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\tpage_size\"\x98\x01\n" +
+	"\x18GetChannelMediasResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x124\n" +
+	"\x06medias\x18\x02 \x03(\v2\x1c.api.v1.services.types.MediaR\x06medias\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"T\n" +
+	"\x16AddChannelMediaRequest\x12\x1e\n" +
+	"\n" +
+	"channel_id\x18\x01 \x01(\tR\n" +
+	"channel_id\x12\x1a\n" +
+	"\bmedia_id\x18\x02 \x01(\tR\bmedia_id\"3\n" +
+	"\x17AddChannelMediaResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"W\n" +
+	"\x19RemoveChannelMediaRequest\x12\x1e\n" +
+	"\n" +
+	"channel_id\x18\x01 \x01(\tR\n" +
+	"channel_id\x12\x1a\n" +
+	"\bmedia_id\x18\x02 \x01(\tR\bmedia_id\"6\n" +
+	"\x1aRemoveChannelMediaResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"\x90\x01\n" +
+	"\x1cGetChannelSubscribersRequest\x12\x1e\n" +
+	"\n" +
+	"channel_id\x18\x01 \x01(\tR\n" +
+	"channel_id\x12\x1e\n" +
+	"\n" +
+	"count_only\x18\x02 \x01(\bR\n" +
+	"count_only\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"\xbc\x01\n" +
+	"\x1dGetChannelSubscribersResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x12\x14\n" +
+	"\x05count\x18\x02 \x01(\x05R\x05count\x12=\n" +
+	"\vsubscribers\x18\x03 \x03(\v2\x1b.api.v1.services.types.UserR\vsubscribers\x12\x12\n" +
+	"\x04page\x18\x04 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x05 \x01(\x05R\tpage_size\"?\n" +
+	"\x1dGetChannelSubscriptionRequest\x12\x1e\n" +
+	"\n" +
+	"channel_id\x18\x01 \x01(\tR\n" +
+	"channel_id\"F\n" +
+	"\x1eGetChannelSubscriptionResponse\x12$\n" +
+	"\ris_subscribed\x18\x01 \x01(\bR\ris_subscribed\"9\n" +
+	"\x17SubscribeChannelRequest\x12\x1e\n" +
+	"\n" +
+	"channel_id\x18\x01 \x01(\tR\n" +
+	"channel_id\"Z\n" +
+	"\x18SubscribeChannelResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12$\n" +
+	"\ris_subscribed\x18\x02 \x01(\bR\ris_subscribed\";\n" +
+	"\x19UnsubscribeChannelRequest\x12\x1e\n" +
+	"\n" +
+	"channel_id\x18\x01 \x01(\tR\n" +
+	"channel_id\"\\\n" +
+	"\x1aUnsubscribeChannelResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12$\n" +
+	"\ris_subscribed\x18\x02 \x01(\bR\ris_subscribed\"c\n" +
+	"\rSearchRequest\x12\f\n" +
+	"\x01q\x18\x01 \x01(\tR\x01q\x12\x12\n" +
+	"\x04type\x18\x02 \x01(\tR\x04type\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"\xbc\x02\n" +
+	"\x0eSearchResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x124\n" +
+	"\x06medias\x18\x02 \x03(\v2\x1c.api.v1.services.types.MediaR\x06medias\x12:\n" +
+	"\bchannels\x18\x03 \x03(\v2\x1e.api.v1.services.types.ChannelR\bchannels\x12=\n" +
+	"\tplaylists\x18\x04 \x03(\v2\x1f.api.v1.services.types.PlaylistR\tplaylists\x121\n" +
+	"\x05users\x18\x05 \x03(\v2\x1b.api.v1.services.types.UserR\x05users\x12\x12\n" +
+	"\x04page\x18\x06 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\a \x01(\x05R\tpage_size\"A\n" +
+	"\x1bGetSearchSuggestionsRequest\x12\f\n" +
+	"\x01q\x18\x01 \x01(\tR\x01q\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"@\n" +
+	"\x1cGetSearchSuggestionsResponse\x12 \n" +
+	"\vsuggestions\x18\x01 \x03(\tR\vsuggestions\"\x1a\n" +
+	"\x18GetDashboardStatsRequest\"\xd5\x01\n" +
+	"\x19GetDashboardStatsResponse\x12 \n" +
+	"\vtotal_users\x18\x01 \x01(\x05R\vtotal_users\x12\"\n" +
+	"\ftotal_medias\x18\x02 \x01(\x05R\ftotal_medias\x12 \n" +
+	"\vtotal_views\x18\x03 \x01(\x05R\vtotal_views\x12&\n" +
+	"\x0etotal_channels\x18\x04 \x01(\x05R\x0etotal_channels\x12(\n" +
+	"\x0fpending_reviews\x18\x05 \x01(\x05R\x0fpending_reviews\".\n" +
+	"\x14GetMediaStatsRequest\x12\x16\n" +
+	"\x06period\x18\x01 \x01(\tR\x06period\"\xa3\x01\n" +
+	"\x15GetMediaStatsResponse\x12$\n" +
+	"\rtotal_uploads\x18\x01 \x01(\x05R\rtotal_uploads\x12 \n" +
+	"\vtotal_views\x18\x02 \x01(\x05R\vtotal_views\x12B\n" +
+	"\vdaily_stats\x18\x03 \x03(\v2 .api.v1.services.types.StatPointR\vdaily_stats\"-\n" +
+	"\x13GetUserStatsRequest\x12\x16\n" +
+	"\x06period\x18\x01 \x01(\tR\x06period\"\xbe\x01\n" +
+	"\x14GetUserStatsResponse\x12 \n" +
+	"\vtotal_users\x18\x01 \x01(\x05R\vtotal_users\x12\x1c\n" +
+	"\tnew_users\x18\x02 \x01(\x05R\tnew_users\x12\"\n" +
+	"\factive_users\x18\x03 \x01(\x05R\factive_users\x12B\n" +
+	"\vdaily_stats\x18\x04 \x03(\v2 .api.v1.services.types.StatPointR\vdaily_stats\"0\n" +
+	"\x16GetTrafficStatsRequest\x12\x16\n" +
+	"\x06period\x18\x01 \x01(\tR\x06period\"\xaf\x01\n" +
+	"\x17GetTrafficStatsResponse\x12(\n" +
+	"\x0ftotal_bandwidth\x18\x01 \x01(\x03R\x0ftotal_bandwidth\x12&\n" +
+	"\x0etotal_requests\x18\x02 \x01(\x03R\x0etotal_requests\x12B\n" +
+	"\vdaily_stats\x18\x03 \x03(\v2 .api.v1.services.types.StatPointR\vdaily_stats\"L\n" +
+	"\x18GetPendingReviewsRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\"\x98\x01\n" +
+	"\x19GetPendingReviewsResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x123\n" +
+	"\x05items\x18\x02 \x03(\v2\x1d.api.v1.services.types.ReviewR\x05items\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"K\n" +
+	"\x17GetReviewHistoryRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\"\x97\x01\n" +
+	"\x18GetReviewHistoryResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x123\n" +
+	"\x05items\x18\x02 \x03(\v2\x1d.api.v1.services.types.ReviewR\x05items\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"\"\n" +
+	"\x10GetReviewRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"J\n" +
+	"\x11GetReviewResponse\x125\n" +
+	"\x06review\x18\x01 \x01(\v2\x1d.api.v1.services.types.ReviewR\x06review\"L\n" +
+	"\x13UpdateReviewRequest\x125\n" +
+	"\x06review\x18\x01 \x01(\v2\x1d.api.v1.services.types.ReviewR\x06review\"M\n" +
+	"\x14UpdateReviewResponse\x125\n" +
+	"\x06review\x18\x01 \x01(\v2\x1d.api.v1.services.types.ReviewR\x06review\"]\n" +
+	"\x19BatchUpdateReviewsRequest\x12\x10\n" +
+	"\x03ids\x18\x01 \x03(\tR\x03ids\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\x12\x16\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\"B\n" +
+	"\x1aBatchUpdateReviewsResponse\x12$\n" +
+	"\rupdated_count\x18\x01 \x01(\x05R\rupdated_count\"\x14\n" +
+	"\x12GetSettingsRequest\"\xa8\x01\n" +
+	"\x13GetSettingsResponse\x12T\n" +
+	"\bsettings\x18\x01 \x03(\v28.api.v1.services.media.GetSettingsResponse.SettingsEntryR\bsettings\x1a;\n" +
+	"\rSettingsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xac\x01\n" +
+	"\x15UpdateSettingsRequest\x12V\n" +
+	"\bsettings\x18\x01 \x03(\v2:.api.v1.services.media.UpdateSettingsRequest.SettingsEntryR\bsettings\x1a;\n" +
+	"\rSettingsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xae\x01\n" +
+	"\x16UpdateSettingsResponse\x12W\n" +
+	"\bsettings\x18\x01 \x03(\v2;.api.v1.services.media.UpdateSettingsResponse.SettingsEntryR\bsettings\x1a;\n" +
+	"\rSettingsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"-\n" +
+	"\x15GetHomeContentRequest\x12\x14\n" +
+	"\x05limit\x18\x01 \x01(\x05R\x05limit\"\xde\x01\n" +
+	"\x16GetHomeContentResponse\x128\n" +
+	"\bfeatured\x18\x01 \x03(\v2\x1c.api.v1.services.types.MediaR\bfeatured\x12>\n" +
+	"\vrecommended\x18\x02 \x03(\v2\x1c.api.v1.services.types.MediaR\vrecommended\x12J\n" +
+	"\x10popular_channels\x18\x03 \x03(\v2\x1e.api.v1.services.types.ChannelR\x10popular_channels\"I\n" +
+	"\x19GetTrendingContentRequest\x12\x16\n" +
+	"\x06period\x18\x01 \x01(\tR\x06period\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"R\n" +
+	"\x1aGetTrendingContentResponse\x124\n" +
+	"\x06medias\x18\x01 \x03(\v2\x1c.api.v1.services.types.MediaR\x06medias\"N\n" +
+	"\x1aGetSubscriptionFeedRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\"\x9b\x01\n" +
+	"\x1bGetSubscriptionFeedResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x124\n" +
+	"\x06medias\x18\x02 \x03(\v2\x1c.api.v1.services.types.MediaR\x06medias\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size2\xa4\"\n" +
 	"\fMediaService\x12y\n" +
 	"\n" +
 	"ListMedias\x12(.api.v1.services.media.ListMediasRequest\x1a).api.v1.services.media.ListMediasResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/api/v1/medias\x12x\n" +
@@ -4648,14 +9532,34 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\vUpdateMedia\x12).api.v1.services.media.UpdateMediaRequest\x1a*.api.v1.services.media.UpdateMediaResponse\"$\x82\xd3\xe4\x93\x02\x1e:\x01*\x1a\x19/api/v1/medias/{media.id}\x12\x81\x01\n" +
 	"\vDeleteMedia\x12).api.v1.services.media.DeleteMediaRequest\x1a*.api.v1.services.media.DeleteMediaResponse\"\x1b\x82\xd3\xe4\x93\x02\x15*\x13/api/v1/medias/{id}\x12\x9e\x01\n" +
 	"\x12IncrementViewCount\x120.api.v1.services.media.IncrementViewCountRequest\x1a1.api.v1.services.media.IncrementViewCountResponse\"#\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/api/v1/medias/{id}/view\x12\x86\x01\n" +
-	"\vUploadMedia\x12).api.v1.services.media.UploadMediaRequest\x1a*.api.v1.services.media.UploadMediaResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/medias/upload\x12\x9f\x01\n" +
-	"\x11ListEncodingTasks\x12/.api.v1.services.media.ListEncodingTasksRequest\x1a0.api.v1.services.media.ListEncodingTasksResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/api/v1/medias/{media_id}/tasks\x12\xaa\x01\n" +
-	"\x14GetTranscodingStatus\x122.api.v1.services.media.GetTranscodingStatusRequest\x1a3.api.v1.services.media.GetTranscodingStatusResponse\")\x82\xd3\xe4\x93\x02#\x12!/api/v1/medias/transcoding/status\x12\x99\x01\n" +
-	"\x12ListEncodeProfiles\x120.api.v1.services.media.ListEncodeProfilesRequest\x1a1.api.v1.services.media.ListEncodeProfilesResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/api/v1/media/profiles\x12\x98\x01\n" +
-	"\x10GetEncodeProfile\x12..api.v1.services.media.GetEncodeProfileRequest\x1a/.api.v1.services.media.GetEncodeProfileResponse\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/v1/media/profiles/{id}\x12\x9f\x01\n" +
-	"\x13CreateEncodeProfile\x121.api.v1.services.media.CreateEncodeProfileRequest\x1a2.api.v1.services.media.CreateEncodeProfileResponse\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/api/v1/media/profiles\x12\xac\x01\n" +
-	"\x13UpdateEncodeProfile\x121.api.v1.services.media.UpdateEncodeProfileRequest\x1a2.api.v1.services.media.UpdateEncodeProfileResponse\".\x82\xd3\xe4\x93\x02(:\x01*\x1a#/api/v1/media/profiles/{profile.id}\x12\xa1\x01\n" +
-	"\x13DeleteEncodeProfile\x121.api.v1.services.media.DeleteEncodeProfileRequest\x1a2.api.v1.services.media.DeleteEncodeProfileResponse\"#\x82\xd3\xe4\x93\x02\x1d*\x1b/api/v1/media/profiles/{id}2\xe2\x05\n" +
+	"\vUploadMedia\x12).api.v1.services.media.UploadMediaRequest\x1a*.api.v1.services.media.UploadMediaResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/medias/upload\x12\x91\x01\n" +
+	"\x0eGetMediaStream\x12,.api.v1.services.media.GetMediaStreamRequest\x1a-.api.v1.services.media.GetMediaStreamResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/v1/medias/{id}/stream\x12\x99\x01\n" +
+	"\x10GetMediaDownload\x12..api.v1.services.media.GetMediaDownloadRequest\x1a/.api.v1.services.media.GetMediaDownloadResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/medias/{id}/download\x12\x9d\x01\n" +
+	"\x11GetMediaThumbnail\x12/.api.v1.services.media.GetMediaThumbnailRequest\x1a0.api.v1.services.media.GetMediaThumbnailResponse\"%\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/v1/medias/{id}/thumbnail\x12\x9f\x01\n" +
+	"\x11ListEncodingTasks\x12/.api.v1.services.media.ListEncodingTasksRequest\x1a0.api.v1.services.media.ListEncodingTasksResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/api/v1/medias/{media_id}/tasks\x12\x99\x01\n" +
+	"\x10GetMediaVariants\x12..api.v1.services.media.GetMediaVariantsRequest\x1a/.api.v1.services.media.GetMediaVariantsResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/medias/{id}/variants\x12\xb2\x01\n" +
+	"\x11RetryEncodingTask\x12/.api.v1.services.media.RetryEncodingTaskRequest\x1a0.api.v1.services.media.RetryEncodingTaskResponse\":\x82\xd3\xe4\x93\x024:\x01*\"//api/v1/medias/{media_id}/tasks/{task_id}/retry\x12\x9e\x01\n" +
+	"\x11GetEncodingStatus\x12/.api.v1.services.media.GetEncodingStatusRequest\x1a0.api.v1.services.media.GetEncodingStatusResponse\"&\x82\xd3\xe4\x93\x02 \x12\x1e/api/v1/medias/encoding/status\x12\xa6\x01\n" +
+	"\x14ListAllEncodingTasks\x122.api.v1.services.media.ListAllEncodingTasksRequest\x1a3.api.v1.services.media.ListAllEncodingTasksResponse\"%\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/v1/medias/encoding/tasks\x12\xad\x01\n" +
+	"\x13RetryAllFailedTasks\x121.api.v1.services.media.RetryAllFailedTasksRequest\x1a2.api.v1.services.media.RetryAllFailedTasksResponse\"/\x82\xd3\xe4\x93\x02):\x01*\"$/api/v1/medias/encoding/retry-failed\x12\x93\x01\n" +
+	"\rGetMediaLikes\x12+.api.v1.services.media.GetMediaLikesRequest\x1a,.api.v1.services.media.GetMediaLikesResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/api/v1/medias/{media_id}/likes\x12\x9c\x01\n" +
+	"\x0fToggleMediaLike\x12-.api.v1.services.media.ToggleMediaLikeRequest\x1a..api.v1.services.media.ToggleMediaLikeResponse\"*\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/api/v1/medias/{media_id}/likes\x12\x99\x01\n" +
+	"\x0fDeleteMediaLike\x12-.api.v1.services.media.DeleteMediaLikeRequest\x1a..api.v1.services.media.DeleteMediaLikeResponse\"'\x82\xd3\xe4\x93\x02!*\x1f/api/v1/medias/{media_id}/likes\x12\xa3\x01\n" +
+	"\x11GetMediaFavorites\x12/.api.v1.services.media.GetMediaFavoritesRequest\x1a0.api.v1.services.media.GetMediaFavoritesResponse\"+\x82\xd3\xe4\x93\x02%\x12#/api/v1/medias/{media_id}/favorites\x12\xac\x01\n" +
+	"\x13ToggleMediaFavorite\x121.api.v1.services.media.ToggleMediaFavoriteRequest\x1a2.api.v1.services.media.ToggleMediaFavoriteResponse\".\x82\xd3\xe4\x93\x02(:\x01*\"#/api/v1/medias/{media_id}/favorites\x12\xa9\x01\n" +
+	"\x13DeleteMediaFavorite\x121.api.v1.services.media.DeleteMediaFavoriteRequest\x1a2.api.v1.services.media.DeleteMediaFavoriteResponse\"+\x82\xd3\xe4\x93\x02%*#/api/v1/medias/{media_id}/favorites\x12\x97\x01\n" +
+	"\x0eGetMediaShares\x12,.api.v1.services.media.GetMediaSharesRequest\x1a-.api.v1.services.media.GetMediaSharesResponse\"(\x82\xd3\xe4\x93\x02\"\x12 /api/v1/medias/{media_id}/shares\x12\xa0\x01\n" +
+	"\x10CreateMediaShare\x12..api.v1.services.media.CreateMediaShareRequest\x1a/.api.v1.services.media.CreateMediaShareResponse\"+\x82\xd3\xe4\x93\x02%:\x01*\" /api/v1/medias/{media_id}/shares\x12\x9f\x01\n" +
+	"\x10GetMediaComments\x12..api.v1.services.media.GetMediaCommentsRequest\x1a/.api.v1.services.media.GetMediaCommentsResponse\"*\x82\xd3\xe4\x93\x02$\x12\"/api/v1/medias/{media_id}/comments\x12\xa3\x01\n" +
+	"\x11GetMediaSubtitles\x12/.api.v1.services.media.GetMediaSubtitlesRequest\x1a0.api.v1.services.media.GetMediaSubtitlesResponse\"+\x82\xd3\xe4\x93\x02%\x12#/api/v1/medias/{media_id}/subtitles\x12\xac\x01\n" +
+	"\x13CreateMediaSubtitle\x121.api.v1.services.media.CreateMediaSubtitleRequest\x1a2.api.v1.services.media.CreateMediaSubtitleResponse\".\x82\xd3\xe4\x93\x02(:\x01*\"#/api/v1/medias/{media_id}/subtitles\x12\x9f\x01\n" +
+	"\x10GetMediaMetadata\x12..api.v1.services.media.GetMediaMetadataRequest\x1a/.api.v1.services.media.GetMediaMetadataResponse\"*\x82\xd3\xe4\x93\x02$\x12\"/api/v1/medias/{media_id}/metadata2\xf6\x06\n" +
+	"\x16EncodingProfileService\x12\xa3\x01\n" +
+	"\x12ListEncodeProfiles\x120.api.v1.services.media.ListEncodeProfilesRequest\x1a1.api.v1.services.media.ListEncodeProfilesResponse\"(\x82\xd3\xe4\x93\x02\"\x12 /api/v1/medias/encoding/profiles\x12\xa2\x01\n" +
+	"\x10GetEncodeProfile\x12..api.v1.services.media.GetEncodeProfileRequest\x1a/.api.v1.services.media.GetEncodeProfileResponse\"-\x82\xd3\xe4\x93\x02'\x12%/api/v1/medias/encoding/profiles/{id}\x12\xa9\x01\n" +
+	"\x13CreateEncodeProfile\x121.api.v1.services.media.CreateEncodeProfileRequest\x1a2.api.v1.services.media.CreateEncodeProfileResponse\"+\x82\xd3\xe4\x93\x02%:\x01*\" /api/v1/medias/encoding/profiles\x12\xb6\x01\n" +
+	"\x13UpdateEncodeProfile\x121.api.v1.services.media.UpdateEncodeProfileRequest\x1a2.api.v1.services.media.UpdateEncodeProfileResponse\"8\x82\xd3\xe4\x93\x022:\x01*\x1a-/api/v1/medias/encoding/profiles/{profile.id}\x12\xab\x01\n" +
+	"\x13DeleteEncodeProfile\x121.api.v1.services.media.DeleteEncodeProfileRequest\x1a2.api.v1.services.media.DeleteEncodeProfileResponse\"-\x82\xd3\xe4\x93\x02'*%/api/v1/medias/encoding/profiles/{id}2\xe2\x05\n" +
 	"\x0fCategoryService\x12\x89\x01\n" +
 	"\x0eListCategories\x12,.api.v1.services.media.ListCategoriesRequest\x1a-.api.v1.services.media.ListCategoriesResponse\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/categories\x12\x85\x01\n" +
 	"\vGetCategory\x12).api.v1.services.media.GetCategoryRequest\x1a*.api.v1.services.media.GetCategoryResponse\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/categories/{id}\x12\x8c\x01\n" +
@@ -4668,31 +9572,58 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\x06GetTag\x12$.api.v1.services.media.GetTagRequest\x1a%.api.v1.services.media.GetTagResponse\"\x19\x82\xd3\xe4\x93\x02\x13\x12\x11/api/v1/tags/{id}\x12w\n" +
 	"\tCreateTag\x12'.api.v1.services.media.CreateTagRequest\x1a(.api.v1.services.media.CreateTagResponse\"\x17\x82\xd3\xe4\x93\x02\x11:\x01*\"\f/api/v1/tags\x12\x80\x01\n" +
 	"\tUpdateTag\x12'.api.v1.services.media.UpdateTagRequest\x1a(.api.v1.services.media.UpdateTagResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\x1a\x15/api/v1/tags/{tag.id}\x12y\n" +
-	"\tDeleteTag\x12'.api.v1.services.media.DeleteTagRequest\x1a(.api.v1.services.media.DeleteTagResponse\"\x19\x82\xd3\xe4\x93\x02\x13*\x11/api/v1/tags/{id}2\xc4\x05\n" +
+	"\tDeleteTag\x12'.api.v1.services.media.DeleteTagRequest\x1a(.api.v1.services.media.DeleteTagResponse\"\x19\x82\xd3\xe4\x93\x02\x13*\x11/api/v1/tags/{id}2\x8a\b\n" +
 	"\x0eCommentService\x12\x81\x01\n" +
 	"\fListComments\x12*.api.v1.services.media.ListCommentsRequest\x1a+.api.v1.services.media.ListCommentsResponse\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/api/v1/comments\x12\x80\x01\n" +
 	"\n" +
 	"GetComment\x12(.api.v1.services.media.GetCommentRequest\x1a).api.v1.services.media.GetCommentResponse\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/api/v1/comments/{id}\x12\x87\x01\n" +
 	"\rCreateComment\x12+.api.v1.services.media.CreateCommentRequest\x1a,.api.v1.services.media.CreateCommentResponse\"\x1b\x82\xd3\xe4\x93\x02\x15:\x01*\"\x10/api/v1/comments\x12\x94\x01\n" +
 	"\rUpdateComment\x12+.api.v1.services.media.UpdateCommentRequest\x1a,.api.v1.services.media.UpdateCommentResponse\"(\x82\xd3\xe4\x93\x02\":\x01*\x1a\x1d/api/v1/comments/{comment.id}\x12\x89\x01\n" +
-	"\rDeleteComment\x12+.api.v1.services.media.DeleteCommentRequest\x1a,.api.v1.services.media.DeleteCommentResponse\"\x1d\x82\xd3\xe4\x93\x02\x17*\x15/api/v1/comments/{id}2\xb9\x03\n" +
-	"\vLikeService\x12\x82\x01\n" +
-	"\n" +
-	"ToggleLike\x12(.api.v1.services.media.ToggleLikeRequest\x1a).api.v1.services.media.ToggleLikeResponse\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/api/v1/likes/toggle\x12\x93\x01\n" +
-	"\rGetMediaLikes\x12+.api.v1.services.media.GetMediaLikesRequest\x1a,.api.v1.services.media.GetMediaLikesResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/api/v1/medias/{media_id}/likes\x12\x8e\x01\n" +
-	"\fGetUserLikes\x12*.api.v1.services.media.GetUserLikesRequest\x1a+.api.v1.services.media.GetUserLikesResponse\"%\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/v1/users/{user_id}/likes2\xbb\x03\n" +
-	"\x0fFavoriteService\x12\x82\x01\n" +
-	"\fGetFavorites\x12*.api.v1.services.media.GetFavoritesRequest\x1a+.api.v1.services.media.GetFavoritesResponse\"\x19\x82\xd3\xe4\x93\x02\x13\x12\x11/api/v1/favorites\x12\x92\x01\n" +
-	"\x0eToggleFavorite\x12,.api.v1.services.media.ToggleFavoriteRequest\x1a-.api.v1.services.media.ToggleFavoriteResponse\"#\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/api/v1/favorites/toggle\x12\x8d\x01\n" +
-	"\x0eRemoveFavorite\x12,.api.v1.services.media.RemoveFavoriteRequest\x1a-.api.v1.services.media.RemoveFavoriteResponse\"\x1e\x82\xd3\xe4\x93\x02\x18*\x16/api/v1/favorites/{id}2\xa3\b\n" +
+	"\rDeleteComment\x12+.api.v1.services.media.DeleteCommentRequest\x1a,.api.v1.services.media.DeleteCommentResponse\"\x1d\x82\xd3\xe4\x93\x02\x17*\x15/api/v1/comments/{id}\x12\x9d\x01\n" +
+	"\x11GetCommentReplies\x12/.api.v1.services.media.GetCommentRepliesRequest\x1a0.api.v1.services.media.GetCommentRepliesResponse\"%\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/v1/comments/{id}/replies\x12\xa3\x01\n" +
+	"\x12CreateCommentReply\x120.api.v1.services.media.CreateCommentReplyRequest\x1a1.api.v1.services.media.CreateCommentReplyResponse\"(\x82\xd3\xe4\x93\x02\":\x01*\"\x1d/api/v1/comments/{id}/replies2\xf7\t\n" +
 	"\x0fPlaylistService\x12\x82\x01\n" +
 	"\fGetPlaylists\x12*.api.v1.services.media.GetPlaylistsRequest\x1a+.api.v1.services.media.GetPlaylistsResponse\"\x19\x82\xd3\xe4\x93\x02\x13\x12\x11/api/v1/playlists\x12\x84\x01\n" +
 	"\vGetPlaylist\x12).api.v1.services.media.GetPlaylistRequest\x1a*.api.v1.services.media.GetPlaylistResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/api/v1/playlists/{id}\x12\x8b\x01\n" +
 	"\x0eCreatePlaylist\x12,.api.v1.services.media.CreatePlaylistRequest\x1a-.api.v1.services.media.CreatePlaylistResponse\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/api/v1/playlists\x12\x99\x01\n" +
 	"\x0eUpdatePlaylist\x12,.api.v1.services.media.UpdatePlaylistRequest\x1a-.api.v1.services.media.UpdatePlaylistResponse\"*\x82\xd3\xe4\x93\x02$:\x01*\x1a\x1f/api/v1/playlists/{playlist.id}\x12\x8d\x01\n" +
-	"\x0eDeletePlaylist\x12,.api.v1.services.media.DeletePlaylistRequest\x1a-.api.v1.services.media.DeletePlaylistResponse\"\x1e\x82\xd3\xe4\x93\x02\x18*\x16/api/v1/playlists/{id}\x12\x9a\x01\n" +
-	"\rAddToPlaylist\x12+.api.v1.services.media.AddToPlaylistRequest\x1a,.api.v1.services.media.AddToPlaylistResponse\".\x82\xd3\xe4\x93\x02(:\x01*\"#/api/v1/playlists/{playlist_id}/add\x12\xac\x01\n" +
-	"\x12RemoveFromPlaylist\x120.api.v1.services.media.RemoveFromPlaylistRequest\x1a1.api.v1.services.media.RemoveFromPlaylistResponse\"1\x82\xd3\xe4\x93\x02+:\x01*\"&/api/v1/playlists/{playlist_id}/removeB\x84\x01\n" +
+	"\x0eDeletePlaylist\x12,.api.v1.services.media.DeletePlaylistRequest\x1a-.api.v1.services.media.DeletePlaylistResponse\"\x1e\x82\xd3\xe4\x93\x02\x18*\x16/api/v1/playlists/{id}\x12\xa6\x01\n" +
+	"\x10AddPlaylistMedia\x12..api.v1.services.media.AddPlaylistMediaRequest\x1a/.api.v1.services.media.AddPlaylistMediaResponse\"1\x82\xd3\xe4\x93\x02+:\x01*\"&/api/v1/playlists/{playlist_id}/medias\x12\xba\x01\n" +
+	"\x14ReorderPlaylistMedia\x122.api.v1.services.media.ReorderPlaylistMediaRequest\x1a3.api.v1.services.media.ReorderPlaylistMediaResponse\"9\x82\xd3\xe4\x93\x023:\x01*\x1a./api/v1/playlists/{playlist_id}/medias/reorder\x12\xb7\x01\n" +
+	"\x13RemovePlaylistMedia\x121.api.v1.services.media.RemovePlaylistMediaRequest\x1a2.api.v1.services.media.RemovePlaylistMediaResponse\"9\x82\xd3\xe4\x93\x023*1/api/v1/playlists/{playlist_id}/medias/{media_id}2\x92\x0f\n" +
+	"\x0eChannelService\x12\x81\x01\n" +
+	"\fListChannels\x12*.api.v1.services.media.ListChannelsRequest\x1a+.api.v1.services.media.ListChannelsResponse\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/api/v1/channels\x12\x80\x01\n" +
+	"\n" +
+	"GetChannel\x12(.api.v1.services.media.GetChannelRequest\x1a).api.v1.services.media.GetChannelResponse\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/api/v1/channels/{id}\x12\x87\x01\n" +
+	"\rCreateChannel\x12+.api.v1.services.media.CreateChannelRequest\x1a,.api.v1.services.media.CreateChannelResponse\"\x1b\x82\xd3\xe4\x93\x02\x15:\x01*\"\x10/api/v1/channels\x12\x94\x01\n" +
+	"\rUpdateChannel\x12+.api.v1.services.media.UpdateChannelRequest\x1a,.api.v1.services.media.UpdateChannelResponse\"(\x82\xd3\xe4\x93\x02\":\x01*\x1a\x1d/api/v1/channels/{channel.id}\x12\x89\x01\n" +
+	"\rDeleteChannel\x12+.api.v1.services.media.DeleteChannelRequest\x1a,.api.v1.services.media.DeleteChannelResponse\"\x1d\x82\xd3\xe4\x93\x02\x17*\x15/api/v1/channels/{id}\x12\xa1\x01\n" +
+	"\x10GetChannelMedias\x12..api.v1.services.media.GetChannelMediasRequest\x1a/.api.v1.services.media.GetChannelMediasResponse\",\x82\xd3\xe4\x93\x02&\x12$/api/v1/channels/{channel_id}/medias\x12\xa1\x01\n" +
+	"\x0fAddChannelMedia\x12-.api.v1.services.media.AddChannelMediaRequest\x1a..api.v1.services.media.AddChannelMediaResponse\"/\x82\xd3\xe4\x93\x02):\x01*\"$/api/v1/channels/{channel_id}/medias\x12\xb2\x01\n" +
+	"\x12RemoveChannelMedia\x120.api.v1.services.media.RemoveChannelMediaRequest\x1a1.api.v1.services.media.RemoveChannelMediaResponse\"7\x82\xd3\xe4\x93\x021*//api/v1/channels/{channel_id}/medias/{media_id}\x12\xb5\x01\n" +
+	"\x15GetChannelSubscribers\x123.api.v1.services.media.GetChannelSubscribersRequest\x1a4.api.v1.services.media.GetChannelSubscribersResponse\"1\x82\xd3\xe4\x93\x02+\x12)/api/v1/channels/{channel_id}/subscribers\x12\xb9\x01\n" +
+	"\x16GetChannelSubscription\x124.api.v1.services.media.GetChannelSubscriptionRequest\x1a5.api.v1.services.media.GetChannelSubscriptionResponse\"2\x82\xd3\xe4\x93\x02,\x12*/api/v1/channels/{channel_id}/subscription\x12\xaa\x01\n" +
+	"\x10SubscribeChannel\x12..api.v1.services.media.SubscribeChannelRequest\x1a/.api.v1.services.media.SubscribeChannelResponse\"5\x82\xd3\xe4\x93\x02/:\x01*\"*/api/v1/channels/{channel_id}/subscription\x12\xad\x01\n" +
+	"\x12UnsubscribeChannel\x120.api.v1.services.media.UnsubscribeChannelRequest\x1a1.api.v1.services.media.UnsubscribeChannelResponse\"2\x82\xd3\xe4\x93\x02,**/api/v1/channels/{channel_id}/subscription2\xa4\x02\n" +
+	"\rSearchService\x12m\n" +
+	"\x06Search\x12$.api.v1.services.media.SearchRequest\x1a%.api.v1.services.media.SearchResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/api/v1/search\x12\xa3\x01\n" +
+	"\x14GetSearchSuggestions\x122.api.v1.services.media.GetSearchSuggestionsRequest\x1a3.api.v1.services.media.GetSearchSuggestionsResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/v1/search/suggestions2\xf7\f\n" +
+	"\fAdminService\x12\x9d\x01\n" +
+	"\x11GetDashboardStats\x12/.api.v1.services.media.GetDashboardStatsRequest\x1a0.api.v1.services.media.GetDashboardStatsResponse\"%\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/v1/admin/stats/dashboard\x12\x8e\x01\n" +
+	"\rGetMediaStats\x12+.api.v1.services.media.GetMediaStatsRequest\x1a,.api.v1.services.media.GetMediaStatsResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/v1/admin/stats/medias\x12\x8a\x01\n" +
+	"\fGetUserStats\x12*.api.v1.services.media.GetUserStatsRequest\x1a+.api.v1.services.media.GetUserStatsResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/api/v1/admin/stats/users\x12\x95\x01\n" +
+	"\x0fGetTrafficStats\x12-.api.v1.services.media.GetTrafficStatsRequest\x1a..api.v1.services.media.GetTrafficStatsResponse\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/v1/admin/stats/traffic\x12\x9c\x01\n" +
+	"\x11GetPendingReviews\x12/.api.v1.services.media.GetPendingReviewsRequest\x1a0.api.v1.services.media.GetPendingReviewsResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/admin/review/pending\x12\x99\x01\n" +
+	"\x10GetReviewHistory\x12..api.v1.services.media.GetReviewHistoryRequest\x1a/.api.v1.services.media.GetReviewHistoryResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/admin/review/history\x12\x81\x01\n" +
+	"\tGetReview\x12'.api.v1.services.media.GetReviewRequest\x1a(.api.v1.services.media.GetReviewResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/api/v1/admin/review/{id}\x12\x94\x01\n" +
+	"\fUpdateReview\x12*.api.v1.services.media.UpdateReviewRequest\x1a+.api.v1.services.media.UpdateReviewResponse\"+\x82\xd3\xe4\x93\x02%:\x01*\x1a /api/v1/admin/review/{review.id}\x12\xa0\x01\n" +
+	"\x12BatchUpdateReviews\x120.api.v1.services.media.BatchUpdateReviewsRequest\x1a1.api.v1.services.media.BatchUpdateReviewsResponse\"%\x82\xd3\xe4\x93\x02\x1f:\x01*\x1a\x1a/api/v1/admin/review/batch\x12\x84\x01\n" +
+	"\vGetSettings\x12).api.v1.services.media.GetSettingsRequest\x1a*.api.v1.services.media.GetSettingsResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/api/v1/admin/settings\x12\x90\x01\n" +
+	"\x0eUpdateSettings\x12,.api.v1.services.media.UpdateSettingsRequest\x1a-.api.v1.services.media.UpdateSettingsResponse\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\x1a\x16/api/v1/admin/settings2\xde\x03\n" +
+	"\rPortalService\x12\x8a\x01\n" +
+	"\x0eGetHomeContent\x12,.api.v1.services.media.GetHomeContentRequest\x1a-.api.v1.services.media.GetHomeContentResponse\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1/portal/home\x12\x9a\x01\n" +
+	"\x12GetTrendingContent\x120.api.v1.services.media.GetTrendingContentRequest\x1a1.api.v1.services.media.GetTrendingContentResponse\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/portal/trending\x12\xa2\x01\n" +
+	"\x13GetSubscriptionFeed\x121.api.v1.services.media.GetSubscriptionFeedRequest\x1a2.api.v1.services.media.GetSubscriptionFeedResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/portal/subscriptionsB\x84\x01\n" +
 	"!com.origcms.api.v1.services.mediaB\x18OrigCMSServiceMediaProtoP\x01Z4origadmin/application/origcms/api/gen/v1/media;media\xa2\x02\fOrigCMSMediab\x06proto3"
 
 var (
@@ -4707,252 +9638,472 @@ func file_v1_media_media_service_proto_rawDescGZIP() []byte {
 	return file_v1_media_media_service_proto_rawDescData
 }
 
-var file_v1_media_media_service_proto_msgTypes = make([]protoimpl.MessageInfo, 85)
+var file_v1_media_media_service_proto_msgTypes = make([]protoimpl.MessageInfo, 176)
 var file_v1_media_media_service_proto_goTypes = []any{
-	(*ListMediasRequest)(nil),            // 0: api.v1.services.media.ListMediasRequest
-	(*ListMediasResponse)(nil),           // 1: api.v1.services.media.ListMediasResponse
-	(*GetMediaRequest)(nil),              // 2: api.v1.services.media.GetMediaRequest
-	(*GetMediaResponse)(nil),             // 3: api.v1.services.media.GetMediaResponse
-	(*CreateMediaRequest)(nil),           // 4: api.v1.services.media.CreateMediaRequest
-	(*CreateMediaResponse)(nil),          // 5: api.v1.services.media.CreateMediaResponse
-	(*UpdateMediaRequest)(nil),           // 6: api.v1.services.media.UpdateMediaRequest
-	(*UpdateMediaResponse)(nil),          // 7: api.v1.services.media.UpdateMediaResponse
-	(*DeleteMediaRequest)(nil),           // 8: api.v1.services.media.DeleteMediaRequest
-	(*DeleteMediaResponse)(nil),          // 9: api.v1.services.media.DeleteMediaResponse
-	(*IncrementViewCountRequest)(nil),    // 10: api.v1.services.media.IncrementViewCountRequest
-	(*IncrementViewCountResponse)(nil),   // 11: api.v1.services.media.IncrementViewCountResponse
-	(*UploadMediaRequest)(nil),           // 12: api.v1.services.media.UploadMediaRequest
-	(*UploadMediaResponse)(nil),          // 13: api.v1.services.media.UploadMediaResponse
-	(*ListCategoriesRequest)(nil),        // 14: api.v1.services.media.ListCategoriesRequest
-	(*ListCategoriesResponse)(nil),       // 15: api.v1.services.media.ListCategoriesResponse
-	(*GetCategoryRequest)(nil),           // 16: api.v1.services.media.GetCategoryRequest
-	(*GetCategoryResponse)(nil),          // 17: api.v1.services.media.GetCategoryResponse
-	(*CreateCategoryRequest)(nil),        // 18: api.v1.services.media.CreateCategoryRequest
-	(*CreateCategoryResponse)(nil),       // 19: api.v1.services.media.CreateCategoryResponse
-	(*UpdateCategoryRequest)(nil),        // 20: api.v1.services.media.UpdateCategoryRequest
-	(*UpdateCategoryResponse)(nil),       // 21: api.v1.services.media.UpdateCategoryResponse
-	(*DeleteCategoryRequest)(nil),        // 22: api.v1.services.media.DeleteCategoryRequest
-	(*DeleteCategoryResponse)(nil),       // 23: api.v1.services.media.DeleteCategoryResponse
-	(*ListTagsRequest)(nil),              // 24: api.v1.services.media.ListTagsRequest
-	(*ListTagsResponse)(nil),             // 25: api.v1.services.media.ListTagsResponse
-	(*GetTagRequest)(nil),                // 26: api.v1.services.media.GetTagRequest
-	(*GetTagResponse)(nil),               // 27: api.v1.services.media.GetTagResponse
-	(*CreateTagRequest)(nil),             // 28: api.v1.services.media.CreateTagRequest
-	(*CreateTagResponse)(nil),            // 29: api.v1.services.media.CreateTagResponse
-	(*UpdateTagRequest)(nil),             // 30: api.v1.services.media.UpdateTagRequest
-	(*UpdateTagResponse)(nil),            // 31: api.v1.services.media.UpdateTagResponse
-	(*DeleteTagRequest)(nil),             // 32: api.v1.services.media.DeleteTagRequest
-	(*DeleteTagResponse)(nil),            // 33: api.v1.services.media.DeleteTagResponse
-	(*ListCommentsRequest)(nil),          // 34: api.v1.services.media.ListCommentsRequest
-	(*ListCommentsResponse)(nil),         // 35: api.v1.services.media.ListCommentsResponse
-	(*GetCommentRequest)(nil),            // 36: api.v1.services.media.GetCommentRequest
-	(*GetCommentResponse)(nil),           // 37: api.v1.services.media.GetCommentResponse
-	(*CreateCommentRequest)(nil),         // 38: api.v1.services.media.CreateCommentRequest
-	(*CreateCommentResponse)(nil),        // 39: api.v1.services.media.CreateCommentResponse
-	(*UpdateCommentRequest)(nil),         // 40: api.v1.services.media.UpdateCommentRequest
-	(*UpdateCommentResponse)(nil),        // 41: api.v1.services.media.UpdateCommentResponse
-	(*DeleteCommentRequest)(nil),         // 42: api.v1.services.media.DeleteCommentRequest
-	(*DeleteCommentResponse)(nil),        // 43: api.v1.services.media.DeleteCommentResponse
-	(*ToggleLikeRequest)(nil),            // 44: api.v1.services.media.ToggleLikeRequest
-	(*ToggleLikeResponse)(nil),           // 45: api.v1.services.media.ToggleLikeResponse
-	(*GetMediaLikesRequest)(nil),         // 46: api.v1.services.media.GetMediaLikesRequest
-	(*GetMediaLikesResponse)(nil),        // 47: api.v1.services.media.GetMediaLikesResponse
-	(*GetUserLikesRequest)(nil),          // 48: api.v1.services.media.GetUserLikesRequest
-	(*GetUserLikesResponse)(nil),         // 49: api.v1.services.media.GetUserLikesResponse
-	(*GetFavoritesRequest)(nil),          // 50: api.v1.services.media.GetFavoritesRequest
-	(*GetFavoritesResponse)(nil),         // 51: api.v1.services.media.GetFavoritesResponse
-	(*ToggleFavoriteRequest)(nil),        // 52: api.v1.services.media.ToggleFavoriteRequest
-	(*ToggleFavoriteResponse)(nil),       // 53: api.v1.services.media.ToggleFavoriteResponse
-	(*RemoveFavoriteRequest)(nil),        // 54: api.v1.services.media.RemoveFavoriteRequest
-	(*RemoveFavoriteResponse)(nil),       // 55: api.v1.services.media.RemoveFavoriteResponse
-	(*GetPlaylistsRequest)(nil),          // 56: api.v1.services.media.GetPlaylistsRequest
-	(*GetPlaylistsResponse)(nil),         // 57: api.v1.services.media.GetPlaylistsResponse
-	(*GetPlaylistRequest)(nil),           // 58: api.v1.services.media.GetPlaylistRequest
-	(*GetPlaylistResponse)(nil),          // 59: api.v1.services.media.GetPlaylistResponse
-	(*CreatePlaylistRequest)(nil),        // 60: api.v1.services.media.CreatePlaylistRequest
-	(*CreatePlaylistResponse)(nil),       // 61: api.v1.services.media.CreatePlaylistResponse
-	(*UpdatePlaylistRequest)(nil),        // 62: api.v1.services.media.UpdatePlaylistRequest
-	(*UpdatePlaylistResponse)(nil),       // 63: api.v1.services.media.UpdatePlaylistResponse
-	(*DeletePlaylistRequest)(nil),        // 64: api.v1.services.media.DeletePlaylistRequest
-	(*DeletePlaylistResponse)(nil),       // 65: api.v1.services.media.DeletePlaylistResponse
-	(*AddToPlaylistRequest)(nil),         // 66: api.v1.services.media.AddToPlaylistRequest
-	(*AddToPlaylistResponse)(nil),        // 67: api.v1.services.media.AddToPlaylistResponse
-	(*RemoveFromPlaylistRequest)(nil),    // 68: api.v1.services.media.RemoveFromPlaylistRequest
-	(*RemoveFromPlaylistResponse)(nil),   // 69: api.v1.services.media.RemoveFromPlaylistResponse
-	(*ListEncodingTasksRequest)(nil),     // 70: api.v1.services.media.ListEncodingTasksRequest
-	(*ListEncodingTasksResponse)(nil),    // 71: api.v1.services.media.ListEncodingTasksResponse
-	(*GetTranscodingStatusRequest)(nil),  // 72: api.v1.services.media.GetTranscodingStatusRequest
-	(*GetTranscodingStatusResponse)(nil), // 73: api.v1.services.media.GetTranscodingStatusResponse
-	(*TranscodingMediaItem)(nil),         // 74: api.v1.services.media.TranscodingMediaItem
-	(*ListEncodeProfilesRequest)(nil),    // 75: api.v1.services.media.ListEncodeProfilesRequest
-	(*ListEncodeProfilesResponse)(nil),   // 76: api.v1.services.media.ListEncodeProfilesResponse
-	(*GetEncodeProfileRequest)(nil),      // 77: api.v1.services.media.GetEncodeProfileRequest
-	(*GetEncodeProfileResponse)(nil),     // 78: api.v1.services.media.GetEncodeProfileResponse
-	(*CreateEncodeProfileRequest)(nil),   // 79: api.v1.services.media.CreateEncodeProfileRequest
-	(*CreateEncodeProfileResponse)(nil),  // 80: api.v1.services.media.CreateEncodeProfileResponse
-	(*UpdateEncodeProfileRequest)(nil),   // 81: api.v1.services.media.UpdateEncodeProfileRequest
-	(*UpdateEncodeProfileResponse)(nil),  // 82: api.v1.services.media.UpdateEncodeProfileResponse
-	(*DeleteEncodeProfileRequest)(nil),   // 83: api.v1.services.media.DeleteEncodeProfileRequest
-	(*DeleteEncodeProfileResponse)(nil),  // 84: api.v1.services.media.DeleteEncodeProfileResponse
-	(*types.Media)(nil),                  // 85: api.v1.services.types.Media
-	(*fieldmaskpb.FieldMask)(nil),        // 86: google.protobuf.FieldMask
-	(*emptypb.Empty)(nil),                // 87: google.protobuf.Empty
-	(*types.Category)(nil),               // 88: api.v1.services.types.Category
-	(*types.Tag)(nil),                    // 89: api.v1.services.types.Tag
-	(*types.Comment)(nil),                // 90: api.v1.services.types.Comment
-	(*types.Like)(nil),                   // 91: api.v1.services.types.Like
-	(*types.Favorite)(nil),               // 92: api.v1.services.types.Favorite
-	(*types.Playlist)(nil),               // 93: api.v1.services.types.Playlist
-	(*types.EncodingTask)(nil),           // 94: api.v1.services.types.EncodingTask
-	(*types.EncodeProfile)(nil),          // 95: api.v1.services.types.EncodeProfile
+	(*ListMediasRequest)(nil),              // 0: api.v1.services.media.ListMediasRequest
+	(*ListMediasResponse)(nil),             // 1: api.v1.services.media.ListMediasResponse
+	(*GetMediaRequest)(nil),                // 2: api.v1.services.media.GetMediaRequest
+	(*GetMediaResponse)(nil),               // 3: api.v1.services.media.GetMediaResponse
+	(*CreateMediaRequest)(nil),             // 4: api.v1.services.media.CreateMediaRequest
+	(*CreateMediaResponse)(nil),            // 5: api.v1.services.media.CreateMediaResponse
+	(*UpdateMediaRequest)(nil),             // 6: api.v1.services.media.UpdateMediaRequest
+	(*UpdateMediaResponse)(nil),            // 7: api.v1.services.media.UpdateMediaResponse
+	(*DeleteMediaRequest)(nil),             // 8: api.v1.services.media.DeleteMediaRequest
+	(*DeleteMediaResponse)(nil),            // 9: api.v1.services.media.DeleteMediaResponse
+	(*IncrementViewCountRequest)(nil),      // 10: api.v1.services.media.IncrementViewCountRequest
+	(*IncrementViewCountResponse)(nil),     // 11: api.v1.services.media.IncrementViewCountResponse
+	(*UploadMediaRequest)(nil),             // 12: api.v1.services.media.UploadMediaRequest
+	(*UploadMediaResponse)(nil),            // 13: api.v1.services.media.UploadMediaResponse
+	(*GetMediaStreamRequest)(nil),          // 14: api.v1.services.media.GetMediaStreamRequest
+	(*GetMediaStreamResponse)(nil),         // 15: api.v1.services.media.GetMediaStreamResponse
+	(*GetMediaDownloadRequest)(nil),        // 16: api.v1.services.media.GetMediaDownloadRequest
+	(*GetMediaDownloadResponse)(nil),       // 17: api.v1.services.media.GetMediaDownloadResponse
+	(*GetMediaThumbnailRequest)(nil),       // 18: api.v1.services.media.GetMediaThumbnailRequest
+	(*GetMediaThumbnailResponse)(nil),      // 19: api.v1.services.media.GetMediaThumbnailResponse
+	(*ListEncodingTasksRequest)(nil),       // 20: api.v1.services.media.ListEncodingTasksRequest
+	(*ListEncodingTasksResponse)(nil),      // 21: api.v1.services.media.ListEncodingTasksResponse
+	(*GetMediaVariantsRequest)(nil),        // 22: api.v1.services.media.GetMediaVariantsRequest
+	(*GetMediaVariantsResponse)(nil),       // 23: api.v1.services.media.GetMediaVariantsResponse
+	(*RetryEncodingTaskRequest)(nil),       // 24: api.v1.services.media.RetryEncodingTaskRequest
+	(*RetryEncodingTaskResponse)(nil),      // 25: api.v1.services.media.RetryEncodingTaskResponse
+	(*GetEncodingStatusRequest)(nil),       // 26: api.v1.services.media.GetEncodingStatusRequest
+	(*GetEncodingStatusResponse)(nil),      // 27: api.v1.services.media.GetEncodingStatusResponse
+	(*ListAllEncodingTasksRequest)(nil),    // 28: api.v1.services.media.ListAllEncodingTasksRequest
+	(*ListAllEncodingTasksResponse)(nil),   // 29: api.v1.services.media.ListAllEncodingTasksResponse
+	(*RetryAllFailedTasksRequest)(nil),     // 30: api.v1.services.media.RetryAllFailedTasksRequest
+	(*RetryAllFailedTasksResponse)(nil),    // 31: api.v1.services.media.RetryAllFailedTasksResponse
+	(*TranscodingMediaItem)(nil),           // 32: api.v1.services.media.TranscodingMediaItem
+	(*GetMediaLikesRequest)(nil),           // 33: api.v1.services.media.GetMediaLikesRequest
+	(*GetMediaLikesResponse)(nil),          // 34: api.v1.services.media.GetMediaLikesResponse
+	(*ToggleMediaLikeRequest)(nil),         // 35: api.v1.services.media.ToggleMediaLikeRequest
+	(*ToggleMediaLikeResponse)(nil),        // 36: api.v1.services.media.ToggleMediaLikeResponse
+	(*DeleteMediaLikeRequest)(nil),         // 37: api.v1.services.media.DeleteMediaLikeRequest
+	(*DeleteMediaLikeResponse)(nil),        // 38: api.v1.services.media.DeleteMediaLikeResponse
+	(*GetMediaFavoritesRequest)(nil),       // 39: api.v1.services.media.GetMediaFavoritesRequest
+	(*GetMediaFavoritesResponse)(nil),      // 40: api.v1.services.media.GetMediaFavoritesResponse
+	(*ToggleMediaFavoriteRequest)(nil),     // 41: api.v1.services.media.ToggleMediaFavoriteRequest
+	(*ToggleMediaFavoriteResponse)(nil),    // 42: api.v1.services.media.ToggleMediaFavoriteResponse
+	(*DeleteMediaFavoriteRequest)(nil),     // 43: api.v1.services.media.DeleteMediaFavoriteRequest
+	(*DeleteMediaFavoriteResponse)(nil),    // 44: api.v1.services.media.DeleteMediaFavoriteResponse
+	(*GetMediaSharesRequest)(nil),          // 45: api.v1.services.media.GetMediaSharesRequest
+	(*GetMediaSharesResponse)(nil),         // 46: api.v1.services.media.GetMediaSharesResponse
+	(*CreateMediaShareRequest)(nil),        // 47: api.v1.services.media.CreateMediaShareRequest
+	(*CreateMediaShareResponse)(nil),       // 48: api.v1.services.media.CreateMediaShareResponse
+	(*GetMediaCommentsRequest)(nil),        // 49: api.v1.services.media.GetMediaCommentsRequest
+	(*GetMediaCommentsResponse)(nil),       // 50: api.v1.services.media.GetMediaCommentsResponse
+	(*GetMediaSubtitlesRequest)(nil),       // 51: api.v1.services.media.GetMediaSubtitlesRequest
+	(*GetMediaSubtitlesResponse)(nil),      // 52: api.v1.services.media.GetMediaSubtitlesResponse
+	(*CreateMediaSubtitleRequest)(nil),     // 53: api.v1.services.media.CreateMediaSubtitleRequest
+	(*CreateMediaSubtitleResponse)(nil),    // 54: api.v1.services.media.CreateMediaSubtitleResponse
+	(*GetMediaMetadataRequest)(nil),        // 55: api.v1.services.media.GetMediaMetadataRequest
+	(*GetMediaMetadataResponse)(nil),       // 56: api.v1.services.media.GetMediaMetadataResponse
+	(*ListEncodeProfilesRequest)(nil),      // 57: api.v1.services.media.ListEncodeProfilesRequest
+	(*ListEncodeProfilesResponse)(nil),     // 58: api.v1.services.media.ListEncodeProfilesResponse
+	(*GetEncodeProfileRequest)(nil),        // 59: api.v1.services.media.GetEncodeProfileRequest
+	(*GetEncodeProfileResponse)(nil),       // 60: api.v1.services.media.GetEncodeProfileResponse
+	(*CreateEncodeProfileRequest)(nil),     // 61: api.v1.services.media.CreateEncodeProfileRequest
+	(*CreateEncodeProfileResponse)(nil),    // 62: api.v1.services.media.CreateEncodeProfileResponse
+	(*UpdateEncodeProfileRequest)(nil),     // 63: api.v1.services.media.UpdateEncodeProfileRequest
+	(*UpdateEncodeProfileResponse)(nil),    // 64: api.v1.services.media.UpdateEncodeProfileResponse
+	(*DeleteEncodeProfileRequest)(nil),     // 65: api.v1.services.media.DeleteEncodeProfileRequest
+	(*DeleteEncodeProfileResponse)(nil),    // 66: api.v1.services.media.DeleteEncodeProfileResponse
+	(*ListCategoriesRequest)(nil),          // 67: api.v1.services.media.ListCategoriesRequest
+	(*ListCategoriesResponse)(nil),         // 68: api.v1.services.media.ListCategoriesResponse
+	(*GetCategoryRequest)(nil),             // 69: api.v1.services.media.GetCategoryRequest
+	(*GetCategoryResponse)(nil),            // 70: api.v1.services.media.GetCategoryResponse
+	(*CreateCategoryRequest)(nil),          // 71: api.v1.services.media.CreateCategoryRequest
+	(*CreateCategoryResponse)(nil),         // 72: api.v1.services.media.CreateCategoryResponse
+	(*UpdateCategoryRequest)(nil),          // 73: api.v1.services.media.UpdateCategoryRequest
+	(*UpdateCategoryResponse)(nil),         // 74: api.v1.services.media.UpdateCategoryResponse
+	(*DeleteCategoryRequest)(nil),          // 75: api.v1.services.media.DeleteCategoryRequest
+	(*DeleteCategoryResponse)(nil),         // 76: api.v1.services.media.DeleteCategoryResponse
+	(*ListTagsRequest)(nil),                // 77: api.v1.services.media.ListTagsRequest
+	(*ListTagsResponse)(nil),               // 78: api.v1.services.media.ListTagsResponse
+	(*GetTagRequest)(nil),                  // 79: api.v1.services.media.GetTagRequest
+	(*GetTagResponse)(nil),                 // 80: api.v1.services.media.GetTagResponse
+	(*CreateTagRequest)(nil),               // 81: api.v1.services.media.CreateTagRequest
+	(*CreateTagResponse)(nil),              // 82: api.v1.services.media.CreateTagResponse
+	(*UpdateTagRequest)(nil),               // 83: api.v1.services.media.UpdateTagRequest
+	(*UpdateTagResponse)(nil),              // 84: api.v1.services.media.UpdateTagResponse
+	(*DeleteTagRequest)(nil),               // 85: api.v1.services.media.DeleteTagRequest
+	(*DeleteTagResponse)(nil),              // 86: api.v1.services.media.DeleteTagResponse
+	(*ListCommentsRequest)(nil),            // 87: api.v1.services.media.ListCommentsRequest
+	(*ListCommentsResponse)(nil),           // 88: api.v1.services.media.ListCommentsResponse
+	(*GetCommentRequest)(nil),              // 89: api.v1.services.media.GetCommentRequest
+	(*GetCommentResponse)(nil),             // 90: api.v1.services.media.GetCommentResponse
+	(*CreateCommentRequest)(nil),           // 91: api.v1.services.media.CreateCommentRequest
+	(*CreateCommentResponse)(nil),          // 92: api.v1.services.media.CreateCommentResponse
+	(*UpdateCommentRequest)(nil),           // 93: api.v1.services.media.UpdateCommentRequest
+	(*UpdateCommentResponse)(nil),          // 94: api.v1.services.media.UpdateCommentResponse
+	(*DeleteCommentRequest)(nil),           // 95: api.v1.services.media.DeleteCommentRequest
+	(*DeleteCommentResponse)(nil),          // 96: api.v1.services.media.DeleteCommentResponse
+	(*GetCommentRepliesRequest)(nil),       // 97: api.v1.services.media.GetCommentRepliesRequest
+	(*GetCommentRepliesResponse)(nil),      // 98: api.v1.services.media.GetCommentRepliesResponse
+	(*CreateCommentReplyRequest)(nil),      // 99: api.v1.services.media.CreateCommentReplyRequest
+	(*CreateCommentReplyResponse)(nil),     // 100: api.v1.services.media.CreateCommentReplyResponse
+	(*GetPlaylistsRequest)(nil),            // 101: api.v1.services.media.GetPlaylistsRequest
+	(*GetPlaylistsResponse)(nil),           // 102: api.v1.services.media.GetPlaylistsResponse
+	(*GetPlaylistRequest)(nil),             // 103: api.v1.services.media.GetPlaylistRequest
+	(*GetPlaylistResponse)(nil),            // 104: api.v1.services.media.GetPlaylistResponse
+	(*CreatePlaylistRequest)(nil),          // 105: api.v1.services.media.CreatePlaylistRequest
+	(*CreatePlaylistResponse)(nil),         // 106: api.v1.services.media.CreatePlaylistResponse
+	(*UpdatePlaylistRequest)(nil),          // 107: api.v1.services.media.UpdatePlaylistRequest
+	(*UpdatePlaylistResponse)(nil),         // 108: api.v1.services.media.UpdatePlaylistResponse
+	(*DeletePlaylistRequest)(nil),          // 109: api.v1.services.media.DeletePlaylistRequest
+	(*DeletePlaylistResponse)(nil),         // 110: api.v1.services.media.DeletePlaylistResponse
+	(*AddPlaylistMediaRequest)(nil),        // 111: api.v1.services.media.AddPlaylistMediaRequest
+	(*AddPlaylistMediaResponse)(nil),       // 112: api.v1.services.media.AddPlaylistMediaResponse
+	(*ReorderPlaylistMediaRequest)(nil),    // 113: api.v1.services.media.ReorderPlaylistMediaRequest
+	(*ReorderPlaylistMediaResponse)(nil),   // 114: api.v1.services.media.ReorderPlaylistMediaResponse
+	(*RemovePlaylistMediaRequest)(nil),     // 115: api.v1.services.media.RemovePlaylistMediaRequest
+	(*RemovePlaylistMediaResponse)(nil),    // 116: api.v1.services.media.RemovePlaylistMediaResponse
+	(*ListChannelsRequest)(nil),            // 117: api.v1.services.media.ListChannelsRequest
+	(*ListChannelsResponse)(nil),           // 118: api.v1.services.media.ListChannelsResponse
+	(*GetChannelRequest)(nil),              // 119: api.v1.services.media.GetChannelRequest
+	(*GetChannelResponse)(nil),             // 120: api.v1.services.media.GetChannelResponse
+	(*CreateChannelRequest)(nil),           // 121: api.v1.services.media.CreateChannelRequest
+	(*CreateChannelResponse)(nil),          // 122: api.v1.services.media.CreateChannelResponse
+	(*UpdateChannelRequest)(nil),           // 123: api.v1.services.media.UpdateChannelRequest
+	(*UpdateChannelResponse)(nil),          // 124: api.v1.services.media.UpdateChannelResponse
+	(*DeleteChannelRequest)(nil),           // 125: api.v1.services.media.DeleteChannelRequest
+	(*DeleteChannelResponse)(nil),          // 126: api.v1.services.media.DeleteChannelResponse
+	(*GetChannelMediasRequest)(nil),        // 127: api.v1.services.media.GetChannelMediasRequest
+	(*GetChannelMediasResponse)(nil),       // 128: api.v1.services.media.GetChannelMediasResponse
+	(*AddChannelMediaRequest)(nil),         // 129: api.v1.services.media.AddChannelMediaRequest
+	(*AddChannelMediaResponse)(nil),        // 130: api.v1.services.media.AddChannelMediaResponse
+	(*RemoveChannelMediaRequest)(nil),      // 131: api.v1.services.media.RemoveChannelMediaRequest
+	(*RemoveChannelMediaResponse)(nil),     // 132: api.v1.services.media.RemoveChannelMediaResponse
+	(*GetChannelSubscribersRequest)(nil),   // 133: api.v1.services.media.GetChannelSubscribersRequest
+	(*GetChannelSubscribersResponse)(nil),  // 134: api.v1.services.media.GetChannelSubscribersResponse
+	(*GetChannelSubscriptionRequest)(nil),  // 135: api.v1.services.media.GetChannelSubscriptionRequest
+	(*GetChannelSubscriptionResponse)(nil), // 136: api.v1.services.media.GetChannelSubscriptionResponse
+	(*SubscribeChannelRequest)(nil),        // 137: api.v1.services.media.SubscribeChannelRequest
+	(*SubscribeChannelResponse)(nil),       // 138: api.v1.services.media.SubscribeChannelResponse
+	(*UnsubscribeChannelRequest)(nil),      // 139: api.v1.services.media.UnsubscribeChannelRequest
+	(*UnsubscribeChannelResponse)(nil),     // 140: api.v1.services.media.UnsubscribeChannelResponse
+	(*SearchRequest)(nil),                  // 141: api.v1.services.media.SearchRequest
+	(*SearchResponse)(nil),                 // 142: api.v1.services.media.SearchResponse
+	(*GetSearchSuggestionsRequest)(nil),    // 143: api.v1.services.media.GetSearchSuggestionsRequest
+	(*GetSearchSuggestionsResponse)(nil),   // 144: api.v1.services.media.GetSearchSuggestionsResponse
+	(*GetDashboardStatsRequest)(nil),       // 145: api.v1.services.media.GetDashboardStatsRequest
+	(*GetDashboardStatsResponse)(nil),      // 146: api.v1.services.media.GetDashboardStatsResponse
+	(*GetMediaStatsRequest)(nil),           // 147: api.v1.services.media.GetMediaStatsRequest
+	(*GetMediaStatsResponse)(nil),          // 148: api.v1.services.media.GetMediaStatsResponse
+	(*GetUserStatsRequest)(nil),            // 149: api.v1.services.media.GetUserStatsRequest
+	(*GetUserStatsResponse)(nil),           // 150: api.v1.services.media.GetUserStatsResponse
+	(*GetTrafficStatsRequest)(nil),         // 151: api.v1.services.media.GetTrafficStatsRequest
+	(*GetTrafficStatsResponse)(nil),        // 152: api.v1.services.media.GetTrafficStatsResponse
+	(*GetPendingReviewsRequest)(nil),       // 153: api.v1.services.media.GetPendingReviewsRequest
+	(*GetPendingReviewsResponse)(nil),      // 154: api.v1.services.media.GetPendingReviewsResponse
+	(*GetReviewHistoryRequest)(nil),        // 155: api.v1.services.media.GetReviewHistoryRequest
+	(*GetReviewHistoryResponse)(nil),       // 156: api.v1.services.media.GetReviewHistoryResponse
+	(*GetReviewRequest)(nil),               // 157: api.v1.services.media.GetReviewRequest
+	(*GetReviewResponse)(nil),              // 158: api.v1.services.media.GetReviewResponse
+	(*UpdateReviewRequest)(nil),            // 159: api.v1.services.media.UpdateReviewRequest
+	(*UpdateReviewResponse)(nil),           // 160: api.v1.services.media.UpdateReviewResponse
+	(*BatchUpdateReviewsRequest)(nil),      // 161: api.v1.services.media.BatchUpdateReviewsRequest
+	(*BatchUpdateReviewsResponse)(nil),     // 162: api.v1.services.media.BatchUpdateReviewsResponse
+	(*GetSettingsRequest)(nil),             // 163: api.v1.services.media.GetSettingsRequest
+	(*GetSettingsResponse)(nil),            // 164: api.v1.services.media.GetSettingsResponse
+	(*UpdateSettingsRequest)(nil),          // 165: api.v1.services.media.UpdateSettingsRequest
+	(*UpdateSettingsResponse)(nil),         // 166: api.v1.services.media.UpdateSettingsResponse
+	(*GetHomeContentRequest)(nil),          // 167: api.v1.services.media.GetHomeContentRequest
+	(*GetHomeContentResponse)(nil),         // 168: api.v1.services.media.GetHomeContentResponse
+	(*GetTrendingContentRequest)(nil),      // 169: api.v1.services.media.GetTrendingContentRequest
+	(*GetTrendingContentResponse)(nil),     // 170: api.v1.services.media.GetTrendingContentResponse
+	(*GetSubscriptionFeedRequest)(nil),     // 171: api.v1.services.media.GetSubscriptionFeedRequest
+	(*GetSubscriptionFeedResponse)(nil),    // 172: api.v1.services.media.GetSubscriptionFeedResponse
+	nil,                                    // 173: api.v1.services.media.GetSettingsResponse.SettingsEntry
+	nil,                                    // 174: api.v1.services.media.UpdateSettingsRequest.SettingsEntry
+	nil,                                    // 175: api.v1.services.media.UpdateSettingsResponse.SettingsEntry
+	(*types.Media)(nil),                    // 176: api.v1.services.types.Media
+	(*fieldmaskpb.FieldMask)(nil),          // 177: google.protobuf.FieldMask
+	(*emptypb.Empty)(nil),                  // 178: google.protobuf.Empty
+	(*types.EncodingTask)(nil),             // 179: api.v1.services.types.EncodingTask
+	(*types.MediaVariant)(nil),             // 180: api.v1.services.types.MediaVariant
+	(*types.Comment)(nil),                  // 181: api.v1.services.types.Comment
+	(*types.Subtitle)(nil),                 // 182: api.v1.services.types.Subtitle
+	(*types.MediaMetadata)(nil),            // 183: api.v1.services.types.MediaMetadata
+	(*types.EncodeProfile)(nil),            // 184: api.v1.services.types.EncodeProfile
+	(*types.Category)(nil),                 // 185: api.v1.services.types.Category
+	(*types.Tag)(nil),                      // 186: api.v1.services.types.Tag
+	(*types.Playlist)(nil),                 // 187: api.v1.services.types.Playlist
+	(*types.Channel)(nil),                  // 188: api.v1.services.types.Channel
+	(*types.User)(nil),                     // 189: api.v1.services.types.User
+	(*types.StatPoint)(nil),                // 190: api.v1.services.types.StatPoint
+	(*types.Review)(nil),                   // 191: api.v1.services.types.Review
 }
 var file_v1_media_media_service_proto_depIdxs = []int32{
-	85, // 0: api.v1.services.media.ListMediasResponse.medias:type_name -> api.v1.services.types.Media
-	85, // 1: api.v1.services.media.GetMediaResponse.media:type_name -> api.v1.services.types.Media
-	85, // 2: api.v1.services.media.CreateMediaRequest.media:type_name -> api.v1.services.types.Media
-	85, // 3: api.v1.services.media.CreateMediaResponse.media:type_name -> api.v1.services.types.Media
-	85, // 4: api.v1.services.media.UpdateMediaRequest.media:type_name -> api.v1.services.types.Media
-	86, // 5: api.v1.services.media.UpdateMediaRequest.update_mask:type_name -> google.protobuf.FieldMask
-	85, // 6: api.v1.services.media.UpdateMediaResponse.media:type_name -> api.v1.services.types.Media
-	87, // 7: api.v1.services.media.DeleteMediaResponse.empty:type_name -> google.protobuf.Empty
-	85, // 8: api.v1.services.media.UploadMediaResponse.media:type_name -> api.v1.services.types.Media
-	88, // 9: api.v1.services.media.ListCategoriesResponse.categories:type_name -> api.v1.services.types.Category
-	88, // 10: api.v1.services.media.GetCategoryResponse.category:type_name -> api.v1.services.types.Category
-	88, // 11: api.v1.services.media.CreateCategoryRequest.category:type_name -> api.v1.services.types.Category
-	88, // 12: api.v1.services.media.CreateCategoryResponse.category:type_name -> api.v1.services.types.Category
-	88, // 13: api.v1.services.media.UpdateCategoryRequest.category:type_name -> api.v1.services.types.Category
-	86, // 14: api.v1.services.media.UpdateCategoryRequest.update_mask:type_name -> google.protobuf.FieldMask
-	88, // 15: api.v1.services.media.UpdateCategoryResponse.category:type_name -> api.v1.services.types.Category
-	87, // 16: api.v1.services.media.DeleteCategoryResponse.empty:type_name -> google.protobuf.Empty
-	89, // 17: api.v1.services.media.ListTagsResponse.tags:type_name -> api.v1.services.types.Tag
-	89, // 18: api.v1.services.media.GetTagResponse.tag:type_name -> api.v1.services.types.Tag
-	89, // 19: api.v1.services.media.CreateTagRequest.tag:type_name -> api.v1.services.types.Tag
-	89, // 20: api.v1.services.media.CreateTagResponse.tag:type_name -> api.v1.services.types.Tag
-	89, // 21: api.v1.services.media.UpdateTagRequest.tag:type_name -> api.v1.services.types.Tag
-	86, // 22: api.v1.services.media.UpdateTagRequest.update_mask:type_name -> google.protobuf.FieldMask
-	89, // 23: api.v1.services.media.UpdateTagResponse.tag:type_name -> api.v1.services.types.Tag
-	87, // 24: api.v1.services.media.DeleteTagResponse.empty:type_name -> google.protobuf.Empty
-	90, // 25: api.v1.services.media.ListCommentsResponse.comments:type_name -> api.v1.services.types.Comment
-	90, // 26: api.v1.services.media.GetCommentResponse.comment:type_name -> api.v1.services.types.Comment
-	90, // 27: api.v1.services.media.CreateCommentRequest.comment:type_name -> api.v1.services.types.Comment
-	90, // 28: api.v1.services.media.CreateCommentResponse.comment:type_name -> api.v1.services.types.Comment
-	90, // 29: api.v1.services.media.UpdateCommentRequest.comment:type_name -> api.v1.services.types.Comment
-	86, // 30: api.v1.services.media.UpdateCommentRequest.update_mask:type_name -> google.protobuf.FieldMask
-	90, // 31: api.v1.services.media.UpdateCommentResponse.comment:type_name -> api.v1.services.types.Comment
-	87, // 32: api.v1.services.media.DeleteCommentResponse.empty:type_name -> google.protobuf.Empty
-	91, // 33: api.v1.services.media.GetUserLikesResponse.likes:type_name -> api.v1.services.types.Like
-	92, // 34: api.v1.services.media.GetFavoritesResponse.favorites:type_name -> api.v1.services.types.Favorite
-	85, // 35: api.v1.services.media.GetFavoritesResponse.medias:type_name -> api.v1.services.types.Media
-	87, // 36: api.v1.services.media.RemoveFavoriteResponse.empty:type_name -> google.protobuf.Empty
-	93, // 37: api.v1.services.media.GetPlaylistsResponse.playlists:type_name -> api.v1.services.types.Playlist
-	93, // 38: api.v1.services.media.GetPlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
-	85, // 39: api.v1.services.media.GetPlaylistResponse.medias:type_name -> api.v1.services.types.Media
-	93, // 40: api.v1.services.media.CreatePlaylistRequest.playlist:type_name -> api.v1.services.types.Playlist
-	93, // 41: api.v1.services.media.CreatePlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
-	93, // 42: api.v1.services.media.UpdatePlaylistRequest.playlist:type_name -> api.v1.services.types.Playlist
-	86, // 43: api.v1.services.media.UpdatePlaylistRequest.update_mask:type_name -> google.protobuf.FieldMask
-	93, // 44: api.v1.services.media.UpdatePlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
-	87, // 45: api.v1.services.media.DeletePlaylistResponse.empty:type_name -> google.protobuf.Empty
-	94, // 46: api.v1.services.media.ListEncodingTasksResponse.tasks:type_name -> api.v1.services.types.EncodingTask
-	74, // 47: api.v1.services.media.GetTranscodingStatusResponse.items:type_name -> api.v1.services.media.TranscodingMediaItem
-	85, // 48: api.v1.services.media.TranscodingMediaItem.media:type_name -> api.v1.services.types.Media
-	94, // 49: api.v1.services.media.TranscodingMediaItem.tasks:type_name -> api.v1.services.types.EncodingTask
-	95, // 50: api.v1.services.media.ListEncodeProfilesResponse.profiles:type_name -> api.v1.services.types.EncodeProfile
-	95, // 51: api.v1.services.media.GetEncodeProfileResponse.profile:type_name -> api.v1.services.types.EncodeProfile
-	95, // 52: api.v1.services.media.CreateEncodeProfileRequest.profile:type_name -> api.v1.services.types.EncodeProfile
-	95, // 53: api.v1.services.media.CreateEncodeProfileResponse.profile:type_name -> api.v1.services.types.EncodeProfile
-	95, // 54: api.v1.services.media.UpdateEncodeProfileRequest.profile:type_name -> api.v1.services.types.EncodeProfile
-	95, // 55: api.v1.services.media.UpdateEncodeProfileResponse.profile:type_name -> api.v1.services.types.EncodeProfile
-	87, // 56: api.v1.services.media.DeleteEncodeProfileResponse.empty:type_name -> google.protobuf.Empty
-	0,  // 57: api.v1.services.media.MediaService.ListMedias:input_type -> api.v1.services.media.ListMediasRequest
-	2,  // 58: api.v1.services.media.MediaService.GetMedia:input_type -> api.v1.services.media.GetMediaRequest
-	4,  // 59: api.v1.services.media.MediaService.CreateMedia:input_type -> api.v1.services.media.CreateMediaRequest
-	6,  // 60: api.v1.services.media.MediaService.UpdateMedia:input_type -> api.v1.services.media.UpdateMediaRequest
-	8,  // 61: api.v1.services.media.MediaService.DeleteMedia:input_type -> api.v1.services.media.DeleteMediaRequest
-	10, // 62: api.v1.services.media.MediaService.IncrementViewCount:input_type -> api.v1.services.media.IncrementViewCountRequest
-	12, // 63: api.v1.services.media.MediaService.UploadMedia:input_type -> api.v1.services.media.UploadMediaRequest
-	70, // 64: api.v1.services.media.MediaService.ListEncodingTasks:input_type -> api.v1.services.media.ListEncodingTasksRequest
-	72, // 65: api.v1.services.media.MediaService.GetTranscodingStatus:input_type -> api.v1.services.media.GetTranscodingStatusRequest
-	75, // 66: api.v1.services.media.MediaService.ListEncodeProfiles:input_type -> api.v1.services.media.ListEncodeProfilesRequest
-	77, // 67: api.v1.services.media.MediaService.GetEncodeProfile:input_type -> api.v1.services.media.GetEncodeProfileRequest
-	79, // 68: api.v1.services.media.MediaService.CreateEncodeProfile:input_type -> api.v1.services.media.CreateEncodeProfileRequest
-	81, // 69: api.v1.services.media.MediaService.UpdateEncodeProfile:input_type -> api.v1.services.media.UpdateEncodeProfileRequest
-	83, // 70: api.v1.services.media.MediaService.DeleteEncodeProfile:input_type -> api.v1.services.media.DeleteEncodeProfileRequest
-	14, // 71: api.v1.services.media.CategoryService.ListCategories:input_type -> api.v1.services.media.ListCategoriesRequest
-	16, // 72: api.v1.services.media.CategoryService.GetCategory:input_type -> api.v1.services.media.GetCategoryRequest
-	18, // 73: api.v1.services.media.CategoryService.CreateCategory:input_type -> api.v1.services.media.CreateCategoryRequest
-	20, // 74: api.v1.services.media.CategoryService.UpdateCategory:input_type -> api.v1.services.media.UpdateCategoryRequest
-	22, // 75: api.v1.services.media.CategoryService.DeleteCategory:input_type -> api.v1.services.media.DeleteCategoryRequest
-	24, // 76: api.v1.services.media.TagService.ListTags:input_type -> api.v1.services.media.ListTagsRequest
-	26, // 77: api.v1.services.media.TagService.GetTag:input_type -> api.v1.services.media.GetTagRequest
-	28, // 78: api.v1.services.media.TagService.CreateTag:input_type -> api.v1.services.media.CreateTagRequest
-	30, // 79: api.v1.services.media.TagService.UpdateTag:input_type -> api.v1.services.media.UpdateTagRequest
-	32, // 80: api.v1.services.media.TagService.DeleteTag:input_type -> api.v1.services.media.DeleteTagRequest
-	34, // 81: api.v1.services.media.CommentService.ListComments:input_type -> api.v1.services.media.ListCommentsRequest
-	36, // 82: api.v1.services.media.CommentService.GetComment:input_type -> api.v1.services.media.GetCommentRequest
-	38, // 83: api.v1.services.media.CommentService.CreateComment:input_type -> api.v1.services.media.CreateCommentRequest
-	40, // 84: api.v1.services.media.CommentService.UpdateComment:input_type -> api.v1.services.media.UpdateCommentRequest
-	42, // 85: api.v1.services.media.CommentService.DeleteComment:input_type -> api.v1.services.media.DeleteCommentRequest
-	44, // 86: api.v1.services.media.LikeService.ToggleLike:input_type -> api.v1.services.media.ToggleLikeRequest
-	46, // 87: api.v1.services.media.LikeService.GetMediaLikes:input_type -> api.v1.services.media.GetMediaLikesRequest
-	48, // 88: api.v1.services.media.LikeService.GetUserLikes:input_type -> api.v1.services.media.GetUserLikesRequest
-	50, // 89: api.v1.services.media.FavoriteService.GetFavorites:input_type -> api.v1.services.media.GetFavoritesRequest
-	52, // 90: api.v1.services.media.FavoriteService.ToggleFavorite:input_type -> api.v1.services.media.ToggleFavoriteRequest
-	54, // 91: api.v1.services.media.FavoriteService.RemoveFavorite:input_type -> api.v1.services.media.RemoveFavoriteRequest
-	56, // 92: api.v1.services.media.PlaylistService.GetPlaylists:input_type -> api.v1.services.media.GetPlaylistsRequest
-	58, // 93: api.v1.services.media.PlaylistService.GetPlaylist:input_type -> api.v1.services.media.GetPlaylistRequest
-	60, // 94: api.v1.services.media.PlaylistService.CreatePlaylist:input_type -> api.v1.services.media.CreatePlaylistRequest
-	62, // 95: api.v1.services.media.PlaylistService.UpdatePlaylist:input_type -> api.v1.services.media.UpdatePlaylistRequest
-	64, // 96: api.v1.services.media.PlaylistService.DeletePlaylist:input_type -> api.v1.services.media.DeletePlaylistRequest
-	66, // 97: api.v1.services.media.PlaylistService.AddToPlaylist:input_type -> api.v1.services.media.AddToPlaylistRequest
-	68, // 98: api.v1.services.media.PlaylistService.RemoveFromPlaylist:input_type -> api.v1.services.media.RemoveFromPlaylistRequest
-	1,  // 99: api.v1.services.media.MediaService.ListMedias:output_type -> api.v1.services.media.ListMediasResponse
-	3,  // 100: api.v1.services.media.MediaService.GetMedia:output_type -> api.v1.services.media.GetMediaResponse
-	5,  // 101: api.v1.services.media.MediaService.CreateMedia:output_type -> api.v1.services.media.CreateMediaResponse
-	7,  // 102: api.v1.services.media.MediaService.UpdateMedia:output_type -> api.v1.services.media.UpdateMediaResponse
-	9,  // 103: api.v1.services.media.MediaService.DeleteMedia:output_type -> api.v1.services.media.DeleteMediaResponse
-	11, // 104: api.v1.services.media.MediaService.IncrementViewCount:output_type -> api.v1.services.media.IncrementViewCountResponse
-	13, // 105: api.v1.services.media.MediaService.UploadMedia:output_type -> api.v1.services.media.UploadMediaResponse
-	71, // 106: api.v1.services.media.MediaService.ListEncodingTasks:output_type -> api.v1.services.media.ListEncodingTasksResponse
-	73, // 107: api.v1.services.media.MediaService.GetTranscodingStatus:output_type -> api.v1.services.media.GetTranscodingStatusResponse
-	76, // 108: api.v1.services.media.MediaService.ListEncodeProfiles:output_type -> api.v1.services.media.ListEncodeProfilesResponse
-	78, // 109: api.v1.services.media.MediaService.GetEncodeProfile:output_type -> api.v1.services.media.GetEncodeProfileResponse
-	80, // 110: api.v1.services.media.MediaService.CreateEncodeProfile:output_type -> api.v1.services.media.CreateEncodeProfileResponse
-	82, // 111: api.v1.services.media.MediaService.UpdateEncodeProfile:output_type -> api.v1.services.media.UpdateEncodeProfileResponse
-	84, // 112: api.v1.services.media.MediaService.DeleteEncodeProfile:output_type -> api.v1.services.media.DeleteEncodeProfileResponse
-	15, // 113: api.v1.services.media.CategoryService.ListCategories:output_type -> api.v1.services.media.ListCategoriesResponse
-	17, // 114: api.v1.services.media.CategoryService.GetCategory:output_type -> api.v1.services.media.GetCategoryResponse
-	19, // 115: api.v1.services.media.CategoryService.CreateCategory:output_type -> api.v1.services.media.CreateCategoryResponse
-	21, // 116: api.v1.services.media.CategoryService.UpdateCategory:output_type -> api.v1.services.media.UpdateCategoryResponse
-	23, // 117: api.v1.services.media.CategoryService.DeleteCategory:output_type -> api.v1.services.media.DeleteCategoryResponse
-	25, // 118: api.v1.services.media.TagService.ListTags:output_type -> api.v1.services.media.ListTagsResponse
-	27, // 119: api.v1.services.media.TagService.GetTag:output_type -> api.v1.services.media.GetTagResponse
-	29, // 120: api.v1.services.media.TagService.CreateTag:output_type -> api.v1.services.media.CreateTagResponse
-	31, // 121: api.v1.services.media.TagService.UpdateTag:output_type -> api.v1.services.media.UpdateTagResponse
-	33, // 122: api.v1.services.media.TagService.DeleteTag:output_type -> api.v1.services.media.DeleteTagResponse
-	35, // 123: api.v1.services.media.CommentService.ListComments:output_type -> api.v1.services.media.ListCommentsResponse
-	37, // 124: api.v1.services.media.CommentService.GetComment:output_type -> api.v1.services.media.GetCommentResponse
-	39, // 125: api.v1.services.media.CommentService.CreateComment:output_type -> api.v1.services.media.CreateCommentResponse
-	41, // 126: api.v1.services.media.CommentService.UpdateComment:output_type -> api.v1.services.media.UpdateCommentResponse
-	43, // 127: api.v1.services.media.CommentService.DeleteComment:output_type -> api.v1.services.media.DeleteCommentResponse
-	45, // 128: api.v1.services.media.LikeService.ToggleLike:output_type -> api.v1.services.media.ToggleLikeResponse
-	47, // 129: api.v1.services.media.LikeService.GetMediaLikes:output_type -> api.v1.services.media.GetMediaLikesResponse
-	49, // 130: api.v1.services.media.LikeService.GetUserLikes:output_type -> api.v1.services.media.GetUserLikesResponse
-	51, // 131: api.v1.services.media.FavoriteService.GetFavorites:output_type -> api.v1.services.media.GetFavoritesResponse
-	53, // 132: api.v1.services.media.FavoriteService.ToggleFavorite:output_type -> api.v1.services.media.ToggleFavoriteResponse
-	55, // 133: api.v1.services.media.FavoriteService.RemoveFavorite:output_type -> api.v1.services.media.RemoveFavoriteResponse
-	57, // 134: api.v1.services.media.PlaylistService.GetPlaylists:output_type -> api.v1.services.media.GetPlaylistsResponse
-	59, // 135: api.v1.services.media.PlaylistService.GetPlaylist:output_type -> api.v1.services.media.GetPlaylistResponse
-	61, // 136: api.v1.services.media.PlaylistService.CreatePlaylist:output_type -> api.v1.services.media.CreatePlaylistResponse
-	63, // 137: api.v1.services.media.PlaylistService.UpdatePlaylist:output_type -> api.v1.services.media.UpdatePlaylistResponse
-	65, // 138: api.v1.services.media.PlaylistService.DeletePlaylist:output_type -> api.v1.services.media.DeletePlaylistResponse
-	67, // 139: api.v1.services.media.PlaylistService.AddToPlaylist:output_type -> api.v1.services.media.AddToPlaylistResponse
-	69, // 140: api.v1.services.media.PlaylistService.RemoveFromPlaylist:output_type -> api.v1.services.media.RemoveFromPlaylistResponse
-	99, // [99:141] is the sub-list for method output_type
-	57, // [57:99] is the sub-list for method input_type
-	57, // [57:57] is the sub-list for extension type_name
-	57, // [57:57] is the sub-list for extension extendee
-	0,  // [0:57] is the sub-list for field type_name
+	176, // 0: api.v1.services.media.ListMediasResponse.medias:type_name -> api.v1.services.types.Media
+	176, // 1: api.v1.services.media.GetMediaResponse.media:type_name -> api.v1.services.types.Media
+	176, // 2: api.v1.services.media.CreateMediaRequest.media:type_name -> api.v1.services.types.Media
+	176, // 3: api.v1.services.media.CreateMediaResponse.media:type_name -> api.v1.services.types.Media
+	176, // 4: api.v1.services.media.UpdateMediaRequest.media:type_name -> api.v1.services.types.Media
+	177, // 5: api.v1.services.media.UpdateMediaRequest.update_mask:type_name -> google.protobuf.FieldMask
+	176, // 6: api.v1.services.media.UpdateMediaResponse.media:type_name -> api.v1.services.types.Media
+	178, // 7: api.v1.services.media.DeleteMediaResponse.empty:type_name -> google.protobuf.Empty
+	176, // 8: api.v1.services.media.UploadMediaResponse.media:type_name -> api.v1.services.types.Media
+	179, // 9: api.v1.services.media.ListEncodingTasksResponse.tasks:type_name -> api.v1.services.types.EncodingTask
+	180, // 10: api.v1.services.media.GetMediaVariantsResponse.variants:type_name -> api.v1.services.types.MediaVariant
+	179, // 11: api.v1.services.media.RetryEncodingTaskResponse.task:type_name -> api.v1.services.types.EncodingTask
+	32,  // 12: api.v1.services.media.GetEncodingStatusResponse.items:type_name -> api.v1.services.media.TranscodingMediaItem
+	179, // 13: api.v1.services.media.ListAllEncodingTasksResponse.tasks:type_name -> api.v1.services.types.EncodingTask
+	176, // 14: api.v1.services.media.TranscodingMediaItem.media:type_name -> api.v1.services.types.Media
+	179, // 15: api.v1.services.media.TranscodingMediaItem.tasks:type_name -> api.v1.services.types.EncodingTask
+	181, // 16: api.v1.services.media.GetMediaCommentsResponse.comments:type_name -> api.v1.services.types.Comment
+	182, // 17: api.v1.services.media.GetMediaSubtitlesResponse.subtitles:type_name -> api.v1.services.types.Subtitle
+	182, // 18: api.v1.services.media.CreateMediaSubtitleResponse.subtitle:type_name -> api.v1.services.types.Subtitle
+	183, // 19: api.v1.services.media.GetMediaMetadataResponse.metadata:type_name -> api.v1.services.types.MediaMetadata
+	184, // 20: api.v1.services.media.ListEncodeProfilesResponse.profiles:type_name -> api.v1.services.types.EncodeProfile
+	184, // 21: api.v1.services.media.GetEncodeProfileResponse.profile:type_name -> api.v1.services.types.EncodeProfile
+	184, // 22: api.v1.services.media.CreateEncodeProfileRequest.profile:type_name -> api.v1.services.types.EncodeProfile
+	184, // 23: api.v1.services.media.CreateEncodeProfileResponse.profile:type_name -> api.v1.services.types.EncodeProfile
+	184, // 24: api.v1.services.media.UpdateEncodeProfileRequest.profile:type_name -> api.v1.services.types.EncodeProfile
+	184, // 25: api.v1.services.media.UpdateEncodeProfileResponse.profile:type_name -> api.v1.services.types.EncodeProfile
+	178, // 26: api.v1.services.media.DeleteEncodeProfileResponse.empty:type_name -> google.protobuf.Empty
+	185, // 27: api.v1.services.media.ListCategoriesResponse.categories:type_name -> api.v1.services.types.Category
+	185, // 28: api.v1.services.media.GetCategoryResponse.category:type_name -> api.v1.services.types.Category
+	185, // 29: api.v1.services.media.CreateCategoryRequest.category:type_name -> api.v1.services.types.Category
+	185, // 30: api.v1.services.media.CreateCategoryResponse.category:type_name -> api.v1.services.types.Category
+	185, // 31: api.v1.services.media.UpdateCategoryRequest.category:type_name -> api.v1.services.types.Category
+	177, // 32: api.v1.services.media.UpdateCategoryRequest.update_mask:type_name -> google.protobuf.FieldMask
+	185, // 33: api.v1.services.media.UpdateCategoryResponse.category:type_name -> api.v1.services.types.Category
+	178, // 34: api.v1.services.media.DeleteCategoryResponse.empty:type_name -> google.protobuf.Empty
+	186, // 35: api.v1.services.media.ListTagsResponse.tags:type_name -> api.v1.services.types.Tag
+	186, // 36: api.v1.services.media.GetTagResponse.tag:type_name -> api.v1.services.types.Tag
+	186, // 37: api.v1.services.media.CreateTagRequest.tag:type_name -> api.v1.services.types.Tag
+	186, // 38: api.v1.services.media.CreateTagResponse.tag:type_name -> api.v1.services.types.Tag
+	186, // 39: api.v1.services.media.UpdateTagRequest.tag:type_name -> api.v1.services.types.Tag
+	177, // 40: api.v1.services.media.UpdateTagRequest.update_mask:type_name -> google.protobuf.FieldMask
+	186, // 41: api.v1.services.media.UpdateTagResponse.tag:type_name -> api.v1.services.types.Tag
+	178, // 42: api.v1.services.media.DeleteTagResponse.empty:type_name -> google.protobuf.Empty
+	181, // 43: api.v1.services.media.ListCommentsResponse.comments:type_name -> api.v1.services.types.Comment
+	181, // 44: api.v1.services.media.GetCommentResponse.comment:type_name -> api.v1.services.types.Comment
+	181, // 45: api.v1.services.media.CreateCommentRequest.comment:type_name -> api.v1.services.types.Comment
+	181, // 46: api.v1.services.media.CreateCommentResponse.comment:type_name -> api.v1.services.types.Comment
+	181, // 47: api.v1.services.media.UpdateCommentRequest.comment:type_name -> api.v1.services.types.Comment
+	177, // 48: api.v1.services.media.UpdateCommentRequest.update_mask:type_name -> google.protobuf.FieldMask
+	181, // 49: api.v1.services.media.UpdateCommentResponse.comment:type_name -> api.v1.services.types.Comment
+	178, // 50: api.v1.services.media.DeleteCommentResponse.empty:type_name -> google.protobuf.Empty
+	181, // 51: api.v1.services.media.GetCommentRepliesResponse.replies:type_name -> api.v1.services.types.Comment
+	181, // 52: api.v1.services.media.CreateCommentReplyRequest.comment:type_name -> api.v1.services.types.Comment
+	181, // 53: api.v1.services.media.CreateCommentReplyResponse.reply:type_name -> api.v1.services.types.Comment
+	187, // 54: api.v1.services.media.GetPlaylistsResponse.playlists:type_name -> api.v1.services.types.Playlist
+	187, // 55: api.v1.services.media.GetPlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
+	176, // 56: api.v1.services.media.GetPlaylistResponse.medias:type_name -> api.v1.services.types.Media
+	187, // 57: api.v1.services.media.CreatePlaylistRequest.playlist:type_name -> api.v1.services.types.Playlist
+	187, // 58: api.v1.services.media.CreatePlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
+	187, // 59: api.v1.services.media.UpdatePlaylistRequest.playlist:type_name -> api.v1.services.types.Playlist
+	177, // 60: api.v1.services.media.UpdatePlaylistRequest.update_mask:type_name -> google.protobuf.FieldMask
+	187, // 61: api.v1.services.media.UpdatePlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
+	178, // 62: api.v1.services.media.DeletePlaylistResponse.empty:type_name -> google.protobuf.Empty
+	188, // 63: api.v1.services.media.ListChannelsResponse.channels:type_name -> api.v1.services.types.Channel
+	188, // 64: api.v1.services.media.GetChannelResponse.channel:type_name -> api.v1.services.types.Channel
+	188, // 65: api.v1.services.media.CreateChannelRequest.channel:type_name -> api.v1.services.types.Channel
+	188, // 66: api.v1.services.media.CreateChannelResponse.channel:type_name -> api.v1.services.types.Channel
+	188, // 67: api.v1.services.media.UpdateChannelRequest.channel:type_name -> api.v1.services.types.Channel
+	177, // 68: api.v1.services.media.UpdateChannelRequest.update_mask:type_name -> google.protobuf.FieldMask
+	188, // 69: api.v1.services.media.UpdateChannelResponse.channel:type_name -> api.v1.services.types.Channel
+	178, // 70: api.v1.services.media.DeleteChannelResponse.empty:type_name -> google.protobuf.Empty
+	176, // 71: api.v1.services.media.GetChannelMediasResponse.medias:type_name -> api.v1.services.types.Media
+	189, // 72: api.v1.services.media.GetChannelSubscribersResponse.subscribers:type_name -> api.v1.services.types.User
+	176, // 73: api.v1.services.media.SearchResponse.medias:type_name -> api.v1.services.types.Media
+	188, // 74: api.v1.services.media.SearchResponse.channels:type_name -> api.v1.services.types.Channel
+	187, // 75: api.v1.services.media.SearchResponse.playlists:type_name -> api.v1.services.types.Playlist
+	189, // 76: api.v1.services.media.SearchResponse.users:type_name -> api.v1.services.types.User
+	190, // 77: api.v1.services.media.GetMediaStatsResponse.daily_stats:type_name -> api.v1.services.types.StatPoint
+	190, // 78: api.v1.services.media.GetUserStatsResponse.daily_stats:type_name -> api.v1.services.types.StatPoint
+	190, // 79: api.v1.services.media.GetTrafficStatsResponse.daily_stats:type_name -> api.v1.services.types.StatPoint
+	191, // 80: api.v1.services.media.GetPendingReviewsResponse.items:type_name -> api.v1.services.types.Review
+	191, // 81: api.v1.services.media.GetReviewHistoryResponse.items:type_name -> api.v1.services.types.Review
+	191, // 82: api.v1.services.media.GetReviewResponse.review:type_name -> api.v1.services.types.Review
+	191, // 83: api.v1.services.media.UpdateReviewRequest.review:type_name -> api.v1.services.types.Review
+	191, // 84: api.v1.services.media.UpdateReviewResponse.review:type_name -> api.v1.services.types.Review
+	173, // 85: api.v1.services.media.GetSettingsResponse.settings:type_name -> api.v1.services.media.GetSettingsResponse.SettingsEntry
+	174, // 86: api.v1.services.media.UpdateSettingsRequest.settings:type_name -> api.v1.services.media.UpdateSettingsRequest.SettingsEntry
+	175, // 87: api.v1.services.media.UpdateSettingsResponse.settings:type_name -> api.v1.services.media.UpdateSettingsResponse.SettingsEntry
+	176, // 88: api.v1.services.media.GetHomeContentResponse.featured:type_name -> api.v1.services.types.Media
+	176, // 89: api.v1.services.media.GetHomeContentResponse.recommended:type_name -> api.v1.services.types.Media
+	188, // 90: api.v1.services.media.GetHomeContentResponse.popular_channels:type_name -> api.v1.services.types.Channel
+	176, // 91: api.v1.services.media.GetTrendingContentResponse.medias:type_name -> api.v1.services.types.Media
+	176, // 92: api.v1.services.media.GetSubscriptionFeedResponse.medias:type_name -> api.v1.services.types.Media
+	0,   // 93: api.v1.services.media.MediaService.ListMedias:input_type -> api.v1.services.media.ListMediasRequest
+	2,   // 94: api.v1.services.media.MediaService.GetMedia:input_type -> api.v1.services.media.GetMediaRequest
+	4,   // 95: api.v1.services.media.MediaService.CreateMedia:input_type -> api.v1.services.media.CreateMediaRequest
+	6,   // 96: api.v1.services.media.MediaService.UpdateMedia:input_type -> api.v1.services.media.UpdateMediaRequest
+	8,   // 97: api.v1.services.media.MediaService.DeleteMedia:input_type -> api.v1.services.media.DeleteMediaRequest
+	10,  // 98: api.v1.services.media.MediaService.IncrementViewCount:input_type -> api.v1.services.media.IncrementViewCountRequest
+	12,  // 99: api.v1.services.media.MediaService.UploadMedia:input_type -> api.v1.services.media.UploadMediaRequest
+	14,  // 100: api.v1.services.media.MediaService.GetMediaStream:input_type -> api.v1.services.media.GetMediaStreamRequest
+	16,  // 101: api.v1.services.media.MediaService.GetMediaDownload:input_type -> api.v1.services.media.GetMediaDownloadRequest
+	18,  // 102: api.v1.services.media.MediaService.GetMediaThumbnail:input_type -> api.v1.services.media.GetMediaThumbnailRequest
+	20,  // 103: api.v1.services.media.MediaService.ListEncodingTasks:input_type -> api.v1.services.media.ListEncodingTasksRequest
+	22,  // 104: api.v1.services.media.MediaService.GetMediaVariants:input_type -> api.v1.services.media.GetMediaVariantsRequest
+	24,  // 105: api.v1.services.media.MediaService.RetryEncodingTask:input_type -> api.v1.services.media.RetryEncodingTaskRequest
+	26,  // 106: api.v1.services.media.MediaService.GetEncodingStatus:input_type -> api.v1.services.media.GetEncodingStatusRequest
+	28,  // 107: api.v1.services.media.MediaService.ListAllEncodingTasks:input_type -> api.v1.services.media.ListAllEncodingTasksRequest
+	30,  // 108: api.v1.services.media.MediaService.RetryAllFailedTasks:input_type -> api.v1.services.media.RetryAllFailedTasksRequest
+	33,  // 109: api.v1.services.media.MediaService.GetMediaLikes:input_type -> api.v1.services.media.GetMediaLikesRequest
+	35,  // 110: api.v1.services.media.MediaService.ToggleMediaLike:input_type -> api.v1.services.media.ToggleMediaLikeRequest
+	37,  // 111: api.v1.services.media.MediaService.DeleteMediaLike:input_type -> api.v1.services.media.DeleteMediaLikeRequest
+	39,  // 112: api.v1.services.media.MediaService.GetMediaFavorites:input_type -> api.v1.services.media.GetMediaFavoritesRequest
+	41,  // 113: api.v1.services.media.MediaService.ToggleMediaFavorite:input_type -> api.v1.services.media.ToggleMediaFavoriteRequest
+	43,  // 114: api.v1.services.media.MediaService.DeleteMediaFavorite:input_type -> api.v1.services.media.DeleteMediaFavoriteRequest
+	45,  // 115: api.v1.services.media.MediaService.GetMediaShares:input_type -> api.v1.services.media.GetMediaSharesRequest
+	47,  // 116: api.v1.services.media.MediaService.CreateMediaShare:input_type -> api.v1.services.media.CreateMediaShareRequest
+	49,  // 117: api.v1.services.media.MediaService.GetMediaComments:input_type -> api.v1.services.media.GetMediaCommentsRequest
+	51,  // 118: api.v1.services.media.MediaService.GetMediaSubtitles:input_type -> api.v1.services.media.GetMediaSubtitlesRequest
+	53,  // 119: api.v1.services.media.MediaService.CreateMediaSubtitle:input_type -> api.v1.services.media.CreateMediaSubtitleRequest
+	55,  // 120: api.v1.services.media.MediaService.GetMediaMetadata:input_type -> api.v1.services.media.GetMediaMetadataRequest
+	57,  // 121: api.v1.services.media.EncodingProfileService.ListEncodeProfiles:input_type -> api.v1.services.media.ListEncodeProfilesRequest
+	59,  // 122: api.v1.services.media.EncodingProfileService.GetEncodeProfile:input_type -> api.v1.services.media.GetEncodeProfileRequest
+	61,  // 123: api.v1.services.media.EncodingProfileService.CreateEncodeProfile:input_type -> api.v1.services.media.CreateEncodeProfileRequest
+	63,  // 124: api.v1.services.media.EncodingProfileService.UpdateEncodeProfile:input_type -> api.v1.services.media.UpdateEncodeProfileRequest
+	65,  // 125: api.v1.services.media.EncodingProfileService.DeleteEncodeProfile:input_type -> api.v1.services.media.DeleteEncodeProfileRequest
+	67,  // 126: api.v1.services.media.CategoryService.ListCategories:input_type -> api.v1.services.media.ListCategoriesRequest
+	69,  // 127: api.v1.services.media.CategoryService.GetCategory:input_type -> api.v1.services.media.GetCategoryRequest
+	71,  // 128: api.v1.services.media.CategoryService.CreateCategory:input_type -> api.v1.services.media.CreateCategoryRequest
+	73,  // 129: api.v1.services.media.CategoryService.UpdateCategory:input_type -> api.v1.services.media.UpdateCategoryRequest
+	75,  // 130: api.v1.services.media.CategoryService.DeleteCategory:input_type -> api.v1.services.media.DeleteCategoryRequest
+	77,  // 131: api.v1.services.media.TagService.ListTags:input_type -> api.v1.services.media.ListTagsRequest
+	79,  // 132: api.v1.services.media.TagService.GetTag:input_type -> api.v1.services.media.GetTagRequest
+	81,  // 133: api.v1.services.media.TagService.CreateTag:input_type -> api.v1.services.media.CreateTagRequest
+	83,  // 134: api.v1.services.media.TagService.UpdateTag:input_type -> api.v1.services.media.UpdateTagRequest
+	85,  // 135: api.v1.services.media.TagService.DeleteTag:input_type -> api.v1.services.media.DeleteTagRequest
+	87,  // 136: api.v1.services.media.CommentService.ListComments:input_type -> api.v1.services.media.ListCommentsRequest
+	89,  // 137: api.v1.services.media.CommentService.GetComment:input_type -> api.v1.services.media.GetCommentRequest
+	91,  // 138: api.v1.services.media.CommentService.CreateComment:input_type -> api.v1.services.media.CreateCommentRequest
+	93,  // 139: api.v1.services.media.CommentService.UpdateComment:input_type -> api.v1.services.media.UpdateCommentRequest
+	95,  // 140: api.v1.services.media.CommentService.DeleteComment:input_type -> api.v1.services.media.DeleteCommentRequest
+	97,  // 141: api.v1.services.media.CommentService.GetCommentReplies:input_type -> api.v1.services.media.GetCommentRepliesRequest
+	99,  // 142: api.v1.services.media.CommentService.CreateCommentReply:input_type -> api.v1.services.media.CreateCommentReplyRequest
+	101, // 143: api.v1.services.media.PlaylistService.GetPlaylists:input_type -> api.v1.services.media.GetPlaylistsRequest
+	103, // 144: api.v1.services.media.PlaylistService.GetPlaylist:input_type -> api.v1.services.media.GetPlaylistRequest
+	105, // 145: api.v1.services.media.PlaylistService.CreatePlaylist:input_type -> api.v1.services.media.CreatePlaylistRequest
+	107, // 146: api.v1.services.media.PlaylistService.UpdatePlaylist:input_type -> api.v1.services.media.UpdatePlaylistRequest
+	109, // 147: api.v1.services.media.PlaylistService.DeletePlaylist:input_type -> api.v1.services.media.DeletePlaylistRequest
+	111, // 148: api.v1.services.media.PlaylistService.AddPlaylistMedia:input_type -> api.v1.services.media.AddPlaylistMediaRequest
+	113, // 149: api.v1.services.media.PlaylistService.ReorderPlaylistMedia:input_type -> api.v1.services.media.ReorderPlaylistMediaRequest
+	115, // 150: api.v1.services.media.PlaylistService.RemovePlaylistMedia:input_type -> api.v1.services.media.RemovePlaylistMediaRequest
+	117, // 151: api.v1.services.media.ChannelService.ListChannels:input_type -> api.v1.services.media.ListChannelsRequest
+	119, // 152: api.v1.services.media.ChannelService.GetChannel:input_type -> api.v1.services.media.GetChannelRequest
+	121, // 153: api.v1.services.media.ChannelService.CreateChannel:input_type -> api.v1.services.media.CreateChannelRequest
+	123, // 154: api.v1.services.media.ChannelService.UpdateChannel:input_type -> api.v1.services.media.UpdateChannelRequest
+	125, // 155: api.v1.services.media.ChannelService.DeleteChannel:input_type -> api.v1.services.media.DeleteChannelRequest
+	127, // 156: api.v1.services.media.ChannelService.GetChannelMedias:input_type -> api.v1.services.media.GetChannelMediasRequest
+	129, // 157: api.v1.services.media.ChannelService.AddChannelMedia:input_type -> api.v1.services.media.AddChannelMediaRequest
+	131, // 158: api.v1.services.media.ChannelService.RemoveChannelMedia:input_type -> api.v1.services.media.RemoveChannelMediaRequest
+	133, // 159: api.v1.services.media.ChannelService.GetChannelSubscribers:input_type -> api.v1.services.media.GetChannelSubscribersRequest
+	135, // 160: api.v1.services.media.ChannelService.GetChannelSubscription:input_type -> api.v1.services.media.GetChannelSubscriptionRequest
+	137, // 161: api.v1.services.media.ChannelService.SubscribeChannel:input_type -> api.v1.services.media.SubscribeChannelRequest
+	139, // 162: api.v1.services.media.ChannelService.UnsubscribeChannel:input_type -> api.v1.services.media.UnsubscribeChannelRequest
+	141, // 163: api.v1.services.media.SearchService.Search:input_type -> api.v1.services.media.SearchRequest
+	143, // 164: api.v1.services.media.SearchService.GetSearchSuggestions:input_type -> api.v1.services.media.GetSearchSuggestionsRequest
+	145, // 165: api.v1.services.media.AdminService.GetDashboardStats:input_type -> api.v1.services.media.GetDashboardStatsRequest
+	147, // 166: api.v1.services.media.AdminService.GetMediaStats:input_type -> api.v1.services.media.GetMediaStatsRequest
+	149, // 167: api.v1.services.media.AdminService.GetUserStats:input_type -> api.v1.services.media.GetUserStatsRequest
+	151, // 168: api.v1.services.media.AdminService.GetTrafficStats:input_type -> api.v1.services.media.GetTrafficStatsRequest
+	153, // 169: api.v1.services.media.AdminService.GetPendingReviews:input_type -> api.v1.services.media.GetPendingReviewsRequest
+	155, // 170: api.v1.services.media.AdminService.GetReviewHistory:input_type -> api.v1.services.media.GetReviewHistoryRequest
+	157, // 171: api.v1.services.media.AdminService.GetReview:input_type -> api.v1.services.media.GetReviewRequest
+	159, // 172: api.v1.services.media.AdminService.UpdateReview:input_type -> api.v1.services.media.UpdateReviewRequest
+	161, // 173: api.v1.services.media.AdminService.BatchUpdateReviews:input_type -> api.v1.services.media.BatchUpdateReviewsRequest
+	163, // 174: api.v1.services.media.AdminService.GetSettings:input_type -> api.v1.services.media.GetSettingsRequest
+	165, // 175: api.v1.services.media.AdminService.UpdateSettings:input_type -> api.v1.services.media.UpdateSettingsRequest
+	167, // 176: api.v1.services.media.PortalService.GetHomeContent:input_type -> api.v1.services.media.GetHomeContentRequest
+	169, // 177: api.v1.services.media.PortalService.GetTrendingContent:input_type -> api.v1.services.media.GetTrendingContentRequest
+	171, // 178: api.v1.services.media.PortalService.GetSubscriptionFeed:input_type -> api.v1.services.media.GetSubscriptionFeedRequest
+	1,   // 179: api.v1.services.media.MediaService.ListMedias:output_type -> api.v1.services.media.ListMediasResponse
+	3,   // 180: api.v1.services.media.MediaService.GetMedia:output_type -> api.v1.services.media.GetMediaResponse
+	5,   // 181: api.v1.services.media.MediaService.CreateMedia:output_type -> api.v1.services.media.CreateMediaResponse
+	7,   // 182: api.v1.services.media.MediaService.UpdateMedia:output_type -> api.v1.services.media.UpdateMediaResponse
+	9,   // 183: api.v1.services.media.MediaService.DeleteMedia:output_type -> api.v1.services.media.DeleteMediaResponse
+	11,  // 184: api.v1.services.media.MediaService.IncrementViewCount:output_type -> api.v1.services.media.IncrementViewCountResponse
+	13,  // 185: api.v1.services.media.MediaService.UploadMedia:output_type -> api.v1.services.media.UploadMediaResponse
+	15,  // 186: api.v1.services.media.MediaService.GetMediaStream:output_type -> api.v1.services.media.GetMediaStreamResponse
+	17,  // 187: api.v1.services.media.MediaService.GetMediaDownload:output_type -> api.v1.services.media.GetMediaDownloadResponse
+	19,  // 188: api.v1.services.media.MediaService.GetMediaThumbnail:output_type -> api.v1.services.media.GetMediaThumbnailResponse
+	21,  // 189: api.v1.services.media.MediaService.ListEncodingTasks:output_type -> api.v1.services.media.ListEncodingTasksResponse
+	23,  // 190: api.v1.services.media.MediaService.GetMediaVariants:output_type -> api.v1.services.media.GetMediaVariantsResponse
+	25,  // 191: api.v1.services.media.MediaService.RetryEncodingTask:output_type -> api.v1.services.media.RetryEncodingTaskResponse
+	27,  // 192: api.v1.services.media.MediaService.GetEncodingStatus:output_type -> api.v1.services.media.GetEncodingStatusResponse
+	29,  // 193: api.v1.services.media.MediaService.ListAllEncodingTasks:output_type -> api.v1.services.media.ListAllEncodingTasksResponse
+	31,  // 194: api.v1.services.media.MediaService.RetryAllFailedTasks:output_type -> api.v1.services.media.RetryAllFailedTasksResponse
+	34,  // 195: api.v1.services.media.MediaService.GetMediaLikes:output_type -> api.v1.services.media.GetMediaLikesResponse
+	36,  // 196: api.v1.services.media.MediaService.ToggleMediaLike:output_type -> api.v1.services.media.ToggleMediaLikeResponse
+	38,  // 197: api.v1.services.media.MediaService.DeleteMediaLike:output_type -> api.v1.services.media.DeleteMediaLikeResponse
+	40,  // 198: api.v1.services.media.MediaService.GetMediaFavorites:output_type -> api.v1.services.media.GetMediaFavoritesResponse
+	42,  // 199: api.v1.services.media.MediaService.ToggleMediaFavorite:output_type -> api.v1.services.media.ToggleMediaFavoriteResponse
+	44,  // 200: api.v1.services.media.MediaService.DeleteMediaFavorite:output_type -> api.v1.services.media.DeleteMediaFavoriteResponse
+	46,  // 201: api.v1.services.media.MediaService.GetMediaShares:output_type -> api.v1.services.media.GetMediaSharesResponse
+	48,  // 202: api.v1.services.media.MediaService.CreateMediaShare:output_type -> api.v1.services.media.CreateMediaShareResponse
+	50,  // 203: api.v1.services.media.MediaService.GetMediaComments:output_type -> api.v1.services.media.GetMediaCommentsResponse
+	52,  // 204: api.v1.services.media.MediaService.GetMediaSubtitles:output_type -> api.v1.services.media.GetMediaSubtitlesResponse
+	54,  // 205: api.v1.services.media.MediaService.CreateMediaSubtitle:output_type -> api.v1.services.media.CreateMediaSubtitleResponse
+	56,  // 206: api.v1.services.media.MediaService.GetMediaMetadata:output_type -> api.v1.services.media.GetMediaMetadataResponse
+	58,  // 207: api.v1.services.media.EncodingProfileService.ListEncodeProfiles:output_type -> api.v1.services.media.ListEncodeProfilesResponse
+	60,  // 208: api.v1.services.media.EncodingProfileService.GetEncodeProfile:output_type -> api.v1.services.media.GetEncodeProfileResponse
+	62,  // 209: api.v1.services.media.EncodingProfileService.CreateEncodeProfile:output_type -> api.v1.services.media.CreateEncodeProfileResponse
+	64,  // 210: api.v1.services.media.EncodingProfileService.UpdateEncodeProfile:output_type -> api.v1.services.media.UpdateEncodeProfileResponse
+	66,  // 211: api.v1.services.media.EncodingProfileService.DeleteEncodeProfile:output_type -> api.v1.services.media.DeleteEncodeProfileResponse
+	68,  // 212: api.v1.services.media.CategoryService.ListCategories:output_type -> api.v1.services.media.ListCategoriesResponse
+	70,  // 213: api.v1.services.media.CategoryService.GetCategory:output_type -> api.v1.services.media.GetCategoryResponse
+	72,  // 214: api.v1.services.media.CategoryService.CreateCategory:output_type -> api.v1.services.media.CreateCategoryResponse
+	74,  // 215: api.v1.services.media.CategoryService.UpdateCategory:output_type -> api.v1.services.media.UpdateCategoryResponse
+	76,  // 216: api.v1.services.media.CategoryService.DeleteCategory:output_type -> api.v1.services.media.DeleteCategoryResponse
+	78,  // 217: api.v1.services.media.TagService.ListTags:output_type -> api.v1.services.media.ListTagsResponse
+	80,  // 218: api.v1.services.media.TagService.GetTag:output_type -> api.v1.services.media.GetTagResponse
+	82,  // 219: api.v1.services.media.TagService.CreateTag:output_type -> api.v1.services.media.CreateTagResponse
+	84,  // 220: api.v1.services.media.TagService.UpdateTag:output_type -> api.v1.services.media.UpdateTagResponse
+	86,  // 221: api.v1.services.media.TagService.DeleteTag:output_type -> api.v1.services.media.DeleteTagResponse
+	88,  // 222: api.v1.services.media.CommentService.ListComments:output_type -> api.v1.services.media.ListCommentsResponse
+	90,  // 223: api.v1.services.media.CommentService.GetComment:output_type -> api.v1.services.media.GetCommentResponse
+	92,  // 224: api.v1.services.media.CommentService.CreateComment:output_type -> api.v1.services.media.CreateCommentResponse
+	94,  // 225: api.v1.services.media.CommentService.UpdateComment:output_type -> api.v1.services.media.UpdateCommentResponse
+	96,  // 226: api.v1.services.media.CommentService.DeleteComment:output_type -> api.v1.services.media.DeleteCommentResponse
+	98,  // 227: api.v1.services.media.CommentService.GetCommentReplies:output_type -> api.v1.services.media.GetCommentRepliesResponse
+	100, // 228: api.v1.services.media.CommentService.CreateCommentReply:output_type -> api.v1.services.media.CreateCommentReplyResponse
+	102, // 229: api.v1.services.media.PlaylistService.GetPlaylists:output_type -> api.v1.services.media.GetPlaylistsResponse
+	104, // 230: api.v1.services.media.PlaylistService.GetPlaylist:output_type -> api.v1.services.media.GetPlaylistResponse
+	106, // 231: api.v1.services.media.PlaylistService.CreatePlaylist:output_type -> api.v1.services.media.CreatePlaylistResponse
+	108, // 232: api.v1.services.media.PlaylistService.UpdatePlaylist:output_type -> api.v1.services.media.UpdatePlaylistResponse
+	110, // 233: api.v1.services.media.PlaylistService.DeletePlaylist:output_type -> api.v1.services.media.DeletePlaylistResponse
+	112, // 234: api.v1.services.media.PlaylistService.AddPlaylistMedia:output_type -> api.v1.services.media.AddPlaylistMediaResponse
+	114, // 235: api.v1.services.media.PlaylistService.ReorderPlaylistMedia:output_type -> api.v1.services.media.ReorderPlaylistMediaResponse
+	116, // 236: api.v1.services.media.PlaylistService.RemovePlaylistMedia:output_type -> api.v1.services.media.RemovePlaylistMediaResponse
+	118, // 237: api.v1.services.media.ChannelService.ListChannels:output_type -> api.v1.services.media.ListChannelsResponse
+	120, // 238: api.v1.services.media.ChannelService.GetChannel:output_type -> api.v1.services.media.GetChannelResponse
+	122, // 239: api.v1.services.media.ChannelService.CreateChannel:output_type -> api.v1.services.media.CreateChannelResponse
+	124, // 240: api.v1.services.media.ChannelService.UpdateChannel:output_type -> api.v1.services.media.UpdateChannelResponse
+	126, // 241: api.v1.services.media.ChannelService.DeleteChannel:output_type -> api.v1.services.media.DeleteChannelResponse
+	128, // 242: api.v1.services.media.ChannelService.GetChannelMedias:output_type -> api.v1.services.media.GetChannelMediasResponse
+	130, // 243: api.v1.services.media.ChannelService.AddChannelMedia:output_type -> api.v1.services.media.AddChannelMediaResponse
+	132, // 244: api.v1.services.media.ChannelService.RemoveChannelMedia:output_type -> api.v1.services.media.RemoveChannelMediaResponse
+	134, // 245: api.v1.services.media.ChannelService.GetChannelSubscribers:output_type -> api.v1.services.media.GetChannelSubscribersResponse
+	136, // 246: api.v1.services.media.ChannelService.GetChannelSubscription:output_type -> api.v1.services.media.GetChannelSubscriptionResponse
+	138, // 247: api.v1.services.media.ChannelService.SubscribeChannel:output_type -> api.v1.services.media.SubscribeChannelResponse
+	140, // 248: api.v1.services.media.ChannelService.UnsubscribeChannel:output_type -> api.v1.services.media.UnsubscribeChannelResponse
+	142, // 249: api.v1.services.media.SearchService.Search:output_type -> api.v1.services.media.SearchResponse
+	144, // 250: api.v1.services.media.SearchService.GetSearchSuggestions:output_type -> api.v1.services.media.GetSearchSuggestionsResponse
+	146, // 251: api.v1.services.media.AdminService.GetDashboardStats:output_type -> api.v1.services.media.GetDashboardStatsResponse
+	148, // 252: api.v1.services.media.AdminService.GetMediaStats:output_type -> api.v1.services.media.GetMediaStatsResponse
+	150, // 253: api.v1.services.media.AdminService.GetUserStats:output_type -> api.v1.services.media.GetUserStatsResponse
+	152, // 254: api.v1.services.media.AdminService.GetTrafficStats:output_type -> api.v1.services.media.GetTrafficStatsResponse
+	154, // 255: api.v1.services.media.AdminService.GetPendingReviews:output_type -> api.v1.services.media.GetPendingReviewsResponse
+	156, // 256: api.v1.services.media.AdminService.GetReviewHistory:output_type -> api.v1.services.media.GetReviewHistoryResponse
+	158, // 257: api.v1.services.media.AdminService.GetReview:output_type -> api.v1.services.media.GetReviewResponse
+	160, // 258: api.v1.services.media.AdminService.UpdateReview:output_type -> api.v1.services.media.UpdateReviewResponse
+	162, // 259: api.v1.services.media.AdminService.BatchUpdateReviews:output_type -> api.v1.services.media.BatchUpdateReviewsResponse
+	164, // 260: api.v1.services.media.AdminService.GetSettings:output_type -> api.v1.services.media.GetSettingsResponse
+	166, // 261: api.v1.services.media.AdminService.UpdateSettings:output_type -> api.v1.services.media.UpdateSettingsResponse
+	168, // 262: api.v1.services.media.PortalService.GetHomeContent:output_type -> api.v1.services.media.GetHomeContentResponse
+	170, // 263: api.v1.services.media.PortalService.GetTrendingContent:output_type -> api.v1.services.media.GetTrendingContentResponse
+	172, // 264: api.v1.services.media.PortalService.GetSubscriptionFeed:output_type -> api.v1.services.media.GetSubscriptionFeedResponse
+	179, // [179:265] is the sub-list for method output_type
+	93,  // [93:179] is the sub-list for method input_type
+	93,  // [93:93] is the sub-list for extension type_name
+	93,  // [93:93] is the sub-list for extension extendee
+	0,   // [0:93] is the sub-list for field type_name
 }
 
 func init() { file_v1_media_media_service_proto_init() }
@@ -4961,20 +10112,23 @@ func file_v1_media_media_service_proto_init() {
 		return
 	}
 	file_v1_media_media_service_proto_msgTypes[0].OneofWrappers = []any{}
-	file_v1_media_media_service_proto_msgTypes[14].OneofWrappers = []any{}
-	file_v1_media_media_service_proto_msgTypes[24].OneofWrappers = []any{}
-	file_v1_media_media_service_proto_msgTypes[34].OneofWrappers = []any{}
-	file_v1_media_media_service_proto_msgTypes[56].OneofWrappers = []any{}
-	file_v1_media_media_service_proto_msgTypes[72].OneofWrappers = []any{}
+	file_v1_media_media_service_proto_msgTypes[26].OneofWrappers = []any{}
+	file_v1_media_media_service_proto_msgTypes[28].OneofWrappers = []any{}
+	file_v1_media_media_service_proto_msgTypes[30].OneofWrappers = []any{}
+	file_v1_media_media_service_proto_msgTypes[67].OneofWrappers = []any{}
+	file_v1_media_media_service_proto_msgTypes[77].OneofWrappers = []any{}
+	file_v1_media_media_service_proto_msgTypes[87].OneofWrappers = []any{}
+	file_v1_media_media_service_proto_msgTypes[101].OneofWrappers = []any{}
+	file_v1_media_media_service_proto_msgTypes[117].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_media_media_service_proto_rawDesc), len(file_v1_media_media_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   85,
+			NumMessages:   176,
 			NumExtensions: 0,
-			NumServices:   7,
+			NumServices:   10,
 		},
 		GoTypes:           file_v1_media_media_service_proto_goTypes,
 		DependencyIndexes: file_v1_media_media_service_proto_depIdxs,

@@ -30,7 +30,7 @@ func NewProfileHandler(clients *client.Clients, logger log.Logger) *ProfileHandl
 
 // UserProfileRequest defines the request for a user public profile page.
 type UserProfileRequest struct {
-	ID int64 `json:"id"`
+	ID string `json:"id"`
 }
 
 // UserProfileResponse aggregates user info + their latest published media.
@@ -47,7 +47,7 @@ func (h *ProfileHandler) GetUserProfile(ctx context.Context, req *UserProfileReq
 		WithProfile: true,
 	})
 	if err != nil {
-		h.log.Errorf("failed to get user %d: %v", req.ID, err)
+		h.log.Errorf("failed to get user %s: %v", req.ID, err)
 		return nil, err
 	}
 

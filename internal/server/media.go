@@ -715,11 +715,6 @@ func (h *MediaHandler) retryTaskByID() gin.HandlerFunc {
 			Fail(c, ErrBadRequest, "task_id is required")
 			return
 		}
-		taskID, err := strconv.Atoi(taskIDStr)
-		if err != nil || taskID <= 0 {
-			Fail(c, ErrBadRequest, "invalid task_id: must be a positive integer")
-			return
-		}
 
 		task, err := h.uc.RetryTask(c.Request.Context(), taskIDStr)
 		if err != nil {
@@ -776,6 +771,10 @@ func (h *MediaHandler) transcodingEvents() gin.HandlerFunc {
 					"media_id": ev.MediaId,
 					"task_id":  ev.Task.Id,
 					"status":   ev.Task.Status,
+					"progress": ev.Progress,
+					"speed":    ev.Speed,
+					"fps":      ev.Fps,
+					"time":     ev.Time,
 				})
 				return true
 			}

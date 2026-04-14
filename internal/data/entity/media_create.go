@@ -62,20 +62,6 @@ func (_c *MediaCreate) SetNillableShortToken(v *string) *MediaCreate {
 	return _c
 }
 
-// SetUUID sets the "uuid" field.
-func (_c *MediaCreate) SetUUID(v string) *MediaCreate {
-	_c.mutation.SetUUID(v)
-	return _c
-}
-
-// SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_c *MediaCreate) SetNillableUUID(v *string) *MediaCreate {
-	if v != nil {
-		_c.SetUUID(*v)
-	}
-	return _c
-}
-
 // SetType sets the "type" field.
 func (_c *MediaCreate) SetType(v string) *MediaCreate {
 	_c.mutation.SetType(v)
@@ -667,6 +653,10 @@ func (_c *MediaCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *MediaCreate) defaults() {
+	if _, ok := _c.mutation.ShortToken(); !ok {
+		v := media.DefaultShortToken()
+		_c.mutation.SetShortToken(v)
+	}
 	if _, ok := _c.mutation.GetType(); !ok {
 		v := media.DefaultType
 		_c.mutation.SetType(v)
@@ -766,11 +756,6 @@ func (_c *MediaCreate) check() error {
 	if v, ok := _c.mutation.ShortToken(); ok {
 		if err := media.ShortTokenValidator(v); err != nil {
 			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Media.short_token": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.UUID(); ok {
-		if err := media.UUIDValidator(v); err != nil {
-			return &ValidationError{Name: "uuid", err: fmt.Errorf(`entity: validator failed for field "Media.uuid": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.GetType(); !ok {
@@ -953,10 +938,6 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ShortToken(); ok {
 		_spec.SetField(media.FieldShortToken, field.TypeString, value)
 		_node.ShortToken = value
-	}
-	if value, ok := _c.mutation.UUID(); ok {
-		_spec.SetField(media.FieldUUID, field.TypeString, value)
-		_node.UUID = value
 	}
 	if value, ok := _c.mutation.GetType(); ok {
 		_spec.SetField(media.FieldType, field.TypeString, value)

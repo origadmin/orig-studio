@@ -44,13 +44,13 @@ func (h *CommentHandler) Register(group *gin.RouterGroup) {
 func (h *CommentHandler) listComments(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	mediaID, _ := strconv.Atoi(c.Query("media_id"))
+	mediaID := c.Query("media_id")
 
 	var items []*biz.Comment
 	var total int
 	var err error
 
-	if mediaID > 0 {
+	if mediaID != "" {
 		items, total, err = h.uc.ListMediaComments(c.Request.Context(), mediaID, page, limit)
 	} else {
 		// For admin page, return all comments when no media_id is provided
@@ -73,8 +73,8 @@ func (h *CommentHandler) listComments(c *gin.Context) {
 // listMediaComments returns comments for a specific media with nested replies.
 // GET /comments/media/:mediaId
 func (h *CommentHandler) listMediaComments(c *gin.Context) {
-	mediaId, err := strconv.Atoi(c.Param("mediaId"))
-	if err != nil {
+	mediaId := c.Param("mediaId")
+	if mediaId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid media ID"})
 		return
 	}
@@ -106,9 +106,9 @@ func (h *CommentHandler) createComment(c *gin.Context) {
 	claims := val.(*auth.Claims)
 
 	var input struct {
-		Text     string `json:"text" binding:"required"`
-		MediaID  int    `json:"media_id" binding:"required"`
-		ParentID *int   `json:"parent_id"`
+		Text     string  `json:"text" binding:"required"`
+		MediaID  string  `json:"media_id" binding:"required"`
+		ParentID *string `json:"parent_id"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -118,7 +118,7 @@ func (h *CommentHandler) createComment(c *gin.Context) {
 	comment := &biz.Comment{
 		Text:     input.Text,
 		MediaID:  input.MediaID,
-		UserID:   int(claims.UserID),
+		UserID:   claims.UserID,
 		ParentID: input.ParentID,
 	}
 
@@ -140,8 +140,8 @@ func (h *CommentHandler) updateComment(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
@@ -157,7 +157,7 @@ func (h *CommentHandler) updateComment(c *gin.Context) {
 	comment, err := h.uc.UpdateComment(
 		c.Request.Context(),
 		id,
-		int(claims.UserID),
+		claims.UserID,
 		claims.IsStaff,
 		input.Text,
 	)
@@ -178,13 +178,13 @@ func (h *CommentHandler) deleteComment(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
-	err = h.uc.DeleteComment(c.Request.Context(), id, int(claims.UserID), claims.IsStaff)
+	err := h.uc.DeleteComment(c.Request.Context(), id, claims.UserID, claims.IsStaff)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

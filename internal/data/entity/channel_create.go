@@ -52,6 +52,14 @@ func (_c *ChannelCreate) SetShortToken(v string) *ChannelCreate {
 	return _c
 }
 
+// SetNillableShortToken sets the "short_token" field if the given value is not nil.
+func (_c *ChannelCreate) SetNillableShortToken(v *string) *ChannelCreate {
+	if v != nil {
+		_c.SetShortToken(*v)
+	}
+	return _c
+}
+
 // SetBannerLogo sets the "banner_logo" field.
 func (_c *ChannelCreate) SetBannerLogo(v string) *ChannelCreate {
 	_c.mutation.SetBannerLogo(v)
@@ -141,6 +149,10 @@ func (_c *ChannelCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *ChannelCreate) defaults() {
+	if _, ok := _c.mutation.ShortToken(); !ok {
+		v := channel.DefaultShortToken()
+		_c.mutation.SetShortToken(v)
+	}
 	if _, ok := _c.mutation.AddDate(); !ok {
 		v := channel.DefaultAddDate()
 		_c.mutation.SetAddDate(v)

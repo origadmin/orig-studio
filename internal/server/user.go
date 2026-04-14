@@ -186,7 +186,7 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 		users.GET("/:id/playlists", func(c *gin.Context) {
 			id := c.Param("id")
 			// Handle "me" as special case
-			var userID int64
+			var userID string
 			if id == "me" {
 				if claims, ok := c.Get("claims"); ok {
 					userID = claims.(*auth.Claims).UserID
@@ -195,12 +195,7 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 					return
 				}
 			} else {
-				var err error
-				userID, err = strconv.ParseInt(id, 10, 64)
-				if err != nil {
-					Fail(c, ErrBadRequest, "Invalid ID")
-					return
-				}
+				userID = id
 			}
 
 			// TODO: Implement playlist listing
@@ -210,7 +205,7 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 		users.GET("/:id/favorites", JWTMiddleware(h.jwt), func(c *gin.Context) {
 			id := c.Param("id")
 			// Handle "me" as special case
-			var userID int64
+			var userID string
 			if id == "me" {
 				if claims, ok := c.Get("claims"); ok {
 					userID = claims.(*auth.Claims).UserID
@@ -219,12 +214,7 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 					return
 				}
 			} else {
-				var err error
-				userID, err = strconv.ParseInt(id, 10, 64)
-				if err != nil {
-					Fail(c, ErrBadRequest, "Invalid ID")
-					return
-				}
+				userID = id
 			}
 
 			// TODO: Implement favorites listing
@@ -234,7 +224,7 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 		users.GET("/:id/likes", JWTMiddleware(h.jwt), func(c *gin.Context) {
 			id := c.Param("id")
 			// Handle "me" as special case
-			var userID int64
+			var userID string
 			if id == "me" {
 				if claims, ok := c.Get("claims"); ok {
 					userID = claims.(*auth.Claims).UserID
@@ -243,12 +233,7 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 					return
 				}
 			} else {
-				var err error
-				userID, err = strconv.ParseInt(id, 10, 64)
-				if err != nil {
-					Fail(c, ErrBadRequest, "Invalid ID")
-					return
-				}
+				userID = id
 			}
 
 			// TODO: Implement likes listing
@@ -258,7 +243,7 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 		users.GET("/:id/subscriptions", JWTMiddleware(h.jwt), func(c *gin.Context) {
 			id := c.Param("id")
 			// Handle "me" as special case
-			var userID int64
+			var userID string
 			if id == "me" {
 				if claims, ok := c.Get("claims"); ok {
 					userID = claims.(*auth.Claims).UserID
@@ -267,12 +252,7 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 					return
 				}
 			} else {
-				var err error
-				userID, err = strconv.ParseInt(id, 10, 64)
-				if err != nil {
-					Fail(c, ErrBadRequest, "Invalid ID")
-					return
-				}
+				userID = id
 			}
 
 			page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -280,7 +260,7 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 
 			list, total, err := h.uc.GetSubscriptions(
 				c.Request.Context(),
-				int(userID),
+				userID,
 				page,
 				pageSize,
 			)
@@ -300,7 +280,7 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 		users.GET("/:id/followers", func(c *gin.Context) {
 			id := c.Param("id")
 			// Handle "me" as special case
-			var userID int64
+			var userID string
 			if id == "me" {
 				if claims, ok := c.Get("claims"); ok {
 					userID = claims.(*auth.Claims).UserID
@@ -309,12 +289,7 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 					return
 				}
 			} else {
-				var err error
-				userID, err = strconv.ParseInt(id, 10, 64)
-				if err != nil {
-					Fail(c, ErrBadRequest, "Invalid ID")
-					return
-				}
+				userID = id
 			}
 
 			page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -322,7 +297,7 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 
 			list, total, err := h.uc.GetSubscribers(
 				c.Request.Context(),
-				int(userID),
+				userID,
 				page,
 				pageSize,
 			)
@@ -342,7 +317,7 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 		users.GET("/:id/stats", func(c *gin.Context) {
 			id := c.Param("id")
 			// Handle "me" as special case
-			var userID int64
+			var userID string
 			if id == "me" {
 				if claims, ok := c.Get("claims"); ok {
 					userID = claims.(*auth.Claims).UserID
@@ -351,12 +326,7 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 					return
 				}
 			} else {
-				var err error
-				userID, err = strconv.ParseInt(id, 10, 64)
-				if err != nil {
-					Fail(c, ErrBadRequest, "Invalid ID")
-					return
-				}
+				userID = id
 			}
 
 			// TODO: Implement user stats
@@ -372,13 +342,8 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 					Fail(c, ErrUnauthorized, "unauthorized")
 					return
 				}
-			} else {
-				_, err := strconv.ParseInt(id, 10, 64)
-				if err != nil {
-					Fail(c, ErrBadRequest, "Invalid ID")
-					return
-				}
 			}
+			// No need to parse as int64, use string directly
 
 			limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
 			page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -397,11 +362,7 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 		// ================================
 		// Get user by ID
 		users.GET("/:id", func(c *gin.Context) {
-			id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-			if err != nil {
-				Fail(c, ErrBadRequest, "Invalid ID")
-				return
-			}
+			id := c.Param("id")
 			u, err := h.uc.GetUser(c.Request.Context(), id)
 			if err != nil {
 				Fail(c, ErrUserNotFound, "User not found")
@@ -412,12 +373,8 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 
 		// Delete user
 		users.DELETE("/:id", func(c *gin.Context) {
-			id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-			if err != nil {
-				Fail(c, ErrBadRequest, "Invalid ID")
-				return
-			}
-			err = h.uc.DeleteUser(c.Request.Context(), id)
+			id := c.Param("id")
+			err := h.uc.DeleteUser(c.Request.Context(), id)
 			if err != nil {
 				Fail(c, ErrInternal, err.Error())
 				return

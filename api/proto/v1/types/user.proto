@@ -31,11 +31,11 @@ message UserSetting {
 // User is the model entity for the User schema.
 message User {
   // ID of the ent.
-  int64 id = 1 [json_name = "id"];
+  string id = 1 [json_name = "id"];
   // create_author.field.comment
-  int64 create_author = 2 [json_name = "create_author"];
+  string create_author = 2 [json_name = "create_author"];
   // update_author.field.comment
-  int64 update_author = 3 [json_name = "update_author"];
+  string update_author = 3 [json_name = "update_author"];
   // create_time.field.comment
   google.protobuf.Timestamp create_time = 4 [json_name = "create_time"];
   // update_time.field.comment
@@ -82,7 +82,7 @@ message User {
 // Role is the model entity for the Role schema.
 message Role {
   // ID of the ent.
-  int64 id = 1 [json_name = "id"];
+  string id = 1 [json_name = "id"];
   // create_time.field.comment
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
   // update_time.field.comment
@@ -109,7 +109,7 @@ message Role {
 // Permission is the model entity for the Permission schema.
 message Permission {
   // ID of the ent.
-  int64 id = 1 [json_name = "id"];
+  string id = 1 [json_name = "id"];
   // create_time.field.comment
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
   // update_time.field.comment
@@ -131,15 +131,15 @@ message Permission {
   // permission.field.status
   int32 status = 11 [json_name = "status"];
   // permission.field.parent_id
-  int64 parent_id = 12 [json_name = "parent_id"];
+  string parent_id = 12 [json_name = "parent_id"];
 }
 
 // UserRole is the many-to-many relation between User and Role.
 message UserRole {
   // ID of the ent.
-  int64 id = 1 [json_name = "id"];
+  string id = 1 [json_name = "id"];
   // user_role.field.user_id
-  int64 user_id = 2 [json_name = "user_id"];
+  string user_id = 2 [json_name = "user_id"];
   // user_role.field.role_id
-  int64 role_id = 3 [json_name = "role_id"];
+  string role_id = 3 [json_name = "role_id"];
 }

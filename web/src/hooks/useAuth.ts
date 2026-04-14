@@ -21,7 +21,7 @@ export interface AuthState {
 }
 
 export interface UseAuthReturn extends AuthState {
-    login: (token: string, user: User) => void;
+    login: (token: string, refreshToken: string, user: User) => void;
     logout: () => void;
 }
 
@@ -64,8 +64,9 @@ export function useAuth(): UseAuthReturn {
         return getStoredUser();
     });
 
-    const login = useCallback((newToken: string, newUser: User) => {
+    const login = useCallback((newToken: string, newRefreshToken: string, newUser: User) => {
         localStorage.setItem(TOKEN_KEY, newToken);
+        localStorage.setItem('origcms_refresh_token', newRefreshToken);
         localStorage.setItem(USER_KEY, JSON.stringify(newUser));
 
         // 同时设置 token_expires_at 以保持一致性
@@ -90,9 +91,42 @@ export function useAuth(): UseAuthReturn {
 
     // Periodically check token expiry
     useEffect(() => {
-        const checkToken = () => {
+        const checkToken = async () => {
             if (token && isTokenExpired()) {
-                logout();
+                // 尝试使用refresh token刷新
+                try {
+                    const refreshToken = localStorage.getItem('origcms_refresh_token');
+                    if (refreshToken) {
+                        const response = await fetch('/api/v1/auth/refresh', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ refresh_token: refreshToken }),
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            // 保存新token
+                            localStorage.setItem('origcms_token', data.access_token);
+                            if (data.refresh_token) {
+                                localStorage.setItem('origcms_refresh_token', data.refresh_token);
+                            }
+                            localStorage.setItem('token_expires_at', String(Date.now() + data.expires_in * 1000));
+                            // 更新状态
+                            setToken(data.access_token);
+                        } else {
+                            // 刷新失败，登出
+                            logout();
+                        }
+                    } else {
+                        // 没有refresh token，登出
+                        logout();
+                    }
+                } catch (error) {
+                    // 刷新失败，登出
+                    logout();
+                }
             }
         };
 

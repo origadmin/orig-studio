@@ -16,40 +16,40 @@ import (
 
 // UserRepo is a User repository interface.
 type UserRepo interface {
-	Get(context.Context, int64, ...*UserQueryOption) (*types.User, error)
+	Get(context.Context, string, ...*UserQueryOption) (*types.User, error)
 	List(context.Context, ...*UserQueryOption) ([]*types.User, int32, error)
 	Create(context.Context, *types.User, string, ...*UserCreateOption) (*types.User, error)
 	Update(context.Context, *types.User, ...*UserUpdateOption) (*types.User, error)
-	Delete(context.Context, int64) error
-	Restore(context.Context, int64) error
+	Delete(context.Context, string) error
+	Restore(context.Context, string) error
 
 	GetByUsername(context.Context, string) (*types.User, error)
 	GetByEmail(context.Context, string) (*types.User, error)
 	GetByPhone(context.Context, string) (*types.User, error)
-	GetUserAndPassword(context.Context, int64) (*types.User, string, error)
+	GetUserAndPassword(context.Context, string) (*types.User, string, error)
 
-	ChangeUserPassword(context.Context, int64, string) error
+	ChangeUserPassword(context.Context, string, string) error
 
-	UpdateUserProfile(context.Context, int64, *types.UserProfile) error
-	GetUserProfile(context.Context, int64) (*types.UserProfile, error)
-	UpdateUserSetting(context.Context, int64, *types.UserSetting) error
-	GetUserSetting(context.Context, int64) (*types.UserSetting, error)
+	UpdateUserProfile(context.Context, string, *types.UserProfile) error
+	GetUserProfile(context.Context, string) (*types.UserProfile, error)
+	UpdateUserSetting(context.Context, string, *types.UserSetting) error
+	GetUserSetting(context.Context, string) (*types.UserSetting, error)
 
-	UpdateUserStatus(context.Context, int64, int8) error
+	UpdateUserStatus(context.Context, string, int8) error
 
 	// GetEntity returns the raw ent entity (for fields not in proto types, e.g. role).
-	GetEntity(context.Context, int64) (*entity.User, error)
+	GetEntity(context.Context, string) (*entity.User, error)
 
 	// SetUserRole updates a user's role directly via ent.
-	SetUserRole(context.Context, int64, string) error
+	SetUserRole(context.Context, string, string) error
 
 	// Subscription methods
-	IsSubscribed(ctx context.Context, subscriberID, channelID int) (bool, error)
-	GetSubscriberCount(ctx context.Context, channelID int) (int, error)
-	Subscribe(ctx context.Context, subscriberID, channelID int) error
-	Unsubscribe(ctx context.Context, subscriberID, channelID int) error
-	GetSubscriptions(ctx context.Context, subscriberID int, page, pageSize int) ([]*types.User, int, error)
-	GetSubscribers(ctx context.Context, channelID int, page, pageSize int) ([]*types.User, int, error)
+	IsSubscribed(ctx context.Context, subscriberID, channelID string) (bool, error)
+	GetSubscriberCount(ctx context.Context, channelID string) (int, error)
+	Subscribe(ctx context.Context, subscriberID, channelID string) error
+	Unsubscribe(ctx context.Context, subscriberID, channelID string) error
+	GetSubscriptions(ctx context.Context, subscriberID string, page, pageSize int) ([]*types.User, int, error)
+	GetSubscribers(ctx context.Context, channelID string, page, pageSize int) ([]*types.User, int, error)
 }
 
 // UserQueryOption specifies options for querying users.

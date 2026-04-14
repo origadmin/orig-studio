@@ -50,12 +50,12 @@ type FeedSection struct {
 
 // MediaItem is a simplified media representation for feed display.
 type MediaItem struct {
-	ID           int64  `json:"id"`
+	ID           string `json:"id"`
 	Title        string `json:"title"`
 	Description  string `json:"description"`
 	ThumbnailURL string `json:"thumbnail_url"`
 	ViewCount    int64  `json:"view_count"`
-	AuthorID     int64  `json:"author_id"`
+	AuthorID     string `json:"author_id"`
 }
 
 // GetHomeFeed returns aggregated trending and latest media for the homepage.

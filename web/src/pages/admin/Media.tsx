@@ -450,15 +450,21 @@ export default function MediaPage() {
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 <div
-                                                    className="w-16 h-10 bg-slate-100 rounded overflow-hidden shrink-0 flex items-center justify-center">
+                                                    className="w-16 h-10 bg-slate-100 rounded overflow-hidden shrink-0 flex items-center justify-center relative group">
                                                     {media.thumbnail ? (
                                                         <img
                                                             src={media.thumbnail.startsWith('http') ? media.thumbnail : `${API_BASE_URL}${media.thumbnail.startsWith('/') ? '' : '/'}${media.thumbnail}`}
-                                                            alt="" className="w-full h-full object-cover"/>
+                                                            alt="" className="w-full h-full object-cover transition-opacity duration-300"/>
                                                     ) : (
                                                         media.type === 'video' ?
                                                             <Video className="w-4 h-4 text-slate-400"/> :
                                                             <ImageIcon className="w-4 h-4 text-slate-400"/>
+                                                    )}
+                                                    {(media.preview_file_path || media.preview_file) && (
+                                                        <img
+                                                            src={(media.preview_file_path || media.preview_file).startsWith('http') ? (media.preview_file_path || media.preview_file) : `${API_BASE_URL}${(media.preview_file_path || media.preview_file).startsWith('/') ? '' : '/'}${media.preview_file_path || media.preview_file}`}
+                                                            alt="preview" 
+                                                            className="w-full h-full object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"/>
                                                     )}
                                                 </div>
                                                 <span className="font-medium line-clamp-1 max-w-[200px]"

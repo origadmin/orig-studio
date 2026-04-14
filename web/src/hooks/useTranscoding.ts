@@ -6,10 +6,13 @@ import {useEffect, useState, useCallback, useRef} from "react";
 import {mediaApi} from "../lib/api/media";
 
 interface TranscodingEvent {
-    media_id: number;
-    task_id: number;
+    media_id: string;
+    task_id?: string;
     status: "pending" | "processing" | "success" | "failed";
-    progress: number;
+    progress?: number;
+    speed?: string;
+    fps?: number;
+    time?: number;
 }
 
 interface TranscodingSSEStatus {
@@ -17,7 +20,7 @@ interface TranscodingSSEStatus {
     reconnecting: boolean;
 }
 
-export function useTranscoding(mediaId?: number): {
+export function useTranscoding(mediaId?: string): {
     lastEvent: TranscodingEvent | null;
     sseStatus: TranscodingSSEStatus;
     connect: () => void;

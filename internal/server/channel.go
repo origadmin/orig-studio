@@ -91,8 +91,8 @@ func (h *ChannelHandler) ListChannels(c *gin.Context) {
 
 // GetChannel returns a single channel by ID with its media items.
 func (h *ChannelHandler) GetChannel(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		Fail(c, ErrBadRequest, "Invalid ID")
 		return
 	}
@@ -108,8 +108,8 @@ func (h *ChannelHandler) GetChannel(c *gin.Context) {
 
 // GetUserChannels returns channels for a specific user.
 func (h *ChannelHandler) GetUserChannels(c *gin.Context) {
-	userId, err := strconv.Atoi(c.Param("userId"))
-	if err != nil {
+	userId := c.Param("userId")
+	if userId == "" {
 		Fail(c, ErrBadRequest, "Invalid user ID")
 		return
 	}
@@ -156,7 +156,7 @@ func (h *ChannelHandler) CreateChannel(c *gin.Context) {
 		Description:   input.Description,
 		BannerLogo:    input.BannerLogo,
 		FriendlyToken: input.FriendlyToken,
-		UserID:        int(claims.UserID),
+		UserID:        claims.UserID,
 	}
 
 	created, err := h.uc.CreateChannel(c.Request.Context(), chItem)
@@ -177,8 +177,8 @@ func (h *ChannelHandler) UpdateChannel(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		Fail(c, ErrBadRequest, "Invalid ID")
 		return
 	}
@@ -203,7 +203,7 @@ func (h *ChannelHandler) UpdateChannel(c *gin.Context) {
 	updated, err := h.uc.UpdateChannel(
 		c.Request.Context(),
 		chItem,
-		int(claims.UserID),
+		claims.UserID,
 		claims.IsStaff,
 	)
 	if err != nil {
@@ -223,13 +223,13 @@ func (h *ChannelHandler) DeleteChannel(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		Fail(c, ErrBadRequest, "Invalid ID")
 		return
 	}
 
-	err = h.uc.DeleteChannel(c.Request.Context(), id, int(claims.UserID), claims.IsStaff)
+	err := h.uc.DeleteChannel(c.Request.Context(), id, claims.UserID, claims.IsStaff)
 	if err != nil {
 		Fail(c, ErrInternal, err.Error())
 		return
@@ -247,25 +247,25 @@ func (h *ChannelHandler) AddMedia(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		Fail(c, ErrBadRequest, "Invalid channel ID")
 		return
 	}
 
 	var input struct {
-		MediaID int `json:"media_id" binding:"required"`
+		MediaID string `json:"media_id" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		Fail(c, ErrBadRequest, err.Error())
 		return
 	}
 
-	err = h.uc.AddMediaToChannel(
+	err := h.uc.AddMediaToChannel(
 		c.Request.Context(),
 		id,
 		input.MediaID,
-		int(claims.UserID),
+		claims.UserID,
 		claims.IsStaff,
 	)
 	if err != nil {
@@ -289,22 +289,22 @@ func (h *ChannelHandler) RemoveMedia(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		Fail(c, ErrBadRequest, "Invalid channel ID")
 		return
 	}
-	mediaId, err := strconv.Atoi(c.Param("mediaId"))
-	if err != nil {
+	mediaId := c.Param("mediaId")
+	if mediaId == "" {
 		Fail(c, ErrBadRequest, "Invalid media ID")
 		return
 	}
 
-	err = h.uc.RemoveMediaFromChannel(
+	err := h.uc.RemoveMediaFromChannel(
 		c.Request.Context(),
 		id,
 		mediaId,
-		int(claims.UserID),
+		claims.UserID,
 		claims.IsStaff,
 	)
 	if err != nil {
@@ -321,8 +321,8 @@ func (h *ChannelHandler) RemoveMedia(c *gin.Context) {
 
 // GetChannelSubscribers returns subscribers for a channel with optional count parameter.
 func (h *ChannelHandler) GetChannelSubscribers(c *gin.Context) {
-	_, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		Fail(c, ErrBadRequest, "Invalid channel ID")
 		return
 	}
@@ -350,8 +350,8 @@ func (h *ChannelHandler) GetChannelSubscribers(c *gin.Context) {
 
 // GetSubscriptionStatus returns the subscription status for the current user.
 func (h *ChannelHandler) GetSubscriptionStatus(c *gin.Context) {
-	_, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		Fail(c, ErrBadRequest, "Invalid channel ID")
 		return
 	}
@@ -368,8 +368,8 @@ func (h *ChannelHandler) GetSubscriptionStatus(c *gin.Context) {
 
 // SubscribeToChannel subscribes the current user to a channel.
 func (h *ChannelHandler) SubscribeToChannel(c *gin.Context) {
-	_, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		Fail(c, ErrBadRequest, "Invalid channel ID")
 		return
 	}
@@ -386,8 +386,8 @@ func (h *ChannelHandler) SubscribeToChannel(c *gin.Context) {
 
 // UnsubscribeFromChannel unsubscribes the current user from a channel.
 func (h *ChannelHandler) UnsubscribeFromChannel(c *gin.Context) {
-	_, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		Fail(c, ErrBadRequest, "Invalid channel ID")
 		return
 	}

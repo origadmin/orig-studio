@@ -7,7 +7,7 @@
  * Supports filtering by status and media_id (from URL param).
  */
 
-import {useEffect, useState, useCallback, useMemo} from "react";
+import {useEffect, useState, useCallback, useMemo, useRef} from "react";
 import {useLocation, useNavigate} from "@tanstack/react-router";
 import {mediaApi, encodingApi, type EncodeProfile} from "../../lib/api/media";
 import {API_BASE_URL} from "../../lib/request";
@@ -42,15 +42,15 @@ import {
     Filter, MoreVertical, Trash2, Play,
     Pause, Settings, ArrowUpDown, Download, AlertCircle
 } from "lucide-react";
-import {formatDate} from "../../lib/format";
+import {formatDate, formatRelativeTime} from "../../lib/format";
 
 // ─── Types ─────────────────────────────────────────────
 
 type StatusFilter = "all" | "pending" | "processing" | "success" | "failed" | "skipped";
 
 interface EncodingTask {
-    id: number;
-    media_id: number;
+    id: number | string;
+    media_id: string;
     profile_id: number;
     profile_name?: string;
     status: string;
@@ -58,6 +58,10 @@ interface EncodingTask {
     error_message: string;
     created_at?: any;
     update_time?: any;
+    progress?: number;
+    speed?: string;
+    fps?: number;
+    time?: number;
 }
 
 interface EncodingTaskListResponse {
@@ -66,7 +70,7 @@ interface EncodingTaskListResponse {
     partial_count: number;
     failed_count: number;
     success_count: number;
-    total_filtered: number;
+    total: number;
     page: number;
     page_size: number;
     items: EncodingTask[];
@@ -75,7 +79,7 @@ interface EncodingTaskListResponse {
 // ─── Helpers ──────────────────────────────────────────
 
 /** Build link to Media page that searches for this media ID */
-function mediaLink(mediaId: number): string {
+function mediaLink(mediaId: string): string {
     return `/admin/media?q=%23${mediaId}`;
 }
 
@@ -150,7 +154,8 @@ function TaskRow({
         <>
             <TableRow
                 key={`task-${task.id}`}
-                className={`group hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors ${isSelected ? 'bg-muted/30' : ''}`}>
+                className={`group hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors ${isSelected ? 'bg-muted/30' : ''}`}
+                style={{height: '64px'}}>
                 <TableCell className="w-[50px]">
                     <Checkbox
                         checked={isSelected}
@@ -159,19 +164,20 @@ function TaskRow({
                     />
                 </TableCell>
                 {/* ENCODING */}
-                <TableCell className="w-[200px]">
+                <TableCell className="w-[220px]">
                     <a href={mediaLink(task.media_id)}
-                       className="group/media inline-flex items-center gap-2.5 text-sm font-medium text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400">
+                       className="group/media inline-flex items-center gap-3 text-sm font-medium text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200">
                         <span
-                            className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 group-hover/media:bg-blue-50 dark:group-hover/media:bg-blue-950/30 transition-colors">
+                            className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-50 to-slate-100 dark:from-blue-950/30 dark:to-slate-800 flex items-center justify-center shrink-0 group-hover/media:from-blue-100 group-hover/media:to-blue-50 dark:group-hover/media:from-blue-900/30 dark:group-hover/media:to-blue-950/50 transition-all duration-200 shadow-sm">
                             <Video
-                                className="w-3.5 h-3.5 text-slate-400 group-hover/media:text-blue-500 transition-colors"/>
+                                className="w-4 h-4 text-blue-500 group-hover/media:text-blue-600 dark:group-hover/media:text-blue-400 transition-colors"/>
                         </span>
-                        <div className="min-w-0">
-                            <span className="block truncate max-w-[140px]">#{task.media_id}</span>
+                        <div className="min-w-0 flex-1">
+                            <span className="block truncate max-w-[150px] font-medium text-slate-900 dark:text-slate-100">Media</span>
+                            <span className="block truncate max-w-[150px] text-xs text-muted-foreground">{task.media_id.substring(0, 8)}...</span>
                         </div>
                         <ExternalLink
-                            className="w-3 h-3 opacity-0 group-hover/media:opacity-100 text-blue-500 shrink-0 transition-opacity"/>
+                            className="w-3.5 h-3.5 opacity-0 group-hover/media:opacity-100 text-blue-500 shrink-0 transition-opacity"/>
                     </a>
                 </TableCell>
 
@@ -184,19 +190,19 @@ function TaskRow({
                 </TableCell>
 
                 {/* PROGRESS */}
-                <TableCell className="w-[120px]">
+                <TableCell className="w-[150px]">
                     {isProcessing && (
                         <div className="flex flex-col gap-1.5">
                             <div className="flex items-center justify-between">
                                 <span
                                     className="text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-tight">Processing</span>
                                 <span
-                                    className="text-[10px] tabular-nums font-bold text-slate-600 dark:text-slate-400">50%</span>
+                                    className="text-[10px] tabular-nums font-bold text-slate-600 dark:text-slate-400">{task.progress ?? 0}%</span>
                             </div>
                             <div className="h-2.5 w-full bg-sky-100 dark:bg-sky-950/30 rounded-full overflow-hidden">
                                 <div
                                     className="h-full bg-sky-600 transition-all duration-500 ease-out animate-pulse"
-                                    style={{width: `50%`}}
+                                    style={{width: `${Math.min(Math.max(task.progress ?? 0, 0), 100)}%`}}
                                 />
                             </div>
                         </div>
@@ -223,7 +229,7 @@ function TaskRow({
                             <div className="flex items-center justify-between">
                                 <span
                                     className="text-[10px] font-bold uppercase tracking-tight">{task.status === 'pending' ? 'Queued' : 'Waiting'}</span>
-                                <span className="text-[10px] tabular-nums font-bold">0%</span>
+                                <span className="text-[10px] tabular-nums font-bold text-slate-600 dark:text-slate-400">0%</span>
                             </div>
                             <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"/>
                         </div>
@@ -242,7 +248,7 @@ function TaskRow({
                 {/* HAS FILE */}
                 <TableCell className="w-[80px]">
                     {task.output_path ? (
-                        <Badge variant="outline" className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 border-emerald-200">
+                        <Badge className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 border-2 border-emerald-200 dark:border-emerald-800">
                             Yes
                         </Badge>
                     ) : (
@@ -255,7 +261,7 @@ function TaskRow({
                 {/* Time */}
                 <TableCell className="w-[120px] text-right">
                     <span className="text-[11px] text-muted-foreground tabular-nums whitespace-nowrap">
-                        {formatTime(task.update_time || task.created_at)}
+                        {formatRelativeTime(task.update_time || task.created_at)}
                     </span>
                 </TableCell>
 
@@ -383,7 +389,7 @@ export default function TranscodingStatus() {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<StatusFilter>("all");
     const [page, setPage] = useState(1);
-    const [retryingTaskId, setRetryingTaskId] = useState<number | null>(null);
+    const [retryingTaskId, setRetryingTaskId] = useState<number | string | null>(null);
     const [encodeProfiles, setEncodeProfiles] = useState<EncodeProfile[]>([]);
 
     // Applied filters (used for fetching data)
@@ -414,7 +420,7 @@ export default function TranscodingStatus() {
         failed: 0,
     });
 
-    const {lastEvent, sseStatus} = useTranscoding(undefined);
+    const {lastEvent, sseStatus} = useTranscoding(urlMediaId);
 
     // Fetch total stats (card area) - always complete data
     const fetchTotalStats = useCallback(async () => {
@@ -463,7 +469,7 @@ export default function TranscodingStatus() {
             }
             
             if (mediaId) {
-                params.media_id = parseInt(mediaId, 10);
+                params.media_id = mediaId;
             }
             if (profile && profile !== '') {
                 params.profile = profile;
@@ -483,6 +489,12 @@ export default function TranscodingStatus() {
             setLoading(false);
         }
     }, []);
+
+    // Keep a stable reference to fetchFilteredTasks for setTimeout
+    const fetchFilteredTasksRef = useRef(fetchFilteredTasks);
+    useEffect(() => {
+        fetchFilteredTasksRef.current = fetchFilteredTasks;
+    }, [fetchFilteredTasks]);
 
     // Search and Reset handlers
     const handleSearch = () => {
@@ -566,22 +578,52 @@ export default function TranscodingStatus() {
             if (interval) clearInterval(interval);
         };
     }, [sseStatus.connected, statusFilter, page, urlMediaId, profileFilter, chunkFilter, searchQuery, fetchFilteredTasks]);
+
+    // Fetch data when page changes
+    useEffect(() => {
+        fetchFilteredTasks(statusFilter, page, urlMediaId, profileFilter, chunkFilter, searchQuery);
+    }, [page, statusFilter, urlMediaId, profileFilter, chunkFilter, searchQuery, fetchFilteredTasks]);
     // SSE event handling - only update changed data
     useEffect(() => {
         if (!lastEvent) return;
-        if (urlMediaId && lastEvent.media_id !== parseInt(urlMediaId, 10)) return;
+        if (urlMediaId && lastEvent.media_id !== urlMediaId) return;
 
         // Optimization: only update changed tasks instead of entire list
         setFilteredData(prev => {
             if (!prev || !prev.items) return prev;
 
             const updatedItems = prev.items.map(task => {
-                if (task.id === lastEvent.task_id) {
-                    return {
+                // Compare task.id (string) with lastEvent.task_id (string)
+                if (String(task.id) === String(lastEvent.task_id)) {
+                    const updatedTask: EncodingTask = {
                         ...task,
                         status: lastEvent.status,
-                        update_time: new Date().toISOString()
+                        update_time: new Date().toISOString(),
                     };
+                    
+                    // Update progress fields if available
+                    if (lastEvent.progress !== undefined) {
+                        updatedTask.progress = lastEvent.progress;
+                    }
+                    if (lastEvent.speed !== undefined) {
+                        updatedTask.speed = lastEvent.speed;
+                    }
+                    if (lastEvent.fps !== undefined) {
+                        updatedTask.fps = lastEvent.fps;
+                    }
+                    if (lastEvent.time !== undefined) {
+                        updatedTask.time = lastEvent.time;
+                    }
+                    
+                    // When task is success, refetch to get output_path
+                    if (lastEvent.status === 'success') {
+                        // Refetch data in 1 second to get updated output_path
+                        setTimeout(() => {
+                            fetchFilteredTasksRef.current(statusFilter, page, urlMediaId, profileFilter, chunkFilter, searchQuery);
+                        }, 1000);
+                    }
+                    
+                    return updatedTask;
                 }
                 return task;
             });
@@ -601,7 +643,7 @@ export default function TranscodingStatus() {
                 processing_count: processingCount
             };
         });
-    }, [lastEvent, urlMediaId]);
+    }, [lastEvent, urlMediaId, statusFilter, page, profileFilter, chunkFilter, searchQuery]);
 
     // Sort logic (filtering is handled by backend)
 const filteredTasks = useMemo(() => {
@@ -659,7 +701,7 @@ const filteredTasks = useMemo(() => {
     // 批量操作
     const handleBatchRetry = async () => {
         // 立即更新本地任务状态，提供更好的用户体验
-        setData(prev => {
+        setFilteredData(prev => {
             if (!prev) return prev;
 
             const updatedItems = prev.items.map(task => {
@@ -696,7 +738,7 @@ const filteredTasks = useMemo(() => {
             } catch (err: any) {
                 console.error("Retry task failed:", err.message);
                 // 出错时恢复任务状态
-                setData(prev => {
+                setFilteredData(prev => {
                     if (!prev) return prev;
 
                     const updatedItems = prev.items.map(task => {
@@ -733,11 +775,11 @@ const filteredTasks = useMemo(() => {
     };
 
     // Retry handler
-    const handleRetryTask = async (taskId: number) => {
+    const handleRetryTask = async (taskId: string) => {
         setRetryingTaskId(taskId);
 
         // 立即更新本地任务状态，提供更好的用户体验
-        setData(prev => {
+        setFilteredData(prev => {
             if (!prev) return prev;
 
             const updatedItems = prev.items.map(task => {
@@ -773,7 +815,7 @@ const filteredTasks = useMemo(() => {
         } catch (err: any) {
             console.error("Retry task failed:", err.message);
             // 出错时恢复任务状态
-            setData(prev => {
+            setFilteredData(prev => {
                 if (!prev) return prev;
 
                 const updatedItems = prev.items.map(task => {
@@ -815,13 +857,13 @@ const filteredTasks = useMemo(() => {
 
     // Tab definitions
     const tabs: { value: StatusFilter; label: string; count: number }[] = [
-        {value: "all", label: "全部", count: (filteredData?.pending_count || 0) + (filteredData?.processing_count || 0) + (filteredData?.success_count || 0) + (filteredData?.failed_count || 0)},
+        {value: "all", label: "全部", count: filteredData?.total ?? 0},
         {value: "pending", label: "排队", count: filteredData?.pending_count ?? 0},
         {value: "success", label: "完成", count: filteredData?.success_count ?? 0},
         {value: "failed", label: "失败", count: filteredData?.failed_count ?? 0},
     ];
 
-    const totalPages = Math.ceil(((filteredData?.pending_count || 0) + (filteredData?.processing_count || 0) + (filteredData?.success_count || 0) + (filteredData?.failed_count || 0)) / (filteredData?.page_size ?? 25));
+    const totalPages = Math.ceil((filteredData?.total ?? 0) / (filteredData?.page_size ?? 25));
 
     // Loading skeleton
     if (loading && !filteredData) {
@@ -880,7 +922,7 @@ const filteredTasks = useMemo(() => {
                         <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
 
                         {/* 搜索和筛选 */}
-                        <div className="flex flex-col lg:flex-row gap-4">
+                        <div className="flex flex-col lg:flex-row gap-4 items-center">
                             <div className="flex-1 min-w-0">
                                 <div className="relative w-full">
                                     <Search
@@ -889,17 +931,17 @@ const filteredTasks = useMemo(() => {
                                         placeholder="Search tasks by media ID, profile, or status..."
                                         value={pendingSearchQuery}
                                         onChange={(e) => setPendingSearchQuery(e.target.value)}
-                                        className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                        className="pl-10 h-10 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
                                     />
                                 </div>
                             </div>
-                            <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-3">
                                 <Select
                                     value={pendingProfileFilter}
                                     onValueChange={(val) => setPendingProfileFilter(val === 'all' ? '' : val)}
                                 >
                                     <SelectTrigger
-                                        className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                        className="w-[140px] h-10 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
                                             <SelectValue placeholder="Profile"/>
@@ -917,35 +959,13 @@ const filteredTasks = useMemo(() => {
                                         ))}
                                     </SelectContent>
                                 </Select>
-                                <Select
-                                    value={pendingStatusFilter}
-                                    onValueChange={(val) => setPendingStatusFilter(val === 'all' ? '' : (val as StatusFilter))}
-                                >
-                                    <SelectTrigger
-                                        className="w-[140px] h-9 focus:ring-1 focus:ring-ring focus:ring-offset-0">
-                                        <div className="flex items-center gap-2">
-                                            <Filter className="h-4 w-4"/>
-                                            <SelectValue placeholder="Status"/>
-                                        </div>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all"
-                                                    className="justify-center text-center font-medium opacity-70">
-                                            --- All ---
-                                        </SelectItem>
-                                        <SelectItem value="pending">Pending</SelectItem>
-                                        <SelectItem value="processing">Processing</SelectItem>
-                                        <SelectItem value="success">Success</SelectItem>
-                                        <SelectItem value="failed">Failed</SelectItem>
-                                        <SelectItem value="skipped">Skipped</SelectItem>
-                                    </SelectContent>
-                                </Select>
+
                                 <Select
                                     value={pendingChunkFilter}
                                     onValueChange={(val) => setPendingChunkFilter(val === 'all' ? '' : val)}
                                 >
                                     <SelectTrigger
-                                        className="w-[140px] h-9 focus:ring-1 focus:ring-ring focus:ring-offset-0">
+                                        className="w-[140px] h-10 focus:ring-1 focus:ring-ring focus:ring-offset-0">
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
                                             <SelectValue placeholder="Chunk"/>
@@ -960,11 +980,11 @@ const filteredTasks = useMemo(() => {
                                         <SelectItem value="false">False (Full)</SelectItem>
                                     </SelectContent>
                                 </Select>
-                                <div className="flex items-center gap-2 ml-auto lg:ml-0">
+                                <div className="flex items-center gap-3 ml-auto lg:ml-0">
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="h-9 px-3"
+                                        className="h-10 px-4"
                                         onClick={handleReset}
                                     >
                                         <RotateCcw className="h-4 w-4 mr-2"/>
@@ -973,7 +993,7 @@ const filteredTasks = useMemo(() => {
                                     <Button
                                         variant="default"
                                         size="sm"
-                                        className="h-9 px-4"
+                                        className="h-10 px-4"
                                         onClick={handleSearch}
                                     >
                                         <Search className="h-4 w-4 mr-2"/>
@@ -987,7 +1007,7 @@ const filteredTasks = useMemo(() => {
             </Card>
 
             {/* ═══ Stats Cards ════════════════════════════ */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {
                     [
                         {
@@ -1204,10 +1224,10 @@ const filteredTasks = useMemo(() => {
             </Card>
 
             {/* Pagination */}
-            {filteredData && ((filteredData.pending_count || 0) + (filteredData.processing_count || 0) + (filteredData.success_count || 0) + (filteredData.failed_count || 0)) > (filteredData.page_size ?? 25) && (
+            {filteredData && filteredData.total > (filteredData.page_size ?? 25) && (
                 <div className="flex items-center justify-between pt-1 text-xs text-muted-foreground">
                     <span className="tabular-nums">
-                        Page {filteredData.page} of {totalPages} · {((filteredData.pending_count || 0) + (filteredData.processing_count || 0) + (filteredData.success_count || 0) + (filteredData.failed_count || 0))} total
+                        Page {filteredData.page} of {totalPages} · {filteredData.total} total
                     </span>
                     <div className="flex gap-1.5">
                         <Button variant="outline" size="sm" className="h-8 text-xs px-3"

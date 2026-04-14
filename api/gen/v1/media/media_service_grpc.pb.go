@@ -26,13 +26,27 @@ const (
 	MediaService_DeleteMedia_FullMethodName          = "/api.v1.services.media.MediaService/DeleteMedia"
 	MediaService_IncrementViewCount_FullMethodName   = "/api.v1.services.media.MediaService/IncrementViewCount"
 	MediaService_UploadMedia_FullMethodName          = "/api.v1.services.media.MediaService/UploadMedia"
+	MediaService_GetMediaStream_FullMethodName       = "/api.v1.services.media.MediaService/GetMediaStream"
+	MediaService_GetMediaDownload_FullMethodName     = "/api.v1.services.media.MediaService/GetMediaDownload"
+	MediaService_GetMediaThumbnail_FullMethodName    = "/api.v1.services.media.MediaService/GetMediaThumbnail"
 	MediaService_ListEncodingTasks_FullMethodName    = "/api.v1.services.media.MediaService/ListEncodingTasks"
-	MediaService_GetTranscodingStatus_FullMethodName = "/api.v1.services.media.MediaService/GetTranscodingStatus"
-	MediaService_ListEncodeProfiles_FullMethodName   = "/api.v1.services.media.MediaService/ListEncodeProfiles"
-	MediaService_GetEncodeProfile_FullMethodName     = "/api.v1.services.media.MediaService/GetEncodeProfile"
-	MediaService_CreateEncodeProfile_FullMethodName  = "/api.v1.services.media.MediaService/CreateEncodeProfile"
-	MediaService_UpdateEncodeProfile_FullMethodName  = "/api.v1.services.media.MediaService/UpdateEncodeProfile"
-	MediaService_DeleteEncodeProfile_FullMethodName  = "/api.v1.services.media.MediaService/DeleteEncodeProfile"
+	MediaService_GetMediaVariants_FullMethodName     = "/api.v1.services.media.MediaService/GetMediaVariants"
+	MediaService_RetryEncodingTask_FullMethodName    = "/api.v1.services.media.MediaService/RetryEncodingTask"
+	MediaService_GetEncodingStatus_FullMethodName    = "/api.v1.services.media.MediaService/GetEncodingStatus"
+	MediaService_ListAllEncodingTasks_FullMethodName = "/api.v1.services.media.MediaService/ListAllEncodingTasks"
+	MediaService_RetryAllFailedTasks_FullMethodName  = "/api.v1.services.media.MediaService/RetryAllFailedTasks"
+	MediaService_GetMediaLikes_FullMethodName        = "/api.v1.services.media.MediaService/GetMediaLikes"
+	MediaService_ToggleMediaLike_FullMethodName      = "/api.v1.services.media.MediaService/ToggleMediaLike"
+	MediaService_DeleteMediaLike_FullMethodName      = "/api.v1.services.media.MediaService/DeleteMediaLike"
+	MediaService_GetMediaFavorites_FullMethodName    = "/api.v1.services.media.MediaService/GetMediaFavorites"
+	MediaService_ToggleMediaFavorite_FullMethodName  = "/api.v1.services.media.MediaService/ToggleMediaFavorite"
+	MediaService_DeleteMediaFavorite_FullMethodName  = "/api.v1.services.media.MediaService/DeleteMediaFavorite"
+	MediaService_GetMediaShares_FullMethodName       = "/api.v1.services.media.MediaService/GetMediaShares"
+	MediaService_CreateMediaShare_FullMethodName     = "/api.v1.services.media.MediaService/CreateMediaShare"
+	MediaService_GetMediaComments_FullMethodName     = "/api.v1.services.media.MediaService/GetMediaComments"
+	MediaService_GetMediaSubtitles_FullMethodName    = "/api.v1.services.media.MediaService/GetMediaSubtitles"
+	MediaService_CreateMediaSubtitle_FullMethodName  = "/api.v1.services.media.MediaService/CreateMediaSubtitle"
+	MediaService_GetMediaMetadata_FullMethodName     = "/api.v1.services.media.MediaService/GetMediaMetadata"
 )
 
 // MediaServiceClient is the client API for MediaService service.
@@ -54,22 +68,49 @@ type MediaServiceClient interface {
 	// IncrementViewCount increments the view count of a media.
 	IncrementViewCount(ctx context.Context, in *IncrementViewCountRequest, opts ...grpc.CallOption) (*IncrementViewCountResponse, error)
 	// UploadMedia uploads a media file.
-	// Note: For large files, standard HTTP multipart is preferred over gRPC in the gateway.
 	UploadMedia(ctx context.Context, in *UploadMediaRequest, opts ...grpc.CallOption) (*UploadMediaResponse, error)
+	// GetMediaStream returns the streaming URL for a media.
+	GetMediaStream(ctx context.Context, in *GetMediaStreamRequest, opts ...grpc.CallOption) (*GetMediaStreamResponse, error)
+	// GetMediaDownload returns the download URL for a media.
+	GetMediaDownload(ctx context.Context, in *GetMediaDownloadRequest, opts ...grpc.CallOption) (*GetMediaDownloadResponse, error)
+	// GetMediaThumbnail returns the thumbnail URL for a media.
+	GetMediaThumbnail(ctx context.Context, in *GetMediaThumbnailRequest, opts ...grpc.CallOption) (*GetMediaThumbnailResponse, error)
 	// ListEncodingTasks returns a list of encoding tasks for a media.
 	ListEncodingTasks(ctx context.Context, in *ListEncodingTasksRequest, opts ...grpc.CallOption) (*ListEncodingTasksResponse, error)
-	// GetTranscodingStatus returns the overall transcoding status of the system.
-	GetTranscodingStatus(ctx context.Context, in *GetTranscodingStatusRequest, opts ...grpc.CallOption) (*GetTranscodingStatusResponse, error)
-	// ListEncodeProfiles returns a list of encoding profiles.
-	ListEncodeProfiles(ctx context.Context, in *ListEncodeProfilesRequest, opts ...grpc.CallOption) (*ListEncodeProfilesResponse, error)
-	// GetEncodeProfile returns an encoding profile by ID.
-	GetEncodeProfile(ctx context.Context, in *GetEncodeProfileRequest, opts ...grpc.CallOption) (*GetEncodeProfileResponse, error)
-	// CreateEncodeProfile creates a new encoding profile.
-	CreateEncodeProfile(ctx context.Context, in *CreateEncodeProfileRequest, opts ...grpc.CallOption) (*CreateEncodeProfileResponse, error)
-	// UpdateEncodeProfile updates an existing encoding profile.
-	UpdateEncodeProfile(ctx context.Context, in *UpdateEncodeProfileRequest, opts ...grpc.CallOption) (*UpdateEncodeProfileResponse, error)
-	// DeleteEncodeProfile deletes an encoding profile.
-	DeleteEncodeProfile(ctx context.Context, in *DeleteEncodeProfileRequest, opts ...grpc.CallOption) (*DeleteEncodeProfileResponse, error)
+	// GetMediaVariants returns the available variants for a media.
+	GetMediaVariants(ctx context.Context, in *GetMediaVariantsRequest, opts ...grpc.CallOption) (*GetMediaVariantsResponse, error)
+	// RetryEncodingTask retries a specific encoding task.
+	RetryEncodingTask(ctx context.Context, in *RetryEncodingTaskRequest, opts ...grpc.CallOption) (*RetryEncodingTaskResponse, error)
+	// GetEncodingStatus returns the overall encoding status of the system.
+	GetEncodingStatus(ctx context.Context, in *GetEncodingStatusRequest, opts ...grpc.CallOption) (*GetEncodingStatusResponse, error)
+	// ListAllEncodingTasks returns a flat list of all encoding tasks (admin view).
+	ListAllEncodingTasks(ctx context.Context, in *ListAllEncodingTasksRequest, opts ...grpc.CallOption) (*ListAllEncodingTasksResponse, error)
+	// RetryAllFailedTasks retries all failed encoding tasks.
+	RetryAllFailedTasks(ctx context.Context, in *RetryAllFailedTasksRequest, opts ...grpc.CallOption) (*RetryAllFailedTasksResponse, error)
+	// GetMediaLikes returns the like status for a media.
+	GetMediaLikes(ctx context.Context, in *GetMediaLikesRequest, opts ...grpc.CallOption) (*GetMediaLikesResponse, error)
+	// ToggleMediaLike toggles like status for a media.
+	ToggleMediaLike(ctx context.Context, in *ToggleMediaLikeRequest, opts ...grpc.CallOption) (*ToggleMediaLikeResponse, error)
+	// DeleteMediaLike removes like from a media.
+	DeleteMediaLike(ctx context.Context, in *DeleteMediaLikeRequest, opts ...grpc.CallOption) (*DeleteMediaLikeResponse, error)
+	// GetMediaFavorites returns the favorite status for a media.
+	GetMediaFavorites(ctx context.Context, in *GetMediaFavoritesRequest, opts ...grpc.CallOption) (*GetMediaFavoritesResponse, error)
+	// ToggleMediaFavorite toggles favorite status for a media.
+	ToggleMediaFavorite(ctx context.Context, in *ToggleMediaFavoriteRequest, opts ...grpc.CallOption) (*ToggleMediaFavoriteResponse, error)
+	// DeleteMediaFavorite removes favorite from a media.
+	DeleteMediaFavorite(ctx context.Context, in *DeleteMediaFavoriteRequest, opts ...grpc.CallOption) (*DeleteMediaFavoriteResponse, error)
+	// GetMediaShares returns share statistics for a media.
+	GetMediaShares(ctx context.Context, in *GetMediaSharesRequest, opts ...grpc.CallOption) (*GetMediaSharesResponse, error)
+	// CreateMediaShare creates a share record for a media.
+	CreateMediaShare(ctx context.Context, in *CreateMediaShareRequest, opts ...grpc.CallOption) (*CreateMediaShareResponse, error)
+	// GetMediaComments returns comments for a media.
+	GetMediaComments(ctx context.Context, in *GetMediaCommentsRequest, opts ...grpc.CallOption) (*GetMediaCommentsResponse, error)
+	// GetMediaSubtitles returns subtitles for a media.
+	GetMediaSubtitles(ctx context.Context, in *GetMediaSubtitlesRequest, opts ...grpc.CallOption) (*GetMediaSubtitlesResponse, error)
+	// CreateMediaSubtitle uploads a subtitle for a media.
+	CreateMediaSubtitle(ctx context.Context, in *CreateMediaSubtitleRequest, opts ...grpc.CallOption) (*CreateMediaSubtitleResponse, error)
+	// GetMediaMetadata returns metadata for a media.
+	GetMediaMetadata(ctx context.Context, in *GetMediaMetadataRequest, opts ...grpc.CallOption) (*GetMediaMetadataResponse, error)
 }
 
 type mediaServiceClient struct {
@@ -150,6 +191,36 @@ func (c *mediaServiceClient) UploadMedia(ctx context.Context, in *UploadMediaReq
 	return out, nil
 }
 
+func (c *mediaServiceClient) GetMediaStream(ctx context.Context, in *GetMediaStreamRequest, opts ...grpc.CallOption) (*GetMediaStreamResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMediaStreamResponse)
+	err := c.cc.Invoke(ctx, MediaService_GetMediaStream_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) GetMediaDownload(ctx context.Context, in *GetMediaDownloadRequest, opts ...grpc.CallOption) (*GetMediaDownloadResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMediaDownloadResponse)
+	err := c.cc.Invoke(ctx, MediaService_GetMediaDownload_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) GetMediaThumbnail(ctx context.Context, in *GetMediaThumbnailRequest, opts ...grpc.CallOption) (*GetMediaThumbnailResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMediaThumbnailResponse)
+	err := c.cc.Invoke(ctx, MediaService_GetMediaThumbnail_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *mediaServiceClient) ListEncodingTasks(ctx context.Context, in *ListEncodingTasksRequest, opts ...grpc.CallOption) (*ListEncodingTasksResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListEncodingTasksResponse)
@@ -160,60 +231,170 @@ func (c *mediaServiceClient) ListEncodingTasks(ctx context.Context, in *ListEnco
 	return out, nil
 }
 
-func (c *mediaServiceClient) GetTranscodingStatus(ctx context.Context, in *GetTranscodingStatusRequest, opts ...grpc.CallOption) (*GetTranscodingStatusResponse, error) {
+func (c *mediaServiceClient) GetMediaVariants(ctx context.Context, in *GetMediaVariantsRequest, opts ...grpc.CallOption) (*GetMediaVariantsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetTranscodingStatusResponse)
-	err := c.cc.Invoke(ctx, MediaService_GetTranscodingStatus_FullMethodName, in, out, cOpts...)
+	out := new(GetMediaVariantsResponse)
+	err := c.cc.Invoke(ctx, MediaService_GetMediaVariants_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *mediaServiceClient) ListEncodeProfiles(ctx context.Context, in *ListEncodeProfilesRequest, opts ...grpc.CallOption) (*ListEncodeProfilesResponse, error) {
+func (c *mediaServiceClient) RetryEncodingTask(ctx context.Context, in *RetryEncodingTaskRequest, opts ...grpc.CallOption) (*RetryEncodingTaskResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListEncodeProfilesResponse)
-	err := c.cc.Invoke(ctx, MediaService_ListEncodeProfiles_FullMethodName, in, out, cOpts...)
+	out := new(RetryEncodingTaskResponse)
+	err := c.cc.Invoke(ctx, MediaService_RetryEncodingTask_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *mediaServiceClient) GetEncodeProfile(ctx context.Context, in *GetEncodeProfileRequest, opts ...grpc.CallOption) (*GetEncodeProfileResponse, error) {
+func (c *mediaServiceClient) GetEncodingStatus(ctx context.Context, in *GetEncodingStatusRequest, opts ...grpc.CallOption) (*GetEncodingStatusResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetEncodeProfileResponse)
-	err := c.cc.Invoke(ctx, MediaService_GetEncodeProfile_FullMethodName, in, out, cOpts...)
+	out := new(GetEncodingStatusResponse)
+	err := c.cc.Invoke(ctx, MediaService_GetEncodingStatus_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *mediaServiceClient) CreateEncodeProfile(ctx context.Context, in *CreateEncodeProfileRequest, opts ...grpc.CallOption) (*CreateEncodeProfileResponse, error) {
+func (c *mediaServiceClient) ListAllEncodingTasks(ctx context.Context, in *ListAllEncodingTasksRequest, opts ...grpc.CallOption) (*ListAllEncodingTasksResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateEncodeProfileResponse)
-	err := c.cc.Invoke(ctx, MediaService_CreateEncodeProfile_FullMethodName, in, out, cOpts...)
+	out := new(ListAllEncodingTasksResponse)
+	err := c.cc.Invoke(ctx, MediaService_ListAllEncodingTasks_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *mediaServiceClient) UpdateEncodeProfile(ctx context.Context, in *UpdateEncodeProfileRequest, opts ...grpc.CallOption) (*UpdateEncodeProfileResponse, error) {
+func (c *mediaServiceClient) RetryAllFailedTasks(ctx context.Context, in *RetryAllFailedTasksRequest, opts ...grpc.CallOption) (*RetryAllFailedTasksResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateEncodeProfileResponse)
-	err := c.cc.Invoke(ctx, MediaService_UpdateEncodeProfile_FullMethodName, in, out, cOpts...)
+	out := new(RetryAllFailedTasksResponse)
+	err := c.cc.Invoke(ctx, MediaService_RetryAllFailedTasks_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *mediaServiceClient) DeleteEncodeProfile(ctx context.Context, in *DeleteEncodeProfileRequest, opts ...grpc.CallOption) (*DeleteEncodeProfileResponse, error) {
+func (c *mediaServiceClient) GetMediaLikes(ctx context.Context, in *GetMediaLikesRequest, opts ...grpc.CallOption) (*GetMediaLikesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteEncodeProfileResponse)
-	err := c.cc.Invoke(ctx, MediaService_DeleteEncodeProfile_FullMethodName, in, out, cOpts...)
+	out := new(GetMediaLikesResponse)
+	err := c.cc.Invoke(ctx, MediaService_GetMediaLikes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) ToggleMediaLike(ctx context.Context, in *ToggleMediaLikeRequest, opts ...grpc.CallOption) (*ToggleMediaLikeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ToggleMediaLikeResponse)
+	err := c.cc.Invoke(ctx, MediaService_ToggleMediaLike_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) DeleteMediaLike(ctx context.Context, in *DeleteMediaLikeRequest, opts ...grpc.CallOption) (*DeleteMediaLikeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteMediaLikeResponse)
+	err := c.cc.Invoke(ctx, MediaService_DeleteMediaLike_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) GetMediaFavorites(ctx context.Context, in *GetMediaFavoritesRequest, opts ...grpc.CallOption) (*GetMediaFavoritesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMediaFavoritesResponse)
+	err := c.cc.Invoke(ctx, MediaService_GetMediaFavorites_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) ToggleMediaFavorite(ctx context.Context, in *ToggleMediaFavoriteRequest, opts ...grpc.CallOption) (*ToggleMediaFavoriteResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ToggleMediaFavoriteResponse)
+	err := c.cc.Invoke(ctx, MediaService_ToggleMediaFavorite_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) DeleteMediaFavorite(ctx context.Context, in *DeleteMediaFavoriteRequest, opts ...grpc.CallOption) (*DeleteMediaFavoriteResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteMediaFavoriteResponse)
+	err := c.cc.Invoke(ctx, MediaService_DeleteMediaFavorite_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) GetMediaShares(ctx context.Context, in *GetMediaSharesRequest, opts ...grpc.CallOption) (*GetMediaSharesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMediaSharesResponse)
+	err := c.cc.Invoke(ctx, MediaService_GetMediaShares_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) CreateMediaShare(ctx context.Context, in *CreateMediaShareRequest, opts ...grpc.CallOption) (*CreateMediaShareResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateMediaShareResponse)
+	err := c.cc.Invoke(ctx, MediaService_CreateMediaShare_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) GetMediaComments(ctx context.Context, in *GetMediaCommentsRequest, opts ...grpc.CallOption) (*GetMediaCommentsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMediaCommentsResponse)
+	err := c.cc.Invoke(ctx, MediaService_GetMediaComments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) GetMediaSubtitles(ctx context.Context, in *GetMediaSubtitlesRequest, opts ...grpc.CallOption) (*GetMediaSubtitlesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMediaSubtitlesResponse)
+	err := c.cc.Invoke(ctx, MediaService_GetMediaSubtitles_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) CreateMediaSubtitle(ctx context.Context, in *CreateMediaSubtitleRequest, opts ...grpc.CallOption) (*CreateMediaSubtitleResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateMediaSubtitleResponse)
+	err := c.cc.Invoke(ctx, MediaService_CreateMediaSubtitle_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) GetMediaMetadata(ctx context.Context, in *GetMediaMetadataRequest, opts ...grpc.CallOption) (*GetMediaMetadataResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMediaMetadataResponse)
+	err := c.cc.Invoke(ctx, MediaService_GetMediaMetadata_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -239,22 +420,49 @@ type MediaServiceServer interface {
 	// IncrementViewCount increments the view count of a media.
 	IncrementViewCount(context.Context, *IncrementViewCountRequest) (*IncrementViewCountResponse, error)
 	// UploadMedia uploads a media file.
-	// Note: For large files, standard HTTP multipart is preferred over gRPC in the gateway.
 	UploadMedia(context.Context, *UploadMediaRequest) (*UploadMediaResponse, error)
+	// GetMediaStream returns the streaming URL for a media.
+	GetMediaStream(context.Context, *GetMediaStreamRequest) (*GetMediaStreamResponse, error)
+	// GetMediaDownload returns the download URL for a media.
+	GetMediaDownload(context.Context, *GetMediaDownloadRequest) (*GetMediaDownloadResponse, error)
+	// GetMediaThumbnail returns the thumbnail URL for a media.
+	GetMediaThumbnail(context.Context, *GetMediaThumbnailRequest) (*GetMediaThumbnailResponse, error)
 	// ListEncodingTasks returns a list of encoding tasks for a media.
 	ListEncodingTasks(context.Context, *ListEncodingTasksRequest) (*ListEncodingTasksResponse, error)
-	// GetTranscodingStatus returns the overall transcoding status of the system.
-	GetTranscodingStatus(context.Context, *GetTranscodingStatusRequest) (*GetTranscodingStatusResponse, error)
-	// ListEncodeProfiles returns a list of encoding profiles.
-	ListEncodeProfiles(context.Context, *ListEncodeProfilesRequest) (*ListEncodeProfilesResponse, error)
-	// GetEncodeProfile returns an encoding profile by ID.
-	GetEncodeProfile(context.Context, *GetEncodeProfileRequest) (*GetEncodeProfileResponse, error)
-	// CreateEncodeProfile creates a new encoding profile.
-	CreateEncodeProfile(context.Context, *CreateEncodeProfileRequest) (*CreateEncodeProfileResponse, error)
-	// UpdateEncodeProfile updates an existing encoding profile.
-	UpdateEncodeProfile(context.Context, *UpdateEncodeProfileRequest) (*UpdateEncodeProfileResponse, error)
-	// DeleteEncodeProfile deletes an encoding profile.
-	DeleteEncodeProfile(context.Context, *DeleteEncodeProfileRequest) (*DeleteEncodeProfileResponse, error)
+	// GetMediaVariants returns the available variants for a media.
+	GetMediaVariants(context.Context, *GetMediaVariantsRequest) (*GetMediaVariantsResponse, error)
+	// RetryEncodingTask retries a specific encoding task.
+	RetryEncodingTask(context.Context, *RetryEncodingTaskRequest) (*RetryEncodingTaskResponse, error)
+	// GetEncodingStatus returns the overall encoding status of the system.
+	GetEncodingStatus(context.Context, *GetEncodingStatusRequest) (*GetEncodingStatusResponse, error)
+	// ListAllEncodingTasks returns a flat list of all encoding tasks (admin view).
+	ListAllEncodingTasks(context.Context, *ListAllEncodingTasksRequest) (*ListAllEncodingTasksResponse, error)
+	// RetryAllFailedTasks retries all failed encoding tasks.
+	RetryAllFailedTasks(context.Context, *RetryAllFailedTasksRequest) (*RetryAllFailedTasksResponse, error)
+	// GetMediaLikes returns the like status for a media.
+	GetMediaLikes(context.Context, *GetMediaLikesRequest) (*GetMediaLikesResponse, error)
+	// ToggleMediaLike toggles like status for a media.
+	ToggleMediaLike(context.Context, *ToggleMediaLikeRequest) (*ToggleMediaLikeResponse, error)
+	// DeleteMediaLike removes like from a media.
+	DeleteMediaLike(context.Context, *DeleteMediaLikeRequest) (*DeleteMediaLikeResponse, error)
+	// GetMediaFavorites returns the favorite status for a media.
+	GetMediaFavorites(context.Context, *GetMediaFavoritesRequest) (*GetMediaFavoritesResponse, error)
+	// ToggleMediaFavorite toggles favorite status for a media.
+	ToggleMediaFavorite(context.Context, *ToggleMediaFavoriteRequest) (*ToggleMediaFavoriteResponse, error)
+	// DeleteMediaFavorite removes favorite from a media.
+	DeleteMediaFavorite(context.Context, *DeleteMediaFavoriteRequest) (*DeleteMediaFavoriteResponse, error)
+	// GetMediaShares returns share statistics for a media.
+	GetMediaShares(context.Context, *GetMediaSharesRequest) (*GetMediaSharesResponse, error)
+	// CreateMediaShare creates a share record for a media.
+	CreateMediaShare(context.Context, *CreateMediaShareRequest) (*CreateMediaShareResponse, error)
+	// GetMediaComments returns comments for a media.
+	GetMediaComments(context.Context, *GetMediaCommentsRequest) (*GetMediaCommentsResponse, error)
+	// GetMediaSubtitles returns subtitles for a media.
+	GetMediaSubtitles(context.Context, *GetMediaSubtitlesRequest) (*GetMediaSubtitlesResponse, error)
+	// CreateMediaSubtitle uploads a subtitle for a media.
+	CreateMediaSubtitle(context.Context, *CreateMediaSubtitleRequest) (*CreateMediaSubtitleResponse, error)
+	// GetMediaMetadata returns metadata for a media.
+	GetMediaMetadata(context.Context, *GetMediaMetadataRequest) (*GetMediaMetadataResponse, error)
 	mustEmbedUnimplementedMediaServiceServer()
 }
 
@@ -286,26 +494,68 @@ func (UnimplementedMediaServiceServer) IncrementViewCount(context.Context, *Incr
 func (UnimplementedMediaServiceServer) UploadMedia(context.Context, *UploadMediaRequest) (*UploadMediaResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UploadMedia not implemented")
 }
+func (UnimplementedMediaServiceServer) GetMediaStream(context.Context, *GetMediaStreamRequest) (*GetMediaStreamResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMediaStream not implemented")
+}
+func (UnimplementedMediaServiceServer) GetMediaDownload(context.Context, *GetMediaDownloadRequest) (*GetMediaDownloadResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMediaDownload not implemented")
+}
+func (UnimplementedMediaServiceServer) GetMediaThumbnail(context.Context, *GetMediaThumbnailRequest) (*GetMediaThumbnailResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMediaThumbnail not implemented")
+}
 func (UnimplementedMediaServiceServer) ListEncodingTasks(context.Context, *ListEncodingTasksRequest) (*ListEncodingTasksResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListEncodingTasks not implemented")
 }
-func (UnimplementedMediaServiceServer) GetTranscodingStatus(context.Context, *GetTranscodingStatusRequest) (*GetTranscodingStatusResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetTranscodingStatus not implemented")
+func (UnimplementedMediaServiceServer) GetMediaVariants(context.Context, *GetMediaVariantsRequest) (*GetMediaVariantsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMediaVariants not implemented")
 }
-func (UnimplementedMediaServiceServer) ListEncodeProfiles(context.Context, *ListEncodeProfilesRequest) (*ListEncodeProfilesResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListEncodeProfiles not implemented")
+func (UnimplementedMediaServiceServer) RetryEncodingTask(context.Context, *RetryEncodingTaskRequest) (*RetryEncodingTaskResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RetryEncodingTask not implemented")
 }
-func (UnimplementedMediaServiceServer) GetEncodeProfile(context.Context, *GetEncodeProfileRequest) (*GetEncodeProfileResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetEncodeProfile not implemented")
+func (UnimplementedMediaServiceServer) GetEncodingStatus(context.Context, *GetEncodingStatusRequest) (*GetEncodingStatusResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetEncodingStatus not implemented")
 }
-func (UnimplementedMediaServiceServer) CreateEncodeProfile(context.Context, *CreateEncodeProfileRequest) (*CreateEncodeProfileResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method CreateEncodeProfile not implemented")
+func (UnimplementedMediaServiceServer) ListAllEncodingTasks(context.Context, *ListAllEncodingTasksRequest) (*ListAllEncodingTasksResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListAllEncodingTasks not implemented")
 }
-func (UnimplementedMediaServiceServer) UpdateEncodeProfile(context.Context, *UpdateEncodeProfileRequest) (*UpdateEncodeProfileResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method UpdateEncodeProfile not implemented")
+func (UnimplementedMediaServiceServer) RetryAllFailedTasks(context.Context, *RetryAllFailedTasksRequest) (*RetryAllFailedTasksResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RetryAllFailedTasks not implemented")
 }
-func (UnimplementedMediaServiceServer) DeleteEncodeProfile(context.Context, *DeleteEncodeProfileRequest) (*DeleteEncodeProfileResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method DeleteEncodeProfile not implemented")
+func (UnimplementedMediaServiceServer) GetMediaLikes(context.Context, *GetMediaLikesRequest) (*GetMediaLikesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMediaLikes not implemented")
+}
+func (UnimplementedMediaServiceServer) ToggleMediaLike(context.Context, *ToggleMediaLikeRequest) (*ToggleMediaLikeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ToggleMediaLike not implemented")
+}
+func (UnimplementedMediaServiceServer) DeleteMediaLike(context.Context, *DeleteMediaLikeRequest) (*DeleteMediaLikeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteMediaLike not implemented")
+}
+func (UnimplementedMediaServiceServer) GetMediaFavorites(context.Context, *GetMediaFavoritesRequest) (*GetMediaFavoritesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMediaFavorites not implemented")
+}
+func (UnimplementedMediaServiceServer) ToggleMediaFavorite(context.Context, *ToggleMediaFavoriteRequest) (*ToggleMediaFavoriteResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ToggleMediaFavorite not implemented")
+}
+func (UnimplementedMediaServiceServer) DeleteMediaFavorite(context.Context, *DeleteMediaFavoriteRequest) (*DeleteMediaFavoriteResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteMediaFavorite not implemented")
+}
+func (UnimplementedMediaServiceServer) GetMediaShares(context.Context, *GetMediaSharesRequest) (*GetMediaSharesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMediaShares not implemented")
+}
+func (UnimplementedMediaServiceServer) CreateMediaShare(context.Context, *CreateMediaShareRequest) (*CreateMediaShareResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateMediaShare not implemented")
+}
+func (UnimplementedMediaServiceServer) GetMediaComments(context.Context, *GetMediaCommentsRequest) (*GetMediaCommentsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMediaComments not implemented")
+}
+func (UnimplementedMediaServiceServer) GetMediaSubtitles(context.Context, *GetMediaSubtitlesRequest) (*GetMediaSubtitlesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMediaSubtitles not implemented")
+}
+func (UnimplementedMediaServiceServer) CreateMediaSubtitle(context.Context, *CreateMediaSubtitleRequest) (*CreateMediaSubtitleResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateMediaSubtitle not implemented")
+}
+func (UnimplementedMediaServiceServer) GetMediaMetadata(context.Context, *GetMediaMetadataRequest) (*GetMediaMetadataResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMediaMetadata not implemented")
 }
 func (UnimplementedMediaServiceServer) mustEmbedUnimplementedMediaServiceServer() {}
 func (UnimplementedMediaServiceServer) testEmbeddedByValue()                      {}
@@ -454,6 +704,60 @@ func _MediaService_UploadMedia_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MediaService_GetMediaStream_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMediaStreamRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).GetMediaStream(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_GetMediaStream_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).GetMediaStream(ctx, req.(*GetMediaStreamRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_GetMediaDownload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMediaDownloadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).GetMediaDownload(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_GetMediaDownload_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).GetMediaDownload(ctx, req.(*GetMediaDownloadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_GetMediaThumbnail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMediaThumbnailRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).GetMediaThumbnail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_GetMediaThumbnail_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).GetMediaThumbnail(ctx, req.(*GetMediaThumbnailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _MediaService_ListEncodingTasks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListEncodingTasksRequest)
 	if err := dec(in); err != nil {
@@ -472,110 +776,308 @@ func _MediaService_ListEncodingTasks_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MediaService_GetTranscodingStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetTranscodingStatusRequest)
+func _MediaService_GetMediaVariants_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMediaVariantsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MediaServiceServer).GetTranscodingStatus(ctx, in)
+		return srv.(MediaServiceServer).GetMediaVariants(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MediaService_GetTranscodingStatus_FullMethodName,
+		FullMethod: MediaService_GetMediaVariants_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MediaServiceServer).GetTranscodingStatus(ctx, req.(*GetTranscodingStatusRequest))
+		return srv.(MediaServiceServer).GetMediaVariants(ctx, req.(*GetMediaVariantsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MediaService_ListEncodeProfiles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListEncodeProfilesRequest)
+func _MediaService_RetryEncodingTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RetryEncodingTaskRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MediaServiceServer).ListEncodeProfiles(ctx, in)
+		return srv.(MediaServiceServer).RetryEncodingTask(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MediaService_ListEncodeProfiles_FullMethodName,
+		FullMethod: MediaService_RetryEncodingTask_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MediaServiceServer).ListEncodeProfiles(ctx, req.(*ListEncodeProfilesRequest))
+		return srv.(MediaServiceServer).RetryEncodingTask(ctx, req.(*RetryEncodingTaskRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MediaService_GetEncodeProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetEncodeProfileRequest)
+func _MediaService_GetEncodingStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEncodingStatusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MediaServiceServer).GetEncodeProfile(ctx, in)
+		return srv.(MediaServiceServer).GetEncodingStatus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MediaService_GetEncodeProfile_FullMethodName,
+		FullMethod: MediaService_GetEncodingStatus_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MediaServiceServer).GetEncodeProfile(ctx, req.(*GetEncodeProfileRequest))
+		return srv.(MediaServiceServer).GetEncodingStatus(ctx, req.(*GetEncodingStatusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MediaService_CreateEncodeProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateEncodeProfileRequest)
+func _MediaService_ListAllEncodingTasks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAllEncodingTasksRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MediaServiceServer).CreateEncodeProfile(ctx, in)
+		return srv.(MediaServiceServer).ListAllEncodingTasks(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MediaService_CreateEncodeProfile_FullMethodName,
+		FullMethod: MediaService_ListAllEncodingTasks_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MediaServiceServer).CreateEncodeProfile(ctx, req.(*CreateEncodeProfileRequest))
+		return srv.(MediaServiceServer).ListAllEncodingTasks(ctx, req.(*ListAllEncodingTasksRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MediaService_UpdateEncodeProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateEncodeProfileRequest)
+func _MediaService_RetryAllFailedTasks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RetryAllFailedTasksRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MediaServiceServer).UpdateEncodeProfile(ctx, in)
+		return srv.(MediaServiceServer).RetryAllFailedTasks(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MediaService_UpdateEncodeProfile_FullMethodName,
+		FullMethod: MediaService_RetryAllFailedTasks_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MediaServiceServer).UpdateEncodeProfile(ctx, req.(*UpdateEncodeProfileRequest))
+		return srv.(MediaServiceServer).RetryAllFailedTasks(ctx, req.(*RetryAllFailedTasksRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MediaService_DeleteEncodeProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteEncodeProfileRequest)
+func _MediaService_GetMediaLikes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMediaLikesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MediaServiceServer).DeleteEncodeProfile(ctx, in)
+		return srv.(MediaServiceServer).GetMediaLikes(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MediaService_DeleteEncodeProfile_FullMethodName,
+		FullMethod: MediaService_GetMediaLikes_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MediaServiceServer).DeleteEncodeProfile(ctx, req.(*DeleteEncodeProfileRequest))
+		return srv.(MediaServiceServer).GetMediaLikes(ctx, req.(*GetMediaLikesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_ToggleMediaLike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ToggleMediaLikeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).ToggleMediaLike(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_ToggleMediaLike_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).ToggleMediaLike(ctx, req.(*ToggleMediaLikeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_DeleteMediaLike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteMediaLikeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).DeleteMediaLike(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_DeleteMediaLike_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).DeleteMediaLike(ctx, req.(*DeleteMediaLikeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_GetMediaFavorites_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMediaFavoritesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).GetMediaFavorites(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_GetMediaFavorites_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).GetMediaFavorites(ctx, req.(*GetMediaFavoritesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_ToggleMediaFavorite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ToggleMediaFavoriteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).ToggleMediaFavorite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_ToggleMediaFavorite_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).ToggleMediaFavorite(ctx, req.(*ToggleMediaFavoriteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_DeleteMediaFavorite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteMediaFavoriteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).DeleteMediaFavorite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_DeleteMediaFavorite_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).DeleteMediaFavorite(ctx, req.(*DeleteMediaFavoriteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_GetMediaShares_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMediaSharesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).GetMediaShares(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_GetMediaShares_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).GetMediaShares(ctx, req.(*GetMediaSharesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_CreateMediaShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateMediaShareRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).CreateMediaShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_CreateMediaShare_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).CreateMediaShare(ctx, req.(*CreateMediaShareRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_GetMediaComments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMediaCommentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).GetMediaComments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_GetMediaComments_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).GetMediaComments(ctx, req.(*GetMediaCommentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_GetMediaSubtitles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMediaSubtitlesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).GetMediaSubtitles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_GetMediaSubtitles_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).GetMediaSubtitles(ctx, req.(*GetMediaSubtitlesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_CreateMediaSubtitle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateMediaSubtitleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).CreateMediaSubtitle(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_CreateMediaSubtitle_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).CreateMediaSubtitle(ctx, req.(*CreateMediaSubtitleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_GetMediaMetadata_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMediaMetadataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).GetMediaMetadata(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_GetMediaMetadata_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).GetMediaMetadata(ctx, req.(*GetMediaMetadataRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -616,32 +1118,353 @@ var MediaService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _MediaService_UploadMedia_Handler,
 		},
 		{
+			MethodName: "GetMediaStream",
+			Handler:    _MediaService_GetMediaStream_Handler,
+		},
+		{
+			MethodName: "GetMediaDownload",
+			Handler:    _MediaService_GetMediaDownload_Handler,
+		},
+		{
+			MethodName: "GetMediaThumbnail",
+			Handler:    _MediaService_GetMediaThumbnail_Handler,
+		},
+		{
 			MethodName: "ListEncodingTasks",
 			Handler:    _MediaService_ListEncodingTasks_Handler,
 		},
 		{
-			MethodName: "GetTranscodingStatus",
-			Handler:    _MediaService_GetTranscodingStatus_Handler,
+			MethodName: "GetMediaVariants",
+			Handler:    _MediaService_GetMediaVariants_Handler,
 		},
 		{
+			MethodName: "RetryEncodingTask",
+			Handler:    _MediaService_RetryEncodingTask_Handler,
+		},
+		{
+			MethodName: "GetEncodingStatus",
+			Handler:    _MediaService_GetEncodingStatus_Handler,
+		},
+		{
+			MethodName: "ListAllEncodingTasks",
+			Handler:    _MediaService_ListAllEncodingTasks_Handler,
+		},
+		{
+			MethodName: "RetryAllFailedTasks",
+			Handler:    _MediaService_RetryAllFailedTasks_Handler,
+		},
+		{
+			MethodName: "GetMediaLikes",
+			Handler:    _MediaService_GetMediaLikes_Handler,
+		},
+		{
+			MethodName: "ToggleMediaLike",
+			Handler:    _MediaService_ToggleMediaLike_Handler,
+		},
+		{
+			MethodName: "DeleteMediaLike",
+			Handler:    _MediaService_DeleteMediaLike_Handler,
+		},
+		{
+			MethodName: "GetMediaFavorites",
+			Handler:    _MediaService_GetMediaFavorites_Handler,
+		},
+		{
+			MethodName: "ToggleMediaFavorite",
+			Handler:    _MediaService_ToggleMediaFavorite_Handler,
+		},
+		{
+			MethodName: "DeleteMediaFavorite",
+			Handler:    _MediaService_DeleteMediaFavorite_Handler,
+		},
+		{
+			MethodName: "GetMediaShares",
+			Handler:    _MediaService_GetMediaShares_Handler,
+		},
+		{
+			MethodName: "CreateMediaShare",
+			Handler:    _MediaService_CreateMediaShare_Handler,
+		},
+		{
+			MethodName: "GetMediaComments",
+			Handler:    _MediaService_GetMediaComments_Handler,
+		},
+		{
+			MethodName: "GetMediaSubtitles",
+			Handler:    _MediaService_GetMediaSubtitles_Handler,
+		},
+		{
+			MethodName: "CreateMediaSubtitle",
+			Handler:    _MediaService_CreateMediaSubtitle_Handler,
+		},
+		{
+			MethodName: "GetMediaMetadata",
+			Handler:    _MediaService_GetMediaMetadata_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "v1/media/media_service.proto",
+}
+
+const (
+	EncodingProfileService_ListEncodeProfiles_FullMethodName  = "/api.v1.services.media.EncodingProfileService/ListEncodeProfiles"
+	EncodingProfileService_GetEncodeProfile_FullMethodName    = "/api.v1.services.media.EncodingProfileService/GetEncodeProfile"
+	EncodingProfileService_CreateEncodeProfile_FullMethodName = "/api.v1.services.media.EncodingProfileService/CreateEncodeProfile"
+	EncodingProfileService_UpdateEncodeProfile_FullMethodName = "/api.v1.services.media.EncodingProfileService/UpdateEncodeProfile"
+	EncodingProfileService_DeleteEncodeProfile_FullMethodName = "/api.v1.services.media.EncodingProfileService/DeleteEncodeProfile"
+)
+
+// EncodingProfileServiceClient is the client API for EncodingProfileService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type EncodingProfileServiceClient interface {
+	// ListEncodeProfiles returns a list of encoding profiles.
+	ListEncodeProfiles(ctx context.Context, in *ListEncodeProfilesRequest, opts ...grpc.CallOption) (*ListEncodeProfilesResponse, error)
+	// GetEncodeProfile returns an encoding profile by ID.
+	GetEncodeProfile(ctx context.Context, in *GetEncodeProfileRequest, opts ...grpc.CallOption) (*GetEncodeProfileResponse, error)
+	// CreateEncodeProfile creates a new encoding profile.
+	CreateEncodeProfile(ctx context.Context, in *CreateEncodeProfileRequest, opts ...grpc.CallOption) (*CreateEncodeProfileResponse, error)
+	// UpdateEncodeProfile updates an existing encoding profile.
+	UpdateEncodeProfile(ctx context.Context, in *UpdateEncodeProfileRequest, opts ...grpc.CallOption) (*UpdateEncodeProfileResponse, error)
+	// DeleteEncodeProfile deletes an encoding profile.
+	DeleteEncodeProfile(ctx context.Context, in *DeleteEncodeProfileRequest, opts ...grpc.CallOption) (*DeleteEncodeProfileResponse, error)
+}
+
+type encodingProfileServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewEncodingProfileServiceClient(cc grpc.ClientConnInterface) EncodingProfileServiceClient {
+	return &encodingProfileServiceClient{cc}
+}
+
+func (c *encodingProfileServiceClient) ListEncodeProfiles(ctx context.Context, in *ListEncodeProfilesRequest, opts ...grpc.CallOption) (*ListEncodeProfilesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListEncodeProfilesResponse)
+	err := c.cc.Invoke(ctx, EncodingProfileService_ListEncodeProfiles_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *encodingProfileServiceClient) GetEncodeProfile(ctx context.Context, in *GetEncodeProfileRequest, opts ...grpc.CallOption) (*GetEncodeProfileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetEncodeProfileResponse)
+	err := c.cc.Invoke(ctx, EncodingProfileService_GetEncodeProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *encodingProfileServiceClient) CreateEncodeProfile(ctx context.Context, in *CreateEncodeProfileRequest, opts ...grpc.CallOption) (*CreateEncodeProfileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateEncodeProfileResponse)
+	err := c.cc.Invoke(ctx, EncodingProfileService_CreateEncodeProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *encodingProfileServiceClient) UpdateEncodeProfile(ctx context.Context, in *UpdateEncodeProfileRequest, opts ...grpc.CallOption) (*UpdateEncodeProfileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateEncodeProfileResponse)
+	err := c.cc.Invoke(ctx, EncodingProfileService_UpdateEncodeProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *encodingProfileServiceClient) DeleteEncodeProfile(ctx context.Context, in *DeleteEncodeProfileRequest, opts ...grpc.CallOption) (*DeleteEncodeProfileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteEncodeProfileResponse)
+	err := c.cc.Invoke(ctx, EncodingProfileService_DeleteEncodeProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// EncodingProfileServiceServer is the server API for EncodingProfileService service.
+// All implementations must embed UnimplementedEncodingProfileServiceServer
+// for forward compatibility.
+type EncodingProfileServiceServer interface {
+	// ListEncodeProfiles returns a list of encoding profiles.
+	ListEncodeProfiles(context.Context, *ListEncodeProfilesRequest) (*ListEncodeProfilesResponse, error)
+	// GetEncodeProfile returns an encoding profile by ID.
+	GetEncodeProfile(context.Context, *GetEncodeProfileRequest) (*GetEncodeProfileResponse, error)
+	// CreateEncodeProfile creates a new encoding profile.
+	CreateEncodeProfile(context.Context, *CreateEncodeProfileRequest) (*CreateEncodeProfileResponse, error)
+	// UpdateEncodeProfile updates an existing encoding profile.
+	UpdateEncodeProfile(context.Context, *UpdateEncodeProfileRequest) (*UpdateEncodeProfileResponse, error)
+	// DeleteEncodeProfile deletes an encoding profile.
+	DeleteEncodeProfile(context.Context, *DeleteEncodeProfileRequest) (*DeleteEncodeProfileResponse, error)
+	mustEmbedUnimplementedEncodingProfileServiceServer()
+}
+
+// UnimplementedEncodingProfileServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedEncodingProfileServiceServer struct{}
+
+func (UnimplementedEncodingProfileServiceServer) ListEncodeProfiles(context.Context, *ListEncodeProfilesRequest) (*ListEncodeProfilesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListEncodeProfiles not implemented")
+}
+func (UnimplementedEncodingProfileServiceServer) GetEncodeProfile(context.Context, *GetEncodeProfileRequest) (*GetEncodeProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetEncodeProfile not implemented")
+}
+func (UnimplementedEncodingProfileServiceServer) CreateEncodeProfile(context.Context, *CreateEncodeProfileRequest) (*CreateEncodeProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateEncodeProfile not implemented")
+}
+func (UnimplementedEncodingProfileServiceServer) UpdateEncodeProfile(context.Context, *UpdateEncodeProfileRequest) (*UpdateEncodeProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateEncodeProfile not implemented")
+}
+func (UnimplementedEncodingProfileServiceServer) DeleteEncodeProfile(context.Context, *DeleteEncodeProfileRequest) (*DeleteEncodeProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteEncodeProfile not implemented")
+}
+func (UnimplementedEncodingProfileServiceServer) mustEmbedUnimplementedEncodingProfileServiceServer() {
+}
+func (UnimplementedEncodingProfileServiceServer) testEmbeddedByValue() {}
+
+// UnsafeEncodingProfileServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to EncodingProfileServiceServer will
+// result in compilation errors.
+type UnsafeEncodingProfileServiceServer interface {
+	mustEmbedUnimplementedEncodingProfileServiceServer()
+}
+
+func RegisterEncodingProfileServiceServer(s grpc.ServiceRegistrar, srv EncodingProfileServiceServer) {
+	// If the following call panics, it indicates UnimplementedEncodingProfileServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&EncodingProfileService_ServiceDesc, srv)
+}
+
+func _EncodingProfileService_ListEncodeProfiles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListEncodeProfilesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EncodingProfileServiceServer).ListEncodeProfiles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EncodingProfileService_ListEncodeProfiles_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EncodingProfileServiceServer).ListEncodeProfiles(ctx, req.(*ListEncodeProfilesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _EncodingProfileService_GetEncodeProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEncodeProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EncodingProfileServiceServer).GetEncodeProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EncodingProfileService_GetEncodeProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EncodingProfileServiceServer).GetEncodeProfile(ctx, req.(*GetEncodeProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _EncodingProfileService_CreateEncodeProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateEncodeProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EncodingProfileServiceServer).CreateEncodeProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EncodingProfileService_CreateEncodeProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EncodingProfileServiceServer).CreateEncodeProfile(ctx, req.(*CreateEncodeProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _EncodingProfileService_UpdateEncodeProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateEncodeProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EncodingProfileServiceServer).UpdateEncodeProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EncodingProfileService_UpdateEncodeProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EncodingProfileServiceServer).UpdateEncodeProfile(ctx, req.(*UpdateEncodeProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _EncodingProfileService_DeleteEncodeProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteEncodeProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EncodingProfileServiceServer).DeleteEncodeProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EncodingProfileService_DeleteEncodeProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EncodingProfileServiceServer).DeleteEncodeProfile(ctx, req.(*DeleteEncodeProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// EncodingProfileService_ServiceDesc is the grpc.ServiceDesc for EncodingProfileService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var EncodingProfileService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "api.v1.services.media.EncodingProfileService",
+	HandlerType: (*EncodingProfileServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
 			MethodName: "ListEncodeProfiles",
-			Handler:    _MediaService_ListEncodeProfiles_Handler,
+			Handler:    _EncodingProfileService_ListEncodeProfiles_Handler,
 		},
 		{
 			MethodName: "GetEncodeProfile",
-			Handler:    _MediaService_GetEncodeProfile_Handler,
+			Handler:    _EncodingProfileService_GetEncodeProfile_Handler,
 		},
 		{
 			MethodName: "CreateEncodeProfile",
-			Handler:    _MediaService_CreateEncodeProfile_Handler,
+			Handler:    _EncodingProfileService_CreateEncodeProfile_Handler,
 		},
 		{
 			MethodName: "UpdateEncodeProfile",
-			Handler:    _MediaService_UpdateEncodeProfile_Handler,
+			Handler:    _EncodingProfileService_UpdateEncodeProfile_Handler,
 		},
 		{
 			MethodName: "DeleteEncodeProfile",
-			Handler:    _MediaService_DeleteEncodeProfile_Handler,
+			Handler:    _EncodingProfileService_DeleteEncodeProfile_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -659,8 +1482,6 @@ const (
 // CategoryServiceClient is the client API for CategoryService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// Category Service
 type CategoryServiceClient interface {
 	ListCategories(ctx context.Context, in *ListCategoriesRequest, opts ...grpc.CallOption) (*ListCategoriesResponse, error)
 	GetCategory(ctx context.Context, in *GetCategoryRequest, opts ...grpc.CallOption) (*GetCategoryResponse, error)
@@ -730,8 +1551,6 @@ func (c *categoryServiceClient) DeleteCategory(ctx context.Context, in *DeleteCa
 // CategoryServiceServer is the server API for CategoryService service.
 // All implementations must embed UnimplementedCategoryServiceServer
 // for forward compatibility.
-//
-// Category Service
 type CategoryServiceServer interface {
 	ListCategories(context.Context, *ListCategoriesRequest) (*ListCategoriesResponse, error)
 	GetCategory(context.Context, *GetCategoryRequest) (*GetCategoryResponse, error)
@@ -917,8 +1736,6 @@ const (
 // TagServiceClient is the client API for TagService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// Tag Service
 type TagServiceClient interface {
 	ListTags(ctx context.Context, in *ListTagsRequest, opts ...grpc.CallOption) (*ListTagsResponse, error)
 	GetTag(ctx context.Context, in *GetTagRequest, opts ...grpc.CallOption) (*GetTagResponse, error)
@@ -988,8 +1805,6 @@ func (c *tagServiceClient) DeleteTag(ctx context.Context, in *DeleteTagRequest, 
 // TagServiceServer is the server API for TagService service.
 // All implementations must embed UnimplementedTagServiceServer
 // for forward compatibility.
-//
-// Tag Service
 type TagServiceServer interface {
 	ListTags(context.Context, *ListTagsRequest) (*ListTagsResponse, error)
 	GetTag(context.Context, *GetTagRequest) (*GetTagResponse, error)
@@ -1165,24 +1980,26 @@ var TagService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	CommentService_ListComments_FullMethodName  = "/api.v1.services.media.CommentService/ListComments"
-	CommentService_GetComment_FullMethodName    = "/api.v1.services.media.CommentService/GetComment"
-	CommentService_CreateComment_FullMethodName = "/api.v1.services.media.CommentService/CreateComment"
-	CommentService_UpdateComment_FullMethodName = "/api.v1.services.media.CommentService/UpdateComment"
-	CommentService_DeleteComment_FullMethodName = "/api.v1.services.media.CommentService/DeleteComment"
+	CommentService_ListComments_FullMethodName       = "/api.v1.services.media.CommentService/ListComments"
+	CommentService_GetComment_FullMethodName         = "/api.v1.services.media.CommentService/GetComment"
+	CommentService_CreateComment_FullMethodName      = "/api.v1.services.media.CommentService/CreateComment"
+	CommentService_UpdateComment_FullMethodName      = "/api.v1.services.media.CommentService/UpdateComment"
+	CommentService_DeleteComment_FullMethodName      = "/api.v1.services.media.CommentService/DeleteComment"
+	CommentService_GetCommentReplies_FullMethodName  = "/api.v1.services.media.CommentService/GetCommentReplies"
+	CommentService_CreateCommentReply_FullMethodName = "/api.v1.services.media.CommentService/CreateCommentReply"
 )
 
 // CommentServiceClient is the client API for CommentService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// Comment Service
 type CommentServiceClient interface {
 	ListComments(ctx context.Context, in *ListCommentsRequest, opts ...grpc.CallOption) (*ListCommentsResponse, error)
 	GetComment(ctx context.Context, in *GetCommentRequest, opts ...grpc.CallOption) (*GetCommentResponse, error)
 	CreateComment(ctx context.Context, in *CreateCommentRequest, opts ...grpc.CallOption) (*CreateCommentResponse, error)
 	UpdateComment(ctx context.Context, in *UpdateCommentRequest, opts ...grpc.CallOption) (*UpdateCommentResponse, error)
 	DeleteComment(ctx context.Context, in *DeleteCommentRequest, opts ...grpc.CallOption) (*DeleteCommentResponse, error)
+	GetCommentReplies(ctx context.Context, in *GetCommentRepliesRequest, opts ...grpc.CallOption) (*GetCommentRepliesResponse, error)
+	CreateCommentReply(ctx context.Context, in *CreateCommentReplyRequest, opts ...grpc.CallOption) (*CreateCommentReplyResponse, error)
 }
 
 type commentServiceClient struct {
@@ -1243,17 +2060,37 @@ func (c *commentServiceClient) DeleteComment(ctx context.Context, in *DeleteComm
 	return out, nil
 }
 
+func (c *commentServiceClient) GetCommentReplies(ctx context.Context, in *GetCommentRepliesRequest, opts ...grpc.CallOption) (*GetCommentRepliesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCommentRepliesResponse)
+	err := c.cc.Invoke(ctx, CommentService_GetCommentReplies_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *commentServiceClient) CreateCommentReply(ctx context.Context, in *CreateCommentReplyRequest, opts ...grpc.CallOption) (*CreateCommentReplyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateCommentReplyResponse)
+	err := c.cc.Invoke(ctx, CommentService_CreateCommentReply_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CommentServiceServer is the server API for CommentService service.
 // All implementations must embed UnimplementedCommentServiceServer
 // for forward compatibility.
-//
-// Comment Service
 type CommentServiceServer interface {
 	ListComments(context.Context, *ListCommentsRequest) (*ListCommentsResponse, error)
 	GetComment(context.Context, *GetCommentRequest) (*GetCommentResponse, error)
 	CreateComment(context.Context, *CreateCommentRequest) (*CreateCommentResponse, error)
 	UpdateComment(context.Context, *UpdateCommentRequest) (*UpdateCommentResponse, error)
 	DeleteComment(context.Context, *DeleteCommentRequest) (*DeleteCommentResponse, error)
+	GetCommentReplies(context.Context, *GetCommentRepliesRequest) (*GetCommentRepliesResponse, error)
+	CreateCommentReply(context.Context, *CreateCommentReplyRequest) (*CreateCommentReplyResponse, error)
 	mustEmbedUnimplementedCommentServiceServer()
 }
 
@@ -1278,6 +2115,12 @@ func (UnimplementedCommentServiceServer) UpdateComment(context.Context, *UpdateC
 }
 func (UnimplementedCommentServiceServer) DeleteComment(context.Context, *DeleteCommentRequest) (*DeleteCommentResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteComment not implemented")
+}
+func (UnimplementedCommentServiceServer) GetCommentReplies(context.Context, *GetCommentRepliesRequest) (*GetCommentRepliesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCommentReplies not implemented")
+}
+func (UnimplementedCommentServiceServer) CreateCommentReply(context.Context, *CreateCommentReplyRequest) (*CreateCommentReplyResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateCommentReply not implemented")
 }
 func (UnimplementedCommentServiceServer) mustEmbedUnimplementedCommentServiceServer() {}
 func (UnimplementedCommentServiceServer) testEmbeddedByValue()                        {}
@@ -1390,6 +2233,42 @@ func _CommentService_DeleteComment_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CommentService_GetCommentReplies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCommentRepliesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommentServiceServer).GetCommentReplies(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CommentService_GetCommentReplies_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommentServiceServer).GetCommentReplies(ctx, req.(*GetCommentRepliesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CommentService_CreateCommentReply_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCommentReplyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommentServiceServer).CreateCommentReply(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CommentService_CreateCommentReply_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommentServiceServer).CreateCommentReply(ctx, req.(*CreateCommentReplyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CommentService_ServiceDesc is the grpc.ServiceDesc for CommentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1417,187 +2296,13 @@ var CommentService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "DeleteComment",
 			Handler:    _CommentService_DeleteComment_Handler,
 		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "v1/media/media_service.proto",
-}
-
-const (
-	LikeService_ToggleLike_FullMethodName    = "/api.v1.services.media.LikeService/ToggleLike"
-	LikeService_GetMediaLikes_FullMethodName = "/api.v1.services.media.LikeService/GetMediaLikes"
-	LikeService_GetUserLikes_FullMethodName  = "/api.v1.services.media.LikeService/GetUserLikes"
-)
-
-// LikeServiceClient is the client API for LikeService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// Like Service
-type LikeServiceClient interface {
-	ToggleLike(ctx context.Context, in *ToggleLikeRequest, opts ...grpc.CallOption) (*ToggleLikeResponse, error)
-	GetMediaLikes(ctx context.Context, in *GetMediaLikesRequest, opts ...grpc.CallOption) (*GetMediaLikesResponse, error)
-	GetUserLikes(ctx context.Context, in *GetUserLikesRequest, opts ...grpc.CallOption) (*GetUserLikesResponse, error)
-}
-
-type likeServiceClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewLikeServiceClient(cc grpc.ClientConnInterface) LikeServiceClient {
-	return &likeServiceClient{cc}
-}
-
-func (c *likeServiceClient) ToggleLike(ctx context.Context, in *ToggleLikeRequest, opts ...grpc.CallOption) (*ToggleLikeResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ToggleLikeResponse)
-	err := c.cc.Invoke(ctx, LikeService_ToggleLike_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *likeServiceClient) GetMediaLikes(ctx context.Context, in *GetMediaLikesRequest, opts ...grpc.CallOption) (*GetMediaLikesResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetMediaLikesResponse)
-	err := c.cc.Invoke(ctx, LikeService_GetMediaLikes_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *likeServiceClient) GetUserLikes(ctx context.Context, in *GetUserLikesRequest, opts ...grpc.CallOption) (*GetUserLikesResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetUserLikesResponse)
-	err := c.cc.Invoke(ctx, LikeService_GetUserLikes_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// LikeServiceServer is the server API for LikeService service.
-// All implementations must embed UnimplementedLikeServiceServer
-// for forward compatibility.
-//
-// Like Service
-type LikeServiceServer interface {
-	ToggleLike(context.Context, *ToggleLikeRequest) (*ToggleLikeResponse, error)
-	GetMediaLikes(context.Context, *GetMediaLikesRequest) (*GetMediaLikesResponse, error)
-	GetUserLikes(context.Context, *GetUserLikesRequest) (*GetUserLikesResponse, error)
-	mustEmbedUnimplementedLikeServiceServer()
-}
-
-// UnimplementedLikeServiceServer must be embedded to have
-// forward compatible implementations.
-//
-// NOTE: this should be embedded by value instead of pointer to avoid a nil
-// pointer dereference when methods are called.
-type UnimplementedLikeServiceServer struct{}
-
-func (UnimplementedLikeServiceServer) ToggleLike(context.Context, *ToggleLikeRequest) (*ToggleLikeResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ToggleLike not implemented")
-}
-func (UnimplementedLikeServiceServer) GetMediaLikes(context.Context, *GetMediaLikesRequest) (*GetMediaLikesResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetMediaLikes not implemented")
-}
-func (UnimplementedLikeServiceServer) GetUserLikes(context.Context, *GetUserLikesRequest) (*GetUserLikesResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetUserLikes not implemented")
-}
-func (UnimplementedLikeServiceServer) mustEmbedUnimplementedLikeServiceServer() {}
-func (UnimplementedLikeServiceServer) testEmbeddedByValue()                     {}
-
-// UnsafeLikeServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to LikeServiceServer will
-// result in compilation errors.
-type UnsafeLikeServiceServer interface {
-	mustEmbedUnimplementedLikeServiceServer()
-}
-
-func RegisterLikeServiceServer(s grpc.ServiceRegistrar, srv LikeServiceServer) {
-	// If the following call panics, it indicates UnimplementedLikeServiceServer was
-	// embedded by pointer and is nil.  This will cause panics if an
-	// unimplemented method is ever invoked, so we test this at initialization
-	// time to prevent it from happening at runtime later due to I/O.
-	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
-		t.testEmbeddedByValue()
-	}
-	s.RegisterService(&LikeService_ServiceDesc, srv)
-}
-
-func _LikeService_ToggleLike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ToggleLikeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LikeServiceServer).ToggleLike(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: LikeService_ToggleLike_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LikeServiceServer).ToggleLike(ctx, req.(*ToggleLikeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _LikeService_GetMediaLikes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMediaLikesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LikeServiceServer).GetMediaLikes(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: LikeService_GetMediaLikes_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LikeServiceServer).GetMediaLikes(ctx, req.(*GetMediaLikesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _LikeService_GetUserLikes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserLikesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LikeServiceServer).GetUserLikes(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: LikeService_GetUserLikes_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LikeServiceServer).GetUserLikes(ctx, req.(*GetUserLikesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// LikeService_ServiceDesc is the grpc.ServiceDesc for LikeService service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var LikeService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api.v1.services.media.LikeService",
-	HandlerType: (*LikeServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ToggleLike",
-			Handler:    _LikeService_ToggleLike_Handler,
+			MethodName: "GetCommentReplies",
+			Handler:    _CommentService_GetCommentReplies_Handler,
 		},
 		{
-			MethodName: "GetMediaLikes",
-			Handler:    _LikeService_GetMediaLikes_Handler,
-		},
-		{
-			MethodName: "GetUserLikes",
-			Handler:    _LikeService_GetUserLikes_Handler,
+			MethodName: "CreateCommentReply",
+			Handler:    _CommentService_CreateCommentReply_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -1605,210 +2310,28 @@ var LikeService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	FavoriteService_GetFavorites_FullMethodName   = "/api.v1.services.media.FavoriteService/GetFavorites"
-	FavoriteService_ToggleFavorite_FullMethodName = "/api.v1.services.media.FavoriteService/ToggleFavorite"
-	FavoriteService_RemoveFavorite_FullMethodName = "/api.v1.services.media.FavoriteService/RemoveFavorite"
-)
-
-// FavoriteServiceClient is the client API for FavoriteService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// Favorite Service
-type FavoriteServiceClient interface {
-	GetFavorites(ctx context.Context, in *GetFavoritesRequest, opts ...grpc.CallOption) (*GetFavoritesResponse, error)
-	ToggleFavorite(ctx context.Context, in *ToggleFavoriteRequest, opts ...grpc.CallOption) (*ToggleFavoriteResponse, error)
-	RemoveFavorite(ctx context.Context, in *RemoveFavoriteRequest, opts ...grpc.CallOption) (*RemoveFavoriteResponse, error)
-}
-
-type favoriteServiceClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewFavoriteServiceClient(cc grpc.ClientConnInterface) FavoriteServiceClient {
-	return &favoriteServiceClient{cc}
-}
-
-func (c *favoriteServiceClient) GetFavorites(ctx context.Context, in *GetFavoritesRequest, opts ...grpc.CallOption) (*GetFavoritesResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetFavoritesResponse)
-	err := c.cc.Invoke(ctx, FavoriteService_GetFavorites_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *favoriteServiceClient) ToggleFavorite(ctx context.Context, in *ToggleFavoriteRequest, opts ...grpc.CallOption) (*ToggleFavoriteResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ToggleFavoriteResponse)
-	err := c.cc.Invoke(ctx, FavoriteService_ToggleFavorite_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *favoriteServiceClient) RemoveFavorite(ctx context.Context, in *RemoveFavoriteRequest, opts ...grpc.CallOption) (*RemoveFavoriteResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RemoveFavoriteResponse)
-	err := c.cc.Invoke(ctx, FavoriteService_RemoveFavorite_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// FavoriteServiceServer is the server API for FavoriteService service.
-// All implementations must embed UnimplementedFavoriteServiceServer
-// for forward compatibility.
-//
-// Favorite Service
-type FavoriteServiceServer interface {
-	GetFavorites(context.Context, *GetFavoritesRequest) (*GetFavoritesResponse, error)
-	ToggleFavorite(context.Context, *ToggleFavoriteRequest) (*ToggleFavoriteResponse, error)
-	RemoveFavorite(context.Context, *RemoveFavoriteRequest) (*RemoveFavoriteResponse, error)
-	mustEmbedUnimplementedFavoriteServiceServer()
-}
-
-// UnimplementedFavoriteServiceServer must be embedded to have
-// forward compatible implementations.
-//
-// NOTE: this should be embedded by value instead of pointer to avoid a nil
-// pointer dereference when methods are called.
-type UnimplementedFavoriteServiceServer struct{}
-
-func (UnimplementedFavoriteServiceServer) GetFavorites(context.Context, *GetFavoritesRequest) (*GetFavoritesResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetFavorites not implemented")
-}
-func (UnimplementedFavoriteServiceServer) ToggleFavorite(context.Context, *ToggleFavoriteRequest) (*ToggleFavoriteResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ToggleFavorite not implemented")
-}
-func (UnimplementedFavoriteServiceServer) RemoveFavorite(context.Context, *RemoveFavoriteRequest) (*RemoveFavoriteResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method RemoveFavorite not implemented")
-}
-func (UnimplementedFavoriteServiceServer) mustEmbedUnimplementedFavoriteServiceServer() {}
-func (UnimplementedFavoriteServiceServer) testEmbeddedByValue()                         {}
-
-// UnsafeFavoriteServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to FavoriteServiceServer will
-// result in compilation errors.
-type UnsafeFavoriteServiceServer interface {
-	mustEmbedUnimplementedFavoriteServiceServer()
-}
-
-func RegisterFavoriteServiceServer(s grpc.ServiceRegistrar, srv FavoriteServiceServer) {
-	// If the following call panics, it indicates UnimplementedFavoriteServiceServer was
-	// embedded by pointer and is nil.  This will cause panics if an
-	// unimplemented method is ever invoked, so we test this at initialization
-	// time to prevent it from happening at runtime later due to I/O.
-	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
-		t.testEmbeddedByValue()
-	}
-	s.RegisterService(&FavoriteService_ServiceDesc, srv)
-}
-
-func _FavoriteService_GetFavorites_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetFavoritesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(FavoriteServiceServer).GetFavorites(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: FavoriteService_GetFavorites_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FavoriteServiceServer).GetFavorites(ctx, req.(*GetFavoritesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _FavoriteService_ToggleFavorite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ToggleFavoriteRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(FavoriteServiceServer).ToggleFavorite(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: FavoriteService_ToggleFavorite_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FavoriteServiceServer).ToggleFavorite(ctx, req.(*ToggleFavoriteRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _FavoriteService_RemoveFavorite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RemoveFavoriteRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(FavoriteServiceServer).RemoveFavorite(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: FavoriteService_RemoveFavorite_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FavoriteServiceServer).RemoveFavorite(ctx, req.(*RemoveFavoriteRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// FavoriteService_ServiceDesc is the grpc.ServiceDesc for FavoriteService service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var FavoriteService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api.v1.services.media.FavoriteService",
-	HandlerType: (*FavoriteServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "GetFavorites",
-			Handler:    _FavoriteService_GetFavorites_Handler,
-		},
-		{
-			MethodName: "ToggleFavorite",
-			Handler:    _FavoriteService_ToggleFavorite_Handler,
-		},
-		{
-			MethodName: "RemoveFavorite",
-			Handler:    _FavoriteService_RemoveFavorite_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "v1/media/media_service.proto",
-}
-
-const (
-	PlaylistService_GetPlaylists_FullMethodName       = "/api.v1.services.media.PlaylistService/GetPlaylists"
-	PlaylistService_GetPlaylist_FullMethodName        = "/api.v1.services.media.PlaylistService/GetPlaylist"
-	PlaylistService_CreatePlaylist_FullMethodName     = "/api.v1.services.media.PlaylistService/CreatePlaylist"
-	PlaylistService_UpdatePlaylist_FullMethodName     = "/api.v1.services.media.PlaylistService/UpdatePlaylist"
-	PlaylistService_DeletePlaylist_FullMethodName     = "/api.v1.services.media.PlaylistService/DeletePlaylist"
-	PlaylistService_AddToPlaylist_FullMethodName      = "/api.v1.services.media.PlaylistService/AddToPlaylist"
-	PlaylistService_RemoveFromPlaylist_FullMethodName = "/api.v1.services.media.PlaylistService/RemoveFromPlaylist"
+	PlaylistService_GetPlaylists_FullMethodName         = "/api.v1.services.media.PlaylistService/GetPlaylists"
+	PlaylistService_GetPlaylist_FullMethodName          = "/api.v1.services.media.PlaylistService/GetPlaylist"
+	PlaylistService_CreatePlaylist_FullMethodName       = "/api.v1.services.media.PlaylistService/CreatePlaylist"
+	PlaylistService_UpdatePlaylist_FullMethodName       = "/api.v1.services.media.PlaylistService/UpdatePlaylist"
+	PlaylistService_DeletePlaylist_FullMethodName       = "/api.v1.services.media.PlaylistService/DeletePlaylist"
+	PlaylistService_AddPlaylistMedia_FullMethodName     = "/api.v1.services.media.PlaylistService/AddPlaylistMedia"
+	PlaylistService_ReorderPlaylistMedia_FullMethodName = "/api.v1.services.media.PlaylistService/ReorderPlaylistMedia"
+	PlaylistService_RemovePlaylistMedia_FullMethodName  = "/api.v1.services.media.PlaylistService/RemovePlaylistMedia"
 )
 
 // PlaylistServiceClient is the client API for PlaylistService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// Playlist Service
 type PlaylistServiceClient interface {
 	GetPlaylists(ctx context.Context, in *GetPlaylistsRequest, opts ...grpc.CallOption) (*GetPlaylistsResponse, error)
 	GetPlaylist(ctx context.Context, in *GetPlaylistRequest, opts ...grpc.CallOption) (*GetPlaylistResponse, error)
 	CreatePlaylist(ctx context.Context, in *CreatePlaylistRequest, opts ...grpc.CallOption) (*CreatePlaylistResponse, error)
 	UpdatePlaylist(ctx context.Context, in *UpdatePlaylistRequest, opts ...grpc.CallOption) (*UpdatePlaylistResponse, error)
 	DeletePlaylist(ctx context.Context, in *DeletePlaylistRequest, opts ...grpc.CallOption) (*DeletePlaylistResponse, error)
-	AddToPlaylist(ctx context.Context, in *AddToPlaylistRequest, opts ...grpc.CallOption) (*AddToPlaylistResponse, error)
-	RemoveFromPlaylist(ctx context.Context, in *RemoveFromPlaylistRequest, opts ...grpc.CallOption) (*RemoveFromPlaylistResponse, error)
+	AddPlaylistMedia(ctx context.Context, in *AddPlaylistMediaRequest, opts ...grpc.CallOption) (*AddPlaylistMediaResponse, error)
+	ReorderPlaylistMedia(ctx context.Context, in *ReorderPlaylistMediaRequest, opts ...grpc.CallOption) (*ReorderPlaylistMediaResponse, error)
+	RemovePlaylistMedia(ctx context.Context, in *RemovePlaylistMediaRequest, opts ...grpc.CallOption) (*RemovePlaylistMediaResponse, error)
 }
 
 type playlistServiceClient struct {
@@ -1869,20 +2392,30 @@ func (c *playlistServiceClient) DeletePlaylist(ctx context.Context, in *DeletePl
 	return out, nil
 }
 
-func (c *playlistServiceClient) AddToPlaylist(ctx context.Context, in *AddToPlaylistRequest, opts ...grpc.CallOption) (*AddToPlaylistResponse, error) {
+func (c *playlistServiceClient) AddPlaylistMedia(ctx context.Context, in *AddPlaylistMediaRequest, opts ...grpc.CallOption) (*AddPlaylistMediaResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AddToPlaylistResponse)
-	err := c.cc.Invoke(ctx, PlaylistService_AddToPlaylist_FullMethodName, in, out, cOpts...)
+	out := new(AddPlaylistMediaResponse)
+	err := c.cc.Invoke(ctx, PlaylistService_AddPlaylistMedia_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *playlistServiceClient) RemoveFromPlaylist(ctx context.Context, in *RemoveFromPlaylistRequest, opts ...grpc.CallOption) (*RemoveFromPlaylistResponse, error) {
+func (c *playlistServiceClient) ReorderPlaylistMedia(ctx context.Context, in *ReorderPlaylistMediaRequest, opts ...grpc.CallOption) (*ReorderPlaylistMediaResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RemoveFromPlaylistResponse)
-	err := c.cc.Invoke(ctx, PlaylistService_RemoveFromPlaylist_FullMethodName, in, out, cOpts...)
+	out := new(ReorderPlaylistMediaResponse)
+	err := c.cc.Invoke(ctx, PlaylistService_ReorderPlaylistMedia_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playlistServiceClient) RemovePlaylistMedia(ctx context.Context, in *RemovePlaylistMediaRequest, opts ...grpc.CallOption) (*RemovePlaylistMediaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemovePlaylistMediaResponse)
+	err := c.cc.Invoke(ctx, PlaylistService_RemovePlaylistMedia_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1892,16 +2425,15 @@ func (c *playlistServiceClient) RemoveFromPlaylist(ctx context.Context, in *Remo
 // PlaylistServiceServer is the server API for PlaylistService service.
 // All implementations must embed UnimplementedPlaylistServiceServer
 // for forward compatibility.
-//
-// Playlist Service
 type PlaylistServiceServer interface {
 	GetPlaylists(context.Context, *GetPlaylistsRequest) (*GetPlaylistsResponse, error)
 	GetPlaylist(context.Context, *GetPlaylistRequest) (*GetPlaylistResponse, error)
 	CreatePlaylist(context.Context, *CreatePlaylistRequest) (*CreatePlaylistResponse, error)
 	UpdatePlaylist(context.Context, *UpdatePlaylistRequest) (*UpdatePlaylistResponse, error)
 	DeletePlaylist(context.Context, *DeletePlaylistRequest) (*DeletePlaylistResponse, error)
-	AddToPlaylist(context.Context, *AddToPlaylistRequest) (*AddToPlaylistResponse, error)
-	RemoveFromPlaylist(context.Context, *RemoveFromPlaylistRequest) (*RemoveFromPlaylistResponse, error)
+	AddPlaylistMedia(context.Context, *AddPlaylistMediaRequest) (*AddPlaylistMediaResponse, error)
+	ReorderPlaylistMedia(context.Context, *ReorderPlaylistMediaRequest) (*ReorderPlaylistMediaResponse, error)
+	RemovePlaylistMedia(context.Context, *RemovePlaylistMediaRequest) (*RemovePlaylistMediaResponse, error)
 	mustEmbedUnimplementedPlaylistServiceServer()
 }
 
@@ -1927,11 +2459,14 @@ func (UnimplementedPlaylistServiceServer) UpdatePlaylist(context.Context, *Updat
 func (UnimplementedPlaylistServiceServer) DeletePlaylist(context.Context, *DeletePlaylistRequest) (*DeletePlaylistResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeletePlaylist not implemented")
 }
-func (UnimplementedPlaylistServiceServer) AddToPlaylist(context.Context, *AddToPlaylistRequest) (*AddToPlaylistResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method AddToPlaylist not implemented")
+func (UnimplementedPlaylistServiceServer) AddPlaylistMedia(context.Context, *AddPlaylistMediaRequest) (*AddPlaylistMediaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AddPlaylistMedia not implemented")
 }
-func (UnimplementedPlaylistServiceServer) RemoveFromPlaylist(context.Context, *RemoveFromPlaylistRequest) (*RemoveFromPlaylistResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method RemoveFromPlaylist not implemented")
+func (UnimplementedPlaylistServiceServer) ReorderPlaylistMedia(context.Context, *ReorderPlaylistMediaRequest) (*ReorderPlaylistMediaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReorderPlaylistMedia not implemented")
+}
+func (UnimplementedPlaylistServiceServer) RemovePlaylistMedia(context.Context, *RemovePlaylistMediaRequest) (*RemovePlaylistMediaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RemovePlaylistMedia not implemented")
 }
 func (UnimplementedPlaylistServiceServer) mustEmbedUnimplementedPlaylistServiceServer() {}
 func (UnimplementedPlaylistServiceServer) testEmbeddedByValue()                         {}
@@ -2044,38 +2579,56 @@ func _PlaylistService_DeletePlaylist_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PlaylistService_AddToPlaylist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddToPlaylistRequest)
+func _PlaylistService_AddPlaylistMedia_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddPlaylistMediaRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PlaylistServiceServer).AddToPlaylist(ctx, in)
+		return srv.(PlaylistServiceServer).AddPlaylistMedia(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PlaylistService_AddToPlaylist_FullMethodName,
+		FullMethod: PlaylistService_AddPlaylistMedia_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlaylistServiceServer).AddToPlaylist(ctx, req.(*AddToPlaylistRequest))
+		return srv.(PlaylistServiceServer).AddPlaylistMedia(ctx, req.(*AddPlaylistMediaRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PlaylistService_RemoveFromPlaylist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RemoveFromPlaylistRequest)
+func _PlaylistService_ReorderPlaylistMedia_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReorderPlaylistMediaRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PlaylistServiceServer).RemoveFromPlaylist(ctx, in)
+		return srv.(PlaylistServiceServer).ReorderPlaylistMedia(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PlaylistService_RemoveFromPlaylist_FullMethodName,
+		FullMethod: PlaylistService_ReorderPlaylistMedia_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlaylistServiceServer).RemoveFromPlaylist(ctx, req.(*RemoveFromPlaylistRequest))
+		return srv.(PlaylistServiceServer).ReorderPlaylistMedia(ctx, req.(*ReorderPlaylistMediaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlaylistService_RemovePlaylistMedia_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemovePlaylistMediaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlaylistServiceServer).RemovePlaylistMedia(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlaylistService_RemovePlaylistMedia_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlaylistServiceServer).RemovePlaylistMedia(ctx, req.(*RemovePlaylistMediaRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2108,12 +2661,1342 @@ var PlaylistService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PlaylistService_DeletePlaylist_Handler,
 		},
 		{
-			MethodName: "AddToPlaylist",
-			Handler:    _PlaylistService_AddToPlaylist_Handler,
+			MethodName: "AddPlaylistMedia",
+			Handler:    _PlaylistService_AddPlaylistMedia_Handler,
 		},
 		{
-			MethodName: "RemoveFromPlaylist",
-			Handler:    _PlaylistService_RemoveFromPlaylist_Handler,
+			MethodName: "ReorderPlaylistMedia",
+			Handler:    _PlaylistService_ReorderPlaylistMedia_Handler,
+		},
+		{
+			MethodName: "RemovePlaylistMedia",
+			Handler:    _PlaylistService_RemovePlaylistMedia_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "v1/media/media_service.proto",
+}
+
+const (
+	ChannelService_ListChannels_FullMethodName           = "/api.v1.services.media.ChannelService/ListChannels"
+	ChannelService_GetChannel_FullMethodName             = "/api.v1.services.media.ChannelService/GetChannel"
+	ChannelService_CreateChannel_FullMethodName          = "/api.v1.services.media.ChannelService/CreateChannel"
+	ChannelService_UpdateChannel_FullMethodName          = "/api.v1.services.media.ChannelService/UpdateChannel"
+	ChannelService_DeleteChannel_FullMethodName          = "/api.v1.services.media.ChannelService/DeleteChannel"
+	ChannelService_GetChannelMedias_FullMethodName       = "/api.v1.services.media.ChannelService/GetChannelMedias"
+	ChannelService_AddChannelMedia_FullMethodName        = "/api.v1.services.media.ChannelService/AddChannelMedia"
+	ChannelService_RemoveChannelMedia_FullMethodName     = "/api.v1.services.media.ChannelService/RemoveChannelMedia"
+	ChannelService_GetChannelSubscribers_FullMethodName  = "/api.v1.services.media.ChannelService/GetChannelSubscribers"
+	ChannelService_GetChannelSubscription_FullMethodName = "/api.v1.services.media.ChannelService/GetChannelSubscription"
+	ChannelService_SubscribeChannel_FullMethodName       = "/api.v1.services.media.ChannelService/SubscribeChannel"
+	ChannelService_UnsubscribeChannel_FullMethodName     = "/api.v1.services.media.ChannelService/UnsubscribeChannel"
+)
+
+// ChannelServiceClient is the client API for ChannelService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type ChannelServiceClient interface {
+	ListChannels(ctx context.Context, in *ListChannelsRequest, opts ...grpc.CallOption) (*ListChannelsResponse, error)
+	GetChannel(ctx context.Context, in *GetChannelRequest, opts ...grpc.CallOption) (*GetChannelResponse, error)
+	CreateChannel(ctx context.Context, in *CreateChannelRequest, opts ...grpc.CallOption) (*CreateChannelResponse, error)
+	UpdateChannel(ctx context.Context, in *UpdateChannelRequest, opts ...grpc.CallOption) (*UpdateChannelResponse, error)
+	DeleteChannel(ctx context.Context, in *DeleteChannelRequest, opts ...grpc.CallOption) (*DeleteChannelResponse, error)
+	GetChannelMedias(ctx context.Context, in *GetChannelMediasRequest, opts ...grpc.CallOption) (*GetChannelMediasResponse, error)
+	AddChannelMedia(ctx context.Context, in *AddChannelMediaRequest, opts ...grpc.CallOption) (*AddChannelMediaResponse, error)
+	RemoveChannelMedia(ctx context.Context, in *RemoveChannelMediaRequest, opts ...grpc.CallOption) (*RemoveChannelMediaResponse, error)
+	GetChannelSubscribers(ctx context.Context, in *GetChannelSubscribersRequest, opts ...grpc.CallOption) (*GetChannelSubscribersResponse, error)
+	GetChannelSubscription(ctx context.Context, in *GetChannelSubscriptionRequest, opts ...grpc.CallOption) (*GetChannelSubscriptionResponse, error)
+	SubscribeChannel(ctx context.Context, in *SubscribeChannelRequest, opts ...grpc.CallOption) (*SubscribeChannelResponse, error)
+	UnsubscribeChannel(ctx context.Context, in *UnsubscribeChannelRequest, opts ...grpc.CallOption) (*UnsubscribeChannelResponse, error)
+}
+
+type channelServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewChannelServiceClient(cc grpc.ClientConnInterface) ChannelServiceClient {
+	return &channelServiceClient{cc}
+}
+
+func (c *channelServiceClient) ListChannels(ctx context.Context, in *ListChannelsRequest, opts ...grpc.CallOption) (*ListChannelsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListChannelsResponse)
+	err := c.cc.Invoke(ctx, ChannelService_ListChannels_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *channelServiceClient) GetChannel(ctx context.Context, in *GetChannelRequest, opts ...grpc.CallOption) (*GetChannelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetChannelResponse)
+	err := c.cc.Invoke(ctx, ChannelService_GetChannel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *channelServiceClient) CreateChannel(ctx context.Context, in *CreateChannelRequest, opts ...grpc.CallOption) (*CreateChannelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateChannelResponse)
+	err := c.cc.Invoke(ctx, ChannelService_CreateChannel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *channelServiceClient) UpdateChannel(ctx context.Context, in *UpdateChannelRequest, opts ...grpc.CallOption) (*UpdateChannelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateChannelResponse)
+	err := c.cc.Invoke(ctx, ChannelService_UpdateChannel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *channelServiceClient) DeleteChannel(ctx context.Context, in *DeleteChannelRequest, opts ...grpc.CallOption) (*DeleteChannelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteChannelResponse)
+	err := c.cc.Invoke(ctx, ChannelService_DeleteChannel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *channelServiceClient) GetChannelMedias(ctx context.Context, in *GetChannelMediasRequest, opts ...grpc.CallOption) (*GetChannelMediasResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetChannelMediasResponse)
+	err := c.cc.Invoke(ctx, ChannelService_GetChannelMedias_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *channelServiceClient) AddChannelMedia(ctx context.Context, in *AddChannelMediaRequest, opts ...grpc.CallOption) (*AddChannelMediaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddChannelMediaResponse)
+	err := c.cc.Invoke(ctx, ChannelService_AddChannelMedia_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *channelServiceClient) RemoveChannelMedia(ctx context.Context, in *RemoveChannelMediaRequest, opts ...grpc.CallOption) (*RemoveChannelMediaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemoveChannelMediaResponse)
+	err := c.cc.Invoke(ctx, ChannelService_RemoveChannelMedia_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *channelServiceClient) GetChannelSubscribers(ctx context.Context, in *GetChannelSubscribersRequest, opts ...grpc.CallOption) (*GetChannelSubscribersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetChannelSubscribersResponse)
+	err := c.cc.Invoke(ctx, ChannelService_GetChannelSubscribers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *channelServiceClient) GetChannelSubscription(ctx context.Context, in *GetChannelSubscriptionRequest, opts ...grpc.CallOption) (*GetChannelSubscriptionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetChannelSubscriptionResponse)
+	err := c.cc.Invoke(ctx, ChannelService_GetChannelSubscription_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *channelServiceClient) SubscribeChannel(ctx context.Context, in *SubscribeChannelRequest, opts ...grpc.CallOption) (*SubscribeChannelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SubscribeChannelResponse)
+	err := c.cc.Invoke(ctx, ChannelService_SubscribeChannel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *channelServiceClient) UnsubscribeChannel(ctx context.Context, in *UnsubscribeChannelRequest, opts ...grpc.CallOption) (*UnsubscribeChannelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UnsubscribeChannelResponse)
+	err := c.cc.Invoke(ctx, ChannelService_UnsubscribeChannel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ChannelServiceServer is the server API for ChannelService service.
+// All implementations must embed UnimplementedChannelServiceServer
+// for forward compatibility.
+type ChannelServiceServer interface {
+	ListChannels(context.Context, *ListChannelsRequest) (*ListChannelsResponse, error)
+	GetChannel(context.Context, *GetChannelRequest) (*GetChannelResponse, error)
+	CreateChannel(context.Context, *CreateChannelRequest) (*CreateChannelResponse, error)
+	UpdateChannel(context.Context, *UpdateChannelRequest) (*UpdateChannelResponse, error)
+	DeleteChannel(context.Context, *DeleteChannelRequest) (*DeleteChannelResponse, error)
+	GetChannelMedias(context.Context, *GetChannelMediasRequest) (*GetChannelMediasResponse, error)
+	AddChannelMedia(context.Context, *AddChannelMediaRequest) (*AddChannelMediaResponse, error)
+	RemoveChannelMedia(context.Context, *RemoveChannelMediaRequest) (*RemoveChannelMediaResponse, error)
+	GetChannelSubscribers(context.Context, *GetChannelSubscribersRequest) (*GetChannelSubscribersResponse, error)
+	GetChannelSubscription(context.Context, *GetChannelSubscriptionRequest) (*GetChannelSubscriptionResponse, error)
+	SubscribeChannel(context.Context, *SubscribeChannelRequest) (*SubscribeChannelResponse, error)
+	UnsubscribeChannel(context.Context, *UnsubscribeChannelRequest) (*UnsubscribeChannelResponse, error)
+	mustEmbedUnimplementedChannelServiceServer()
+}
+
+// UnimplementedChannelServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedChannelServiceServer struct{}
+
+func (UnimplementedChannelServiceServer) ListChannels(context.Context, *ListChannelsRequest) (*ListChannelsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListChannels not implemented")
+}
+func (UnimplementedChannelServiceServer) GetChannel(context.Context, *GetChannelRequest) (*GetChannelResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetChannel not implemented")
+}
+func (UnimplementedChannelServiceServer) CreateChannel(context.Context, *CreateChannelRequest) (*CreateChannelResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateChannel not implemented")
+}
+func (UnimplementedChannelServiceServer) UpdateChannel(context.Context, *UpdateChannelRequest) (*UpdateChannelResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateChannel not implemented")
+}
+func (UnimplementedChannelServiceServer) DeleteChannel(context.Context, *DeleteChannelRequest) (*DeleteChannelResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteChannel not implemented")
+}
+func (UnimplementedChannelServiceServer) GetChannelMedias(context.Context, *GetChannelMediasRequest) (*GetChannelMediasResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetChannelMedias not implemented")
+}
+func (UnimplementedChannelServiceServer) AddChannelMedia(context.Context, *AddChannelMediaRequest) (*AddChannelMediaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AddChannelMedia not implemented")
+}
+func (UnimplementedChannelServiceServer) RemoveChannelMedia(context.Context, *RemoveChannelMediaRequest) (*RemoveChannelMediaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RemoveChannelMedia not implemented")
+}
+func (UnimplementedChannelServiceServer) GetChannelSubscribers(context.Context, *GetChannelSubscribersRequest) (*GetChannelSubscribersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetChannelSubscribers not implemented")
+}
+func (UnimplementedChannelServiceServer) GetChannelSubscription(context.Context, *GetChannelSubscriptionRequest) (*GetChannelSubscriptionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetChannelSubscription not implemented")
+}
+func (UnimplementedChannelServiceServer) SubscribeChannel(context.Context, *SubscribeChannelRequest) (*SubscribeChannelResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SubscribeChannel not implemented")
+}
+func (UnimplementedChannelServiceServer) UnsubscribeChannel(context.Context, *UnsubscribeChannelRequest) (*UnsubscribeChannelResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UnsubscribeChannel not implemented")
+}
+func (UnimplementedChannelServiceServer) mustEmbedUnimplementedChannelServiceServer() {}
+func (UnimplementedChannelServiceServer) testEmbeddedByValue()                        {}
+
+// UnsafeChannelServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ChannelServiceServer will
+// result in compilation errors.
+type UnsafeChannelServiceServer interface {
+	mustEmbedUnimplementedChannelServiceServer()
+}
+
+func RegisterChannelServiceServer(s grpc.ServiceRegistrar, srv ChannelServiceServer) {
+	// If the following call panics, it indicates UnimplementedChannelServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&ChannelService_ServiceDesc, srv)
+}
+
+func _ChannelService_ListChannels_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListChannelsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChannelServiceServer).ListChannels(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChannelService_ListChannels_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChannelServiceServer).ListChannels(ctx, req.(*ListChannelsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChannelService_GetChannel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetChannelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChannelServiceServer).GetChannel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChannelService_GetChannel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChannelServiceServer).GetChannel(ctx, req.(*GetChannelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChannelService_CreateChannel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateChannelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChannelServiceServer).CreateChannel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChannelService_CreateChannel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChannelServiceServer).CreateChannel(ctx, req.(*CreateChannelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChannelService_UpdateChannel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateChannelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChannelServiceServer).UpdateChannel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChannelService_UpdateChannel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChannelServiceServer).UpdateChannel(ctx, req.(*UpdateChannelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChannelService_DeleteChannel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteChannelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChannelServiceServer).DeleteChannel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChannelService_DeleteChannel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChannelServiceServer).DeleteChannel(ctx, req.(*DeleteChannelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChannelService_GetChannelMedias_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetChannelMediasRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChannelServiceServer).GetChannelMedias(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChannelService_GetChannelMedias_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChannelServiceServer).GetChannelMedias(ctx, req.(*GetChannelMediasRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChannelService_AddChannelMedia_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddChannelMediaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChannelServiceServer).AddChannelMedia(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChannelService_AddChannelMedia_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChannelServiceServer).AddChannelMedia(ctx, req.(*AddChannelMediaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChannelService_RemoveChannelMedia_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveChannelMediaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChannelServiceServer).RemoveChannelMedia(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChannelService_RemoveChannelMedia_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChannelServiceServer).RemoveChannelMedia(ctx, req.(*RemoveChannelMediaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChannelService_GetChannelSubscribers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetChannelSubscribersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChannelServiceServer).GetChannelSubscribers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChannelService_GetChannelSubscribers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChannelServiceServer).GetChannelSubscribers(ctx, req.(*GetChannelSubscribersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChannelService_GetChannelSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetChannelSubscriptionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChannelServiceServer).GetChannelSubscription(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChannelService_GetChannelSubscription_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChannelServiceServer).GetChannelSubscription(ctx, req.(*GetChannelSubscriptionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChannelService_SubscribeChannel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SubscribeChannelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChannelServiceServer).SubscribeChannel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChannelService_SubscribeChannel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChannelServiceServer).SubscribeChannel(ctx, req.(*SubscribeChannelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChannelService_UnsubscribeChannel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UnsubscribeChannelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChannelServiceServer).UnsubscribeChannel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChannelService_UnsubscribeChannel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChannelServiceServer).UnsubscribeChannel(ctx, req.(*UnsubscribeChannelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// ChannelService_ServiceDesc is the grpc.ServiceDesc for ChannelService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var ChannelService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "api.v1.services.media.ChannelService",
+	HandlerType: (*ChannelServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "ListChannels",
+			Handler:    _ChannelService_ListChannels_Handler,
+		},
+		{
+			MethodName: "GetChannel",
+			Handler:    _ChannelService_GetChannel_Handler,
+		},
+		{
+			MethodName: "CreateChannel",
+			Handler:    _ChannelService_CreateChannel_Handler,
+		},
+		{
+			MethodName: "UpdateChannel",
+			Handler:    _ChannelService_UpdateChannel_Handler,
+		},
+		{
+			MethodName: "DeleteChannel",
+			Handler:    _ChannelService_DeleteChannel_Handler,
+		},
+		{
+			MethodName: "GetChannelMedias",
+			Handler:    _ChannelService_GetChannelMedias_Handler,
+		},
+		{
+			MethodName: "AddChannelMedia",
+			Handler:    _ChannelService_AddChannelMedia_Handler,
+		},
+		{
+			MethodName: "RemoveChannelMedia",
+			Handler:    _ChannelService_RemoveChannelMedia_Handler,
+		},
+		{
+			MethodName: "GetChannelSubscribers",
+			Handler:    _ChannelService_GetChannelSubscribers_Handler,
+		},
+		{
+			MethodName: "GetChannelSubscription",
+			Handler:    _ChannelService_GetChannelSubscription_Handler,
+		},
+		{
+			MethodName: "SubscribeChannel",
+			Handler:    _ChannelService_SubscribeChannel_Handler,
+		},
+		{
+			MethodName: "UnsubscribeChannel",
+			Handler:    _ChannelService_UnsubscribeChannel_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "v1/media/media_service.proto",
+}
+
+const (
+	SearchService_Search_FullMethodName               = "/api.v1.services.media.SearchService/Search"
+	SearchService_GetSearchSuggestions_FullMethodName = "/api.v1.services.media.SearchService/GetSearchSuggestions"
+)
+
+// SearchServiceClient is the client API for SearchService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type SearchServiceClient interface {
+	Search(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*SearchResponse, error)
+	GetSearchSuggestions(ctx context.Context, in *GetSearchSuggestionsRequest, opts ...grpc.CallOption) (*GetSearchSuggestionsResponse, error)
+}
+
+type searchServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewSearchServiceClient(cc grpc.ClientConnInterface) SearchServiceClient {
+	return &searchServiceClient{cc}
+}
+
+func (c *searchServiceClient) Search(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*SearchResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SearchResponse)
+	err := c.cc.Invoke(ctx, SearchService_Search_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *searchServiceClient) GetSearchSuggestions(ctx context.Context, in *GetSearchSuggestionsRequest, opts ...grpc.CallOption) (*GetSearchSuggestionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSearchSuggestionsResponse)
+	err := c.cc.Invoke(ctx, SearchService_GetSearchSuggestions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// SearchServiceServer is the server API for SearchService service.
+// All implementations must embed UnimplementedSearchServiceServer
+// for forward compatibility.
+type SearchServiceServer interface {
+	Search(context.Context, *SearchRequest) (*SearchResponse, error)
+	GetSearchSuggestions(context.Context, *GetSearchSuggestionsRequest) (*GetSearchSuggestionsResponse, error)
+	mustEmbedUnimplementedSearchServiceServer()
+}
+
+// UnimplementedSearchServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedSearchServiceServer struct{}
+
+func (UnimplementedSearchServiceServer) Search(context.Context, *SearchRequest) (*SearchResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Search not implemented")
+}
+func (UnimplementedSearchServiceServer) GetSearchSuggestions(context.Context, *GetSearchSuggestionsRequest) (*GetSearchSuggestionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetSearchSuggestions not implemented")
+}
+func (UnimplementedSearchServiceServer) mustEmbedUnimplementedSearchServiceServer() {}
+func (UnimplementedSearchServiceServer) testEmbeddedByValue()                       {}
+
+// UnsafeSearchServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to SearchServiceServer will
+// result in compilation errors.
+type UnsafeSearchServiceServer interface {
+	mustEmbedUnimplementedSearchServiceServer()
+}
+
+func RegisterSearchServiceServer(s grpc.ServiceRegistrar, srv SearchServiceServer) {
+	// If the following call panics, it indicates UnimplementedSearchServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&SearchService_ServiceDesc, srv)
+}
+
+func _SearchService_Search_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SearchServiceServer).Search(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SearchService_Search_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SearchServiceServer).Search(ctx, req.(*SearchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SearchService_GetSearchSuggestions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSearchSuggestionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SearchServiceServer).GetSearchSuggestions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SearchService_GetSearchSuggestions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SearchServiceServer).GetSearchSuggestions(ctx, req.(*GetSearchSuggestionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// SearchService_ServiceDesc is the grpc.ServiceDesc for SearchService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var SearchService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "api.v1.services.media.SearchService",
+	HandlerType: (*SearchServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Search",
+			Handler:    _SearchService_Search_Handler,
+		},
+		{
+			MethodName: "GetSearchSuggestions",
+			Handler:    _SearchService_GetSearchSuggestions_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "v1/media/media_service.proto",
+}
+
+const (
+	AdminService_GetDashboardStats_FullMethodName  = "/api.v1.services.media.AdminService/GetDashboardStats"
+	AdminService_GetMediaStats_FullMethodName      = "/api.v1.services.media.AdminService/GetMediaStats"
+	AdminService_GetUserStats_FullMethodName       = "/api.v1.services.media.AdminService/GetUserStats"
+	AdminService_GetTrafficStats_FullMethodName    = "/api.v1.services.media.AdminService/GetTrafficStats"
+	AdminService_GetPendingReviews_FullMethodName  = "/api.v1.services.media.AdminService/GetPendingReviews"
+	AdminService_GetReviewHistory_FullMethodName   = "/api.v1.services.media.AdminService/GetReviewHistory"
+	AdminService_GetReview_FullMethodName          = "/api.v1.services.media.AdminService/GetReview"
+	AdminService_UpdateReview_FullMethodName       = "/api.v1.services.media.AdminService/UpdateReview"
+	AdminService_BatchUpdateReviews_FullMethodName = "/api.v1.services.media.AdminService/BatchUpdateReviews"
+	AdminService_GetSettings_FullMethodName        = "/api.v1.services.media.AdminService/GetSettings"
+	AdminService_UpdateSettings_FullMethodName     = "/api.v1.services.media.AdminService/UpdateSettings"
+)
+
+// AdminServiceClient is the client API for AdminService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type AdminServiceClient interface {
+	// Stats
+	GetDashboardStats(ctx context.Context, in *GetDashboardStatsRequest, opts ...grpc.CallOption) (*GetDashboardStatsResponse, error)
+	GetMediaStats(ctx context.Context, in *GetMediaStatsRequest, opts ...grpc.CallOption) (*GetMediaStatsResponse, error)
+	GetUserStats(ctx context.Context, in *GetUserStatsRequest, opts ...grpc.CallOption) (*GetUserStatsResponse, error)
+	GetTrafficStats(ctx context.Context, in *GetTrafficStatsRequest, opts ...grpc.CallOption) (*GetTrafficStatsResponse, error)
+	// Review
+	GetPendingReviews(ctx context.Context, in *GetPendingReviewsRequest, opts ...grpc.CallOption) (*GetPendingReviewsResponse, error)
+	GetReviewHistory(ctx context.Context, in *GetReviewHistoryRequest, opts ...grpc.CallOption) (*GetReviewHistoryResponse, error)
+	GetReview(ctx context.Context, in *GetReviewRequest, opts ...grpc.CallOption) (*GetReviewResponse, error)
+	UpdateReview(ctx context.Context, in *UpdateReviewRequest, opts ...grpc.CallOption) (*UpdateReviewResponse, error)
+	BatchUpdateReviews(ctx context.Context, in *BatchUpdateReviewsRequest, opts ...grpc.CallOption) (*BatchUpdateReviewsResponse, error)
+	// Settings
+	GetSettings(ctx context.Context, in *GetSettingsRequest, opts ...grpc.CallOption) (*GetSettingsResponse, error)
+	UpdateSettings(ctx context.Context, in *UpdateSettingsRequest, opts ...grpc.CallOption) (*UpdateSettingsResponse, error)
+}
+
+type adminServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewAdminServiceClient(cc grpc.ClientConnInterface) AdminServiceClient {
+	return &adminServiceClient{cc}
+}
+
+func (c *adminServiceClient) GetDashboardStats(ctx context.Context, in *GetDashboardStatsRequest, opts ...grpc.CallOption) (*GetDashboardStatsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetDashboardStatsResponse)
+	err := c.cc.Invoke(ctx, AdminService_GetDashboardStats_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) GetMediaStats(ctx context.Context, in *GetMediaStatsRequest, opts ...grpc.CallOption) (*GetMediaStatsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMediaStatsResponse)
+	err := c.cc.Invoke(ctx, AdminService_GetMediaStats_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) GetUserStats(ctx context.Context, in *GetUserStatsRequest, opts ...grpc.CallOption) (*GetUserStatsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUserStatsResponse)
+	err := c.cc.Invoke(ctx, AdminService_GetUserStats_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) GetTrafficStats(ctx context.Context, in *GetTrafficStatsRequest, opts ...grpc.CallOption) (*GetTrafficStatsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTrafficStatsResponse)
+	err := c.cc.Invoke(ctx, AdminService_GetTrafficStats_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) GetPendingReviews(ctx context.Context, in *GetPendingReviewsRequest, opts ...grpc.CallOption) (*GetPendingReviewsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPendingReviewsResponse)
+	err := c.cc.Invoke(ctx, AdminService_GetPendingReviews_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) GetReviewHistory(ctx context.Context, in *GetReviewHistoryRequest, opts ...grpc.CallOption) (*GetReviewHistoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetReviewHistoryResponse)
+	err := c.cc.Invoke(ctx, AdminService_GetReviewHistory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) GetReview(ctx context.Context, in *GetReviewRequest, opts ...grpc.CallOption) (*GetReviewResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetReviewResponse)
+	err := c.cc.Invoke(ctx, AdminService_GetReview_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) UpdateReview(ctx context.Context, in *UpdateReviewRequest, opts ...grpc.CallOption) (*UpdateReviewResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateReviewResponse)
+	err := c.cc.Invoke(ctx, AdminService_UpdateReview_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) BatchUpdateReviews(ctx context.Context, in *BatchUpdateReviewsRequest, opts ...grpc.CallOption) (*BatchUpdateReviewsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BatchUpdateReviewsResponse)
+	err := c.cc.Invoke(ctx, AdminService_BatchUpdateReviews_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) GetSettings(ctx context.Context, in *GetSettingsRequest, opts ...grpc.CallOption) (*GetSettingsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSettingsResponse)
+	err := c.cc.Invoke(ctx, AdminService_GetSettings_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) UpdateSettings(ctx context.Context, in *UpdateSettingsRequest, opts ...grpc.CallOption) (*UpdateSettingsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateSettingsResponse)
+	err := c.cc.Invoke(ctx, AdminService_UpdateSettings_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// AdminServiceServer is the server API for AdminService service.
+// All implementations must embed UnimplementedAdminServiceServer
+// for forward compatibility.
+type AdminServiceServer interface {
+	// Stats
+	GetDashboardStats(context.Context, *GetDashboardStatsRequest) (*GetDashboardStatsResponse, error)
+	GetMediaStats(context.Context, *GetMediaStatsRequest) (*GetMediaStatsResponse, error)
+	GetUserStats(context.Context, *GetUserStatsRequest) (*GetUserStatsResponse, error)
+	GetTrafficStats(context.Context, *GetTrafficStatsRequest) (*GetTrafficStatsResponse, error)
+	// Review
+	GetPendingReviews(context.Context, *GetPendingReviewsRequest) (*GetPendingReviewsResponse, error)
+	GetReviewHistory(context.Context, *GetReviewHistoryRequest) (*GetReviewHistoryResponse, error)
+	GetReview(context.Context, *GetReviewRequest) (*GetReviewResponse, error)
+	UpdateReview(context.Context, *UpdateReviewRequest) (*UpdateReviewResponse, error)
+	BatchUpdateReviews(context.Context, *BatchUpdateReviewsRequest) (*BatchUpdateReviewsResponse, error)
+	// Settings
+	GetSettings(context.Context, *GetSettingsRequest) (*GetSettingsResponse, error)
+	UpdateSettings(context.Context, *UpdateSettingsRequest) (*UpdateSettingsResponse, error)
+	mustEmbedUnimplementedAdminServiceServer()
+}
+
+// UnimplementedAdminServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedAdminServiceServer struct{}
+
+func (UnimplementedAdminServiceServer) GetDashboardStats(context.Context, *GetDashboardStatsRequest) (*GetDashboardStatsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetDashboardStats not implemented")
+}
+func (UnimplementedAdminServiceServer) GetMediaStats(context.Context, *GetMediaStatsRequest) (*GetMediaStatsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMediaStats not implemented")
+}
+func (UnimplementedAdminServiceServer) GetUserStats(context.Context, *GetUserStatsRequest) (*GetUserStatsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetUserStats not implemented")
+}
+func (UnimplementedAdminServiceServer) GetTrafficStats(context.Context, *GetTrafficStatsRequest) (*GetTrafficStatsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetTrafficStats not implemented")
+}
+func (UnimplementedAdminServiceServer) GetPendingReviews(context.Context, *GetPendingReviewsRequest) (*GetPendingReviewsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPendingReviews not implemented")
+}
+func (UnimplementedAdminServiceServer) GetReviewHistory(context.Context, *GetReviewHistoryRequest) (*GetReviewHistoryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetReviewHistory not implemented")
+}
+func (UnimplementedAdminServiceServer) GetReview(context.Context, *GetReviewRequest) (*GetReviewResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetReview not implemented")
+}
+func (UnimplementedAdminServiceServer) UpdateReview(context.Context, *UpdateReviewRequest) (*UpdateReviewResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateReview not implemented")
+}
+func (UnimplementedAdminServiceServer) BatchUpdateReviews(context.Context, *BatchUpdateReviewsRequest) (*BatchUpdateReviewsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method BatchUpdateReviews not implemented")
+}
+func (UnimplementedAdminServiceServer) GetSettings(context.Context, *GetSettingsRequest) (*GetSettingsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetSettings not implemented")
+}
+func (UnimplementedAdminServiceServer) UpdateSettings(context.Context, *UpdateSettingsRequest) (*UpdateSettingsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateSettings not implemented")
+}
+func (UnimplementedAdminServiceServer) mustEmbedUnimplementedAdminServiceServer() {}
+func (UnimplementedAdminServiceServer) testEmbeddedByValue()                      {}
+
+// UnsafeAdminServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to AdminServiceServer will
+// result in compilation errors.
+type UnsafeAdminServiceServer interface {
+	mustEmbedUnimplementedAdminServiceServer()
+}
+
+func RegisterAdminServiceServer(s grpc.ServiceRegistrar, srv AdminServiceServer) {
+	// If the following call panics, it indicates UnimplementedAdminServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&AdminService_ServiceDesc, srv)
+}
+
+func _AdminService_GetDashboardStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDashboardStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).GetDashboardStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_GetDashboardStats_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).GetDashboardStats(ctx, req.(*GetDashboardStatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_GetMediaStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMediaStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).GetMediaStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_GetMediaStats_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).GetMediaStats(ctx, req.(*GetMediaStatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_GetUserStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).GetUserStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_GetUserStats_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).GetUserStats(ctx, req.(*GetUserStatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_GetTrafficStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTrafficStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).GetTrafficStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_GetTrafficStats_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).GetTrafficStats(ctx, req.(*GetTrafficStatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_GetPendingReviews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPendingReviewsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).GetPendingReviews(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_GetPendingReviews_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).GetPendingReviews(ctx, req.(*GetPendingReviewsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_GetReviewHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetReviewHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).GetReviewHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_GetReviewHistory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).GetReviewHistory(ctx, req.(*GetReviewHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_GetReview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetReviewRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).GetReview(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_GetReview_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).GetReview(ctx, req.(*GetReviewRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_UpdateReview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateReviewRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).UpdateReview(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_UpdateReview_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).UpdateReview(ctx, req.(*UpdateReviewRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_BatchUpdateReviews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BatchUpdateReviewsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).BatchUpdateReviews(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_BatchUpdateReviews_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).BatchUpdateReviews(ctx, req.(*BatchUpdateReviewsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_GetSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSettingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).GetSettings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_GetSettings_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).GetSettings(ctx, req.(*GetSettingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_UpdateSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateSettingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).UpdateSettings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_UpdateSettings_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).UpdateSettings(ctx, req.(*UpdateSettingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// AdminService_ServiceDesc is the grpc.ServiceDesc for AdminService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var AdminService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "api.v1.services.media.AdminService",
+	HandlerType: (*AdminServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetDashboardStats",
+			Handler:    _AdminService_GetDashboardStats_Handler,
+		},
+		{
+			MethodName: "GetMediaStats",
+			Handler:    _AdminService_GetMediaStats_Handler,
+		},
+		{
+			MethodName: "GetUserStats",
+			Handler:    _AdminService_GetUserStats_Handler,
+		},
+		{
+			MethodName: "GetTrafficStats",
+			Handler:    _AdminService_GetTrafficStats_Handler,
+		},
+		{
+			MethodName: "GetPendingReviews",
+			Handler:    _AdminService_GetPendingReviews_Handler,
+		},
+		{
+			MethodName: "GetReviewHistory",
+			Handler:    _AdminService_GetReviewHistory_Handler,
+		},
+		{
+			MethodName: "GetReview",
+			Handler:    _AdminService_GetReview_Handler,
+		},
+		{
+			MethodName: "UpdateReview",
+			Handler:    _AdminService_UpdateReview_Handler,
+		},
+		{
+			MethodName: "BatchUpdateReviews",
+			Handler:    _AdminService_BatchUpdateReviews_Handler,
+		},
+		{
+			MethodName: "GetSettings",
+			Handler:    _AdminService_GetSettings_Handler,
+		},
+		{
+			MethodName: "UpdateSettings",
+			Handler:    _AdminService_UpdateSettings_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "v1/media/media_service.proto",
+}
+
+const (
+	PortalService_GetHomeContent_FullMethodName      = "/api.v1.services.media.PortalService/GetHomeContent"
+	PortalService_GetTrendingContent_FullMethodName  = "/api.v1.services.media.PortalService/GetTrendingContent"
+	PortalService_GetSubscriptionFeed_FullMethodName = "/api.v1.services.media.PortalService/GetSubscriptionFeed"
+)
+
+// PortalServiceClient is the client API for PortalService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type PortalServiceClient interface {
+	GetHomeContent(ctx context.Context, in *GetHomeContentRequest, opts ...grpc.CallOption) (*GetHomeContentResponse, error)
+	GetTrendingContent(ctx context.Context, in *GetTrendingContentRequest, opts ...grpc.CallOption) (*GetTrendingContentResponse, error)
+	GetSubscriptionFeed(ctx context.Context, in *GetSubscriptionFeedRequest, opts ...grpc.CallOption) (*GetSubscriptionFeedResponse, error)
+}
+
+type portalServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewPortalServiceClient(cc grpc.ClientConnInterface) PortalServiceClient {
+	return &portalServiceClient{cc}
+}
+
+func (c *portalServiceClient) GetHomeContent(ctx context.Context, in *GetHomeContentRequest, opts ...grpc.CallOption) (*GetHomeContentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetHomeContentResponse)
+	err := c.cc.Invoke(ctx, PortalService_GetHomeContent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *portalServiceClient) GetTrendingContent(ctx context.Context, in *GetTrendingContentRequest, opts ...grpc.CallOption) (*GetTrendingContentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTrendingContentResponse)
+	err := c.cc.Invoke(ctx, PortalService_GetTrendingContent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *portalServiceClient) GetSubscriptionFeed(ctx context.Context, in *GetSubscriptionFeedRequest, opts ...grpc.CallOption) (*GetSubscriptionFeedResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSubscriptionFeedResponse)
+	err := c.cc.Invoke(ctx, PortalService_GetSubscriptionFeed_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// PortalServiceServer is the server API for PortalService service.
+// All implementations must embed UnimplementedPortalServiceServer
+// for forward compatibility.
+type PortalServiceServer interface {
+	GetHomeContent(context.Context, *GetHomeContentRequest) (*GetHomeContentResponse, error)
+	GetTrendingContent(context.Context, *GetTrendingContentRequest) (*GetTrendingContentResponse, error)
+	GetSubscriptionFeed(context.Context, *GetSubscriptionFeedRequest) (*GetSubscriptionFeedResponse, error)
+	mustEmbedUnimplementedPortalServiceServer()
+}
+
+// UnimplementedPortalServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedPortalServiceServer struct{}
+
+func (UnimplementedPortalServiceServer) GetHomeContent(context.Context, *GetHomeContentRequest) (*GetHomeContentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetHomeContent not implemented")
+}
+func (UnimplementedPortalServiceServer) GetTrendingContent(context.Context, *GetTrendingContentRequest) (*GetTrendingContentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetTrendingContent not implemented")
+}
+func (UnimplementedPortalServiceServer) GetSubscriptionFeed(context.Context, *GetSubscriptionFeedRequest) (*GetSubscriptionFeedResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetSubscriptionFeed not implemented")
+}
+func (UnimplementedPortalServiceServer) mustEmbedUnimplementedPortalServiceServer() {}
+func (UnimplementedPortalServiceServer) testEmbeddedByValue()                       {}
+
+// UnsafePortalServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to PortalServiceServer will
+// result in compilation errors.
+type UnsafePortalServiceServer interface {
+	mustEmbedUnimplementedPortalServiceServer()
+}
+
+func RegisterPortalServiceServer(s grpc.ServiceRegistrar, srv PortalServiceServer) {
+	// If the following call panics, it indicates UnimplementedPortalServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&PortalService_ServiceDesc, srv)
+}
+
+func _PortalService_GetHomeContent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetHomeContentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).GetHomeContent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_GetHomeContent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).GetHomeContent(ctx, req.(*GetHomeContentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PortalService_GetTrendingContent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTrendingContentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).GetTrendingContent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_GetTrendingContent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).GetTrendingContent(ctx, req.(*GetTrendingContentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PortalService_GetSubscriptionFeed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSubscriptionFeedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).GetSubscriptionFeed(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_GetSubscriptionFeed_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).GetSubscriptionFeed(ctx, req.(*GetSubscriptionFeedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// PortalService_ServiceDesc is the grpc.ServiceDesc for PortalService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var PortalService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "api.v1.services.media.PortalService",
+	HandlerType: (*PortalServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetHomeContent",
+			Handler:    _PortalService_GetHomeContent_Handler,
+		},
+		{
+			MethodName: "GetTrendingContent",
+			Handler:    _PortalService_GetTrendingContent_Handler,
+		},
+		{
+			MethodName: "GetSubscriptionFeed",
+			Handler:    _PortalService_GetSubscriptionFeed_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
