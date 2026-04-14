@@ -10,7 +10,6 @@ import (
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
-	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
@@ -41,7 +40,6 @@ type MediaQuery struct {
 	withTagsRel   *MediaTagQuery
 	withFavorites *FavoriteQuery
 	withLikes     *LikeQuery
-	withTasks     *EncodingTaskQuery
 	withFKs       bool
 	modifiers     []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -256,28 +254,6 @@ func (_q *MediaQuery) QueryLikes() *LikeQuery {
 	return query
 }
 
-// QueryTasks chains the current query on the "tasks" edge.
-func (_q *MediaQuery) QueryTasks() *EncodingTaskQuery {
-	query := (&EncodingTaskClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(media.Table, media.FieldID, selector),
-			sqlgraph.To(encodingtask.Table, encodingtask.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, media.TasksTable, media.TasksColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // First returns the first Media entity from the query.
 // Returns a *NotFoundError when no Media was found.
 func (_q *MediaQuery) First(ctx context.Context) (*Media, error) {
@@ -302,8 +278,8 @@ func (_q *MediaQuery) FirstX(ctx context.Context) *Media {
 
 // FirstID returns the first Media ID from the query.
 // Returns a *NotFoundError when no Media ID was found.
-func (_q *MediaQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *MediaQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -315,7 +291,7 @@ func (_q *MediaQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *MediaQuery) FirstIDX(ctx context.Context) int {
+func (_q *MediaQuery) FirstIDX(ctx context.Context) string {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -353,8 +329,8 @@ func (_q *MediaQuery) OnlyX(ctx context.Context) *Media {
 // OnlyID is like Only, but returns the only Media ID in the query.
 // Returns a *NotSingularError when more than one Media ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *MediaQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *MediaQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -370,7 +346,7 @@ func (_q *MediaQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *MediaQuery) OnlyIDX(ctx context.Context) int {
+func (_q *MediaQuery) OnlyIDX(ctx context.Context) string {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -398,7 +374,7 @@ func (_q *MediaQuery) AllX(ctx context.Context) []*Media {
 }
 
 // IDs executes the query and returns a list of Media IDs.
-func (_q *MediaQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (_q *MediaQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
@@ -410,7 +386,7 @@ func (_q *MediaQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *MediaQuery) IDsX(ctx context.Context) []int {
+func (_q *MediaQuery) IDsX(ctx context.Context) []string {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -478,7 +454,6 @@ func (_q *MediaQuery) Clone() *MediaQuery {
 		withTagsRel:   _q.withTagsRel.Clone(),
 		withFavorites: _q.withFavorites.Clone(),
 		withLikes:     _q.withLikes.Clone(),
-		withTasks:     _q.withTasks.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -574,17 +549,6 @@ func (_q *MediaQuery) WithLikes(opts ...func(*LikeQuery)) *MediaQuery {
 	return _q
 }
 
-// WithTasks tells the query-builder to eager-load the nodes that are connected to
-// the "tasks" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *MediaQuery) WithTasks(opts ...func(*EncodingTaskQuery)) *MediaQuery {
-	query := (&EncodingTaskClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withTasks = query
-	return _q
-}
-
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -664,7 +628,7 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 		nodes       = []*Media{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [9]bool{
+		loadedTypes = [8]bool{
 			_q.withUser != nil,
 			_q.withCategory != nil,
 			_q.withComments != nil,
@@ -673,7 +637,6 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 			_q.withTagsRel != nil,
 			_q.withFavorites != nil,
 			_q.withLikes != nil,
-			_q.withTasks != nil,
 		}
 	)
 	if withFKs {
@@ -753,19 +716,12 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 			return nil, err
 		}
 	}
-	if query := _q.withTasks; query != nil {
-		if err := _q.loadTasks(ctx, query, nodes,
-			func(n *Media) { n.Edges.Tasks = []*EncodingTask{} },
-			func(n *Media, e *EncodingTask) { n.Edges.Tasks = append(n.Edges.Tasks, e) }); err != nil {
-			return nil, err
-		}
-	}
 	return nodes, nil
 }
 
 func (_q *MediaQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Media, init func(*Media), assign func(*Media, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Media)
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Media)
 	for i := range nodes {
 		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
@@ -793,8 +749,8 @@ func (_q *MediaQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*M
 	return nil
 }
 func (_q *MediaQuery) loadCategory(ctx context.Context, query *CategoryQuery, nodes []*Media, init func(*Media), assign func(*Media, *Category)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Media)
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Media)
 	for i := range nodes {
 		fk := nodes[i].CategoryID
 		if _, ok := nodeids[fk]; !ok {
@@ -823,7 +779,7 @@ func (_q *MediaQuery) loadCategory(ctx context.Context, query *CategoryQuery, no
 }
 func (_q *MediaQuery) loadComments(ctx context.Context, query *CommentQuery, nodes []*Media, init func(*Media), assign func(*Media, *Comment)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Media)
+	nodeids := make(map[string]*Media)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -853,8 +809,8 @@ func (_q *MediaQuery) loadComments(ctx context.Context, query *CommentQuery, nod
 	return nil
 }
 func (_q *MediaQuery) loadChannel(ctx context.Context, query *ChannelQuery, nodes []*Media, init func(*Media), assign func(*Media, *Channel)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Media)
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Media)
 	for i := range nodes {
 		fk := nodes[i].ChannelID
 		if _, ok := nodeids[fk]; !ok {
@@ -883,7 +839,7 @@ func (_q *MediaQuery) loadChannel(ctx context.Context, query *ChannelQuery, node
 }
 func (_q *MediaQuery) loadPlaylists(ctx context.Context, query *MediaPlaylistQuery, nodes []*Media, init func(*Media), assign func(*Media, *MediaPlaylist)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Media)
+	nodeids := make(map[string]*Media)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -914,7 +870,7 @@ func (_q *MediaQuery) loadPlaylists(ctx context.Context, query *MediaPlaylistQue
 }
 func (_q *MediaQuery) loadTagsRel(ctx context.Context, query *MediaTagQuery, nodes []*Media, init func(*Media), assign func(*Media, *MediaTag)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Media)
+	nodeids := make(map[string]*Media)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -945,7 +901,7 @@ func (_q *MediaQuery) loadTagsRel(ctx context.Context, query *MediaTagQuery, nod
 }
 func (_q *MediaQuery) loadFavorites(ctx context.Context, query *FavoriteQuery, nodes []*Media, init func(*Media), assign func(*Media, *Favorite)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Media)
+	nodeids := make(map[string]*Media)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -975,7 +931,7 @@ func (_q *MediaQuery) loadFavorites(ctx context.Context, query *FavoriteQuery, n
 }
 func (_q *MediaQuery) loadLikes(ctx context.Context, query *LikeQuery, nodes []*Media, init func(*Media), assign func(*Media, *Like)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Media)
+	nodeids := make(map[string]*Media)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -988,36 +944,6 @@ func (_q *MediaQuery) loadLikes(ctx context.Context, query *LikeQuery, nodes []*
 	}
 	query.Where(predicate.Like(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(media.LikesColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.MediaID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "media_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
-func (_q *MediaQuery) loadTasks(ctx context.Context, query *EncodingTaskQuery, nodes []*Media, init func(*Media), assign func(*Media, *EncodingTask)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Media)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(encodingtask.FieldMediaID)
-	}
-	query.Where(predicate.EncodingTask(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(media.TasksColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -1047,7 +973,7 @@ func (_q *MediaQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (_q *MediaQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(media.Table, media.Columns, sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(media.Table, media.Columns, sqlgraph.NewFieldSpec(media.FieldID, field.TypeString))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

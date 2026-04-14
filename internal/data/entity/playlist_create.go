@@ -12,7 +12,6 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // PlaylistCreate is the builder for creating a Playlist entity.
@@ -34,20 +33,14 @@ func (_c *PlaylistCreate) SetDescription(v string) *PlaylistCreate {
 	return _c
 }
 
-// SetFriendlyToken sets the "friendly_token" field.
-func (_c *PlaylistCreate) SetFriendlyToken(v string) *PlaylistCreate {
-	_c.mutation.SetFriendlyToken(v)
-	return _c
-}
-
-// SetUID sets the "uid" field.
-func (_c *PlaylistCreate) SetUID(v uuid.UUID) *PlaylistCreate {
-	_c.mutation.SetUID(v)
+// SetShortToken sets the "short_token" field.
+func (_c *PlaylistCreate) SetShortToken(v string) *PlaylistCreate {
+	_c.mutation.SetShortToken(v)
 	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *PlaylistCreate) SetUserID(v int) *PlaylistCreate {
+func (_c *PlaylistCreate) SetUserID(v string) *PlaylistCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
@@ -80,15 +73,29 @@ func (_c *PlaylistCreate) SetNillableAddDate(v *time.Time) *PlaylistCreate {
 	return _c
 }
 
+// SetID sets the "id" field.
+func (_c *PlaylistCreate) SetID(v string) *PlaylistCreate {
+	_c.mutation.SetID(v)
+	return _c
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (_c *PlaylistCreate) SetNillableID(v *string) *PlaylistCreate {
+	if v != nil {
+		_c.SetID(*v)
+	}
+	return _c
+}
+
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_c *PlaylistCreate) AddUserIDs(ids ...int) *PlaylistCreate {
+func (_c *PlaylistCreate) AddUserIDs(ids ...string) *PlaylistCreate {
 	_c.mutation.AddUserIDs(ids...)
 	return _c
 }
 
 // AddUser adds the "user" edges to the User entity.
 func (_c *PlaylistCreate) AddUser(v ...*User) *PlaylistCreate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -138,6 +145,10 @@ func (_c *PlaylistCreate) defaults() {
 		v := playlist.DefaultAddDate()
 		_c.mutation.SetAddDate(v)
 	}
+	if _, ok := _c.mutation.ID(); !ok {
+		v := playlist.DefaultID()
+		_c.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -153,16 +164,13 @@ func (_c *PlaylistCreate) check() error {
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`entity: missing required field "Playlist.description"`)}
 	}
-	if _, ok := _c.mutation.FriendlyToken(); !ok {
-		return &ValidationError{Name: "friendly_token", err: errors.New(`entity: missing required field "Playlist.friendly_token"`)}
+	if _, ok := _c.mutation.ShortToken(); !ok {
+		return &ValidationError{Name: "short_token", err: errors.New(`entity: missing required field "Playlist.short_token"`)}
 	}
-	if v, ok := _c.mutation.FriendlyToken(); ok {
-		if err := playlist.FriendlyTokenValidator(v); err != nil {
-			return &ValidationError{Name: "friendly_token", err: fmt.Errorf(`entity: validator failed for field "Playlist.friendly_token": %w`, err)}
+	if v, ok := _c.mutation.ShortToken(); ok {
+		if err := playlist.ShortTokenValidator(v); err != nil {
+			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Playlist.short_token": %w`, err)}
 		}
-	}
-	if _, ok := _c.mutation.UID(); !ok {
-		return &ValidationError{Name: "uid", err: errors.New(`entity: missing required field "Playlist.uid"`)}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`entity: missing required field "Playlist.user_id"`)}
@@ -172,6 +180,11 @@ func (_c *PlaylistCreate) check() error {
 	}
 	if _, ok := _c.mutation.AddDate(); !ok {
 		return &ValidationError{Name: "add_date", err: errors.New(`entity: missing required field "Playlist.add_date"`)}
+	}
+	if v, ok := _c.mutation.ID(); ok {
+		if err := playlist.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`entity: validator failed for field "Playlist.id": %w`, err)}
+		}
 	}
 	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`entity: missing required edge "Playlist.user"`)}
@@ -190,8 +203,13 @@ func (_c *PlaylistCreate) sqlSave(ctx context.Context) (*Playlist, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(string); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected Playlist.ID type: %T", _spec.ID.Value)
+		}
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
@@ -200,8 +218,12 @@ func (_c *PlaylistCreate) sqlSave(ctx context.Context) (*Playlist, error) {
 func (_c *PlaylistCreate) createSpec() (*Playlist, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Playlist{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(playlist.Table, sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(playlist.Table, sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString))
 	)
+	if id, ok := _c.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := _c.mutation.Title(); ok {
 		_spec.SetField(playlist.FieldTitle, field.TypeString, value)
 		_node.Title = value
@@ -210,16 +232,12 @@ func (_c *PlaylistCreate) createSpec() (*Playlist, *sqlgraph.CreateSpec) {
 		_spec.SetField(playlist.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
-	if value, ok := _c.mutation.FriendlyToken(); ok {
-		_spec.SetField(playlist.FieldFriendlyToken, field.TypeString, value)
-		_node.FriendlyToken = value
-	}
-	if value, ok := _c.mutation.UID(); ok {
-		_spec.SetField(playlist.FieldUID, field.TypeUUID, value)
-		_node.UID = value
+	if value, ok := _c.mutation.ShortToken(); ok {
+		_spec.SetField(playlist.FieldShortToken, field.TypeString, value)
+		_node.ShortToken = value
 	}
 	if value, ok := _c.mutation.UserID(); ok {
-		_spec.SetField(playlist.FieldUserID, field.TypeInt, value)
+		_spec.SetField(playlist.FieldUserID, field.TypeString, value)
 		_node.UserID = value
 	}
 	if value, ok := _c.mutation.Privacy(); ok {
@@ -238,7 +256,7 @@ func (_c *PlaylistCreate) createSpec() (*Playlist, *sqlgraph.CreateSpec) {
 			Columns: playlist.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -294,10 +312,6 @@ func (_c *PlaylistCreateBulk) Save(ctx context.Context) ([]*Playlist, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

@@ -17,17 +17,17 @@ import (
 type Channel struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 	// UserID holds the value of the "user_id" field.
-	UserID int `json:"user_id,omitempty"`
+	UserID string `json:"user_id,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// Slug holds the value of the "slug" field.
 	Slug string `json:"slug,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
-	// FriendlyToken holds the value of the "friendly_token" field.
-	FriendlyToken string `json:"friendly_token,omitempty"`
+	// ShortToken holds the value of the "short_token" field.
+	ShortToken string `json:"short_token,omitempty"`
 	// BannerLogo holds the value of the "banner_logo" field.
 	BannerLogo string `json:"banner_logo,omitempty"`
 	// AddDate holds the value of the "add_date" field.
@@ -74,9 +74,7 @@ func (*Channel) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case channel.FieldID, channel.FieldUserID:
-			values[i] = new(sql.NullInt64)
-		case channel.FieldTitle, channel.FieldSlug, channel.FieldDescription, channel.FieldFriendlyToken, channel.FieldBannerLogo:
+		case channel.FieldID, channel.FieldUserID, channel.FieldTitle, channel.FieldSlug, channel.FieldDescription, channel.FieldShortToken, channel.FieldBannerLogo:
 			values[i] = new(sql.NullString)
 		case channel.FieldAddDate:
 			values[i] = new(sql.NullTime)
@@ -96,16 +94,16 @@ func (_m *Channel) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case channel.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value.Valid {
+				_m.ID = value.String
 			}
-			_m.ID = int(value.Int64)
 		case channel.FieldUserID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				_m.UserID = int(value.Int64)
+				_m.UserID = value.String
 			}
 		case channel.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -125,11 +123,11 @@ func (_m *Channel) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Description = value.String
 			}
-		case channel.FieldFriendlyToken:
+		case channel.FieldShortToken:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field friendly_token", values[i])
+				return fmt.Errorf("unexpected type %T for field short_token", values[i])
 			} else if value.Valid {
-				_m.FriendlyToken = value.String
+				_m.ShortToken = value.String
 			}
 		case channel.FieldBannerLogo:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -190,7 +188,7 @@ func (_m *Channel) String() string {
 	builder.WriteString("Channel(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(_m.UserID)
 	builder.WriteString(", ")
 	builder.WriteString("title=")
 	builder.WriteString(_m.Title)
@@ -201,8 +199,8 @@ func (_m *Channel) String() string {
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
 	builder.WriteString(", ")
-	builder.WriteString("friendly_token=")
-	builder.WriteString(_m.FriendlyToken)
+	builder.WriteString("short_token=")
+	builder.WriteString(_m.ShortToken)
 	builder.WriteString(", ")
 	builder.WriteString("banner_logo=")
 	builder.WriteString(_m.BannerLogo)

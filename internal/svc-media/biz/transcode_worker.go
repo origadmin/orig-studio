@@ -22,8 +22,8 @@ import (
 
 // TranscodeJob represents a single transcoding job for one profile of one media.
 type TranscodeJob struct {
-	MediaID      int64
-	TaskID       int64
+	MediaID      string
+	TaskID       string
 	Profile      *EncodeProfile
 	InputPath    string // source video file path
 	OutputDir    string // final output directory (e.g., hls/{uuid}/{profile_name}/)
@@ -94,7 +94,7 @@ func (w *goroutineWorker) Submit(ctx context.Context, job TranscodeJob) error {
 		defer cancel()
 
 		if err := executeTranscodeJob(jobCtx, job, logger); err != nil {
-			logger.Errorf("transcode job failed: media=%d profile=%s err=%v",
+			logger.Errorf("transcode job failed: media=%s profile=%s err=%v",
 				job.MediaID, job.Profile.Name, err)
 		}
 	}()
@@ -133,12 +133,11 @@ func executeTranscodeJob(ctx context.Context, job TranscodeJob, logger *log.Help
 
 	// Update task status to processing when we actually start executing
 	if job.EncodingRepo != nil {
-		task, err := job.EncodingRepo.Get(ctx, int(job.TaskID))
+		task, err := job.EncodingRepo.Get(ctx, job.TaskID)
 		if err == nil && task != nil {
 			task.Status = "processing"
-			task.Progress = 10
 			if _, err := job.EncodingRepo.Update(ctx, task); err != nil {
-				logger.Warnf("failed to update task %d status: %v", job.TaskID, err)
+				logger.Warnf("failed to update task %s status: %v", job.TaskID, err)
 			}
 			if job.MediaUC != nil {
 				job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
@@ -151,6 +150,10 @@ func executeTranscodeJob(ctx context.Context, job TranscodeJob, logger *log.Help
 	case IsPreviewProfile(profile):
 		// GIF preview generation
 		execErr = executePreviewJob(ctx, job, logger)
+
+	case IsFramesProfile(profile):
+		// Preview frames generation for progress bar hover
+		execErr = executeFramesJob(ctx, job, logger)
 
 	case IsVideoProfile(profile):
 		// Direct HLS transcoding (no intermediate MP4)
@@ -167,13 +170,12 @@ func executeTranscodeJob(ctx context.Context, job TranscodeJob, logger *log.Help
 
 	// If execution failed, update task status to failed
 	if execErr != nil && job.EncodingRepo != nil {
-		task, err := job.EncodingRepo.Get(ctx, int(job.TaskID))
+		task, err := job.EncodingRepo.Get(ctx, job.TaskID)
 		if err == nil && task != nil {
 			task.Status = "failed"
 			task.ErrorMessage = execErr.Error()
-			task.Progress = 0
 			if _, err := job.EncodingRepo.Update(ctx, task); err != nil {
-				logger.Warnf("failed to update task %d status to failed: %v", job.TaskID, err)
+				logger.Warnf("failed to update task %s status to failed: %v", job.TaskID, err)
 			}
 			if job.MediaUC != nil {
 				job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
@@ -194,6 +196,42 @@ func IsPreviewProfile(p *EncodeProfile) bool {
 	return p.Extension == "gif" || strings.EqualFold(p.Name, "preview")
 }
 
+// IsFramesProfile returns true if this is the preview frames profile.
+func IsFramesProfile(p *EncodeProfile) bool {
+	return p.Extension == "jpg" || strings.EqualFold(p.Name, "frames") || strings.EqualFold(p.Name, "preview-frames")
+}
+
+// executeFramesJob generates multiple preview frames for progress bar hover preview.
+// Output: {baseDir}/frames/{uuid}/frame_001.jpg, frame_002.jpg, etc.
+func executeFramesJob(ctx context.Context, job TranscodeJob, logger *log.Helper) error {
+	framesDir := filepath.Join(job.OutputDir, "..", "frames") // up from hls/{uuid} to base dir
+	if err := os.MkdirAll(framesDir, 0o755); err != nil {
+		return fmt.Errorf("failed to create frames directory: %w", err)
+	}
+
+	scale := extractScaleParam(job.Profile.BentoParameters)
+	frameCount := 30 // Default 30 frames
+
+	// Extract frame count from parameters if specified
+	fields := strings.Fields(job.Profile.BentoParameters)
+	for i, f := range fields {
+		if (f == "-frames" || f == "--frames") && i+1 < len(fields) {
+			fmt.Sscanf(fields[i+1], "%d", &frameCount)
+			break
+		}
+	}
+
+	logger.Infof("[Frames] generating preview frames: media=%s frames=%d scale=%s", job.MediaID, frameCount, scale)
+
+	err := ffmpeg.GeneratePreviewFrames(ctx, job.InputPath, framesDir, frameCount, scale)
+	if err != nil {
+		return fmt.Errorf("preview frames failed for profile %s: %w", job.Profile.Name, err)
+	}
+
+	logger.Infof("[Frames] complete: media=%s → %s/", job.MediaID, framesDir)
+	return nil
+}
+
 // executeVideoHLSJob runs direct HLS transcoding from source video to HLS segments.
 // Output: {outputDir}/index.m3u8 + segment_001.ts, segment_002.ts, ...
 func executeVideoHLSJob(ctx context.Context, job TranscodeJob, logger *log.Helper) error {
@@ -208,10 +246,41 @@ func executeVideoHLSJob(ctx context.Context, job TranscodeJob, logger *log.Helpe
 		return fmt.Errorf("non-transcodable resolution: %s", profile.Resolution)
 	}
 
-	logger.Infof("[HLS] transcoding media=%d profile=%s res=%s codec=%s → %s",
+	logger.Infof("[HLS] transcoding media=%s profile=%s res=%s codec=%s → %s",
 		job.MediaID, profile.Name, profile.Resolution, profile.VideoCodec, job.OutputDir)
 
-	err := ffmpeg.TranscodeToHLS(
+	duration := 0.0
+	if dur, err := ffmpeg.GetVideoDuration(ctx, job.InputPath); err == nil {
+		duration = dur.Seconds()
+	}
+
+	progressCb := func(progress int, frame int64, fps float64, speed string, time float64) {
+		if job.EncodingRepo == nil {
+			return
+		}
+
+		task, err := job.EncodingRepo.Get(ctx, job.TaskID)
+		if err != nil || task == nil {
+			return
+		}
+
+		if progress > 0 && progress < 100 {
+			// Progress is now handled by SSE, not stored in database
+			// So we don't need to update the task progress in the database
+			
+			if job.MediaUC != nil {
+				// Create a copy of the task to avoid modifying the original
+				taskCopy := *task
+				// We don't update progress in the task anymore
+				job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: &taskCopy})
+			}
+		}
+
+		logger.Infof("[HLS] progress: media=%s profile=%s progress=%d%% frame=%d fps=%.1f speed=%s",
+			job.MediaID, profile.Name, progress, frame, fps, speed)
+	}
+
+	err := ffmpeg.TranscodeToHLSWithProgress(
 		ctx,
 		job.InputPath,
 		job.OutputDir,
@@ -221,13 +290,15 @@ func executeVideoHLSJob(ctx context.Context, job TranscodeJob, logger *log.Helpe
 		profile.AudioCodec,
 		profile.VideoBitrate,
 		profile.AudioBitrate,
+		duration,
+		progressCb,
 	)
 	if err != nil {
 		return fmt.Errorf("direct HLS transcode failed for profile %s: %w", profile.Name, err)
 	}
 
 	logger.Infof(
-		"[HLS] complete: media=%d profile=%s → %s/index.m3u8",
+		"[HLS] complete: media=%s profile=%s → %s/index.m3u8",
 		job.MediaID,
 		profile.Name,
 		job.OutputDir,
@@ -245,20 +316,16 @@ func executePreviewJob(ctx context.Context, job TranscodeJob, logger *log.Helper
 
 	gifPath := filepath.Join(previewDir, fmt.Sprintf("%s.gif", job.UUID))
 
-	// Extract scale from BentoParameters (e.g., "--scale 320" or "--fps 10 --scale 320")
 	scale := extractScaleParam(job.Profile.BentoParameters)
-	if scale == "" {
-		scale = "320" // default width
-	}
 
-	logger.Infof("[GIF] generating preview: media=%d → %s", job.MediaID, gifPath)
+	logger.Infof("[GIF] generating preview: media=%s → %s", job.MediaID, gifPath)
 
 	err := ffmpeg.GenerateGIFPreview(ctx, job.InputPath, gifPath, scale)
 	if err != nil {
 		return fmt.Errorf("GIF preview failed for profile %s: %w", job.Profile.Name, err)
 	}
 
-	logger.Infof("[GIF] complete: media=%d → %s", job.MediaID, gifPath)
+	logger.Infof("[GIF] complete: media=%s → %s", job.MediaID, gifPath)
 	return nil
 }
 
@@ -310,18 +377,21 @@ func GenerateUUID() string {
 }
 
 // extractScaleParam extracts the scale value from BentoParameters string.
-// e.g., "--fps 10 --scale 320" → "320"
+// e.g., "--fps 10 --scale 320" → "320:-1" (ffmpeg scale filter format)
+// Returns "320:-1" as default if not found.
 func extractScaleParam(bentoParams string) string {
 	fields := strings.Fields(bentoParams)
 	for i, f := range fields {
 		if f == "-scale" && i+1 < len(fields) {
-			return fields[i+1]
+			width := fields[i+1]
+			return fmt.Sprintf("%s:-1", width)
 		}
 		if f == "--scale" && i+1 < len(fields) {
-			return fields[i+1]
+			width := fields[i+1]
+			return fmt.Sprintf("%s:-1", width)
 		}
 	}
-	return ""
+	return "320:-1"
 }
 
 // countingSemaphore is a simple sync.Locker-based semaphore.

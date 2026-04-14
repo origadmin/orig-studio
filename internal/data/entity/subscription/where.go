@@ -11,57 +11,67 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Subscription {
+func ID(id string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Subscription {
+func IDEQ(id string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Subscription {
+func IDNEQ(id string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Subscription {
+func IDIn(ids ...string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Subscription {
+func IDNotIn(ids ...string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Subscription {
+func IDGT(id string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Subscription {
+func IDGTE(id string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Subscription {
+func IDLT(id string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Subscription {
+func IDLTE(id string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldLTE(FieldID, id))
 }
 
+// IDEqualFold applies the EqualFold predicate on the ID field.
+func IDEqualFold(id string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEqualFold(FieldID, id))
+}
+
+// IDContainsFold applies the ContainsFold predicate on the ID field.
+func IDContainsFold(id string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContainsFold(FieldID, id))
+}
+
 // SubscriberID applies equality check predicate on the "subscriber_id" field. It's identical to SubscriberIDEQ.
-func SubscriberID(v int) predicate.Subscription {
+func SubscriberID(v string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldEQ(FieldSubscriberID, v))
 }
 
 // ChannelID applies equality check predicate on the "channel_id" field. It's identical to ChannelIDEQ.
-func ChannelID(v int) predicate.Subscription {
+func ChannelID(v string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldEQ(FieldChannelID, v))
 }
 
@@ -71,43 +81,133 @@ func CreatedAt(v time.Time) predicate.Subscription {
 }
 
 // SubscriberIDEQ applies the EQ predicate on the "subscriber_id" field.
-func SubscriberIDEQ(v int) predicate.Subscription {
+func SubscriberIDEQ(v string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldEQ(FieldSubscriberID, v))
 }
 
 // SubscriberIDNEQ applies the NEQ predicate on the "subscriber_id" field.
-func SubscriberIDNEQ(v int) predicate.Subscription {
+func SubscriberIDNEQ(v string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldNEQ(FieldSubscriberID, v))
 }
 
 // SubscriberIDIn applies the In predicate on the "subscriber_id" field.
-func SubscriberIDIn(vs ...int) predicate.Subscription {
+func SubscriberIDIn(vs ...string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldIn(FieldSubscriberID, vs...))
 }
 
 // SubscriberIDNotIn applies the NotIn predicate on the "subscriber_id" field.
-func SubscriberIDNotIn(vs ...int) predicate.Subscription {
+func SubscriberIDNotIn(vs ...string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldNotIn(FieldSubscriberID, vs...))
 }
 
+// SubscriberIDGT applies the GT predicate on the "subscriber_id" field.
+func SubscriberIDGT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldSubscriberID, v))
+}
+
+// SubscriberIDGTE applies the GTE predicate on the "subscriber_id" field.
+func SubscriberIDGTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldSubscriberID, v))
+}
+
+// SubscriberIDLT applies the LT predicate on the "subscriber_id" field.
+func SubscriberIDLT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldSubscriberID, v))
+}
+
+// SubscriberIDLTE applies the LTE predicate on the "subscriber_id" field.
+func SubscriberIDLTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldSubscriberID, v))
+}
+
+// SubscriberIDContains applies the Contains predicate on the "subscriber_id" field.
+func SubscriberIDContains(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContains(FieldSubscriberID, v))
+}
+
+// SubscriberIDHasPrefix applies the HasPrefix predicate on the "subscriber_id" field.
+func SubscriberIDHasPrefix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasPrefix(FieldSubscriberID, v))
+}
+
+// SubscriberIDHasSuffix applies the HasSuffix predicate on the "subscriber_id" field.
+func SubscriberIDHasSuffix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasSuffix(FieldSubscriberID, v))
+}
+
+// SubscriberIDEqualFold applies the EqualFold predicate on the "subscriber_id" field.
+func SubscriberIDEqualFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEqualFold(FieldSubscriberID, v))
+}
+
+// SubscriberIDContainsFold applies the ContainsFold predicate on the "subscriber_id" field.
+func SubscriberIDContainsFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContainsFold(FieldSubscriberID, v))
+}
+
 // ChannelIDEQ applies the EQ predicate on the "channel_id" field.
-func ChannelIDEQ(v int) predicate.Subscription {
+func ChannelIDEQ(v string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldEQ(FieldChannelID, v))
 }
 
 // ChannelIDNEQ applies the NEQ predicate on the "channel_id" field.
-func ChannelIDNEQ(v int) predicate.Subscription {
+func ChannelIDNEQ(v string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldNEQ(FieldChannelID, v))
 }
 
 // ChannelIDIn applies the In predicate on the "channel_id" field.
-func ChannelIDIn(vs ...int) predicate.Subscription {
+func ChannelIDIn(vs ...string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldIn(FieldChannelID, vs...))
 }
 
 // ChannelIDNotIn applies the NotIn predicate on the "channel_id" field.
-func ChannelIDNotIn(vs ...int) predicate.Subscription {
+func ChannelIDNotIn(vs ...string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldNotIn(FieldChannelID, vs...))
+}
+
+// ChannelIDGT applies the GT predicate on the "channel_id" field.
+func ChannelIDGT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldChannelID, v))
+}
+
+// ChannelIDGTE applies the GTE predicate on the "channel_id" field.
+func ChannelIDGTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldChannelID, v))
+}
+
+// ChannelIDLT applies the LT predicate on the "channel_id" field.
+func ChannelIDLT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldChannelID, v))
+}
+
+// ChannelIDLTE applies the LTE predicate on the "channel_id" field.
+func ChannelIDLTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldChannelID, v))
+}
+
+// ChannelIDContains applies the Contains predicate on the "channel_id" field.
+func ChannelIDContains(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContains(FieldChannelID, v))
+}
+
+// ChannelIDHasPrefix applies the HasPrefix predicate on the "channel_id" field.
+func ChannelIDHasPrefix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasPrefix(FieldChannelID, v))
+}
+
+// ChannelIDHasSuffix applies the HasSuffix predicate on the "channel_id" field.
+func ChannelIDHasSuffix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasSuffix(FieldChannelID, v))
+}
+
+// ChannelIDEqualFold applies the EqualFold predicate on the "channel_id" field.
+func ChannelIDEqualFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEqualFold(FieldChannelID, v))
+}
+
+// ChannelIDContainsFold applies the ContainsFold predicate on the "channel_id" field.
+func ChannelIDContainsFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContainsFold(FieldChannelID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

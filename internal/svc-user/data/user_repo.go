@@ -9,13 +9,14 @@ import (
 	"context"
 	"log/slog"
 
-	"google.golang.org/protobuf/types/known/timestamppb"
-
 	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/user"
+	"origadmin/application/origcms/internal/helpers/idutil"
 	"origadmin/application/origcms/internal/svc-user/dto"
+
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // userRepo implements the dto.UserRepo interface using the shared entity package.
@@ -31,10 +32,10 @@ func NewUserRepo(db *entity.Client) dto.UserRepo {
 // Get retrieves a user by ID.
 func (r *userRepo) Get(
 	ctx context.Context,
-	id int64,
+	id string,
 	opts ...*dto.UserQueryOption,
 ) (*types.User, error) {
-	u, err := r.db.User.Get(ctx, int(id))
+	u, err := r.db.User.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -104,6 +105,7 @@ func (r *userRepo) Create(
 	}
 
 	u, err := r.db.User.Create().
+		SetID(idutil.GenUUID()).
 		SetUsername(in.Username).
 		SetName(in.Nickname).
 		SetEmail(in.Email).
@@ -127,7 +129,7 @@ func (r *userRepo) Update(
 	in *types.User,
 	opts ...*dto.UserUpdateOption,
 ) (*types.User, error) {
-	u, err := r.db.User.UpdateOneID(int(in.Id)).
+	u, err := r.db.User.UpdateOneID(in.Uuid).
 		SetName(in.Nickname).
 		SetEmail(in.Email).
 		SetIsActive(in.Status == 1).
@@ -141,14 +143,14 @@ func (r *userRepo) Update(
 }
 
 // Delete deletes a user by ID.
-func (r *userRepo) Delete(ctx context.Context, id int64) error {
+func (r *userRepo) Delete(ctx context.Context, id string) error {
 	// Hard delete
-	return r.db.User.DeleteOneID(int(id)).Exec(ctx)
+	return r.db.User.DeleteOneID(id).Exec(ctx)
 }
 
 // Restore reactivates a soft-deleted user.
-func (r *userRepo) Restore(ctx context.Context, id int64) error {
-	return r.db.User.UpdateOneID(int(id)).SetIsActive(true).Exec(ctx)
+func (r *userRepo) Restore(ctx context.Context, id string) error {
+	return r.db.User.UpdateOneID(id).SetIsActive(true).Exec(ctx)
 }
 
 // GetByUsername retrieves a user by username.
@@ -183,8 +185,8 @@ func (r *userRepo) GetByPhone(ctx context.Context, phone string) (*types.User, e
 }
 
 // GetUserAndPassword retrieves a user and their password hash.
-func (r *userRepo) GetUserAndPassword(ctx context.Context, id int64) (*types.User, string, error) {
-	u, err := r.db.User.Get(ctx, int(id))
+func (r *userRepo) GetUserAndPassword(ctx context.Context, id string) (*types.User, string, error) {
+	u, err := r.db.User.Get(ctx, id)
 	if err != nil {
 		return nil, "", err
 	}
@@ -192,13 +194,13 @@ func (r *userRepo) GetUserAndPassword(ctx context.Context, id int64) (*types.Use
 }
 
 // ChangeUserPassword changes a user's password.
-func (r *userRepo) ChangeUserPassword(ctx context.Context, userID int64, hashedPassword string) error {
-	return r.db.User.UpdateOneID(int(userID)).SetPassword(hashedPassword).Exec(ctx)
+func (r *userRepo) ChangeUserPassword(ctx context.Context, userID string, hashedPassword string) error {
+	return r.db.User.UpdateOneID(userID).SetPassword(hashedPassword).Exec(ctx)
 }
 
 // UpdateUserProfile updates a user's profile fields directly on the User entity.
-func (r *userRepo) UpdateUserProfile(ctx context.Context, userID int64, profile *types.UserProfile) error {
-	return r.db.User.UpdateOneID(int(userID)).
+func (r *userRepo) UpdateUserProfile(ctx context.Context, userID string, profile *types.UserProfile) error {
+	return r.db.User.UpdateOneID(userID).
 		SetName(profile.Name).
 		SetDescription(profile.Bio).
 		SetLocation(profile.Location).
@@ -207,8 +209,8 @@ func (r *userRepo) UpdateUserProfile(ctx context.Context, userID int64, profile 
 }
 
 // GetUserProfile retrieves a user's profile from the User entity.
-func (r *userRepo) GetUserProfile(ctx context.Context, userID int64) (*types.UserProfile, error) {
-	u, err := r.db.User.Get(ctx, int(userID))
+func (r *userRepo) GetUserProfile(ctx context.Context, userID string) (*types.UserProfile, error) {
+	u, err := r.db.User.Get(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -216,18 +218,18 @@ func (r *userRepo) GetUserProfile(ctx context.Context, userID int64) (*types.Use
 }
 
 // UpdateUserSetting is a stub (settings could be added to schema later if needed).
-func (r *userRepo) UpdateUserSetting(ctx context.Context, userID int64, setting *types.UserSetting) error {
+func (r *userRepo) UpdateUserSetting(ctx context.Context, userID string, setting *types.UserSetting) error {
 	return nil
 }
 
 // GetUserSetting is a stub.
-func (r *userRepo) GetUserSetting(ctx context.Context, userID int64) (*types.UserSetting, error) {
+func (r *userRepo) GetUserSetting(ctx context.Context, userID string) (*types.UserSetting, error) {
 	return &types.UserSetting{}, nil
 }
 
 // UpdateUserStatus updates a user's status.
-func (r *userRepo) UpdateUserStatus(ctx context.Context, userID int64, status int8) error {
-	return r.db.User.UpdateOneID(int(userID)).SetIsActive(status == 1).Exec(ctx)
+func (r *userRepo) UpdateUserStatus(ctx context.Context, userID string, status int8) error {
+	return r.db.User.UpdateOneID(userID).SetIsActive(status == 1).Exec(ctx)
 }
 
 // Helper functions
@@ -243,7 +245,7 @@ func convertUserToProto(u *entity.User) *types.User {
 		"is_superuser", u.IsSuperuser,
 	)
 	result := &types.User{
-		Id:          int64(u.ID),
+		Uuid:        u.ID,
 		Username:    u.Username,
 		Nickname:    u.Name,
 		Email:       u.Email,
@@ -270,19 +272,19 @@ func convertUserToProfileProto(u *entity.User) *types.UserProfile {
 }
 
 // GetEntity returns the raw ent entity.User (for fields not in proto types, e.g. role).
-func (r *userRepo) GetEntity(ctx context.Context, id int64) (*entity.User, error) {
-	return r.db.User.Get(ctx, int(id))
+func (r *userRepo) GetEntity(ctx context.Context, id string) (*entity.User, error) {
+	return r.db.User.Get(ctx, id)
 }
 
 // SetUserRole updates a user's role field directly.
-func (r *userRepo) SetUserRole(ctx context.Context, id int64, role string) error {
-	return r.db.User.UpdateOneID(int(id)).SetRole(user.Role(role)).Exec(ctx)
+func (r *userRepo) SetUserRole(ctx context.Context, id string, role string) error {
+	return r.db.User.UpdateOneID(id).SetRole(user.Role(role)).Exec(ctx)
 }
 
 // ==================== Subscription Methods ====================
 
 // IsSubscribed checks if a user is subscribed to a channel
-func (r *userRepo) IsSubscribed(ctx context.Context, subscriberID, channelID int) (bool, error) {
+func (r *userRepo) IsSubscribed(ctx context.Context, subscriberID, channelID string) (bool, error) {
 	count, err := r.db.Subscription.Query().
 		Where(
 			subscription.SubscriberID(subscriberID),
@@ -296,7 +298,7 @@ func (r *userRepo) IsSubscribed(ctx context.Context, subscriberID, channelID int
 }
 
 // GetSubscriberCount gets the number of subscribers for a channel
-func (r *userRepo) GetSubscriberCount(ctx context.Context, channelID int) (int, error) {
+func (r *userRepo) GetSubscriberCount(ctx context.Context, channelID string) (int, error) {
 	count, err := r.db.Subscription.Query().
 		Where(subscription.ChannelID(channelID)).
 		Count(ctx)
@@ -304,7 +306,7 @@ func (r *userRepo) GetSubscriberCount(ctx context.Context, channelID int) (int, 
 }
 
 // Subscribe adds a subscription
-func (r *userRepo) Subscribe(ctx context.Context, subscriberID, channelID int) error {
+func (r *userRepo) Subscribe(ctx context.Context, subscriberID, channelID string) error {
 	// Check if already subscribed
 	exists, err := r.IsSubscribed(ctx, subscriberID, channelID)
 	if err != nil {
@@ -322,7 +324,7 @@ func (r *userRepo) Subscribe(ctx context.Context, subscriberID, channelID int) e
 }
 
 // Unsubscribe removes a subscription
-func (r *userRepo) Unsubscribe(ctx context.Context, subscriberID, channelID int) error {
+func (r *userRepo) Unsubscribe(ctx context.Context, subscriberID, channelID string) error {
 	// Check if subscription exists
 	exists, err := r.IsSubscribed(ctx, subscriberID, channelID)
 	if err != nil {
@@ -342,7 +344,7 @@ func (r *userRepo) Unsubscribe(ctx context.Context, subscriberID, channelID int)
 }
 
 // GetSubscriptions gets all channels a user is subscribed to
-func (r *userRepo) GetSubscriptions(ctx context.Context, subscriberID int, page, pageSize int) ([]*types.User, int, error) {
+func (r *userRepo) GetSubscriptions(ctx context.Context, subscriberID string, page, pageSize int) ([]*types.User, int, error) {
 	subs, err := r.db.Subscription.Query().
 		Where(subscription.SubscriberID(subscriberID)).
 		WithChannel().
@@ -371,7 +373,7 @@ func (r *userRepo) GetSubscriptions(ctx context.Context, subscriberID int, page,
 }
 
 // GetSubscribers gets all subscribers for a channel
-func (r *userRepo) GetSubscribers(ctx context.Context, channelID int, page, pageSize int) ([]*types.User, int, error) {
+func (r *userRepo) GetSubscribers(ctx context.Context, channelID string, page, pageSize int) ([]*types.User, int, error) {
 	subs, err := r.db.Subscription.Query().
 		Where(subscription.ChannelID(channelID)).
 		WithSubscriber().

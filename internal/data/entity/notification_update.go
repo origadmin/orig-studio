@@ -122,14 +122,14 @@ func (_u *NotificationUpdate) SetNillableCreatedAt(v *time.Time) *NotificationUp
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *NotificationUpdate) AddUserIDs(ids ...int) *NotificationUpdate {
+func (_u *NotificationUpdate) AddUserIDs(ids ...string) *NotificationUpdate {
 	_u.mutation.AddUserIDs(ids...)
 	return _u
 }
 
 // AddUser adds the "user" edges to the User entity.
 func (_u *NotificationUpdate) AddUser(v ...*User) *NotificationUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -148,14 +148,14 @@ func (_u *NotificationUpdate) ClearUser() *NotificationUpdate {
 }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (_u *NotificationUpdate) RemoveUserIDs(ids ...int) *NotificationUpdate {
+func (_u *NotificationUpdate) RemoveUserIDs(ids ...string) *NotificationUpdate {
 	_u.mutation.RemoveUserIDs(ids...)
 	return _u
 }
 
 // RemoveUser removes "user" edges to User entities.
 func (_u *NotificationUpdate) RemoveUser(v ...*User) *NotificationUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -251,7 +251,7 @@ func (_u *NotificationUpdate) sqlSave(ctx context.Context) (_node int, err error
 			Columns: notification.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -264,7 +264,7 @@ func (_u *NotificationUpdate) sqlSave(ctx context.Context) (_node int, err error
 			Columns: notification.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -280,7 +280,7 @@ func (_u *NotificationUpdate) sqlSave(ctx context.Context) (_node int, err error
 			Columns: notification.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -402,14 +402,14 @@ func (_u *NotificationUpdateOne) SetNillableCreatedAt(v *time.Time) *Notificatio
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *NotificationUpdateOne) AddUserIDs(ids ...int) *NotificationUpdateOne {
+func (_u *NotificationUpdateOne) AddUserIDs(ids ...string) *NotificationUpdateOne {
 	_u.mutation.AddUserIDs(ids...)
 	return _u
 }
 
 // AddUser adds the "user" edges to the User entity.
 func (_u *NotificationUpdateOne) AddUser(v ...*User) *NotificationUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -428,14 +428,14 @@ func (_u *NotificationUpdateOne) ClearUser() *NotificationUpdateOne {
 }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (_u *NotificationUpdateOne) RemoveUserIDs(ids ...int) *NotificationUpdateOne {
+func (_u *NotificationUpdateOne) RemoveUserIDs(ids ...string) *NotificationUpdateOne {
 	_u.mutation.RemoveUserIDs(ids...)
 	return _u
 }
 
 // RemoveUser removes "user" edges to User entities.
 func (_u *NotificationUpdateOne) RemoveUser(v ...*User) *NotificationUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -561,7 +561,7 @@ func (_u *NotificationUpdateOne) sqlSave(ctx context.Context) (_node *Notificati
 			Columns: notification.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -574,7 +574,7 @@ func (_u *NotificationUpdateOne) sqlSave(ctx context.Context) (_node *Notificati
 			Columns: notification.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -590,7 +590,7 @@ func (_u *NotificationUpdateOne) sqlSave(ctx context.Context) (_node *Notificati
 			Columns: notification.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

@@ -19,7 +19,7 @@ type MediaTag struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MediaTagQuery when eager-loading is set.
 	Edges          MediaTagEdges `json:"edges"`
-	media_tags_rel *int
+	media_tags_rel *string
 	selectValues   sql.SelectValues
 }
 
@@ -60,7 +60,7 @@ func (*MediaTag) scanValues(columns []string) ([]any, error) {
 		case mediatag.FieldID:
 			values[i] = new(sql.NullInt64)
 		case mediatag.ForeignKeys[0]: // media_tags_rel
-			values[i] = new(sql.NullInt64)
+			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -83,11 +83,11 @@ func (_m *MediaTag) assignValues(columns []string, values []any) error {
 			}
 			_m.ID = int(value.Int64)
 		case mediatag.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field media_tags_rel", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field media_tags_rel", values[i])
 			} else if value.Valid {
-				_m.media_tags_rel = new(int)
-				*_m.media_tags_rel = int(value.Int64)
+				_m.media_tags_rel = new(string)
+				*_m.media_tags_rel = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])

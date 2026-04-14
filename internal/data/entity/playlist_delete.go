@@ -40,7 +40,7 @@ func (_d *PlaylistDelete) ExecX(ctx context.Context) int {
 }
 
 func (_d *PlaylistDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(playlist.Table, sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(playlist.Table, sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString))
 	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

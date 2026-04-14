@@ -23,13 +23,13 @@ type MediaPlaylistCreate struct {
 }
 
 // SetPlaylistID sets the "playlist_id" field.
-func (_c *MediaPlaylistCreate) SetPlaylistID(v int) *MediaPlaylistCreate {
+func (_c *MediaPlaylistCreate) SetPlaylistID(v string) *MediaPlaylistCreate {
 	_c.mutation.SetPlaylistID(v)
 	return _c
 }
 
 // SetMediaID sets the "media_id" field.
-func (_c *MediaPlaylistCreate) SetMediaID(v int) *MediaPlaylistCreate {
+func (_c *MediaPlaylistCreate) SetMediaID(v string) *MediaPlaylistCreate {
 	_c.mutation.SetMediaID(v)
 	return _c
 }
@@ -58,6 +58,20 @@ func (_c *MediaPlaylistCreate) SetActionDate(v time.Time) *MediaPlaylistCreate {
 func (_c *MediaPlaylistCreate) SetNillableActionDate(v *time.Time) *MediaPlaylistCreate {
 	if v != nil {
 		_c.SetActionDate(*v)
+	}
+	return _c
+}
+
+// SetID sets the "id" field.
+func (_c *MediaPlaylistCreate) SetID(v string) *MediaPlaylistCreate {
+	_c.mutation.SetID(v)
+	return _c
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (_c *MediaPlaylistCreate) SetNillableID(v *string) *MediaPlaylistCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }
@@ -115,6 +129,10 @@ func (_c *MediaPlaylistCreate) defaults() {
 		v := mediaplaylist.DefaultActionDate()
 		_c.mutation.SetActionDate(v)
 	}
+	if _, ok := _c.mutation.ID(); !ok {
+		v := mediaplaylist.DefaultID()
+		_c.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -130,6 +148,11 @@ func (_c *MediaPlaylistCreate) check() error {
 	}
 	if _, ok := _c.mutation.ActionDate(); !ok {
 		return &ValidationError{Name: "action_date", err: errors.New(`entity: missing required field "MediaPlaylist.action_date"`)}
+	}
+	if v, ok := _c.mutation.ID(); ok {
+		if err := mediaplaylist.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`entity: validator failed for field "MediaPlaylist.id": %w`, err)}
+		}
 	}
 	if len(_c.mutation.MediaIDs()) == 0 {
 		return &ValidationError{Name: "media", err: errors.New(`entity: missing required edge "MediaPlaylist.media"`)}
@@ -151,8 +174,13 @@ func (_c *MediaPlaylistCreate) sqlSave(ctx context.Context) (*MediaPlaylist, err
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(string); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected MediaPlaylist.ID type: %T", _spec.ID.Value)
+		}
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
@@ -161,8 +189,12 @@ func (_c *MediaPlaylistCreate) sqlSave(ctx context.Context) (*MediaPlaylist, err
 func (_c *MediaPlaylistCreate) createSpec() (*MediaPlaylist, *sqlgraph.CreateSpec) {
 	var (
 		_node = &MediaPlaylist{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(mediaplaylist.Table, sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(mediaplaylist.Table, sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeString))
 	)
+	if id, ok := _c.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := _c.mutation.Ordering(); ok {
 		_spec.SetField(mediaplaylist.FieldOrdering, field.TypeInt, value)
 		_node.Ordering = value
@@ -179,7 +211,7 @@ func (_c *MediaPlaylistCreate) createSpec() (*MediaPlaylist, *sqlgraph.CreateSpe
 			Columns: []string{mediaplaylist.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -196,7 +228,7 @@ func (_c *MediaPlaylistCreate) createSpec() (*MediaPlaylist, *sqlgraph.CreateSpe
 			Columns: []string{mediaplaylist.PlaylistColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -253,10 +285,6 @@ func (_c *MediaPlaylistCreateBulk) Save(ctx context.Context) ([]*MediaPlaylist, 
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

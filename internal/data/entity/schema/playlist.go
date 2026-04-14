@@ -14,7 +14,7 @@ import (
 	"entgo.io/ent/schema/index"
 	"time"
 
-	"github.com/google/uuid"
+	"origadmin/application/origcms/internal/helpers/idutil"
 )
 
 type Playlist struct {
@@ -23,11 +23,11 @@ type Playlist struct {
 
 func (Playlist) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.DefaultUUIDv7()), // UUIDv7 for distributed system
 		field.String("title").NotEmpty().MaxLen(100),
 		field.Text("description"),
-		field.String("friendly_token").MaxLen(12).Unique(),
-		field.UUID("uid", uuid.New()).Unique(),
-		field.Int("user_id"),
+		field.String("short_token").MaxLen(12).Unique().DefaultFunc(idutil.DefaultShortID()),
+		field.String("user_id"),
 		field.Int("privacy").Default(1), // 1=public, 2=unlisted, 3=private
 		field.Time("add_date").Default(time.Now),
 	}
@@ -36,7 +36,7 @@ func (Playlist) Fields() []ent.Field {
 func (Playlist) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("title"),
-		index.Fields("friendly_token"),
+		index.Fields("short_token"),
 		index.Fields("user_id"),
 		index.Fields("add_date"),
 	}

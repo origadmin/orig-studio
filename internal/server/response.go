@@ -57,6 +57,12 @@ func getHTTPStatus(code int) int {
 		return 400
 	case code == 10005:
 		return 409
+	case code == 20001:
+		return 404 // ErrUserNotFound
+	case code == 30001:
+		return 404 // ErrMediaNotFound
+	case code == 40001:
+		return 404 // ErrCommentNotFound
 	default:
 		return 500
 	}

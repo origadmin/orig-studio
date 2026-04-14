@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"entgo.io/ent"
-	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -35,7 +34,7 @@ func (EncodeProfile) Fields() []ent.Field {
 // Edges of the EncodeProfile.
 func (EncodeProfile) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("tasks", EncodingTask.Type),
+		// edge.To("tasks", EncodingTaskNew.Type),
 	}
 }
 

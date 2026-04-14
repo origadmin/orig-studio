@@ -45,7 +45,7 @@ func (r *categoryRepo) Create(ctx context.Context, c *biz.Category) (*biz.Catego
 }
 
 func (r *categoryRepo) Get(ctx context.Context, id int) (*biz.Category, error) {
-	ent, err := r.data.db.Category.Get(ctx, id)
+	ent, err := r.data.db.Category.Get(ctx, string(id))
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (r *categoryRepo) Get(ctx context.Context, id int) (*biz.Category, error) {
 }
 
 func (r *categoryRepo) Update(ctx context.Context, c *biz.Category) (*biz.Category, error) {
-	ent, err := r.data.db.Category.UpdateOneID(c.ID).
+	ent, err := r.data.db.Category.UpdateOneID(string(c.ID)).
 		SetName(c.Name).
 		SetSlug(c.Slug).
 		SetDescription(c.Description).
@@ -65,7 +65,7 @@ func (r *categoryRepo) Update(ctx context.Context, c *biz.Category) (*biz.Catego
 }
 
 func (r *categoryRepo) Delete(ctx context.Context, id int) error {
-	return r.data.db.Category.DeleteOneID(id).Exec(ctx)
+	return r.data.db.Category.DeleteOneID(string(id)).Exec(ctx)
 }
 
 func (r *categoryRepo) ListAll(ctx context.Context) ([]*biz.Category, error) {
@@ -142,7 +142,7 @@ func (r *tagRepo) ListAll(ctx context.Context, page, pageSize int) ([]*biz.Tag, 
 
 func mapCategory(ent *entity.Category) *biz.Category {
 	return &biz.Category{
-		ID:          ent.ID,
+		ID:          int(len(ent.ID)),
 		Name:        ent.Name,
 		Slug:        ent.Slug,
 		Description: ent.Description,

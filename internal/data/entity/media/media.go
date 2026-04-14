@@ -18,8 +18,8 @@ const (
 	FieldTitle = "title"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// FieldFriendlyToken holds the string denoting the friendly_token field in the database.
-	FieldFriendlyToken = "friendly_token"
+	// FieldShortToken holds the string denoting the short_token field in the database.
+	FieldShortToken = "short_token"
 	// FieldUUID holds the string denoting the uuid field in the database.
 	FieldUUID = "uuid"
 	// FieldType holds the string denoting the type field in the database.
@@ -106,8 +106,6 @@ const (
 	EdgeFavorites = "favorites"
 	// EdgeLikes holds the string denoting the likes edge name in mutations.
 	EdgeLikes = "likes"
-	// EdgeTasks holds the string denoting the tasks edge name in mutations.
-	EdgeTasks = "tasks"
 	// Table holds the table name of the media in the database.
 	Table = "media"
 	// UserTable is the table that holds the user relation/edge.
@@ -166,13 +164,6 @@ const (
 	LikesInverseTable = "files_like"
 	// LikesColumn is the table column denoting the likes relation/edge.
 	LikesColumn = "media_id"
-	// TasksTable is the table that holds the tasks relation/edge.
-	TasksTable = "encoding_tasks"
-	// TasksInverseTable is the table name for the EncodingTask entity.
-	// It exists in this package in order to avoid circular dependency with the "encodingtask" package.
-	TasksInverseTable = "encoding_tasks"
-	// TasksColumn is the table column denoting the tasks relation/edge.
-	TasksColumn = "media_id"
 )
 
 // Columns holds all SQL columns for media fields.
@@ -180,7 +171,7 @@ var Columns = []string{
 	FieldID,
 	FieldTitle,
 	FieldDescription,
-	FieldFriendlyToken,
+	FieldShortToken,
 	FieldUUID,
 	FieldType,
 	FieldURL,
@@ -243,8 +234,8 @@ func ValidColumn(column string) bool {
 var (
 	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	TitleValidator func(string) error
-	// FriendlyTokenValidator is a validator for the "friendly_token" field. It is called by the builders before save.
-	FriendlyTokenValidator func(string) error
+	// ShortTokenValidator is a validator for the "short_token" field. It is called by the builders before save.
+	ShortTokenValidator func(string) error
 	// UUIDValidator is a validator for the "uuid" field. It is called by the builders before save.
 	UUIDValidator func(string) error
 	// DefaultType holds the default value on creation for the "type" field.
@@ -313,6 +304,10 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() string
+	// IDValidator is a validator for the "id" field. It is called by the builders before save.
+	IDValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Media queries.
@@ -333,9 +328,9 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByFriendlyToken orders the results by the friendly_token field.
-func ByFriendlyToken(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldFriendlyToken, opts...).ToFunc()
+// ByShortToken orders the results by the short_token field.
+func ByShortToken(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldShortToken, opts...).ToFunc()
 }
 
 // ByUUID orders the results by the uuid field.
@@ -598,20 +593,6 @@ func ByLikes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLikesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-
-// ByTasksCount orders the results by tasks count.
-func ByTasksCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTasksStep(), opts...)
-	}
-}
-
-// ByTasks orders the results by tasks terms.
-func ByTasks(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTasksStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -666,12 +647,5 @@ func newLikesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LikesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LikesTable, LikesColumn),
-	)
-}
-func newTasksStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TasksInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, TasksTable, TasksColumn),
 	)
 }

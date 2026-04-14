@@ -3,10 +3,11 @@
 package encodingtask
 
 import (
+	"fmt"
+	"origadmin/application/origcms/internal/data/enums"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -20,36 +21,18 @@ const (
 	FieldProfileID = "profile_id"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
-	// FieldProgress holds the string denoting the progress field in the database.
-	FieldProgress = "progress"
 	// FieldOutputPath holds the string denoting the output_path field in the database.
 	FieldOutputPath = "output_path"
 	// FieldErrorMessage holds the string denoting the error_message field in the database.
 	FieldErrorMessage = "error_message"
+	// FieldChunk holds the string denoting the chunk field in the database.
+	FieldChunk = "chunk"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// EdgeMedia holds the string denoting the media edge name in mutations.
-	EdgeMedia = "media"
-	// EdgeProfile holds the string denoting the profile edge name in mutations.
-	EdgeProfile = "profile"
 	// Table holds the table name of the encodingtask in the database.
 	Table = "encoding_tasks"
-	// MediaTable is the table that holds the media relation/edge.
-	MediaTable = "encoding_tasks"
-	// MediaInverseTable is the table name for the Media entity.
-	// It exists in this package in order to avoid circular dependency with the "media" package.
-	MediaInverseTable = "media"
-	// MediaColumn is the table column denoting the media relation/edge.
-	MediaColumn = "media_id"
-	// ProfileTable is the table that holds the profile relation/edge.
-	ProfileTable = "encoding_tasks"
-	// ProfileInverseTable is the table name for the EncodeProfile entity.
-	// It exists in this package in order to avoid circular dependency with the "encodeprofile" package.
-	ProfileInverseTable = "encode_profiles"
-	// ProfileColumn is the table column denoting the profile relation/edge.
-	ProfileColumn = "profile_id"
 )
 
 // Columns holds all SQL columns for encodingtask fields.
@@ -58,9 +41,9 @@ var Columns = []string{
 	FieldMediaID,
 	FieldProfileID,
 	FieldStatus,
-	FieldProgress,
 	FieldOutputPath,
 	FieldErrorMessage,
+	FieldChunk,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -76,21 +59,35 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultStatus holds the default value on creation for the "status" field.
-	DefaultStatus string
-	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
-	StatusValidator func(string) error
-	// DefaultProgress holds the default value on creation for the "progress" field.
-	DefaultProgress int
+	// MediaIDValidator is a validator for the "media_id" field. It is called by the builders before save.
+	MediaIDValidator func(string) error
 	// OutputPathValidator is a validator for the "output_path" field. It is called by the builders before save.
 	OutputPathValidator func(string) error
+	// DefaultChunk holds the default value on creation for the "chunk" field.
+	DefaultChunk bool
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() string
+	// IDValidator is a validator for the "id" field. It is called by the builders before save.
+	IDValidator func(string) error
 )
+
+const DefaultStatus enums.EncodingTaskStatus = "pending"
+
+// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
+func StatusValidator(s enums.EncodingTaskStatus) error {
+	switch s {
+	case "unknown", "pending", "processing", "success", "failed", "skipped", "partial":
+		return nil
+	default:
+		return fmt.Errorf("encodingtask: invalid enum value for status field: %q", s)
+	}
+}
 
 // OrderOption defines the ordering options for the EncodingTask queries.
 type OrderOption func(*sql.Selector)
@@ -115,11 +112,6 @@ func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
 }
 
-// ByProgress orders the results by the progress field.
-func ByProgress(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldProgress, opts...).ToFunc()
-}
-
 // ByOutputPath orders the results by the output_path field.
 func ByOutputPath(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOutputPath, opts...).ToFunc()
@@ -130,6 +122,11 @@ func ByErrorMessage(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldErrorMessage, opts...).ToFunc()
 }
 
+// ByChunk orders the results by the chunk field.
+func ByChunk(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldChunk, opts...).ToFunc()
+}
+
 // ByCreatedAt orders the results by the created_at field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
@@ -138,32 +135,4 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdatedAt orders the results by the updated_at field.
 func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
-}
-
-// ByMediaField orders the results by media field.
-func ByMediaField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newMediaStep(), sql.OrderByField(field, opts...))
-	}
-}
-
-// ByProfileField orders the results by profile field.
-func ByProfileField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newProfileStep(), sql.OrderByField(field, opts...))
-	}
-}
-func newMediaStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(MediaInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, MediaTable, MediaColumn),
-	)
-}
-func newProfileStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ProfileInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, ProfileTable, ProfileColumn),
-	)
 }

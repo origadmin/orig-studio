@@ -8,52 +8,61 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Playlist {
+func ID(id string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Playlist {
+func IDEQ(id string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Playlist {
+func IDNEQ(id string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Playlist {
+func IDIn(ids ...string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Playlist {
+func IDNotIn(ids ...string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Playlist {
+func IDGT(id string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Playlist {
+func IDGTE(id string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Playlist {
+func IDLT(id string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Playlist {
+func IDLTE(id string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldLTE(FieldID, id))
+}
+
+// IDEqualFold applies the EqualFold predicate on the ID field.
+func IDEqualFold(id string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldEqualFold(FieldID, id))
+}
+
+// IDContainsFold applies the ContainsFold predicate on the ID field.
+func IDContainsFold(id string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldContainsFold(FieldID, id))
 }
 
 // Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
@@ -66,18 +75,13 @@ func Description(v string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldEQ(FieldDescription, v))
 }
 
-// FriendlyToken applies equality check predicate on the "friendly_token" field. It's identical to FriendlyTokenEQ.
-func FriendlyToken(v string) predicate.Playlist {
-	return predicate.Playlist(sql.FieldEQ(FieldFriendlyToken, v))
-}
-
-// UID applies equality check predicate on the "uid" field. It's identical to UIDEQ.
-func UID(v uuid.UUID) predicate.Playlist {
-	return predicate.Playlist(sql.FieldEQ(FieldUID, v))
+// ShortToken applies equality check predicate on the "short_token" field. It's identical to ShortTokenEQ.
+func ShortToken(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldEQ(FieldShortToken, v))
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int) predicate.Playlist {
+func UserID(v string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldEQ(FieldUserID, v))
 }
 
@@ -221,149 +225,134 @@ func DescriptionContainsFold(v string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldContainsFold(FieldDescription, v))
 }
 
-// FriendlyTokenEQ applies the EQ predicate on the "friendly_token" field.
-func FriendlyTokenEQ(v string) predicate.Playlist {
-	return predicate.Playlist(sql.FieldEQ(FieldFriendlyToken, v))
+// ShortTokenEQ applies the EQ predicate on the "short_token" field.
+func ShortTokenEQ(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldEQ(FieldShortToken, v))
 }
 
-// FriendlyTokenNEQ applies the NEQ predicate on the "friendly_token" field.
-func FriendlyTokenNEQ(v string) predicate.Playlist {
-	return predicate.Playlist(sql.FieldNEQ(FieldFriendlyToken, v))
+// ShortTokenNEQ applies the NEQ predicate on the "short_token" field.
+func ShortTokenNEQ(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldNEQ(FieldShortToken, v))
 }
 
-// FriendlyTokenIn applies the In predicate on the "friendly_token" field.
-func FriendlyTokenIn(vs ...string) predicate.Playlist {
-	return predicate.Playlist(sql.FieldIn(FieldFriendlyToken, vs...))
+// ShortTokenIn applies the In predicate on the "short_token" field.
+func ShortTokenIn(vs ...string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldIn(FieldShortToken, vs...))
 }
 
-// FriendlyTokenNotIn applies the NotIn predicate on the "friendly_token" field.
-func FriendlyTokenNotIn(vs ...string) predicate.Playlist {
-	return predicate.Playlist(sql.FieldNotIn(FieldFriendlyToken, vs...))
+// ShortTokenNotIn applies the NotIn predicate on the "short_token" field.
+func ShortTokenNotIn(vs ...string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldNotIn(FieldShortToken, vs...))
 }
 
-// FriendlyTokenGT applies the GT predicate on the "friendly_token" field.
-func FriendlyTokenGT(v string) predicate.Playlist {
-	return predicate.Playlist(sql.FieldGT(FieldFriendlyToken, v))
+// ShortTokenGT applies the GT predicate on the "short_token" field.
+func ShortTokenGT(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldGT(FieldShortToken, v))
 }
 
-// FriendlyTokenGTE applies the GTE predicate on the "friendly_token" field.
-func FriendlyTokenGTE(v string) predicate.Playlist {
-	return predicate.Playlist(sql.FieldGTE(FieldFriendlyToken, v))
+// ShortTokenGTE applies the GTE predicate on the "short_token" field.
+func ShortTokenGTE(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldGTE(FieldShortToken, v))
 }
 
-// FriendlyTokenLT applies the LT predicate on the "friendly_token" field.
-func FriendlyTokenLT(v string) predicate.Playlist {
-	return predicate.Playlist(sql.FieldLT(FieldFriendlyToken, v))
+// ShortTokenLT applies the LT predicate on the "short_token" field.
+func ShortTokenLT(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldLT(FieldShortToken, v))
 }
 
-// FriendlyTokenLTE applies the LTE predicate on the "friendly_token" field.
-func FriendlyTokenLTE(v string) predicate.Playlist {
-	return predicate.Playlist(sql.FieldLTE(FieldFriendlyToken, v))
+// ShortTokenLTE applies the LTE predicate on the "short_token" field.
+func ShortTokenLTE(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldLTE(FieldShortToken, v))
 }
 
-// FriendlyTokenContains applies the Contains predicate on the "friendly_token" field.
-func FriendlyTokenContains(v string) predicate.Playlist {
-	return predicate.Playlist(sql.FieldContains(FieldFriendlyToken, v))
+// ShortTokenContains applies the Contains predicate on the "short_token" field.
+func ShortTokenContains(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldContains(FieldShortToken, v))
 }
 
-// FriendlyTokenHasPrefix applies the HasPrefix predicate on the "friendly_token" field.
-func FriendlyTokenHasPrefix(v string) predicate.Playlist {
-	return predicate.Playlist(sql.FieldHasPrefix(FieldFriendlyToken, v))
+// ShortTokenHasPrefix applies the HasPrefix predicate on the "short_token" field.
+func ShortTokenHasPrefix(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldHasPrefix(FieldShortToken, v))
 }
 
-// FriendlyTokenHasSuffix applies the HasSuffix predicate on the "friendly_token" field.
-func FriendlyTokenHasSuffix(v string) predicate.Playlist {
-	return predicate.Playlist(sql.FieldHasSuffix(FieldFriendlyToken, v))
+// ShortTokenHasSuffix applies the HasSuffix predicate on the "short_token" field.
+func ShortTokenHasSuffix(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldHasSuffix(FieldShortToken, v))
 }
 
-// FriendlyTokenEqualFold applies the EqualFold predicate on the "friendly_token" field.
-func FriendlyTokenEqualFold(v string) predicate.Playlist {
-	return predicate.Playlist(sql.FieldEqualFold(FieldFriendlyToken, v))
+// ShortTokenEqualFold applies the EqualFold predicate on the "short_token" field.
+func ShortTokenEqualFold(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldEqualFold(FieldShortToken, v))
 }
 
-// FriendlyTokenContainsFold applies the ContainsFold predicate on the "friendly_token" field.
-func FriendlyTokenContainsFold(v string) predicate.Playlist {
-	return predicate.Playlist(sql.FieldContainsFold(FieldFriendlyToken, v))
-}
-
-// UIDEQ applies the EQ predicate on the "uid" field.
-func UIDEQ(v uuid.UUID) predicate.Playlist {
-	return predicate.Playlist(sql.FieldEQ(FieldUID, v))
-}
-
-// UIDNEQ applies the NEQ predicate on the "uid" field.
-func UIDNEQ(v uuid.UUID) predicate.Playlist {
-	return predicate.Playlist(sql.FieldNEQ(FieldUID, v))
-}
-
-// UIDIn applies the In predicate on the "uid" field.
-func UIDIn(vs ...uuid.UUID) predicate.Playlist {
-	return predicate.Playlist(sql.FieldIn(FieldUID, vs...))
-}
-
-// UIDNotIn applies the NotIn predicate on the "uid" field.
-func UIDNotIn(vs ...uuid.UUID) predicate.Playlist {
-	return predicate.Playlist(sql.FieldNotIn(FieldUID, vs...))
-}
-
-// UIDGT applies the GT predicate on the "uid" field.
-func UIDGT(v uuid.UUID) predicate.Playlist {
-	return predicate.Playlist(sql.FieldGT(FieldUID, v))
-}
-
-// UIDGTE applies the GTE predicate on the "uid" field.
-func UIDGTE(v uuid.UUID) predicate.Playlist {
-	return predicate.Playlist(sql.FieldGTE(FieldUID, v))
-}
-
-// UIDLT applies the LT predicate on the "uid" field.
-func UIDLT(v uuid.UUID) predicate.Playlist {
-	return predicate.Playlist(sql.FieldLT(FieldUID, v))
-}
-
-// UIDLTE applies the LTE predicate on the "uid" field.
-func UIDLTE(v uuid.UUID) predicate.Playlist {
-	return predicate.Playlist(sql.FieldLTE(FieldUID, v))
+// ShortTokenContainsFold applies the ContainsFold predicate on the "short_token" field.
+func ShortTokenContainsFold(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldContainsFold(FieldShortToken, v))
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int) predicate.Playlist {
+func UserIDEQ(v string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int) predicate.Playlist {
+func UserIDNEQ(v string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int) predicate.Playlist {
+func UserIDIn(vs ...string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int) predicate.Playlist {
+func UserIDNotIn(vs ...string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldNotIn(FieldUserID, vs...))
 }
 
 // UserIDGT applies the GT predicate on the "user_id" field.
-func UserIDGT(v int) predicate.Playlist {
+func UserIDGT(v string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldGT(FieldUserID, v))
 }
 
 // UserIDGTE applies the GTE predicate on the "user_id" field.
-func UserIDGTE(v int) predicate.Playlist {
+func UserIDGTE(v string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldGTE(FieldUserID, v))
 }
 
 // UserIDLT applies the LT predicate on the "user_id" field.
-func UserIDLT(v int) predicate.Playlist {
+func UserIDLT(v string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldLT(FieldUserID, v))
 }
 
 // UserIDLTE applies the LTE predicate on the "user_id" field.
-func UserIDLTE(v int) predicate.Playlist {
+func UserIDLTE(v string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldLTE(FieldUserID, v))
+}
+
+// UserIDContains applies the Contains predicate on the "user_id" field.
+func UserIDContains(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldContains(FieldUserID, v))
+}
+
+// UserIDHasPrefix applies the HasPrefix predicate on the "user_id" field.
+func UserIDHasPrefix(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldHasPrefix(FieldUserID, v))
+}
+
+// UserIDHasSuffix applies the HasSuffix predicate on the "user_id" field.
+func UserIDHasSuffix(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldHasSuffix(FieldUserID, v))
+}
+
+// UserIDEqualFold applies the EqualFold predicate on the "user_id" field.
+func UserIDEqualFold(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldEqualFold(FieldUserID, v))
+}
+
+// UserIDContainsFold applies the ContainsFold predicate on the "user_id" field.
+func UserIDContainsFold(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldContainsFold(FieldUserID, v))
 }
 
 // PrivacyEQ applies the EQ predicate on the "privacy" field.

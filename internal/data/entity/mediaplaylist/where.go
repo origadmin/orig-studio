@@ -11,57 +11,67 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.MediaPlaylist {
+func ID(id string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.MediaPlaylist {
+func IDEQ(id string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.MediaPlaylist {
+func IDNEQ(id string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.MediaPlaylist {
+func IDIn(ids ...string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.MediaPlaylist {
+func IDNotIn(ids ...string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.MediaPlaylist {
+func IDGT(id string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.MediaPlaylist {
+func IDGTE(id string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.MediaPlaylist {
+func IDLT(id string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.MediaPlaylist {
+func IDLTE(id string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldLTE(FieldID, id))
 }
 
+// IDEqualFold applies the EqualFold predicate on the ID field.
+func IDEqualFold(id string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldEqualFold(FieldID, id))
+}
+
+// IDContainsFold applies the ContainsFold predicate on the ID field.
+func IDContainsFold(id string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldContainsFold(FieldID, id))
+}
+
 // PlaylistID applies equality check predicate on the "playlist_id" field. It's identical to PlaylistIDEQ.
-func PlaylistID(v int) predicate.MediaPlaylist {
+func PlaylistID(v string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldEQ(FieldPlaylistID, v))
 }
 
 // MediaID applies equality check predicate on the "media_id" field. It's identical to MediaIDEQ.
-func MediaID(v int) predicate.MediaPlaylist {
+func MediaID(v string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldEQ(FieldMediaID, v))
 }
 
@@ -76,43 +86,133 @@ func ActionDate(v time.Time) predicate.MediaPlaylist {
 }
 
 // PlaylistIDEQ applies the EQ predicate on the "playlist_id" field.
-func PlaylistIDEQ(v int) predicate.MediaPlaylist {
+func PlaylistIDEQ(v string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldEQ(FieldPlaylistID, v))
 }
 
 // PlaylistIDNEQ applies the NEQ predicate on the "playlist_id" field.
-func PlaylistIDNEQ(v int) predicate.MediaPlaylist {
+func PlaylistIDNEQ(v string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldNEQ(FieldPlaylistID, v))
 }
 
 // PlaylistIDIn applies the In predicate on the "playlist_id" field.
-func PlaylistIDIn(vs ...int) predicate.MediaPlaylist {
+func PlaylistIDIn(vs ...string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldIn(FieldPlaylistID, vs...))
 }
 
 // PlaylistIDNotIn applies the NotIn predicate on the "playlist_id" field.
-func PlaylistIDNotIn(vs ...int) predicate.MediaPlaylist {
+func PlaylistIDNotIn(vs ...string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldNotIn(FieldPlaylistID, vs...))
 }
 
+// PlaylistIDGT applies the GT predicate on the "playlist_id" field.
+func PlaylistIDGT(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldGT(FieldPlaylistID, v))
+}
+
+// PlaylistIDGTE applies the GTE predicate on the "playlist_id" field.
+func PlaylistIDGTE(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldGTE(FieldPlaylistID, v))
+}
+
+// PlaylistIDLT applies the LT predicate on the "playlist_id" field.
+func PlaylistIDLT(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldLT(FieldPlaylistID, v))
+}
+
+// PlaylistIDLTE applies the LTE predicate on the "playlist_id" field.
+func PlaylistIDLTE(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldLTE(FieldPlaylistID, v))
+}
+
+// PlaylistIDContains applies the Contains predicate on the "playlist_id" field.
+func PlaylistIDContains(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldContains(FieldPlaylistID, v))
+}
+
+// PlaylistIDHasPrefix applies the HasPrefix predicate on the "playlist_id" field.
+func PlaylistIDHasPrefix(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldHasPrefix(FieldPlaylistID, v))
+}
+
+// PlaylistIDHasSuffix applies the HasSuffix predicate on the "playlist_id" field.
+func PlaylistIDHasSuffix(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldHasSuffix(FieldPlaylistID, v))
+}
+
+// PlaylistIDEqualFold applies the EqualFold predicate on the "playlist_id" field.
+func PlaylistIDEqualFold(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldEqualFold(FieldPlaylistID, v))
+}
+
+// PlaylistIDContainsFold applies the ContainsFold predicate on the "playlist_id" field.
+func PlaylistIDContainsFold(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldContainsFold(FieldPlaylistID, v))
+}
+
 // MediaIDEQ applies the EQ predicate on the "media_id" field.
-func MediaIDEQ(v int) predicate.MediaPlaylist {
+func MediaIDEQ(v string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldEQ(FieldMediaID, v))
 }
 
 // MediaIDNEQ applies the NEQ predicate on the "media_id" field.
-func MediaIDNEQ(v int) predicate.MediaPlaylist {
+func MediaIDNEQ(v string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldNEQ(FieldMediaID, v))
 }
 
 // MediaIDIn applies the In predicate on the "media_id" field.
-func MediaIDIn(vs ...int) predicate.MediaPlaylist {
+func MediaIDIn(vs ...string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldIn(FieldMediaID, vs...))
 }
 
 // MediaIDNotIn applies the NotIn predicate on the "media_id" field.
-func MediaIDNotIn(vs ...int) predicate.MediaPlaylist {
+func MediaIDNotIn(vs ...string) predicate.MediaPlaylist {
 	return predicate.MediaPlaylist(sql.FieldNotIn(FieldMediaID, vs...))
+}
+
+// MediaIDGT applies the GT predicate on the "media_id" field.
+func MediaIDGT(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldGT(FieldMediaID, v))
+}
+
+// MediaIDGTE applies the GTE predicate on the "media_id" field.
+func MediaIDGTE(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldGTE(FieldMediaID, v))
+}
+
+// MediaIDLT applies the LT predicate on the "media_id" field.
+func MediaIDLT(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldLT(FieldMediaID, v))
+}
+
+// MediaIDLTE applies the LTE predicate on the "media_id" field.
+func MediaIDLTE(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldLTE(FieldMediaID, v))
+}
+
+// MediaIDContains applies the Contains predicate on the "media_id" field.
+func MediaIDContains(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldContains(FieldMediaID, v))
+}
+
+// MediaIDHasPrefix applies the HasPrefix predicate on the "media_id" field.
+func MediaIDHasPrefix(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldHasPrefix(FieldMediaID, v))
+}
+
+// MediaIDHasSuffix applies the HasSuffix predicate on the "media_id" field.
+func MediaIDHasSuffix(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldHasSuffix(FieldMediaID, v))
+}
+
+// MediaIDEqualFold applies the EqualFold predicate on the "media_id" field.
+func MediaIDEqualFold(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldEqualFold(FieldMediaID, v))
+}
+
+// MediaIDContainsFold applies the ContainsFold predicate on the "media_id" field.
+func MediaIDContainsFold(v string) predicate.MediaPlaylist {
+	return predicate.MediaPlaylist(sql.FieldContainsFold(FieldMediaID, v))
 }
 
 // OrderingEQ applies the EQ predicate on the "ordering" field.

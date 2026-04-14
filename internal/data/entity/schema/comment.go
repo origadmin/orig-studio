@@ -15,7 +15,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 
-	"github.com/google/uuid"
+	"origadmin/application/origcms/internal/helpers/idutil"
 )
 
 type Comment struct {
@@ -24,11 +24,11 @@ type Comment struct {
 
 func (Comment) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.DefaultUUIDv7()), // UUIDv7 for distributed system
 		field.Text("text"),
-		field.UUID("uid", uuid.New()).Unique().Default(uuid.New),
 		field.Time("add_date").Default(time.Now),
-		field.Int("media_id").StorageKey("media_comments"),
-		field.Int("user_id").StorageKey("user_comments"),
+		field.String("media_id").StorageKey("media_comments"),
+		field.String("user_id").StorageKey("user_comments"),
 	}
 }
 

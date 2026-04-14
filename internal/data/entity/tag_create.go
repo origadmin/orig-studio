@@ -47,14 +47,14 @@ func (_c *TagCreate) SetListingsThumbnail(v string) *TagCreate {
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_c *TagCreate) AddUserIDs(ids ...int) *TagCreate {
+func (_c *TagCreate) AddUserIDs(ids ...string) *TagCreate {
 	_c.mutation.AddUserIDs(ids...)
 	return _c
 }
 
 // AddUser adds the "user" edges to the User entity.
 func (_c *TagCreate) AddUser(v ...*User) *TagCreate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -169,7 +169,7 @@ func (_c *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 			Columns: tag.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

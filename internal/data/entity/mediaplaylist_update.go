@@ -32,13 +32,13 @@ func (_u *MediaPlaylistUpdate) Where(ps ...predicate.MediaPlaylist) *MediaPlayli
 }
 
 // SetPlaylistID sets the "playlist_id" field.
-func (_u *MediaPlaylistUpdate) SetPlaylistID(v int) *MediaPlaylistUpdate {
+func (_u *MediaPlaylistUpdate) SetPlaylistID(v string) *MediaPlaylistUpdate {
 	_u.mutation.SetPlaylistID(v)
 	return _u
 }
 
 // SetNillablePlaylistID sets the "playlist_id" field if the given value is not nil.
-func (_u *MediaPlaylistUpdate) SetNillablePlaylistID(v *int) *MediaPlaylistUpdate {
+func (_u *MediaPlaylistUpdate) SetNillablePlaylistID(v *string) *MediaPlaylistUpdate {
 	if v != nil {
 		_u.SetPlaylistID(*v)
 	}
@@ -46,13 +46,13 @@ func (_u *MediaPlaylistUpdate) SetNillablePlaylistID(v *int) *MediaPlaylistUpdat
 }
 
 // SetMediaID sets the "media_id" field.
-func (_u *MediaPlaylistUpdate) SetMediaID(v int) *MediaPlaylistUpdate {
+func (_u *MediaPlaylistUpdate) SetMediaID(v string) *MediaPlaylistUpdate {
 	_u.mutation.SetMediaID(v)
 	return _u
 }
 
 // SetNillableMediaID sets the "media_id" field if the given value is not nil.
-func (_u *MediaPlaylistUpdate) SetNillableMediaID(v *int) *MediaPlaylistUpdate {
+func (_u *MediaPlaylistUpdate) SetNillableMediaID(v *string) *MediaPlaylistUpdate {
 	if v != nil {
 		_u.SetMediaID(*v)
 	}
@@ -169,7 +169,7 @@ func (_u *MediaPlaylistUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(mediaplaylist.Table, mediaplaylist.Columns, sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(mediaplaylist.Table, mediaplaylist.Columns, sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeString))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -194,7 +194,7 @@ func (_u *MediaPlaylistUpdate) sqlSave(ctx context.Context) (_node int, err erro
 			Columns: []string{mediaplaylist.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -207,7 +207,7 @@ func (_u *MediaPlaylistUpdate) sqlSave(ctx context.Context) (_node int, err erro
 			Columns: []string{mediaplaylist.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -223,7 +223,7 @@ func (_u *MediaPlaylistUpdate) sqlSave(ctx context.Context) (_node int, err erro
 			Columns: []string{mediaplaylist.PlaylistColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -236,7 +236,7 @@ func (_u *MediaPlaylistUpdate) sqlSave(ctx context.Context) (_node int, err erro
 			Columns: []string{mediaplaylist.PlaylistColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -267,13 +267,13 @@ type MediaPlaylistUpdateOne struct {
 }
 
 // SetPlaylistID sets the "playlist_id" field.
-func (_u *MediaPlaylistUpdateOne) SetPlaylistID(v int) *MediaPlaylistUpdateOne {
+func (_u *MediaPlaylistUpdateOne) SetPlaylistID(v string) *MediaPlaylistUpdateOne {
 	_u.mutation.SetPlaylistID(v)
 	return _u
 }
 
 // SetNillablePlaylistID sets the "playlist_id" field if the given value is not nil.
-func (_u *MediaPlaylistUpdateOne) SetNillablePlaylistID(v *int) *MediaPlaylistUpdateOne {
+func (_u *MediaPlaylistUpdateOne) SetNillablePlaylistID(v *string) *MediaPlaylistUpdateOne {
 	if v != nil {
 		_u.SetPlaylistID(*v)
 	}
@@ -281,13 +281,13 @@ func (_u *MediaPlaylistUpdateOne) SetNillablePlaylistID(v *int) *MediaPlaylistUp
 }
 
 // SetMediaID sets the "media_id" field.
-func (_u *MediaPlaylistUpdateOne) SetMediaID(v int) *MediaPlaylistUpdateOne {
+func (_u *MediaPlaylistUpdateOne) SetMediaID(v string) *MediaPlaylistUpdateOne {
 	_u.mutation.SetMediaID(v)
 	return _u
 }
 
 // SetNillableMediaID sets the "media_id" field if the given value is not nil.
-func (_u *MediaPlaylistUpdateOne) SetNillableMediaID(v *int) *MediaPlaylistUpdateOne {
+func (_u *MediaPlaylistUpdateOne) SetNillableMediaID(v *string) *MediaPlaylistUpdateOne {
 	if v != nil {
 		_u.SetMediaID(*v)
 	}
@@ -417,7 +417,7 @@ func (_u *MediaPlaylistUpdateOne) sqlSave(ctx context.Context) (_node *MediaPlay
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(mediaplaylist.Table, mediaplaylist.Columns, sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(mediaplaylist.Table, mediaplaylist.Columns, sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeString))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`entity: missing "MediaPlaylist.id" for update`)}
@@ -459,7 +459,7 @@ func (_u *MediaPlaylistUpdateOne) sqlSave(ctx context.Context) (_node *MediaPlay
 			Columns: []string{mediaplaylist.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -472,7 +472,7 @@ func (_u *MediaPlaylistUpdateOne) sqlSave(ctx context.Context) (_node *MediaPlay
 			Columns: []string{mediaplaylist.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -488,7 +488,7 @@ func (_u *MediaPlaylistUpdateOne) sqlSave(ctx context.Context) (_node *MediaPlay
 			Columns: []string{mediaplaylist.PlaylistColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -501,7 +501,7 @@ func (_u *MediaPlaylistUpdateOne) sqlSave(ctx context.Context) (_node *MediaPlay
 			Columns: []string{mediaplaylist.PlaylistColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

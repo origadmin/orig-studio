@@ -4,11 +4,9 @@ package entity
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 	"origadmin/application/origcms/internal/data/entity/encodeprofile"
-	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 
 	"entgo.io/ent"
@@ -25,7 +23,6 @@ type EncodeProfileQuery struct {
 	order      []encodeprofile.OrderOption
 	inters     []Interceptor
 	predicates []predicate.EncodeProfile
-	withTasks  *EncodingTaskQuery
 	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -61,28 +58,6 @@ func (_q *EncodeProfileQuery) Unique(unique bool) *EncodeProfileQuery {
 func (_q *EncodeProfileQuery) Order(o ...encodeprofile.OrderOption) *EncodeProfileQuery {
 	_q.order = append(_q.order, o...)
 	return _q
-}
-
-// QueryTasks chains the current query on the "tasks" edge.
-func (_q *EncodeProfileQuery) QueryTasks() *EncodingTaskQuery {
-	query := (&EncodingTaskClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(encodeprofile.Table, encodeprofile.FieldID, selector),
-			sqlgraph.To(encodingtask.Table, encodingtask.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, encodeprofile.TasksTable, encodeprofile.TasksColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // First returns the first EncodeProfile entity from the query.
@@ -277,23 +252,11 @@ func (_q *EncodeProfileQuery) Clone() *EncodeProfileQuery {
 		order:      append([]encodeprofile.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
 		predicates: append([]predicate.EncodeProfile{}, _q.predicates...),
-		withTasks:  _q.withTasks.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
 		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
-}
-
-// WithTasks tells the query-builder to eager-load the nodes that are connected to
-// the "tasks" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *EncodeProfileQuery) WithTasks(opts ...func(*EncodingTaskQuery)) *EncodeProfileQuery {
-	query := (&EncodingTaskClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withTasks = query
-	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -372,11 +335,8 @@ func (_q *EncodeProfileQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *EncodeProfileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*EncodeProfile, error) {
 	var (
-		nodes       = []*EncodeProfile{}
-		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
-			_q.withTasks != nil,
-		}
+		nodes = []*EncodeProfile{}
+		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*EncodeProfile).scanValues(nil, columns)
@@ -384,7 +344,6 @@ func (_q *EncodeProfileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &EncodeProfile{config: _q.config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
@@ -399,45 +358,7 @@ func (_q *EncodeProfileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withTasks; query != nil {
-		if err := _q.loadTasks(ctx, query, nodes,
-			func(n *EncodeProfile) { n.Edges.Tasks = []*EncodingTask{} },
-			func(n *EncodeProfile, e *EncodingTask) { n.Edges.Tasks = append(n.Edges.Tasks, e) }); err != nil {
-			return nil, err
-		}
-	}
 	return nodes, nil
-}
-
-func (_q *EncodeProfileQuery) loadTasks(ctx context.Context, query *EncodingTaskQuery, nodes []*EncodeProfile, init func(*EncodeProfile), assign func(*EncodeProfile, *EncodingTask)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*EncodeProfile)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(encodingtask.FieldProfileID)
-	}
-	query.Where(predicate.EncodingTask(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(encodeprofile.TasksColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.ProfileID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "profile_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
 }
 
 func (_q *EncodeProfileQuery) sqlCount(ctx context.Context) (int, error) {

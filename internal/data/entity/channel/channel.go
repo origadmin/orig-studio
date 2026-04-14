@@ -22,8 +22,8 @@ const (
 	FieldSlug = "slug"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// FieldFriendlyToken holds the string denoting the friendly_token field in the database.
-	FieldFriendlyToken = "friendly_token"
+	// FieldShortToken holds the string denoting the short_token field in the database.
+	FieldShortToken = "short_token"
 	// FieldBannerLogo holds the string denoting the banner_logo field in the database.
 	FieldBannerLogo = "banner_logo"
 	// FieldAddDate holds the string denoting the add_date field in the database.
@@ -57,7 +57,7 @@ var Columns = []string{
 	FieldTitle,
 	FieldSlug,
 	FieldDescription,
-	FieldFriendlyToken,
+	FieldShortToken,
 	FieldBannerLogo,
 	FieldAddDate,
 }
@@ -77,12 +77,16 @@ var (
 	TitleValidator func(string) error
 	// SlugValidator is a validator for the "slug" field. It is called by the builders before save.
 	SlugValidator func(string) error
-	// FriendlyTokenValidator is a validator for the "friendly_token" field. It is called by the builders before save.
-	FriendlyTokenValidator func(string) error
+	// ShortTokenValidator is a validator for the "short_token" field. It is called by the builders before save.
+	ShortTokenValidator func(string) error
 	// BannerLogoValidator is a validator for the "banner_logo" field. It is called by the builders before save.
 	BannerLogoValidator func(string) error
 	// DefaultAddDate holds the default value on creation for the "add_date" field.
 	DefaultAddDate func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() string
+	// IDValidator is a validator for the "id" field. It is called by the builders before save.
+	IDValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Channel queries.
@@ -113,9 +117,9 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByFriendlyToken orders the results by the friendly_token field.
-func ByFriendlyToken(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldFriendlyToken, opts...).ToFunc()
+// ByShortToken orders the results by the short_token field.
+func ByShortToken(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldShortToken, opts...).ToFunc()
 }
 
 // ByBannerLogo orders the results by the banner_logo field.

@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/svc-media/biz"
 )
 
@@ -56,7 +57,7 @@ func (h *UploadHandler) initiateMultipartUpload() gin.HandlerFunc {
 			ContentType string   `json:"content_type"`
 			Title       string   `json:"title"`
 			Description string   `json:"description"`
-			CategoryID  *int64   `json:"category_id"`
+			CategoryID  *string  `json:"category_id"`
 			Tags        []string `json:"tags"`
 			Thumbnail   string   `json:"thumbnail"`
 		}
@@ -154,7 +155,7 @@ func (h *UploadHandler) completeMultipartUpload() gin.HandlerFunc {
 			Sha256      string   `json:"sha256"`
 			Title       string   `json:"title"`
 			Description string   `json:"description"`
-			CategoryID  *int64   `json:"category_id"`
+			CategoryID  *string  `json:"category_id"`
 			Tags        []string `json:"tags"`
 			Thumbnail   string   `json:"thumbnail"`
 		}
@@ -215,7 +216,7 @@ func (h *UploadHandler) listUploadSessions() gin.HandlerFunc {
 		claims, _ := c.MustGet("claims").(*auth.Claims)
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
-		status := c.Query("status")
+		status := enums.ParseUploadStatus(c.Query("status"))
 
 		sessions, total, err := h.uc.ListSessions(
 			c.Request.Context(),

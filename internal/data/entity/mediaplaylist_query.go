@@ -133,8 +133,8 @@ func (_q *MediaPlaylistQuery) FirstX(ctx context.Context) *MediaPlaylist {
 
 // FirstID returns the first MediaPlaylist ID from the query.
 // Returns a *NotFoundError when no MediaPlaylist ID was found.
-func (_q *MediaPlaylistQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *MediaPlaylistQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -146,7 +146,7 @@ func (_q *MediaPlaylistQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *MediaPlaylistQuery) FirstIDX(ctx context.Context) int {
+func (_q *MediaPlaylistQuery) FirstIDX(ctx context.Context) string {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -184,8 +184,8 @@ func (_q *MediaPlaylistQuery) OnlyX(ctx context.Context) *MediaPlaylist {
 // OnlyID is like Only, but returns the only MediaPlaylist ID in the query.
 // Returns a *NotSingularError when more than one MediaPlaylist ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *MediaPlaylistQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *MediaPlaylistQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -201,7 +201,7 @@ func (_q *MediaPlaylistQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *MediaPlaylistQuery) OnlyIDX(ctx context.Context) int {
+func (_q *MediaPlaylistQuery) OnlyIDX(ctx context.Context) string {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -229,7 +229,7 @@ func (_q *MediaPlaylistQuery) AllX(ctx context.Context) []*MediaPlaylist {
 }
 
 // IDs executes the query and returns a list of MediaPlaylist IDs.
-func (_q *MediaPlaylistQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (_q *MediaPlaylistQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
@@ -241,7 +241,7 @@ func (_q *MediaPlaylistQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *MediaPlaylistQuery) IDsX(ctx context.Context) []int {
+func (_q *MediaPlaylistQuery) IDsX(ctx context.Context) []string {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -338,7 +338,7 @@ func (_q *MediaPlaylistQuery) WithPlaylist(opts ...func(*PlaylistQuery)) *MediaP
 // Example:
 //
 //	var v []struct {
-//		PlaylistID int `json:"playlist_id,omitempty"`
+//		PlaylistID string `json:"playlist_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -361,7 +361,7 @@ func (_q *MediaPlaylistQuery) GroupBy(field string, fields ...string) *MediaPlay
 // Example:
 //
 //	var v []struct {
-//		PlaylistID int `json:"playlist_id,omitempty"`
+//		PlaylistID string `json:"playlist_id,omitempty"`
 //	}
 //
 //	client.MediaPlaylist.Query().
@@ -456,8 +456,8 @@ func (_q *MediaPlaylistQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 }
 
 func (_q *MediaPlaylistQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes []*MediaPlaylist, init func(*MediaPlaylist), assign func(*MediaPlaylist, *Media)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*MediaPlaylist)
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*MediaPlaylist)
 	for i := range nodes {
 		fk := nodes[i].MediaID
 		if _, ok := nodeids[fk]; !ok {
@@ -485,8 +485,8 @@ func (_q *MediaPlaylistQuery) loadMedia(ctx context.Context, query *MediaQuery, 
 	return nil
 }
 func (_q *MediaPlaylistQuery) loadPlaylist(ctx context.Context, query *PlaylistQuery, nodes []*MediaPlaylist, init func(*MediaPlaylist), assign func(*MediaPlaylist, *Playlist)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*MediaPlaylist)
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*MediaPlaylist)
 	for i := range nodes {
 		fk := nodes[i].PlaylistID
 		if _, ok := nodeids[fk]; !ok {
@@ -527,7 +527,7 @@ func (_q *MediaPlaylistQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (_q *MediaPlaylistQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(mediaplaylist.Table, mediaplaylist.Columns, sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(mediaplaylist.Table, mediaplaylist.Columns, sqlgraph.NewFieldSpec(mediaplaylist.FieldID, field.TypeString))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

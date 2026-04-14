@@ -7,7 +7,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/google/uuid"
 )
 
 const (
@@ -17,8 +16,6 @@ const (
 	FieldID = "id"
 	// FieldText holds the string denoting the text field in the database.
 	FieldText = "text"
-	// FieldUID holds the string denoting the uid field in the database.
-	FieldUID = "uid"
 	// FieldAddDate holds the string denoting the add_date field in the database.
 	FieldAddDate = "add_date"
 	// FieldMediaID holds the string denoting the media_id field in the database.
@@ -63,7 +60,6 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldText,
-	FieldUID,
 	FieldAddDate,
 	FieldMediaID,
 	FieldUserID,
@@ -91,10 +87,12 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultUID holds the default value on creation for the "uid" field.
-	DefaultUID func() uuid.UUID
 	// DefaultAddDate holds the default value on creation for the "add_date" field.
 	DefaultAddDate func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() string
+	// IDValidator is a validator for the "id" field. It is called by the builders before save.
+	IDValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Comment queries.
@@ -108,11 +106,6 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByText orders the results by the text field.
 func ByText(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldText, opts...).ToFunc()
-}
-
-// ByUID orders the results by the uid field.
-func ByUID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUID, opts...).ToFunc()
 }
 
 // ByAddDate orders the results by the add_date field.

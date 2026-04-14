@@ -11,52 +11,62 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Channel {
+func ID(id string) predicate.Channel {
 	return predicate.Channel(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Channel {
+func IDEQ(id string) predicate.Channel {
 	return predicate.Channel(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Channel {
+func IDNEQ(id string) predicate.Channel {
 	return predicate.Channel(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Channel {
+func IDIn(ids ...string) predicate.Channel {
 	return predicate.Channel(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Channel {
+func IDNotIn(ids ...string) predicate.Channel {
 	return predicate.Channel(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Channel {
+func IDGT(id string) predicate.Channel {
 	return predicate.Channel(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Channel {
+func IDGTE(id string) predicate.Channel {
 	return predicate.Channel(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Channel {
+func IDLT(id string) predicate.Channel {
 	return predicate.Channel(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Channel {
+func IDLTE(id string) predicate.Channel {
 	return predicate.Channel(sql.FieldLTE(FieldID, id))
 }
 
+// IDEqualFold applies the EqualFold predicate on the ID field.
+func IDEqualFold(id string) predicate.Channel {
+	return predicate.Channel(sql.FieldEqualFold(FieldID, id))
+}
+
+// IDContainsFold applies the ContainsFold predicate on the ID field.
+func IDContainsFold(id string) predicate.Channel {
+	return predicate.Channel(sql.FieldContainsFold(FieldID, id))
+}
+
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int) predicate.Channel {
+func UserID(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldEQ(FieldUserID, v))
 }
 
@@ -75,9 +85,9 @@ func Description(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldEQ(FieldDescription, v))
 }
 
-// FriendlyToken applies equality check predicate on the "friendly_token" field. It's identical to FriendlyTokenEQ.
-func FriendlyToken(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldEQ(FieldFriendlyToken, v))
+// ShortToken applies equality check predicate on the "short_token" field. It's identical to ShortTokenEQ.
+func ShortToken(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldShortToken, v))
 }
 
 // BannerLogo applies equality check predicate on the "banner_logo" field. It's identical to BannerLogoEQ.
@@ -91,23 +101,68 @@ func AddDate(v time.Time) predicate.Channel {
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int) predicate.Channel {
+func UserIDEQ(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int) predicate.Channel {
+func UserIDNEQ(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int) predicate.Channel {
+func UserIDIn(vs ...string) predicate.Channel {
 	return predicate.Channel(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int) predicate.Channel {
+func UserIDNotIn(vs ...string) predicate.Channel {
 	return predicate.Channel(sql.FieldNotIn(FieldUserID, vs...))
+}
+
+// UserIDGT applies the GT predicate on the "user_id" field.
+func UserIDGT(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldGT(FieldUserID, v))
+}
+
+// UserIDGTE applies the GTE predicate on the "user_id" field.
+func UserIDGTE(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldGTE(FieldUserID, v))
+}
+
+// UserIDLT applies the LT predicate on the "user_id" field.
+func UserIDLT(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldLT(FieldUserID, v))
+}
+
+// UserIDLTE applies the LTE predicate on the "user_id" field.
+func UserIDLTE(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldLTE(FieldUserID, v))
+}
+
+// UserIDContains applies the Contains predicate on the "user_id" field.
+func UserIDContains(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldContains(FieldUserID, v))
+}
+
+// UserIDHasPrefix applies the HasPrefix predicate on the "user_id" field.
+func UserIDHasPrefix(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldHasPrefix(FieldUserID, v))
+}
+
+// UserIDHasSuffix applies the HasSuffix predicate on the "user_id" field.
+func UserIDHasSuffix(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldHasSuffix(FieldUserID, v))
+}
+
+// UserIDEqualFold applies the EqualFold predicate on the "user_id" field.
+func UserIDEqualFold(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEqualFold(FieldUserID, v))
+}
+
+// UserIDContainsFold applies the ContainsFold predicate on the "user_id" field.
+func UserIDContainsFold(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldContainsFold(FieldUserID, v))
 }
 
 // TitleEQ applies the EQ predicate on the "title" field.
@@ -305,69 +360,69 @@ func DescriptionContainsFold(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldContainsFold(FieldDescription, v))
 }
 
-// FriendlyTokenEQ applies the EQ predicate on the "friendly_token" field.
-func FriendlyTokenEQ(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldEQ(FieldFriendlyToken, v))
+// ShortTokenEQ applies the EQ predicate on the "short_token" field.
+func ShortTokenEQ(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldShortToken, v))
 }
 
-// FriendlyTokenNEQ applies the NEQ predicate on the "friendly_token" field.
-func FriendlyTokenNEQ(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldNEQ(FieldFriendlyToken, v))
+// ShortTokenNEQ applies the NEQ predicate on the "short_token" field.
+func ShortTokenNEQ(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldShortToken, v))
 }
 
-// FriendlyTokenIn applies the In predicate on the "friendly_token" field.
-func FriendlyTokenIn(vs ...string) predicate.Channel {
-	return predicate.Channel(sql.FieldIn(FieldFriendlyToken, vs...))
+// ShortTokenIn applies the In predicate on the "short_token" field.
+func ShortTokenIn(vs ...string) predicate.Channel {
+	return predicate.Channel(sql.FieldIn(FieldShortToken, vs...))
 }
 
-// FriendlyTokenNotIn applies the NotIn predicate on the "friendly_token" field.
-func FriendlyTokenNotIn(vs ...string) predicate.Channel {
-	return predicate.Channel(sql.FieldNotIn(FieldFriendlyToken, vs...))
+// ShortTokenNotIn applies the NotIn predicate on the "short_token" field.
+func ShortTokenNotIn(vs ...string) predicate.Channel {
+	return predicate.Channel(sql.FieldNotIn(FieldShortToken, vs...))
 }
 
-// FriendlyTokenGT applies the GT predicate on the "friendly_token" field.
-func FriendlyTokenGT(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldGT(FieldFriendlyToken, v))
+// ShortTokenGT applies the GT predicate on the "short_token" field.
+func ShortTokenGT(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldGT(FieldShortToken, v))
 }
 
-// FriendlyTokenGTE applies the GTE predicate on the "friendly_token" field.
-func FriendlyTokenGTE(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldGTE(FieldFriendlyToken, v))
+// ShortTokenGTE applies the GTE predicate on the "short_token" field.
+func ShortTokenGTE(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldGTE(FieldShortToken, v))
 }
 
-// FriendlyTokenLT applies the LT predicate on the "friendly_token" field.
-func FriendlyTokenLT(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldLT(FieldFriendlyToken, v))
+// ShortTokenLT applies the LT predicate on the "short_token" field.
+func ShortTokenLT(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldLT(FieldShortToken, v))
 }
 
-// FriendlyTokenLTE applies the LTE predicate on the "friendly_token" field.
-func FriendlyTokenLTE(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldLTE(FieldFriendlyToken, v))
+// ShortTokenLTE applies the LTE predicate on the "short_token" field.
+func ShortTokenLTE(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldLTE(FieldShortToken, v))
 }
 
-// FriendlyTokenContains applies the Contains predicate on the "friendly_token" field.
-func FriendlyTokenContains(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldContains(FieldFriendlyToken, v))
+// ShortTokenContains applies the Contains predicate on the "short_token" field.
+func ShortTokenContains(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldContains(FieldShortToken, v))
 }
 
-// FriendlyTokenHasPrefix applies the HasPrefix predicate on the "friendly_token" field.
-func FriendlyTokenHasPrefix(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldHasPrefix(FieldFriendlyToken, v))
+// ShortTokenHasPrefix applies the HasPrefix predicate on the "short_token" field.
+func ShortTokenHasPrefix(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldHasPrefix(FieldShortToken, v))
 }
 
-// FriendlyTokenHasSuffix applies the HasSuffix predicate on the "friendly_token" field.
-func FriendlyTokenHasSuffix(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldHasSuffix(FieldFriendlyToken, v))
+// ShortTokenHasSuffix applies the HasSuffix predicate on the "short_token" field.
+func ShortTokenHasSuffix(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldHasSuffix(FieldShortToken, v))
 }
 
-// FriendlyTokenEqualFold applies the EqualFold predicate on the "friendly_token" field.
-func FriendlyTokenEqualFold(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldEqualFold(FieldFriendlyToken, v))
+// ShortTokenEqualFold applies the EqualFold predicate on the "short_token" field.
+func ShortTokenEqualFold(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEqualFold(FieldShortToken, v))
 }
 
-// FriendlyTokenContainsFold applies the ContainsFold predicate on the "friendly_token" field.
-func FriendlyTokenContainsFold(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldContainsFold(FieldFriendlyToken, v))
+// ShortTokenContainsFold applies the ContainsFold predicate on the "short_token" field.
+func ShortTokenContainsFold(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldContainsFold(FieldShortToken, v))
 }
 
 // BannerLogoEQ applies the EQ predicate on the "banner_logo" field.

@@ -11,48 +11,58 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Media {
+func ID(id string) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Media {
+func IDEQ(id string) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Media {
+func IDNEQ(id string) predicate.Media {
 	return predicate.Media(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Media {
+func IDIn(ids ...string) predicate.Media {
 	return predicate.Media(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Media {
+func IDNotIn(ids ...string) predicate.Media {
 	return predicate.Media(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Media {
+func IDGT(id string) predicate.Media {
 	return predicate.Media(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Media {
+func IDGTE(id string) predicate.Media {
 	return predicate.Media(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Media {
+func IDLT(id string) predicate.Media {
 	return predicate.Media(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Media {
+func IDLTE(id string) predicate.Media {
 	return predicate.Media(sql.FieldLTE(FieldID, id))
+}
+
+// IDEqualFold applies the EqualFold predicate on the ID field.
+func IDEqualFold(id string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldID, id))
+}
+
+// IDContainsFold applies the ContainsFold predicate on the ID field.
+func IDContainsFold(id string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldID, id))
 }
 
 // Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
@@ -65,9 +75,9 @@ func Description(v string) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldDescription, v))
 }
 
-// FriendlyToken applies equality check predicate on the "friendly_token" field. It's identical to FriendlyTokenEQ.
-func FriendlyToken(v string) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldFriendlyToken, v))
+// ShortToken applies equality check predicate on the "short_token" field. It's identical to ShortTokenEQ.
+func ShortToken(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldShortToken, v))
 }
 
 // UUID applies equality check predicate on the "uuid" field. It's identical to UUIDEQ.
@@ -211,17 +221,17 @@ func ReportedTimes(v int) predicate.Media {
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int) predicate.Media {
+func UserID(v string) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldUserID, v))
 }
 
 // CategoryID applies equality check predicate on the "category_id" field. It's identical to CategoryIDEQ.
-func CategoryID(v int) predicate.Media {
+func CategoryID(v string) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldCategoryID, v))
 }
 
 // ChannelID applies equality check predicate on the "channel_id" field. It's identical to ChannelIDEQ.
-func ChannelID(v int) predicate.Media {
+func ChannelID(v string) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldChannelID, v))
 }
 
@@ -380,79 +390,79 @@ func DescriptionContainsFold(v string) predicate.Media {
 	return predicate.Media(sql.FieldContainsFold(FieldDescription, v))
 }
 
-// FriendlyTokenEQ applies the EQ predicate on the "friendly_token" field.
-func FriendlyTokenEQ(v string) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldFriendlyToken, v))
+// ShortTokenEQ applies the EQ predicate on the "short_token" field.
+func ShortTokenEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldShortToken, v))
 }
 
-// FriendlyTokenNEQ applies the NEQ predicate on the "friendly_token" field.
-func FriendlyTokenNEQ(v string) predicate.Media {
-	return predicate.Media(sql.FieldNEQ(FieldFriendlyToken, v))
+// ShortTokenNEQ applies the NEQ predicate on the "short_token" field.
+func ShortTokenNEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldShortToken, v))
 }
 
-// FriendlyTokenIn applies the In predicate on the "friendly_token" field.
-func FriendlyTokenIn(vs ...string) predicate.Media {
-	return predicate.Media(sql.FieldIn(FieldFriendlyToken, vs...))
+// ShortTokenIn applies the In predicate on the "short_token" field.
+func ShortTokenIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldShortToken, vs...))
 }
 
-// FriendlyTokenNotIn applies the NotIn predicate on the "friendly_token" field.
-func FriendlyTokenNotIn(vs ...string) predicate.Media {
-	return predicate.Media(sql.FieldNotIn(FieldFriendlyToken, vs...))
+// ShortTokenNotIn applies the NotIn predicate on the "short_token" field.
+func ShortTokenNotIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldShortToken, vs...))
 }
 
-// FriendlyTokenGT applies the GT predicate on the "friendly_token" field.
-func FriendlyTokenGT(v string) predicate.Media {
-	return predicate.Media(sql.FieldGT(FieldFriendlyToken, v))
+// ShortTokenGT applies the GT predicate on the "short_token" field.
+func ShortTokenGT(v string) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldShortToken, v))
 }
 
-// FriendlyTokenGTE applies the GTE predicate on the "friendly_token" field.
-func FriendlyTokenGTE(v string) predicate.Media {
-	return predicate.Media(sql.FieldGTE(FieldFriendlyToken, v))
+// ShortTokenGTE applies the GTE predicate on the "short_token" field.
+func ShortTokenGTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldShortToken, v))
 }
 
-// FriendlyTokenLT applies the LT predicate on the "friendly_token" field.
-func FriendlyTokenLT(v string) predicate.Media {
-	return predicate.Media(sql.FieldLT(FieldFriendlyToken, v))
+// ShortTokenLT applies the LT predicate on the "short_token" field.
+func ShortTokenLT(v string) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldShortToken, v))
 }
 
-// FriendlyTokenLTE applies the LTE predicate on the "friendly_token" field.
-func FriendlyTokenLTE(v string) predicate.Media {
-	return predicate.Media(sql.FieldLTE(FieldFriendlyToken, v))
+// ShortTokenLTE applies the LTE predicate on the "short_token" field.
+func ShortTokenLTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldShortToken, v))
 }
 
-// FriendlyTokenContains applies the Contains predicate on the "friendly_token" field.
-func FriendlyTokenContains(v string) predicate.Media {
-	return predicate.Media(sql.FieldContains(FieldFriendlyToken, v))
+// ShortTokenContains applies the Contains predicate on the "short_token" field.
+func ShortTokenContains(v string) predicate.Media {
+	return predicate.Media(sql.FieldContains(FieldShortToken, v))
 }
 
-// FriendlyTokenHasPrefix applies the HasPrefix predicate on the "friendly_token" field.
-func FriendlyTokenHasPrefix(v string) predicate.Media {
-	return predicate.Media(sql.FieldHasPrefix(FieldFriendlyToken, v))
+// ShortTokenHasPrefix applies the HasPrefix predicate on the "short_token" field.
+func ShortTokenHasPrefix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasPrefix(FieldShortToken, v))
 }
 
-// FriendlyTokenHasSuffix applies the HasSuffix predicate on the "friendly_token" field.
-func FriendlyTokenHasSuffix(v string) predicate.Media {
-	return predicate.Media(sql.FieldHasSuffix(FieldFriendlyToken, v))
+// ShortTokenHasSuffix applies the HasSuffix predicate on the "short_token" field.
+func ShortTokenHasSuffix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasSuffix(FieldShortToken, v))
 }
 
-// FriendlyTokenIsNil applies the IsNil predicate on the "friendly_token" field.
-func FriendlyTokenIsNil() predicate.Media {
-	return predicate.Media(sql.FieldIsNull(FieldFriendlyToken))
+// ShortTokenIsNil applies the IsNil predicate on the "short_token" field.
+func ShortTokenIsNil() predicate.Media {
+	return predicate.Media(sql.FieldIsNull(FieldShortToken))
 }
 
-// FriendlyTokenNotNil applies the NotNil predicate on the "friendly_token" field.
-func FriendlyTokenNotNil() predicate.Media {
-	return predicate.Media(sql.FieldNotNull(FieldFriendlyToken))
+// ShortTokenNotNil applies the NotNil predicate on the "short_token" field.
+func ShortTokenNotNil() predicate.Media {
+	return predicate.Media(sql.FieldNotNull(FieldShortToken))
 }
 
-// FriendlyTokenEqualFold applies the EqualFold predicate on the "friendly_token" field.
-func FriendlyTokenEqualFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldEqualFold(FieldFriendlyToken, v))
+// ShortTokenEqualFold applies the EqualFold predicate on the "short_token" field.
+func ShortTokenEqualFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldShortToken, v))
 }
 
-// FriendlyTokenContainsFold applies the ContainsFold predicate on the "friendly_token" field.
-func FriendlyTokenContainsFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldContainsFold(FieldFriendlyToken, v))
+// ShortTokenContainsFold applies the ContainsFold predicate on the "short_token" field.
+func ShortTokenContainsFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldShortToken, v))
 }
 
 // UUIDEQ applies the EQ predicate on the "uuid" field.
@@ -1881,43 +1891,123 @@ func TagsNotNil() predicate.Media {
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int) predicate.Media {
+func UserIDEQ(v string) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int) predicate.Media {
+func UserIDNEQ(v string) predicate.Media {
 	return predicate.Media(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int) predicate.Media {
+func UserIDIn(vs ...string) predicate.Media {
 	return predicate.Media(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int) predicate.Media {
+func UserIDNotIn(vs ...string) predicate.Media {
 	return predicate.Media(sql.FieldNotIn(FieldUserID, vs...))
 }
 
+// UserIDGT applies the GT predicate on the "user_id" field.
+func UserIDGT(v string) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldUserID, v))
+}
+
+// UserIDGTE applies the GTE predicate on the "user_id" field.
+func UserIDGTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldUserID, v))
+}
+
+// UserIDLT applies the LT predicate on the "user_id" field.
+func UserIDLT(v string) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldUserID, v))
+}
+
+// UserIDLTE applies the LTE predicate on the "user_id" field.
+func UserIDLTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldUserID, v))
+}
+
+// UserIDContains applies the Contains predicate on the "user_id" field.
+func UserIDContains(v string) predicate.Media {
+	return predicate.Media(sql.FieldContains(FieldUserID, v))
+}
+
+// UserIDHasPrefix applies the HasPrefix predicate on the "user_id" field.
+func UserIDHasPrefix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasPrefix(FieldUserID, v))
+}
+
+// UserIDHasSuffix applies the HasSuffix predicate on the "user_id" field.
+func UserIDHasSuffix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasSuffix(FieldUserID, v))
+}
+
+// UserIDEqualFold applies the EqualFold predicate on the "user_id" field.
+func UserIDEqualFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldUserID, v))
+}
+
+// UserIDContainsFold applies the ContainsFold predicate on the "user_id" field.
+func UserIDContainsFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldUserID, v))
+}
+
 // CategoryIDEQ applies the EQ predicate on the "category_id" field.
-func CategoryIDEQ(v int) predicate.Media {
+func CategoryIDEQ(v string) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldCategoryID, v))
 }
 
 // CategoryIDNEQ applies the NEQ predicate on the "category_id" field.
-func CategoryIDNEQ(v int) predicate.Media {
+func CategoryIDNEQ(v string) predicate.Media {
 	return predicate.Media(sql.FieldNEQ(FieldCategoryID, v))
 }
 
 // CategoryIDIn applies the In predicate on the "category_id" field.
-func CategoryIDIn(vs ...int) predicate.Media {
+func CategoryIDIn(vs ...string) predicate.Media {
 	return predicate.Media(sql.FieldIn(FieldCategoryID, vs...))
 }
 
 // CategoryIDNotIn applies the NotIn predicate on the "category_id" field.
-func CategoryIDNotIn(vs ...int) predicate.Media {
+func CategoryIDNotIn(vs ...string) predicate.Media {
 	return predicate.Media(sql.FieldNotIn(FieldCategoryID, vs...))
+}
+
+// CategoryIDGT applies the GT predicate on the "category_id" field.
+func CategoryIDGT(v string) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldCategoryID, v))
+}
+
+// CategoryIDGTE applies the GTE predicate on the "category_id" field.
+func CategoryIDGTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldCategoryID, v))
+}
+
+// CategoryIDLT applies the LT predicate on the "category_id" field.
+func CategoryIDLT(v string) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldCategoryID, v))
+}
+
+// CategoryIDLTE applies the LTE predicate on the "category_id" field.
+func CategoryIDLTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldCategoryID, v))
+}
+
+// CategoryIDContains applies the Contains predicate on the "category_id" field.
+func CategoryIDContains(v string) predicate.Media {
+	return predicate.Media(sql.FieldContains(FieldCategoryID, v))
+}
+
+// CategoryIDHasPrefix applies the HasPrefix predicate on the "category_id" field.
+func CategoryIDHasPrefix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasPrefix(FieldCategoryID, v))
+}
+
+// CategoryIDHasSuffix applies the HasSuffix predicate on the "category_id" field.
+func CategoryIDHasSuffix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasSuffix(FieldCategoryID, v))
 }
 
 // CategoryIDIsNil applies the IsNil predicate on the "category_id" field.
@@ -1930,24 +2020,69 @@ func CategoryIDNotNil() predicate.Media {
 	return predicate.Media(sql.FieldNotNull(FieldCategoryID))
 }
 
+// CategoryIDEqualFold applies the EqualFold predicate on the "category_id" field.
+func CategoryIDEqualFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldCategoryID, v))
+}
+
+// CategoryIDContainsFold applies the ContainsFold predicate on the "category_id" field.
+func CategoryIDContainsFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldCategoryID, v))
+}
+
 // ChannelIDEQ applies the EQ predicate on the "channel_id" field.
-func ChannelIDEQ(v int) predicate.Media {
+func ChannelIDEQ(v string) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldChannelID, v))
 }
 
 // ChannelIDNEQ applies the NEQ predicate on the "channel_id" field.
-func ChannelIDNEQ(v int) predicate.Media {
+func ChannelIDNEQ(v string) predicate.Media {
 	return predicate.Media(sql.FieldNEQ(FieldChannelID, v))
 }
 
 // ChannelIDIn applies the In predicate on the "channel_id" field.
-func ChannelIDIn(vs ...int) predicate.Media {
+func ChannelIDIn(vs ...string) predicate.Media {
 	return predicate.Media(sql.FieldIn(FieldChannelID, vs...))
 }
 
 // ChannelIDNotIn applies the NotIn predicate on the "channel_id" field.
-func ChannelIDNotIn(vs ...int) predicate.Media {
+func ChannelIDNotIn(vs ...string) predicate.Media {
 	return predicate.Media(sql.FieldNotIn(FieldChannelID, vs...))
+}
+
+// ChannelIDGT applies the GT predicate on the "channel_id" field.
+func ChannelIDGT(v string) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldChannelID, v))
+}
+
+// ChannelIDGTE applies the GTE predicate on the "channel_id" field.
+func ChannelIDGTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldChannelID, v))
+}
+
+// ChannelIDLT applies the LT predicate on the "channel_id" field.
+func ChannelIDLT(v string) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldChannelID, v))
+}
+
+// ChannelIDLTE applies the LTE predicate on the "channel_id" field.
+func ChannelIDLTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldChannelID, v))
+}
+
+// ChannelIDContains applies the Contains predicate on the "channel_id" field.
+func ChannelIDContains(v string) predicate.Media {
+	return predicate.Media(sql.FieldContains(FieldChannelID, v))
+}
+
+// ChannelIDHasPrefix applies the HasPrefix predicate on the "channel_id" field.
+func ChannelIDHasPrefix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasPrefix(FieldChannelID, v))
+}
+
+// ChannelIDHasSuffix applies the HasSuffix predicate on the "channel_id" field.
+func ChannelIDHasSuffix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasSuffix(FieldChannelID, v))
 }
 
 // ChannelIDIsNil applies the IsNil predicate on the "channel_id" field.
@@ -1958,6 +2093,16 @@ func ChannelIDIsNil() predicate.Media {
 // ChannelIDNotNil applies the NotNil predicate on the "channel_id" field.
 func ChannelIDNotNil() predicate.Media {
 	return predicate.Media(sql.FieldNotNull(FieldChannelID))
+}
+
+// ChannelIDEqualFold applies the EqualFold predicate on the "channel_id" field.
+func ChannelIDEqualFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldChannelID, v))
+}
+
+// ChannelIDContainsFold applies the ContainsFold predicate on the "channel_id" field.
+func ChannelIDContainsFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldChannelID, v))
 }
 
 // PublishedAtEQ applies the EQ predicate on the "published_at" field.
@@ -2266,29 +2411,6 @@ func HasLikes() predicate.Media {
 func HasLikesWith(preds ...predicate.Like) predicate.Media {
 	return predicate.Media(func(s *sql.Selector) {
 		step := newLikesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasTasks applies the HasEdge predicate on the "tasks" edge.
-func HasTasks() predicate.Media {
-	return predicate.Media(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TasksTable, TasksColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasTasksWith applies the HasEdge predicate on the "tasks" edge with a given conditions (other predicates).
-func HasTasksWith(preds ...predicate.EncodingTask) predicate.Media {
-	return predicate.Media(func(s *sql.Selector) {
-		step := newTasksStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -15,13 +16,15 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origcms/api/gen/v1/types" // Import the generated Media type
+	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/pubsub"
 	"origadmin/application/origcms/internal/svc-media/dto"
 )
 
 // EncodingEvent represents a status change event for an encoding task.
 type EncodingEvent struct {
-	MediaId int64
+	MediaId string
 	Task    *EncodingTask
 }
 
@@ -31,15 +34,16 @@ type Media = types.Media
 // MediaRepo defines the storage operations for media.
 type MediaRepo interface {
 	Create(ctx context.Context, media *Media) (*Media, error)
-	Get(ctx context.Context, id int64) (*Media, error)
+	CreateWithEntity(ctx context.Context, media *Media) (*entity.Media, *Media, error)
+	Get(ctx context.Context, id string) (*Media, error)
 	List(ctx context.Context, opts ...*dto.MediaQueryOption) ([]*Media, int32, error)
 	Update(ctx context.Context, media *Media) (*Media, error)
-	Delete(ctx context.Context, id int64) error
-	IncrementViewCount(ctx context.Context, id int64) (int64, error)
-	UpdateCommentCount(ctx context.Context, id int64, delta int) error
-	UpdateLikeCount(ctx context.Context, id int64, delta int) error
-	UpdateDislikeCount(ctx context.Context, id int64, delta int) error
-	UpdateFavoriteCount(ctx context.Context, id int64, delta int) error
+	Delete(ctx context.Context, id string) error
+	IncrementViewCount(ctx context.Context, id string) (int64, error)
+	UpdateCommentCount(ctx context.Context, id string, delta int) error
+	UpdateLikeCount(ctx context.Context, id string, delta int) error
+	UpdateDislikeCount(ctx context.Context, id string, delta int) error
+	UpdateFavoriteCount(ctx context.Context, id string, delta int) error
 	// ResetStaleProcessing resets media stuck in "processing" state back to "pending"
 	// and deletes their orphaned encoding tasks (which were interrupted by the restart).
 	// Called at startup to recover from service restarts.
@@ -82,32 +86,44 @@ type EncodeProfileRepo interface {
 
 // EncodingTask represents a transcoding sub-task for a specific media and profile.
 type EncodingTask struct {
-	Id           int    `json:"id"`
-	MediaId      int64  `json:"media_id"`
-	ProfileId    int    `json:"profile_id"`
-	Status       string `json:"status"` // pending, processing, success, failed
-	Progress     int    `json:"progress"`
-	OutputPath   string `json:"output_path"`
-	ErrorMessage string `json:"error_message"`
+	Id           string                `json:"id"`
+	MediaId      string                `json:"media_id"`
+	ProfileId    int                   `json:"profile_id"`
+	Status       enums.EncodingTaskStatus `json:"status"` // pending, processing, success, failed
+	OutputPath   string                `json:"output_path"`
+	ErrorMessage string                `json:"error_message"`
+	Chunk        bool                  `json:"chunk"` // is chunk? (视频分段转码标识)
 }
 
 // EncodingTaskRepo defines the storage operations for encoding tasks.
 type EncodingTaskRepo interface {
 	Create(ctx context.Context, task *EncodingTask) (*EncodingTask, error)
 	Update(ctx context.Context, task *EncodingTask) (*EncodingTask, error)
-	Get(ctx context.Context, id int) (*EncodingTask, error)
-	ListByMedia(ctx context.Context, mediaId int64) ([]*EncodingTask, error)
+	Get(ctx context.Context, id string) (*EncodingTask, error)
+	ListByMedia(ctx context.Context, mediaId string) ([]*EncodingTask, error)
 	// DeleteByMedia deletes all encoding tasks for a given media ID.
-	DeleteByMedia(ctx context.Context, mediaID int64) error
+	DeleteByMedia(ctx context.Context, mediaID string) error
 	// ListFlat returns a paginated flat list of tasks filtered by status/media_id.
 	ListFlat(
 		ctx context.Context,
 		status string,
-		mediaId *int64,
+		mediaId *string,
+		profileFilter string,
+		chunkFilter string,
+		searchQuery string,
 		offset, limit int,
 	) ([]*EncodingTask, int, error)
 	// CountByStatus returns per-status counts from the encoding_task table (NOT the media table).
 	CountByStatus(ctx context.Context) (*StatusCounts, error)
+	// CountByStatusWithFilter returns per-status counts filtered by status, media_id, profile, chunk, and search query.
+	CountByStatusWithFilter(
+		ctx context.Context,
+		status string,
+		mediaId *string,
+		profileFilter string,
+		chunkFilter string,
+		searchQuery string,
+	) (*StatusCounts, error)
 }
 
 type MediaUseCase struct {
@@ -119,7 +135,7 @@ type MediaUseCase struct {
 	log          *log.Helper
 
 	mu   sync.RWMutex
-	subs map[int64][]chan *EncodingEvent
+	subs map[string][]chan *EncodingEvent
 }
 
 func NewMediaUseCase(
@@ -137,17 +153,17 @@ func NewMediaUseCase(
 		storage:      storage,
 		publisher:    publisher,
 		log:          log.NewHelper(log.With(logger, "module", "media.biz")),
-		subs:         make(map[int64][]chan *EncodingEvent),
+		subs:         make(map[string][]chan *EncodingEvent),
 	}
 }
 
-func (uc *MediaUseCase) GetMedia(ctx context.Context, id int64) (*Media, error) {
+func (uc *MediaUseCase) GetMedia(ctx context.Context, id string) (*Media, error) {
 	return uc.repo.Get(ctx, id)
 }
 
 // CheckMedia verifies that a media record exists. Returns an error if not found.
 // Satisfies contentbiz.MediaUseCaseInterface without leaking *types.Media into the content layer.
-func (uc *MediaUseCase) CheckMedia(ctx context.Context, id int64) error {
+func (uc *MediaUseCase) CheckMedia(ctx context.Context, id string) error {
 	_, err := uc.repo.Get(ctx, id)
 	return err
 }
@@ -168,7 +184,7 @@ func (uc *MediaUseCase) CreateMedia(ctx context.Context, media *Media) (*Media, 
 	// Trigger transcoding for videos
 	if strings.HasPrefix(created.MimeType, "video/") && uc.publisher != nil {
 		payload, _ := json.Marshal(struct {
-			MediaID     int64  `json:"media_id"`
+			MediaID     string `json:"media_id"`
 			MediaPath   string `json:"media_path"`
 			ContentType string `json:"content_type"`
 		}{
@@ -178,7 +194,7 @@ func (uc *MediaUseCase) CreateMedia(ctx context.Context, media *Media) (*Media, 
 		})
 		msg := pubsub.NewMessage(payload)
 		if err := uc.publisher.Publish(pubsub.MediaEncodeRequestTopic, msg); err != nil {
-			uc.log.Errorf("failed to publish encode request for media %d: %v", created.Id, err)
+			uc.log.Errorf("failed to publish encode request for media %s: %v", created.Id, err)
 		}
 	}
 
@@ -189,7 +205,7 @@ func (uc *MediaUseCase) UpdateMedia(ctx context.Context, media *Media) (*Media, 
 	return uc.repo.Update(ctx, media)
 }
 
-func (uc *MediaUseCase) DeleteMedia(ctx context.Context, id int64) error {
+func (uc *MediaUseCase) DeleteMedia(ctx context.Context, id string) error {
 	m, err := uc.repo.Get(ctx, id)
 	if err != nil {
 		return err
@@ -197,7 +213,7 @@ func (uc *MediaUseCase) DeleteMedia(ctx context.Context, id int64) error {
 
 	// Delete encoding tasks first to avoid foreign key constraint
 	if err := uc.encodingRepo.DeleteByMedia(ctx, id); err != nil {
-		uc.log.Warnf("failed to delete encoding tasks for media %d: %v", id, err)
+		uc.log.Warnf("failed to delete encoding tasks for media %s: %v", id, err)
 	}
 
 	// Delete from DB
@@ -226,27 +242,27 @@ func (uc *MediaUseCase) DeleteMedia(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (uc *MediaUseCase) IncrementViewCount(ctx context.Context, id int64) (int64, error) {
+func (uc *MediaUseCase) IncrementViewCount(ctx context.Context, id string) (int64, error) {
 	return uc.repo.IncrementViewCount(ctx, id)
 }
 
-func (uc *MediaUseCase) UpdateCommentCount(ctx context.Context, id int64, delta int) error {
+func (uc *MediaUseCase) UpdateCommentCount(ctx context.Context, id string, delta int) error {
 	return uc.repo.UpdateCommentCount(ctx, id, delta)
 }
 
-func (uc *MediaUseCase) UpdateLikeCount(ctx context.Context, id int64, delta int) error {
+func (uc *MediaUseCase) UpdateLikeCount(ctx context.Context, id string, delta int) error {
 	return uc.repo.UpdateLikeCount(ctx, id, delta)
 }
 
-func (uc *MediaUseCase) UpdateDislikeCount(ctx context.Context, id int64, delta int) error {
+func (uc *MediaUseCase) UpdateDislikeCount(ctx context.Context, id string, delta int) error {
 	return uc.repo.UpdateDislikeCount(ctx, id, delta)
 }
 
-func (uc *MediaUseCase) UpdateFavoriteCount(ctx context.Context, id int64, delta int) error {
+func (uc *MediaUseCase) UpdateFavoriteCount(ctx context.Context, id string, delta int) error {
 	return uc.repo.UpdateFavoriteCount(ctx, id, delta)
 }
 
-func (uc *MediaUseCase) UpdateMediaState(ctx context.Context, id int64, state string) error {
+func (uc *MediaUseCase) UpdateMediaState(ctx context.Context, id string, state string) error {
 	m, err := uc.repo.Get(ctx, id)
 	if err != nil {
 		return err
@@ -258,51 +274,50 @@ func (uc *MediaUseCase) UpdateMediaState(ctx context.Context, id int64, state st
 
 func (uc *MediaUseCase) ListEncodingTasks(
 	ctx context.Context,
-	mediaId int64,
+	mediaId string,
 ) ([]*EncodingTask, error) {
 	return uc.encodingRepo.ListByMedia(ctx, mediaId)
 }
 
 // RetryTask resets a failed/partial encoding task back to "pending" so it can be re-processed.
 // It re-publishes the media encode request with the specific task ID to trigger processing.
-func (uc *MediaUseCase) RetryTask(ctx context.Context, taskID int) (*EncodingTask, error) {
+func (uc *MediaUseCase) RetryTask(ctx context.Context, taskID string) (*EncodingTask, error) {
 	task, err := uc.encodingRepo.Get(ctx, taskID)
 	if err != nil {
-		return nil, fmt.Errorf("task %d not found: %w", taskID, err)
+		return nil, fmt.Errorf("task %s not found: %w", taskID, err)
 	}
 
 	// Only allow retrying failed or partial tasks
 	if task.Status != "failed" && task.Status != "partial" && task.Status != "skipped" {
 		return nil, fmt.Errorf(
-			"cannot retry task %d with status %q (only 'failed', 'partial', or 'skipped' can be retried)",
+			"cannot retry task %s with status %q (only 'failed', 'partial', or 'skipped' can be retried)",
 			taskID,
 			task.Status,
 		)
 	}
 
-	// Update task status, progress and clear error message BEFORE publishing
+	// Update task status and clear error message BEFORE publishing
 	task.Status = "pending"
-	task.Progress = 0
 	task.ErrorMessage = ""
 	if _, err := uc.encodingRepo.Update(ctx, task); err != nil {
-		uc.log.Errorf("failed to reset task %d status in DB for retry: %v", taskID, err)
+		uc.log.Errorf("failed to reset task %s status in DB for retry: %v", taskID, err)
 		return nil, fmt.Errorf("update task status: %w", err)
 	}
 
 	// Get media to re-publish encode request
 	media, err := uc.repo.Get(ctx, task.MediaId)
 	if err != nil {
-		uc.log.Warnf("failed to get media %d for retry: %v", task.MediaId, err)
+		uc.log.Warnf("failed to get media %s for retry: %v", task.MediaId, err)
 		return nil, err
 	}
 
 	// Re-publish encode request with specific task ID to trigger processing
 	if uc.publisher != nil {
 		payload, _ := json.Marshal(struct {
-			MediaID     int64  `json:"media_id"`
+			MediaID     string `json:"media_id"`
 			MediaPath   string `json:"media_path"`
 			ContentType string `json:"content_type"`
-			TaskID      int    `json:"task_id"`
+			TaskID      string `json:"task_id"`
 		}{
 			MediaID:     media.Id,
 			MediaPath:   media.Url,
@@ -311,14 +326,14 @@ func (uc *MediaUseCase) RetryTask(ctx context.Context, taskID int) (*EncodingTas
 		})
 		msg := pubsub.NewMessage(payload)
 		if err := uc.publisher.Publish(pubsub.MediaEncodeRequestTopic, msg); err != nil {
-			uc.log.Errorf("failed to re-publish encode request for media %d: %v", media.Id, err)
+			uc.log.Errorf("failed to re-publish encode request for media %s: %v", media.Id, err)
 		} else {
-			uc.log.Infof("re-published encode request for media %d with task ID %d", media.Id, taskID)
+			uc.log.Infof("re-published encode request for media %s with task ID %s", media.Id, taskID)
 		}
 	}
 
 	uc.log.Infof(
-		"task %d (media=%d profile=%d) queued for retry with specific task ID",
+		"task %s (media=%s profile=%d) queued for retry with specific task ID",
 		taskID,
 		task.MediaId,
 		task.ProfileId,
@@ -329,10 +344,10 @@ func (uc *MediaUseCase) RetryTask(ctx context.Context, taskID int) (*EncodingTas
 // RetryAllFailedTasks resets all failed tasks for a given media back to "pending".
 // Returns the count of tasks that were reset.
 // It re-publishes the media encode request to trigger processing, but only the pending tasks will be processed.
-func (uc *MediaUseCase) RetryAllFailedTasks(ctx context.Context, mediaID int64) (int, error) {
+func (uc *MediaUseCase) RetryAllFailedTasks(ctx context.Context, mediaID string) (int, error) {
 	tasks, err := uc.encodingRepo.ListByMedia(ctx, mediaID)
 	if err != nil {
-		return 0, fmt.Errorf("failed to list tasks for media %d: %w", mediaID, err)
+		return 0, fmt.Errorf("failed to list tasks for media %s: %w", mediaID, err)
 	}
 
 	resetCount := 0
@@ -341,10 +356,9 @@ func (uc *MediaUseCase) RetryAllFailedTasks(ctx context.Context, mediaID int64) 
 			continue
 		}
 		t.Status = "pending"
-		t.Progress = 0
 		t.ErrorMessage = ""
 		if _, err := uc.encodingRepo.Update(ctx, t); err != nil {
-			uc.log.Warnf("failed to reset task %d during bulk retry: %v", t.Id, err)
+			uc.log.Warnf("failed to reset task %s during bulk retry: %v", t.Id, err)
 			continue
 		}
 		resetCount++
@@ -354,14 +368,14 @@ func (uc *MediaUseCase) RetryAllFailedTasks(ctx context.Context, mediaID int64) 
 		// Get media to re-publish encode request
 		media, err := uc.repo.Get(ctx, mediaID)
 		if err != nil {
-			uc.log.Warnf("failed to get media %d for retry: %v", mediaID, err)
+			uc.log.Warnf("failed to get media %s for retry: %v", mediaID, err)
 			return resetCount, nil
 		}
 
 		// Re-publish encode request to trigger processing
 		if uc.publisher != nil {
 			payload, _ := json.Marshal(struct {
-				MediaID     int64  `json:"media_id"`
+				MediaID     string `json:"media_id"`
 				MediaPath   string `json:"media_path"`
 				ContentType string `json:"content_type"`
 			}{
@@ -371,14 +385,14 @@ func (uc *MediaUseCase) RetryAllFailedTasks(ctx context.Context, mediaID int64) 
 			})
 			msg := pubsub.NewMessage(payload)
 			if err := uc.publisher.Publish(pubsub.MediaEncodeRequestTopic, msg); err != nil {
-				uc.log.Errorf("failed to re-publish encode request for media %d: %v", media.Id, err)
+				uc.log.Errorf("failed to re-publish encode request for media %s: %v", media.Id, err)
 			} else {
-				uc.log.Infof("re-published encode request for media %d", media.Id)
+				uc.log.Infof("re-published encode request for media %s", media.Id)
 			}
 		}
 	}
 
-	uc.log.Infof("reset %d failed tasks for media %d to pending and re-queued", resetCount, mediaID)
+	uc.log.Infof("reset %d failed tasks for media %s to pending and re-queued", resetCount, mediaID)
 	return resetCount, nil
 }
 
@@ -387,15 +401,15 @@ func (uc *MediaUseCase) RetryAllFailedTasks(ctx context.Context, mediaID int64) 
 // VariantInfo holds aggregated info about a single encoding profile's result.
 // Returned by GetMediaVariants for frontend display and player configuration.
 type VariantInfo struct {
-	TaskID       int    `json:"task_id"`
-	ProfileName  string `json:"profile_name"`
-	ProfileID    int    `json:"profile_id"`
-	Resolution   string `json:"resolution"`  // e.g., "1280x720" or "720"
-	Codec        string `json:"codec"`       // e.g., "h264", "h265"
-	Status       string `json:"status"`      // pending, processing, success, failed, skipped
-	OutputPath   string `json:"output_path"` // HLS playlist path or GIF path
-	Bandwidth    int    `json:"bandwidth"`   // bits per second (estimated)
-	ErrorMessage string `json:"error_message,omitempty"`
+	TaskID       int                   `json:"task_id"`
+	ProfileName  string                `json:"profile_name"`
+	ProfileID    int                   `json:"profile_id"`
+	Resolution   string                `json:"resolution"`  // e.g., "1280x720" or "720"
+	Codec        string                `json:"codec"`       // e.g., "h264", "h265"
+	Status       enums.EncodingTaskStatus `json:"status"`      // pending, processing, success, failed, skipped
+	OutputPath   string                `json:"output_path"` // HLS playlist path or GIF path
+	Bandwidth    int                   `json:"bandwidth"`   // bits per second (estimated)
+	ErrorMessage string                `json:"error_message,omitempty"`
 }
 
 // MediaVariantSummary is the aggregated transcoding status returned by media detail APIs.
@@ -415,33 +429,42 @@ type MediaVariantSummary struct {
 	Variants             []VariantInfo `json:"variants"` // all tasks with details
 }
 
-// TranscodingMediaItem represents a media with its encoding tasks (for task-list view).
-type TranscodingMediaItem struct {
-	Media *Media          `json:"media"`
-	Tasks []*EncodingTask `json:"tasks"`
+// TranscodingStatus holds aggregated counts.
+type TranscodingStatus struct {
+	ProcessingCount int `json:"processing_count"`
+	PendingCount    int `json:"pending_count"`
+	PartialCount    int `json:"partial_count"`
+	FailedCount     int `json:"failed_count"`
+	SuccessCount    int `json:"success_count"`
 }
 
-// TranscodingStatus holds aggregated counts and a (filtered) page of items.
-type TranscodingStatus struct {
-	ProcessingCount int                     `json:"processing_count"`
-	PendingCount    int                     `json:"pending_count"`
-	PartialCount    int                     `json:"partial_count"`
-	FailedCount     int                     `json:"failed_count"`
-	SuccessCount    int                     `json:"success_count"`
-	Items           []*TranscodingMediaItem `json:"items"`
-	TotalFiltered   int                     `json:"total_filtered"`
-	Page            int                     `json:"page"`
-	PageSize        int                     `json:"page_size"`
-}
+// FilterType defines the type of filter for transcoding tasks
+type FilterType string
+
+const (
+	FilterTypeAll      FilterType = "all"
+	FilterTypeActive   FilterType = "active"
+	FilterTypeSpecific FilterType = "specific"
+)
 
 // TranscodingStatusFilter controls which media are returned in the items list.
 type TranscodingStatusFilter struct {
-	// Status filter: "active" (default), "processing", "pending", "failed", "success", "all".
+	// FilterType: "all", "active", or "specific"
+	FilterType FilterType
+	// Status: specific status to filter by (only used when FilterType is "specific")
 	Status string
 	// Page is 1-based.  Defaults to 1.
 	Page int
 	// PageSize limits items returned.  Defaults to 20, max 100.
 	PageSize int
+	// OnlyStats: if true, returns only statistics without items list.
+	OnlyStats bool
+	// ProfileFilter: filter by profile name (partial match).
+	ProfileFilter string
+	// ChunkFilter: filter by chunk name (exact match).
+	ChunkFilter string
+	// SearchQuery: search query for media_id, profile_name, or status.
+	SearchQuery string
 }
 
 // FlatTaskList holds a flat (non-grouped) list of encoding tasks with counts and pagination.
@@ -451,6 +474,7 @@ type FlatTaskList struct {
 	PartialCount    int            `json:"partial_count"`
 	FailedCount     int            `json:"failed_count"`
 	SuccessCount    int            `json:"success_count"`
+	Total           int            `json:"total"`
 	TotalFiltered   int            `json:"total_filtered"`
 	Page            int            `json:"page"`
 	PageSize        int            `json:"page_size"`
@@ -459,18 +483,17 @@ type FlatTaskList struct {
 
 // FlatTaskItem is a single task row for the flat task list view.
 type FlatTaskItem struct {
-	Id           int    `json:"id"`
-	MediaId      int64  `json:"media_id"`
-	MediaTitle   string `json:"media_title,omitempty"`
-	Thumbnail    string `json:"thumbnail,omitempty"`
-	ProfileId    int    `json:"profile_id"`
-	ProfileName  string `json:"profile_name,omitempty"`
-	Status       string `json:"status"`
-	Progress     int    `json:"progress"`
-	OutputPath   string `json:"output_path,omitempty"`
-	ErrorMessage string `json:"error_message,omitempty"`
-	CreateTime   string `json:"created_at,omitempty"`
-	UpdateTime   string `json:"update_time,omitempty"`
+	Id           int                   `json:"id"`
+	MediaId      int64                 `json:"media_id"`
+	MediaTitle   string                `json:"media_title,omitempty"`
+	Thumbnail    string                `json:"thumbnail,omitempty"`
+	ProfileId    int                   `json:"profile_id"`
+	ProfileName  string                `json:"profile_name,omitempty"`
+	Status       enums.EncodingTaskStatus `json:"status"`
+	OutputPath   string                `json:"output_path,omitempty"`
+	ErrorMessage string                `json:"error_message,omitempty"`
+	CreateTime   string                `json:"created_at,omitempty"`
+	UpdateTime   string                `json:"update_time,omitempty"`
 }
 
 // StatusCounts holds per-media-status counts.
@@ -486,62 +509,19 @@ func (uc *MediaUseCase) GetTranscodingStatus(
 	ctx context.Context,
 	filter *TranscodingStatusFilter,
 ) (*TranscodingStatus, error) {
-	if filter == nil {
-		filter = &TranscodingStatusFilter{Status: "active", Page: 1, PageSize: 20}
-	}
-	if filter.Page < 1 {
-		filter.Page = 1
-	}
-	if filter.PageSize < 1 || filter.PageSize > 100 {
-		filter.PageSize = 20
-	}
-
-	// 1. Aggregate counts by media encoding_status.
-	counts, err := uc.repo.CountByEncodingStatus(ctx)
+	// Use encoding_task table for accurate task-level counts
+	counts, err := uc.encodingRepo.CountByStatus(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	status := &TranscodingStatus{
+	return &TranscodingStatus{
 		ProcessingCount: counts.Processing,
 		PendingCount:    counts.Pending,
 		PartialCount:    counts.Partial,
 		FailedCount:     counts.Failed,
 		SuccessCount:    counts.Success,
-		Page:            filter.Page,
-		PageSize:        filter.PageSize,
-	}
-
-	// 2. Determine which media statuses to include.
-	listStatuses := statusesForFilter(filter.Status)
-
-	// 3. Fetch filtered media list with pagination (media-level, not task-level).
-	mediaList, total, err := uc.repo.ListFilteredByEncodingStatus(
-		ctx,
-		listStatuses,
-		filter.Page,
-		filter.PageSize,
-	)
-	if err != nil {
-		return nil, err
-	}
-	status.TotalFiltered = total
-
-	// 4. For each media, fetch its encoding tasks.
-	status.Items = make([]*TranscodingMediaItem, 0, len(mediaList))
-	for _, m := range mediaList {
-		tasks, err := uc.encodingRepo.ListByMedia(ctx, m.Id)
-		if err != nil {
-			uc.log.Errorf("failed to fetch tasks for media %d: %v", m.Id, err)
-			tasks = nil
-		}
-		status.Items = append(status.Items, &TranscodingMediaItem{
-			Media: m,
-			Tasks: tasks,
-		})
-	}
-
-	return status, nil
+	}, nil
 }
 
 // ListEncodingTasksFlat returns a flat, paginated list of encoding tasks (one row per task).
@@ -549,7 +529,7 @@ func (uc *MediaUseCase) GetTranscodingStatus(
 func (uc *MediaUseCase) ListEncodingTasksFlat(
 	ctx context.Context,
 	filter *TranscodingStatusFilter,
-	mediaID *int64,
+	mediaID *string,
 ) (*FlatTaskList, error) {
 	if filter == nil {
 		filter = &TranscodingStatusFilter{Status: "active", Page: 1, PageSize: 25}
@@ -561,44 +541,96 @@ func (uc *MediaUseCase) ListEncodingTasksFlat(
 		filter.PageSize = 25
 	}
 
-	status := filter.Status
+	var status string
+	switch filter.FilterType {
+	case FilterTypeAll:
+		status = "all"
+	case FilterTypeActive:
+		// Active filter: exclude success status
+		status = "active"
+	case FilterTypeSpecific:
+		status = filter.Status
+	default:
+		// Default to all
+		status = "all"
+	}
+
 	if mediaID != nil && *mediaID > 0 {
 		// When filtered to a specific media, default to "all" if not specified
-		if status == "" || status == "active" {
+		if status == "" {
 			status = "all"
 		}
 	}
 
 	offset := (filter.Page - 1) * filter.PageSize
 
-	tasks, total, err := uc.encodingRepo.ListFlat(ctx, status, mediaID, offset, filter.PageSize)
+	var mediaIDStr *string
+	if mediaID != nil {
+		idStr := strconv.FormatInt(*mediaID, 10)
+		mediaIDStr = &idStr
+	}
+	tasks, _, err := uc.encodingRepo.ListFlat(
+		ctx,
+		status,
+		mediaIDStr,
+		filter.ProfileFilter,
+		filter.ChunkFilter,
+		filter.SearchQuery,
+		offset,
+		filter.PageSize,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	// Get counts from the encoding_task table (NOT the Media table)
-	counts, countErr := uc.encodingRepo.CountByStatus(ctx)
+	// Get counts: use complete stats if only_stats=true, else use filtered stats (including Status for total, excluding Status for filter buttons)
+	var counts *StatusCounts
+	var countErr error
+	if filter.OnlyStats {
+		// Card area: complete stats without any filter
+		counts, countErr = uc.encodingRepo.CountByStatus(ctx)
+	} else {
+		// Filter buttons area: stats excluding Status filter but including other filters (Profile, Chunk, Search)
+		// This ensures filter buttons show counts that exclude their own Status condition
+		counts, countErr = uc.encodingRepo.CountByStatusWithFilter(
+			ctx,
+			"", // Exclude Status filter for filter buttons
+			mediaIDStr,
+			filter.ProfileFilter,
+			filter.ChunkFilter,
+			filter.SearchQuery,
+		)
+	}
 	if countErr != nil {
 		counts = &StatusCounts{}
 	}
 
-	// Enrich with profile names
-	items := make([]FlatTaskItem, len(tasks))
-	for i, t := range tasks {
-		item := FlatTaskItem{
-			Id:           t.Id,
-			MediaId:      t.MediaId,
+	// For the "All" filter button, we need the total count excluding Status filter
+	// This ensures consistency between filter buttons and the "All" count
+	var totalWithoutStatusFilter int
+	if !filter.OnlyStats {
+		totalWithoutStatusFilter = counts.Processing + counts.Pending + counts.Partial + counts.Failed + counts.Success
+	}
+
+	var items []FlatTaskItem
+	if !filter.OnlyStats {
+		// Enrich with profile names
+		items = make([]FlatTaskItem, len(tasks))
+		for i, t := range tasks {
+			item := FlatTaskItem{
+			Id:           int(len(t.Id)),
+			MediaId:      int64(len(t.MediaId)),
 			ProfileId:    t.ProfileId,
 			Status:       t.Status,
-			Progress:     t.Progress,
 			OutputPath:   t.OutputPath,
 			ErrorMessage: t.ErrorMessage,
 		}
-		// Look up profile name
-		if profile, perr := uc.profileRepo.Get(ctx, t.ProfileId); perr == nil && profile != nil {
-			item.ProfileName = profile.Name
+			// Look up profile name
+			if profile, perr := uc.profileRepo.Get(ctx, t.ProfileId); perr == nil && profile != nil {
+				item.ProfileName = profile.Name
+			}
+			items[i] = item
 		}
-		items[i] = item
 	}
 
 	return &FlatTaskList{
@@ -607,7 +639,8 @@ func (uc *MediaUseCase) ListEncodingTasksFlat(
 		PartialCount:    counts.Partial,
 		FailedCount:     counts.Failed,
 		SuccessCount:    counts.Success,
-		TotalFiltered:   total,
+		Total:           totalWithoutStatusFilter,
+		TotalFiltered:   totalWithoutStatusFilter,
 		Page:            filter.Page,
 		PageSize:        filter.PageSize,
 		Items:           items,
@@ -622,13 +655,24 @@ func (uc *MediaUseCase) GetMediaVariants(
 	mediaID int64,
 ) (*MediaVariantSummary, error) {
 	// 1. Load media
-	media, err := uc.repo.Get(ctx, mediaID)
+	mediaIDStr := strconv.FormatInt(mediaID, 10)
+	return uc.getMediaVariantsByID(ctx, mediaIDStr, mediaID)
+}
+
+// getMediaVariantsByID is a helper function that takes a string media ID (UUID or numeric)
+// and returns the media variant summary.
+func (uc *MediaUseCase) getMediaVariantsByID(
+	ctx context.Context,
+	mediaIDStr string,
+	mediaID int64,
+) (*MediaVariantSummary, error) {
+	media, err := uc.repo.Get(ctx, mediaIDStr)
 	if err != nil {
 		return nil, err
 	}
 
 	// 2. Load all encoding tasks for this media
-	tasks, err := uc.encodingRepo.ListByMedia(ctx, mediaID)
+	tasks, err := uc.encodingRepo.ListByMedia(ctx, mediaIDStr)
 	if err != nil {
 		// No tasks yet — return minimal info
 		return &MediaVariantSummary{
@@ -652,12 +696,12 @@ func (uc *MediaUseCase) GetMediaVariants(
 	for _, t := range tasks {
 		profile, perr := uc.profileRepo.Get(ctx, t.ProfileId)
 		if perr != nil {
-			uc.log.Warnf("profile %d not found for task %d", t.ProfileId, t.Id)
+			uc.log.Warnf("profile %d not found for task %s", t.ProfileId, t.Id)
 			continue
 		}
 
 		vi := VariantInfo{
-			TaskID:       t.Id,
+			TaskID:       len(t.Id),
 			ProfileName:  profile.Name,
 			ProfileID:    t.ProfileId,
 			Resolution:   profile.Resolution,
@@ -672,8 +716,8 @@ func (uc *MediaUseCase) GetMediaVariants(
 
 		variants = append(variants, vi)
 
-		// Count video task outcomes by status (exclude preview)
-		if !IsPreviewProfileFromName(profile.Name) {
+		// Count video task outcomes by status (exclude preview and frames)
+		if !IsPreviewProfileFromName(profile.Name) && !IsFramesProfileFromName(profile.Name) {
 			switch t.Status {
 			case "success":
 				videoSuccessCount++
@@ -705,9 +749,24 @@ func (uc *MediaUseCase) GetMediaVariants(
 	}, nil
 }
 
+// GetMediaVariantsByUUID returns a comprehensive variant summary for a single media by UUID.
+// Used by gRPC service to handle UUID format media IDs.
+func (uc *MediaUseCase) GetMediaVariantsByUUID(
+	ctx context.Context,
+	mediaIDStr string,
+) (*MediaVariantSummary, error) {
+	// For UUID format, we can use 0 as the numeric mediaID since it's not used in the response
+	return uc.getMediaVariantsByID(ctx, mediaIDStr, 0)
+}
+
 // IsPreviewProfileFromName returns true if the profile name indicates it's a preview/GIF type.
 func IsPreviewProfileFromName(name string) bool {
 	return strings.EqualFold(name, "preview") || strings.EqualFold(name, "gif")
+}
+
+// IsFramesProfileFromName returns true if the profile name indicates it's a frames type.
+func IsFramesProfileFromName(name string) bool {
+	return strings.EqualFold(name, "frames") || strings.EqualFold(name, "preview-frames")
 }
 
 // estimateProfileBandwidth estimates bandwidth in bps from profile settings.
@@ -800,10 +859,10 @@ func statusesForFilter(status string) []string {
 // --- SSE Pub/Sub ---
 
 // Subscribe returns a channel that receives encoding events for a specific media.
-// Pass mediaID=0 to subscribe to all media events (dashboard use).
+// Pass mediaID="" to subscribe to all media events (dashboard use).
 func (uc *MediaUseCase) Subscribe(
 	ctx context.Context,
-	mediaID int64,
+	mediaID string,
 ) (<-chan *EncodingEvent, func()) {
 	uc.mu.Lock()
 	defer uc.mu.Unlock()
@@ -828,8 +887,8 @@ func (uc *MediaUseCase) Subscribe(
 }
 
 // Publish sends an encoding event to all subscribers of a media,
-// and also broadcasts to the global subscriber (mediaID=0).
-func (uc *MediaUseCase) Publish(mediaID int64, event *EncodingEvent) {
+// and also broadcasts to the global subscriber (mediaID="").
+func (uc *MediaUseCase) Publish(mediaID string, event *EncodingEvent) {
 	uc.mu.RLock()
 	defer uc.mu.RUnlock()
 
@@ -843,7 +902,7 @@ func (uc *MediaUseCase) Publish(mediaID int64, event *EncodingEvent) {
 	}
 
 	// Broadcast to global (dashboard) subscribers.
-	for _, ch := range uc.subs[0] {
+	for _, ch := range uc.subs[""] {
 		select {
 		case ch <- event:
 		default:

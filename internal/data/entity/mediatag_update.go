@@ -31,14 +31,14 @@ func (_u *MediaTagUpdate) Where(ps ...predicate.MediaTag) *MediaTagUpdate {
 }
 
 // AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_u *MediaTagUpdate) AddMediumIDs(ids ...int) *MediaTagUpdate {
+func (_u *MediaTagUpdate) AddMediumIDs(ids ...string) *MediaTagUpdate {
 	_u.mutation.AddMediumIDs(ids...)
 	return _u
 }
 
 // AddMedia adds the "media" edges to the Media entity.
 func (_u *MediaTagUpdate) AddMedia(v ...*Media) *MediaTagUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -72,14 +72,14 @@ func (_u *MediaTagUpdate) ClearMedia() *MediaTagUpdate {
 }
 
 // RemoveMediumIDs removes the "media" edge to Media entities by IDs.
-func (_u *MediaTagUpdate) RemoveMediumIDs(ids ...int) *MediaTagUpdate {
+func (_u *MediaTagUpdate) RemoveMediumIDs(ids ...string) *MediaTagUpdate {
 	_u.mutation.RemoveMediumIDs(ids...)
 	return _u
 }
 
 // RemoveMedia removes "media" edges to Media entities.
 func (_u *MediaTagUpdate) RemoveMedia(v ...*Media) *MediaTagUpdate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -157,7 +157,7 @@ func (_u *MediaTagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{mediatag.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -170,7 +170,7 @@ func (_u *MediaTagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{mediatag.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -186,7 +186,7 @@ func (_u *MediaTagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{mediatag.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -262,14 +262,14 @@ type MediaTagUpdateOne struct {
 }
 
 // AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_u *MediaTagUpdateOne) AddMediumIDs(ids ...int) *MediaTagUpdateOne {
+func (_u *MediaTagUpdateOne) AddMediumIDs(ids ...string) *MediaTagUpdateOne {
 	_u.mutation.AddMediumIDs(ids...)
 	return _u
 }
 
 // AddMedia adds the "media" edges to the Media entity.
 func (_u *MediaTagUpdateOne) AddMedia(v ...*Media) *MediaTagUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -303,14 +303,14 @@ func (_u *MediaTagUpdateOne) ClearMedia() *MediaTagUpdateOne {
 }
 
 // RemoveMediumIDs removes the "media" edge to Media entities by IDs.
-func (_u *MediaTagUpdateOne) RemoveMediumIDs(ids ...int) *MediaTagUpdateOne {
+func (_u *MediaTagUpdateOne) RemoveMediumIDs(ids ...string) *MediaTagUpdateOne {
 	_u.mutation.RemoveMediumIDs(ids...)
 	return _u
 }
 
 // RemoveMedia removes "media" edges to Media entities.
 func (_u *MediaTagUpdateOne) RemoveMedia(v ...*Media) *MediaTagUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -418,7 +418,7 @@ func (_u *MediaTagUpdateOne) sqlSave(ctx context.Context) (_node *MediaTag, err 
 			Columns: []string{mediatag.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -431,7 +431,7 @@ func (_u *MediaTagUpdateOne) sqlSave(ctx context.Context) (_node *MediaTag, err 
 			Columns: []string{mediatag.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -447,7 +447,7 @@ func (_u *MediaTagUpdateOne) sqlSave(ctx context.Context) (_node *MediaTag, err 
 			Columns: []string{mediatag.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

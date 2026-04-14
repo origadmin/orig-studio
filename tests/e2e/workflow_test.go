@@ -13,7 +13,6 @@ func TestCompleteUserWorkflow(t *testing.T) {
 	defer ts.Cleanup()
 
 	var authToken string
-	var userID float64
 
 	t.Run("1. User Signup", func(t *testing.T) {
 		signupBody := map[string]string{
@@ -47,9 +46,7 @@ func TestCompleteUserWorkflow(t *testing.T) {
 			t.Fatal("no access_token in signup response")
 		}
 
-		if user, ok := result["user"].(map[string]interface{}); ok {
-			userID = user["id"].(float64)
-		}
+
 	})
 
 	if authToken == "" {

@@ -6,9 +6,7 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"origadmin/application/origcms/internal/data/entity/encodeprofile"
 	"origadmin/application/origcms/internal/data/entity/encodingtask"
-	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 
 	"entgo.io/ent"
@@ -21,13 +19,11 @@ import (
 // EncodingTaskQuery is the builder for querying EncodingTask entities.
 type EncodingTaskQuery struct {
 	config
-	ctx         *QueryContext
-	order       []encodingtask.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.EncodingTask
-	withMedia   *MediaQuery
-	withProfile *EncodeProfileQuery
-	modifiers   []func(*sql.Selector)
+	ctx        *QueryContext
+	order      []encodingtask.OrderOption
+	inters     []Interceptor
+	predicates []predicate.EncodingTask
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -64,50 +60,6 @@ func (_q *EncodingTaskQuery) Order(o ...encodingtask.OrderOption) *EncodingTaskQ
 	return _q
 }
 
-// QueryMedia chains the current query on the "media" edge.
-func (_q *EncodingTaskQuery) QueryMedia() *MediaQuery {
-	query := (&MediaClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(encodingtask.Table, encodingtask.FieldID, selector),
-			sqlgraph.To(media.Table, media.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, encodingtask.MediaTable, encodingtask.MediaColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryProfile chains the current query on the "profile" edge.
-func (_q *EncodingTaskQuery) QueryProfile() *EncodeProfileQuery {
-	query := (&EncodeProfileClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(encodingtask.Table, encodingtask.FieldID, selector),
-			sqlgraph.To(encodeprofile.Table, encodeprofile.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, encodingtask.ProfileTable, encodingtask.ProfileColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // First returns the first EncodingTask entity from the query.
 // Returns a *NotFoundError when no EncodingTask was found.
 func (_q *EncodingTaskQuery) First(ctx context.Context) (*EncodingTask, error) {
@@ -132,8 +84,8 @@ func (_q *EncodingTaskQuery) FirstX(ctx context.Context) *EncodingTask {
 
 // FirstID returns the first EncodingTask ID from the query.
 // Returns a *NotFoundError when no EncodingTask ID was found.
-func (_q *EncodingTaskQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *EncodingTaskQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -145,7 +97,7 @@ func (_q *EncodingTaskQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *EncodingTaskQuery) FirstIDX(ctx context.Context) int {
+func (_q *EncodingTaskQuery) FirstIDX(ctx context.Context) string {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -183,8 +135,8 @@ func (_q *EncodingTaskQuery) OnlyX(ctx context.Context) *EncodingTask {
 // OnlyID is like Only, but returns the only EncodingTask ID in the query.
 // Returns a *NotSingularError when more than one EncodingTask ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *EncodingTaskQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *EncodingTaskQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -200,7 +152,7 @@ func (_q *EncodingTaskQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *EncodingTaskQuery) OnlyIDX(ctx context.Context) int {
+func (_q *EncodingTaskQuery) OnlyIDX(ctx context.Context) string {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -228,7 +180,7 @@ func (_q *EncodingTaskQuery) AllX(ctx context.Context) []*EncodingTask {
 }
 
 // IDs executes the query and returns a list of EncodingTask IDs.
-func (_q *EncodingTaskQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (_q *EncodingTaskQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
@@ -240,7 +192,7 @@ func (_q *EncodingTaskQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *EncodingTaskQuery) IDsX(ctx context.Context) []int {
+func (_q *EncodingTaskQuery) IDsX(ctx context.Context) []string {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -295,40 +247,16 @@ func (_q *EncodingTaskQuery) Clone() *EncodingTaskQuery {
 		return nil
 	}
 	return &EncodingTaskQuery{
-		config:      _q.config,
-		ctx:         _q.ctx.Clone(),
-		order:       append([]encodingtask.OrderOption{}, _q.order...),
-		inters:      append([]Interceptor{}, _q.inters...),
-		predicates:  append([]predicate.EncodingTask{}, _q.predicates...),
-		withMedia:   _q.withMedia.Clone(),
-		withProfile: _q.withProfile.Clone(),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]encodingtask.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.EncodingTask{}, _q.predicates...),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
 		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
-}
-
-// WithMedia tells the query-builder to eager-load the nodes that are connected to
-// the "media" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *EncodingTaskQuery) WithMedia(opts ...func(*MediaQuery)) *EncodingTaskQuery {
-	query := (&MediaClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withMedia = query
-	return _q
-}
-
-// WithProfile tells the query-builder to eager-load the nodes that are connected to
-// the "profile" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *EncodingTaskQuery) WithProfile(opts ...func(*EncodeProfileQuery)) *EncodingTaskQuery {
-	query := (&EncodeProfileClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withProfile = query
-	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -337,7 +265,7 @@ func (_q *EncodingTaskQuery) WithProfile(opts ...func(*EncodeProfileQuery)) *Enc
 // Example:
 //
 //	var v []struct {
-//		MediaID int `json:"media_id,omitempty"`
+//		MediaID string `json:"media_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -360,7 +288,7 @@ func (_q *EncodingTaskQuery) GroupBy(field string, fields ...string) *EncodingTa
 // Example:
 //
 //	var v []struct {
-//		MediaID int `json:"media_id,omitempty"`
+//		MediaID string `json:"media_id,omitempty"`
 //	}
 //
 //	client.EncodingTask.Query().
@@ -407,12 +335,8 @@ func (_q *EncodingTaskQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *EncodingTaskQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*EncodingTask, error) {
 	var (
-		nodes       = []*EncodingTask{}
-		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
-			_q.withMedia != nil,
-			_q.withProfile != nil,
-		}
+		nodes = []*EncodingTask{}
+		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*EncodingTask).scanValues(nil, columns)
@@ -420,7 +344,6 @@ func (_q *EncodingTaskQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &EncodingTask{config: _q.config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
@@ -435,78 +358,7 @@ func (_q *EncodingTaskQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withMedia; query != nil {
-		if err := _q.loadMedia(ctx, query, nodes, nil,
-			func(n *EncodingTask, e *Media) { n.Edges.Media = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := _q.withProfile; query != nil {
-		if err := _q.loadProfile(ctx, query, nodes, nil,
-			func(n *EncodingTask, e *EncodeProfile) { n.Edges.Profile = e }); err != nil {
-			return nil, err
-		}
-	}
 	return nodes, nil
-}
-
-func (_q *EncodingTaskQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes []*EncodingTask, init func(*EncodingTask), assign func(*EncodingTask, *Media)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*EncodingTask)
-	for i := range nodes {
-		fk := nodes[i].MediaID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(media.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "media_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
-func (_q *EncodingTaskQuery) loadProfile(ctx context.Context, query *EncodeProfileQuery, nodes []*EncodingTask, init func(*EncodingTask), assign func(*EncodingTask, *EncodeProfile)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*EncodingTask)
-	for i := range nodes {
-		fk := nodes[i].ProfileID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(encodeprofile.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "profile_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
 }
 
 func (_q *EncodingTaskQuery) sqlCount(ctx context.Context) (int, error) {
@@ -522,7 +374,7 @@ func (_q *EncodingTaskQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (_q *EncodingTaskQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(encodingtask.Table, encodingtask.Columns, sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(encodingtask.Table, encodingtask.Columns, sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeString))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -536,12 +388,6 @@ func (_q *EncodingTaskQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != encodingtask.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
-		}
-		if _q.withMedia != nil {
-			_spec.Node.AddColumnOnce(encodingtask.FieldMediaID)
-		}
-		if _q.withProfile != nil {
-			_spec.Node.AddColumnOnce(encodingtask.FieldProfileID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

@@ -46,7 +46,7 @@ func TestUploadE2E(t *testing.T) {
 	require.NoError(t, client.Schema.Create(context.Background()))
 
 	// Initialize JWT Manager
-	jwtMgr := auth.NewManager("secret-key", 24*time.Hour)
+	jwtMgr := auth.NewManager("secret-key", 24*time.Hour, 72*time.Hour)
 
 	// Setup svc-media dependencies
 	logger := log.NewStdLogger(os.Stderr)
@@ -101,7 +101,7 @@ func TestUploadE2E(t *testing.T) {
 
 	// 3. E2E Upload Flow
 	filename := "e2e_video.mp4"
-	fileSize := int64(1024 * 1024 * 3) // 3MB, so 2 parts (2MB + 1MB)
+	fileSize := int64(1024 * 1024 * 6) // 6MB, so 2 parts (5MB + 1MB)
 
 	// --- A. Initiate Multipart Upload ---
 	initReq := pb.InitiateMultipartUploadRequest{

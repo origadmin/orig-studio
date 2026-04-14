@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/encodeprofile"
-	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -171,21 +170,6 @@ func (_c *EncodeProfileCreate) SetNillableUpdatedAt(v *time.Time) *EncodeProfile
 		_c.SetUpdatedAt(*v)
 	}
 	return _c
-}
-
-// AddTaskIDs adds the "tasks" edge to the EncodingTask entity by IDs.
-func (_c *EncodeProfileCreate) AddTaskIDs(ids ...int) *EncodeProfileCreate {
-	_c.mutation.AddTaskIDs(ids...)
-	return _c
-}
-
-// AddTasks adds the "tasks" edges to the EncodingTask entity.
-func (_c *EncodeProfileCreate) AddTasks(v ...*EncodingTask) *EncodeProfileCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddTaskIDs(ids...)
 }
 
 // Mutation returns the EncodeProfileMutation object of the builder.
@@ -383,22 +367,6 @@ func (_c *EncodeProfileCreate) createSpec() (*EncodeProfile, *sqlgraph.CreateSpe
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(encodeprofile.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
-	}
-	if nodes := _c.mutation.TasksIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   encodeprofile.TasksTable,
-			Columns: []string{encodeprofile.TasksColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

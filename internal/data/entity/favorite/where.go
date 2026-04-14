@@ -11,57 +11,67 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Favorite {
+func ID(id string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Favorite {
+func IDEQ(id string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Favorite {
+func IDNEQ(id string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Favorite {
+func IDIn(ids ...string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Favorite {
+func IDNotIn(ids ...string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Favorite {
+func IDGT(id string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Favorite {
+func IDGTE(id string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Favorite {
+func IDLT(id string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Favorite {
+func IDLTE(id string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldLTE(FieldID, id))
 }
 
+// IDEqualFold applies the EqualFold predicate on the ID field.
+func IDEqualFold(id string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldEqualFold(FieldID, id))
+}
+
+// IDContainsFold applies the ContainsFold predicate on the ID field.
+func IDContainsFold(id string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldContainsFold(FieldID, id))
+}
+
 // MediaID applies equality check predicate on the "media_id" field. It's identical to MediaIDEQ.
-func MediaID(v int) predicate.Favorite {
+func MediaID(v string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldEQ(FieldMediaID, v))
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int) predicate.Favorite {
+func UserID(v string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldEQ(FieldUserID, v))
 }
 
@@ -71,43 +81,133 @@ func CreatedAt(v time.Time) predicate.Favorite {
 }
 
 // MediaIDEQ applies the EQ predicate on the "media_id" field.
-func MediaIDEQ(v int) predicate.Favorite {
+func MediaIDEQ(v string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldEQ(FieldMediaID, v))
 }
 
 // MediaIDNEQ applies the NEQ predicate on the "media_id" field.
-func MediaIDNEQ(v int) predicate.Favorite {
+func MediaIDNEQ(v string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldNEQ(FieldMediaID, v))
 }
 
 // MediaIDIn applies the In predicate on the "media_id" field.
-func MediaIDIn(vs ...int) predicate.Favorite {
+func MediaIDIn(vs ...string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldIn(FieldMediaID, vs...))
 }
 
 // MediaIDNotIn applies the NotIn predicate on the "media_id" field.
-func MediaIDNotIn(vs ...int) predicate.Favorite {
+func MediaIDNotIn(vs ...string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldNotIn(FieldMediaID, vs...))
 }
 
+// MediaIDGT applies the GT predicate on the "media_id" field.
+func MediaIDGT(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldGT(FieldMediaID, v))
+}
+
+// MediaIDGTE applies the GTE predicate on the "media_id" field.
+func MediaIDGTE(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldGTE(FieldMediaID, v))
+}
+
+// MediaIDLT applies the LT predicate on the "media_id" field.
+func MediaIDLT(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldLT(FieldMediaID, v))
+}
+
+// MediaIDLTE applies the LTE predicate on the "media_id" field.
+func MediaIDLTE(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldLTE(FieldMediaID, v))
+}
+
+// MediaIDContains applies the Contains predicate on the "media_id" field.
+func MediaIDContains(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldContains(FieldMediaID, v))
+}
+
+// MediaIDHasPrefix applies the HasPrefix predicate on the "media_id" field.
+func MediaIDHasPrefix(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldHasPrefix(FieldMediaID, v))
+}
+
+// MediaIDHasSuffix applies the HasSuffix predicate on the "media_id" field.
+func MediaIDHasSuffix(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldHasSuffix(FieldMediaID, v))
+}
+
+// MediaIDEqualFold applies the EqualFold predicate on the "media_id" field.
+func MediaIDEqualFold(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldEqualFold(FieldMediaID, v))
+}
+
+// MediaIDContainsFold applies the ContainsFold predicate on the "media_id" field.
+func MediaIDContainsFold(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldContainsFold(FieldMediaID, v))
+}
+
 // UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int) predicate.Favorite {
+func UserIDEQ(v string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int) predicate.Favorite {
+func UserIDNEQ(v string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int) predicate.Favorite {
+func UserIDIn(vs ...string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int) predicate.Favorite {
+func UserIDNotIn(vs ...string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldNotIn(FieldUserID, vs...))
+}
+
+// UserIDGT applies the GT predicate on the "user_id" field.
+func UserIDGT(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldGT(FieldUserID, v))
+}
+
+// UserIDGTE applies the GTE predicate on the "user_id" field.
+func UserIDGTE(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldGTE(FieldUserID, v))
+}
+
+// UserIDLT applies the LT predicate on the "user_id" field.
+func UserIDLT(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldLT(FieldUserID, v))
+}
+
+// UserIDLTE applies the LTE predicate on the "user_id" field.
+func UserIDLTE(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldLTE(FieldUserID, v))
+}
+
+// UserIDContains applies the Contains predicate on the "user_id" field.
+func UserIDContains(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldContains(FieldUserID, v))
+}
+
+// UserIDHasPrefix applies the HasPrefix predicate on the "user_id" field.
+func UserIDHasPrefix(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldHasPrefix(FieldUserID, v))
+}
+
+// UserIDHasSuffix applies the HasSuffix predicate on the "user_id" field.
+func UserIDHasSuffix(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldHasSuffix(FieldUserID, v))
+}
+
+// UserIDEqualFold applies the EqualFold predicate on the "user_id" field.
+func UserIDEqualFold(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldEqualFold(FieldUserID, v))
+}
+
+// UserIDContainsFold applies the ContainsFold predicate on the "user_id" field.
+func UserIDContainsFold(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldContainsFold(FieldUserID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

@@ -12,28 +12,25 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 )
 
 // Comment is the model entity for the Comment schema.
 type Comment struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 	// Text holds the value of the "text" field.
 	Text string `json:"text,omitempty"`
-	// UID holds the value of the "uid" field.
-	UID uuid.UUID `json:"uid,omitempty"`
 	// AddDate holds the value of the "add_date" field.
 	AddDate time.Time `json:"add_date,omitempty"`
 	// MediaID holds the value of the "media_id" field.
-	MediaID int `json:"media_id,omitempty"`
+	MediaID string `json:"media_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
-	UserID int `json:"user_id,omitempty"`
+	UserID string `json:"user_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CommentQuery when eager-loading is set.
 	Edges           CommentEdges `json:"edges"`
-	comment_replies *int
+	comment_replies *string
 	selectValues    sql.SelectValues
 }
 
@@ -99,16 +96,12 @@ func (*Comment) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case comment.FieldID, comment.FieldMediaID, comment.FieldUserID:
-			values[i] = new(sql.NullInt64)
-		case comment.FieldText:
+		case comment.FieldID, comment.FieldText, comment.FieldMediaID, comment.FieldUserID:
 			values[i] = new(sql.NullString)
 		case comment.FieldAddDate:
 			values[i] = new(sql.NullTime)
-		case comment.FieldUID:
-			values[i] = new(uuid.UUID)
 		case comment.ForeignKeys[0]: // comment_replies
-			values[i] = new(sql.NullInt64)
+			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -125,22 +118,16 @@ func (_m *Comment) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case comment.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value.Valid {
+				_m.ID = value.String
 			}
-			_m.ID = int(value.Int64)
 		case comment.FieldText:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field text", values[i])
 			} else if value.Valid {
 				_m.Text = value.String
-			}
-		case comment.FieldUID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field uid", values[i])
-			} else if value != nil {
-				_m.UID = *value
 			}
 		case comment.FieldAddDate:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -149,23 +136,23 @@ func (_m *Comment) assignValues(columns []string, values []any) error {
 				_m.AddDate = value.Time
 			}
 		case comment.FieldMediaID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field media_id", values[i])
 			} else if value.Valid {
-				_m.MediaID = int(value.Int64)
+				_m.MediaID = value.String
 			}
 		case comment.FieldUserID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				_m.UserID = int(value.Int64)
+				_m.UserID = value.String
 			}
 		case comment.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field comment_replies", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field comment_replies", values[i])
 			} else if value.Valid {
-				_m.comment_replies = new(int)
-				*_m.comment_replies = int(value.Int64)
+				_m.comment_replies = new(string)
+				*_m.comment_replies = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -226,17 +213,14 @@ func (_m *Comment) String() string {
 	builder.WriteString("text=")
 	builder.WriteString(_m.Text)
 	builder.WriteString(", ")
-	builder.WriteString("uid=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UID))
-	builder.WriteString(", ")
 	builder.WriteString("add_date=")
 	builder.WriteString(_m.AddDate.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("media_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.MediaID))
+	builder.WriteString(_m.MediaID)
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(_m.UserID)
 	builder.WriteByte(')')
 	return builder.String()
 }

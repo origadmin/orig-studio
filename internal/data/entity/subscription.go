@@ -17,11 +17,11 @@ import (
 type Subscription struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 	// SubscriberID holds the value of the "subscriber_id" field.
-	SubscriberID int `json:"subscriber_id,omitempty"`
+	SubscriberID string `json:"subscriber_id,omitempty"`
 	// ChannelID holds the value of the "channel_id" field.
-	ChannelID int `json:"channel_id,omitempty"`
+	ChannelID string `json:"channel_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -69,7 +69,7 @@ func (*Subscription) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case subscription.FieldID, subscription.FieldSubscriberID, subscription.FieldChannelID:
-			values[i] = new(sql.NullInt64)
+			values[i] = new(sql.NullString)
 		case subscription.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		default:
@@ -88,22 +88,22 @@ func (_m *Subscription) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case subscription.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value.Valid {
+				_m.ID = value.String
 			}
-			_m.ID = int(value.Int64)
 		case subscription.FieldSubscriberID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field subscriber_id", values[i])
 			} else if value.Valid {
-				_m.SubscriberID = int(value.Int64)
+				_m.SubscriberID = value.String
 			}
 		case subscription.FieldChannelID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field channel_id", values[i])
 			} else if value.Valid {
-				_m.ChannelID = int(value.Int64)
+				_m.ChannelID = value.String
 			}
 		case subscription.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -158,10 +158,10 @@ func (_m *Subscription) String() string {
 	builder.WriteString("Subscription(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("subscriber_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.SubscriberID))
+	builder.WriteString(_m.SubscriberID)
 	builder.WriteString(", ")
 	builder.WriteString("channel_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ChannelID))
+	builder.WriteString(_m.ChannelID)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))

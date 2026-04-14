@@ -348,15 +348,29 @@ func (_c *UserCreate) SetNillableLastLogin(v *time.Time) *UserCreate {
 	return _c
 }
 
+// SetID sets the "id" field.
+func (_c *UserCreate) SetID(v string) *UserCreate {
+	_c.mutation.SetID(v)
+	return _c
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (_c *UserCreate) SetNillableID(v *string) *UserCreate {
+	if v != nil {
+		_c.SetID(*v)
+	}
+	return _c
+}
+
 // AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_c *UserCreate) AddMediumIDs(ids ...int) *UserCreate {
+func (_c *UserCreate) AddMediumIDs(ids ...string) *UserCreate {
 	_c.mutation.AddMediumIDs(ids...)
 	return _c
 }
 
 // AddMedia adds the "media" edges to the Media entity.
 func (_c *UserCreate) AddMedia(v ...*Media) *UserCreate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -364,14 +378,14 @@ func (_c *UserCreate) AddMedia(v ...*Media) *UserCreate {
 }
 
 // AddChannelIDs adds the "channels" edge to the Channel entity by IDs.
-func (_c *UserCreate) AddChannelIDs(ids ...int) *UserCreate {
+func (_c *UserCreate) AddChannelIDs(ids ...string) *UserCreate {
 	_c.mutation.AddChannelIDs(ids...)
 	return _c
 }
 
 // AddChannels adds the "channels" edges to the Channel entity.
 func (_c *UserCreate) AddChannels(v ...*Channel) *UserCreate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -379,14 +393,14 @@ func (_c *UserCreate) AddChannels(v ...*Channel) *UserCreate {
 }
 
 // AddPlaylistIDs adds the "playlists" edge to the Playlist entity by IDs.
-func (_c *UserCreate) AddPlaylistIDs(ids ...int) *UserCreate {
+func (_c *UserCreate) AddPlaylistIDs(ids ...string) *UserCreate {
 	_c.mutation.AddPlaylistIDs(ids...)
 	return _c
 }
 
 // AddPlaylists adds the "playlists" edges to the Playlist entity.
 func (_c *UserCreate) AddPlaylists(v ...*Playlist) *UserCreate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -394,14 +408,14 @@ func (_c *UserCreate) AddPlaylists(v ...*Playlist) *UserCreate {
 }
 
 // AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
-func (_c *UserCreate) AddCommentIDs(ids ...int) *UserCreate {
+func (_c *UserCreate) AddCommentIDs(ids ...string) *UserCreate {
 	_c.mutation.AddCommentIDs(ids...)
 	return _c
 }
 
 // AddComments adds the "comments" edges to the Comment entity.
 func (_c *UserCreate) AddComments(v ...*Comment) *UserCreate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -424,14 +438,14 @@ func (_c *UserCreate) AddNotifications(v ...*Notification) *UserCreate {
 }
 
 // AddCategoryIDs adds the "categories" edge to the Category entity by IDs.
-func (_c *UserCreate) AddCategoryIDs(ids ...int) *UserCreate {
+func (_c *UserCreate) AddCategoryIDs(ids ...string) *UserCreate {
 	_c.mutation.AddCategoryIDs(ids...)
 	return _c
 }
 
 // AddCategories adds the "categories" edges to the Category entity.
 func (_c *UserCreate) AddCategories(v ...*Category) *UserCreate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -454,14 +468,14 @@ func (_c *UserCreate) AddTags(v ...*Tag) *UserCreate {
 }
 
 // AddFavoriteIDs adds the "favorites" edge to the Favorite entity by IDs.
-func (_c *UserCreate) AddFavoriteIDs(ids ...int) *UserCreate {
+func (_c *UserCreate) AddFavoriteIDs(ids ...string) *UserCreate {
 	_c.mutation.AddFavoriteIDs(ids...)
 	return _c
 }
 
 // AddFavorites adds the "favorites" edges to the Favorite entity.
 func (_c *UserCreate) AddFavorites(v ...*Favorite) *UserCreate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -469,14 +483,14 @@ func (_c *UserCreate) AddFavorites(v ...*Favorite) *UserCreate {
 }
 
 // AddLikeIDs adds the "likes" edge to the Like entity by IDs.
-func (_c *UserCreate) AddLikeIDs(ids ...int) *UserCreate {
+func (_c *UserCreate) AddLikeIDs(ids ...string) *UserCreate {
 	_c.mutation.AddLikeIDs(ids...)
 	return _c
 }
 
 // AddLikes adds the "likes" edges to the Like entity.
 func (_c *UserCreate) AddLikes(v ...*Like) *UserCreate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -484,14 +498,14 @@ func (_c *UserCreate) AddLikes(v ...*Like) *UserCreate {
 }
 
 // AddSubscriptionIDs adds the "subscriptions" edge to the Subscription entity by IDs.
-func (_c *UserCreate) AddSubscriptionIDs(ids ...int) *UserCreate {
+func (_c *UserCreate) AddSubscriptionIDs(ids ...string) *UserCreate {
 	_c.mutation.AddSubscriptionIDs(ids...)
 	return _c
 }
 
 // AddSubscriptions adds the "subscriptions" edges to the Subscription entity.
 func (_c *UserCreate) AddSubscriptions(v ...*Subscription) *UserCreate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -499,14 +513,14 @@ func (_c *UserCreate) AddSubscriptions(v ...*Subscription) *UserCreate {
 }
 
 // AddSubscriberIDs adds the "subscribers" edge to the Subscription entity by IDs.
-func (_c *UserCreate) AddSubscriberIDs(ids ...int) *UserCreate {
+func (_c *UserCreate) AddSubscriberIDs(ids ...string) *UserCreate {
 	_c.mutation.AddSubscriberIDs(ids...)
 	return _c
 }
 
 // AddSubscribers adds the "subscribers" edges to the Subscription entity.
 func (_c *UserCreate) AddSubscribers(v ...*Subscription) *UserCreate {
-	ids := make([]int, len(v))
+	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -599,6 +613,10 @@ func (_c *UserCreate) defaults() {
 	if _, ok := _c.mutation.DateAdded(); !ok {
 		v := user.DefaultDateAdded()
 		_c.mutation.SetDateAdded(v)
+	}
+	if _, ok := _c.mutation.ID(); !ok {
+		v := user.DefaultID()
+		_c.mutation.SetID(v)
 	}
 }
 
@@ -705,6 +723,11 @@ func (_c *UserCreate) check() error {
 	if _, ok := _c.mutation.DateAdded(); !ok {
 		return &ValidationError{Name: "date_added", err: errors.New(`entity: missing required field "User.date_added"`)}
 	}
+	if v, ok := _c.mutation.ID(); ok {
+		if err := user.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`entity: validator failed for field "User.id": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -719,8 +742,13 @@ func (_c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(string); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected User.ID type: %T", _spec.ID.Value)
+		}
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
@@ -729,8 +757,12 @@ func (_c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	var (
 		_node = &User{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeString))
 	)
+	if id, ok := _c.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := _c.mutation.Username(); ok {
 		_spec.SetField(user.FieldUsername, field.TypeString, value)
 		_node.Username = value
@@ -839,7 +871,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -855,7 +887,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.ChannelsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -871,7 +903,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: user.PlaylistsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -887,7 +919,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -919,7 +951,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.CategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -951,7 +983,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.FavoritesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(favorite.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -967,7 +999,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.LikesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -983,7 +1015,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.SubscriptionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -999,7 +1031,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.SubscribersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1055,10 +1087,6 @@ func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

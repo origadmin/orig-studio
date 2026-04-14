@@ -6,12 +6,14 @@ package data
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/uploadsession"
+	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/svc-media/biz"
 )
 
@@ -40,7 +42,7 @@ func (r *uploadRepo) CreateSession(ctx context.Context, session *biz.UploadSessi
 		SetTitle(session.Title).
 		SetDescription(session.Description).
 		SetTags(session.Tags).
-		SetStatus(session.Status).
+		SetStatus(string(session.Status)).
 		SetParts(session.Parts).
 		SetSha256(session.Sha256).
 		SetStoragePath(session.StoragePath).
@@ -48,10 +50,12 @@ func (r *uploadRepo) CreateSession(ctx context.Context, session *biz.UploadSessi
 		SetExpiresAt(session.ExpiresAt)
 
 	if session.CategoryID != nil {
-		builder.SetCategoryID(*session.CategoryID)
+		categoryID, _ := strconv.Atoi(*session.CategoryID)
+		builder.SetCategoryID(int64(categoryID))
 	}
 	if session.UserID != nil {
-		builder.SetUserID(*session.UserID)
+		userID, _ := strconv.Atoi(*session.UserID)
+		builder.SetUserID(int64(userID))
 	}
 
 	_, err := builder.Save(ctx)
@@ -72,7 +76,7 @@ func (r *uploadRepo) UpdateSession(ctx context.Context, session *biz.UploadSessi
 	return r.data.UploadSession.Update().
 		Where(uploadsession.UploadID(session.UploadID)).
 		SetUploadedSize(session.UploadedSize).
-		SetStatus(session.Status).
+		SetStatus(string(session.Status)).
 		SetParts(session.Parts).
 		SetSha256(session.Sha256).
 		SetStoragePath(session.StoragePath).
@@ -87,13 +91,14 @@ func (r *uploadRepo) DeleteSession(ctx context.Context, uploadID string) error {
 	return err
 }
 
-func (r *uploadRepo) ListSessions(ctx context.Context, userID int64, status string, page, pageSize int) ([]*biz.UploadSession, int, error) {
+func (r *uploadRepo) ListSessions(ctx context.Context, userID string, status enums.UploadStatus, page, pageSize int) ([]*biz.UploadSession, int, error) {
 	query := r.data.UploadSession.Query()
-	if userID > 0 {
-		query = query.Where(uploadsession.UserID(userID))
+	if userID != "" {
+		userIDInt, _ := strconv.Atoi(userID)
+		query = query.Where(uploadsession.UserID(int64(userIDInt)))
 	}
 	if status != "" {
-		query = query.Where(uploadsession.Status(status))
+		query = query.Where(uploadsession.Status(string(status)))
 	}
 
 	total, err := query.Count(ctx)
@@ -119,7 +124,7 @@ func (r *uploadRepo) DeleteExpiredSessions(ctx context.Context, now time.Time) (
 	expired, err := r.data.UploadSession.Query().
 		Where(
 			uploadsession.ExpiresAtLT(now),
-			uploadsession.StatusNEQ(biz.StatusCompleted),
+			uploadsession.StatusNEQ(string(enums.UploadStatusCompleted)),
 		).
 		All(ctx)
 	if err != nil {
@@ -147,6 +152,18 @@ func (r *uploadRepo) DeleteExpiredSessions(ctx context.Context, now time.Time) (
 }
 
 func (r *uploadRepo) entToBiz(s *entity.UploadSession) *biz.UploadSession {
+	var categoryID *string
+	if s.CategoryID != nil {
+		idStr := strconv.FormatInt(*s.CategoryID, 10)
+		categoryID = &idStr
+	}
+
+	var userID *string
+	if s.UserID != nil {
+		idStr := strconv.FormatInt(*s.UserID, 10)
+		userID = &idStr
+	}
+
 	return &biz.UploadSession{
 		UploadID:     s.UploadID,
 		Filename:     s.Filename,
@@ -157,10 +174,10 @@ func (r *uploadRepo) entToBiz(s *entity.UploadSession) *biz.UploadSession {
 		UploadedSize: s.UploadedSize,
 		Title:        s.Title,
 		Description:  s.Description,
-		CategoryID:   s.CategoryID,
+		CategoryID:   categoryID,
 		Tags:         s.Tags,
-		UserID:       s.UserID,
-		Status:       s.Status,
+		UserID:       userID,
+		Status:       enums.UploadStatus(s.Status),
 		Parts:        s.Parts,
 		Sha256:       s.Sha256,
 		StoragePath:  s.StoragePath,

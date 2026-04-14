@@ -17,25 +17,25 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/go-kratos/kratos/v2/log"
 
+	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/helpers/ffmpeg"
 	"origadmin/application/origcms/internal/pubsub"
 )
 
 // MediaEncodeRequest is the payload for media.encode.request messages.
 type MediaEncodeRequest struct {
-	MediaID     int64  `json:"media_id"`
-	MediaPath   string `json:"media_path"`
-	ContentType string `json:"content_type"`
-	TaskID      *int   `json:"task_id,omitempty"` // 可选：只重试特定任务
+	MediaID     string  `json:"media_id"`
+	MediaPath   string  `json:"media_path"`
+	ContentType string  `json:"content_type"`
+	TaskID      *string `json:"task_id,omitempty"` // 可选：只重试特定任务
 }
 
 // MediaEncodeEvent is the payload for progress/completion messages.
 type MediaEncodeEvent struct {
-	MediaID  int64         `json:"media_id"`
-	Task     *EncodingTask `json:"task,omitempty"`
-	Status   string        `json:"status"` // processing, success, failed
-	Progress int           `json:"progress"`
-	Error    string        `json:"error,omitempty"`
+	MediaID string        `json:"media_id"`
+	Task    *EncodingTask `json:"task,omitempty"`
+	Status  string        `json:"status"` // processing, success, failed
+	Error   string        `json:"error,omitempty"`
 }
 
 // TranscodeHandler handles incoming media.encode.request messages.
@@ -87,10 +87,10 @@ func (h *TranscodeHandler) Handle(msg *message.Message) error {
 		return fmt.Errorf("unmarshal: %w", err)
 	}
 
-	h.logger.Infof("received encode request: media=%d path=%s", req.MediaID, req.MediaPath)
+	h.logger.Infof("received encode request: media=%s path=%s", req.MediaID, req.MediaPath)
 
 	if err := h.processMedia(ctx, &req); err != nil {
-		h.logger.Errorf("media processing failed: media=%d err=%v", req.MediaID, err)
+		h.logger.Errorf("media processing failed: media=%s err=%v", req.MediaID, err)
 		return err
 	}
 
@@ -122,14 +122,14 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 	// --- Step 1: Load media and ensure UUID ---
 	media, err := h.mediaRepo.Get(procCtx, mediaID)
 	if err != nil {
-		return fmt.Errorf("get media %d: %w", mediaID, err)
+		return fmt.Errorf("get media %s: %w", mediaID, err)
 	}
 
 	// Generate UUID if not present (for secure public paths)
 	if media.Uuid == "" {
 		media.Uuid = GenerateUUID()
 		if _, err := h.mediaRepo.Update(procCtx, media); err != nil {
-			h.logger.Warnf("failed to save UUID for media %d: %v", mediaID, err)
+			h.logger.Warnf("failed to save UUID for media %s: %v", mediaID, err)
 		}
 	}
 	mediaUUID := media.Uuid
@@ -147,10 +147,10 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		if _, err := GenerateThumbnail(procCtx, fullPath, thumbDir, thumbFilename); err == nil {
 			media.Thumbnail = fmt.Sprintf("thumbnails/%s.jpg", mediaUUID)
 			if _, err := h.mediaRepo.Update(procCtx, media); err != nil {
-				h.logger.Warnf("failed to save thumbnail for media %d: %v", mediaID, err)
+				h.logger.Warnf("failed to save thumbnail for media %s: %v", mediaID, err)
 			}
 		} else {
-			h.logger.Warnf("thumbnail generation failed for media %d: %v", mediaID, err)
+			h.logger.Warnf("thumbnail generation failed for media %s: %v", mediaID, err)
 		}
 	}
 
@@ -160,11 +160,13 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		return fmt.Errorf("list profiles: %w", err)
 	}
 
-	// Separate video and preview profiles
-	var videoProfiles, previewProfiles []*EncodeProfile
+	// Separate video, preview, and frames profiles
+	var videoProfiles, previewProfiles, framesProfiles []*EncodeProfile
 	for _, p := range profiles {
 		if IsPreviewProfile(p) {
 			previewProfiles = append(previewProfiles, p)
+		} else if IsFramesProfile(p) {
+			framesProfiles = append(framesProfiles, p)
 		} else if IsVideoProfile(p) {
 			videoProfiles = append(videoProfiles, p)
 		} else {
@@ -172,12 +174,12 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		}
 	}
 
-	allProfiles := append(videoProfiles, previewProfiles...)
+	allProfiles := append(append(videoProfiles, previewProfiles...), framesProfiles...)
 
 	// Get existing tasks for this media
 	existingTasks, err := h.encodingRepo.ListByMedia(procCtx, mediaID)
 	if err != nil {
-		h.logger.Warnf("failed to get existing tasks for media %d: %v", mediaID, err)
+		h.logger.Warnf("failed to get existing tasks for media %s: %v", mediaID, err)
 		existingTasks = nil
 	}
 
@@ -195,36 +197,36 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		// 直接获取该任务，而不依赖 allProfiles (可能该 profile 已被设置为不活跃，但任务仍需处理)
 		existingTask, err := h.encodingRepo.Get(procCtx, *req.TaskID)
 		if err != nil {
-			return fmt.Errorf("get encoding task %d: %w", *req.TaskID, err)
+			return fmt.Errorf("get encoding task %s: %w", *req.TaskID, err)
 		}
 
 		if existingTask.MediaId != mediaID {
-			return fmt.Errorf("task %d does not belong to media %d", *req.TaskID, mediaID)
+			return fmt.Errorf("task %s does not belong to media %s", *req.TaskID, mediaID)
 		}
 
 		// 任务状态已经在 RetryTask 中被重置为 pending，这里不需要再次重置
 		// 只需要将任务加入处理队列
 		tasks = append(tasks, existingTask)
-		h.logger.Infof("processing specific task %d (media=%d)", existingTask.Id, mediaID)
+		h.logger.Infof("processing specific task %s (media=%s)", existingTask.Id, mediaID)
 	} else {
 		// 没有指定 TaskID，处理所有需要处理的任务（初始上传或重试所有失败）
 		for _, p := range allProfiles {
 			// Check if there's an existing task for this profile
 			if existingTask, exists := existingTaskMap[p.Id]; exists {
 				// If task is already successful, skip it
-				if existingTask.Status == "success" {
-					h.logger.Infof("skipping already successful task %d for profile %s (media=%d)", existingTask.Id, p.Name, mediaID)
+				if existingTask.Status == enums.EncodingTaskStatusSuccess {
+					h.logger.Infof("skipping already successful task %s for profile %s (media=%s)", existingTask.Id, p.Name, mediaID)
 					continue
 				}
 				// Only process tasks that are already in pending state (for retries)
 				// Do NOT reset other states - let them remain as is
-				if existingTask.Status == "pending" {
+				if existingTask.Status == enums.EncodingTaskStatusPending {
 					tasks = append(tasks, existingTask)
-					h.logger.Infof("processing pending task %d for profile %s (media=%d)", existingTask.Id, p.Name, mediaID)
+					h.logger.Infof("processing pending task %s for profile %s (media=%s)", existingTask.Id, p.Name, mediaID)
 					continue
 				}
 				// For non-pending, non-success tasks, skip them
-				h.logger.Infof("skipping task %d with status %s for profile %s (media=%d)", existingTask.Id, existingTask.Status, p.Name, mediaID)
+				h.logger.Infof("skipping task %s with status %s for profile %s (media=%s)", existingTask.Id, existingTask.Status, p.Name, mediaID)
 				continue
 			}
 
@@ -232,8 +234,7 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 			task := &EncodingTask{
 				MediaId:   mediaID,
 				ProfileId: p.Id,
-				Status:    "pending",
-				Progress:  0,
+				Status:    enums.EncodingTaskStatusPending,
 			}
 			t, err := h.encodingRepo.Create(procCtx, task)
 			if err != nil {
@@ -245,7 +246,7 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 	}
 
 	if len(tasks) == 0 {
-		h.logger.Warnf("no encoding tasks created for media %d", mediaID)
+		h.logger.Warnf("no encoding tasks created for media %s", mediaID)
 		media.EncodingStatus = "failed"
 		h.mediaRepo.Update(procCtx, media)
 		return nil
@@ -272,6 +273,9 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		var outputDir string
 		if IsVideoProfile(profile) {
 			outputDir = filepath.Join(hlsBaseDir, profile.Name)
+		} else if IsFramesProfile(profile) {
+			// Frames: output goes to frames/ dir; we pass hlsBaseDir as anchor
+			outputDir = hlsBaseDir // executeFramesJob will navigate up to frames/
 		} else {
 			// Preview: output goes to previews/ dir; we pass hlsBaseDir as anchor
 			outputDir = hlsBaseDir // executePreviewJob will navigate up to previews/
@@ -281,7 +285,7 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		task := t
 		job := TranscodeJob{
 			MediaID:      mediaID,
-			TaskID:       int64(task.Id),
+			TaskID:       task.Id,
 			Profile:      profile,
 			InputPath:    fullPath,
 			OutputDir:    outputDir,
@@ -327,12 +331,10 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 
 		profile, _ := h.profileRepo.Get(procCtx, t.ProfileId)
 		if result.err != nil {
-			t.Status = "failed"
+			t.Status = enums.EncodingTaskStatusFailed
 			t.ErrorMessage = result.err.Error()
-			t.Progress = 0
 		} else {
-			t.Status = "success"
-			t.Progress = 100
+			t.Status = enums.EncodingTaskStatusSuccess
 			t.ErrorMessage = ""
 
 			if profile != nil {
@@ -340,22 +342,23 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 					t.OutputPath = fmt.Sprintf("%s/%s/index.m3u8", mediaUUID, profile.Name)
 				} else if IsPreviewProfile(profile) {
 					t.OutputPath = fmt.Sprintf("previews/%s.gif", mediaUUID)
+				} else if IsFramesProfile(profile) {
+					t.OutputPath = fmt.Sprintf("frames/%s/", mediaUUID)
 				}
 			}
 		}
 
 		if _, err := h.encodingRepo.Update(procCtx, t); err != nil {
-			h.logger.Warnf("failed to update task %d: %v", t.Id, err)
+			h.logger.Warnf("failed to update task %s: %v", t.Id, err)
 		}
 
 		// Notify frontend of task change
 		h.mediaUC.Publish(mediaID, &EncodingEvent{MediaId: mediaID, Task: t})
 		h.publishEvent(ctx, &MediaEncodeEvent{
-			MediaID:  mediaID,
-			Task:     t,
-			Status:   t.Status,
-			Progress: t.Progress,
-			Error:    t.ErrorMessage,
+			MediaID: mediaID,
+			Task:    t,
+			Status:  string(t.Status),
+			Error:   t.ErrorMessage,
 		})
 	}
 
@@ -377,7 +380,7 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		}
 
 		videoTotalCount++
-		if t.Status == "success" {
+		if t.Status == enums.EncodingTaskStatusSuccess {
 			videoSuccessCount++
 			variantInfos = append(variantInfos, ffmpeg.VariantInfo{
 				Path:       fmt.Sprintf("%s/index.m3u8", profile.Name),
@@ -385,7 +388,7 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 				Resolution: ffmpeg.ResolutionToSize(profile.Resolution),
 				Name:       profile.Name,
 			})
-		} else if t.Status == "failed" {
+		} else if t.Status == enums.EncodingTaskStatusFailed {
 			videoFailedCount++
 		}
 	}
@@ -426,7 +429,7 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		Status:  media.EncodingStatus,
 	})
 
-	h.logger.Infof("media processing complete: media=%d uuid=%s status=%s (video: %d ok / %d fail)",
+	h.logger.Infof("media processing complete: media=%s uuid=%s status=%s (video: %d ok / %d fail)",
 		mediaID, mediaUUID, media.EncodingStatus, videoSuccessCount, videoFailedCount)
 
 	return nil
@@ -434,18 +437,23 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 
 // waitForOutput polls for the expected output file after worker submission.
 // For video profiles: checks for index.m3u8; for preview: checks for .gif file.
+// Progress updates are handled by the transcoding worker itself for video profiles.
+// For preview profiles, we provide basic progress updates here.
 func (h *TranscodeHandler) waitForOutput(
 	job TranscodeJob,
 	task *EncodingTask,
 	result *transcodeResult,
 ) error {
 	var expectedFile string
-	maxAttempts := 240 // max 20 min wait per task (5s interval)
+	maxAttempts := 600 // max 20 min wait per task (2s interval)
 
 	if IsVideoProfile(job.Profile) {
 		expectedFile = filepath.Join(job.OutputDir, "index.m3u8")
 	} else if IsPreviewProfile(job.Profile) {
-		expectedFile = filepath.Join(filepath.Dir(job.OutputDir), "..", "previews", fmt.Sprintf("%s.gif", job.UUID))
+		expectedFile = filepath.Join(job.OutputDir, "..", "previews", fmt.Sprintf("%s.gif", job.UUID))
+	} else if IsFramesProfile(job.Profile) {
+		// For frames, we just wait for the directory to be created
+		expectedFile = filepath.Join(job.OutputDir, "..", "frames")
 	} else {
 		return nil // unknown type, nothing to wait for
 	}
@@ -456,10 +464,10 @@ func (h *TranscodeHandler) waitForOutput(
 		// 检查任务状态
 		currentTask, err := h.encodingRepo.Get(context.Background(), task.Id)
 		if err == nil && currentTask != nil {
-			if currentTask.Status == "processing" {
+			if currentTask.Status == enums.EncodingTaskStatusProcessing {
 				h.logger.Infof("task %d has started processing, beginning file wait", task.Id)
 				break
-			} else if currentTask.Status == "failed" {
+			} else if currentTask.Status == enums.EncodingTaskStatusFailed {
 				h.logger.Warnf("task %d failed during execution: %s", task.Id, currentTask.ErrorMessage)
 				return fmt.Errorf("task %d failed: %s", task.Id, currentTask.ErrorMessage)
 			}
@@ -471,32 +479,49 @@ func (h *TranscodeHandler) waitForOutput(
 	}
 
 	// 初始延迟：给转码任务时间开始生成文件
-	time.Sleep(10 * time.Second)
+	time.Sleep(2 * time.Second)
 
-	// Update progress during waiting
+	// Poll for output file
+	// For video profiles, progress is updated by the transcoding worker
+	// For preview profiles, we provide basic progress updates here
 	for i := 0; i < maxAttempts; i++ {
 		// Check task status first
 		currentTask, err := h.encodingRepo.Get(context.Background(), task.Id)
-		if err == nil && currentTask != nil && currentTask.Status == "failed" {
+		if err == nil && currentTask != nil && currentTask.Status == enums.EncodingTaskStatusFailed {
 			h.logger.Warnf("task %d failed during file wait: %s", task.Id, currentTask.ErrorMessage)
 			return fmt.Errorf("task %d failed: %s", task.Id, currentTask.ErrorMessage)
 		}
 
-		// Calculate progress: 10% to 90% over maxAttempts
-		// Add a small random offset to make progress unique per task
-		offset := task.Id % 10
-		progress := 10 + (i * 80 / maxAttempts) + offset
-		if progress > 90 {
-			progress = 90
-		}
-		task.Progress = progress
-		if _, err := h.encodingRepo.Update(context.Background(), task); err != nil {
-			h.logger.Warnf("failed to update task %d progress: %v", task.Id, err)
+		// For preview and frames profiles, provide basic progress updates
+		// Video profiles have their own progress updates from ffmpeg
+		if (IsPreviewProfile(job.Profile) || IsFramesProfile(job.Profile)) && currentTask != nil {
+			// Basic progress: 20% to 90%
+			progress := 20 + (i * 70 / maxAttempts)
+			if progress > 90 {
+				progress = 90
+			}
+
+			// Publish progress update via SSE
+			if job.MediaUC != nil {
+				taskCopy := *currentTask
+				job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: &taskCopy})
+			}
 		}
 
-		time.Sleep(5 * time.Second)
+		time.Sleep(2 * time.Second)
+
+		// Check if expected file/directory exists
 		if _, err := os.Stat(expectedFile); err == nil {
-			return nil // file exists
+			// For frames profile, we also check if at least one frame exists
+			if IsFramesProfile(job.Profile) {
+				framesDir := expectedFile
+				frameFile := filepath.Join(framesDir, "frame_001.jpg")
+				if _, err := os.Stat(frameFile); err == nil {
+					return nil // directory and first frame exist
+				}
+				continue // wait more for frames to be generated
+			}
+			return nil // file/directory exists
 		}
 	}
 
@@ -505,7 +530,7 @@ func (h *TranscodeHandler) waitForOutput(
 
 // transcodeResult holds the result of a single transcode job execution.
 type transcodeResult struct {
-	taskID int
+	taskID string
 	err    error
 }
 
@@ -524,7 +549,7 @@ func (h *TranscodeHandler) publishEvent(ctx context.Context, event *MediaEncodeE
 	msg := pubsub.NewMessage(payload)
 
 	topic := pubsub.MediaEncodeProgressTopic
-	if event.Status == "success" || event.Status == "failed" || event.Status == "partial" {
+	if event.Status == string(enums.MediaEncodingStatusSuccess) || event.Status == string(enums.MediaEncodingStatusFailed) || event.Status == string(enums.MediaEncodingStatusPartial) {
 		topic = pubsub.MediaEncodeCompletedTopic
 	}
 

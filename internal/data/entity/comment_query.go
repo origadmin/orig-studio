@@ -180,8 +180,8 @@ func (_q *CommentQuery) FirstX(ctx context.Context) *Comment {
 
 // FirstID returns the first Comment ID from the query.
 // Returns a *NotFoundError when no Comment ID was found.
-func (_q *CommentQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *CommentQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -193,7 +193,7 @@ func (_q *CommentQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *CommentQuery) FirstIDX(ctx context.Context) int {
+func (_q *CommentQuery) FirstIDX(ctx context.Context) string {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -231,8 +231,8 @@ func (_q *CommentQuery) OnlyX(ctx context.Context) *Comment {
 // OnlyID is like Only, but returns the only Comment ID in the query.
 // Returns a *NotSingularError when more than one Comment ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *CommentQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *CommentQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -248,7 +248,7 @@ func (_q *CommentQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *CommentQuery) OnlyIDX(ctx context.Context) int {
+func (_q *CommentQuery) OnlyIDX(ctx context.Context) string {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -276,7 +276,7 @@ func (_q *CommentQuery) AllX(ctx context.Context) []*Comment {
 }
 
 // IDs executes the query and returns a list of Comment IDs.
-func (_q *CommentQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (_q *CommentQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
@@ -288,7 +288,7 @@ func (_q *CommentQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *CommentQuery) IDsX(ctx context.Context) []int {
+func (_q *CommentQuery) IDsX(ctx context.Context) []string {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -545,8 +545,8 @@ func (_q *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 }
 
 func (_q *CommentQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes []*Comment, init func(*Comment), assign func(*Comment, *Media)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Comment)
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Comment)
 	for i := range nodes {
 		fk := nodes[i].MediaID
 		if _, ok := nodeids[fk]; !ok {
@@ -574,8 +574,8 @@ func (_q *CommentQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes 
 	return nil
 }
 func (_q *CommentQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Comment, init func(*Comment), assign func(*Comment, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Comment)
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Comment)
 	for i := range nodes {
 		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
@@ -603,8 +603,8 @@ func (_q *CommentQuery) loadUser(ctx context.Context, query *UserQuery, nodes []
 	return nil
 }
 func (_q *CommentQuery) loadParent(ctx context.Context, query *CommentQuery, nodes []*Comment, init func(*Comment), assign func(*Comment, *Comment)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Comment)
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Comment)
 	for i := range nodes {
 		if nodes[i].comment_replies == nil {
 			continue
@@ -636,7 +636,7 @@ func (_q *CommentQuery) loadParent(ctx context.Context, query *CommentQuery, nod
 }
 func (_q *CommentQuery) loadReplies(ctx context.Context, query *CommentQuery, nodes []*Comment, init func(*Comment), assign func(*Comment, *Comment)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Comment)
+	nodeids := make(map[string]*Comment)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -679,7 +679,7 @@ func (_q *CommentQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (_q *CommentQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(comment.Table, comment.Columns, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(comment.Table, comment.Columns, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

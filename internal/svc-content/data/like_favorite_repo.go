@@ -42,7 +42,7 @@ func NewFavoriteRepo(data *Data, logger log.Logger) biz.FavoriteRepo {
 
 func (r *likeRepo) Create(
 	ctx context.Context,
-	userID, mediaID int,
+	userID, mediaID string,
 	likeType string,
 ) (*biz.Like, error) {
 	ent, err := r.data.db.Like.Create().
@@ -62,7 +62,7 @@ func (r *likeRepo) Create(
 	}, nil
 }
 
-func (r *likeRepo) Delete(ctx context.Context, userID, mediaID int) error {
+func (r *likeRepo) Delete(ctx context.Context, userID, mediaID string) error {
 	_, err := r.data.db.Like.Delete().
 		Where(
 			like.HasMediaWith(media.IDEQ(mediaID)),
@@ -72,7 +72,7 @@ func (r *likeRepo) Delete(ctx context.Context, userID, mediaID int) error {
 	return err
 }
 
-func (r *likeRepo) GetStatus(ctx context.Context, userID, mediaID int) (string, error) {
+func (r *likeRepo) GetStatus(ctx context.Context, userID, mediaID string) (string, error) {
 	ent, err := r.data.db.Like.Query().
 		Where(
 			like.HasMediaWith(media.IDEQ(mediaID)),
@@ -88,7 +88,7 @@ func (r *likeRepo) GetStatus(ctx context.Context, userID, mediaID int) (string, 
 	return ent.LikeType, nil
 }
 
-func (r *likeRepo) CountByMedia(ctx context.Context, mediaID int, likeType string) (int64, error) {
+func (r *likeRepo) CountByMedia(ctx context.Context, mediaID string, likeType string) (int64, error) {
 	count, err := r.data.db.Like.Query().
 		Where(
 			like.HasMediaWith(media.IDEQ(mediaID)),
@@ -100,7 +100,7 @@ func (r *likeRepo) CountByMedia(ctx context.Context, mediaID int, likeType strin
 
 // ─── Favorite repo ────────────────────────────────────────────────────────────
 
-func (r *favoriteRepo) Create(ctx context.Context, userID, mediaID int) (*biz.Favorite, error) {
+func (r *favoriteRepo) Create(ctx context.Context, userID, mediaID string) (*biz.Favorite, error) {
 	ent, err := r.data.db.Favorite.Create().
 		SetMediaID(mediaID).
 		SetUserID(userID).
@@ -116,7 +116,7 @@ func (r *favoriteRepo) Create(ctx context.Context, userID, mediaID int) (*biz.Fa
 	}, nil
 }
 
-func (r *favoriteRepo) Delete(ctx context.Context, userID, mediaID int) error {
+func (r *favoriteRepo) Delete(ctx context.Context, userID, mediaID string) error {
 	_, err := r.data.db.Favorite.Delete().
 		Where(
 			favorite.HasMediaWith(media.IDEQ(mediaID)),
@@ -126,7 +126,7 @@ func (r *favoriteRepo) Delete(ctx context.Context, userID, mediaID int) error {
 	return err
 }
 
-func (r *favoriteRepo) IsFavorited(ctx context.Context, userID, mediaID int) (bool, error) {
+func (r *favoriteRepo) IsFavorited(ctx context.Context, userID, mediaID string) (bool, error) {
 	return r.data.db.Favorite.Query().
 		Where(
 			favorite.HasMediaWith(media.IDEQ(mediaID)),
@@ -135,27 +135,32 @@ func (r *favoriteRepo) IsFavorited(ctx context.Context, userID, mediaID int) (bo
 		Exist(ctx)
 }
 
-func (r *favoriteRepo) CountByMedia(ctx context.Context, mediaID int) (int64, error) {
+func (r *favoriteRepo) CountByMedia(ctx context.Context, mediaID string) (int64, error) {
 	count, err := r.data.db.Favorite.Query().
 		Where(favorite.HasMediaWith(media.IDEQ(mediaID))).
 		Count(ctx)
 	return int64(count), err
 }
 
-func (r *favoriteRepo) ListByUser(ctx context.Context, userID int) ([]*biz.Favorite, error) {
+func (r *favoriteRepo) ListByUser(ctx context.Context, userID string) ([]*biz.Favorite, error) {
 	ents, err := r.data.db.Favorite.Query().
 		Where(favorite.HasUserWith(user.IDEQ(userID))).
 		Order(entity.Desc(favorite.FieldCreatedAt)).
+		WithMedia().
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	res := make([]*biz.Favorite, len(ents))
 	for i, ent := range ents {
+		mediaID := ""
+		if ent.Edges.Media != nil {
+			mediaID = ent.Edges.Media.ID
+		}
 		res[i] = &biz.Favorite{
 			ID:        ent.ID,
 			UserID:    userID,
-			MediaID:   0, // mediaID not directly on entity; load via edge if needed
+			MediaID:   mediaID,
 			CreatedAt: ent.CreatedAt,
 		}
 	}

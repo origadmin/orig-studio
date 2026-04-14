@@ -18,11 +18,11 @@ import (
 type Favorite struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 	// MediaID holds the value of the "media_id" field.
-	MediaID int `json:"media_id,omitempty"`
+	MediaID string `json:"media_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
-	UserID int `json:"user_id,omitempty"`
+	UserID string `json:"user_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -70,7 +70,7 @@ func (*Favorite) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case favorite.FieldID, favorite.FieldMediaID, favorite.FieldUserID:
-			values[i] = new(sql.NullInt64)
+			values[i] = new(sql.NullString)
 		case favorite.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		default:
@@ -89,22 +89,22 @@ func (_m *Favorite) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case favorite.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value.Valid {
+				_m.ID = value.String
 			}
-			_m.ID = int(value.Int64)
 		case favorite.FieldMediaID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field media_id", values[i])
 			} else if value.Valid {
-				_m.MediaID = int(value.Int64)
+				_m.MediaID = value.String
 			}
 		case favorite.FieldUserID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				_m.UserID = int(value.Int64)
+				_m.UserID = value.String
 			}
 		case favorite.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -159,10 +159,10 @@ func (_m *Favorite) String() string {
 	builder.WriteString("Favorite(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("media_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.MediaID))
+	builder.WriteString(_m.MediaID)
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(_m.UserID)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))

@@ -14,6 +14,8 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+
+	"origadmin/application/origcms/internal/helpers/idutil"
 )
 
 type Media struct {
@@ -22,9 +24,10 @@ type Media struct {
 
 func (Media) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.DefaultUUIDv7()), // UUIDv7 for distributed system
 		field.String("title").MaxLen(255),
 		field.Text("description").Optional(),
-		field.String("friendly_token").Unique().MaxLen(150).Optional(),
+		field.String("short_token").Unique().MaxLen(150).DefaultFunc(idutil.DefaultShortID()),
 		field.String("uuid").Unique().MaxLen(36).Optional(), // UUID for secure public paths (HLS, thumbnails, previews)
 		field.String("type").MaxLen(20).Default("video"),    // video / image / audio
 		field.String("url").MaxLen(512),                     // original file path
@@ -56,9 +59,9 @@ func (Media) Fields() []ent.Field {
 		field.Bool("is_reviewed").Default(true),
 		field.Int("reported_times").Default(0),
 		field.JSON("tags", []string{}).Optional(),
-		field.Int("user_id"),
-		field.Int("category_id").Optional(),
-		field.Int("channel_id").Optional(),
+		field.String("user_id"),
+		field.String("category_id").Optional(),
+		field.String("channel_id").Optional(),
 		field.Time("published_at").Optional(),
 		field.Time("created_at").Default(time.Now),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
@@ -68,7 +71,7 @@ func (Media) Fields() []ent.Field {
 func (Media) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("uuid").Unique(),
-		index.Fields("friendly_token").Unique(),
+		index.Fields("short_token").Unique(),
 		index.Fields("title"),
 		index.Fields("type"),
 		index.Fields("state"),
@@ -91,6 +94,6 @@ func (Media) Edges() []ent.Edge {
 		edge.To("tags_rel", MediaTag.Type),
 		edge.To("favorites", Favorite.Type),
 		edge.To("likes", Like.Type),
-		edge.To("tasks", EncodingTask.Type),
+		// edge.To("tasks", EncodingTask.Type),
 	}
 }

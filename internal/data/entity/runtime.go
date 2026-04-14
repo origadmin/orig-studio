@@ -20,8 +20,6 @@ import (
 	"origadmin/application/origcms/internal/data/entity/uploadsession"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -31,63 +29,69 @@ func init() {
 	categoryFields := schema.Category{}.Fields()
 	_ = categoryFields
 	// categoryDescName is the schema descriptor for name field.
-	categoryDescName := categoryFields[0].Descriptor()
+	categoryDescName := categoryFields[1].Descriptor()
 	// category.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	category.NameValidator = categoryDescName.Validators[0].(func(string) error)
 	// categoryDescSlug is the schema descriptor for slug field.
-	categoryDescSlug := categoryFields[1].Descriptor()
+	categoryDescSlug := categoryFields[2].Descriptor()
 	// category.SlugValidator is a validator for the "slug" field. It is called by the builders before save.
 	category.SlugValidator = categoryDescSlug.Validators[0].(func(string) error)
 	// categoryDescThumbnail is the schema descriptor for thumbnail field.
-	categoryDescThumbnail := categoryFields[3].Descriptor()
+	categoryDescThumbnail := categoryFields[4].Descriptor()
 	// category.ThumbnailValidator is a validator for the "thumbnail" field. It is called by the builders before save.
 	category.ThumbnailValidator = categoryDescThumbnail.Validators[0].(func(string) error)
 	// categoryDescListingsThumbnail is the schema descriptor for listings_thumbnail field.
-	categoryDescListingsThumbnail := categoryFields[4].Descriptor()
+	categoryDescListingsThumbnail := categoryFields[5].Descriptor()
 	// category.ListingsThumbnailValidator is a validator for the "listings_thumbnail" field. It is called by the builders before save.
 	category.ListingsThumbnailValidator = categoryDescListingsThumbnail.Validators[0].(func(string) error)
 	// categoryDescIcon is the schema descriptor for icon field.
-	categoryDescIcon := categoryFields[5].Descriptor()
+	categoryDescIcon := categoryFields[6].Descriptor()
 	// category.IconValidator is a validator for the "icon" field. It is called by the builders before save.
 	category.IconValidator = categoryDescIcon.Validators[0].(func(string) error)
 	// categoryDescColor is the schema descriptor for color field.
-	categoryDescColor := categoryFields[6].Descriptor()
+	categoryDescColor := categoryFields[7].Descriptor()
 	// category.ColorValidator is a validator for the "color" field. It is called by the builders before save.
 	category.ColorValidator = categoryDescColor.Validators[0].(func(string) error)
 	// categoryDescSequence is the schema descriptor for sequence field.
-	categoryDescSequence := categoryFields[8].Descriptor()
+	categoryDescSequence := categoryFields[9].Descriptor()
 	// category.DefaultSequence holds the default value on creation for the sequence field.
 	category.DefaultSequence = categoryDescSequence.Default.(int)
 	// categoryDescStatus is the schema descriptor for status field.
-	categoryDescStatus := categoryFields[9].Descriptor()
+	categoryDescStatus := categoryFields[10].Descriptor()
 	// category.DefaultStatus holds the default value on creation for the status field.
 	category.DefaultStatus = categoryDescStatus.Default.(int)
 	// categoryDescMediaCount is the schema descriptor for media_count field.
-	categoryDescMediaCount := categoryFields[10].Descriptor()
+	categoryDescMediaCount := categoryFields[11].Descriptor()
 	// category.DefaultMediaCount holds the default value on creation for the media_count field.
 	category.DefaultMediaCount = categoryDescMediaCount.Default.(int)
 	// categoryDescIsGlobal is the schema descriptor for is_global field.
-	categoryDescIsGlobal := categoryFields[11].Descriptor()
+	categoryDescIsGlobal := categoryFields[12].Descriptor()
 	// category.DefaultIsGlobal holds the default value on creation for the is_global field.
 	category.DefaultIsGlobal = categoryDescIsGlobal.Default.(bool)
 	// categoryDescIsRbacCategory is the schema descriptor for is_rbac_category field.
-	categoryDescIsRbacCategory := categoryFields[12].Descriptor()
+	categoryDescIsRbacCategory := categoryFields[13].Descriptor()
 	// category.DefaultIsRbacCategory holds the default value on creation for the is_rbac_category field.
 	category.DefaultIsRbacCategory = categoryDescIsRbacCategory.Default.(bool)
 	// categoryDescCreatedAt is the schema descriptor for created_at field.
-	categoryDescCreatedAt := categoryFields[15].Descriptor()
+	categoryDescCreatedAt := categoryFields[16].Descriptor()
 	// category.DefaultCreatedAt holds the default value on creation for the created_at field.
 	category.DefaultCreatedAt = categoryDescCreatedAt.Default.(func() time.Time)
 	// categoryDescUpdatedAt is the schema descriptor for updated_at field.
-	categoryDescUpdatedAt := categoryFields[16].Descriptor()
+	categoryDescUpdatedAt := categoryFields[17].Descriptor()
 	// category.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	category.DefaultUpdatedAt = categoryDescUpdatedAt.Default.(func() time.Time)
 	// category.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	category.UpdateDefaultUpdatedAt = categoryDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// categoryDescID is the schema descriptor for id field.
+	categoryDescID := categoryFields[0].Descriptor()
+	// category.DefaultID holds the default value on creation for the id field.
+	category.DefaultID = categoryDescID.Default.(func() string)
+	// category.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	category.IDValidator = categoryDescID.Validators[0].(func(string) error)
 	channelFields := schema.Channel{}.Fields()
 	_ = channelFields
 	// channelDescTitle is the schema descriptor for title field.
-	channelDescTitle := channelFields[1].Descriptor()
+	channelDescTitle := channelFields[2].Descriptor()
 	// channel.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	channel.TitleValidator = func() func(string) error {
 		validators := channelDescTitle.Validators
@@ -105,31 +109,39 @@ func init() {
 		}
 	}()
 	// channelDescSlug is the schema descriptor for slug field.
-	channelDescSlug := channelFields[2].Descriptor()
+	channelDescSlug := channelFields[3].Descriptor()
 	// channel.SlugValidator is a validator for the "slug" field. It is called by the builders before save.
 	channel.SlugValidator = channelDescSlug.Validators[0].(func(string) error)
-	// channelDescFriendlyToken is the schema descriptor for friendly_token field.
-	channelDescFriendlyToken := channelFields[4].Descriptor()
-	// channel.FriendlyTokenValidator is a validator for the "friendly_token" field. It is called by the builders before save.
-	channel.FriendlyTokenValidator = channelDescFriendlyToken.Validators[0].(func(string) error)
+	// channelDescShortToken is the schema descriptor for short_token field.
+	channelDescShortToken := channelFields[5].Descriptor()
+	// channel.ShortTokenValidator is a validator for the "short_token" field. It is called by the builders before save.
+	channel.ShortTokenValidator = channelDescShortToken.Validators[0].(func(string) error)
 	// channelDescBannerLogo is the schema descriptor for banner_logo field.
-	channelDescBannerLogo := channelFields[5].Descriptor()
+	channelDescBannerLogo := channelFields[6].Descriptor()
 	// channel.BannerLogoValidator is a validator for the "banner_logo" field. It is called by the builders before save.
 	channel.BannerLogoValidator = channelDescBannerLogo.Validators[0].(func(string) error)
 	// channelDescAddDate is the schema descriptor for add_date field.
-	channelDescAddDate := channelFields[6].Descriptor()
+	channelDescAddDate := channelFields[7].Descriptor()
 	// channel.DefaultAddDate holds the default value on creation for the add_date field.
 	channel.DefaultAddDate = channelDescAddDate.Default.(func() time.Time)
+	// channelDescID is the schema descriptor for id field.
+	channelDescID := channelFields[0].Descriptor()
+	// channel.DefaultID holds the default value on creation for the id field.
+	channel.DefaultID = channelDescID.Default.(func() string)
+	// channel.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	channel.IDValidator = channelDescID.Validators[0].(func(string) error)
 	commentFields := schema.Comment{}.Fields()
 	_ = commentFields
-	// commentDescUID is the schema descriptor for uid field.
-	commentDescUID := commentFields[1].Descriptor()
-	// comment.DefaultUID holds the default value on creation for the uid field.
-	comment.DefaultUID = commentDescUID.Default.(func() uuid.UUID)
 	// commentDescAddDate is the schema descriptor for add_date field.
 	commentDescAddDate := commentFields[2].Descriptor()
 	// comment.DefaultAddDate holds the default value on creation for the add_date field.
 	comment.DefaultAddDate = commentDescAddDate.Default.(func() time.Time)
+	// commentDescID is the schema descriptor for id field.
+	commentDescID := commentFields[0].Descriptor()
+	// comment.DefaultID holds the default value on creation for the id field.
+	comment.DefaultID = commentDescID.Default.(func() string)
+	// comment.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	comment.IDValidator = commentDescID.Validators[0].(func(string) error)
 	encodeprofileFields := schema.EncodeProfile{}.Fields()
 	_ = encodeprofileFields
 	// encodeprofileDescName is the schema descriptor for name field.
@@ -182,196 +194,224 @@ func init() {
 	encodeprofile.UpdateDefaultUpdatedAt = encodeprofileDescUpdatedAt.UpdateDefault.(func() time.Time)
 	encodingtaskFields := schema.EncodingTask{}.Fields()
 	_ = encodingtaskFields
-	// encodingtaskDescStatus is the schema descriptor for status field.
-	encodingtaskDescStatus := encodingtaskFields[2].Descriptor()
-	// encodingtask.DefaultStatus holds the default value on creation for the status field.
-	encodingtask.DefaultStatus = encodingtaskDescStatus.Default.(string)
-	// encodingtask.StatusValidator is a validator for the "status" field. It is called by the builders before save.
-	encodingtask.StatusValidator = encodingtaskDescStatus.Validators[0].(func(string) error)
-	// encodingtaskDescProgress is the schema descriptor for progress field.
-	encodingtaskDescProgress := encodingtaskFields[3].Descriptor()
-	// encodingtask.DefaultProgress holds the default value on creation for the progress field.
-	encodingtask.DefaultProgress = encodingtaskDescProgress.Default.(int)
+	// encodingtaskDescMediaID is the schema descriptor for media_id field.
+	encodingtaskDescMediaID := encodingtaskFields[1].Descriptor()
+	// encodingtask.MediaIDValidator is a validator for the "media_id" field. It is called by the builders before save.
+	encodingtask.MediaIDValidator = encodingtaskDescMediaID.Validators[0].(func(string) error)
 	// encodingtaskDescOutputPath is the schema descriptor for output_path field.
 	encodingtaskDescOutputPath := encodingtaskFields[4].Descriptor()
 	// encodingtask.OutputPathValidator is a validator for the "output_path" field. It is called by the builders before save.
 	encodingtask.OutputPathValidator = encodingtaskDescOutputPath.Validators[0].(func(string) error)
+	// encodingtaskDescChunk is the schema descriptor for chunk field.
+	encodingtaskDescChunk := encodingtaskFields[6].Descriptor()
+	// encodingtask.DefaultChunk holds the default value on creation for the chunk field.
+	encodingtask.DefaultChunk = encodingtaskDescChunk.Default.(bool)
 	// encodingtaskDescCreatedAt is the schema descriptor for created_at field.
-	encodingtaskDescCreatedAt := encodingtaskFields[6].Descriptor()
+	encodingtaskDescCreatedAt := encodingtaskFields[7].Descriptor()
 	// encodingtask.DefaultCreatedAt holds the default value on creation for the created_at field.
 	encodingtask.DefaultCreatedAt = encodingtaskDescCreatedAt.Default.(func() time.Time)
 	// encodingtaskDescUpdatedAt is the schema descriptor for updated_at field.
-	encodingtaskDescUpdatedAt := encodingtaskFields[7].Descriptor()
+	encodingtaskDescUpdatedAt := encodingtaskFields[8].Descriptor()
 	// encodingtask.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	encodingtask.DefaultUpdatedAt = encodingtaskDescUpdatedAt.Default.(func() time.Time)
 	// encodingtask.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	encodingtask.UpdateDefaultUpdatedAt = encodingtaskDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// encodingtaskDescID is the schema descriptor for id field.
+	encodingtaskDescID := encodingtaskFields[0].Descriptor()
+	// encodingtask.DefaultID holds the default value on creation for the id field.
+	encodingtask.DefaultID = encodingtaskDescID.Default.(func() string)
+	// encodingtask.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	encodingtask.IDValidator = encodingtaskDescID.Validators[0].(func(string) error)
 	favoriteFields := schema.Favorite{}.Fields()
 	_ = favoriteFields
 	// favoriteDescCreatedAt is the schema descriptor for created_at field.
-	favoriteDescCreatedAt := favoriteFields[2].Descriptor()
+	favoriteDescCreatedAt := favoriteFields[3].Descriptor()
 	// favorite.DefaultCreatedAt holds the default value on creation for the created_at field.
 	favorite.DefaultCreatedAt = favoriteDescCreatedAt.Default.(func() time.Time)
+	// favoriteDescID is the schema descriptor for id field.
+	favoriteDescID := favoriteFields[0].Descriptor()
+	// favorite.DefaultID holds the default value on creation for the id field.
+	favorite.DefaultID = favoriteDescID.Default.(func() string)
+	// favorite.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	favorite.IDValidator = favoriteDescID.Validators[0].(func(string) error)
 	likeFields := schema.Like{}.Fields()
 	_ = likeFields
 	// likeDescLikeType is the schema descriptor for like_type field.
-	likeDescLikeType := likeFields[2].Descriptor()
+	likeDescLikeType := likeFields[3].Descriptor()
 	// like.DefaultLikeType holds the default value on creation for the like_type field.
 	like.DefaultLikeType = likeDescLikeType.Default.(string)
 	// like.LikeTypeValidator is a validator for the "like_type" field. It is called by the builders before save.
 	like.LikeTypeValidator = likeDescLikeType.Validators[0].(func(string) error)
 	// likeDescCreatedAt is the schema descriptor for created_at field.
-	likeDescCreatedAt := likeFields[3].Descriptor()
+	likeDescCreatedAt := likeFields[4].Descriptor()
 	// like.DefaultCreatedAt holds the default value on creation for the created_at field.
 	like.DefaultCreatedAt = likeDescCreatedAt.Default.(func() time.Time)
+	// likeDescID is the schema descriptor for id field.
+	likeDescID := likeFields[0].Descriptor()
+	// like.DefaultID holds the default value on creation for the id field.
+	like.DefaultID = likeDescID.Default.(func() string)
+	// like.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	like.IDValidator = likeDescID.Validators[0].(func(string) error)
 	mediaFields := schema.Media{}.Fields()
 	_ = mediaFields
 	// mediaDescTitle is the schema descriptor for title field.
-	mediaDescTitle := mediaFields[0].Descriptor()
+	mediaDescTitle := mediaFields[1].Descriptor()
 	// media.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	media.TitleValidator = mediaDescTitle.Validators[0].(func(string) error)
-	// mediaDescFriendlyToken is the schema descriptor for friendly_token field.
-	mediaDescFriendlyToken := mediaFields[2].Descriptor()
-	// media.FriendlyTokenValidator is a validator for the "friendly_token" field. It is called by the builders before save.
-	media.FriendlyTokenValidator = mediaDescFriendlyToken.Validators[0].(func(string) error)
+	// mediaDescShortToken is the schema descriptor for short_token field.
+	mediaDescShortToken := mediaFields[3].Descriptor()
+	// media.ShortTokenValidator is a validator for the "short_token" field. It is called by the builders before save.
+	media.ShortTokenValidator = mediaDescShortToken.Validators[0].(func(string) error)
 	// mediaDescUUID is the schema descriptor for uuid field.
-	mediaDescUUID := mediaFields[3].Descriptor()
+	mediaDescUUID := mediaFields[4].Descriptor()
 	// media.UUIDValidator is a validator for the "uuid" field. It is called by the builders before save.
 	media.UUIDValidator = mediaDescUUID.Validators[0].(func(string) error)
 	// mediaDescType is the schema descriptor for type field.
-	mediaDescType := mediaFields[4].Descriptor()
+	mediaDescType := mediaFields[5].Descriptor()
 	// media.DefaultType holds the default value on creation for the type field.
 	media.DefaultType = mediaDescType.Default.(string)
 	// media.TypeValidator is a validator for the "type" field. It is called by the builders before save.
 	media.TypeValidator = mediaDescType.Validators[0].(func(string) error)
 	// mediaDescURL is the schema descriptor for url field.
-	mediaDescURL := mediaFields[5].Descriptor()
+	mediaDescURL := mediaFields[6].Descriptor()
 	// media.URLValidator is a validator for the "url" field. It is called by the builders before save.
 	media.URLValidator = mediaDescURL.Validators[0].(func(string) error)
 	// mediaDescHlsFile is the schema descriptor for hls_file field.
-	mediaDescHlsFile := mediaFields[6].Descriptor()
+	mediaDescHlsFile := mediaFields[7].Descriptor()
 	// media.HlsFileValidator is a validator for the "hls_file" field. It is called by the builders before save.
 	media.HlsFileValidator = mediaDescHlsFile.Validators[0].(func(string) error)
 	// mediaDescThumbnail is the schema descriptor for thumbnail field.
-	mediaDescThumbnail := mediaFields[7].Descriptor()
+	mediaDescThumbnail := mediaFields[8].Descriptor()
 	// media.ThumbnailValidator is a validator for the "thumbnail" field. It is called by the builders before save.
 	media.ThumbnailValidator = mediaDescThumbnail.Validators[0].(func(string) error)
 	// mediaDescPoster is the schema descriptor for poster field.
-	mediaDescPoster := mediaFields[8].Descriptor()
+	mediaDescPoster := mediaFields[9].Descriptor()
 	// media.PosterValidator is a validator for the "poster" field. It is called by the builders before save.
 	media.PosterValidator = mediaDescPoster.Validators[0].(func(string) error)
 	// mediaDescPreviewFilePath is the schema descriptor for preview_file_path field.
-	mediaDescPreviewFilePath := mediaFields[9].Descriptor()
+	mediaDescPreviewFilePath := mediaFields[10].Descriptor()
 	// media.PreviewFilePathValidator is a validator for the "preview_file_path" field. It is called by the builders before save.
 	media.PreviewFilePathValidator = mediaDescPreviewFilePath.Validators[0].(func(string) error)
 	// mediaDescDuration is the schema descriptor for duration field.
-	mediaDescDuration := mediaFields[10].Descriptor()
+	mediaDescDuration := mediaFields[11].Descriptor()
 	// media.DefaultDuration holds the default value on creation for the duration field.
 	media.DefaultDuration = mediaDescDuration.Default.(int)
 	// mediaDescSize is the schema descriptor for size field.
-	mediaDescSize := mediaFields[11].Descriptor()
+	mediaDescSize := mediaFields[12].Descriptor()
 	// media.SizeValidator is a validator for the "size" field. It is called by the builders before save.
 	media.SizeValidator = mediaDescSize.Validators[0].(func(string) error)
 	// mediaDescWidth is the schema descriptor for width field.
-	mediaDescWidth := mediaFields[12].Descriptor()
+	mediaDescWidth := mediaFields[13].Descriptor()
 	// media.DefaultWidth holds the default value on creation for the width field.
 	media.DefaultWidth = mediaDescWidth.Default.(int)
 	// mediaDescHeight is the schema descriptor for height field.
-	mediaDescHeight := mediaFields[13].Descriptor()
+	mediaDescHeight := mediaFields[14].Descriptor()
 	// media.DefaultHeight holds the default value on creation for the height field.
 	media.DefaultHeight = mediaDescHeight.Default.(int)
 	// mediaDescMimeType is the schema descriptor for mime_type field.
-	mediaDescMimeType := mediaFields[14].Descriptor()
+	mediaDescMimeType := mediaFields[15].Descriptor()
 	// media.MimeTypeValidator is a validator for the "mime_type" field. It is called by the builders before save.
 	media.MimeTypeValidator = mediaDescMimeType.Validators[0].(func(string) error)
 	// mediaDescMd5sum is the schema descriptor for md5sum field.
-	mediaDescMd5sum := mediaFields[15].Descriptor()
+	mediaDescMd5sum := mediaFields[16].Descriptor()
 	// media.Md5sumValidator is a validator for the "md5sum" field. It is called by the builders before save.
 	media.Md5sumValidator = mediaDescMd5sum.Validators[0].(func(string) error)
 	// mediaDescExtension is the schema descriptor for extension field.
-	mediaDescExtension := mediaFields[16].Descriptor()
+	mediaDescExtension := mediaFields[17].Descriptor()
 	// media.ExtensionValidator is a validator for the "extension" field. It is called by the builders before save.
 	media.ExtensionValidator = mediaDescExtension.Validators[0].(func(string) error)
 	// mediaDescPrivacy is the schema descriptor for privacy field.
-	mediaDescPrivacy := mediaFields[17].Descriptor()
+	mediaDescPrivacy := mediaFields[18].Descriptor()
 	// media.DefaultPrivacy holds the default value on creation for the privacy field.
 	media.DefaultPrivacy = mediaDescPrivacy.Default.(int)
 	// mediaDescEncodingStatus is the schema descriptor for encoding_status field.
-	mediaDescEncodingStatus := mediaFields[18].Descriptor()
+	mediaDescEncodingStatus := mediaFields[19].Descriptor()
 	// media.DefaultEncodingStatus holds the default value on creation for the encoding_status field.
 	media.DefaultEncodingStatus = mediaDescEncodingStatus.Default.(string)
 	// media.EncodingStatusValidator is a validator for the "encoding_status" field. It is called by the builders before save.
 	media.EncodingStatusValidator = mediaDescEncodingStatus.Validators[0].(func(string) error)
 	// mediaDescState is the schema descriptor for state field.
-	mediaDescState := mediaFields[19].Descriptor()
+	mediaDescState := mediaFields[20].Descriptor()
 	// media.DefaultState holds the default value on creation for the state field.
 	media.DefaultState = mediaDescState.Default.(string)
 	// media.StateValidator is a validator for the "state" field. It is called by the builders before save.
 	media.StateValidator = mediaDescState.Validators[0].(func(string) error)
 	// mediaDescViewCount is the schema descriptor for view_count field.
-	mediaDescViewCount := mediaFields[20].Descriptor()
+	mediaDescViewCount := mediaFields[21].Descriptor()
 	// media.DefaultViewCount holds the default value on creation for the view_count field.
 	media.DefaultViewCount = mediaDescViewCount.Default.(int64)
 	// mediaDescLikeCount is the schema descriptor for like_count field.
-	mediaDescLikeCount := mediaFields[21].Descriptor()
+	mediaDescLikeCount := mediaFields[22].Descriptor()
 	// media.DefaultLikeCount holds the default value on creation for the like_count field.
 	media.DefaultLikeCount = mediaDescLikeCount.Default.(int64)
 	// mediaDescDislikeCount is the schema descriptor for dislike_count field.
-	mediaDescDislikeCount := mediaFields[22].Descriptor()
+	mediaDescDislikeCount := mediaFields[23].Descriptor()
 	// media.DefaultDislikeCount holds the default value on creation for the dislike_count field.
 	media.DefaultDislikeCount = mediaDescDislikeCount.Default.(int64)
 	// mediaDescCommentCount is the schema descriptor for comment_count field.
-	mediaDescCommentCount := mediaFields[23].Descriptor()
+	mediaDescCommentCount := mediaFields[24].Descriptor()
 	// media.DefaultCommentCount holds the default value on creation for the comment_count field.
 	media.DefaultCommentCount = mediaDescCommentCount.Default.(int64)
 	// mediaDescFavoriteCount is the schema descriptor for favorite_count field.
-	mediaDescFavoriteCount := mediaFields[24].Descriptor()
+	mediaDescFavoriteCount := mediaFields[25].Descriptor()
 	// media.DefaultFavoriteCount holds the default value on creation for the favorite_count field.
 	media.DefaultFavoriteCount = mediaDescFavoriteCount.Default.(int64)
 	// mediaDescDownloadCount is the schema descriptor for download_count field.
-	mediaDescDownloadCount := mediaFields[25].Descriptor()
+	mediaDescDownloadCount := mediaFields[26].Descriptor()
 	// media.DefaultDownloadCount holds the default value on creation for the download_count field.
 	media.DefaultDownloadCount = mediaDescDownloadCount.Default.(int64)
 	// mediaDescAllowDownload is the schema descriptor for allow_download field.
-	mediaDescAllowDownload := mediaFields[26].Descriptor()
+	mediaDescAllowDownload := mediaFields[27].Descriptor()
 	// media.DefaultAllowDownload holds the default value on creation for the allow_download field.
 	media.DefaultAllowDownload = mediaDescAllowDownload.Default.(bool)
 	// mediaDescEnableComments is the schema descriptor for enable_comments field.
-	mediaDescEnableComments := mediaFields[27].Descriptor()
+	mediaDescEnableComments := mediaFields[28].Descriptor()
 	// media.DefaultEnableComments holds the default value on creation for the enable_comments field.
 	media.DefaultEnableComments = mediaDescEnableComments.Default.(bool)
 	// mediaDescFeatured is the schema descriptor for featured field.
-	mediaDescFeatured := mediaFields[28].Descriptor()
+	mediaDescFeatured := mediaFields[29].Descriptor()
 	// media.DefaultFeatured holds the default value on creation for the featured field.
 	media.DefaultFeatured = mediaDescFeatured.Default.(bool)
 	// mediaDescIsReviewed is the schema descriptor for is_reviewed field.
-	mediaDescIsReviewed := mediaFields[29].Descriptor()
+	mediaDescIsReviewed := mediaFields[30].Descriptor()
 	// media.DefaultIsReviewed holds the default value on creation for the is_reviewed field.
 	media.DefaultIsReviewed = mediaDescIsReviewed.Default.(bool)
 	// mediaDescReportedTimes is the schema descriptor for reported_times field.
-	mediaDescReportedTimes := mediaFields[30].Descriptor()
+	mediaDescReportedTimes := mediaFields[31].Descriptor()
 	// media.DefaultReportedTimes holds the default value on creation for the reported_times field.
 	media.DefaultReportedTimes = mediaDescReportedTimes.Default.(int)
 	// mediaDescCreatedAt is the schema descriptor for created_at field.
-	mediaDescCreatedAt := mediaFields[36].Descriptor()
+	mediaDescCreatedAt := mediaFields[37].Descriptor()
 	// media.DefaultCreatedAt holds the default value on creation for the created_at field.
 	media.DefaultCreatedAt = mediaDescCreatedAt.Default.(func() time.Time)
 	// mediaDescUpdatedAt is the schema descriptor for updated_at field.
-	mediaDescUpdatedAt := mediaFields[37].Descriptor()
+	mediaDescUpdatedAt := mediaFields[38].Descriptor()
 	// media.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	media.DefaultUpdatedAt = mediaDescUpdatedAt.Default.(func() time.Time)
 	// media.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	media.UpdateDefaultUpdatedAt = mediaDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// mediaDescID is the schema descriptor for id field.
+	mediaDescID := mediaFields[0].Descriptor()
+	// media.DefaultID holds the default value on creation for the id field.
+	media.DefaultID = mediaDescID.Default.(func() string)
+	// media.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	media.IDValidator = mediaDescID.Validators[0].(func(string) error)
 	mediaplaylistFields := schema.MediaPlaylist{}.Fields()
 	_ = mediaplaylistFields
 	// mediaplaylistDescOrdering is the schema descriptor for ordering field.
-	mediaplaylistDescOrdering := mediaplaylistFields[2].Descriptor()
+	mediaplaylistDescOrdering := mediaplaylistFields[3].Descriptor()
 	// mediaplaylist.DefaultOrdering holds the default value on creation for the ordering field.
 	mediaplaylist.DefaultOrdering = mediaplaylistDescOrdering.Default.(int)
 	// mediaplaylistDescActionDate is the schema descriptor for action_date field.
-	mediaplaylistDescActionDate := mediaplaylistFields[3].Descriptor()
+	mediaplaylistDescActionDate := mediaplaylistFields[4].Descriptor()
 	// mediaplaylist.DefaultActionDate holds the default value on creation for the action_date field.
 	mediaplaylist.DefaultActionDate = mediaplaylistDescActionDate.Default.(func() time.Time)
+	// mediaplaylistDescID is the schema descriptor for id field.
+	mediaplaylistDescID := mediaplaylistFields[0].Descriptor()
+	// mediaplaylist.DefaultID holds the default value on creation for the id field.
+	mediaplaylist.DefaultID = mediaplaylistDescID.Default.(func() string)
+	// mediaplaylist.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	mediaplaylist.IDValidator = mediaplaylistDescID.Validators[0].(func(string) error)
 	notificationFields := schema.Notification{}.Fields()
 	_ = notificationFields
 	// notificationDescAction is the schema descriptor for action field.
@@ -399,7 +439,7 @@ func init() {
 	playlistFields := schema.Playlist{}.Fields()
 	_ = playlistFields
 	// playlistDescTitle is the schema descriptor for title field.
-	playlistDescTitle := playlistFields[0].Descriptor()
+	playlistDescTitle := playlistFields[1].Descriptor()
 	// playlist.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	playlist.TitleValidator = func() func(string) error {
 		validators := playlistDescTitle.Validators
@@ -416,10 +456,10 @@ func init() {
 			return nil
 		}
 	}()
-	// playlistDescFriendlyToken is the schema descriptor for friendly_token field.
-	playlistDescFriendlyToken := playlistFields[2].Descriptor()
-	// playlist.FriendlyTokenValidator is a validator for the "friendly_token" field. It is called by the builders before save.
-	playlist.FriendlyTokenValidator = playlistDescFriendlyToken.Validators[0].(func(string) error)
+	// playlistDescShortToken is the schema descriptor for short_token field.
+	playlistDescShortToken := playlistFields[3].Descriptor()
+	// playlist.ShortTokenValidator is a validator for the "short_token" field. It is called by the builders before save.
+	playlist.ShortTokenValidator = playlistDescShortToken.Validators[0].(func(string) error)
 	// playlistDescPrivacy is the schema descriptor for privacy field.
 	playlistDescPrivacy := playlistFields[5].Descriptor()
 	// playlist.DefaultPrivacy holds the default value on creation for the privacy field.
@@ -428,12 +468,24 @@ func init() {
 	playlistDescAddDate := playlistFields[6].Descriptor()
 	// playlist.DefaultAddDate holds the default value on creation for the add_date field.
 	playlist.DefaultAddDate = playlistDescAddDate.Default.(func() time.Time)
+	// playlistDescID is the schema descriptor for id field.
+	playlistDescID := playlistFields[0].Descriptor()
+	// playlist.DefaultID holds the default value on creation for the id field.
+	playlist.DefaultID = playlistDescID.Default.(func() string)
+	// playlist.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	playlist.IDValidator = playlistDescID.Validators[0].(func(string) error)
 	subscriptionFields := schema.Subscription{}.Fields()
 	_ = subscriptionFields
 	// subscriptionDescCreatedAt is the schema descriptor for created_at field.
-	subscriptionDescCreatedAt := subscriptionFields[2].Descriptor()
+	subscriptionDescCreatedAt := subscriptionFields[3].Descriptor()
 	// subscription.DefaultCreatedAt holds the default value on creation for the created_at field.
 	subscription.DefaultCreatedAt = subscriptionDescCreatedAt.Default.(func() time.Time)
+	// subscriptionDescID is the schema descriptor for id field.
+	subscriptionDescID := subscriptionFields[0].Descriptor()
+	// subscription.DefaultID holds the default value on creation for the id field.
+	subscription.DefaultID = subscriptionDescID.Default.(func() string)
+	// subscription.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	subscription.IDValidator = subscriptionDescID.Validators[0].(func(string) error)
 	tagFields := schema.Tag{}.Fields()
 	_ = tagFields
 	// tagDescTitle is the schema descriptor for title field.
@@ -559,7 +611,7 @@ func init() {
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescUsername is the schema descriptor for username field.
-	userDescUsername := userFields[0].Descriptor()
+	userDescUsername := userFields[1].Descriptor()
 	// user.UsernameValidator is a validator for the "username" field. It is called by the builders before save.
 	user.UsernameValidator = func() func(string) error {
 		validators := userDescUsername.Validators
@@ -577,7 +629,7 @@ func init() {
 		}
 	}()
 	// userDescEmail is the schema descriptor for email field.
-	userDescEmail := userFields[1].Descriptor()
+	userDescEmail := userFields[2].Descriptor()
 	// user.EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	user.EmailValidator = func() func(string) error {
 		validators := userDescEmail.Validators
@@ -595,79 +647,85 @@ func init() {
 		}
 	}()
 	// userDescPassword is the schema descriptor for password field.
-	userDescPassword := userFields[2].Descriptor()
+	userDescPassword := userFields[3].Descriptor()
 	// user.PasswordValidator is a validator for the "password" field. It is called by the builders before save.
 	user.PasswordValidator = userDescPassword.Validators[0].(func(string) error)
 	// userDescName is the schema descriptor for name field.
-	userDescName := userFields[3].Descriptor()
+	userDescName := userFields[4].Descriptor()
 	// user.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	user.NameValidator = userDescName.Validators[0].(func(string) error)
 	// userDescFirstName is the schema descriptor for first_name field.
-	userDescFirstName := userFields[4].Descriptor()
+	userDescFirstName := userFields[5].Descriptor()
 	// user.FirstNameValidator is a validator for the "first_name" field. It is called by the builders before save.
 	user.FirstNameValidator = userDescFirstName.Validators[0].(func(string) error)
 	// userDescLastName is the schema descriptor for last_name field.
-	userDescLastName := userFields[5].Descriptor()
+	userDescLastName := userFields[6].Descriptor()
 	// user.LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
 	user.LastNameValidator = userDescLastName.Validators[0].(func(string) error)
 	// userDescIsActive is the schema descriptor for is_active field.
-	userDescIsActive := userFields[6].Descriptor()
+	userDescIsActive := userFields[7].Descriptor()
 	// user.DefaultIsActive holds the default value on creation for the is_active field.
 	user.DefaultIsActive = userDescIsActive.Default.(bool)
 	// userDescIsStaff is the schema descriptor for is_staff field.
-	userDescIsStaff := userFields[7].Descriptor()
+	userDescIsStaff := userFields[8].Descriptor()
 	// user.DefaultIsStaff holds the default value on creation for the is_staff field.
 	user.DefaultIsStaff = userDescIsStaff.Default.(bool)
 	// userDescIsSuperuser is the schema descriptor for is_superuser field.
-	userDescIsSuperuser := userFields[9].Descriptor()
+	userDescIsSuperuser := userFields[10].Descriptor()
 	// user.DefaultIsSuperuser holds the default value on creation for the is_superuser field.
 	user.DefaultIsSuperuser = userDescIsSuperuser.Default.(bool)
 	// userDescIsFeatured is the schema descriptor for is_featured field.
-	userDescIsFeatured := userFields[11].Descriptor()
+	userDescIsFeatured := userFields[12].Descriptor()
 	// user.DefaultIsFeatured holds the default value on creation for the is_featured field.
 	user.DefaultIsFeatured = userDescIsFeatured.Default.(bool)
 	// userDescAdvancedUser is the schema descriptor for advanced_user field.
-	userDescAdvancedUser := userFields[12].Descriptor()
+	userDescAdvancedUser := userFields[13].Descriptor()
 	// user.DefaultAdvancedUser holds the default value on creation for the advanced_user field.
 	user.DefaultAdvancedUser = userDescAdvancedUser.Default.(bool)
 	// userDescIsEditor is the schema descriptor for is_editor field.
-	userDescIsEditor := userFields[13].Descriptor()
+	userDescIsEditor := userFields[14].Descriptor()
 	// user.DefaultIsEditor holds the default value on creation for the is_editor field.
 	user.DefaultIsEditor = userDescIsEditor.Default.(bool)
 	// userDescIsManager is the schema descriptor for is_manager field.
-	userDescIsManager := userFields[14].Descriptor()
+	userDescIsManager := userFields[15].Descriptor()
 	// user.DefaultIsManager holds the default value on creation for the is_manager field.
 	user.DefaultIsManager = userDescIsManager.Default.(bool)
 	// userDescTitle is the schema descriptor for title field.
-	userDescTitle := userFields[15].Descriptor()
+	userDescTitle := userFields[16].Descriptor()
 	// user.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	user.TitleValidator = userDescTitle.Validators[0].(func(string) error)
 	// userDescLogo is the schema descriptor for logo field.
-	userDescLogo := userFields[17].Descriptor()
+	userDescLogo := userFields[18].Descriptor()
 	// user.LogoValidator is a validator for the "logo" field. It is called by the builders before save.
 	user.LogoValidator = userDescLogo.Validators[0].(func(string) error)
 	// userDescLocation is the schema descriptor for location field.
-	userDescLocation := userFields[18].Descriptor()
+	userDescLocation := userFields[19].Descriptor()
 	// user.LocationValidator is a validator for the "location" field. It is called by the builders before save.
 	user.LocationValidator = userDescLocation.Validators[0].(func(string) error)
 	// userDescMediaCount is the schema descriptor for media_count field.
-	userDescMediaCount := userFields[19].Descriptor()
+	userDescMediaCount := userFields[20].Descriptor()
 	// user.DefaultMediaCount holds the default value on creation for the media_count field.
 	user.DefaultMediaCount = userDescMediaCount.Default.(int)
 	// userDescNotificationOnComments is the schema descriptor for notification_on_comments field.
-	userDescNotificationOnComments := userFields[20].Descriptor()
+	userDescNotificationOnComments := userFields[21].Descriptor()
 	// user.DefaultNotificationOnComments holds the default value on creation for the notification_on_comments field.
 	user.DefaultNotificationOnComments = userDescNotificationOnComments.Default.(bool)
 	// userDescAllowContact is the schema descriptor for allow_contact field.
-	userDescAllowContact := userFields[21].Descriptor()
+	userDescAllowContact := userFields[22].Descriptor()
 	// user.DefaultAllowContact holds the default value on creation for the allow_contact field.
 	user.DefaultAllowContact = userDescAllowContact.Default.(bool)
 	// userDescDateJoined is the schema descriptor for date_joined field.
-	userDescDateJoined := userFields[22].Descriptor()
+	userDescDateJoined := userFields[23].Descriptor()
 	// user.DefaultDateJoined holds the default value on creation for the date_joined field.
 	user.DefaultDateJoined = userDescDateJoined.Default.(func() time.Time)
 	// userDescDateAdded is the schema descriptor for date_added field.
-	userDescDateAdded := userFields[23].Descriptor()
+	userDescDateAdded := userFields[24].Descriptor()
 	// user.DefaultDateAdded holds the default value on creation for the date_added field.
 	user.DefaultDateAdded = userDescDateAdded.Default.(func() time.Time)
+	// userDescID is the schema descriptor for id field.
+	userDescID := userFields[0].Descriptor()
+	// user.DefaultID holds the default value on creation for the id field.
+	user.DefaultID = userDescID.Default.(func() string)
+	// user.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	user.IDValidator = userDescID.Validators[0].(func(string) error)
 }

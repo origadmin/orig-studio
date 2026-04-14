@@ -100,8 +100,14 @@ func main() {
 	defer db.Close()
 
 	ctx := context.Background()
+	
 	// AutoMigrate all schemas in the unified entity
-	if err := db.Schema.Create(ctx, migrate.WithForeignKeys(false)); err != nil {
+	// Use WithDropIndex and WithDropColumn to ensure schema changes are applied
+	if err := db.Schema.Create(ctx, 
+		migrate.WithForeignKeys(false),
+		migrate.WithDropIndex(true),
+		migrate.WithDropColumn(true),
+	); err != nil {
 		log.Fatalf("ent AutoMigrate failed: %v", err)
 	}
 	log.Info("database migration complete")

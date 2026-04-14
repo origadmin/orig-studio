@@ -6,9 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/encodeprofile"
 	"origadmin/application/origcms/internal/data/entity/encodingtask"
-	"origadmin/application/origcms/internal/data/entity/media"
+	"origadmin/application/origcms/internal/data/enums"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -23,7 +22,7 @@ type EncodingTaskCreate struct {
 }
 
 // SetMediaID sets the "media_id" field.
-func (_c *EncodingTaskCreate) SetMediaID(v int) *EncodingTaskCreate {
+func (_c *EncodingTaskCreate) SetMediaID(v string) *EncodingTaskCreate {
 	_c.mutation.SetMediaID(v)
 	return _c
 }
@@ -35,29 +34,15 @@ func (_c *EncodingTaskCreate) SetProfileID(v int) *EncodingTaskCreate {
 }
 
 // SetStatus sets the "status" field.
-func (_c *EncodingTaskCreate) SetStatus(v string) *EncodingTaskCreate {
+func (_c *EncodingTaskCreate) SetStatus(v enums.EncodingTaskStatus) *EncodingTaskCreate {
 	_c.mutation.SetStatus(v)
 	return _c
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_c *EncodingTaskCreate) SetNillableStatus(v *string) *EncodingTaskCreate {
+func (_c *EncodingTaskCreate) SetNillableStatus(v *enums.EncodingTaskStatus) *EncodingTaskCreate {
 	if v != nil {
 		_c.SetStatus(*v)
-	}
-	return _c
-}
-
-// SetProgress sets the "progress" field.
-func (_c *EncodingTaskCreate) SetProgress(v int) *EncodingTaskCreate {
-	_c.mutation.SetProgress(v)
-	return _c
-}
-
-// SetNillableProgress sets the "progress" field if the given value is not nil.
-func (_c *EncodingTaskCreate) SetNillableProgress(v *int) *EncodingTaskCreate {
-	if v != nil {
-		_c.SetProgress(*v)
 	}
 	return _c
 }
@@ -90,6 +75,20 @@ func (_c *EncodingTaskCreate) SetNillableErrorMessage(v *string) *EncodingTaskCr
 	return _c
 }
 
+// SetChunk sets the "chunk" field.
+func (_c *EncodingTaskCreate) SetChunk(v bool) *EncodingTaskCreate {
+	_c.mutation.SetChunk(v)
+	return _c
+}
+
+// SetNillableChunk sets the "chunk" field if the given value is not nil.
+func (_c *EncodingTaskCreate) SetNillableChunk(v *bool) *EncodingTaskCreate {
+	if v != nil {
+		_c.SetChunk(*v)
+	}
+	return _c
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_c *EncodingTaskCreate) SetCreatedAt(v time.Time) *EncodingTaskCreate {
 	_c.mutation.SetCreatedAt(v)
@@ -118,14 +117,18 @@ func (_c *EncodingTaskCreate) SetNillableUpdatedAt(v *time.Time) *EncodingTaskCr
 	return _c
 }
 
-// SetMedia sets the "media" edge to the Media entity.
-func (_c *EncodingTaskCreate) SetMedia(v *Media) *EncodingTaskCreate {
-	return _c.SetMediaID(v.ID)
+// SetID sets the "id" field.
+func (_c *EncodingTaskCreate) SetID(v string) *EncodingTaskCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
-// SetProfile sets the "profile" edge to the EncodeProfile entity.
-func (_c *EncodingTaskCreate) SetProfile(v *EncodeProfile) *EncodingTaskCreate {
-	return _c.SetProfileID(v.ID)
+// SetNillableID sets the "id" field if the given value is not nil.
+func (_c *EncodingTaskCreate) SetNillableID(v *string) *EncodingTaskCreate {
+	if v != nil {
+		_c.SetID(*v)
+	}
+	return _c
 }
 
 // Mutation returns the EncodingTaskMutation object of the builder.
@@ -167,9 +170,9 @@ func (_c *EncodingTaskCreate) defaults() {
 		v := encodingtask.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
-	if _, ok := _c.mutation.Progress(); !ok {
-		v := encodingtask.DefaultProgress
-		_c.mutation.SetProgress(v)
+	if _, ok := _c.mutation.Chunk(); !ok {
+		v := encodingtask.DefaultChunk
+		_c.mutation.SetChunk(v)
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := encodingtask.DefaultCreatedAt()
@@ -179,12 +182,21 @@ func (_c *EncodingTaskCreate) defaults() {
 		v := encodingtask.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.ID(); !ok {
+		v := encodingtask.DefaultID()
+		_c.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *EncodingTaskCreate) check() error {
 	if _, ok := _c.mutation.MediaID(); !ok {
 		return &ValidationError{Name: "media_id", err: errors.New(`entity: missing required field "EncodingTask.media_id"`)}
+	}
+	if v, ok := _c.mutation.MediaID(); ok {
+		if err := encodingtask.MediaIDValidator(v); err != nil {
+			return &ValidationError{Name: "media_id", err: fmt.Errorf(`entity: validator failed for field "EncodingTask.media_id": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.ProfileID(); !ok {
 		return &ValidationError{Name: "profile_id", err: errors.New(`entity: missing required field "EncodingTask.profile_id"`)}
@@ -197,13 +209,13 @@ func (_c *EncodingTaskCreate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "EncodingTask.status": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Progress(); !ok {
-		return &ValidationError{Name: "progress", err: errors.New(`entity: missing required field "EncodingTask.progress"`)}
-	}
 	if v, ok := _c.mutation.OutputPath(); ok {
 		if err := encodingtask.OutputPathValidator(v); err != nil {
 			return &ValidationError{Name: "output_path", err: fmt.Errorf(`entity: validator failed for field "EncodingTask.output_path": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.Chunk(); !ok {
+		return &ValidationError{Name: "chunk", err: errors.New(`entity: missing required field "EncodingTask.chunk"`)}
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "EncodingTask.created_at"`)}
@@ -211,11 +223,10 @@ func (_c *EncodingTaskCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`entity: missing required field "EncodingTask.updated_at"`)}
 	}
-	if len(_c.mutation.MediaIDs()) == 0 {
-		return &ValidationError{Name: "media", err: errors.New(`entity: missing required edge "EncodingTask.media"`)}
-	}
-	if len(_c.mutation.ProfileIDs()) == 0 {
-		return &ValidationError{Name: "profile", err: errors.New(`entity: missing required edge "EncodingTask.profile"`)}
+	if v, ok := _c.mutation.ID(); ok {
+		if err := encodingtask.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`entity: validator failed for field "EncodingTask.id": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -231,8 +242,13 @@ func (_c *EncodingTaskCreate) sqlSave(ctx context.Context) (*EncodingTask, error
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(string); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected EncodingTask.ID type: %T", _spec.ID.Value)
+		}
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
@@ -241,15 +257,23 @@ func (_c *EncodingTaskCreate) sqlSave(ctx context.Context) (*EncodingTask, error
 func (_c *EncodingTaskCreate) createSpec() (*EncodingTask, *sqlgraph.CreateSpec) {
 	var (
 		_node = &EncodingTask{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(encodingtask.Table, sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(encodingtask.Table, sqlgraph.NewFieldSpec(encodingtask.FieldID, field.TypeString))
 	)
-	if value, ok := _c.mutation.Status(); ok {
-		_spec.SetField(encodingtask.FieldStatus, field.TypeString, value)
-		_node.Status = value
+	if id, ok := _c.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
 	}
-	if value, ok := _c.mutation.Progress(); ok {
-		_spec.SetField(encodingtask.FieldProgress, field.TypeInt, value)
-		_node.Progress = value
+	if value, ok := _c.mutation.MediaID(); ok {
+		_spec.SetField(encodingtask.FieldMediaID, field.TypeString, value)
+		_node.MediaID = value
+	}
+	if value, ok := _c.mutation.ProfileID(); ok {
+		_spec.SetField(encodingtask.FieldProfileID, field.TypeInt, value)
+		_node.ProfileID = value
+	}
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(encodingtask.FieldStatus, field.TypeEnum, value)
+		_node.Status = value
 	}
 	if value, ok := _c.mutation.OutputPath(); ok {
 		_spec.SetField(encodingtask.FieldOutputPath, field.TypeString, value)
@@ -259,6 +283,10 @@ func (_c *EncodingTaskCreate) createSpec() (*EncodingTask, *sqlgraph.CreateSpec)
 		_spec.SetField(encodingtask.FieldErrorMessage, field.TypeString, value)
 		_node.ErrorMessage = value
 	}
+	if value, ok := _c.mutation.Chunk(); ok {
+		_spec.SetField(encodingtask.FieldChunk, field.TypeBool, value)
+		_node.Chunk = value
+	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(encodingtask.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -266,40 +294,6 @@ func (_c *EncodingTaskCreate) createSpec() (*EncodingTask, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(encodingtask.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
-	}
-	if nodes := _c.mutation.MediaIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   encodingtask.MediaTable,
-			Columns: []string{encodingtask.MediaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.MediaID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.ProfileIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   encodingtask.ProfileTable,
-			Columns: []string{encodingtask.ProfileColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(encodeprofile.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.ProfileID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
@@ -349,10 +343,6 @@ func (_c *EncodingTaskCreateBulk) Save(ctx context.Context) ([]*EncodingTask, er
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

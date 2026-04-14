@@ -18,10 +18,8 @@ const (
 	FieldTitle = "title"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// FieldFriendlyToken holds the string denoting the friendly_token field in the database.
-	FieldFriendlyToken = "friendly_token"
-	// FieldUID holds the string denoting the uid field in the database.
-	FieldUID = "uid"
+	// FieldShortToken holds the string denoting the short_token field in the database.
+	FieldShortToken = "short_token"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
 	// FieldPrivacy holds the string denoting the privacy field in the database.
@@ -44,8 +42,7 @@ var Columns = []string{
 	FieldID,
 	FieldTitle,
 	FieldDescription,
-	FieldFriendlyToken,
-	FieldUID,
+	FieldShortToken,
 	FieldUserID,
 	FieldPrivacy,
 	FieldAddDate,
@@ -70,12 +67,16 @@ func ValidColumn(column string) bool {
 var (
 	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	TitleValidator func(string) error
-	// FriendlyTokenValidator is a validator for the "friendly_token" field. It is called by the builders before save.
-	FriendlyTokenValidator func(string) error
+	// ShortTokenValidator is a validator for the "short_token" field. It is called by the builders before save.
+	ShortTokenValidator func(string) error
 	// DefaultPrivacy holds the default value on creation for the "privacy" field.
 	DefaultPrivacy int
 	// DefaultAddDate holds the default value on creation for the "add_date" field.
 	DefaultAddDate func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() string
+	// IDValidator is a validator for the "id" field. It is called by the builders before save.
+	IDValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Playlist queries.
@@ -96,14 +97,9 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByFriendlyToken orders the results by the friendly_token field.
-func ByFriendlyToken(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldFriendlyToken, opts...).ToFunc()
-}
-
-// ByUID orders the results by the uid field.
-func ByUID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUID, opts...).ToFunc()
+// ByShortToken orders the results by the short_token field.
+func ByShortToken(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldShortToken, opts...).ToFunc()
 }
 
 // ByUserID orders the results by the user_id field.

@@ -18,11 +18,11 @@ import (
 type Like struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 	// MediaID holds the value of the "media_id" field.
-	MediaID int `json:"media_id,omitempty"`
+	MediaID string `json:"media_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
-	UserID int `json:"user_id,omitempty"`
+	UserID string `json:"user_id,omitempty"`
 	// LikeType holds the value of the "like_type" field.
 	LikeType string `json:"like_type,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -71,9 +71,7 @@ func (*Like) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case like.FieldID, like.FieldMediaID, like.FieldUserID:
-			values[i] = new(sql.NullInt64)
-		case like.FieldLikeType:
+		case like.FieldID, like.FieldMediaID, like.FieldUserID, like.FieldLikeType:
 			values[i] = new(sql.NullString)
 		case like.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -93,22 +91,22 @@ func (_m *Like) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case like.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value.Valid {
+				_m.ID = value.String
 			}
-			_m.ID = int(value.Int64)
 		case like.FieldMediaID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field media_id", values[i])
 			} else if value.Valid {
-				_m.MediaID = int(value.Int64)
+				_m.MediaID = value.String
 			}
 		case like.FieldUserID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				_m.UserID = int(value.Int64)
+				_m.UserID = value.String
 			}
 		case like.FieldLikeType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -169,10 +167,10 @@ func (_m *Like) String() string {
 	builder.WriteString("Like(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("media_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.MediaID))
+	builder.WriteString(_m.MediaID)
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(_m.UserID)
 	builder.WriteString(", ")
 	builder.WriteString("like_type=")
 	builder.WriteString(_m.LikeType)
