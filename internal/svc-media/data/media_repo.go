@@ -224,12 +224,16 @@ func (r *mediaRepo) Update(
 	if in.HlsFile != "" {
 		update = update.SetHlsFile(in.HlsFile)
 	}
+	if in.PreviewFilePath != "" {
+		update = update.SetPreviewFilePath(in.PreviewFilePath)
+	}
 	if in.EncodingStatus != "" {
 		update = update.SetEncodingStatus(in.EncodingStatus)
 	}
-	if in.Uuid != "" {
-		update = update.SetUUID(in.Uuid)
-	}
+	// Uuid field is deprecated, use Id instead
+	// if in.Uuid != "" {
+	// 	update = update.SetUUID(in.Uuid)
+	// }
 	if in.Duration > 0 {
 		update = update.SetDuration(int(in.Duration))
 	}
@@ -438,8 +442,8 @@ func convertMediaToProto(m *entity.Media) *types.Media {
 		Url:            m.URL,
 		Thumbnail:      m.Thumbnail,
 		HlsFile:        m.HlsFile,
+		PreviewFilePath:    m.PreviewFilePath,
 		EncodingStatus: m.EncodingStatus,
-		Uuid:           m.UUID,
 		Duration:       int32(m.Duration),
 		Size:           size,
 		MimeType:       m.MimeType,

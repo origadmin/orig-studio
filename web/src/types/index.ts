@@ -1,12 +1,12 @@
 export interface User {
-    id: number;
+    id: string;
     username: string;
     nickname?: string;
     avatar?: string;
 }
 
 export interface Media {
-    id: number;
+    id: string;
     title: string;
     description?: string;
     thumbnail?: string;
@@ -18,7 +18,7 @@ export interface Media {
     size?: string;
     edges?: {
         user?: Array<{
-            id: number;
+            id: string;
             username: string;
             nickname?: string;
         }>;
@@ -40,7 +40,7 @@ export interface MediaItem extends Media {
 }
 
 export interface Comment {
-    id: number;
+    id: string;
     content: string;
     created_at: string;
     user: User;
@@ -58,8 +58,8 @@ export interface ToggleLikeResponse {
 }
 
 export interface Favorite {
-    id: number;
-    media_id: number;
+    id: string;
+    media_id: string;
     media: Media;
     created_at: string;
 }

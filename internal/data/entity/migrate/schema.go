@@ -331,8 +331,7 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "title", Type: field.TypeString, Size: 255},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
-		{Name: "short_token", Type: field.TypeString, Unique: true, Nullable: true, Size: 150},
-		{Name: "uuid", Type: field.TypeString, Unique: true, Nullable: true, Size: 36},
+		{Name: "short_token", Type: field.TypeString, Nullable: true, Size: 150},
 		{Name: "type", Type: field.TypeString, Size: 20, Default: "video"},
 		{Name: "url", Type: field.TypeString, Size: 512},
 		{Name: "hls_file", Type: field.TypeString, Nullable: true, Size: 1024},
@@ -378,46 +377,36 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "media_categories_media",
-				Columns:    []*schema.Column{MediaColumns[36]},
+				Columns:    []*schema.Column{MediaColumns[35]},
 				RefColumns: []*schema.Column{CategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_users_channel_media",
-				Columns:    []*schema.Column{MediaColumns[37]},
+				Columns:    []*schema.Column{MediaColumns[36]},
 				RefColumns: []*schema.Column{UsersChannelColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_files_media_category_media",
-				Columns:    []*schema.Column{MediaColumns[38]},
+				Columns:    []*schema.Column{MediaColumns[37]},
 				RefColumns: []*schema.Column{FilesMediaCategoryColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_files_media_tags_media",
-				Columns:    []*schema.Column{MediaColumns[39]},
+				Columns:    []*schema.Column{MediaColumns[38]},
 				RefColumns: []*schema.Column{FilesMediaTagsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_users_user_media",
-				Columns:    []*schema.Column{MediaColumns[40]},
+				Columns:    []*schema.Column{MediaColumns[39]},
 				RefColumns: []*schema.Column{UsersUserColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
-			{
-				Name:    "media_uuid",
-				Unique:  true,
-				Columns: []*schema.Column{MediaColumns[4]},
-			},
-			{
-				Name:    "media_short_token",
-				Unique:  true,
-				Columns: []*schema.Column{MediaColumns[3]},
-			},
 			{
 				Name:    "media_title",
 				Unique:  false,
@@ -426,37 +415,37 @@ var (
 			{
 				Name:    "media_type",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[5]},
+				Columns: []*schema.Column{MediaColumns[4]},
 			},
 			{
 				Name:    "media_state",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[20]},
+				Columns: []*schema.Column{MediaColumns[19]},
 			},
 			{
 				Name:    "media_encoding_status",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[19]},
+				Columns: []*schema.Column{MediaColumns[18]},
 			},
 			{
 				Name:    "media_featured",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[29]},
+				Columns: []*schema.Column{MediaColumns[28]},
 			},
 			{
 				Name:    "media_view_count",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[21]},
+				Columns: []*schema.Column{MediaColumns[20]},
 			},
 			{
 				Name:    "media_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[34]},
+				Columns: []*schema.Column{MediaColumns[33]},
 			},
 			{
 				Name:    "media_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[40]},
+				Columns: []*schema.Column{MediaColumns[39]},
 			},
 		},
 	}

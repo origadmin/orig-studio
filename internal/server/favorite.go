@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -46,7 +45,7 @@ func (h *FavoriteHandler) listFavorites(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	items, err := h.uc.ListUserFavorites(c.Request.Context(), int(claims.UserID))
+	items, err := h.uc.ListUserFavorites(c.Request.Context(), claims.UserID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -65,14 +64,14 @@ func (h *FavoriteHandler) toggleFavorite(c *gin.Context) {
 	claims := val.(*auth.Claims)
 
 	var input struct {
-		MediaID int `json:"media_id" binding:"required"`
+		MediaID string `json:"media_id" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	stats, err := h.uc.ToggleFavorite(c.Request.Context(), int(claims.UserID), input.MediaID)
+	stats, err := h.uc.ToggleFavorite(c.Request.Context(), claims.UserID, input.MediaID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -92,8 +91,8 @@ func (h *FavoriteHandler) removeFavorite(c *gin.Context) {
 		return
 	}
 
-	_, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
@@ -113,13 +112,13 @@ func (h *FavoriteHandler) checkFavorite(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	mediaId, err := strconv.Atoi(c.Param("mediaId"))
-	if err != nil {
+	mediaId := c.Param("mediaId")
+	if mediaId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid media ID"})
 		return
 	}
 
-	stats, err := h.uc.GetMediaStats(c.Request.Context(), int(claims.UserID), mediaId)
+	stats, err := h.uc.GetMediaStats(c.Request.Context(), claims.UserID, mediaId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -131,8 +130,8 @@ func (h *FavoriteHandler) checkFavorite(c *gin.Context) {
 // getFavoriteStatus returns favorite count and current user's status for a media.
 // GET /media/:mediaId/favorite → {"is_favorited": bool}
 func (h *FavoriteHandler) getFavoriteStatus(c *gin.Context) {
-	mediaId, err := strconv.Atoi(c.Param("mediaId"))
-	if err != nil {
+	mediaId := c.Param("mediaId")
+	if mediaId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid media ID"})
 		return
 	}
@@ -141,7 +140,7 @@ func (h *FavoriteHandler) getFavoriteStatus(c *gin.Context) {
 	val, ok := c.Get("claims")
 	if ok && val != nil {
 		claims := val.(*auth.Claims)
-		stats, err := h.uc.GetMediaStats(c.Request.Context(), int(claims.UserID), mediaId)
+		stats, err := h.uc.GetMediaStats(c.Request.Context(), claims.UserID, mediaId)
 		if err == nil {
 			isFavorited = stats.IsFavorited
 		}
@@ -162,13 +161,13 @@ func (h *FavoriteHandler) toggleFavoriteStatus(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	mediaId, err := strconv.Atoi(c.Param("mediaId"))
-	if err != nil {
+	mediaId := c.Param("mediaId")
+	if mediaId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid media ID"})
 		return
 	}
 
-	favorited, err := h.uc.ToggleFavorite(c.Request.Context(), int(claims.UserID), mediaId)
+	favorited, err := h.uc.ToggleFavorite(c.Request.Context(), claims.UserID, mediaId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

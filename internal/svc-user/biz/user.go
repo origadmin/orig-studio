@@ -7,7 +7,6 @@ package biz
 
 import (
 	"context"
-	"strconv"
 
 	kratosLog "github.com/go-kratos/kratos/v2/log"
 
@@ -36,18 +35,18 @@ func NewUserUseCase(repo dto.UserRepo, hasher hash.Crypto, logger log.Logger) *U
 	}
 }
 
-func (uc *UserUseCase) UpdateUserStatus(ctx context.Context, id int64, status int8) error {
+func (uc *UserUseCase) UpdateUserStatus(ctx context.Context, id string, status int8) error {
 	return uc.repo.UpdateUserStatus(ctx, id, status)
 }
 
 // UpdateUserPassword updates a user's password hash directly.
 // Note: The password verification and hashing should be handled by the identity service.
-func (uc *UserUseCase) UpdateUserPassword(ctx context.Context, userID int64, hashedPassword string) error {
+func (uc *UserUseCase) UpdateUserPassword(ctx context.Context, userID string, hashedPassword string) error {
 	return uc.repo.ChangeUserPassword(ctx, userID, hashedPassword)
 }
 
 // GetUserPasswordHash retrieves the encrypted password hash for a user.
-func (uc *UserUseCase) GetUserPasswordHash(ctx context.Context, id int64) (string, error) {
+func (uc *UserUseCase) GetUserPasswordHash(ctx context.Context, id string) (string, error) {
 	_, hash, err := uc.repo.GetUserAndPassword(ctx, id)
 	return hash, err
 }
@@ -56,7 +55,7 @@ func (uc *UserUseCase) ListUsers(ctx context.Context, opts ...*dto.UserQueryOpti
 	return uc.repo.List(ctx, opts...)
 }
 
-func (uc *UserUseCase) GetUser(ctx context.Context, id int64, opts ...*dto.UserQueryOption) (*types.User, error) {
+func (uc *UserUseCase) GetUser(ctx context.Context, id string, opts ...*dto.UserQueryOption) (*types.User, error) {
 	return uc.repo.Get(ctx, id, opts...)
 }
 
@@ -71,9 +70,8 @@ func (uc *UserUseCase) CreateUser(ctx context.Context, in *types.User, hashedPas
 	// Automatically set audit fields from the context
 	p, ok := security.FromContext(ctx)
 	if ok {
-		authorID, _ := strconv.ParseInt(p.GetID(), 10, 64)
-		in.CreateAuthor = authorID
-		in.UpdateAuthor = authorID
+		in.CreateAuthor = p.GetID()
+		in.UpdateAuthor = p.GetID()
 	}
 
 	return uc.repo.Create(ctx, in, hashedPassword, opts...)
@@ -83,7 +81,7 @@ func (uc *UserUseCase) UpdateUser(ctx context.Context, in *types.User, opts ...*
 	return uc.repo.Update(ctx, in, opts...)
 }
 
-func (uc *UserUseCase) DeleteUser(ctx context.Context, id int64) error {
+func (uc *UserUseCase) DeleteUser(ctx context.Context, id string) error {
 	return uc.repo.Delete(ctx, id)
 }
 
@@ -93,7 +91,7 @@ func (uc *UserUseCase) GetUserByUsername(ctx context.Context, username string) (
 }
 
 // VerifyPassword checks whether the plain-text password matches the stored hash.
-func (uc *UserUseCase) VerifyPassword(ctx context.Context, userID int64, plainPassword string) error {
+func (uc *UserUseCase) VerifyPassword(ctx context.Context, userID string, plainPassword string) error {
 	_, hashedPassword, err := uc.repo.GetUserAndPassword(ctx, userID)
 	if err != nil {
 		return err
@@ -107,12 +105,12 @@ func (uc *UserUseCase) HashPassword(plainPassword string) (string, error) {
 }
 
 // GetUserEntity returns the raw ent entity.User (for fields not in proto types, e.g. role).
-func (uc *UserUseCase) GetUserEntity(ctx context.Context, id int64) (*entity.User, error) {
+func (uc *UserUseCase) GetUserEntity(ctx context.Context, id string) (*entity.User, error) {
 	return uc.repo.GetEntity(ctx, id)
 }
 
 // SetUserRole updates a user's role.
-func (uc *UserUseCase) SetUserRole(ctx context.Context, id int64, role string) error {
+func (uc *UserUseCase) SetUserRole(ctx context.Context, id string, role string) error {
 	return uc.repo.SetUserRole(ctx, id, role)
 }
 
@@ -125,17 +123,17 @@ func (uc *UserUseCase) CountUsers(ctx context.Context) (int, error) {
 // ==================== Subscription Methods ====================
 
 // IsSubscribed checks if a user is subscribed to a channel
-func (uc *UserUseCase) IsSubscribed(ctx context.Context, subscriberID, channelID int) (bool, error) {
+func (uc *UserUseCase) IsSubscribed(ctx context.Context, subscriberID, channelID string) (bool, error) {
 	return uc.repo.IsSubscribed(ctx, subscriberID, channelID)
 }
 
 // GetSubscriberCount gets the number of subscribers for a channel
-func (uc *UserUseCase) GetSubscriberCount(ctx context.Context, channelID int) (int, error) {
+func (uc *UserUseCase) GetSubscriberCount(ctx context.Context, channelID string) (int, error) {
 	return uc.repo.GetSubscriberCount(ctx, channelID)
 }
 
 // Subscribe adds a subscription
-func (uc *UserUseCase) Subscribe(ctx context.Context, subscriberID, channelID int) error {
+func (uc *UserUseCase) Subscribe(ctx context.Context, subscriberID, channelID string) error {
 	if subscriberID == channelID {
 		return nil // Can't subscribe to yourself
 	}
@@ -143,16 +141,16 @@ func (uc *UserUseCase) Subscribe(ctx context.Context, subscriberID, channelID in
 }
 
 // Unsubscribe removes a subscription
-func (uc *UserUseCase) Unsubscribe(ctx context.Context, subscriberID, channelID int) error {
+func (uc *UserUseCase) Unsubscribe(ctx context.Context, subscriberID, channelID string) error {
 	return uc.repo.Unsubscribe(ctx, subscriberID, channelID)
 }
 
 // GetSubscriptions gets all channels a user is subscribed to
-func (uc *UserUseCase) GetSubscriptions(ctx context.Context, subscriberID int, page, pageSize int) ([]*types.User, int, error) {
+func (uc *UserUseCase) GetSubscriptions(ctx context.Context, subscriberID string, page, pageSize int) ([]*types.User, int, error) {
 	return uc.repo.GetSubscriptions(ctx, subscriberID, page, pageSize)
 }
 
 // GetSubscribers gets all subscribers for a channel
-func (uc *UserUseCase) GetSubscribers(ctx context.Context, channelID int, page, pageSize int) ([]*types.User, int, error) {
+func (uc *UserUseCase) GetSubscribers(ctx context.Context, channelID string, page, pageSize int) ([]*types.User, int, error) {
 	return uc.repo.GetSubscribers(ctx, channelID, page, pageSize)
 }

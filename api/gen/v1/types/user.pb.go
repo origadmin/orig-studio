@@ -180,11 +180,11 @@ func (x *UserSetting) GetPreferences() map[string]string {
 type User struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// ID of the ent.
-	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// create_author.field.comment
-	CreateAuthor int64 `protobuf:"varint,2,opt,name=create_author,proto3" json:"create_author,omitempty"`
+	CreateAuthor string `protobuf:"bytes,2,opt,name=create_author,proto3" json:"create_author,omitempty"`
 	// update_author.field.comment
-	UpdateAuthor int64 `protobuf:"varint,3,opt,name=update_author,proto3" json:"update_author,omitempty"`
+	UpdateAuthor string `protobuf:"bytes,3,opt,name=update_author,proto3" json:"update_author,omitempty"`
 	// create_time.field.comment
 	CreateTime *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=create_time,proto3" json:"create_time,omitempty"`
 	// update_time.field.comment
@@ -259,25 +259,25 @@ func (*User) Descriptor() ([]byte, []int) {
 	return file_v1_types_user_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *User) GetId() int64 {
+func (x *User) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
-func (x *User) GetCreateAuthor() int64 {
+func (x *User) GetCreateAuthor() string {
 	if x != nil {
 		return x.CreateAuthor
 	}
-	return 0
+	return ""
 }
 
-func (x *User) GetUpdateAuthor() int64 {
+func (x *User) GetUpdateAuthor() string {
 	if x != nil {
 		return x.UpdateAuthor
 	}
-	return 0
+	return ""
 }
 
 func (x *User) GetCreateTime() *timestamppb.Timestamp {
@@ -424,7 +424,7 @@ func (x *User) GetRoles() []*Role {
 type Role struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// ID of the ent.
-	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// create_time.field.comment
 	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
 	// update_time.field.comment
@@ -479,11 +479,11 @@ func (*Role) Descriptor() ([]byte, []int) {
 	return file_v1_types_user_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *Role) GetId() int64 {
+func (x *Role) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
 func (x *Role) GetCreateTime() *timestamppb.Timestamp {
@@ -560,7 +560,7 @@ func (x *Role) GetPermissions() []*Permission {
 type Permission struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// ID of the ent.
-	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// create_time.field.comment
 	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
 	// update_time.field.comment
@@ -582,7 +582,7 @@ type Permission struct {
 	// permission.field.status
 	Status int32 `protobuf:"varint,11,opt,name=status,proto3" json:"status,omitempty"`
 	// permission.field.parent_id
-	ParentId      int64 `protobuf:"varint,12,opt,name=parent_id,proto3" json:"parent_id,omitempty"`
+	ParentId      string `protobuf:"bytes,12,opt,name=parent_id,proto3" json:"parent_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -617,11 +617,11 @@ func (*Permission) Descriptor() ([]byte, []int) {
 	return file_v1_types_user_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *Permission) GetId() int64 {
+func (x *Permission) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
 func (x *Permission) GetCreateTime() *timestamppb.Timestamp {
@@ -694,22 +694,22 @@ func (x *Permission) GetStatus() int32 {
 	return 0
 }
 
-func (x *Permission) GetParentId() int64 {
+func (x *Permission) GetParentId() string {
 	if x != nil {
 		return x.ParentId
 	}
-	return 0
+	return ""
 }
 
 // UserRole is the many-to-many relation between User and Role.
 type UserRole struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// ID of the ent.
-	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// user_role.field.user_id
-	UserId int64 `protobuf:"varint,2,opt,name=user_id,proto3" json:"user_id,omitempty"`
+	UserId string `protobuf:"bytes,2,opt,name=user_id,proto3" json:"user_id,omitempty"`
 	// user_role.field.role_id
-	RoleId        int64 `protobuf:"varint,3,opt,name=role_id,proto3" json:"role_id,omitempty"`
+	RoleId        string `protobuf:"bytes,3,opt,name=role_id,proto3" json:"role_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -744,25 +744,25 @@ func (*UserRole) Descriptor() ([]byte, []int) {
 	return file_v1_types_user_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *UserRole) GetId() int64 {
+func (x *UserRole) GetId() string {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return ""
 }
 
-func (x *UserRole) GetUserId() int64 {
+func (x *UserRole) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return ""
 }
 
-func (x *UserRole) GetRoleId() int64 {
+func (x *UserRole) GetRoleId() string {
 	if x != nil {
 		return x.RoleId
 	}
-	return 0
+	return ""
 }
 
 var File_v1_types_user_proto protoreflect.FileDescriptor
@@ -786,9 +786,9 @@ const file_v1_types_user_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xf3\x06\n" +
 	"\x04User\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12$\n" +
-	"\rcreate_author\x18\x02 \x01(\x03R\rcreate_author\x12$\n" +
-	"\rupdate_author\x18\x03 \x01(\x03R\rupdate_author\x12<\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12$\n" +
+	"\rcreate_author\x18\x02 \x01(\tR\rcreate_author\x12$\n" +
+	"\rupdate_author\x18\x03 \x01(\tR\rupdate_author\x12<\n" +
 	"\vcreate_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
 	"\vupdate_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\x12\x12\n" +
 	"\x04uuid\x18\x06 \x01(\tR\x04uuid\x12\x1a\n" +
@@ -813,7 +813,7 @@ const file_v1_types_user_proto_rawDesc = "" +
 	"\asetting\x183 \x01(\v2\".api.v1.services.types.UserSettingR\asetting\x121\n" +
 	"\x05roles\x18d \x03(\v2\x1b.api.v1.services.types.RoleR\x05roles\"\xa2\x03\n" +
 	"\x04Role\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12<\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
 	"\vupdate_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\x12\x18\n" +
 	"\akeyword\x18\x04 \x01(\tR\akeyword\x12\x12\n" +
@@ -826,7 +826,7 @@ const file_v1_types_user_proto_rawDesc = "" +
 	"\vpermissions\x18f \x03(\v2!.api.v1.services.types.PermissionR\vpermissions\"\x8c\x03\n" +
 	"\n" +
 	"Permission\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12<\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
 	"\vupdate_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\x12\x18\n" +
 	"\akeyword\x18\x04 \x01(\tR\akeyword\x12\x12\n" +
@@ -838,11 +838,11 @@ const file_v1_types_user_proto_rawDesc = "" +
 	"\bsequence\x18\n" +
 	" \x01(\x05R\bsequence\x12\x16\n" +
 	"\x06status\x18\v \x01(\x05R\x06status\x12\x1c\n" +
-	"\tparent_id\x18\f \x01(\x03R\tparent_id\"N\n" +
+	"\tparent_id\x18\f \x01(\tR\tparent_id\"N\n" +
 	"\bUserRole\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
-	"\auser_id\x18\x02 \x01(\x03R\auser_id\x12\x18\n" +
-	"\arole_id\x18\x03 \x01(\x03R\arole_idB\x82\x01\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
+	"\auser_id\x18\x02 \x01(\tR\auser_id\x12\x18\n" +
+	"\arole_id\x18\x03 \x01(\tR\arole_idB\x82\x01\n" +
 	"!com.origcms.api.v1.services.typesB\x1bOrigCMSServiceTypeUserProtoP\x01Z4origadmin/application/origcms/api/gen/v1/types;types\xa2\x02\aOrigCMSb\x06proto3"
 
 var (

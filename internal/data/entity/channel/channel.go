@@ -77,6 +77,8 @@ var (
 	TitleValidator func(string) error
 	// SlugValidator is a validator for the "slug" field. It is called by the builders before save.
 	SlugValidator func(string) error
+	// DefaultShortToken holds the default value on creation for the "short_token" field.
+	DefaultShortToken func() string
 	// ShortTokenValidator is a validator for the "short_token" field. It is called by the builders before save.
 	ShortTokenValidator func(string) error
 	// BannerLogoValidator is a validator for the "banner_logo" field. It is called by the builders before save.

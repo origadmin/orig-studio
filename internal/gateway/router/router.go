@@ -8,7 +8,6 @@ package router
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/origadmin/runtime/log"
 	"origadmin/application/origcms/internal/auth"
@@ -93,12 +92,7 @@ func (rt *Router) handleSearch(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rt *Router) handleVideoDetail(w http.ResponseWriter, r *http.Request) {
-	idStr := r.PathValue("id")
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		http.Error(w, `{"error":"invalid media ID"}`, http.StatusBadRequest)
-		return
-	}
+	id := r.PathValue("id")
 
 	resp, err := rt.detail.GetVideoDetail(r.Context(), &handler.VideoDetailRequest{ID: id})
 	if err != nil {
@@ -109,12 +103,7 @@ func (rt *Router) handleVideoDetail(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rt *Router) handleUserProfile(w http.ResponseWriter, r *http.Request) {
-	idStr := r.PathValue("id")
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		http.Error(w, `{"error":"invalid user ID"}`, http.StatusBadRequest)
-		return
-	}
+	id := r.PathValue("id")
 
 	resp, err := rt.profile.GetUserProfile(r.Context(), &handler.UserProfileRequest{ID: id})
 	if err != nil {

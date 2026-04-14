@@ -227,7 +227,7 @@ func (h *MeHandler) GetSubscriptions(c *gin.Context) {
 
 	list, total, err := h.userUC.GetSubscriptions(
 		c.Request.Context(),
-		int(claims.UserID),
+		claims.UserID,
 		page,
 		pageSize,
 	)

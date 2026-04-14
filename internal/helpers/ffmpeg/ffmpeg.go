@@ -241,6 +241,11 @@ func TranscodeToHLSWithProgress(
 	duration float64,
 	progressCb ProgressCallback,
 ) error {
+	// Clean up existing files in output directory to avoid segment残留
+	if err := os.RemoveAll(outputDir); err != nil {
+		return fmt.Errorf("failed to clean output directory: %w", err)
+	}
+	
 	if err := os.MkdirAll(outputDir, 0o755); err != nil {
 		return fmt.Errorf("failed to create HLS output directory: %w", err)
 	}

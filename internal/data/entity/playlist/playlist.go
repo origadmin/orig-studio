@@ -67,6 +67,8 @@ func ValidColumn(column string) bool {
 var (
 	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	TitleValidator func(string) error
+	// DefaultShortToken holds the default value on creation for the "short_token" field.
+	DefaultShortToken func() string
 	// ShortTokenValidator is a validator for the "short_token" field. It is called by the builders before save.
 	ShortTokenValidator func(string) error
 	// DefaultPrivacy holds the default value on creation for the "privacy" field.

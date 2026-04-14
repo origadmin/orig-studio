@@ -55,9 +55,10 @@ func (h *NotificationHandler) listNotifications(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 
+	userID, _ := strconv.Atoi(claims.UserID)
 	items, total, err := h.uc.ListUserNotifications(
 		c.Request.Context(),
-		int(claims.UserID),
+		userID,
 		page,
 		limit,
 	)
@@ -66,7 +67,7 @@ func (h *NotificationHandler) listNotifications(c *gin.Context) {
 		return
 	}
 
-	unread, _ := h.uc.GetUnreadCount(c.Request.Context(), int(claims.UserID))
+	unread, _ := h.uc.GetUnreadCount(c.Request.Context(), userID)
 
 	OK(c, gin.H{
 		"items":        items,
@@ -99,7 +100,8 @@ func (h *NotificationHandler) createNotification(c *gin.Context) {
 			return
 		}
 		claims := val.(*auth.Claims)
-		targetUserID = int(claims.UserID)
+		userID, _ := strconv.Atoi(claims.UserID)
+		targetUserID = userID
 	}
 
 	n := &biz.Notification{
@@ -133,7 +135,8 @@ func (h *NotificationHandler) markAsRead(c *gin.Context) {
 		return
 	}
 
-	err = h.uc.MarkAsRead(c.Request.Context(), id, int(claims.UserID))
+	userID, _ := strconv.Atoi(claims.UserID)
+	err = h.uc.MarkAsRead(c.Request.Context(), id, userID)
 	if err != nil {
 		Fail(c, ErrInternal, err.Error())
 		return
@@ -151,7 +154,8 @@ func (h *NotificationHandler) markAllRead(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	err := h.uc.MarkAllAsRead(c.Request.Context(), int(claims.UserID))
+	userID, _ := strconv.Atoi(claims.UserID)
+	err := h.uc.MarkAllAsRead(c.Request.Context(), userID)
 	if err != nil {
 		Fail(c, ErrInternal, err.Error())
 		return
@@ -169,7 +173,8 @@ func (h *NotificationHandler) unreadCount(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	count, err := h.uc.GetUnreadCount(c.Request.Context(), int(claims.UserID))
+	userID, _ := strconv.Atoi(claims.UserID)
+	count, err := h.uc.GetUnreadCount(c.Request.Context(), userID)
 	if err != nil {
 		Fail(c, ErrInternal, err.Error())
 		return

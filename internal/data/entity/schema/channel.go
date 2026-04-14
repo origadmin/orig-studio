@@ -23,12 +23,12 @@ type Channel struct {
 
 func (Channel) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.DefaultUUIDv7()), // UUIDv7 for distributed system
+		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.GenUUIDv7), // UUIDv7 for distributed system
 		field.String("user_id"),
 		field.String("title").NotEmpty().MaxLen(90),
 		field.String("slug").MaxLen(100).Unique(),
 		field.Text("description"),
-		field.String("short_token").MaxLen(12).Unique().DefaultFunc(idutil.DefaultShortID()),
+		field.String("short_token").MaxLen(12).Unique().DefaultFunc(idutil.GenShortID),
 		field.String("banner_logo").MaxLen(500),
 		field.Time("add_date").Default(time.Now),
 	}

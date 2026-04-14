@@ -6,6 +6,7 @@ import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/field_mask.proto";
 import "v1/types/media.proto";
+import "v1/types/user.proto";
 
 option go_package = "origadmin/application/origcms/api/gen/v1/media;media";
 option java_multiple_files = true;
@@ -512,8 +513,8 @@ message ListMediasRequest {
   string keyword = 4 [json_name = "keyword"];
   optional int32 type = 5 [json_name = "type"];
   optional int32 status = 6 [json_name = "status"];
-  optional int64 category_id = 7 [json_name = "category_id"];
-  optional int64 user_id = 8 [json_name = "user_id"];
+  optional string category_id = 7 [json_name = "category_id"];
+  optional string user_id = 8 [json_name = "user_id"];
   string order_by = 9 [json_name = "order_by"];
   bool descending = 10 [json_name = "descending"];
 }
@@ -527,7 +528,7 @@ message ListMediasResponse {
 }
 
 message GetMediaRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message GetMediaResponse {
@@ -552,7 +553,7 @@ message UpdateMediaResponse {
 }
 
 message DeleteMediaRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message DeleteMediaResponse {
@@ -560,7 +561,7 @@ message DeleteMediaResponse {
 }
 
 message IncrementViewCountRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message IncrementViewCountResponse {
@@ -574,7 +575,7 @@ message UploadMediaRequest {
   string file_path = 4 [json_name = "file_path"];
   int64 size = 5 [json_name = "size"];
   int32 duration = 6 [json_name = "duration"];
-  int64 user_id = 7 [json_name = "user_id"];
+  string user_id = 7 [json_name = "user_id"];
 }
 
 message UploadMediaResponse {
@@ -582,7 +583,7 @@ message UploadMediaResponse {
 }
 
 message GetMediaStreamRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message GetMediaStreamResponse {
@@ -591,7 +592,7 @@ message GetMediaStreamResponse {
 }
 
 message GetMediaDownloadRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message GetMediaDownloadResponse {
@@ -600,7 +601,7 @@ message GetMediaDownloadResponse {
 }
 
 message GetMediaThumbnailRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message GetMediaThumbnailResponse {
@@ -610,7 +611,7 @@ message GetMediaThumbnailResponse {
 // ========== Encoding Messages ==========
 
 message ListEncodingTasksRequest {
-  int64 media_id = 1 [json_name = "media_id"];
+  string media_id = 1 [json_name = "media_id"];
 }
 
 message ListEncodingTasksResponse {
@@ -618,7 +619,7 @@ message ListEncodingTasksResponse {
 }
 
 message GetMediaVariantsRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message GetMediaVariantsResponse {
@@ -626,8 +627,8 @@ message GetMediaVariantsResponse {
 }
 
 message RetryEncodingTaskRequest {
-  int64 media_id = 1 [json_name = "media_id"];
-  int64 task_id = 2 [json_name = "task_id"];
+  string media_id = 1 [json_name = "media_id"];
+  string task_id = 2 [json_name = "task_id"];
 }
 
 message RetryEncodingTaskResponse {
@@ -635,7 +636,7 @@ message RetryEncodingTaskResponse {
 }
 
 message GetEncodingStatusRequest {
-  optional int64 user_id = 1 [json_name = "user_id"];
+  optional string user_id = 1 [json_name = "user_id"];
   string status = 2 [json_name = "status"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
@@ -646,7 +647,7 @@ message GetEncodingStatusResponse {
   int32 pending_count = 2 [json_name = "pending_count"];
   int32 failed_count = 3 [json_name = "failed_count"];
   int32 success_count = 4 [json_name = "success_count"];
-  int32 total_filtered = 5 [json_name = "total_filtered"];
+  int32 total = 5 [json_name = "total"];
   int32 page = 6 [json_name = "page"];
   int32 page_size = 7 [json_name = "page_size"];
   repeated TranscodingMediaItem items = 8 [json_name = "items"];
@@ -656,7 +657,7 @@ message ListAllEncodingTasksRequest {
   string status = 1 [json_name = "status"];
   int32 page = 2 [json_name = "page"];
   int32 page_size = 3 [json_name = "page_size"];
-  optional int64 media_id = 4 [json_name = "media_id"];
+  optional string media_id = 4 [json_name = "media_id"];
 }
 
 message ListAllEncodingTasksResponse {
@@ -667,7 +668,7 @@ message ListAllEncodingTasksResponse {
 }
 
 message RetryAllFailedTasksRequest {
-  optional int64 media_id = 1 [json_name = "media_id"];
+  optional string media_id = 1 [json_name = "media_id"];
 }
 
 message RetryAllFailedTasksResponse {
@@ -682,7 +683,7 @@ message TranscodingMediaItem {
 // ========== Like Messages ==========
 
 message GetMediaLikesRequest {
-  int64 media_id = 1;
+  string media_id = 1;
 }
 
 message GetMediaLikesResponse {
@@ -693,7 +694,7 @@ message GetMediaLikesResponse {
 }
 
 message ToggleMediaLikeRequest {
-  int64 media_id = 1 [json_name = "media_id"];
+  string media_id = 1 [json_name = "media_id"];
   string type = 2 [json_name = "type"]; // "like" or "dislike"
 }
 
@@ -705,7 +706,7 @@ message ToggleMediaLikeResponse {
 }
 
 message DeleteMediaLikeRequest {
-  int64 media_id = 1 [json_name = "media_id"];
+  string media_id = 1 [json_name = "media_id"];
 }
 
 message DeleteMediaLikeResponse {
@@ -715,7 +716,7 @@ message DeleteMediaLikeResponse {
 // ========== Favorite Messages ==========
 
 message GetMediaFavoritesRequest {
-  int64 media_id = 1;
+  string media_id = 1;
 }
 
 message GetMediaFavoritesResponse {
@@ -724,7 +725,7 @@ message GetMediaFavoritesResponse {
 }
 
 message ToggleMediaFavoriteRequest {
-  int64 media_id = 1 [json_name = "media_id"];
+  string media_id = 1 [json_name = "media_id"];
 }
 
 message ToggleMediaFavoriteResponse {
@@ -733,7 +734,7 @@ message ToggleMediaFavoriteResponse {
 }
 
 message DeleteMediaFavoriteRequest {
-  int64 media_id = 1 [json_name = "media_id"];
+  string media_id = 1 [json_name = "media_id"];
 }
 
 message DeleteMediaFavoriteResponse {
@@ -743,7 +744,7 @@ message DeleteMediaFavoriteResponse {
 // ========== Share Messages ==========
 
 message GetMediaSharesRequest {
-  int64 media_id = 1;
+  string media_id = 1;
 }
 
 message GetMediaSharesResponse {
@@ -752,7 +753,7 @@ message GetMediaSharesResponse {
 }
 
 message CreateMediaShareRequest {
-  int64 media_id = 1 [json_name = "media_id"];
+  string media_id = 1 [json_name = "media_id"];
   string platform = 2 [json_name = "platform"];
 }
 
@@ -764,7 +765,7 @@ message CreateMediaShareResponse {
 // ========== Comment Messages ==========
 
 message GetMediaCommentsRequest {
-  int64 media_id = 1;
+  string media_id = 1;
   int32 page = 2 [json_name = "page"];
   int32 page_size = 3 [json_name = "page_size"];
 }
@@ -779,7 +780,7 @@ message GetMediaCommentsResponse {
 // ========== Subtitle Messages ==========
 
 message GetMediaSubtitlesRequest {
-  int64 media_id = 1;
+  string media_id = 1;
 }
 
 message GetMediaSubtitlesResponse {
@@ -787,7 +788,7 @@ message GetMediaSubtitlesResponse {
 }
 
 message CreateMediaSubtitleRequest {
-  int64 media_id = 1 [json_name = "media_id"];
+  string media_id = 1 [json_name = "media_id"];
   string language = 2 [json_name = "language"];
   string file_url = 3 [json_name = "file_url"];
 }
@@ -799,7 +800,7 @@ message CreateMediaSubtitleResponse {
 // ========== Metadata Messages ==========
 
 message GetMediaMetadataRequest {
-  int64 media_id = 1;
+  string media_id = 1;
 }
 
 message GetMediaMetadataResponse {
@@ -815,7 +816,7 @@ message ListEncodeProfilesResponse {
 }
 
 message GetEncodeProfileRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message GetEncodeProfileResponse {
@@ -839,7 +840,7 @@ message UpdateEncodeProfileResponse {
 }
 
 message DeleteEncodeProfileRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message DeleteEncodeProfileResponse {
@@ -852,7 +853,7 @@ message ListCategoriesRequest {
   int32 page = 1 [json_name = "page"];
   int32 page_size = 2 [json_name = "page_size"];
   string page_token = 3 [json_name = "page_token"];
-  optional int64 parent_id = 4 [json_name = "parent_id"];
+  optional string parent_id = 4 [json_name = "parent_id"];
   optional int32 status = 5 [json_name = "status"];
 }
 
@@ -865,7 +866,7 @@ message ListCategoriesResponse {
 }
 
 message GetCategoryRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message GetCategoryResponse {
@@ -890,7 +891,7 @@ message UpdateCategoryResponse {
 }
 
 message DeleteCategoryRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message DeleteCategoryResponse {
@@ -916,7 +917,7 @@ message ListTagsResponse {
 }
 
 message GetTagRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message GetTagResponse {
@@ -941,7 +942,7 @@ message UpdateTagResponse {
 }
 
 message DeleteTagRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message DeleteTagResponse {
@@ -954,9 +955,9 @@ message ListCommentsRequest {
   int32 page = 1 [json_name = "page"];
   int32 page_size = 2 [json_name = "page_size"];
   string page_token = 3 [json_name = "page_token"];
-  optional int64 media_id = 4 [json_name = "media_id"];
-  optional int64 user_id = 5 [json_name = "user_id"];
-  optional int64 parent_id = 6 [json_name = "parent_id"];
+  optional string media_id = 4 [json_name = "media_id"];
+  optional string user_id = 5 [json_name = "user_id"];
+  optional string parent_id = 6 [json_name = "parent_id"];
   optional int32 status = 7 [json_name = "status"];
 }
 
@@ -969,7 +970,7 @@ message ListCommentsResponse {
 }
 
 message GetCommentRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message GetCommentResponse {
@@ -994,7 +995,7 @@ message UpdateCommentResponse {
 }
 
 message DeleteCommentRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message DeleteCommentResponse {
@@ -1002,7 +1003,7 @@ message DeleteCommentResponse {
 }
 
 message GetCommentRepliesRequest {
-  int64 id = 1;
+  string id = 1;
   int32 page = 2 [json_name = "page"];
   int32 page_size = 3 [json_name = "page_size"];
 }
@@ -1015,7 +1016,7 @@ message GetCommentRepliesResponse {
 }
 
 message CreateCommentReplyRequest {
-  int64 id = 1;
+  string id = 1;
   api.v1.services.types.Comment comment = 2;
 }
 
@@ -1026,7 +1027,7 @@ message CreateCommentReplyResponse {
 // ========== Playlist Messages ==========
 
 message GetPlaylistsRequest {
-  int64 user_id = 1 [json_name = "user_id"];
+  string user_id = 1 [json_name = "user_id"];
   optional bool is_public = 2 [json_name = "is_public"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
@@ -1040,7 +1041,7 @@ message GetPlaylistsResponse {
 }
 
 message GetPlaylistRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message GetPlaylistResponse {
@@ -1066,7 +1067,7 @@ message UpdatePlaylistResponse {
 }
 
 message DeletePlaylistRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message DeletePlaylistResponse {
@@ -1074,8 +1075,8 @@ message DeletePlaylistResponse {
 }
 
 message AddPlaylistMediaRequest {
-  int64 playlist_id = 1 [json_name = "playlist_id"];
-  int64 media_id = 2 [json_name = "media_id"];
+  string playlist_id = 1 [json_name = "playlist_id"];
+  string media_id = 2 [json_name = "media_id"];
 }
 
 message AddPlaylistMediaResponse {
@@ -1083,8 +1084,8 @@ message AddPlaylistMediaResponse {
 }
 
 message ReorderPlaylistMediaRequest {
-  int64 playlist_id = 1 [json_name = "playlist_id"];
-  repeated int64 media_ids = 2 [json_name = "media_ids"];
+  string playlist_id = 1 [json_name = "playlist_id"];
+  repeated string media_ids = 2 [json_name = "media_ids"];
 }
 
 message ReorderPlaylistMediaResponse {
@@ -1092,8 +1093,8 @@ message ReorderPlaylistMediaResponse {
 }
 
 message RemovePlaylistMediaRequest {
-  int64 playlist_id = 1 [json_name = "playlist_id"];
-  int64 media_id = 2 [json_name = "media_id"];
+  string playlist_id = 1 [json_name = "playlist_id"];
+  string media_id = 2 [json_name = "media_id"];
 }
 
 message RemovePlaylistMediaResponse {
@@ -1106,7 +1107,7 @@ message ListChannelsRequest {
   int32 page = 1 [json_name = "page"];
   int32 page_size = 2 [json_name = "page_size"];
   string keyword = 3 [json_name = "keyword"];
-  optional int64 user_id = 4 [json_name = "user_id"];
+  optional string user_id = 4 [json_name = "user_id"];
 }
 
 message ListChannelsResponse {
@@ -1117,7 +1118,7 @@ message ListChannelsResponse {
 }
 
 message GetChannelRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message GetChannelResponse {
@@ -1142,7 +1143,7 @@ message UpdateChannelResponse {
 }
 
 message DeleteChannelRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message DeleteChannelResponse {
@@ -1150,7 +1151,7 @@ message DeleteChannelResponse {
 }
 
 message GetChannelMediasRequest {
-  int64 channel_id = 1 [json_name = "channel_id"];
+  string channel_id = 1 [json_name = "channel_id"];
   int32 page = 2 [json_name = "page"];
   int32 page_size = 3 [json_name = "page_size"];
 }
@@ -1163,8 +1164,8 @@ message GetChannelMediasResponse {
 }
 
 message AddChannelMediaRequest {
-  int64 channel_id = 1 [json_name = "channel_id"];
-  int64 media_id = 2 [json_name = "media_id"];
+  string channel_id = 1 [json_name = "channel_id"];
+  string media_id = 2 [json_name = "media_id"];
 }
 
 message AddChannelMediaResponse {
@@ -1172,8 +1173,8 @@ message AddChannelMediaResponse {
 }
 
 message RemoveChannelMediaRequest {
-  int64 channel_id = 1 [json_name = "channel_id"];
-  int64 media_id = 2 [json_name = "media_id"];
+  string channel_id = 1 [json_name = "channel_id"];
+  string media_id = 2 [json_name = "media_id"];
 }
 
 message RemoveChannelMediaResponse {
@@ -1181,7 +1182,7 @@ message RemoveChannelMediaResponse {
 }
 
 message GetChannelSubscribersRequest {
-  int64 channel_id = 1 [json_name = "channel_id"];
+  string channel_id = 1 [json_name = "channel_id"];
   bool count_only = 2 [json_name = "count_only"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
@@ -1196,7 +1197,7 @@ message GetChannelSubscribersResponse {
 }
 
 message GetChannelSubscriptionRequest {
-  int64 channel_id = 1 [json_name = "channel_id"];
+  string channel_id = 1 [json_name = "channel_id"];
 }
 
 message GetChannelSubscriptionResponse {
@@ -1204,7 +1205,7 @@ message GetChannelSubscriptionResponse {
 }
 
 message SubscribeChannelRequest {
-  int64 channel_id = 1 [json_name = "channel_id"];
+  string channel_id = 1 [json_name = "channel_id"];
 }
 
 message SubscribeChannelResponse {
@@ -1213,7 +1214,7 @@ message SubscribeChannelResponse {
 }
 
 message UnsubscribeChannelRequest {
-  int64 channel_id = 1 [json_name = "channel_id"];
+  string channel_id = 1 [json_name = "channel_id"];
 }
 
 message UnsubscribeChannelResponse {
@@ -1317,7 +1318,7 @@ message GetReviewHistoryResponse {
 }
 
 message GetReviewRequest {
-  int64 id = 1;
+  string id = 1;
 }
 
 message GetReviewResponse {
@@ -1333,7 +1334,7 @@ message UpdateReviewResponse {
 }
 
 message BatchUpdateReviewsRequest {
-  repeated int64 ids = 1 [json_name = "ids"];
+  repeated string ids = 1 [json_name = "ids"];
   string status = 2 [json_name = "status"];
   string reason = 3 [json_name = "reason"];
 }

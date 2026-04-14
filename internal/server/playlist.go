@@ -76,8 +76,8 @@ func (h *PlaylistHandler) listPlaylists(c *gin.Context) {
 
 // getPlaylist returns a single playlist with its media items.
 func (h *PlaylistHandler) getPlaylist(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
@@ -105,7 +105,7 @@ func (h *PlaylistHandler) myPlaylists(c *gin.Context) {
 
 	items, total, err := h.uc.ListUserPlaylists(
 		c.Request.Context(),
-		int(claims.UserID),
+		claims.UserID,
 		page,
 		limit,
 	)
@@ -142,7 +142,7 @@ func (h *PlaylistHandler) createPlaylist(c *gin.Context) {
 	p := &biz.Playlist{
 		Name:        input.Name,
 		Description: input.Description,
-		UserID:      int(claims.UserID),
+		UserID:      claims.UserID,
 		IsPublic:    input.IsPublic,
 	}
 
@@ -164,8 +164,8 @@ func (h *PlaylistHandler) updatePlaylist(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
@@ -187,7 +187,7 @@ func (h *PlaylistHandler) updatePlaylist(c *gin.Context) {
 		IsPublic:    input.IsPublic,
 	}
 
-	updated, err := h.uc.UpdatePlaylist(c.Request.Context(), p, int(claims.UserID), claims.IsStaff)
+	updated, err := h.uc.UpdatePlaylist(c.Request.Context(), p, claims.UserID, claims.IsStaff)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -205,13 +205,13 @@ func (h *PlaylistHandler) deletePlaylist(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
-	err = h.uc.DeletePlaylist(c.Request.Context(), id, int(claims.UserID), claims.IsStaff)
+	err := h.uc.DeletePlaylist(c.Request.Context(), id, claims.UserID, claims.IsStaff)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -229,25 +229,25 @@ func (h *PlaylistHandler) addMedia(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid playlist ID"})
 		return
 	}
 
 	var input struct {
-		MediaID int `json:"media_id" binding:"required"`
+		MediaID string `json:"media_id" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err = h.uc.AddMediaToPlaylist(
+	err := h.uc.AddMediaToPlaylist(
 		c.Request.Context(),
 		id,
 		input.MediaID,
-		int(claims.UserID),
+		claims.UserID,
 		claims.IsStaff,
 	)
 	if err != nil {
@@ -271,22 +271,22 @@ func (h *PlaylistHandler) removeMedia(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid playlist ID"})
 		return
 	}
-	mediaId, err := strconv.Atoi(c.Param("mediaId"))
-	if err != nil {
+	mediaId := c.Param("mediaId")
+	if mediaId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid media ID"})
 		return
 	}
 
-	err = h.uc.RemoveMediaFromPlaylist(
+	err := h.uc.RemoveMediaFromPlaylist(
 		c.Request.Context(),
 		id,
 		mediaId,
-		int(claims.UserID),
+		claims.UserID,
 		claims.IsStaff,
 	)
 	if err != nil {
@@ -306,25 +306,25 @@ func (h *PlaylistHandler) reorderMedia(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	id := c.Param("id")
+	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid playlist ID"})
 		return
 	}
 
 	var input struct {
-		MediaOrders map[int]int `json:"media_orders" binding:"required"`
+		MediaOrders map[string]int `json:"media_orders" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err = h.uc.ReorderMediaInPlaylist(
+	err := h.uc.ReorderMediaInPlaylist(
 		c.Request.Context(),
 		id,
 		input.MediaOrders,
-		int(claims.UserID),
+		claims.UserID,
 		claims.IsStaff,
 	)
 	if err != nil {

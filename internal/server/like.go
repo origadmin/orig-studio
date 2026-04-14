@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -47,7 +46,7 @@ func (h *LikeHandler) toggleLike(c *gin.Context) {
 	claims := val.(*auth.Claims)
 
 	var input struct {
-		MediaID int    `json:"media_id" binding:"required"`
+		MediaID string `json:"media_id" binding:"required"`
 		Type    string `json:"type" binding:"required,oneof=like dislike"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -55,14 +54,14 @@ func (h *LikeHandler) toggleLike(c *gin.Context) {
 		return
 	}
 
-	_, err := h.uc.ToggleLike(c.Request.Context(), int(claims.UserID), input.MediaID, input.Type)
+	_, err := h.uc.ToggleLike(c.Request.Context(), claims.UserID, input.MediaID, input.Type)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Get updated stats for response
-	stats, _ := h.uc.GetMediaStats(c.Request.Context(), int(claims.UserID), input.MediaID)
+	stats, _ := h.uc.GetMediaStats(c.Request.Context(), claims.UserID, input.MediaID)
 	c.JSON(http.StatusOK, gin.H{
 		"liked":    stats.UserLikeType == "like",
 		"disliked": stats.UserLikeType == "dislike",
@@ -72,17 +71,17 @@ func (h *LikeHandler) toggleLike(c *gin.Context) {
 // getMediaLikes returns like/dislike counts and current user's status for a media.
 // GET /likes/media/:mediaId → {"likes": N, "dislikes": N, "user_liked": "none"|"liked"|"disliked"}
 func (h *LikeHandler) getMediaLikes(c *gin.Context) {
-	mediaId, err := strconv.Atoi(c.Param("mediaId"))
-	if err != nil {
+	mediaId := c.Param("mediaId")
+	if mediaId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid media ID"})
 		return
 	}
 
-	var userID int
+	var userID string
 	val, ok := c.Get("claims")
 	if ok && val != nil {
 		claims := val.(*auth.Claims)
-		userID = int(claims.UserID)
+		userID = claims.UserID
 	}
 
 	stats, err := h.uc.GetMediaStats(c.Request.Context(), userID, mediaId)
@@ -108,13 +107,13 @@ func (h *LikeHandler) checkLike(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	mediaId, err := strconv.Atoi(c.Param("mediaId"))
-	if err != nil {
+	mediaId := c.Param("mediaId")
+	if mediaId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid media ID"})
 		return
 	}
 
-	stats, err := h.uc.GetMediaStats(c.Request.Context(), int(claims.UserID), mediaId)
+	stats, err := h.uc.GetMediaStats(c.Request.Context(), claims.UserID, mediaId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -129,17 +128,17 @@ func (h *LikeHandler) checkLike(c *gin.Context) {
 // getLikeStatus returns like count and current user's status for a media.
 // GET /media/:mediaId/like → {"is_liked": bool, "is_disliked": bool, "like_count": int, "dislike_count": int}
 func (h *LikeHandler) getLikeStatus(c *gin.Context) {
-	mediaId, err := strconv.Atoi(c.Param("mediaId"))
-	if err != nil {
+	mediaId := c.Param("mediaId")
+	if mediaId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid media ID"})
 		return
 	}
 
-	var userID int
+	var userID string
 	val, ok := c.Get("claims")
 	if ok && val != nil {
 		claims := val.(*auth.Claims)
-		userID = int(claims.UserID)
+		userID = claims.UserID
 	}
 
 	stats, err := h.uc.GetMediaStats(c.Request.Context(), userID, mediaId)
@@ -166,20 +165,20 @@ func (h *LikeHandler) toggleLikeStatus(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	mediaId, err := strconv.Atoi(c.Param("mediaId"))
-	if err != nil {
+	mediaId := c.Param("mediaId")
+	if mediaId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid media ID"})
 		return
 	}
 
-	_, err = h.uc.ToggleLike(c.Request.Context(), int(claims.UserID), mediaId, "like")
+	_, err := h.uc.ToggleLike(c.Request.Context(), claims.UserID, mediaId, "like")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Get updated stats for response
-	stats, _ := h.uc.GetMediaStats(c.Request.Context(), int(claims.UserID), mediaId)
+	stats, _ := h.uc.GetMediaStats(c.Request.Context(), claims.UserID, mediaId)
 	c.JSON(http.StatusOK, gin.H{
 		"is_liked":      stats.UserLikeType == "like",
 		"is_disliked":   stats.UserLikeType == "dislike",
@@ -198,20 +197,20 @@ func (h *LikeHandler) toggleDislikeStatus(c *gin.Context) {
 	}
 	claims := val.(*auth.Claims)
 
-	mediaId, err := strconv.Atoi(c.Param("mediaId"))
-	if err != nil {
+	mediaId := c.Param("mediaId")
+	if mediaId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid media ID"})
 		return
 	}
 
-	_, err = h.uc.ToggleLike(c.Request.Context(), int(claims.UserID), mediaId, "dislike")
+	_, err := h.uc.ToggleLike(c.Request.Context(), claims.UserID, mediaId, "dislike")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Get updated stats for response
-	stats, _ := h.uc.GetMediaStats(c.Request.Context(), int(claims.UserID), mediaId)
+	stats, _ := h.uc.GetMediaStats(c.Request.Context(), claims.UserID, mediaId)
 	c.JSON(http.StatusOK, gin.H{
 		"is_liked":      stats.UserLikeType == "like",
 		"is_disliked":   stats.UserLikeType == "dislike",

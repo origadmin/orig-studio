@@ -30,7 +30,7 @@ func NewDetailHandler(clients *client.Clients, logger log.Logger) *DetailHandler
 
 // VideoDetailRequest defines the request for a video detail page.
 type VideoDetailRequest struct {
-	ID int64 `json:"id"`
+	ID string `json:"id"`
 }
 
 // VideoDetailResponse aggregates media + author + related videos.
@@ -43,7 +43,7 @@ type VideoDetailResponse struct {
 
 // AuthorInfo is a simplified user profile for display.
 type AuthorInfo struct {
-	ID          int64  `json:"id"`
+	ID          string `json:"id"`
 	Username    string `json:"username"`
 	DisplayName string `json:"display_name"`
 	AvatarURL   string `json:"avatar_url"`
@@ -53,7 +53,7 @@ type AuthorInfo struct {
 func (h *DetailHandler) GetVideoDetail(ctx context.Context, req *VideoDetailRequest) (*VideoDetailResponse, error) {
 	videoResp, err := h.clients.Media.GetMedia(ctx, &mediav1.GetMediaRequest{Id: req.ID})
 	if err != nil {
-		h.log.Errorf("failed to get media %d: %v", req.ID, err)
+		h.log.Errorf("failed to get media %s: %v", req.ID, err)
 		return nil, err
 	}
 
@@ -73,7 +73,7 @@ func (h *DetailHandler) GetVideoDetail(ctx context.Context, req *VideoDetailRequ
 	// Fetch author profile (best-effort, non-fatal)
 	userResp, err := h.clients.User.GetUser(ctx, &userv1.GetUserRequest{Id: video.UserId})
 	if err != nil {
-		h.log.Warnf("failed to fetch author for media %d: %v", req.ID, err)
+		h.log.Warnf("failed to fetch author for media %s: %v", req.ID, err)
 	} else if userResp.User != nil {
 		resp.Author = &AuthorInfo{
 			ID:          userResp.User.Id,

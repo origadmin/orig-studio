@@ -20,14 +20,22 @@ import (
 	"origadmin/application/origcms/internal/helpers/ffmpeg"
 )
 
+// abs returns the absolute value of an integer
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
 // TranscodeJob represents a single transcoding job for one profile of one media.
 type TranscodeJob struct {
 	MediaID      string
 	TaskID       string
 	Profile      *EncodeProfile
 	InputPath    string // source video file path
-	OutputDir    string // final output directory (e.g., hls/{uuid}/{profile_name}/)
-	UUID         string // media UUID for path construction
+	OutputDir    string // final output directory (e.g., hls/{id}/{profile_name}/)
+	UUID         string // media ID for path construction (deprecated, use MediaID instead)
 	EncodingRepo EncodingTaskRepo
 	MediaUC      *MediaUseCase
 	Logger       *log.Helper
@@ -125,9 +133,9 @@ func (w *goroutineWorker) Shutdown(ctx context.Context) error {
 // executeTranscodeJob runs a single profile transcode job to completion.
 //
 // For video profiles (mp4/webm): directly outputs HLS segments via ffmpeg's HLS muxer
-// into hls/{uuid}/{profile_name}/ with index.m3u8 + segment_XXX.ts files.
+// into hls/{id}/{profile_name}/ with index.m3u8 + segment_XXX.ts files.
 //
-// For preview/GIF profile: generates animated GIF preview into previews/{uuid}.gif.
+// For preview/GIF profile: generates animated GIF preview into previews/{id}.gif.
 func executeTranscodeJob(ctx context.Context, job TranscodeJob, logger *log.Helper) error {
 	profile := job.Profile
 
@@ -202,9 +210,9 @@ func IsFramesProfile(p *EncodeProfile) bool {
 }
 
 // executeFramesJob generates multiple preview frames for progress bar hover preview.
-// Output: {baseDir}/frames/{uuid}/frame_001.jpg, frame_002.jpg, etc.
+// Output: {baseDir}/frames/{id}/frame_001.jpg, frame_002.jpg, etc.
 func executeFramesJob(ctx context.Context, job TranscodeJob, logger *log.Helper) error {
-	framesDir := filepath.Join(job.OutputDir, "..", "frames") // up from hls/{uuid} to base dir
+	framesDir := filepath.Join(job.OutputDir, "..", "frames") // up from hls/{id} to base dir
 	if err := os.MkdirAll(framesDir, 0o755); err != nil {
 		return fmt.Errorf("failed to create frames directory: %w", err)
 	}
@@ -223,9 +231,52 @@ func executeFramesJob(ctx context.Context, job TranscodeJob, logger *log.Helper)
 
 	logger.Infof("[Frames] generating preview frames: media=%s frames=%d scale=%s", job.MediaID, frameCount, scale)
 
+	// Update task status to processing
+	if job.EncodingRepo != nil {
+		task, err := job.EncodingRepo.Get(ctx, job.TaskID)
+		if err == nil && task != nil {
+			task.Status = "processing"
+			if _, err := job.EncodingRepo.Update(ctx, task); err != nil {
+				logger.Warnf("failed to update task %s status: %v", job.TaskID, err)
+			}
+			if job.MediaUC != nil {
+				job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
+			}
+		}
+	}
+
 	err := ffmpeg.GeneratePreviewFrames(ctx, job.InputPath, framesDir, frameCount, scale)
 	if err != nil {
+		// Update task status to failed
+		if job.EncodingRepo != nil {
+			task, getErr := job.EncodingRepo.Get(ctx, job.TaskID)
+			if getErr == nil && task != nil {
+				task.Status = "failed"
+				task.ErrorMessage = err.Error()
+				if _, updateErr := job.EncodingRepo.Update(ctx, task); updateErr != nil {
+					logger.Warnf("failed to update task %s status to failed: %v", job.TaskID, updateErr)
+				}
+				if job.MediaUC != nil {
+					job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
+				}
+			}
+		}
 		return fmt.Errorf("preview frames failed for profile %s: %w", job.Profile.Name, err)
+	}
+
+	// Update task status to success
+	if job.EncodingRepo != nil {
+		task, err := job.EncodingRepo.Get(ctx, job.TaskID)
+		if err == nil && task != nil {
+			task.Status = "success"
+			task.OutputPath = fmt.Sprintf("frames/%s/", job.MediaID)
+			if _, err := job.EncodingRepo.Update(ctx, task); err != nil {
+				logger.Warnf("failed to update task %s status to success: %v", job.TaskID, err)
+			}
+			if job.MediaUC != nil {
+				job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
+			}
+		}
 	}
 
 	logger.Infof("[Frames] complete: media=%s → %s/", job.MediaID, framesDir)
@@ -254,7 +305,7 @@ func executeVideoHLSJob(ctx context.Context, job TranscodeJob, logger *log.Helpe
 		duration = dur.Seconds()
 	}
 
-	progressCb := func(progress int, frame int64, fps float64, speed string, time float64) {
+	progressCb := func(progress int, frame int64, fps float64, speed string, currentTime float64) {
 		if job.EncodingRepo == nil {
 			return
 		}
@@ -264,20 +315,24 @@ func executeVideoHLSJob(ctx context.Context, job TranscodeJob, logger *log.Helpe
 			return
 		}
 
-		if progress > 0 && progress < 100 {
-			// Progress is now handled by SSE, not stored in database
-			// So we don't need to update the task progress in the database
-			
+		if progress >= 0 && progress <= 100 {
 			if job.MediaUC != nil {
 				// Create a copy of the task to avoid modifying the original
 				taskCopy := *task
-				// We don't update progress in the task anymore
-				job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: &taskCopy})
+				// Publish with complete progress data
+				job.MediaUC.Publish(job.MediaID, &EncodingEvent{
+					MediaId:  job.MediaID,
+					Task:     &taskCopy,
+					Progress: progress,
+					Speed:    speed,
+					Fps:      fps,
+					Time:     currentTime,
+				})
 			}
 		}
 
-		logger.Infof("[HLS] progress: media=%s profile=%s progress=%d%% frame=%d fps=%.1f speed=%s",
-			job.MediaID, profile.Name, progress, frame, fps, speed)
+		logger.Infof("[HLS] progress: media=%s profile=%s progress=%d%% frame=%d fps=%.1f speed=%s time=%.1fs",
+			job.MediaID, profile.Name, progress, frame, fps, speed, currentTime)
 	}
 
 	err := ffmpeg.TranscodeToHLSWithProgress(
@@ -307,22 +362,65 @@ func executeVideoHLSJob(ctx context.Context, job TranscodeJob, logger *log.Helpe
 }
 
 // executePreviewJob generates an animated GIF preview from the source video.
-// Output: {baseDir}/previews/{uuid}.gif
+// Output: {baseDir}/previews/{id}.gif
 func executePreviewJob(ctx context.Context, job TranscodeJob, logger *log.Helper) error {
-	previewDir := filepath.Join(job.OutputDir, "..", "previews") // up from hls/{uuid} to base dir
+	previewDir := filepath.Join(job.OutputDir, "..", "previews") // up from hls/{id} to base dir
 	if err := os.MkdirAll(previewDir, 0o755); err != nil {
 		return fmt.Errorf("failed to create preview directory: %w", err)
 	}
 
-	gifPath := filepath.Join(previewDir, fmt.Sprintf("%s.gif", job.UUID))
+	gifPath := filepath.Join(previewDir, fmt.Sprintf("%s.gif", job.MediaID))
 
 	scale := extractScaleParam(job.Profile.BentoParameters)
 
 	logger.Infof("[GIF] generating preview: media=%s → %s", job.MediaID, gifPath)
 
+	// Update task status to processing
+	if job.EncodingRepo != nil {
+		task, err := job.EncodingRepo.Get(ctx, job.TaskID)
+		if err == nil && task != nil {
+			task.Status = "processing"
+			if _, err := job.EncodingRepo.Update(ctx, task); err != nil {
+				logger.Warnf("failed to update task %s status: %v", job.TaskID, err)
+			}
+			if job.MediaUC != nil {
+				job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
+			}
+		}
+	}
+
 	err := ffmpeg.GenerateGIFPreview(ctx, job.InputPath, gifPath, scale)
 	if err != nil {
+		// Update task status to failed
+		if job.EncodingRepo != nil {
+			task, getErr := job.EncodingRepo.Get(ctx, job.TaskID)
+			if getErr == nil && task != nil {
+				task.Status = "failed"
+				task.ErrorMessage = err.Error()
+				if _, updateErr := job.EncodingRepo.Update(ctx, task); updateErr != nil {
+					logger.Warnf("failed to update task %s status to failed: %v", job.TaskID, updateErr)
+				}
+				if job.MediaUC != nil {
+					job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
+				}
+			}
+		}
 		return fmt.Errorf("GIF preview failed for profile %s: %w", job.Profile.Name, err)
+	}
+
+	// Update task status to success
+	if job.EncodingRepo != nil {
+		task, err := job.EncodingRepo.Get(ctx, job.TaskID)
+		if err == nil && task != nil {
+			task.Status = "success"
+			task.OutputPath = fmt.Sprintf("previews/%s.gif", job.MediaID)
+			if _, err := job.EncodingRepo.Update(ctx, task); err != nil {
+				logger.Warnf("failed to update task %s status to success: %v", job.TaskID, err)
+			}
+			if job.MediaUC != nil {
+				job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
+			}
+		}
 	}
 
 	logger.Infof("[GIF] complete: media=%s → %s", job.MediaID, gifPath)

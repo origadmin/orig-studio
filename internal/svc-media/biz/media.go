@@ -24,8 +24,12 @@ import (
 
 // EncodingEvent represents a status change event for an encoding task.
 type EncodingEvent struct {
-	MediaId string
-	Task    *EncodingTask
+	MediaId  string
+	Task     *EncodingTask
+	Progress int     `json:"progress,omitempty"`
+	Speed    string  `json:"speed,omitempty"`
+	Fps      float64 `json:"fps,omitempty"`
+	Time     float64 `json:"time,omitempty"`
 }
 
 // Media is a wrapper for types.Media for biz layer.
@@ -79,6 +83,7 @@ type EncodeProfileRepo interface {
 	ListActive(ctx context.Context) ([]*EncodeProfile, error)
 	ListAll(ctx context.Context) ([]*EncodeProfile, error)
 	Get(ctx context.Context, id int) (*EncodeProfile, error)
+	GetByName(ctx context.Context, name string) (*EncodeProfile, error)
 	Create(ctx context.Context, profile *EncodeProfile) (*EncodeProfile, error)
 	Update(ctx context.Context, profile *EncodeProfile) (*EncodeProfile, error)
 	Delete(ctx context.Context, id int) error
@@ -86,13 +91,15 @@ type EncodeProfileRepo interface {
 
 // EncodingTask represents a transcoding sub-task for a specific media and profile.
 type EncodingTask struct {
-	Id           string                `json:"id"`
-	MediaId      string                `json:"media_id"`
-	ProfileId    int                   `json:"profile_id"`
+	Id           string                   `json:"id"`
+	MediaId      string                   `json:"media_id"`
+	ProfileId    int                      `json:"profile_id"`
 	Status       enums.EncodingTaskStatus `json:"status"` // pending, processing, success, failed
-	OutputPath   string                `json:"output_path"`
-	ErrorMessage string                `json:"error_message"`
-	Chunk        bool                  `json:"chunk"` // is chunk? (视频分段转码标识)
+	OutputPath   string                   `json:"output_path"`
+	ErrorMessage string                   `json:"error_message"`
+	Chunk        bool                     `json:"chunk"` // is chunk? (视频分段转码标识)
+	CreateTime   string                   `json:"created_at,omitempty"`
+	UpdateTime   string                   `json:"update_time,omitempty"`
 }
 
 // EncodingTaskRepo defines the storage operations for encoding tasks.
@@ -109,6 +116,7 @@ type EncodingTaskRepo interface {
 		status string,
 		mediaId *string,
 		profileFilter string,
+		profileID int,
 		chunkFilter string,
 		searchQuery string,
 		offset, limit int,
@@ -121,6 +129,7 @@ type EncodingTaskRepo interface {
 		status string,
 		mediaId *string,
 		profileFilter string,
+		profileID int,
 		chunkFilter string,
 		searchQuery string,
 	) (*StatusCounts, error)
@@ -288,9 +297,9 @@ func (uc *MediaUseCase) RetryTask(ctx context.Context, taskID string) (*Encoding
 	}
 
 	// Only allow retrying failed or partial tasks
-	if task.Status != "failed" && task.Status != "partial" && task.Status != "skipped" {
+	if task.Status != "failed" && task.Status != "partial" {
 		return nil, fmt.Errorf(
-			"cannot retry task %s with status %q (only 'failed', 'partial', or 'skipped' can be retried)",
+			"cannot retry task %s with status %q (only 'failed' or 'partial' can be retried)",
 			taskID,
 			task.Status,
 		)
@@ -352,7 +361,7 @@ func (uc *MediaUseCase) RetryAllFailedTasks(ctx context.Context, mediaID string)
 
 	resetCount := 0
 	for _, t := range tasks {
-		if t.Status != "failed" && t.Status != "partial" && t.Status != "skipped" {
+		if t.Status != "failed" && t.Status != "partial" {
 			continue
 		}
 		t.Status = "pending"
@@ -401,22 +410,21 @@ func (uc *MediaUseCase) RetryAllFailedTasks(ctx context.Context, mediaID string)
 // VariantInfo holds aggregated info about a single encoding profile's result.
 // Returned by GetMediaVariants for frontend display and player configuration.
 type VariantInfo struct {
-	TaskID       int                   `json:"task_id"`
-	ProfileName  string                `json:"profile_name"`
-	ProfileID    int                   `json:"profile_id"`
-	Resolution   string                `json:"resolution"`  // e.g., "1280x720" or "720"
-	Codec        string                `json:"codec"`       // e.g., "h264", "h265"
+	TaskID       string                   `json:"task_id"`
+	ProfileName  string                   `json:"profile_name"`
+	ProfileID    int                      `json:"profile_id"`
+	Resolution   string                   `json:"resolution"`  // e.g., "1280x720" or "720"
+	Codec        string                   `json:"codec"`       // e.g., "h264", "h265"
 	Status       enums.EncodingTaskStatus `json:"status"`      // pending, processing, success, failed, skipped
-	OutputPath   string                `json:"output_path"` // HLS playlist path or GIF path
-	Bandwidth    int                   `json:"bandwidth"`   // bits per second (estimated)
-	ErrorMessage string                `json:"error_message,omitempty"`
+	OutputPath   string                   `json:"output_path"` // HLS playlist path or GIF path
+	Bandwidth    int                      `json:"bandwidth"`   // bits per second (estimated)
+	ErrorMessage string                   `json:"error_message,omitempty"`
 }
 
 // MediaVariantSummary is the aggregated transcoding status returned by media detail APIs.
 // This is what the "media management" page displays — a compact view of all profile outcomes.
 type MediaVariantSummary struct {
-	MediaID              int64         `json:"media_id"`
-	UUID                 string        `json:"uuid"`
+	MediaID              string        `json:"media_id"`
 	EncodingStatus       string        `json:"encoding_status"` // overall: success/partial/failed/processing
 	HlsFile              string        `json:"hls_file"`        // master.m3u8 path
 	Thumbnail            string        `json:"thumbnail"`       // thumbnail path
@@ -475,7 +483,6 @@ type FlatTaskList struct {
 	FailedCount     int            `json:"failed_count"`
 	SuccessCount    int            `json:"success_count"`
 	Total           int            `json:"total"`
-	TotalFiltered   int            `json:"total_filtered"`
 	Page            int            `json:"page"`
 	PageSize        int            `json:"page_size"`
 	Items           []FlatTaskItem `json:"items"`
@@ -483,17 +490,17 @@ type FlatTaskList struct {
 
 // FlatTaskItem is a single task row for the flat task list view.
 type FlatTaskItem struct {
-	Id           int                   `json:"id"`
-	MediaId      int64                 `json:"media_id"`
-	MediaTitle   string                `json:"media_title,omitempty"`
-	Thumbnail    string                `json:"thumbnail,omitempty"`
-	ProfileId    int                   `json:"profile_id"`
-	ProfileName  string                `json:"profile_name,omitempty"`
+	Id           string                   `json:"id"`
+	MediaId      string                   `json:"media_id"`
+	MediaTitle   string                   `json:"media_title,omitempty"`
+	Thumbnail    string                   `json:"thumbnail,omitempty"`
+	ProfileId    int                      `json:"profile_id"`
+	ProfileName  string                   `json:"profile_name,omitempty"`
 	Status       enums.EncodingTaskStatus `json:"status"`
-	OutputPath   string                `json:"output_path,omitempty"`
-	ErrorMessage string                `json:"error_message,omitempty"`
-	CreateTime   string                `json:"created_at,omitempty"`
-	UpdateTime   string                `json:"update_time,omitempty"`
+	OutputPath   string                   `json:"output_path,omitempty"`
+	ErrorMessage string                   `json:"error_message,omitempty"`
+	CreateTime   string                   `json:"created_at,omitempty"`
+	UpdateTime   string                   `json:"update_time,omitempty"`
 }
 
 // StatusCounts holds per-media-status counts.
@@ -555,7 +562,7 @@ func (uc *MediaUseCase) ListEncodingTasksFlat(
 		status = "all"
 	}
 
-	if mediaID != nil && *mediaID > 0 {
+	if mediaID != nil && *mediaID != "" {
 		// When filtered to a specific media, default to "all" if not specified
 		if status == "" {
 			status = "all"
@@ -564,16 +571,31 @@ func (uc *MediaUseCase) ListEncodingTasksFlat(
 
 	offset := (filter.Page - 1) * filter.PageSize
 
+	// 直接使用传入的 mediaID，无论是数字还是 UUID
+	// 编码任务的 MediaId 字段存储的是 UUID，所以直接使用
 	var mediaIDStr *string
-	if mediaID != nil {
-		idStr := strconv.FormatInt(*mediaID, 10)
-		mediaIDStr = &idStr
+	if mediaID != nil && *mediaID != "" {
+		uc.log.Infof("Using media_id: %s", *mediaID)
+		mediaIDStr = mediaID
+	}
+
+	// Get profile ID from profile name if provided
+	var profileID int
+	if filter.ProfileFilter != "" {
+		profile, err := uc.profileRepo.GetByName(ctx, filter.ProfileFilter)
+		if err == nil && profile != nil {
+			profileID = profile.Id
+			fmt.Printf("Profile filter: %s, Profile ID: %d\n", filter.ProfileFilter, profileID)
+		} else {
+			fmt.Printf("Profile not found: %s, Error: %v\n", filter.ProfileFilter, err)
+		}
 	}
 	tasks, _, err := uc.encodingRepo.ListFlat(
 		ctx,
 		status,
 		mediaIDStr,
 		filter.ProfileFilter,
+		profileID,
 		filter.ChunkFilter,
 		filter.SearchQuery,
 		offset,
@@ -597,6 +619,7 @@ func (uc *MediaUseCase) ListEncodingTasksFlat(
 			"", // Exclude Status filter for filter buttons
 			mediaIDStr,
 			filter.ProfileFilter,
+			profileID,
 			filter.ChunkFilter,
 			filter.SearchQuery,
 		)
@@ -618,13 +641,15 @@ func (uc *MediaUseCase) ListEncodingTasksFlat(
 		items = make([]FlatTaskItem, len(tasks))
 		for i, t := range tasks {
 			item := FlatTaskItem{
-			Id:           int(len(t.Id)),
-			MediaId:      int64(len(t.MediaId)),
-			ProfileId:    t.ProfileId,
-			Status:       t.Status,
-			OutputPath:   t.OutputPath,
-			ErrorMessage: t.ErrorMessage,
-		}
+				Id:           t.Id,
+				MediaId:      t.MediaId,
+				ProfileId:    t.ProfileId,
+				Status:       t.Status,
+				OutputPath:   t.OutputPath,
+				ErrorMessage: t.ErrorMessage,
+				CreateTime:   t.CreateTime,
+				UpdateTime:   t.UpdateTime,
+			}
 			// Look up profile name
 			if profile, perr := uc.profileRepo.Get(ctx, t.ProfileId); perr == nil && profile != nil {
 				item.ProfileName = profile.Name
@@ -640,7 +665,6 @@ func (uc *MediaUseCase) ListEncodingTasksFlat(
 		FailedCount:     counts.Failed,
 		SuccessCount:    counts.Success,
 		Total:           totalWithoutStatusFilter,
-		TotalFiltered:   totalWithoutStatusFilter,
 		Page:            filter.Page,
 		PageSize:        filter.PageSize,
 		Items:           items,
@@ -676,12 +700,11 @@ func (uc *MediaUseCase) getMediaVariantsByID(
 	if err != nil {
 		// No tasks yet — return minimal info
 		return &MediaVariantSummary{
-			MediaID:        mediaID,
-			UUID:           media.Uuid,
+			MediaID:        media.Id,
 			EncodingStatus: media.EncodingStatus,
 			HlsFile:        media.HlsFile,
 			Thumbnail:      media.Thumbnail,
-			PreviewFile:    media.PreviewFile,
+			PreviewFile:    media.PreviewFilePath,
 			Variants:       []VariantInfo{},
 		}, nil
 	}
@@ -701,7 +724,7 @@ func (uc *MediaUseCase) getMediaVariantsByID(
 		}
 
 		vi := VariantInfo{
-			TaskID:       len(t.Id),
+			TaskID:       t.Id,
 			ProfileName:  profile.Name,
 			ProfileID:    t.ProfileId,
 			Resolution:   profile.Resolution,
@@ -721,7 +744,7 @@ func (uc *MediaUseCase) getMediaVariantsByID(
 			switch t.Status {
 			case "success":
 				videoSuccessCount++
-			case "failed", "skipped":
+			case "failed":
 				videoFailedCount++
 			case "pending":
 				videoPendingCount++
@@ -734,12 +757,11 @@ func (uc *MediaUseCase) getMediaVariantsByID(
 	videoTotalCount := videoSuccessCount + videoFailedCount + videoPendingCount + videoProcessingCount
 
 	return &MediaVariantSummary{
-		MediaID:              mediaID,
-		UUID:                 media.Uuid,
+		MediaID:              media.Id,
 		EncodingStatus:       media.EncodingStatus,
 		HlsFile:              media.HlsFile,
 		Thumbnail:            media.Thumbnail,
-		PreviewFile:          media.PreviewFile,
+		PreviewFile:          media.PreviewFilePath,
 		VideoTotalCount:      videoTotalCount,
 		VideoSuccessCount:    videoSuccessCount,
 		VideoFailedCount:     videoFailedCount,

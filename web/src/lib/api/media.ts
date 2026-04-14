@@ -12,7 +12,7 @@ export interface ApiResponse<T> {
 
 // Media 对齐后端 entity.Media JSON 序列化字段
 export interface Media {
-    id: number;
+    id: string;
     title: string;
     description?: string;
     friendly_token?: string;
@@ -22,6 +22,7 @@ export interface Media {
     thumbnail?: string;
     poster?: string;
     preview_file_path?: string;
+    preview_file?: string;
     duration: number;
     size?: string; // 后端存的是 string
     width: number;
@@ -32,7 +33,6 @@ export interface Media {
     privacy: number; // 1: public, 2: private, 3: unlisted
     encoding_status: string; // "pending" | "processing" | "success" | "partial" | "failed"
     state: string; // "draft" | "active" | "deleted"
-    uuid?: string; // secure unique ID for public paths (HLS, thumbnails)
     view_count: number;
     like_count: number;
     dislike_count: number;
@@ -45,7 +45,7 @@ export interface Media {
     is_reviewed: boolean;
     reported_times: number;
     tags?: string[];
-    user_id: number;
+    user_id: string;
     published_at?: string;
     created_at: string;
     create_time?: { seconds: number; nanos: number };
@@ -191,7 +191,7 @@ export interface ShareResponse {
 // ==================== Encoding Module ====================
 export const encodingApi = {
     // 获取转码事件流（SSE）
-    getSSEUrl: (mediaId?: number) => {
+    getSSEUrl: (mediaId?: string) => {
         // 使用相对路径，让前端代理处理
         return `/api/v1/encoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
     },
@@ -204,19 +204,19 @@ export const encodingApi = {
         status?: string;
         page?: number;
         page_size?: number;
-        media_id?: number;
+        media_id?: string;
         only_stats?: boolean;
-    }) => api.get<EncodingTaskListResponse>("/encoding/tasks", params as Record<string, unknown>),
+    }) => api.get<EncodingTaskListResponse>('/encoding/tasks', params as Record<string, unknown>),
 
     // 重试单个任务
-    retryTask: (taskId: number) => {
+    retryTask: (taskId: string) => {
         return api.post<{ message: string; task: any }>('/encoding/retry', null, {
             params: {task_id: taskId}
         });
     },
 
     // 重试所有失败任务
-    retryAllFailed: (mediaId?: number) => {
+    retryAllFailed: (mediaId?: string) => {
         return api.post<{ message: string; retried_count: number }>('/encoding/retry-all-failed', null, {
             params: {media_id: mediaId}
         });
@@ -365,7 +365,7 @@ export const mediaApi = {
     }) => api.get<TranscodingStatusResponse>("/encoding/status", params as Record<string, unknown>),
 
     // 获取转码事件流（SSE）
-    getSSEUrl: (mediaId?: number) => {
+    getSSEUrl: (mediaId?: string) => {
         // 使用相对路径，让前端代理处理
         return `/api/v1/encoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
     },
@@ -406,8 +406,7 @@ export const mediaApi = {
 
 // MediaVariantSummary is the aggregated transcoding status for a single media.
 export interface MediaVariantSummary {
-    media_id: number;
-    uuid: string;
+    media_id: string;
     encoding_status: string;
     hls_file?: string;
     thumbnail?: string;
@@ -451,7 +450,7 @@ export const legacyMediaApi = {
     listTasks: (mediaId: number) => api.get<{ tasks: EncodingTask[] }>(`/medias/${mediaId}/tasks`),
     retryTranscode: (mediaId: number) =>
         api.post<{ message: string; media_id: number }>(`/medias/${mediaId}/tasks/:taskId/retry`),
-    retryTask: (taskId: number) => {
+    retryTask: (taskId: string) => {
         return fetch(`${API_BASE_URL}/encoding/retry?task_id=${taskId}`, {
             method: "POST",
             headers: {

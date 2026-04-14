@@ -53,6 +53,14 @@ func (r *encodeProfileRepo) Get(ctx context.Context, id int) (*biz.EncodeProfile
 	return convertEncodeProfileToBiz(item), nil
 }
 
+func (r *encodeProfileRepo) GetByName(ctx context.Context, name string) (*biz.EncodeProfile, error) {
+	item, err := r.db.EncodeProfile.Query().Where(encodeprofile.NameEQ(name)).First(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return convertEncodeProfileToBiz(item), nil
+}
+
 func (r *encodeProfileRepo) Create(
 	ctx context.Context,
 	profile *biz.EncodeProfile,

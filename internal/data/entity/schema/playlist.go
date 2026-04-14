@@ -23,10 +23,10 @@ type Playlist struct {
 
 func (Playlist) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.DefaultUUIDv7()), // UUIDv7 for distributed system
+		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.GenUUIDv7), // UUIDv7 for distributed system
 		field.String("title").NotEmpty().MaxLen(100),
 		field.Text("description"),
-		field.String("short_token").MaxLen(12).Unique().DefaultFunc(idutil.DefaultShortID()),
+		field.String("short_token").MaxLen(12).Unique().DefaultFunc(idutil.GenShortID),
 		field.String("user_id"),
 		field.Int("privacy").Default(1), // 1=public, 2=unlisted, 3=private
 		field.Time("add_date").Default(time.Now),

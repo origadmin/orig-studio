@@ -6,11 +6,13 @@ package service
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 
 	pb "origadmin/application/origcms/api/gen/v1/upload"
+	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/svc-media/biz"
 )
 
@@ -32,9 +34,16 @@ func NewUploadService(uc *biz.UploadUseCase, logger log.Logger) *UploadService {
 // InitiateMultipartUpload implements pb.UploadServiceServer.
 func (s *UploadService) InitiateMultipartUpload(ctx context.Context, req *pb.InitiateMultipartUploadRequest) (*pb.InitiateMultipartUploadResponse, error) {
 	// Extract user ID from context (assuming it's set by middleware)
-	var userID *int64
+	var userID *string
 	if id, ok := ctx.Value("user_id").(int64); ok {
-		userID = &id
+		idStr := strconv.FormatInt(id, 10)
+		userID = &idStr
+	}
+
+	var categoryID *string
+	if req.CategoryId != 0 {
+		idStr := strconv.FormatInt(req.CategoryId, 10)
+		categoryID = &idStr
 	}
 
 	session, err := s.uc.InitiateMultipartUpload(
@@ -44,7 +53,7 @@ func (s *UploadService) InitiateMultipartUpload(ctx context.Context, req *pb.Ini
 		req.ContentType,
 		req.Title,
 		req.Description,
-		&req.CategoryId,
+		categoryID,
 		req.Tags,
 		"", // thumbnail not supported in proto
 		userID,
@@ -97,7 +106,7 @@ func (s *UploadService) ListParts(ctx context.Context, req *pb.ListPartsRequest)
 		TotalParts:   int32(session.TotalParts),
 		UploadedSize: session.UploadedSize,
 		TotalSize:    session.FileSize,
-		Status:       session.Status,
+		Status:       string(session.Status),
 	}, nil
 }
 
@@ -127,9 +136,16 @@ func (s *UploadService) AbortMultipartUpload(ctx context.Context, req *pb.AbortM
 
 // UploadFile implements pb.UploadServiceServer.
 func (s *UploadService) UploadFile(ctx context.Context, req *pb.UploadFileRequest) (*pb.UploadFileResponse, error) {
-	var userID *int64
+	var userID *string
 	if id, ok := ctx.Value("user_id").(int64); ok {
-		userID = &id
+		idStr := strconv.FormatInt(id, 10)
+		userID = &idStr
+	}
+
+	var categoryID *string
+	if req.CategoryId != 0 {
+		idStr := strconv.FormatInt(req.CategoryId, 10)
+		categoryID = &idStr
 	}
 
 	session, err := s.uc.InitiateMultipartUpload(
@@ -139,7 +155,7 @@ func (s *UploadService) UploadFile(ctx context.Context, req *pb.UploadFileReques
 		req.ContentType,
 		req.Title,
 		req.Description,
-		&req.CategoryId,
+		categoryID,
 		req.Tags,
 		"", // thumbnail not supported in proto
 		userID,
@@ -155,7 +171,7 @@ func (s *UploadService) UploadFile(ctx context.Context, req *pb.UploadFileReques
 	}
 
 	media, err := s.uc.CompleteMultipartUpload(ctx, session.UploadID, "",
-		req.Title, req.Description, &req.CategoryId, req.Tags, "")
+		req.Title, req.Description, categoryID, req.Tags, "")
 	if err != nil {
 		_ = s.uc.AbortMultipartUpload(ctx, session.UploadID)
 		return nil, err
@@ -189,7 +205,7 @@ func (s *UploadService) GetUploadSession(ctx context.Context, req *pb.GetUploadS
 		TotalParts:   int32(session.TotalParts),
 		ChunkSize:    int32(session.ChunkSize),
 		UploadedSize: session.UploadedSize,
-		Status:       session.Status,
+		Status:       string(session.Status),
 		Parts:        parts,
 		CreatedAt:    session.CreatedAt.Format(time.RFC3339),
 		ExpiresAt:    session.ExpiresAt.Format(time.RFC3339),
@@ -198,12 +214,12 @@ func (s *UploadService) GetUploadSession(ctx context.Context, req *pb.GetUploadS
 
 // ListUploadSessions implements pb.UploadServiceServer.
 func (s *UploadService) ListUploadSessions(ctx context.Context, req *pb.ListUploadSessionsRequest) (*pb.ListUploadSessionsResponse, error) {
-	var userID int64
+	var userID string
 	if id, ok := ctx.Value("user_id").(int64); ok {
-		userID = id
+		userID = strconv.FormatInt(id, 10)
 	}
 
-	sessions, total, err := s.uc.ListSessions(ctx, userID, req.GetStatus(), int(req.Page), int(req.PageSize))
+	sessions, total, err := s.uc.ListSessions(ctx, userID, enums.UploadStatus(req.GetStatus()), int(req.Page), int(req.PageSize))
 	if err != nil {
 		return nil, err
 	}
@@ -211,17 +227,17 @@ func (s *UploadService) ListUploadSessions(ctx context.Context, req *pb.ListUplo
 	pbSessions := make([]*pb.GetUploadSessionResponse, len(sessions))
 	for i, session := range sessions {
 		pbSessions[i] = &pb.GetUploadSessionResponse{
-			UploadId:     session.UploadID,
-			Filename:     session.Filename,
-			FileSize:     session.FileSize,
-			ContentType:  session.ContentType,
-			TotalParts:   int32(session.TotalParts),
-			ChunkSize:    int32(session.ChunkSize),
-			UploadedSize: session.UploadedSize,
-			Status:       session.Status,
-			CreatedAt:    session.CreatedAt.Format(time.RFC3339),
-			ExpiresAt:    session.ExpiresAt.Format(time.RFC3339),
-		}
+				UploadId:     session.UploadID,
+				Filename:     session.Filename,
+				FileSize:     session.FileSize,
+				ContentType:  session.ContentType,
+				TotalParts:   int32(session.TotalParts),
+				ChunkSize:    int32(session.ChunkSize),
+				UploadedSize: session.UploadedSize,
+				Status:       string(session.Status),
+				CreatedAt:    session.CreatedAt.Format(time.RFC3339),
+				ExpiresAt:    session.ExpiresAt.Format(time.RFC3339),
+			}
 	}
 
 	return &pb.ListUploadSessionsResponse{

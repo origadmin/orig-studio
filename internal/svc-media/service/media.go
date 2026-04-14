@@ -294,7 +294,7 @@ func (s *MediaService) GetMediaVariants(
 	result := make([]*types.MediaVariant, len(summary.Variants))
 	for i, v := range summary.Variants {
 		result[i] = &types.MediaVariant{
-			Id:         strconv.Itoa(v.TaskID),
+			Id:         v.TaskID,
 			MediaId:    mediaIDStr,
 			ProfileId:  strconv.Itoa(v.ProfileID),
 			Resolution: v.Resolution,
@@ -539,12 +539,9 @@ func (s *MediaService) EncodingTasksHTTPHandler(w stdhttp.ResponseWriter, r *std
 		filter.OnlyStats = true
 	}
 
-	var mediaID *int64
+	var mediaID *string
 	if m := r.URL.Query().Get("media_id"); m != "" {
-		id, err := strconv.ParseInt(m, 10, 64)
-		if err == nil && id > 0 {
-			mediaID = &id
-		}
+		mediaID = &m
 	}
 
 	result, err := s.uc.ListEncodingTasksFlat(r.Context(), filter, mediaID)

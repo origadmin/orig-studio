@@ -14,10 +14,10 @@ import (
 
 // Playlist represents a user's media playlist.
 type Playlist struct {
-	ID          int       `json:"id"`
+	ID          string    `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
-	UserID      int       `json:"user_id"`
+	UserID      string    `json:"user_id"`
 	IsPublic    bool      `json:"is_public"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
@@ -25,39 +25,39 @@ type Playlist struct {
 
 // Channel represents a content channel.
 type Channel struct {
-	ID            int       `json:"id"`
+	ID            string    `json:"id"`
 	Title         string    `json:"title"`
 	Description   string    `json:"description"`
 	BannerLogo    string    `json:"banner_logo"`
 	FriendlyToken string    `json:"friendly_token"`
-	UserID        int       `json:"user_id"`
+	UserID        string    `json:"user_id"`
 	CreatedAt     time.Time `json:"created_at"`
 }
 
 // PlaylistRepo defines storage operations for playlists.
 type PlaylistRepo interface {
 	Create(ctx context.Context, p *Playlist) (*Playlist, error)
-	Get(ctx context.Context, id int) (*Playlist, error)
+	Get(ctx context.Context, id string) (*Playlist, error)
 	Update(ctx context.Context, p *Playlist) (*Playlist, error)
-	Delete(ctx context.Context, id int) error
-	ListByUser(ctx context.Context, userID int, page, pageSize int) ([]*Playlist, int, error)
+	Delete(ctx context.Context, id string) error
+	ListByUser(ctx context.Context, userID string, page, pageSize int) ([]*Playlist, int, error)
 	ListAll(ctx context.Context, page, pageSize int) ([]*Playlist, int, error)
-	AddMedia(ctx context.Context, playlistID, mediaID int) error
-	RemoveMedia(ctx context.Context, playlistID, mediaID int) error
-	ReorderMedia(ctx context.Context, playlistID int, mediaOrders map[int]int) error
+	AddMedia(ctx context.Context, playlistID, mediaID string) error
+	RemoveMedia(ctx context.Context, playlistID, mediaID string) error
+	ReorderMedia(ctx context.Context, playlistID string, mediaOrders map[string]int) error
 }
 
 // ChannelRepo defines storage operations for channels.
 type ChannelRepo interface {
 	Create(ctx context.Context, ch *Channel) (*Channel, error)
-	Get(ctx context.Context, id int) (*Channel, error)
+	Get(ctx context.Context, id string) (*Channel, error)
 	GetBySlug(ctx context.Context, slug string) (*Channel, error)
 	Update(ctx context.Context, ch *Channel) (*Channel, error)
-	Delete(ctx context.Context, id int) error
-	ListByUser(ctx context.Context, userID int, page, pageSize int) ([]*Channel, int, error)
+	Delete(ctx context.Context, id string) error
+	ListByUser(ctx context.Context, userID string, page, pageSize int) ([]*Channel, int, error)
 	ListAll(ctx context.Context, page, pageSize int) ([]*Channel, int, error)
-	AddMedia(ctx context.Context, channelID, mediaID int) error
-	RemoveMedia(ctx context.Context, channelID, mediaID int) error
+	AddMedia(ctx context.Context, channelID, mediaID string) error
+	RemoveMedia(ctx context.Context, channelID, mediaID string) error
 }
 
 // PlaylistChannelUseCase handles playlist and channel business logic.
@@ -85,15 +85,15 @@ func (uc *PlaylistChannelUseCase) ListPlaylists(ctx context.Context, page, pageS
 	return uc.playlistRepo.ListAll(ctx, page, pageSize)
 }
 
-func (uc *PlaylistChannelUseCase) GetPlaylist(ctx context.Context, id int) (*Playlist, error) {
+func (uc *PlaylistChannelUseCase) GetPlaylist(ctx context.Context, id string) (*Playlist, error) {
 	return uc.playlistRepo.Get(ctx, id)
 }
 
-func (uc *PlaylistChannelUseCase) ListUserPlaylists(ctx context.Context, userID int, page, pageSize int) ([]*Playlist, int, error) {
+func (uc *PlaylistChannelUseCase) ListUserPlaylists(ctx context.Context, userID string, page, pageSize int) ([]*Playlist, int, error) {
 	return uc.playlistRepo.ListByUser(ctx, userID, page, pageSize)
 }
 
-func (uc *PlaylistChannelUseCase) UpdatePlaylist(ctx context.Context, p *Playlist, userID int, isAdmin bool) (*Playlist, error) {
+func (uc *PlaylistChannelUseCase) UpdatePlaylist(ctx context.Context, p *Playlist, userID string, isAdmin bool) (*Playlist, error) {
 	existing, err := uc.playlistRepo.Get(ctx, p.ID)
 	if err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ func (uc *PlaylistChannelUseCase) UpdatePlaylist(ctx context.Context, p *Playlis
 	return uc.playlistRepo.Update(ctx, p)
 }
 
-func (uc *PlaylistChannelUseCase) DeletePlaylist(ctx context.Context, id int, userID int, isAdmin bool) error {
+func (uc *PlaylistChannelUseCase) DeletePlaylist(ctx context.Context, id string, userID string, isAdmin bool) error {
 	existing, err := uc.playlistRepo.Get(ctx, id)
 	if err != nil {
 		return err
@@ -115,7 +115,7 @@ func (uc *PlaylistChannelUseCase) DeletePlaylist(ctx context.Context, id int, us
 	return uc.playlistRepo.Delete(ctx, id)
 }
 
-func (uc *PlaylistChannelUseCase) AddMediaToPlaylist(ctx context.Context, playlistID, mediaID int, userID int, isAdmin bool) error {
+func (uc *PlaylistChannelUseCase) AddMediaToPlaylist(ctx context.Context, playlistID, mediaID string, userID string, isAdmin bool) error {
 	existing, err := uc.playlistRepo.Get(ctx, playlistID)
 	if err != nil {
 		return err
@@ -126,7 +126,7 @@ func (uc *PlaylistChannelUseCase) AddMediaToPlaylist(ctx context.Context, playli
 	return uc.playlistRepo.AddMedia(ctx, playlistID, mediaID)
 }
 
-func (uc *PlaylistChannelUseCase) RemoveMediaFromPlaylist(ctx context.Context, playlistID, mediaID int, userID int, isAdmin bool) error {
+func (uc *PlaylistChannelUseCase) RemoveMediaFromPlaylist(ctx context.Context, playlistID, mediaID string, userID string, isAdmin bool) error {
 	existing, err := uc.playlistRepo.Get(ctx, playlistID)
 	if err != nil {
 		return err
@@ -137,7 +137,7 @@ func (uc *PlaylistChannelUseCase) RemoveMediaFromPlaylist(ctx context.Context, p
 	return uc.playlistRepo.RemoveMedia(ctx, playlistID, mediaID)
 }
 
-func (uc *PlaylistChannelUseCase) ReorderMediaInPlaylist(ctx context.Context, playlistID int, mediaOrders map[int]int, userID int, isAdmin bool) error {
+func (uc *PlaylistChannelUseCase) ReorderMediaInPlaylist(ctx context.Context, playlistID string, mediaOrders map[string]int, userID string, isAdmin bool) error {
 	existing, err := uc.playlistRepo.Get(ctx, playlistID)
 	if err != nil {
 		return err
@@ -154,7 +154,7 @@ func (uc *PlaylistChannelUseCase) CreateChannel(ctx context.Context, ch *Channel
 	return uc.channelRepo.Create(ctx, ch)
 }
 
-func (uc *PlaylistChannelUseCase) GetChannel(ctx context.Context, id int) (*Channel, error) {
+func (uc *PlaylistChannelUseCase) GetChannel(ctx context.Context, id string) (*Channel, error) {
 	return uc.channelRepo.Get(ctx, id)
 }
 
@@ -166,11 +166,11 @@ func (uc *PlaylistChannelUseCase) ListChannels(ctx context.Context, page, pageSi
 	return uc.channelRepo.ListAll(ctx, page, pageSize)
 }
 
-func (uc *PlaylistChannelUseCase) ListUserChannels(ctx context.Context, userID int, page, pageSize int) ([]*Channel, int, error) {
+func (uc *PlaylistChannelUseCase) ListUserChannels(ctx context.Context, userID string, page, pageSize int) ([]*Channel, int, error) {
 	return uc.channelRepo.ListByUser(ctx, userID, page, pageSize)
 }
 
-func (uc *PlaylistChannelUseCase) UpdateChannel(ctx context.Context, ch *Channel, userID int, isAdmin bool) (*Channel, error) {
+func (uc *PlaylistChannelUseCase) UpdateChannel(ctx context.Context, ch *Channel, userID string, isAdmin bool) (*Channel, error) {
 	existing, err := uc.channelRepo.Get(ctx, ch.ID)
 	if err != nil {
 		return nil, err
@@ -181,7 +181,7 @@ func (uc *PlaylistChannelUseCase) UpdateChannel(ctx context.Context, ch *Channel
 	return uc.channelRepo.Update(ctx, ch)
 }
 
-func (uc *PlaylistChannelUseCase) DeleteChannel(ctx context.Context, id int, userID int, isAdmin bool) error {
+func (uc *PlaylistChannelUseCase) DeleteChannel(ctx context.Context, id string, userID string, isAdmin bool) error {
 	existing, err := uc.channelRepo.Get(ctx, id)
 	if err != nil {
 		return err
@@ -192,7 +192,7 @@ func (uc *PlaylistChannelUseCase) DeleteChannel(ctx context.Context, id int, use
 	return uc.channelRepo.Delete(ctx, id)
 }
 
-func (uc *PlaylistChannelUseCase) AddMediaToChannel(ctx context.Context, channelID, mediaID int, userID int, isAdmin bool) error {
+func (uc *PlaylistChannelUseCase) AddMediaToChannel(ctx context.Context, channelID, mediaID string, userID string, isAdmin bool) error {
 	existing, err := uc.channelRepo.Get(ctx, channelID)
 	if err != nil {
 		return err
@@ -203,7 +203,7 @@ func (uc *PlaylistChannelUseCase) AddMediaToChannel(ctx context.Context, channel
 	return uc.channelRepo.AddMedia(ctx, channelID, mediaID)
 }
 
-func (uc *PlaylistChannelUseCase) RemoveMediaFromChannel(ctx context.Context, channelID, mediaID int, userID int, isAdmin bool) error {
+func (uc *PlaylistChannelUseCase) RemoveMediaFromChannel(ctx context.Context, channelID, mediaID string, userID string, isAdmin bool) error {
 	existing, err := uc.channelRepo.Get(ctx, channelID)
 	if err != nil {
 		return err
