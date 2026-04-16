@@ -45,7 +45,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const [buffered, setBuffered] = useState(0);
     const [currentQuality, setCurrentQuality] = useState<string>('auto');
 
-    // 使用全局播放器设置
+    // Use global player settings
     const {
         volume,
         isMuted,
@@ -88,7 +88,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         };
     }, [src, hlsSrc]);
 
-    // 应用全局设置到视频元素
+    // Apply global settings to video element
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
@@ -98,7 +98,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         video.playbackRate = playbackRate;
     }, [volume, isMuted, playbackRate]);
 
-    // 点击外部关闭菜单
+    // Click outside to close menu
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (settingsMenuRef.current && !settingsMenuRef.current.contains(e.target as Node)) {
@@ -203,7 +203,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         setShowPlaybackMenu(false);
     }, [setPlaybackRate]);
 
-    // 清晰度选择
+    // Quality selection
     const handleQualityChange = useCallback((quality: string) => {
         setCurrentQuality(quality);
         setShowSettingsMenu(false);
@@ -398,25 +398,25 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                 </div>
                             </div>
 
-                            {/* Time display - 修复小数问题 */}
+                            {/* Time display - fix decimal issue */}
                             <span className="text-white text-sm font-medium min-w-[100px]">
                                 {formatDuration(Math.floor(currentTime))} / {formatDuration(Math.floor(duration))}
                             </span>
                         </div>
 
                         <div className="flex items-center gap-2" ref={settingsMenuRef}>
-                            {/* 字幕 */}
+                            {/* Subtitles */}
                             <Button
                                 variant="ghost"
                                 size="icon"
                                 className="h-10 w-10 text-white hover:bg-white/10 rounded-full opacity-50 cursor-not-allowed"
                                 disabled
-                                title="字幕 (开发中)"
+                                title="Subtitles (in development)"
                             >
                                 <Subtitles size={20}/>
                             </Button>
 
-                            {/* 播放速度 */}
+                            {/* Playback speed */}
                             <div className="relative">
                                 <Button
                                     variant="ghost"
@@ -451,7 +451,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                 )}
                             </div>
 
-                            {/* 设置 */}
+                            {/* Settings */}
                             <div className="relative">
                                 <Button
                                     variant="ghost"
@@ -468,10 +468,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                 {showSettingsMenu && (
                                     <div
                                         className="absolute bottom-full right-0 mb-2 bg-black/90 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden min-w-[160px] shadow-xl">
-                                        {/* 清晰度 */}
+                                        {/* Quality */}
                                         <div
                                             className="px-3 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-white/10">
-                                            清晰度
+                                            Quality
                                         </div>
                                         <button
                                             className={`w-full text-left px-4 py-2 text-white hover:bg-white/10 transition-colors text-sm ${
@@ -482,7 +482,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                                 handleQualityChange('auto');
                                             }}
                                         >
-                                            自动
+                                            Auto
                                         </button>
                                         {qualities?.map((q) => (
                                             <button
@@ -502,29 +502,29 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                 )}
                             </div>
 
-                            {/* 画中画 */}
+                            {/* Picture-in-Picture */}
                             <Button
                                 variant="ghost"
                                 size="icon"
                                 className="h-10 w-10 text-white hover:bg-white/10 rounded-full opacity-50 cursor-not-allowed"
                                 disabled
-                                title="画中画 (开发中)"
+                                title="Picture-in-Picture (in development)"
                             >
                                 <PictureInPicture size={20}/>
                             </Button>
 
-                            {/* 迷你播放器 */}
+                            {/* Mini player */}
                             <Button
                                 variant="ghost"
                                 size="icon"
                                 className="h-10 w-10 text-white hover:bg-white/10 rounded-full opacity-50 cursor-not-allowed"
                                 disabled
-                                title="迷你播放器 (开发中)"
+                                title="Mini player (in development)"
                             >
                                 <MonitorPlay size={20}/>
                             </Button>
 
-                            {/* 全屏 */}
+                            {/* Fullscreen */}
                             <Button
                                 variant="ghost"
                                 size="icon"

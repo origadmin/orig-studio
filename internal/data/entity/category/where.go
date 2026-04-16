@@ -1156,6 +1156,29 @@ func HasMediaWith(preds ...predicate.Media) predicate.Category {
 	})
 }
 
+// HasArticles applies the HasEdge predicate on the "articles" edge.
+func HasArticles() predicate.Category {
+	return predicate.Category(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ArticlesTable, ArticlesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasArticlesWith applies the HasEdge predicate on the "articles" edge with a given conditions (other predicates).
+func HasArticlesWith(preds ...predicate.Article) predicate.Category {
+	return predicate.Category(func(s *sql.Selector) {
+		step := newArticlesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasParent applies the HasEdge predicate on the "parent" edge.
 func HasParent() predicate.Category {
 	return predicate.Category(func(s *sql.Selector) {

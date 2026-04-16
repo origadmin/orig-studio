@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/handler"
 	systemData "origadmin/application/origcms/internal/svc-system/data"
 )
 
@@ -30,9 +31,9 @@ func NewSystemHandler(jwtMgr *auth.Manager, statsRepo *systemData.StatsRepo) *Sy
 }
 
 // Register registers all system routes
-func (h *SystemHandler) Register(group *gin.RouterGroup) {
-	system := group.Group("/system")
-	system.Use(JWTMiddleware(h.jwtMgr)) // All system routes require auth
+func (h *SystemHandler) Register(r handler.Router) {
+	system := r.Group("/system")
+	// All system routes require auth
 	{
 		// ========== 1. Stats sub-module ==========
 		h.registerStats(system)
@@ -43,24 +44,24 @@ func (h *SystemHandler) Register(group *gin.RouterGroup) {
 }
 
 // registerStats handles all statistics routes
-func (h *SystemHandler) registerStats(g *gin.RouterGroup) {
+func (h *SystemHandler) registerStats(g handler.Router) {
 	stats := g.Group("/stats")
 	{
 		// Static routes first (alphabetical order)
-		stats.GET("/dashboard", h.getDashboardStats())
-		stats.GET("/media", h.getMediaStats())
-		stats.GET("/traffic", h.getTrafficStats())
-		stats.GET("/users", h.getUserStats())
+		stats.GET("/dashboard", GinHandlerToHTTP(h.getDashboardStats()))
+		stats.GET("/media", GinHandlerToHTTP(h.getMediaStats()))
+		stats.GET("/traffic", GinHandlerToHTTP(h.getTrafficStats()))
+		stats.GET("/users", GinHandlerToHTTP(h.getUserStats()))
 	}
 }
 
 // registerSettings handles all settings routes
-func (h *SystemHandler) registerSettings(g *gin.RouterGroup) {
+func (h *SystemHandler) registerSettings(g handler.Router) {
 	settings := g.Group("/settings")
 	{
 		// Collection routes
-		settings.GET("", h.getSettings())
-		settings.PUT("", h.updateSettings())
+		settings.GET("", GinHandlerToHTTP(h.getSettings()))
+		settings.PUT("", GinHandlerToHTTP(h.updateSettings()))
 	}
 }
 

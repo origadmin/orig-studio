@@ -74,6 +74,16 @@ func (r *mediaRepo) List(
 	if opt.Keyword != "" {
 		query = query.Where(media.TitleContains(opt.Keyword))
 	}
+	// TODO: Implement tag filtering
+	// if len(opt.Tags) > 0 {
+	// 	for _, tag := range opt.Tags {
+	// 		// For JSON field in SQLite, use Expr to build raw SQL query
+	// 		tagParam := fmt.Sprintf(`"%s"`, tag)
+	// 		query = query.Where(func(s *entity.MediaQuery) {
+	// 			s.Where(entity.Media.TagsContains(tag))
+	// 		})
+	// 	}
+	// }
 	if opt.Featured != nil {
 		query = query.Where(media.FeaturedEQ(*opt.Featured))
 	}
@@ -163,6 +173,9 @@ func (r *mediaRepo) Create(
 	if in.CategoryId != "" {
 		create = create.SetNillableCategoryID(&in.CategoryId)
 	}
+	if len(in.Tags) > 0 {
+		create = create.SetTags(in.Tags)
+	}
 
 	m, err := create.Save(ctx)
 	if err != nil {
@@ -240,6 +253,8 @@ func (r *mediaRepo) Update(
 	if in.CategoryId != "" {
 		update = update.SetNillableCategoryID(&in.CategoryId)
 	}
+	// Update tags
+	update = update.SetTags(in.Tags)
 
 	m, err := update.Save(ctx)
 	if err != nil {
@@ -450,6 +465,7 @@ func convertMediaToProto(m *entity.Media) *types.Media {
 		ViewCount:      m.ViewCount,
 		LikeCount:      m.LikeCount,
 		UserId:         m.UserID,
+		Tags:           m.Tags,
 		CreateTime:     timestamppb.New(m.CreatedAt),
 	}
 }

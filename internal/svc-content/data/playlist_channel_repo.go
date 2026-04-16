@@ -13,6 +13,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
 	"origadmin/application/origcms/internal/data/entity/playlist"
+	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/svc-content/biz"
 )
 
@@ -35,11 +36,15 @@ func NewChannelRepo(data *Data, logger log.Logger) biz.ChannelRepo {
 }
 
 func (r *playlistRepo) Create(ctx context.Context, p *biz.Playlist) (*biz.Playlist, error) {
+	privacy := 1 // Default to public
+	if !p.IsPublic {
+		privacy = 0
+	}
 	ent, err := r.data.db.Playlist.Create().
 		SetTitle(p.Name).
 		SetDescription(p.Description).
 		SetUserID(p.UserID).
-		SetPrivacy(1). // Default to public
+		SetPrivacy(privacy).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -52,13 +57,24 @@ func (r *playlistRepo) Get(ctx context.Context, id string) (*biz.Playlist, error
 	if err != nil {
 		return nil, err
 	}
-	return mapPlaylist(ent), nil
+	playlist := mapPlaylist(ent)
+	// Get media items for the playlist
+	mediaItems, err := r.GetPlaylistMedia(ctx, id)
+	if err == nil {
+		playlist.MediaItems = mediaItems
+	}
+	return playlist, nil
 }
 
 func (r *playlistRepo) Update(ctx context.Context, p *biz.Playlist) (*biz.Playlist, error) {
+	privacy := 1 // Default to public
+	if !p.IsPublic {
+		privacy = 0
+	}
 	ent, err := r.data.db.Playlist.UpdateOneID(p.ID).
 		SetTitle(p.Name).
 		SetDescription(p.Description).
+		SetPrivacy(privacy).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -67,6 +83,14 @@ func (r *playlistRepo) Update(ctx context.Context, p *biz.Playlist) (*biz.Playli
 }
 
 func (r *playlistRepo) Delete(ctx context.Context, id string) error {
+	// First delete associated media playlist entries
+	_, err := r.data.db.MediaPlaylist.Delete().
+		Where(mediaplaylist.PlaylistIDEQ(id)).
+		Exec(ctx)
+	if err != nil {
+		return err
+	}
+	// Then delete the playlist itself
 	return r.data.db.Playlist.DeleteOneID(id).Exec(ctx)
 }
 
@@ -85,7 +109,13 @@ func (r *playlistRepo) ListByUser(ctx context.Context, userID string, page, page
 	}
 	res := make([]*biz.Playlist, len(ents))
 	for i, ent := range ents {
-		res[i] = mapPlaylist(ent)
+		playlist := mapPlaylist(ent)
+		// Get media items for each playlist
+		mediaItems, err := r.GetPlaylistMedia(ctx, ent.ID)
+		if err == nil {
+			playlist.MediaItems = mediaItems
+		}
+		res[i] = playlist
 	}
 	return res, total, nil
 }
@@ -105,7 +135,13 @@ func (r *playlistRepo) ListAll(ctx context.Context, page, pageSize int) ([]*biz.
 	}
 	res := make([]*biz.Playlist, len(ents))
 	for i, ent := range ents {
-		res[i] = mapPlaylist(ent)
+		playlist := mapPlaylist(ent)
+		// Get media items for each playlist
+		mediaItems, err := r.GetPlaylistMedia(ctx, ent.ID)
+		if err == nil {
+			playlist.MediaItems = mediaItems
+		}
+		res[i] = playlist
 	}
 	return res, total, nil
 }
@@ -163,6 +199,21 @@ func (r *playlistRepo) ReorderMedia(ctx context.Context, playlistID string, medi
 	return nil
 }
 
+func (r *playlistRepo) GetPlaylistMedia(ctx context.Context, playlistID string) ([]string, error) {
+	medias, err := r.data.db.MediaPlaylist.Query().
+		Where(mediaplaylist.PlaylistIDEQ(playlistID)).
+		Order(entity.Asc(mediaplaylist.FieldOrdering)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	mediaIDs := make([]string, len(medias))
+	for i, media := range medias {
+		mediaIDs[i] = media.MediaID
+	}
+	return mediaIDs, nil
+}
+
 func (r *channelRepo) Create(ctx context.Context, ch *biz.Channel) (*biz.Channel, error) {
 	ent, err := r.data.db.Channel.Create().
 		SetTitle(ch.Title).
@@ -197,6 +248,7 @@ func (r *channelRepo) Update(ctx context.Context, ch *biz.Channel) (*biz.Channel
 		SetTitle(ch.Title).
 		SetDescription(ch.Description).
 		SetBannerLogo(ch.BannerLogo).
+		SetIsPublic(ch.IsPublic).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -260,6 +312,118 @@ func (r *channelRepo) RemoveMedia(ctx context.Context, channelID, mediaID string
 		Exec(ctx)
 }
 
+// Subscription methods
+
+func (r *channelRepo) Subscribe(ctx context.Context, channelID, userID string) error {
+	// Check if subscription already exists
+	exists, _ := r.data.db.Subscription.Query().
+		Where(
+			subscription.ChannelIDEQ(channelID),
+			subscription.SubscriberIDEQ(userID),
+		).Exist(ctx)
+	if exists {
+		return nil // Already subscribed
+	}
+
+	// Create new subscription
+	_, err := r.data.db.Subscription.Create().
+		SetChannelID(channelID).
+		SetSubscriberID(userID).
+		Save(ctx)
+	return err
+}
+
+func (r *channelRepo) Unsubscribe(ctx context.Context, channelID, userID string) error {
+	_, err := r.data.db.Subscription.Delete().
+		Where(
+			subscription.ChannelIDEQ(channelID),
+			subscription.SubscriberIDEQ(userID),
+		).Exec(ctx)
+	return err
+}
+
+func (r *channelRepo) IsSubscribed(ctx context.Context, channelID, userID string) (bool, error) {
+	return r.data.db.Subscription.Query().
+		Where(
+			subscription.ChannelIDEQ(channelID),
+			subscription.SubscriberIDEQ(userID),
+		).Exist(ctx)
+}
+
+func (r *channelRepo) GetSubscribers(ctx context.Context, channelID string, page, pageSize int) ([]string, int, error) {
+	query := r.data.db.Subscription.Query().Where(subscription.ChannelIDEQ(channelID))
+	
+	total, err := query.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	
+	ents, err := query.
+		Limit(pageSize).
+		Offset((page - 1) * pageSize).
+		All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	
+	subscribers := make([]string, len(ents))
+	for i, ent := range ents {
+		subscribers[i] = ent.SubscriberID
+	}
+	
+	return subscribers, total, nil
+}
+
+func (r *channelRepo) GetSubscriberCount(ctx context.Context, channelID string) (int, error) {
+	return r.data.db.Subscription.Query().
+		Where(subscription.ChannelIDEQ(channelID)).
+		Count(ctx)
+}
+
+// Invitation methods - using in-memory storage as a workaround
+// Note: This is a temporary solution. In a production environment, you should use a proper storage system.
+
+var channelInvitations = make(map[string]map[string]bool) // channelID -> userID -> isInvited
+
+func (r *channelRepo) InviteUserToChannel(ctx context.Context, channelID, userID string) error {
+	if _, ok := channelInvitations[channelID]; !ok {
+		channelInvitations[channelID] = make(map[string]bool)
+	}
+	channelInvitations[channelID][userID] = true
+	return nil
+}
+
+func (r *channelRepo) AcceptChannelInvitation(ctx context.Context, channelID, userID string) error {
+	if _, ok := channelInvitations[channelID]; ok {
+		delete(channelInvitations[channelID], userID)
+	}
+	return nil
+}
+
+func (r *channelRepo) RejectChannelInvitation(ctx context.Context, channelID, userID string) error {
+	if _, ok := channelInvitations[channelID]; ok {
+		delete(channelInvitations[channelID], userID)
+	}
+	return nil
+}
+
+func (r *channelRepo) GetChannelInvitations(ctx context.Context, userID string) ([]string, error) {
+	var invitations []string
+	for channelID, users := range channelInvitations {
+		if users[userID] {
+			invitations = append(invitations, channelID)
+		}
+	}
+	return invitations, nil
+}
+
+func (r *channelRepo) IsInvitedToChannel(ctx context.Context, channelID, userID string) (bool, error) {
+	if users, ok := channelInvitations[channelID]; ok {
+		return users[userID], nil
+	}
+	return false, nil
+}
+
 func mapPlaylist(ent *entity.Playlist) *biz.Playlist {
 	return &biz.Playlist{
 		ID:          ent.ID,
@@ -269,6 +433,7 @@ func mapPlaylist(ent *entity.Playlist) *biz.Playlist {
 		IsPublic:    ent.Privacy == 1,
 		CreatedAt:   ent.AddDate,
 		UpdatedAt:   ent.AddDate,
+		MediaItems:  []string{},
 	}
 }
 
@@ -279,6 +444,7 @@ func mapChannel(ent *entity.Channel) *biz.Channel {
 		Description:   ent.Description,
 		BannerLogo:    ent.BannerLogo,
 		FriendlyToken: ent.Slug,
+		IsPublic:      ent.IsPublic,
 		UserID:        ent.UserID,
 		CreatedAt:     ent.AddDate,
 	}

@@ -11,6 +11,60 @@ import (
 	"origadmin/application/origcms/internal/auth"
 )
 
+// GinMiddlewareAdapter adapts a gin.HandlerFunc to http.HandlerFunc
+func GinMiddlewareAdapter(middleware gin.HandlerFunc, next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Create a gin context
+		c, _ := gin.CreateTestContext(w)
+		c.Request = r
+		
+		// Call the middleware first
+		middleware(c)
+		
+		// If the middleware didn't abort, call the next handler
+		if !c.IsAborted() {
+			next(w, r)
+		}
+	}
+}
+
+// WithJWT wraps a handler with JWT middleware
+func WithJWT(jwtMgr *auth.Manager, handler http.HandlerFunc) http.HandlerFunc {
+	return GinMiddlewareAdapter(JWTMiddleware(jwtMgr), handler)
+}
+
+// GinHandlerToHTTP converts a gin.HandlerFunc to http.HandlerFunc
+func GinHandlerToHTTP(handler gin.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		c, _ := gin.CreateTestContext(w)
+		c.Request = r
+		handler(c)
+	}
+}
+
+// WithAdmin wraps a handler with JWT + Admin middleware
+func WithAdmin(jwtMgr *auth.Manager, handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		c, _ := gin.CreateTestContext(w)
+		c.Request = r
+		
+		// First run JWT middleware
+		JWTMiddleware(jwtMgr)(c)
+		if c.IsAborted() {
+			return
+		}
+		
+		// Then run Admin middleware
+		AdminMiddleware(jwtMgr)(c)
+		if c.IsAborted() {
+			return
+		}
+		
+		// Call the actual handler
+		handler(w, r)
+	}
+}
+
 // JWTMiddleware validates Bearer token and injects claims into context.
 func JWTMiddleware(jwtMgr *auth.Manager) gin.HandlerFunc {
 	return func(c *gin.Context) {

@@ -27,11 +27,14 @@ type Comment struct {
 	MediaID string `json:"media_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
+	// Status holds the value of the "status" field.
+	Status string `json:"status,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CommentQuery when eager-loading is set.
-	Edges           CommentEdges `json:"edges"`
-	comment_replies *string
-	selectValues    sql.SelectValues
+	Edges            CommentEdges `json:"edges"`
+	article_comments *string
+	comment_replies  *string
+	selectValues     sql.SelectValues
 }
 
 // CommentEdges holds the relations/edges for other nodes in the graph.
@@ -96,11 +99,13 @@ func (*Comment) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case comment.FieldID, comment.FieldText, comment.FieldMediaID, comment.FieldUserID:
+		case comment.FieldID, comment.FieldText, comment.FieldMediaID, comment.FieldUserID, comment.FieldStatus:
 			values[i] = new(sql.NullString)
 		case comment.FieldAddDate:
 			values[i] = new(sql.NullTime)
-		case comment.ForeignKeys[0]: // comment_replies
+		case comment.ForeignKeys[0]: // article_comments
+			values[i] = new(sql.NullString)
+		case comment.ForeignKeys[1]: // comment_replies
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -147,7 +152,20 @@ func (_m *Comment) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UserID = value.String
 			}
+		case comment.FieldStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				_m.Status = value.String
+			}
 		case comment.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field article_comments", values[i])
+			} else if value.Valid {
+				_m.article_comments = new(string)
+				*_m.article_comments = value.String
+			}
+		case comment.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field comment_replies", values[i])
 			} else if value.Valid {
@@ -221,6 +239,9 @@ func (_m *Comment) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(_m.UserID)
+	builder.WriteString(", ")
+	builder.WriteString("status=")
+	builder.WriteString(_m.Status)
 	builder.WriteByte(')')
 	return builder.String()
 }

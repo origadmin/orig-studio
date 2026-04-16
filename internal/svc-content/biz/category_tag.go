@@ -82,6 +82,10 @@ func (uc *CategoryTagUseCase) DeleteCategory(ctx context.Context, id int) error 
 	return uc.categoryRepo.Delete(ctx, id)
 }
 
+func (uc *CategoryTagUseCase) GetCategory(ctx context.Context, id int) (*Category, error) {
+	return uc.categoryRepo.Get(ctx, id)
+}
+
 func (uc *CategoryTagUseCase) ListTags(
 	ctx context.Context,
 	page, pageSize int,
@@ -95,4 +99,12 @@ func (uc *CategoryTagUseCase) CreateTag(ctx context.Context, t *Tag) (*Tag, erro
 
 func (uc *CategoryTagUseCase) DeleteTag(ctx context.Context, id int) error {
 	return uc.tagRepo.Delete(ctx, id)
+}
+
+func (uc *CategoryTagUseCase) GetTag(ctx context.Context, id int) (*Tag, error) {
+	return uc.tagRepo.Get(ctx, id)
+}
+
+func (uc *CategoryTagUseCase) UpdateTag(ctx context.Context, t *Tag) (*Tag, error) {
+	return uc.tagRepo.Update(ctx, t)
 }

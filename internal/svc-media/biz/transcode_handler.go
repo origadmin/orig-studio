@@ -162,6 +162,16 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		} else if IsFramesProfile(p) {
 			framesProfiles = append(framesProfiles, p)
 		} else if IsVideoProfile(p) {
+			// For short videos, only use short video profiles
+			if media.Type == "short_video" && !strings.Contains(p.Name, "short") {
+				h.logger.Infof("skipping non-short profile for short video: name=%s", p.Name)
+				continue
+			}
+			// For regular videos, skip short video profiles
+			if media.Type != "short_video" && strings.Contains(p.Name, "short") {
+				h.logger.Infof("skipping short profile for regular video: name=%s", p.Name)
+				continue
+			}
 			videoProfiles = append(videoProfiles, p)
 		} else {
 			h.logger.Infof("skipping unknown profile type: name=%s ext=%s", p.Name, p.Extension)
@@ -486,16 +496,16 @@ func (h *TranscodeHandler) waitForOutput(
 		currentTask, err := h.encodingRepo.Get(context.Background(), task.Id)
 		if err == nil && currentTask != nil {
 			if currentTask.Status == enums.EncodingTaskStatusProcessing {
-				h.logger.Infof("task %d has started processing, beginning file wait", task.Id)
+				h.logger.Infof("task %s has started processing, beginning file wait", task.Id)
 				break
 			} else if currentTask.Status == enums.EncodingTaskStatusFailed {
-				h.logger.Warnf("task %d failed during execution: %s", task.Id, currentTask.ErrorMessage)
-				return fmt.Errorf("task %d failed: %s", task.Id, currentTask.ErrorMessage)
+				h.logger.Warnf("task %s failed during execution: %s", task.Id, currentTask.ErrorMessage)
+				return fmt.Errorf("task %s failed: %s", task.Id, currentTask.ErrorMessage)
 			}
 		}
 		time.Sleep(5 * time.Second)
 		if i == maxWaitForStart-1 {
-			return fmt.Errorf("task %d did not start processing within timeout", task.Id)
+			return fmt.Errorf("task %s did not start processing within timeout", task.Id)
 		}
 	}
 
@@ -509,8 +519,8 @@ func (h *TranscodeHandler) waitForOutput(
 		// Check task status first
 		currentTask, err := h.encodingRepo.Get(context.Background(), task.Id)
 		if err == nil && currentTask != nil && currentTask.Status == enums.EncodingTaskStatusFailed {
-			h.logger.Warnf("task %d failed during file wait: %s", task.Id, currentTask.ErrorMessage)
-			return fmt.Errorf("task %d failed: %s", task.Id, currentTask.ErrorMessage)
+			h.logger.Warnf("task %s failed during file wait: %s", task.Id, currentTask.ErrorMessage)
+			return fmt.Errorf("task %s failed: %s", task.Id, currentTask.ErrorMessage)
 		}
 
 		// For preview and frames profiles, provide basic progress updates

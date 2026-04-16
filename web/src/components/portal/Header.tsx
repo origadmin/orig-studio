@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {useAuth} from '../../hooks/useAuth';
-import NotificationBadge from '../../components/common/NotificationBadge';
+// import NotificationBadge from '../../components/common/NotificationBadge';
 
 /* ── QuickLink 定义 ──────────────────────────────────────────────────────── */
 
@@ -219,8 +219,8 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                 <div className="flex items-center gap-2 shrink-0">
                     {isAuthenticated && user ? (
                         <>
-                            {/* 通知徽章 */}
-                            <NotificationBadge/>
+                            {/* 通知徽章 - 暂时禁用 */}
+                            {/* <NotificationBadge/> */}
 
                             {/* 上传按钮 */}
                             <Link

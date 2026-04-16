@@ -49,11 +49,11 @@ const Comments: React.FC = () => {
         const fetchComments = async () => {
             try {
                 setLoading(true);
-                // 由于后端API要求media_id参数，我们暂时传递一个默认值0
-                // 当media_id为0时，后端会返回错误，但我们可以捕获这个错误并显示适当的消息
-                const response = await commentApi.getAll({ media_id: '0' });
+                // 直接调用getAll()获取所有评论，不需要传递media_id参数
+                const response = await commentApi.getAll();
+                const commentList = Array.isArray(response?.items) ? response.items : [];
                 // Map API response to our comment interface
-                const mappedComments = (response || []).map((comment: any) => ({
+                const mappedComments = commentList.map((comment: any) => ({
                     id: comment.id,
                     user: {
                         name: comment.username || 'Unknown User',
@@ -74,11 +74,7 @@ const Comments: React.FC = () => {
                 setComments(mappedComments);
             } catch (err: any) {
                 // 捕获错误并显示友好的消息
-                if (err.message.includes('media_id is required')) {
-                    setError('请先选择一个媒体文件查看评论');
-                } else {
-                    setError(err.message || t('common.error'));
-                }
+                setError(err.message || t('common.error'));
                 console.error('Failed to fetch comments:', err);
             } finally {
                 setLoading(false);
@@ -102,11 +98,11 @@ const Comments: React.FC = () => {
     const reportedCount = comments.filter(c => c.status === 'reported' || c.isSpam).length;
 
     const getStatusBadge = (status: string, isSpam: boolean) => {
-        if (isSpam) return <Badge variant="destructive">{t('admin.spam')}</Badge>;
+        if (isSpam) return <Badge variant="secondary">{t('admin.spam')}</Badge>;
         const variants: Record<string, 'default' | 'secondary' | 'outline'> = {
             approved: 'default',
             pending: 'outline',
-            reported: 'destructive',
+            reported: 'secondary',
         };
         const labels: Record<string, string> = {
             approved: t('admin.approved'),

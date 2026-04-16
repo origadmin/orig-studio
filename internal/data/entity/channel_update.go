@@ -115,6 +115,20 @@ func (_u *ChannelUpdate) SetNillableBannerLogo(v *string) *ChannelUpdate {
 	return _u
 }
 
+// SetIsPublic sets the "is_public" field.
+func (_u *ChannelUpdate) SetIsPublic(v bool) *ChannelUpdate {
+	_u.mutation.SetIsPublic(v)
+	return _u
+}
+
+// SetNillableIsPublic sets the "is_public" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableIsPublic(v *bool) *ChannelUpdate {
+	if v != nil {
+		_u.SetIsPublic(*v)
+	}
+	return _u
+}
+
 // SetAddDate sets the "add_date" field.
 func (_u *ChannelUpdate) SetAddDate(v time.Time) *ChannelUpdate {
 	_u.mutation.SetAddDate(v)
@@ -268,6 +282,9 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.BannerLogo(); ok {
 		_spec.SetField(channel.FieldBannerLogo, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.IsPublic(); ok {
+		_spec.SetField(channel.FieldIsPublic, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.AddDate(); ok {
 		_spec.SetField(channel.FieldAddDate, field.TypeTime, value)
@@ -448,6 +465,20 @@ func (_u *ChannelUpdateOne) SetBannerLogo(v string) *ChannelUpdateOne {
 func (_u *ChannelUpdateOne) SetNillableBannerLogo(v *string) *ChannelUpdateOne {
 	if v != nil {
 		_u.SetBannerLogo(*v)
+	}
+	return _u
+}
+
+// SetIsPublic sets the "is_public" field.
+func (_u *ChannelUpdateOne) SetIsPublic(v bool) *ChannelUpdateOne {
+	_u.mutation.SetIsPublic(v)
+	return _u
+}
+
+// SetNillableIsPublic sets the "is_public" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableIsPublic(v *bool) *ChannelUpdateOne {
+	if v != nil {
+		_u.SetIsPublic(*v)
 	}
 	return _u
 }
@@ -635,6 +666,9 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 	}
 	if value, ok := _u.mutation.BannerLogo(); ok {
 		_spec.SetField(channel.FieldBannerLogo, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.IsPublic(); ok {
+		_spec.SetField(channel.FieldIsPublic, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.AddDate(); ok {
 		_spec.SetField(channel.FieldAddDate, field.TypeTime, value)

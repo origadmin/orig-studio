@@ -89,55 +89,34 @@ export function useAuth(): UseAuthReturn {
         setUser(null);
     }, []);
 
-    // Periodically check token expiry
+    // 监听 storage 事件，接收 token 更新通知
     useEffect(() => {
-        const checkToken = async () => {
-            if (token && isTokenExpired()) {
-                // 尝试使用refresh token刷新
-                try {
-                    const refreshToken = localStorage.getItem('origcms_refresh_token');
-                    if (refreshToken) {
-                        const response = await fetch('/api/v1/auth/refresh', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ refresh_token: refreshToken }),
-                        });
-                        
-                        if (response.ok) {
-                            const data = await response.json();
-                            // 保存新token
-                            localStorage.setItem('origcms_token', data.access_token);
-                            if (data.refresh_token) {
-                                localStorage.setItem('origcms_refresh_token', data.refresh_token);
-                            }
-                            localStorage.setItem('token_expires_at', String(Date.now() + data.expires_in * 1000));
-                            // 更新状态
-                            setToken(data.access_token);
-                        } else {
-                            // 刷新失败，登出
-                            logout();
-                        }
-                    } else {
-                        // 没有refresh token，登出
-                        logout();
-                    }
-                } catch (error) {
-                    // 刷新失败，登出
-                    logout();
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === TOKEN_KEY) {
+                if (e.newValue) {
+                    setToken(e.newValue);
+                    // 同时也更新 user，因为刷新 token 时也会更新 user
+                    setUser(getStoredUser());
+                } else {
+                    setToken(null);
+                    setUser(null);
                 }
+            } else if (e.key === USER_KEY) {
+                setUser(getStoredUser());
             }
         };
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, []);
 
-        // Check on mount
-        checkToken();
-
-        // Check every minute
-        const interval = setInterval(checkToken, 60000);
-
-        return () => clearInterval(interval);
-    }, [token, logout]);
+    // 只在挂载时检查一次 token 状态
+    useEffect(() => {
+        if (token && isTokenExpired()) {
+            clearAuth();
+            setToken(null);
+            setUser(null);
+        }
+    }, [token]);
 
     const isAdmin = user?.roles?.includes('admin') ?? false;
 

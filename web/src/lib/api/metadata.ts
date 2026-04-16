@@ -60,29 +60,29 @@ export interface SceneChange {
 export const metadataApi = {
     // 获取媒体元数据
     getByMediaId: (mediaId: string) =>
-        api.get<MediaMetadata>(`/media/${mediaId}/metadata`),
+        api.get<MediaMetadata>(`/medias/${mediaId}/metadata`),
 
     // 触发元数据挖掘
     triggerMining: (mediaId: string) =>
-        api.post<{ success: boolean; message: string }>(`/media/${mediaId}/metadata/mining`),
+        api.post<{ success: boolean; message: string }>(`/medias/${mediaId}/metadata/mining`),
 
     // 获取元数据挖掘状态
     getMiningStatus: (mediaId: string) =>
-        api.get<{ status: string; progress: number; message: string }>(`/media/${mediaId}/metadata/status`),
+        api.get<{ status: string; progress: number; message: string }>(`/medias/${mediaId}/metadata/status`),
 
     // 获取关键帧
     getKeyFrames: (mediaId: string) =>
-        api.get<KeyFrame[]>(`/media/${mediaId}/metadata/key-frames`),
+        api.get<KeyFrame[]>(`/medias/${mediaId}/metadata/key-frames`),
 
     // 获取音频波形
     getAudioWaveform: (mediaId: string) =>
-        api.get<AudioWaveform>(`/media/${mediaId}/metadata/audio-waveform`),
+        api.get<AudioWaveform>(`/medias/${mediaId}/metadata/audio-waveform`),
 
     // 获取文本内容
     getTextContent: (mediaId: string) =>
-        api.get<TextContent>(`/media/${mediaId}/metadata/text-content`),
+        api.get<TextContent>(`/medias/${mediaId}/metadata/text-content`),
 
     // 获取场景变化
     getSceneChanges: (mediaId: string) =>
-        api.get<SceneChange[]>(`/media/${mediaId}/metadata/scene-changes`),
+        api.get<SceneChange[]>(`/medias/${mediaId}/metadata/scene-changes`),
 };

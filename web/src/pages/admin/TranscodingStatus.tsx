@@ -404,7 +404,7 @@ export default function TranscodingStatus() {
     const [pendingStatusFilter, setPendingStatusFilter] = useState<StatusFilter | ''>('');
     const [pendingChunkFilter, setPendingChunkFilter] = useState<string>('');
 
-    const [selectedRows, setSelectedRows] = useState<number[]>([]);
+    const [selectedRows, setSelectedRows] = useState<(string | number)[]>([]);
     const [sortConfig, setSortConfig] = useState<{ key: keyof EncodingTask, direction: 'asc' | 'desc' } | null>(null);
     
     // Total stats for card area (always complete, never filtered)
@@ -420,7 +420,7 @@ export default function TranscodingStatus() {
         failed: 0,
     });
 
-    const {lastEvent, sseStatus} = useTranscoding(urlMediaId);
+    const {lastEvent, sseStatus} = useTranscoding(urlMediaId ?? undefined);
 
     // Fetch total stats (card area) - always complete data
     const fetchTotalStats = useCallback(async () => {
@@ -692,7 +692,7 @@ const filteredTasks = useMemo(() => {
         }
     };
 
-    const toggleSelectRow = (id: number) => {
+    const toggleSelectRow = (id: string | number) => {
         setSelectedRows(prev =>
             prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
         );
@@ -734,7 +734,7 @@ const filteredTasks = useMemo(() => {
         for (const id of selectedRows) {
             setRetryingTaskId(id);
             try {
-                await encodingApi.retryTask(id);
+                await encodingApi.retryTask(String(id));
             } catch (err: any) {
                 console.error("Retry task failed:", err.message);
                 // 出错时恢复任务状态
@@ -1210,7 +1210,7 @@ const filteredTasks = useMemo(() => {
                                     {filteredTasks.map((task) => (
                                         <TaskRow key={task.id}
                                                  task={task}
-                                                 onRetry={() => handleRetryTask(task.id)}
+                                                 onRetry={() => handleRetryTask(String(task.id))}
                                                  isRetrying={retryingTaskId === task.id}
                                                  isSelected={selectedRows.includes(task.id)}
                                                  onToggleSelect={() => toggleSelectRow(task.id)}

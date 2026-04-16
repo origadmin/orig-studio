@@ -54,6 +54,20 @@ func (_c *CommentCreate) SetUserID(v string) *CommentCreate {
 	return _c
 }
 
+// SetStatus sets the "status" field.
+func (_c *CommentCreate) SetStatus(v string) *CommentCreate {
+	_c.mutation.SetStatus(v)
+	return _c
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *CommentCreate) SetNillableStatus(v *string) *CommentCreate {
+	if v != nil {
+		_c.SetStatus(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *CommentCreate) SetID(v string) *CommentCreate {
 	_c.mutation.SetID(v)
@@ -151,6 +165,10 @@ func (_c *CommentCreate) defaults() {
 		v := comment.DefaultAddDate()
 		_c.mutation.SetAddDate(v)
 	}
+	if _, ok := _c.mutation.Status(); !ok {
+		v := comment.DefaultStatus
+		_c.mutation.SetStatus(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := comment.DefaultID()
 		_c.mutation.SetID(v)
@@ -170,6 +188,9 @@ func (_c *CommentCreate) check() error {
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`entity: missing required field "Comment.user_id"`)}
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`entity: missing required field "Comment.status"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := comment.IDValidator(v); err != nil {
@@ -224,6 +245,10 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.AddDate(); ok {
 		_spec.SetField(comment.FieldAddDate, field.TypeTime, value)
 		_node.AddDate = value
+	}
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(comment.FieldStatus, field.TypeString, value)
+		_node.Status = value
 	}
 	if nodes := _c.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

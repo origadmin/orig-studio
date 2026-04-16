@@ -163,6 +163,7 @@ func ConvertCommentPBToComment(from *CommentPB) *Comment {
 		ID:      from.Id,
 		MediaID: from.MediaId,
 		UserID:  from.UserId,
+		Status:  ConvertInt32ToString(from.Status),
 	}
 	return to
 }
@@ -177,6 +178,7 @@ func ConvertCommentToCommentPB(from *Comment) *CommentPB {
 		Id:      from.ID,
 		UserId:  from.UserID,
 		MediaId: from.MediaID,
+		Status:  ConvertStringToInt32(from.Status),
 	}
 	return to
 }
@@ -319,7 +321,6 @@ func ConvertMediaPBToMedia(from *MediaPB) *Media {
 		ID:              from.Id,
 		Title:           from.Title,
 		Description:     from.Description,
-		UUID:            from.Uuid,
 		Type:            from.Type,
 		URL:             from.Url,
 		HlsFile:         from.HlsFile,
@@ -385,7 +386,6 @@ func ConvertMediaToMediaPB(from *Media) *MediaPB {
 		Tags:            from.Tags,
 		HlsFile:         from.HlsFile,
 		EncodingStatus:  from.EncodingStatus,
-		Uuid:            from.UUID,
 		PreviewFilePath: from.PreviewFilePath,
 		State:           from.State,
 		PublishedAt:     ConvertTimeToTimestamp(from.PublishedAt),

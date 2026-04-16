@@ -52,6 +52,8 @@ const (
 	EdgeUser = "user"
 	// EdgeMedia holds the string denoting the media edge name in mutations.
 	EdgeMedia = "media"
+	// EdgeArticles holds the string denoting the articles edge name in mutations.
+	EdgeArticles = "articles"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
 	// EdgeChildren holds the string denoting the children edge name in mutations.
@@ -72,6 +74,13 @@ const (
 	MediaInverseTable = "media"
 	// MediaColumn is the table column denoting the media relation/edge.
 	MediaColumn = "category_id"
+	// ArticlesTable is the table that holds the articles relation/edge.
+	ArticlesTable = "articles"
+	// ArticlesInverseTable is the table name for the Article entity.
+	// It exists in this package in order to avoid circular dependency with the "article" package.
+	ArticlesInverseTable = "articles"
+	// ArticlesColumn is the table column denoting the articles relation/edge.
+	ArticlesColumn = "category_id"
 	// ParentTable is the table that holds the parent relation/edge.
 	ParentTable = "categories"
 	// ParentColumn is the table column denoting the parent relation/edge.
@@ -274,6 +283,20 @@ func ByMedia(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByArticlesCount orders the results by articles count.
+func ByArticlesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newArticlesStep(), opts...)
+	}
+}
+
+// ByArticles orders the results by articles terms.
+func ByArticles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newArticlesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByParentField orders the results by parent field.
 func ByParentField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -306,6 +329,13 @@ func newMediaStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MediaInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, MediaTable, MediaColumn),
+	)
+}
+func newArticlesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ArticlesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ArticlesTable, ArticlesColumn),
 	)
 }
 func newParentStep() *sqlgraph.Step {

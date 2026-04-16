@@ -25,7 +25,10 @@ import (
 
 	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/handler"
+	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/svc-user/biz"
+	"origadmin/application/origcms/internal/svc-user/dto"
 )
 
 type UserHandler struct {
@@ -37,31 +40,33 @@ func NewUserHandler(uc *biz.UserUseCase, jwt *auth.Manager) *UserHandler {
 	return &UserHandler{uc: uc, jwt: jwt}
 }
 
-func (h *UserHandler) Register(group *gin.RouterGroup) {
-	users := group.Group("/users")
+func (h *UserHandler) Register(r handler.Router) {
+	users := r.Group("/users")
 	{
 		// ================================
 		// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST
 		// ================================
 		// Current user endpoints
-		users.GET("/me", JWTMiddleware(h.jwt), func(c *gin.Context) {
-			claims, ok := c.MustGet("claims").(*auth.Claims)
-			if !ok {
-				Fail(c, ErrUnauthorized, "unauthorized")
+		users.GET("/me", WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
+			claims := c.Get("claims").(*auth.Claims)
+			if claims == nil {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 				return
 			}
-			u, err := h.uc.GetUser(c.Request.Context(), claims.UserID)
+			u, err := h.uc.GetUser(r.Context(), claims.UserID)
 			if err != nil {
-				Fail(c, ErrUserNotFound, "User not found")
+				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 				return
 			}
-			OK(c, u)
-		})
+			c.JSON(http.StatusOK, u)
+		}))
 
-		users.PUT("/me", JWTMiddleware(h.jwt), func(c *gin.Context) {
-			claims, ok := c.MustGet("claims").(*auth.Claims)
-			if !ok {
-				Fail(c, ErrUnauthorized, "unauthorized")
+		users.PUT("/me", WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
+			claims := c.Get("claims").(*auth.Claims)
+			if claims == nil {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 				return
 			}
 
@@ -69,14 +74,14 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 				Nickname string `json:"nickname"`
 				Email    string `json:"email" binding:"omitempty,email"`
 			}
-			if err := c.ShouldBindJSON(&input); err != nil {
-				Fail(c, ErrBadRequest, err.Error())
+			if err := c.Bind(&input); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
 
-			u, err := h.uc.GetUser(c.Request.Context(), claims.UserID)
+			u, err := h.uc.GetUser(r.Context(), claims.UserID)
 			if err != nil {
-				Fail(c, ErrUserNotFound, "User not found")
+				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 				return
 			}
 
@@ -87,18 +92,19 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 				u.Email = input.Email
 			}
 
-			updated, err := h.uc.UpdateUser(c.Request.Context(), u)
+			updated, err := h.uc.UpdateUser(r.Context(), u)
 			if err != nil {
-				Fail(c, ErrInternal, err.Error())
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			OK(c, updated)
-		})
+			c.JSON(http.StatusOK, updated)
+		}))
 
-		users.PUT("/me/password", JWTMiddleware(h.jwt), func(c *gin.Context) {
-			claims, ok := c.MustGet("claims").(*auth.Claims)
-			if !ok {
-				Fail(c, ErrUnauthorized, "unauthorized")
+		users.PUT("/me/password", WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
+			claims := c.Get("claims").(*auth.Claims)
+			if claims == nil {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 				return
 			}
 
@@ -106,14 +112,14 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 				OldPassword string `json:"old_password" binding:"required"`
 				NewPassword string `json:"new_password" binding:"required,min=6"`
 			}
-			if err := c.ShouldBindJSON(&input); err != nil {
-				Fail(c, ErrBadRequest, err.Error())
+			if err := c.Bind(&input); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
 
 			// Verify old password
-			if err := h.uc.VerifyPassword(c.Request.Context(), claims.UserID, input.OldPassword); err != nil {
-				Fail(c, ErrPasswordWrong, "Invalid old password")
+			if err := h.uc.VerifyPassword(r.Context(), claims.UserID, input.OldPassword); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid old password"})
 				return
 			}
 
@@ -121,30 +127,42 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 			// TODO: Implement UpdatePassword
 			// hashedPassword, err := h.uc.HashPassword(input.NewPassword)
 			// if err != nil {
-			// 	Fail(c, ErrInternal, "Failed to hash password")
-			// 	return
+			//  c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+			//  return
 			// }
 
-			// if err := h.uc.UpdatePassword(c.Request.Context(), claims.UserID, hashedPassword); err != nil {
-			// 	Fail(c, ErrInternal, err.Error())
-			// 	return
+			// if err := h.uc.UpdatePassword(r.Context(), claims.UserID, hashedPassword); err != nil {
+			//  c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			//  return
 			// }
 
-			OK(c, gin.H{"message": "Password updated"})
-		})
+			c.JSON(http.StatusOK, gin.H{"message": "Password updated"})
+		}))
 
 		// List users
-		users.GET("", func(c *gin.Context) {
-			limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
-			page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+		users.GET("", func(w http.ResponseWriter, r *http.Request) {
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
+			limit, _ := strconv.Atoi(c.Query("limit"))
+			if limit == 0 {
+				limit = 20
+			}
+			page, _ := strconv.Atoi(c.Query("page"))
+			if page == 0 {
+				page = 1
+			}
 
-			items, total, err := h.uc.ListUsers(c.Request.Context())
+			items, total, err := h.uc.ListUsers(r.Context(), &dto.UserQueryOption{
+				QueryOption: repo.QueryOption{
+					Page:     int32(page),
+					PageSize: int32(limit),
+				},
+			})
 			if err != nil {
-				Fail(c, ErrInternal, err.Error())
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 
-			OK(c, gin.H{
+			c.JSON(http.StatusOK, gin.H{
 				"items":     items,
 				"total":     total,
 				"page":      page,
@@ -153,45 +171,47 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 		})
 
 		// Create user
-		users.POST("", func(c *gin.Context) {
+		users.POST("", func(w http.ResponseWriter, r *http.Request) {
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
 			var input struct {
 				Username string `json:"username" binding:"required"`
 				Email    string `json:"email" binding:"required,email"`
 				Password string `json:"password" binding:"required,min=6"`
 				Name     string `json:"name"`
 			}
-			if err := c.ShouldBindJSON(&input); err != nil {
-				Fail(c, ErrBadRequest, err.Error())
+			if err := c.Bind(&input); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
 
 			hashedPassword, _ := h.uc.HashPassword(input.Password)
-			u, err := h.uc.CreateUser(c.Request.Context(), &types.User{
+			u, err := h.uc.CreateUser(r.Context(), &types.User{
 				Username: input.Username,
 				Email:    input.Email,
 				Nickname: input.Name, // Use Name as Nickname if Name is not in User
 			}, hashedPassword)
 			if err != nil {
-				Fail(c, ErrInternal, err.Error())
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 
-			c.JSON(http.StatusCreated, Response[interface{}]{Code: 0, Message: "ok", Data: u})
+			c.JSON(http.StatusCreated, gin.H{"code": 0, "message": "ok", "data": u})
 		})
 
 		// ================================
 		// 2. NESTED RESOURCE ROUTES
 		// ================================
 		// User related resources
-		users.GET("/:id/playlists", func(c *gin.Context) {
+		users.GET("/:id/playlists", func(w http.ResponseWriter, r *http.Request) {
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
 			id := c.Param("id")
 			// Handle "me" as special case
 			var userID string
 			if id == "me" {
-				if claims, ok := c.Get("claims"); ok {
+				if claims := c.Get("claims"); claims != nil {
 					userID = claims.(*auth.Claims).UserID
 				} else {
-					Fail(c, ErrUnauthorized, "unauthorized")
+					c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 					return
 				}
 			} else {
@@ -199,18 +219,19 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 			}
 
 			// TODO: Implement playlist listing
-			OK(c, gin.H{"user_id": userID, "playlists": []interface{}{}})
+			c.JSON(http.StatusOK, gin.H{"user_id": userID, "playlists": []interface{}{}})
 		})
 
-		users.GET("/:id/favorites", JWTMiddleware(h.jwt), func(c *gin.Context) {
+		users.GET("/:id/favorites", WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
 			id := c.Param("id")
 			// Handle "me" as special case
 			var userID string
 			if id == "me" {
-				if claims, ok := c.Get("claims"); ok {
+				if claims := c.Get("claims"); claims != nil {
 					userID = claims.(*auth.Claims).UserID
 				} else {
-					Fail(c, ErrUnauthorized, "unauthorized")
+					c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 					return
 				}
 			} else {
@@ -218,18 +239,19 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 			}
 
 			// TODO: Implement favorites listing
-			OK(c, gin.H{"user_id": userID, "favorites": []interface{}{}})
-		})
+			c.JSON(http.StatusOK, gin.H{"user_id": userID, "favorites": []interface{}{}})
+		}))
 
-		users.GET("/:id/likes", JWTMiddleware(h.jwt), func(c *gin.Context) {
+		users.GET("/:id/likes", WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
 			id := c.Param("id")
 			// Handle "me" as special case
 			var userID string
 			if id == "me" {
-				if claims, ok := c.Get("claims"); ok {
+				if claims := c.Get("claims"); claims != nil {
 					userID = claims.(*auth.Claims).UserID
 				} else {
-					Fail(c, ErrUnauthorized, "unauthorized")
+					c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 					return
 				}
 			} else {
@@ -237,76 +259,90 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 			}
 
 			// TODO: Implement likes listing
-			OK(c, gin.H{"user_id": userID, "likes": []interface{}{}})
-		})
+			c.JSON(http.StatusOK, gin.H{"user_id": userID, "likes": []interface{}{}})
+		}))
 
-		users.GET("/:id/subscriptions", JWTMiddleware(h.jwt), func(c *gin.Context) {
+		users.GET("/:id/subscriptions", WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
 			id := c.Param("id")
 			// Handle "me" as special case
 			var userID string
 			if id == "me" {
-				if claims, ok := c.Get("claims"); ok {
+				if claims := c.Get("claims"); claims != nil {
 					userID = claims.(*auth.Claims).UserID
 				} else {
-					Fail(c, ErrUnauthorized, "unauthorized")
+					c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 					return
 				}
 			} else {
 				userID = id
 			}
 
-			page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-			pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+			page, _ := strconv.Atoi(c.Query("page"))
+			if page == 0 {
+				page = 1
+			}
+			pageSize, _ := strconv.Atoi(c.Query("page_size"))
+			if pageSize == 0 {
+				pageSize = 20
+			}
 
 			list, total, err := h.uc.GetSubscriptions(
-				c.Request.Context(),
+				r.Context(),
 				userID,
 				page,
 				pageSize,
 			)
 			if err != nil {
-				Fail(c, ErrInternal, err.Error())
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 
-			OK(c, gin.H{
+			c.JSON(http.StatusOK, gin.H{
 				"items":     list,
 				"total":     total,
 				"page":      page,
 				"page_size": pageSize,
 			})
-		})
+		}))
 
-		users.GET("/:id/followers", func(c *gin.Context) {
+		users.GET("/:id/followers", func(w http.ResponseWriter, r *http.Request) {
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
 			id := c.Param("id")
 			// Handle "me" as special case
 			var userID string
 			if id == "me" {
-				if claims, ok := c.Get("claims"); ok {
+				if claims := c.Get("claims"); claims != nil {
 					userID = claims.(*auth.Claims).UserID
 				} else {
-					Fail(c, ErrUnauthorized, "unauthorized")
+					c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 					return
 				}
 			} else {
 				userID = id
 			}
 
-			page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-			pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+			page, _ := strconv.Atoi(c.Query("page"))
+			if page == 0 {
+				page = 1
+			}
+			pageSize, _ := strconv.Atoi(c.Query("page_size"))
+			if pageSize == 0 {
+				pageSize = 20
+			}
 
 			list, total, err := h.uc.GetSubscribers(
-				c.Request.Context(),
+				r.Context(),
 				userID,
 				page,
 				pageSize,
 			)
 			if err != nil {
-				Fail(c, ErrInternal, err.Error())
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 
-			OK(c, gin.H{
+			c.JSON(http.StatusOK, gin.H{
 				"items":     list,
 				"total":     total,
 				"page":      page,
@@ -314,15 +350,16 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 			})
 		})
 
-		users.GET("/:id/stats", func(c *gin.Context) {
+		users.GET("/:id/stats", func(w http.ResponseWriter, r *http.Request) {
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
 			id := c.Param("id")
 			// Handle "me" as special case
 			var userID string
 			if id == "me" {
-				if claims, ok := c.Get("claims"); ok {
+				if claims := c.Get("claims"); claims != nil {
 					userID = claims.(*auth.Claims).UserID
 				} else {
-					Fail(c, ErrUnauthorized, "unauthorized")
+					c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 					return
 				}
 			} else {
@@ -330,26 +367,33 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 			}
 
 			// TODO: Implement user stats
-			OK(c, gin.H{"user_id": userID, "stats": gin.H{}})
+			c.JSON(http.StatusOK, gin.H{"user_id": userID, "stats": gin.H{}})
 		})
 
 		// User channels
-		users.GET("/:id/channels", func(c *gin.Context) {
+		users.GET("/:id/channels", func(w http.ResponseWriter, r *http.Request) {
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
 			id := c.Param("id")
 			// Handle "me" as special case
 			if id == "me" {
-				if _, ok := c.Get("claims"); !ok {
-					Fail(c, ErrUnauthorized, "unauthorized")
+				if c.Get("claims") == nil {
+					c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 					return
 				}
 			}
 			// No need to parse as int64, use string directly
 
-			limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
-			page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+			limit, _ := strconv.Atoi(c.Query("limit"))
+			if limit == 0 {
+				limit = 100
+			}
+			page, _ := strconv.Atoi(c.Query("page"))
+			if page == 0 {
+				page = 1
+			}
 
 			// TODO: Implement ListUserChannels
-			OK(c, gin.H{
+			c.JSON(http.StatusOK, gin.H{
 				"items":     []interface{}{},
 				"total":     0,
 				"page":      page,
@@ -361,25 +405,27 @@ func (h *UserHandler) Register(group *gin.RouterGroup) {
 		// 3. PARAMETER ROUTES (WITH :id) - MUST BE LAST
 		// ================================
 		// Get user by ID
-		users.GET("/:id", func(c *gin.Context) {
+		users.GET("/:id", func(w http.ResponseWriter, r *http.Request) {
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
 			id := c.Param("id")
-			u, err := h.uc.GetUser(c.Request.Context(), id)
+			u, err := h.uc.GetUser(r.Context(), id)
 			if err != nil {
-				Fail(c, ErrUserNotFound, "User not found")
+				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 				return
 			}
-			OK(c, u)
+			c.JSON(http.StatusOK, u)
 		})
 
 		// Delete user
-		users.DELETE("/:id", func(c *gin.Context) {
+		users.DELETE("/:id", func(w http.ResponseWriter, r *http.Request) {
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
 			id := c.Param("id")
-			err := h.uc.DeleteUser(c.Request.Context(), id)
+			err := h.uc.DeleteUser(r.Context(), id)
 			if err != nil {
-				Fail(c, ErrInternal, err.Error())
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			OK(c, gin.H{"message": "deleted"})
+			c.JSON(http.StatusOK, gin.H{"message": "deleted"})
 		})
 	}
 

@@ -41,6 +41,7 @@ type MediaQueryOption struct {
 	Featured   *bool
 	OrderBy    string
 	Descending bool
+	Tags       []string
 }
 
 // MediaCreateOption specifies options for creating media.

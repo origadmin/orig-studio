@@ -12,6 +12,7 @@ import (
 
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/svc-media/biz"
 )
 
@@ -27,20 +28,21 @@ func NewUploadHandler(uc *biz.UploadUseCase, jwtMgr *auth.Manager) *UploadHandle
 	return &UploadHandler{uc: uc, jwtMgr: jwtMgr}
 }
 
-func (h *UploadHandler) Register(group *gin.RouterGroup) {
-	uploads := group.Group("/uploads")
-	uploads.Use(JWTMiddleware(h.jwtMgr))
+func (h *UploadHandler) Register(r handler.Router) {
+	uploads := r.Group("/uploads")
+	// Note: We can't use Use() directly with the Router interface
+	// We'll need to apply middleware to each route individually
 	{
 		// Multipart upload routes
-		uploads.POST("/multipart", h.initiateMultipartUpload())
-		uploads.POST("/:uploadId/parts/:partNumber", h.uploadPart())
-		uploads.POST("/:uploadId/complete", h.completeMultipartUpload())
-		uploads.POST("/:uploadId/abort", h.abortMultipartUpload())
-		uploads.GET("/:uploadId/parts", h.listParts())
+		uploads.POST("/multipart", WithJWT(h.jwtMgr, GinHandlerToHTTP(h.initiateMultipartUpload())))
+		uploads.POST("/:uploadId/parts/:partNumber", WithJWT(h.jwtMgr, GinHandlerToHTTP(h.uploadPart())))
+		uploads.POST("/:uploadId/complete", WithJWT(h.jwtMgr, GinHandlerToHTTP(h.completeMultipartUpload())))
+		uploads.POST("/:uploadId/abort", WithJWT(h.jwtMgr, GinHandlerToHTTP(h.abortMultipartUpload())))
+		uploads.GET("/:uploadId/parts", WithJWT(h.jwtMgr, GinHandlerToHTTP(h.listParts())))
 
 		// Session management
-		uploads.GET("/sessions", h.listUploadSessions())
-		uploads.GET("/sessions/:uploadId", h.getUploadSession())
+		uploads.GET("/sessions", WithJWT(h.jwtMgr, GinHandlerToHTTP(h.listUploadSessions())))
+		uploads.GET("/sessions/:uploadId", WithJWT(h.jwtMgr, GinHandlerToHTTP(h.getUploadSession())))
 	}
 }
 

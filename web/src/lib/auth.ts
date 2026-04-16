@@ -66,3 +66,20 @@ export function isAuthenticated(): boolean {
 
 // 导出 request 中的工具
 export {getAccessToken, setAuth, clearAuth};
+
+// 导出 upload 相关工具
+export {
+    startMultipartUpload,
+    cancelUpload,
+    pauseUpload,
+    shouldUseChunkedUpload,
+    updateUploadMetadataApi,
+    DEFAULT_CHUNK_SIZE as CHUNK_SIZE,
+    MAX_CONCURRENT_CHUNKS,
+} from './upload';
+export type {
+    PartInfo,
+    UploadStatus,
+    UploadTask,
+    UploadCallbacks,
+} from './upload';

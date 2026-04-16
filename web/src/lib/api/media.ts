@@ -125,8 +125,8 @@ export interface EncodeProfile {
 }
 
 export interface EncodingTask {
-    id: number;
-    media_id: number;
+    id: string;
+    media_id: string;
     profile_id: number;
     status: string; // "pending" | "processing" | "success" | "failed"
     progress: number;
@@ -193,7 +193,7 @@ export const encodingApi = {
     // 获取转码事件流（SSE）
     getSSEUrl: (mediaId?: string) => {
         // 使用相对路径，让前端代理处理
-        return `/api/v1/encoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
+        return `/api/v1/admin/encoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
     },
 
     // 获取所有转码任务（扁平列表）
@@ -206,32 +206,30 @@ export const encodingApi = {
         page_size?: number;
         media_id?: string;
         only_stats?: boolean;
-    }) => api.get<EncodingTaskListResponse>('/encoding/tasks', params as Record<string, unknown>),
+    }) => api.get<EncodingTaskListResponse>('/admin/encoding/tasks', params as Record<string, unknown>),
 
     // 重试单个任务
     retryTask: (taskId: string) => {
-        return api.post<{ message: string; task: any }>('/encoding/retry', null, {
-            params: {task_id: taskId}
-        });
+        return api.post<{ message: string; task: any }>(`/admin/encoding/tasks/${taskId}/retry`);
     },
 
     // 重试所有失败任务
     retryAllFailed: (mediaId?: string) => {
-        return api.post<{ message: string; retried_count: number }>('/encoding/retry-all-failed', null, {
+        return api.post<{ message: string; retried_count: number }>('/admin/encoding/retry-failed', null, {
             params: {media_id: mediaId}
         });
     },
 
     // 编码配置管理
     profiles: {
-        list: () => api.get<{ profiles: EncodeProfile[] }>('/encoding/profiles'),
-        get: (id: number) => api.get<{ profile: EncodeProfile }>(`/encoding/profiles/${id}`),
+        list: () => api.get<{ profiles: EncodeProfile[] }>('/admin/encoding/profiles'),
+        get: (id: number) => api.get<{ profile: EncodeProfile }>(`/admin/encoding/profiles/${id}`),
         create: (data: Partial<EncodeProfile>) => api.post<{
             profile: EncodeProfile
-        }>('/encoding/profiles', data),
+        }>('/admin/encoding/profiles', data),
         update: (id: number, data: Partial<EncodeProfile>) =>
-            api.put<{ profile: EncodeProfile }>(`/encoding/profiles/${id}`, data),
-        delete: (id: number) => api.del<void>(`/encoding/profiles/${id}`),
+            api.put<{ profile: EncodeProfile }>(`/admin/encoding/profiles/${id}`, data),
+        delete: (id: number) => api.del<void>(`/admin/encoding/profiles/${id}`),
     },
 };
 
@@ -420,7 +418,7 @@ export interface MediaVariantSummary {
 }
 
 export interface VariantInfo {
-    task_id: number;
+    task_id: string;
     profile_name: string;
     profile_id: number;
     resolution: string;
@@ -435,23 +433,23 @@ export interface VariantInfo {
 // 这些将在未来版本中移除
 export const legacyMediaApi = {
     // 旧版路径 - 将在未来版本中移除
-    listProfiles: () => api.get<{ profiles: EncodeProfile[] }>("/encoding/profiles"),
-    getProfile: (id: number) => api.get<{ profile: EncodeProfile }>(`/encoding/profiles/${id}`),
-    createProfile: (data: Partial<EncodeProfile>) => api.post<{ profile: EncodeProfile }>("/encoding/profiles", data),
+    listProfiles: () => api.get<{ profiles: EncodeProfile[] }>("/admin/encoding/profiles"),
+    getProfile: (id: number) => api.get<{ profile: EncodeProfile }>(`/admin/encoding/profiles/${id}`),
+    createProfile: (data: Partial<EncodeProfile>) => api.post<{ profile: EncodeProfile }>("/admin/encoding/profiles", data),
     updateProfile: (id: number, data: Partial<EncodeProfile>) =>
-        api.put<{ profile: EncodeProfile }>(`/encoding/profiles/${id}`, data),
-    deleteProfile: (id: number) => api.del<void>(`/encoding/profiles/${id}`),
+        api.put<{ profile: EncodeProfile }>(`/admin/encoding/profiles/${id}`, data),
+    deleteProfile: (id: number) => api.del<void>(`/admin/encoding/profiles/${id}`),
     getEncodingTasks: (params?: {
         status?: string;
         page?: number;
         page_size?: number;
         media_id?: number;
-    }) => api.get<EncodingTaskListResponse>("/encoding/tasks", params as Record<string, unknown>),
+    }) => api.get<EncodingTaskListResponse>("/admin/encoding/tasks", params as Record<string, unknown>),
     listTasks: (mediaId: number) => api.get<{ tasks: EncodingTask[] }>(`/medias/${mediaId}/tasks`),
     retryTranscode: (mediaId: number) =>
         api.post<{ message: string; media_id: number }>(`/medias/${mediaId}/tasks/:taskId/retry`),
     retryTask: (taskId: string) => {
-        return fetch(`${API_BASE_URL}/encoding/retry?task_id=${taskId}`, {
+        return fetch(`${API_BASE_URL}/api/v1/admin/encoding/tasks/${taskId}/retry`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -460,7 +458,7 @@ export const legacyMediaApi = {
         }).then((r) => !r.ok ? r.json().then((e) => Promise.reject(e)) : r.json());
     },
     retryAllFailed: (mediaId: number) => {
-        return fetch(`${API_BASE_URL}/encoding/retry-all-failed?media_id=${mediaId}`, {
+        return fetch(`${API_BASE_URL}/api/v1/admin/encoding/retry-failed?media_id=${mediaId}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -471,6 +469,6 @@ export const legacyMediaApi = {
     getVariants: (mediaId: number) =>
         api.get<MediaVariantSummary>(`/medias/${mediaId}/variants`),
     getSSEUrl: (mediaId?: number) => {
-        return `${API_BASE_URL}/encoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
+        return `${API_BASE_URL}/api/v1/admin/encoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
     },
 };

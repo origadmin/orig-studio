@@ -30,6 +30,8 @@ type Channel struct {
 	ShortToken string `json:"short_token,omitempty"`
 	// BannerLogo holds the value of the "banner_logo" field.
 	BannerLogo string `json:"banner_logo,omitempty"`
+	// IsPublic holds the value of the "is_public" field.
+	IsPublic bool `json:"is_public,omitempty"`
 	// AddDate holds the value of the "add_date" field.
 	AddDate time.Time `json:"add_date,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -74,6 +76,8 @@ func (*Channel) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case channel.FieldIsPublic:
+			values[i] = new(sql.NullBool)
 		case channel.FieldID, channel.FieldUserID, channel.FieldTitle, channel.FieldSlug, channel.FieldDescription, channel.FieldShortToken, channel.FieldBannerLogo:
 			values[i] = new(sql.NullString)
 		case channel.FieldAddDate:
@@ -134,6 +138,12 @@ func (_m *Channel) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field banner_logo", values[i])
 			} else if value.Valid {
 				_m.BannerLogo = value.String
+			}
+		case channel.FieldIsPublic:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_public", values[i])
+			} else if value.Valid {
+				_m.IsPublic = value.Bool
 			}
 		case channel.FieldAddDate:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -204,6 +214,9 @@ func (_m *Channel) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("banner_logo=")
 	builder.WriteString(_m.BannerLogo)
+	builder.WriteString(", ")
+	builder.WriteString("is_public=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsPublic))
 	builder.WriteString(", ")
 	builder.WriteString("add_date=")
 	builder.WriteString(_m.AddDate.Format(time.ANSIC))

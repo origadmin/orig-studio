@@ -9,6 +9,86 @@ import (
 )
 
 var (
+	// ArticlesColumns holds the columns for the "articles" table.
+	ArticlesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "title", Type: field.TypeString, Size: 255},
+		{Name: "content", Type: field.TypeString, Size: 2147483647},
+		{Name: "summary", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "slug", Type: field.TypeString, Unique: true, Nullable: true, Size: 150},
+		{Name: "state", Type: field.TypeString, Size: 20, Default: "draft"},
+		{Name: "view_count", Type: field.TypeInt64, Default: 0},
+		{Name: "comment_count", Type: field.TypeInt64, Default: 0},
+		{Name: "featured", Type: field.TypeBool, Default: false},
+		{Name: "tags", Type: field.TypeJSON, Nullable: true},
+		{Name: "published_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "category_id", Type: field.TypeString, Nullable: true, Size: 36},
+		{Name: "user_id", Type: field.TypeString, Size: 36},
+	}
+	// ArticlesTable holds the schema information for the "articles" table.
+	ArticlesTable = &schema.Table{
+		Name:       "articles",
+		Columns:    ArticlesColumns,
+		PrimaryKey: []*schema.Column{ArticlesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "articles_categories_articles",
+				Columns:    []*schema.Column{ArticlesColumns[13]},
+				RefColumns: []*schema.Column{CategoriesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "articles_users_user_articles",
+				Columns:    []*schema.Column{ArticlesColumns[14]},
+				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "article_title",
+				Unique:  false,
+				Columns: []*schema.Column{ArticlesColumns[1]},
+			},
+			{
+				Name:    "article_slug",
+				Unique:  false,
+				Columns: []*schema.Column{ArticlesColumns[4]},
+			},
+			{
+				Name:    "article_state",
+				Unique:  false,
+				Columns: []*schema.Column{ArticlesColumns[5]},
+			},
+			{
+				Name:    "article_featured",
+				Unique:  false,
+				Columns: []*schema.Column{ArticlesColumns[8]},
+			},
+			{
+				Name:    "article_view_count",
+				Unique:  false,
+				Columns: []*schema.Column{ArticlesColumns[6]},
+			},
+			{
+				Name:    "article_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{ArticlesColumns[11]},
+			},
+			{
+				Name:    "article_published_at",
+				Unique:  false,
+				Columns: []*schema.Column{ArticlesColumns[10]},
+			},
+			{
+				Name:    "article_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{ArticlesColumns[14]},
+			},
+		},
+	}
 	// CategoriesColumns holds the columns for the "categories" table.
 	CategoriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
@@ -92,6 +172,7 @@ var (
 		{Name: "description", Type: field.TypeString, Size: 2147483647},
 		{Name: "short_token", Type: field.TypeString, Unique: true, Size: 12},
 		{Name: "banner_logo", Type: field.TypeString, Size: 500},
+		{Name: "is_public", Type: field.TypeBool, Default: true},
 		{Name: "add_date", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeString, Size: 36},
 	}
@@ -103,7 +184,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "users_channel_users_user_channels",
-				Columns:    []*schema.Column{UsersChannelColumns[7]},
+				Columns:    []*schema.Column{UsersChannelColumns[8]},
 				RefColumns: []*schema.Column{UsersUserColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -112,7 +193,7 @@ var (
 			{
 				Name:    "channel_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{UsersChannelColumns[7]},
+				Columns: []*schema.Column{UsersChannelColumns[8]},
 			},
 			{
 				Name:    "channel_title",
@@ -132,7 +213,7 @@ var (
 			{
 				Name:    "channel_add_date",
 				Unique:  false,
-				Columns: []*schema.Column{UsersChannelColumns[6]},
+				Columns: []*schema.Column{UsersChannelColumns[7]},
 			},
 		},
 	}
@@ -141,6 +222,8 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "text", Type: field.TypeString, Size: 2147483647},
 		{Name: "add_date", Type: field.TypeTime},
+		{Name: "status", Type: field.TypeString, Default: "PENDING"},
+		{Name: "article_comments", Type: field.TypeString, Nullable: true, Size: 36},
 		{Name: "comment_replies", Type: field.TypeString, Nullable: true, Size: 36},
 		{Name: "media_comments", Type: field.TypeString, Size: 36},
 		{Name: "user_comments", Type: field.TypeString, Size: 36},
@@ -152,20 +235,26 @@ var (
 		PrimaryKey: []*schema.Column{FilesCommentColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
+				Symbol:     "files_comment_articles_comments",
+				Columns:    []*schema.Column{FilesCommentColumns[4]},
+				RefColumns: []*schema.Column{ArticlesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
 				Symbol:     "files_comment_files_comment_replies",
-				Columns:    []*schema.Column{FilesCommentColumns[3]},
+				Columns:    []*schema.Column{FilesCommentColumns[5]},
 				RefColumns: []*schema.Column{FilesCommentColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "files_comment_media_comments",
-				Columns:    []*schema.Column{FilesCommentColumns[4]},
+				Columns:    []*schema.Column{FilesCommentColumns[6]},
 				RefColumns: []*schema.Column{MediaColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "files_comment_users_user_comments",
-				Columns:    []*schema.Column{FilesCommentColumns[5]},
+				Columns:    []*schema.Column{FilesCommentColumns[7]},
 				RefColumns: []*schema.Column{UsersUserColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -179,12 +268,12 @@ var (
 			{
 				Name:    "comment_media_comments",
 				Unique:  false,
-				Columns: []*schema.Column{FilesCommentColumns[4]},
+				Columns: []*schema.Column{FilesCommentColumns[6]},
 			},
 			{
 				Name:    "comment_user_comments",
 				Unique:  false,
-				Columns: []*schema.Column{FilesCommentColumns[5]},
+				Columns: []*schema.Column{FilesCommentColumns[7]},
 			},
 		},
 	}
@@ -858,6 +947,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		ArticlesTable,
 		CategoriesTable,
 		UsersChannelTable,
 		FilesCommentTable,
@@ -882,6 +972,8 @@ var (
 )
 
 func init() {
+	ArticlesTable.ForeignKeys[0].RefTable = CategoriesTable
+	ArticlesTable.ForeignKeys[1].RefTable = UsersUserTable
 	CategoriesTable.ForeignKeys[0].RefTable = CategoriesTable
 	CategoriesTable.ForeignKeys[1].RefTable = FilesMediaCategoryTable
 	CategoriesTable.ForeignKeys[2].RefTable = UsersUserTable
@@ -889,9 +981,10 @@ func init() {
 	UsersChannelTable.Annotation = &entsql.Annotation{
 		Table: "users_channel",
 	}
-	FilesCommentTable.ForeignKeys[0].RefTable = FilesCommentTable
-	FilesCommentTable.ForeignKeys[1].RefTable = MediaTable
-	FilesCommentTable.ForeignKeys[2].RefTable = UsersUserTable
+	FilesCommentTable.ForeignKeys[0].RefTable = ArticlesTable
+	FilesCommentTable.ForeignKeys[1].RefTable = FilesCommentTable
+	FilesCommentTable.ForeignKeys[2].RefTable = MediaTable
+	FilesCommentTable.ForeignKeys[3].RefTable = UsersUserTable
 	FilesCommentTable.Annotation = &entsql.Annotation{
 		Table: "files_comment",
 	}

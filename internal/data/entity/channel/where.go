@@ -95,6 +95,11 @@ func BannerLogo(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldEQ(FieldBannerLogo, v))
 }
 
+// IsPublic applies equality check predicate on the "is_public" field. It's identical to IsPublicEQ.
+func IsPublic(v bool) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldIsPublic, v))
+}
+
 // AddDate applies equality check predicate on the "add_date" field. It's identical to AddDateEQ.
 func AddDate(v time.Time) predicate.Channel {
 	return predicate.Channel(sql.FieldEQ(FieldAddDate, v))
@@ -488,6 +493,16 @@ func BannerLogoEqualFold(v string) predicate.Channel {
 // BannerLogoContainsFold applies the ContainsFold predicate on the "banner_logo" field.
 func BannerLogoContainsFold(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldContainsFold(FieldBannerLogo, v))
+}
+
+// IsPublicEQ applies the EQ predicate on the "is_public" field.
+func IsPublicEQ(v bool) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldIsPublic, v))
+}
+
+// IsPublicNEQ applies the NEQ predicate on the "is_public" field.
+func IsPublicNEQ(v bool) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldIsPublic, v))
 }
 
 // AddDateEQ applies the EQ predicate on the "add_date" field.

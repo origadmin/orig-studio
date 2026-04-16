@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
@@ -375,6 +376,21 @@ func (_c *UserCreate) AddMedia(v ...*Media) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddMediumIDs(ids...)
+}
+
+// AddArticleIDs adds the "articles" edge to the Article entity by IDs.
+func (_c *UserCreate) AddArticleIDs(ids ...string) *UserCreate {
+	_c.mutation.AddArticleIDs(ids...)
+	return _c
+}
+
+// AddArticles adds the "articles" edges to the Article entity.
+func (_c *UserCreate) AddArticles(v ...*Article) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddArticleIDs(ids...)
 }
 
 // AddChannelIDs adds the "channels" edge to the Channel entity by IDs.
@@ -872,6 +888,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ArticlesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ArticlesTable,
+			Columns: []string{user.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

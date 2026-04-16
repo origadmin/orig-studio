@@ -29,6 +29,7 @@ func (Comment) Fields() []ent.Field {
 		field.Time("add_date").Default(time.Now),
 		field.String("media_id").StorageKey("media_comments"),
 		field.String("user_id").StorageKey("user_comments"),
+		field.String("status").Default("PENDING"), // PENDING, APPROVED, REJECTED
 	}
 }
 

@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/handler"
 	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 	userbiz "origadmin/application/origcms/internal/svc-user/biz"
 )
@@ -33,28 +34,29 @@ func NewMeHandler(
 	}
 }
 
-func (h *MeHandler) Register(group *gin.RouterGroup) {
-	me := group.Group("/me")
+func (h *MeHandler) Register(r handler.Router) {
+	me := r.Group("/me")
 	{
 		// All /me routes require authentication
-		me.Use(JWTMiddleware(h.jwt))
+		// Note: We can't use Use() directly with the Router interface
+		// We'll need to apply middleware to each route individually
 
 		// ================================
 		// 1. CURRENT USER PROFILE
 		// ================================
-		me.GET("", h.GetMe)
-		me.PUT("", h.UpdateMe)
-		me.PUT("/password", h.UpdatePassword)
+		me.GET("", WithJWT(h.jwt, GinHandlerToHTTP(h.GetMe)))
+		me.PUT("", WithJWT(h.jwt, GinHandlerToHTTP(h.UpdateMe)))
+		me.PUT("/password", WithJWT(h.jwt, GinHandlerToHTTP(h.UpdatePassword)))
 
 		// ================================
 		// 2. CURRENT USER RESOURCES
 		// ================================
-		me.GET("/playlists", h.GetPlaylists)
-		me.GET("/favorites", h.GetFavorites)
-		me.GET("/likes", h.GetLikes)
-		me.GET("/subscriptions", h.GetSubscriptions)
-		me.GET("/history", h.GetHistory)
-		me.GET("/stats", h.GetStats)
+		me.GET("/playlists", WithJWT(h.jwt, GinHandlerToHTTP(h.GetPlaylists)))
+		me.GET("/favorites", WithJWT(h.jwt, GinHandlerToHTTP(h.GetFavorites)))
+		me.GET("/likes", WithJWT(h.jwt, GinHandlerToHTTP(h.GetLikes)))
+		me.GET("/subscriptions", WithJWT(h.jwt, GinHandlerToHTTP(h.GetSubscriptions)))
+		me.GET("/history", WithJWT(h.jwt, GinHandlerToHTTP(h.GetHistory)))
+		me.GET("/stats", WithJWT(h.jwt, GinHandlerToHTTP(h.GetStats)))
 	}
 }
 
@@ -156,7 +158,7 @@ func (h *MeHandler) UpdatePassword(c *gin.Context) {
 
 // GetPlaylists returns the current user's playlists.
 func (h *MeHandler) GetPlaylists(c *gin.Context) {
-	_, ok := c.MustGet("claims").(*auth.Claims)
+	claims, ok := c.MustGet("claims").(*auth.Claims)
 	if !ok {
 		Fail(c, ErrUnauthorized, "unauthorized")
 		return
@@ -165,10 +167,15 @@ func (h *MeHandler) GetPlaylists(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 
-	// TODO: Implement playlist listing
+	list, total, err := h.playlistUC.ListUserPlaylists(c.Request.Context(), claims.UserID, page, pageSize)
+	if err != nil {
+		Fail(c, ErrInternal, err.Error())
+		return
+	}
+
 	OK(c, gin.H{
-		"items":     []interface{}{},
-		"total":     0,
+		"items":     list,
+		"total":     total,
 		"page":      page,
 		"page_size": pageSize,
 	})
@@ -176,41 +183,45 @@ func (h *MeHandler) GetPlaylists(c *gin.Context) {
 
 // GetFavorites returns the current user's favorites.
 func (h *MeHandler) GetFavorites(c *gin.Context) {
-	_, ok := c.MustGet("claims").(*auth.Claims)
+	claims, ok := c.MustGet("claims").(*auth.Claims)
 	if !ok {
 		Fail(c, ErrUnauthorized, "unauthorized")
 		return
 	}
 
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	favorites, err := h.likeFavoriteUC.ListUserFavorites(c.Request.Context(), claims.UserID)
+	if err != nil {
+		Fail(c, ErrInternal, err.Error())
+		return
+	}
 
-	// TODO: Implement favorites listing
 	OK(c, gin.H{
-		"items":     []interface{}{},
-		"total":     0,
-		"page":      page,
-		"page_size": pageSize,
+		"items":     favorites,
+		"total":     len(favorites),
+		"page":      1,
+		"page_size": len(favorites),
 	})
 }
 
 // GetLikes returns the current user's likes.
 func (h *MeHandler) GetLikes(c *gin.Context) {
-	_, ok := c.MustGet("claims").(*auth.Claims)
+	claims, ok := c.MustGet("claims").(*auth.Claims)
 	if !ok {
 		Fail(c, ErrUnauthorized, "unauthorized")
 		return
 	}
 
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	likes, err := h.likeFavoriteUC.ListUserLikes(c.Request.Context(), claims.UserID)
+	if err != nil {
+		Fail(c, ErrInternal, err.Error())
+		return
+	}
 
-	// TODO: Implement likes listing
 	OK(c, gin.H{
-		"items":     []interface{}{},
-		"total":     0,
-		"page":      page,
-		"page_size": pageSize,
+		"items":     likes,
+		"total":     len(likes),
+		"page":      1,
+		"page_size": len(likes),
 	})
 }
 
@@ -255,7 +266,7 @@ func (h *MeHandler) GetHistory(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 
-	// TODO: Implement history listing
+	// TODO: Implement history listing with proper repository and use case
 	OK(c, gin.H{
 		"items":     []interface{}{},
 		"total":     0,

@@ -19,6 +19,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/svc-content/biz"
 )
 
@@ -33,8 +34,8 @@ func NewChannelHandler(uc *biz.PlaylistChannelUseCase, jwt *auth.Manager) *Chann
 	return &ChannelHandler{uc: uc, jwt: jwt}
 }
 
-func (h *ChannelHandler) Register(group *gin.RouterGroup) {
-	channels := group.Group("/channels")
+func (h *ChannelHandler) Register(r handler.Router) {
+	channels := r.Group("/channels")
 	{
 		// Public read routes
 		// ================================
@@ -47,95 +48,124 @@ func (h *ChannelHandler) Register(group *gin.RouterGroup) {
 		// ================================
 		// Channel subscribers and subscription
 		channels.GET("/:id/subscribers", h.GetChannelSubscribers)
-		channels.GET("/:id/subscription", JWTMiddleware(h.jwt), h.GetSubscriptionStatus)
-		channels.POST("/:id/subscription", JWTMiddleware(h.jwt), h.SubscribeToChannel)
-		channels.DELETE("/:id/subscription", JWTMiddleware(h.jwt), h.UnsubscribeFromChannel)
+		channels.GET("/:id/subscription", WithJWT(h.jwt, h.GetSubscriptionStatus))
+		channels.POST("/:id/subscription", WithJWT(h.jwt, h.SubscribeToChannel))
+		channels.DELETE("/:id/subscription", WithJWT(h.jwt, h.UnsubscribeFromChannel))
 
 		// Protected write routes
-		protected := channels.Group("")
-		protected.Use(JWTMiddleware(h.jwt))
+		// Note: We can't use Use() directly with the Router interface
+		// We'll need to apply middleware to each route individually
 		{
-			protected.POST("", h.CreateChannel)
+			channels.POST("", WithJWT(h.jwt, h.CreateChannel))
 			// Media management within channel
-			protected.POST("/:id/medias", h.AddMedia)
-			protected.DELETE("/:id/medias/:mediaId", h.RemoveMedia)
+			channels.POST("/:id/medias", WithJWT(h.jwt, h.AddMedia))
+			channels.DELETE("/:id/medias/:mediaId", WithJWT(h.jwt, h.RemoveMedia))
+			// Invitation management
+			channels.POST("/:id/invitations", WithJWT(h.jwt, h.InviteUserToChannel))
+			channels.POST("/invitations/:id/accept", WithJWT(h.jwt, h.AcceptChannelInvitation))
+			channels.POST("/invitations/:id/reject", WithJWT(h.jwt, h.RejectChannelInvitation))
+			channels.GET("/invitations", WithJWT(h.jwt, h.GetChannelInvitations))
 		}
 
 		// ================================
 		// 3. PARAMETER ROUTES (WITH :id) - MUST BE LAST
 		// ================================
 		channels.GET("/:id", h.GetChannel)
-		channels.PUT("/:id", JWTMiddleware(h.jwt), h.UpdateChannel)
-		channels.DELETE("/:id", JWTMiddleware(h.jwt), h.DeleteChannel)
+		channels.PUT("/:id", WithJWT(h.jwt, h.UpdateChannel))
+		channels.DELETE("/:id", WithJWT(h.jwt, h.DeleteChannel))
 	}
 }
 
 // ListChannels returns all channels with optional pagination.
-func (h *ChannelHandler) ListChannels(c *gin.Context) {
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+func (h *ChannelHandler) ListChannels(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	limit, _ := strconv.Atoi(c.Query("limit"))
+	if limit == 0 {
+		limit = 20
+	}
+	page, _ := strconv.Atoi(c.Query("page"))
+	if page == 0 {
+		page = 1
+	}
 
-	items, total, err := h.uc.ListChannels(c.Request.Context(), page, limit)
+	items, total, err := h.uc.ListChannels(r.Context(), page, limit)
 	if err != nil {
-		Fail(c, ErrInternal, err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
 		return
 	}
 
-	OK(c, gin.H{
-		"items":     items,
-		"total":     total,
-		"page":      page,
-		"page_size": limit,
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"message": "ok",
+		"data": gin.H{
+			"items":     items,
+			"total":     total,
+			"page":      page,
+			"page_size": limit,
+		},
 	})
 }
 
 // GetChannel returns a single channel by ID with its media items.
-func (h *ChannelHandler) GetChannel(c *gin.Context) {
+func (h *ChannelHandler) GetChannel(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
 	id := c.Param("id")
 	if id == "" {
-		Fail(c, ErrBadRequest, "Invalid ID")
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "Invalid ID"})
 		return
 	}
 
-	chItem, err := h.uc.GetChannel(c.Request.Context(), id)
+	chItem, err := h.uc.GetChannel(r.Context(), id)
 	if err != nil {
-		Fail(c, ErrNotFound, "channel not found")
+		c.JSON(http.StatusNotFound, gin.H{"code": ErrNotFound, "message": "channel not found"})
 		return
 	}
 
-	OK(c, chItem)
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": chItem})
 }
 
 // GetUserChannels returns channels for a specific user.
-func (h *ChannelHandler) GetUserChannels(c *gin.Context) {
+func (h *ChannelHandler) GetUserChannels(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
 	userId := c.Param("userId")
 	if userId == "" {
-		Fail(c, ErrBadRequest, "Invalid user ID")
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "Invalid user ID"})
 		return
 	}
 
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.Query("limit"))
+	if limit == 0 {
+		limit = 100
+	}
+	page, _ := strconv.Atoi(c.Query("page"))
+	if page == 0 {
+		page = 1
+	}
 
-	items, total, err := h.uc.ListUserChannels(c.Request.Context(), userId, page, limit)
+	items, total, err := h.uc.ListUserChannels(r.Context(), userId, page, limit)
 	if err != nil {
-		Fail(c, ErrInternal, err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
 		return
 	}
 
-	OK(c, gin.H{
-		"items":     items,
-		"total":     total,
-		"page":      page,
-		"page_size": limit,
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"message": "ok",
+		"data": gin.H{
+			"items":     items,
+			"total":     total,
+			"page":      page,
+			"page_size": limit,
+		},
 	})
 }
 
 // CreateChannel creates a new channel for the authenticated user.
-func (h *ChannelHandler) CreateChannel(c *gin.Context) {
-	val, exists := c.Get("claims")
-	if !exists {
-		Fail(c, ErrUnauthorized, "unauthorized")
+func (h *ChannelHandler) CreateChannel(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	val := c.Get("claims")
+	if val == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"code": ErrUnauthorized, "message": "unauthorized"})
 		return
 	}
 	claims := val.(*auth.Claims)
@@ -145,9 +175,10 @@ func (h *ChannelHandler) CreateChannel(c *gin.Context) {
 		Description   string `json:"description"`
 		BannerLogo    string `json:"banner_logo"`
 		FriendlyToken string `json:"friendly_token"`
+		IsPublic      bool   `json:"is_public"`
 	}
-	if err := c.ShouldBindJSON(&input); err != nil {
-		Fail(c, ErrBadRequest, err.Error())
+	if err := c.Bind(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
 		return
 	}
 
@@ -156,30 +187,32 @@ func (h *ChannelHandler) CreateChannel(c *gin.Context) {
 		Description:   input.Description,
 		BannerLogo:    input.BannerLogo,
 		FriendlyToken: input.FriendlyToken,
+		IsPublic:      input.IsPublic,
 		UserID:        claims.UserID,
 	}
 
-	created, err := h.uc.CreateChannel(c.Request.Context(), chItem)
+	created, err := h.uc.CreateChannel(r.Context(), chItem)
 	if err != nil {
-		Fail(c, ErrInternal, err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, Response[interface{}]{Code: 0, Message: "ok", Data: created})
+	c.JSON(http.StatusCreated, gin.H{"code": 0, "message": "ok", "data": created})
 }
 
 // UpdateChannel updates a channel. Only the owner can update.
-func (h *ChannelHandler) UpdateChannel(c *gin.Context) {
-	val, exists := c.Get("claims")
-	if !exists {
-		Fail(c, ErrUnauthorized, "unauthorized")
+func (h *ChannelHandler) UpdateChannel(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	val := c.Get("claims")
+	if val == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"code": ErrUnauthorized, "message": "unauthorized"})
 		return
 	}
 	claims := val.(*auth.Claims)
 
 	id := c.Param("id")
 	if id == "" {
-		Fail(c, ErrBadRequest, "Invalid ID")
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "Invalid ID"})
 		return
 	}
 
@@ -187,217 +220,387 @@ func (h *ChannelHandler) UpdateChannel(c *gin.Context) {
 		Title       string `json:"title"`
 		Description string `json:"description"`
 		BannerLogo  string `json:"banner_logo"`
+		IsPublic    *bool  `json:"is_public"`
 	}
-	if err := c.ShouldBindJSON(&input); err != nil {
-		Fail(c, ErrBadRequest, err.Error())
+	if err := c.Bind(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
+		return
+	}
+
+	// Get existing channel to preserve other fields
+	existingChannel, err := h.uc.GetChannel(r.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
 		return
 	}
 
 	chItem := &biz.Channel{
-		ID:          id,
-		Title:       input.Title,
-		Description: input.Description,
-		BannerLogo:  input.BannerLogo,
+		ID:            id,
+		Title:         input.Title,
+		Description:   input.Description,
+		BannerLogo:    input.BannerLogo,
+		IsPublic:      existingChannel.IsPublic,
+		UserID:        existingChannel.UserID,
+		CreatedAt:     existingChannel.CreatedAt,
+	}
+
+	// Update IsPublic if provided
+	if input.IsPublic != nil {
+		chItem.IsPublic = *input.IsPublic
 	}
 
 	updated, err := h.uc.UpdateChannel(
-		c.Request.Context(),
+		r.Context(),
 		chItem,
 		claims.UserID,
 		claims.IsStaff,
 	)
 	if err != nil {
-		Fail(c, ErrInternal, err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
 		return
 	}
 
-	OK(c, updated)
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": updated})
 }
 
 // DeleteChannel deletes a channel. Only the owner or admin can delete.
-func (h *ChannelHandler) DeleteChannel(c *gin.Context) {
-	val, exists := c.Get("claims")
-	if !exists {
-		Fail(c, ErrUnauthorized, "unauthorized")
+func (h *ChannelHandler) DeleteChannel(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	val := c.Get("claims")
+	if val == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"code": ErrUnauthorized, "message": "unauthorized"})
 		return
 	}
 	claims := val.(*auth.Claims)
 
 	id := c.Param("id")
 	if id == "" {
-		Fail(c, ErrBadRequest, "Invalid ID")
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "Invalid ID"})
 		return
 	}
 
-	err := h.uc.DeleteChannel(c.Request.Context(), id, claims.UserID, claims.IsStaff)
+	err := h.uc.DeleteChannel(r.Context(), id, claims.UserID, claims.IsStaff)
 	if err != nil {
-		Fail(c, ErrInternal, err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
 		return
 	}
 
-	OK(c, gin.H{"message": "deleted"})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": gin.H{"message": "deleted"}})
 }
 
 // AddMedia adds a media item to a channel.
-func (h *ChannelHandler) AddMedia(c *gin.Context) {
-	val, exists := c.Get("claims")
-	if !exists {
-		Fail(c, ErrUnauthorized, "unauthorized")
+func (h *ChannelHandler) AddMedia(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	val := c.Get("claims")
+	if val == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"code": ErrUnauthorized, "message": "unauthorized"})
 		return
 	}
 	claims := val.(*auth.Claims)
 
 	id := c.Param("id")
 	if id == "" {
-		Fail(c, ErrBadRequest, "Invalid channel ID")
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "Invalid channel ID"})
 		return
 	}
 
 	var input struct {
 		MediaID string `json:"media_id" binding:"required"`
 	}
-	if err := c.ShouldBindJSON(&input); err != nil {
-		Fail(c, ErrBadRequest, err.Error())
+	if err := c.Bind(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
 		return
 	}
 
 	err := h.uc.AddMediaToChannel(
-		c.Request.Context(),
+		r.Context(),
 		id,
 		input.MediaID,
 		claims.UserID,
 		claims.IsStaff,
 	)
 	if err != nil {
-		Fail(c, ErrInternal, err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
 		return
 	}
 
-	OK(c, gin.H{
-		"message":    "media added to channel",
-		"channel_id": id,
-		"media_id":   input.MediaID,
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"message": "ok",
+		"data": gin.H{
+			"message":    "media added to channel",
+			"channel_id": id,
+			"media_id":   input.MediaID,
+		},
 	})
 }
 
 // RemoveMedia removes a media item from a channel (sets channel_id to null).
-func (h *ChannelHandler) RemoveMedia(c *gin.Context) {
-	val, exists := c.Get("claims")
-	if !exists {
-		Fail(c, ErrUnauthorized, "unauthorized")
+func (h *ChannelHandler) RemoveMedia(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	val := c.Get("claims")
+	if val == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"code": ErrUnauthorized, "message": "unauthorized"})
 		return
 	}
 	claims := val.(*auth.Claims)
 
 	id := c.Param("id")
 	if id == "" {
-		Fail(c, ErrBadRequest, "Invalid channel ID")
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "Invalid channel ID"})
 		return
 	}
 	mediaId := c.Param("mediaId")
 	if mediaId == "" {
-		Fail(c, ErrBadRequest, "Invalid media ID")
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "Invalid media ID"})
 		return
 	}
 
 	err := h.uc.RemoveMediaFromChannel(
-		c.Request.Context(),
+		r.Context(),
 		id,
 		mediaId,
 		claims.UserID,
 		claims.IsStaff,
 	)
 	if err != nil {
-		Fail(c, ErrInternal, err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
 		return
 	}
 
-	OK(c, gin.H{
-		"message":    "media removed from channel",
-		"channel_id": id,
-		"media_id":   mediaId,
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"message": "ok",
+		"data": gin.H{
+			"message":    "media removed from channel",
+			"channel_id": id,
+			"media_id":   mediaId,
+		},
 	})
 }
 
 // GetChannelSubscribers returns subscribers for a channel with optional count parameter.
-func (h *ChannelHandler) GetChannelSubscribers(c *gin.Context) {
+func (h *ChannelHandler) GetChannelSubscribers(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
 	id := c.Param("id")
 	if id == "" {
-		Fail(c, ErrBadRequest, "Invalid channel ID")
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "Invalid channel ID"})
 		return
 	}
 
 	// Check if count parameter is present
 	if c.Query("count") == "true" {
 		// Return only count
-		// TODO: Implement GetSubscriberCount
-		OK(c, gin.H{"count": 0})
+		count, err := h.uc.GetChannelSubscriberCount(r.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": gin.H{"count": count}})
 		return
 	}
 
 	// Return subscribers list
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	page, _ := strconv.Atoi(c.Query("page"))
+	if page == 0 {
+		page = 1
+	}
+	pageSize, _ := strconv.Atoi(c.Query("page_size"))
+	if pageSize == 0 {
+		pageSize = 20
+	}
 
-	// TODO: Implement GetSubscribers
-	OK(c, gin.H{
-		"items":     []interface{}{},
-		"total":     0,
-		"page":      page,
-		"page_size": pageSize,
+	subscribers, total, err := h.uc.GetChannelSubscribers(r.Context(), id, page, pageSize)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"message": "ok",
+		"data": gin.H{
+			"items":     subscribers,
+			"total":     total,
+			"page":      page,
+			"page_size": pageSize,
+		},
 	})
 }
 
 // GetSubscriptionStatus returns the subscription status for the current user.
-func (h *ChannelHandler) GetSubscriptionStatus(c *gin.Context) {
+func (h *ChannelHandler) GetSubscriptionStatus(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
 	id := c.Param("id")
 	if id == "" {
-		Fail(c, ErrBadRequest, "Invalid channel ID")
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "Invalid channel ID"})
 		return
 	}
 
-	_, ok := c.MustGet("claims").(*auth.Claims)
-	if !ok {
-		Fail(c, ErrUnauthorized, "unauthorized")
+	val := c.Get("claims")
+	if val == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"code": ErrUnauthorized, "message": "unauthorized"})
+		return
+	}
+	claims := val.(*auth.Claims)
+
+	isSubscribed, err := h.uc.IsSubscribedToChannel(r.Context(), id, claims.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
 		return
 	}
 
-	// TODO: Implement IsSubscribed
-	OK(c, gin.H{"is_subscribed": false})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": gin.H{"is_subscribed": isSubscribed}})
 }
 
 // SubscribeToChannel subscribes the current user to a channel.
-func (h *ChannelHandler) SubscribeToChannel(c *gin.Context) {
+func (h *ChannelHandler) SubscribeToChannel(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
 	id := c.Param("id")
 	if id == "" {
-		Fail(c, ErrBadRequest, "Invalid channel ID")
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "Invalid channel ID"})
 		return
 	}
 
-	_, ok := c.MustGet("claims").(*auth.Claims)
-	if !ok {
-		Fail(c, ErrUnauthorized, "unauthorized")
+	val := c.Get("claims")
+	if val == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"code": ErrUnauthorized, "message": "unauthorized"})
+		return
+	}
+	claims := val.(*auth.Claims)
+
+	err := h.uc.SubscribeToChannel(r.Context(), id, claims.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
 		return
 	}
 
-	// TODO: Implement Subscribe
-	OK(c, gin.H{"success": true, "message": "Subscribed to channel"})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": gin.H{"success": true, "message": "Subscribed to channel"}})
 }
 
 // UnsubscribeFromChannel unsubscribes the current user from a channel.
-func (h *ChannelHandler) UnsubscribeFromChannel(c *gin.Context) {
+func (h *ChannelHandler) UnsubscribeFromChannel(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
 	id := c.Param("id")
 	if id == "" {
-		Fail(c, ErrBadRequest, "Invalid channel ID")
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "Invalid channel ID"})
 		return
 	}
 
-	_, ok := c.MustGet("claims").(*auth.Claims)
-	if !ok {
-		Fail(c, ErrUnauthorized, "unauthorized")
+	val := c.Get("claims")
+	if val == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"code": ErrUnauthorized, "message": "unauthorized"})
+		return
+	}
+	claims := val.(*auth.Claims)
+
+	err := h.uc.UnsubscribeFromChannel(r.Context(), id, claims.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
 		return
 	}
 
-	// TODO: Implement Unsubscribe
-	OK(c, gin.H{"success": true, "message": "Unsubscribed from channel"})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": gin.H{"success": true, "message": "Unsubscribed from channel"}})
+}
+
+// InviteUserToChannel invites a user to join a channel.
+func (h *ChannelHandler) InviteUserToChannel(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "Invalid channel ID"})
+		return
+	}
+
+	val := c.Get("claims")
+	if val == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"code": ErrUnauthorized, "message": "unauthorized"})
+		return
+	}
+	claims := val.(*auth.Claims)
+
+	var input struct {
+		UserID string `json:"user_id" binding:"required"`
+	}
+	if err := c.Bind(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
+		return
+	}
+
+	err := h.uc.InviteUserToChannel(r.Context(), id, input.UserID, claims.UserID, claims.IsStaff)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": gin.H{"success": true, "message": "User invited to channel"}})
+}
+
+// AcceptChannelInvitation accepts a channel invitation.
+func (h *ChannelHandler) AcceptChannelInvitation(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "Invalid channel ID"})
+		return
+	}
+
+	val := c.Get("claims")
+	if val == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"code": ErrUnauthorized, "message": "unauthorized"})
+		return
+	}
+	claims := val.(*auth.Claims)
+
+	err := h.uc.AcceptChannelInvitation(r.Context(), id, claims.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": gin.H{"success": true, "message": "Invitation accepted"}})
+}
+
+// RejectChannelInvitation rejects a channel invitation.
+func (h *ChannelHandler) RejectChannelInvitation(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "Invalid channel ID"})
+		return
+	}
+
+	val := c.Get("claims")
+	if val == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"code": ErrUnauthorized, "message": "unauthorized"})
+		return
+	}
+	claims := val.(*auth.Claims)
+
+	err := h.uc.RejectChannelInvitation(r.Context(), id, claims.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": gin.H{"success": true, "message": "Invitation rejected"}})
+}
+
+// GetChannelInvitations returns the current user's channel invitations.
+func (h *ChannelHandler) GetChannelInvitations(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	val := c.Get("claims")
+	if val == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"code": ErrUnauthorized, "message": "unauthorized"})
+		return
+	}
+	claims := val.(*auth.Claims)
+
+	invitations, err := h.uc.GetChannelInvitations(r.Context(), claims.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": gin.H{"invitations": invitations}})
 }

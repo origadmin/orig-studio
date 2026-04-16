@@ -30,6 +30,7 @@ func (Channel) Fields() []ent.Field {
 		field.Text("description"),
 		field.String("short_token").MaxLen(12).Unique().DefaultFunc(idutil.GenShortID),
 		field.String("banner_logo").MaxLen(500),
+		field.Bool("is_public").Default(true),
 		field.Time("add_date").Default(time.Now),
 	}
 }

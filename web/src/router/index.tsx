@@ -12,9 +12,9 @@ import {
     redirect,
 } from '@tanstack/react-router';
 
-import PortalLayout from '../layout/PortalLayout';
-import AdminLayout from '../layout/AdminLayout';
-import {getStoredToken, getStoredUser} from '../hooks/useAuth';
+import PortalLayout from '@/layout/PortalLayout';
+import AdminLayout from '@/layout/AdminLayout';
+import {getStoredToken, getStoredUser} from '@/hooks/useAuth';
 
 // ── Lazy pages ────────────────────────────────────────────────────────────────
 
