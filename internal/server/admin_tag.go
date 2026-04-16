@@ -4,9 +4,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/svc-admin/service"
+
+	"github.com/gin-gonic/gin"
 )
 
 // AdminTagHandler handles tag HTTP requests in admin panel
@@ -57,13 +58,13 @@ func (h *AdminTagHandler) listTags() gin.HandlerFunc {
 
 		// Return response
 		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
+			"code":    0,
 			"message": "ok",
 			"data": gin.H{
-				"list":       tags,
-				"total":      total,
-				"page":       page,
-				"page_size":  pageSize,
+				"items":       tags,
+				"total":       total,
+				"page":        page,
+				"page_size":   pageSize,
 				"total_pages": totalPages,
 			},
 		})
@@ -82,9 +83,9 @@ func (h *AdminTagHandler) getTag() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
+			"code":    0,
 			"message": "ok",
-			"data": tag,
+			"data":    tag,
 		})
 	}
 }
@@ -116,9 +117,9 @@ func (h *AdminTagHandler) createTag() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
+			"code":    0,
 			"message": "Tag created successfully",
-			"data": createdTag,
+			"data":    createdTag,
 		})
 	}
 }
@@ -152,9 +153,9 @@ func (h *AdminTagHandler) updateTag() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
+			"code":    0,
 			"message": "Tag updated successfully",
-			"data": updatedTag,
+			"data":    updatedTag,
 		})
 	}
 }
@@ -170,7 +171,7 @@ func (h *AdminTagHandler) deleteTag() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
+			"code":    0,
 			"message": "Tag deleted successfully",
 		})
 	}
@@ -201,7 +202,7 @@ func (h *AdminTagHandler) bulkTagOperation() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
+			"code":    0,
 			"message": "Bulk operation completed",
 			"data": gin.H{
 				"success": count,
@@ -216,7 +217,7 @@ func (h *AdminTagHandler) exportTags() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// TODO: Implement export functionality
 		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
+			"code":    0,
 			"message": "Export functionality not implemented yet",
 		})
 	}
@@ -227,7 +228,7 @@ func (h *AdminTagHandler) importTags() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// TODO: Implement import functionality
 		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
+			"code":    0,
 			"message": "Import functionality not implemented yet",
 		})
 	}

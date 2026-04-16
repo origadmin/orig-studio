@@ -14,7 +14,7 @@ export interface Tag {
 }
 
 export interface TagListResponse {
-  list: Tag[];
+  items: Tag[];
   total: number;
   page: number;
   page_size: number;

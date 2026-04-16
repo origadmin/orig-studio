@@ -41,12 +41,10 @@ import {
 import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, Hash, Filter, RotateCcw} from 'lucide-react';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {tagApi, Tag, CreateTagRequest, UpdateTagRequest} from '@/lib/api/admin-tags';
-import {extractList} from '@/lib/extract';
 
 const Tags: React.FC = () => {
     const {t} = useTranslation();
-    const [searchTerm, setSearchTerm] = useState('');
-    const [trendingFilter, setTrendingFilter] = useState('all');
+    const [searchParams, setSearchParams] = useState({keyword: '', page: 1});
     const [tags, setTags] = useState<Tag[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -67,12 +65,16 @@ const Tags: React.FC = () => {
         loadTags();
     }, []);
 
-    const loadTags = async () => {
+    const loadTags = async (params = searchParams) => {
         setLoading(true);
         setError(null);
         try {
-            const response = await tagApi.list({page_size: 100});
-            const tagList = extractList<Tag>(response);
+            const apiParams: any = {page_size: 100};
+            if (params.keyword) {
+                apiParams.keyword = params.keyword;
+            }
+            const response = await tagApi.list(apiParams);
+            const tagList = Array.isArray(response?.items) ? response.items : [];
             setTags(tagList);
         } catch (err) {
             setError('Failed to load tags');
@@ -152,11 +154,9 @@ const Tags: React.FC = () => {
         setShowDeleteDialog(true);
     };
 
-    const filteredTags = tags.filter(tag => {
-        const matchesSearch = tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            tag.slug.toLowerCase().includes(searchTerm.toLowerCase());
-        return matchesSearch;
-    });
+    const handleView = (tag: Tag) => {
+        window.open(`/tags/${tag.slug}`, '_blank');
+    };
 
     const totalTags = tags.length;
     const activeTags = tags.length; // 假设所有标签都是active
@@ -190,55 +190,35 @@ const Tags: React.FC = () => {
                                         className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                                     <Input
                                         placeholder={t('admin.search') || t('admin.tags') + '...'}
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        value={searchParams.keyword}
+                                        onChange={(e) => setSearchParams({...searchParams, keyword: e.target.value})}
                                         className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
                                     />
                                 </div>
                             </div>
-                            <div className="flex flex-wrap items-center gap-2">
-                                <Select value={trendingFilter} onValueChange={setTrendingFilter}>
-                                    <SelectTrigger className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
-                                        <div className="flex items-center gap-2">
-                                            <Filter className="h-4 w-4"/>
-                                            {trendingFilter === 'all' ? (
-                                                <span className="text-muted-foreground">Trending</span>
-                                            ) : (
-                                                <SelectValue placeholder="Trending"/>
-                                            )}
-                                        </div>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all" className="justify-center text-center font-medium opacity-70">--- All ---</SelectItem>
-                                        <SelectItem value="trending">{t('admin.trending')}</SelectItem>
-                                        <SelectItem value="normal">{t('admin.normalTag')}</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <div className="flex items-center gap-2 ml-auto lg:ml-0">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-9 px-3"
-                                        onClick={() => {
-                                            setSearchTerm('');
-                                            setTrendingFilter('all');
-                                        }}
-                                    >
-                                        <RotateCcw className="h-4 w-4 mr-2"/>
-                                        Reset
-                                    </Button>
-                                    <Button
-                                        variant="default"
-                                        size="sm"
-                                        className="h-9 px-4"
-                                        onClick={() => {
-                                            // 这里可以添加搜索逻辑
-                                        }}
-                                    >
-                                        <Search className="h-4 w-4 mr-2"/>
-                                        Search
-                                    </Button>
-                                </div>
+                            <div className="flex items-center gap-2 ml-auto lg:ml-0">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-9 px-3"
+                                    onClick={() => {
+                                        const newParams = {keyword: '', page: 1};
+                                        setSearchParams(newParams);
+                                        loadTags(newParams);
+                                    }}
+                                >
+                                    <RotateCcw className="h-4 w-4 mr-2"/>
+                                    Reset
+                                </Button>
+                                <Button
+                                    variant="default"
+                                    size="sm"
+                                    className="h-9 px-4"
+                                    onClick={() => loadTags()}
+                                >
+                                    <Search className="h-4 w-4 mr-2"/>
+                                    Search
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -330,14 +310,14 @@ const Tags: React.FC = () => {
                                         </Button>
                                     </TableCell>
                                 </TableRow>
-                            ) : filteredTags.length === 0 ? (
+                            ) : tags.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={6} className="text-center py-8">
                                         No tags found
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                filteredTags.map((tag) => (
+                                tags.map((tag) => (
                                     <TableRow key={tag.id}>
                                         <TableCell className="font-medium">{tag.id}</TableCell>
                                         <TableCell>
@@ -360,7 +340,7 @@ const Tags: React.FC = () => {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleView(tag)}>
                                                         <Eye className="mr-2 h-4 w-4"/>
                                                         {t('admin.view')}
                                                     </DropdownMenuItem>

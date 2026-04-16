@@ -4,7 +4,7 @@
  */
 
 import {useState, useEffect} from 'react';
-import {Search, Plus, User, MoreVertical, Trash2, Edit, Shield, Mail, Eye, RotateCcw} from 'lucide-react';
+import {Search, Plus, User as UserIcon, MoreVertical, Trash2, Edit, Shield, Mail, Eye, RotateCcw} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Badge} from '@/components/ui/badge';
@@ -26,44 +26,162 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {userApi} from '@/lib/api/user';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {userApi, User, CreateUserRequest, UpdateUserRequest} from '@/lib/api/user';
 import {useTranslation} from 'react-i18next';
 import {getFullUrl} from '@/lib/utils';
-import {extractList} from '@/lib/extract';
 
 export default function UsersPage() {
     const {t} = useTranslation();
-    const [users, setUsers] = useState<any[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [roleFilter, setRoleFilter] = useState('all');
+    const [searchParams, setSearchParams] = useState({keyword: '', role: 'all', page: 1});
+    
+    const [showCreateDialog, setShowCreateDialog] = useState(false);
+    const [showEditDialog, setShowEditDialog] = useState(false);
+    const [showChangeRoleDialog, setShowChangeRoleDialog] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [formData, setFormData] = useState<Partial<CreateUserRequest & UpdateUserRequest>>({
+        username: '',
+        email: '',
+        password: '',
+        role: 'user',
+        status: 'active',
+    });
 
     useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                setLoading(true);
-                const response = await userApi.list({page_size: 100});
-                // 提取列表数据，防止因格式不匹配导致崩溃
-                const userList = extractList<any>(response);
-                setUsers(userList);
-            } catch (error) {
-                console.error('Failed to fetch users:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchUsers();
+        loadUsers();
     }, []);
 
-    const filteredUsers = users.filter(user => {
-        const matchesSearch =
-            user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (user.nickname && user.nickname.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-        return matchesSearch && matchesRole;
-    });
+    const loadUsers = async (params = searchParams) => {
+        try {
+            setLoading(true);
+            const apiParams: any = {page_size: 100};
+            if (params.keyword) {
+                apiParams.keyword = params.keyword;
+            }
+            if (params.role && params.role !== 'all') {
+                apiParams.role = params.role;
+            }
+            const response = await userApi.list(apiParams);
+            const userList = Array.isArray(response?.items) ? response.items : [];
+            setUsers(userList);
+        } catch (error) {
+            console.error('Failed to fetch users:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const resetForm = () => {
+        setFormData({
+            username: '',
+            email: '',
+            password: '',
+            role: 'user',
+            status: 'active',
+        });
+    };
+
+    const handleCreate = async () => {
+        try {
+            await userApi.create(formData as CreateUserRequest);
+            await loadUsers();
+            setShowCreateDialog(false);
+            resetForm();
+        } catch (err) {
+            console.error('Failed to create user:', err);
+        }
+    };
+
+    const handleUpdate = async () => {
+        if (!currentUser) return;
+
+        try {
+            await userApi.update(currentUser.id, formData as UpdateUserRequest);
+            await loadUsers();
+            setShowEditDialog(false);
+            resetForm();
+            setCurrentUser(null);
+        } catch (err) {
+            console.error('Failed to update user:', err);
+        }
+    };
+
+    const handleChangeRole = async (newRole: string) => {
+        if (!currentUser) return;
+
+        try {
+            await userApi.update(currentUser.id, {role: newRole});
+            await loadUsers();
+            setShowChangeRoleDialog(false);
+            setCurrentUser(null);
+        } catch (err) {
+            console.error('Failed to change role:', err);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!currentUser) return;
+
+        try {
+            await userApi.delete(currentUser.id);
+            await loadUsers();
+            setShowDeleteDialog(false);
+            setCurrentUser(null);
+        } catch (err) {
+            console.error('Failed to delete user:', err);
+        }
+    };
+
+    const openCreateDialog = () => {
+        resetForm();
+        setShowCreateDialog(true);
+    };
+
+    const openEditDialog = (user: User) => {
+        setCurrentUser(user);
+        setFormData({
+            username: user.username,
+            email: user.email,
+            role: user.role,
+            status: user.status,
+        });
+        setShowEditDialog(true);
+    };
+
+    const openChangeRoleDialog = (user: User) => {
+        setCurrentUser(user);
+        setShowChangeRoleDialog(true);
+    };
+
+    const openDeleteDialog = (user: User) => {
+        setCurrentUser(user);
+        setShowDeleteDialog(true);
+    };
+
+    const handleViewProfile = (user: User) => {
+        window.open(`/members/${user.username}`, '_blank');
+    };
 
     const getRoleBadge = (role: string) => {
         const roles: Record<string, { variant: "default" | "secondary" | "outline", label: string }> = {
@@ -73,14 +191,6 @@ export default function UsersPage() {
         };
         return roles[role] || {variant: "outline", label: role};
     };
-
-    const getStatusBadge = (status: string) => {
-        return status === "active"
-            ? <Badge variant="default" className="bg-green-500">{t('admin.active') || "Active"}</Badge>
-            : <Badge variant="secondary">{t('admin.inactive') || "Inactive"}</Badge>;
-    };
-
-
 
     return (
         <div className="space-y-4 p-4 md:p-6">
@@ -109,18 +219,18 @@ export default function UsersPage() {
                                         className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                                     <Input
                                         placeholder={t('admin.search') || "Search users..."}
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        value={searchParams.keyword}
+                                        onChange={(e) => setSearchParams({...searchParams, keyword: e.target.value})}
                                         className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
                                     />
                                 </div>
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
-                                <Select value={roleFilter} onValueChange={setRoleFilter}>
+                                <Select value={searchParams.role} onValueChange={(v) => setSearchParams({...searchParams, role: v})}>
                                     <SelectTrigger className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
-                                            {roleFilter === 'all' ? (
+                                            {searchParams.role === 'all' ? (
                                                 <span className="text-muted-foreground">Roles</span>
                                             ) : (
                                                 <SelectValue placeholder="Roles"/>
@@ -140,8 +250,9 @@ export default function UsersPage() {
                                         size="sm"
                                         className="h-9 px-3"
                                         onClick={() => {
-                                            setSearchTerm('');
-                                            setRoleFilter('all');
+                                            const newParams = {keyword: '', role: 'all', page: 1};
+                                            setSearchParams(newParams);
+                                            loadUsers(newParams);
                                         }}
                                     >
                                         <RotateCcw className="h-4 w-4 mr-2"/>
@@ -151,9 +262,7 @@ export default function UsersPage() {
                                         variant="default"
                                         size="sm"
                                         className="h-9 px-4"
-                                        onClick={() => {
-                                            // 这里可以添加搜索逻辑
-                                        }}
+                                        onClick={() => loadUsers()}
                                     >
                                         <Search className="h-4 w-4 mr-2"/>
                                         Search
@@ -175,7 +284,7 @@ export default function UsersPage() {
                                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{users.length}</p>
                             </div>
                             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                                <User className="w-6 h-6 text-blue-600"/>
+                                <UserIcon className="w-6 h-6 text-blue-600"/>
                             </div>
                         </div>
                     </CardContent>
@@ -234,7 +343,7 @@ export default function UsersPage() {
                             <CardDescription>{t('admin.manageUserAccounts') || "Manage user accounts and permissions"}</CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button className="bg-blue-600 hover:bg-blue-700">
+                            <Button className="bg-blue-600 hover:bg-blue-700" onClick={openCreateDialog}>
                                 <Plus className="w-4 h-4 mr-2"/>
                                 {t('admin.addUser') || "Add User"}
                             </Button>
@@ -260,17 +369,17 @@ export default function UsersPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredUsers.length > 0 ? filteredUsers.map((user) => (
+                                {users.length > 0 ? users.map((user) => (
                                     <TableRow key={user.id}>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="w-10 h-10">
                                                     <AvatarImage
                                                         src={user.avatar ? getFullUrl(user.avatar) : undefined}/>
-                                                    <AvatarFallback>{user.nickname ? user.nickname.charAt(0) : user.username.charAt(0)}</AvatarFallback>
+                                                    <AvatarFallback>{user.username ? user.username.charAt(0) : '?'}</AvatarFallback>
                                                 </Avatar>
                                                 <div>
-                                                    <p className="font-medium">{user.nickname || user.username}</p>
+                                                    <p className="font-medium">{user.username}</p>
                                                     <p className="text-sm text-slate-500">@{user.username}</p>
                                                 </div>
                                             </div>
@@ -285,7 +394,11 @@ export default function UsersPage() {
                                             <Badge {...getRoleBadge(user.role)} />
                                         </TableCell>
                                         <TableCell>
-                                            {getStatusBadge(user.status)}
+                                            {user.status === "active" ? (
+                                                <Badge variant="default" className="bg-green-500">{t('admin.active') || "Active"}</Badge>
+                                            ) : (
+                                                <Badge variant="secondary">{t('admin.inactive') || "Inactive"}</Badge>
+                                            )}
                                         </TableCell>
                                         <TableCell className="text-sm text-slate-500">{user.created_at}</TableCell>
                                         <TableCell className="text-right">
@@ -296,19 +409,19 @@ export default function UsersPage() {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleViewProfile(user)}>
                                                         <Eye className="w-4 h-4 mr-2"/>
                                                         {t('admin.viewProfile') || "View Profile"}
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => openEditDialog(user)}>
                                                         <Edit className="w-4 h-4 mr-2"/>
                                                         {t('admin.edit') || "Edit"}
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => openChangeRoleDialog(user)}>
                                                         <Shield className="w-4 h-4 mr-2"/>
                                                         {t('admin.changeRole') || "Change Role"}
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem className="text-red-600">
+                                                    <DropdownMenuItem className="text-red-600" onClick={() => openDeleteDialog(user)}>
                                                         <Trash2 className="w-4 h-4 mr-2"/>
                                                         {t('admin.delete') || "Delete"}
                                                     </DropdownMenuItem>
@@ -328,6 +441,168 @@ export default function UsersPage() {
                     )}
                 </CardContent>
             </Card>
+
+            {/* Create User Dialog */}
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('admin.addUser') || "Add User"}</DialogTitle>
+                        <DialogDescription>{t('admin.createNewUser') || "Create a new user account"}</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.username') || "Username"}</label>
+                            <Input
+                                value={formData.username}
+                                onChange={(e) => setFormData({...formData, username: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.email') || "Email"}</label>
+                            <Input
+                                type="email"
+                                value={formData.email}
+                                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.password') || "Password"}</label>
+                            <Input
+                                type="password"
+                                value={formData.password}
+                                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.role') || "Role"}</label>
+                            <Select value={formData.role} onValueChange={(v) => setFormData({...formData, role: v})}>
+                                <SelectTrigger>
+                                    <SelectValue/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="user">{t('admin.user') || "User"}</SelectItem>
+                                    <SelectItem value="editor">{t('admin.editor') || "Editor"}</SelectItem>
+                                    <SelectItem value="admin">{t('admin.admin') || "Admin"}</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                            {t('admin.cancel') || "Cancel"}
+                        </Button>
+                        <Button onClick={handleCreate}>
+                            {t('admin.create') || "Create"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Edit User Dialog */}
+            <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('admin.editUser') || "Edit User"}</DialogTitle>
+                        <DialogDescription>{t('admin.editUserDesc') || "Edit user account details"}</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.username') || "Username"}</label>
+                            <Input
+                                value={formData.username}
+                                onChange={(e) => setFormData({...formData, username: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.email') || "Email"}</label>
+                            <Input
+                                type="email"
+                                value={formData.email}
+                                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.role') || "Role"}</label>
+                            <Select value={formData.role} onValueChange={(v) => setFormData({...formData, role: v})}>
+                                <SelectTrigger>
+                                    <SelectValue/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="user">{t('admin.user') || "User"}</SelectItem>
+                                    <SelectItem value="editor">{t('admin.editor') || "Editor"}</SelectItem>
+                                    <SelectItem value="admin">{t('admin.admin') || "Admin"}</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.status') || "Status"}</label>
+                            <Select value={formData.status} onValueChange={(v) => setFormData({...formData, status: v})}>
+                                <SelectTrigger>
+                                    <SelectValue/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="active">{t('admin.active') || "Active"}</SelectItem>
+                                    <SelectItem value="inactive">{t('admin.inactive') || "Inactive"}</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                            {t('admin.cancel') || "Cancel"}
+                        </Button>
+                        <Button onClick={handleUpdate}>
+                            {t('admin.save') || "Save"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Change Role Dialog */}
+            <Dialog open={showChangeRoleDialog} onOpenChange={setShowChangeRoleDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('admin.changeRole') || "Change Role"}</DialogTitle>
+                        <DialogDescription>{t('admin.changeRoleDesc') || "Change user role"}</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.newRole') || "New Role"}</label>
+                            <Select 
+                                value={currentUser?.role || 'user'} 
+                                onValueChange={(v) => handleChangeRole(v)}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="user">{t('admin.user') || "User"}</SelectItem>
+                                    <SelectItem value="editor">{t('admin.editor') || "Editor"}</SelectItem>
+                                    <SelectItem value="admin">{t('admin.admin') || "Admin"}</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete User Alert Dialog */}
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t('admin.deleteUser') || "Delete User"}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {t('admin.deleteUserConfirm') || "Are you sure you want to delete this user? This action cannot be undone."}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>{t('admin.cancel') || "Cancel"}</AlertDialogCancel>
+                        <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDelete}>
+                            {t('admin.delete') || "Delete"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
