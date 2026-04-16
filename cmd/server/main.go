@@ -15,7 +15,6 @@ import (
 	"github.com/origadmin/runtime"
 	runtimebootstrap "github.com/origadmin/runtime/engine/bootstrap"
 	"github.com/origadmin/runtime/log"
-
 	"origadmin/application/origcms/internal/conf"
 	confhelper "origadmin/application/origcms/internal/helpers/conf"
 	"origadmin/application/origcms/internal/server"
@@ -42,13 +41,15 @@ func main() {
 	// Initialize environment variables and find configuration file
 	confPath := confhelper.InitEnvAndConf(envName, flagconf)
 	if confPath == "" {
-		log.Fatalf("Could not find configuration file. Searched -conf flag, executable path, and development path.")
+		log.Fatalf(
+			"Could not find configuration file. Searched -conf flag, executable path, and development path.",
+		)
 	}
 
 	log.Infof("Loading configuration from: %s\n", confPath)
 
 	rt := runtime.New(Name, Version)
-	if err := rt.Load(confPath, runtimebootstrap.WithConfigTransformer(conf.Transformer)); err != nil {
+	if err := rt.Load(confPath, runtimebootstrap.WithConfigTransformer(conf.Transformer), runtimebootstrap.WithDirectly(true)); err != nil {
 		log.Fatalf("failed to create runtime: %v", err)
 	}
 	defer func() {
@@ -60,6 +61,10 @@ func main() {
 	if !ok {
 		log.Fatalf("failed to get config")
 	}
+
+	// Debug: print actual database config
+	dialect, source := cfg.GetDefaultDB()
+	log.Infof("Database config: dialect=%s, source=%s", dialect, source)
 
 	logger := rt.Logger()
 	log.SetLogger(logger)
