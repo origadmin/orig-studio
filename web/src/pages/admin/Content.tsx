@@ -3,7 +3,7 @@
  * 管理端 - 内容管理页面
  */
 
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {Search, Plus, FileText, MoreVertical, Trash2, Edit, Eye, Filter} from 'lucide-react';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Button} from '@/components/ui/button';
@@ -24,60 +24,36 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
-// 模拟内容数据
-const mockContent = [
-    {
-        id: "1",
-        title: "Getting Started with OrigCMS",
-        type: "article",
-        status: "published",
-        author: "Admin",
-        views: 12500,
-        created_at: "2024-03-15"
-    },
-    {
-        id: "2",
-        title: "Media Upload Best Practices",
-        type: "article",
-        status: "published",
-        author: "Editor",
-        views: 8900,
-        created_at: "2024-03-14"
-    },
-    {
-        id: "3",
-        title: "Community Guidelines",
-        type: "page",
-        status: "published",
-        author: "Admin",
-        views: 45000,
-        created_at: "2024-03-10"
-    },
-    {
-        id: "4",
-        title: "New Features Coming Soon",
-        type: "article",
-        status: "draft",
-        author: "Editor",
-        views: 0,
-        created_at: "2024-03-08"
-    },
-    {
-        id: "5",
-        title: "Privacy Policy",
-        type: "page",
-        status: "published",
-        author: "Admin",
-        views: 23000,
-        created_at: "2024-03-01"
-    }
-];
+import {contentApi, Content} from '@/lib/api/content';
+import {extractList} from '@/lib/extract';
 
 export default function ContentPage() {
-    const [contents] = useState(mockContent);
+    const [contents, setContents] = useState<Content[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // 加载内容数据
+    useEffect(() => {
+        const loadContent = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const response = await contentApi.adminList({page_size: 100});
+                // 提取列表数据，防止因格式不匹配导致崩溃
+                const contentList = extractList<Content>(response);
+                setContents(contentList);
+            } catch (err) {
+                setError('Failed to load content');
+                console.error('Error loading content:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadContent();
+    }, []);
 
     const filteredContent = contents.filter(item => {
         const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -175,53 +151,81 @@ export default function ContentPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredContent.map((item) => (
-                                <TableRow key={item.id}>
-                                    <TableCell>
-                                        <div className="flex items-center gap-3">
-                                            <div
-                                                className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
-                                                <FileText className="w-5 h-5 text-slate-500"/>
-                                            </div>
-                                            <span className="font-medium">{item.title}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant="outline">{item.type}</Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant={item.status === 'published' ? 'default' : 'secondary'}>
-                                            {item.status}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-sm text-slate-500">{item.author}</TableCell>
-                                    <TableCell className="text-sm text-slate-500">{formatViews(item.views)}</TableCell>
-                                    <TableCell className="text-sm text-slate-500">{item.created_at}</TableCell>
-                                    <TableCell className="text-right">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="sm">
-                                                    <MoreVertical className="w-4 h-4"/>
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem>
-                                                    <Eye className="w-4 h-4 mr-2"/>
-                                                    View
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    <Edit className="w-4 h-4 mr-2"/>
-                                                    Edit
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem className="text-red-600">
-                                                    <Trash2 className="w-4 h-4 mr-2"/>
-                                                    Delete
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="text-center py-8">
+                                        <div className="animate-pulse">Loading content...</div>
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            ) : error ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="text-center py-8">
+                                        <div className="text-red-600">{error}</div>
+                                        <Button 
+                                            variant="outline" 
+                                            size="sm" 
+                                            className="mt-2"
+                                            onClick={() => window.location.reload()}
+                                        >
+                                            Retry
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ) : filteredContent.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="text-center py-8">
+                                        No content found
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                filteredContent.map((item) => (
+                                    <TableRow key={item.id}>
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <div
+                                                    className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
+                                                    <FileText className="w-5 h-5 text-slate-500"/>
+                                                </div>
+                                                <span className="font-medium">{item.title}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant="outline">{item.type}</Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant={item.status === 'published' ? 'default' : 'secondary'}>
+                                                {item.status}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-sm text-slate-500">Author ID: {item.author_id}</TableCell>
+                                        <TableCell className="text-sm text-slate-500">{formatViews(item.views)}</TableCell>
+                                        <TableCell className="text-sm text-slate-500">{new Date(item.created_at).toLocaleDateString()}</TableCell>
+                                        <TableCell className="text-right">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="sm">
+                                                        <MoreVertical className="w-4 h-4"/>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem>
+                                                        <Eye className="w-4 h-4 mr-2"/>
+                                                        View
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem>
+                                                        <Edit className="w-4 h-4 mr-2"/>
+                                                        Edit
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem className="text-red-600">
+                                                        <Trash2 className="w-4 h-4 mr-2"/>
+                                                        Delete
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>

@@ -3,6 +3,7 @@
 package entity
 
 import (
+	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
@@ -26,6 +27,68 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	articleFields := schema.Article{}.Fields()
+	_ = articleFields
+	// articleDescTitle is the schema descriptor for title field.
+	articleDescTitle := articleFields[1].Descriptor()
+	// article.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	article.TitleValidator = func() func(string) error {
+		validators := articleDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// articleDescContent is the schema descriptor for content field.
+	articleDescContent := articleFields[2].Descriptor()
+	// article.ContentValidator is a validator for the "content" field. It is called by the builders before save.
+	article.ContentValidator = articleDescContent.Validators[0].(func(string) error)
+	// articleDescSlug is the schema descriptor for slug field.
+	articleDescSlug := articleFields[4].Descriptor()
+	// article.SlugValidator is a validator for the "slug" field. It is called by the builders before save.
+	article.SlugValidator = articleDescSlug.Validators[0].(func(string) error)
+	// articleDescState is the schema descriptor for state field.
+	articleDescState := articleFields[5].Descriptor()
+	// article.DefaultState holds the default value on creation for the state field.
+	article.DefaultState = articleDescState.Default.(string)
+	// article.StateValidator is a validator for the "state" field. It is called by the builders before save.
+	article.StateValidator = articleDescState.Validators[0].(func(string) error)
+	// articleDescViewCount is the schema descriptor for view_count field.
+	articleDescViewCount := articleFields[6].Descriptor()
+	// article.DefaultViewCount holds the default value on creation for the view_count field.
+	article.DefaultViewCount = articleDescViewCount.Default.(int64)
+	// articleDescCommentCount is the schema descriptor for comment_count field.
+	articleDescCommentCount := articleFields[7].Descriptor()
+	// article.DefaultCommentCount holds the default value on creation for the comment_count field.
+	article.DefaultCommentCount = articleDescCommentCount.Default.(int64)
+	// articleDescFeatured is the schema descriptor for featured field.
+	articleDescFeatured := articleFields[8].Descriptor()
+	// article.DefaultFeatured holds the default value on creation for the featured field.
+	article.DefaultFeatured = articleDescFeatured.Default.(bool)
+	// articleDescCreatedAt is the schema descriptor for created_at field.
+	articleDescCreatedAt := articleFields[13].Descriptor()
+	// article.DefaultCreatedAt holds the default value on creation for the created_at field.
+	article.DefaultCreatedAt = articleDescCreatedAt.Default.(func() time.Time)
+	// articleDescUpdatedAt is the schema descriptor for updated_at field.
+	articleDescUpdatedAt := articleFields[14].Descriptor()
+	// article.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	article.DefaultUpdatedAt = articleDescUpdatedAt.Default.(func() time.Time)
+	// article.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	article.UpdateDefaultUpdatedAt = articleDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// articleDescID is the schema descriptor for id field.
+	articleDescID := articleFields[0].Descriptor()
+	// article.DefaultID holds the default value on creation for the id field.
+	article.DefaultID = articleDescID.Default.(func() string)
+	// article.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	article.IDValidator = articleDescID.Validators[0].(func(string) error)
 	categoryFields := schema.Category{}.Fields()
 	_ = categoryFields
 	// categoryDescName is the schema descriptor for name field.
@@ -122,8 +185,12 @@ func init() {
 	channelDescBannerLogo := channelFields[6].Descriptor()
 	// channel.BannerLogoValidator is a validator for the "banner_logo" field. It is called by the builders before save.
 	channel.BannerLogoValidator = channelDescBannerLogo.Validators[0].(func(string) error)
+	// channelDescIsPublic is the schema descriptor for is_public field.
+	channelDescIsPublic := channelFields[7].Descriptor()
+	// channel.DefaultIsPublic holds the default value on creation for the is_public field.
+	channel.DefaultIsPublic = channelDescIsPublic.Default.(bool)
 	// channelDescAddDate is the schema descriptor for add_date field.
-	channelDescAddDate := channelFields[7].Descriptor()
+	channelDescAddDate := channelFields[8].Descriptor()
 	// channel.DefaultAddDate holds the default value on creation for the add_date field.
 	channel.DefaultAddDate = channelDescAddDate.Default.(func() time.Time)
 	// channelDescID is the schema descriptor for id field.
@@ -138,6 +205,10 @@ func init() {
 	commentDescAddDate := commentFields[2].Descriptor()
 	// comment.DefaultAddDate holds the default value on creation for the add_date field.
 	comment.DefaultAddDate = commentDescAddDate.Default.(func() time.Time)
+	// commentDescStatus is the schema descriptor for status field.
+	commentDescStatus := commentFields[5].Descriptor()
+	// comment.DefaultStatus holds the default value on creation for the status field.
+	comment.DefaultStatus = commentDescStatus.Default.(string)
 	// commentDescID is the schema descriptor for id field.
 	commentDescID := commentFields[0].Descriptor()
 	// comment.DefaultID holds the default value on creation for the id field.

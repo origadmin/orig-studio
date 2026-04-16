@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/svc-content/biz"
 )
 
@@ -22,7 +23,7 @@ func NewShareHandler(uc *biz.LikeFavoriteUseCase, jwt *auth.Manager) *ShareHandl
 	return &ShareHandler{uc: uc, jwt: jwt}
 }
 
-func (h *ShareHandler) Register(group *gin.RouterGroup) {
+func (h *ShareHandler) Register(r handler.Router) {
 	// Share routes are now defined in media.go with consistent :id parameter
 }
 

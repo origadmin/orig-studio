@@ -58,6 +58,10 @@ func SeedEncodeProfiles(ctx context.Context, client *entity.Client) error {
 		{"h264-2160", "mp4", "2160", "h264", false, "--video-bitrate 25000k --audio-bitrate 320k"},
 		{"h265-2160", "mp4", "2160", "h265", false, "--video-bitrate 22000k --audio-bitrate 320k"},
 
+		// Short video profiles
+		{"h264-short-360", "mp4", "360", "h264", true, "--video-bitrate 800k --audio-bitrate 96k"},
+		{"h265-short-360", "mp4", "360", "h265", true, "--video-bitrate 600k --audio-bitrate 96k"},
+
 		{"preview", "gif", "-", "-", true, "--fps 10 --scale 320"},
 	}
 

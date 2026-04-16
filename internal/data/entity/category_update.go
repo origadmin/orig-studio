@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/predicate"
@@ -356,6 +357,21 @@ func (_u *CategoryUpdate) AddMedia(v ...*Media) *CategoryUpdate {
 	return _u.AddMediumIDs(ids...)
 }
 
+// AddArticleIDs adds the "articles" edge to the Article entity by IDs.
+func (_u *CategoryUpdate) AddArticleIDs(ids ...string) *CategoryUpdate {
+	_u.mutation.AddArticleIDs(ids...)
+	return _u
+}
+
+// AddArticles adds the "articles" edges to the Article entity.
+func (_u *CategoryUpdate) AddArticles(v ...*Article) *CategoryUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddArticleIDs(ids...)
+}
+
 // SetParent sets the "parent" edge to the Category entity.
 func (_u *CategoryUpdate) SetParent(v *Category) *CategoryUpdate {
 	return _u.SetParentID(v.ID)
@@ -406,6 +422,27 @@ func (_u *CategoryUpdate) RemoveMedia(v ...*Media) *CategoryUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveMediumIDs(ids...)
+}
+
+// ClearArticles clears all "articles" edges to the Article entity.
+func (_u *CategoryUpdate) ClearArticles() *CategoryUpdate {
+	_u.mutation.ClearArticles()
+	return _u
+}
+
+// RemoveArticleIDs removes the "articles" edge to Article entities by IDs.
+func (_u *CategoryUpdate) RemoveArticleIDs(ids ...string) *CategoryUpdate {
+	_u.mutation.RemoveArticleIDs(ids...)
+	return _u
+}
+
+// RemoveArticles removes "articles" edges to Article entities.
+func (_u *CategoryUpdate) RemoveArticles(v ...*Article) *CategoryUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveArticleIDs(ids...)
 }
 
 // ClearParent clears the "parent" edge to the Category entity.
@@ -666,6 +703,51 @@ func (_u *CategoryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ArticlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   category.ArticlesTable,
+			Columns: []string{category.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedArticlesIDs(); len(nodes) > 0 && !_u.mutation.ArticlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   category.ArticlesTable,
+			Columns: []string{category.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ArticlesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   category.ArticlesTable,
+			Columns: []string{category.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1094,6 +1176,21 @@ func (_u *CategoryUpdateOne) AddMedia(v ...*Media) *CategoryUpdateOne {
 	return _u.AddMediumIDs(ids...)
 }
 
+// AddArticleIDs adds the "articles" edge to the Article entity by IDs.
+func (_u *CategoryUpdateOne) AddArticleIDs(ids ...string) *CategoryUpdateOne {
+	_u.mutation.AddArticleIDs(ids...)
+	return _u
+}
+
+// AddArticles adds the "articles" edges to the Article entity.
+func (_u *CategoryUpdateOne) AddArticles(v ...*Article) *CategoryUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddArticleIDs(ids...)
+}
+
 // SetParent sets the "parent" edge to the Category entity.
 func (_u *CategoryUpdateOne) SetParent(v *Category) *CategoryUpdateOne {
 	return _u.SetParentID(v.ID)
@@ -1144,6 +1241,27 @@ func (_u *CategoryUpdateOne) RemoveMedia(v ...*Media) *CategoryUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveMediumIDs(ids...)
+}
+
+// ClearArticles clears all "articles" edges to the Article entity.
+func (_u *CategoryUpdateOne) ClearArticles() *CategoryUpdateOne {
+	_u.mutation.ClearArticles()
+	return _u
+}
+
+// RemoveArticleIDs removes the "articles" edge to Article entities by IDs.
+func (_u *CategoryUpdateOne) RemoveArticleIDs(ids ...string) *CategoryUpdateOne {
+	_u.mutation.RemoveArticleIDs(ids...)
+	return _u
+}
+
+// RemoveArticles removes "articles" edges to Article entities.
+func (_u *CategoryUpdateOne) RemoveArticles(v ...*Article) *CategoryUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveArticleIDs(ids...)
 }
 
 // ClearParent clears the "parent" edge to the Category entity.
@@ -1434,6 +1552,51 @@ func (_u *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ArticlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   category.ArticlesTable,
+			Columns: []string{category.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedArticlesIDs(); len(nodes) > 0 && !_u.mutation.ArticlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   category.ArticlesTable,
+			Columns: []string{category.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ArticlesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   category.ArticlesTable,
+			Columns: []string{category.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

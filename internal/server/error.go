@@ -1,6 +1,6 @@
 package server
 
-// 通用错误码
+// Common error codes
 const (
 	ErrOK           = 0
 	ErrInternal     = 10000
@@ -11,7 +11,7 @@ const (
 	ErrConflict     = 10005
 )
 
-// 业务错误码
+// Business error codes
 const (
 	ErrUserNotFound  = 20001
 	ErrUserExists    = 20002

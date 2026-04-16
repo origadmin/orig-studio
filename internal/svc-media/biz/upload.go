@@ -314,7 +314,12 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 	// Derive media type (e.g., video, image)
 	media.Type = "file"
 	if strings.Contains(session.ContentType, "video") {
-		media.Type = "video"
+		// Check if it's a short video (duration < 60 seconds)
+		if duration.Seconds() < 60 {
+			media.Type = "short_video"
+		} else {
+			media.Type = "video"
+		}
 	} else if strings.Contains(session.ContentType, "image") {
 		media.Type = "image"
 	} else if strings.Contains(session.ContentType, "audio") {

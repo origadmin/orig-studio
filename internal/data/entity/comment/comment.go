@@ -22,6 +22,8 @@ const (
 	FieldMediaID = "media_comments"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_comments"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 	// EdgeMedia holds the string denoting the media edge name in mutations.
 	EdgeMedia = "media"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -63,11 +65,13 @@ var Columns = []string{
 	FieldAddDate,
 	FieldMediaID,
 	FieldUserID,
+	FieldStatus,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "files_comment"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"article_comments",
 	"comment_replies",
 }
 
@@ -89,6 +93,8 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultAddDate holds the default value on creation for the "add_date" field.
 	DefaultAddDate func() time.Time
+	// DefaultStatus holds the default value on creation for the "status" field.
+	DefaultStatus string
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -121,6 +127,11 @@ func ByMediaID(opts ...sql.OrderTermOption) OrderOption {
 // ByUserID orders the results by the user_id field.
 func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
 }
 
 // ByMediaField orders the results by media field.

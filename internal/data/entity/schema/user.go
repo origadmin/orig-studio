@@ -72,6 +72,7 @@ func (User) Annotations() []schema.Annotation {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("media", Media.Type),
+		edge.To("articles", Article.Type),
 		edge.To("channels", Channel.Type),
 		edge.To("playlists", Playlist.Type),
 		edge.To("comments", Comment.Type),

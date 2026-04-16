@@ -66,6 +66,20 @@ func (_c *ChannelCreate) SetBannerLogo(v string) *ChannelCreate {
 	return _c
 }
 
+// SetIsPublic sets the "is_public" field.
+func (_c *ChannelCreate) SetIsPublic(v bool) *ChannelCreate {
+	_c.mutation.SetIsPublic(v)
+	return _c
+}
+
+// SetNillableIsPublic sets the "is_public" field if the given value is not nil.
+func (_c *ChannelCreate) SetNillableIsPublic(v *bool) *ChannelCreate {
+	if v != nil {
+		_c.SetIsPublic(*v)
+	}
+	return _c
+}
+
 // SetAddDate sets the "add_date" field.
 func (_c *ChannelCreate) SetAddDate(v time.Time) *ChannelCreate {
 	_c.mutation.SetAddDate(v)
@@ -153,6 +167,10 @@ func (_c *ChannelCreate) defaults() {
 		v := channel.DefaultShortToken()
 		_c.mutation.SetShortToken(v)
 	}
+	if _, ok := _c.mutation.IsPublic(); !ok {
+		v := channel.DefaultIsPublic
+		_c.mutation.SetIsPublic(v)
+	}
 	if _, ok := _c.mutation.AddDate(); !ok {
 		v := channel.DefaultAddDate()
 		_c.mutation.SetAddDate(v)
@@ -202,6 +220,9 @@ func (_c *ChannelCreate) check() error {
 		if err := channel.BannerLogoValidator(v); err != nil {
 			return &ValidationError{Name: "banner_logo", err: fmt.Errorf(`entity: validator failed for field "Channel.banner_logo": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.IsPublic(); !ok {
+		return &ValidationError{Name: "is_public", err: errors.New(`entity: missing required field "Channel.is_public"`)}
 	}
 	if _, ok := _c.mutation.AddDate(); !ok {
 		return &ValidationError{Name: "add_date", err: errors.New(`entity: missing required field "Channel.add_date"`)}
@@ -268,6 +289,10 @@ func (_c *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.BannerLogo(); ok {
 		_spec.SetField(channel.FieldBannerLogo, field.TypeString, value)
 		_node.BannerLogo = value
+	}
+	if value, ok := _c.mutation.IsPublic(); ok {
+		_spec.SetField(channel.FieldIsPublic, field.TypeBool, value)
+		_node.IsPublic = value
 	}
 	if value, ok := _c.mutation.AddDate(); ok {
 		_spec.SetField(channel.FieldAddDate, field.TypeTime, value)

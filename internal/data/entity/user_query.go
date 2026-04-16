@@ -7,6 +7,7 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"math"
+	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
@@ -35,6 +36,7 @@ type UserQuery struct {
 	inters            []Interceptor
 	predicates        []predicate.User
 	withMedia         *MediaQuery
+	withArticles      *ArticleQuery
 	withChannels      *ChannelQuery
 	withPlaylists     *PlaylistQuery
 	withComments      *CommentQuery
@@ -97,6 +99,28 @@ func (_q *UserQuery) QueryMedia() *MediaQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(media.Table, media.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.MediaTable, user.MediaColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryArticles chains the current query on the "articles" edge.
+func (_q *UserQuery) QueryArticles() *ArticleQuery {
+	query := (&ArticleClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(article.Table, article.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ArticlesTable, user.ArticlesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -517,6 +541,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		inters:            append([]Interceptor{}, _q.inters...),
 		predicates:        append([]predicate.User{}, _q.predicates...),
 		withMedia:         _q.withMedia.Clone(),
+		withArticles:      _q.withArticles.Clone(),
 		withChannels:      _q.withChannels.Clone(),
 		withPlaylists:     _q.withPlaylists.Clone(),
 		withComments:      _q.withComments.Clone(),
@@ -542,6 +567,17 @@ func (_q *UserQuery) WithMedia(opts ...func(*MediaQuery)) *UserQuery {
 		opt(query)
 	}
 	_q.withMedia = query
+	return _q
+}
+
+// WithArticles tells the query-builder to eager-load the nodes that are connected to
+// the "articles" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithArticles(opts ...func(*ArticleQuery)) *UserQuery {
+	query := (&ArticleClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withArticles = query
 	return _q
 }
 
@@ -733,8 +769,9 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [11]bool{
+		loadedTypes = [12]bool{
 			_q.withMedia != nil,
+			_q.withArticles != nil,
 			_q.withChannels != nil,
 			_q.withPlaylists != nil,
 			_q.withComments != nil,
@@ -772,6 +809,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadMedia(ctx, query, nodes,
 			func(n *User) { n.Edges.Media = []*Media{} },
 			func(n *User, e *Media) { n.Edges.Media = append(n.Edges.Media, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withArticles; query != nil {
+		if err := _q.loadArticles(ctx, query, nodes,
+			func(n *User) { n.Edges.Articles = []*Article{} },
+			func(n *User, e *Article) { n.Edges.Articles = append(n.Edges.Articles, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -864,6 +908,36 @@ func (_q *UserQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes []*
 	}
 	query.Where(predicate.Media(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.MediaColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadArticles(ctx context.Context, query *ArticleQuery, nodes []*User, init func(*User), assign func(*User, *Article)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(article.FieldUserID)
+	}
+	query.Where(predicate.Article(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ArticlesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

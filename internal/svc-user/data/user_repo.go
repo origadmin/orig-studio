@@ -75,8 +75,18 @@ func (r *userRepo) List(
 		return nil, 0, err
 	}
 
-	offset := (opt.Page - 1) * opt.PageSize
-	query = query.Offset(int(offset)).Limit(int(opt.PageSize))
+	// Set default pagination values if not provided
+	page := opt.Page
+	pageSize := opt.PageSize
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 20 // Default page size
+	}
+
+	offset := (page - 1) * pageSize
+	query = query.Offset(int(offset)).Limit(int(pageSize))
 
 	users, err := query.All(ctx)
 	if err != nil {
@@ -91,7 +101,7 @@ func (r *userRepo) List(
 	return result, int32(total), nil
 }
 
-// Create creates a new user.
+// Create creates a new user and automatically creates a default channel.
 func (r *userRepo) Create(
 	ctx context.Context,
 	in *types.User,
@@ -118,6 +128,20 @@ func (r *userRepo) Create(
 		Save(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	// 为新用户创建默认频道
+	_, err = r.db.Channel.Create().
+		SetID(idutil.GenUUID()).
+		SetUserID(u.ID).
+		SetTitle(u.Username + "'s Channel").
+		SetSlug(u.Username).
+		SetDescription("Default channel for " + u.Username).
+		SetIsPublic(true).
+		Save(ctx)
+	if err != nil {
+		// 记录错误但不影响用户创建
+		slog.Error("Failed to create default channel for user", "user_id", u.ID, "error", err)
 	}
 
 	return convertUserToProto(u), nil

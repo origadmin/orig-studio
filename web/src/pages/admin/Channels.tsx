@@ -1,9 +1,10 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
+import {Textarea} from '@/components/ui/textarea';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {
     Table,
@@ -19,78 +20,133 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, UserPlus, Users, Filter, Loader2, RotateCcw} from 'lucide-react';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
-
-// 模拟数据
-const mockChannels = [
-    {
-        id: 1,
-        name: '科技频道',
-        slug: 'tech-channel',
-        description: '最新科技资讯和评测',
-        owner: {name: '张三', avatar: ''},
-        subscriberCount: 15600,
-        mediaCount: 89,
-        category: '科技',
-        status: 'verified',
-        createdAt: '2024-01-15'
-    },
-    {
-        id: 2,
-        name: '音乐现场',
-        slug: 'music-live',
-        description: '高质量音乐现场视频',
-        owner: {name: '李四', avatar: ''},
-        subscriberCount: 8900,
-        mediaCount: 45,
-        category: '音乐',
-        status: 'verified',
-        createdAt: '2024-02-20'
-    },
-    {
-        id: 3,
-        name: '游戏实况',
-        slug: 'gaming-live',
-        description: '游戏直播和实况录像',
-        owner: {name: '王五', avatar: ''},
-        subscriberCount: 23400,
-        mediaCount: 156,
-        category: '游戏',
-        status: 'active',
-        createdAt: '2024-03-10'
-    },
-    {
-        id: 4,
-        name: '教育课堂',
-        slug: 'edu-class',
-        description: '中小学在线教育',
-        owner: {name: '赵六', avatar: ''},
-        subscriberCount: 5600,
-        mediaCount: 234,
-        category: '教育',
-        status: 'active',
-        createdAt: '2024-04-05'
-    },
-    {
-        id: 5,
-        name: '影视解说',
-        slug: 'movie-talk',
-        description: '电影电视剧解说',
-        owner: {name: '钱七', avatar: ''},
-        subscriberCount: 12300,
-        mediaCount: 67,
-        category: '娱乐',
-        status: 'pending',
-        createdAt: '2024-05-12'
-    },
-];
+import {channelApi, Channel} from '@/lib/api/channel';
 
 const Channels: React.FC = () => {
     const {t} = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
-    const [channels] = useState(mockChannels);
+    const [channels, setChannels] = useState<Channel[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [showCreateDialog, setShowCreateDialog] = useState(false);
+    const [showEditDialog, setShowEditDialog] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [currentChannel, setCurrentChannel] = useState<Channel | null>(null);
+    const [formData, setFormData] = useState<Partial<Channel>>({
+        name: '',
+        slug: '',
+        description: '',
+        status: 'active',
+    });
+
+    // 加载频道数据
+    useEffect(() => {
+        loadChannels();
+    }, []);
+
+    const loadChannels = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await channelApi.getAll();
+            const channelList = Array.isArray(response?.items) ? response.items : [];
+            setChannels(channelList);
+        } catch (err) {
+            setError('Failed to load channels');
+            console.error('Error loading channels:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const resetForm = () => {
+        setFormData({
+            name: '',
+            slug: '',
+            description: '',
+            status: 'active',
+        });
+    };
+
+    const handleCreate = async () => {
+        try {
+            await channelApi.create(formData);
+            await loadChannels();
+            setShowCreateDialog(false);
+            resetForm();
+        } catch (err) {
+            console.error('Failed to create channel:', err);
+        }
+    };
+
+    const handleUpdate = async () => {
+        if (!currentChannel) return;
+
+        try {
+            await channelApi.update(currentChannel.id, formData);
+            await loadChannels();
+            setShowEditDialog(false);
+            resetForm();
+            setCurrentChannel(null);
+        } catch (err) {
+            console.error('Failed to update channel:', err);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!currentChannel) return;
+
+        try {
+            await channelApi.delete(currentChannel.id);
+            await loadChannels();
+            setShowDeleteDialog(false);
+            setCurrentChannel(null);
+        } catch (err) {
+            console.error('Failed to delete channel:', err);
+        }
+    };
+
+    const openCreateDialog = () => {
+        resetForm();
+        setShowCreateDialog(true);
+    };
+
+    const openEditDialog = (channel: Channel) => {
+        setCurrentChannel(channel);
+        setFormData({
+            name: channel.name,
+            slug: channel.slug,
+            description: channel.description,
+            status: channel.status,
+        });
+        setShowEditDialog(true);
+    };
+
+    const openDeleteDialog = (channel: Channel) => {
+        setCurrentChannel(channel);
+        setShowDeleteDialog(true);
+    };
 
     const filteredChannels = channels.filter(channel => {
         const matchesSearch = channel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -99,7 +155,7 @@ const Channels: React.FC = () => {
         return matchesSearch && matchesStatus;
     });
 
-    const totalSubscribers = channels.reduce((sum, c) => sum + c.subscriberCount, 0);
+    const totalSubscribers = channels.reduce((sum, c) => sum + (c.subscriber_count || 0), 0);
     const verifiedCount = channels.filter(c => c.status === 'verified').length;
     const pendingCount = channels.filter(c => c.status === 'pending').length;
 
@@ -276,7 +332,7 @@ const Channels: React.FC = () => {
                             <CardTitle>{t('admin.channelList')}</CardTitle>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button>
+                            <Button onClick={openCreateDialog}>
                                 <Plus className="mr-2 h-4 w-4"/>
                                 {t('admin.newChannel')}
                             </Button>
@@ -298,72 +354,270 @@ const Channels: React.FC = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredChannels.map((channel) => (
-                                <TableRow key={channel.id}>
-                                    <TableCell>
-                                        <div className="flex items-center gap-3">
-                                            <Avatar className="h-10 w-10">
-                                                <AvatarFallback>{channel.name[0]}</AvatarFallback>
-                                            </Avatar>
-                                            <div>
-                                                <div className="font-medium">{channel.name}</div>
-                                                <div className="text-xs text-muted-foreground">{channel.slug}</div>
-                                            </div>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            <Avatar className="h-6 w-6">
-                                                <AvatarFallback
-                                                    className="text-xs">{channel.owner.name[0]}</AvatarFallback>
-                                            </Avatar>
-                                            {channel.owner.name}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-right font-medium">
-                                        {formatNumber(channel.subscriberCount)}
-                                    </TableCell>
-                                    <TableCell className="text-right">{channel.mediaCount}</TableCell>
-                                    <TableCell>
-                                        <Badge variant="outline">{channel.category}</Badge>
-                                    </TableCell>
-                                    <TableCell>{getStatusBadge(channel.status)}</TableCell>
-                                    <TableCell className="text-muted-foreground">{channel.createdAt}</TableCell>
-                                    <TableCell className="text-right">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="sm">
-                                                    <MoreHorizontal className="h-4 w-4"/>
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem>
-                                                    <Eye className="mr-2 h-4 w-4"/>
-                                                    {t('admin.view')}
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    <Edit className="mr-2 h-4 w-4"/>
-                                                    {t('admin.edit')}
-                                                </DropdownMenuItem>
-                                                {channel.status === 'pending' && (
-                                                    <DropdownMenuItem>
-                                                        <UserPlus className="mr-2 h-4 w-4"/>
-                                                        {t('admin.verify')}
-                                                    </DropdownMenuItem>
-                                                )}
-                                                <DropdownMenuItem className="text-red-600">
-                                                    <Trash2 className="mr-2 h-4 w-4"/>
-                                                    {t('admin.delete')}
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={8} className="text-center py-8">
+                                        <div className="animate-pulse">Loading channels...</div>
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            ) : error ? (
+                                <TableRow>
+                                    <TableCell colSpan={8} className="text-center py-8">
+                                        <div className="text-red-600">{error}</div>
+                                        <Button 
+                                            variant="outline" 
+                                            size="sm" 
+                                            className="mt-2"
+                                            onClick={() => window.location.reload()}
+                                        >
+                                            Retry
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ) : filteredChannels.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={8} className="text-center py-8">
+                                        No channels found
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                filteredChannels.map((channel) => (
+                                    <TableRow key={channel.id}>
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <Avatar className="h-10 w-10">
+                                                    <AvatarFallback>{channel.name[0]}</AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <div className="font-medium">{channel.name}</div>
+                                                    <div className="text-xs text-muted-foreground">{channel.slug}</div>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
+                                                <Avatar className="h-6 w-6">
+                                                    <AvatarFallback
+                                                        className="text-xs">{channel.user_id.substring(0, 1).toUpperCase()}</AvatarFallback>
+                                                </Avatar>
+                                                <span className="text-muted-foreground">User ID: {channel.user_id}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-right font-medium">
+                                            {formatNumber(channel.subscriber_count)}
+                                        </TableCell>
+                                        <TableCell className="text-right">{channel.media_count || 0}</TableCell>
+                                        <TableCell>
+                                            <Badge variant="outline">-</Badge>
+                                        </TableCell>
+                                        <TableCell>{getStatusBadge(channel.status)}</TableCell>
+                                        <TableCell className="text-muted-foreground">
+                                            {new Date(channel.created_at).toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="sm">
+                                                        <MoreHorizontal className="h-4 w-4"/>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem>
+                                                        <Eye className="mr-2 h-4 w-4"/>
+                                                        {t('admin.view')}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => openEditDialog(channel)}>
+                                                        <Edit className="mr-2 h-4 w-4"/>
+                                                        {t('admin.edit')}
+                                                    </DropdownMenuItem>
+                                                    {channel.status === 'pending' && (
+                                                        <DropdownMenuItem>
+                                                            <UserPlus className="mr-2 h-4 w-4"/>
+                                                            {t('admin.verify')}
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                    <DropdownMenuItem 
+                                                        className="text-red-600" 
+                                                        onClick={() => openDeleteDialog(channel)}
+                                                    >
+                                                        <Trash2 className="mr-2 h-4 w-4"/>
+                                                        {t('admin.delete')}
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>
             </Card>
+
+            {/* Create Channel Dialog */}
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('admin.newChannel') || 'New Channel'}</DialogTitle>
+                        <DialogDescription>
+                            Create a new channel for your content
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Name *
+                            </h4>
+                            <Input
+                                placeholder="Enter channel name"
+                                value={formData.name || ''}
+                                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Slug *
+                            </h4>
+                            <Input
+                                placeholder="Enter channel slug"
+                                value={formData.slug || ''}
+                                onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Description
+                            </h4>
+                            <Textarea
+                                placeholder="Enter channel description"
+                                value={formData.description || ''}
+                                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Status
+                            </h4>
+                            <Select
+                                value={formData.status || 'active'}
+                                onValueChange={(value) => setFormData({...formData, status: value})}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select status"/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="active">Active</SelectItem>
+                                    <SelectItem value="verified">Verified</SelectItem>
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="banned">Banned</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                            {t('common.cancel') || 'Cancel'}
+                        </Button>
+                        <Button onClick={handleCreate}>
+                            {t('common.save') || 'Save'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Edit Channel Dialog */}
+            <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('admin.editChannel') || 'Edit Channel'}</DialogTitle>
+                        <DialogDescription>
+                            Update the channel information
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Name *
+                            </h4>
+                            <Input
+                                placeholder="Enter channel name"
+                                value={formData.name || ''}
+                                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Slug *
+                            </h4>
+                            <Input
+                                placeholder="Enter channel slug"
+                                value={formData.slug || ''}
+                                onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Description
+                            </h4>
+                            <Textarea
+                                placeholder="Enter channel description"
+                                value={formData.description || ''}
+                                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Status
+                            </h4>
+                            <Select
+                                value={formData.status || 'active'}
+                                onValueChange={(value) => setFormData({...formData, status: value})}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select status"/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="active">Active</SelectItem>
+                                    <SelectItem value="verified">Verified</SelectItem>
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="banned">Banned</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                            {t('common.cancel') || 'Cancel'}
+                        </Button>
+                        <Button onClick={handleUpdate}>
+                            {t('common.save') || 'Save'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Channel Dialog */}
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t('admin.deleteChannel') || 'Delete Channel'}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete this channel? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>
+                            {t('common.cancel') || 'Cancel'}
+                        </AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={handleDelete}
+                            className="bg-red-600 hover:bg-red-700"
+                        >
+                            {t('common.delete') || 'Delete'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };

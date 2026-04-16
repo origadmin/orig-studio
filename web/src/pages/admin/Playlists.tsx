@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
@@ -21,108 +21,56 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {MoreHorizontal, Search, Edit, Trash2, Eye, PlayCircle, Lock, Globe, User, Filter, RotateCcw} from 'lucide-react';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
-
-// 模拟数据
-const mockPlaylists = [
-    {
-        id: 1,
-        name: 'Python 全栈教程',
-        slug: 'python-fullstack',
-        description: '从入门到精通 Python',
-        owner: {name: '张三', username: 'zhangsan'},
-        mediaCount: 45,
-        viewCount: 12300,
-        visibility: 'public',
-        status: 'active',
-        createdAt: '2024-04-15'
-    },
-    {
-        id: 2,
-        name: 'React 进阶之路',
-        slug: 'react-advanced',
-        description: 'React 高级模式和最佳实践',
-        owner: {name: '李四', username: 'lisi'},
-        mediaCount: 32,
-        viewCount: 8900,
-        visibility: 'public',
-        status: 'active',
-        createdAt: '2024-04-20'
-    },
-    {
-        id: 3,
-        name: '我的收藏',
-        slug: 'my-favorites',
-        description: '我喜欢的视频',
-        owner: {name: '王五', username: 'wangwu'},
-        mediaCount: 89,
-        viewCount: 5600,
-        visibility: 'private',
-        status: 'active',
-        createdAt: '2024-05-01'
-    },
-    {
-        id: 4,
-        name: 'Go 语言实战',
-        slug: 'go-practical',
-        description: 'Go 项目实战教程',
-        owner: {name: '赵六', username: 'zhaoliu'},
-        mediaCount: 28,
-        viewCount: 4500,
-        visibility: 'public',
-        status: 'active',
-        createdAt: '2024-05-10'
-    },
-    {
-        id: 5,
-        name: '算法与数据结构',
-        slug: 'algorithms',
-        description: '面试必看算法题',
-        owner: {name: '钱七', username: 'qianqi'},
-        mediaCount: 67,
-        viewCount: 15600,
-        visibility: 'unlisted',
-        status: 'active',
-        createdAt: '2024-05-15'
-    },
-    {
-        id: 6,
-        name: '待整理',
-        slug: 'to-organize',
-        description: '还没整理的视频',
-        owner: {name: '孙八', username: 'sunba'},
-        mediaCount: 12,
-        viewCount: 0,
-        visibility: 'private',
-        status: 'draft',
-        createdAt: '2024-05-18'
-    },
-];
+import {playlistApi, Playlist} from '@/lib/api/playlist';
+import {extractList} from '@/lib/extract';
 
 const Playlists: React.FC = () => {
     const {t} = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
     const [visibilityFilter, setVisibilityFilter] = useState('all');
-    const [playlists] = useState(mockPlaylists);
+    const [playlists, setPlaylists] = useState<Playlist[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // 加载播放列表数据
+    useEffect(() => {
+        const loadPlaylists = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const response = await playlistApi.list({page_size: 100});
+                // 提取列表数据，防止因格式不匹配导致崩溃
+                const playlistList = extractList<Playlist>(response);
+                setPlaylists(playlistList);
+            } catch (err) {
+                setError('Failed to load playlists');
+                console.error('Error loading playlists:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadPlaylists();
+    }, []);
 
     const filteredPlaylists = playlists.filter(playlist => {
-        const matchesSearch = playlist.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            playlist.description.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesVisibility = visibilityFilter === 'all' || playlist.visibility === visibilityFilter;
-        return matchesSearch && matchesVisibility;
+        const matchesSearch = playlist.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (playlist.description && playlist.description.toLowerCase().includes(searchTerm.toLowerCase()));
+        return matchesSearch;
     });
 
     const totalPlaylists = playlists.length;
-    const publicCount = playlists.filter(p => p.visibility === 'public').length;
-    const privateCount = playlists.filter(p => p.visibility === 'private').length;
-    const totalViews = playlists.reduce((sum, p) => sum + p.viewCount, 0);
+    const publicCount = playlists.length; // API返回数据中没有visibility字段
+    const privateCount = 0; // API返回数据中没有visibility字段
+    const totalViews = 0; // API返回数据中没有viewCount字段
 
-    const getVisibilityBadge = (visibility: string) => {
+    const getVisibilityBadge = (visibility: 'public' | 'private' | 'unlisted' | string) => {
         const configs = {
             public: {icon: Globe, label: t('admin.pub'), variant: 'default' as const},
             private: {icon: Lock, label: t('admin.priv'), variant: 'secondary' as const},
             unlisted: {icon: Eye, label: t('admin.unlisted'), variant: 'outline' as const},
         };
-        const config = configs[visibility] || configs.public;
+        const config = configs[visibility as keyof typeof configs] || configs.public;
         const Icon = config.icon;
         return (
             <Badge variant={config.variant}>
@@ -288,54 +236,88 @@ const Playlists: React.FC = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredPlaylists.map((playlist) => (
-                                <TableRow key={playlist.id}>
-                                    <TableCell className="font-medium">{playlist.id}</TableCell>
-                                    <TableCell>
-                                        <div>
-                                            <div className="font-medium">{playlist.name}</div>
-                                            <div className="text-xs text-muted-foreground">{playlist.slug}</div>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            <Avatar className="h-6 w-6">
-                                                <AvatarFallback className="text-xs">
-                                                    <User className="h-3 w-3"/>
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            {playlist.owner.name}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-right">{playlist.mediaCount}</TableCell>
-                                    <TableCell className="text-right">{formatNumber(playlist.viewCount)}</TableCell>
-                                    <TableCell>{getVisibilityBadge(playlist.visibility)}</TableCell>
-                                    <TableCell className="text-muted-foreground">{playlist.createdAt}</TableCell>
-                                    <TableCell className="text-right">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="sm">
-                                                    <MoreHorizontal className="h-4 w-4"/>
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem>
-                                                    <Eye className="mr-2 h-4 w-4"/>
-                                                    {t('admin.view')}
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    <Edit className="mr-2 h-4 w-4"/>
-                                                    {t('admin.edit')}
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem className="text-red-600">
-                                                    <Trash2 className="mr-2 h-4 w-4"/>
-                                                    {t('admin.delete')}
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={8} className="text-center py-8">
+                                        <div className="animate-pulse">Loading playlists...</div>
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            ) : error ? (
+                                <TableRow>
+                                    <TableCell colSpan={8} className="text-center py-8">
+                                        <div className="text-red-600">{error}</div>
+                                        <Button 
+                                            variant="outline" 
+                                            size="sm" 
+                                            className="mt-2"
+                                            onClick={() => window.location.reload()}
+                                        >
+                                            Retry
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ) : filteredPlaylists.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={8} className="text-center py-8">
+                                        No playlists found
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                filteredPlaylists.map((playlist) => (
+                                    <TableRow key={playlist.id}>
+                                        <TableCell className="font-medium">{playlist.id}</TableCell>
+                                        <TableCell>
+                                            <div>
+                                                <div className="font-medium">{playlist.title}</div>
+                                                {playlist.description && (
+                                                    <div className="text-xs text-muted-foreground">{playlist.description}</div>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
+                                                <Avatar className="h-6 w-6">
+                                                    <AvatarFallback className="text-xs">
+                                                        <User className="h-3 w-3"/>
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <span className="text-muted-foreground">User ID: {playlist.user_id}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-right">{playlist.media_count || 0}</TableCell>
+                                        <TableCell className="text-right">0</TableCell>
+                                        <TableCell>
+                                            <Badge variant="outline">-</Badge>
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground">
+                                            {new Date(playlist.created_at).toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="sm">
+                                                        <MoreHorizontal className="h-4 w-4"/>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem>
+                                                        <Eye className="mr-2 h-4 w-4"/>
+                                                        {t('admin.view')}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem>
+                                                        <Edit className="mr-2 h-4 w-4"/>
+                                                        {t('admin.edit')}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem className="text-red-600">
+                                                        <Trash2 className="mr-2 h-4 w-4"/>
+                                                        {t('admin.delete')}
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>

@@ -1,0 +1,126 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
+// Package handler provides adapters for different HTTP frameworks.
+package handler
+
+import (
+	"context"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+// GinRouterAdapter adapts a gin.RouterGroup to the Router interface.
+type GinRouterAdapter struct {
+	group *gin.RouterGroup
+}
+
+// NewGinRouterAdapter creates a new GinRouterAdapter.
+func NewGinRouterAdapter(group *gin.RouterGroup) *GinRouterAdapter {
+	return &GinRouterAdapter{group: group}
+}
+
+// Group creates a new route group with the given prefix.
+func (a *GinRouterAdapter) Group(prefix string) Router {
+	return &GinRouterAdapter{group: a.group.Group(prefix)}
+}
+
+// GET registers a GET route.
+func (a *GinRouterAdapter) GET(path string, handler http.HandlerFunc) {
+	a.group.GET(path, gin.WrapH(handler))
+}
+
+// POST registers a POST route.
+func (a *GinRouterAdapter) POST(path string, handler http.HandlerFunc) {
+	a.group.POST(path, gin.WrapH(handler))
+}
+
+// PUT registers a PUT route.
+func (a *GinRouterAdapter) PUT(path string, handler http.HandlerFunc) {
+	a.group.PUT(path, gin.WrapH(handler))
+}
+
+// DELETE registers a DELETE route.
+func (a *GinRouterAdapter) DELETE(path string, handler http.HandlerFunc) {
+	a.group.DELETE(path, gin.WrapH(handler))
+}
+
+// PATCH registers a PATCH route.
+func (a *GinRouterAdapter) PATCH(path string, handler http.HandlerFunc) {
+	a.group.PATCH(path, gin.WrapH(handler))
+}
+
+// GinContextAdapter adapts a gin.Context to the Context interface.
+type GinContextAdapter struct {
+	c *gin.Context
+}
+
+// NewGinContextAdapter creates a new GinContextAdapter.
+func NewGinContextAdapter(c *gin.Context) *GinContextAdapter {
+	return &GinContextAdapter{c: c}
+}
+
+// NewGinContextAdapterFromHTTP creates a new GinContextAdapter from http.ResponseWriter and http.Request.
+func NewGinContextAdapterFromHTTP(w http.ResponseWriter, r *http.Request) *GinContextAdapter {
+	c, _ := gin.CreateTestContext(w)
+	c.Request = r
+	return &GinContextAdapter{c: c}
+}
+
+// Context returns the underlying context.Context.
+func (a *GinContextAdapter) Context() context.Context {
+	return a.c.Request.Context()
+}
+
+// Request returns the underlying http.Request.
+func (a *GinContextAdapter) Request() *http.Request {
+	return a.c.Request
+}
+
+// ResponseWriter returns the underlying http.ResponseWriter.
+func (a *GinContextAdapter) ResponseWriter() http.ResponseWriter {
+	return a.c.Writer
+}
+
+// Param gets a URL parameter.
+func (a *GinContextAdapter) Param(key string) string {
+	return a.c.Param(key)
+}
+
+// Query gets a query parameter.
+func (a *GinContextAdapter) Query(key string) string {
+	return a.c.Query(key)
+}
+
+// Bind binds the request body to a struct.
+func (a *GinContextAdapter) Bind(v interface{}) error {
+	return a.c.ShouldBind(v)
+}
+
+// JSON sends a JSON response.
+func (a *GinContextAdapter) JSON(code int, v interface{}) {
+	a.c.JSON(code, v)
+}
+
+// Status sends a status code response.
+func (a *GinContextAdapter) Status(code int) {
+	a.c.Status(code)
+}
+
+// Header sets a response header.
+func (a *GinContextAdapter) Header(key, value string) {
+	a.c.Header(key, value)
+}
+
+// Get gets a value from the context.
+func (a *GinContextAdapter) Get(key string) interface{} {
+	val, _ := a.c.Get(key)
+	return val
+}
+
+// Set sets a value in the context.
+func (a *GinContextAdapter) Set(key string, value interface{}) {
+	a.c.Set(key, value)
+}

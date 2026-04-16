@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
@@ -83,6 +84,33 @@ func (f TraverseFunc) Traverse(ctx context.Context, q entity.Query) error {
 		return err
 	}
 	return f(ctx, query)
+}
+
+// The ArticleFunc type is an adapter to allow the use of ordinary function as a Querier.
+type ArticleFunc func(context.Context, *entity.ArticleQuery) (entity.Value, error)
+
+// Query calls f(ctx, q).
+func (f ArticleFunc) Query(ctx context.Context, q entity.Query) (entity.Value, error) {
+	if q, ok := q.(*entity.ArticleQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *entity.ArticleQuery", q)
+}
+
+// The TraverseArticle type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseArticle func(context.Context, *entity.ArticleQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseArticle) Intercept(next entity.Querier) entity.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseArticle) Traverse(ctx context.Context, q entity.Query) error {
+	if q, ok := q.(*entity.ArticleQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *entity.ArticleQuery", q)
 }
 
 // The CategoryFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -547,6 +575,8 @@ func (f TraverseUser) Traverse(ctx context.Context, q entity.Query) error {
 // NewQuery returns the generic Query interface for the given typed query.
 func NewQuery(q entity.Query) (Query, error) {
 	switch q := q.(type) {
+	case *entity.ArticleQuery:
+		return &query[*entity.ArticleQuery, predicate.Article, article.OrderOption]{typ: entity.TypeArticle, tq: q}, nil
 	case *entity.CategoryQuery:
 		return &query[*entity.CategoryQuery, predicate.Category, category.OrderOption]{typ: entity.TypeCategory, tq: q}, nil
 	case *entity.ChannelQuery:

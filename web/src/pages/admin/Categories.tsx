@@ -32,7 +32,8 @@ const Categories: React.FC = () => {
             try {
                 setLoading(true);
                 const response = await categoryApi.getAll();
-                setCategories(response || []);
+                const categoryList = Array.isArray(response?.items) ? response.items : [];
+                setCategories(categoryList);
             } catch (error) {
                 console.error('Failed to fetch categories:', error);
             } finally {

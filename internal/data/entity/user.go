@@ -77,6 +77,8 @@ type User struct {
 type UserEdges struct {
 	// Media holds the value of the media edge.
 	Media []*Media `json:"media,omitempty"`
+	// Articles holds the value of the articles edge.
+	Articles []*Article `json:"articles,omitempty"`
 	// Channels holds the value of the channels edge.
 	Channels []*Channel `json:"channels,omitempty"`
 	// Playlists holds the value of the playlists edge.
@@ -99,7 +101,7 @@ type UserEdges struct {
 	Subscribers []*Subscription `json:"subscribers,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [11]bool
+	loadedTypes [12]bool
 }
 
 // MediaOrErr returns the Media value or an error if the edge
@@ -111,10 +113,19 @@ func (e UserEdges) MediaOrErr() ([]*Media, error) {
 	return nil, &NotLoadedError{edge: "media"}
 }
 
+// ArticlesOrErr returns the Articles value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ArticlesOrErr() ([]*Article, error) {
+	if e.loadedTypes[1] {
+		return e.Articles, nil
+	}
+	return nil, &NotLoadedError{edge: "articles"}
+}
+
 // ChannelsOrErr returns the Channels value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) ChannelsOrErr() ([]*Channel, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.Channels, nil
 	}
 	return nil, &NotLoadedError{edge: "channels"}
@@ -123,7 +134,7 @@ func (e UserEdges) ChannelsOrErr() ([]*Channel, error) {
 // PlaylistsOrErr returns the Playlists value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) PlaylistsOrErr() ([]*Playlist, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.Playlists, nil
 	}
 	return nil, &NotLoadedError{edge: "playlists"}
@@ -132,7 +143,7 @@ func (e UserEdges) PlaylistsOrErr() ([]*Playlist, error) {
 // CommentsOrErr returns the Comments value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) CommentsOrErr() ([]*Comment, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.Comments, nil
 	}
 	return nil, &NotLoadedError{edge: "comments"}
@@ -141,7 +152,7 @@ func (e UserEdges) CommentsOrErr() ([]*Comment, error) {
 // NotificationsOrErr returns the Notifications value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) NotificationsOrErr() ([]*Notification, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.Notifications, nil
 	}
 	return nil, &NotLoadedError{edge: "notifications"}
@@ -150,7 +161,7 @@ func (e UserEdges) NotificationsOrErr() ([]*Notification, error) {
 // CategoriesOrErr returns the Categories value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) CategoriesOrErr() ([]*Category, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[6] {
 		return e.Categories, nil
 	}
 	return nil, &NotLoadedError{edge: "categories"}
@@ -159,7 +170,7 @@ func (e UserEdges) CategoriesOrErr() ([]*Category, error) {
 // TagsOrErr returns the Tags value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) TagsOrErr() ([]*Tag, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[7] {
 		return e.Tags, nil
 	}
 	return nil, &NotLoadedError{edge: "tags"}
@@ -168,7 +179,7 @@ func (e UserEdges) TagsOrErr() ([]*Tag, error) {
 // FavoritesOrErr returns the Favorites value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) FavoritesOrErr() ([]*Favorite, error) {
-	if e.loadedTypes[7] {
+	if e.loadedTypes[8] {
 		return e.Favorites, nil
 	}
 	return nil, &NotLoadedError{edge: "favorites"}
@@ -177,7 +188,7 @@ func (e UserEdges) FavoritesOrErr() ([]*Favorite, error) {
 // LikesOrErr returns the Likes value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) LikesOrErr() ([]*Like, error) {
-	if e.loadedTypes[8] {
+	if e.loadedTypes[9] {
 		return e.Likes, nil
 	}
 	return nil, &NotLoadedError{edge: "likes"}
@@ -186,7 +197,7 @@ func (e UserEdges) LikesOrErr() ([]*Like, error) {
 // SubscriptionsOrErr returns the Subscriptions value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) SubscriptionsOrErr() ([]*Subscription, error) {
-	if e.loadedTypes[9] {
+	if e.loadedTypes[10] {
 		return e.Subscriptions, nil
 	}
 	return nil, &NotLoadedError{edge: "subscriptions"}
@@ -195,7 +206,7 @@ func (e UserEdges) SubscriptionsOrErr() ([]*Subscription, error) {
 // SubscribersOrErr returns the Subscribers value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) SubscribersOrErr() ([]*Subscription, error) {
-	if e.loadedTypes[10] {
+	if e.loadedTypes[11] {
 		return e.Subscribers, nil
 	}
 	return nil, &NotLoadedError{edge: "subscribers"}
@@ -401,6 +412,11 @@ func (_m *User) Value(name string) (ent.Value, error) {
 // QueryMedia queries the "media" edge of the User entity.
 func (_m *User) QueryMedia() *MediaQuery {
 	return NewUserClient(_m.config).QueryMedia(_m)
+}
+
+// QueryArticles queries the "articles" edge of the User entity.
+func (_m *User) QueryArticles() *ArticleQuery {
+	return NewUserClient(_m.config).QueryArticles(_m)
 }
 
 // QueryChannels queries the "channels" edge of the User entity.

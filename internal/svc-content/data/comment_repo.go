@@ -111,6 +111,45 @@ func (r *commentRepo) ListAll(ctx context.Context, page, pageSize int) ([]*biz.C
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
 		Order(entity.Desc(comment.FieldAddDate)).
+		WithUser().
+		WithReplies(func(rq *entity.CommentQuery) {
+			rq.WithUser()
+		}).
+		All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	res := make([]*biz.Comment, len(ents))
+	for i, ent := range ents {
+		res[i] = mapComment(ent)
+	}
+	return res, total, nil
+}
+
+func (r *commentRepo) UpdateStatus(ctx context.Context, id string, status string) (*biz.Comment, error) {
+	ent, err := r.data.db.Comment.UpdateOneID(id).
+		SetStatus(status).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return mapComment(ent), nil
+}
+
+func (r *commentRepo) ListByStatus(ctx context.Context, status string, page, pageSize int) ([]*biz.Comment, int, error) {
+	query := r.data.db.Comment.Query().Where(comment.StatusEQ(status))
+	total, err := query.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	ents, err := query.
+		Limit(pageSize).
+		Offset((page - 1) * pageSize).
+		Order(entity.Desc(comment.FieldAddDate)).
+		WithUser().
+		WithMedia().
 		All(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -131,6 +170,7 @@ func mapComment(ent *entity.Comment) *biz.Comment {
 		UserID:    ent.UserID,
 		AddDate:   ent.AddDate,
 		UpdatedAt: ent.AddDate,
+		Status:    ent.Status,
 	}
 
 	if ent.Edges.Parent != nil {

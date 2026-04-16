@@ -12,45 +12,38 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/handler"
+	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origcms/internal/svc-admin/service"
 	"origadmin/application/origcms/internal/svc-media/biz"
 )
 
 // AdminHandler handles admin-related routes.
 type AdminHandler struct {
-	jwt     *auth.Manager
-	mediaUC *biz.MediaUseCase
+	jwt        *auth.Manager
+	mediaUC    *biz.MediaUseCase
+	tagService *service.TagService
 	// Add other use cases as needed
 }
 
 // NewAdminHandler creates a new AdminHandler.
-func NewAdminHandler(jwt *auth.Manager, mediaUC *biz.MediaUseCase) *AdminHandler {
-	return &AdminHandler{jwt: jwt, mediaUC: mediaUC}
+func NewAdminHandler(jwt *auth.Manager, mediaUC *biz.MediaUseCase, tagService *service.TagService) *AdminHandler {
+	return &AdminHandler{jwt: jwt, mediaUC: mediaUC, tagService: tagService}
 }
 
-func (h *AdminHandler) Register(group *gin.RouterGroup) {
-	admin := group.Group("/admin")
-	admin.Use(JWTMiddleware(h.jwt))
-	admin.Use(func(c *gin.Context) {
-		claims, ok := c.MustGet("claims").(*auth.Claims)
-		if !ok || !claims.IsStaff {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Admin access required"})
-			c.Abort()
-			return
-		}
-		c.Next()
-	})
-
+func (h *AdminHandler) Register(r handler.Router) {
+	admin := r.Group("/admin")
 	{
 		// ================================
 		// 1. Stats Panel
 		// ================================
 		stats := admin.Group("/stats")
 		{
-			stats.GET("/dashboard", h.getDashboardStats())
-			stats.GET("/medias", h.getMediaStats())
-			stats.GET("/users", h.getUserStats())
-			stats.GET("/traffic", h.getTrafficStats())
+			stats.GET("/dashboard", WithAdmin(h.jwt, GinHandlerToHTTP(h.getDashboardStats())))
+			stats.GET("/medias", WithAdmin(h.jwt, GinHandlerToHTTP(h.getMediaStats())))
+			stats.GET("/users", WithAdmin(h.jwt, GinHandlerToHTTP(h.getUserStats())))
+			stats.GET("/traffic", WithAdmin(h.jwt, GinHandlerToHTTP(h.getTrafficStats())))
 		}
 
 		// ================================
@@ -59,19 +52,19 @@ func (h *AdminHandler) Register(group *gin.RouterGroup) {
 		encoding := admin.Group("/encoding")
 		{
 			// Tasks
-			encoding.GET("/tasks", h.getAllEncodingTasks())
-			encoding.GET("/status", h.getEncodingStatus())
-			encoding.POST("/tasks/:taskId/retry", h.retryTask())
-			encoding.POST("/retry-failed", h.retryAllFailedTasks())
+			encoding.GET("/tasks", WithAdmin(h.jwt, GinHandlerToHTTP(h.getAllEncodingTasks())))
+			encoding.GET("/status", WithAdmin(h.jwt, GinHandlerToHTTP(h.getEncodingStatus())))
+			encoding.POST("/tasks/:taskId/retry", WithAdmin(h.jwt, GinHandlerToHTTP(h.retryTask())))
+			encoding.POST("/retry-failed", WithAdmin(h.jwt, GinHandlerToHTTP(h.retryAllFailedTasks())))
 
 			// Profiles
 			profiles := encoding.Group("/profiles")
 			{
-				profiles.GET("", h.listEncodeProfiles())
-				profiles.POST("", h.createEncodeProfile())
-				profiles.GET("/:id", h.getEncodeProfile())
-				profiles.PUT("/:id", h.updateEncodeProfile())
-				profiles.DELETE("/:id", h.deleteEncodeProfile())
+				profiles.GET("", WithAdmin(h.jwt, GinHandlerToHTTP(h.listEncodeProfiles())))
+				profiles.POST("", WithAdmin(h.jwt, GinHandlerToHTTP(h.createEncodeProfile())))
+				profiles.GET("/:id", WithAdmin(h.jwt, GinHandlerToHTTP(h.getEncodeProfile())))
+				profiles.PUT("/:id", WithAdmin(h.jwt, GinHandlerToHTTP(h.updateEncodeProfile())))
+				profiles.DELETE("/:id", WithAdmin(h.jwt, GinHandlerToHTTP(h.deleteEncodeProfile())))
 			}
 		}
 
@@ -80,8 +73,23 @@ func (h *AdminHandler) Register(group *gin.RouterGroup) {
 		// ================================
 		settings := admin.Group("/settings")
 		{
-			settings.GET("", h.getSystemSettings())
-			settings.PUT("", h.updateSystemSettings())
+			settings.GET("", WithAdmin(h.jwt, GinHandlerToHTTP(h.getSystemSettings())))
+			settings.PUT("", WithAdmin(h.jwt, GinHandlerToHTTP(h.updateSystemSettings())))
+		}
+
+		// ================================
+		// 4. Tag Management
+		// ================================
+		tags := admin.Group("/tags")
+		{
+			tags.GET("", WithAdmin(h.jwt, GinHandlerToHTTP(h.listTags())))
+			tags.GET("/:id", WithAdmin(h.jwt, GinHandlerToHTTP(h.getTag())))
+			tags.POST("", WithAdmin(h.jwt, GinHandlerToHTTP(h.createTag())))
+			tags.PUT("/:id", WithAdmin(h.jwt, GinHandlerToHTTP(h.updateTag())))
+			tags.DELETE("/:id", WithAdmin(h.jwt, GinHandlerToHTTP(h.deleteTag())))
+			tags.POST("/bulk", WithAdmin(h.jwt, GinHandlerToHTTP(h.bulkTagOperation())))
+			tags.GET("/export", WithAdmin(h.jwt, GinHandlerToHTTP(h.exportTags())))
+			tags.POST("/import", WithAdmin(h.jwt, GinHandlerToHTTP(h.importTags())))
 		}
 	}
 }
@@ -349,5 +357,198 @@ func (h *AdminHandler) updateSystemSettings() gin.HandlerFunc {
 		}
 		// TODO: Save settings to database
 		c.JSON(http.StatusOK, gin.H{"message": "Settings updated", "settings": settings})
+	}
+}
+
+// --- Tag Management Handlers ---
+
+func (h *AdminHandler) listTags() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Parse query parameters
+		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+		search := c.Query("search")
+		status := c.Query("status")
+		sortBy := c.DefaultQuery("sort_by", "created_at")
+		sortOrder := c.DefaultQuery("sort_order", "desc")
+
+		// Get tags
+		tags, total, err := h.tagService.List(c.Request.Context(), page, pageSize, search, status, sortBy, sortOrder)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": 10000, "message": "Failed to list tags"})
+			return
+		}
+
+		// Calculate total pages
+		totalPages := (int(total) + pageSize - 1) / pageSize
+
+		// Return response
+		c.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"message": "ok",
+			"data": gin.H{
+				"list":       tags,
+				"total":      total,
+				"page":       page,
+				"page_size":  pageSize,
+				"total_pages": totalPages,
+			},
+		})
+	}
+}
+
+func (h *AdminHandler) getTag() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+
+		tag, err := h.tagService.Get(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"code": 10001, "message": "Tag not found"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"message": "ok",
+			"data": tag,
+		})
+	}
+}
+
+func (h *AdminHandler) createTag() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req struct {
+			Name        string `json:"name" binding:"required"`
+			Slug        string `json:"slug" binding:"required"`
+			Description string `json:"description"`
+			Color       string `json:"color"`
+			Status      string `json:"status"`
+		}
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 10004, "message": "Invalid request"})
+			return
+		}
+
+		tag := &entity.Tag{
+			Title: req.Name,
+		}
+
+		createdTag, err := h.tagService.Create(c.Request.Context(), tag)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 10004, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"message": "Tag created successfully",
+			"data": createdTag,
+		})
+	}
+}
+
+func (h *AdminHandler) updateTag() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+
+		var req struct {
+			Name        string `json:"name"`
+			Slug        string `json:"slug"`
+			Description string `json:"description"`
+			Color       string `json:"color"`
+			Status      string `json:"status"`
+		}
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 10004, "message": "Invalid request"})
+			return
+		}
+
+		updates := &entity.Tag{
+			Title: req.Name,
+		}
+
+		updatedTag, err := h.tagService.Update(c.Request.Context(), id, updates)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 10004, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"message": "Tag updated successfully",
+			"data": updatedTag,
+		})
+	}
+}
+
+func (h *AdminHandler) deleteTag() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+
+		if err := h.tagService.Delete(c.Request.Context(), id); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 10004, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"message": "Tag deleted successfully",
+		})
+	}
+}
+
+func (h *AdminHandler) bulkTagOperation() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req struct {
+			IDs    []string `json:"ids" binding:"required"`
+			Action string   `json:"action" binding:"required"`
+		}
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 10004, "message": "Invalid request"})
+			return
+		}
+
+		if req.Action != "delete" {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 10004, "message": "Unsupported action"})
+			return
+		}
+
+		count, err := h.tagService.BulkDelete(c.Request.Context(), req.IDs)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 10004, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"message": "Bulk operation completed",
+			"data": gin.H{
+				"success": count,
+				"failed":  len(req.IDs) - count,
+			},
+		})
+	}
+}
+
+func (h *AdminHandler) exportTags() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// TODO: Implement export functionality
+		c.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"message": "Export functionality not implemented yet",
+		})
+	}
+}
+
+func (h *AdminHandler) importTags() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// TODO: Implement import functionality
+		c.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"message": "Import functionality not implemented yet",
+		})
 	}
 }

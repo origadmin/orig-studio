@@ -1,5 +1,4 @@
-// API 请求库 - 参考 webui 模式
-// 支持 Token 刷新、错误处理、请求拦截
+// API 请求库 - 按照 webui 项目模式重写
 
 import axios from "axios";
 
@@ -23,7 +22,14 @@ interface Token {
     access_token: string;
     expires_in: number;
     token_type: string;
-    refresh_token?: string; // optional, not issued in M1
+    refresh_token?: string;
+    user?: {
+        id: string;
+        username: string;
+        nickname?: string;
+        email?: string;
+        is_staff: boolean;
+    };
 }
 
 interface ApiError {
@@ -37,22 +43,6 @@ const TOKEN_KEY = "origcms_token";
 const USER_KEY = "origcms_user";
 
 let accessToken: string | null = localStorage.getItem(TOKEN_KEY);
-let isRefreshing = false;
-let failedQueue: Array<{
-    resolve: (value: unknown) => void;
-    reject: (reason?: unknown) => void;
-}> = [];
-
-const processQueue = (error: ApiError | null, token: string | null = null) => {
-    failedQueue.forEach((prom) => {
-        if (error) {
-            prom.reject(error);
-        } else {
-            prom.resolve(token);
-        }
-    });
-    failedQueue = [];
-};
 
 // 确保每次获取token时都从localStorage读取最新值
 export const getAccessToken = () => {
@@ -72,7 +62,35 @@ export const setAuth = (token: Token) => {
     if (token.refresh_token) {
         localStorage.setItem('origcms_refresh_token', token.refresh_token);
     }
-    localStorage.setItem("token_expires_at", String(Date.now() + token.expires_in * 1000));
+    // 确保 expires_in 是数字
+    const expiresIn = typeof token.expires_in === 'string' 
+        ? parseInt(token.expires_in, 10) 
+        : token.expires_in;
+    localStorage.setItem("token_expires_at", String(Date.now() + expiresIn * 1000));
+    
+    // 如果响应中包含 user 信息，保存它
+    if (token.user) {
+        const user = {
+            id: token.user.id,
+            username: token.user.username,
+            displayName: token.user.nickname || token.user.username,
+            avatarUrl: undefined,
+            roles: token.user.is_staff ? ['admin', 'user'] : ['user']
+        };
+        localStorage.setItem(USER_KEY, JSON.stringify(user));
+        
+        // 触发事件通知 useAuth 更新
+        window.dispatchEvent(new StorageEvent('storage', {
+            key: USER_KEY,
+            newValue: JSON.stringify(user),
+        }));
+    }
+    
+    // 触发事件通知 useAuth 更新
+    window.dispatchEvent(new StorageEvent('storage', {
+        key: TOKEN_KEY,
+        newValue: token.access_token,
+    }));
 };
 
 export const clearAuth = () => {
@@ -83,7 +101,7 @@ export const clearAuth = () => {
     localStorage.removeItem("token_expires_at");
 };
 
-export const isTokenExpired = (): boolean => {
+export const isTokenExpired = (bufferSeconds: number = 60): boolean => {
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) return true;
 
@@ -91,7 +109,8 @@ export const isTokenExpired = (): boolean => {
         // 解析 JWT token 来获取 exp 字段
         const payload = JSON.parse(atob(token.split('.')[1]));
         if (!payload.exp) return true;
-        return Date.now() > payload.exp * 1000;
+        // 提前 bufferSeconds 认为过期，避免边界情况
+        return Date.now() > (payload.exp - bufferSeconds) * 1000;
     } catch {
         return true;
     }
@@ -107,11 +126,11 @@ function createRequest() {
         },
     });
 
-    // 请求拦截器：带上 token（如果有）
+    // Request Interceptor
     request.interceptors.request.use(
         (config) => {
             const token = localStorage.getItem(TOKEN_KEY);
-            if (token) {
+            if (token && config.headers) {
                 config.headers.Authorization = `Bearer ${token}`;
             }
             return config;
@@ -119,7 +138,26 @@ function createRequest() {
         (error) => Promise.reject(error)
     );
 
-    // 响应拦截器：处理统一响应格式和 401 错误
+    // 响应拦截器：处理 401 和 token 刷新 - 按照 webui 项目模式
+    let isRefreshing = false;
+    let failedQueue: { resolve: (value: unknown) => void; reject: (reason?: unknown) => void }[] = [];
+
+    const processQueue = (error: unknown | null, token: string | null = null) => {
+        failedQueue.forEach((prom) => {
+            if (error) {
+                prom.reject(error);
+            } else {
+                prom.resolve(token);
+            }
+        });
+        failedQueue = [];
+    };
+
+    const handleAuthError = () => {
+        clearAuth();
+        window.location.href = "/auth/signin";
+    };
+
     request.interceptors.response.use(
         (response) => {
             // 适配新的统一响应格式 {code, message, data}
@@ -141,72 +179,76 @@ function createRequest() {
                 // 返回 data 部分
                 return {...response, data: data.data};
             }
-            // 原始格式，直接返回
+            // 原始格式，直接返回（用于认证接口）
             return response;
         },
         async (error) => {
-            const originalRequest = error.config;
+            const originalRequest = error.config as any;
 
-            // 非 401 直接拒绝
-            if (error.response?.status !== 401) {
+            // 构造完整的 URL
+            const refreshTokenUrl = API_PREFIX + "/auth/refresh";
+            const signinUrl = "/auth/signin";
+            const signupUrl = "/auth/signup";
+            
+            const publicUrls = [refreshTokenUrl, signinUrl, signupUrl];
+            
+            // 如果不是 401 或者是公共接口的 401，直接拒绝
+            if (error.response?.status !== 401 || publicUrls.includes(originalRequest.url || "")) {
                 return Promise.reject(error);
             }
 
-            // auth 接口返回 401 不做重定向（登录失败正常错误）
-            const authUrls = ["/auth/signin", "/auth/signup", "/auth/refresh"];
-            if (authUrls.some((url) => originalRequest.url?.includes(url))) {
-                return Promise.reject(error);
-            }
-
-            // 尝试使用 refresh token 刷新
-            if (!isRefreshing) {
-                isRefreshing = true;
-                
-                try {
-                    const refreshToken = getRefreshToken();
-                    if (refreshToken) {
-                        // 调用 refresh token 接口
-                        const response = await axios.post<Token>(`${API_BASE_URL}${API_PREFIX}/auth/refresh`, {
-                            refresh_token: refreshToken
-                        });
-                        
-                        // 保存新 token
-                        setAuth(response.data);
-                        
-                        // 更新请求头并重新发送原始请求
-                        originalRequest.headers.Authorization = `Bearer ${response.data.access_token}`;
-                        
-                        // 处理队列中的请求
-                        processQueue(null, response.data.access_token);
-                        
-                        // 重新发送原始请求
-                        return request(originalRequest);
-                    } else {
-                        // 没有 refresh token，清 token 跳登录
-                        clearAuth();
-                        window.location.href = "/auth/signin";
-                        return Promise.reject(error);
-                    }
-                } catch (refreshError) {
-                    // refresh token 失败，清 token 跳登录
-                    clearAuth();
-                    processQueue(refreshError as ApiError, null);
-                    window.location.href = "/auth/signin";
-                    return Promise.reject(refreshError);
-                } finally {
-                    isRefreshing = false;
-                }
-            } else {
-                // 正在刷新 token，加入队列等待
+            if (isRefreshing) {
                 return new Promise((resolve, reject) => {
-                    failedQueue.push({
-                        resolve: (token: string) => {
+                    failedQueue.push({ resolve, reject });
+                })
+                    .then((token) => {
+                        if (originalRequest.headers) {
                             originalRequest.headers.Authorization = `Bearer ${token}`;
-                            resolve(request(originalRequest));
-                        },
-                        reject
+                        }
+                        return request(originalRequest);
+                    })
+                    .catch((err) => {
+                        return Promise.reject(err);
                     });
-                });
+            }
+
+            isRefreshing = true;
+            originalRequest._retry = true;
+
+            const refreshToken = getRefreshToken();
+            if (!refreshToken) {
+                isRefreshing = false;
+                handleAuthError();
+                return Promise.reject(error);
+            }
+
+            try {
+                // 使用普通 axios 而不是 request 实例调用 refresh token 接口
+                // 这一点很重要！webui 项目也是这样做的！
+                const { data: newToken } = await axios.post<Token>(
+                    (API_BASE_URL || "") + refreshTokenUrl, 
+                    { refresh_token: refreshToken }
+                );
+
+                setAuth(newToken);
+                if (originalRequest.headers) {
+                    originalRequest.headers.Authorization = `Bearer ${newToken.access_token}`;
+                }
+                processQueue(null, newToken.access_token);
+                return request(originalRequest);
+            } catch (refreshError) {
+                const axiosError = refreshError as any;
+                
+                // 检查是否是刷新 token 失败
+                const isRefreshError = axiosError?.response?.status === 401;
+                
+                processQueue(axiosError, null);
+                if (isRefreshError) {
+                    handleAuthError();
+                }
+                return Promise.reject(refreshError);
+            } finally {
+                isRefreshing = false;
             }
         }
     );

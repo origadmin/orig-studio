@@ -26,9 +26,9 @@ var (
 type ProgressCallback func(progress int, frame int64, fps float64, speed string, time float64)
 
 func init() {
-	// 默认探索路径
+	// Default search path
 	defaultToolsDir := `tools\bin`
-	// 如果在 Windows 下且当前目录下有 tools\bin
+	// If on Windows and tools\bin exists in current directory
 	if _, err := os.Stat(filepath.Join(defaultToolsDir, "ffmpeg.exe")); err == nil {
 		ffmpegPath, _ = filepath.Abs(filepath.Join(defaultToolsDir, "ffmpeg.exe"))
 		ffprobePath, _ = filepath.Abs(filepath.Join(defaultToolsDir, "ffprobe.exe"))
@@ -241,7 +241,7 @@ func TranscodeToHLSWithProgress(
 	duration float64,
 	progressCb ProgressCallback,
 ) error {
-	// Clean up existing files in output directory to avoid segment残留
+	// Clean up existing files in output directory to avoid segment residue
 	if err := os.RemoveAll(outputDir); err != nil {
 		return fmt.Errorf("failed to clean output directory: %w", err)
 	}

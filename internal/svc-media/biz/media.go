@@ -185,6 +185,11 @@ func (uc *MediaUseCase) ListMedias(
 }
 
 func (uc *MediaUseCase) CreateMedia(ctx context.Context, media *Media) (*Media, error) {
+	// 验证媒体必须关联且仅关联一个分类
+	if media.CategoryId == "" {
+		return nil, fmt.Errorf("media must have a category")
+	}
+
 	created, err := uc.repo.Create(ctx, media)
 	if err != nil {
 		return nil, err
@@ -211,6 +216,11 @@ func (uc *MediaUseCase) CreateMedia(ctx context.Context, media *Media) (*Media, 
 }
 
 func (uc *MediaUseCase) UpdateMedia(ctx context.Context, media *Media) (*Media, error) {
+	// 验证媒体必须关联且仅关联一个分类
+	if media.CategoryId == "" {
+		return nil, fmt.Errorf("media must have a category")
+	}
+
 	return uc.repo.Update(ctx, media)
 }
 

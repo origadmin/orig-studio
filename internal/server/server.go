@@ -1,0 +1,140 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
+// Package server handles server startup and routing for the application.
+package server
+
+import (
+	"os"
+
+	"github.com/gin-gonic/gin"
+
+	"github.com/origadmin/runtime/log"
+	"origadmin/application/origcms/internal/handler"
+)
+
+// Server represents the application server.
+type Server struct {
+	authHandler        *AuthHandler
+	userHandler        *UserHandler
+	mediaHandler       *MediaHandler
+	uploadHandler      *UploadHandler
+	categoryHandler    *CategoryHandler
+	tagHandler         *TagHandler
+	feedHandler        *FeedHandler
+	notificationHandler *NotificationHandler
+	channelHandler     *ChannelHandler
+	shareHandler       *ShareHandler
+	systemHandler      *SystemHandler
+	statsHandler       *StatsHandler
+	searchHandler      *SearchHandler
+	meHandler          *MeHandler
+	adminHandler       *AdminHandler
+}
+
+// NewServer creates a new server instance.
+func NewServer(
+	authHandler *AuthHandler,
+	userHandler *UserHandler,
+	mediaHandler *MediaHandler,
+	uploadHandler *UploadHandler,
+	categoryHandler *CategoryHandler,
+	tagHandler *TagHandler,
+	feedHandler *FeedHandler,
+	notificationHandler *NotificationHandler,
+	channelHandler *ChannelHandler,
+	shareHandler *ShareHandler,
+	systemHandler *SystemHandler,
+	statsHandler *StatsHandler,
+	searchHandler *SearchHandler,
+	meHandler *MeHandler,
+	adminHandler *AdminHandler,
+) *Server {
+	return &Server{
+		authHandler:        authHandler,
+		userHandler:        userHandler,
+		mediaHandler:       mediaHandler,
+		uploadHandler:      uploadHandler,
+		categoryHandler:    categoryHandler,
+		tagHandler:         tagHandler,
+		feedHandler:        feedHandler,
+		notificationHandler: notificationHandler,
+		channelHandler:     channelHandler,
+		shareHandler:       shareHandler,
+		systemHandler:      systemHandler,
+		statsHandler:       statsHandler,
+		searchHandler:      searchHandler,
+		meHandler:          meHandler,
+		adminHandler:       adminHandler,
+	}
+}
+
+// Start starts the server.
+func (s *Server) Start(addr string) error {
+	if getEnv("GIN_MODE", "debug") == "release" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+	r := gin.Default()
+
+	// CORS
+	r.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, Range")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	})
+
+	// Static files for media uploads
+	r.Static("/uploads", "./data/uploads/uploads")
+	r.Static("/thumbnails", "./data/uploads/thumbnails")
+	r.Static("/hls", "./data/uploads/hls")
+
+	// Register all module routes
+	s.RegisterRoutes(r)
+
+	log.Infof("origcms server starting, addr: %s", addr)
+	return r.Run(addr)
+}
+
+// RegisterRoutes registers all routes for the server.
+func (s *Server) RegisterRoutes(r *gin.Engine) {
+	// Health check
+	r.GET("/health", HealthHandler)
+
+	// API v1 routes
+	apiV1 := r.Group("/api/v1")
+	adapter := handler.NewGinRouterAdapter(apiV1)
+	{
+		s.authHandler.Register(adapter)
+		s.userHandler.Register(adapter)
+		s.mediaHandler.Register(adapter)
+		s.uploadHandler.Register(adapter)
+		s.categoryHandler.Register(adapter)
+		s.tagHandler.Register(adapter)
+		s.feedHandler.Register(adapter)
+		s.notificationHandler.Register(adapter)
+		s.channelHandler.Register(adapter)
+		s.shareHandler.Register(adapter)
+		s.systemHandler.Register(adapter)
+		s.statsHandler.Register(adapter)
+		s.searchHandler.Register(adapter)
+		s.meHandler.Register(adapter)
+		s.adminHandler.Register(adapter)
+	}
+}
+
+// getEnv gets an environment variable or returns the default value.
+func getEnv(key, defaultVal string) string {
+	if v, ok := os.LookupEnv(key); ok {
+		return v
+	}
+	return defaultVal
+}

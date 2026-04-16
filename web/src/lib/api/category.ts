@@ -1,5 +1,6 @@
 // Category API
 import {api} from "../request";
+import {PaginatedResponse} from "./types";
 
 export interface Category {
     id: string;
@@ -13,7 +14,7 @@ export interface Category {
 }
 
 export const categoryApi = {
-    getAll: () => api.get<Category[]>("/categories"),
+    getAll: () => api.get<PaginatedResponse<Category>>("/categories"),
     get: (id: string) => api.get<Category>(`/categories/${id}`),
     create: (data: Partial<Category>) => api.post<Category>("/categories", data),
     update: (id: string, data: Partial<Category>) => api.put<Category>(`/categories/${id}`, data),

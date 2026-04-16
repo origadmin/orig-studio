@@ -1,10 +1,11 @@
 package server
 
 import (
-	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/helpers/repo"
 	mediabiz "origadmin/application/origcms/internal/svc-media/biz"
 	"origadmin/application/origcms/internal/svc-media/dto"
@@ -20,11 +21,11 @@ func NewSearchHandler(mediaUC *mediabiz.MediaUseCase) *SearchHandler {
 	return &SearchHandler{mediaUC: mediaUC}
 }
 
-func (h *SearchHandler) Register(group *gin.RouterGroup) {
-	search := group.Group("/search")
+func (h *SearchHandler) Register(r handler.Router) {
+	search := r.Group("/search")
 	{
-		search.GET("", h.search)
-		search.GET("/suggestions", h.suggestions)
+		search.GET("", GinHandlerToHTTP(h.search))
+		search.GET("/suggestions", GinHandlerToHTTP(h.suggestions))
 	}
 }
 
@@ -53,18 +54,35 @@ func (h *SearchHandler) search(c *gin.Context) {
 		},
 	}
 
+	// Handle tags filtering
+	if tagsStr := c.Query("tags"); tagsStr != "" {
+		tags := strings.Split(tagsStr, ",")
+		for i := range tags {
+			tags[i] = strings.TrimSpace(tags[i])
+		}
+		opts.Tags = tags
+	}
+
 	medias, total, err := h.mediaUC.ListMedias(c.Request.Context(), opts)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		Fail(c, 50000, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"list":      medias,
-		"total":     total,
-		"page":      page,
-		"page_size": pageSize,
-	})
+	// Build pagination response
+	response := PageResponse[interface{}]{
+		Code:    0,
+		Message: "ok",
+	}
+	response.Data.Items = make([]interface{}, len(medias))
+	for i, media := range medias {
+		response.Data.Items[i] = media
+	}
+	response.Data.Total = int64(total)
+	response.Data.Page = page
+	response.Data.PageSize = pageSize
+
+	c.JSON(200, response)
 }
 
 func boolPtr(b bool) *bool {
@@ -83,7 +101,7 @@ func (h *SearchHandler) suggestions(c *gin.Context) {
 	}
 
 	if keyword == "" {
-		c.JSON(http.StatusOK, gin.H{"suggestions": []string{}})
+		OK(c, gin.H{"suggestions": []string{}})
 		return
 	}
 
@@ -98,7 +116,7 @@ func (h *SearchHandler) suggestions(c *gin.Context) {
 
 	medias, _, err := h.mediaUC.ListMedias(c.Request.Context(), opts)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"suggestions": []string{}})
+		OK(c, gin.H{"suggestions": []string{}})
 		return
 	}
 
@@ -109,5 +127,5 @@ func (h *SearchHandler) suggestions(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"suggestions": suggestions})
+	OK(c, gin.H{"suggestions": suggestions})
 }

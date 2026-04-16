@@ -29,6 +29,7 @@ import {
 import {userApi} from '@/lib/api/user';
 import {useTranslation} from 'react-i18next';
 import {getFullUrl} from '@/lib/utils';
+import {extractList} from '@/lib/extract';
 
 export default function UsersPage() {
     const {t} = useTranslation();
@@ -42,7 +43,9 @@ export default function UsersPage() {
             try {
                 setLoading(true);
                 const response = await userApi.list({page_size: 100});
-                setUsers(response.list || []);
+                // 提取列表数据，防止因格式不匹配导致崩溃
+                const userList = extractList<any>(response);
+                setUsers(userList);
             } catch (error) {
                 console.error('Failed to fetch users:', error);
             } finally {

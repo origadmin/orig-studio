@@ -25,6 +25,7 @@ type Comment struct {
 	ParentID  *string   `json:"parent_id,omitempty"`
 	AddDate   time.Time `json:"add_date"`
 	UpdatedAt time.Time `json:"updated_at"`
+	Status    string    `json:"status"` // PENDING, APPROVED, REJECTED
 
 	// Edges
 	User    *entity.User `json:"user,omitempty"`
@@ -39,6 +40,8 @@ type CommentRepo interface {
 	Delete(ctx context.Context, id string) error
 	ListByMedia(ctx context.Context, mediaID string, page, pageSize int) ([]*Comment, int, error)
 	ListAll(ctx context.Context, page, pageSize int) ([]*Comment, int, error)
+	UpdateStatus(ctx context.Context, id string, status string) (*Comment, error)
+	ListByStatus(ctx context.Context, status string, page, pageSize int) ([]*Comment, int, error)
 }
 
 // CommentUseCase handles comment business logic.
@@ -122,4 +125,26 @@ func (uc *CommentUseCase) GetComment(ctx context.Context, id string) (*Comment, 
 
 func (uc *CommentUseCase) ListAll(ctx context.Context, page, pageSize int) ([]*Comment, int, error) {
 	return uc.repo.ListAll(ctx, page, pageSize)
+}
+
+func (uc *CommentUseCase) UpdateCommentStatus(ctx context.Context, id string, status string, isAdmin bool) (*Comment, error) {
+	if !isAdmin {
+		return nil, fmt.Errorf("permission denied")
+	}
+
+	// Validate status
+	validStatuses := map[string]bool{"PENDING": true, "APPROVED": true, "REJECTED": true}
+	if !validStatuses[status] {
+		return nil, fmt.Errorf("invalid status")
+	}
+
+	return uc.repo.UpdateStatus(ctx, id, status)
+}
+
+func (uc *CommentUseCase) ListCommentsByStatus(ctx context.Context, status string, page, pageSize int, isAdmin bool) ([]*Comment, int, error) {
+	if !isAdmin {
+		return nil, 0, fmt.Errorf("permission denied")
+	}
+
+	return uc.repo.ListByStatus(ctx, status, page, pageSize)
 }

@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/svc-content/biz"
 )
 
@@ -22,8 +23,8 @@ func NewFeedHandler(uc *biz.FeedUseCase) *FeedHandler {
 	return &FeedHandler{uc: uc}
 }
 
-func (h *FeedHandler) Register(group *gin.RouterGroup) {
-	group.GET("/feed", h.GetFeed)
+func (h *FeedHandler) Register(r handler.Router) {
+	r.GET("/feed", h.GetFeed)
 }
 
 // FeedResponse represents the feed response structure
@@ -42,10 +43,17 @@ type Section struct {
 }
 
 // GetFeed godoc: GET /api/v1/feed
-func (h *FeedHandler) GetFeed(c *gin.Context) {
-	ctx := c.Request.Context()
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+func (h *FeedHandler) GetFeed(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	ctx := r.Context()
+	page, _ := strconv.Atoi(c.Query("page"))
+	if page == 0 {
+		page = 1
+	}
+	pageSize, _ := strconv.Atoi(c.Query("page_size"))
+	if pageSize == 0 {
+		pageSize = 20
+	}
 
 	medias, total, err := h.uc.ListLatest(ctx, page, pageSize)
 	if err != nil {

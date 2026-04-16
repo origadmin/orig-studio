@@ -17,7 +17,9 @@ import (
 	"github.com/origadmin/runtime/log"
 	"origadmin/application/origcms/api/gen/v1/media"
 	"origadmin/application/origcms/api/gen/v1/types"
+	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/svc-media/biz"
+	"origadmin/application/origcms/internal/svc-media/dto"
 )
 
 type MediaService struct {
@@ -37,7 +39,37 @@ func (s *MediaService) ListMedias(
 	ctx context.Context,
 	req *media.ListMediasRequest,
 ) (*media.ListMediasResponse, error) {
-	items, total, err := s.uc.ListMedias(ctx)
+	// Create query options from request
+	opts := &dto.MediaQueryOption{
+		QueryOption: repo.QueryOption{
+			Page:     req.Page,
+			PageSize: req.PageSize,
+			Keyword:  req.Keyword,
+		},
+		OrderBy:    req.OrderBy,
+		Descending: req.Descending,
+	}
+	
+	// Set filters
+	if req.Type != nil {
+		opts.Type = req.Type
+	}
+	if req.Status != nil {
+		opts.Status = req.Status
+	}
+	if req.UserId != nil {
+		opts.UserID = req.UserId
+	}
+	if req.CategoryId != nil {
+		opts.CategoryID = req.CategoryId
+	}
+	
+	// For short videos, set MediaType filter
+	if req.Type != nil && *req.Type == 4 { // Assuming 4 is the type code for short videos
+		opts.MediaType = "short_video"
+	}
+	
+	items, total, err := s.uc.ListMedias(ctx, opts)
 	if err != nil {
 		return nil, err
 	}

@@ -2,9 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package server is the M1 monolith entry point for origcms.
-// It wires up ent, svc-user biz/data, and a Gin HTTP server in a single process.
-// Microservice split starts at M2.
+// Package server implements the server handlers for the application.
 package server
 
 import (
@@ -17,6 +15,7 @@ import (
 
 	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/svc-user/biz"
 	"origadmin/application/origcms/internal/svc-user/dto"
 )
@@ -32,8 +31,9 @@ func NewAuthHandler(uc *biz.UserUseCase, jwt *auth.Manager) *AuthHandler {
 	return &AuthHandler{uc: uc, jwt: jwt}
 }
 
-func (h *AuthHandler) Register(group *gin.RouterGroup) {
-	authGroup := group.Group("/auth")
+// Register registers the handler's routes.
+func (h *AuthHandler) Register(r handler.Router) {
+	authGroup := r.Group("/auth")
 	{
 		// Public auth routes
 		authGroup.POST("/signin", h.Login)
@@ -67,7 +67,7 @@ type TokenResponse struct {
 	User         *LoginUser `json:"user"`
 }
 
-// LoginUser 是登录响应中返回的用户信息，包含前端需要的 is_staff 字段
+// LoginUser is the user info returned in login response, including the is_staff field needed by frontend
 type LoginUser struct {
 	Id       string `json:"id"`
 	Username string `json:"username"`
@@ -77,15 +77,16 @@ type LoginUser struct {
 }
 
 // Login godoc: POST /api/v1/auth/signin
-func (h *AuthHandler) Login(c *gin.Context) {
+func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
 	var req LoginRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.Bind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Look up user by username (entity for role field)
-	u, err := h.uc.GetUserByUsername(c.Request.Context(), req.Username)
+	u, err := h.uc.GetUserByUsername(r.Context(), req.Username)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return
@@ -93,13 +94,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	// Get role from entity (types.User doesn't have role field)
 	userRole := "user"
-	if entUser, entErr := h.uc.GetUserEntity(c.Request.Context(), u.Uuid); entErr == nil &&
+	if entUser, entErr := h.uc.GetUserEntity(r.Context(), u.Uuid); entErr == nil &&
 		entUser.Role != "" {
 		userRole = string(entUser.Role)
 	}
 
 	// Verify password
-	if err := h.uc.VerifyPassword(c.Request.Context(), u.Uuid, req.Password); err != nil {
+	if err := h.uc.VerifyPassword(r.Context(), u.Uuid, req.Password); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return
 	}
@@ -119,7 +120,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// 返回简化版用户信息，确保包含 is_staff 字段
+	// Return simplified user info, ensure it includes the is_staff field
 	loginUser := &LoginUser{
 		Id:       u.Uuid,
 		Username: u.Username,
@@ -134,14 +135,15 @@ func (h *AuthHandler) Login(c *gin.Context) {
 }
 
 // RegisterUser godoc: POST /api/v1/auth/register
-func (h *AuthHandler) RegisterUser(c *gin.Context) {
+func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
 	var req RegisterRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.Bind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	count, _ := h.uc.CountUsers(c.Request.Context())
+	count, _ := h.uc.CountUsers(r.Context())
 	isFirstUser := count == 0
 
 	newUser := &types.User{
@@ -157,7 +159,7 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 		if herr != nil {
 			return nil, herr
 		}
-		return h.uc.CreateUser(c.Request.Context(), newUser, hashed)
+		return h.uc.CreateUser(r.Context(), newUser, hashed)
 	}()
 	if err != nil {
 		slog.Error("register failed", "err", err)
@@ -168,7 +170,7 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 	userRole := "user"
 	if isFirstUser {
 		userRole = "admin"
-		_ = h.uc.SetUserRole(c.Request.Context(), created.Uuid, "admin")
+		_ = h.uc.SetUserRole(r.Context(), created.Uuid, "admin")
 	}
 
 	token, err := h.jwt.Generate(created.Uuid, created.Username, created.IsStaff, userRole)
@@ -200,14 +202,15 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 }
 
 // Me godoc: GET /api/v1/auth/me  (requires JWT)
-func (h *AuthHandler) Me(c *gin.Context) {
-	claims, ok := c.MustGet("claims").(*auth.Claims)
+func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	claims, ok := c.Get("claims").(*auth.Claims)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
 
-	u, err := h.uc.GetUser(c.Request.Context(), claims.UserID, &dto.UserQueryOption{
+	u, err := h.uc.GetUser(r.Context(), claims.UserID, &dto.UserQueryOption{
 		WithProfile: true,
 	})
 	if err != nil {
@@ -218,11 +221,12 @@ func (h *AuthHandler) Me(c *gin.Context) {
 }
 
 // RefreshToken godoc: POST /api/v1/auth/refresh
-func (h *AuthHandler) RefreshToken(c *gin.Context) {
+func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
 	var req struct {
 		RefreshToken string `json:"refresh_token" binding:"required"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.Bind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -231,6 +235,13 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	claims, err := h.jwt.Parse(req.RefreshToken)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid refresh token"})
+		return
+	}
+
+	// Get user information
+	u, err := h.uc.GetUser(r.Context(), claims.UserID, nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
 		return
 	}
 
@@ -250,16 +261,27 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
+	// Return simplified user info, ensure it includes the is_staff field
+	loginUser := &LoginUser{
+		Id:       u.Uuid,
+		Username: u.Username,
+		Nickname: u.Nickname,
+		Email:    u.Email,
+		IsStaff:  u.IsStaff,
+	}
+
 	c.JSON(http.StatusOK, TokenResponse{
 		AccessToken:  token,
 		RefreshToken: refreshToken,
 		TokenType:    "Bearer",
 		ExpiresIn:    int64(h.jwt.TTL().Seconds()),
+		User:         loginUser,
 	})
 }
 
 // Logout godoc: POST /api/v1/auth/logout (stateless: client discards token)
-func (h *AuthHandler) Logout(c *gin.Context) {
+func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
 	c.JSON(http.StatusOK, gin.H{"message": "logged out"})
 }
 

@@ -16,11 +16,11 @@ jest.mock('@/hooks/queries', () => ({
             favorite_count: 20,
             created_at: '2024-01-01T00:00:00Z',
             encoding_status: 'success',
-            url: '/api/v1/media/1',
-            hls_file: '/api/v1/media/1/hls.m3u8',
-            thumbnail: '/api/v1/media/1/thumbnail.jpg',
-            poster: '/api/v1/media/1/poster.jpg',
-            preview_file_path: '/api/v1/media/1/preview.jpg',
+            url: '/api/v1/medias/1',
+            hls_file: '/api/v1/medias/1/hls.m3u8',
+            thumbnail: '/api/v1/medias/1/thumbnail.jpg',
+            poster: '/api/v1/medias/1/poster.jpg',
+            preview_file_path: '/api/v1/medias/1/preview.jpg',
             duration: 300,
             user_id: 1,
             tags: ['test', 'video'],
@@ -50,7 +50,7 @@ jest.mock('@/hooks/queries', () => ({
                     view_count: 500,
                     created_at: '2024-01-02T00:00:00Z',
                     duration: 180,
-                    thumbnail: '/api/v1/media/2/thumbnail.jpg',
+                    thumbnail: '/api/v1/medias/2/thumbnail.jpg',
                     edges: {
                         user: [{
                             id: 2,
@@ -65,7 +65,7 @@ jest.mock('@/hooks/queries', () => ({
                     view_count: 300,
                     created_at: '2024-01-03T00:00:00Z',
                     duration: 240,
-                    thumbnail: '/api/v1/media/3/thumbnail.jpg',
+                    thumbnail: '/api/v1/medias/3/thumbnail.jpg',
                     edges: {
                         user: [{
                             id: 3,
@@ -180,13 +180,13 @@ jest.mock('@/lib/api/media', () => ({
                 variants: [
                     {
                         status: 'success',
-                        output_path: '/api/v1/media/1/720p.m3u8',
+                        output_path: '/api/v1/medias/1/720p.m3u8',
                         resolution: '720p',
                         profile_name: '720p'
                     },
                     {
                         status: 'success',
-                        output_path: '/api/v1/media/1/480p.m3u8',
+                        output_path: '/api/v1/medias/1/480p.m3u8',
                         resolution: '480p',
                         profile_name: '480p'
                     }

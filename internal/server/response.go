@@ -4,14 +4,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Response 统一响应格式
+// Response unified response format
 type Response[T any] struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 	Data    T      `json:"data,omitempty"`
 }
 
-// PageResponse 分页响应格式
+// PageResponse pagination response format
 type PageResponse[T any] struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
@@ -23,7 +23,7 @@ type PageResponse[T any] struct {
 	} `json:"data"`
 }
 
-// NotificationListResponse 通知列表响应格式
+// NotificationListResponse notification list response format
 type NotificationListResponse struct {
 	Items       []interface{} `json:"items"`
 	Total       int64         `json:"total"`
@@ -32,17 +32,17 @@ type NotificationListResponse struct {
 	PageSize    int           `json:"page_size"`
 }
 
-// OK 返回成功响应
+// OK return success response
 func OK(c *gin.Context, data interface{}) {
 	c.JSON(200, Response[interface{}]{Code: 0, Message: "ok", Data: data})
 }
 
-// Fail 返回失败响应
+// Fail return failure response
 func Fail(c *gin.Context, code int, message string) {
 	c.JSON(getHTTPStatus(code), Response[interface{}]{Code: code, Message: message})
 }
 
-// getHTTPStatus 根据错误码获取HTTP状态码
+// getHTTPStatus get HTTP status code based on error code
 func getHTTPStatus(code int) int {
 	switch {
 	case code == 0:

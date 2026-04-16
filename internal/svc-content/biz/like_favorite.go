@@ -43,6 +43,7 @@ type LikeRepo interface {
 	Delete(ctx context.Context, userID, mediaID string) error
 	GetStatus(ctx context.Context, userID, mediaID string) (string, error) // returns like, dislike or none
 	CountByMedia(ctx context.Context, mediaID string, likeType string) (int64, error)
+	ListByUser(ctx context.Context, userID string) ([]*Like, error)
 }
 
 // FavoriteRepo defines storage operations for favorites.
@@ -170,4 +171,8 @@ func (uc *LikeFavoriteUseCase) GetMediaStats(ctx context.Context, userID, mediaI
 
 func (uc *LikeFavoriteUseCase) ListUserFavorites(ctx context.Context, userID string) ([]*Favorite, error) {
 	return uc.favoriteRepo.ListByUser(ctx, userID)
+}
+
+func (uc *LikeFavoriteUseCase) ListUserLikes(ctx context.Context, userID string) ([]*Like, error) {
+	return uc.likeRepo.ListByUser(ctx, userID)
 }

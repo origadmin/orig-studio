@@ -98,6 +98,32 @@ func (r *likeRepo) CountByMedia(ctx context.Context, mediaID string, likeType st
 	return int64(count), err
 }
 
+func (r *likeRepo) ListByUser(ctx context.Context, userID string) ([]*biz.Like, error) {
+	ents, err := r.data.db.Like.Query().
+		Where(like.HasUserWith(user.IDEQ(userID))).
+		Order(entity.Desc(like.FieldCreatedAt)).
+		WithMedia().
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res := make([]*biz.Like, len(ents))
+	for i, ent := range ents {
+		mediaID := ""
+		if ent.Edges.Media != nil {
+			mediaID = ent.Edges.Media.ID
+		}
+		res[i] = &biz.Like{
+			ID:        ent.ID,
+			UserID:    userID,
+			MediaID:   mediaID,
+			LikeType:  ent.LikeType,
+			CreatedAt: ent.CreatedAt,
+		}
+	}
+	return res, nil
+}
+
 // ─── Favorite repo ────────────────────────────────────────────────────────────
 
 func (r *favoriteRepo) Create(ctx context.Context, userID, mediaID string) (*biz.Favorite, error) {

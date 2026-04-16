@@ -87,6 +87,20 @@ func (_u *CommentUpdate) SetNillableUserID(v *string) *CommentUpdate {
 	return _u
 }
 
+// SetStatus sets the "status" field.
+func (_u *CommentUpdate) SetStatus(v string) *CommentUpdate {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *CommentUpdate) SetNillableStatus(v *string) *CommentUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
 // SetMedia sets the "media" edge to the Media entity.
 func (_u *CommentUpdate) SetMedia(v *Media) *CommentUpdate {
 	return _u.SetMediaID(v.ID)
@@ -236,6 +250,9 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddDate(); ok {
 		_spec.SetField(comment.FieldAddDate, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(comment.FieldStatus, field.TypeString, value)
 	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -447,6 +464,20 @@ func (_u *CommentUpdateOne) SetNillableUserID(v *string) *CommentUpdateOne {
 	return _u
 }
 
+// SetStatus sets the "status" field.
+func (_u *CommentUpdateOne) SetStatus(v string) *CommentUpdateOne {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *CommentUpdateOne) SetNillableStatus(v *string) *CommentUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
 // SetMedia sets the "media" edge to the Media entity.
 func (_u *CommentUpdateOne) SetMedia(v *Media) *CommentUpdateOne {
 	return _u.SetMediaID(v.ID)
@@ -626,6 +657,9 @@ func (_u *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err er
 	}
 	if value, ok := _u.mutation.AddDate(); ok {
 		_spec.SetField(comment.FieldAddDate, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(comment.FieldStatus, field.TypeString, value)
 	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{

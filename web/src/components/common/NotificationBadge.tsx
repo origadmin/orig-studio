@@ -8,27 +8,32 @@ import {useAuth} from '@/hooks/useAuth';
 const NotificationBadge: React.FC = () => {
     const {user} = useAuth();
     const [unreadCount, setUnreadCount] = useState(0);
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        let isMounted = true;
+        
+        const fetchUnreadCount = async () => {
+            if (!user) return;
+            try {
+                const response = await notificationApi.getUnreadCount();
+                if (isMounted) {
+                    setUnreadCount(response.unread_count || 0);
+                }
+            } catch (err) {
+                console.error('Failed to fetch unread count:', err);
+            }
+        };
+
         if (user) {
             fetchUnreadCount();
+            // 30秒刷新一次
+            const interval = setInterval(fetchUnreadCount, 30000);
+            return () => {
+                isMounted = false;
+                clearInterval(interval);
+            };
         }
     }, [user]);
-
-    const fetchUnreadCount = async () => {
-        if (!user) return;
-
-        try {
-            setLoading(true);
-            const response = await notificationApi.getUnreadCount();
-            setUnreadCount(response.count || 0);
-        } catch (err) {
-            console.error('Failed to fetch unread count:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     if (!user) return null;
 

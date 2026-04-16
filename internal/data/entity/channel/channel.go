@@ -26,6 +26,8 @@ const (
 	FieldShortToken = "short_token"
 	// FieldBannerLogo holds the string denoting the banner_logo field in the database.
 	FieldBannerLogo = "banner_logo"
+	// FieldIsPublic holds the string denoting the is_public field in the database.
+	FieldIsPublic = "is_public"
 	// FieldAddDate holds the string denoting the add_date field in the database.
 	FieldAddDate = "add_date"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -59,6 +61,7 @@ var Columns = []string{
 	FieldDescription,
 	FieldShortToken,
 	FieldBannerLogo,
+	FieldIsPublic,
 	FieldAddDate,
 }
 
@@ -83,6 +86,8 @@ var (
 	ShortTokenValidator func(string) error
 	// BannerLogoValidator is a validator for the "banner_logo" field. It is called by the builders before save.
 	BannerLogoValidator func(string) error
+	// DefaultIsPublic holds the default value on creation for the "is_public" field.
+	DefaultIsPublic bool
 	// DefaultAddDate holds the default value on creation for the "add_date" field.
 	DefaultAddDate func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
@@ -127,6 +132,11 @@ func ByShortToken(opts ...sql.OrderTermOption) OrderOption {
 // ByBannerLogo orders the results by the banner_logo field.
 func ByBannerLogo(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBannerLogo, opts...).ToFunc()
+}
+
+// ByIsPublic orders the results by the is_public field.
+func ByIsPublic(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsPublic, opts...).ToFunc()
 }
 
 // ByAddDate orders the results by the add_date field.

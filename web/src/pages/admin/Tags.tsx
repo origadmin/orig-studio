@@ -1,9 +1,10 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
+import {Textarea} from '@/components/ui/textarea';
 import {
     Table,
     TableBody,
@@ -18,42 +19,149 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, Hash, Filter, RotateCcw} from 'lucide-react';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
-
-// 模拟数据
-const mockTags = [
-    {id: 1, name: '人工智能', slug: 'ai', mediaCount: 234, trending: true, status: 'active'},
-    {id: 2, name: '机器学习', slug: 'machine-learning', mediaCount: 156, trending: true, status: 'active'},
-    {id: 3, name: 'Python', slug: 'python', mediaCount: 189, trending: false, status: 'active'},
-    {id: 4, name: 'JavaScript', slug: 'javascript', mediaCount: 312, trending: false, status: 'active'},
-    {id: 5, name: '区块链', slug: 'blockchain', mediaCount: 89, trending: false, status: 'active'},
-    {id: 6, name: '云计算', slug: 'cloud-computing', mediaCount: 67, trending: true, status: 'active'},
-    {id: 7, name: '大数据', slug: 'big-data', mediaCount: 45, trending: false, status: 'inactive'},
-    {id: 8, name: '物联网', slug: 'iot', mediaCount: 23, trending: false, status: 'active'},
-    {id: 9, name: '5G', slug: '5g', mediaCount: 78, trending: false, status: 'active'},
-    {id: 10, name: '网络安全', slug: 'cybersecurity', mediaCount: 56, trending: false, status: 'active'},
-];
+import {tagApi, Tag, CreateTagRequest, UpdateTagRequest} from '@/lib/api/admin-tags';
+import {extractList} from '@/lib/extract';
 
 const Tags: React.FC = () => {
     const {t} = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
     const [trendingFilter, setTrendingFilter] = useState('all');
-    const [tags] = useState(mockTags);
+    const [tags, setTags] = useState<Tag[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [showCreateDialog, setShowCreateDialog] = useState(false);
+    const [showEditDialog, setShowEditDialog] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [currentTag, setCurrentTag] = useState<Tag | null>(null);
+    const [formData, setFormData] = useState<Partial<CreateTagRequest & UpdateTagRequest>>({
+        name: '',
+        slug: '',
+        description: '',
+        color: '',
+        status: 'active',
+    });
+
+    // 加载标签数据
+    useEffect(() => {
+        loadTags();
+    }, []);
+
+    const loadTags = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await tagApi.list({page_size: 100});
+            const tagList = extractList<Tag>(response);
+            setTags(tagList);
+        } catch (err) {
+            setError('Failed to load tags');
+            console.error('Error loading tags:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const resetForm = () => {
+        setFormData({
+            name: '',
+            slug: '',
+            description: '',
+            color: '',
+            status: 'active',
+        });
+    };
+
+    const handleCreate = async () => {
+        try {
+            await tagApi.create(formData as CreateTagRequest);
+            await loadTags();
+            setShowCreateDialog(false);
+            resetForm();
+        } catch (err) {
+            console.error('Failed to create tag:', err);
+        }
+    };
+
+    const handleUpdate = async () => {
+        if (!currentTag) return;
+
+        try {
+            await tagApi.update(currentTag.id, formData as UpdateTagRequest);
+            await loadTags();
+            setShowEditDialog(false);
+            resetForm();
+            setCurrentTag(null);
+        } catch (err) {
+            console.error('Failed to update tag:', err);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!currentTag) return;
+
+        try {
+            await tagApi.delete(currentTag.id);
+            await loadTags();
+            setShowDeleteDialog(false);
+            setCurrentTag(null);
+        } catch (err) {
+            console.error('Failed to delete tag:', err);
+        }
+    };
+
+    const openCreateDialog = () => {
+        resetForm();
+        setShowCreateDialog(true);
+    };
+
+    const openEditDialog = (tag: Tag) => {
+        setCurrentTag(tag);
+        setFormData({
+            name: tag.name,
+            slug: tag.slug,
+            description: tag.description || '',
+            color: tag.color || '',
+            status: tag.status,
+        });
+        setShowEditDialog(true);
+    };
+
+    const openDeleteDialog = (tag: Tag) => {
+        setCurrentTag(tag);
+        setShowDeleteDialog(true);
+    };
 
     const filteredTags = tags.filter(tag => {
         const matchesSearch = tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             tag.slug.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesTrending = trendingFilter === 'all' ||
-            (trendingFilter === 'trending' && tag.trending) ||
-            (trendingFilter === 'normal' && !tag.trending);
-        return matchesSearch && matchesTrending;
+        return matchesSearch;
     });
 
     const totalTags = tags.length;
-    const activeTags = tags.filter(t => t.status === 'active').length;
-    const trendingTags = tags.filter(t => t.trending).length;
-    const totalMedia = tags.reduce((sum, t) => sum + t.mediaCount, 0);
+    const activeTags = tags.length; // 假设所有标签都是active
+    const trendingTags = 0; // API返回数据中没有trending字段
+    const totalMedia = tags.reduce((sum, t) => sum + (t.count || 0), 0);
 
     return (
         <div className="space-y-4 p-4 md:p-6">
@@ -182,7 +290,7 @@ const Tags: React.FC = () => {
                             <CardTitle>{t('admin.tagList')}</CardTitle>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button>
+                            <Button onClick={openCreateDialog}>
                                 <Plus className="mr-2 h-4 w-4"/>
                                 {t('admin.newTag')}
                             </Button>
@@ -197,64 +305,267 @@ const Tags: React.FC = () => {
                                 <TableHead>{t('admin.tagName')}</TableHead>
                                 <TableHead>Slug</TableHead>
                                 <TableHead className="text-right">{t('admin.mediaCount')}</TableHead>
-                                <TableHead>{t('admin.trendingCol')}</TableHead>
-                                <TableHead>{t('admin.status')}</TableHead>
+                                <TableHead>Created</TableHead>
                                 <TableHead className="text-right">{t('admin.actions')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredTags.map((tag) => (
-                                <TableRow key={tag.id}>
-                                    <TableCell className="font-medium">{tag.id}</TableCell>
-                                    <TableCell>
-                                        <span className="font-medium">{tag.name}</span>
-                                    </TableCell>
-                                    <TableCell>
-                                        <code className="text-xs bg-muted px-2 py-1 rounded">{tag.slug}</code>
-                                    </TableCell>
-                                    <TableCell className="text-right">{tag.mediaCount}</TableCell>
-                                    <TableCell>
-                                        {tag.trending ? (
-                                            <Badge variant="default"
-                                                   className="bg-orange-500">{t('admin.trending')}</Badge>
-                                        ) : (
-                                            <span className="text-muted-foreground">-</span>
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant={tag.status === 'active' ? 'secondary' : 'outline'}>
-                                            {tag.status === 'active' ? t('admin.enabled') : t('admin.disabled')}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="sm">
-                                                    <MoreHorizontal className="h-4 w-4"/>
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem>
-                                                    <Eye className="mr-2 h-4 w-4"/>
-                                                    {t('admin.view')}
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    <Edit className="mr-2 h-4 w-4"/>
-                                                    {t('admin.edit')}
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem className="text-red-600">
-                                                    <Trash2 className="mr-2 h-4 w-4"/>
-                                                    {t('admin.delete')}
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center py-8">
+                                        <div className="animate-pulse">Loading tags...</div>
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            ) : error ? (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center py-8">
+                                        <div className="text-red-600">{error}</div>
+                                        <Button 
+                                            variant="outline" 
+                                            size="sm" 
+                                            className="mt-2"
+                                            onClick={() => window.location.reload()}
+                                        >
+                                            Retry
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ) : filteredTags.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center py-8">
+                                        No tags found
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                filteredTags.map((tag) => (
+                                    <TableRow key={tag.id}>
+                                        <TableCell className="font-medium">{tag.id}</TableCell>
+                                        <TableCell>
+                                            <span className="font-medium">{tag.name}</span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <code className="text-xs bg-muted px-2 py-1 rounded">{tag.slug}</code>
+                                        </TableCell>
+                                        <TableCell className="text-right">{tag.count || 0}</TableCell>
+                                        <TableCell>
+                                            <span className="text-sm text-muted-foreground">
+                                                {new Date(tag.created_at).toLocaleDateString()}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="sm">
+                                                        <MoreHorizontal className="h-4 w-4"/>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem>
+                                                        <Eye className="mr-2 h-4 w-4"/>
+                                                        {t('admin.view')}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => openEditDialog(tag)}>
+                                                        <Edit className="mr-2 h-4 w-4"/>
+                                                        {t('admin.edit')}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem 
+                                                        className="text-red-600" 
+                                                        onClick={() => openDeleteDialog(tag)}
+                                                    >
+                                                        <Trash2 className="mr-2 h-4 w-4"/>
+                                                        {t('admin.delete')}
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>
             </Card>
+
+            {/* Create Tag Dialog */}
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('admin.newTag') || 'New Tag'}</DialogTitle>
+                        <DialogDescription>
+                            Create a new tag for organizing your content
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Name *
+                            </h4>
+                            <Input
+                                placeholder="Enter tag name"
+                                value={formData.name || ''}
+                                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Slug *
+                            </h4>
+                            <Input
+                                placeholder="Enter tag slug"
+                                value={formData.slug || ''}
+                                onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Description
+                            </h4>
+                            <Textarea
+                                placeholder="Enter tag description"
+                                value={formData.description || ''}
+                                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Color
+                            </h4>
+                            <Input
+                                placeholder="#000000"
+                                value={formData.color || ''}
+                                onChange={(e) => setFormData({...formData, color: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Status
+                            </h4>
+                            <Select
+                                value={formData.status || 'active'}
+                                onValueChange={(value) => setFormData({...formData, status: value})}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select status"/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="active">Active</SelectItem>
+                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                            {t('common.cancel') || 'Cancel'}
+                        </Button>
+                        <Button onClick={handleCreate}>
+                            {t('common.save') || 'Save'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Edit Tag Dialog */}
+            <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('admin.editTag') || 'Edit Tag'}</DialogTitle>
+                        <DialogDescription>
+                            Update the tag information
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Name *
+                            </h4>
+                            <Input
+                                placeholder="Enter tag name"
+                                value={formData.name || ''}
+                                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Slug *
+                            </h4>
+                            <Input
+                                placeholder="Enter tag slug"
+                                value={formData.slug || ''}
+                                onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Description
+                            </h4>
+                            <Textarea
+                                placeholder="Enter tag description"
+                                value={formData.description || ''}
+                                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Color
+                            </h4>
+                            <Input
+                                placeholder="#000000"
+                                value={formData.color || ''}
+                                onChange={(e) => setFormData({...formData, color: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Status
+                            </h4>
+                            <Select
+                                value={formData.status || 'active'}
+                                onValueChange={(value) => setFormData({...formData, status: value})}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select status"/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="active">Active</SelectItem>
+                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                            {t('common.cancel') || 'Cancel'}
+                        </Button>
+                        <Button onClick={handleUpdate}>
+                            {t('common.save') || 'Save'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Tag Dialog */}
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t('admin.deleteTag') || 'Delete Tag'}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete this tag? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>
+                            {t('common.cancel') || 'Cancel'}
+                        </AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={handleDelete}
+                            className="bg-red-600 hover:bg-red-700"
+                        >
+                            {t('common.delete') || 'Delete'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };
