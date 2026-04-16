@@ -1,9 +1,10 @@
 import React, {useState, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
-import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
+import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
+import {Textarea} from '@/components/ui/textarea';
 import {
     Table,
     TableBody,
@@ -18,36 +19,136 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, RotateCcw} from 'lucide-react';
-import {categoryApi} from '@/lib/api/category';
+import {categoryApi, Category} from '@/lib/api/category';
 
 const Categories: React.FC = () => {
     const {t} = useTranslation();
-    const [searchTerm, setSearchTerm] = useState('');
-    const [categories, setCategories] = useState<any[]>([]);
+    const [searchParams, setSearchParams] = useState({keyword: '', page: 1});
+    const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
+    
+    const [showCreateDialog, setShowCreateDialog] = useState(false);
+    const [showEditDialog, setShowEditDialog] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    
+    const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
+    const [formData, setFormData] = useState<Partial<Category>>({
+        name: '',
+        slug: '',
+        description: '',
+        parent_id: '',
+        order: 0,
+    });
 
     useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                setLoading(true);
-                const response = await categoryApi.getAll();
-                const categoryList = Array.isArray(response?.items) ? response.items : [];
-                setCategories(categoryList);
-            } catch (error) {
-                console.error('Failed to fetch categories:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchCategories();
+        loadCategories();
     }, []);
 
-    const filteredCategories = categories.filter(cat =>
-        cat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (cat.description && cat.description.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const loadCategories = async (params = searchParams) => {
+        try {
+            setLoading(true);
+            const response = await categoryApi.getAll();
+            const categoryList = Array.isArray(response?.items) ? response.items : [];
+            setCategories(categoryList);
+        } catch (error) {
+            console.error('Failed to fetch categories:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const resetForm = () => {
+        setFormData({
+            name: '',
+            slug: '',
+            description: '',
+            parent_id: '',
+            order: 0,
+        });
+    };
+
+    const handleCreate = async () => {
+        try {
+            await categoryApi.create(formData as Partial<Category>);
+            await loadCategories();
+            setShowCreateDialog(false);
+            resetForm();
+        } catch (err) {
+            console.error('Failed to create category:', err);
+        }
+    };
+
+    const handleUpdate = async () => {
+        if (!currentCategory) return;
+
+        try {
+            await categoryApi.update(currentCategory.id, formData as Partial<Category>);
+            await loadCategories();
+            setShowEditDialog(false);
+            resetForm();
+            setCurrentCategory(null);
+        } catch (err) {
+            console.error('Failed to update category:', err);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!currentCategory) return;
+
+        try {
+            await categoryApi.delete(currentCategory.id);
+            await loadCategories();
+            setShowDeleteDialog(false);
+            setCurrentCategory(null);
+        } catch (err) {
+            console.error('Failed to delete category:', err);
+        }
+    };
+
+    const openCreateDialog = () => {
+        resetForm();
+        setShowCreateDialog(true);
+    };
+
+    const openEditDialog = (category: Category) => {
+        setCurrentCategory(category);
+        setFormData({
+            name: category.name,
+            slug: category.slug,
+            description: category.description || '',
+            parent_id: category.parent_id || '',
+            order: category.order || 0,
+        });
+        setShowEditDialog(true);
+    };
+
+    const openDeleteDialog = (category: Category) => {
+        setCurrentCategory(category);
+        setShowDeleteDialog(true);
+    };
+
+    const handleView = (category: Category) => {
+        window.open(`/categories/${category.slug}`, '_blank');
+    };
 
     const activeCount = categories.filter(c => c.status === 'active' || c.status === 'Enabled').length;
     const totalMedia = categories.reduce((sum, c) => sum + (c.media_count || 0), 0);
@@ -79,8 +180,8 @@ const Categories: React.FC = () => {
                                         className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                                     <Input
                                         placeholder={t('admin.search') || t('admin.categories') + '...'}
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        value={searchParams.keyword}
+                                        onChange={(e) => setSearchParams({...searchParams, keyword: e.target.value})}
                                         className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
                                     />
                                 </div>
@@ -91,7 +192,9 @@ const Categories: React.FC = () => {
                                     size="sm"
                                     className="h-9 px-3"
                                     onClick={() => {
-                                        setSearchTerm('');
+                                        const newParams = {keyword: '', page: 1};
+                                        setSearchParams(newParams);
+                                        loadCategories(newParams);
                                     }}
                                 >
                                     <RotateCcw className="h-4 w-4 mr-2"/>
@@ -101,9 +204,7 @@ const Categories: React.FC = () => {
                                     variant="default"
                                     size="sm"
                                     className="h-9 px-4"
-                                    onClick={() => {
-                                        // 这里可以添加搜索逻辑
-                                    }}
+                                    onClick={() => loadCategories()}
                                 >
                                     <Search className="h-4 w-4 mr-2"/>
                                     Search
@@ -154,7 +255,7 @@ const Categories: React.FC = () => {
                             <CardTitle>{t('admin.categoryList')}</CardTitle>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button>
+                            <Button onClick={openCreateDialog}>
                                 <Plus className="mr-2 h-4 w-4"/>
                                 {t('admin.newCategory')}
                             </Button>
@@ -182,7 +283,7 @@ const Categories: React.FC = () => {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredCategories.length > 0 ? filteredCategories.map((category) => (
+                                {categories.length > 0 ? categories.map((category) => (
                                     <TableRow key={category.id}>
                                         <TableCell className="font-medium">{category.id}</TableCell>
                                         <TableCell>{category.name}</TableCell>
@@ -208,15 +309,15 @@ const Categories: React.FC = () => {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleView(category)}>
                                                         <Eye className="mr-2 h-4 w-4"/>
                                                         {t('admin.view')}
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => openEditDialog(category)}>
                                                         <Edit className="mr-2 h-4 w-4"/>
                                                         {t('admin.edit')}
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem className="text-red-600">
+                                                    <DropdownMenuItem className="text-red-600" onClick={() => openDeleteDialog(category)}>
                                                         <Trash2 className="mr-2 h-4 w-4"/>
                                                         {t('admin.delete')}
                                                     </DropdownMenuItem>
@@ -236,6 +337,122 @@ const Categories: React.FC = () => {
                     )}
                 </CardContent>
             </Card>
+
+            {/* Create Category Dialog */}
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('admin.newCategory') || "New Category"}</DialogTitle>
+                        <DialogDescription>{t('admin.createNewCategory') || "Create a new category"}</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.name') || "Name"}</label>
+                            <Input
+                                value={formData.name}
+                                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.slug') || "Slug"}</label>
+                            <Input
+                                value={formData.slug}
+                                onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.description') || "Description"}</label>
+                            <Textarea
+                                value={formData.description}
+                                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.order') || "Order"}</label>
+                            <Input
+                                type="number"
+                                value={formData.order}
+                                onChange={(e) => setFormData({...formData, order: parseInt(e.target.value) || 0})}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                            {t('admin.cancel') || "Cancel"}
+                        </Button>
+                        <Button onClick={handleCreate}>
+                            {t('admin.create') || "Create"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Edit Category Dialog */}
+            <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('admin.editCategory') || "Edit Category"}</DialogTitle>
+                        <DialogDescription>{t('admin.editCategoryDesc') || "Edit category details"}</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.name') || "Name"}</label>
+                            <Input
+                                value={formData.name}
+                                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.slug') || "Slug"}</label>
+                            <Input
+                                value={formData.slug}
+                                onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.description') || "Description"}</label>
+                            <Textarea
+                                value={formData.description}
+                                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.order') || "Order"}</label>
+                            <Input
+                                type="number"
+                                value={formData.order}
+                                onChange={(e) => setFormData({...formData, order: parseInt(e.target.value) || 0})}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                            {t('admin.cancel') || "Cancel"}
+                        </Button>
+                        <Button onClick={handleUpdate}>
+                            {t('admin.save') || "Save"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Category Alert Dialog */}
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t('admin.deleteCategory') || "Delete Category"}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {t('admin.deleteCategoryConfirm') || "Are you sure you want to delete this category? This action cannot be undone."}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>{t('admin.cancel') || "Cancel"}</AlertDialogCancel>
+                        <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDelete}>
+                            {t('admin.delete') || "Delete"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };

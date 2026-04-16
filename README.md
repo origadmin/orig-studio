@@ -157,9 +157,10 @@ orig-cms/
 
 | 文档 | 说明 |
 |------|------|
-| [架构设计](docs/ARCHITECTURE.md) | 服务边界、数据流、前端架构 |
-| [项目分析](docs/PROJECT_ANALYSIS.md) | 完成度评估与问题清单 |
-| [开发路线](docs/MILESTONES.md) | 里程碑计划 M0~M5 |
+| [架构设计](docs/ARCHITECTURE.md) | 系统架构、服务边界、数据流 |
+| [开发者文档](docs/DEVELOPMENT.md) | 开发环境搭建、代码规范、API 开发 |
+| [管理员文档](docs/ADMIN.md) | 系统配置、用户管理、运维指南 |
+| [视频转码](docs/TRANSCODE.md) | FFmpeg 配置、转码流程、监控 |
 
 ## 硬件建议
 

@@ -63,7 +63,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {Label} from "@/components/ui/label";
-import {mediaApi, type Media, type MediaVariantSummary} from '@/lib/api/media';
+import {mediaApi, encodingApi, type Media, type MediaVariantSummary} from '@/lib/api/media';
 import {API_BASE_URL} from '@/lib/request';
 import {useAdminMediaList, useUpdateMedia, useDeleteMedia} from '@/hooks/queries';
 import {UploadComponent} from '@/components/upload/UploadComponent';
@@ -97,26 +97,14 @@ export default function MediaPage() {
     const [variantData, setVariantData] = useState<MediaVariantSummary | null>(null);
     const [retryingAllId, setRetryingAllId] = useState<number | null>(null);
 
-    const [searchTerm, setSearchTerm] = useState(urlSearch || '');
-    const [statusFilter, setStatusFilter] = useState('all');
+    const [searchParams, setSearchParams] = useState({keyword: urlSearch || '', status: 'all', page: 1});
 
     // React Query Hooks
-    const {data: mediaData, isLoading: loading, refetch: loadMedia} = useAdminMediaList({page: 1, page_size: 50});
+    const {data: mediaData, isLoading: loading, refetch: loadMedia} = useAdminMediaList(searchParams);
     const updateMutation = useUpdateMedia();
     const deleteMutation = useDeleteMedia();
 
     const mediaList = mediaData?.items || (Array.isArray(mediaData) ? mediaData : []) as Media[];
-
-    const filteredMedia = mediaList.filter((item: Media) => {
-        const matchesSearch = item.title?.toLowerCase().includes(searchTerm.toLowerCase());
-        // Search by ID when query starts with "#", otherwise search by title
-        const isIdSearch = searchTerm.startsWith("#");
-        const actualSearch = isIdSearch
-            ? `#${item.id}` === searchTerm
-            : item.title?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || item.state === statusFilter;
-        return actualSearch && matchesStatus;
-    });
 
     const formatDuration = (seconds: number) => {
         if (!seconds) return '-';
@@ -293,18 +281,18 @@ export default function MediaPage() {
                                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                                         <Input
                                             placeholder="搜索媒体..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            value={searchParams.keyword}
+                                            onChange={(e) => setSearchParams({...searchParams, keyword: e.target.value})}
                                             className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
                                         />
                                     </div>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-2">
-                                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                    <Select value={searchParams.status} onValueChange={(v) => setSearchParams({...searchParams, status: v})}>
                                         <SelectTrigger className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
                                             <div className="flex items-center gap-2">
                                                 <Filter className="h-4 w-4"/>
-                                                {statusFilter === 'all' ? (
+                                                {searchParams.status === 'all' ? (
                                                     <span className="text-muted-foreground">Status</span>
                                                 ) : (
                                                     <SelectValue placeholder="Status"/>
@@ -324,8 +312,9 @@ export default function MediaPage() {
                                             size="sm"
                                             className="h-9 px-3"
                                             onClick={() => {
-                                                setSearchTerm('');
-                                                setStatusFilter('all');
+                                                const newParams = {keyword: '', status: 'all', page: 1};
+                                                setSearchParams(newParams);
+                                                loadMedia();
                                             }}
                                         >
                                             <RotateCcw className="h-4 w-4 mr-2"/>
@@ -335,9 +324,7 @@ export default function MediaPage() {
                                             variant="default"
                                             size="sm"
                                             className="h-9 px-4"
-                                            onClick={() => {
-                                                // 这里可以添加搜索逻辑
-                                            }}
+                                            onClick={() => loadMedia()}
                                         >
                                             <Search className="h-4 w-4 mr-2"/>
                                             Search
@@ -415,7 +402,7 @@ export default function MediaPage() {
                     <div>
                         <CardTitle>所有媒体</CardTitle>
                         <CardDescription>
-                            {filteredMedia.length} 条媒体记录
+                            {mediaList.length} 条媒体记录
                         </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
@@ -445,7 +432,7 @@ export default function MediaPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredMedia.length > 0 ? filteredMedia.map((media) => (
+                                {mediaList.length > 0 ? mediaList.map((media) => (
                                     <TableRow key={media.id} id={`media-row-${media.id}`}>
                                         <TableCell>
                                             <div className="flex items-center gap-3">

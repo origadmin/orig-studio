@@ -984,7 +984,7 @@ const filteredTasks = useMemo(() => {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="h-10 px-4"
+                                        className="h-9 px-3"
                                         onClick={handleReset}
                                     >
                                         <RotateCcw className="h-4 w-4 mr-2"/>
@@ -993,7 +993,7 @@ const filteredTasks = useMemo(() => {
                                     <Button
                                         variant="default"
                                         size="sm"
-                                        className="h-10 px-4"
+                                        className="h-9 px-4"
                                         onClick={handleSearch}
                                     >
                                         <Search className="h-4 w-4 mr-2"/>
@@ -1230,11 +1230,11 @@ const filteredTasks = useMemo(() => {
                         Page {filteredData.page} of {totalPages} · {filteredData.total} total
                     </span>
                     <div className="flex gap-1.5">
-                        <Button variant="outline" size="sm" className="h-8 text-xs px-3"
+                        <Button variant="outline" size="sm" className="h-9 px-3"
                                 disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
                             ← Previous
                         </Button>
-                        <Button variant="outline" size="sm" className="h-8 text-xs px-3"
+                        <Button variant="outline" size="sm" className="h-9 px-3"
                                 disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>
                             Next →
                         </Button>
