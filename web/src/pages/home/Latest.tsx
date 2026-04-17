@@ -45,13 +45,13 @@ const LatestPage = () => {
 
     // Load initial data and append when page changes
     useEffect(() => {
-        if (data?.list && data.list.length > 0) {
+        if (data?.items && data.items.length > 0) {
             if (page === 1) {
-                setItems(data.list);
+                setItems(data.items);
             } else {
-                setItems(prev => [...prev, ...data.list]);
+                setItems(prev => [...prev, ...data.items]);
             }
-            setHasMore(data.list.length === PAGE_SIZE);
+            setHasMore(data.items.length === PAGE_SIZE);
         } else if (page > 1) {
             setHasMore(false);
         }
@@ -95,7 +95,7 @@ const LatestPage = () => {
                     onClick={() => setActiveCategoryId(null)}
                     className={activeCategoryId === null ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
                 >{t('home.all')}</Button>
-                {categories?.map((cat) => (
+                {categories?.items?.map((cat) => (
                     <Button
                         key={cat.id}
                         variant={activeCategoryId === cat.id ? 'default' : 'outline'}
@@ -108,7 +108,7 @@ const LatestPage = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                 {items.map((media) => (
-                    <Link key={media.id} to="/watch" search={{v: String(media.id)}} className="group">
+                    <Link key={media.id} to="/watch" search={{v: media.friendly_token || String(media.id)}} className="group">
                         <div
                             className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
                             <div className="relative aspect-video overflow-hidden">

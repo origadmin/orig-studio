@@ -30,17 +30,17 @@ func SeedEncodeProfiles(ctx context.Context, client *entity.Client) error {
 		Active      bool
 		BentoParams string
 	}{
-		{"h265-240", "mp4", "240", "h265", true, "--video-bitrate 400k --audio-bitrate 64k"},
+		{"h265-240", "mp4", "240", "h265", false, "--video-bitrate 400k --audio-bitrate 64k"},
 		{"vp9-240", "webm", "240", "vp9", false, "--video-bitrate 350k --audio-bitrate 64k"},
-		{"h264-240", "mp4", "240", "h264", true, "--video-bitrate 500k --audio-bitrate 64k"},
+		{"h264-240", "mp4", "240", "h264", false, "--video-bitrate 500k --audio-bitrate 64k"},
 
-		{"h265-360", "mp4", "360", "h265", true, "--video-bitrate 800k --audio-bitrate 96k"},
+		{"h265-360", "mp4", "360", "h265", false, "--video-bitrate 800k --audio-bitrate 96k"},
 		{"vp9-360", "webm", "360", "vp9", false, "--video-bitrate 700k --audio-bitrate 96k"},
-		{"h264-360", "mp4", "360", "h264", true, "--video-bitrate 1000k --audio-bitrate 96k"},
+		{"h264-360", "mp4", "360", "h264", false, "--video-bitrate 1000k --audio-bitrate 96k"},
 
-		{"h265-480", "mp4", "480", "h265", true, "--video-bitrate 1500k --audio-bitrate 128k"},
+		{"h265-480", "mp4", "480", "h265", false, "--video-bitrate 1500k --audio-bitrate 128k"},
 		{"vp9-480", "webm", "480", "vp9", false, "--video-bitrate 1200k --audio-bitrate 128k"},
-		{"h264-480", "mp4", "480", "h264", true, "--video-bitrate 2000k --audio-bitrate 128k"},
+		{"h264-480", "mp4", "480", "h264", false, "--video-bitrate 2000k --audio-bitrate 128k"},
 
 		{"h265-720", "mp4", "720", "h265", true, "--video-bitrate 3500k --audio-bitrate 128k"},
 		{"vp9-720", "webm", "720", "vp9", false, "--video-bitrate 3000k --audio-bitrate 128k"},
@@ -59,10 +59,11 @@ func SeedEncodeProfiles(ctx context.Context, client *entity.Client) error {
 		{"h265-2160", "mp4", "2160", "h265", false, "--video-bitrate 22000k --audio-bitrate 320k"},
 
 		// Short video profiles
-		{"h264-short-360", "mp4", "360", "h264", true, "--video-bitrate 800k --audio-bitrate 96k"},
-		{"h265-short-360", "mp4", "360", "h265", true, "--video-bitrate 600k --audio-bitrate 96k"},
+		{"h264-short-360", "mp4", "360", "h264", false, "--video-bitrate 800k --audio-bitrate 96k"},
+		{"h265-short-360", "mp4", "360", "h265", false, "--video-bitrate 600k --audio-bitrate 96k"},
 
 		{"preview", "gif", "-", "-", true, "--fps 10 --scale 320"},
+		{"preview-frames", "jpg", "-", "-", true, "--frames 30 --scale 160"},
 	}
 
 	for _, p := range profiles {

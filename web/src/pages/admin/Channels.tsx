@@ -19,6 +19,8 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import {
     Dialog,
@@ -355,13 +357,13 @@ const Channels: React.FC = () => {
                         </TableHeader>
                         <TableBody>
                             {loading ? (
-                                <TableRow>
+                                <TableRow key="loading">
                                     <TableCell colSpan={8} className="text-center py-8">
                                         <div className="animate-pulse">Loading channels...</div>
                                     </TableCell>
                                 </TableRow>
                             ) : error ? (
-                                <TableRow>
+                                <TableRow key="error">
                                     <TableCell colSpan={8} className="text-center py-8">
                                         <div className="text-red-600">{error}</div>
                                         <Button 
@@ -375,7 +377,7 @@ const Channels: React.FC = () => {
                                     </TableCell>
                                 </TableRow>
                             ) : filteredChannels.length === 0 ? (
-                                <TableRow>
+                                <TableRow key="empty">
                                     <TableCell colSpan={8} className="text-center py-8">
                                         No channels found
                                     </TableCell>
@@ -417,11 +419,18 @@ const Channels: React.FC = () => {
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="sm">
-                                                        <MoreHorizontal className="h-4 w-4"/>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="h-6 w-6" 
+                                                        title="More Actions"
+                                                    >
+                                                        <MoreHorizontal className="h-3 w-3"/>
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuSeparator/>
                                                     <DropdownMenuItem>
                                                         <Eye className="mr-2 h-4 w-4"/>
                                                         {t('admin.view')}
@@ -437,7 +446,7 @@ const Channels: React.FC = () => {
                                                         </DropdownMenuItem>
                                                     )}
                                                     <DropdownMenuItem 
-                                                        className="text-red-600" 
+                                                        className="text-destructive focus:text-destructive" 
                                                         onClick={() => openDeleteDialog(channel)}
                                                     >
                                                         <Trash2 className="mr-2 h-4 w-4"/>

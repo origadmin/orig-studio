@@ -1427,7 +1427,7 @@ type GetEncodingStatusResponse struct {
 	PendingCount    int32                   `protobuf:"varint,2,opt,name=pending_count,proto3" json:"pending_count,omitempty"`
 	FailedCount     int32                   `protobuf:"varint,3,opt,name=failed_count,proto3" json:"failed_count,omitempty"`
 	SuccessCount    int32                   `protobuf:"varint,4,opt,name=success_count,proto3" json:"success_count,omitempty"`
-	TotalFiltered   int32                   `protobuf:"varint,5,opt,name=total_filtered,proto3" json:"total_filtered,omitempty"`
+	Total           int32                   `protobuf:"varint,5,opt,name=total,proto3" json:"total,omitempty"`
 	Page            int32                   `protobuf:"varint,6,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize        int32                   `protobuf:"varint,7,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	Items           []*TranscodingMediaItem `protobuf:"bytes,8,rep,name=items,proto3" json:"items,omitempty"`
@@ -1493,9 +1493,9 @@ func (x *GetEncodingStatusResponse) GetSuccessCount() int32 {
 	return 0
 }
 
-func (x *GetEncodingStatusResponse) GetTotalFiltered() int32 {
+func (x *GetEncodingStatusResponse) GetTotal() int32 {
 	if x != nil {
-		return x.TotalFiltered
+		return x.Total
 	}
 	return 0
 }
@@ -9041,13 +9041,13 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_sizeB\n" +
 	"\n" +
-	"\b_user_id\"\xd4\x02\n" +
+	"\b_user_id\"\xc2\x02\n" +
 	"\x19GetEncodingStatusResponse\x12*\n" +
 	"\x10processing_count\x18\x01 \x01(\x05R\x10processing_count\x12$\n" +
 	"\rpending_count\x18\x02 \x01(\x05R\rpending_count\x12\"\n" +
 	"\ffailed_count\x18\x03 \x01(\x05R\ffailed_count\x12$\n" +
-	"\rsuccess_count\x18\x04 \x01(\x05R\rsuccess_count\x12&\n" +
-	"\x0etotal_filtered\x18\x05 \x01(\x05R\x0etotal_filtered\x12\x12\n" +
+	"\rsuccess_count\x18\x04 \x01(\x05R\rsuccess_count\x12\x14\n" +
+	"\x05total\x18\x05 \x01(\x05R\x05total\x12\x12\n" +
 	"\x04page\x18\x06 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\a \x01(\x05R\tpage_size\x12A\n" +
 	"\x05items\x18\b \x03(\v2+.api.v1.services.media.TranscodingMediaItemR\x05items\"\x95\x01\n" +

@@ -23,6 +23,8 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import {contentApi, Content} from '@/lib/api/content';
 import {extractList} from '@/lib/extract';
@@ -152,13 +154,13 @@ export default function ContentPage() {
                         </TableHeader>
                         <TableBody>
                             {loading ? (
-                                <TableRow>
+                                <TableRow key="loading">
                                     <TableCell colSpan={7} className="text-center py-8">
                                         <div className="animate-pulse">Loading content...</div>
                                     </TableCell>
                                 </TableRow>
                             ) : error ? (
-                                <TableRow>
+                                <TableRow key="error">
                                     <TableCell colSpan={7} className="text-center py-8">
                                         <div className="text-red-600">{error}</div>
                                         <Button 
@@ -172,7 +174,7 @@ export default function ContentPage() {
                                     </TableCell>
                                 </TableRow>
                             ) : filteredContent.length === 0 ? (
-                                <TableRow>
+                                <TableRow key="empty">
                                     <TableCell colSpan={7} className="text-center py-8">
                                         No content found
                                     </TableCell>
@@ -203,11 +205,18 @@ export default function ContentPage() {
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="sm">
-                                                        <MoreVertical className="w-4 h-4"/>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="h-6 w-6" 
+                                                        title="More Actions"
+                                                    >
+                                                        <MoreVertical className="h-3 w-3"/>
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuSeparator/>
                                                     <DropdownMenuItem>
                                                         <Eye className="w-4 h-4 mr-2"/>
                                                         View
@@ -216,7 +225,7 @@ export default function ContentPage() {
                                                         <Edit className="w-4 h-4 mr-2"/>
                                                         Edit
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem className="text-red-600">
+                                                    <DropdownMenuItem className="text-destructive focus:text-destructive">
                                                         <Trash2 className="w-4 h-4 mr-2"/>
                                                         Delete
                                                     </DropdownMenuItem>

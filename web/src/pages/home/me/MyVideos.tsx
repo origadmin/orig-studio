@@ -35,7 +35,7 @@ const MyVideos = () => {
 
     const deleteMutation = useDeleteMedia();
 
-    const mediaList = data?.list || [];
+    const mediaList = data?.items || [];
 
     const handleDelete = async (id: number) => {
         if (window.confirm('确定要删除这个视频吗？')) {
@@ -115,7 +115,7 @@ const MyVideos = () => {
                                 <div
                                     className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                     <Button size="sm" variant="secondary" className="h-8 w-8 p-0 rounded-full" asChild>
-                                        <Link to="/watch" search={{v: item.id?.toString() || ''}}>
+                                        <Link to="/watch" search={{v: item.friendly_token || item.id?.toString() || ''}}>
                                             <ExternalLink className="w-4 h-4"/>
                                         </Link>
                                     </Button>

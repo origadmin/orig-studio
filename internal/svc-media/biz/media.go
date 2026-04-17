@@ -16,7 +16,6 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origcms/api/gen/v1/types" // Import the generated Media type
-	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/pubsub"
 	"origadmin/application/origcms/internal/svc-media/dto"
@@ -36,104 +35,16 @@ type EncodingEvent struct {
 type Media = types.Media
 
 // MediaRepo defines the storage operations for media.
-type MediaRepo interface {
-	Create(ctx context.Context, media *Media) (*Media, error)
-	CreateWithEntity(ctx context.Context, media *Media) (*entity.Media, *Media, error)
-	Get(ctx context.Context, id string) (*Media, error)
-	List(ctx context.Context, opts ...*dto.MediaQueryOption) ([]*Media, int32, error)
-	Update(ctx context.Context, media *Media) (*Media, error)
-	Delete(ctx context.Context, id string) error
-	IncrementViewCount(ctx context.Context, id string) (int64, error)
-	UpdateCommentCount(ctx context.Context, id string, delta int) error
-	UpdateLikeCount(ctx context.Context, id string, delta int) error
-	UpdateDislikeCount(ctx context.Context, id string, delta int) error
-	UpdateFavoriteCount(ctx context.Context, id string, delta int) error
-	// ResetStaleProcessing resets media stuck in "processing" state back to "pending"
-	// and deletes their orphaned encoding tasks (which were interrupted by the restart).
-	// Called at startup to recover from service restarts.
-	ResetStaleProcessing(ctx context.Context) (int, error)
-	// CountByEncodingStatus returns per-status media counts using a single GROUP BY query.
-	CountByEncodingStatus(ctx context.Context) (*StatusCounts, error)
-	// ListFilteredByEncodingStatus returns a paginated list of media matching the given encoding statuses.
-	ListFilteredByEncodingStatus(
-		ctx context.Context,
-		statuses []string,
-		page, pageSize int,
-	) ([]*Media, int, error)
-}
-
-// EncodeProfile represents an encoding preset.
-type EncodeProfile struct {
-	Id           int    `json:"id"`
-	Name         string `json:"name"`
-	Description  string `json:"description"`
-	Extension    string `json:"extension"`
-	Resolution   string `json:"resolution"`
-	VideoCodec   string `json:"video_codec"`
-	VideoBitrate string `json:"video_bitrate"`
-	AudioCodec   string `json:"audio_codec"`
-	AudioBitrate string `json:"audio_bitrate"`
-	IsActive     bool   `json:"is_active"`
-	// BentoParameters stores additional arguments for Bento4 tools (e.g., mp4hls)
-	BentoParameters string `json:"bento_parameters"`
-}
+type MediaRepo = dto.MediaRepo
 
 // EncodeProfileRepo defines the storage operations for encode profiles.
-type EncodeProfileRepo interface {
-	ListActive(ctx context.Context) ([]*EncodeProfile, error)
-	ListAll(ctx context.Context) ([]*EncodeProfile, error)
-	Get(ctx context.Context, id int) (*EncodeProfile, error)
-	GetByName(ctx context.Context, name string) (*EncodeProfile, error)
-	Create(ctx context.Context, profile *EncodeProfile) (*EncodeProfile, error)
-	Update(ctx context.Context, profile *EncodeProfile) (*EncodeProfile, error)
-	Delete(ctx context.Context, id int) error
-}
+type EncodeProfileRepo = dto.EncodeProfileRepo
 
 // EncodingTask represents a transcoding sub-task for a specific media and profile.
-type EncodingTask struct {
-	Id           string                   `json:"id"`
-	MediaId      string                   `json:"media_id"`
-	ProfileId    int                      `json:"profile_id"`
-	Status       enums.EncodingTaskStatus `json:"status"` // pending, processing, success, failed
-	OutputPath   string                   `json:"output_path"`
-	ErrorMessage string                   `json:"error_message"`
-	Chunk        bool                     `json:"chunk"` // is chunk? (视频分段转码标识)
-	CreateTime   string                   `json:"created_at,omitempty"`
-	UpdateTime   string                   `json:"update_time,omitempty"`
-}
+type EncodingTask = dto.EncodingTask
 
 // EncodingTaskRepo defines the storage operations for encoding tasks.
-type EncodingTaskRepo interface {
-	Create(ctx context.Context, task *EncodingTask) (*EncodingTask, error)
-	Update(ctx context.Context, task *EncodingTask) (*EncodingTask, error)
-	Get(ctx context.Context, id string) (*EncodingTask, error)
-	ListByMedia(ctx context.Context, mediaId string) ([]*EncodingTask, error)
-	// DeleteByMedia deletes all encoding tasks for a given media ID.
-	DeleteByMedia(ctx context.Context, mediaID string) error
-	// ListFlat returns a paginated flat list of tasks filtered by status/media_id.
-	ListFlat(
-		ctx context.Context,
-		status string,
-		mediaId *string,
-		profileFilter string,
-		profileID int,
-		chunkFilter string,
-		searchQuery string,
-		offset, limit int,
-	) ([]*EncodingTask, int, error)
-	// CountByStatus returns per-status counts from the encoding_task table (NOT the media table).
-	CountByStatus(ctx context.Context) (*StatusCounts, error)
-	// CountByStatusWithFilter returns per-status counts filtered by status, media_id, profile, chunk, and search query.
-	CountByStatusWithFilter(
-		ctx context.Context,
-		status string,
-		mediaId *string,
-		profileFilter string,
-		profileID int,
-		chunkFilter string,
-		searchQuery string,
-	) (*StatusCounts, error)
-}
+type EncodingTaskRepo = dto.EncodingTaskRepo
 
 type MediaUseCase struct {
 	repo         MediaRepo
@@ -514,13 +425,7 @@ type FlatTaskItem struct {
 }
 
 // StatusCounts holds per-media-status counts.
-type StatusCounts struct {
-	Processing int `json:"processing"`
-	Pending    int `json:"pending"`
-	Partial    int `json:"partial"`
-	Failed     int `json:"failed"`
-	Success    int `json:"success"`
-}
+type StatusCounts = dto.StatusCounts
 
 func (uc *MediaUseCase) GetTranscodingStatus(
 	ctx context.Context,
@@ -802,7 +707,7 @@ func IsFramesProfileFromName(name string) bool {
 }
 
 // estimateProfileBandwidth estimates bandwidth in bps from profile settings.
-func estimateProfileBandwidth(p *EncodeProfile) int {
+func estimateProfileBandwidth(p *dto.EncodeProfile) int {
 	// Try parsing from BentoParameters first
 	if p.BentoParameters != "" {
 		fields := strings.Fields(p.BentoParameters)
@@ -945,32 +850,67 @@ func (uc *MediaUseCase) Publish(mediaID string, event *EncodingEvent) {
 // --- Encode Profiles ---
 
 // ListEncodeProfiles returns all encoding profiles.
-func (uc *MediaUseCase) ListEncodeProfiles(ctx context.Context) ([]*EncodeProfile, error) {
+func (uc *MediaUseCase) ListEncodeProfiles(ctx context.Context) ([]*dto.EncodeProfile, error) {
 	return uc.profileRepo.ListAll(ctx)
 }
 
 // GetEncodeProfile returns an encoding profile by ID.
-func (uc *MediaUseCase) GetEncodeProfile(ctx context.Context, id int) (*EncodeProfile, error) {
+func (uc *MediaUseCase) GetEncodeProfile(ctx context.Context, id int) (*dto.EncodeProfile, error) {
 	return uc.profileRepo.Get(ctx, id)
 }
 
 // CreateEncodeProfile creates a new encoding profile.
 func (uc *MediaUseCase) CreateEncodeProfile(
 	ctx context.Context,
-	profile *EncodeProfile,
-) (*EncodeProfile, error) {
+	profile *dto.EncodeProfile,
+) (*dto.EncodeProfile, error) {
 	return uc.profileRepo.Create(ctx, profile)
 }
 
 // UpdateEncodeProfile updates an existing encoding profile.
 func (uc *MediaUseCase) UpdateEncodeProfile(
 	ctx context.Context,
-	profile *EncodeProfile,
-) (*EncodeProfile, error) {
+	profile *dto.EncodeProfile,
+) (*dto.EncodeProfile, error) {
 	return uc.profileRepo.Update(ctx, profile)
 }
 
 // DeleteEncodeProfile deletes an encoding profile.
 func (uc *MediaUseCase) DeleteEncodeProfile(ctx context.Context, id int) error {
 	return uc.profileRepo.Delete(ctx, id)
+}
+
+// ReviewMedia 审核媒体
+func (uc *MediaUseCase) ReviewMedia(ctx context.Context, mediaID string, approve bool, comment string, reviewerID string) (*Media, error) {
+	media, err := uc.repo.Get(ctx, mediaID)
+	if err != nil {
+		return nil, err
+	}
+
+	// 更新审核状态
+	media.IsReviewed = approve
+	if approve {
+		media.ReviewStatus = "reviewed"
+	} else {
+		media.ReviewStatus = "rejected"
+	}
+
+	// 计算可见性
+	media.Listable = uc.ShouldBeListable(media)
+
+	// 保存更新
+	updated, err := uc.repo.Update(ctx, media)
+	if err != nil {
+		return nil, err
+	}
+
+	uc.log.Infof("Media %s reviewed by %s: %v, comment: %s", mediaID, reviewerID, approve, comment)
+	return updated, nil
+}
+
+// ShouldBeListable 计算媒体是否应该可见
+func (uc *MediaUseCase) ShouldBeListable(media *Media) bool {
+	return media.EncodingStatus == "success" && 
+		   media.IsReviewed && 
+		   media.State == "active"
 }

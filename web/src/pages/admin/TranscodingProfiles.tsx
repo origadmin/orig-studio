@@ -36,7 +36,7 @@ import {
     DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
 import {
-    PlusCircle, Edit, Trash2, CheckCircle, XCircle, Play, Pause,
+    PlusCircle, Edit, Trash2, CheckCircle, XCircle, Play, Pause, Settings,
     Search, Filter, MoreVertical, Download, Upload, Copy,
     Trash, CheckSquare, Square, ArrowUpDown, ChevronDown, ChevronUp, RotateCcw
 } from "lucide-react";
@@ -513,8 +513,8 @@ export default function TranscodingProfiles() {
                         <div className="flex items-center gap-2">
                             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                                 <DialogTrigger asChild>
-                                    <Button onClick={() => setEditingProfile({is_active: true})}>
-                                        <PlusCircle className="mr-2 h-4 w-4"/>
+                                    <Button variant="outline" size="sm" onClick={() => setEditingProfile({is_active: true})}>
+                                        <PlusCircle className="h-4 w-4 mr-2"/>
                                         Add Profile
                                     </Button>
                                 </DialogTrigger>
@@ -724,7 +724,8 @@ export default function TranscodingProfiles() {
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline" size="sm">
-                                        <MoreVertical className="h-4 w-4"/>
+                                        <Settings className="h-4 w-4 mr-2"/>
+                                        Options
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
@@ -805,13 +806,13 @@ export default function TranscodingProfiles() {
                             </TableHeader>
                             <TableBody>
                                 {loading ? (
-                                    <TableRow>
+                                    <TableRow key="loading">
                                         <TableCell colSpan={7} className="text-center py-8">
                                             Loading profiles...
                                         </TableCell>
                                     </TableRow>
                                 ) : filteredProfiles.length === 0 ? (
-                                    <TableRow>
+                                    <TableRow key="empty">
                                         <TableCell colSpan={7} className="text-center py-8">
                                             <div
                                                 className="flex flex-col items-center justify-center text-muted-foreground">
@@ -915,11 +916,13 @@ export default function TranscodingProfiles() {
                                                         </Button>
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
-                                                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                                    <MoreVertical className="h-4 w-4"/>
+                                                                <Button variant="ghost" size="icon" className="h-6 w-6" title="More Actions">
+                                                                    <MoreVertical className="h-3 w-3"/>
                                                                 </Button>
                                                             </DropdownMenuTrigger>
                                                             <DropdownMenuContent align="end">
+                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                                <DropdownMenuSeparator/>
                                                                 <DropdownMenuItem onClick={() => {
                                                                     setEditingProfile({...p});
                                                                     setIsDialogOpen(true);

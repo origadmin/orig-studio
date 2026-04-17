@@ -137,6 +137,11 @@ func NewMediaHandler(
 }
 
 func (h *MediaHandler) Register(r handler.Router) {
+	// Keep Register for backward compatibility
+}
+
+// RegisterGin directly registers routes with gin.RouterGroup
+func (h *MediaHandler) RegisterGin(rg *gin.RouterGroup) {
 	// Ensure upload directory exists
 	if err := os.MkdirAll(UploadDir, 0o755); err != nil {
 		slog.Warn("failed to create upload directory", "err", err)
@@ -147,86 +152,89 @@ func (h *MediaHandler) Register(r handler.Router) {
 	// ================================
 
 	// Media upload
-	r.POST("/medias/upload", WithJWT(h.jwtMgr, h.uploadMediaHandler))
+	rg.POST("/medias/upload", JWTMiddleware(h.jwtMgr), h.uploadMedia())
 
 	// Media list
-	r.GET("/medias", h.listMediaHandler)
+	rg.GET("/medias", h.listMedia())
 
 	// Encoding Profiles - independent path to avoid conflict with /medias/:id
-	r.GET("/encoding/profiles", h.listEncodeProfilesHandler)
-	r.GET("/encoding/profiles/:profile_id", h.getEncodeProfileHandler)
-	r.POST("/encoding/profiles", WithJWT(h.jwtMgr, h.createEncodeProfileHandler))
-	r.PUT("/encoding/profiles/:profile_id", WithJWT(h.jwtMgr, h.updateEncodeProfileHandler))
-	r.DELETE("/encoding/profiles/:profile_id", WithJWT(h.jwtMgr, h.deleteEncodeProfileHandler))
+	rg.GET("/encoding/profiles", h.listEncodeProfiles())
+	rg.GET("/encoding/profiles/:profile_id", h.getEncodeProfile())
+	rg.POST("/encoding/profiles", JWTMiddleware(h.jwtMgr), h.createEncodeProfile())
+	rg.PUT("/encoding/profiles/:profile_id", JWTMiddleware(h.jwtMgr), h.updateEncodeProfile())
+	rg.DELETE("/encoding/profiles/:profile_id", JWTMiddleware(h.jwtMgr), h.deleteEncodeProfile())
 
 	// Transcoding & Encoding Status - independent path
-	r.GET("/encoding/tasks", h.getEncodingTasksFlatHandler)
-	r.GET("/encoding/events", h.transcodingEventsHandler)
-	r.POST("/encoding/retry", WithJWT(h.jwtMgr, h.retryTaskByIDHandler))
-	r.POST("/encoding/retry-all-failed", WithJWT(h.jwtMgr, h.retryAllFailedHandler))
+	rg.GET("/encoding/tasks", h.getEncodingTasksFlat())
+	rg.GET("/encoding/events", h.transcodingEvents())
+	rg.POST("/encoding/retry", JWTMiddleware(h.jwtMgr), h.retryTaskByID())
+	rg.POST("/encoding/retry-all-failed", JWTMiddleware(h.jwtMgr), h.retryAllFailed())
 
 	// ================================
 	// 2. Media resource paths - with variable parameters
 	// ================================
-	media := r.Group("/media")
+	media := rg.Group("/media")
 	{
 		// Media CRUD Operations
-		media.GET("/:id", h.getMediaHandler)
-		media.PUT("/:id", WithJWT(h.jwtMgr, h.updateMediaHandler))
-		media.DELETE("/:id", WithJWT(h.jwtMgr, h.deleteMediaHandler))
+		media.GET("/:id", h.getMedia())
+		media.PUT("/:id", JWTMiddleware(h.jwtMgr), h.updateMedia())
+		media.DELETE("/:id", JWTMiddleware(h.jwtMgr), h.deleteMedia())
 
 		// Media Variants
-		media.GET("/:id/variants", h.getMediaVariantsHandler)
+		media.GET("/:id/variants", h.getMediaVariants())
 
 		// Media Tasks & Retry
-		media.GET("/:id/tasks", h.listEncodingTasksHandler)
-		media.POST("/:id/tasks/:taskId/retry", WithJWT(h.jwtMgr, h.retryTranscodeHandler))
+		media.GET("/:id/tasks", h.listEncodingTasks())
+		media.POST("/:id/tasks/:taskId/retry", JWTMiddleware(h.jwtMgr), h.retryTranscode())
 
 		// Like & Dislike
-		media.GET("/:id/likes", h.getLikeStatusHandler)
-		media.POST("/:id/likes", WithJWT(h.jwtMgr, h.toggleLikeHandler))
-		media.DELETE("/:id/likes", WithJWT(h.jwtMgr, h.toggleDislikeHandler))
+		media.GET("/:id/likes", h.getLikeStatus())
+		media.POST("/:id/likes", JWTMiddleware(h.jwtMgr), h.toggleLike())
+		media.DELETE("/:id/likes", JWTMiddleware(h.jwtMgr), h.toggleDislike())
 
 		// Favorite
-		media.GET("/:id/favorites", h.getFavoriteStatusHandler)
-		media.POST("/:id/favorites", WithJWT(h.jwtMgr, h.toggleFavoriteHandler))
-		media.DELETE("/:id/favorites", WithJWT(h.jwtMgr, h.toggleFavoriteHandler))
+		media.GET("/:id/favorites", h.getFavoriteStatus())
+		media.POST("/:id/favorites", JWTMiddleware(h.jwtMgr), h.toggleFavorite())
+		media.DELETE("/:id/favorites", JWTMiddleware(h.jwtMgr), h.toggleFavorite())
 
 		// Share
-		media.GET("/:id/shares", h.getShareUrlHandler)
-		media.POST("/:id/shares", WithJWT(h.jwtMgr, h.recordShareHandler))
+		media.GET("/:id/shares", h.getShareUrl())
+		media.POST("/:id/shares", JWTMiddleware(h.jwtMgr), h.recordShare())
 	}
 
 	// ================================
 	// 3. Medias resource paths - compatible with frontend requests
 	// ================================
-	medias := r.Group("/medias")
+	medias := rg.Group("/medias")
 	{
 		// Media CRUD Operations
-		medias.GET("/:id", h.getMediaHandler)
-		medias.PUT("/:id", WithJWT(h.jwtMgr, h.updateMediaHandler))
-		medias.DELETE("/:id", WithJWT(h.jwtMgr, h.deleteMediaHandler))
+		medias.GET("/:id", h.getMedia())
+		medias.PUT("/:id", JWTMiddleware(h.jwtMgr), h.updateMedia())
+		medias.DELETE("/:id", JWTMiddleware(h.jwtMgr), h.deleteMedia())
 
 		// Media Variants
-		medias.GET("/:id/variants", h.getMediaVariantsHandler)
+		medias.GET("/:id/variants", h.getMediaVariants())
 
 		// Media Tasks & Retry
-		medias.GET("/:id/tasks", h.listEncodingTasksHandler)
-		medias.POST("/:id/tasks/:taskId/retry", WithJWT(h.jwtMgr, h.retryTranscodeHandler))
+		medias.GET("/:id/tasks", h.listEncodingTasks())
+		medias.POST("/:id/tasks/:taskId/retry", JWTMiddleware(h.jwtMgr), h.retryTranscode())
 
 		// Like & Dislike
-		medias.GET("/:id/likes", h.getLikeStatusHandler)
-		medias.POST("/:id/likes", WithJWT(h.jwtMgr, h.toggleLikeHandler))
-		medias.DELETE("/:id/likes", WithJWT(h.jwtMgr, h.toggleDislikeHandler))
+		medias.GET("/:id/likes", h.getLikeStatus())
+		medias.POST("/:id/likes", JWTMiddleware(h.jwtMgr), h.toggleLike())
+		medias.DELETE("/:id/likes", JWTMiddleware(h.jwtMgr), h.toggleDislike())
 
 		// Favorite
-		medias.GET("/:id/favorites", h.getFavoriteStatusHandler)
-		medias.POST("/:id/favorites", WithJWT(h.jwtMgr, h.toggleFavoriteHandler))
-		medias.DELETE("/:id/favorites", WithJWT(h.jwtMgr, h.toggleFavoriteHandler))
+		medias.GET("/:id/favorites", h.getFavoriteStatus())
+		medias.POST("/:id/favorites", JWTMiddleware(h.jwtMgr), h.toggleFavorite())
+		medias.DELETE("/:id/favorites", JWTMiddleware(h.jwtMgr), h.toggleFavorite())
 
 		// Share
-		medias.GET("/:id/shares", h.getShareUrlHandler)
-		medias.POST("/:id/shares", WithJWT(h.jwtMgr, h.recordShareHandler))
+		medias.GET("/:id/shares", h.getShareUrl())
+		medias.POST("/:id/shares", JWTMiddleware(h.jwtMgr), h.recordShare())
+
+		// Review (TODO: add gin version)
+		// medias.POST("/:id/review", JWTMiddleware(h.jwtMgr), h.reviewMediaHandler)
 	}
 }
 
@@ -436,18 +444,8 @@ func (h *MediaHandler) uploadMediaHandler(w http.ResponseWriter, r *http.Request
 
 	privacy, _ := strconv.Atoi(privacyStr)
 
-	// For video files, detect if it's a short video based on duration
-	if strings.HasPrefix(mimeType, "video/") {
-		// Get video duration
-		var duration time.Duration
-		if d, err := ffmpeg.GetVideoDuration(ctx, filePath); err == nil {
-			duration = d
-			// Check if it's a short video (duration < 60 seconds)
-			if duration.Seconds() < 60 {
-				mediaType = "short_video"
-			}
-		}
-	}
+	// For video files, just keep as "video" type
+	// Short video detection (vertical aspect ratio) will be added later if needed
 
 	m := &biz.Media{
 		Title:          title,
@@ -464,6 +462,9 @@ func (h *MediaHandler) uploadMediaHandler(w http.ResponseWriter, r *http.Request
 		Privacy:        int32(privacy),
 		Tags:           tags,
 		CategoryId:     strconv.Itoa(categoryID),
+		IsReviewed:     false,
+		ReviewStatus:   "pending_review",
+		Listable:       false,
 	}
 
 	created, err := h.uc.CreateMedia(ctx, m)
@@ -831,7 +832,7 @@ func (h *MediaHandler) getEncodeProfileHandler(w http.ResponseWriter, r *http.Re
 func (h *MediaHandler) createEncodeProfileHandler(w http.ResponseWriter, r *http.Request) {
 	c := handler.NewGinContextAdapterFromHTTP(w, r)
 
-	var profile biz.EncodeProfile
+	var profile dto.EncodeProfile
 	if err := c.Bind(&profile); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -855,7 +856,7 @@ func (h *MediaHandler) updateEncodeProfileHandler(w http.ResponseWriter, r *http
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Profile ID"})
 		return
 	}
-	var profile biz.EncodeProfile
+	var profile dto.EncodeProfile
 	if err := c.Bind(&profile); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -1075,6 +1076,56 @@ func (h *MediaHandler) recordShareHandler(w http.ResponseWriter, r *http.Request
 	})
 }
 
+func (h *MediaHandler) reviewMediaHandler(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	ctx := c.Context()
+
+	val := c.Get("claims")
+	if val == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	claims := val.(*auth.Claims)
+
+	if !claims.IsStaff {
+		c.JSON(http.StatusForbidden, gin.H{"error": "only staff can review media"})
+		return
+	}
+
+	idStr := c.Param("id")
+	if idStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	var req struct {
+		Action     string `json:"action"`
+		ReviewerID string `json:"reviewer_id"`
+		Comment    string `json:"comment"`
+	}
+
+	if err := c.Bind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	approve := req.Action == "approve"
+
+	updated, err := h.uc.ReviewMedia(ctx, idStr, approve, req.Comment, claims.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":            updated.Id,
+		"is_reviewed":   updated.IsReviewed,
+		"review_status": updated.ReviewStatus,
+		"listable":      updated.Listable,
+		"updated_at":    updated.UpdateTime,
+	})
+}
+
 // --- List Media ---
 
 func (h *MediaHandler) listMedia() gin.HandlerFunc {
@@ -1261,17 +1312,17 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 		title := c.PostForm("title")
 		description := c.PostForm("description")
 		categoryIDStr := c.PostForm("category_id")
-	tagsStr := c.PostForm("tags")
-	privacyStr := c.DefaultPostForm("privacy", "1")
+		tagsStr := c.PostForm("tags")
+		privacyStr := c.DefaultPostForm("privacy", "1")
 
-	if title == "" {
-		title = strings.TrimSuffix(header.Filename, ext)
-	}
+		if title == "" {
+			title = strings.TrimSuffix(header.Filename, ext)
+		}
 
-	var categoryID int
-	if categoryIDStr != "" {
-		categoryID, _ = strconv.Atoi(categoryIDStr)
-	}
+		var categoryID int
+		if categoryIDStr != "" {
+			categoryID, _ = strconv.Atoi(categoryIDStr)
+		}
 
 		var tags []string
 		if tagsStr != "" {
@@ -1311,6 +1362,9 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 			Privacy:        int32(privacy),
 			Tags:           tags,
 			CategoryId:     strconv.Itoa(categoryID),
+			IsReviewed:     false,
+			ReviewStatus:   "pending_review",
+			Listable:       false,
 		}
 
 		created, err := h.uc.CreateMedia(ctx, m)
@@ -1684,7 +1738,7 @@ func (h *MediaHandler) getEncodeProfile() gin.HandlerFunc {
 
 func (h *MediaHandler) createEncodeProfile() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var profile biz.EncodeProfile
+		var profile dto.EncodeProfile
 		if err := c.ShouldBindJSON(&profile); err != nil {
 			Fail(c, ErrBadRequest, err.Error())
 			return
@@ -1708,7 +1762,7 @@ func (h *MediaHandler) updateEncodeProfile() gin.HandlerFunc {
 			Fail(c, ErrBadRequest, "Invalid Profile ID")
 			return
 		}
-		var profile biz.EncodeProfile
+		var profile dto.EncodeProfile
 		if err := c.ShouldBindJSON(&profile); err != nil {
 			Fail(c, ErrBadRequest, err.Error())
 			return

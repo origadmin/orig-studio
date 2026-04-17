@@ -14,7 +14,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/uploadsession"
 	"origadmin/application/origcms/internal/data/enums"
-	"origadmin/application/origcms/internal/svc-media/biz"
+	"origadmin/application/origcms/internal/svc-media/dto"
 )
 
 type uploadRepo struct {
@@ -23,14 +23,14 @@ type uploadRepo struct {
 }
 
 // NewUploadRepo .
-func NewUploadRepo(data *entity.Client, logger log.Logger) biz.UploadRepo {
+func NewUploadRepo(data *entity.Client, logger log.Logger) dto.UploadRepo {
 	return &uploadRepo{
 		data: data,
 		log:  log.NewHelper(log.With(logger, "module", "data/upload")),
 	}
 }
 
-func (r *uploadRepo) CreateSession(ctx context.Context, session *biz.UploadSession) error {
+func (r *uploadRepo) CreateSession(ctx context.Context, session *dto.UploadSession) error {
 	builder := r.data.UploadSession.Create().
 		SetUploadID(session.UploadID).
 		SetFilename(session.Filename).
@@ -62,7 +62,7 @@ func (r *uploadRepo) CreateSession(ctx context.Context, session *biz.UploadSessi
 	return err
 }
 
-func (r *uploadRepo) GetSession(ctx context.Context, uploadID string) (*biz.UploadSession, error) {
+func (r *uploadRepo) GetSession(ctx context.Context, uploadID string) (*dto.UploadSession, error) {
 	entSession, err := r.data.UploadSession.Query().
 		Where(uploadsession.UploadID(uploadID)).
 		Only(ctx)
@@ -72,7 +72,7 @@ func (r *uploadRepo) GetSession(ctx context.Context, uploadID string) (*biz.Uplo
 	return r.entToBiz(entSession), nil
 }
 
-func (r *uploadRepo) UpdateSession(ctx context.Context, session *biz.UploadSession) error {
+func (r *uploadRepo) UpdateSession(ctx context.Context, session *dto.UploadSession) error {
 	return r.data.UploadSession.Update().
 		Where(uploadsession.UploadID(session.UploadID)).
 		SetUploadedSize(session.UploadedSize).
@@ -91,7 +91,7 @@ func (r *uploadRepo) DeleteSession(ctx context.Context, uploadID string) error {
 	return err
 }
 
-func (r *uploadRepo) ListSessions(ctx context.Context, userID string, status enums.UploadStatus, page, pageSize int) ([]*biz.UploadSession, int, error) {
+func (r *uploadRepo) ListSessions(ctx context.Context, userID string, status enums.UploadStatus, page, pageSize int) ([]*dto.UploadSession, int, error) {
 	query := r.data.UploadSession.Query()
 	if userID != "" {
 		userIDInt, _ := strconv.Atoi(userID)
@@ -112,7 +112,7 @@ func (r *uploadRepo) ListSessions(ctx context.Context, userID string, status enu
 		return nil, 0, err
 	}
 
-	res := make([]*biz.UploadSession, len(list))
+	res := make([]*dto.UploadSession, len(list))
 	for i, s := range list {
 		res[i] = r.entToBiz(s)
 	}
@@ -151,7 +151,7 @@ func (r *uploadRepo) DeleteExpiredSessions(ctx context.Context, now time.Time) (
 	return ids, nil
 }
 
-func (r *uploadRepo) entToBiz(s *entity.UploadSession) *biz.UploadSession {
+func (r *uploadRepo) entToBiz(s *entity.UploadSession) *dto.UploadSession {
 	var categoryID *string
 	if s.CategoryID != nil {
 		idStr := strconv.FormatInt(*s.CategoryID, 10)
@@ -164,7 +164,7 @@ func (r *uploadRepo) entToBiz(s *entity.UploadSession) *biz.UploadSession {
 		userID = &idStr
 	}
 
-	return &biz.UploadSession{
+	return &dto.UploadSession{
 		UploadID:     s.UploadID,
 		Filename:     s.Filename,
 		FileSize:     s.FileSize,

@@ -5,7 +5,7 @@ import (
 
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/encodeprofile"
-	"origadmin/application/origcms/internal/svc-media/biz"
+	"origadmin/application/origcms/internal/svc-media/dto"
 )
 
 type encodeProfileRepo struct {
@@ -13,11 +13,11 @@ type encodeProfileRepo struct {
 }
 
 // NewEncodeProfileRepo creates a new EncodeProfile repository.
-func NewEncodeProfileRepo(db *entity.Client) biz.EncodeProfileRepo {
+func NewEncodeProfileRepo(db *entity.Client) dto.EncodeProfileRepo {
 	return &encodeProfileRepo{db: db}
 }
 
-func (r *encodeProfileRepo) ListActive(ctx context.Context) ([]*biz.EncodeProfile, error) {
+func (r *encodeProfileRepo) ListActive(ctx context.Context) ([]*dto.EncodeProfile, error) {
 	items, err := r.db.EncodeProfile.Query().
 		Where(encodeprofile.IsActiveEQ(true)).
 		All(ctx)
@@ -25,46 +25,46 @@ func (r *encodeProfileRepo) ListActive(ctx context.Context) ([]*biz.EncodeProfil
 		return nil, err
 	}
 
-	result := make([]*biz.EncodeProfile, len(items))
+	result := make([]*dto.EncodeProfile, len(items))
 	for i, item := range items {
-		result[i] = convertEncodeProfileToBiz(item)
+		result[i] = convertEncodeProfileToDTO(item)
 	}
 	return result, nil
 }
 
-func (r *encodeProfileRepo) ListAll(ctx context.Context) ([]*biz.EncodeProfile, error) {
+func (r *encodeProfileRepo) ListAll(ctx context.Context) ([]*dto.EncodeProfile, error) {
 	items, err := r.db.EncodeProfile.Query().All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	result := make([]*biz.EncodeProfile, len(items))
+	result := make([]*dto.EncodeProfile, len(items))
 	for i, item := range items {
-		result[i] = convertEncodeProfileToBiz(item)
+		result[i] = convertEncodeProfileToDTO(item)
 	}
 	return result, nil
 }
 
-func (r *encodeProfileRepo) Get(ctx context.Context, id int) (*biz.EncodeProfile, error) {
+func (r *encodeProfileRepo) Get(ctx context.Context, id int) (*dto.EncodeProfile, error) {
 	item, err := r.db.EncodeProfile.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return convertEncodeProfileToBiz(item), nil
+	return convertEncodeProfileToDTO(item), nil
 }
 
-func (r *encodeProfileRepo) GetByName(ctx context.Context, name string) (*biz.EncodeProfile, error) {
+func (r *encodeProfileRepo) GetByName(ctx context.Context, name string) (*dto.EncodeProfile, error) {
 	item, err := r.db.EncodeProfile.Query().Where(encodeprofile.NameEQ(name)).First(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return convertEncodeProfileToBiz(item), nil
+	return convertEncodeProfileToDTO(item), nil
 }
 
 func (r *encodeProfileRepo) Create(
 	ctx context.Context,
-	profile *biz.EncodeProfile,
-) (*biz.EncodeProfile, error) {
+	profile *dto.EncodeProfile,
+) (*dto.EncodeProfile, error) {
 	builder := r.db.EncodeProfile.Create().
 		SetName(profile.Name).
 		SetDescription(profile.Description).
@@ -85,13 +85,13 @@ func (r *encodeProfileRepo) Create(
 	if err != nil {
 		return nil, err
 	}
-	return convertEncodeProfileToBiz(item), nil
+	return convertEncodeProfileToDTO(item), nil
 }
 
 func (r *encodeProfileRepo) Update(
 	ctx context.Context,
-	profile *biz.EncodeProfile,
-) (*biz.EncodeProfile, error) {
+	profile *dto.EncodeProfile,
+) (*dto.EncodeProfile, error) {
 	item, err := r.db.EncodeProfile.UpdateOneID(profile.Id).
 		SetName(profile.Name).
 		SetDescription(profile.Description).
@@ -107,15 +107,15 @@ func (r *encodeProfileRepo) Update(
 	if err != nil {
 		return nil, err
 	}
-	return convertEncodeProfileToBiz(item), nil
+	return convertEncodeProfileToDTO(item), nil
 }
 
 func (r *encodeProfileRepo) Delete(ctx context.Context, id int) error {
 	return r.db.EncodeProfile.DeleteOneID(id).Exec(ctx)
 }
 
-func convertEncodeProfileToBiz(m *entity.EncodeProfile) *biz.EncodeProfile {
-	return &biz.EncodeProfile{
+func convertEncodeProfileToDTO(m *entity.EncodeProfile) *dto.EncodeProfile {
+	return &dto.EncodeProfile{
 		Id:              m.ID,
 		Name:            m.Name,
 		Description:     m.Description,

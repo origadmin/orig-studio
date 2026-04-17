@@ -18,6 +18,8 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import {
     Dialog,
@@ -335,11 +337,18 @@ const Tags: React.FC = () => {
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="sm">
-                                                        <MoreHorizontal className="h-4 w-4"/>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="h-6 w-6" 
+                                                        title="More Actions"
+                                                    >
+                                                        <MoreHorizontal className="h-3 w-3"/>
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuSeparator/>
                                                     <DropdownMenuItem onClick={() => handleView(tag)}>
                                                         <Eye className="mr-2 h-4 w-4"/>
                                                         {t('admin.view')}
@@ -349,7 +358,7 @@ const Tags: React.FC = () => {
                                                         {t('admin.edit')}
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem 
-                                                        className="text-red-600" 
+                                                        className="text-destructive focus:text-destructive" 
                                                         onClick={() => openDeleteDialog(tag)}
                                                     >
                                                         <Trash2 className="mr-2 h-4 w-4"/>

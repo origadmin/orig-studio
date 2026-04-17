@@ -25,6 +25,8 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import {
     Dialog,
@@ -276,7 +278,7 @@ export default function UsersPage() {
 
             {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card key="total-users" className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
@@ -290,7 +292,7 @@ export default function UsersPage() {
                     </CardContent>
                     <div className="absolute bottom-0 left-0 h-1 bg-blue-500 w-full opacity-10"/>
                 </Card>
-                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card key="active-users" className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
@@ -304,7 +306,7 @@ export default function UsersPage() {
                     </CardContent>
                     <div className="absolute bottom-0 left-0 h-1 bg-green-500 w-full opacity-10"/>
                 </Card>
-                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card key="admins" className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
@@ -318,7 +320,7 @@ export default function UsersPage() {
                     </CardContent>
                     <div className="absolute bottom-0 left-0 h-1 bg-purple-500 w-full opacity-10"/>
                 </Card>
-                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card key="editors" className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
@@ -404,11 +406,18 @@ export default function UsersPage() {
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="sm">
-                                                        <MoreVertical className="w-4 h-4"/>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="h-6 w-6" 
+                                                        title="More Actions"
+                                                    >
+                                                        <MoreVertical className="h-3 w-3"/>
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuSeparator/>
                                                     <DropdownMenuItem onClick={() => handleViewProfile(user)}>
                                                         <Eye className="w-4 h-4 mr-2"/>
                                                         {t('admin.viewProfile') || "View Profile"}
@@ -421,7 +430,10 @@ export default function UsersPage() {
                                                         <Shield className="w-4 h-4 mr-2"/>
                                                         {t('admin.changeRole') || "Change Role"}
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem className="text-red-600" onClick={() => openDeleteDialog(user)}>
+                                                    <DropdownMenuItem 
+                                                        className="text-destructive focus:text-destructive" 
+                                                        onClick={() => openDeleteDialog(user)}
+                                                    >
                                                         <Trash2 className="w-4 h-4 mr-2"/>
                                                         {t('admin.delete') || "Delete"}
                                                     </DropdownMenuItem>
@@ -430,7 +442,7 @@ export default function UsersPage() {
                                         </TableCell>
                                     </TableRow>
                                 )) : (
-                                    <TableRow>
+                                    <TableRow key="empty">
                                         <TableCell colSpan={6} className="text-center py-8">
                                             {t('admin.noUsersFound') || "No users found"}
                                         </TableCell>

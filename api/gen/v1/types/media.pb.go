@@ -104,7 +104,11 @@ type Media struct {
 	// media.field.md5sum
 	Md5Sum string `protobuf:"bytes,39,opt,name=md5sum,proto3" json:"md5sum,omitempty"`
 	// media.field.poster
-	Poster        string `protobuf:"bytes,40,opt,name=poster,proto3" json:"poster,omitempty"`
+	Poster string `protobuf:"bytes,40,opt,name=poster,proto3" json:"poster,omitempty"`
+	// media.field.review_status
+	ReviewStatus string `protobuf:"bytes,41,opt,name=review_status,proto3" json:"review_status,omitempty"`
+	// media.field.listable
+	Listable      bool `protobuf:"varint,42,opt,name=listable,proto3" json:"listable,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -417,6 +421,20 @@ func (x *Media) GetPoster() string {
 		return x.Poster
 	}
 	return ""
+}
+
+func (x *Media) GetReviewStatus() string {
+	if x != nil {
+		return x.ReviewStatus
+	}
+	return ""
+}
+
+func (x *Media) GetListable() bool {
+	if x != nil {
+		return x.Listable
+	}
+	return false
 }
 
 // EncodeProfile is the model entity for EncodeProfile.
@@ -2014,7 +2032,7 @@ var File_v1_types_media_proto protoreflect.FileDescriptor
 
 const file_v1_types_media_proto_rawDesc = "" +
 	"\n" +
-	"\x14v1/types/media.proto\x12\x15api.v1.services.types\x1a\x1fgoogle/protobuf/timestamp.proto\"\x97\n" +
+	"\x14v1/types/media.proto\x12\x15api.v1.services.types\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd9\n" +
 	"\n" +
 	"\x05Media\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
@@ -2061,7 +2079,9 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\x0ereported_times\x18% \x01(\x05R\x0ereported_times\x12\x1c\n" +
 	"\textension\x18& \x01(\tR\textension\x12\x16\n" +
 	"\x06md5sum\x18' \x01(\tR\x06md5sum\x12\x16\n" +
-	"\x06poster\x18( \x01(\tR\x06poster\"\xf5\x01\n" +
+	"\x06poster\x18( \x01(\tR\x06poster\x12$\n" +
+	"\rreview_status\x18) \x01(\tR\rreview_status\x12\x1a\n" +
+	"\blistable\x18* \x01(\bR\blistable\"\xf5\x01\n" +
 	"\rEncodeProfile\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +

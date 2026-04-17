@@ -174,8 +174,8 @@ func NewUploadRepo(db *entity.Client, logger log.Logger) mediabiz.UploadRepo {
 }
 
 // NewStorage creates a new storage.
-func NewStorage(logger log.Logger) mediabiz.Storage {
-	return mediadata.NewLocalStorage("./data/uploads", logger)
+func NewStorage() mediabiz.Storage {
+	return mediadata.NewLocalStorage("./data/uploads")
 }
 
 // NewMediaUseCase creates a new media use case.
@@ -207,6 +207,7 @@ func NewUploadUseCase(
 		taskRepo,
 		mediaUC,
 		storage,
+		5*1024*1024, // 5MB chunk size
 		logger,
 	)
 	return uploadUC
@@ -237,6 +238,7 @@ func NewTranscodeHandler(
 		publisher,
 		logger,
 		"./data/uploads",
+		30*time.Minute, // 30 minute task timeout
 	)
 }
 
@@ -411,8 +413,9 @@ func NewMediaHandler(
 func NewUploadHandler(
 	uploadUC *mediabiz.UploadUseCase,
 	jwt *auth.Manager,
+	logger log.Logger,
 ) *server.UploadHandler {
-	return server.NewUploadHandler(uploadUC, jwt)
+	return server.NewUploadHandler(uploadUC, jwt, logger)
 }
 
 // NewCategoryHandler creates a new category handler.

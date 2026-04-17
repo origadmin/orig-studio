@@ -56,7 +56,7 @@ const HistoryPage = () => {
     // Update hasMore when data changes
     useEffect(() => {
         if (data) {
-            setHasMore(data.list.length === pageSize);
+            setHasMore(data.items.length === pageSize);
         }
     }, [data, pageSize]);
 
@@ -73,7 +73,7 @@ const HistoryPage = () => {
         return () => observer.disconnect();
     }, [loadMore]);
 
-    const items = data?.list || [];
+    const items = data?.items || [];
 
     if (isLoading) {
         return (
@@ -126,7 +126,7 @@ const HistoryPage = () => {
                 {items.map((item) => (
                     <Link
                         key={item.id}
-                        to="/watch" search={{v: String(item.media_id)}}
+                        to="/watch" search={{v: item.friendly_token || String(item.media_id)}}
                         className="group flex items-center gap-4 p-3 bg-white dark:bg-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                     >
                         {/* 缩略图 */}

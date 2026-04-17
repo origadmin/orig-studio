@@ -115,8 +115,10 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 	{
 		s.authHandler.Register(adapter)
 		s.userHandler.Register(adapter)
-		s.mediaHandler.Register(adapter)
-		s.uploadHandler.Register(adapter)
+		// Media handler uses direct gin registration for proper middleware
+		s.mediaHandler.RegisterGin(apiV1)
+		// Upload handler uses direct gin registration for proper middleware
+		s.uploadHandler.RegisterGin(apiV1)
 		s.categoryHandler.Register(adapter)
 		s.tagHandler.Register(adapter)
 		s.feedHandler.Register(adapter)

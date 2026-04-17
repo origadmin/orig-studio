@@ -196,7 +196,7 @@ const SearchPage = () => {
                 <>
                     <div className="space-y-6">
                         {searchResults.map(item => (
-                            <Link key={item.id} to="/watch" search={{v: String(item.id)}}
+                            <Link key={item.id} to="/watch" search={{v: item.friendly_token || String(item.id)}}
                                   className="flex flex-col md:flex-row gap-6 group p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-gray-800 transition-all">
                                 <div
                                     className="relative w-full md:w-72 aspect-video bg-slate-200 rounded-xl overflow-hidden shrink-0 border border-slate-100 dark:border-gray-700 shadow-sm">

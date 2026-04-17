@@ -11,26 +11,19 @@ import (
 	"origadmin/application/origcms/internal/auth"
 )
 
-// GinMiddlewareAdapter adapts a gin.HandlerFunc to http.HandlerFunc
-func GinMiddlewareAdapter(middleware gin.HandlerFunc, next http.HandlerFunc) http.HandlerFunc {
+// GinMiddlewareAdapter adapts a gin.HandlerFunc to http.HandlerFunc with shared context
+// The middleware and handler share the same gin.Context
+func GinMiddlewareAdapter(middleware gin.HandlerFunc, handler gin.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Create a gin context
 		c, _ := gin.CreateTestContext(w)
 		c.Request = r
-		
-		// Call the middleware first
+
 		middleware(c)
-		
-		// If the middleware didn't abort, call the next handler
+
 		if !c.IsAborted() {
-			next(w, r)
+			handler(c)
 		}
 	}
-}
-
-// WithJWT wraps a handler with JWT middleware
-func WithJWT(jwtMgr *auth.Manager, handler http.HandlerFunc) http.HandlerFunc {
-	return GinMiddlewareAdapter(JWTMiddleware(jwtMgr), handler)
 }
 
 // GinHandlerToHTTP converts a gin.HandlerFunc to http.HandlerFunc
@@ -42,26 +35,44 @@ func GinHandlerToHTTP(handler gin.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// WithAdmin wraps a handler with JWT + Admin middleware
-func WithAdmin(jwtMgr *auth.Manager, handler http.HandlerFunc) http.HandlerFunc {
+// WithJWT wraps a handler with JWT middleware
+// Supports both gin.HandlerFunc and http.HandlerFunc
+func WithJWT(jwtMgr *auth.Manager, handler interface{}) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c, _ := gin.CreateTestContext(w)
 		c.Request = r
-		
-		// First run JWT middleware
+
 		JWTMiddleware(jwtMgr)(c)
 		if c.IsAborted() {
 			return
 		}
-		
-		// Then run Admin middleware
+
+		switch h := handler.(type) {
+		case gin.HandlerFunc:
+			h(c)
+		case http.HandlerFunc:
+			h(w, r)
+		}
+	}
+}
+
+// WithAdmin wraps a gin.HandlerFunc with JWT + Admin middleware
+func WithAdmin(jwtMgr *auth.Manager, handler gin.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		c, _ := gin.CreateTestContext(w)
+		c.Request = r
+
+		JWTMiddleware(jwtMgr)(c)
+		if c.IsAborted() {
+			return
+		}
+
 		AdminMiddleware(jwtMgr)(c)
 		if c.IsAborted() {
 			return
 		}
-		
-		// Call the actual handler
-		handler(w, r)
+
+		handler(c)
 	}
 }
 
@@ -98,16 +109,10 @@ func RequiredRole(role string) gin.HandlerFunc {
 // AdminMiddleware requires JWT + admin (or staff) role.
 func AdminMiddleware(jwtMgr *auth.Manager) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// JWTMiddleware should have been run already if using separate groups
-		// but for safety we can check here or assume it's in the chain.
 		claims, ok := c.Get("claims")
 		if !ok {
-			// Try to run it inline if not already run
-			JWTMiddleware(jwtMgr)(c)
-			if c.IsAborted() {
-				return
-			}
-			claims, _ = c.Get("claims")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "no claims in context"})
+			return
 		}
 
 		cl := claims.(*auth.Claims)

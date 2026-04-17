@@ -467,6 +467,7 @@ func convertMediaToProto(m *entity.Media) *types.Media {
 		UserId:         m.UserID,
 		Tags:           m.Tags,
 		CreateTime:     timestamppb.New(m.CreatedAt),
+		FriendlyToken:  m.ShortToken,
 	}
 }
 

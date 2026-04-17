@@ -21,6 +21,7 @@ import (
 	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/helpers/ffmpeg"
 	"origadmin/application/origcms/internal/pubsub"
+	"origadmin/application/origcms/internal/svc-media/dto"
 )
 
 // Upload status constants
@@ -32,52 +33,16 @@ const (
 )
 
 // UploadSession represents an upload session for multipart uploads.
-type UploadSession struct {
-	UploadID     string         `json:"upload_id"`
-	Filename     string         `json:"filename"`
-	FileSize     int64          `json:"file_size"`
-	ContentType  string         `json:"content_type"`
-	TotalParts   int            `json:"total_parts"`
-	ChunkSize    int            `json:"chunk_size"`
-	UploadedSize int64          `json:"uploaded_size"`
-	Title        string         `json:"title"`
-	Description  string         `json:"description"`
-	CategoryID   *string        `json:"category_id"`
-	Tags         []string       `json:"tags"`
-	UserID       *string        `json:"user_id"`
-	Status       enums.UploadStatus `json:"status"`
-	Thumbnail    string         `json:"thumbnail"`
-	Parts        map[int]string `json:"parts"` // part_number -> etag
-	Sha256       string         `json:"sha256"`
-	StoragePath  string         `json:"storage_path"`
-	TempDir      string         `json:"temp_dir"`
-	ExpiresAt    time.Time      `json:"expires_at"`
-	CreatedAt    time.Time      `json:"created_at"`
-	UpdatedAt    time.Time      `json:"updated_at"`
-}
+type UploadSession = dto.UploadSession
 
 // UploadRepo defines the storage operations for upload sessions.
-type UploadRepo interface {
-	CreateSession(ctx context.Context, session *UploadSession) error
-	GetSession(ctx context.Context, uploadID string) (*UploadSession, error)
-	UpdateSession(ctx context.Context, session *UploadSession) error
-	DeleteSession(ctx context.Context, uploadID string) error
-	ListSessions(
-		ctx context.Context,
-		userID string,
-		status enums.UploadStatus,
-		page, pageSize int,
-	) ([]*UploadSession, int, error)
-	// DeleteExpiredSessions finds and deletes sessions that have expired.
-	// Returns the list of upload IDs deleted.
-	DeleteExpiredSessions(ctx context.Context, now time.Time) ([]string, error)
-}
+type UploadRepo = dto.UploadRepo
 
 type UploadUseCase struct {
 	repo         UploadRepo
 	mediaRepo    MediaRepo
-	profileRepo  EncodeProfileRepo
-	encodingRepo EncodingTaskRepo
+	profileRepo  dto.EncodeProfileRepo
+	encodingRepo dto.EncodingTaskRepo
 	mediaUseCase *MediaUseCase
 	storage      Storage
 	publisher    message.Publisher // Watermill publisher for async encoding
@@ -90,10 +55,11 @@ type UploadUseCase struct {
 func NewUploadUseCase(
 	repo UploadRepo,
 	mediaRepo MediaRepo,
-	profileRepo EncodeProfileRepo,
-	encodingRepo EncodingTaskRepo,
+	profileRepo dto.EncodeProfileRepo,
+	encodingRepo dto.EncodingTaskRepo,
 	mediaUseCase *MediaUseCase,
 	storage Storage,
+	chunkSize int,
 	logger log.Logger,
 ) *UploadUseCase {
 	return &UploadUseCase{
@@ -103,7 +69,7 @@ func NewUploadUseCase(
 		encodingRepo: encodingRepo,
 		mediaUseCase: mediaUseCase,
 		storage:      storage,
-		chunkSize:    5 * 1024 * 1024, // 5MB default
+		chunkSize:    chunkSize,
 		log:          log.NewHelper(log.With(logger, "module", "upload.biz")),
 	}
 }
@@ -282,8 +248,8 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 	// Extract duration if it's a video
 	var duration time.Duration
 	if strings.Contains(session.ContentType, "video") {
-		// Base directory for data (should ideally be configurable)
-		baseDir := "./data/uploads"
+		// Use storage base path from config
+		baseDir := "./data/uploads" // TODO: Get from config
 		fullPath := filepath.Join(baseDir, finalPath)
 		if d, err := ffmpeg.GetVideoDuration(ctx, fullPath); err == nil {
 			duration = d

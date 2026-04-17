@@ -9,6 +9,7 @@ import (
 
 	"origadmin/application/origcms/api/gen/v1/media"
 	"origadmin/application/origcms/api/gen/v1/types"
+	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/helpers/repo"
 )
 
@@ -17,6 +18,7 @@ type MediaRepo interface {
 	Get(context.Context, string, ...*MediaQueryOption) (*types.Media, error)
 	List(context.Context, ...*MediaQueryOption) ([]*types.Media, int32, error)
 	Create(context.Context, *types.Media, ...*MediaCreateOption) (*types.Media, error)
+	CreateWithEntity(context.Context, *types.Media) (*entity.Media, *types.Media, error)
 	Update(context.Context, *types.Media, ...*MediaUpdateOption) (*types.Media, error)
 	Delete(context.Context, string) error
 
@@ -26,6 +28,13 @@ type MediaRepo interface {
 
 	// Increment views
 	IncrementViewCount(context.Context, string) (int64, error)
+	UpdateCommentCount(context.Context, string, int) error
+	UpdateLikeCount(context.Context, string, int) error
+	UpdateDislikeCount(context.Context, string, int) error
+	UpdateFavoriteCount(context.Context, string, int) error
+	ResetStaleProcessing(context.Context) (int, error)
+	CountByEncodingStatus(context.Context) (*StatusCounts, error)
+	ListFilteredByEncodingStatus(context.Context, []string, int, int) ([]*types.Media, int, error)
 }
 
 // MediaQueryOption specifies options for querying media.

@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/data/enums"
@@ -22,27 +23,34 @@ import (
 type UploadHandler struct {
 	uc     *biz.UploadUseCase
 	jwtMgr *auth.Manager
+	log    *log.Helper
 }
 
-func NewUploadHandler(uc *biz.UploadUseCase, jwtMgr *auth.Manager) *UploadHandler {
-	return &UploadHandler{uc: uc, jwtMgr: jwtMgr}
+func NewUploadHandler(uc *biz.UploadUseCase, jwtMgr *auth.Manager, logger log.Logger) *UploadHandler {
+	return &UploadHandler{
+		uc:     uc,
+		jwtMgr: jwtMgr,
+		log:    log.NewHelper(log.With(logger, "module", "server/upload")),
+	}
 }
 
 func (h *UploadHandler) Register(r handler.Router) {
-	uploads := r.Group("/uploads")
-	// Note: We can't use Use() directly with the Router interface
-	// We'll need to apply middleware to each route individually
-	{
-		// Multipart upload routes
-		uploads.POST("/multipart", WithJWT(h.jwtMgr, GinHandlerToHTTP(h.initiateMultipartUpload())))
-		uploads.POST("/:uploadId/parts/:partNumber", WithJWT(h.jwtMgr, GinHandlerToHTTP(h.uploadPart())))
-		uploads.POST("/:uploadId/complete", WithJWT(h.jwtMgr, GinHandlerToHTTP(h.completeMultipartUpload())))
-		uploads.POST("/:uploadId/abort", WithJWT(h.jwtMgr, GinHandlerToHTTP(h.abortMultipartUpload())))
-		uploads.GET("/:uploadId/parts", WithJWT(h.jwtMgr, GinHandlerToHTTP(h.listParts())))
+	// Create a direct gin registration since we need proper middleware chain
+	// This is a workaround - the handler.Router interface doesn't support gin.HandlerFunc directly
+}
 
-		// Session management
-		uploads.GET("/sessions", WithJWT(h.jwtMgr, GinHandlerToHTTP(h.listUploadSessions())))
-		uploads.GET("/sessions/:uploadId", WithJWT(h.jwtMgr, GinHandlerToHTTP(h.getUploadSession())))
+// RegisterGin directly registers routes with gin.RouterGroup (to be called from routes.go)
+func (h *UploadHandler) RegisterGin(rg *gin.RouterGroup) {
+	uploads := rg.Group("/uploads")
+	{
+		uploads.POST("/multipart", JWTMiddleware(h.jwtMgr), h.initiateMultipartUpload())
+		uploads.POST("/:uploadId/parts/:partNumber", JWTMiddleware(h.jwtMgr), h.uploadPart())
+		uploads.POST("/:uploadId/complete", JWTMiddleware(h.jwtMgr), h.completeMultipartUpload())
+		uploads.POST("/:uploadId/abort", JWTMiddleware(h.jwtMgr), h.abortMultipartUpload())
+		uploads.GET("/:uploadId/parts", JWTMiddleware(h.jwtMgr), h.listParts())
+
+		uploads.GET("/sessions", JWTMiddleware(h.jwtMgr), h.listUploadSessions())
+		uploads.GET("/sessions/:uploadId", JWTMiddleware(h.jwtMgr), h.getUploadSession())
 	}
 }
 
@@ -51,7 +59,10 @@ func (h *UploadHandler) Register(r handler.Router) {
 // initiateMultipartUpload starts a new multipart upload session.
 func (h *UploadHandler) initiateMultipartUpload() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		h.log.Infof("initiateMultipartUpload called")
+		
 		claims, _ := c.MustGet("claims").(*auth.Claims)
+		h.log.Infof("user_id: %s", claims.UserID)
 
 		var req struct {
 			Filename    string   `json:"filename"`
@@ -64,9 +75,12 @@ func (h *UploadHandler) initiateMultipartUpload() gin.HandlerFunc {
 			Thumbnail   string   `json:"thumbnail"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
+			h.log.Errorf("invalid request: %v", err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request: " + err.Error()})
 			return
 		}
+		
+		h.log.Infof("request: filename=%s, file_size=%d, content_type=%s", req.Filename, req.FileSize, req.ContentType)
 
 		session, err := h.uc.InitiateMultipartUpload(
 			c.Request.Context(),
@@ -81,9 +95,12 @@ func (h *UploadHandler) initiateMultipartUpload() gin.HandlerFunc {
 			&claims.UserID,
 		)
 		if err != nil {
+			h.log.Errorf("InitiateMultipartUpload failed: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		
+		h.log.Infof("session created: upload_id=%s, total_parts=%d", session.UploadID, session.TotalParts)
 
 		c.JSON(http.StatusOK, gin.H{
 			"upload_id":   session.UploadID,
@@ -97,20 +114,32 @@ func (h *UploadHandler) initiateMultipartUpload() gin.HandlerFunc {
 func (h *UploadHandler) uploadPart() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uploadID := c.Param("uploadId")
-		partNumber, _ := strconv.Atoi(c.Param("partNumber"))
-
-		data, err := c.GetRawData()
+		partNumberStr := c.Param("partNumber")
+		h.log.Infof("uploadPart called: upload_id=%s, part_number=%s", uploadID, partNumberStr)
+		
+		partNumber, err := strconv.Atoi(partNumberStr)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to read part data"})
+			h.log.Errorf("invalid part number: %s, error: %v", partNumberStr, err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid part number"})
 			return
 		}
 
+		data, err := c.GetRawData()
+		if err != nil {
+			h.log.Errorf("failed to read part data: %v", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to read part data"})
+			return
+		}
+		h.log.Infof("read part data: size=%d bytes", len(data))
+
 		etag, err := h.uc.UploadPart(c.Request.Context(), uploadID, partNumber, data)
 		if err != nil {
+			h.log.Errorf("UploadPart failed: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
+		h.log.Infof("part uploaded: upload_id=%s, part_number=%d, etag=%s", uploadID, partNumber, etag)
 		c.JSON(http.StatusOK, gin.H{
 			"etag": etag,
 			"size": len(data),
