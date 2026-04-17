@@ -20,6 +20,7 @@ import (
 	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/helpers/ffmpeg"
 	"origadmin/application/origcms/internal/pubsub"
+	"origadmin/application/origcms/internal/svc-media/dto"
 )
 
 // MediaEncodeRequest is the payload for media.encode.request messages.
@@ -44,25 +45,27 @@ type MediaEncodeEvent struct {
 //	thumbnail → parallel profile transcodes (direct HLS or GIF preview) → master playlist → status determination
 type TranscodeHandler struct {
 	mediaUC      *MediaUseCase
-	profileRepo  EncodeProfileRepo
-	encodingRepo EncodingTaskRepo
+	profileRepo  dto.EncodeProfileRepo
+	encodingRepo dto.EncodingTaskRepo
 	mediaRepo    MediaRepo
 	worker       TranscodeWorker
 	publisher    message.Publisher
 	logger       *log.Helper
 	baseDir      string // e.g., "./data/uploads"
+	taskTimeout  time.Duration
 }
 
 // NewTranscodeHandler creates a new TranscodeHandler.
 func NewTranscodeHandler(
 	mediaUC *MediaUseCase,
-	profileRepo EncodeProfileRepo,
-	encodingRepo EncodingTaskRepo,
+	profileRepo dto.EncodeProfileRepo,
+	encodingRepo dto.EncodingTaskRepo,
 	mediaRepo MediaRepo,
 	worker TranscodeWorker,
 	publisher message.Publisher,
 	logger log.Logger,
 	baseDir string,
+	taskTimeout time.Duration,
 ) *TranscodeHandler {
 	return &TranscodeHandler{
 		mediaUC:      mediaUC,
@@ -73,6 +76,7 @@ func NewTranscodeHandler(
 		publisher:    publisher,
 		logger:       log.NewHelper(log.With(logger, "module", "transcode.handler")),
 		baseDir:      baseDir,
+		taskTimeout:  taskTimeout,
 	}
 }
 
@@ -116,7 +120,7 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 	mediaID := req.MediaID
 	fullPath := filepath.Join(h.baseDir, req.MediaPath)
 
-	procCtx, cancel := context.WithTimeout(context.Background(), 4*time.Hour)
+	procCtx, cancel := context.WithTimeout(context.Background(), h.taskTimeout)
 	defer cancel()
 
 	// --- Step 1: Load media ---
@@ -155,23 +159,14 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 	}
 
 	// Separate video, preview, and frames profiles
-	var videoProfiles, previewProfiles, framesProfiles []*EncodeProfile
+	var videoProfiles, previewProfiles, framesProfiles []*dto.EncodeProfile
 	for _, p := range profiles {
 		if IsPreviewProfile(p) {
 			previewProfiles = append(previewProfiles, p)
 		} else if IsFramesProfile(p) {
 			framesProfiles = append(framesProfiles, p)
 		} else if IsVideoProfile(p) {
-			// For short videos, only use short video profiles
-			if media.Type == "short_video" && !strings.Contains(p.Name, "short") {
-				h.logger.Infof("skipping non-short profile for short video: name=%s", p.Name)
-				continue
-			}
-			// For regular videos, skip short video profiles
-			if media.Type != "short_video" && strings.Contains(p.Name, "short") {
-				h.logger.Infof("skipping short profile for regular video: name=%s", p.Name)
-				continue
-			}
+			// Use all active video profiles regardless of video type
 			videoProfiles = append(videoProfiles, p)
 		} else {
 			h.logger.Infof("skipping unknown profile type: name=%s ext=%s", p.Name, p.Extension)
@@ -598,7 +593,7 @@ func (h *TranscodeHandler) publishEvent(ctx context.Context, event *MediaEncodeE
 
 // estimateBandwidth extracts bandwidth from profile's BentoParameters (e.g., "--video-bitrate 400k" → 400000).
 // Falls back to resolution-based estimation if not parseable.
-func estimateBandwidth(p *EncodeProfile) int {
+func estimateBandwidth(p *dto.EncodeProfile) int {
 	// Try parsing from BentoParameters
 	if p.BentoParameters != "" {
 		fields := strings.Fields(p.BentoParameters)

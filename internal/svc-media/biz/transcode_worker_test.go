@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
+
+	"origadmin/application/origcms/internal/svc-media/dto"
 )
 
 func TestCountingSemaphore(t *testing.T) {
@@ -46,8 +48,8 @@ func TestGoroutineWorker_Status(t *testing.T) {
 	// Submit 5 jobs — only 2 should run concurrently
 	for i := 0; i < 5; i++ {
 		worker.Submit(context.Background(), TranscodeJob{
-			MediaID: int64(i),
-			Profile: &EncodeProfile{Name: "test", Extension: "skip", Resolution: "-"},
+			MediaID: string(rune(i)),
+			Profile: &dto.EncodeProfile{Name: "test", Extension: "skip", Resolution: "-"},
 		})
 	}
 
@@ -69,13 +71,13 @@ func TestGoroutineWorker_Status(t *testing.T) {
 
 func TestIsSkipProfile(t *testing.T) {
 	tests := []struct {
-		profile  EncodeProfile
+		profile  dto.EncodeProfile
 		expected bool
 	}{
-		{EncodeProfile{Extension: "mp4", Resolution: "720"}, false},
-		{EncodeProfile{Extension: "mp4", Resolution: "1080"}, false},
-		{EncodeProfile{Extension: "gif", Resolution: "-"}, true},
-		{EncodeProfile{Extension: "gif", Resolution: ""}, true},
+		{dto.EncodeProfile{Extension: "mp4", Resolution: "720"}, false},
+		{dto.EncodeProfile{Extension: "mp4", Resolution: "1080"}, false},
+		{dto.EncodeProfile{Extension: "gif", Resolution: "-"}, true},
+		{dto.EncodeProfile{Extension: "gif", Resolution: ""}, true},
 	}
 
 	for _, tt := range tests {

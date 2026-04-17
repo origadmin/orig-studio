@@ -18,6 +18,8 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import {MoreHorizontal, Search, Edit, Trash2, Eye, PlayCircle, Lock, Globe, User, Filter, RotateCcw} from 'lucide-react';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
@@ -257,7 +259,7 @@ const Playlists: React.FC = () => {
                                     </TableCell>
                                 </TableRow>
                             ) : filteredPlaylists.length === 0 ? (
-                                <TableRow>
+                                <TableRow key="empty">
                                     <TableCell colSpan={8} className="text-center py-8">
                                         No playlists found
                                     </TableCell>
@@ -295,11 +297,18 @@ const Playlists: React.FC = () => {
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="sm">
-                                                        <MoreHorizontal className="h-4 w-4"/>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="h-6 w-6" 
+                                                        title="More Actions"
+                                                    >
+                                                        <MoreHorizontal className="h-3 w-3"/>
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuSeparator/>
                                                     <DropdownMenuItem>
                                                         <Eye className="mr-2 h-4 w-4"/>
                                                         {t('admin.view')}
@@ -308,7 +317,7 @@ const Playlists: React.FC = () => {
                                                         <Edit className="mr-2 h-4 w-4"/>
                                                         {t('admin.edit')}
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem className="text-red-600">
+                                                    <DropdownMenuItem className="text-destructive focus:text-destructive">
                                                         <Trash2 className="mr-2 h-4 w-4"/>
                                                         {t('admin.delete')}
                                                     </DropdownMenuItem>

@@ -18,6 +18,8 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import {MoreHorizontal, Search, Eye, Trash2, MessageCircle, ThumbsUp, Flag, Ban, Loader2, Filter, RotateCcw} from 'lucide-react';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
@@ -324,11 +326,18 @@ const Comments: React.FC = () => {
                                             <TableCell className="text-right">
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="sm">
-                                                            <MoreHorizontal className="h-4 w-4"/>
+                                                        <Button 
+                                                            variant="ghost" 
+                                                            size="icon" 
+                                                            className="h-6 w-6" 
+                                                            title="More Actions"
+                                                        >
+                                                            <MoreHorizontal className="h-3 w-3"/>
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
+                                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                        <DropdownMenuSeparator/>
                                                         <DropdownMenuItem>
                                                             <Eye className="mr-2 h-4 w-4"/>
                                                             {t('admin.view')}
@@ -339,7 +348,7 @@ const Comments: React.FC = () => {
                                                                     <MessageCircle className="mr-2 h-4 w-4"/>
                                                                     {t('admin.approve')}
                                                                 </DropdownMenuItem>
-                                                                <DropdownMenuItem className="text-red-600">
+                                                                <DropdownMenuItem className="text-destructive focus:text-destructive">
                                                                     <Ban className="mr-2 h-4 w-4"/>
                                                                     {t('admin.reject')}
                                                                 </DropdownMenuItem>
@@ -351,7 +360,7 @@ const Comments: React.FC = () => {
                                                                 {t('admin.banUser')}
                                                             </DropdownMenuItem>
                                                         )}
-                                                        <DropdownMenuItem className="text-red-600">
+                                                        <DropdownMenuItem className="text-destructive focus:text-destructive">
                                                             <Trash2 className="mr-2 h-4 w-4"/>
                                                             {t('admin.delete')}
                                                         </DropdownMenuItem>
@@ -361,7 +370,7 @@ const Comments: React.FC = () => {
                                         </TableRow>
                                     ))
                                 ) : (
-                                    <TableRow>
+                                    <TableRow key="empty">
                                         <TableCell colSpan={9} className="text-center py-8">
                                             <p className="text-muted-foreground">{t('admin.noComments') || 'No comments found'}</p>
                                         </TableCell>

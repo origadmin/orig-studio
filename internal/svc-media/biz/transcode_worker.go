@@ -18,6 +18,7 @@ import (
 	"github.com/google/uuid"
 
 	"origadmin/application/origcms/internal/helpers/ffmpeg"
+	"origadmin/application/origcms/internal/svc-media/dto"
 )
 
 // abs returns the absolute value of an integer
@@ -32,11 +33,11 @@ func abs(x int) int {
 type TranscodeJob struct {
 	MediaID      string
 	TaskID       string
-	Profile      *EncodeProfile
+	Profile      *dto.EncodeProfile
 	InputPath    string // source video file path
 	OutputDir    string // final output directory (e.g., hls/{id}/{profile_name}/)
 	UUID         string // media ID for path construction (deprecated, use MediaID instead)
-	EncodingRepo EncodingTaskRepo
+	EncodingRepo dto.EncodingTaskRepo
 	MediaUC      *MediaUseCase
 	Logger       *log.Helper
 }
@@ -195,17 +196,17 @@ func executeTranscodeJob(ctx context.Context, job TranscodeJob, logger *log.Help
 }
 
 // IsVideoProfile returns true if this is a standard video transcoding profile.
-func IsVideoProfile(p *EncodeProfile) bool {
+func IsVideoProfile(p *dto.EncodeProfile) bool {
 	return p.Extension == "mp4" || p.Extension == "webm"
 }
 
 // IsPreviewProfile returns true if this is the GIF preview profile.
-func IsPreviewProfile(p *EncodeProfile) bool {
+func IsPreviewProfile(p *dto.EncodeProfile) bool {
 	return p.Extension == "gif" || strings.EqualFold(p.Name, "preview")
 }
 
 // IsFramesProfile returns true if this is the preview frames profile.
-func IsFramesProfile(p *EncodeProfile) bool {
+func IsFramesProfile(p *dto.EncodeProfile) bool {
 	return p.Extension == "jpg" || strings.EqualFold(p.Name, "frames") || strings.EqualFold(p.Name, "preview-frames")
 }
 

@@ -189,17 +189,14 @@ export interface ShareResponse {
 }
 
 // ==================== Encoding Module ====================
+// NOTE: 后端路径 /api/v1/admin/encoding/* (有 admin 前缀)
 export const encodingApi = {
     // 获取转码事件流（SSE）
     getSSEUrl: (mediaId?: string) => {
-        // 使用相对路径，让前端代理处理
         return `/api/v1/admin/encoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
     },
 
     // 获取所有转码任务（扁平列表）
-    // 当 status=all 时，返回完整统计
-    // 当 status 为其他值时，返回过滤后的统计
-    // 当 only_stats=true 时，只返回统计，不返回任务列表
     getTasks: (params?: {
         status?: string;
         page?: number;
@@ -432,7 +429,7 @@ export interface VariantInfo {
 // 为了保持向后兼容，导出 encodingApi 的方法到 mediaApi
 // 这些将在未来版本中移除
 export const legacyMediaApi = {
-    // 旧版路径 - 将在未来版本中移除
+    // 旧版路径 - 已在 encodingApi 中统一
     listProfiles: () => api.get<{ profiles: EncodeProfile[] }>("/admin/encoding/profiles"),
     getProfile: (id: number) => api.get<{ profile: EncodeProfile }>(`/admin/encoding/profiles/${id}`),
     createProfile: (data: Partial<EncodeProfile>) => api.post<{ profile: EncodeProfile }>("/admin/encoding/profiles", data),
@@ -449,26 +446,16 @@ export const legacyMediaApi = {
     retryTranscode: (mediaId: number) =>
         api.post<{ message: string; media_id: number }>(`/medias/${mediaId}/tasks/:taskId/retry`),
     retryTask: (taskId: string) => {
-        return fetch(`${API_BASE_URL}/api/v1/admin/encoding/tasks/${taskId}/retry`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                ...(getAccessToken() ? {Authorization: `Bearer ${getAccessToken()}`} : {}),
-            },
-        }).then((r) => !r.ok ? r.json().then((e) => Promise.reject(e)) : r.json());
+        return api.post<{ message: string; task: any }>(`/admin/encoding/tasks/${taskId}/retry`);
     },
     retryAllFailed: (mediaId: number) => {
-        return fetch(`${API_BASE_URL}/api/v1/admin/encoding/retry-failed?media_id=${mediaId}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                ...(getAccessToken() ? {Authorization: `Bearer ${getAccessToken()}`} : {}),
-            },
-        }).then((r) => !r.ok ? r.json().then((e) => Promise.reject(e)) : r.json());
+        return api.post<{ message: string; retried_count: number }>('/admin/encoding/retry-failed', null, {
+            params: {media_id: mediaId}
+        });
     },
     getVariants: (mediaId: number) =>
         api.get<MediaVariantSummary>(`/medias/${mediaId}/variants`),
     getSSEUrl: (mediaId?: number) => {
-        return `${API_BASE_URL}/api/v1/admin/encoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
+        return `/api/v1/admin/encoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
     },
 };

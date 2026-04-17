@@ -92,6 +92,10 @@ message Media {
   string md5sum = 39 [json_name = "md5sum"];
   // media.field.poster
   string poster = 40 [json_name = "poster"];
+  // media.field.review_status
+  string review_status = 41 [json_name = "review_status"];
+  // media.field.listable
+  bool listable = 42 [json_name = "listable"];
 }
 
 // EncodeProfile is the model entity for EncodeProfile.

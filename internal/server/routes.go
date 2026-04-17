@@ -3,11 +3,13 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
+
+	"origadmin/application/origcms/internal/handler"
 )
 
 // Module interface for route registration
 type Module interface {
-	Register(group *gin.RouterGroup)
+	Register(r handler.Router)
 }
 
 // RegisterRoutes registers all HTTP routes
@@ -18,10 +20,10 @@ func RegisterRoutes(router *gin.Engine, mods ...Module) {
 	})
 
 	// API v1 routes
-	v1 := router.Group("/api/v1")
-	{
-		for _, mod := range mods {
-			mod.Register(v1)
-		}
+	apiV1 := router.Group("/api/v1")
+	adapter := handler.NewGinRouterAdapter(apiV1)
+
+	for _, mod := range mods {
+		mod.Register(adapter)
 	}
 }

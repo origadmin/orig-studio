@@ -8,7 +8,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/enums"
-	"origadmin/application/origcms/internal/svc-media/biz"
+	"origadmin/application/origcms/internal/svc-media/dto"
 )
 
 type encodingTaskRepo struct {
@@ -16,14 +16,14 @@ type encodingTaskRepo struct {
 }
 
 // NewEncodingTaskRepo creates a new EncodingTask repository.
-func NewEncodingTaskRepo(db *entity.Client) biz.EncodingTaskRepo {
+func NewEncodingTaskRepo(db *entity.Client) dto.EncodingTaskRepo {
 	return &encodingTaskRepo{db: db}
 }
 
 func (r *encodingTaskRepo) Create(
 	ctx context.Context,
-	task *biz.EncodingTask,
-) (*biz.EncodingTask, error) {
+	task *dto.EncodingTask,
+) (*dto.EncodingTask, error) {
 	m, err := r.db.EncodingTask.Create().
 		SetMediaID(task.MediaId).
 		SetProfileID(task.ProfileId).
@@ -35,13 +35,13 @@ func (r *encodingTaskRepo) Create(
 	if err != nil {
 		return nil, err
 	}
-	return convertEncodingTaskToBiz(m), nil
+	return convertEncodingTaskToDto(m), nil
 }
 
 func (r *encodingTaskRepo) Update(
 	ctx context.Context,
-	task *biz.EncodingTask,
-) (*biz.EncodingTask, error) {
+	task *dto.EncodingTask,
+) (*dto.EncodingTask, error) {
 	update := r.db.EncodingTask.UpdateOneID(task.Id).
 		SetStatus(task.Status)
 
@@ -56,21 +56,21 @@ func (r *encodingTaskRepo) Update(
 	if err != nil {
 		return nil, err
 	}
-	return convertEncodingTaskToBiz(m), nil
+	return convertEncodingTaskToDto(m), nil
 }
 
-func (r *encodingTaskRepo) Get(ctx context.Context, id string) (*biz.EncodingTask, error) {
+func (r *encodingTaskRepo) Get(ctx context.Context, id string) (*dto.EncodingTask, error) {
 	m, err := r.db.EncodingTask.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return convertEncodingTaskToBiz(m), nil
+	return convertEncodingTaskToDto(m), nil
 }
 
 func (r *encodingTaskRepo) ListByMedia(
 	ctx context.Context,
 	mediaId string,
-) ([]*biz.EncodingTask, error) {
+) ([]*dto.EncodingTask, error) {
 	query := r.db.EncodingTask.Query()
 	if mediaId != "" {
 		query = query.Where(encodingtask.MediaIDEQ(mediaId))
@@ -80,9 +80,9 @@ func (r *encodingTaskRepo) ListByMedia(
 		return nil, err
 	}
 
-	result := make([]*biz.EncodingTask, len(items))
+	result := make([]*dto.EncodingTask, len(items))
 	for i, item := range items {
-		result[i] = convertEncodingTaskToBiz(item)
+		result[i] = convertEncodingTaskToDto(item)
 	}
 	return result, nil
 }
@@ -105,7 +105,7 @@ func (r *encodingTaskRepo) ListFlat(
 	chunkFilter string,
 	searchQuery string,
 	offset, limit int,
-) ([]*biz.EncodingTask, int, error) {
+) ([]*dto.EncodingTask, int, error) {
 	query := r.db.EncodingTask.Query()
 	if status != "" && status != "all" {
 		// Special handling for active status: exclude success
@@ -159,15 +159,15 @@ func (r *encodingTaskRepo) ListFlat(
 		return nil, 0, err
 	}
 
-	result := make([]*biz.EncodingTask, len(items))
+	result := make([]*dto.EncodingTask, len(items))
 	for i, item := range items {
-		result[i] = convertEncodingTaskToBiz(item)
+		result[i] = convertEncodingTaskToDto(item)
 	}
 	return result, total, nil
 }
 
-func convertEncodingTaskToBiz(m *entity.EncodingTask) *biz.EncodingTask {
-	return &biz.EncodingTask{
+func convertEncodingTaskToDto(m *entity.EncodingTask) *dto.EncodingTask {
+	return &dto.EncodingTask{
 		Id:           m.ID,
 		MediaId:      m.MediaID,
 		ProfileId:    m.ProfileID,
@@ -183,7 +183,7 @@ func convertEncodingTaskToBiz(m *entity.EncodingTask) *biz.EncodingTask {
 // CountByStatus returns per-status counts from the encoding_task table.
 // This is the correct data source for task-level status counts (unlike
 // mediaRepo.CountByEncodingStatus which queries the Media table).
-func (r *encodingTaskRepo) CountByStatus(ctx context.Context) (*biz.StatusCounts, error) {
+func (r *encodingTaskRepo) CountByStatus(ctx context.Context) (*dto.StatusCounts, error) {
 	type countRow struct {
 		Status string `json:"status"`
 		Count  int    `json:"count"`
@@ -198,7 +198,7 @@ func (r *encodingTaskRepo) CountByStatus(ctx context.Context) (*biz.StatusCounts
 		return nil, err
 	}
 
-	counts := &biz.StatusCounts{}
+	counts := &dto.StatusCounts{}
 	for _, row := range rows {
 		switch row.Status {
 		case "processing":
@@ -225,7 +225,7 @@ func (r *encodingTaskRepo) CountByStatusWithFilter(
 	profileID int,
 	chunkFilter string,
 	searchQuery string,
-) (*biz.StatusCounts, error) {
+) (*dto.StatusCounts, error) {
 	// Log the profileFilter to debug
 	if profileFilter != "" {
 		fmt.Printf("CountByStatusWithFilter: profileFilter=%s\n", profileFilter)
@@ -281,7 +281,7 @@ func (r *encodingTaskRepo) CountByStatusWithFilter(
 
 	// 如果没有符合条件的任务，返回空计数
 	if len(taskIDs) == 0 {
-		return &biz.StatusCounts{}, nil
+		return &dto.StatusCounts{}, nil
 	}
 
 	// 构建ID列表
@@ -302,7 +302,7 @@ func (r *encodingTaskRepo) CountByStatusWithFilter(
 		return nil, err
 	}
 
-	counts := &biz.StatusCounts{}
+	counts := &dto.StatusCounts{}
 	for _, row := range rows {
 		switch row.Status {
 		case "processing":

@@ -81,3 +81,5 @@ web/tsc-output.txt
 *.db
 
 
+# Added by code-review-graph
+.code-review-graph/

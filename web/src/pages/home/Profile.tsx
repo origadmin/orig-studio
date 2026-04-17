@@ -153,7 +153,7 @@ const ProfilePage = () => {
                             {videos.length > 0 ? (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                                     {videos.map(video => (
-                                        <Link key={video.id} to="/watch" search={{v: String(video.id)}}
+                                        <Link key={video.id} to="/watch" search={{v: video.friendly_token || String(video.id)}}
                                               className="group">
                                             <div
                                                 className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1">

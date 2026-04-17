@@ -10,13 +10,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/ThreeDotsLabs/watermill"
-	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/google/wire"
-	log2 "github.com/origadmin/runtime/log"
-	"github.com/origadmin/toolkits/crypto/hash"
-	"github.com/origadmin/toolkits/crypto/hash/types"
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/data/entity"
@@ -38,9 +31,14 @@ import (
 	"strconv"
 	"strings"
 	"time"
-)
 
-import (
+	"github.com/ThreeDotsLabs/watermill"
+	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/google/wire"
+	"github.com/origadmin/runtime/log"
+	"github.com/origadmin/toolkits/crypto/hash"
+	"github.com/origadmin/toolkits/crypto/hash/types"
+
 	_ "github.com/lib/pq"
 )
 
@@ -56,7 +54,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	mediaRepo := NewMediaRepo(client)
 	encodeProfileRepo := NewEncodeProfileRepo(client)
 	encodingTaskRepo := NewEncodingTaskRepo(client)
-	storage := NewStorage(logger)
+	storage := NewStorage()
 	publisher := NewPublisher(pubSub)
 	mediaUseCase := NewMediaUseCase(mediaRepo, encodeProfileRepo, encodingTaskRepo, storage, publisher, logger)
 	transcodeWorker := NewWorker(logger)
@@ -81,7 +79,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	favoriteRepo := NewFavoriteRepo(data, logger)
 	likeFavoriteUseCase := NewLikeFavoriteUseCase(likeRepo, favoriteRepo, mediaUseCase, logger)
 	mediaHandler := NewMediaHandler(manager, mediaUseCase, uploadUseCase, likeFavoriteUseCase)
-	uploadHandler := NewUploadHandler(uploadUseCase, manager)
+	uploadHandler := NewUploadHandler(uploadUseCase, manager, logger)
 	categoryRepo := NewCategoryRepo(data, logger)
 	tagRepo := NewTagRepo(data, logger)
 	categoryTagUseCase := NewCategoryTagUseCase(categoryRepo, tagRepo, logger)
@@ -189,7 +187,7 @@ var ProviderSet = wire.NewSet(
 )
 
 // NewDatabase creates a new database client.
-func NewDatabase(cfg *conf.Config, logger log2.Logger) (*entity.Client, error) {
+func NewDatabase(cfg *conf.Config, logger log.Logger) (*entity.Client, error) {
 	dbDialect, dbSource := cfg.GetDefaultDB()
 	db, err := openDB(dbSource, dbDialect, logger)
 	if err != nil {
@@ -226,7 +224,7 @@ func NewJWTManager(cfg *conf.Config) *auth.Manager {
 }
 
 // NewPubSub creates a new pubsub instance.
-func NewPubSub(logger log2.Logger) *pubsub.PubSub {
+func NewPubSub(logger log.Logger) *pubsub.PubSub {
 	wmLogger := watermill.NewStdLogger(true, true)
 	return pubsub.NewGoChannel(64, wmLogger)
 }
@@ -252,13 +250,13 @@ func NewEncodingTaskRepo(db *entity.Client) biz.EncodingTaskRepo {
 }
 
 // NewUploadRepo creates a new upload repo.
-func NewUploadRepo(db *entity.Client, logger log2.Logger) biz.UploadRepo {
+func NewUploadRepo(db *entity.Client, logger log.Logger) biz.UploadRepo {
 	return data.NewUploadRepo(db, logger)
 }
 
 // NewStorage creates a new storage.
-func NewStorage(logger log2.Logger) biz.Storage {
-	return data.NewLocalStorage("./data/uploads", logger)
+func NewStorage() biz.Storage {
+	return data.NewLocalStorage("./data/uploads")
 }
 
 // NewMediaUseCase creates a new media use case.
@@ -268,7 +266,7 @@ func NewMediaUseCase(
 	taskRepo biz.EncodingTaskRepo,
 	storage biz.Storage,
 	publisher message.Publisher,
-	logger log2.Logger,
+	logger log.Logger,
 ) *biz.MediaUseCase {
 	return biz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, storage, publisher, logger)
 }
@@ -281,7 +279,7 @@ func NewUploadUseCase(
 	taskRepo biz.EncodingTaskRepo,
 	mediaUC *biz.MediaUseCase,
 	storage biz.Storage,
-	logger log2.Logger,
+	logger log.Logger,
 ) *biz.UploadUseCase {
 	uploadUC := biz.NewUploadUseCase(
 		uploadRepo,
@@ -290,15 +288,16 @@ func NewUploadUseCase(
 		taskRepo,
 		mediaUC,
 		storage,
+		5*1024*1024, // 5MB chunk size
 		logger,
 	)
 	return uploadUC
 }
 
 // NewWorker creates a new worker.
-func NewWorker(logger log2.Logger) biz.TranscodeWorker {
+func NewWorker(logger log.Logger) biz.TranscodeWorker {
 	maxWorkers := int32(envInt("TRANSCODE_MAX_WORKERS", 3))
-	return biz.NewGoroutineWorker(maxWorkers, log2.NewHelper(log2.With(logger, "module", "transcode.worker")))
+	return biz.NewGoroutineWorker(maxWorkers, log.NewHelper(log.With(logger, "module", "transcode.worker")))
 }
 
 // NewTranscodeHandler creates a new transcode handler.
@@ -309,7 +308,7 @@ func NewTranscodeHandler(
 	mediaRepo biz.MediaRepo,
 	worker biz.TranscodeWorker,
 	publisher message.Publisher,
-	logger log2.Logger,
+	logger log.Logger,
 ) *biz.TranscodeHandler {
 	return biz.NewTranscodeHandler(
 		mediaUC,
@@ -320,6 +319,7 @@ func NewTranscodeHandler(
 		publisher,
 		logger,
 		"./data/uploads",
+		30*time.Minute, // 30 minute task timeout
 	)
 }
 
@@ -327,7 +327,7 @@ func NewTranscodeHandler(
 func NewRouter(
 	transcodeHandler *biz.TranscodeHandler,
 	ps *pubsub.PubSub,
-	logger log2.Logger,
+	logger log.Logger,
 ) (*message.Router, error) {
 	wmLogger := watermill.NewStdLogger(true, true)
 	router, err := message.NewRouter(message.RouterConfig{}, wmLogger)
@@ -351,47 +351,47 @@ func NewContentDB(db *entity.Client) *data2.Data {
 }
 
 // NewCategoryRepo creates a new category repo.
-func NewCategoryRepo(contentDB *data2.Data, logger log2.Logger) biz2.CategoryRepo {
+func NewCategoryRepo(contentDB *data2.Data, logger log.Logger) biz2.CategoryRepo {
 	return data2.NewCategoryRepo(contentDB, logger)
 }
 
 // NewTagRepo creates a new tag repo.
-func NewTagRepo(contentDB *data2.Data, logger log2.Logger) biz2.TagRepo {
+func NewTagRepo(contentDB *data2.Data, logger log.Logger) biz2.TagRepo {
 	return data2.NewTagRepo(contentDB, logger)
 }
 
 // NewCommentRepo creates a new comment repo.
-func NewCommentRepo(contentDB *data2.Data, logger log2.Logger) biz2.CommentRepo {
+func NewCommentRepo(contentDB *data2.Data, logger log.Logger) biz2.CommentRepo {
 	return data2.NewCommentRepo(contentDB, logger)
 }
 
 // NewPlaylistRepo creates a new playlist repo.
-func NewPlaylistRepo(contentDB *data2.Data, logger log2.Logger) biz2.PlaylistRepo {
+func NewPlaylistRepo(contentDB *data2.Data, logger log.Logger) biz2.PlaylistRepo {
 	return data2.NewPlaylistRepo(contentDB, logger)
 }
 
 // NewChannelRepo creates a new channel repo.
-func NewChannelRepo(contentDB *data2.Data, logger log2.Logger) biz2.ChannelRepo {
+func NewChannelRepo(contentDB *data2.Data, logger log.Logger) biz2.ChannelRepo {
 	return data2.NewChannelRepo(contentDB, logger)
 }
 
 // NewFeedRepo creates a new feed repo.
-func NewFeedRepo(contentDB *data2.Data, logger log2.Logger) biz2.FeedRepo {
+func NewFeedRepo(contentDB *data2.Data, logger log.Logger) biz2.FeedRepo {
 	return data2.NewFeedRepo(contentDB, logger)
 }
 
 // NewLikeRepo creates a new like repo.
-func NewLikeRepo(contentDB *data2.Data, logger log2.Logger) biz2.LikeRepo {
+func NewLikeRepo(contentDB *data2.Data, logger log.Logger) biz2.LikeRepo {
 	return data2.NewLikeRepo(contentDB, logger)
 }
 
 // NewFavoriteRepo creates a new favorite repo.
-func NewFavoriteRepo(contentDB *data2.Data, logger log2.Logger) biz2.FavoriteRepo {
+func NewFavoriteRepo(contentDB *data2.Data, logger log.Logger) biz2.FavoriteRepo {
 	return data2.NewFavoriteRepo(contentDB, logger)
 }
 
 // NewNotificationRepo creates a new notification repo.
-func NewNotificationRepo(contentDB *data2.Data, logger log2.Logger) biz2.NotificationRepo {
+func NewNotificationRepo(contentDB *data2.Data, logger log.Logger) biz2.NotificationRepo {
 	return data2.NewNotificationRepo(contentDB, logger)
 }
 
@@ -399,7 +399,7 @@ func NewNotificationRepo(contentDB *data2.Data, logger log2.Logger) biz2.Notific
 func NewCategoryTagUseCase(
 	categoryRepo biz2.CategoryRepo,
 	tagRepo biz2.TagRepo,
-	logger log2.Logger,
+	logger log.Logger,
 ) *biz2.CategoryTagUseCase {
 	return biz2.NewCategoryTagUseCase(categoryRepo, tagRepo, logger)
 }
@@ -408,7 +408,7 @@ func NewCategoryTagUseCase(
 func NewCommentUseCase(
 	commentRepo biz2.CommentRepo,
 	mediaUC *biz.MediaUseCase,
-	logger log2.Logger,
+	logger log.Logger,
 ) *biz2.CommentUseCase {
 	return biz2.NewCommentUseCase(commentRepo, mediaUC, logger)
 }
@@ -417,7 +417,7 @@ func NewCommentUseCase(
 func NewPlaylistChannelUseCase(
 	playlistRepo biz2.PlaylistRepo,
 	channelRepo biz2.ChannelRepo,
-	logger log2.Logger,
+	logger log.Logger,
 ) *biz2.PlaylistChannelUseCase {
 	return biz2.NewPlaylistChannelUseCase(playlistRepo, channelRepo, logger)
 }
@@ -425,7 +425,7 @@ func NewPlaylistChannelUseCase(
 // NewFeedUseCase creates a new feed use case.
 func NewFeedUseCase(
 	feedRepo biz2.FeedRepo,
-	logger log2.Logger,
+	logger log.Logger,
 ) *biz2.FeedUseCase {
 	return biz2.NewFeedUseCase(feedRepo, logger)
 }
@@ -435,7 +435,7 @@ func NewLikeFavoriteUseCase(
 	likeRepo biz2.LikeRepo,
 	favoriteRepo biz2.FavoriteRepo,
 	mediaUC *biz.MediaUseCase,
-	logger log2.Logger,
+	logger log.Logger,
 ) *biz2.LikeFavoriteUseCase {
 	return biz2.NewLikeFavoriteUseCase(likeRepo, favoriteRepo, mediaUC, logger)
 }
@@ -443,7 +443,7 @@ func NewLikeFavoriteUseCase(
 // NewNotificationUseCase creates a new notification use case.
 func NewNotificationUseCase(
 	notificationRepo biz2.NotificationRepo,
-	logger log2.Logger,
+	logger log.Logger,
 ) *biz2.NotificationUseCase {
 	return biz2.NewNotificationUseCase(notificationRepo, logger)
 }
@@ -457,7 +457,7 @@ func NewUserRepo(db *entity.Client) dto.UserRepo {
 func NewUserUseCase(
 	userRepo dto.UserRepo,
 	hasher hash.Crypto,
-	logger log2.Logger,
+	logger log.Logger,
 ) *biz3.UserUseCase {
 	return biz3.NewUserUseCase(userRepo, hasher, logger)
 }
@@ -492,8 +492,9 @@ func NewMediaHandler(
 func NewUploadHandler(
 	uploadUC *biz.UploadUseCase,
 	jwt *auth.Manager,
+	logger log.Logger,
 ) *server.UploadHandler {
-	return server.NewUploadHandler(uploadUC, jwt)
+	return server.NewUploadHandler(uploadUC, jwt, logger)
 }
 
 // NewCategoryHandler creates a new category handler.
@@ -635,7 +636,7 @@ func (d *AppDependencies) Cleanup() {
 	}
 }
 
-func openDB(dsn, dbType string, logger log2.Logger) (*entity.Client, error) {
+func openDB(dsn, dbType string, logger log.Logger) (*entity.Client, error) {
 	driverName := "sqlite3"
 	if dbType == "postgres" {
 		driverName = "postgres"
@@ -661,7 +662,7 @@ func openDB(dsn, dbType string, logger log2.Logger) (*entity.Client, error) {
 	return entity.Open(driverName, dsn)
 }
 
-func ensurePostgresDB(dsn string, logger log2.Logger) error {
+func ensurePostgresDB(dsn string, logger log.Logger) error {
 
 	_, dbName := parsePostgresDSN(dsn)
 	if dbName == "" {
@@ -697,7 +698,7 @@ func ensurePostgresDB(dsn string, logger log2.Logger) error {
 		if err != nil {
 			return fmt.Errorf("create database %s: %w", dbName, err)
 		}
-		log2.Infof("Created database: %s", dbName)
+		log.Infof("Created database: %s", dbName)
 	}
 	return nil
 }

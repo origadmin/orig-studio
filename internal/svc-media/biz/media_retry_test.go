@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"origadmin/application/origcms/api/gen/v1/types"
+	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/svc-media/dto"
 )
@@ -17,63 +19,68 @@ type mockMediaRepo struct {
 	mock.Mock
 }
 
-func (m *mockMediaRepo) Create(
-	ctx context.Context,
-	media *Media,
-) (*Media, error) {
-	return nil, nil
-}
-func (m *mockMediaRepo) Get(ctx context.Context, id int64) (*Media, error) {
-	args := m.Called(ctx, id)
-	return args.Get(0).(*Media), args.Error(1)
+func (m *mockMediaRepo) Get(ctx context.Context, id string, opts ...*dto.MediaQueryOption) (*types.Media, error) {
+	args := m.Called(ctx, id, opts)
+	return args.Get(0).(*types.Media), args.Error(1)
 }
 
-func (m *mockMediaRepo) List(
-	ctx context.Context,
-	opts ...*dto.MediaQueryOption,
-) ([]*Media, int32, error) {
+func (m *mockMediaRepo) List(ctx context.Context, opts ...*dto.MediaQueryOption) ([]*types.Media, int32, error) {
 	return nil, 0, nil
 }
 
-func (m *mockMediaRepo) Update(
-	ctx context.Context,
-	media *Media,
-) (*Media, error) {
+func (m *mockMediaRepo) Create(ctx context.Context, media *types.Media, opts ...*dto.MediaCreateOption) (*types.Media, error) {
 	return nil, nil
 }
-func (m *mockMediaRepo) Delete(ctx context.Context, id int64) error { return nil }
-func (m *mockMediaRepo) IncrementViewCount(ctx context.Context, id int64) (int64, error) {
+
+func (m *mockMediaRepo) CreateWithEntity(ctx context.Context, media *types.Media) (*entity.Media, *types.Media, error) {
+	return nil, nil, nil
+}
+
+func (m *mockMediaRepo) Update(ctx context.Context, media *types.Media, opts ...*dto.MediaUpdateOption) (*types.Media, error) {
+	return nil, nil
+}
+
+func (m *mockMediaRepo) Delete(ctx context.Context, id string) error {
+	return nil
+}
+
+func (m *mockMediaRepo) ListCategories(ctx context.Context, opts ...*dto.CategoryQueryOption) ([]*types.Category, int32, error) {
+	return nil, 0, nil
+}
+
+func (m *mockMediaRepo) GetCategory(ctx context.Context, id string) (*types.Category, error) {
+	return nil, nil
+}
+
+func (m *mockMediaRepo) IncrementViewCount(ctx context.Context, id string) (int64, error) {
 	return 0, nil
 }
 
-func (m *mockMediaRepo) UpdateCommentCount(ctx context.Context, id int64, delta int) error {
+func (m *mockMediaRepo) UpdateCommentCount(ctx context.Context, id string, delta int) error {
 	return nil
 }
 
-func (m *mockMediaRepo) UpdateLikeCount(
-	ctx context.Context,
-	id int64,
-	delta int,
-) error {
-	return nil
-}
-func (m *mockMediaRepo) UpdateDislikeCount(ctx context.Context, id int64, delta int) error {
+func (m *mockMediaRepo) UpdateLikeCount(ctx context.Context, id string, delta int) error {
 	return nil
 }
 
-func (m *mockMediaRepo) UpdateFavoriteCount(ctx context.Context, id int64, delta int) error {
+func (m *mockMediaRepo) UpdateDislikeCount(ctx context.Context, id string, delta int) error {
 	return nil
 }
-func (m *mockMediaRepo) ResetStaleProcessing(ctx context.Context) (int, error) { return 0, nil }
-func (m *mockMediaRepo) CountByEncodingStatus(ctx context.Context) (*StatusCounts, error) {
+
+func (m *mockMediaRepo) UpdateFavoriteCount(ctx context.Context, id string, delta int) error {
+	return nil
+}
+
+func (m *mockMediaRepo) ResetStaleProcessing(ctx context.Context) (int, error) {
+	return 0, nil
+}
+
+func (m *mockMediaRepo) CountByEncodingStatus(ctx context.Context) (*dto.StatusCounts, error) {
 	return nil, nil
 }
 
-func (m *mockMediaRepo) ListFilteredByEncodingStatus(
-	ctx context.Context,
-	statuses []string,
-	page, pageSize int,
-) ([]*Media, int, error) {
+func (m *mockMediaRepo) ListFilteredByEncodingStatus(ctx context.Context, statuses []string, page, pageSize int) ([]*types.Media, int, error) {
 	return nil, 0, nil
 }
 
@@ -82,57 +89,37 @@ type mockEncodingTaskRepo struct {
 	mock.Mock
 }
 
-func (m *mockEncodingTaskRepo) Create(
-	ctx context.Context,
-	task *EncodingTask,
-) (*EncodingTask, error) {
+func (m *mockEncodingTaskRepo) Create(ctx context.Context, task *dto.EncodingTask) (*dto.EncodingTask, error) {
 	return nil, nil
 }
 
-func (m *mockEncodingTaskRepo) Update(
-	ctx context.Context,
-	task *EncodingTask,
-) (*EncodingTask, error) {
+func (m *mockEncodingTaskRepo) Update(ctx context.Context, task *dto.EncodingTask) (*dto.EncodingTask, error) {
 	args := m.Called(ctx, task)
-	return args.Get(0).(*EncodingTask), args.Error(1)
+	return args.Get(0).(*dto.EncodingTask), args.Error(1)
 }
 
-func (m *mockEncodingTaskRepo) Get(ctx context.Context, id int) (*EncodingTask, error) {
+func (m *mockEncodingTaskRepo) Get(ctx context.Context, id string) (*dto.EncodingTask, error) {
 	args := m.Called(ctx, id)
-	return args.Get(0).(*EncodingTask), args.Error(1)
+	return args.Get(0).(*dto.EncodingTask), args.Error(1)
 }
 
-func (m *mockEncodingTaskRepo) ListByMedia(
-	ctx context.Context,
-	mediaId int64,
-) ([]*EncodingTask, error) {
+func (m *mockEncodingTaskRepo) ListByMedia(ctx context.Context, mediaId string) ([]*dto.EncodingTask, error) {
 	return nil, nil
 }
 
-func (m *mockEncodingTaskRepo) DeleteByMedia(
-	ctx context.Context,
-	mediaID int64,
-) error {
+func (m *mockEncodingTaskRepo) DeleteByMedia(ctx context.Context, mediaID string) error {
 	return nil
 }
 
-func (m *mockEncodingTaskRepo) ListFlat(
-	ctx context.Context,
-	status string,
-	mediaId *int64,
-	profileFilter string,
-	chunkFilter string,
-	searchQuery string,
-	offset, limit int,
-) ([]*EncodingTask, int, error) {
+func (m *mockEncodingTaskRepo) ListFlat(ctx context.Context, status string, mediaId *string, profileFilter string, profileID int, chunkFilter string, searchQuery string, offset, limit int) ([]*dto.EncodingTask, int, error) {
 	return nil, 0, nil
 }
 
-func (m *mockEncodingTaskRepo) CountByStatus(ctx context.Context) (*StatusCounts, error) {
+func (m *mockEncodingTaskRepo) CountByStatus(ctx context.Context) (*dto.StatusCounts, error) {
 	return nil, nil
 }
 
-func (m *mockEncodingTaskRepo) CountByStatusWithFilter(ctx context.Context, status string, mediaId *int64, profileFilter string, chunkFilter string, searchQuery string) (*StatusCounts, error) {
+func (m *mockEncodingTaskRepo) CountByStatusWithFilter(ctx context.Context, status string, mediaId *string, profileFilter string, profileID int, chunkFilter string, searchQuery string) (*dto.StatusCounts, error) {
 	return nil, nil
 }
 
@@ -147,18 +134,17 @@ func TestMediaUseCase_RetryTask_StatusUpdate(t *testing.T) {
 		log:          log.NewHelper(log.DefaultLogger),
 	}
 
-	taskID := 123
-	mediaID := int64(456)
+	taskID := "123"
+	mediaID := "456"
 
-	originalTask := &EncodingTask{
+	originalTask := &dto.EncodingTask{
 		Id:           taskID,
 		MediaId:      mediaID,
-		Status:       "failed",
-		Progress:     45,
+		Status:       enums.EncodingTaskStatusFailed,
 		ErrorMessage: "something went wrong",
 	}
 
-	media := &Media{
+	media := &types.Media{
 		Id:       mediaID,
 		Url:      "uploads/test.mp4",
 		MimeType: "video/mp4",
@@ -168,11 +154,11 @@ func TestMediaUseCase_RetryTask_StatusUpdate(t *testing.T) {
 	taskRepo.On("Get", ctx, taskID).Return(originalTask, nil)
 
 	// Check that Update is called with status="pending" and progress=0
-	taskRepo.On("Update", ctx, mock.MatchedBy(func(t *EncodingTask) bool {
-		return t.Id == taskID && t.Status == "pending" && t.Progress == 0 && t.ErrorMessage == ""
+	taskRepo.On("Update", ctx, mock.MatchedBy(func(t *dto.EncodingTask) bool {
+		return t.Id == taskID && t.Status == enums.EncodingTaskStatusPending && t.ErrorMessage == ""
 	})).Return(originalTask, nil)
 
-	mediaRepo.On("Get", ctx, mediaID).Return(media, nil)
+	mediaRepo.On("Get", ctx, mediaID, mock.Anything).Return(media, nil)
 
 	// 2. Execute
 	updatedTask, err := uc.RetryTask(ctx, taskID)
@@ -181,7 +167,6 @@ func TestMediaUseCase_RetryTask_StatusUpdate(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, updatedTask)
 	assert.Equal(t, enums.EncodingTaskStatusPending, originalTask.Status)
-	assert.Equal(t, 0, originalTask.Progress)
 	assert.Equal(t, "", originalTask.ErrorMessage)
 
 	taskRepo.AssertExpectations(t)

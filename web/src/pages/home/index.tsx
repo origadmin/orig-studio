@@ -34,14 +34,14 @@ const HomePage = () => {
         page_size: 6,
         featured: true,
     });
-    const featuredVideos = featuredData?.list || [];
+    const featuredVideos = featuredData?.items || [];
 
     // Recommended videos
     const {data: recommendedData} = useMediaList({
         page: 1,
         page_size: 8,
     });
-    const recommendedVideos = recommendedData?.list || [];
+    const recommendedVideos = recommendedData?.items || [];
 
     // Infinite scroll video list
     const {
@@ -53,7 +53,14 @@ const HomePage = () => {
         page_size: 12,
     });
 
-    const items = data?.pages.flatMap(page => page.list).filter(Boolean) || [];
+    let items = [];
+    if (data && data.pages) {
+        for (const page of data.pages) {
+            if (page && page.items) {
+                items = items.concat(page.items);
+            }
+        }
+    }
 
     // Infinite scroll
     const sentinelRef = useRef<HTMLDivElement>(null);
@@ -125,7 +132,7 @@ const HomePage = () => {
                         const thumbUrl = getImageUrl(media?.thumbnail, 'thumbnail');
 
                         return (
-                            <Link key={media?.id} to="/watch" search={{v: String(media?.id)}}
+                            <Link key={media?.id} to="/watch" search={{v: media?.friendly_token || String(media?.id)}}
                                   className="group w-64 flex-shrink-0">
                                 <div
                                     className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
@@ -189,7 +196,7 @@ const HomePage = () => {
                         const thumbUrl = getImageUrl(media?.thumbnail, 'thumbnail');
 
                         return (
-                            <Link key={media?.id} to="/watch" search={{v: String(media?.id)}}
+                            <Link key={media?.id} to="/watch" search={{v: media?.friendly_token || String(media?.id)}}
                                   className="group w-64 flex-shrink-0">
                                 <div
                                     className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
@@ -262,7 +269,7 @@ const HomePage = () => {
                             const thumbUrl = getImageUrl(media?.thumbnail, 'thumbnail');
 
                             return (
-                                <Link key={media?.id} to="/watch" search={{v: String(media?.id)}} className="group">
+                                <Link key={media?.id} to="/watch" search={{v: media?.friendly_token || String(media?.id)}} className="group">
                                     <div
                                         className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
                                         <div className="relative aspect-video overflow-hidden">

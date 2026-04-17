@@ -17,6 +17,7 @@ import (
 	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/svc-admin/service"
 	"origadmin/application/origcms/internal/svc-media/biz"
+	"origadmin/application/origcms/internal/svc-media/dto"
 )
 
 // AdminHandler handles admin-related routes.
@@ -40,10 +41,10 @@ func (h *AdminHandler) Register(r handler.Router) {
 		// ================================
 		stats := admin.Group("/stats")
 		{
-			stats.GET("/dashboard", WithAdmin(h.jwt, GinHandlerToHTTP(h.getDashboardStats())))
-			stats.GET("/medias", WithAdmin(h.jwt, GinHandlerToHTTP(h.getMediaStats())))
-			stats.GET("/users", WithAdmin(h.jwt, GinHandlerToHTTP(h.getUserStats())))
-			stats.GET("/traffic", WithAdmin(h.jwt, GinHandlerToHTTP(h.getTrafficStats())))
+			stats.GET("/dashboard", WithAdmin(h.jwt, h.getDashboardStats()))
+			stats.GET("/medias", WithAdmin(h.jwt, h.getMediaStats()))
+			stats.GET("/users", WithAdmin(h.jwt, h.getUserStats()))
+			stats.GET("/traffic", WithAdmin(h.jwt, h.getTrafficStats()))
 		}
 
 		// ================================
@@ -51,20 +52,18 @@ func (h *AdminHandler) Register(r handler.Router) {
 		// ================================
 		encoding := admin.Group("/encoding")
 		{
-			// Tasks
-			encoding.GET("/tasks", WithAdmin(h.jwt, GinHandlerToHTTP(h.getAllEncodingTasks())))
-			encoding.GET("/status", WithAdmin(h.jwt, GinHandlerToHTTP(h.getEncodingStatus())))
-			encoding.POST("/tasks/:taskId/retry", WithAdmin(h.jwt, GinHandlerToHTTP(h.retryTask())))
-			encoding.POST("/retry-failed", WithAdmin(h.jwt, GinHandlerToHTTP(h.retryAllFailedTasks())))
+			encoding.GET("/tasks", WithAdmin(h.jwt, h.getAllEncodingTasks()))
+			encoding.GET("/status", WithAdmin(h.jwt, h.getEncodingStatus()))
+			encoding.POST("/tasks/:taskId/retry", WithAdmin(h.jwt, h.retryTask()))
+			encoding.POST("/retry-failed", WithAdmin(h.jwt, h.retryAllFailedTasks()))
 
-			// Profiles
 			profiles := encoding.Group("/profiles")
 			{
-				profiles.GET("", WithAdmin(h.jwt, GinHandlerToHTTP(h.listEncodeProfiles())))
-				profiles.POST("", WithAdmin(h.jwt, GinHandlerToHTTP(h.createEncodeProfile())))
-				profiles.GET("/:id", WithAdmin(h.jwt, GinHandlerToHTTP(h.getEncodeProfile())))
-				profiles.PUT("/:id", WithAdmin(h.jwt, GinHandlerToHTTP(h.updateEncodeProfile())))
-				profiles.DELETE("/:id", WithAdmin(h.jwt, GinHandlerToHTTP(h.deleteEncodeProfile())))
+				profiles.GET("", WithAdmin(h.jwt, h.listEncodeProfiles()))
+				profiles.POST("", WithAdmin(h.jwt, h.createEncodeProfile()))
+				profiles.GET("/:id", WithAdmin(h.jwt, h.getEncodeProfile()))
+				profiles.PUT("/:id", WithAdmin(h.jwt, h.updateEncodeProfile()))
+				profiles.DELETE("/:id", WithAdmin(h.jwt, h.deleteEncodeProfile()))
 			}
 		}
 
@@ -73,8 +72,8 @@ func (h *AdminHandler) Register(r handler.Router) {
 		// ================================
 		settings := admin.Group("/settings")
 		{
-			settings.GET("", WithAdmin(h.jwt, GinHandlerToHTTP(h.getSystemSettings())))
-			settings.PUT("", WithAdmin(h.jwt, GinHandlerToHTTP(h.updateSystemSettings())))
+			settings.GET("", WithAdmin(h.jwt, h.getSystemSettings()))
+			settings.PUT("", WithAdmin(h.jwt, h.updateSystemSettings()))
 		}
 
 		// ================================
@@ -82,14 +81,14 @@ func (h *AdminHandler) Register(r handler.Router) {
 		// ================================
 		tags := admin.Group("/tags")
 		{
-			tags.GET("", WithAdmin(h.jwt, GinHandlerToHTTP(h.listTags())))
-			tags.GET("/:id", WithAdmin(h.jwt, GinHandlerToHTTP(h.getTag())))
-			tags.POST("", WithAdmin(h.jwt, GinHandlerToHTTP(h.createTag())))
-			tags.PUT("/:id", WithAdmin(h.jwt, GinHandlerToHTTP(h.updateTag())))
-			tags.DELETE("/:id", WithAdmin(h.jwt, GinHandlerToHTTP(h.deleteTag())))
-			tags.POST("/bulk", WithAdmin(h.jwt, GinHandlerToHTTP(h.bulkTagOperation())))
-			tags.GET("/export", WithAdmin(h.jwt, GinHandlerToHTTP(h.exportTags())))
-			tags.POST("/import", WithAdmin(h.jwt, GinHandlerToHTTP(h.importTags())))
+			tags.GET("", WithAdmin(h.jwt, h.listTags()))
+			tags.GET("/:id", WithAdmin(h.jwt, h.getTag()))
+			tags.POST("", WithAdmin(h.jwt, h.createTag()))
+			tags.PUT("/:id", WithAdmin(h.jwt, h.updateTag()))
+			tags.DELETE("/:id", WithAdmin(h.jwt, h.deleteTag()))
+			tags.POST("/bulk", WithAdmin(h.jwt, h.bulkTagOperation()))
+			tags.GET("/export", WithAdmin(h.jwt, h.exportTags()))
+			tags.POST("/import", WithAdmin(h.jwt, h.importTags()))
 		}
 	}
 }
@@ -259,7 +258,7 @@ func (h *AdminHandler) listEncodeProfiles() gin.HandlerFunc {
 
 func (h *AdminHandler) createEncodeProfile() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var profile biz.EncodeProfile
+		var profile dto.EncodeProfile
 		if err := c.ShouldBindJSON(&profile); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -296,7 +295,7 @@ func (h *AdminHandler) updateEncodeProfile() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Profile ID"})
 			return
 		}
-		var profile biz.EncodeProfile
+		var profile dto.EncodeProfile
 		if err := c.ShouldBindJSON(&profile); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return

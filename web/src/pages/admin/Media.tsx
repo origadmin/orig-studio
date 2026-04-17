@@ -37,6 +37,8 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import {
     Dialog,
@@ -513,11 +515,18 @@ export default function MediaPage() {
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="sm">
-                                                        <MoreVertical className="w-4 h-4"/>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="h-6 w-6" 
+                                                        title="More Actions"
+                                                    >
+                                                        <MoreVertical className="h-3 w-3"/>
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuSeparator/>
                                                     <DropdownMenuItem
                                                         onClick={() => window.open(`/watch?v=${media.friendly_token || media.id}`, '_blank')}>
                                                         <Eye className="w-4 h-4 mr-2"/>
@@ -527,7 +536,8 @@ export default function MediaPage() {
                                                         <Edit className="w-4 h-4 mr-2"/>
                                                         编辑
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem className="text-red-600"
+                                                    <DropdownMenuItem 
+                                                        className="text-destructive focus:text-destructive"
                                                                       onClick={() => handleDeleteClick(media)}>
                                                         <Trash2 className="w-4 h-4 mr-2"/>
                                                         删除
@@ -537,7 +547,7 @@ export default function MediaPage() {
                                         </TableCell>
                                     </TableRow>
                                 )) : (
-                                    <TableRow>
+                                    <TableRow key="empty">
                                         <TableCell colSpan={10} className="h-24 text-center text-slate-400">
                                             没有找到匹配的媒体数据
                                         </TableCell>

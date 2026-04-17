@@ -1,63 +1,71 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
 package integration
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"fmt"
-	"io"
-	"mime/multipart"
-	"net/http"
 	"net/http/httptest"
-	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/origadmin/toolkits/crypto/hash"
-	hashtypes "github.com/origadmin/toolkits/crypto/hash/types"
+	"github.com/stretchr/testify/require"
 
-	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/auth/hash"
+	hashtypes "origadmin/application/origcms/internal/auth/hash/types"
+	contentbiz "origadmin/application/origcms/internal/content/biz"
+	contentdata "origadmin/application/origcms/internal/content/data"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/migrate"
+	"origadmin/application/origcms/internal/data/system"
 	"origadmin/application/origcms/internal/server"
-	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
-	contentdata "origadmin/application/origcms/internal/svc-content/data"
 	mediabiz "origadmin/application/origcms/internal/svc-media/biz"
 	mediadata "origadmin/application/origcms/internal/svc-media/data"
 	"origadmin/application/origcms/internal/svc-user/biz"
 	"origadmin/application/origcms/internal/svc-user/data"
-	systemdata "origadmin/application/origcms/internal/svc-system/data"
 )
 
 const (
-	TestJWTSecret = "test-secret-for-integration-tests-only"
-	TestJWTExpiry = 24 * time.Hour
+	TestJWTSecret          = "test-secret-key-for-testing-only"
+	TestJWTExpiry          = 24 * time.Hour
+	TestRefreshTokenExpiry = 7 * 24 * time.Hour
 )
 
-// TestRole represents user roles for testing
 type TestRole string
 
 const (
-	RoleGuest TestRole = "guest"
-	RoleUser  TestRole = "user"
-	RoleStaff TestRole = "staff"
 	RoleAdmin TestRole = "admin"
+	RoleUser  TestRole = "user"
+	RoleGuest TestRole = "guest"
 )
 
-// TestUser represents a test user
 type TestUser struct {
-	ID       string
-	Username string
-	Password string
-	Role     TestRole
-	IsStaff  bool
-	Token    string
+	ID        string
+	Email     string
+	Username  string
+	Password  string
+	Role      string
+	Token     string
+	ExpiresAt time.Time
+}
+
+// mockPublisher implements pubsub.Publisher interface for testing
+type mockPublisher struct {
+	messages []*mockMessage
+}
+
+type mockMessage struct {
+	topic string
+	data  []byte
+}
+
+func (m *mockPublisher) Publish(topic string, data []byte) error {
+	m.messages = append(m.messages, &mockMessage{topic: topic, data: data})
+	return nil
 }
 
 // TestServer encapsulates the test environment
@@ -87,15 +95,13 @@ func SetupTestServer(t *testing.T) *TestServer {
 		t.Fatalf("failed to create schema: %v", err)
 	}
 
-	// Initialize dependencies - use standard logger that implements log.Logger interface
-	logger := log.DefaultLogger
+	// Initialize dependencies
+	logger := log.NewStdLogger(nil)
 	hasher, err := hash.NewCrypto(hashtypes.BCRYPT)
 	if err != nil {
 		t.Fatalf("failed to create hasher: %v", err)
 	}
 
-	// Add refresh token TTL parameter
-	TestRefreshTokenExpiry := 7 * 24 * time.Hour
 	jwtMgr := auth.NewManager(TestJWTSecret, TestJWTExpiry, TestRefreshTokenExpiry)
 
 	// Seed encode profiles
@@ -110,7 +116,6 @@ func SetupTestServer(t *testing.T) *TestServer {
 	mediaRepo := mediadata.NewMediaRepo(db)
 	profileRepo := mediadata.NewEncodeProfileRepo(db)
 	taskRepo := mediadata.NewEncodingTaskRepo(db)
-
 	uploadRepo := mediadata.NewUploadRepo(db, logger)
 	storage := mediadata.NewLocalStorage("./data/test-uploads", logger)
 
@@ -118,15 +123,13 @@ func SetupTestServer(t *testing.T) *TestServer {
 	mockPub := &mockPublisher{}
 
 	mediaUC := mediabiz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, storage, mockPub, logger)
-	uploadUC := mediabiz.NewUploadUseCase(uploadRepo, mediaRepo, profileRepo, taskRepo, mediaUC, storage, logger)
+	uploadUC := mediabiz.NewUploadUseCase(uploadRepo, mediaRepo, profileRepo, taskRepo, mediaUC, storage, 5*1024*1024, logger)
 	uploadUC.SetPublisher(mockPub)
 
 	// Content layer
 	contentDB := contentdata.NewData(db)
 	categoryRepo := contentdata.NewCategoryRepo(contentDB, logger)
 	tagRepo := contentdata.NewTagRepo(contentDB, logger)
-	commentRepo := contentdata.NewCommentRepo(contentDB, logger)
-	playlistRepo := contentdata.NewPlaylistRepo(contentDB, logger)
 	channelRepo := contentdata.NewChannelRepo(contentDB, logger)
 	feedRepo := contentdata.NewFeedRepo(contentDB, logger)
 	likeRepo := contentdata.NewLikeRepo(contentDB, logger)
@@ -134,28 +137,26 @@ func SetupTestServer(t *testing.T) *TestServer {
 	notificationRepo := contentdata.NewNotificationRepo(contentDB, logger)
 
 	categoryTagUC := contentbiz.NewCategoryTagUseCase(categoryRepo, tagRepo, logger)
-	commentUC := contentbiz.NewCommentUseCase(commentRepo, mediaUC, logger)
-	playlistChannelUC := contentbiz.NewPlaylistChannelUseCase(playlistRepo, channelRepo, logger)
-	feedUC := contentbiz.NewFeedUseCase(feedRepo, logger)
 	likeFavoriteUC := contentbiz.NewLikeFavoriteUseCase(likeRepo, favoriteRepo, mediaUC, logger)
+	playlistChannelUC := contentbiz.NewPlaylistChannelUseCase(nil, channelRepo, logger)
+	feedUC := contentbiz.NewFeedUseCase(feedRepo, logger)
 	notificationUC := contentbiz.NewNotificationUseCase(notificationRepo, logger)
 
-	// Create handlers
+	// Create handlers - only use handlers that actually exist
 	authHandler := server.NewAuthHandler(userUC, jwtMgr)
 	userHandler := server.NewUserHandler(userUC, jwtMgr)
 	mediaHandler := server.NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC)
 	uploadHandler := server.NewUploadHandler(uploadUC, jwtMgr)
 	categoryHandler := server.NewCategoryHandler(categoryTagUC)
 	tagHandler := server.NewTagHandler(categoryTagUC)
-	commentHandler := server.NewCommentHandler(commentUC, jwtMgr)
-	playlistHandler := server.NewPlaylistHandler(playlistChannelUC, jwtMgr)
 	feedHandler := server.NewFeedHandler(feedUC)
 	notificationHandler := server.NewNotificationHandler(notificationUC, jwtMgr)
 	channelHandler := server.NewChannelHandler(playlistChannelUC, jwtMgr)
 	shareHandler := server.NewShareHandler(likeFavoriteUC, jwtMgr)
+	meHandler := server.NewMeHandler(userUC, likeFavoriteUC, playlistChannelUC, jwtMgr)
 
 	// Stats repo for stats handler
-	statsRepo := systemdata.NewStatsRepo(db)
+	statsRepo := system.NewStatsRepo(db)
 	statsHandler := server.NewStatsHandler(mediaUC, likeFavoriteUC, statsRepo, jwtMgr)
 	searchHandler := server.NewSearchHandler(mediaUC)
 
@@ -175,10 +176,7 @@ func SetupTestServer(t *testing.T) *TestServer {
 		c.Next()
 	})
 
-	// Create MeHandler
-	meHandler := server.NewMeHandler(userUC, likeFavoriteUC, playlistChannelUC, jwtMgr)
-
-	// Register routes
+	// Register routes using server.RegisterRoutes
 	server.RegisterRoutes(router,
 		authHandler,
 		userHandler,
@@ -186,8 +184,6 @@ func SetupTestServer(t *testing.T) *TestServer {
 		uploadHandler,
 		categoryHandler,
 		tagHandler,
-		commentHandler,
-		playlistHandler,
 		feedHandler,
 		notificationHandler,
 		channelHandler,
@@ -219,57 +215,60 @@ func SetupTestServer(t *testing.T) *TestServer {
 // createTestUsers creates test users for each role
 func (ts *TestServer) createTestUsers(ctx context.Context, t *testing.T, userUC *biz.UserUseCase) {
 	users := []struct {
-		role     TestRole
-		username string
-		password string
-		isStaff  bool
-		roleStr  string
+		role  TestRole
+		email string
+		name  string
+		pass  string
 	}{
-		{RoleAdmin, "admin", "admin123", true, "admin"},
-		{RoleStaff, "staff", "staff123", true, "staff"},
-		{RoleUser, "user1", "user123", false, "user"},
-		{RoleUser, "user2", "user456", false, "user"},
+		{RoleAdmin, "admin@test.com", "admin", "admin123"},
+		{RoleUser, "user@test.com", "user1", "user123"},
+		{RoleGuest, "guest@test.com", "guest", "guest123"},
 	}
 
 	for _, u := range users {
-		hashedPassword, _ := userUC.HashPassword(u.password)
-		created, err := userUC.CreateUser(ctx, &types.User{
-			Username: u.username,
-			Email:    u.username + "@example.com",
-			IsStaff:  u.isStaff,
-		}, hashedPassword)
+		// Create user
+		_, err := userUC.Register(ctx, &biz.RegisterRequest{
+			Email:    u.email,
+			Username: u.name,
+			Password: u.pass,
+		})
 		if err != nil {
-			t.Fatalf("failed to create test user %s: %v", u.username, err)
+			t.Fatalf("failed to create test user %s: %v", u.role, err)
 		}
 
-		// Update user with proper details
-		user, _ := userUC.GetUserEntity(ctx, created.Uuid)
-		if user != nil {
-			// Set role if needed
-		}
-
-		// Generate token
-		token, err := ts.JWTMgr.Generate(created.Uuid, u.username, u.isStaff, u.roleStr)
+		// Login to get token
+		resp, err := userUC.Login(ctx, &biz.LoginRequest{
+			Email:    u.email,
+			Password: u.pass,
+		})
 		if err != nil {
-			t.Fatalf("failed to generate token for %s: %v", u.username, err)
+			t.Fatalf("failed to login test user %s: %v", u.role, err)
 		}
 
-		testUser := &TestUser{
-			ID:       created.Uuid,
-			Username: u.username,
-			Password: u.password,
-			Role:     u.role,
-			IsStaff:  u.isStaff,
-			Token:    token,
+		// Get user by email to get ID
+		user, err := userUC.GetByEmail(ctx, u.email)
+		if err != nil {
+			t.Fatalf("failed to get test user %s: %v", u.role, err)
 		}
 
-		ts.Users[u.role] = testUser
-		// Also store by username for specific user access
-		ts.Users[TestRole(u.username)] = testUser
+		ts.Users[u.role] = &TestUser{
+			ID:        user.Id,
+			Email:     u.email,
+			Username:  u.name,
+			Password:  u.pass,
+			Role:      string(u.role),
+			Token:     resp.Token,
+			ExpiresAt: time.Now().Add(TestJWTExpiry),
+		}
 	}
 }
 
-// Cleanup closes the test server and cleans up resources
+// GetAuthToken returns a valid auth token for the given role
+func (ts *TestServer) GetAuthToken(role TestRole) string {
+	return "Bearer " + ts.Users[role].Token
+}
+
+// Cleanup shuts down the test server
 func (ts *TestServer) Cleanup() {
 	if ts.Server != nil {
 		ts.Server.Close()
@@ -277,152 +276,19 @@ func (ts *TestServer) Cleanup() {
 	if ts.DB != nil {
 		ts.DB.Close()
 	}
-	// Clean up test uploads
-	os.RemoveAll("./data/test-uploads")
 }
 
-// RequestOptions holds options for making HTTP requests
-type RequestOptions struct {
-	Method      string
-	Path        string
-	Body        interface{}
-	Token       string
-	ContentType string
+// AssertStatusCode asserts the response status code
+func AssertStatusCode(t *testing.T, resp *httptest.ResponseRecorder, expected int) {
+	require.Equal(t, expected, resp.Code, "unexpected status code: %s", resp.Body.String())
 }
 
-// MakeRequest performs an HTTP request to the test server
-func (ts *TestServer) MakeRequest(opts RequestOptions) (*http.Response, []byte, error) {
-	url := ts.Server.URL + ts.BaseURL + opts.Path
-
-	var body io.Reader
-	if opts.Body != nil {
-		switch v := opts.Body.(type) {
-		case string:
-			body = bytes.NewBufferString(v)
-		case []byte:
-			body = bytes.NewBuffer(v)
-		default:
-			jsonBody, err := json.Marshal(opts.Body)
-			if err != nil {
-				return nil, nil, fmt.Errorf("failed to marshal body: %w", err)
-			}
-			body = bytes.NewBuffer(jsonBody)
-		}
-	}
-
-	req, err := http.NewRequest(opts.Method, url, body)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	// Set headers
-	if opts.Token != "" {
-		req.Header.Set("Authorization", "Bearer "+opts.Token)
-	}
-	if opts.ContentType != "" {
-		req.Header.Set("Content-Type", opts.ContentType)
-	} else if opts.Body != nil {
-		req.Header.Set("Content-Type", "application/json")
-	}
-
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to make request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	return resp, respBody, nil
+// AssertSuccess asserts a successful response (2xx)
+func AssertSuccess(t *testing.T, resp *httptest.ResponseRecorder) {
+	require.True(t, resp.Code >= 200 && resp.Code < 300, "expected success, got %d: %s", resp.Code, resp.Body.String())
 }
 
-// GetToken returns the token for a specific role or user
-func (ts *TestServer) GetToken(role TestRole) string {
-	if user, ok := ts.Users[role]; ok {
-		return user.Token
-	}
-	return ""
-}
-
-// ParseResponse parses JSON response into the target struct
-func ParseResponse(data []byte, target interface{}) error {
-	return json.Unmarshal(data, target)
-}
-
-// AssertStatus checks if the response status matches expected
-func AssertStatus(t *testing.T, resp *http.Response, expected int) {
-	if resp.StatusCode != expected {
-		t.Errorf("Expected status %d, got %d", expected, resp.StatusCode)
-	}
-}
-
-// AssertJSON checks if the response body contains expected fields
-func AssertJSON(t *testing.T, body []byte, checks map[string]interface{}) {
-	var result map[string]interface{}
-	if err := json.Unmarshal(body, &result); err != nil {
-		t.Errorf("Failed to parse JSON response: %v", err)
-		return
-	}
-
-	for key, expected := range checks {
-		actual, ok := result[key]
-		if !ok {
-			t.Errorf("Expected key '%s' not found in response", key)
-			continue
-		}
-		if actual != expected {
-			t.Errorf("For key '%s': expected %v (%T), got %v (%T)",
-				key, expected, expected, actual, actual)
-		}
-	}
-}
-
-// CreateMultipartRequest creates a multipart form request for file uploads
-func CreateMultipartRequest(t *testing.T, filePath string, fields map[string]string) ([]byte, string) {
-	var b bytes.Buffer
-	w := multipart.NewWriter(&b)
-
-	// Add file if provided
-	if filePath != "" {
-		f, err := os.Open(filePath)
-		if err != nil {
-			t.Fatalf("failed to open file: %v", err)
-		}
-		defer f.Close()
-
-		fw, err := w.CreateFormFile("file", filepath.Base(filePath))
-		if err != nil {
-			t.Fatalf("failed to create form file: %v", err)
-		}
-
-		if _, err = io.Copy(fw, f); err != nil {
-			t.Fatalf("failed to copy file: %v", err)
-		}
-	}
-
-	// Add other fields
-	for key, val := range fields {
-		if err := w.WriteField(key, val); err != nil {
-			t.Fatalf("failed to write field: %v", err)
-		}
-	}
-
-	w.Close()
-
-	return b.Bytes(), w.FormDataContentType()
-}
-
-// mockPublisher implements a mock message publisher for tests
-type mockPublisher struct{}
-
-func (m *mockPublisher) Publish(topic string, messages ...*message.Message) error {
-	return nil
-}
-
-func (m *mockPublisher) Close() error {
-	return nil
+// AssertError asserts an error response (4xx or 5xx)
+func AssertError(t *testing.T, resp *httptest.ResponseRecorder) {
+	require.True(t, resp.Code >= 400, "expected error, got %d", resp.Code)
 }
