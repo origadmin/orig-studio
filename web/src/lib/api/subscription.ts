@@ -21,13 +21,13 @@ export interface SubscriptionListResponse {
 
 export const subscriptionApi = {
     // 获取订阅状态
-    getStatus: (userId: string) => api.get<SubscriptionStatus>(`/users/${userId}/subscription`),
+    getStatus: (channelId: string) => api.get<SubscriptionStatus>(`/channels/${channelId}/subscription`),
 
-    // 订阅用户
-    subscribe: (userId: string) => api.post<void>(`/users/${userId}/subscribe`),
+    // 订阅频道
+    subscribe: (channelId: string) => api.post<void>(`/channels/${channelId}/subscription`),
 
     // 取消订阅
-    unsubscribe: (userId: string) => api.del<void>(`/users/${userId}/subscribe`),
+    unsubscribe: (channelId: string) => api.del<void>(`/channels/${channelId}/subscription`),
 
     // 获取订阅列表
     getSubscriptions: (params?: { page?: number; page_size?: number; keyword?: string }) =>

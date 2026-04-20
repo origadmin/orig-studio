@@ -44,6 +44,8 @@ message User {
   string uuid = 6 [json_name = "uuid"];
   // user.field.username
   string username = 7 [json_name = "username"];
+  // user.field.handle
+  string handle = 21 [json_name = "handle"];
   // user.field.nickname
   string nickname = 8 [json_name = "nickname"];
   // user.field.password

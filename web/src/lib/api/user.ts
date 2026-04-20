@@ -66,6 +66,9 @@ export const userApi = {
     // 获取用户详情
     get: (id: string) => api.get<User>(`/users/${id}`),
 
+    // 通过 handle 获取用户
+    getByHandle: (handle: string) => api.get<User>(`/users/handle/${handle}`),
+
     // 创建用户
     create: (data: CreateUserRequest) => api.post<User>("/users", data),
 

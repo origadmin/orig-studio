@@ -222,6 +222,23 @@ func (h *UserHandler) Register(r handler.Router) {
 			c.JSON(http.StatusOK, gin.H{"user_id": userID, "playlists": []interface{}{}})
 		})
 
+		// Get user by handle
+		users.GET("/handle/:handle", func(w http.ResponseWriter, r *http.Request) {
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
+			handle := c.Param("handle")
+			if handle == "" {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid handle"})
+				return
+			}
+
+			u, err := h.uc.GetUserByHandle(r.Context(), handle)
+			if err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+				return
+			}
+			c.JSON(http.StatusOK, u)
+		})
+
 		users.GET("/:id/favorites", WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
 			c := handler.NewGinContextAdapterFromHTTP(w, r)
 			id := c.Param("id")

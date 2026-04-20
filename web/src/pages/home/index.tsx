@@ -132,7 +132,7 @@ const HomePage = () => {
                         const thumbUrl = getImageUrl(media?.thumbnail, 'thumbnail');
 
                         return (
-                            <Link key={media?.id} to="/watch" search={{v: media?.friendly_token || String(media?.id)}}
+                            <Link key={media?.id} to="/watch" search={{v: media?.short_token}}
                                   className="group w-64 flex-shrink-0">
                                 <div
                                     className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
@@ -196,7 +196,7 @@ const HomePage = () => {
                         const thumbUrl = getImageUrl(media?.thumbnail, 'thumbnail');
 
                         return (
-                            <Link key={media?.id} to="/watch" search={{v: media?.friendly_token || String(media?.id)}}
+                            <Link key={media?.id} to="/watch" search={{v: media?.short_token}}
                                   className="group w-64 flex-shrink-0">
                                 <div
                                     className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
@@ -269,7 +269,7 @@ const HomePage = () => {
                             const thumbUrl = getImageUrl(media?.thumbnail, 'thumbnail');
 
                             return (
-                                <Link key={media?.id} to="/watch" search={{v: media?.friendly_token || String(media?.id)}} className="group">
+                                <Link key={media?.id} to="/watch" search={{v: media?.short_token}} className="group">
                                     <div
                                         className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
                                         <div className="relative aspect-video overflow-hidden">

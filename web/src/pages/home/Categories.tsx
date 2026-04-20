@@ -75,7 +75,7 @@ const CategoriesPage = () => {
                     {/* Category videos */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                         {category.media?.slice(0, 4).map((media: any) => (
-                            <Link key={media.id} to="/watch" search={{v: media.friendly_token || String(media.id)}} className="group">
+                            <Link key={media.id} to="/watch" search={{v: media.short_token}} className="group">
                                 <div
                                     className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
                                 >

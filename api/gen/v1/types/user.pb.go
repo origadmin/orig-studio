@@ -193,6 +193,8 @@ type User struct {
 	Uuid string `protobuf:"bytes,6,opt,name=uuid,proto3" json:"uuid,omitempty"`
 	// user.field.username
 	Username string `protobuf:"bytes,7,opt,name=username,proto3" json:"username,omitempty"`
+	// user.field.handle
+	Handle string `protobuf:"bytes,21,opt,name=handle,proto3" json:"handle,omitempty"`
 	// user.field.nickname
 	Nickname string `protobuf:"bytes,8,opt,name=nickname,proto3" json:"nickname,omitempty"`
 	// user.field.password
@@ -304,6 +306,13 @@ func (x *User) GetUuid() string {
 func (x *User) GetUsername() string {
 	if x != nil {
 		return x.Username
+	}
+	return ""
+}
+
+func (x *User) GetHandle() string {
+	if x != nil {
+		return x.Handle
 	}
 	return ""
 }
@@ -784,7 +793,7 @@ const file_v1_types_user_proto_rawDesc = "" +
 	"\vpreferences\x18\x04 \x03(\v23.api.v1.services.types.UserSetting.PreferencesEntryR\vpreferences\x1a>\n" +
 	"\x10PreferencesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xf3\x06\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x8b\a\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12$\n" +
 	"\rcreate_author\x18\x02 \x01(\tR\rcreate_author\x12$\n" +
@@ -792,7 +801,8 @@ const file_v1_types_user_proto_rawDesc = "" +
 	"\vcreate_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
 	"\vupdate_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\x12\x12\n" +
 	"\x04uuid\x18\x06 \x01(\tR\x04uuid\x12\x1a\n" +
-	"\busername\x18\a \x01(\tR\busername\x12\x1a\n" +
+	"\busername\x18\a \x01(\tR\busername\x12\x16\n" +
+	"\x06handle\x18\x15 \x01(\tR\x06handle\x12\x1a\n" +
 	"\bnickname\x18\b \x01(\tR\bnickname\x12\x1a\n" +
 	"\bpassword\x18\t \x01(\tR\bpassword\x12\x14\n" +
 	"\x05phone\x18\n" +
@@ -842,8 +852,8 @@ const file_v1_types_user_proto_rawDesc = "" +
 	"\bUserRole\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\auser_id\x18\x02 \x01(\tR\auser_id\x12\x18\n" +
-	"\arole_id\x18\x03 \x01(\tR\arole_idB\x82\x01\n" +
-	"!com.origcms.api.v1.services.typesB\x1bOrigCMSServiceTypeUserProtoP\x01Z4origadmin/application/origcms/api/gen/v1/types;types\xa2\x02\aOrigCMSb\x06proto3"
+	"\arole_id\x18\x03 \x01(\tR\arole_idB\xd4\x01\n" +
+	"\x19com.api.v1.services.typesB\tUserProtoP\x01Z4origadmin/application/origcms/api/gen/v1/types;types\xa2\x02\x04AVST\xaa\x02\x15Api.V1.Services.Types\xca\x02\x15Api\\V1\\Services\\Types\xe2\x02!Api\\V1\\Services\\Types\\GPBMetadata\xea\x02\x18Api::V1::Services::Typesb\x06proto3"
 
 var (
 	file_v1_types_user_proto_rawDescOnce sync.Once

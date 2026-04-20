@@ -18,26 +18,26 @@ const (
 type EncodingTaskStatus string
 
 const (
-	EncodingTaskStatusUnknown   EncodingTaskStatus = "unknown"
-	EncodingTaskStatusPending   EncodingTaskStatus = "pending"
+	EncodingTaskStatusUnknown    EncodingTaskStatus = "unknown"
+	EncodingTaskStatusPending    EncodingTaskStatus = "pending"
 	EncodingTaskStatusProcessing EncodingTaskStatus = "processing"
-	EncodingTaskStatusSuccess   EncodingTaskStatus = "success"
-	EncodingTaskStatusFailed    EncodingTaskStatus = "failed"
-	EncodingTaskStatusSkipped   EncodingTaskStatus = "skipped"
-	EncodingTaskStatusPartial   EncodingTaskStatus = "partial"
-	EncodingTaskStatusInvalid   EncodingTaskStatus = EncodingTaskStatusUnknown
+	EncodingTaskStatusSuccess    EncodingTaskStatus = "success"
+	EncodingTaskStatusFailed     EncodingTaskStatus = "failed"
+	EncodingTaskStatusSkipped    EncodingTaskStatus = "skipped"
+	EncodingTaskStatusPartial    EncodingTaskStatus = "partial"
+	EncodingTaskStatusInvalid    EncodingTaskStatus = EncodingTaskStatusUnknown
 )
 
 // UploadStatus represents upload session status
 type UploadStatus string
 
 const (
-	UploadStatusUnknown    UploadStatus = "unknown"
-	UploadStatusPending    UploadStatus = "pending"
-	UploadStatusUploading  UploadStatus = "uploading"
-	UploadStatusCompleted  UploadStatus = "completed"
-	UploadStatusAborted    UploadStatus = "aborted"
-	UploadStatusInvalid    UploadStatus = UploadStatusUnknown
+	UploadStatusUnknown   UploadStatus = "unknown"
+	UploadStatusPending   UploadStatus = "pending"
+	UploadStatusUploading UploadStatus = "uploading"
+	UploadStatusCompleted UploadStatus = "completed"
+	UploadStatusAborted   UploadStatus = "aborted"
+	UploadStatusInvalid   UploadStatus = UploadStatusUnknown
 )
 
 // MediaEncodingStatus represents media encoding status
@@ -139,6 +139,10 @@ func (EncodingTaskStatus) Values() []string {
 		string(EncodingTaskStatusSkipped),
 		string(EncodingTaskStatusPartial),
 	}
+}
+
+func (s EncodingTaskStatus) String() string {
+	return string(s)
 }
 
 // Values returns all possible values for UploadStatus

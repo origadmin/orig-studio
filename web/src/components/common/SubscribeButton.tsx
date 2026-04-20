@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 
 interface SubscribeButtonProps {
-    userId: string;
+    channelId: string;
     initialSubscriberCount?: number;
     className?: string;
     size?: 'sm' | 'default' | 'lg';
@@ -21,7 +21,7 @@ interface SubscribeButtonProps {
 }
 
 const SubscribeButton: React.FC<SubscribeButtonProps> = ({
-                                                             userId,
+                                                             channelId,
                                                              initialSubscriberCount = 0,
                                                              className = '',
                                                              size = 'default',
@@ -35,17 +35,14 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
     const [initialLoading, setInitialLoading] = useState(true);
     const [showLoginDialog, setShowLoginDialog] = useState(false);
 
-    // 检查是否是当前用户自己
-    const isSelf = user?.id === userId;
-
     useEffect(() => {
         const fetchStatus = async () => {
-            if (!isAuthenticated || isSelf) {
+            if (!isAuthenticated || !channelId) {
                 setInitialLoading(false);
                 return;
             }
             try {
-                const response = await subscriptionApi.getStatus(userId);
+                const response = await subscriptionApi.getStatus(channelId);
                 setIsSubscribed(response.is_subscribed);
                 if (response.subscriber_count !== undefined) {
                     setSubscriberCount(response.subscriber_count);
@@ -57,7 +54,7 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
             }
         };
         fetchStatus();
-    }, [userId, isAuthenticated, isSelf]);
+    }, [channelId, isAuthenticated]);
 
     const handleSubscribe = async () => {
         if (!isAuthenticated) {
@@ -65,18 +62,18 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
             return;
         }
 
-        if (isSelf) {
-            return; // 不能订阅自己
+        if (!channelId) {
+            return;
         }
 
         try {
             setLoading(true);
             if (isSubscribed) {
-                await subscriptionApi.unsubscribe(userId);
+                await subscriptionApi.unsubscribe(channelId);
                 setIsSubscribed(false);
                 setSubscriberCount(prev => Math.max(0, prev - 1));
             } else {
-                await subscriptionApi.subscribe(userId);
+                await subscriptionApi.subscribe(channelId);
                 setIsSubscribed(true);
                 setSubscriberCount(prev => prev + 1);
             }
@@ -97,21 +94,6 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
             >
                 <Loader2 className="w-4 h-4 animate-spin mr-2"/>
                 {t('common.loading')}
-            </Button>
-        );
-    }
-
-    // 如果是自己，显示编辑按钮或不显示
-    if (isSelf) {
-        return (
-            <Button
-                size={size}
-                variant="outline"
-                className={className}
-                disabled
-            >
-                <UserCheck className="w-4 h-4 mr-2"/>
-                {t('common.you') || 'You'}
             </Button>
         );
     }

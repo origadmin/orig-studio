@@ -81,7 +81,7 @@ const DefaultStatus enums.EncodingTaskStatus = "pending"
 
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s enums.EncodingTaskStatus) error {
-	switch s {
+	switch s.String() {
 	case "unknown", "pending", "processing", "success", "failed", "skipped", "partial":
 		return nil
 	default:

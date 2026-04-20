@@ -10,6 +10,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/ThreeDotsLabs/watermill"
+	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/google/wire"
+	"github.com/origadmin/runtime/log"
+	"github.com/origadmin/toolkits/crypto/hash"
+	"github.com/origadmin/toolkits/crypto/hash/types"
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/data/entity"
@@ -31,14 +37,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+)
 
-	"github.com/ThreeDotsLabs/watermill"
-	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/google/wire"
-	"github.com/origadmin/runtime/log"
-	"github.com/origadmin/toolkits/crypto/hash"
-	"github.com/origadmin/toolkits/crypto/hash/types"
-
+import (
 	_ "github.com/lib/pq"
 )
 
@@ -51,14 +52,14 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 		return nil, err
 	}
 	pubSub := NewPubSub(logger)
-	mediaRepo := NewMediaRepo(client)
-	encodeProfileRepo := NewEncodeProfileRepo(client)
-	encodingTaskRepo := NewEncodingTaskRepo(client)
+	v := NewMediaRepo(client)
+	v2 := NewEncodeProfileRepo(client)
+	v3 := NewEncodingTaskRepo(client)
 	storage := NewStorage()
 	publisher := NewPublisher(pubSub)
-	mediaUseCase := NewMediaUseCase(mediaRepo, encodeProfileRepo, encodingTaskRepo, storage, publisher, logger)
+	mediaUseCase := NewMediaUseCase(v, v2, v3, storage, publisher, logger)
 	transcodeWorker := NewWorker(logger)
-	transcodeHandler := NewTranscodeHandler(mediaUseCase, encodeProfileRepo, encodingTaskRepo, mediaRepo, transcodeWorker, publisher, logger)
+	transcodeHandler := NewTranscodeHandler(mediaUseCase, v2, v3, v, transcodeWorker, publisher, logger)
 	router, err := NewRouter(transcodeHandler, pubSub, logger)
 	if err != nil {
 		return nil, err
@@ -72,8 +73,8 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	manager := NewJWTManager(cfg)
 	authHandler := NewAuthHandler(userUseCase, manager)
 	userHandler := NewUserHandler(userUseCase, manager)
-	uploadRepo := NewUploadRepo(client, logger)
-	uploadUseCase := NewUploadUseCase(uploadRepo, mediaRepo, encodeProfileRepo, encodingTaskRepo, mediaUseCase, storage, logger)
+	v4 := NewUploadRepo(client, logger)
+	uploadUseCase := NewUploadUseCase(v4, v, v2, v3, mediaUseCase, storage, logger)
 	data := NewContentDB(client)
 	likeRepo := NewLikeRepo(data, logger)
 	favoriteRepo := NewFavoriteRepo(data, logger)
@@ -288,7 +289,7 @@ func NewUploadUseCase(
 		taskRepo,
 		mediaUC,
 		storage,
-		5*1024*1024, // 5MB chunk size
+		5*1024*1024,
 		logger,
 	)
 	return uploadUC
@@ -319,7 +320,7 @@ func NewTranscodeHandler(
 		publisher,
 		logger,
 		"./data/uploads",
-		30*time.Minute, // 30 minute task timeout
+		30*time.Minute,
 	)
 }
 

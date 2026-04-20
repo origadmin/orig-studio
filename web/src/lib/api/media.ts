@@ -15,7 +15,7 @@ export interface Media {
     id: string;
     title: string;
     description?: string;
-    friendly_token?: string;
+    short_token?: string;
     type: string; // "video" | "image" | "audio"
     url: string;
     hls_file?: string;

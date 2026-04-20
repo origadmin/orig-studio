@@ -3536,8 +3536,8 @@ const file_v1_user_user_service_proto_rawDesc = "" +
 	"\rListUserRoles\x12*.api.v1.services.user.ListUserRolesRequest\x1a+.api.v1.services.user.ListUserRolesResponse\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/users/{id}/roles\x12\x87\x01\n" +
 	"\fGetUserStats\x12).api.v1.services.user.GetUserStatsRequest\x1a*.api.v1.services.user.GetUserStatsResponse\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/users/{id}/stats\x12\x97\x01\n" +
 	"\x10GetUserPlaylists\x12-.api.v1.services.user.GetUserPlaylistsRequest\x1a..api.v1.services.user.GetUserPlaylistsResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/users/{id}/playlists\x12\x97\x01\n" +
-	"\x10GetUserFollowers\x12-.api.v1.services.user.GetUserFollowersRequest\x1a..api.v1.services.user.GetUserFollowersResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/users/{id}/followersB\x7f\n" +
-	" com.origcms.api.v1.services.userB\x17OrigCMSServiceUserProtoP\x01Z2origadmin/application/origcms/api/gen/v1/user;user\xa2\x02\vOrigCMSUserb\x06proto3"
+	"\x10GetUserFollowers\x12-.api.v1.services.user.GetUserFollowersRequest\x1a..api.v1.services.user.GetUserFollowersResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/users/{id}/followersB\xd4\x01\n" +
+	"\x18com.api.v1.services.userB\x10UserServiceProtoP\x01Z2origadmin/application/origcms/api/gen/v1/user;user\xa2\x02\x04AVSU\xaa\x02\x14Api.V1.Services.User\xca\x02\x14Api\\V1\\Services\\User\xe2\x02 Api\\V1\\Services\\User\\GPBMetadata\xea\x02\x17Api::V1::Services::Userb\x06proto3"
 
 var (
 	file_v1_user_user_service_proto_rawDescOnce sync.Once

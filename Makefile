@@ -7,7 +7,7 @@
 # List of applications to build/release, corresponding to directories in ./cmd/
 APPS := svc-api-gateway svc-user svc-media svc-content
 
-# Path to the third_party directory for external protobufs
+# Path to the third_party directory for external protobufs (optional, created by make deps)
 THIRD_PARTY_PATH := third_party
 
 # The import path for the shared version package within your framework.
@@ -41,34 +41,61 @@ init: ## 🔧 Install all required development tools
 
 all: deps generate test lint ## ✅ Run all essential development steps
 
-deps: ## 📦 Update and export third-party protobuf dependencies
-	@echo "Updating buf dependencies..."
-	@buf dep update
-	@echo "Exporting protobuf dependencies to $(THIRD_PARTY_PATH)..."
+deps: ## 📦 Export third-party protobuf dependencies (optional, requires network)
+	@echo "Exporting buf dependencies to $(THIRD_PARTY_PATH)..."
+	@mkdir -p $(THIRD_PARTY_PATH)
 	@buf export buf.build/bufbuild/protovalidate -o $(THIRD_PARTY_PATH)
 	@buf export buf.build/protocolbuffers/wellknowntypes -o $(THIRD_PARTY_PATH)
 	@buf export buf.build/googleapis/googleapis -o $(THIRD_PARTY_PATH)
-	# Add other third-party dependencies as needed, e.g., kratos/apis, origadmin/runtime
 
 
-generate: ## 🧬 Run all code generation tasks (Protobuf, Wire, Ent)
-	@echo "Generating API Protobuf code using buf..."
-	@buf generate
-	@echo "Generating Common Config Protobuf code..."
-	@protoc -I. -I./$(THIRD_PARTY_PATH) --go_out=paths=source_relative:. --validate_out=paths=source_relative,lang=go:. configs/*.proto
-	@echo "Generating Wire code for dependency injection..."
-	@go generate ./cmd/...
-	@echo "Running go generate for Ent schemas..."
-	@go generate ./internal/svc-user/data/...
-	# Add go generate for other services' ent schemas here
-	@echo "Running go mod tidy after code generation..."
+# ---------------------------------------------------------------------------- #
+#                            Code Generation                                  #
+# ---------------------------------------------------------------------------- #
+
+.PHONY: generate gen-proto gen-openapi gen-types gen-convpb gen-wire gen-ent
+
+generate: ## 🧬 Run all code generation tasks (Proto → OpenAPI → Types → Wire → Ent → ConvPB)
+	@$(MAKE) gen-proto
+	@$(MAKE) gen-wire
+	@$(MAKE) gen-ent
+	@$(MAKE) gen-convpb
+	@echo "Running go mod tidy..."
 	@go mod tidy
 
-clean: ## 🧹 Clean up build artifacts and temporary files
+gen-proto: ## 📡 Generate Protobuf Go code + OpenAPI docs via buf (requires network for remote deps)
+	@echo "Generating API Protobuf code + OpenAPI documentation..."
+	@cd api && buf generate
+	@echo "✅ OpenAPI docs generated at docs/api/openapi.yaml"
+
+gen-openapi: ## 📖 Generate OpenAPI/Swagger documentation only
+	@$(MAKE) gen-proto
+
+gen-types: ## 🔷 Generate TypeScript types from OpenAPI v3 spec
+	@echo "Generating TypeScript types from OpenAPI v3..."
+	@if not exist "docs/api/openapi.yaml" ( \
+		echo "⚠️  OpenAPI file not found. Run 'make gen-proto' first." && exit 1 \
+	)
+	@call scripts\gen-types.bat
+
+gen-wire: ## 🔌 Generate Wire dependency injection code
+	@echo "Generating Wire code..."
+	@go generate ./cmd/...
+
+gen-ent: ## 🏗️ Generate Ent ORM code
+	@echo "Generating Ent schemas..."
+	@go generate ./internal/svc-user/data/...
+
+gen-convpb: ## 🔀 Generate entity↔proto type conversion code
+	@echo "Generating convpb type converters..."
+	@go generate ./internal/data/convpb
+
+clean: ## 🧹 Clean up build artifacts and generated code
 	@echo "Cleaning up..."
 	@rm -rf ./bin ./dist ./coverage.out
-	@rm -rf ./api/proto/v1/*.pb.go ./api/proto/v1/*.pb.validate.go
-	@rm -rf ./configs/*.pb.go ./configs/*.pb.validate.go
+	@rm -rf ./api/gen
+	@rm -rf ./docs/api
+	@rm -rf ./web/src/types/api.ts
 	@rm -rf ./internal/svc-user/data/ent
 	@rm -rf ./third_party
 
