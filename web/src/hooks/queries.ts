@@ -1,5 +1,5 @@
 import {useQuery, useMutation, useQueryClient, useInfiniteQuery} from '@tanstack/react-query';
-import {mediaApi, type Media} from '@/lib/api/media';
+import {mediaApi, publicMediaApi, adminMediaApi, type Media} from '@/lib/api/media';
 import {categoryApi, type Category} from '@/lib/api/category';
 
 /**
@@ -89,7 +89,7 @@ export function useAdminMediaList(params: {
 }
 
 /**
- * useMediaDetail: Fetch single media details
+ * useMediaDetail: Fetch single media details (Legacy - uses ID or short_token)
  */
 export function useMediaDetail(id: string | null) {
     // 彻底清理 id：移除任何引号、空格，并确保是纯数字字符串
@@ -98,6 +98,41 @@ export function useMediaDetail(id: string | null) {
         queryKey: mediaKeys.detail(cleanId!),
         queryFn: async () => {
             const res = await mediaApi.get(cleanId!);
+            return res;
+        },
+        enabled: !!cleanId,
+    });
+}
+
+/**
+ * usePublicMediaDetail: Fetch public media details using short_token (Recommended)
+ * MediaCMS style: /api/v1/medias/{short_token}
+ * Returns public fields only, auto-increments view count
+ */
+export function usePublicMediaDetail(shortToken: string | null) {
+    // 清理 short_token
+    const cleanToken = shortToken ? String(shortToken).replace(/["']/g, '').trim() : null;
+    return useQuery({
+        queryKey: ['publicMedia', 'detail', cleanToken!],
+        queryFn: async () => {
+            const res = await publicMediaApi.get(cleanToken!);
+            return res;
+        },
+        enabled: !!cleanToken && cleanToken.length > 0,
+    });
+}
+
+/**
+ * useAdminMediaDetail: Fetch full media details using ID (Admin only)
+ * MediaCMS style: /api/v1/admin/medias/:id
+ * Requires JWT + Admin role, returns all fields including private media
+ */
+export function useAdminMediaDetail(id: string | null) {
+    const cleanId = id ? String(id).replace(/["']/g, '').trim() : null;
+    return useQuery({
+        queryKey: ['adminMedia', 'detail', cleanId!],
+        queryFn: async () => {
+            const res = await adminMediaApi.getById(cleanId!);
             return res;
         },
         enabled: !!cleanId,
