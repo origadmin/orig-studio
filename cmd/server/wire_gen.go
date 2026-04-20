@@ -110,6 +110,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 		DB:                  client,
 		PubSub:              pubSub,
 		Router:              router,
+		JWTManager:          manager,
 		AuthHandler:         authHandler,
 		UserHandler:         userHandler,
 		MediaHandler:        mediaHandler,
@@ -612,6 +613,7 @@ type AppDependencies struct {
 	DB                  *entity.Client
 	PubSub              *pubsub.PubSub
 	Router              *message.Router
+	JWTManager          *auth.Manager
 	AuthHandler         *server.AuthHandler
 	UserHandler         *server.UserHandler
 	MediaHandler        *server.MediaHandler

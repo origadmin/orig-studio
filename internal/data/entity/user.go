@@ -29,8 +29,6 @@ type User struct {
 	FirstName string `json:"first_name,omitempty"`
 	// LastName holds the value of the "last_name" field.
 	LastName string `json:"last_name,omitempty"`
-	// Handle holds the value of the "handle" field.
-	Handle string `json:"handle,omitempty"`
 	// IsActive holds the value of the "is_active" field.
 	IsActive bool `json:"is_active,omitempty"`
 	// IsStaff holds the value of the "is_staff" field.
@@ -223,7 +221,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case user.FieldMediaCount:
 			values[i] = new(sql.NullInt64)
-		case user.FieldID, user.FieldUsername, user.FieldEmail, user.FieldPassword, user.FieldName, user.FieldFirstName, user.FieldLastName, user.FieldHandle, user.FieldRole, user.FieldTitle, user.FieldDescription, user.FieldLogo, user.FieldLocation:
+		case user.FieldID, user.FieldUsername, user.FieldEmail, user.FieldPassword, user.FieldName, user.FieldFirstName, user.FieldLastName, user.FieldRole, user.FieldTitle, user.FieldDescription, user.FieldLogo, user.FieldLocation:
 			values[i] = new(sql.NullString)
 		case user.FieldDateJoined, user.FieldDateAdded, user.FieldLastLogin:
 			values[i] = new(sql.NullTime)
@@ -283,12 +281,6 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field last_name", values[i])
 			} else if value.Valid {
 				_m.LastName = value.String
-			}
-		case user.FieldHandle:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field handle", values[i])
-			} else if value.Valid {
-				_m.Handle = value.String
 			}
 		case user.FieldIsActive:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -517,9 +509,6 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("last_name=")
 	builder.WriteString(_m.LastName)
-	builder.WriteString(", ")
-	builder.WriteString("handle=")
-	builder.WriteString(_m.Handle)
 	builder.WriteString(", ")
 	builder.WriteString("is_active=")
 	builder.WriteString(fmt.Sprintf("%v", _m.IsActive))

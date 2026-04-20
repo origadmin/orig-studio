@@ -83,12 +83,6 @@ func (_c *UserCreate) SetNillableLastName(v *string) *UserCreate {
 	return _c
 }
 
-// SetHandle sets the "handle" field.
-func (_c *UserCreate) SetHandle(v string) *UserCreate {
-	_c.mutation.SetHandle(v)
-	return _c
-}
-
 // SetIsActive sets the "is_active" field.
 func (_c *UserCreate) SetIsActive(v bool) *UserCreate {
 	_c.mutation.SetIsActive(v)
@@ -686,14 +680,6 @@ func (_c *UserCreate) check() error {
 			return &ValidationError{Name: "last_name", err: fmt.Errorf(`entity: validator failed for field "User.last_name": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Handle(); !ok {
-		return &ValidationError{Name: "handle", err: errors.New(`entity: missing required field "User.handle"`)}
-	}
-	if v, ok := _c.mutation.Handle(); ok {
-		if err := user.HandleValidator(v); err != nil {
-			return &ValidationError{Name: "handle", err: fmt.Errorf(`entity: validator failed for field "User.handle": %w`, err)}
-		}
-	}
 	if _, ok := _c.mutation.IsActive(); !ok {
 		return &ValidationError{Name: "is_active", err: errors.New(`entity: missing required field "User.is_active"`)}
 	}
@@ -816,10 +802,6 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.LastName(); ok {
 		_spec.SetField(user.FieldLastName, field.TypeString, value)
 		_node.LastName = value
-	}
-	if value, ok := _c.mutation.Handle(); ok {
-		_spec.SetField(user.FieldHandle, field.TypeString, value)
-		_node.Handle = value
 	}
 	if value, ok := _c.mutation.IsActive(); ok {
 		_spec.SetField(user.FieldIsActive, field.TypeBool, value)

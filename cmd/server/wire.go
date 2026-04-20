@@ -532,6 +532,7 @@ type AppDependencies struct {
 	DB                  *entity.Client
 	PubSub              *pubsub.PubSub
 	Router              *message.Router
+	JWTManager          *auth.Manager
 	AuthHandler         *server.AuthHandler
 	UserHandler         *server.UserHandler
 	MediaHandler        *server.MediaHandler

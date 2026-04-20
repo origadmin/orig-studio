@@ -25,7 +25,6 @@ type UserRepo interface {
 
 	GetByUsername(context.Context, string) (*types.User, error)
 	GetByEmail(context.Context, string) (*types.User, error)
-	GetByHandle(context.Context, string) (*types.User, error)
 	GetByPhone(context.Context, string) (*types.User, error)
 	GetUserAndPassword(context.Context, string) (*types.User, string, error)
 

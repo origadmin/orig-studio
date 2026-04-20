@@ -233,7 +233,7 @@ const WatchPage = () => {
 
                         <div className="flex items-center">
                             <InteractionBar
-                                mediaId={id as string}
+                                mediaId={String(media.id)}
                                 commentCount={media.comment_count}
                             />
                         </div>
@@ -259,7 +259,7 @@ const WatchPage = () => {
 
                     {/* Comments Section */}
                     <div className="mt-8">
-                        <CommentSection mediaId={id as string}/>
+                        <CommentSection mediaId={String(media.id)}/>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {useLocation, useParams} from '@tanstack/react-router';
+import {useParams} from '@tanstack/react-router';
 import {Link} from '@tanstack/react-router';
 import {Play, Eye, Calendar, Settings, Bell, Heart, UserPlus, MessageSquare} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
@@ -29,9 +29,9 @@ const ProfilePage = () => {
                 setError(null);
 
                 let userResponse;
-                if (params.handle && params.isHandle) {
-                    // 通过 handle 获取用户
-                    userResponse = await userApi.getByHandle(params.handle);
+                if (params.username) {
+                    // 通过 username 获取用户
+                    userResponse = await userApi.getByUsername(params.username);
                 } else if (params.id) {
                     // 通过 id 获取用户
                     userResponse = await userApi.get(params.id);
@@ -60,7 +60,7 @@ const ProfilePage = () => {
         };
 
         fetchUserAndVideos();
-    }, [params.id, params.handle, params.isHandle]);
+    }, [params.id, params.username]);
 
     return (
         <div className="space-y-8">
@@ -105,7 +105,7 @@ const ProfilePage = () => {
                             {user.is_verified &&
                                 <Badge variant="default" className="bg-emerald-500">{t('common.verified')}</Badge>}
                         </div>
-                        <p className="text-slate-500 dark:text-gray-400">{user.handle || `@${user.username}`}</p>
+                        <p className="text-slate-500 dark:text-gray-400">@{user.username}</p>
                         <p className="text-slate-600 dark:text-gray-300 max-w-2xl">{user.bio || t('profile.noBio')}</p>
                         <div className="flex flex-wrap gap-6 text-sm">
                             <div className="flex items-center gap-2"><UserPlus className="w-4 h-4 text-slate-400"/><span

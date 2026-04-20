@@ -108,6 +108,8 @@ func main() {
 		deps.SearchHandler,
 		deps.MeHandler,
 		deps.AdminHandler,
+		deps.DB,
+		deps.JWTManager,
 	)
 
 	// Start server

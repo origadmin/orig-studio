@@ -222,16 +222,16 @@ func (h *UserHandler) Register(r handler.Router) {
 			c.JSON(http.StatusOK, gin.H{"user_id": userID, "playlists": []interface{}{}})
 		})
 
-		// Get user by handle
-		users.GET("/handle/:handle", func(w http.ResponseWriter, r *http.Request) {
+		// Get user by username
+		users.GET("/username/:username", func(w http.ResponseWriter, r *http.Request) {
 			c := handler.NewGinContextAdapterFromHTTP(w, r)
-			handle := c.Param("handle")
-			if handle == "" {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid handle"})
+			username := c.Param("username")
+			if username == "" {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid username"})
 				return
 			}
 
-			u, err := h.uc.GetUserByHandle(r.Context(), handle)
+			u, err := h.uc.GetUserByUsername(r.Context(), username)
 			if err != nil {
 				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 				return

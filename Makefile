@@ -82,9 +82,9 @@ gen-wire: ## 🔌 Generate Wire dependency injection code
 	@echo "Generating Wire code..."
 	@go generate ./cmd/...
 
-gen-ent: ## 🏗️ Generate Ent ORM code
+gen-ent: ## 🏗️ Generate Ent ORM code (Schema: internal/data/entity/schema/)
 	@echo "Generating Ent schemas..."
-	@go generate ./internal/svc-user/data/...
+	@go generate ./internal/data/entity/...
 
 gen-convpb: ## 🔀 Generate entity↔proto type conversion code
 	@echo "Generating convpb type converters..."
@@ -96,7 +96,7 @@ clean: ## 🧹 Clean up build artifacts and generated code
 	@rm -rf ./api/gen
 	@rm -rf ./docs/api
 	@rm -rf ./web/src/types/api.ts
-	@rm -rf ./internal/svc-user/data/ent
+	@rm -rf ./internal/data/entity/ent/*  # 注意: 不删除 schema/ 和 generate.go
 	@rm -rf ./third_party
 
 
