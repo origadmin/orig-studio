@@ -39,7 +39,8 @@
     "subtitles": "Subtitles",
     "delete": "Delete",
     "submitting": "Submitting...",
-    "retry": "Retry"
+    "retry": "Retry",
+    "reply": "Reply"
   },
   "nav": {
     "home": "Home",
@@ -122,7 +123,14 @@
     "failed": "Failed",
     "optimizing": "Queued",
     "partial": "Partial",
-    "subscribers": "subscribers"
+    "subscribers": "subscribers",
+    "comments": "comments",
+    "noComments": "No comments yet. Be the first to comment!",
+    "addComment": "Add a comment...",
+    "postComment": "Comment",
+    "pleaseLoginToComment": "Sign in to add a comment",
+    "pleaseLoginToReply": "Sign in to reply",
+    "sortBy": "Sort by"
   },
   "channel": {
     "manageChannel": "Manage Channel",
@@ -489,7 +497,14 @@
     "followers": "Followers",
     "noSubscriptions": "No subscriptions yet",
     "noFollowers": "No followers yet",
-    "subscribedAt": "Subscribed at {{date}}"
+    "subscribedAt": "Subscribed at {{date}}",
+    "notifications": "Notifications",
+    "all": "All",
+    "personalized": "Personalized",
+    "none": "None",
+    "unsubscribe": "Unsubscribe",
+    "confirmUnsubscribe": "Unsubscribe?",
+    "unsubscribeMessage": "You won't receive notifications from this channel anymore."
   },
   "notifications": {
     "title": "Notifications",

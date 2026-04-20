@@ -39,7 +39,8 @@
     "subtitles": "字幕",
     "delete": "删除",
     "submitting": "提交中...",
-    "retry": "重试"
+    "retry": "重试",
+    "reply": "回复"
   },
   "nav": {
     "home": "主页",
@@ -122,7 +123,14 @@
     "failed": "失败",
     "optimizing": "排队中",
     "partial": "部分完成",
-    "subscribers": "订阅者"
+    "subscribers": "订阅者",
+    "comments": "条评论",
+    "noComments": "暂无评论，成为第一个评论的人吧！",
+    "addComment": "添加评论...",
+    "postComment": "评论",
+    "pleaseLoginToComment": "登录后才能发表评论",
+    "pleaseLoginToReply": "登录后才能回复",
+    "sortBy": "排序方式"
   },
   "channel": {
     "manageChannel": "管理频道",
@@ -489,7 +497,14 @@
     "followers": "我的粉丝",
     "noSubscriptions": "暂无订阅",
     "noFollowers": "暂无粉丝",
-    "subscribedAt": "订阅于 {{date}}"
+    "subscribedAt": "订阅于 {{date}}",
+    "notifications": "通知设置",
+    "all": "全部",
+    "personalized": "个性化",
+    "none": "无",
+    "unsubscribe": "取消订阅",
+    "confirmUnsubscribe": "取消订阅？",
+    "unsubscribeMessage": "您将不再收到此频道的任何通知。"
   },
   "notifications": {
     "title": "通知",
