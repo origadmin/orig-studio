@@ -15,9 +15,9 @@ import {Card, CardContent} from '@/components/ui/card';
 import {Skeleton} from '@/components/ui/skeleton';
 import {formatViews, formatDate, formatDuration} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
-import {mediaApi} from '@/lib/api/media';
+import {publicMediaApi, mediaApi} from '@/lib/api/media';
 import {commentApi} from '@/lib/api/comment';
-import {useMediaDetail, useMediaList, useDeleteMedia} from '@/hooks/queries';
+import {usePublicMediaDetail, useMediaList, useDeleteMedia} from '@/hooks/queries';
 import {useAuth} from '@/hooks/useAuth';
 import {getImageUrl, handleImageError} from '@/lib/imageUtils';
 import ErrorPage from '@/components/common/ErrorPage';
@@ -28,8 +28,9 @@ import VideoPlayer from '@/components/common/VideoPlayer';
 
 const WatchPage = () => {
     const {t} = useTranslation();
-    const {v: id} = useSearch({strict: false});
-    const {data: media, isLoading: isMediaLoading, error: mediaError} = useMediaDetail(id as string);
+    const {v: shortToken} = useSearch({strict: false});
+    // ✅ 使用新的 usePublicMediaDetail hook (short_token based)
+    const {data: media, isLoading: isMediaLoading, error: mediaError} = usePublicMediaDetail(shortToken as string);
     const {user} = useAuth();
     const deleteMutation = useDeleteMedia();
 
@@ -42,7 +43,8 @@ const WatchPage = () => {
         status: 'active'
     });
 
-    const recommendations = recData?.items?.filter(m => m.id !== Number(id)) || [];
+    // 推荐视频过滤：使用 short_token 过滤当前视频
+    const recommendations = recData?.items?.filter(m => m.short_token !== shortToken) || [];
     const loading = isMediaLoading;
     const error = mediaError ? t('watch.failedToLoad') : null;
 
@@ -51,8 +53,8 @@ const WatchPage = () => {
         if (!media) return;
 
         try {
-            await deleteMutation.mutateAsync(id as string);
-            // Redirect to home page after deletion
+            // 使用 media.id 删除（Admin API 需要 ID）
+            await deleteMutation.mutateAsync(media.id);
             window.location.href = '/';
         } catch (err) {
             console.error('Failed to delete media:', err);
@@ -64,11 +66,10 @@ const WatchPage = () => {
         if (!media || retrying) return;
         setRetrying(true);
         try {
+            // 使用 publicMediaApi 的转码重试（如果支持）或保留旧的 mediaApi
             await mediaApi.encoding.retry(media.id);
-            // Reload the page data after a short delay to show processing state
             setTimeout(() => window.location.reload(), 1000);
         } catch {
-            // Error silently — user can see the button still there
         } finally {
             setRetrying(false);
         }
@@ -234,6 +235,7 @@ const WatchPage = () => {
                         <div className="flex items-center">
                             <InteractionBar
                                 mediaId={String(media.id)}
+                                shortToken={media.short_token || (shortToken as string)}
                                 commentCount={media.comment_count}
                             />
                         </div>

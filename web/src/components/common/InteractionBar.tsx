@@ -14,7 +14,7 @@ import {
 import {useTranslation} from 'react-i18next';
 import {Button} from '@/components/ui/button';
 import {formatViews} from '@/lib/format';
-import {mediaApi, LikeResponse, FavoriteResponse, ShareResponse} from '@/lib/api/media';
+import {mediaApi, publicMediaApi, LikeResponse, FavoriteResponse, ShareResponse} from '@/lib/api/media';
 import {playlistApi} from '@/lib/api/playlist';
 import {useAuth} from '@/hooks/useAuth';
 import {useNavigate} from '@tanstack/react-router';
@@ -34,14 +34,19 @@ import {
 
 interface InteractionBarProps {
     mediaId: string;
+    shortToken?: string;  // 可选：使用 short_token 调用 publicMediaApi (推荐)
     commentCount?: number;
     onCommentClick?: () => void;
 }
 
-const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, commentCount = 0, onCommentClick}) => {
+const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, commentCount = 0, onCommentClick}) => {
     const {t} = useTranslation();
     const {isAuthenticated} = useAuth();
     const navigate = useNavigate();
+
+    // 决定使用哪个 API：优先使用 publicMediaApi (short_token based)
+    const usePublicApi = !!shortToken;
+    const apiIdentifier = shortToken || mediaId;
 
     // Like state
     const [likeCount, setLikeCount] = useState(0);
@@ -76,12 +81,14 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, commentCount = 
 
     // Fetch initial status
     useEffect(() => {
-        if (!mediaId) return;
+        if (!apiIdentifier) return;
 
         const fetchStatus = async () => {
             try {
-                // Fetch like status
-                const likeStatus: LikeResponse = await mediaApi.likes.getStatus(mediaId);
+                // Fetch like status - 优先使用 publicMediaApi
+                const likeStatus: LikeResponse = usePublicApi
+                    ? await publicMediaApi.likes.getStatus(apiIdentifier)
+                    : await mediaApi.likes.getStatus(mediaId);
                 setLikeCount(likeStatus.like_count);
                 setDislikeCount(likeStatus.dislike_count);
                 setIsLiked(likeStatus.is_liked);
@@ -91,8 +98,10 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, commentCount = 
             }
 
             try {
-                // Fetch favorite status
-                const favStatus: FavoriteResponse = await mediaApi.favorites.getStatus(mediaId);
+                // Fetch favorite status - 优先使用 publicMediaApi
+                const favStatus: FavoriteResponse = usePublicApi
+                    ? await publicMediaApi.favorites.getStatus(apiIdentifier)
+                    : await mediaApi.favorites.getStatus(mediaId);
                 setFavoriteCount(favStatus.favorite_count);
                 setIsFavorited(favStatus.is_favorited);
             } catch (err) {
@@ -101,7 +110,7 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, commentCount = 
         };
 
         fetchStatus();
-    }, [mediaId]);
+    }, [apiIdentifier, usePublicApi, mediaId]);
 
     const requireAuth = (action: string): boolean => {
         if (!isAuthenticated) {
@@ -117,7 +126,10 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, commentCount = 
 
         try {
             setIsLiking(true);
-            const response: LikeResponse = await mediaApi.likes.toggle(mediaId);
+            // 使用 publicMediaApi 或 mediaApi
+            const response: LikeResponse = usePublicApi
+                ? await publicMediaApi.likes.toggle(apiIdentifier)
+                : await mediaApi.likes.toggle(mediaId);
             setLikeCount(response.like_count);
             setDislikeCount(response.dislike_count);
             setIsLiked(response.is_liked);
@@ -134,7 +146,10 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, commentCount = 
 
         try {
             setIsDisliking(true);
-            const response: LikeResponse = await mediaApi.likes.toggleDislike(mediaId);
+            // 使用 publicMediaApi 或 mediaApi
+            const response: LikeResponse = usePublicApi
+                ? await publicMediaApi.likes.toggleDislike(apiIdentifier)
+                : await mediaApi.likes.toggleDislike(mediaId);
             setLikeCount(response.like_count);
             setDislikeCount(response.dislike_count);
             setIsLiked(response.is_liked);
@@ -151,7 +166,10 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, commentCount = 
 
         try {
             setIsFavoriting(true);
-            const response: FavoriteResponse = await mediaApi.favorites.toggle(mediaId);
+            // 使用 publicMediaApi 或 mediaApi
+            const response: FavoriteResponse = usePublicApi
+                ? await publicMediaApi.favorites.toggle(apiIdentifier)
+                : await mediaApi.favorites.toggle(mediaId);
             setFavoriteCount(response.favorite_count);
             setIsFavorited(response.is_favorited);
         } catch (err) {
@@ -164,7 +182,10 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, commentCount = 
     const handleShare = async () => {
         try {
             setIsSharing(true);
-            const response: ShareResponse = await mediaApi.shares.getShareUrl(mediaId);
+            // 使用 publicMediaApi 或 mediaApi
+            const response: ShareResponse = usePublicApi
+                ? await publicMediaApi.shares.getShareUrl(apiIdentifier)
+                : await mediaApi.shares.getShareUrl(mediaId);
             setShareData(response);
             setShowShareModal(true);
         } catch (err) {

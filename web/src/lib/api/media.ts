@@ -459,3 +459,192 @@ export const legacyMediaApi = {
         return `/api/v1/admin/encoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
     },
 };
+
+// ==================== Public Media API (short_token based) ====================
+// MediaCMS style: /api/v1/medias/{short_token}
+// 用于公开页面、Watch 页面、用户交互操作
+// 无需认证或可选 JWT 认证
+export const publicMediaApi = {
+    // 获取媒体列表（公开，默认只返回 active 状态）
+    list: (params?: {
+        page?: number;
+        page_size?: number;
+        type?: string;
+        category_id?: number;
+        keyword?: string;
+        user_id?: number;
+        state?: string;
+        featured?: string;
+        order_by?: string;
+        descending?: boolean;
+    }) => api.get<MediaListResponse>("/medias", params as Record<string, unknown>),
+
+    // 获取媒体公开详情（使用 short_token）
+    // 返回公开字段，不包含敏感信息
+    // 自动增加观看计数
+    get: (shortToken: string) => {
+        const cleanToken = String(shortToken).replace(/["']/g, '').trim();
+        return api.get<Media>(`/medias/${cleanToken}`);
+    },
+
+    // 上传媒体文件（需要 JWT，支持进度回调）
+    upload: (
+        file: File,
+        metadata: {
+            title?: string;
+            description?: string;
+            category_id?: number;
+            tags?: string[];
+            privacy?: number;
+        },
+        onProgress?: (percent: number) => void,
+    ) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        if (metadata.title) formData.append("title", metadata.title);
+        if (metadata.description) formData.append("description", metadata.description);
+        if (metadata.category_id) formData.append("category_id", String(metadata.category_id));
+        if (metadata.tags?.length) formData.append("tags", metadata.tags.join(","));
+        if (metadata.privacy) formData.append("privacy", String(metadata.privacy));
+
+        const token = getAccessToken();
+
+        return new Promise<{ data: Media }>((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+
+            if (onProgress) {
+                xhr.upload.addEventListener("progress", (e) => {
+                    if (e.lengthComputable) {
+                        onProgress(Math.round((e.loaded / e.total) * 100));
+                    }
+                });
+            }
+
+            xhr.addEventListener("load", () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        const data = response.data || response;
+                        resolve({data});
+                    } catch {
+                        reject(new Error("Invalid response"));
+                    }
+                } else {
+                    try {
+                        const err = JSON.parse(xhr.responseText);
+                        reject(new Error(err.message || err.error || `Upload failed: ${xhr.status}`));
+                    } catch {
+                        reject(new Error(`Upload failed: ${xhr.status}`));
+                    }
+                }
+            });
+
+            xhr.addEventListener("error", () => reject(new Error("Network error")));
+            xhr.addEventListener("abort", () => reject(new Error("Upload aborted")));
+
+            xhr.open("POST", `${API_BASE_URL}/medias/upload`);
+            if (token) {
+                xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+            }
+            xhr.send(formData);
+        });
+    },
+
+    // ==================== 点赞/点踩 API (使用 short_token) ====================
+    likes: {
+        // 获取点赞状态（无需认证）
+        getStatus: (shortToken: string) =>
+            api.get<LikeResponse>(`/medias/${shortToken}/likes`),
+        // 点赞/取消点赞（需要 JWT）
+        toggle: (shortToken: string) =>
+            api.post<LikeResponse>(`/medias/${shortToken}/likes`),
+        // 点踩/取消点踩（需要 JWT）
+        toggleDislike: (shortToken: string) =>
+            api.post<LikeResponse>(`/medias/${shortToken}/dislikes`),
+    },
+
+    // ==================== 收藏 API (使用 short_token) ====================
+    favorites: {
+        // 获取收藏状态（无需认证）
+        getStatus: (shortToken: string) =>
+            api.get<FavoriteResponse>(`/medias/${shortToken}/favorites`),
+        // 收藏/取消收藏（需要 JWT）
+        toggle: (shortToken: string) =>
+            api.post<FavoriteResponse>(`/medias/${shortToken}/favorites`),
+    },
+
+    // ==================== 分享 API (使用 short_token) ====================
+    shares: {
+        // 获取分享链接（返回 /watch?v={short_token} 格式）
+        getShareUrl: (shortToken: string) =>
+            api.get<ShareResponse>(`/medias/${shortToken}/shares`),
+        // 分享视频（增加分享计数，需要 JWT）
+        share: (shortToken: string) =>
+            api.post<{ success: boolean }>(`/medias/${shortToken}/shares`),
+    },
+};
+
+// ==================== Admin Media API (ID based, requires JWT + Admin) ====================
+// MediaCMS style: /api/v1/admin/medias/:id
+// 用于管理后台、CRUD 操作、完整数据访问
+// 需要 JWT + Admin 角色权限
+export const adminMediaApi = {
+    // 管理端：获取所有媒体（包括未发布的，支持更多过滤条件）
+    list: (params?: {
+        page?: number;
+        page_size?: number;
+        type?: string;
+        state?: string;
+        keyword?: string;
+        user_id?: number | string;
+        category_id?: number | string;
+        featured?: boolean;
+        tags?: string[];
+        order_by?: string;
+        descending?: boolean;
+    }) => api.get<MediaListResponse>("/admin/medias", params as Record<string, unknown>),
+
+    // 获取媒体完整详情（返回所有字段，包括私有视频）
+    // 使用 UUID ID，不接受 short_token
+    getById: (id: string) => api.get<Media>(`/admin/medias/${id}`),
+
+    // 更新媒体（Admin 可以编辑任何媒体）
+    update: (id: string, data: UpdateMediaRequest) =>
+        api.put<Media>(`/admin/medias/${id}`, data),
+
+    // 删除媒体（Admin 可以删除任何媒体）
+    delete: (id: string) => api.del<void>(`/admin/medias/${id}`),
+
+    // 获取统计数据
+    getStats: (id: string) =>
+        api.get<{
+            id: string;
+            view_count: number;
+            like_count: number;
+            dislike_count: number;
+            comment_count: number;
+            favorite_count: number;
+            encoding_status: string;
+        }>(`/admin/medias/${id}/stats`),
+
+    // 获取转码变体信息（Admin 版本，返回详细数据）
+    getVariants: (id: string) =>
+        api.get<MediaVariantSummary>(`/admin/medias/${id}/variants`),
+
+    // 变更媒体状态（用于审核流程）
+    changeState: (id: string, state: string, comment?: string) =>
+        api.put<{
+            id: string;
+            state: string;
+            updated_at: string;
+            changed_by: string;
+        }>(`/admin/medias/${id}/state`, {state, comment}),
+
+    // 获取编码任务列表
+    getTasks: (id: string) =>
+        api.get<{ tasks: EncodingTask[] }>(`/admin/medias/${id}/tasks`),
+
+    // 重试编码任务
+    retryTask: (id: string, taskId: string) =>
+        api.post<{ message: string }>(`/admin/medias/${id}/tasks/${taskId}/retry`),
+};
