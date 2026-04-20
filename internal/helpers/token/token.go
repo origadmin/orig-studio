@@ -7,12 +7,9 @@ import (
 )
 
 const (
-	// TokenLength is the length of the short token
-	TokenLength = 12
-	// ShortIDLength is the length of the short ID
-	ShortIDLength = 8
-	// CharSet is the character set used for generating tokens
-	CharSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	TokenLength   = 22
+	ShortIDLength = 12
+	CharSet       = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 )
 
 // GenerateShortToken generates a random short token for URL references

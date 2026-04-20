@@ -8,6 +8,7 @@ package data
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/data/convpb"
@@ -27,6 +28,41 @@ type mediaRepo struct {
 // NewMediaRepo creates a new Media repository.
 func NewMediaRepo(db *entity.Client) biz.MediaRepo {
 	return &mediaRepo{db: db}
+}
+
+// GetByShortToken 通过 short_token 获取媒体（仅用于公开 API）
+func (r *mediaRepo) GetByShortToken(ctx context.Context, shortToken string) (*types.Media, error) {
+	if strings.TrimSpace(shortToken) == "" {
+		return nil, fmt.Errorf("short_token cannot be empty")
+	}
+	m, err := r.db.Media.Query().
+		Where(media.ShortTokenEQ(shortToken)).
+		Only(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("media not found by short_token %s: %w", shortToken, err)
+	}
+	return convpb.ConvertMediaToMediaPB(m), nil
+}
+
+// GetByID 通过 UUID 获取媒体（仅用于 Admin/Authenticated API）
+func (r *mediaRepo) GetByID(ctx context.Context, id string) (*types.Media, error) {
+	if strings.TrimSpace(id) == "" {
+		return nil, fmt.Errorf("id cannot be empty")
+	}
+	m, err := r.db.Media.Get(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("media not found by id %s: %w", id, err)
+	}
+	return convpb.ConvertMediaToMediaPB(m), nil
+}
+
+// ResolveToID 将 short_token 解析为内部 ID
+func (r *mediaRepo) ResolveToID(ctx context.Context, shortToken string) (string, error) {
+	m, err := r.GetByShortToken(ctx, shortToken)
+	if err != nil {
+		return "", err
+	}
+	return m.Id, nil
 }
 
 func (r *mediaRepo) Get(

@@ -81,6 +81,21 @@ func (uc *MediaUseCase) GetMedia(ctx context.Context, id string) (*Media, error)
 	return uc.repo.Get(ctx, id)
 }
 
+// GetByShortToken 通过 short_token 获取媒体（仅用于公开 API）
+func (uc *MediaUseCase) GetByShortToken(ctx context.Context, shortToken string) (*Media, error) {
+	return uc.repo.GetByShortToken(ctx, shortToken)
+}
+
+// GetByID 通过 UUID 获取媒体（仅用于 Admin/Authenticated API）
+func (uc *MediaUseCase) GetByID(ctx context.Context, id string) (*Media, error) {
+	return uc.repo.GetByID(ctx, id)
+}
+
+// ResolveToID 将 short_token 解析为内部 ID
+func (uc *MediaUseCase) ResolveToID(ctx context.Context, shortToken string) (string, error) {
+	return uc.repo.ResolveToID(ctx, shortToken)
+}
+
 // CheckMedia verifies that a media record exists. Returns an error if not found.
 // Satisfies contentbiz.MediaUseCaseInterface without leaking *types.Media into the content layer.
 func (uc *MediaUseCase) CheckMedia(ctx context.Context, id string) error {
