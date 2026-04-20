@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -53,10 +54,20 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 				Limit(pageSize).
 				Offset((page - 1) * pageSize).
 				Order(entity.Desc(comment.FieldAddDate)).
+				WithUser().
+				WithReplies(func(q *entity.CommentQuery) {
+					q.WithUser().
+						Order(entity.Desc(comment.FieldAddDate))
+				}).
 				All(ctx)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "Failed to fetch comments"})
 				return
+			}
+
+			comments := make([]gin.H, len(items))
+			for i, item := range items {
+				comments[i] = convertCommentToResponse(item)
 			}
 
 			c.JSON(http.StatusOK, gin.H{
@@ -64,7 +75,7 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 				"message": "success",
 				"data": gin.H{
 					"total":     total,
-					"comments":  items,
+					"comments":  comments,
 					"page":      page,
 					"page_size": pageSize,
 				},
@@ -82,7 +93,11 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 				return
 			}
 
-			c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": commentObj})
+			c.JSON(http.StatusOK, gin.H{
+				"code":    0,
+				"message": "success",
+				"data": convertCommentToResponse(commentObj),
+			})
 		})
 	}
 
@@ -139,7 +154,7 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 			c.JSON(http.StatusCreated, gin.H{
 				"code":    0,
 				"message": "success",
-				"data": gin.H{"comment": commentObj},
+				"data": gin.H{"comment": convertCommentToResponse(commentObj)},
 			})
 		})
 
@@ -176,7 +191,7 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 			c.JSON(http.StatusOK, gin.H{
 				"code":    0,
 				"message": "success",
-				"data": gin.H{"comment": commentObj},
+				"data": gin.H{"comment": convertCommentToResponse(commentObj)},
 			})
 		})
 
@@ -194,4 +209,42 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 			c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success"})
 		})
 	}
+}
+
+func convertCommentToResponse(item *entity.Comment) gin.H {
+	resp := gin.H{
+		"id":         item.ID,
+		"content":    item.Text,
+		"status":     item.Status,
+		"create_time": item.AddDate.Format(time.RFC3339),
+		"update_time": item.AddDate.Format(time.RFC3339),
+		"like_count": 0,
+		"is_liked":   false,
+	}
+
+	if item.MediaID != "" {
+		resp["media_id"] = item.MediaID
+	}
+	if item.UserID != "" {
+		resp["user_id"] = item.UserID
+	}
+	if item.Edges.User != nil {
+		u := item.Edges.User
+		resp["username"] = u.Username
+		if u.Logo != "" {
+			resp["avatar"] = u.Logo
+		}
+	}
+	if item.Edges.Parent != nil {
+		resp["parent_id"] = item.Edges.Parent.ID
+	}
+	if len(item.Edges.Replies) > 0 {
+		replies := make([]gin.H, len(item.Edges.Replies))
+		for i, r := range item.Edges.Replies {
+			replies[i] = convertCommentToResponse(r)
+		}
+		resp["replies"] = replies
+	}
+
+	return resp
 }

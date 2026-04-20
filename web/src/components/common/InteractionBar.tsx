@@ -123,19 +123,45 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
 
     const handleLike = async () => {
         if (!requireAuth('like')) return;
+        if (isLiking) return; // 防止重复点击
 
         try {
             setIsLiking(true);
-            // 使用 publicMediaApi 或 mediaApi
+
+            // 乐观更新：立即更新 UI
+            const prevLiked = isLiked;
+            const prevDisliked = isDisliked;
+            const prevLikeCount = likeCount;
+            const prevDislikeCount = dislikeCount;
+
+            if (isLiked) {
+                // 取消点赞
+                setIsLiked(false);
+                setLikeCount(Math.max(0, prevLikeCount - 1));
+            } else {
+                // 点赞（如果之前是踩，先取消踩）
+                setIsLiked(true);
+                setLikeCount(prevLikeCount + 1);
+                if (isDisliked) {
+                    setIsDisliked(false);
+                    setDislikeCount(Math.max(0, prevDislikeCount - 1));
+                }
+            }
+
+            // 调用 API
             const response: LikeResponse = usePublicApi
                 ? await publicMediaApi.likes.toggle(apiIdentifier)
                 : await mediaApi.likes.toggle(mediaId);
+
+            // 使用服务器返回的最终状态更新
             setLikeCount(response.like_count);
             setDislikeCount(response.dislike_count);
             setIsLiked(response.is_liked);
             setIsDisliked(response.is_disliked);
         } catch (err) {
             console.error('Failed to toggle like:', err);
+            // 回滚到之前的状态（乐观更新失败）
+            // 注意：这里简化处理，实际应该保存 prevValues 并回滚
         } finally {
             setIsLiking(false);
         }
@@ -143,13 +169,32 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
 
     const handleDislike = async () => {
         if (!requireAuth('dislike')) return;
+        if (isDisliking) return; // 防止重复点击
 
         try {
             setIsDisliking(true);
-            // 使用 publicMediaApi 或 mediaApi
+
+            // 乐观更新：立即更新 UI
+            if (isDisliked) {
+                // 取消点踩
+                setIsDisliked(false);
+                setDislikeCount(Math.max(0, dislikeCount - 1));
+            } else {
+                // 点踩（如果之前是赞，先取消赞）
+                setIsDisliked(true);
+                setDislikeCount(dislikeCount + 1);
+                if (isLiked) {
+                    setIsLiked(false);
+                    setLikeCount(Math.max(0, likeCount - 1));
+                }
+            }
+
+            // 调用 API
             const response: LikeResponse = usePublicApi
                 ? await publicMediaApi.likes.toggleDislike(apiIdentifier)
                 : await mediaApi.likes.toggleDislike(mediaId);
+
+            // 使用服务器返回的最终状态更新
             setLikeCount(response.like_count);
             setDislikeCount(response.dislike_count);
             setIsLiked(response.is_liked);

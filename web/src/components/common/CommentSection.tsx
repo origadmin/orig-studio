@@ -7,7 +7,7 @@ import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {formatDate} from '@/lib/format';
 import {commentApi} from '@/lib/api/comment';
 import {useAuth} from '@/hooks/useAuth';
-import {useNavigate} from '@tanstack/react-router';
+import {useNavigate, Link} from '@tanstack/react-router';
 
 interface CommentSectionProps {
     mediaId: string;
@@ -19,7 +19,7 @@ interface Comment {
     user_id?: string;
     username?: string;
     avatar?: string;
-    parent_id?: string;
+    parent_id?: string | null;
     content: string;
     status?: string;
     create_time?: string;
@@ -55,19 +55,28 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
             const topLevelComments: Comment[] = [];
 
             const commentsList = response?.comments || [];
-            commentsList.forEach(comment => {
+            commentsList.forEach((comment: any) => {
                 const formattedComment: Comment = {
-                    ...comment,
-                    replies: [],
-                    like_count: 0,
-                    is_liked: false
+                    id: comment.id || '',
+                    media_id: comment.media_id || '',
+                    user_id: comment.user_id || '',
+                    username: comment.username || 'Anonymous',
+                    avatar: comment.avatar || '',
+                    parent_id: comment.parent_id || null,
+                    content: comment.content || '',
+                    status: comment.status || '',
+                    create_time: comment.create_time || '',
+                    update_time: comment.update_time || '',
+                    like_count: comment.like_count || 0,
+                    is_liked: comment.is_liked || false,
+                    replies: comment.replies || []
                 };
-                commentMap.set(comment.id, formattedComment);
+                commentMap.set(formattedComment.id, formattedComment);
 
-                if (!comment.parent_id) {
+                if (!formattedComment.parent_id) {
                     topLevelComments.push(formattedComment);
                 } else {
-                    const parent = commentMap.get(comment.parent_id);
+                    const parent = commentMap.get(formattedComment.parent_id);
                     if (parent) {
                         parent.replies?.push(formattedComment);
                     }
@@ -144,9 +153,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
             </Avatar>
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`font-medium text-gray-900 dark:text-white hover:text-blue-600 cursor-pointer ${isReply ? 'text-sm' : ''}`}>
+                    <Link
+                        to="/@$username"
+                        params={{username: comment.username || 'anonymous'}}
+                        className={`font-medium text-gray-900 dark:text-white hover:text-blue-600 cursor-pointer ${isReply ? 'text-sm' : ''}`}
+                    >
                         @{comment.username || 'Anonymous'}
-                    </span>
+                    </Link>
                     <span className={`text-gray-500 dark:text-gray-400 ${isReply ? 'text-xs' : 'text-xs'}`}>
                         {formatDate(comment.create_time)}
                         {comment.update_time && comment.update_time !== comment.create_time && (

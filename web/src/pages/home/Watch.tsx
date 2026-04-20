@@ -24,7 +24,7 @@ import ErrorPage from '@/components/common/ErrorPage';
 import SubscribeButton from '@/components/common/SubscribeButton';
 import CommentSection from '@/components/common/CommentSection';
 import InteractionBar from '@/components/common/InteractionBar';
-import VideoPlayer from '@/components/common/VideoPlayer';
+import VideoPlayer, {VideoPlayerHandle} from '@/components/common/VideoPlayer';
 
 const WatchPage = () => {
     const {t} = useTranslation();
@@ -36,6 +36,9 @@ const WatchPage = () => {
 
     const [retrying, setRetrying] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    // Video player ref for external control
+    const videoPlayerRef = useRef<VideoPlayerHandle>(null);
 
     const {data: recData} = useMediaList({
         page_size: 10,
@@ -125,9 +128,13 @@ const WatchPage = () => {
                 {/* Player Container with new YouTube-style VideoPlayer */}
                 <div className="relative">
                     <VideoPlayer
-                        src={media.url}
+                        ref={videoPlayerRef}
+                        src={media.url || ''}
                         hlsSrc={media.hls_file}
                         poster={media.poster || media.thumbnail}
+                        onError={(error) => {
+                            console.error('Video player error:', error);
+                        }}
                     />
                     
                     {/* Encoding Status Indicator */}
