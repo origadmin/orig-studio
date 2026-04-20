@@ -90,11 +90,6 @@ func (uc *UserUseCase) GetUserByUsername(ctx context.Context, username string) (
 	return uc.repo.GetByUsername(ctx, username)
 }
 
-// GetUserByHandle retrieves a user by handle.
-func (uc *UserUseCase) GetUserByHandle(ctx context.Context, handle string) (*types.User, error) {
-	return uc.repo.GetByHandle(ctx, handle)
-}
-
 // VerifyPassword checks whether the plain-text password matches the stored hash.
 func (uc *UserUseCase) VerifyPassword(ctx context.Context, userID string, plainPassword string) error {
 	_, hashedPassword, err := uc.repo.GetUserAndPassword(ctx, userID)

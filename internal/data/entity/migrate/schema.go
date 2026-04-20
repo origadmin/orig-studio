@@ -817,7 +817,6 @@ var (
 		{Name: "name", Type: field.TypeString, Size: 250, SchemaType: map[string]string{"postgres": "VARCHAR(250)"}},
 		{Name: "first_name", Type: field.TypeString, Nullable: true, Size: 150},
 		{Name: "last_name", Type: field.TypeString, Nullable: true, Size: 150},
-		{Name: "handle", Type: field.TypeString, Unique: true, Size: 50},
 		{Name: "is_active", Type: field.TypeBool, Default: true},
 		{Name: "is_staff", Type: field.TypeBool, Default: false},
 		{Name: "role", Type: field.TypeEnum, Enums: []string{"user", "admin", "editor"}, Default: "user"},
@@ -855,24 +854,19 @@ var (
 				Columns: []*schema.Column{UsersUserColumns[2]},
 			},
 			{
-				Name:    "user_handle",
+				Name:    "user_is_active",
 				Unique:  false,
 				Columns: []*schema.Column{UsersUserColumns[7]},
 			},
 			{
-				Name:    "user_is_active",
+				Name:    "user_is_staff",
 				Unique:  false,
 				Columns: []*schema.Column{UsersUserColumns[8]},
 			},
 			{
-				Name:    "user_is_staff",
-				Unique:  false,
-				Columns: []*schema.Column{UsersUserColumns[9]},
-			},
-			{
 				Name:    "user_date_added",
 				Unique:  false,
-				Columns: []*schema.Column{UsersUserColumns[25]},
+				Columns: []*schema.Column{UsersUserColumns[24]},
 			},
 		},
 	}

@@ -27,8 +27,6 @@ const (
 	FieldFirstName = "first_name"
 	// FieldLastName holds the string denoting the last_name field in the database.
 	FieldLastName = "last_name"
-	// FieldHandle holds the string denoting the handle field in the database.
-	FieldHandle = "handle"
 	// FieldIsActive holds the string denoting the is_active field in the database.
 	FieldIsActive = "is_active"
 	// FieldIsStaff holds the string denoting the is_staff field in the database.
@@ -182,7 +180,6 @@ var Columns = []string{
 	FieldName,
 	FieldFirstName,
 	FieldLastName,
-	FieldHandle,
 	FieldIsActive,
 	FieldIsStaff,
 	FieldRole,
@@ -239,8 +236,6 @@ var (
 	FirstNameValidator func(string) error
 	// LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
 	LastNameValidator func(string) error
-	// HandleValidator is a validator for the "handle" field. It is called by the builders before save.
-	HandleValidator func(string) error
 	// DefaultIsActive holds the default value on creation for the "is_active" field.
 	DefaultIsActive bool
 	// DefaultIsStaff holds the default value on creation for the "is_staff" field.
@@ -340,11 +335,6 @@ func ByFirstName(opts ...sql.OrderTermOption) OrderOption {
 // ByLastName orders the results by the last_name field.
 func ByLastName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastName, opts...).ToFunc()
-}
-
-// ByHandle orders the results by the handle field.
-func ByHandle(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldHandle, opts...).ToFunc()
 }
 
 // ByIsActive orders the results by the is_active field.

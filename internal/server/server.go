@@ -11,6 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/origadmin/runtime/log"
+	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/handler"
 )
 
@@ -31,6 +33,8 @@ type Server struct {
 	searchHandler      *SearchHandler
 	meHandler          *MeHandler
 	adminHandler       *AdminHandler
+	entityClient       *entity.Client
+	jwtMgr             *auth.Manager
 }
 
 // NewServer creates a new server instance.
@@ -50,6 +54,8 @@ func NewServer(
 	searchHandler *SearchHandler,
 	meHandler *MeHandler,
 	adminHandler *AdminHandler,
+	entityClient *entity.Client,
+	jwtMgr *auth.Manager,
 ) *Server {
 	return &Server{
 		authHandler:        authHandler,
@@ -67,6 +73,8 @@ func NewServer(
 		searchHandler:      searchHandler,
 		meHandler:          meHandler,
 		adminHandler:       adminHandler,
+		entityClient:       entityClient,
+		jwtMgr:             jwtMgr,
 	}
 }
 
@@ -131,6 +139,9 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 		s.meHandler.Register(adapter)
 		s.adminHandler.Register(adapter)
 	}
+
+	// Comment routes (direct gin registration for entity access)
+	RegisterCommentRoutes(apiV1, s.entityClient, s.jwtMgr)
 }
 
 // getEnv gets an environment variable or returns the default value.

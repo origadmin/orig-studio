@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package api.v1.services;
+
+import "gnostic/openapi/v3/annotations.proto";
+
+option go_package = "origadmin/application/origcms/api/gen/v1/services;services";
+
+// OpenAPI v3 metadata for OrigCMS API documentation.
+// This file provides API metadata that is used to generate OpenAPI/Swagger documentation.
+//
+// Reference:
+//   - Backend project: projects/backend/api/v1/proto/annotations.proto
+//   - Gnostic: https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+//   - Buf: https://buf.build/docs/configuration/generate/plugins#openapiv2
+
+option (gnostic.openapi.v3.document) = {
+  info: {
+    title: "OrigCMS API"
+    version: "Version from annotation"
+    description: "OrigCMS is a modern Content Management System for video platforms."
+    contact: {
+      name: "GodCong"
+      url: "https://github.com/origadmin"
+      email: "waitforadding@gmail.com"
+    }
+    license: {
+      name: "MIT"
+      url: "https://origadmin/application/origcms/blob/master/LICENSE"
+    }
+  }
+  servers: [
+    {url: "http://localhost:18080"},
+    {url: "https://localhost:18080"}
+  ]
+  components: {
+    security_schemes: {
+      additional_properties: [
+        {
+          name: "Basic"
+          value: {
+            security_scheme: {
+              type: "http"
+              scheme: "basic"
+            }
+          }
+        },
+        {
+          name: "Bearer"
+          value: {
+            security_scheme: {
+              type: "apiKey"
+              name: "Authorization"
+              in: "header"
+            }
+          }
+        }
+      ]
+    }
+  }
+};

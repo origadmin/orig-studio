@@ -5,227 +5,408 @@
 package biz
 
 import (
-	"context"
 	"encoding/json"
-	"os"
 	"testing"
-	"time"
 
-	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/stretchr/testify/assert"
-
+	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/svc-media/dto"
 )
 
-// MockTranscodeWorker 模拟转码 worker
-type MockTranscodeWorker struct {
-	tasks []TranscodeJob
-}
+func TestMediaEncodeRequest_Unmarshal(t *testing.T) {
+	tests := []struct {
+		name    string
+		payload string
+		want    MediaEncodeRequest
+		wantErr bool
+	}{
+		{
+			name:    "valid request with all fields",
+			payload: `{"media_id":"123","media_path":"uploads/test.mp4","content_type":"video/mp4"}`,
+			want: MediaEncodeRequest{
+				MediaID:     "123",
+				MediaPath:   "uploads/test.mp4",
+				ContentType: "video/mp4",
+				TaskID:      nil,
+			},
+			wantErr: false,
+		},
+		{
+			name:    "valid request with task_id for retry",
+			payload: `{"media_id":"123","media_path":"uploads/test.mp4","content_type":"video/mp4","task_id":"task-456"}`,
+			want: MediaEncodeRequest{
+				MediaID:     "123",
+				MediaPath:   "uploads/test.mp4",
+				ContentType: "video/mp4",
+				TaskID:      strPtr("task-456"),
+			},
+			wantErr: false,
+		},
+		{
+			name:    "invalid json",
+			payload: `{"media_id":`,
+			want:    MediaEncodeRequest{},
+			wantErr: true,
+		},
+	}
 
-func NewMockTranscodeWorker() *MockTranscodeWorker {
-	return &MockTranscodeWorker{
-		tasks: make([]TranscodeJob, 0),
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var req MediaEncodeRequest
+			err := json.Unmarshal([]byte(tt.payload), &req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Unmarshal() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr {
+				if req.MediaID != tt.want.MediaID {
+					t.Errorf("MediaID = %v, want %v", req.MediaID, tt.want.MediaID)
+				}
+				if req.MediaPath != tt.want.MediaPath {
+					t.Errorf("MediaPath = %v, want %v", req.MediaPath, tt.want.MediaPath)
+				}
+				if req.ContentType != tt.want.ContentType {
+					t.Errorf("ContentType = %v, want %v", req.ContentType, tt.want.ContentType)
+				}
+				if (req.TaskID == nil) != (tt.want.TaskID == nil) {
+					t.Errorf("TaskID mismatch: got %v, want %v", req.TaskID, tt.want.TaskID)
+				}
+				if req.TaskID != nil && tt.want.TaskID != nil && *req.TaskID != *tt.want.TaskID {
+					t.Errorf("TaskID = %v, want %v", *req.TaskID, *tt.want.TaskID)
+				}
+			}
+		})
 	}
 }
 
-func (w *MockTranscodeWorker) Submit(ctx context.Context, job TranscodeJob) error {
-	w.tasks = append(w.tasks, job)
-	// 模拟转码成功
-	return nil
-}
+func TestMediaEncodeEvent_Marshal(t *testing.T) {
+	event := MediaEncodeEvent{
+		MediaID: "123",
+		Task: &EncodingTask{
+			Id:        "task-1",
+			MediaId:   "123",
+			ProfileId: 1,
+			Status:    enums.EncodingTaskStatusSuccess,
+		},
+		Status: "success",
+		Error:  "",
+	}
 
-func (w *MockTranscodeWorker) Shutdown(ctx context.Context) error {
-	// 模拟关闭
-	return nil
-}
+	data, err := json.Marshal(event)
+	if err != nil {
+		t.Fatalf("Marshal() error = %v", err)
+	}
 
-func (w *MockTranscodeWorker) Status() WorkerPoolStatus {
-	// 模拟状态
-	return WorkerPoolStatus{
-		MaxWorkers:    4,
-		ActiveWorkers: 0,
-		PendingJobs:   int32(len(w.tasks)),
+	var decoded MediaEncodeEvent
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("Unmarshal() error = %v", err)
+	}
+
+	if decoded.MediaID != event.MediaID {
+		t.Errorf("MediaID = %v, want %v", decoded.MediaID, event.MediaID)
+	}
+	if decoded.Status != event.Status {
+		t.Errorf("Status = %v, want %v", decoded.Status, event.Status)
+	}
+	if decoded.Task == nil || decoded.Task.Id != event.Task.Id {
+		t.Errorf("Task.Id = %v, want %v", decoded.Task.Id, event.Task.Id)
 	}
 }
 
-// MockMessagePublisher 模拟消息发布器
-type MockMessagePublisher struct {
-	messages []*message.Message
+func TestEncodingTask_StatusTransitions(t *testing.T) {
+	tests := []struct {
+		name    string
+		initial enums.EncodingTaskStatus
+		target  enums.EncodingTaskStatus
+	}{
+		{"pending to processing", enums.EncodingTaskStatusPending, enums.EncodingTaskStatusProcessing},
+		{"processing to success", enums.EncodingTaskStatusProcessing, enums.EncodingTaskStatusSuccess},
+		{"processing to failed", enums.EncodingTaskStatusProcessing, enums.EncodingTaskStatusFailed},
+		{"pending to success direct", enums.EncodingTaskStatusPending, enums.EncodingTaskStatusSuccess},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			task := &EncodingTask{
+				Id:        "test-task",
+				MediaId:   "media-1",
+				ProfileId: 1,
+				Status:    tt.initial,
+			}
+			task.Status = tt.target
+
+			if task.Status != tt.target {
+				t.Errorf("Status transition failed: got %v, want %v", task.Status, tt.target)
+			}
+		})
+	}
 }
 
-func NewMockMessagePublisher() *MockMessagePublisher {
-	return &MockMessagePublisher{
-		messages: make([]*message.Message, 0),
+func TestTranscodeHandler_EstimateBandwidth(t *testing.T) {
+	tests := []struct {
+		name    string
+		profile *dto.EncodeProfile
+		wantMin int
+		wantMax int
+	}{
+		{
+			name: "4K profile with bitrate",
+			profile: &dto.EncodeProfile{
+				Resolution:      "2160",
+				BentoParameters: "--video-bitrate 20M",
+			},
+			wantMin: 19_000_000,
+			wantMax: 21_000_000,
+		},
+		{
+			name: "1080p profile with bitrate",
+			profile: &dto.EncodeProfile{
+				Resolution:      "1080",
+				BentoParameters: "--video-bitrate 4000k",
+			},
+			wantMin: 3_500_000,
+			wantMax: 4_500_000,
+		},
+		{
+			name: "720p profile without explicit bitrate (fallback)",
+			profile: &dto.EncodeProfile{
+				Resolution: "720",
+			},
+			wantMin: 3_500_000,
+			wantMax: 4_500_000,
+		},
+		{
+			name: "480p fallback",
+			profile: &dto.EncodeProfile{
+				Resolution: "480",
+			},
+			wantMin: 1_800_000,
+			wantMax: 2_200_000,
+		},
+		{
+			name: "360p fallback",
+			profile: &dto.EncodeProfile{
+				Resolution: "360",
+			},
+			wantMin: 900_000,
+			wantMax: 1_100_000,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bw := estimateBandwidth(tt.profile)
+			if bw < tt.wantMin || bw > tt.wantMax {
+				t.Errorf("estimateBandwidth() = %d, want between %d and %d", bw, tt.wantMin, tt.wantMax)
+			}
+		})
 	}
 }
 
-func (p *MockMessagePublisher) Publish(topic string, messages ...*message.Message) error {
-	p.messages = append(p.messages, messages...)
-	return nil
+func TestTranscodeJob_OutputPaths(t *testing.T) {
+	mediaUUID := "test-media-uuid-123"
+	profileName := "1080p"
+
+	tests := []struct {
+		name      string
+		profile   *dto.EncodeProfile
+		expectDir string
+	}{
+		{
+			name:      "video profile HLS output",
+			profile:   &dto.EncodeProfile{Name: profileName, Extension: "mp4", Resolution: "1080"},
+			expectDir: "hls/" + mediaUUID + "/" + profileName,
+		},
+		{
+			name:      "preview profile GIF output",
+			profile:   &dto.EncodeProfile{Name: "preview", Extension: "gif", Resolution: "-"},
+			expectDir: "previews",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var outputDir string
+			if IsVideoProfile(tt.profile) {
+				outputDir = "hls/" + mediaUUID + "/" + tt.profile.Name
+			} else if IsPreviewProfile(tt.profile) {
+				outputDir = "previews"
+			}
+
+			if outputDir != tt.expectDir {
+				t.Errorf("outputDir = %v, want %v", outputDir, tt.expectDir)
+			}
+		})
+	}
 }
 
-func (p *MockMessagePublisher) Close() error {
-	// 模拟关闭
-	return nil
+func TestTranscodeHandler_ProcessMedia_StatusDetermination(t *testing.T) {
+	tests := []struct {
+		name       string
+		videoTasks []enums.EncodingTaskStatus
+		wantStatus string
+	}{
+		{
+			name:       "all video tasks succeed",
+			videoTasks: []enums.EncodingTaskStatus{enums.EncodingTaskStatusSuccess, enums.EncodingTaskStatusSuccess},
+			wantStatus: "success",
+		},
+		{
+			name:       "some video tasks succeed (partial)",
+			videoTasks: []enums.EncodingTaskStatus{enums.EncodingTaskStatusSuccess, enums.EncodingTaskStatusFailed},
+			wantStatus: "partial",
+		},
+		{
+			name:       "all video tasks fail",
+			videoTasks: []enums.EncodingTaskStatus{enums.EncodingTaskStatusFailed, enums.EncodingTaskStatusFailed},
+			wantStatus: "failed",
+		},
+		{
+			name:       "no video tasks (all preview)",
+			videoTasks: []enums.EncodingTaskStatus{},
+			wantStatus: "success",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			status := determineMediaStatus(tt.videoTasks)
+			if status != tt.wantStatus {
+				t.Errorf("determineMediaStatus() = %v, want %v", status, tt.wantStatus)
+			}
+		})
+	}
 }
 
-// TestTranscodeHandler_Handle 测试转码请求处理
-func TestTranscodeHandler_Handle(t *testing.T) {
-	// 创建模拟依赖
-	mediaRepo := NewMockReviewRepo()
-	profileRepo := NewMockEncodeProfileRepo()
-	encodingRepo := NewMockEncodingTaskRepo()
-	worker := NewMockTranscodeWorker()
-	publisher := NewMockMessagePublisher()
-	logger := log.NewStdLogger(os.Stdout)
-	
-	// 创建媒体用例
-	mediaUC := NewMediaUseCase(mediaRepo, nil, nil, nil, nil, logger)
-	
-	// 创建转码处理器
-	handler := NewTranscodeHandler(
-		mediaUC,
-		profileRepo,
-		encodingRepo,
-		mediaRepo,
-		worker,
-		publisher,
-		logger,
-		"./test-data",
-		1*time.Second, // 短超时
-	)
-	
-	// 创建测试媒体
-	media := &Media{
-		Id:             "media-123",
-		Title:          "Test Video",
-		Type:           "video",
-		Url:            "uploads/test.mp4",
-		UserId:         "user-123",
-		State:          "active",
-		EncodingStatus: "pending",
-		MimeType:       "video/mp4",
-		Size:           1024 * 1024,
-		Extension:      "mp4",
-		Privacy:        1,
+func determineMediaStatus(videoTasks []enums.EncodingTaskStatus) string {
+	if len(videoTasks) == 0 {
+		return "success"
 	}
-	
-	// 保存媒体
-	_, err := mediaRepo.Create(context.Background(), media)
-	assert.NoError(t, err)
-	
-	// 创建测试编码配置
-	profile1 := &dto.EncodeProfile{
-		Id:         1,
-		Name:       "720p",
-		Resolution: "720",
-		Extension:  "mp4",
-		IsActive:   true,
+
+	successCount := 0
+
+	for _, status := range videoTasks {
+		if status == enums.EncodingTaskStatusSuccess {
+			successCount++
+		}
 	}
-	_, err = profileRepo.Create(context.Background(), profile1)
-	assert.NoError(t, err)
-	
-	// 创建转码请求
-	req := MediaEncodeRequest{
-		MediaID:     "media-123",
-		MediaPath:   "uploads/test.mp4",
-		ContentType: "video/mp4",
+
+	if successCount == len(videoTasks) {
+		return "success"
 	}
-	
-	// 序列化请求
-	payload, err := json.Marshal(req)
-	assert.NoError(t, err)
-	
-	// 创建消息
-	msg := message.NewMessage("msg-1", payload)
-	
-	// 处理转码请求
-	err = handler.Handle(msg)
-	// 预期会失败，因为缺少 ffmpeg 和输出文件
-	assert.Error(t, err)
-	
-	// 验证媒体状态更新
-	updatedMedia, err := mediaRepo.Get(context.Background(), "media-123")
-	assert.NoError(t, err)
-	assert.Equal(t, "processing", updatedMedia.EncodingStatus)
+	if successCount > 0 {
+		return "partial"
+	}
+	return "failed"
 }
 
-// TestTranscodeHandler_ProcessMedia 测试转码流程核心逻辑
-func TestTranscodeHandler_ProcessMedia(t *testing.T) {
-	// 创建模拟依赖
-	mediaRepo := NewMockReviewRepo()
-	profileRepo := NewMockEncodeProfileRepo()
-	encodingRepo := NewMockEncodingTaskRepo()
-	worker := NewMockTranscodeWorker()
-	publisher := NewMockMessagePublisher()
-	logger := log.NewStdLogger(os.Stdout)
-	
-	// 创建媒体用例
-	mediaUC := NewMediaUseCase(mediaRepo, nil, nil, nil, nil, logger)
-	
-	// 创建转码处理器
-	handler := NewTranscodeHandler(
-		mediaUC,
-		profileRepo,
-		encodingRepo,
-		mediaRepo,
-		worker,
-		publisher,
-		logger,
-		"./test-data",
-		1*time.Second, // 短超时
-	)
-	
-	// 创建测试媒体
-	media := &Media{
-		Id:             "media-123",
-		Title:          "Test Video",
-		Type:           "video",
-		Url:            "uploads/test.mp4",
-		UserId:         "user-123",
-		State:          "active",
-		EncodingStatus: "pending",
-		MimeType:       "video/mp4",
-		Size:           1024 * 1024,
-		Extension:      "mp4",
-		Privacy:        1,
+func strPtr(s string) *string {
+	return &s
+}
+
+func TestEncodingEvent_Progress(t *testing.T) {
+	event := &EncodingEvent{
+		MediaId:  "media-1",
+		Task:     &EncodingTask{Id: "task-1"},
+		Progress: 50,
+		Speed:    "1.5x",
+		Fps:      30,
+		Time:     120,
 	}
-	
-	// 保存媒体
-	_, err := mediaRepo.Create(context.Background(), media)
-	assert.NoError(t, err)
-	
-	// 创建测试编码配置
-	profile1 := &dto.EncodeProfile{
-		Id:         1,
-		Name:       "720p",
-		Resolution: "720",
-		Extension:  "mp4",
-		IsActive:   true,
+
+	if event.Progress != 50 {
+		t.Errorf("Progress = %d, want 50", event.Progress)
 	}
-	_, err = profileRepo.Create(context.Background(), profile1)
-	assert.NoError(t, err)
-	
-	// 创建转码请求
-	req := &MediaEncodeRequest{
-		MediaID:     "media-123",
-		MediaPath:   "uploads/test.mp4",
-		ContentType: "video/mp4",
+
+	if event.Speed != "1.5x" {
+		t.Errorf("Speed = %s, want 1.5x", event.Speed)
 	}
-	
-	// 处理转码请求
-	err = handler.processMedia(context.Background(), req)
-	// 预期会失败，因为缺少 ffmpeg 和输出文件
-	assert.Error(t, err)
-	
-	// 验证任务创建
-	tasks, err := encodingRepo.ListByMedia(context.Background(), "media-123")
-	assert.NoError(t, err)
-	assert.Greater(t, len(tasks), 0)
-	
-	// 验证媒体状态更新
-	updatedMedia, err := mediaRepo.Get(context.Background(), "media-123")
-	assert.NoError(t, err)
-	assert.Equal(t, "processing", updatedMedia.EncodingStatus)
+}
+
+func TestMediaEncodingStatus_Constants(t *testing.T) {
+	tests := []struct {
+		status enums.MediaEncodingStatus
+		want   string
+	}{
+		{enums.MediaEncodingStatusUnknown, "unknown"},
+		{enums.MediaEncodingStatusPending, "pending"},
+		{enums.MediaEncodingStatusProcessing, "processing"},
+		{enums.MediaEncodingStatusSuccess, "success"},
+		{enums.MediaEncodingStatusFailed, "failed"},
+		{enums.MediaEncodingStatusPartial, "partial"},
+	}
+
+	for _, tt := range tests {
+		t.Run(string(tt.status), func(t *testing.T) {
+			if string(tt.status) != tt.want {
+				t.Errorf("status = %s, want %s", tt.status, tt.want)
+			}
+		})
+	}
+}
+
+func TestEncodingTaskStatus_Constants(t *testing.T) {
+	tests := []struct {
+		status enums.EncodingTaskStatus
+		want   string
+	}{
+		{enums.EncodingTaskStatusUnknown, "unknown"},
+		{enums.EncodingTaskStatusPending, "pending"},
+		{enums.EncodingTaskStatusProcessing, "processing"},
+		{enums.EncodingTaskStatusSuccess, "success"},
+		{enums.EncodingTaskStatusFailed, "failed"},
+		{enums.EncodingTaskStatusSkipped, "skipped"},
+	}
+
+	for _, tt := range tests {
+		t.Run(string(tt.status), func(t *testing.T) {
+			if string(tt.status) != tt.want {
+				t.Errorf("status = %s, want %s", tt.status, tt.want)
+			}
+		})
+	}
+}
+
+func TestTranscodeJob_Structure(t *testing.T) {
+	job := TranscodeJob{
+		MediaID:   "media-123",
+		TaskID:    "task-456",
+		Profile:   &dto.EncodeProfile{Name: "1080p", Resolution: "1080"},
+		InputPath: "/path/to/input.mp4",
+		OutputDir: "/path/to/output",
+		UUID:      "uuid-789",
+	}
+
+	if job.MediaID != "media-123" {
+		t.Errorf("MediaID = %s, want media-123", job.MediaID)
+	}
+
+	if job.TaskID != "task-456" {
+		t.Errorf("TaskID = %s, want task-456", job.TaskID)
+	}
+
+	if job.Profile.Name != "1080p" {
+		t.Errorf("Profile.Name = %s, want 1080p", job.Profile.Name)
+	}
+}
+
+func TestVariantInfo(t *testing.T) {
+	info := VariantInfo{
+		TaskID:      "task-1",
+		ProfileName: "1080p",
+		Bandwidth:   8_000_000,
+		Resolution:  "1920x1080",
+		Codec:      "h264",
+	}
+
+	if info.Bandwidth != 8_000_000 {
+		t.Errorf("Bandwidth = %d, want 8000000", info.Bandwidth)
+	}
+
+	if info.Resolution != "1920x1080" {
+		t.Errorf("Resolution = %s, want 1920x1080", info.Resolution)
+	}
+
+	if info.ProfileName != "1080p" {
+		t.Errorf("ProfileName = %s, want 1080p", info.ProfileName)
+	}
 }

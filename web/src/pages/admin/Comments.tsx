@@ -66,12 +66,12 @@ const Comments: React.FC = () => {
                         title: comment.media?.title || 'Unknown Media',
                         id: comment.media_id || 0
                     },
-                    content: comment.body || comment.text || '',
+                    content: comment.content || comment.body || comment.text || '',
                     likes: comment.like_count || 0,
                     replies: comment.reply_count || 0,
                     status: comment.status || 'approved',
                     isSpam: comment.is_spam || false,
-                    createdAt: comment.created_at || new Date().toISOString()
+                    createdAt: comment.create_time || comment.created_at || new Date().toISOString()
                 }));
                 setComments(mappedComments);
             } catch (err: any) {

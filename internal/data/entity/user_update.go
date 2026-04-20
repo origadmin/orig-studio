@@ -136,20 +136,6 @@ func (_u *UserUpdate) ClearLastName() *UserUpdate {
 	return _u
 }
 
-// SetHandle sets the "handle" field.
-func (_u *UserUpdate) SetHandle(v string) *UserUpdate {
-	_u.mutation.SetHandle(v)
-	return _u
-}
-
-// SetNillableHandle sets the "handle" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableHandle(v *string) *UserUpdate {
-	if v != nil {
-		_u.SetHandle(*v)
-	}
-	return _u
-}
-
 // SetIsActive sets the "is_active" field.
 func (_u *UserUpdate) SetIsActive(v bool) *UserUpdate {
 	_u.mutation.SetIsActive(v)
@@ -955,11 +941,6 @@ func (_u *UserUpdate) check() error {
 			return &ValidationError{Name: "last_name", err: fmt.Errorf(`entity: validator failed for field "User.last_name": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Handle(); ok {
-		if err := user.HandleValidator(v); err != nil {
-			return &ValidationError{Name: "handle", err: fmt.Errorf(`entity: validator failed for field "User.handle": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Role(); ok {
 		if err := user.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf(`entity: validator failed for field "User.role": %w`, err)}
@@ -1024,9 +1005,6 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.LastNameCleared() {
 		_spec.ClearField(user.FieldLastName, field.TypeString)
-	}
-	if value, ok := _u.mutation.Handle(); ok {
-		_spec.SetField(user.FieldHandle, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.IsActive(); ok {
 		_spec.SetField(user.FieldIsActive, field.TypeBool, value)
@@ -1761,20 +1739,6 @@ func (_u *UserUpdateOne) SetNillableLastName(v *string) *UserUpdateOne {
 // ClearLastName clears the value of the "last_name" field.
 func (_u *UserUpdateOne) ClearLastName() *UserUpdateOne {
 	_u.mutation.ClearLastName()
-	return _u
-}
-
-// SetHandle sets the "handle" field.
-func (_u *UserUpdateOne) SetHandle(v string) *UserUpdateOne {
-	_u.mutation.SetHandle(v)
-	return _u
-}
-
-// SetNillableHandle sets the "handle" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableHandle(v *string) *UserUpdateOne {
-	if v != nil {
-		_u.SetHandle(*v)
-	}
 	return _u
 }
 
@@ -2596,11 +2560,6 @@ func (_u *UserUpdateOne) check() error {
 			return &ValidationError{Name: "last_name", err: fmt.Errorf(`entity: validator failed for field "User.last_name": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Handle(); ok {
-		if err := user.HandleValidator(v); err != nil {
-			return &ValidationError{Name: "handle", err: fmt.Errorf(`entity: validator failed for field "User.handle": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Role(); ok {
 		if err := user.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf(`entity: validator failed for field "User.role": %w`, err)}
@@ -2682,9 +2641,6 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if _u.mutation.LastNameCleared() {
 		_spec.ClearField(user.FieldLastName, field.TypeString)
-	}
-	if value, ok := _u.mutation.Handle(); ok {
-		_spec.SetField(user.FieldHandle, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.IsActive(); ok {
 		_spec.SetField(user.FieldIsActive, field.TypeBool, value)
