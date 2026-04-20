@@ -27,7 +27,7 @@ func (Media) Fields() []ent.Field {
 		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.GenUUIDv7), // UUIDv7 for distributed system
 		field.String("title").MaxLen(255),
 		field.Text("description").Optional(),
-		field.String("short_token").MaxLen(150).DefaultFunc(idutil.GenShortID).Optional(),
+		field.String("short_token").MaxLen(150).DefaultFunc(idutil.GenShortID).Unique().NotEmpty(),
 		field.String("type").MaxLen(20).Default("video"), // video / image / audio
 		field.String("url").MaxLen(512),                  // original file path
 		field.String("hls_file").MaxLen(1024).Optional(), // HLS master playlist path
@@ -77,7 +77,7 @@ func (Media) Indexes() []ent.Index {
 		index.Fields("view_count"),
 		index.Fields("created_at"),
 		index.Fields("user_id"),
-		// category_id 由 edge 自动管理，索引通过 edge 生成
+		index.Fields("short_token").Unique(),
 	}
 }
 

@@ -151,10 +151,10 @@ func (h *MediaHandler) RegisterGin(rg *gin.RouterGroup) {
 	// 1. Independent fixed paths - no conflict with variable paths
 	// ================================
 
-	// Media upload
+	// Media upload (requires JWT)
 	rg.POST("/medias/upload", JWTMiddleware(h.jwtMgr), h.uploadMedia())
 
-	// Media list
+	// Media list (public)
 	rg.GET("/medias", h.listMedia())
 
 	// Encoding Profiles - independent path to avoid conflict with /medias/:id
@@ -171,70 +171,69 @@ func (h *MediaHandler) RegisterGin(rg *gin.RouterGroup) {
 	rg.POST("/encoding/retry-all-failed", JWTMiddleware(h.jwtMgr), h.retryAllFailed())
 
 	// ================================
-	// 2. Media resource paths - with variable parameters
+	// 2. Public Routes (short_token based) - MediaCMS style
+	// 与 MediaCMS 的 /api/v1/media/{friendly_token} 一致
 	// ================================
-	media := rg.Group("/media")
+	publicMedias := rg.Group("/medias")
 	{
-		// Media CRUD Operations
-		media.GET("/:id", h.getMedia())
-		media.PUT("/:id", JWTMiddleware(h.jwtMgr), h.updateMedia())
-		media.DELETE("/:id", JWTMiddleware(h.jwtMgr), h.deleteMedia())
+		// 核心：使用 short_token，不接受 ID
+		publicMedias.GET("/:short_token", h.getPublicDetail())
 
-		// Media Variants
-		media.GET("/:id/variants", h.getMediaVariants())
-
-		// Media Tasks & Retry
-		media.GET("/:id/tasks", h.listEncodingTasks())
-		media.POST("/:id/tasks/:taskId/retry", JWTMiddleware(h.jwtMgr), h.retryTranscode())
-
-		// Like & Dislike
-		media.GET("/:id/likes", h.getLikeStatus())
-		media.POST("/:id/likes", JWTMiddleware(h.jwtMgr), h.toggleLike())
-		media.DELETE("/:id/likes", JWTMiddleware(h.jwtMgr), h.toggleDislike())
-
-		// Favorite
-		media.GET("/:id/favorites", h.getFavoriteStatus())
-		media.POST("/:id/favorites", JWTMiddleware(h.jwtMgr), h.toggleFavorite())
-		media.DELETE("/:id/favorites", JWTMiddleware(h.jwtMgr), h.toggleFavorite())
-
-		// Share
-		media.GET("/:id/shares", h.getShareUrl())
-		media.POST("/:id/shares", JWTMiddleware(h.jwtMgr), h.recordShare())
+		// 交互操作（支持可选JWT）
+		publicMedias.POST("/:short_token/likes", JWTMiddleware(h.jwtMgr), h.toggleLikeByShortToken())
+		publicMedias.GET("/:short_token/likes", h.getLikeStatusByShortToken())
+		publicMedias.DELETE("/:short_token/likes", JWTMiddleware(h.jwtMgr), h.toggleDislikeByShortToken())
+		publicMedias.POST("/:short_token/favorites", JWTMiddleware(h.jwtMgr), h.toggleFavoriteByShortToken())
+		publicMedias.GET("/:short_token/favorites", h.getFavoriteStatusByShortToken())
+		publicMedias.GET("/:short_token/shares", h.getShareUrlByShortToken())
+		publicMedias.POST("/:short_token/shares", JWTMiddleware(h.jwtMgr), h.recordShareByShortToken())
 	}
 
 	// ================================
-	// 3. Medias resource paths - compatible with frontend requests
+	// 3. Admin Routes (ID based, requires JWT + Admin role)
+	// 与 MediaCMS 的 /api/v1/manage_* 一致
 	// ================================
-	medias := rg.Group("/medias")
+	adminMedias := rg.Group("/admin/medias").Use(JWTMiddleware(h.jwtMgr), AdminMiddleware(h.jwtMgr))
 	{
-		// Media CRUD Operations
-		medias.GET("/:id", h.getMedia())
-		medias.PUT("/:id", JWTMiddleware(h.jwtMgr), h.updateMedia())
-		medias.DELETE("/:id", JWTMiddleware(h.jwtMgr), h.deleteMedia())
+		// 管理列表（支持更多过滤条件）
+		adminMedias.GET("", h.adminListMedia())
 
-		// Media Variants
-		medias.GET("/:id/variants", h.getMediaVariants())
+		// 核心管理操作：使用 ID，返回完整信息
+		adminMedias.GET("/:id", h.adminGetByID())
+		adminMedias.PUT("/:id", h.adminUpdateMedia())
+		adminMedias.DELETE("/:id", h.adminDeleteMedia())
 
-		// Media Tasks & Retry
-		medias.GET("/:id/tasks", h.listEncodingTasks())
-		medias.POST("/:id/tasks/:taskId/retry", JWTMiddleware(h.jwtMgr), h.retryTranscode())
+		// 统计和变体信息
+		adminMedias.GET("/:id/stats", h.adminGetStats())
+		adminMedias.GET("/:id/variants", h.adminGetVariants())
+		adminMedias.GET("/:id/tasks", h.listEncodingTasks())
+		adminMedias.POST("/:id/tasks/:taskId/retry", h.retryTranscode())
 
-		// Like & Dislike
-		medias.GET("/:id/likes", h.getLikeStatus())
-		medias.POST("/:id/likes", JWTMiddleware(h.jwtMgr), h.toggleLike())
-		medias.DELETE("/:id/likes", JWTMiddleware(h.jwtMgr), h.toggleDislike())
+		// 状态变更
+		adminMedias.PUT("/:id/state", h.adminChangeState())
+	}
 
-		// Favorite
-		medias.GET("/:id/favorites", h.getFavoriteStatus())
-		medias.POST("/:id/favorites", JWTMiddleware(h.jwtMgr), h.toggleFavorite())
-		medias.DELETE("/:id/favorites", JWTMiddleware(h.jwtMgr), h.toggleFavorite())
-
-		// Share
-		medias.GET("/:id/shares", h.getShareUrl())
-		medias.POST("/:id/shares", JWTMiddleware(h.jwtMgr), h.recordShare())
-
-		// Review (TODO: add gin version)
-		// medias.POST("/:id/review", JWTMiddleware(h.jwtMgr), h.reviewMediaHandler)
+	// ================================
+	// 4. Legacy Routes (backward compatibility)
+	// 保持旧路由可用，使用 /media/:id (单数) 前缀避免冲突
+	// TODO: Phase 6 删除这些路由
+	// ================================
+	legacyMedia := rg.Group("/media")
+	{
+		legacyMedia.GET("/:id", h.getMedia())
+		legacyMedia.PUT("/:id", JWTMiddleware(h.jwtMgr), h.updateMedia())
+		legacyMedia.DELETE("/:id", JWTMiddleware(h.jwtMgr), h.deleteMedia())
+		legacyMedia.GET("/:id/variants", h.getMediaVariants())
+		legacyMedia.GET("/:id/tasks", h.listEncodingTasks())
+		legacyMedia.POST("/:id/tasks/:taskId/retry", JWTMiddleware(h.jwtMgr), h.retryTranscode())
+		legacyMedia.GET("/:id/likes", h.getLikeStatus())
+		legacyMedia.POST("/:id/likes", JWTMiddleware(h.jwtMgr), h.toggleLike())
+		legacyMedia.DELETE("/:id/likes", JWTMiddleware(h.jwtMgr), h.toggleDislike())
+		legacyMedia.GET("/:id/favorites", h.getFavoriteStatus())
+		legacyMedia.POST("/:id/favorites", JWTMiddleware(h.jwtMgr), h.toggleFavorite())
+		legacyMedia.DELETE("/:id/favorites", JWTMiddleware(h.jwtMgr), h.toggleFavorite())
+		legacyMedia.GET("/:id/shares", h.getShareUrl())
+		legacyMedia.POST("/:id/shares", JWTMiddleware(h.jwtMgr), h.recordShare())
 	}
 }
 
@@ -2010,6 +2009,602 @@ func (h *MediaHandler) recordShare() gin.HandlerFunc {
 
 		OK(c, gin.H{
 			"success": true,
+		})
+	}
+}
+
+// ================================
+// Public API Handlers (short_token based)
+// MediaCMS style: /api/v1/medias/{short_token}
+// ================================
+
+// getPublicDetail 公开媒体详情 (MediaCMS: views.MediaDetail)
+func (h *MediaHandler) getPublicDetail() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		shortToken := c.Param("short_token")
+
+		if shortToken == "" {
+			Fail(c, ErrBadRequest, "short_token is required")
+			return
+		}
+
+		// ✅ 只使用 GetByShortToken，绝不回退到 ID 查询
+		media, err := h.uc.GetByShortToken(ctx, shortToken)
+		if err != nil {
+			Fail(c, ErrMediaNotFound, "media not found")
+			return
+		}
+
+		// 权限检查：私有视频不可通过公开 API 访问
+		if media.State == "private" || media.Privacy == 2 {
+			Fail(c, ErrForbidden, "private media")
+			return
+		}
+
+		// 自增观看计数
+		go func() {
+			bgCtx := context.Background()
+			h.uc.IncrementViewCount(bgCtx, media.Id)
+		}()
+
+		// 返回公开字段（不包含敏感信息）
+		OK(c, filterPublicFields(media))
+	}
+}
+
+// toggleLikeByShortToken 通过 short_token 点赞
+func (h *MediaHandler) toggleLikeByShortToken() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		shortToken := c.Param("short_token")
+
+		if shortToken == "" {
+			Fail(c, ErrBadRequest, "short_token is required")
+			return
+		}
+
+		claims, ok := c.MustGet("claims").(*auth.Claims)
+		if !ok {
+			Fail(c, ErrUnauthorized, "unauthorized")
+			return
+		}
+
+		// 解析 short_token → ID
+		mediaID, err := h.uc.ResolveToID(ctx, shortToken)
+		if err != nil {
+			Fail(c, ErrMediaNotFound, "media not found")
+			return
+		}
+
+		stats, err := h.likeFavoriteUC.ToggleLike(ctx, claims.UserID, mediaID, "like")
+		if err != nil {
+			Fail(c, ErrInternal, err.Error())
+			return
+		}
+
+		OK(c, gin.H{
+			"is_liked":      stats.UserLikeType == "like",
+			"is_disliked":   stats.UserLikeType == "dislike",
+			"like_count":    stats.LikeCount,
+			"dislike_count": stats.DislikeCount,
+		})
+	}
+}
+
+// getLikeStatusByShortToken 获取点赞状态（通过 short_token）
+func (h *MediaHandler) getLikeStatusByShortToken() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		shortToken := c.Param("short_token")
+
+		if shortToken == "" {
+			Fail(c, ErrBadRequest, "short_token is required")
+			return
+		}
+
+		// 解析 short_token → ID
+		mediaID, err := h.uc.ResolveToID(ctx, shortToken)
+		if err != nil {
+			Fail(c, ErrMediaNotFound, "media not found")
+			return
+		}
+
+		var userID string
+		if claims, ok := c.Get("claims"); ok {
+			userID = claims.(*auth.Claims).UserID
+		}
+
+		stats, err := h.likeFavoriteUC.GetMediaStats(ctx, userID, mediaID)
+		if err != nil {
+			Fail(c, ErrInternal, err.Error())
+			return
+		}
+
+		OK(c, gin.H{
+			"is_liked":      stats.UserLikeType == "like",
+			"is_disliked":   stats.UserLikeType == "dislike",
+			"like_count":    stats.LikeCount,
+			"dislike_count": stats.DislikeCount,
+		})
+	}
+}
+
+// toggleDislikeByShortToken 通过 short_token 点踩
+func (h *MediaHandler) toggleDislikeByShortToken() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		shortToken := c.Param("short_token")
+
+		if shortToken == "" {
+			Fail(c, ErrBadRequest, "short_token is required")
+			return
+		}
+
+		claims, ok := c.MustGet("claims").(*auth.Claims)
+		if !ok {
+			Fail(c, ErrUnauthorized, "unauthorized")
+			return
+		}
+
+		// 解析 short_token → ID
+		mediaID, err := h.uc.ResolveToID(ctx, shortToken)
+		if err != nil {
+			Fail(c, ErrMediaNotFound, "media not found")
+			return
+		}
+
+		stats, err := h.likeFavoriteUC.ToggleLike(ctx, claims.UserID, mediaID, "dislike")
+		if err != nil {
+			Fail(c, ErrInternal, err.Error())
+			return
+		}
+
+		OK(c, gin.H{
+			"is_liked":      stats.UserLikeType == "like",
+			"is_disliked":   stats.UserLikeType == "dislike",
+			"like_count":    stats.LikeCount,
+			"dislike_count": stats.DislikeCount,
+		})
+	}
+}
+
+// toggleFavoriteByShortToken 通过 short_token 收藏
+func (h *MediaHandler) toggleFavoriteByShortToken() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		shortToken := c.Param("short_token")
+
+		if shortToken == "" {
+			Fail(c, ErrBadRequest, "short_token is required")
+			return
+		}
+
+		claims, ok := c.MustGet("claims").(*auth.Claims)
+		if !ok {
+			Fail(c, ErrUnauthorized, "unauthorized")
+			return
+		}
+
+		// 解析 short_token → ID
+		mediaID, err := h.uc.ResolveToID(ctx, shortToken)
+		if err != nil {
+			Fail(c, ErrMediaNotFound, "media not found")
+			return
+		}
+
+		stats, err := h.likeFavoriteUC.ToggleFavorite(ctx, claims.UserID, mediaID)
+		if err != nil {
+			Fail(c, ErrInternal, err.Error())
+			return
+		}
+
+		OK(c, gin.H{
+			"success":      true,
+			"is_favorited": stats.IsFavorited,
+		})
+	}
+}
+
+// getFavoriteStatusByShortToken 获取收藏状态（通过 short_token）
+func (h *MediaHandler) getFavoriteStatusByShortToken() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		shortToken := c.Param("short_token")
+
+		if shortToken == "" {
+			Fail(c, ErrBadRequest, "short_token is required")
+			return
+		}
+
+		// 解析 short_token → ID
+		mediaID, err := h.uc.ResolveToID(ctx, shortToken)
+		if err != nil {
+			Fail(c, ErrMediaNotFound, "media not found")
+			return
+		}
+
+		var userID string
+		if claims, ok := c.Get("claims"); ok {
+			userID = claims.(*auth.Claims).UserID
+		}
+
+		stats, err := h.likeFavoriteUC.GetMediaStats(ctx, userID, mediaID)
+		if err != nil {
+			Fail(c, ErrInternal, err.Error())
+			return
+		}
+
+		OK(c, gin.H{
+			"success":      true,
+			"is_favorited": stats.IsFavorited,
+		})
+	}
+}
+
+// getShareUrlByShortToken 获取分享链接（通过 short_token）
+func (h *MediaHandler) getShareUrlByShortToken() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		shortToken := c.Param("short_token")
+
+		if shortToken == "" {
+			Fail(c, ErrBadRequest, "short_token is required")
+			return
+		}
+
+		// Build share URL - using short_token instead of id
+		shareUrl := c.Request.Host + "/watch?v=" + shortToken
+		// Add https:// if not present
+		if len(shareUrl) > 0 && shareUrl[0] != 'h' {
+			shareUrl = "https://" + shareUrl
+		}
+
+		OK(c, gin.H{
+			"url": shareUrl,
+		})
+	}
+}
+
+// recordShareByShortToken 记录分享（通过 short_token）
+func (h *MediaHandler) recordShareByShortToken() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		_, exists := c.Get("claims")
+		if !exists {
+			Fail(c, ErrUnauthorized, "unauthorized")
+			return
+		}
+
+		shortToken := c.Param("short_token")
+		if shortToken == "" {
+			Fail(c, ErrBadRequest, "Invalid short_token")
+			return
+		}
+
+		// TODO: Implement share count increment in the future
+		// For now, just return success
+
+		OK(c, gin.H{
+			"success": true,
+		})
+	}
+}
+
+// filterPublicFields 过滤公开字段，隐藏敏感信息
+func filterPublicFields(m *biz.Media) map[string]interface{} {
+	return map[string]interface{}{
+		"id":             m.Id,
+		"short_token":    m.ShortToken,
+		"title":          m.Title,
+		"description":    m.Description,
+		"url":            m.Url,
+		"hls_file":       m.HlsFile,
+		"thumbnail":      m.Thumbnail,
+		"poster":         m.Poster,
+		"preview_file":   m.PreviewFilePath,
+		"duration":       m.Duration,
+		"width":          m.Width,
+		"height":         m.Height,
+		"view_count":     m.ViewCount,
+		"like_count":     m.LikeCount,
+		"dislike_count":  m.DislikeCount,
+		"comment_count":  m.CommentCount,
+		"favorite_count": m.FavoriteCount,
+		"created_at":     m.CreateTime,
+		"user_id":        m.UserId,
+		"category_id":    m.CategoryId,
+		"tags":           m.Tags,
+	}
+}
+
+// ================================
+// Admin API Handlers (ID based)
+// MediaCMS style: /api/v1/admin/medias/:id
+// ================================
+
+// adminListMedia 管理列表（支持更多过滤条件）
+func (h *MediaHandler) adminListMedia() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+
+		opt := &dto.MediaQueryOption{
+			State:      c.Query("state"),
+			MediaType:  c.Query("type"),
+			OrderBy:    c.DefaultQuery("order_by", "created_at"),
+			Descending: c.DefaultQuery("descending", "true") == "true",
+		}
+		opt.Page = int32(page)
+		opt.PageSize = int32(pageSize)
+		opt.Keyword = c.Query("keyword")
+
+		if userIDStr := c.Query("user_id"); userIDStr != "" {
+			opt.UserID = &userIDStr
+		}
+
+		if catIDStr := c.Query("category_id"); catIDStr != "" {
+			opt.CategoryID = &catIDStr
+		}
+
+		if c.Query("featured") == "true" {
+			v := true
+			opt.Featured = &v
+		}
+
+		// Handle tags filtering
+		if tagsStr := c.Query("tags"); tagsStr != "" {
+			tags := strings.Split(tagsStr, ",")
+			for i := range tags {
+				tags[i] = strings.TrimSpace(tags[i])
+			}
+			opt.Tags = tags
+		}
+
+		items, total, err := h.uc.ListMedias(ctx, opt)
+		if err != nil {
+			Fail(c, ErrInternal, err.Error())
+			return
+		}
+
+		OK(c, gin.H{
+			"items":     items,
+			"total":     total,
+			"page":      page,
+			"page_size": pageSize,
+		})
+	}
+}
+
+// adminGetByID Admin 获取媒体完整信息（使用 GetByID）
+func (h *MediaHandler) adminGetByID() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		idStr := c.Param("id")
+		if idStr == "" {
+			Fail(c, ErrBadRequest, "Invalid ID")
+			return
+		}
+
+		// ✅ 只使用 GetByID，不接受 short_token
+		m, err := h.uc.GetByID(ctx, idStr)
+		if err != nil {
+			Fail(c, ErrMediaNotFound, "media not found")
+			return
+		}
+
+		// Admin 可以看到完整信息，包括私有视频
+		OK(c, m)
+	}
+}
+
+// adminUpdateMedia Admin 更新媒体
+func (h *MediaHandler) adminUpdateMedia() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		// JWT + Admin 权限已由中间件验证
+		idStr := c.Param("id")
+		if idStr == "" {
+			Fail(c, ErrBadRequest, "Invalid ID")
+			return
+		}
+
+		// 使用 GetByID 获取完整信息
+		m, err := h.uc.GetByID(ctx, idStr)
+		if err != nil {
+			Fail(c, ErrMediaNotFound, "media not found")
+			return
+		}
+
+		var req updateMediaRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			Fail(c, ErrBadRequest, err.Error())
+			return
+		}
+
+		if req.Title != "" {
+			m.Title = req.Title
+		}
+		if req.Description != "" {
+			m.Description = req.Description
+		}
+		if req.CategoryID != nil {
+			m.CategoryId = strconv.Itoa(*req.CategoryID)
+		}
+		if req.Tags != nil {
+			m.Tags = req.Tags
+		}
+		if req.Privacy != nil {
+			m.Privacy = int32(*req.Privacy)
+		}
+		if req.State != nil {
+			m.State = *req.State
+		}
+		if req.Featured != nil {
+			m.Featured = *req.Featured
+		}
+
+		updated, err := h.uc.UpdateMedia(ctx, m)
+		if err != nil {
+			Fail(c, ErrInternal, err.Error())
+			return
+		}
+
+		// Re-fetch to get full details
+		updated, _ = h.uc.GetByID(ctx, idStr)
+
+		OK(c, updated)
+	}
+}
+
+// adminDeleteMedia Admin 删除媒体
+func (h *MediaHandler) adminDeleteMedia() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		// JWT + Admin 权限已由中间件验证
+		idStr := c.Param("id")
+		if idStr == "" {
+			Fail(c, ErrBadRequest, "Invalid ID")
+			return
+		}
+
+		// 使用 GetByID 验证存在性
+		m, err := h.uc.GetByID(ctx, idStr)
+		if err != nil {
+			Fail(c, ErrMediaNotFound, "media not found")
+			return
+		}
+
+		// Admin 可以删除任何媒体（不需要权限检查）
+
+		if m.Url != "" {
+			filename := filepath.Base(m.Url)
+			_ = os.Remove(filepath.Join(UploadDir, "uploads", filename))
+		}
+
+		if err := h.uc.DeleteMedia(ctx, idStr); err != nil {
+			Fail(c, ErrInternal, err.Error())
+			return
+		}
+
+		OK(c, gin.H{"message": "deleted"})
+	}
+}
+
+// adminGetStats 获取统计数据
+func (h *MediaHandler) adminGetStats() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		idStr := c.Param("id")
+		if idStr == "" {
+			Fail(c, ErrBadRequest, "Invalid ID")
+			return
+		}
+
+		// 使用 GetByID 获取媒体信息
+		m, err := h.uc.GetByID(ctx, idStr)
+		if err != nil {
+			Fail(c, ErrMediaNotFound, "media not found")
+			return
+		}
+
+		OK(c, gin.H{
+			"id":             m.Id,
+			"view_count":     m.ViewCount,
+			"like_count":     m.LikeCount,
+			"dislike_count":  m.DislikeCount,
+			"comment_count":  m.CommentCount,
+			"favorite_count": m.FavoriteCount,
+			"encoding_status": m.EncodingStatus,
+		})
+	}
+}
+
+// adminGetVariants 获取变体信息（Admin 版本）
+func (h *MediaHandler) adminGetVariants() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		idStr := c.Param("id")
+		if idStr == "" {
+			Fail(c, ErrBadRequest, "invalid media ID")
+			return
+		}
+
+		summary, err := h.uc.GetMediaVariantsByUUID(ctx, idStr)
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				Fail(c, ErrMediaNotFound, "media not found")
+				return
+			}
+			Fail(c, ErrInternal, err.Error())
+			return
+		}
+
+		OK(c, summary)
+	}
+}
+
+// adminChangeState 变更媒体状态
+func (h *MediaHandler) adminChangeState() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		// JWT + Admin 权限已由中间件验证
+		idStr := c.Param("id")
+		if idStr == "" {
+			Fail(c, ErrBadRequest, "Invalid ID")
+			return
+		}
+
+		var req struct {
+			State   string `json:"state"`
+			Comment string `json:"comment"`
+		}
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+			Fail(c, ErrBadRequest, err.Error())
+			return
+		}
+
+		if req.State == "" {
+			Fail(c, ErrBadRequest, "state is required")
+			return
+		}
+
+		// 使用 GetByID 验证存在性
+		_, err := h.uc.GetByID(ctx, idStr)
+		if err != nil {
+			Fail(c, ErrMediaNotFound, "media not found")
+			return
+		}
+
+		err = h.uc.UpdateMediaState(ctx, idStr, req.State)
+		if err != nil {
+			Fail(c, ErrInternal, err.Error())
+			return
+		}
+
+		// Re-fetch to get updated state
+		updated, _ := h.uc.GetByID(ctx, idStr)
+
+		// 获取操作者信息（用于审计日志）
+		var changedBy string
+		if cl, ok := c.Get("claims"); ok {
+			changedBy = cl.(*auth.Claims).UserID
+		} else {
+			changedBy = "system"
+		}
+
+		OK(c, gin.H{
+			"id":         updated.Id,
+			"state":      updated.State,
+			"updated_at": updated.UpdateTime,
+			"changed_by": changedBy,
 		})
 	}
 }

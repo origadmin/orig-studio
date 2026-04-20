@@ -1,6 +1,10 @@
 import i18n from 'i18next';
 
-export function formatDuration(seconds: number): string {
+export function formatDuration(seconds: number | null | undefined): string {
+    if (seconds === null || seconds === undefined || isNaN(seconds)) {
+        return '0:00';
+    }
+
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = seconds % 60;
@@ -20,8 +24,13 @@ export function formatViews(count: number | undefined): string {
     return String(count);
 }
 
-export function formatDate(dateInput: string | number | { seconds: number; nanos: number }): string {
+export function formatDate(dateInput: string | number | { seconds: number; nanos: number } | null | undefined): string {
     const lng = i18n.language;
+
+    if (dateInput === null || dateInput === undefined) {
+        return lng === 'zh' ? '未知时间' : 'Unknown time';
+    }
+
     let date: Date;
 
     if (typeof dateInput === 'string') {
@@ -56,8 +65,13 @@ export function formatFileSize(bytes: number): string {
     return `${bytes} B`;
 }
 
-export function formatRelativeTime(dateInput: string | number | { seconds: number; nanos: number }): string {
+export function formatRelativeTime(dateInput: string | number | { seconds: number; nanos: number } | null | undefined): string {
     const lng = i18n.language;
+
+    if (dateInput === null || dateInput === undefined) {
+        return lng === 'zh' ? '刚刚' : 'Just now';
+    }
+
     let date: Date;
 
     if (typeof dateInput === 'string') {

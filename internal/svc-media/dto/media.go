@@ -15,6 +15,23 @@ import (
 
 // MediaRepo is a Media repository interface.
 type MediaRepo interface {
+	// ========== 公开 API 使用 (short_token based) ==========
+
+	// GetByShortToken 通过 short_token 获取媒体
+	// 用于: GET /api/v1/medias/{short_token}
+	GetByShortToken(context.Context, string) (*types.Media, error)
+
+	// ResolveToID 将 short_token 解析为内部 ID
+	// 用于: 后续操作需要 ID 时（如点赞计数）
+	ResolveToID(context.Context, string) (string, error)
+
+	// ========== 内部/Admin API 使用 (ID based) ==========
+
+	// GetByID 通过 UUID 获取媒体完整信息
+	// 用于: GET /api/v1/admin/medias/:id
+	GetByID(context.Context, string) (*types.Media, error)
+
+	// ========== 原有方法（保持兼容）==========
 	Get(context.Context, string, ...*MediaQueryOption) (*types.Media, error)
 	List(context.Context, ...*MediaQueryOption) ([]*types.Media, int32, error)
 	Create(context.Context, *types.Media, ...*MediaCreateOption) (*types.Media, error)
