@@ -4,7 +4,7 @@
 // versions: v0.0.1
 // source: .
 
-package conv
+package convpb
 
 import (
 	"origadmin/application/origcms/api/gen/v1/types"
@@ -17,6 +17,9 @@ import (
 
 // Local type aliases for external types.
 type (
+	Article            = entity.Article
+	ArticleEdges       = entity.ArticleEdges
+	Articles           = []*entity.Article
 	Category           = entity.Category
 	CategoryEdges      = entity.CategoryEdges
 	CategoryPB         = types.Category
@@ -163,7 +166,7 @@ func ConvertCommentPBToComment(from *CommentPB) *Comment {
 		ID:      from.Id,
 		MediaID: from.MediaId,
 		UserID:  from.UserId,
-		Status:  ConvertInt32ToString(from.Status),
+		Status:  from.Status,
 	}
 	return to
 }
@@ -178,7 +181,7 @@ func ConvertCommentToCommentPB(from *Comment) *CommentPB {
 		Id:      from.ID,
 		UserId:  from.UserID,
 		MediaId: from.MediaID,
-		Status:  ConvertStringToInt32(from.Status),
+		Status:  from.Status,
 	}
 	return to
 }
@@ -190,7 +193,7 @@ func ConvertEncodeProfilePBToEncodeProfile(from *EncodeProfilePB) *EncodeProfile
 	}
 
 	to := &EncodeProfile{
-		ID:          ConvertStringToInt(from.Id),
+		ID:          int(from.Id),
 		Name:        from.Name,
 		Description: from.Description,
 		Extension:   from.Extension,
@@ -209,7 +212,7 @@ func ConvertEncodeProfileToEncodeProfilePB(from *EncodeProfile) *EncodeProfilePB
 	}
 
 	to := &EncodeProfilePB{
-		Id:          ConvertIntToString(from.ID),
+		Id:          int64(from.ID),
 		Name:        from.Name,
 		Description: from.Description,
 		Extension:   from.Extension,
@@ -230,7 +233,7 @@ func ConvertEncodingTaskPBToEncodingTask(from *EncodingTaskPB) *EncodingTask {
 	to := &EncodingTask{
 		ID:           from.Id,
 		MediaID:      from.MediaId,
-		ProfileID:    ConvertStringToInt(from.ProfileId),
+		ProfileID:    int(from.ProfileId),
 		Status:       ConvertStringToEnumsEncodingTaskStatus(from.Status),
 		OutputPath:   from.OutputPath,
 		ErrorMessage: from.ErrorMessage,
@@ -247,7 +250,7 @@ func ConvertEncodingTaskToEncodingTaskPB(from *EncodingTask) *EncodingTaskPB {
 	to := &EncodingTaskPB{
 		Id:           from.ID,
 		MediaId:      from.MediaID,
-		ProfileId:    ConvertIntToString(from.ProfileID),
+		ProfileId:    int64(from.ProfileID),
 		Status:       ConvertEnumsEncodingTaskStatusToString(from.Status),
 		OutputPath:   from.OutputPath,
 		ErrorMessage: from.ErrorMessage,
@@ -321,6 +324,7 @@ func ConvertMediaPBToMedia(from *MediaPB) *Media {
 		ID:              from.Id,
 		Title:           from.Title,
 		Description:     from.Description,
+		ShortToken:      from.ShortToken,
 		Type:            from.Type,
 		URL:             from.Url,
 		HlsFile:         from.HlsFile,
@@ -351,6 +355,7 @@ func ConvertMediaPBToMedia(from *MediaPB) *Media {
 		Tags:            from.Tags,
 		UserID:          from.UserId,
 		CategoryID:      from.CategoryId,
+		ChannelID:       from.ChannelId,
 		PublishedAt:     ConvertTimestampToTime(from.PublishedAt),
 	}
 	return to
@@ -382,12 +387,14 @@ func ConvertMediaToMediaPB(from *Media) *MediaPB {
 		FavoriteCount:   from.FavoriteCount,
 		DownloadCount:   from.DownloadCount,
 		UserId:          from.UserID,
+		ChannelId:       from.ChannelID,
 		CategoryId:      from.CategoryID,
 		Tags:            from.Tags,
 		HlsFile:         from.HlsFile,
 		EncodingStatus:  from.EncodingStatus,
 		PreviewFilePath: from.PreviewFilePath,
 		State:           from.State,
+		ShortToken:      from.ShortToken,
 		PublishedAt:     ConvertTimeToTimestamp(from.PublishedAt),
 		AllowDownload:   from.AllowDownload,
 		EnableComments:  from.EnableComments,
@@ -436,7 +443,7 @@ func ConvertTagPBToTag(from *TagPB) *Tag {
 	}
 
 	to := &Tag{
-		ID:         ConvertStringToInt(from.Id),
+		ID:         int(from.Id),
 		MediaCount: int(from.MediaCount),
 	}
 	return to
@@ -449,7 +456,7 @@ func ConvertTagToTagPB(from *Tag) *TagPB {
 	}
 
 	to := &TagPB{
-		Id:         ConvertIntToString(from.ID),
+		Id:         int64(from.ID),
 		MediaCount: int64(from.MediaCount),
 	}
 	return to

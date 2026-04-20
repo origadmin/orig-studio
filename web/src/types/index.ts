@@ -3,6 +3,7 @@ export interface User {
     username: string;
     nickname?: string;
     avatar?: string;
+    channel_id?: string;
 }
 
 export interface Media {
@@ -16,6 +17,8 @@ export interface Media {
     created_at?: string;
     type?: string;
     size?: string;
+    user_id?: string;
+    channel_id?: string;
     edges?: {
         user?: Array<{
             id: string;
@@ -27,7 +30,7 @@ export interface Media {
         };
     };
     encoding_status?: string;
-    friendly_token?: string;
+    short_token?: string;
     tags?: string[];
     state?: string;
 }

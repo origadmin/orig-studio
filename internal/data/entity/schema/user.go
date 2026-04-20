@@ -30,6 +30,7 @@ func (User) Fields() []ent.Field {
 		field.String("name").MaxLen(250).SchemaType(map[string]string{"postgres": "VARCHAR(250)"}),
 		field.String("first_name").Optional().MaxLen(150),
 		field.String("last_name").Optional().MaxLen(150),
+		field.String("handle").NotEmpty().Unique().MaxLen(50),
 		field.Bool("is_active").Default(true),
 		field.Bool("is_staff").Default(false),
 		field.Enum("role").Values("user", "admin", "editor").Default("user"),
@@ -56,6 +57,7 @@ func (User) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("username"),
 		index.Fields("email"),
+		index.Fields("handle"),
 		index.Fields("is_active"),
 		index.Fields("is_staff"),
 		index.Fields("date_added"),

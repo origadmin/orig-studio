@@ -95,6 +95,11 @@ func LastName(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldLastName, v))
 }
 
+// Handle applies equality check predicate on the "handle" field. It's identical to HandleEQ.
+func Handle(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldHandle, v))
+}
+
 // IsActive applies equality check predicate on the "is_active" field. It's identical to IsActiveEQ.
 func IsActive(v bool) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldIsActive, v))
@@ -593,6 +598,71 @@ func LastNameEqualFold(v string) predicate.User {
 // LastNameContainsFold applies the ContainsFold predicate on the "last_name" field.
 func LastNameContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldLastName, v))
+}
+
+// HandleEQ applies the EQ predicate on the "handle" field.
+func HandleEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldHandle, v))
+}
+
+// HandleNEQ applies the NEQ predicate on the "handle" field.
+func HandleNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldHandle, v))
+}
+
+// HandleIn applies the In predicate on the "handle" field.
+func HandleIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldHandle, vs...))
+}
+
+// HandleNotIn applies the NotIn predicate on the "handle" field.
+func HandleNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldHandle, vs...))
+}
+
+// HandleGT applies the GT predicate on the "handle" field.
+func HandleGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldHandle, v))
+}
+
+// HandleGTE applies the GTE predicate on the "handle" field.
+func HandleGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldHandle, v))
+}
+
+// HandleLT applies the LT predicate on the "handle" field.
+func HandleLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldHandle, v))
+}
+
+// HandleLTE applies the LTE predicate on the "handle" field.
+func HandleLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldHandle, v))
+}
+
+// HandleContains applies the Contains predicate on the "handle" field.
+func HandleContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldHandle, v))
+}
+
+// HandleHasPrefix applies the HasPrefix predicate on the "handle" field.
+func HandleHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldHandle, v))
+}
+
+// HandleHasSuffix applies the HasSuffix predicate on the "handle" field.
+func HandleHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldHandle, v))
+}
+
+// HandleEqualFold applies the EqualFold predicate on the "handle" field.
+func HandleEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldHandle, v))
+}
+
+// HandleContainsFold applies the ContainsFold predicate on the "handle" field.
+func HandleContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldHandle, v))
 }
 
 // IsActiveEQ applies the EQ predicate on the "is_active" field.

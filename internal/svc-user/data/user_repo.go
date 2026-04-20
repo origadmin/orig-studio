@@ -117,6 +117,7 @@ func (r *userRepo) Create(
 	u, err := r.db.User.Create().
 		SetID(idutil.GenUUID()).
 		SetUsername(in.Username).
+		SetHandle("@" + in.Username).
 		SetName(in.Nickname).
 		SetEmail(in.Email).
 		SetPassword(hashedPassword).
@@ -203,6 +204,15 @@ func (r *userRepo) GetByEmail(ctx context.Context, email string) (*types.User, e
 	return convertUserToProto(u), nil
 }
 
+// GetByHandle retrieves a user by handle.
+func (r *userRepo) GetByHandle(ctx context.Context, handle string) (*types.User, error) {
+	u, err := r.db.User.Query().Where(user.Handle(handle)).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return convertUserToProto(u), nil
+}
+
 // GetByPhone is not supported in unified schema (email only).
 func (r *userRepo) GetByPhone(ctx context.Context, phone string) (*types.User, error) {
 	return nil, nil
@@ -271,6 +281,7 @@ func convertUserToProto(u *entity.User) *types.User {
 	result := &types.User{
 		Uuid:        u.ID,
 		Username:    u.Username,
+		Handle:      u.Handle,
 		Nickname:    u.Name,
 		Email:       u.Email,
 		Status:      status,

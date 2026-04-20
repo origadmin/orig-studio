@@ -9,9 +9,8 @@ import (
 	"context"
 	"fmt"
 
-	"google.golang.org/protobuf/types/known/timestamppb"
-
 	"origadmin/application/origcms/api/gen/v1/types"
+	"origadmin/application/origcms/internal/data/convpb"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/encodingtask"
@@ -32,13 +31,22 @@ func NewMediaRepo(db *entity.Client) biz.MediaRepo {
 
 func (r *mediaRepo) Get(
 	ctx context.Context,
-	id string,
+	idOrShortToken string,
+	_ ...*dto.MediaQueryOption,
 ) (*types.Media, error) {
-	m, err := r.db.Media.Get(ctx, id)
+	// 优先按 short_token 查询
+	m, err := r.db.Media.Query().
+		Where(media.ShortTokenEQ(idOrShortToken)).
+		Only(ctx)
+	if err == nil {
+		return convpb.ConvertMediaToMediaPB(m), nil
+	}
+	// 失败后按 ID 查询
+	m, err = r.db.Media.Get(ctx, idOrShortToken)
 	if err != nil {
 		return nil, err
 	}
-	return convertMediaToProto(m), nil
+	return convpb.ConvertMediaToMediaPB(m), nil
 }
 
 func (r *mediaRepo) List(
@@ -142,7 +150,7 @@ func (r *mediaRepo) List(
 
 	result := make([]*types.Media, len(items))
 	for i, item := range items {
-		result[i] = convertMediaToProto(item)
+		result[i] = convpb.ConvertMediaToMediaPB(item)
 	}
 	return result, int32(total), nil
 }
@@ -150,6 +158,7 @@ func (r *mediaRepo) List(
 func (r *mediaRepo) Create(
 	ctx context.Context,
 	in *types.Media,
+	_ ...*dto.MediaCreateOption,
 ) (*types.Media, error) {
 	create := r.db.Media.Create().
 		SetTitle(in.Title).
@@ -181,7 +190,7 @@ func (r *mediaRepo) Create(
 	if err != nil {
 		return nil, err
 	}
-	return convertMediaToProto(m), nil
+	return convpb.ConvertMediaToMediaPB(m), nil
 }
 
 // CreateWithEntity creates a new media and returns both entity.Media and types.Media.
@@ -216,12 +225,13 @@ func (r *mediaRepo) CreateWithEntity(
 	if err != nil {
 		return nil, nil, err
 	}
-	return m, convertMediaToProto(m), nil
+	return m, convpb.ConvertMediaToMediaPB(m), nil
 }
 
 func (r *mediaRepo) Update(
 	ctx context.Context,
 	in *types.Media,
+	_ ...*dto.MediaUpdateOption,
 ) (*types.Media, error) {
 	update := r.db.Media.UpdateOneID(in.Id).
 		SetTitle(in.Title).
@@ -260,7 +270,7 @@ func (r *mediaRepo) Update(
 	if err != nil {
 		return nil, err
 	}
-	return convertMediaToProto(m), nil
+	return convpb.ConvertMediaToMediaPB(m), nil
 }
 
 func (r *mediaRepo) Delete(ctx context.Context, id string) error {
@@ -298,7 +308,11 @@ func (r *mediaRepo) GetCategory(ctx context.Context, id string) (*types.Category
 	return convertCategoryToProto(c), nil
 }
 
-func (r *mediaRepo) IncrementViewCount(ctx context.Context, id string) (int64, error) {
+func (r *mediaRepo) IncrementViewCount(ctx context.Context, idOrShortToken string) (int64, error) {
+	id, err := r.getMediaID(ctx, idOrShortToken)
+	if err != nil {
+		return 0, err
+	}
 	m, err := r.db.Media.UpdateOneID(id).
 		AddViewCount(1).
 		Save(ctx)
@@ -308,30 +322,45 @@ func (r *mediaRepo) IncrementViewCount(ctx context.Context, id string) (int64, e
 	return m.ViewCount, nil
 }
 
-func (r *mediaRepo) UpdateCommentCount(ctx context.Context, id string, delta int) error {
+func (r *mediaRepo) UpdateCommentCount(ctx context.Context, idOrShortToken string, delta int) error {
+	id, err := r.getMediaID(ctx, idOrShortToken)
+	if err != nil {
+		return err
+	}
 	return r.db.Media.UpdateOneID(id).
 		AddCommentCount(int64(delta)).
 		Exec(ctx)
 }
 
-func (r *mediaRepo) UpdateLikeCount(ctx context.Context, id string, delta int) error {
+func (r *mediaRepo) UpdateLikeCount(ctx context.Context, idOrShortToken string, delta int) error {
+	id, err := r.getMediaID(ctx, idOrShortToken)
+	if err != nil {
+		return err
+	}
 	return r.db.Media.UpdateOneID(id).
 		AddLikeCount(int64(delta)).
 		Exec(ctx)
 }
 
-func (r *mediaRepo) UpdateDislikeCount(ctx context.Context, id string, delta int) error {
+func (r *mediaRepo) UpdateDislikeCount(ctx context.Context, idOrShortToken string, delta int) error {
+	id, err := r.getMediaID(ctx, idOrShortToken)
+	if err != nil {
+		return err
+	}
 	return r.db.Media.UpdateOneID(id).
 		AddDislikeCount(int64(delta)).
 		Exec(ctx)
 }
 
-func (r *mediaRepo) UpdateFavoriteCount(ctx context.Context, id string, delta int) error {
+func (r *mediaRepo) UpdateFavoriteCount(ctx context.Context, idOrShortToken string, delta int) error {
+	id, err := r.getMediaID(ctx, idOrShortToken)
+	if err != nil {
+		return err
+	}
 	return r.db.Media.UpdateOneID(id).
 		AddFavoriteCount(int64(delta)).
 		Exec(ctx)
 }
-
 
 // CountByEncodingStatus returns per-status media counts using a single GROUP BY query.
 func (r *mediaRepo) CountByEncodingStatus(ctx context.Context) (*biz.StatusCounts, error) {
@@ -397,7 +426,7 @@ func (r *mediaRepo) ListFilteredByEncodingStatus(
 
 	result := make([]*types.Media, len(items))
 	for i, item := range items {
-		result[i] = convertMediaToProto(item)
+		result[i] = convpb.ConvertMediaToMediaPB(item)
 	}
 	return result, total, nil
 }
@@ -444,31 +473,20 @@ func (r *mediaRepo) ResetStaleProcessing(ctx context.Context) (int, error) {
 	return count, nil
 }
 
-// convertMediaToProto converts entity.Media → proto types.Media.
-func convertMediaToProto(m *entity.Media) *types.Media {
-	var size int64
-	_, _ = fmt.Sscanf(m.Size, "%d", &size)
-
-	return &types.Media{
-		Id:             m.ID,
-		Title:          m.Title,
-		Description:    m.Description,
-		Type:           m.Type,
-		Url:            m.URL,
-		Thumbnail:      m.Thumbnail,
-		HlsFile:        m.HlsFile,
-		PreviewFilePath:    m.PreviewFilePath,
-		EncodingStatus: m.EncodingStatus,
-		Duration:       int32(m.Duration),
-		Size:           size,
-		MimeType:       m.MimeType,
-		ViewCount:      m.ViewCount,
-		LikeCount:      m.LikeCount,
-		UserId:         m.UserID,
-		Tags:           m.Tags,
-		CreateTime:     timestamppb.New(m.CreatedAt),
-		FriendlyToken:  m.ShortToken,
+func (r *mediaRepo) getMediaID(ctx context.Context, idOrShortToken string) (string, error) {
+	// 优先按 short_token 查询
+	m, err := r.db.Media.Query().
+		Where(media.ShortTokenEQ(idOrShortToken)).
+		Only(ctx)
+	if err == nil {
+		return m.ID, nil
 	}
+	// 失败后按 ID 查询
+	m, err = r.db.Media.Get(ctx, idOrShortToken)
+	if err != nil {
+		return "", err
+	}
+	return m.ID, nil
 }
 
 // convertCategoryToProto converts entity.Category → proto types.Category.

@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {useLocation} from '@tanstack/react-router';
+import {useLocation, useParams} from '@tanstack/react-router';
 import {Link} from '@tanstack/react-router';
 import {Play, Eye, Calendar, Settings, Bell, Heart, UserPlus, MessageSquare} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
@@ -15,17 +15,7 @@ import ErrorPage from '@/components/common/ErrorPage';
 import SubscribeButton from '@/components/common/SubscribeButton';
 
 const ProfilePage = () => {
-    let id = '1';
-    try {
-        const location = useLocation();
-        // Extract id from the pathname
-        const pathParts = location.pathname.split('/');
-        if (pathParts.length > 2 && pathParts[1] === 'u') {
-            id = pathParts[2] || '1';
-        }
-    } catch (error) {
-        console.error('Error getting location:', error);
-    }
+    const params = useParams();
     const {t} = useTranslation();
     const [user, setUser] = useState<any>(null);
     const [videos, setVideos] = useState<any[]>([]);
@@ -38,12 +28,21 @@ const ProfilePage = () => {
                 setLoading(true);
                 setError(null);
 
-                // Fetch user data
-                const userResponse = await userApi.get(id);
+                let userResponse;
+                if (params.handle && params.isHandle) {
+                    // 通过 handle 获取用户
+                    userResponse = await userApi.getByHandle(params.handle);
+                } else if (params.id) {
+                    // 通过 id 获取用户
+                    userResponse = await userApi.get(params.id);
+                } else {
+                    throw new Error('No user identifier provided');
+                }
+
                 setUser(userResponse);
 
                 // Fetch user videos
-                const videosResponse = await mediaApi.list({user_id: id});
+                const videosResponse = await mediaApi.list({user_id: userResponse.id});
                 setVideos(videosResponse.list || []);
             } catch (err: any) {
                 // Check if the error is due to user not found
@@ -61,7 +60,7 @@ const ProfilePage = () => {
         };
 
         fetchUserAndVideos();
-    }, [id]);
+    }, [params.id, params.handle, params.isHandle]);
 
     return (
         <div className="space-y-8">
@@ -92,7 +91,7 @@ const ProfilePage = () => {
                                     className="w-4 h-4 mr-2"/>{t('common.editProfile')}</Button>
                             ) : (
                                 <SubscribeButton
-                                    userId={user.id?.toString() || ''}
+                                    channelId={user.channel_id || user.id || ''}
                                     initialSubscriberCount={user.subscriber_count || 0}
                                     className="bg-white dark:bg-gray-800"
                                 />
@@ -106,7 +105,7 @@ const ProfilePage = () => {
                             {user.is_verified &&
                                 <Badge variant="default" className="bg-emerald-500">{t('common.verified')}</Badge>}
                         </div>
-                        <p className="text-slate-500 dark:text-gray-400">@{user.username}</p>
+                        <p className="text-slate-500 dark:text-gray-400">{user.handle || `@${user.username}`}</p>
                         <p className="text-slate-600 dark:text-gray-300 max-w-2xl">{user.bio || t('profile.noBio')}</p>
                         <div className="flex flex-wrap gap-6 text-sm">
                             <div className="flex items-center gap-2"><UserPlus className="w-4 h-4 text-slate-400"/><span
@@ -153,7 +152,7 @@ const ProfilePage = () => {
                             {videos.length > 0 ? (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                                     {videos.map(video => (
-                                        <Link key={video.id} to="/watch" search={{v: video.friendly_token || String(video.id)}}
+                                        <Link key={video.id} to="/watch" search={{v: video.short_token}}
                                               className="group">
                                             <div
                                                 className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1">

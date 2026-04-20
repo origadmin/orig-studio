@@ -9623,8 +9623,8 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\rPortalService\x12\x8a\x01\n" +
 	"\x0eGetHomeContent\x12,.api.v1.services.media.GetHomeContentRequest\x1a-.api.v1.services.media.GetHomeContentResponse\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1/portal/home\x12\x9a\x01\n" +
 	"\x12GetTrendingContent\x120.api.v1.services.media.GetTrendingContentRequest\x1a1.api.v1.services.media.GetTrendingContentResponse\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/portal/trending\x12\xa2\x01\n" +
-	"\x13GetSubscriptionFeed\x121.api.v1.services.media.GetSubscriptionFeedRequest\x1a2.api.v1.services.media.GetSubscriptionFeedResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/portal/subscriptionsB\x84\x01\n" +
-	"!com.origcms.api.v1.services.mediaB\x18OrigCMSServiceMediaProtoP\x01Z4origadmin/application/origcms/api/gen/v1/media;media\xa2\x02\fOrigCMSMediab\x06proto3"
+	"\x13GetSubscriptionFeed\x121.api.v1.services.media.GetSubscriptionFeedRequest\x1a2.api.v1.services.media.GetSubscriptionFeedResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/portal/subscriptionsB\xdc\x01\n" +
+	"\x19com.api.v1.services.mediaB\x11MediaServiceProtoP\x01Z4origadmin/application/origcms/api/gen/v1/media;media\xa2\x02\x04AVSM\xaa\x02\x15Api.V1.Services.Media\xca\x02\x15Api\\V1\\Services\\Media\xe2\x02!Api\\V1\\Services\\Media\\GPBMetadata\xea\x02\x18Api::V1::Services::Mediab\x06proto3"
 
 var (
 	file_v1_media_media_service_proto_rawDescOnce sync.Once

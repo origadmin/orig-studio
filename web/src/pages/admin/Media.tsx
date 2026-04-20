@@ -528,7 +528,7 @@ export default function MediaPage() {
                                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                     <DropdownMenuSeparator/>
                                                     <DropdownMenuItem
-                                                        onClick={() => window.open(`/watch?v=${media.friendly_token || media.id}`, '_blank')}>
+                                                        onClick={() => window.open(`/watch?v=${media.short_token || media.id}`, '_blank')}>
                                                         <Eye className="w-4 h-4 mr-2"/>
                                                         查看
                                                     </DropdownMenuItem>

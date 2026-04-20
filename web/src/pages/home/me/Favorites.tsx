@@ -66,7 +66,7 @@ const FavoritesPage = () => {
                     {favorites.map(favorite => {
                         const video = favorite.media;
                         return (
-                            <Link key={video.id} to="/watch" search={{v: video.friendly_token || String(video.id)}} className="group">
+                            <Link key={video.id} to="/watch" search={{v: video.short_token || String(video.id)}} className="group">
                                 <div
                                     className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1">
                                     <div className="relative aspect-video">

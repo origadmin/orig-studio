@@ -71,6 +71,8 @@ type Media struct {
 	DownloadCount int64 `protobuf:"varint,22,opt,name=download_count,proto3" json:"download_count,omitempty"`
 	// media.field.user_id
 	UserId string `protobuf:"bytes,23,opt,name=user_id,proto3" json:"user_id,omitempty"`
+	// media.field.channel_id
+	ChannelId string `protobuf:"bytes,44,opt,name=channel_id,proto3" json:"channel_id,omitempty"`
 	// media.field.category_id
 	CategoryId string `protobuf:"bytes,24,opt,name=category_id,proto3" json:"category_id,omitempty"`
 	// media.field.tags
@@ -87,6 +89,8 @@ type Media struct {
 	State string `protobuf:"bytes,30,opt,name=state,proto3" json:"state,omitempty"`
 	// media.field.friendly_token — URL-friendly token for public access
 	FriendlyToken string `protobuf:"bytes,31,opt,name=friendly_token,proto3" json:"friendly_token,omitempty"`
+	// media.field.short_token — URL-friendly token for public access
+	ShortToken string `protobuf:"bytes,43,opt,name=short_token,proto3" json:"short_token,omitempty"`
 	// media.field.published_at
 	PublishedAt *timestamppb.Timestamp `protobuf:"bytes,32,opt,name=published_at,proto3" json:"published_at,omitempty"`
 	// media.field.allow_download
@@ -304,6 +308,13 @@ func (x *Media) GetUserId() string {
 	return ""
 }
 
+func (x *Media) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
 func (x *Media) GetCategoryId() string {
 	if x != nil {
 		return x.CategoryId
@@ -356,6 +367,13 @@ func (x *Media) GetState() string {
 func (x *Media) GetFriendlyToken() string {
 	if x != nil {
 		return x.FriendlyToken
+	}
+	return ""
+}
+
+func (x *Media) GetShortToken() string {
+	if x != nil {
+		return x.ShortToken
 	}
 	return ""
 }
@@ -440,7 +458,7 @@ func (x *Media) GetListable() bool {
 // EncodeProfile is the model entity for EncodeProfile.
 type EncodeProfile struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	Extension     string                 `protobuf:"bytes,4,opt,name=extension,proto3" json:"extension,omitempty"`
@@ -482,11 +500,11 @@ func (*EncodeProfile) Descriptor() ([]byte, []int) {
 	return file_v1_types_media_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *EncodeProfile) GetId() string {
+func (x *EncodeProfile) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
-	return ""
+	return 0
 }
 
 func (x *EncodeProfile) GetName() string {
@@ -543,7 +561,7 @@ type EncodingTask struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	MediaId       string                 `protobuf:"bytes,2,opt,name=media_id,proto3" json:"media_id,omitempty"`
-	ProfileId     string                 `protobuf:"bytes,3,opt,name=profile_id,proto3" json:"profile_id,omitempty"`
+	ProfileId     int64                  `protobuf:"varint,3,opt,name=profile_id,proto3" json:"profile_id,omitempty"`
 	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
 	Progress      int32                  `protobuf:"varint,5,opt,name=progress,proto3" json:"progress,omitempty"`
 	OutputPath    string                 `protobuf:"bytes,6,opt,name=output_path,proto3" json:"output_path,omitempty"`
@@ -598,11 +616,11 @@ func (x *EncodingTask) GetMediaId() string {
 	return ""
 }
 
-func (x *EncodingTask) GetProfileId() string {
+func (x *EncodingTask) GetProfileId() int64 {
 	if x != nil {
 		return x.ProfileId
 	}
-	return ""
+	return 0
 }
 
 func (x *EncodingTask) GetStatus() string {
@@ -796,7 +814,7 @@ func (x *Category) GetMediaCount() int64 {
 type Tag struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// ID of the ent.
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	// create_time.field.comment
 	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
 	// update_time.field.comment
@@ -847,11 +865,11 @@ func (*Tag) Descriptor() ([]byte, []int) {
 	return file_v1_types_media_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *Tag) GetId() string {
+func (x *Tag) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
-	return ""
+	return 0
 }
 
 func (x *Tag) GetCreateTime() *timestamppb.Timestamp {
@@ -930,7 +948,7 @@ type Comment struct {
 	// comment.field.like_count
 	LikeCount int64 `protobuf:"varint,8,opt,name=like_count,proto3" json:"like_count,omitempty"`
 	// comment.field.status
-	Status        int32 `protobuf:"varint,9,opt,name=status,proto3" json:"status,omitempty"`
+	Status        string `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1021,11 +1039,11 @@ func (x *Comment) GetLikeCount() int64 {
 	return 0
 }
 
-func (x *Comment) GetStatus() int32 {
+func (x *Comment) GetStatus() string {
 	if x != nil {
 		return x.Status
 	}
-	return 0
+	return ""
 }
 
 // Like is the model entity for Like.
@@ -2032,8 +2050,7 @@ var File_v1_types_media_proto protoreflect.FileDescriptor
 
 const file_v1_types_media_proto_rawDesc = "" +
 	"\n" +
-	"\x14v1/types/media.proto\x12\x15api.v1.services.types\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd9\n" +
-	"\n" +
+	"\x14v1/types/media.proto\x12\x15api.v1.services.types\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9b\v\n" +
 	"\x05Media\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
@@ -2062,7 +2079,10 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\x0efavorite_count\x18\x14 \x01(\x03R\x0efavorite_count\x12 \n" +
 	"\vshare_count\x18\x15 \x01(\x03R\vshare_count\x12&\n" +
 	"\x0edownload_count\x18\x16 \x01(\x03R\x0edownload_count\x12\x18\n" +
-	"\auser_id\x18\x17 \x01(\tR\auser_id\x12 \n" +
+	"\auser_id\x18\x17 \x01(\tR\auser_id\x12\x1e\n" +
+	"\n" +
+	"channel_id\x18, \x01(\tR\n" +
+	"channel_id\x12 \n" +
 	"\vcategory_id\x18\x18 \x01(\tR\vcategory_id\x12\x12\n" +
 	"\x04tags\x18\x19 \x03(\tR\x04tags\x12\x1a\n" +
 	"\bhls_file\x18\x1a \x01(\tR\bhls_file\x12(\n" +
@@ -2070,7 +2090,8 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\x04uuid\x18\x1c \x01(\tR\x04uuid\x12,\n" +
 	"\x11preview_file_path\x18\x1d \x01(\tR\x11preview_file_path\x12\x14\n" +
 	"\x05state\x18\x1e \x01(\tR\x05state\x12&\n" +
-	"\x0efriendly_token\x18\x1f \x01(\tR\x0efriendly_token\x12>\n" +
+	"\x0efriendly_token\x18\x1f \x01(\tR\x0efriendly_token\x12 \n" +
+	"\vshort_token\x18+ \x01(\tR\vshort_token\x12>\n" +
 	"\fpublished_at\x18  \x01(\v2\x1a.google.protobuf.TimestampR\fpublished_at\x12&\n" +
 	"\x0eallow_download\x18! \x01(\bR\x0eallow_download\x12(\n" +
 	"\x0fenable_comments\x18\" \x01(\bR\x0fenable_comments\x12\x1a\n" +
@@ -2083,7 +2104,7 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\rreview_status\x18) \x01(\tR\rreview_status\x12\x1a\n" +
 	"\blistable\x18* \x01(\bR\blistable\"\xf5\x01\n" +
 	"\rEncodeProfile\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1c\n" +
 	"\textension\x18\x04 \x01(\tR\textension\x12\x1e\n" +
@@ -2097,7 +2118,7 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
 	"\bmedia_id\x18\x02 \x01(\tR\bmedia_id\x12\x1e\n" +
 	"\n" +
-	"profile_id\x18\x03 \x01(\tR\n" +
+	"profile_id\x18\x03 \x01(\x03R\n" +
 	"profile_id\x12\x16\n" +
 	"\x06status\x18\x04 \x01(\tR\x06status\x12\x1a\n" +
 	"\bprogress\x18\x05 \x01(\x05R\bprogress\x12 \n" +
@@ -2120,7 +2141,7 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\x06status\x18\v \x01(\x05R\x06status\x12 \n" +
 	"\vmedia_count\x18\f \x01(\x03R\vmedia_count\"\xab\x02\n" +
 	"\x03Tag\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
 	"\vupdate_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\x12\x12\n" +
 	"\x04name\x18\x04 \x01(\tR\x04name\x12\x12\n" +
@@ -2140,7 +2161,7 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\n" +
 	"like_count\x18\b \x01(\x03R\n" +
 	"like_count\x12\x16\n" +
-	"\x06status\x18\t \x01(\x05R\x06status\"\x9e\x01\n" +
+	"\x06status\x18\t \x01(\tR\x06status\"\x9e\x01\n" +
 	"\x04Like\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12\x18\n" +
@@ -2228,8 +2249,9 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\x05notes\x18\b \x01(\tR\x05notes\"5\n" +
 	"\tStatPoint\x12\x12\n" +
 	"\x04date\x18\x01 \x01(\tR\x04date\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\x03R\x05valueB\x83\x01\n" +
-	"!com.origcms.api.v1.services.typesB\x1cOrigCMSServiceTypeMediaProtoP\x01Z4origadmin/application/origcms/api/gen/v1/types;types\xa2\x02\aOrigCMSb\x06proto3"
+	"\x05value\x18\x02 \x01(\x03R\x05valueB\xd5\x01\n" +
+	"\x19com.api.v1.services.typesB\n" +
+	"MediaProtoP\x01Z4origadmin/application/origcms/api/gen/v1/types;types\xa2\x02\x04AVST\xaa\x02\x15Api.V1.Services.Types\xca\x02\x15Api\\V1\\Services\\Types\xe2\x02!Api\\V1\\Services\\Types\\GPBMetadata\xea\x02\x18Api::V1::Services::Typesb\x06proto3"
 
 var (
 	file_v1_types_media_proto_rawDescOnce sync.Once
