@@ -9,7 +9,8 @@ import {
     Download,
     LogIn,
     Check,
-    Link2
+    Link2,
+    BookmarkPlus
 } from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {Button} from '@/components/ui/button';
@@ -45,8 +46,8 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
     const navigate = useNavigate();
 
     // 决定使用哪个 API：优先使用 publicMediaApi (short_token based)
-    const usePublicApi = !!shortToken;
-    const apiIdentifier = shortToken || mediaId;
+    const usePublicApi = !!shortToken && shortToken.trim().length > 0;
+    const apiIdentifier = (shortToken && shortToken.trim()) || mediaId;
 
     // Like state
     const [likeCount, setLikeCount] = useState(0);
@@ -71,6 +72,9 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
     const [isSaving, setIsSaving] = useState(false);
     const [showSaveModal, setShowSaveModal] = useState(false);
     const [playlists, setPlaylists] = useState<{ id: string; name: string }[]>([]);
+    const [newPlaylistName, setNewPlaylistName] = useState('');
+    const [isCreatingPlaylist, setIsCreatingPlaylist] = useState(false);
+    const [showCreateForm, setShowCreateForm] = useState(false);
 
     // Download state
     const [isDownloading, setIsDownloading] = useState(false);
@@ -285,10 +289,33 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
 
     const handleAddToPlaylist = async (playlistId: string) => {
         try {
+            setIsSaving(true);
             await playlistApi.addMedia(playlistId, mediaId);
             setShowSaveModal(false);
         } catch (err) {
             console.error('Failed to add to playlist:', err);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleCreatePlaylist = async () => {
+        if (!newPlaylistName.trim()) return;
+
+        try {
+            setIsCreatingPlaylist(true);
+            // API 期望 title 字段，不是 name
+            const newPlaylist = await playlistApi.create({title: newPlaylistName.trim()});
+            // 自动添加媒体到新创建的播放列表
+            await playlistApi.addMedia(String(newPlaylist.id), mediaId);
+            setPlaylists(prev => [...prev, {id: String(newPlaylist.id), name: newPlaylist.title || newPlaylistName.trim()}]);
+            setNewPlaylistName('');
+            setShowCreateForm(false);
+            setShowSaveModal(false);
+        } catch (err) {
+            console.error('Failed to create playlist:', err);
+        } finally {
+            setIsCreatingPlaylist(false);
         }
     };
 
@@ -536,33 +563,116 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
 
             {/* Save to Playlist Modal */}
             <Dialog open={showSaveModal} onOpenChange={setShowSaveModal}>
-                <DialogContent>
+                <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{t('watch.saveToPlaylist') || 'Save to Playlist'}</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Bookmark className="w-5 h-5 text-emerald-600"/>
+                            {t('watch.saveToPlaylist') || 'Save to Playlist'}
+                        </DialogTitle>
                         <DialogDescription>
                             {t('watch.selectPlaylist') || 'Select a playlist to save this video'}
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="space-y-2 mt-4">
-                        {playlists.length > 0 ? (
-                            playlists.map(playlist => (
-                                <Button
-                                    key={playlist.id}
-                                    variant="outline"
-                                    className="w-full justify-start"
-                                    onClick={() => handleAddToPlaylist(playlist.id)}
-                                >
-                                    <Bookmark className="w-4 h-4 mr-2"/>
-                                    {playlist.name}
-                                </Button>
-                            ))
+
+                    <div className="space-y-3 mt-4">
+                        {/* Existing playlists */}
+                        {playlists.length > 0 && (
+                            <div className="space-y-2 max-h-48 overflow-y-auto">
+                                {playlists.map(playlist => (
+                                    <Button
+                                        key={playlist.id}
+                                        variant="outline"
+                                        className="w-full justify-start h-auto py-2.5 px-3"
+                                        onClick={() => handleAddToPlaylist(playlist.id)}
+                                        disabled={isSaving}
+                                    >
+                                        <Bookmark className="w-4 h-4 mr-2 flex-shrink-0"/>
+                                        <span className="truncate text-left">{playlist.name}</span>
+                                        {isSaving && (
+                                            <Loader2 className="w-4 h-4 ml-auto animate-spin flex-shrink-0"/>
+                                        )}
+                                    </Button>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Divider */}
+                        {playlists.length > 0 && (
+                            <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
+                                <span className="text-xs text-gray-500 uppercase tracking-wider px-1">
+                                    {t('watch.orCreateNew') || 'Or create new'}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Create new playlist form */}
+                        {!showCreateForm ? (
+                            <Button
+                                variant="outline"
+                                className="w-full justify-start border-dashed border-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                onClick={() => setShowCreateForm(true)}
+                            >
+                                <BookmarkPlus className="w-4 h-4 mr-2"/>
+                                {t('watch.createNewPlaylist') || '+ Create new playlist'}
+                            </Button>
                         ) : (
-                            <div className="text-center py-4">
-                                <p className="text-sm text-gray-500 mb-4">{t('watch.noPlaylists') || 'No playlists found'}</p>
+                            <div className="space-y-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <input
+                                    type="text"
+                                    value={newPlaylistName}
+                                    onChange={(e) => setNewPlaylistName(e.target.value)}
+                                    placeholder={t('watch.playlistNamePlaceholder') || 'Enter playlist name...'}
+                                    className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
+                                    autoFocus
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !isCreatingPlaylist) {
+                                            handleCreatePlaylist();
+                                        }
+                                    }}
+                                />
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="flex-1"
+                                        onClick={() => {
+                                            setShowCreateForm(false);
+                                            setNewPlaylistName('');
+                                        }}
+                                        disabled={isCreatingPlaylist}
+                                    >
+                                        {t('common.cancel')}
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                                        onClick={handleCreatePlaylist}
+                                        disabled={!newPlaylistName.trim() || isCreatingPlaylist}
+                                    >
+                                        {isCreatingPlaylist ? (
+                                            <Loader2 className="w-4 h-4 animate-spin mr-1"/>
+                                        ) : null}
+                                        {t('watch.create') || 'Create'}
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Empty state with CTA */}
+                        {playlists.length === 0 && !showCreateForm && (
+                            <div className="text-center py-6">
+                                <Bookmark className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3"/>
+                                <p className="text-sm text-gray-500 mb-4">
+                                    {t('watch.noPlaylists') || "You don't have any playlists yet"}
+                                </p>
+                                <p className="text-xs text-gray-400 mb-4">
+                                    {t('watch.createFirstPlaylist') || 'Create your first playlist to organize your videos'}
+                                </p>
                                 <Button
-                                    onClick={() => navigate({to: '/me/playlists'})}
+                                    onClick={() => setShowCreateForm(true)}
                                     className="bg-emerald-600 hover:bg-emerald-700"
                                 >
+                                    <BookmarkPlus className="w-4 h-4 mr-2"/>
                                     {t('watch.createPlaylist') || 'Create Playlist'}
                                 </Button>
                             </div>

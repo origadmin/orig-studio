@@ -114,6 +114,13 @@
     "copyLink": "复制链接",
     "saveToPlaylist": "保存到播放列表",
     "noPlaylists": "暂无播放列表",
+    "createPlaylist": "创建播放列表",
+    "selectPlaylist": "选择一个播放列表来保存此视频",
+    "orCreateNew": "或新建",
+    "createNewPlaylist": "+ 创建新播放列表",
+    "playlistNamePlaceholder": "输入播放列表名称...",
+    "createFirstPlaylist": "创建您的第一个播放列表来整理视频",
+    "create": "创建",
     "subscriberCount": "{{count}} 订阅者",
     "views": "观看次数",
     "noDescription": "暂无描述",
@@ -130,7 +137,9 @@
     "postComment": "评论",
     "pleaseLoginToComment": "登录后才能发表评论",
     "pleaseLoginToReply": "登录后才能回复",
-    "sortBy": "排序方式"
+    "sortBy": "排序方式",
+    "confirmDelete": "确定要删除此视频吗？此操作无法撤销。",
+    "retryTranscode": "重试转码"
   },
   "channel": {
     "manageChannel": "管理频道",

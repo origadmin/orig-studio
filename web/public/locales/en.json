@@ -113,7 +113,14 @@
     "shareLink": "Share Link",
     "copyLink": "Copy Link",
     "saveToPlaylist": "Save to Playlist",
-    "noPlaylists": "No playlists yet",
+    "noPlaylists": "No playlists found",
+    "createPlaylist": "Create Playlist",
+    "selectPlaylist": "Select a playlist to save this video",
+    "orCreateNew": "Or create new",
+    "createNewPlaylist": "+ Create new playlist",
+    "playlistNamePlaceholder": "Enter playlist name...",
+    "createFirstPlaylist": "Create your first playlist to organize videos",
+    "create": "Create",
     "subscriberCount": "{{count}} subscribers",
     "views": "views",
     "noDescription": "No description",
@@ -130,7 +137,9 @@
     "postComment": "Comment",
     "pleaseLoginToComment": "Sign in to add a comment",
     "pleaseLoginToReply": "Sign in to reply",
-    "sortBy": "Sort by"
+    "sortBy": "Sort by",
+    "confirmDelete": "Are you sure you want to delete this video? This action cannot be undone.",
+    "retryTranscode": "Retry Transcoding"
   },
   "channel": {
     "manageChannel": "Manage Channel",

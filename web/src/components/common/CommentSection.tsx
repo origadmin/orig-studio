@@ -5,7 +5,7 @@ import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {formatDate} from '@/lib/format';
-import {commentApi} from '@/lib/api/comment';
+import {commentApi, type CommentLikeResponse} from '@/lib/api/comment';
 import {useAuth} from '@/hooks/useAuth';
 import {useNavigate, Link} from '@tanstack/react-router';
 
@@ -41,6 +41,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [replyText, setReplyText] = useState('');
     const [isSubmittingReply, setIsSubmittingReply] = useState(false);
+    const [commentLikes, setCommentLikes] = useState<Map<string, CommentLikeResponse>>(new Map());
+    const [likingComments, setLikingComments] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         fetchComments();
@@ -135,51 +137,149 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
         }
     };
 
-    const handleLikeComment = async (_commentId: string) => {
+    const handleLikeComment = async (commentId: string) => {
+        if (!isAuthenticated) {
+            navigate({to: '/auth/signin'});
+            return;
+        }
+        if (likingComments.has(commentId)) return; // 防止重复点击
+
         try {
-            await fetchComments();
+            setLikingComments(prev => new Set(prev).add(commentId));
+
+            // 乐观更新
+            const prevStatus = commentLikes.get(commentId);
+            const newLiked = !prevStatus?.is_liked;
+            const newDisliked = false;
+
+            if (prevStatus) {
+                setCommentLikes(prev => {
+                    const updated = new Map(prev);
+                    updated.set(commentId, {
+                        like_count: prevStatus.like_count + (newLiked ? 1 : -1),
+                        is_liked: newLiked,
+                        is_disliked: newDisliked,
+                    });
+                    return updated;
+                });
+            }
+
+            // 调用 API
+            const response: CommentLikeResponse = await commentApi.likes.toggle(commentId);
+
+            // 使用服务器返回的最终状态
+            setCommentLikes(prev => {
+                const updated = new Map(prev);
+                updated.set(commentId, response);
+                return updated;
+            });
         } catch (err) {
             console.error('Failed to like comment:', err);
+        } finally {
+            setLikingComments(prev => {
+                const updated = new Set(prev);
+                updated.delete(commentId);
+                return updated;
+            });
+        }
+    };
+
+    const handleDislikeComment = async (commentId: string) => {
+        if (!isAuthenticated) {
+            navigate({to: '/auth/signin'});
+            return;
+        }
+        if (likingComments.has(commentId)) return;
+
+        try {
+            setLikingComments(prev => new Set(prev).add(commentId));
+
+            const response: CommentLikeResponse = await commentApi.likes.toggleDislike(commentId);
+
+            setCommentLikes(prev => {
+                const updated = new Map(prev);
+                updated.set(commentId, response);
+                return updated;
+            });
+        } catch (err) {
+            console.error('Failed to dislike comment:', err);
+        } finally {
+            setLikingComments(prev => {
+                const updated = new Set(prev);
+                updated.delete(commentId);
+                return updated;
+            });
         }
     };
 
     const renderComment = (comment: Comment, isReply: boolean = false) => (
-        <div key={comment.id} className={`flex gap-3 ${isReply ? '' : 'py-4'}`}>
+        <div key={comment.id} className={`flex gap-3 ${isReply ? 'ml-12 pl-4 border-l-2 border-gray-200 dark:border-gray-700' : 'py-4'}`}>
             <Avatar className={`${isReply ? 'h-8 w-8' : 'h-10 w-10'} flex-shrink-0`}>
-                <AvatarImage src={comment.avatar}/>
-                <AvatarFallback className="bg-gray-200 text-gray-600 text-sm">
-                    {comment.username?.[0]?.toUpperCase() || 'U'}
+                <AvatarImage src={comment.avatar || undefined}/>
+                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm font-medium">
+                    {(comment.username || 'U')[0]?.toUpperCase() || 'U'}
                 </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                     <Link
                         to="/@$username"
-                        params={{username: comment.username || 'anonymous'}}
-                        className={`font-medium text-gray-900 dark:text-white hover:text-blue-600 cursor-pointer ${isReply ? 'text-sm' : ''}`}
+                        params={{username: comment.username?.trim() || 'anonymous'}}
+                        className={`font-semibold text-gray-900 dark:text-white hover:text-blue-600 cursor-pointer transition-colors ${isReply ? 'text-sm' : ''}`}
                     >
-                        @{comment.username || 'Anonymous'}
+                        @{comment.username?.trim() || 'Anonymous'}
                     </Link>
                     <span className={`text-gray-500 dark:text-gray-400 ${isReply ? 'text-xs' : 'text-xs'}`}>
                         {formatDate(comment.create_time)}
                         {comment.update_time && comment.update_time !== comment.create_time && (
-                            <span className="ml-1">(edited)</span>
+                            <span className="ml-1 text-gray-400">(edited)</span>
                         )}
                     </span>
                 </div>
-                <p className={`text-gray-900 dark:text-gray-100 mt-1 whitespace-pre-wrap ${isReply ? 'text-sm' : ''}`}>
-                    {comment.content}
+                <p className={`text-gray-800 dark:text-gray-200 mt-1.5 leading-relaxed whitespace-pre-wrap break-words ${isReply ? 'text-sm' : 'text-[15px]'}`}>
+                    {comment.content || <span className="text-gray-400 italic">No content</span>}
                 </p>
-                <div className="flex items-center gap-4 mt-2">
+                <div className="flex items-center gap-1 mt-2">
+                    {/* Like button */}
                     <button
-                        className="flex items-center gap-1.5 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full p-1.5 transition-colors"
+                        className={`flex items-center gap-1.5 rounded-full p-1.5 transition-colors ${
+                            commentLikes.get(comment.id)?.is_liked
+                                ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20'
+                                : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+                        } ${likingComments.has(comment.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
                         onClick={() => handleLikeComment(comment.id)}
+                        disabled={likingComments.has(comment.id)}
                     >
-                        <ThumbsUp className="w-4 h-4"/>
+                        {likingComments.has(comment.id) ? (
+                            <Loader2 className="w-4 h-4 animate-spin"/>
+                        ) : (
+                            <ThumbsUp className={`w-4 h-4 ${commentLikes.get(comment.id)?.is_liked ? 'fill-current' : ''}`}/>
+                        )}
+                        <span className={`text-xs font-medium ${
+                            commentLikes.get(comment.id)?.is_liked ? 'text-blue-600' : ''
+                        }`}>
+                            {(commentLikes.get(comment.id)?.like_count ?? comment.like_count ?? 0) || ''}
+                        </span>
                     </button>
-                    <button className="flex items-center gap-1.5 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full p-1.5 transition-colors">
-                        <ThumbsDown className="w-4 h-4"/>
+
+                    {/* Dislike button */}
+                    <button
+                        className={`flex items-center gap-1.5 rounded-full p-1.5 transition-colors ${
+                            commentLikes.get(comment.id)?.is_disliked
+                                ? 'text-red-600 bg-red-50 dark:bg-red-900/20'
+                                : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+                        } ${likingComments.has(comment.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={() => handleDislikeComment(comment.id)}
+                        disabled={likingComments.has(comment.id)}
+                    >
+                        {likingComments.has(comment.id) ? (
+                            <Loader2 className="w-4 h-4 animate-spin"/>
+                        ) : (
+                            <ThumbsDown className={`w-4 h-4 ${commentLikes.get(comment.id)?.is_disliked ? 'fill-current' : ''}`}/>
+                        )}
                     </button>
+
+                    {/* Reply button */}
                     <button
                         className="flex items-center gap-1.5 text-gray-500 hover:text-blue-600 font-medium text-sm px-2 py-1 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                         onClick={() => setReplyingTo(comment.id)}

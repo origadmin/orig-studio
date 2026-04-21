@@ -209,6 +209,9 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 			c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success"})
 		})
 	}
+
+	// Register Comment Likes routes (stub)
+	registerCommentLikesRoutes(group, jwtMgr)
 }
 
 func convertCommentToResponse(item *entity.Comment) gin.H {
@@ -247,4 +250,72 @@ func convertCommentToResponse(item *entity.Comment) gin.H {
 	}
 
 	return resp
+}
+
+// Comment Likes Routes (Stub - TODO: Implement with database table)
+func registerCommentLikesRoutes(group *gin.RouterGroup, jwtMgr *auth.Manager) {
+	commentLikes := group.Group("/comments/:id")
+	{
+		// GET /comments/:id/likes - Get comment like status (PUBLIC)
+		commentLikes.GET("/likes", func(c *gin.Context) {
+			commentID := c.Param("id")
+			if commentID == "" {
+				c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "comment ID required"})
+				return
+			}
+
+			// TODO: Replace with actual database query when comment_likes table is created
+			// For now, return default values (stub implementation)
+			c.JSON(http.StatusOK, gin.H{
+				"code":    0,
+				"message": "success",
+				"data": gin.H{
+					"like_count": 0,
+					"is_liked":   false,
+					"is_disliked": false,
+				},
+			})
+		})
+
+		// POST /comments/:id/likes - Toggle like (AUTH REQUIRED)
+		commentLikes.POST("/likes", JWTMiddleware(jwtMgr), func(c *gin.Context) {
+			commentID := c.Param("id")
+			if commentID == "" {
+				c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "comment ID required"})
+				return
+			}
+
+			// TODO: Implement actual toggle logic with database
+			// For now, return stub response
+			c.JSON(http.StatusOK, gin.H{
+				"code":    0,
+				"message": "success",
+				"data": gin.H{
+					"like_count": 1,
+					"is_liked":   true,
+					"is_disliked": false,
+				},
+			})
+		})
+
+		// POST /comments/:id/dislikes - Toggle dislike (AUTH REQUIRED)
+		commentLikes.POST("/dislikes", JWTMiddleware(jwtMgr), func(c *gin.Context) {
+			commentID := c.Param("id")
+			if commentID == "" {
+				c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "comment ID required"})
+				return
+			}
+
+			// TODO: Implement actual toggle logic with database
+			c.JSON(http.StatusOK, gin.H{
+				"code":    0,
+				"message": "success",
+				"data": gin.H{
+					"like_count": 0,
+					"is_liked":   false,
+					"is_disliked": true,
+				},
+			})
+		})
+	}
 }
