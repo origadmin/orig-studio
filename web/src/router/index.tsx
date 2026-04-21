@@ -265,7 +265,7 @@ const subscriptionsRoute = createRoute({
 const adminLayoutRoute = createRoute({
     getParentRoute: () => rootRoute,
     id: 'admin-layout',
-    // beforeLoad: requireAdmin,
+    beforeLoad: requireAdmin,
     component: () => <AdminLayout/>,
 });
 
