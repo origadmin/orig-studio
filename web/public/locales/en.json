@@ -69,7 +69,24 @@
     "uploadVideo": "Upload Video",
     "admin": "Admin",
     "logout": "Logout",
-    "login": "Login"
+    "login": "Login",
+    "browse": "Browse",
+    "subscriptions": "Subscriptions",
+    "you": "You",
+    "explore": "Explore",
+    "subsFeed": "Subscriptions Feed",
+    "myVideos": "My Videos",
+    "favorites": "Favorites",
+    "playlists": "Playlists",
+    "notifications": "Notifications",
+    "trending": "Trending",
+    "mediaAdmin": "Media Admin",
+    "usersAdmin": "Users Admin",
+    "settingsAdmin": "Settings",
+    "toggleLight": "Switch to Light Mode",
+    "toggleDark": "Switch to Dark Mode",
+    "switchToEnglish": "English",
+    "switchToChinese": "中文"
   },
   "header": {
     "searchPlaceholder": "Search videos, tags, users..."

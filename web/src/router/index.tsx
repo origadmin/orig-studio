@@ -28,6 +28,7 @@ const FeaturedPage = lazy(() => import('../pages/home/Featured'));
 const LatestPage = lazy(() => import('../pages/home/Latest'));
 const TagsPage = lazy(() => import('../pages/home/Tags'));
 const MembersPage = lazy(() => import('../pages/home/Members'));
+const TrendingPage = lazy(() => import('../pages/home/Trending'));
 const AboutPage = lazy(() => import('../pages/home/About'));
 const TestPage = lazy(() => import('../pages/test'));
 
@@ -138,6 +139,12 @@ const membersRoute = createRoute({
     getParentRoute: () => portalLayoutRoute,
     path: '/members',
     component: () => <Lazy><MembersPage/></Lazy>,
+});
+
+const trendingRoute = createRoute({
+    getParentRoute: () => portalLayoutRoute,
+    path: '/explore/trending',
+    component: () => <Lazy><TrendingPage/></Lazy>,
 });
 
 const aboutRoute = createRoute({
@@ -344,6 +351,7 @@ const routeTree = rootRoute.addChildren([
         categoriesRoute,
         tagsRoute,
         membersRoute,
+        trendingRoute,
         aboutRoute,
         watchRoute,
         searchRoute,

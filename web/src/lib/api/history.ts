@@ -33,11 +33,11 @@ export interface HistoryListResponse {
 export const historyApi = {
     // 获取历史记录列表
     list: (params?: { page?: number; page_size?: number }) =>
-        api.get<HistoryListResponse>("/user/history", params),
+        api.get<HistoryListResponse>("/me/history", params),
 
     // 清除历史记录
-    clear: () => api.del<void>("/user/history"),
+    clear: () => api.del<void>("/me/history"),
 
     // 删除单个历史记录
-    remove: (id: number) => api.del<void>(`/user/history/${id}`),
+    remove: (id: number) => api.del<void>(`/me/history/${id}`),
 };

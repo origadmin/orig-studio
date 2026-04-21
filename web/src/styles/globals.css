@@ -58,3 +58,47 @@
         @apply bg-background text-foreground;
     }
 }
+
+@layer utilities {
+    .yt-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: transparent transparent;
+    }
+
+    .yt-scrollbar:hover {
+        scrollbar-color: rgb(156 163 175) transparent;
+    }
+
+    .yt-scrollbar::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .yt-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .yt-scrollbar::-webkit-scrollbar-thumb {
+        background-color: transparent;
+        border-radius: 4px;
+    }
+
+    .yt-scrollbar:hover::-webkit-scrollbar-thumb {
+        background-color: rgb(156 163 175);
+    }
+
+    .dark .yt-scrollbar {
+        scrollbar-color: transparent transparent;
+    }
+
+    .dark .yt-scrollbar:hover {
+        scrollbar-color: rgb(75 85 99) transparent;
+    }
+
+    .dark .yt-scrollbar::-webkit-scrollbar-thumb {
+        background-color: transparent;
+    }
+
+    .dark .yt-scrollbar:hover::-webkit-scrollbar-thumb {
+        background-color: rgb(75 85 99);
+    }
+}

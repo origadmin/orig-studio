@@ -28,7 +28,7 @@ export interface CommentLikeResponse {
 }
 
 export const commentApi = {
-    getAll: (params?: { media_id?: string; content_id?: string }) => {
+    getAll: (params?: { media_id?: string; content_id?: string; page?: number; page_size?: number }) => {
         return api.get<CommentListResponse>('/comments', params || {});
     },
     get: (id: string) => api.get<Comment>(`/comments/${id}`),

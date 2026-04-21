@@ -34,11 +34,11 @@ export const favoriteApi = {
 
     // 获取收藏列表
     list: (params?: { page?: number; page_size?: number }) =>
-        api.get<FavoriteListResponse>('/favorites', params),
+        api.get<FavoriteListResponse>('/me/favorites', params),
 
     // 移除收藏
     remove: (favoriteId: string) =>
-        api.del<void>(`/favorites/${favoriteId}`),
+        api.del<void>(`/me/favorites/${favoriteId}`),
 };
 
 export default favoriteApi;

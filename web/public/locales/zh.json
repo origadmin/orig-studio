@@ -69,7 +69,24 @@
     "uploadVideo": "上传视频",
     "admin": "管理后台",
     "logout": "退出登录",
-    "login": "登录"
+    "login": "登录",
+    "browse": "浏览",
+    "subscriptions": "订阅",
+    "you": "你",
+    "explore": "探索",
+    "subsFeed": "订阅内容",
+    "myVideos": "我的视频",
+    "favorites": "收藏",
+    "playlists": "播放列表",
+    "notifications": "通知",
+    "trending": "热门",
+    "mediaAdmin": "媒体管理",
+    "usersAdmin": "用户管理",
+    "settingsAdmin": "系统设置",
+    "toggleLight": "切换亮色模式",
+    "toggleDark": "切换暗色模式",
+    "switchToEnglish": "English",
+    "switchToChinese": "中文"
   },
   "header": {
     "searchPlaceholder": "搜索视频、标签、用户..."
