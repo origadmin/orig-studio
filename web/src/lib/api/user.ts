@@ -110,11 +110,11 @@ export const userApi = {
 
     // 获取我的订阅列表
     getSubscriptions: (params?: { page?: number; page_size?: number }) =>
-        api.get<SubscriptionListResponse>("/subscriptions", params),
+        api.get<SubscriptionListResponse>("/me/subscriptions", params),
 
     // 获取我的粉丝列表
     getFollowers: (params?: { page?: number; page_size?: number }) =>
-        api.get<SubscriptionListResponse>("/followers", params),
+        api.get<SubscriptionListResponse>("/me/followers", params),
 };
 
 export default userApi;

@@ -256,8 +256,11 @@ func (h *MeHandler) GetSubscriptions(c *gin.Context) {
 }
 
 // GetHistory returns the current user's watch history.
+// NOTE: Currently uses favorites + likes as a history proxy since
+// watch_history entity doesn't exist yet. When watch_history is implemented,
+// this should query the dedicated history table instead.
 func (h *MeHandler) GetHistory(c *gin.Context) {
-	_, ok := c.MustGet("claims").(*auth.Claims)
+	claims, ok := c.MustGet("claims").(*auth.Claims)
 	if !ok {
 		Fail(c, ErrUnauthorized, "unauthorized")
 		return
@@ -266,10 +269,52 @@ func (h *MeHandler) GetHistory(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 
-	// TODO: Implement history listing with proper repository and use case
+	favorites, favErr := h.likeFavoriteUC.ListUserFavorites(c.Request.Context(), claims.UserID)
+	if favErr != nil {
+		Fail(c, ErrInternal, favErr.Error())
+		return
+	}
+
+	likes, likeErr := h.likeFavoriteUC.ListUserLikes(c.Request.Context(), claims.UserID)
+	if likeErr != nil {
+		Fail(c, ErrInternal, likeErr.Error())
+		return
+	}
+
+	items := make([]interface{}, 0, len(favorites)+len(likes))
+	for _, f := range favorites {
+		items = append(items, gin.H{
+			"id":         f.ID,
+			"media_id":   f.MediaID,
+			"user_id":    claims.UserID,
+			"progress":   0,
+			"watched_at": f.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		})
+	}
+	for _, l := range likes {
+		items = append(items, gin.H{
+			"id":         l.ID,
+			"media_id":   l.MediaID,
+			"user_id":    claims.UserID,
+			"progress":   0,
+			"watched_at": l.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		})
+	}
+
+	total := len(items)
+
+	start := (page - 1) * pageSize
+	if start > total {
+		start = total
+	}
+	end := start + pageSize
+	if end > total {
+		end = total
+	}
+
 	OK(c, gin.H{
-		"items":     []interface{}{},
-		"total":     0,
+		"items":     items[start:end],
+		"total":     total,
 		"page":      page,
 		"page_size": pageSize,
 	})

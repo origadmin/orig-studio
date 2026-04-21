@@ -31,11 +31,11 @@ export const subscriptionApi = {
 
     // 获取订阅列表
     getSubscriptions: (params?: { page?: number; page_size?: number; keyword?: string }) =>
-        api.get<SubscriptionListResponse>("/subscriptions", params),
+        api.get<SubscriptionListResponse>("/me/subscriptions", params),
 
     // 获取粉丝列表
     getFollowers: (params?: { page?: number; page_size?: number; keyword?: string }) =>
-        api.get<SubscriptionListResponse>("/followers", params),
+        api.get<SubscriptionListResponse>("/me/followers", params),
 };
 
 export default subscriptionApi;

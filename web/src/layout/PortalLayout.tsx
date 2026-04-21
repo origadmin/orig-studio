@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2024 OrigAdmin. All rights reserved.
- * PortalLayout: Header + Sidebar + Content
- */
-
 import React, {useState, useEffect} from 'react';
 import {Outlet} from '@tanstack/react-router';
 import Header from '../components/portal/Header';
@@ -10,7 +5,6 @@ import Sidebar from '../components/portal/Sidebar';
 
 const PortalLayout = () => {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
     const [isDesktop, setIsDesktop] = useState(false);
 
@@ -45,24 +39,18 @@ const PortalLayout = () => {
         localStorage.setItem('sidebarCollapsed', String(next));
     };
 
-    const closeMobileSidebar = () => setSidebarOpen(false);
-    const openMobileSidebar = () => setSidebarOpen(true);
-
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors">
             <Header
                 onToggleSidebar={toggleSidebar}
-                onOpenMobileSidebar={openMobileSidebar}
                 sidebarCollapsed={sidebarCollapsed}
+                darkMode={darkMode}
+                onToggleDarkMode={toggleDarkMode}
             />
 
             <Sidebar
-                darkMode={darkMode}
-                onToggleDarkMode={toggleDarkMode}
                 collapsed={sidebarCollapsed}
                 onToggleCollapse={toggleSidebar}
-                mobileOpen={sidebarOpen}
-                onCloseMobile={closeMobileSidebar}
             />
 
             <main

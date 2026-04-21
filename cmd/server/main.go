@@ -108,6 +108,7 @@ func main() {
 		deps.SearchHandler,
 		deps.MeHandler,
 		deps.AdminHandler,
+		server.NewExploreHandler(deps.DB),
 		deps.DB,
 		deps.JWTManager,
 	)

@@ -55,9 +55,8 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 				Offset((page - 1) * pageSize).
 				Order(entity.Desc(comment.FieldAddDate)).
 				WithUser().
-				WithReplies(func(q *entity.CommentQuery) {
-					q.WithUser().
-						Order(entity.Desc(comment.FieldAddDate))
+				WithParent(func(pq *entity.CommentQuery) {
+					pq.WithUser()
 				}).
 				All(ctx)
 			if err != nil {
@@ -216,13 +215,14 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 
 func convertCommentToResponse(item *entity.Comment) gin.H {
 	resp := gin.H{
-		"id":         item.ID,
-		"content":    item.Text,
-		"status":     item.Status,
+		"id":          item.ID,
+		"content":     item.Text,
+		"status":      item.Status,
 		"create_time": item.AddDate.Format(time.RFC3339),
 		"update_time": item.AddDate.Format(time.RFC3339),
-		"like_count": 0,
-		"is_liked":   false,
+		"like_count":  0,
+		"is_liked":    false,
+		"is_reply":    item.Edges.Parent != nil,
 	}
 
 	if item.MediaID != "" {
@@ -239,17 +239,25 @@ func convertCommentToResponse(item *entity.Comment) gin.H {
 		}
 	}
 	if item.Edges.Parent != nil {
-		resp["parent_id"] = item.Edges.Parent.ID
-	}
-	if len(item.Edges.Replies) > 0 {
-		replies := make([]gin.H, len(item.Edges.Replies))
-		for i, r := range item.Edges.Replies {
-			replies[i] = convertCommentToResponse(r)
+		p := item.Edges.Parent
+		resp["reply_to_comment_id"] = p.ID
+		resp["reply_to_content"] = truncateText(p.Text, 100)
+		if p.Edges.User != nil {
+			resp["reply_to_username"] = p.Edges.User.Username
 		}
-		resp["replies"] = replies
+	} else {
+		resp["parent_id"] = nil
 	}
 
 	return resp
+}
+
+func truncateText(text string, maxLen int) string {
+	runes := []rune(text)
+	if len(runes) <= maxLen {
+		return text
+	}
+	return string(runes[:maxLen]) + "..."
 }
 
 // Comment Likes Routes (Stub - TODO: Implement with database table)

@@ -33,6 +33,7 @@ type Server struct {
 	searchHandler      *SearchHandler
 	meHandler          *MeHandler
 	adminHandler       *AdminHandler
+	exploreHandler     *ExploreHandler
 	entityClient       *entity.Client
 	jwtMgr             *auth.Manager
 }
@@ -54,6 +55,7 @@ func NewServer(
 	searchHandler *SearchHandler,
 	meHandler *MeHandler,
 	adminHandler *AdminHandler,
+	exploreHandler *ExploreHandler,
 	entityClient *entity.Client,
 	jwtMgr *auth.Manager,
 ) *Server {
@@ -73,6 +75,7 @@ func NewServer(
 		searchHandler:      searchHandler,
 		meHandler:          meHandler,
 		adminHandler:       adminHandler,
+		exploreHandler:     exploreHandler,
 		entityClient:       entityClient,
 		jwtMgr:             jwtMgr,
 	}
@@ -138,6 +141,7 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 		s.searchHandler.Register(adapter)
 		s.meHandler.Register(adapter)
 		s.adminHandler.Register(adapter)
+		s.exploreHandler.Register(adapter)
 	}
 
 	// Comment routes (direct gin registration for entity access)

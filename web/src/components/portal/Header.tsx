@@ -16,6 +16,9 @@ import {
     Shield,
     ChevronDown,
     Plus,
+    Sun,
+    Moon,
+    Globe,
 } from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {useAuth} from '../../hooks/useAuth';
@@ -38,12 +41,14 @@ interface HeaderProps {
     onToggleSidebar?: () => void;
     onOpenMobileSidebar?: () => void;
     sidebarCollapsed?: boolean;
+    darkMode?: boolean;
+    onToggleDarkMode?: () => void;
 }
 
 /* ── Component ───────────────────────────────────────────────────────────── */
 
-const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, sidebarCollapsed}) => {
-    const {t} = useTranslation();
+const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, sidebarCollapsed, darkMode, onToggleDarkMode}) => {
+    const {t, i18n} = useTranslation();
     const [search, setSearch] = useState('');
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -216,7 +221,24 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                 </form>
 
                 {/* 右侧: 用户操作 */}
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1 shrink-0">
+                    {onToggleDarkMode && (
+                        <button
+                            onClick={onToggleDarkMode}
+                            className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                            title={darkMode ? t('nav.toggleLight') : t('nav.toggleDark')}
+                        >
+                            {darkMode ? <Sun size={18} className="text-amber-500"/> : <Moon size={18}/>}
+                        </button>
+                    )}
+                    <button
+                        onClick={() => i18n.changeLanguage(i18n.language === 'zh' ? 'en' : 'zh')}
+                        className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                        title={i18n.language === 'zh' ? t('nav.switchToEnglish') : t('nav.switchToChinese')}
+                    >
+                        <Globe size={18} className="text-emerald-500"/>
+                    </button>
+
                     {isAuthenticated && user ? (
                         <>
                             {/* 通知徽章 - 暂时禁用 */}
