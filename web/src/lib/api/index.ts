@@ -94,3 +94,7 @@ export type {
 // ==================== History ====================
 export {historyApi} from "./history";
 export type {HistoryItem, HistoryListResponse} from "./history";
+
+// ==================== Explore ====================
+export {exploreApi} from "./explore";
+export type {TrendingItem, TrendingResponse} from "./explore";
