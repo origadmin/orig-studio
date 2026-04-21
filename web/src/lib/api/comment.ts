@@ -21,6 +21,12 @@ export interface CommentListResponse {
     page_size: number;
 }
 
+export interface CommentLikeResponse {
+    like_count: number;
+    is_liked: boolean;
+    is_disliked: boolean;
+}
+
 export const commentApi = {
     getAll: (params?: { media_id?: string; content_id?: string }) => {
         return api.get<CommentListResponse>('/comments', params || {});
@@ -41,4 +47,14 @@ export const commentApi = {
             comment: { content: data.content }
         }),
     delete: (id: string) => api.del<void>(`/comments/${id}`),
+
+    // Comment Likes API
+    likes: {
+        getStatus: (commentId: string) =>
+            api.get<CommentLikeResponse>(`/comments/${commentId}/likes`),
+        toggle: (commentId: string) =>
+            api.post<CommentLikeResponse>(`/comments/${commentId}/likes`),
+        toggleDislike: (commentId: string) =>
+            api.post<CommentLikeResponse>(`/comments/${commentId}/dislikes`),
+    },
 };
