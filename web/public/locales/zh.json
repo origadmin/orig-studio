@@ -592,7 +592,17 @@
     "none": "无",
     "unsubscribe": "取消订阅",
     "confirmUnsubscribe": "取消订阅？",
-    "unsubscribeMessage": "您将不再收到此频道的任何通知。"
+    "unsubscribeMessage": "您将不再收到此频道的任何通知。",
+    "filterAllChannels": "全部频道",
+    "sortNewest": "最新发布",
+    "sortMostViewed": "最多播放",
+    "sortTrending": "热门趋势",
+    "emptyTitle": "暂无订阅内容",
+    "emptyDescription": "订阅频道后，这里会显示它们的最新视频。",
+    "play": "播放",
+    "watchLater": "稍后观看",
+    "share": "分享",
+    "loadingMore": "加载更多..."
   },
   "notifications": {
     "title": "通知",

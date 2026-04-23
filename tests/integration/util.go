@@ -151,7 +151,7 @@ func SetupTestServer(t *testing.T) *TestServer {
 	tagHandler := server.NewTagHandler(categoryTagUC)
 	feedHandler := server.NewFeedHandler(feedUC)
 	notificationHandler := server.NewNotificationHandler(notificationUC, jwtMgr)
-	channelHandler := server.NewChannelHandler(playlistChannelUC, jwtMgr)
+	channelHandler := server.NewChannelHandler(playlistChannelUC, jwtMgr, db)
 	shareHandler := server.NewShareHandler(likeFavoriteUC, jwtMgr)
 	meHandler := server.NewMeHandler(userUC, likeFavoriteUC, playlistChannelUC, jwtMgr)
 

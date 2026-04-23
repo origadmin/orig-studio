@@ -54,6 +54,8 @@ func (h *MeHandler) Register(r handler.Router) {
 		// ================================
 		me.GET("/playlists", WithJWT(h.jwt, GinHandlerToHTTP(h.GetPlaylists)))
 		me.POST("/playlists", WithJWT(h.jwt, GinHandlerToHTTP(h.CreatePlaylist)))
+		me.PATCH("/playlists/:id", WithJWT(h.jwt, GinHandlerToHTTP(h.UpdatePlaylist)))
+		me.DELETE("/playlists/:id", WithJWT(h.jwt, GinHandlerToHTTP(h.DeletePlaylist)))
 		me.POST("/playlists/:id/media", WithJWT(h.jwt, GinHandlerToHTTP(h.AddMediaToPlaylist)))
 		me.DELETE("/playlists/:id/media/:mediaId", WithJWT(h.jwt, GinHandlerToHTTP(h.RemoveMediaFromPlaylist)))
 		me.GET("/favorites", WithJWT(h.jwt, GinHandlerToHTTP(h.GetFavorites)))
@@ -262,6 +264,77 @@ func (h *MeHandler) AddMediaToPlaylist(c *gin.Context) {
 	}
 
 	OK(c, gin.H{"message": "media added to playlist"})
+}
+
+// UpdatePlaylist updates a playlist's title (and optionally description/is_public).
+func (h *MeHandler) UpdatePlaylist(c *gin.Context) {
+	claims, ok := GetClaims(c)
+	if !ok {
+		Fail(c, ErrUnauthorized, "unauthorized")
+		return
+	}
+
+	playlistID := c.Param("id")
+	if playlistID == "" {
+		Fail(c, ErrBadRequest, "playlist id is required")
+		return
+	}
+
+	var input struct {
+		Title       string `json:"title"`
+		Description string `json:"description"`
+		IsPublic    *bool  `json:"is_public"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		Fail(c, ErrBadRequest, err.Error())
+		return
+	}
+
+	existing, err := h.playlistUC.GetPlaylist(c.Request.Context(), playlistID)
+	if err != nil {
+		Fail(c, ErrNotFound, "playlist not found")
+		return
+	}
+
+	if input.Title != "" {
+		existing.Title = input.Title
+	}
+	if input.Description != "" {
+		existing.Description = input.Description
+	}
+	if input.IsPublic != nil {
+		existing.IsPublic = *input.IsPublic
+	}
+
+	updated, err := h.playlistUC.UpdatePlaylist(c.Request.Context(), existing, claims.GetUserID(), false)
+	if err != nil {
+		Fail(c, ErrInternal, err.Error())
+		return
+	}
+
+	OK(c, updated)
+}
+
+// DeletePlaylist deletes a playlist owned by the current user.
+func (h *MeHandler) DeletePlaylist(c *gin.Context) {
+	claims, ok := GetClaims(c)
+	if !ok {
+		Fail(c, ErrUnauthorized, "unauthorized")
+		return
+	}
+
+	playlistID := c.Param("id")
+	if playlistID == "" {
+		Fail(c, ErrBadRequest, "playlist id is required")
+		return
+	}
+
+	if err := h.playlistUC.DeletePlaylist(c.Request.Context(), playlistID, claims.GetUserID(), false); err != nil {
+		Fail(c, ErrInternal, err.Error())
+		return
+	}
+
+	OK(c, gin.H{"message": "playlist deleted successfully"})
 }
 
 // RemoveMediaFromPlaylist removes a media item from a playlist.

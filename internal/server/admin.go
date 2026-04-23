@@ -103,6 +103,18 @@ func (h *AdminHandler) Register(r handler.Router) {
 			tags.GET("/export", WithAdmin(h.jwt, h.exportTags()))
 			tags.POST("/import", WithAdmin(h.jwt, h.importTags()))
 		}
+
+		// ================================
+		// 5. Playlist Management
+		// ================================
+		playlists := admin.Group("/playlists")
+		{
+			playlists.GET("", WithAdmin(h.jwt, h.adminListPlaylists()))
+			playlists.GET("/:id", WithAdmin(h.jwt, h.adminGetPlaylistDetail())) // :id = UUID
+			playlists.POST("", WithAdmin(h.jwt, h.adminCreatePlaylist()))
+			playlists.PUT("/:id", WithAdmin(h.jwt, h.adminUpdatePlaylist()))     // :id = UUID
+			playlists.DELETE("/:id", WithAdmin(h.jwt, h.adminDeletePlaylist()))  // :id = UUID
+		}
 	}
 }
 
@@ -724,6 +736,202 @@ func (h *AdminHandler) adminDeleteChannel() gin.HandlerFunc {
 			"code":    0,
 			"message": "ok",
 			"data":    gin.H{"message": "channel deleted"},
+		})
+	}
+}
+
+// ================================
+// Admin Playlist Management Handlers
+// ================================
+
+func (h *AdminHandler) adminListPlaylists() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+		if pageSize > 100 {
+			pageSize = 100
+		}
+
+		items, total, err := h.channelUC.ListPlaylists(c.Request.Context(), page, pageSize)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data": gin.H{
+				"items":     items,
+				"total":     total,
+				"page":      page,
+				"page_size": pageSize,
+			},
+		})
+	}
+}
+
+func (h *AdminHandler) adminGetPlaylistDetail() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		if id == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "playlist id is required"})
+			return
+		}
+
+		if !validation.IsValidUUID(id) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    ErrBadRequest,
+				"message": "invalid_uuid_format",
+				"hint":    "Admin playlist API requires UUID format (e.g., 550e8400-e29b-41d4-a716-446655440000)",
+			})
+			return
+		}
+
+		playlist, err := h.channelUC.GetPlaylist(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"code":    ErrNotFound,
+				"message": "playlist_not_found",
+				"hint":    "No playlist exists with the provided UUID",
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    playlist,
+		})
+	}
+}
+
+func (h *AdminHandler) adminCreatePlaylist() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var input struct {
+			Title       string `json:"title" binding:"required"`
+			Description string `json:"description"`
+			UserID      string `json:"user_id" binding:"required"`
+			IsPublic    *bool  `json:"is_public"`
+		}
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
+			return
+		}
+
+		isPublic := true
+		if input.IsPublic != nil {
+			isPublic = *input.IsPublic
+		}
+
+		playlist := &contentbiz.Playlist{
+			Title:       input.Title,
+			Description: input.Description,
+			UserID:      input.UserID,
+			IsPublic:    isPublic,
+		}
+
+		created, err := h.channelUC.CreatePlaylist(c.Request.Context(), playlist)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    created,
+		})
+	}
+}
+
+func (h *AdminHandler) adminUpdatePlaylist() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		if id == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "playlist id is required"})
+			return
+		}
+
+		if !validation.IsValidUUID(id) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    ErrBadRequest,
+				"message": "invalid_uuid_format",
+				"hint":    "Admin playlist API requires UUID format",
+			})
+			return
+		}
+
+		var input struct {
+			Title       string `json:"title"`
+			Description string `json:"description"`
+			IsPublic    *bool  `json:"is_public"`
+		}
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
+			return
+		}
+
+		existingPlaylist, err := h.channelUC.GetPlaylist(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"code": ErrNotFound, "message": "playlist_not_found"})
+			return
+		}
+
+		playlistItem := &contentbiz.Playlist{
+			ID:          id,
+			Title:       input.Title,
+			Description: input.Description,
+			UserID:      existingPlaylist.UserID,
+			IsPublic:    existingPlaylist.IsPublic,
+			ShortToken:  existingPlaylist.ShortToken,
+		}
+
+		if input.IsPublic != nil {
+			playlistItem.IsPublic = *input.IsPublic
+		}
+
+		updated, err := h.channelUC.UpdatePlaylist(c.Request.Context(), playlistItem, "", true)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    updated,
+		})
+	}
+}
+
+func (h *AdminHandler) adminDeletePlaylist() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		if id == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "playlist id is required"})
+			return
+		}
+
+		if !validation.IsValidUUID(id) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    ErrBadRequest,
+				"message": "invalid_uuid_format",
+				"hint":    "Admin playlist API requires UUID format",
+			})
+			return
+		}
+
+		err := h.channelUC.DeletePlaylist(c.Request.Context(), id, "", true)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    gin.H{"message": "playlist deleted"},
 		})
 	}
 }

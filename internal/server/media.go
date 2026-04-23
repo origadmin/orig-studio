@@ -497,7 +497,6 @@ func (h *MediaHandler) uploadMediaHandler(w http.ResponseWriter, r *http.Request
 		Privacy:        int32(privacy),
 		Tags:           tags,
 		CategoryId:     strconv.Itoa(categoryID),
-		IsReviewed:     false,
 		ReviewStatus:   "pending_review",
 		Listable:       false,
 	}
@@ -1154,7 +1153,6 @@ func (h *MediaHandler) reviewMediaHandler(w http.ResponseWriter, r *http.Request
 
 	c.JSON(http.StatusOK, gin.H{
 		"id":            updated.Id,
-		"is_reviewed":   updated.IsReviewed,
 		"review_status": updated.ReviewStatus,
 		"listable":      updated.Listable,
 		"updated_at":    updated.UpdateTime,
@@ -1162,6 +1160,9 @@ func (h *MediaHandler) reviewMediaHandler(w http.ResponseWriter, r *http.Request
 }
 
 // --- List Media ---
+
+func ptrBool(v bool) *bool       { return &v }
+func ptrString(v string) *string { return &v }
 
 func (h *MediaHandler) listMedia() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -1192,6 +1193,8 @@ func (h *MediaHandler) listMedia() gin.HandlerFunc {
 			v := true
 			opt.Featured = &v
 		}
+
+		opt.Listable = ptrBool(true)
 
 		// Handle tags filtering
 		if tagsStr := c.Query("tags"); tagsStr != "" {
@@ -1418,7 +1421,6 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 			Privacy:        int32(privacy),
 			Tags:           tags,
 			CategoryId:     strconv.Itoa(categoryID),
-			IsReviewed:     false,
 			ReviewStatus:   "pending_review",
 			Listable:       false,
 		}
@@ -2099,6 +2101,11 @@ func (h *MediaHandler) getPublicDetail() gin.HandlerFunc {
 
 		if media.State == "private" || media.Privacy == 2 {
 			Fail(c, ErrForbidden, "private media")
+			return
+		}
+
+		if !media.Listable || media.ReviewStatus != "reviewed" {
+			Fail(c, ErrForbidden, "media not available")
 			return
 		}
 

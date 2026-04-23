@@ -592,7 +592,17 @@
     "none": "None",
     "unsubscribe": "Unsubscribe",
     "confirmUnsubscribe": "Unsubscribe?",
-    "unsubscribeMessage": "You won't receive notifications from this channel anymore."
+    "unsubscribeMessage": "You won't receive notifications from this channel anymore.",
+    "filterAllChannels": "All Channels",
+    "sortNewest": "Newest",
+    "sortMostViewed": "Most Viewed",
+    "sortTrending": "Trending",
+    "emptyTitle": "No subscription content",
+    "emptyDescription": "Subscribe to channels to see their latest videos here.",
+    "play": "Play",
+    "watchLater": "Watch Later",
+    "share": "Share",
+    "loadingMore": "Loading more..."
   },
   "notifications": {
     "title": "Notifications",

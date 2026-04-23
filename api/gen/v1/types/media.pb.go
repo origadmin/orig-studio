@@ -99,7 +99,9 @@ type Media struct {
 	EnableComments bool `protobuf:"varint,34,opt,name=enable_comments,proto3" json:"enable_comments,omitempty"`
 	// media.field.featured
 	Featured bool `protobuf:"varint,35,opt,name=featured,proto3" json:"featured,omitempty"`
-	// media.field.is_reviewed
+	// media.field.is_reviewed — DEPRECATED: use review_status instead
+	//
+	// Deprecated: Marked as deprecated in v1/types/media.proto.
 	IsReviewed bool `protobuf:"varint,36,opt,name=is_reviewed,proto3" json:"is_reviewed,omitempty"`
 	// media.field.reported_times
 	ReportedTimes int32 `protobuf:"varint,37,opt,name=reported_times,proto3" json:"reported_times,omitempty"`
@@ -406,6 +408,7 @@ func (x *Media) GetFeatured() bool {
 	return false
 }
 
+// Deprecated: Marked as deprecated in v1/types/media.proto.
 func (x *Media) GetIsReviewed() bool {
 	if x != nil {
 		return x.IsReviewed
@@ -2050,7 +2053,7 @@ var File_v1_types_media_proto protoreflect.FileDescriptor
 
 const file_v1_types_media_proto_rawDesc = "" +
 	"\n" +
-	"\x14v1/types/media.proto\x12\x15api.v1.services.types\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9b\v\n" +
+	"\x14v1/types/media.proto\x12\x15api.v1.services.types\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9f\v\n" +
 	"\x05Media\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
@@ -2095,8 +2098,8 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\fpublished_at\x18  \x01(\v2\x1a.google.protobuf.TimestampR\fpublished_at\x12&\n" +
 	"\x0eallow_download\x18! \x01(\bR\x0eallow_download\x12(\n" +
 	"\x0fenable_comments\x18\" \x01(\bR\x0fenable_comments\x12\x1a\n" +
-	"\bfeatured\x18# \x01(\bR\bfeatured\x12 \n" +
-	"\vis_reviewed\x18$ \x01(\bR\vis_reviewed\x12&\n" +
+	"\bfeatured\x18# \x01(\bR\bfeatured\x12$\n" +
+	"\vis_reviewed\x18$ \x01(\bB\x02\x18\x01R\vis_reviewed\x12&\n" +
 	"\x0ereported_times\x18% \x01(\x05R\x0ereported_times\x12\x1c\n" +
 	"\textension\x18& \x01(\tR\textension\x12\x16\n" +
 	"\x06md5sum\x18' \x01(\tR\x06md5sum\x12\x16\n" +

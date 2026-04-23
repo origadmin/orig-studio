@@ -57,18 +57,22 @@ type MediaRepo interface {
 // MediaQueryOption specifies options for querying media.
 type MediaQueryOption struct {
 	repo.QueryOption
-	Type       *int32
-	UserID     *string
-	CategoryID *string
-	Status     *int32
-	// Added for Gin handler parity
-	State      string
-	MediaType  string
-	Featured   *bool
-	OrderBy    string
-	Descending bool
-	Tags       []string
+	Type         *int32
+	UserID       *string
+	CategoryID   *string
+	Status       *int32
+	State        string
+	MediaType    string
+	Featured     *bool
+	OrderBy      string
+	Descending   bool
+	Tags         []string
+	Listable     *bool
+	ReviewStatus *string
 }
+
+func ptrBool(v bool) *bool       { return &v }
+func ptrString(v string) *string { return &v }
 
 // MediaCreateOption specifies options for creating media.
 type MediaCreateOption struct{}

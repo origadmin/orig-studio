@@ -70,6 +70,20 @@ func (r *playlistRepo) Get(ctx context.Context, id string) (*biz.Playlist, error
 	return playlist, nil
 }
 
+func (r *playlistRepo) GetByShortToken(ctx context.Context, token string) (*biz.Playlist, error) {
+	ent, err := r.data.db.Playlist.Query().Where(playlist.ShortTokenEQ(token)).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	playlist := mapPlaylist(ent)
+	// Get media items for the playlist
+	mediaItems, err := r.GetPlaylistMedia(ctx, ent.ID)
+	if err == nil {
+		playlist.MediaItems = mediaItems
+	}
+	return playlist, nil
+}
+
 func (r *playlistRepo) Update(ctx context.Context, p *biz.Playlist) (*biz.Playlist, error) {
 	privacy := 1 // Default to public
 	if !p.IsPublic {
@@ -487,6 +501,7 @@ func mapPlaylist(ent *entity.Playlist) *biz.Playlist {
 		ID:          ent.ID,
 		Title:       ent.Title,
 		Description: ent.Description,
+		ShortToken:  ent.ShortToken,
 		UserID:      ent.UserID,
 		IsPublic:    ent.Privacy == 1,
 		CreatedAt:   ent.AddDate,

@@ -70,8 +70,10 @@ const (
 	FieldEnableComments = "enable_comments"
 	// FieldFeatured holds the string denoting the featured field in the database.
 	FieldFeatured = "featured"
-	// FieldIsReviewed holds the string denoting the is_reviewed field in the database.
-	FieldIsReviewed = "is_reviewed"
+	// FieldReviewStatus holds the string denoting the review_status field in the database.
+	FieldReviewStatus = "review_status"
+	// FieldListable holds the string denoting the listable field in the database.
+	FieldListable = "listable"
 	// FieldReportedTimes holds the string denoting the reported_times field in the database.
 	FieldReportedTimes = "reported_times"
 	// FieldTags holds the string denoting the tags field in the database.
@@ -195,7 +197,8 @@ var Columns = []string{
 	FieldAllowDownload,
 	FieldEnableComments,
 	FieldFeatured,
-	FieldIsReviewed,
+	FieldReviewStatus,
+	FieldListable,
 	FieldReportedTimes,
 	FieldTags,
 	FieldUserID,
@@ -291,8 +294,12 @@ var (
 	DefaultEnableComments bool
 	// DefaultFeatured holds the default value on creation for the "featured" field.
 	DefaultFeatured bool
-	// DefaultIsReviewed holds the default value on creation for the "is_reviewed" field.
-	DefaultIsReviewed bool
+	// DefaultReviewStatus holds the default value on creation for the "review_status" field.
+	DefaultReviewStatus string
+	// ReviewStatusValidator is a validator for the "review_status" field. It is called by the builders before save.
+	ReviewStatusValidator func(string) error
+	// DefaultListable holds the default value on creation for the "listable" field.
+	DefaultListable bool
 	// DefaultReportedTimes holds the default value on creation for the "reported_times" field.
 	DefaultReportedTimes int
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
@@ -455,9 +462,14 @@ func ByFeatured(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldFeatured, opts...).ToFunc()
 }
 
-// ByIsReviewed orders the results by the is_reviewed field.
-func ByIsReviewed(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIsReviewed, opts...).ToFunc()
+// ByReviewStatus orders the results by the review_status field.
+func ByReviewStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReviewStatus, opts...).ToFunc()
+}
+
+// ByListable orders the results by the listable field.
+func ByListable(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldListable, opts...).ToFunc()
 }
 
 // ByReportedTimes orders the results by the reported_times field.

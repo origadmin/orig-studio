@@ -84,6 +84,18 @@ func (m *mockMediaRepo) ListFilteredByEncodingStatus(ctx context.Context, status
 	return nil, 0, nil
 }
 
+func (m *mockMediaRepo) GetByShortToken(ctx context.Context, shortToken string) (*types.Media, error) {
+	return nil, nil
+}
+
+func (m *mockMediaRepo) GetByID(ctx context.Context, id string) (*types.Media, error) {
+	return m.Get(ctx, id)
+}
+
+func (m *mockMediaRepo) ResolveToID(ctx context.Context, shortToken string) (string, error) {
+	return "", nil
+}
+
 // mockEncodingTaskRepo is a mock of EncodingTaskRepo
 type mockEncodingTaskRepo struct {
 	mock.Mock

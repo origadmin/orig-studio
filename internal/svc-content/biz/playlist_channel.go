@@ -17,6 +17,7 @@ type Playlist struct {
 	ID          string    `json:"id"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
+	ShortToken  string    `json:"short_token"`
 	UserID      string    `json:"user_id"`
 	IsPublic    bool      `json:"is_public"`
 	CreatedAt   time.Time `json:"created_at"`
@@ -42,6 +43,7 @@ type Channel struct {
 type PlaylistRepo interface {
 	Create(ctx context.Context, p *Playlist) (*Playlist, error)
 	Get(ctx context.Context, id string) (*Playlist, error)
+	GetByShortToken(ctx context.Context, token string) (*Playlist, error)
 	Update(ctx context.Context, p *Playlist) (*Playlist, error)
 	Delete(ctx context.Context, id string) error
 	ListByUser(ctx context.Context, userID string, page, pageSize int) ([]*Playlist, int, error)
@@ -107,6 +109,10 @@ func (uc *PlaylistChannelUseCase) ListPlaylists(ctx context.Context, page, pageS
 
 func (uc *PlaylistChannelUseCase) GetPlaylist(ctx context.Context, id string) (*Playlist, error) {
 	return uc.playlistRepo.Get(ctx, id)
+}
+
+func (uc *PlaylistChannelUseCase) GetPlaylistByShortToken(ctx context.Context, token string) (*Playlist, error) {
+	return uc.playlistRepo.GetByShortToken(ctx, token)
 }
 
 func (uc *PlaylistChannelUseCase) ListUserPlaylists(ctx context.Context, userID string, page, pageSize int) ([]*Playlist, int, error) {

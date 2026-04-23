@@ -1,6 +1,8 @@
 import {useQuery, useMutation, useQueryClient, useInfiniteQuery} from '@tanstack/react-query';
 import {mediaApi, publicMediaApi, adminMediaApi, type Media} from '@/lib/api/media';
 import {categoryApi, type Category} from '@/lib/api/category';
+import {channelApi, type ChannelDetail} from '@/lib/api/channel';
+import {playlistApi, type Playlist, type PlaylistListResponse} from '@/lib/api/playlist';
 
 /**
  * keys factory
@@ -176,5 +178,104 @@ export function useCategoryList() {
             const res = await categoryApi.getAll();
             return res;
         },
+    });
+}
+
+export function useChannelByToken(token: string | null) {
+    return useQuery({
+        queryKey: ['channel', 'token', token],
+        queryFn: async () => {
+            const res = await channelApi.getByToken(token!);
+            return res as ChannelDetail;
+        },
+        enabled: !!token,
+    });
+}
+
+export function useChannelByHandle(handle: string | null) {
+    return useQuery({
+        queryKey: ['channel', 'handle', handle],
+        queryFn: async () => {
+            const res = await channelApi.get({username: handle!});
+            return (res as any).data || res as ChannelDetail;
+        },
+        enabled: !!handle,
+    });
+}
+
+export function useMyChannel(enabled: boolean) {
+    return useQuery({
+        queryKey: ['channel', 'me'],
+        queryFn: async () => {
+            const res = await channelApi.getMyChannel();
+            return res as ChannelDetail;
+        },
+        enabled,
+    });
+}
+
+export function useSubscriptionStatus(channelToken: string | null) {
+    return useQuery({
+        queryKey: ['subscription', channelToken],
+        queryFn: async () => {
+            const res = await channelApi.getSubscriptionStatus(channelToken!);
+            return res as {is_subscribed: boolean};
+        },
+        enabled: !!channelToken,
+    });
+}
+
+export function useSubscribe() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (channelToken: string) => channelApi.subscribe(channelToken),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['subscription']});
+            queryClient.invalidateQueries({queryKey: ['channel']});
+        },
+    });
+}
+
+export function useUnsubscribe() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (channelToken: string) => channelApi.unsubscribe(channelToken),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['subscription']});
+            queryClient.invalidateQueries({queryKey: ['channel']});
+        },
+    });
+}
+
+export function useUpdateNotificationSetting() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({channelToken, setting}: {channelToken: string; setting: string}) =>
+            channelApi.updateNotificationSetting(channelToken, setting),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['channel']});
+        },
+    });
+}
+
+export function useChannelVideos(channelToken: string | null, params?: {sort?: string; keyword?: string; page_size?: number; page?: number}) {
+    return useQuery({
+        queryKey: ['channelVideos', channelToken, params],
+        queryFn: async () => {
+            const res = await channelApi.listAll({page: params?.page, limit: params?.page_size});
+            return res;
+        },
+        enabled: !!channelToken,
+    });
+}
+
+export function useChannelPlaylists(channelToken: string | null) {
+    return useQuery({
+        queryKey: ['channelPlaylists', channelToken],
+        queryFn: async () => {
+            const res = await playlistApi.getMyPlaylists();
+            return res as PlaylistListResponse;
+        },
+        enabled: !!channelToken,
     });
 }

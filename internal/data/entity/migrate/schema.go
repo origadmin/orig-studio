@@ -486,7 +486,8 @@ var (
 		{Name: "allow_download", Type: field.TypeBool, Default: true},
 		{Name: "enable_comments", Type: field.TypeBool, Default: true},
 		{Name: "featured", Type: field.TypeBool, Default: false},
-		{Name: "is_reviewed", Type: field.TypeBool, Default: true},
+		{Name: "review_status", Type: field.TypeString, Size: 20, Default: "pending_review"},
+		{Name: "listable", Type: field.TypeBool, Default: false},
 		{Name: "reported_times", Type: field.TypeInt, Default: 0},
 		{Name: "tags", Type: field.TypeJSON, Nullable: true},
 		{Name: "published_at", Type: field.TypeTime, Nullable: true},
@@ -506,31 +507,31 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "media_categories_media",
-				Columns:    []*schema.Column{MediaColumns[35]},
+				Columns:    []*schema.Column{MediaColumns[36]},
 				RefColumns: []*schema.Column{CategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_users_channel_media",
-				Columns:    []*schema.Column{MediaColumns[36]},
+				Columns:    []*schema.Column{MediaColumns[37]},
 				RefColumns: []*schema.Column{UsersChannelColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_files_media_category_media",
-				Columns:    []*schema.Column{MediaColumns[37]},
+				Columns:    []*schema.Column{MediaColumns[38]},
 				RefColumns: []*schema.Column{FilesMediaCategoryColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_files_media_tags_media",
-				Columns:    []*schema.Column{MediaColumns[38]},
+				Columns:    []*schema.Column{MediaColumns[39]},
 				RefColumns: []*schema.Column{FilesMediaTagsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_users_user_media",
-				Columns:    []*schema.Column{MediaColumns[39]},
+				Columns:    []*schema.Column{MediaColumns[40]},
 				RefColumns: []*schema.Column{UsersUserColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -569,17 +570,27 @@ var (
 			{
 				Name:    "media_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[33]},
+				Columns: []*schema.Column{MediaColumns[34]},
 			},
 			{
 				Name:    "media_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[39]},
+				Columns: []*schema.Column{MediaColumns[40]},
 			},
 			{
 				Name:    "media_short_token",
 				Unique:  true,
 				Columns: []*schema.Column{MediaColumns[3]},
+			},
+			{
+				Name:    "media_review_status_listable_state",
+				Unique:  false,
+				Columns: []*schema.Column{MediaColumns[29], MediaColumns[30], MediaColumns[19]},
+			},
+			{
+				Name:    "media_listable",
+				Unique:  false,
+				Columns: []*schema.Column{MediaColumns[30]},
 			},
 		},
 	}

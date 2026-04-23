@@ -1,11 +1,7 @@
-/*
- * Copyright (c) 2024 OrigAdmin. All rights reserved.
- */
-
-import { createRootRoute } from '@tanstack/react-router';
-
-import { Outlet } from '@tanstack/react-router';
+import { createRootRoute, Outlet } from '@tanstack/react-router';
+import NotFoundPage from '@/pages/NotFoundPage';
 
 export const Route = createRootRoute({
-  component: () => <Outlet />,
+    component: () => <Outlet />,
+    notFoundComponent: NotFoundPage,
 });

@@ -902,8 +902,6 @@ func (uc *MediaUseCase) ReviewMedia(ctx context.Context, mediaID string, approve
 		return nil, err
 	}
 
-	// 更新审核状态
-	media.IsReviewed = approve
 	if approve {
 		media.ReviewStatus = "reviewed"
 	} else {
@@ -926,6 +924,6 @@ func (uc *MediaUseCase) ReviewMedia(ctx context.Context, mediaID string, approve
 // ShouldBeListable 计算媒体是否应该可见
 func (uc *MediaUseCase) ShouldBeListable(media *Media) bool {
 	return media.EncodingStatus == "success" && 
-		   media.IsReviewed && 
+		   media.ReviewStatus == "reviewed" && 
 		   media.State == "active"
 }

@@ -30,6 +30,9 @@ type (
 	Channels           = []*entity.Channel
 	Comment            = entity.Comment
 	CommentEdges       = entity.CommentEdges
+	CommentLike        = entity.CommentLike
+	CommentLikeEdges   = entity.CommentLikeEdges
+	CommentLikes       = []*entity.CommentLike
 	CommentPB          = types.Comment
 	Comments           = []*entity.Comment
 	EncodeProfile      = entity.EncodeProfile
@@ -350,7 +353,8 @@ func ConvertMediaPBToMedia(from *MediaPB) *Media {
 		AllowDownload:   from.AllowDownload,
 		EnableComments:  from.EnableComments,
 		Featured:        from.Featured,
-		IsReviewed:      from.IsReviewed,
+		ReviewStatus:    from.ReviewStatus,
+		Listable:        from.Listable,
 		ReportedTimes:   int(from.ReportedTimes),
 		Tags:            from.Tags,
 		UserID:          from.UserId,
@@ -399,11 +403,12 @@ func ConvertMediaToMediaPB(from *Media) *MediaPB {
 		AllowDownload:   from.AllowDownload,
 		EnableComments:  from.EnableComments,
 		Featured:        from.Featured,
-		IsReviewed:      from.IsReviewed,
 		ReportedTimes:   int32(from.ReportedTimes),
 		Extension:       from.Extension,
 		Md5Sum:          from.Md5sum,
 		Poster:          from.Poster,
+		ReviewStatus:    from.ReviewStatus,
+		Listable:        from.Listable,
 	}
 	return to
 }

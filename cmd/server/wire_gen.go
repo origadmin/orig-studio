@@ -95,7 +95,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	notificationRepo := NewNotificationRepo(data, logger)
 	notificationUseCase := NewNotificationUseCase(notificationRepo, logger)
 	notificationHandler := NewNotificationHandler(notificationUseCase, manager)
-	channelHandler := NewChannelHandler(playlistChannelUseCase, manager)
+	channelHandler := NewChannelHandler(playlistChannelUseCase, manager, client)
 	shareHandler := NewShareHandler(likeFavoriteUseCase, manager)
 	statsRepo := NewStatsRepo(client)
 	systemHandler := NewSystemHandler(manager, statsRepo)
@@ -537,8 +537,9 @@ func NewNotificationHandler(
 func NewChannelHandler(
 	playlistChannelUC *biz2.PlaylistChannelUseCase,
 	jwt *auth.Manager,
+	entityClient *entity.Client,
 ) *server.ChannelHandler {
-	return server.NewChannelHandler(playlistChannelUC, jwt)
+	return server.NewChannelHandler(playlistChannelUC, jwt, entityClient)
 }
 
 // NewShareHandler creates a new share handler.
