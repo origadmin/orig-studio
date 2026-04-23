@@ -39,6 +39,7 @@ import (
 	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 	"origadmin/application/origcms/internal/svc-media/biz"
 	"origadmin/application/origcms/internal/svc-media/dto"
+	userbiz "origadmin/application/origcms/internal/svc-user/biz"
 )
 
 // UploadDir is the directory where uploaded media files are stored.
@@ -121,10 +122,12 @@ func computeFileMD5(r io.Reader) (string, error) {
 
 // MediaHandler handles media requests.
 type MediaHandler struct {
-	jwtMgr         *auth.Manager
-	uc             *biz.MediaUseCase
-	uploadUC       *biz.UploadUseCase
-	likeFavoriteUC *contentbiz.LikeFavoriteUseCase
+	jwtMgr                *auth.Manager
+	uc                    *biz.MediaUseCase
+	uploadUC              *biz.UploadUseCase
+	likeFavoriteUC        *contentbiz.LikeFavoriteUseCase
+	playlistChannelUC     *contentbiz.PlaylistChannelUseCase
+	userUC                *userbiz.UserUseCase
 }
 
 func NewMediaHandler(
@@ -132,8 +135,10 @@ func NewMediaHandler(
 	uc *biz.MediaUseCase,
 	uploadUC *biz.UploadUseCase,
 	likeFavoriteUC *contentbiz.LikeFavoriteUseCase,
+	playlistChannelUC *contentbiz.PlaylistChannelUseCase,
+	userUC *userbiz.UserUseCase,
 ) *MediaHandler {
-	return &MediaHandler{jwtMgr: jwtMgr, uc: uc, uploadUC: uploadUC, likeFavoriteUC: likeFavoriteUC}
+	return &MediaHandler{jwtMgr: jwtMgr, uc: uc, uploadUC: uploadUC, likeFavoriteUC: likeFavoriteUC, playlistChannelUC: playlistChannelUC, userUC: userUC}
 }
 
 func (h *MediaHandler) Register(r handler.Router) {
@@ -181,10 +186,10 @@ func (h *MediaHandler) RegisterGin(rg *gin.RouterGroup) {
 
 		// 交互操作（支持可选JWT）
 		publicMedias.POST("/:short_token/likes", JWTMiddleware(h.jwtMgr), h.toggleLikeByShortToken())
-		publicMedias.GET("/:short_token/likes", h.getLikeStatusByShortToken())
+		publicMedias.GET("/:short_token/likes", OptionalJWTMiddleware(h.jwtMgr), h.getLikeStatusByShortToken())
 		publicMedias.DELETE("/:short_token/likes", JWTMiddleware(h.jwtMgr), h.toggleDislikeByShortToken())
 		publicMedias.POST("/:short_token/favorites", JWTMiddleware(h.jwtMgr), h.toggleFavoriteByShortToken())
-		publicMedias.GET("/:short_token/favorites", h.getFavoriteStatusByShortToken())
+		publicMedias.GET("/:short_token/favorites", OptionalJWTMiddleware(h.jwtMgr), h.getFavoriteStatusByShortToken())
 		publicMedias.GET("/:short_token/shares", h.getShareUrlByShortToken())
 		publicMedias.POST("/:short_token/shares", JWTMiddleware(h.jwtMgr), h.recordShareByShortToken())
 	}
@@ -292,8 +297,39 @@ func (h *MediaHandler) listMediaHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	resultItems := make([]map[string]interface{}, len(items))
+	for i, m := range items {
+		item := filterPublicFields(m)
+		edges := map[string]interface{}{}
+
+		if m.UserId != "" && m.UserId != "0" && h.userUC != nil {
+			if u, err := h.userUC.GetUser(ctx, m.UserId); err == nil {
+				userMap := map[string]interface{}{
+					"id":       u.Id,
+					"username": u.Username,
+					"nickname": u.Nickname,
+					"avatar":   u.Avatar,
+				}
+				edges["user"] = []map[string]interface{}{userMap}
+			}
+		}
+
+		if m.CategoryId != "" {
+			catMap := map[string]interface{}{
+				"id": m.CategoryId,
+			}
+			edges["category"] = []map[string]interface{}{catMap}
+		}
+
+		if len(edges) > 0 {
+			item["edges"] = edges
+		}
+
+		resultItems[i] = item
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"items":     items,
+		"items":     resultItems,
 		"total":     total,
 		"page":      page,
 		"page_size": pageSize,
@@ -451,7 +487,7 @@ func (h *MediaHandler) uploadMediaHandler(w http.ResponseWriter, r *http.Request
 		Description:    description,
 		Type:           mediaType,
 		Url:            fileURL,
-		UserId:         claims.UserID,
+		UserId:         claims.GetUserID(),
 		State:          "active",
 		EncodingStatus: "pending",
 		MimeType:       mimeType,
@@ -502,7 +538,7 @@ func (h *MediaHandler) updateMediaHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if m.UserId != claims.UserID && !claims.IsStaff {
+	if m.UserId != claims.GetUserID() && !claims.IsStaff {
 		c.JSON(http.StatusForbidden, gin.H{"error": "you can only edit your own media"})
 		return
 	}
@@ -579,7 +615,7 @@ func (h *MediaHandler) deleteMediaHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if m.UserId != claims.UserID && !claims.IsStaff {
+	if m.UserId != claims.GetUserID() && !claims.IsStaff {
 		c.JSON(http.StatusForbidden, gin.H{"error": "you can only delete your own media"})
 		return
 	}
@@ -901,7 +937,7 @@ func (h *MediaHandler) toggleLikeHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	stats, err := h.likeFavoriteUC.ToggleLike(ctx, claims.UserID, id, "like")
+	stats, err := h.likeFavoriteUC.ToggleLike(ctx, claims.GetUserID(), id, "like")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -932,7 +968,7 @@ func (h *MediaHandler) toggleDislikeHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	stats, err := h.likeFavoriteUC.ToggleLike(ctx, claims.UserID, id, "dislike")
+	stats, err := h.likeFavoriteUC.ToggleLike(ctx, claims.GetUserID(), id, "dislike")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -958,7 +994,7 @@ func (h *MediaHandler) getLikeStatusHandler(w http.ResponseWriter, r *http.Reque
 
 	var userID string
 	if val := c.Get("claims"); val != nil {
-		userID = val.(*auth.Claims).UserID
+		userID = val.(*auth.Claims).GetUserID()
 	}
 
 	stats, err := h.likeFavoriteUC.GetMediaStats(ctx, userID, id)
@@ -992,7 +1028,7 @@ func (h *MediaHandler) toggleFavoriteHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	stats, err := h.likeFavoriteUC.ToggleFavorite(ctx, claims.UserID, id)
+	stats, err := h.likeFavoriteUC.ToggleFavorite(ctx, claims.GetUserID(), id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -1016,7 +1052,7 @@ func (h *MediaHandler) getFavoriteStatusHandler(w http.ResponseWriter, r *http.R
 
 	var userID string
 	if val := c.Get("claims"); val != nil {
-		userID = val.(*auth.Claims).UserID
+		userID = val.(*auth.Claims).GetUserID()
 	}
 
 	stats, err := h.likeFavoriteUC.GetMediaStats(ctx, userID, id)
@@ -1110,7 +1146,7 @@ func (h *MediaHandler) reviewMediaHandler(w http.ResponseWriter, r *http.Request
 
 	approve := req.Action == "approve"
 
-	updated, err := h.uc.ReviewMedia(ctx, idStr, approve, req.Comment, claims.UserID)
+	updated, err := h.uc.ReviewMedia(ctx, idStr, approve, req.Comment, claims.GetUserID())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -1172,18 +1208,39 @@ func (h *MediaHandler) listMedia() gin.HandlerFunc {
 			return
 		}
 
-		// Convert timestamps to ISO 8601 format
-		for _, item := range items {
-			if item.CreateTime != nil {
-				// Timestamps are already in protobuf format, which will be serialized correctly
+		resultItems := make([]map[string]interface{}, len(items))
+		for i, m := range items {
+			item := filterPublicFields(m)
+			edges := map[string]interface{}{}
+
+			if m.UserId != "" && m.UserId != "0" && h.userUC != nil {
+				if u, err := h.userUC.GetUser(ctx, m.UserId); err == nil {
+					userMap := map[string]interface{}{
+						"id":       u.Id,
+						"username": u.Username,
+						"nickname": u.Nickname,
+						"avatar":   u.Avatar,
+					}
+					edges["user"] = []map[string]interface{}{userMap}
+				}
 			}
-			if item.UpdateTime != nil {
-				// Timestamps are already in protobuf format, which will be serialized correctly
+
+			if m.CategoryId != "" {
+				catMap := map[string]interface{}{
+					"id": m.CategoryId,
+				}
+				edges["category"] = []map[string]interface{}{catMap}
 			}
+
+			if len(edges) > 0 {
+				item["edges"] = edges
+			}
+
+			resultItems[i] = item
 		}
 
 		OK(c, gin.H{
-			"items":     items,
+			"items":     resultItems,
 			"total":     total,
 			"page":      page,
 			"page_size": pageSize,
@@ -1219,7 +1276,7 @@ func (h *MediaHandler) getMedia() gin.HandlerFunc {
 func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		claims, ok := c.MustGet("claims").(*auth.Claims)
+		claims, ok := GetClaims(c)
 		if !ok {
 			Fail(c, ErrUnauthorized, "unauthorized")
 			return
@@ -1351,7 +1408,7 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 			Description:    description,
 			Type:           mediaType,
 			Url:            fileURL,
-			UserId:         claims.UserID,
+			UserId:         claims.GetUserID(),
 			State:          "active",
 			EncodingStatus: "pending",
 			MimeType:       mimeType,
@@ -1364,6 +1421,11 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 			IsReviewed:     false,
 			ReviewStatus:   "pending_review",
 			Listable:       false,
+		}
+
+		if m.UserId == "" || m.UserId == "0" {
+			Fail(c, ErrInternal, fmt.Sprintf("invalid user_id: %q", m.UserId))
+			return
 		}
 
 		created, err := h.uc.CreateMedia(ctx, m)
@@ -1395,7 +1457,7 @@ func (h *MediaHandler) updateMedia() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
-		claims, ok := c.MustGet("claims").(*auth.Claims)
+		claims, ok := GetClaims(c)
 		if !ok {
 			Fail(c, ErrUnauthorized, "unauthorized")
 			return
@@ -1413,7 +1475,7 @@ func (h *MediaHandler) updateMedia() gin.HandlerFunc {
 			return
 		}
 
-		if m.UserId != claims.UserID && !claims.IsStaff {
+		if m.UserId != claims.GetUserID() && !claims.IsStaff {
 			Fail(c, ErrForbidden, "you can only edit your own media")
 			return
 		}
@@ -1463,7 +1525,7 @@ func (h *MediaHandler) deleteMedia() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
-		claims, ok := c.MustGet("claims").(*auth.Claims)
+		claims, ok := GetClaims(c)
 		if !ok {
 			Fail(c, ErrUnauthorized, "unauthorized")
 			return
@@ -1481,7 +1543,7 @@ func (h *MediaHandler) deleteMedia() gin.HandlerFunc {
 			return
 		}
 
-		if m.UserId != claims.UserID && !claims.IsStaff {
+		if m.UserId != claims.GetUserID() && !claims.IsStaff {
 			Fail(c, ErrForbidden, "you can only delete your own media")
 			return
 		}
@@ -1796,7 +1858,7 @@ func (h *MediaHandler) deleteEncodeProfile() gin.HandlerFunc {
 func (h *MediaHandler) toggleLike() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		claims, ok := c.MustGet("claims").(*auth.Claims)
+		claims, ok := GetClaims(c)
 		if !ok {
 			Fail(c, ErrUnauthorized, "unauthorized")
 			return
@@ -1808,7 +1870,7 @@ func (h *MediaHandler) toggleLike() gin.HandlerFunc {
 			return
 		}
 
-		stats, err := h.likeFavoriteUC.ToggleLike(ctx, claims.UserID, id, "like")
+		stats, err := h.likeFavoriteUC.ToggleLike(ctx, claims.GetUserID(), id, "like")
 		if err != nil {
 			Fail(c, ErrInternal, err.Error())
 			return
@@ -1826,7 +1888,7 @@ func (h *MediaHandler) toggleLike() gin.HandlerFunc {
 func (h *MediaHandler) toggleDislike() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		claims, ok := c.MustGet("claims").(*auth.Claims)
+		claims, ok := GetClaims(c)
 		if !ok {
 			Fail(c, ErrUnauthorized, "unauthorized")
 			return
@@ -1838,7 +1900,7 @@ func (h *MediaHandler) toggleDislike() gin.HandlerFunc {
 			return
 		}
 
-		stats, err := h.likeFavoriteUC.ToggleLike(ctx, claims.UserID, id, "dislike")
+		stats, err := h.likeFavoriteUC.ToggleLike(ctx, claims.GetUserID(), id, "dislike")
 		if err != nil {
 			Fail(c, ErrInternal, err.Error())
 			return
@@ -1865,7 +1927,7 @@ func (h *MediaHandler) getLikeStatus() gin.HandlerFunc {
 
 		var userID string
 		if claims, ok := c.Get("claims"); ok {
-			userID = claims.(*auth.Claims).UserID
+			userID = claims.(*auth.Claims).GetUserID()
 		}
 
 		stats, err := h.likeFavoriteUC.GetMediaStats(ctx, userID, id)
@@ -1886,7 +1948,7 @@ func (h *MediaHandler) getLikeStatus() gin.HandlerFunc {
 func (h *MediaHandler) toggleFavorite() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		claims, ok := c.MustGet("claims").(*auth.Claims)
+		claims, ok := GetClaims(c)
 		if !ok {
 			Fail(c, ErrUnauthorized, "unauthorized")
 			return
@@ -1898,7 +1960,7 @@ func (h *MediaHandler) toggleFavorite() gin.HandlerFunc {
 			return
 		}
 
-		stats, err := h.likeFavoriteUC.ToggleFavorite(ctx, claims.UserID, id)
+		stats, err := h.likeFavoriteUC.ToggleFavorite(ctx, claims.GetUserID(), id)
 		if err != nil {
 			Fail(c, ErrInternal, err.Error())
 			return
@@ -1923,7 +1985,7 @@ func (h *MediaHandler) getFavoriteStatus() gin.HandlerFunc {
 
 		var userID string
 		if claims, ok := c.Get("claims"); ok {
-			userID = claims.(*auth.Claims).UserID
+			userID = claims.(*auth.Claims).GetUserID()
 		}
 
 		stats, err := h.likeFavoriteUC.GetMediaStats(ctx, userID, id)
@@ -2029,27 +2091,59 @@ func (h *MediaHandler) getPublicDetail() gin.HandlerFunc {
 			return
 		}
 
-		// ✅ 只使用 GetByShortToken，绝不回退到 ID 查询
 		media, err := h.uc.GetByShortToken(ctx, shortToken)
 		if err != nil {
 			Fail(c, ErrMediaNotFound, "media not found")
 			return
 		}
 
-		// 权限检查：私有视频不可通过公开 API 访问
 		if media.State == "private" || media.Privacy == 2 {
 			Fail(c, ErrForbidden, "private media")
 			return
 		}
 
-		// 自增观看计数
 		go func() {
 			bgCtx := context.Background()
 			h.uc.IncrementViewCount(bgCtx, media.Id)
 		}()
 
-		// 返回公开字段（不包含敏感信息）
-		OK(c, filterPublicFields(media))
+		result := filterPublicFields(media)
+
+		edges := map[string]interface{}{}
+
+		if media.UserId != "" && media.UserId != "0" && h.userUC != nil {
+			if u, err := h.userUC.GetUser(ctx, media.UserId); err == nil {
+				userMap := map[string]interface{}{
+					"id":       u.Id,
+					"username": u.Username,
+					"nickname": u.Nickname,
+					"avatar":   u.Avatar,
+				}
+				if h.playlistChannelUC != nil {
+					if subs, _, subErr := h.playlistChannelUC.ListUserChannels(ctx, u.Id, 1, 1); subErr == nil {
+						userMap["subscriber_count"] = len(subs)
+					}
+				}
+				edges["user"] = []map[string]interface{}{userMap}
+			}
+		}
+
+		if media.ChannelId != "" && h.playlistChannelUC != nil {
+			if ch, err := h.playlistChannelUC.GetChannel(ctx, media.ChannelId); err == nil {
+				edges["channels"] = []map[string]interface{}{
+					{
+						"id":   ch.ID,
+						"name": ch.Title,
+					},
+				}
+			}
+		}
+
+		if len(edges) > 0 {
+			result["edges"] = edges
+		}
+
+		OK(c, result)
 	}
 }
 
@@ -2064,7 +2158,7 @@ func (h *MediaHandler) toggleLikeByShortToken() gin.HandlerFunc {
 			return
 		}
 
-		claims, ok := c.MustGet("claims").(*auth.Claims)
+		claims, ok := GetClaims(c)
 		if !ok {
 			Fail(c, ErrUnauthorized, "unauthorized")
 			return
@@ -2077,7 +2171,7 @@ func (h *MediaHandler) toggleLikeByShortToken() gin.HandlerFunc {
 			return
 		}
 
-		stats, err := h.likeFavoriteUC.ToggleLike(ctx, claims.UserID, mediaID, "like")
+		stats, err := h.likeFavoriteUC.ToggleLike(ctx, claims.GetUserID(), mediaID, "like")
 		if err != nil {
 			Fail(c, ErrInternal, err.Error())
 			return
@@ -2111,8 +2205,8 @@ func (h *MediaHandler) getLikeStatusByShortToken() gin.HandlerFunc {
 		}
 
 		var userID string
-		if claims, ok := c.Get("claims"); ok {
-			userID = claims.(*auth.Claims).UserID
+		if claims, ok := GetClaims(c); ok {
+			userID = claims.GetUserID()
 		}
 
 		stats, err := h.likeFavoriteUC.GetMediaStats(ctx, userID, mediaID)
@@ -2141,7 +2235,7 @@ func (h *MediaHandler) toggleDislikeByShortToken() gin.HandlerFunc {
 			return
 		}
 
-		claims, ok := c.MustGet("claims").(*auth.Claims)
+		claims, ok := GetClaims(c)
 		if !ok {
 			Fail(c, ErrUnauthorized, "unauthorized")
 			return
@@ -2154,7 +2248,7 @@ func (h *MediaHandler) toggleDislikeByShortToken() gin.HandlerFunc {
 			return
 		}
 
-		stats, err := h.likeFavoriteUC.ToggleLike(ctx, claims.UserID, mediaID, "dislike")
+		stats, err := h.likeFavoriteUC.ToggleLike(ctx, claims.GetUserID(), mediaID, "dislike")
 		if err != nil {
 			Fail(c, ErrInternal, err.Error())
 			return
@@ -2180,7 +2274,7 @@ func (h *MediaHandler) toggleFavoriteByShortToken() gin.HandlerFunc {
 			return
 		}
 
-		claims, ok := c.MustGet("claims").(*auth.Claims)
+		claims, ok := GetClaims(c)
 		if !ok {
 			Fail(c, ErrUnauthorized, "unauthorized")
 			return
@@ -2193,15 +2287,15 @@ func (h *MediaHandler) toggleFavoriteByShortToken() gin.HandlerFunc {
 			return
 		}
 
-		stats, err := h.likeFavoriteUC.ToggleFavorite(ctx, claims.UserID, mediaID)
+		stats, err := h.likeFavoriteUC.ToggleFavorite(ctx, claims.GetUserID(), mediaID)
 		if err != nil {
 			Fail(c, ErrInternal, err.Error())
 			return
 		}
 
 		OK(c, gin.H{
-			"success":      true,
-			"is_favorited": stats.IsFavorited,
+			"is_favorited":  stats.IsFavorited,
+			"favorite_count": stats.FavoriteCount,
 		})
 	}
 }
@@ -2226,7 +2320,7 @@ func (h *MediaHandler) getFavoriteStatusByShortToken() gin.HandlerFunc {
 
 		var userID string
 		if claims, ok := c.Get("claims"); ok {
-			userID = claims.(*auth.Claims).UserID
+			userID = claims.(*auth.Claims).GetUserID()
 		}
 
 		stats, err := h.likeFavoriteUC.GetMediaStats(ctx, userID, mediaID)
@@ -2236,8 +2330,8 @@ func (h *MediaHandler) getFavoriteStatusByShortToken() gin.HandlerFunc {
 		}
 
 		OK(c, gin.H{
-			"success":      true,
-			"is_favorited": stats.IsFavorited,
+			"is_favorited":  stats.IsFavorited,
+			"favorite_count": stats.FavoriteCount,
 		})
 	}
 }
@@ -2291,29 +2385,49 @@ func (h *MediaHandler) recordShareByShortToken() gin.HandlerFunc {
 
 // filterPublicFields 过滤公开字段，隐藏敏感信息
 func filterPublicFields(m *biz.Media) map[string]interface{} {
-	return map[string]interface{}{
-		"id":             m.Id,
-		"short_token":    m.ShortToken,
-		"title":          m.Title,
-		"description":    m.Description,
-		"url":            m.Url,
-		"hls_file":       m.HlsFile,
-		"thumbnail":      m.Thumbnail,
-		"poster":         m.Poster,
-		"preview_file":   m.PreviewFilePath,
-		"duration":       m.Duration,
-		"width":          m.Width,
-		"height":         m.Height,
-		"view_count":     m.ViewCount,
-		"like_count":     m.LikeCount,
-		"dislike_count":  m.DislikeCount,
-		"comment_count":  m.CommentCount,
-		"favorite_count": m.FavoriteCount,
-		"created_at":     m.CreateTime,
-		"user_id":        m.UserId,
-		"category_id":    m.CategoryId,
-		"tags":           m.Tags,
+	result := map[string]interface{}{
+		"id":              m.Id,
+		"short_token":     m.ShortToken,
+		"title":           m.Title,
+		"description":     m.Description,
+		"url":             m.Url,
+		"hls_file":        m.HlsFile,
+		"thumbnail":       m.Thumbnail,
+		"poster":          m.Poster,
+		"preview_file":    m.PreviewFilePath,
+		"duration":        m.Duration,
+		"width":           m.Width,
+		"height":          m.Height,
+		"view_count":      m.ViewCount,
+		"like_count":      m.LikeCount,
+		"dislike_count":   m.DislikeCount,
+		"comment_count":   m.CommentCount,
+		"favorite_count":  m.FavoriteCount,
+		"user_id":         m.UserId,
+		"category_id":     m.CategoryId,
+		"channel_id":      m.ChannelId,
+		"tags":            m.Tags,
+		"type":            m.Type,
+		"encoding_status": m.EncodingStatus,
+		"state":           m.State,
+		"allow_download":  m.AllowDownload,
+		"enable_comments": m.EnableComments,
+		"featured":        m.Featured,
 	}
+
+	if m.CreateTime != nil {
+		result["created_at"] = m.CreateTime.AsTime().Format(time.RFC3339)
+	} else {
+		result["created_at"] = time.Now().Format(time.RFC3339)
+	}
+	if m.UpdateTime != nil {
+		result["updated_at"] = m.UpdateTime.AsTime().Format(time.RFC3339)
+	}
+	if m.PublishedAt != nil {
+		result["published_at"] = m.PublishedAt.AsTime().Format(time.RFC3339)
+	}
+
+	return result
 }
 
 // ================================
@@ -2367,8 +2481,39 @@ func (h *MediaHandler) adminListMedia() gin.HandlerFunc {
 			return
 		}
 
+		resultItems := make([]map[string]interface{}, len(items))
+		for i, m := range items {
+			item := filterPublicFields(m)
+			edges := map[string]interface{}{}
+
+			if m.UserId != "" && m.UserId != "0" && h.userUC != nil {
+				if u, err := h.userUC.GetUser(ctx, m.UserId); err == nil {
+					userMap := map[string]interface{}{
+						"id":       u.Id,
+						"username": u.Username,
+						"nickname": u.Nickname,
+						"avatar":   u.Avatar,
+					}
+					edges["user"] = []map[string]interface{}{userMap}
+				}
+			}
+
+			if m.CategoryId != "" {
+				catMap := map[string]interface{}{
+					"id": m.CategoryId,
+				}
+				edges["category"] = []map[string]interface{}{catMap}
+			}
+
+			if len(edges) > 0 {
+				item["edges"] = edges
+			}
+
+			resultItems[i] = item
+		}
+
 		OK(c, gin.H{
-			"items":     items,
+			"items":     resultItems,
 			"total":     total,
 			"page":      page,
 			"page_size": pageSize,
@@ -2595,7 +2740,7 @@ func (h *MediaHandler) adminChangeState() gin.HandlerFunc {
 		// 获取操作者信息（用于审计日志）
 		var changedBy string
 		if cl, ok := c.Get("claims"); ok {
-			changedBy = cl.(*auth.Claims).UserID
+			changedBy = cl.(*auth.Claims).GetUserID()
 		} else {
 			changedBy = "system"
 		}

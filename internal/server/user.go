@@ -54,7 +54,7 @@ func (h *UserHandler) Register(r handler.Router) {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 				return
 			}
-			u, err := h.uc.GetUser(r.Context(), claims.UserID)
+			u, err := h.uc.GetUser(r.Context(), claims.GetUserID())
 			if err != nil {
 				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 				return
@@ -79,7 +79,7 @@ func (h *UserHandler) Register(r handler.Router) {
 				return
 			}
 
-			u, err := h.uc.GetUser(r.Context(), claims.UserID)
+			u, err := h.uc.GetUser(r.Context(), claims.GetUserID())
 			if err != nil {
 				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 				return
@@ -118,7 +118,7 @@ func (h *UserHandler) Register(r handler.Router) {
 			}
 
 			// Verify old password
-			if err := h.uc.VerifyPassword(r.Context(), claims.UserID, input.OldPassword); err != nil {
+			if err := h.uc.VerifyPassword(r.Context(), claims.GetUserID(), input.OldPassword); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid old password"})
 				return
 			}
@@ -131,7 +131,7 @@ func (h *UserHandler) Register(r handler.Router) {
 			//  return
 			// }
 
-			// if err := h.uc.UpdatePassword(r.Context(), claims.UserID, hashedPassword); err != nil {
+			// if err := h.uc.UpdatePassword(r.Context(), claims.GetUserID(), hashedPassword); err != nil {
 			//  c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			//  return
 			// }
@@ -209,7 +209,7 @@ func (h *UserHandler) Register(r handler.Router) {
 			var userID string
 			if id == "me" {
 				if claims := c.Get("claims"); claims != nil {
-					userID = claims.(*auth.Claims).UserID
+					userID = claims.(*auth.Claims).GetUserID()
 				} else {
 					c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 					return
@@ -246,7 +246,7 @@ func (h *UserHandler) Register(r handler.Router) {
 			var userID string
 			if id == "me" {
 				if claims := c.Get("claims"); claims != nil {
-					userID = claims.(*auth.Claims).UserID
+					userID = claims.(*auth.Claims).GetUserID()
 				} else {
 					c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 					return
@@ -266,7 +266,7 @@ func (h *UserHandler) Register(r handler.Router) {
 			var userID string
 			if id == "me" {
 				if claims := c.Get("claims"); claims != nil {
-					userID = claims.(*auth.Claims).UserID
+					userID = claims.(*auth.Claims).GetUserID()
 				} else {
 					c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 					return
@@ -286,7 +286,7 @@ func (h *UserHandler) Register(r handler.Router) {
 			var userID string
 			if id == "me" {
 				if claims := c.Get("claims"); claims != nil {
-					userID = claims.(*auth.Claims).UserID
+					userID = claims.(*auth.Claims).GetUserID()
 				} else {
 					c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 					return
@@ -330,7 +330,7 @@ func (h *UserHandler) Register(r handler.Router) {
 			var userID string
 			if id == "me" {
 				if claims := c.Get("claims"); claims != nil {
-					userID = claims.(*auth.Claims).UserID
+					userID = claims.(*auth.Claims).GetUserID()
 				} else {
 					c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 					return
@@ -374,7 +374,7 @@ func (h *UserHandler) Register(r handler.Router) {
 			var userID string
 			if id == "me" {
 				if claims := c.Get("claims"); claims != nil {
-					userID = claims.(*auth.Claims).UserID
+					userID = claims.(*auth.Claims).GetUserID()
 				} else {
 					c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 					return

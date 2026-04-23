@@ -64,7 +64,7 @@ func (h *NotificationHandler) listNotifications(w http.ResponseWriter, r *http.R
 		page = 1
 	}
 
-	userID, _ := strconv.Atoi(claims.UserID)
+	userID, _ := strconv.Atoi(claims.GetUserID())
 	items, total, err := h.uc.ListUserNotifications(
 		r.Context(),
 		userID,
@@ -110,7 +110,7 @@ func (h *NotificationHandler) createNotification(w http.ResponseWriter, r *http.
 			return
 		}
 		claims := val.(*auth.Claims)
-		userID, _ := strconv.Atoi(claims.UserID)
+		userID, _ := strconv.Atoi(claims.GetUserID())
 		targetUserID = userID
 	}
 
@@ -146,7 +146,7 @@ func (h *NotificationHandler) markAsRead(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	userID, _ := strconv.Atoi(claims.UserID)
+	userID, _ := strconv.Atoi(claims.GetUserID())
 	err = h.uc.MarkAsRead(r.Context(), id, userID)
 	if err != nil {
 		c.JSON(500, Response[interface{}]{Code: ErrInternal, Message: err.Error()})
@@ -166,7 +166,7 @@ func (h *NotificationHandler) markAllRead(w http.ResponseWriter, r *http.Request
 	}
 	claims := val.(*auth.Claims)
 
-	userID, _ := strconv.Atoi(claims.UserID)
+	userID, _ := strconv.Atoi(claims.GetUserID())
 	err := h.uc.MarkAllAsRead(r.Context(), userID)
 	if err != nil {
 		c.JSON(500, Response[interface{}]{Code: ErrInternal, Message: err.Error()})
@@ -186,7 +186,7 @@ func (h *NotificationHandler) unreadCount(w http.ResponseWriter, r *http.Request
 	}
 	claims := val.(*auth.Claims)
 
-	userID, _ := strconv.Atoi(claims.UserID)
+	userID, _ := strconv.Atoi(claims.GetUserID())
 	count, err := h.uc.GetUnreadCount(r.Context(), userID)
 	if err != nil {
 		c.JSON(500, Response[interface{}]{Code: ErrInternal, Message: err.Error()})

@@ -11,6 +11,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/commentlike"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
@@ -45,6 +46,7 @@ type UserQuery struct {
 	withTags          *TagQuery
 	withFavorites     *FavoriteQuery
 	withLikes         *LikeQuery
+	withCommentLikes  *CommentLikeQuery
 	withSubscriptions *SubscriptionQuery
 	withSubscribers   *SubscriptionQuery
 	modifiers         []func(*sql.Selector)
@@ -304,6 +306,28 @@ func (_q *UserQuery) QueryLikes() *LikeQuery {
 	return query
 }
 
+// QueryCommentLikes chains the current query on the "comment_likes" edge.
+func (_q *UserQuery) QueryCommentLikes() *CommentLikeQuery {
+	query := (&CommentLikeClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(commentlike.Table, commentlike.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CommentLikesTable, user.CommentLikesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QuerySubscriptions chains the current query on the "subscriptions" edge.
 func (_q *UserQuery) QuerySubscriptions() *SubscriptionQuery {
 	query := (&SubscriptionClient{config: _q.config}).Query()
@@ -550,6 +574,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		withTags:          _q.withTags.Clone(),
 		withFavorites:     _q.withFavorites.Clone(),
 		withLikes:         _q.withLikes.Clone(),
+		withCommentLikes:  _q.withCommentLikes.Clone(),
 		withSubscriptions: _q.withSubscriptions.Clone(),
 		withSubscribers:   _q.withSubscribers.Clone(),
 		// clone intermediate query.
@@ -669,6 +694,17 @@ func (_q *UserQuery) WithLikes(opts ...func(*LikeQuery)) *UserQuery {
 	return _q
 }
 
+// WithCommentLikes tells the query-builder to eager-load the nodes that are connected to
+// the "comment_likes" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithCommentLikes(opts ...func(*CommentLikeQuery)) *UserQuery {
+	query := (&CommentLikeClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withCommentLikes = query
+	return _q
+}
+
 // WithSubscriptions tells the query-builder to eager-load the nodes that are connected to
 // the "subscriptions" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithSubscriptions(opts ...func(*SubscriptionQuery)) *UserQuery {
@@ -769,7 +805,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [12]bool{
+		loadedTypes = [13]bool{
 			_q.withMedia != nil,
 			_q.withArticles != nil,
 			_q.withChannels != nil,
@@ -780,6 +816,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			_q.withTags != nil,
 			_q.withFavorites != nil,
 			_q.withLikes != nil,
+			_q.withCommentLikes != nil,
 			_q.withSubscriptions != nil,
 			_q.withSubscribers != nil,
 		}
@@ -872,6 +909,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadLikes(ctx, query, nodes,
 			func(n *User) { n.Edges.Likes = []*Like{} },
 			func(n *User, e *Like) { n.Edges.Likes = append(n.Edges.Likes, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withCommentLikes; query != nil {
+		if err := _q.loadCommentLikes(ctx, query, nodes,
+			func(n *User) { n.Edges.CommentLikes = []*CommentLike{} },
+			func(n *User, e *CommentLike) { n.Edges.CommentLikes = append(n.Edges.CommentLikes, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1273,6 +1317,36 @@ func (_q *UserQuery) loadLikes(ctx context.Context, query *LikeQuery, nodes []*U
 	}
 	query.Where(predicate.Like(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.LikesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadCommentLikes(ctx context.Context, query *CommentLikeQuery, nodes []*User, init func(*User), assign func(*User, *CommentLike)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(commentlike.FieldUserID)
+	}
+	query.Where(predicate.CommentLike(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.CommentLikesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

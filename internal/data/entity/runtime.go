@@ -7,6 +7,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/commentlike"
 	"origadmin/application/origcms/internal/data/entity/encodeprofile"
 	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
@@ -215,6 +216,24 @@ func init() {
 	comment.DefaultID = commentDescID.Default.(func() string)
 	// comment.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	comment.IDValidator = commentDescID.Validators[0].(func(string) error)
+	commentlikeFields := schema.CommentLike{}.Fields()
+	_ = commentlikeFields
+	// commentlikeDescLikeType is the schema descriptor for like_type field.
+	commentlikeDescLikeType := commentlikeFields[3].Descriptor()
+	// commentlike.DefaultLikeType holds the default value on creation for the like_type field.
+	commentlike.DefaultLikeType = commentlikeDescLikeType.Default.(string)
+	// commentlike.LikeTypeValidator is a validator for the "like_type" field. It is called by the builders before save.
+	commentlike.LikeTypeValidator = commentlikeDescLikeType.Validators[0].(func(string) error)
+	// commentlikeDescCreatedAt is the schema descriptor for created_at field.
+	commentlikeDescCreatedAt := commentlikeFields[4].Descriptor()
+	// commentlike.DefaultCreatedAt holds the default value on creation for the created_at field.
+	commentlike.DefaultCreatedAt = commentlikeDescCreatedAt.Default.(func() time.Time)
+	// commentlikeDescID is the schema descriptor for id field.
+	commentlikeDescID := commentlikeFields[0].Descriptor()
+	// commentlike.DefaultID holds the default value on creation for the id field.
+	commentlike.DefaultID = commentlikeDescID.Default.(func() string)
+	// commentlike.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	commentlike.IDValidator = commentlikeDescID.Validators[0].(func(string) error)
 	encodeprofileFields := schema.EncodeProfile{}.Fields()
 	_ = encodeprofileFields
 	// encodeprofileDescName is the schema descriptor for name field.
@@ -336,7 +355,21 @@ func init() {
 	// media.DefaultShortToken holds the default value on creation for the short_token field.
 	media.DefaultShortToken = mediaDescShortToken.Default.(func() string)
 	// media.ShortTokenValidator is a validator for the "short_token" field. It is called by the builders before save.
-	media.ShortTokenValidator = mediaDescShortToken.Validators[0].(func(string) error)
+	media.ShortTokenValidator = func() func(string) error {
+		validators := mediaDescShortToken.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(short_token string) error {
+			for _, fn := range fns {
+				if err := fn(short_token); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// mediaDescType is the schema descriptor for type field.
 	mediaDescType := mediaFields[4].Descriptor()
 	// media.DefaultType holds the default value on creation for the type field.

@@ -86,12 +86,6 @@ func (_u *MediaUpdate) SetNillableShortToken(v *string) *MediaUpdate {
 	return _u
 }
 
-// ClearShortToken clears the value of the "short_token" field.
-func (_u *MediaUpdate) ClearShortToken() *MediaUpdate {
-	_u.mutation.ClearShortToken()
-	return _u
-}
-
 // SetType sets the "type" field.
 func (_u *MediaUpdate) SetType(v string) *MediaUpdate {
 	_u.mutation.SetType(v)
@@ -1069,9 +1063,6 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.ShortToken(); ok {
 		_spec.SetField(media.FieldShortToken, field.TypeString, value)
 	}
-	if _u.mutation.ShortTokenCleared() {
-		_spec.ClearField(media.FieldShortToken, field.TypeString)
-	}
 	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(media.FieldType, field.TypeString, value)
 	}
@@ -1612,12 +1603,6 @@ func (_u *MediaUpdateOne) SetNillableShortToken(v *string) *MediaUpdateOne {
 	if v != nil {
 		_u.SetShortToken(*v)
 	}
-	return _u
-}
-
-// ClearShortToken clears the value of the "short_token" field.
-func (_u *MediaUpdateOne) ClearShortToken() *MediaUpdateOne {
-	_u.mutation.ClearShortToken()
 	return _u
 }
 
@@ -2627,9 +2612,6 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	}
 	if value, ok := _u.mutation.ShortToken(); ok {
 		_spec.SetField(media.FieldShortToken, field.TypeString, value)
-	}
-	if _u.mutation.ShortTokenCleared() {
-		_spec.ClearField(media.FieldShortToken, field.TypeString)
 	}
 	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(media.FieldType, field.TypeString, value)

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/commentlike"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"origadmin/application/origcms/internal/data/entity/user"
@@ -22,16 +23,17 @@ import (
 // CommentQuery is the builder for querying Comment entities.
 type CommentQuery struct {
 	config
-	ctx         *QueryContext
-	order       []comment.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.Comment
-	withMedia   *MediaQuery
-	withUser    *UserQuery
-	withParent  *CommentQuery
-	withReplies *CommentQuery
-	withFKs     bool
-	modifiers   []func(*sql.Selector)
+	ctx              *QueryContext
+	order            []comment.OrderOption
+	inters           []Interceptor
+	predicates       []predicate.Comment
+	withMedia        *MediaQuery
+	withUser         *UserQuery
+	withParent       *CommentQuery
+	withReplies      *CommentQuery
+	withCommentLikes *CommentLikeQuery
+	withFKs          bool
+	modifiers        []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -149,6 +151,28 @@ func (_q *CommentQuery) QueryReplies() *CommentQuery {
 			sqlgraph.From(comment.Table, comment.FieldID, selector),
 			sqlgraph.To(comment.Table, comment.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, comment.RepliesTable, comment.RepliesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCommentLikes chains the current query on the "comment_likes" edge.
+func (_q *CommentQuery) QueryCommentLikes() *CommentLikeQuery {
+	query := (&CommentLikeClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, selector),
+			sqlgraph.To(commentlike.Table, commentlike.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, comment.CommentLikesTable, comment.CommentLikesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -343,15 +367,16 @@ func (_q *CommentQuery) Clone() *CommentQuery {
 		return nil
 	}
 	return &CommentQuery{
-		config:      _q.config,
-		ctx:         _q.ctx.Clone(),
-		order:       append([]comment.OrderOption{}, _q.order...),
-		inters:      append([]Interceptor{}, _q.inters...),
-		predicates:  append([]predicate.Comment{}, _q.predicates...),
-		withMedia:   _q.withMedia.Clone(),
-		withUser:    _q.withUser.Clone(),
-		withParent:  _q.withParent.Clone(),
-		withReplies: _q.withReplies.Clone(),
+		config:           _q.config,
+		ctx:              _q.ctx.Clone(),
+		order:            append([]comment.OrderOption{}, _q.order...),
+		inters:           append([]Interceptor{}, _q.inters...),
+		predicates:       append([]predicate.Comment{}, _q.predicates...),
+		withMedia:        _q.withMedia.Clone(),
+		withUser:         _q.withUser.Clone(),
+		withParent:       _q.withParent.Clone(),
+		withReplies:      _q.withReplies.Clone(),
+		withCommentLikes: _q.withCommentLikes.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -400,6 +425,17 @@ func (_q *CommentQuery) WithReplies(opts ...func(*CommentQuery)) *CommentQuery {
 		opt(query)
 	}
 	_q.withReplies = query
+	return _q
+}
+
+// WithCommentLikes tells the query-builder to eager-load the nodes that are connected to
+// the "comment_likes" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *CommentQuery) WithCommentLikes(opts ...func(*CommentLikeQuery)) *CommentQuery {
+	query := (&CommentLikeClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withCommentLikes = query
 	return _q
 }
 
@@ -482,11 +518,12 @@ func (_q *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 		nodes       = []*Comment{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [5]bool{
 			_q.withMedia != nil,
 			_q.withUser != nil,
 			_q.withParent != nil,
 			_q.withReplies != nil,
+			_q.withCommentLikes != nil,
 		}
 	)
 	if _q.withParent != nil {
@@ -538,6 +575,13 @@ func (_q *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 		if err := _q.loadReplies(ctx, query, nodes,
 			func(n *Comment) { n.Edges.Replies = []*Comment{} },
 			func(n *Comment, e *Comment) { n.Edges.Replies = append(n.Edges.Replies, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withCommentLikes; query != nil {
+		if err := _q.loadCommentLikes(ctx, query, nodes,
+			func(n *Comment) { n.Edges.CommentLikes = []*CommentLike{} },
+			func(n *Comment, e *CommentLike) { n.Edges.CommentLikes = append(n.Edges.CommentLikes, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -660,6 +704,36 @@ func (_q *CommentQuery) loadReplies(ctx context.Context, query *CommentQuery, no
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "comment_replies" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *CommentQuery) loadCommentLikes(ctx context.Context, query *CommentLikeQuery, nodes []*Comment, init func(*Comment), assign func(*Comment, *CommentLike)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Comment)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(commentlike.FieldCommentID)
+	}
+	query.Where(predicate.CommentLike(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(comment.CommentLikesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.CommentID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "comment_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

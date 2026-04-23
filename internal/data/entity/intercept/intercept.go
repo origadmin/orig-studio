@@ -11,6 +11,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/commentlike"
 	"origadmin/application/origcms/internal/data/entity/encodeprofile"
 	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
@@ -192,6 +193,33 @@ func (f TraverseComment) Traverse(ctx context.Context, q entity.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *entity.CommentQuery", q)
+}
+
+// The CommentLikeFunc type is an adapter to allow the use of ordinary function as a Querier.
+type CommentLikeFunc func(context.Context, *entity.CommentLikeQuery) (entity.Value, error)
+
+// Query calls f(ctx, q).
+func (f CommentLikeFunc) Query(ctx context.Context, q entity.Query) (entity.Value, error) {
+	if q, ok := q.(*entity.CommentLikeQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *entity.CommentLikeQuery", q)
+}
+
+// The TraverseCommentLike type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseCommentLike func(context.Context, *entity.CommentLikeQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseCommentLike) Intercept(next entity.Querier) entity.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseCommentLike) Traverse(ctx context.Context, q entity.Query) error {
+	if q, ok := q.(*entity.CommentLikeQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *entity.CommentLikeQuery", q)
 }
 
 // The EncodeProfileFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -583,6 +611,8 @@ func NewQuery(q entity.Query) (Query, error) {
 		return &query[*entity.ChannelQuery, predicate.Channel, channel.OrderOption]{typ: entity.TypeChannel, tq: q}, nil
 	case *entity.CommentQuery:
 		return &query[*entity.CommentQuery, predicate.Comment, comment.OrderOption]{typ: entity.TypeComment, tq: q}, nil
+	case *entity.CommentLikeQuery:
+		return &query[*entity.CommentLikeQuery, predicate.CommentLike, commentlike.OrderOption]{typ: entity.TypeCommentLike, tq: q}, nil
 	case *entity.EncodeProfileQuery:
 		return &query[*entity.EncodeProfileQuery, predicate.EncodeProfile, encodeprofile.OrderOption]{typ: entity.TypeEncodeProfile, tq: q}, nil
 	case *entity.EncodingTaskQuery:

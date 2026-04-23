@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import {Button} from '@/components/ui/button';
 import {UserPlus, UserCheck, Loader2, ChevronDown, Bell, BellOff, AlertTriangle} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
-import {subscriptionApi} from '@/lib/api/subscription';
+import {channelApi} from '@/lib/api/channel';
 import {useAuth} from '@/hooks/useAuth';
 import {
     Dialog,
@@ -50,13 +50,13 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
                 return;
             }
             try {
-                const response = await subscriptionApi.getStatus(channelId);
+                const response = await channelApi.getSubscriptionStatus(channelId);
                 setIsSubscribed(response.is_subscribed);
-                if (response.subscriber_count !== undefined) {
-                    setSubscriberCount(response.subscriber_count);
+                if ('subscriber_count' in response && (response as any).subscriber_count !== undefined) {
+                    setSubscriberCount((response as any).subscriber_count);
                 }
-                if (response.notification_preference) {
-                    setNotificationPref(response.notification_preference);
+                if ('notification_preference' in response && (response as any).notification_preference) {
+                    setNotificationPref((response as any).notification_preference);
                 }
             } catch (err) {
                 console.error('Failed to fetch subscription status:', err);
@@ -90,7 +90,7 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
 
         try {
             setLoading(true);
-            await subscriptionApi.subscribe(channelId);
+            await channelApi.subscribe(channelId);
             setIsSubscribed(true);
             setSubscriberCount(prev => prev + 1);
         } catch (err) {
@@ -105,7 +105,7 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
 
         try {
             setLoading(true);
-            await subscriptionApi.unsubscribe(channelId);
+            await channelApi.unsubscribe(channelId);
             setIsSubscribed(false);
             setSubscriberCount(prev => Math.max(0, prev - 1));
             setShowUnsubscribeDialog(false);
@@ -121,7 +121,7 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
 
         try {
             setPrefLoading(true);
-            await subscriptionApi.updatePreference(channelId, pref);
+            await channelApi.updateNotificationSetting(channelId, pref);
             setNotificationPref(pref);
             setShowNotificationMenu(false);
         } catch (err) {
@@ -136,6 +136,10 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
         if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
         return String(count);
     };
+
+    if (!channelId) {
+        return null;
+    }
 
     if (initialLoading) {
         return (

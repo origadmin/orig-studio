@@ -10,6 +10,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/commentlike"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
@@ -511,6 +512,21 @@ func (_c *UserCreate) AddLikes(v ...*Like) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddLikeIDs(ids...)
+}
+
+// AddCommentLikeIDs adds the "comment_likes" edge to the CommentLike entity by IDs.
+func (_c *UserCreate) AddCommentLikeIDs(ids ...string) *UserCreate {
+	_c.mutation.AddCommentLikeIDs(ids...)
+	return _c
+}
+
+// AddCommentLikes adds the "comment_likes" edges to the CommentLike entity.
+func (_c *UserCreate) AddCommentLikes(v ...*CommentLike) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddCommentLikeIDs(ids...)
 }
 
 // AddSubscriptionIDs adds the "subscriptions" edge to the Subscription entity by IDs.
@@ -1032,6 +1048,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CommentLikesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CommentLikesTable,
+			Columns: []string{user.CommentLikesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(commentlike.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

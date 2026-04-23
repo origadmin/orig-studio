@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 	"time"
@@ -10,21 +11,29 @@ import (
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 )
 
-func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr *auth.Manager) {
+func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr *auth.Manager, commentLikeUC *contentbiz.CommentLikeUseCase) {
 	// Public routes (no auth required)
 	publicComments := group.Group("/comments")
 	{
 		// GET /comments - List comments with filtering and pagination (PUBLIC)
-		publicComments.GET("", func(c *gin.Context) {
+		publicComments.GET("", OptionalJWTMiddleware(jwtMgr), func(c *gin.Context) {
 			ctx := c.Request.Context()
 
 			mediaID := c.Query("media_id")
 			userID := c.Query("user_id")
 			parentID := c.Query("parent_id")
+			sortBy := c.DefaultQuery("sort_by", "created_at")
+			order := c.DefaultQuery("order", "desc")
 			page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 			pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+
+			var currentUserID string
+			if claims, ok := GetClaims(c); ok {
+				currentUserID = claims.GetUserID()
+			}
 
 			if page < 1 {
 				page = 1
@@ -50,10 +59,24 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 				return
 			}
 
+			switch sortBy {
+			case "like_count":
+				if order == "asc" {
+					query = query.Order(entity.Asc(comment.FieldAddDate))
+				} else {
+					query = query.Order(entity.Desc(comment.FieldAddDate))
+				}
+			default:
+				if order == "asc" {
+					query = query.Order(entity.Asc(comment.FieldAddDate))
+				} else {
+					query = query.Order(entity.Desc(comment.FieldAddDate))
+				}
+			}
+
 			items, err := query.
 				Limit(pageSize).
 				Offset((page - 1) * pageSize).
-				Order(entity.Desc(comment.FieldAddDate)).
 				WithUser().
 				WithParent(func(pq *entity.CommentQuery) {
 					pq.WithUser()
@@ -66,7 +89,7 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 
 			comments := make([]gin.H, len(items))
 			for i, item := range items {
-				comments[i] = convertCommentToResponse(item)
+				comments[i] = convertCommentToResponse(item, currentUserID, commentLikeUC, ctx)
 			}
 
 			c.JSON(http.StatusOK, gin.H{
@@ -82,7 +105,7 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 		})
 
 		// GET /comments/:id - Get single comment (PUBLIC)
-		publicComments.GET("/:id", func(c *gin.Context) {
+		publicComments.GET("/:id", OptionalJWTMiddleware(jwtMgr), func(c *gin.Context) {
 			ctx := c.Request.Context()
 			id := c.Param("id")
 
@@ -92,10 +115,15 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 				return
 			}
 
+			var currentUserID string
+			if claims, ok := GetClaims(c); ok {
+				currentUserID = claims.GetUserID()
+			}
+
 			c.JSON(http.StatusOK, gin.H{
 				"code":    0,
 				"message": "success",
-				"data": convertCommentToResponse(commentObj),
+				"data":    convertCommentToResponse(commentObj, currentUserID, commentLikeUC, ctx),
 			})
 		})
 	}
@@ -134,7 +162,7 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 
 			createBuilder := client.Comment.Create().
 				SetText(input.Comment.Content).
-				SetUserID(claims.UserID).
+				SetUserID(claims.GetUserID()).
 				SetStatus("PENDING")
 
 			if input.Comment.MediaID != "" {
@@ -153,7 +181,7 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 			c.JSON(http.StatusCreated, gin.H{
 				"code":    0,
 				"message": "success",
-				"data": gin.H{"comment": convertCommentToResponse(commentObj)},
+				"data":    gin.H{"comment": convertCommentToResponse(commentObj, claims.GetUserID(), commentLikeUC, ctx)},
 			})
 		})
 
@@ -190,7 +218,7 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 			c.JSON(http.StatusOK, gin.H{
 				"code":    0,
 				"message": "success",
-				"data": gin.H{"comment": convertCommentToResponse(commentObj)},
+				"data":    gin.H{"comment": convertCommentToResponse(commentObj, "", commentLikeUC, ctx)},
 			})
 		})
 
@@ -210,18 +238,28 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 	}
 
 	// Register Comment Likes routes (stub)
-	registerCommentLikesRoutes(group, jwtMgr)
+	registerCommentLikesRoutes(group, jwtMgr, commentLikeUC)
 }
 
-func convertCommentToResponse(item *entity.Comment) gin.H {
+func convertCommentToResponse(item *entity.Comment, currentUserID string, commentLikeUC *contentbiz.CommentLikeUseCase, ctx context.Context) gin.H {
+	var likeCount int64
+	var isLiked bool
+	if commentLikeUC != nil && item.ID != "" {
+		stats, err := commentLikeUC.GetStats(ctx, currentUserID, item.ID)
+		if err == nil && stats != nil {
+			likeCount = stats.LikeCount
+			isLiked = stats.IsLiked
+		}
+	}
+
 	resp := gin.H{
 		"id":          item.ID,
 		"content":     item.Text,
 		"status":      item.Status,
 		"create_time": item.AddDate.Format(time.RFC3339),
 		"update_time": item.AddDate.Format(time.RFC3339),
-		"like_count":  0,
-		"is_liked":    false,
+		"like_count":  likeCount,
+		"is_liked":    isLiked,
 		"is_reply":    item.Edges.Parent != nil,
 	}
 
@@ -260,11 +298,9 @@ func truncateText(text string, maxLen int) string {
 	return string(runes[:maxLen]) + "..."
 }
 
-// Comment Likes Routes (Stub - TODO: Implement with database table)
-func registerCommentLikesRoutes(group *gin.RouterGroup, jwtMgr *auth.Manager) {
+func registerCommentLikesRoutes(group *gin.RouterGroup, jwtMgr *auth.Manager, commentLikeUC *contentbiz.CommentLikeUseCase) {
 	commentLikes := group.Group("/comments/:id")
 	{
-		// GET /comments/:id/likes - Get comment like status (PUBLIC)
 		commentLikes.GET("/likes", func(c *gin.Context) {
 			commentID := c.Param("id")
 			if commentID == "" {
@@ -272,20 +308,20 @@ func registerCommentLikesRoutes(group *gin.RouterGroup, jwtMgr *auth.Manager) {
 				return
 			}
 
-			// TODO: Replace with actual database query when comment_likes table is created
-			// For now, return default values (stub implementation)
-			c.JSON(http.StatusOK, gin.H{
-				"code":    0,
-				"message": "success",
-				"data": gin.H{
-					"like_count": 0,
-					"is_liked":   false,
-					"is_disliked": false,
-				},
-			})
+			userID := ""
+			if claims, ok := GetClaims(c); ok {
+				userID = claims.GetUserID()
+			}
+
+			stats, err := commentLikeUC.GetStats(c.Request.Context(), userID, commentID)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "failed to get comment likes"})
+				return
+			}
+
+			OK(c, stats)
 		})
 
-		// POST /comments/:id/likes - Toggle like (AUTH REQUIRED)
 		commentLikes.POST("/likes", JWTMiddleware(jwtMgr), func(c *gin.Context) {
 			commentID := c.Param("id")
 			if commentID == "" {
@@ -293,20 +329,24 @@ func registerCommentLikesRoutes(group *gin.RouterGroup, jwtMgr *auth.Manager) {
 				return
 			}
 
-			// TODO: Implement actual toggle logic with database
-			// For now, return stub response
-			c.JSON(http.StatusOK, gin.H{
-				"code":    0,
-				"message": "success",
-				"data": gin.H{
-					"like_count": 1,
-					"is_liked":   true,
-					"is_disliked": false,
-				},
-			})
+			userID := ""
+			if claims, ok := GetClaims(c); ok {
+				userID = claims.GetUserID()
+			}
+			if userID == "" {
+				c.JSON(http.StatusUnauthorized, gin.H{"code": 401, "message": "unauthorized"})
+				return
+			}
+
+			stats, err := commentLikeUC.ToggleLike(c.Request.Context(), userID, commentID)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "failed to toggle like"})
+				return
+			}
+
+			OK(c, stats)
 		})
 
-		// POST /comments/:id/dislikes - Toggle dislike (AUTH REQUIRED)
 		commentLikes.POST("/dislikes", JWTMiddleware(jwtMgr), func(c *gin.Context) {
 			commentID := c.Param("id")
 			if commentID == "" {
@@ -314,16 +354,22 @@ func registerCommentLikesRoutes(group *gin.RouterGroup, jwtMgr *auth.Manager) {
 				return
 			}
 
-			// TODO: Implement actual toggle logic with database
-			c.JSON(http.StatusOK, gin.H{
-				"code":    0,
-				"message": "success",
-				"data": gin.H{
-					"like_count": 0,
-					"is_liked":   false,
-					"is_disliked": true,
-				},
-			})
+			userID := ""
+			if claims, ok := GetClaims(c); ok {
+				userID = claims.GetUserID()
+			}
+			if userID == "" {
+				c.JSON(http.StatusUnauthorized, gin.H{"code": 401, "message": "unauthorized"})
+				return
+			}
+
+			stats, err := commentLikeUC.ToggleDislike(c.Request.Context(), userID, commentID)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "failed to toggle dislike"})
+				return
+			}
+
+			OK(c, stats)
 		})
 	}
 }

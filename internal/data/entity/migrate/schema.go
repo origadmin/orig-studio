@@ -277,6 +277,46 @@ var (
 			},
 		},
 	}
+	// ContentCommentLikesColumns holds the columns for the "content_comment_likes" table.
+	ContentCommentLikesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "like_type", Type: field.TypeString, Size: 10, Default: "like"},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "comment_id", Type: field.TypeString, Size: 36},
+		{Name: "user_id", Type: field.TypeString, Size: 36},
+	}
+	// ContentCommentLikesTable holds the schema information for the "content_comment_likes" table.
+	ContentCommentLikesTable = &schema.Table{
+		Name:       "content_comment_likes",
+		Columns:    ContentCommentLikesColumns,
+		PrimaryKey: []*schema.Column{ContentCommentLikesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "content_comment_likes_files_comment_comment_likes",
+				Columns:    []*schema.Column{ContentCommentLikesColumns[3]},
+				RefColumns: []*schema.Column{FilesCommentColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "content_comment_likes_users_user_comment_likes",
+				Columns:    []*schema.Column{ContentCommentLikesColumns[4]},
+				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "commentlike_user_id_comment_id",
+				Unique:  true,
+				Columns: []*schema.Column{ContentCommentLikesColumns[4], ContentCommentLikesColumns[3]},
+			},
+			{
+				Name:    "commentlike_comment_id",
+				Unique:  false,
+				Columns: []*schema.Column{ContentCommentLikesColumns[3]},
+			},
+		},
+	}
 	// EncodeProfilesColumns holds the columns for the "encode_profiles" table.
 	EncodeProfilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -420,7 +460,7 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "title", Type: field.TypeString, Size: 255},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
-		{Name: "short_token", Type: field.TypeString, Nullable: true, Size: 150},
+		{Name: "short_token", Type: field.TypeString, Unique: true, Size: 150},
 		{Name: "type", Type: field.TypeString, Size: 20, Default: "video"},
 		{Name: "url", Type: field.TypeString, Size: 512},
 		{Name: "hls_file", Type: field.TypeString, Nullable: true, Size: 1024},
@@ -535,6 +575,11 @@ var (
 				Name:    "media_user_id",
 				Unique:  false,
 				Columns: []*schema.Column{MediaColumns[39]},
+			},
+			{
+				Name:    "media_short_token",
+				Unique:  true,
+				Columns: []*schema.Column{MediaColumns[3]},
 			},
 		},
 	}
@@ -951,6 +996,7 @@ var (
 		CategoriesTable,
 		UsersChannelTable,
 		FilesCommentTable,
+		ContentCommentLikesTable,
 		EncodeProfilesTable,
 		EncodingTasksTable,
 		FilesFavoriteTable,
@@ -987,6 +1033,11 @@ func init() {
 	FilesCommentTable.ForeignKeys[3].RefTable = UsersUserTable
 	FilesCommentTable.Annotation = &entsql.Annotation{
 		Table: "files_comment",
+	}
+	ContentCommentLikesTable.ForeignKeys[0].RefTable = FilesCommentTable
+	ContentCommentLikesTable.ForeignKeys[1].RefTable = UsersUserTable
+	ContentCommentLikesTable.Annotation = &entsql.Annotation{
+		Table: "content_comment_likes",
 	}
 	FilesFavoriteTable.ForeignKeys[0].RefTable = MediaTable
 	FilesFavoriteTable.ForeignKeys[1].RefTable = UsersUserTable

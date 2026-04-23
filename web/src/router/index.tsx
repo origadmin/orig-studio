@@ -11,6 +11,7 @@ import {
     Outlet,
     redirect,
 } from '@tanstack/react-router';
+import NotFoundPage from '@/pages/NotFoundPage';
 
 import PortalLayout from '@/layout/PortalLayout';
 import AdminLayout from '@/layout/AdminLayout';
@@ -24,6 +25,7 @@ const WatchPage = lazy(() => import('../pages/home/Watch'));
 const SearchPage = lazy(() => import('../pages/home/Search'));
 const ChannelPage = lazy(() => import('../pages/home/Channel'));
 const ProfilePage = lazy(() => import('../pages/home/Profile'));
+const UnifiedChannelPage = lazy(() => import('../pages/home/UnifiedChannelPage'));
 const FeaturedPage = lazy(() => import('../pages/home/Featured'));
 const LatestPage = lazy(() => import('../pages/home/Latest'));
 const TagsPage = lazy(() => import('../pages/home/Tags'));
@@ -94,6 +96,7 @@ function redirectIfAuth() {
 
 const rootRoute = createRootRoute({
     component: () => <Outlet/>,
+    notFoundComponent: NotFoundPage,
 });
 
 // Portal layout wrapper
@@ -157,11 +160,24 @@ const watchRoute = createRoute({
     getParentRoute: () => portalLayoutRoute,
     path: '/watch',
     validateSearch: (search: Record<string, unknown>) => {
-        // 清理 v 参数，移除引号和空格
         const v = search.v ? String(search.v).replace(/["']/g, '').trim() : undefined;
         return {v};
     },
     component: () => <Lazy><WatchPage/></Lazy>,
+});
+
+// Playlist route
+const playlistRoute = createRoute({
+    getParentRoute: () => portalLayoutRoute,
+    path: '/playlist/$id',
+    component: () => <Lazy><PlaylistsPage/></Lazy>,
+});
+
+// Explore page
+const exploreRoute = createRoute({
+    getParentRoute: () => portalLayoutRoute,
+    path: '/explore',
+    component: () => <Lazy><TrendingPage/></Lazy>,
 });
 
 const searchRoute = createRoute({
@@ -188,10 +204,46 @@ const profileRoute = createRoute({
     component: () => <Lazy><ProfilePage/></Lazy>,
 });
 
+// ── Unified Channel Routes (New Architecture) ──
+
+const channelByHandleRoute = createRoute({
+    getParentRoute: () => portalLayoutRoute,
+    path: '/@{$handle}',
+    validateParams: (params: Record<string, unknown>) => ({
+        handle: String(params.handle),
+    }),
+    component: () => <Lazy><UnifiedChannelPage/></Lazy>,
+});
+
+const channelByIdRoute = createRoute({
+    getParentRoute: () => portalLayoutRoute,
+    path: '/channel/$id',
+    component: () => <Lazy><UnifiedChannelPage/></Lazy>,
+});
+
 const testRoute = createRoute({
     getParentRoute: () => portalLayoutRoute,
     path: '/test',
     component: () => <Lazy><TestPage/></Lazy>,
+});
+
+// Static pages (Privacy, Terms, Cookies)
+const privacyRoute = createRoute({
+    getParentRoute: () => portalLayoutRoute,
+    path: '/privacy',
+    component: () => <Lazy><AboutPage/></Lazy>,
+});
+
+const termsRoute = createRoute({
+    getParentRoute: () => portalLayoutRoute,
+    path: '/terms',
+    component: () => <Lazy><AboutPage/></Lazy>,
+});
+
+const cookiesRoute = createRoute({
+    getParentRoute: () => portalLayoutRoute,
+    path: '/cookies',
+    component: () => <Lazy><AboutPage/></Lazy>,
 });
 
 // ── Auth routes ──
@@ -258,6 +310,12 @@ const subscriptionsRoute = createRoute({
     getParentRoute: () => meLayoutRoute,
     path: '/me/subscriptions',
     component: () => <Lazy><SubscriptionsPage/></Lazy>,
+});
+
+const myChannelRoute = createRoute({
+    getParentRoute: () => meLayoutRoute,
+    path: '/me/channel',
+    component: () => <Lazy><UnifiedChannelPage/></Lazy>,
 });
 
 // ── Admin routes ──
@@ -354,10 +412,17 @@ const routeTree = rootRoute.addChildren([
         trendingRoute,
         aboutRoute,
         watchRoute,
+        playlistRoute,
+        exploreRoute,
         searchRoute,
         channelRoute,
         profileRoute,
+        channelByHandleRoute,
+        channelByIdRoute,
         testRoute,
+        privacyRoute,
+        termsRoute,
+        cookiesRoute,
         meLayoutRoute.addChildren([
             uploadRoute,
             myVideosRoute,
@@ -366,6 +431,7 @@ const routeTree = rootRoute.addChildren([
             historyRoute,
             playlistsRoute,
             subscriptionsRoute,
+            myChannelRoute,
         ]),
     ]),
     signInRoute,
@@ -386,7 +452,10 @@ const routeTree = rootRoute.addChildren([
     ]),
 ]);
 
-export const router = createRouter({routeTree});
+export const router = createRouter({
+    routeTree,
+    pathParamsAllowedCharacters: ['@'],
+});
 export {routeTree};
 
 declare module '@tanstack/react-router' {

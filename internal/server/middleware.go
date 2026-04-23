@@ -5,11 +5,24 @@
 package server
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"origadmin/application/origcms/internal/auth"
 )
+
+func GetClaims(c *gin.Context) (*auth.Claims, bool) {
+	if val, exists := c.Get("claims"); exists {
+		if claims, ok := val.(*auth.Claims); ok {
+			return claims, true
+		}
+	}
+	if claims, ok := claimsFromContext(c.Request.Context()); ok {
+		return claims, true
+	}
+	return nil, false
+}
 
 // GinMiddlewareAdapter adapts a gin.HandlerFunc to http.HandlerFunc with shared context
 // The middleware and handler share the same gin.Context
@@ -47,6 +60,10 @@ func WithJWT(jwtMgr *auth.Manager, handler interface{}) http.HandlerFunc {
 			return
 		}
 
+		if claimsVal, exists := c.Get("claims"); exists {
+			r = r.WithContext(context.WithValue(r.Context(), claimsKey, claimsVal))
+		}
+
 		switch h := handler.(type) {
 		case gin.HandlerFunc:
 			h(c)
@@ -72,6 +89,10 @@ func WithAdmin(jwtMgr *auth.Manager, handler gin.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
+		if claimsVal, exists := c.Get("claims"); exists {
+			r = r.WithContext(context.WithValue(r.Context(), claimsKey, claimsVal))
+		}
+
 		handler(c)
 	}
 }
@@ -94,10 +115,23 @@ func JWTMiddleware(jwtMgr *auth.Manager) gin.HandlerFunc {
 	}
 }
 
+// OptionalJWTMiddleware parses Bearer token if present but does not require it.
+func OptionalJWTMiddleware(jwtMgr *auth.Manager) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		header := c.GetHeader("Authorization")
+		if len(header) >= 8 && header[:7] == "Bearer " {
+			if claims, err := jwtMgr.Parse(header[7:]); err == nil {
+				c.Set("claims", claims)
+			}
+		}
+		c.Next()
+	}
+}
+
 // RequiredRole requires authenticated user to have a specific role.
 func RequiredRole(role string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		claims, ok := c.MustGet("claims").(*auth.Claims)
+		claims, ok := GetClaims(c)
 		if !ok || (claims.Role != role && !claims.IsStaff && claims.Role != "admin") {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "permission denied: " + role + " role required"})
 			return
@@ -109,14 +143,13 @@ func RequiredRole(role string) gin.HandlerFunc {
 // AdminMiddleware requires JWT + admin (or staff) role.
 func AdminMiddleware(jwtMgr *auth.Manager) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		claims, ok := c.Get("claims")
+		claims, ok := GetClaims(c)
 		if !ok {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "no claims in context"})
 			return
 		}
 
-		cl := claims.(*auth.Claims)
-		if cl.Role != "admin" && !cl.IsStaff {
+		if claims.Role != "admin" && !claims.IsStaff {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "admin access required"})
 			return
 		}

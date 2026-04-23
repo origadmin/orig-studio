@@ -63,5 +63,6 @@ func (Comment) Edges() []ent.Edge {
 		edge.To("replies", Comment.Type).
 			From("parent").
 			Unique(),
+		edge.To("comment_likes", CommentLike.Type),
 	}
 }

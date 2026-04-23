@@ -56,6 +56,18 @@ func (f CommentFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.CommentMutation", m)
 }
 
+// The CommentLikeFunc type is an adapter to allow the use of ordinary
+// function as CommentLike mutator.
+type CommentLikeFunc func(context.Context, *entity.CommentLikeMutation) (entity.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CommentLikeFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Value, error) {
+	if mv, ok := m.(*entity.CommentLikeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.CommentLikeMutation", m)
+}
+
 // The EncodeProfileFunc type is an adapter to allow the use of ordinary
 // function as EncodeProfile mutator.
 type EncodeProfileFunc func(context.Context, *entity.EncodeProfileMutation) (entity.Value, error)

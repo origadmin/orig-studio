@@ -4,7 +4,7 @@
  */
 
 import React, {useState, useEffect, useRef} from 'react';
-import {useSearch, Link} from '@tanstack/react-router';
+import {useSearch, useNavigate, Link} from '@tanstack/react-router';
 import {
     Loader2, RefreshCw, AlertTriangle, Edit, Trash2, FileText, Eye
 } from 'lucide-react';
@@ -29,6 +29,7 @@ import VideoPlayer, {VideoPlayerHandle} from '@/components/common/VideoPlayer';
 const WatchPage = () => {
     const {t} = useTranslation();
     const {v: shortToken} = useSearch({strict: false});
+    const navigate = useNavigate();
     // ✅ 使用新的 usePublicMediaDetail hook (short_token based)
     const {data: media, isLoading: isMediaLoading, error: mediaError} = usePublicMediaDetail(shortToken as string);
     const {user} = useAuth();
@@ -36,6 +37,7 @@ const WatchPage = () => {
 
     const [retrying, setRetrying] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const commentSectionRef = useRef<HTMLDivElement>(null);
 
     // Video player ref for external control
     const videoPlayerRef = useRef<VideoPlayerHandle>(null);
@@ -135,6 +137,16 @@ const WatchPage = () => {
                         onError={(error) => {
                             console.error('Video player error:', error);
                         }}
+                        onAutoPlayNext={() => {
+                            if (recData?.items && recData.items.length > 0) {
+                                const currentIndex = recData.items.findIndex((v: any) => v.short_token === shortToken);
+                                const nextIndex = currentIndex >= 0 ? currentIndex + 1 : 0;
+                                if (nextIndex < recData.items.length) {
+                                    navigate({to: '/watch', search: {v: recData.items[nextIndex].short_token}});
+                                }
+                            }
+                        }}
+                        autoPlay={false}
                     />
                     
                     {/* Encoding Status Indicator */}
@@ -193,19 +205,31 @@ const WatchPage = () => {
                         className="flex flex-wrap items-center justify-between gap-4 py-2 border-b dark:border-gray-800">
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center gap-4">
-                                <Link to={`/members?u=${media.user_id}`}>
-                                    <Avatar className="h-12 w-12 ring-2 ring-gray-100 dark:ring-gray-800">
-                                        <AvatarImage src={getImageUrl(mediaUser?.avatar, 'avatar')} loading="lazy"
-                                                     onError={(e) => handleImageError(e, 'avatar')}/>
-                                        <AvatarFallback>{mediaUser?.username?.[0] || 'U'}</AvatarFallback>
-                                    </Avatar>
-                                </Link>
-                                <div>
-                                    <Link to={`/members?u=${media.user_id}`}
-                                          className="font-bold text-gray-900 dark:text-white hover:text-blue-600 transition-colors">
-                                        {mediaUser?.nickname || mediaUser?.username || media?.username || 'Unknown User'}
+                                {mediaUser ? (
+                                    <Link to={`/@${mediaUser.username}`}>
+                                        <Avatar className="h-12 w-12 ring-2 ring-gray-100 dark:ring-gray-800">
+                                            <AvatarImage src={getImageUrl(mediaUser.avatar, 'avatar')} loading="lazy"
+                                                         onError={(e) => handleImageError(e, 'avatar')}/>
+                                            <AvatarFallback>{mediaUser.username?.[0] || 'U'}</AvatarFallback>
+                                        </Avatar>
                                     </Link>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatViews(mediaUser?.subscriber_count || 0)} {t('common.subscribers')}</p>
+                                ) : (
+                                    <Avatar className="h-12 w-12 ring-2 ring-gray-100 dark:ring-gray-800">
+                                        <AvatarFallback>?</AvatarFallback>
+                                    </Avatar>
+                                )}
+                                <div>
+                                    {mediaUser ? (
+                                        <>
+                                            <Link to={`/@${mediaUser.username}`}
+                                                  className="font-bold text-gray-900 dark:text-white hover:text-blue-600 transition-colors">
+                                                {mediaUser.nickname || mediaUser.username}
+                                            </Link>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">{formatViews(mediaUser.subscriber_count || 0)} {t('common.subscribers')}</p>
+                                        </>
+                                    ) : (
+                                        <span className="font-bold text-gray-400 dark:text-gray-500">{t('watch.deletedUser') || 'Deleted User'}</span>
+                                    )}
                                 </div>
                                 <SubscribeButton
                                     channelId={media.channel_id || ''}
@@ -214,7 +238,7 @@ const WatchPage = () => {
                             </div>
 
                             {/* Media owner controls */}
-                            {user && media && user.id === media.user_id?.toString() && (
+                            {user && media && String(user.id) === String(media.user_id) && (
                                 <div className="flex items-center gap-2 flex-nowrap">
                                     <Button variant="secondary" size="sm"
                                             className="gap-1 text-xs h-8 px-3 flex-shrink-0">
@@ -244,6 +268,9 @@ const WatchPage = () => {
                                 mediaId={String(media.id)}
                                 shortToken={media.short_token || (shortToken as string)}
                                 commentCount={media.comment_count}
+                                onCommentClick={() => {
+                                    commentSectionRef.current?.scrollIntoView({behavior: 'smooth', block: 'start'});
+                                }}
                             />
                         </div>
                     </div>
@@ -267,7 +294,7 @@ const WatchPage = () => {
                     </Card>
 
                     {/* Comments Section */}
-                    <div className="mt-8">
+                    <div className="mt-8" ref={commentSectionRef}>
                         <CommentSection mediaId={String(media.id)}/>
                     </div>
                 </div>

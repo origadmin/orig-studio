@@ -522,9 +522,10 @@ func NewAdminTagService(tagUC *adminbiz.TagUseCase) *adminservice.TagService {
 func NewAdminHandler(
 	jwt *auth.Manager,
 	mediaUC *mediabiz.MediaUseCase,
+	channelUC *contentbiz.PlaylistChannelUseCase,
 	tagService *adminservice.TagService,
 ) *server.AdminHandler {
-	return server.NewAdminHandler(jwt, mediaUC, tagService)
+	return server.NewAdminHandler(jwt, mediaUC, channelUC, tagService)
 }
 
 // AppDependencies holds all application dependencies.

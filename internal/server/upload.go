@@ -61,8 +61,8 @@ func (h *UploadHandler) initiateMultipartUpload() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		h.log.Infof("initiateMultipartUpload called")
 		
-		claims, _ := c.MustGet("claims").(*auth.Claims)
-		h.log.Infof("user_id: %s", claims.UserID)
+		claims, _ := GetClaims(c)
+		h.log.Infof("user_id: %s", claims.GetUserID())
 
 		var req struct {
 			Filename    string   `json:"filename"`
@@ -82,6 +82,7 @@ func (h *UploadHandler) initiateMultipartUpload() gin.HandlerFunc {
 		
 		h.log.Infof("request: filename=%s, file_size=%d, content_type=%s", req.Filename, req.FileSize, req.ContentType)
 
+		userID := claims.GetUserID()
 		session, err := h.uc.InitiateMultipartUpload(
 			c.Request.Context(),
 			req.Filename,
@@ -92,7 +93,7 @@ func (h *UploadHandler) initiateMultipartUpload() gin.HandlerFunc {
 			req.CategoryID,
 			req.Tags,
 			req.Thumbnail,
-			&claims.UserID,
+			&userID,
 		)
 		if err != nil {
 			h.log.Errorf("InitiateMultipartUpload failed: %v", err)
@@ -244,14 +245,14 @@ func (h *UploadHandler) getUploadSession() gin.HandlerFunc {
 // listUploadSessions lists all active upload sessions.
 func (h *UploadHandler) listUploadSessions() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		claims, _ := c.MustGet("claims").(*auth.Claims)
+		claims, _ := GetClaims(c)
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 		status := enums.ParseUploadStatus(c.Query("status"))
 
 		sessions, total, err := h.uc.ListSessions(
 			c.Request.Context(),
-			claims.UserID,
+			claims.GetUserID(),
 			status,
 			page,
 			pageSize,

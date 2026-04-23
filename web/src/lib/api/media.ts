@@ -16,7 +16,7 @@ export interface Media {
     title: string;
     description?: string;
     short_token?: string;
-    type: string; // "video" | "image" | "audio"
+    type: string;
     url: string;
     hls_file?: string;
     thumbnail?: string;
@@ -24,38 +24,38 @@ export interface Media {
     preview_file_path?: string;
     preview_file?: string;
     duration: number;
-    size?: string; // 后端存的是 string
+    size?: string;
     width: number;
     height: number;
     mime_type?: string;
     md5sum?: string;
     extension?: string;
-    privacy: number; // 1: public, 2: private, 3: unlisted
-    encoding_status: string; // "pending" | "processing" | "success" | "partial" | "failed"
-    state: string; // "draft" | "active" | "deleted"
+    privacy: number;
+    encoding_status: string;
+    state: string;
     view_count: number;
     like_count: number;
     dislike_count: number;
     comment_count: number;
     favorite_count: number;
-    download_count: number;
-    allow_download: boolean;
-    enable_comments: boolean;
-    featured: boolean;
-    is_reviewed: boolean;
-    reported_times: number;
+    download_count?: number;
+    allow_download?: boolean;
+    enable_comments?: boolean;
+    featured?: boolean;
+    is_reviewed?: boolean;
+    reported_times?: number;
     tags?: string[];
     user_id: string;
+    channel_id?: string;
+    category_id?: string;
     published_at?: string;
     created_at: string;
-    create_time?: { seconds: number; nanos: number };
-    updated_at: string;
-    // edges
+    updated_at?: string;
     edges?: {
         user?: UserSummary[];
         category?: CategorySummary;
+        channels?: ChannelSummary[];
         comments?: unknown[];
-        channels?: unknown[];
         playlists?: unknown[];
         tags_rel?: unknown[];
         favorites?: unknown[];
@@ -63,12 +63,17 @@ export interface Media {
     };
 }
 
-// UserSummary 是 edges.user 中返回的用户摘要
 export interface UserSummary {
-    id: number;
+    id: string;
     username: string;
     nickname?: string;
     avatar?: string;
+    subscriber_count?: number;
+}
+
+export interface ChannelSummary {
+    id: string;
+    name: string;
 }
 
 // CategorySummary 是 edges.category 中返回的分类摘要
