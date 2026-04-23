@@ -1,10 +1,10 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {MessageCircle, ThumbsUp, ThumbsDown, Send, Loader2, LogIn, MoreVertical, List, Reply, SmilePlus, X} from 'lucide-react';
+import {MessageCircle, ThumbsUp, ThumbsDown, Send, Loader2, LogIn, MoreVertical, List, Reply, SmilePlus, X, Trash2, ChevronDown} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {Button} from '@/components/ui/button';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {formatDate} from '@/lib/format';
-import {commentApi, type CommentLikeResponse} from '@/lib/api/comment';
+import {commentApi, type CommentLikeResponse, type CommentSortBy} from '@/lib/api/comment';
 import {useAuth} from '@/hooks/useAuth';
 import {useNavigate, Link} from '@tanstack/react-router';
 import data from '@emoji-mart/data';
@@ -55,6 +55,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
     const [loadingMore, setLoadingMore] = useState(false);
     const [total, setTotal] = useState(0);
     const PAGE_SIZE = 10;
+    const [sortBy, setSortBy] = useState<CommentSortBy>('newest');
+    const [showSortMenu, setShowSortMenu] = useState(false);
+    const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
+    const sortMenuRef = useRef<HTMLDivElement>(null);
 
     const emojiPickerRef = useRef<HTMLDivElement>(null);
     const replyEmojiPickerRef = useRef<HTMLDivElement>(null);
@@ -62,6 +66,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
     useEffect(() => {
         fetchComments();
     }, [mediaId]);
+
+    useEffect(() => {
+        fetchComments();
+    }, [sortBy]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -81,7 +89,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
             if (!append) setLoading(true);
             else setLoadingMore(true);
             setError(null);
-            const response = await commentApi.getAll({media_id: mediaId, page: pageNum, page_size: PAGE_SIZE});
+            const sortParams: Record<string, string> = {};
+            switch (sortBy) {
+                case 'newest': sortParams.sort_by = 'created_at'; sortParams.order = 'desc'; break;
+                case 'oldest': sortParams.sort_by = 'created_at'; sortParams.order = 'asc'; break;
+                case 'popular': sortParams.sort_by = 'like_count'; sortParams.order = 'desc'; break;
+            }
+            const response = await commentApi.getAll({media_id: mediaId, page: pageNum, page_size: PAGE_SIZE, ...sortParams});
             const commentsList = response?.comments || [];
             const formattedComments: Comment[] = commentsList.map((comment: any) => ({
                 id: comment.id || '',
@@ -198,15 +212,26 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                 });
             }
 
-            const response: CommentLikeResponse = await commentApi.likes.toggle(commentId);
-
+            const result = await commentApi.likes.toggle(commentId);
             setCommentLikes(prev => {
                 const updated = new Map(prev);
-                updated.set(commentId, response);
+                updated.set(commentId, result);
                 return updated;
             });
         } catch (err) {
             console.error('Failed to like comment:', err);
+            if (commentLikes.get(commentId)) {
+                setCommentLikes(prev => {
+                    const updated = new Map(prev);
+                    const prevStatus = prev.get(commentId)!;
+                    updated.set(commentId, {
+                        like_count: prevStatus.like_count + (prevStatus.is_liked ? -1 : 1),
+                        is_liked: !prevStatus.is_liked,
+                        is_disliked: false,
+                    });
+                    return updated;
+                });
+            }
         } finally {
             setLikingComments(prev => {
                 const updated = new Set(prev);
@@ -225,12 +250,25 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
 
         try {
             setLikingComments(prev => new Set(prev).add(commentId));
+            const prevStatus = commentLikes.get(commentId);
+            const newDisliked = !prevStatus?.is_disliked;
 
-            const response: CommentLikeResponse = await commentApi.likes.toggleDislike(commentId);
+            if (prevStatus) {
+                setCommentLikes(prev => {
+                    const updated = new Map(prev);
+                    updated.set(commentId, {
+                        like_count: prevStatus.like_count + (prevStatus.is_liked ? -1 : 0) + (newDisliked ? 0 : 1),
+                        is_liked: false,
+                        is_disliked: newDisliked,
+                    });
+                    return updated;
+                });
+            }
 
+            const result = await commentApi.likes.toggleDislike(commentId);
             setCommentLikes(prev => {
                 const updated = new Map(prev);
-                updated.set(commentId, response);
+                updated.set(commentId, result);
                 return updated;
             });
         } catch (err) {
@@ -241,6 +279,20 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                 updated.delete(commentId);
                 return updated;
             });
+        }
+    };
+
+    const handleDeleteComment = async (commentId: string) => {
+        if (!isAuthenticated) return;
+        try {
+            setDeletingCommentId(commentId);
+            await commentApi.delete(commentId);
+            setComments(prev => prev.filter(c => c.id !== commentId));
+            setTotal(prev => Math.max(0, prev - 1));
+        } catch (err) {
+            console.error('Failed to delete comment:', err);
+        } finally {
+            setDeletingCommentId(null);
         }
     };
 
@@ -276,14 +328,38 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
 
     return (
         <div className="mt-8">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 relative">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                     {comments.length} {t('watch.comments') || 'Comments'}
                 </h3>
-                <button className="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 px-3 py-1.5 rounded-full transition-colors">
+                <button
+                    className="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 px-3 py-1.5 rounded-full transition-colors"
+                    onClick={() => setShowSortMenu(!showSortMenu)}
+                >
                     <List className="w-4 h-4"/>
-                    {t('watch.sortBy') || 'Sort by'}
+                    {sortBy === 'newest' ? (t('watch.sortNewest') || 'Newest') :
+                     sortBy === 'oldest' ? (t('watch.sortOldest') || 'Oldest') :
+                     (t('watch.sortPopular') || 'Popular')}
+                    <ChevronDown className="w-3 h-3"/>
                 </button>
+                {showSortMenu && (
+                    <div ref={sortMenuRef} className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50 min-w-[140px]">
+                        {(['newest', 'oldest', 'popular'] as CommentSortBy[]).map(option => (
+                            <button
+                                key={option}
+                                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                                    sortBy === option ? 'text-blue-600 font-medium' : 'text-gray-700 dark:text-gray-300'
+                                }`}
+                                onClick={() => { setSortBy(option); setShowSortMenu(false); }}
+                            >
+                                {option === 'newest' ? (t('watch.sortNewest') || 'Newest') :
+                                 option === 'oldest' ? (t('watch.sortOldest') || 'Oldest') :
+                                 (t('watch.sortPopular') || 'Popular')}
+                                {sortBy === option && <span className="ml-2 text-blue-600">✓</span>}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
 
             <div className="mb-6">
@@ -412,8 +488,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
                                     <Link
-                                        to="/@$username"
-                                        params={{username: comment.username?.trim() || 'anonymous'}}
+                                        to={`/@${comment.username?.trim() || 'anonymous'}`}
                                         className="font-semibold text-sm text-gray-900 dark:text-white hover:text-blue-600 cursor-pointer transition-colors"
                                     >
                                         @{comment.username?.trim() || 'Anonymous'}
@@ -422,8 +497,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                                         <>
                                             <span className="text-gray-400 text-xs">→</span>
                                             <Link
-                                                to="/@$username"
-                                                params={{username: comment.reply_to_username?.trim() || ''}}
+                                                to={`/@${comment.reply_to_username?.trim() || ''}`}
                                                 className="text-blue-600 text-sm font-medium hover:underline"
                                             >
                                                 @{comment.reply_to_username}
@@ -492,10 +566,24 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                                         <Reply className="w-4 h-4"/>
                                         {t('common.reply') || 'Reply'}
                                     </button>
+
+                                    {isAuthenticated && user && (String(comment.user_id) === String(user.id) || user.roles?.includes('admin')) && (
+                                        <button
+                                            className="flex items-center gap-1.5 text-gray-500 hover:text-red-600 font-medium text-sm px-2 py-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                            onClick={() => handleDeleteComment(comment.id)}
+                                            disabled={deletingCommentId === comment.id}
+                                        >
+                                            {deletingCommentId === comment.id ? (
+                                                <Loader2 className="w-4 h-4 animate-spin"/>
+                                            ) : (
+                                                <Trash2 className="w-4 h-4"/>
+                                            )}
+                                        </button>
+                                    )}
                                 </div>
 
                                 {replyingTo?.id === comment.id && (
-                                    <div className="mt-3 space-y-2 border-l-2 border-gray-200 dark:border-gray-700 pl-4">
+                                    <div className="mt-3 space-y-2 border-l-2 border-gray-300 dark:border-gray-600 pl-5 ml-1">
                                         {isAuthenticated ? (
                                             <div className="flex gap-3 items-start">
                                                 <Avatar className="h-8 w-8 flex-shrink-0 mt-0.5">

@@ -95,13 +95,15 @@ type UserEdges struct {
 	Favorites []*Favorite `json:"favorites,omitempty"`
 	// Likes holds the value of the likes edge.
 	Likes []*Like `json:"likes,omitempty"`
+	// CommentLikes holds the value of the comment_likes edge.
+	CommentLikes []*CommentLike `json:"comment_likes,omitempty"`
 	// Subscriptions holds the value of the subscriptions edge.
 	Subscriptions []*Subscription `json:"subscriptions,omitempty"`
 	// Subscribers holds the value of the subscribers edge.
 	Subscribers []*Subscription `json:"subscribers,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [12]bool
+	loadedTypes [13]bool
 }
 
 // MediaOrErr returns the Media value or an error if the edge
@@ -194,10 +196,19 @@ func (e UserEdges) LikesOrErr() ([]*Like, error) {
 	return nil, &NotLoadedError{edge: "likes"}
 }
 
+// CommentLikesOrErr returns the CommentLikes value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) CommentLikesOrErr() ([]*CommentLike, error) {
+	if e.loadedTypes[10] {
+		return e.CommentLikes, nil
+	}
+	return nil, &NotLoadedError{edge: "comment_likes"}
+}
+
 // SubscriptionsOrErr returns the Subscriptions value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) SubscriptionsOrErr() ([]*Subscription, error) {
-	if e.loadedTypes[10] {
+	if e.loadedTypes[11] {
 		return e.Subscriptions, nil
 	}
 	return nil, &NotLoadedError{edge: "subscriptions"}
@@ -206,7 +217,7 @@ func (e UserEdges) SubscriptionsOrErr() ([]*Subscription, error) {
 // SubscribersOrErr returns the Subscribers value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) SubscribersOrErr() ([]*Subscription, error) {
-	if e.loadedTypes[11] {
+	if e.loadedTypes[12] {
 		return e.Subscribers, nil
 	}
 	return nil, &NotLoadedError{edge: "subscribers"}
@@ -457,6 +468,11 @@ func (_m *User) QueryFavorites() *FavoriteQuery {
 // QueryLikes queries the "likes" edge of the User entity.
 func (_m *User) QueryLikes() *LikeQuery {
 	return NewUserClient(_m.config).QueryLikes(_m)
+}
+
+// QueryCommentLikes queries the "comment_likes" edge of the User entity.
+func (_m *User) QueryCommentLikes() *CommentLikeQuery {
+	return NewUserClient(_m.config).QueryCommentLikes(_m)
 }
 
 // QuerySubscriptions queries the "subscriptions" edge of the User entity.

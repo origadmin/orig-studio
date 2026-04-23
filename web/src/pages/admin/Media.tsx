@@ -511,7 +511,7 @@ export default function MediaPage() {
                                         <TableCell
                                             className="text-sm text-slate-500">{media.edges?.user?.[0]?.nickname || media.edges?.user?.[0]?.username || '-'}</TableCell>
                                         <TableCell
-                                            className="text-sm text-slate-500">{formatDate(media.create_time)}</TableCell>
+                                            className="text-sm text-slate-500">{formatDate(media.created_at)}</TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>

@@ -277,8 +277,9 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
         }
         try {
             setIsSaving(true);
-            const response = await playlistApi.getAll();
-            setPlaylists(response.map((p: any) => ({id: p.id, name: p.name})));
+            const response = await playlistApi.getMyPlaylists();
+            const items = response.items || response.list || [];
+            setPlaylists(items.map((p: any) => ({id: String(p.id), name: p.title || p.name})));
             setShowSaveModal(true);
         } catch (err) {
             console.error('Failed to fetch playlists:', err);
@@ -304,11 +305,12 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
 
         try {
             setIsCreatingPlaylist(true);
-            // API 期望 title 字段，不是 name
-            const newPlaylist = await playlistApi.create({title: newPlaylistName.trim()});
-            // 自动添加媒体到新创建的播放列表
-            await playlistApi.addMedia(String(newPlaylist.id), mediaId);
-            setPlaylists(prev => [...prev, {id: String(newPlaylist.id), name: newPlaylist.title || newPlaylistName.trim()}]);
+            const result = await playlistApi.create({title: newPlaylistName.trim()});
+            const newPlaylist = result.playlist;
+            if (newPlaylist && newPlaylist.id) {
+                await playlistApi.addMedia(newPlaylist.id, mediaId);
+                setPlaylists(prev => [...prev, {id: newPlaylist.id, name: newPlaylist.title || newPlaylistName.trim()}]);
+            }
             setNewPlaylistName('');
             setShowCreateForm(false);
             setShowSaveModal(false);
@@ -387,7 +389,7 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
                     <Bookmark className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`}/>
                 )}
                 <span
-                    className="font-medium">{isFavorited ? t('watch.saved') || 'Saved' : t('watch.save') || 'Save'}</span>
+                    className="font-medium">{isFavorited ? t('watch.favorited') || 'Favorited' : t('watch.favorite') || 'Favorite'}</span>
             </Button>
 
             {/* Share Button */}
@@ -404,17 +406,6 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
                     <Share2 className="w-4 h-4"/>
                 )}
                 <span className="font-medium">{t('watch.share')}</span>
-            </Button>
-
-            {/* Comment Button */}
-            <Button
-                variant="ghost"
-                size="sm"
-                className="flex items-center gap-2 rounded-full px-4 text-gray-700 dark:text-gray-300"
-                onClick={onCommentClick}
-            >
-                <MessageCircle className="w-4 h-4"/>
-                <span className="font-medium">{formatViews(commentCount)}</span>
             </Button>
 
             {/* More Actions Dropdown */}

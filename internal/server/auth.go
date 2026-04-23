@@ -94,26 +94,25 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	// Get role from entity (types.User doesn't have role field)
 	userRole := "user"
-	if entUser, entErr := h.uc.GetUserEntity(r.Context(), u.Uuid); entErr == nil &&
+	if entUser, entErr := h.uc.GetUserEntity(r.Context(), u.Id); entErr == nil &&
 		entUser.Role != "" {
 		userRole = string(entUser.Role)
 	}
 
 	// Verify password
-	if err := h.uc.VerifyPassword(r.Context(), u.Uuid, req.Password); err != nil {
+	if err := h.uc.VerifyPassword(r.Context(), u.Id, req.Password); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return
 	}
 
-	token, err := h.jwt.Generate(u.Uuid, u.Username, u.IsStaff, userRole)
+	token, err := h.jwt.Generate(u.Id, u.Username, u.IsStaff, userRole)
 	if err != nil {
 		slog.Error("failed to generate token", "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "token generation failed"})
 		return
 	}
 
-	// Generate refresh token
-	refreshToken, err := h.jwt.GenerateRefreshToken(u.Uuid, u.Username, u.IsStaff, userRole)
+	refreshToken, err := h.jwt.GenerateRefreshToken(u.Id, u.Username, u.IsStaff, userRole)
 	if err != nil {
 		slog.Error("failed to generate refresh token", "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "refresh token generation failed"})
@@ -122,7 +121,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	// Return simplified user info, ensure it includes the is_staff field
 	loginUser := &LoginUser{
-		Id:       u.Uuid,
+		Id:       u.Id,
 		Username: u.Username,
 		Nickname: u.Nickname,
 		Email:    u.Email,
@@ -134,7 +133,6 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
-// RegisterUser godoc: POST /api/v1/auth/register
 func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	c := handler.NewGinContextAdapterFromHTTP(w, r)
 	var req RegisterRequest
@@ -170,17 +168,17 @@ func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	userRole := "user"
 	if isFirstUser {
 		userRole = "admin"
-		_ = h.uc.SetUserRole(r.Context(), created.Uuid, "admin")
+		_ = h.uc.SetUserRole(r.Context(), created.Id, "admin")
 	}
 
-	token, err := h.jwt.Generate(created.Uuid, created.Username, created.IsStaff, userRole)
+	token, err := h.jwt.Generate(created.Id, created.Username, created.IsStaff, userRole)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "token generation failed"})
 		return
 	}
 
 	// Generate refresh token
-	refreshToken, err := h.jwt.GenerateRefreshToken(created.Uuid, created.Username, created.IsStaff, userRole)
+	refreshToken, err := h.jwt.GenerateRefreshToken(created.Id, created.Username, created.IsStaff, userRole)
 	if err != nil {
 		slog.Error("failed to generate refresh token", "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "refresh token generation failed"})
@@ -189,7 +187,7 @@ func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	// 返回简化版用户信息，确保包含 is_staff 字段
 	loginUser := &LoginUser{
-		Id:       created.Uuid,
+		Id:       created.Id,
 		Username: created.Username,
 		Nickname: created.Nickname,
 		Email:    created.Email,
@@ -210,7 +208,7 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := h.uc.GetUser(r.Context(), claims.UserID, &dto.UserQueryOption{
+	u, err := h.uc.GetUser(r.Context(), claims.GetUserID(), &dto.UserQueryOption{
 		WithProfile: true,
 	})
 	if err != nil {
@@ -239,14 +237,13 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get user information
-	u, err := h.uc.GetUser(r.Context(), claims.UserID, nil)
+	u, err := h.uc.GetUser(r.Context(), claims.GetUserID(), nil)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
 		return
 	}
 
-	// Generate new access token
-	token, err := h.jwt.Generate(claims.UserID, claims.Username, claims.IsStaff, claims.Role)
+	token, err := h.jwt.Generate(claims.GetUserID(), claims.Username, claims.IsStaff, claims.Role)
 	if err != nil {
 		slog.Error("failed to generate token", "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "token generation failed"})
@@ -254,7 +251,7 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate new refresh token
-	refreshToken, err := h.jwt.GenerateRefreshToken(claims.UserID, claims.Username, claims.IsStaff, claims.Role)
+	refreshToken, err := h.jwt.GenerateRefreshToken(claims.GetUserID(), claims.Username, claims.IsStaff, claims.Role)
 	if err != nil {
 		slog.Error("failed to generate refresh token", "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "refresh token generation failed"})
@@ -263,7 +260,7 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 
 	// Return simplified user info, ensure it includes the is_staff field
 	loginUser := &LoginUser{
-		Id:       u.Uuid,
+		Id:       u.Id,
 		Username: u.Username,
 		Nickname: u.Nickname,
 		Email:    u.Email,

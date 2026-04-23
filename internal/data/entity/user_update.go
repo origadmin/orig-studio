@@ -10,6 +10,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/commentlike"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
@@ -595,6 +596,21 @@ func (_u *UserUpdate) AddLikes(v ...*Like) *UserUpdate {
 	return _u.AddLikeIDs(ids...)
 }
 
+// AddCommentLikeIDs adds the "comment_likes" edge to the CommentLike entity by IDs.
+func (_u *UserUpdate) AddCommentLikeIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddCommentLikeIDs(ids...)
+	return _u
+}
+
+// AddCommentLikes adds the "comment_likes" edges to the CommentLike entity.
+func (_u *UserUpdate) AddCommentLikes(v ...*CommentLike) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCommentLikeIDs(ids...)
+}
+
 // AddSubscriptionIDs adds the "subscriptions" edge to the Subscription entity by IDs.
 func (_u *UserUpdate) AddSubscriptionIDs(ids ...string) *UserUpdate {
 	_u.mutation.AddSubscriptionIDs(ids...)
@@ -838,6 +854,27 @@ func (_u *UserUpdate) RemoveLikes(v ...*Like) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveLikeIDs(ids...)
+}
+
+// ClearCommentLikes clears all "comment_likes" edges to the CommentLike entity.
+func (_u *UserUpdate) ClearCommentLikes() *UserUpdate {
+	_u.mutation.ClearCommentLikes()
+	return _u
+}
+
+// RemoveCommentLikeIDs removes the "comment_likes" edge to CommentLike entities by IDs.
+func (_u *UserUpdate) RemoveCommentLikeIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemoveCommentLikeIDs(ids...)
+	return _u
+}
+
+// RemoveCommentLikes removes "comment_likes" edges to CommentLike entities.
+func (_u *UserUpdate) RemoveCommentLikes(v ...*CommentLike) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCommentLikeIDs(ids...)
 }
 
 // ClearSubscriptions clears all "subscriptions" edges to the Subscription entity.
@@ -1534,6 +1571,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.CommentLikesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CommentLikesTable,
+			Columns: []string{user.CommentLikesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(commentlike.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCommentLikesIDs(); len(nodes) > 0 && !_u.mutation.CommentLikesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CommentLikesTable,
+			Columns: []string{user.CommentLikesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(commentlike.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CommentLikesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CommentLikesTable,
+			Columns: []string{user.CommentLikesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(commentlike.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _u.mutation.SubscriptionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -2201,6 +2283,21 @@ func (_u *UserUpdateOne) AddLikes(v ...*Like) *UserUpdateOne {
 	return _u.AddLikeIDs(ids...)
 }
 
+// AddCommentLikeIDs adds the "comment_likes" edge to the CommentLike entity by IDs.
+func (_u *UserUpdateOne) AddCommentLikeIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddCommentLikeIDs(ids...)
+	return _u
+}
+
+// AddCommentLikes adds the "comment_likes" edges to the CommentLike entity.
+func (_u *UserUpdateOne) AddCommentLikes(v ...*CommentLike) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCommentLikeIDs(ids...)
+}
+
 // AddSubscriptionIDs adds the "subscriptions" edge to the Subscription entity by IDs.
 func (_u *UserUpdateOne) AddSubscriptionIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.AddSubscriptionIDs(ids...)
@@ -2444,6 +2541,27 @@ func (_u *UserUpdateOne) RemoveLikes(v ...*Like) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveLikeIDs(ids...)
+}
+
+// ClearCommentLikes clears all "comment_likes" edges to the CommentLike entity.
+func (_u *UserUpdateOne) ClearCommentLikes() *UserUpdateOne {
+	_u.mutation.ClearCommentLikes()
+	return _u
+}
+
+// RemoveCommentLikeIDs removes the "comment_likes" edge to CommentLike entities by IDs.
+func (_u *UserUpdateOne) RemoveCommentLikeIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemoveCommentLikeIDs(ids...)
+	return _u
+}
+
+// RemoveCommentLikes removes "comment_likes" edges to CommentLike entities.
+func (_u *UserUpdateOne) RemoveCommentLikes(v ...*CommentLike) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCommentLikeIDs(ids...)
 }
 
 // ClearSubscriptions clears all "subscriptions" edges to the Subscription entity.
@@ -3163,6 +3281,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CommentLikesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CommentLikesTable,
+			Columns: []string{user.CommentLikesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(commentlike.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCommentLikesIDs(); len(nodes) > 0 && !_u.mutation.CommentLikesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CommentLikesTable,
+			Columns: []string{user.CommentLikesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(commentlike.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CommentLikesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CommentLikesTable,
+			Columns: []string{user.CommentLikesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(commentlike.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

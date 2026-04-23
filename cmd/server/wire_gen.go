@@ -79,7 +79,10 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	likeRepo := NewLikeRepo(data, logger)
 	favoriteRepo := NewFavoriteRepo(data, logger)
 	likeFavoriteUseCase := NewLikeFavoriteUseCase(likeRepo, favoriteRepo, mediaUseCase, logger)
-	mediaHandler := NewMediaHandler(manager, mediaUseCase, uploadUseCase, likeFavoriteUseCase)
+	playlistRepo := NewPlaylistRepo(data, logger)
+	channelRepo := NewChannelRepo(data, logger)
+	playlistChannelUseCase := NewPlaylistChannelUseCase(playlistRepo, channelRepo, logger)
+	mediaHandler := NewMediaHandler(manager, mediaUseCase, uploadUseCase, likeFavoriteUseCase, playlistChannelUseCase, userUseCase)
 	uploadHandler := NewUploadHandler(uploadUseCase, manager, logger)
 	categoryRepo := NewCategoryRepo(data, logger)
 	tagRepo := NewTagRepo(data, logger)
@@ -92,9 +95,6 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	notificationRepo := NewNotificationRepo(data, logger)
 	notificationUseCase := NewNotificationUseCase(notificationRepo, logger)
 	notificationHandler := NewNotificationHandler(notificationUseCase, manager)
-	playlistRepo := NewPlaylistRepo(data, logger)
-	channelRepo := NewChannelRepo(data, logger)
-	playlistChannelUseCase := NewPlaylistChannelUseCase(playlistRepo, channelRepo, logger)
 	channelHandler := NewChannelHandler(playlistChannelUseCase, manager)
 	shareHandler := NewShareHandler(likeFavoriteUseCase, manager)
 	statsRepo := NewStatsRepo(client)
@@ -105,7 +105,9 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	tagRepository := NewAdminTagRepo(client)
 	tagUseCase := NewAdminTagUseCase(tagRepository)
 	tagService := NewAdminTagService(tagUseCase)
-	adminHandler := NewAdminHandler(manager, mediaUseCase, tagService)
+	adminHandler := NewAdminHandler(manager, mediaUseCase, playlistChannelUseCase, tagService)
+	commentLikeRepo := NewCommentLikeRepo(data, logger)
+	commentLikeUseCase := NewCommentLikeUseCase(commentLikeRepo, logger)
 	appDependencies := &AppDependencies{
 		DB:                  client,
 		PubSub:              pubSub,
@@ -127,6 +129,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 		MeHandler:           meHandler,
 		AdminHandler:        adminHandler,
 		UploadUC:            uploadUseCase,
+		CommentLikeUC:       commentLikeUseCase,
 	}
 	return appDependencies, nil
 }
@@ -486,8 +489,10 @@ func NewMediaHandler(
 	mediaUC *biz.MediaUseCase,
 	uploadUC *biz.UploadUseCase,
 	likeFavoriteUC *biz2.LikeFavoriteUseCase,
+	playlistChannelUC *biz2.PlaylistChannelUseCase,
+	userUC *biz3.UserUseCase,
 ) *server.MediaHandler {
-	return server.NewMediaHandler(jwt, mediaUC, uploadUC, likeFavoriteUC)
+	return server.NewMediaHandler(jwt, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC)
 }
 
 // NewUploadHandler creates a new upload handler.
@@ -599,13 +604,24 @@ func NewAdminTagService(tagUC *biz4.TagUseCase) *service.TagService {
 	return service.NewTagService(tagUC)
 }
 
+// NewCommentLikeRepo creates a new comment like repo.
+func NewCommentLikeRepo(data *data2.Data, logger log.Logger) biz2.CommentLikeRepo {
+	return data2.NewCommentLikeRepo(data, logger)
+}
+
+// NewCommentLikeUseCase creates a new comment like use case.
+func NewCommentLikeUseCase(repo biz2.CommentLikeRepo, logger log.Logger) *biz2.CommentLikeUseCase {
+	return biz2.NewCommentLikeUseCase(repo, logger)
+}
+
 // NewAdminHandler creates a new admin handler.
 func NewAdminHandler(
 	jwt *auth.Manager,
 	mediaUC *biz.MediaUseCase,
+	channelUC *biz2.PlaylistChannelUseCase,
 	tagService *service.TagService,
 ) *server.AdminHandler {
-	return server.NewAdminHandler(jwt, mediaUC, tagService)
+	return server.NewAdminHandler(jwt, mediaUC, channelUC, tagService)
 }
 
 // AppDependencies holds all application dependencies.
@@ -630,6 +646,7 @@ type AppDependencies struct {
 	MeHandler           *server.MeHandler
 	AdminHandler        *server.AdminHandler
 	UploadUC            *biz.UploadUseCase
+	CommentLikeUC       *biz2.CommentLikeUseCase
 }
 
 // Cleanup closes all resources.

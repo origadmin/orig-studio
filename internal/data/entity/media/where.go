@@ -440,16 +440,6 @@ func ShortTokenHasSuffix(v string) predicate.Media {
 	return predicate.Media(sql.FieldHasSuffix(FieldShortToken, v))
 }
 
-// ShortTokenIsNil applies the IsNil predicate on the "short_token" field.
-func ShortTokenIsNil() predicate.Media {
-	return predicate.Media(sql.FieldIsNull(FieldShortToken))
-}
-
-// ShortTokenNotNil applies the NotNil predicate on the "short_token" field.
-func ShortTokenNotNil() predicate.Media {
-	return predicate.Media(sql.FieldNotNull(FieldShortToken))
-}
-
 // ShortTokenEqualFold applies the EqualFold predicate on the "short_token" field.
 func ShortTokenEqualFold(v string) predicate.Media {
 	return predicate.Media(sql.FieldEqualFold(FieldShortToken, v))

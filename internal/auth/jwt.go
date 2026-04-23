@@ -14,11 +14,14 @@ import (
 
 // Claims is the JWT claims structure for origcms.
 type Claims struct {
-	UserID   string `json:"uid"`
 	Username string `json:"username"`
 	IsStaff  bool   `json:"is_staff"`
 	Role     string `json:"role"`
 	jwt.RegisteredClaims
+}
+
+func (c *Claims) GetUserID() string {
+	return c.Subject
 }
 
 // Manager handles JWT signing and parsing.
@@ -51,11 +54,11 @@ func (m *Manager) Generate(
 ) (string, error) {
 	now := time.Now()
 	claims := Claims{
-		UserID:   userID,
 		Username: username,
 		IsStaff:  isStaff,
 		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   userID,
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(m.ttl)),
 			Issuer:    "origcms",
@@ -65,7 +68,6 @@ func (m *Manager) Generate(
 	return token.SignedString(m.secret)
 }
 
-// GenerateRefreshToken creates a signed refresh token for the given user.
 func (m *Manager) GenerateRefreshToken(
 	userID string,
 	username string,
@@ -74,15 +76,14 @@ func (m *Manager) GenerateRefreshToken(
 ) (string, error) {
 	now := time.Now()
 	claims := Claims{
-		UserID:   userID,
 		Username: username,
 		IsStaff:  isStaff,
 		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   userID,
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(m.refreshTokenTTL)),
 			Issuer:    "origcms",
-			Subject:   "refresh",
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

@@ -6,14 +6,17 @@ package data
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/channel"
+	ent "origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
 	"origadmin/application/origcms/internal/data/entity/playlist"
 	"origadmin/application/origcms/internal/data/entity/subscription"
+	"origadmin/application/origcms/internal/data/entity/user"
 	"origadmin/application/origcms/internal/svc-content/biz"
 )
 
@@ -41,10 +44,11 @@ func (r *playlistRepo) Create(ctx context.Context, p *biz.Playlist) (*biz.Playli
 		privacy = 0
 	}
 	ent, err := r.data.db.Playlist.Create().
-		SetTitle(p.Name).
+		SetTitle(p.Title).
 		SetDescription(p.Description).
 		SetUserID(p.UserID).
 		SetPrivacy(privacy).
+		AddUserIDs(p.UserID).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -72,7 +76,7 @@ func (r *playlistRepo) Update(ctx context.Context, p *biz.Playlist) (*biz.Playli
 		privacy = 0
 	}
 	ent, err := r.data.db.Playlist.UpdateOneID(p.ID).
-		SetTitle(p.Name).
+		SetTitle(p.Title).
 		SetDescription(p.Description).
 		SetPrivacy(privacy).
 		Save(ctx)
@@ -215,12 +219,20 @@ func (r *playlistRepo) GetPlaylistMedia(ctx context.Context, playlistID string) 
 }
 
 func (r *channelRepo) Create(ctx context.Context, ch *biz.Channel) (*biz.Channel, error) {
-	ent, err := r.data.db.Channel.Create().
+	builder := r.data.db.Channel.Create().
 		SetTitle(ch.Title).
 		SetDescription(ch.Description).
 		SetBannerLogo(ch.BannerLogo).
 		SetUserID(ch.UserID).
-		Save(ctx)
+		SetIsPublic(ch.IsPublic)
+
+	if ch.FriendlyToken != "" {
+		builder = builder.SetSlug(ch.FriendlyToken)
+	} else if ch.Slug != "" {
+		builder = builder.SetSlug(ch.Slug)
+	}
+
+	ent, err := builder.Save(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -243,13 +255,59 @@ func (r *channelRepo) GetBySlug(ctx context.Context, slug string) (*biz.Channel,
 	return mapChannel(ent), nil
 }
 
+func (r *channelRepo) GetByUsername(ctx context.Context, username string) (*biz.Channel, error) {
+	userEnt, err := r.data.db.User.Query().
+		Where(user.UsernameEQ(username)).
+		Only(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("user not found: %w", err)
+	}
+
+	channels, _, err := r.ListByUser(ctx, userEnt.ID, 1, 1)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get channel for user: %w", err)
+	}
+
+	if len(channels) == 0 {
+		return nil, fmt.Errorf("no channel found for user %s", username)
+	}
+
+	return channels[0], nil
+}
+
+func (r *channelRepo) GetByShortToken(ctx context.Context, token string) (*biz.Channel, error) {
+	ent, err := r.data.db.Channel.Query().Where(channel.SlugEQ(token)).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return mapChannel(ent), nil
+}
+
+func (r *channelRepo) GetDefaultChannel(ctx context.Context, userID string) (*biz.Channel, error) {
+	ent, err := r.data.db.Channel.Query().
+		Where(channel.UserIDEQ(userID)).
+		Order(ent.Asc(channel.FieldID)).
+		First(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return mapChannel(ent), nil
+}
+
 func (r *channelRepo) Update(ctx context.Context, ch *biz.Channel) (*biz.Channel, error) {
-	ent, err := r.data.db.Channel.UpdateOneID(ch.ID).
+	builder := r.data.db.Channel.UpdateOneID(ch.ID).
 		SetTitle(ch.Title).
 		SetDescription(ch.Description).
 		SetBannerLogo(ch.BannerLogo).
-		SetIsPublic(ch.IsPublic).
-		Save(ctx)
+		SetIsPublic(ch.IsPublic)
+
+	if ch.FriendlyToken != "" {
+		builder = builder.SetSlug(ch.FriendlyToken)
+	} else if ch.Slug != "" {
+		builder = builder.SetSlug(ch.Slug)
+	}
+
+	ent, err := builder.Save(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -280,8 +338,8 @@ func (r *channelRepo) ListByUser(ctx context.Context, userID string, page, pageS
 	return res, total, nil
 }
 
-func (r *channelRepo) ListAll(ctx context.Context, page, pageSize int) ([]*biz.Channel, int, error) {
-	query := r.data.db.Channel.Query()
+func (r *channelRepo) ListPublic(ctx context.Context, page, pageSize int) ([]*biz.Channel, int, error) {
+	query := r.data.db.Channel.Query().Where(channel.IsPublicEQ(true))
 	total, err := query.Count(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -427,7 +485,7 @@ func (r *channelRepo) IsInvitedToChannel(ctx context.Context, channelID, userID 
 func mapPlaylist(ent *entity.Playlist) *biz.Playlist {
 	return &biz.Playlist{
 		ID:          ent.ID,
-		Name:        ent.Title,
+		Title:       ent.Title,
 		Description: ent.Description,
 		UserID:      ent.UserID,
 		IsPublic:    ent.Privacy == 1,
@@ -444,6 +502,7 @@ func mapChannel(ent *entity.Channel) *biz.Channel {
 		Description:   ent.Description,
 		BannerLogo:    ent.BannerLogo,
 		FriendlyToken: ent.Slug,
+		Slug:          ent.Slug,
 		IsPublic:      ent.IsPublic,
 		UserID:        ent.UserID,
 		CreatedAt:     ent.AddDate,

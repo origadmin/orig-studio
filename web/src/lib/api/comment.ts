@@ -27,8 +27,10 @@ export interface CommentLikeResponse {
     is_disliked: boolean;
 }
 
+export type CommentSortBy = 'newest' | 'oldest' | 'popular';
+
 export const commentApi = {
-    getAll: (params?: { media_id?: string; content_id?: string; page?: number; page_size?: number }) => {
+    getAll: (params?: { media_id?: string; content_id?: string; page?: number; page_size?: number; sort_by?: string; order?: string }) => {
         return api.get<CommentListResponse>('/comments', params || {});
     },
     get: (id: string) => api.get<Comment>(`/comments/${id}`),

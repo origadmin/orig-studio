@@ -753,6 +753,9 @@ func (_c *MediaCreate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Media.title": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.ShortToken(); !ok {
+		return &ValidationError{Name: "short_token", err: errors.New(`entity: missing required field "Media.short_token"`)}
+	}
 	if v, ok := _c.mutation.ShortToken(); ok {
 		if err := media.ShortTokenValidator(v); err != nil {
 			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Media.short_token": %w`, err)}

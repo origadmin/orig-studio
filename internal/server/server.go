@@ -14,6 +14,7 @@ import (
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/handler"
+	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 )
 
 // Server represents the application server.
@@ -34,6 +35,7 @@ type Server struct {
 	meHandler          *MeHandler
 	adminHandler       *AdminHandler
 	exploreHandler     *ExploreHandler
+	commentLikeUC      *contentbiz.CommentLikeUseCase
 	entityClient       *entity.Client
 	jwtMgr             *auth.Manager
 }
@@ -56,6 +58,7 @@ func NewServer(
 	meHandler *MeHandler,
 	adminHandler *AdminHandler,
 	exploreHandler *ExploreHandler,
+	commentLikeUC *contentbiz.CommentLikeUseCase,
 	entityClient *entity.Client,
 	jwtMgr *auth.Manager,
 ) *Server {
@@ -76,6 +79,7 @@ func NewServer(
 		meHandler:          meHandler,
 		adminHandler:       adminHandler,
 		exploreHandler:     exploreHandler,
+		commentLikeUC:      commentLikeUC,
 		entityClient:       entityClient,
 		jwtMgr:             jwtMgr,
 	}
@@ -145,7 +149,7 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 	}
 
 	// Comment routes (direct gin registration for entity access)
-	RegisterCommentRoutes(apiV1, s.entityClient, s.jwtMgr)
+	RegisterCommentRoutes(apiV1, s.entityClient, s.jwtMgr, s.commentLikeUC)
 }
 
 // getEnv gets an environment variable or returns the default value.

@@ -16,21 +16,23 @@ import (
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/svc-admin/service"
-	"origadmin/application/origcms/internal/svc-media/biz"
+	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
+	mediabiz "origadmin/application/origcms/internal/svc-media/biz"
 	"origadmin/application/origcms/internal/svc-media/dto"
+	"origadmin/application/origcms/internal/validation"
 )
 
 // AdminHandler handles admin-related routes.
 type AdminHandler struct {
 	jwt        *auth.Manager
-	mediaUC    *biz.MediaUseCase
+	mediaUC    *mediabiz.MediaUseCase
+	channelUC  *contentbiz.PlaylistChannelUseCase
 	tagService *service.TagService
-	// Add other use cases as needed
 }
 
 // NewAdminHandler creates a new AdminHandler.
-func NewAdminHandler(jwt *auth.Manager, mediaUC *biz.MediaUseCase, tagService *service.TagService) *AdminHandler {
-	return &AdminHandler{jwt: jwt, mediaUC: mediaUC, tagService: tagService}
+func NewAdminHandler(jwt *auth.Manager, mediaUC *mediabiz.MediaUseCase, channelUC *contentbiz.PlaylistChannelUseCase, tagService *service.TagService) *AdminHandler {
+	return &AdminHandler{jwt: jwt, mediaUC: mediaUC, channelUC: channelUC, tagService: tagService}
 }
 
 func (h *AdminHandler) Register(r handler.Router) {
@@ -48,7 +50,18 @@ func (h *AdminHandler) Register(r handler.Router) {
 		}
 
 		// ================================
-		// 2. Encoding Management
+		// 2. Channel Management (Admin - UUID only) ⭐
+		// ================================
+		channels := admin.Group("/channels")
+		{
+			channels.GET("", WithAdmin(h.jwt, h.adminListChannels()))
+			channels.GET("/:id", WithAdmin(h.jwt, h.adminGetChannelDetail())) // :id = UUID
+			channels.PUT("/:id", WithAdmin(h.jwt, h.adminUpdateChannel()))     // :id = UUID
+			channels.DELETE("/:id", WithAdmin(h.jwt, h.adminDeleteChannel()))  // :id = UUID
+		}
+
+		// ================================
+		// 3. Encoding Management
 		// ================================
 		encoding := admin.Group("/encoding")
 		{
@@ -168,7 +181,7 @@ func (h *AdminHandler) getAllEncodingTasks() gin.HandlerFunc {
 			}
 		}
 
-		filter := &biz.TranscodingStatusFilter{
+		filter := &mediabiz.TranscodingStatusFilter{
 			Status:   status,
 			Page:     1,
 			PageSize: 25,
@@ -546,8 +559,171 @@ func (h *AdminHandler) importTags() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// TODO: Implement import functionality
 		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
+			"code":    0,
 			"message": "Import functionality not implemented yet",
+		})
+	}
+}
+
+// ================================
+// Admin Channel Management Handlers (v3.2 - UUID only)
+// ================================
+
+func (h *AdminHandler) adminListChannels() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+		if pageSize > 100 {
+			pageSize = 100
+		}
+
+		items, total, err := h.channelUC.ListChannels(c.Request.Context(), page, pageSize)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data": gin.H{
+				"items":     items,
+				"total":     total,
+				"page":      page,
+				"page_size": pageSize,
+			},
+		})
+	}
+}
+
+func (h *AdminHandler) adminGetChannelDetail() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		if id == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "channel id is required"})
+			return
+		}
+
+		if !validation.IsValidUUID(id) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    ErrBadRequest,
+				"message": "invalid_uuid_format",
+				"hint":    "Admin channel API requires UUID format (e.g., 550e8400-e29b-41d4-a716-446655440000)",
+			})
+			return
+		}
+
+		ch, err := h.channelUC.GetChannel(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"code":    ErrNotFound,
+				"message": "channel_not_found",
+				"hint":    "No channel exists with the provided UUID",
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    ch,
+		})
+	}
+}
+
+func (h *AdminHandler) adminUpdateChannel() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		if id == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "channel id is required"})
+			return
+		}
+
+		if !validation.IsValidUUID(id) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    ErrBadRequest,
+				"message": "invalid_uuid_format",
+				"hint":    "Admin channel API requires UUID format",
+			})
+			return
+		}
+
+		var input struct {
+			Title       string `json:"title"`
+			Description string `json:"description"`
+			BannerLogo  string `json:"banner_logo"`
+			IsPublic    *bool  `json:"is_public"`
+			IsDefault   *bool  `json:"is_default"`
+		}
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
+			return
+		}
+
+		existingCh, err := h.channelUC.GetChannel(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"code": ErrNotFound, "message": "channel_not_found"})
+			return
+		}
+
+		chItem := &contentbiz.Channel{
+			ID:            id,
+			Title:         input.Title,
+			Description:   input.Description,
+			BannerLogo:    input.BannerLogo,
+			IsPublic:      existingCh.IsPublic,
+			UserID:        existingCh.UserID,
+			CreatedAt:     existingCh.CreatedAt,
+		}
+
+		if input.IsPublic != nil {
+			chItem.IsPublic = *input.IsPublic
+		}
+		if input.IsDefault != nil {
+			chItem.IsDefault = *input.IsDefault
+		}
+
+		updated, err := h.channelUC.UpdateChannel(c.Request.Context(), chItem, "", true)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    updated,
+		})
+	}
+}
+
+func (h *AdminHandler) adminDeleteChannel() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		if id == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "channel id is required"})
+			return
+		}
+
+		if !validation.IsValidUUID(id) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    ErrBadRequest,
+				"message": "invalid_uuid_format",
+				"hint":    "Admin channel API requires UUID format",
+			})
+			return
+		}
+
+		err := h.channelUC.DeleteChannel(c.Request.Context(), id, "", true)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    gin.H{"message": "channel deleted"},
 		})
 	}
 }

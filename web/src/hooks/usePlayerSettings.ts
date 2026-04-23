@@ -5,6 +5,7 @@ interface PlayerSettings {
     isMuted: boolean;
     playbackRate: number;
     quality?: string;
+    autoPlayNext: boolean;
 }
 
 const STORAGE_KEY = 'origcms_player_settings';
@@ -13,6 +14,7 @@ const DEFAULT_SETTINGS: PlayerSettings = {
     volume: 1,
     isMuted: false,
     playbackRate: 1,
+    autoPlayNext: true,
 };
 
 export function usePlayerSettings() {
@@ -53,11 +55,16 @@ export function usePlayerSettings() {
         setSettings(prev => ({...prev, quality}));
     }, []);
 
+    const setAutoPlayNext = useCallback((autoPlayNext: boolean) => {
+        setSettings(prev => ({...prev, autoPlayNext}));
+    }, []);
+
     return {
         ...settings,
         setVolume,
         setIsMuted,
         setPlaybackRate,
         setQuality,
+        setAutoPlayNext,
     };
 }

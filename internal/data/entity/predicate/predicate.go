@@ -18,6 +18,9 @@ type Channel func(*sql.Selector)
 // Comment is the predicate function for comment builders.
 type Comment func(*sql.Selector)
 
+// CommentLike is the predicate function for commentlike builders.
+type CommentLike func(*sql.Selector)
+
 // EncodeProfile is the predicate function for encodeprofile builders.
 type EncodeProfile func(*sql.Selector)
 

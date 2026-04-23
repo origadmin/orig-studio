@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/commentlike"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
@@ -124,6 +125,21 @@ func (_c *CommentCreate) AddReplies(v ...*Comment) *CommentCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddReplyIDs(ids...)
+}
+
+// AddCommentLikeIDs adds the "comment_likes" edge to the CommentLike entity by IDs.
+func (_c *CommentCreate) AddCommentLikeIDs(ids ...string) *CommentCreate {
+	_c.mutation.AddCommentLikeIDs(ids...)
+	return _c
+}
+
+// AddCommentLikes adds the "comment_likes" edges to the CommentLike entity.
+func (_c *CommentCreate) AddCommentLikes(v ...*CommentLike) *CommentCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddCommentLikeIDs(ids...)
 }
 
 // Mutation returns the CommentMutation object of the builder.
@@ -310,6 +326,22 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CommentLikesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   comment.CommentLikesTable,
+			Columns: []string{comment.CommentLikesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(commentlike.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

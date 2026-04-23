@@ -153,7 +153,7 @@ func (r *userRepo) Update(
 	in *types.User,
 	opts ...*dto.UserUpdateOption,
 ) (*types.User, error) {
-	u, err := r.db.User.UpdateOneID(in.Uuid).
+	u, err := r.db.User.UpdateOneID(in.Id).
 		SetName(in.Nickname).
 		SetEmail(in.Email).
 		SetIsActive(in.Status == 1).
@@ -269,6 +269,7 @@ func convertUserToProto(u *entity.User) *types.User {
 		"is_superuser", u.IsSuperuser,
 	)
 	result := &types.User{
+		Id:          u.ID,
 		Uuid:        u.ID,
 		Username:    u.Username,
 		Nickname:    u.Name,

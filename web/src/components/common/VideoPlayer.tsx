@@ -41,11 +41,11 @@ interface VideoPlayerProps {
     qualities?: QualityOption[];
     subtitles?: Array<{ label: string; src: string; language: string }>;
     hasAudioTracks?: boolean;
-    // 受控模式 props
     isPlaying?: boolean;
     currentTime?: number;
     onPlayingChange?: (playing: boolean) => void;
     onTimeChange?: (time: number) => void;
+    onAutoPlayNext?: () => void;
 }
 
 const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
@@ -67,6 +67,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                                                                              currentTime: controlledCurrentTime,
                                                                              onPlayingChange,
                                                                              onTimeChange,
+                                                                             onAutoPlayNext,
                                                                          }, ref) => {
 
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -92,15 +93,20 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
     const [hasError, setHasError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [hlsQualities, setHlsQualities] = useState<QualityOption[]>([]);
+    const [isBuffering, setIsBuffering] = useState(false);
+    const [autoResolution, setAutoResolution] = useState<string>('');
+    const wasPlayingBeforeQualitySwitch = useRef(false);
 
     // Use global player settings
     const {
         volume,
         isMuted,
         playbackRate,
+        autoPlayNext,
         setVolume,
         setIsMuted,
         setPlaybackRate,
+        setAutoPlayNext,
     } = usePlayerSettings();
 
     // 暴露方法给父组件
@@ -210,6 +216,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                 const level = hls.levels[data.level];
                 if (level) {
                     setCurrentQuality(`${level.height}p`);
+                    setAutoResolution(`${level.height}p`);
                 }
             });
 
@@ -397,7 +404,26 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
         setIsPlaying(false);
         onPlayingChange?.(false);
         onEnded?.();
-    }, [onPlayingChange, onEnded]);
+        if (autoPlayNext) {
+            onAutoPlayNext?.();
+        }
+    }, [onPlayingChange, onEnded, autoPlayNext, onAutoPlayNext]);
+
+    const handleWaiting = useCallback(() => {
+        setIsBuffering(true);
+    }, []);
+
+    const handlePlaying = useCallback(() => {
+        setIsBuffering(false);
+    }, []);
+
+    const handleCanPlay = useCallback(() => {
+        setIsBuffering(false);
+        if (wasPlayingBeforeQualitySwitch.current) {
+            wasPlayingBeforeQualitySwitch.current = false;
+            videoRef.current?.play().catch(console.error);
+        }
+    }, []);
 
     const handleError = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
         const video = e.currentTarget;
@@ -444,17 +470,18 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
     // Quality selection with smooth switching
     const handleQualityChange = useCallback((quality: string) => {
         if (!hlsRef.current) {
-            // If no HLS instance, just update state for display
             setCurrentQuality(quality);
             setShowSettingsMenu(false);
             return;
         }
 
+        wasPlayingBeforeQualitySwitch.current = isPlaying;
+        setIsBuffering(true);
+
         if (quality === 'auto') {
-            hlsRef.current.currentLevel = -1; // Auto quality
+            hlsRef.current.currentLevel = -1;
             setCurrentQuality('auto');
         } else {
-            // Find the matching level by height
             const height = parseInt(quality.replace('p', ''), 10);
             const levelIndex = hlsRef.current.levels.findIndex(level => level.height === height);
 
@@ -465,7 +492,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
         }
 
         setShowSettingsMenu(false);
-    }, []);
+    }, [isPlaying]);
 
     // Skip forward/backward
     const skip = useCallback((seconds: number) => {
@@ -482,7 +509,6 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
         if (controlsTimeoutRef.current) {
             clearTimeout(controlsTimeoutRef.current);
         }
-        // Only auto-hide when playing
         if (isPlaying) {
             controlsTimeoutRef.current = setTimeout(() => {
                 setShowControls(false);
@@ -491,10 +517,10 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
     }, [isPlaying]);
 
     const hideControlsImmediately = useCallback(() => {
+        if (controlsTimeoutRef.current) {
+            clearTimeout(controlsTimeoutRef.current);
+        }
         if (isPlaying) {
-            if (controlsTimeoutRef.current) {
-                clearTimeout(controlsTimeoutRef.current);
-            }
             setShowControls(false);
         }
     }, [isPlaying]);
@@ -532,11 +558,17 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
             if (controlsTimeoutRef.current) {
                 clearTimeout(controlsTimeoutRef.current);
             }
+        };
+    }, [showControlsTemporarily, hideControlsImmediately]);
+
+    // Cleanup center overlay timeout on unmount
+    useEffect(() => {
+        return () => {
             if (centerOverlayTimeoutRef.current) {
                 clearTimeout(centerOverlayTimeoutRef.current);
             }
         };
-    }, [showControlsTemporarily, hideControlsImmediately]);
+    }, []);
 
     // Keyboard shortcuts
     useEffect(() => {
@@ -614,6 +646,9 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
                 onEnded={handleEnded}
+                onWaiting={handleWaiting}
+                onPlaying={handlePlaying}
+                onCanPlay={handleCanPlay}
                 onPlay={() => {
                     setIsPlaying(true);
                     onPlayingChange?.(true);
@@ -623,6 +658,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                     setIsPlaying(false);
                     onPlayingChange?.(false);
                     onPause?.();
+                    setShowControls(true);
                 }}
                 onError={handleError}
                 poster={poster ? getFullUrl(poster) : undefined}
@@ -631,7 +667,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
             />
 
             {/* Center overlay icon (shows on click) */}
-            {showCenterOverlay && (
+            {showCenterOverlay && !isBuffering && (
                 <div
                     className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"
                     aria-hidden="true"
@@ -646,26 +682,40 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                 </div>
             )}
 
-            {/* Center play button overlay when paused */}
-            {!isPlaying && !hasError && (
+            {/* Buffering indicator */}
+            {isBuffering && (
                 <div
-                    className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer z-10"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        togglePlay();
-                    }}
-                    role="button"
-                    aria-label="Play video"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            togglePlay();
-                        }
-                    }}
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"
+                    aria-hidden="true"
+                >
+                    <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin"/>
+                </div>
+            )}
+
+            {/* Center play button overlay when paused - only shows when controls are visible */}
+            {!isPlaying && !hasError && showControls && !showCenterOverlay && (
+                <div
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
+                    aria-hidden="true"
                 >
                     <div
-                        className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center transition-transform hover:scale-110">
+                        className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center cursor-pointer pointer-events-auto transition-transform hover:scale-110"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            togglePlay();
+                            showCenterIcon('play');
+                        }}
+                        role="button"
+                        aria-label="Play video"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                togglePlay();
+                                showCenterIcon('play');
+                            }
+                        }}
+                    >
                         <Play size={48} className="text-white fill-white ml-2"/>
                     </div>
                 </div>
@@ -844,6 +894,26 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                         </div>
 
                         <div className="flex items-center gap-2" ref={settingsMenuRef}>
+                            {/* Auto-play next toggle */}
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className={`h-8 px-2 text-xs font-medium rounded-full transition-colors ${
+                                    autoPlayNext
+                                        ? 'text-blue-400 hover:text-blue-300 hover:bg-blue-500/10'
+                                        : 'text-white/50 hover:text-white/80 hover:bg-white/10'
+                                }`}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setAutoPlayNext(!autoPlayNext);
+                                }}
+                                title={autoPlayNext ? 'Auto-play next: ON' : 'Auto-play next: OFF'}
+                                aria-label={autoPlayNext ? 'Disable auto-play next' : 'Enable auto-play next'}
+                            >
+                                <SkipForward size={14} className="mr-1"/>
+                                {autoPlayNext ? 'ON' : 'OFF'}
+                            </Button>
+
                             {/* Subtitles - conditionally rendered */}
                             {hasSubtitles ? (
                                 <Button
@@ -959,9 +1029,9 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                                                 handleQualityChange('auto');
                                             }}
                                         >
-                                            <span>Auto</span>
+                                            <span>Auto{autoResolution ? ` (${autoResolution})` : ''}</span>
                                             {currentQuality === 'auto' && (
-                                                <span className="text-xs text-blue-400">Active</span>
+                                                <span className="text-blue-400 text-xs">✓</span>
                                             )}
                                         </button>
 
@@ -979,18 +1049,12 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                                                     handleQualityChange(q.name);
                                                 }}
                                             >
-                                                <span className="flex items-center gap-2">
-                                                    {q.name}
-                                                    {q.isRecommended && (
-                                                        <span
-                                                            className="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded">
-                                                            Recommended
-                                                        </span>
-                                                    )}
-                                                </span>
-                                                {currentQuality === q.name && (
-                                                    <span className="text-xs text-blue-400">Active</span>
-                                                )}
+                                                <span>{q.name}</span>
+                                                {currentQuality === q.name ? (
+                                                    <span className="text-blue-400 text-xs">✓</span>
+                                                ) : q.isRecommended ? (
+                                                    <span className="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded">推荐</span>
+                                                ) : null}
                                             </button>
                                         ))}
                                     </div>

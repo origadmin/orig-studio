@@ -47,9 +47,11 @@ type CommentEdges struct {
 	Parent *Comment `json:"parent,omitempty"`
 	// Replies holds the value of the replies edge.
 	Replies []*Comment `json:"replies,omitempty"`
+	// CommentLikes holds the value of the comment_likes edge.
+	CommentLikes []*CommentLike `json:"comment_likes,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // MediaOrErr returns the Media value or an error if the edge
@@ -92,6 +94,15 @@ func (e CommentEdges) RepliesOrErr() ([]*Comment, error) {
 		return e.Replies, nil
 	}
 	return nil, &NotLoadedError{edge: "replies"}
+}
+
+// CommentLikesOrErr returns the CommentLikes value or an error if the edge
+// was not loaded in eager-loading.
+func (e CommentEdges) CommentLikesOrErr() ([]*CommentLike, error) {
+	if e.loadedTypes[4] {
+		return e.CommentLikes, nil
+	}
+	return nil, &NotLoadedError{edge: "comment_likes"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -203,6 +214,11 @@ func (_m *Comment) QueryParent() *CommentQuery {
 // QueryReplies queries the "replies" edge of the Comment entity.
 func (_m *Comment) QueryReplies() *CommentQuery {
 	return NewCommentClient(_m.config).QueryReplies(_m)
+}
+
+// QueryCommentLikes queries the "comment_likes" edge of the Comment entity.
+func (_m *Comment) QueryCommentLikes() *CommentLikeQuery {
+	return NewCommentClient(_m.config).QueryCommentLikes(_m)
 }
 
 // Update returns a builder for updating this Comment.

@@ -15,7 +15,7 @@ import (
 // Playlist represents a user's media playlist.
 type Playlist struct {
 	ID          string    `json:"id"`
-	Name        string    `json:"name"`
+	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	UserID      string    `json:"user_id"`
 	IsPublic    bool      `json:"is_public"`
@@ -31,7 +31,9 @@ type Channel struct {
 	Description   string    `json:"description"`
 	BannerLogo    string    `json:"banner_logo"`
 	FriendlyToken string    `json:"friendly_token"`
+	Slug          string    `json:"slug"`
 	IsPublic      bool      `json:"is_public"`
+	IsDefault     bool      `json:"is_default"`
 	UserID        string    `json:"user_id"`
 	CreatedAt     time.Time `json:"created_at"`
 }
@@ -55,10 +57,13 @@ type ChannelRepo interface {
 	Create(ctx context.Context, ch *Channel) (*Channel, error)
 	Get(ctx context.Context, id string) (*Channel, error)
 	GetBySlug(ctx context.Context, slug string) (*Channel, error)
+	GetByUsername(ctx context.Context, username string) (*Channel, error)
+	GetByShortToken(ctx context.Context, token string) (*Channel, error)
+	GetDefaultChannel(ctx context.Context, userID string) (*Channel, error)
 	Update(ctx context.Context, ch *Channel) (*Channel, error)
 	Delete(ctx context.Context, id string) error
 	ListByUser(ctx context.Context, userID string, page, pageSize int) ([]*Channel, int, error)
-	ListAll(ctx context.Context, page, pageSize int) ([]*Channel, int, error)
+	ListPublic(ctx context.Context, page, pageSize int) ([]*Channel, int, error)
 	AddMedia(ctx context.Context, channelID, mediaID string) error
 	RemoveMedia(ctx context.Context, channelID, mediaID string) error
 	// Subscription methods
@@ -177,8 +182,21 @@ func (uc *PlaylistChannelUseCase) GetChannelBySlug(ctx context.Context, slug str
 	return uc.channelRepo.GetBySlug(ctx, slug)
 }
 
+// GetChannelByUsername looks up a channel by username (fallback for @username URLs when slug is not set).
+func (uc *PlaylistChannelUseCase) GetChannelByUsername(ctx context.Context, username string) (*Channel, error) {
+	return uc.channelRepo.GetByUsername(ctx, username)
+}
+
+func (uc *PlaylistChannelUseCase) GetByShortToken(ctx context.Context, token string) (*Channel, error) {
+	return uc.channelRepo.GetByShortToken(ctx, token)
+}
+
+func (uc *PlaylistChannelUseCase) GetDefaultChannel(ctx context.Context, userID string) (*Channel, error) {
+	return uc.channelRepo.GetDefaultChannel(ctx, userID)
+}
+
 func (uc *PlaylistChannelUseCase) ListChannels(ctx context.Context, page, pageSize int) ([]*Channel, int, error) {
-	return uc.channelRepo.ListAll(ctx, page, pageSize)
+	return uc.channelRepo.ListPublic(ctx, page, pageSize)
 }
 
 func (uc *PlaylistChannelUseCase) ListUserChannels(ctx context.Context, userID string, page, pageSize int) ([]*Channel, int, error) {

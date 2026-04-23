@@ -85,6 +85,8 @@ const (
 	EdgeFavorites = "favorites"
 	// EdgeLikes holds the string denoting the likes edge name in mutations.
 	EdgeLikes = "likes"
+	// EdgeCommentLikes holds the string denoting the comment_likes edge name in mutations.
+	EdgeCommentLikes = "comment_likes"
 	// EdgeSubscriptions holds the string denoting the subscriptions edge name in mutations.
 	EdgeSubscriptions = "subscriptions"
 	// EdgeSubscribers holds the string denoting the subscribers edge name in mutations.
@@ -155,6 +157,13 @@ const (
 	LikesInverseTable = "files_like"
 	// LikesColumn is the table column denoting the likes relation/edge.
 	LikesColumn = "user_id"
+	// CommentLikesTable is the table that holds the comment_likes relation/edge.
+	CommentLikesTable = "content_comment_likes"
+	// CommentLikesInverseTable is the table name for the CommentLike entity.
+	// It exists in this package in order to avoid circular dependency with the "commentlike" package.
+	CommentLikesInverseTable = "content_comment_likes"
+	// CommentLikesColumn is the table column denoting the comment_likes relation/edge.
+	CommentLikesColumn = "user_id"
 	// SubscriptionsTable is the table that holds the subscriptions relation/edge.
 	SubscriptionsTable = "subscriptions_subscription"
 	// SubscriptionsInverseTable is the table name for the Subscription entity.
@@ -572,6 +581,20 @@ func ByLikes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByCommentLikesCount orders the results by comment_likes count.
+func ByCommentLikesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCommentLikesStep(), opts...)
+	}
+}
+
+// ByCommentLikes orders the results by comment_likes terms.
+func ByCommentLikes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCommentLikesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // BySubscriptionsCount orders the results by subscriptions count.
 func BySubscriptionsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -667,6 +690,13 @@ func newLikesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LikesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LikesTable, LikesColumn),
+	)
+}
+func newCommentLikesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CommentLikesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CommentLikesTable, CommentLikesColumn),
 	)
 }
 func newSubscriptionsStep() *sqlgraph.Step {

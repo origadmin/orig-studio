@@ -77,7 +77,7 @@ func TestUploadE2E(t *testing.T) {
 	router := gin.Default()
 	RegisterRoutes(router,
 		NewUploadHandler(uploadUC, jwtMgr),
-		NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC),
+		NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC, nil, nil),
 	)
 
 	// 2. Register & Login to get token

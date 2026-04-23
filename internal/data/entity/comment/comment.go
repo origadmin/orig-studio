@@ -32,6 +32,8 @@ const (
 	EdgeParent = "parent"
 	// EdgeReplies holds the string denoting the replies edge name in mutations.
 	EdgeReplies = "replies"
+	// EdgeCommentLikes holds the string denoting the comment_likes edge name in mutations.
+	EdgeCommentLikes = "comment_likes"
 	// Table holds the table name of the comment in the database.
 	Table = "files_comment"
 	// MediaTable is the table that holds the media relation/edge.
@@ -56,6 +58,13 @@ const (
 	RepliesTable = "files_comment"
 	// RepliesColumn is the table column denoting the replies relation/edge.
 	RepliesColumn = "comment_replies"
+	// CommentLikesTable is the table that holds the comment_likes relation/edge.
+	CommentLikesTable = "content_comment_likes"
+	// CommentLikesInverseTable is the table name for the CommentLike entity.
+	// It exists in this package in order to avoid circular dependency with the "commentlike" package.
+	CommentLikesInverseTable = "content_comment_likes"
+	// CommentLikesColumn is the table column denoting the comment_likes relation/edge.
+	CommentLikesColumn = "comment_id"
 )
 
 // Columns holds all SQL columns for comment fields.
@@ -168,6 +177,20 @@ func ByReplies(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newRepliesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByCommentLikesCount orders the results by comment_likes count.
+func ByCommentLikesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCommentLikesStep(), opts...)
+	}
+}
+
+// ByCommentLikes orders the results by comment_likes terms.
+func ByCommentLikes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCommentLikesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newMediaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -194,5 +217,12 @@ func newRepliesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(Table, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, RepliesTable, RepliesColumn),
+	)
+}
+func newCommentLikesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CommentLikesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CommentLikesTable, CommentLikesColumn),
 	)
 }

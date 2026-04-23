@@ -15,6 +15,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/commentlike"
 	"origadmin/application/origcms/internal/data/entity/encodeprofile"
 	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
@@ -49,6 +50,8 @@ type Client struct {
 	Channel *ChannelClient
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
+	// CommentLike is the client for interacting with the CommentLike builders.
+	CommentLike *CommentLikeClient
 	// EncodeProfile is the client for interacting with the EncodeProfile builders.
 	EncodeProfile *EncodeProfileClient
 	// EncodingTask is the client for interacting with the EncodingTask builders.
@@ -92,6 +95,7 @@ func (c *Client) init() {
 	c.Category = NewCategoryClient(c.config)
 	c.Channel = NewChannelClient(c.config)
 	c.Comment = NewCommentClient(c.config)
+	c.CommentLike = NewCommentLikeClient(c.config)
 	c.EncodeProfile = NewEncodeProfileClient(c.config)
 	c.EncodingTask = NewEncodingTaskClient(c.config)
 	c.Favorite = NewFavoriteClient(c.config)
@@ -202,6 +206,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Category:      NewCategoryClient(cfg),
 		Channel:       NewChannelClient(cfg),
 		Comment:       NewCommentClient(cfg),
+		CommentLike:   NewCommentLikeClient(cfg),
 		EncodeProfile: NewEncodeProfileClient(cfg),
 		EncodingTask:  NewEncodingTaskClient(cfg),
 		Favorite:      NewFavoriteClient(cfg),
@@ -239,6 +244,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Category:      NewCategoryClient(cfg),
 		Channel:       NewChannelClient(cfg),
 		Comment:       NewCommentClient(cfg),
+		CommentLike:   NewCommentLikeClient(cfg),
 		EncodeProfile: NewEncodeProfileClient(cfg),
 		EncodingTask:  NewEncodingTaskClient(cfg),
 		Favorite:      NewFavoriteClient(cfg),
@@ -282,9 +288,10 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Article, c.Category, c.Channel, c.Comment, c.EncodeProfile, c.EncodingTask,
-		c.Favorite, c.Like, c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaTag,
-		c.Notification, c.Playlist, c.Subscription, c.Tag, c.UploadSession, c.User,
+		c.Article, c.Category, c.Channel, c.Comment, c.CommentLike, c.EncodeProfile,
+		c.EncodingTask, c.Favorite, c.Like, c.Media, c.MediaCategory, c.MediaPlaylist,
+		c.MediaTag, c.Notification, c.Playlist, c.Subscription, c.Tag, c.UploadSession,
+		c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -294,9 +301,10 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Article, c.Category, c.Channel, c.Comment, c.EncodeProfile, c.EncodingTask,
-		c.Favorite, c.Like, c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaTag,
-		c.Notification, c.Playlist, c.Subscription, c.Tag, c.UploadSession, c.User,
+		c.Article, c.Category, c.Channel, c.Comment, c.CommentLike, c.EncodeProfile,
+		c.EncodingTask, c.Favorite, c.Like, c.Media, c.MediaCategory, c.MediaPlaylist,
+		c.MediaTag, c.Notification, c.Playlist, c.Subscription, c.Tag, c.UploadSession,
+		c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -313,6 +321,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Channel.mutate(ctx, m)
 	case *CommentMutation:
 		return c.Comment.mutate(ctx, m)
+	case *CommentLikeMutation:
+		return c.CommentLike.mutate(ctx, m)
 	case *EncodeProfileMutation:
 		return c.EncodeProfile.mutate(ctx, m)
 	case *EncodingTaskMutation:
@@ -1077,6 +1087,22 @@ func (c *CommentClient) QueryReplies(_m *Comment) *CommentQuery {
 	return query
 }
 
+// QueryCommentLikes queries the comment_likes edge of a Comment.
+func (c *CommentClient) QueryCommentLikes(_m *Comment) *CommentLikeQuery {
+	query := (&CommentLikeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, id),
+			sqlgraph.To(commentlike.Table, commentlike.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, comment.CommentLikesTable, comment.CommentLikesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *CommentClient) Hooks() []Hook {
 	return c.hooks.Comment
@@ -1099,6 +1125,171 @@ func (c *CommentClient) mutate(ctx context.Context, m *CommentMutation) (Value, 
 		return (&CommentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("entity: unknown Comment mutation op: %q", m.Op())
+	}
+}
+
+// CommentLikeClient is a client for the CommentLike schema.
+type CommentLikeClient struct {
+	config
+}
+
+// NewCommentLikeClient returns a client for the CommentLike from the given config.
+func NewCommentLikeClient(c config) *CommentLikeClient {
+	return &CommentLikeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `commentlike.Hooks(f(g(h())))`.
+func (c *CommentLikeClient) Use(hooks ...Hook) {
+	c.hooks.CommentLike = append(c.hooks.CommentLike, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `commentlike.Intercept(f(g(h())))`.
+func (c *CommentLikeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CommentLike = append(c.inters.CommentLike, interceptors...)
+}
+
+// Create returns a builder for creating a CommentLike entity.
+func (c *CommentLikeClient) Create() *CommentLikeCreate {
+	mutation := newCommentLikeMutation(c.config, OpCreate)
+	return &CommentLikeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CommentLike entities.
+func (c *CommentLikeClient) CreateBulk(builders ...*CommentLikeCreate) *CommentLikeCreateBulk {
+	return &CommentLikeCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CommentLikeClient) MapCreateBulk(slice any, setFunc func(*CommentLikeCreate, int)) *CommentLikeCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CommentLikeCreateBulk{err: fmt.Errorf("calling to CommentLikeClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CommentLikeCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CommentLikeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CommentLike.
+func (c *CommentLikeClient) Update() *CommentLikeUpdate {
+	mutation := newCommentLikeMutation(c.config, OpUpdate)
+	return &CommentLikeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CommentLikeClient) UpdateOne(_m *CommentLike) *CommentLikeUpdateOne {
+	mutation := newCommentLikeMutation(c.config, OpUpdateOne, withCommentLike(_m))
+	return &CommentLikeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CommentLikeClient) UpdateOneID(id string) *CommentLikeUpdateOne {
+	mutation := newCommentLikeMutation(c.config, OpUpdateOne, withCommentLikeID(id))
+	return &CommentLikeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CommentLike.
+func (c *CommentLikeClient) Delete() *CommentLikeDelete {
+	mutation := newCommentLikeMutation(c.config, OpDelete)
+	return &CommentLikeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CommentLikeClient) DeleteOne(_m *CommentLike) *CommentLikeDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CommentLikeClient) DeleteOneID(id string) *CommentLikeDeleteOne {
+	builder := c.Delete().Where(commentlike.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CommentLikeDeleteOne{builder}
+}
+
+// Query returns a query builder for CommentLike.
+func (c *CommentLikeClient) Query() *CommentLikeQuery {
+	return &CommentLikeQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCommentLike},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CommentLike entity by its id.
+func (c *CommentLikeClient) Get(ctx context.Context, id string) (*CommentLike, error) {
+	return c.Query().Where(commentlike.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CommentLikeClient) GetX(ctx context.Context, id string) *CommentLike {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryComment queries the comment edge of a CommentLike.
+func (c *CommentLikeClient) QueryComment(_m *CommentLike) *CommentQuery {
+	query := (&CommentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(commentlike.Table, commentlike.FieldID, id),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, commentlike.CommentTable, commentlike.CommentColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a CommentLike.
+func (c *CommentLikeClient) QueryUser(_m *CommentLike) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(commentlike.Table, commentlike.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, commentlike.UserTable, commentlike.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CommentLikeClient) Hooks() []Hook {
+	return c.hooks.CommentLike
+}
+
+// Interceptors returns the client interceptors.
+func (c *CommentLikeClient) Interceptors() []Interceptor {
+	return c.inters.CommentLike
+}
+
+func (c *CommentLikeClient) mutate(ctx context.Context, m *CommentLikeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CommentLikeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CommentLikeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CommentLikeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CommentLikeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entity: unknown CommentLike mutation op: %q", m.Op())
 	}
 }
 
@@ -3467,6 +3658,22 @@ func (c *UserClient) QueryLikes(_m *User) *LikeQuery {
 	return query
 }
 
+// QueryCommentLikes queries the comment_likes edge of a User.
+func (c *UserClient) QueryCommentLikes(_m *User) *CommentLikeQuery {
+	query := (&CommentLikeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(commentlike.Table, commentlike.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CommentLikesTable, user.CommentLikesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QuerySubscriptions queries the subscriptions edge of a User.
 func (c *UserClient) QuerySubscriptions(_m *User) *SubscriptionQuery {
 	query := (&SubscriptionClient{config: c.config}).Query()
@@ -3527,13 +3734,13 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Article, Category, Channel, Comment, EncodeProfile, EncodingTask, Favorite,
-		Like, Media, MediaCategory, MediaPlaylist, MediaTag, Notification, Playlist,
-		Subscription, Tag, UploadSession, User []ent.Hook
+		Article, Category, Channel, Comment, CommentLike, EncodeProfile, EncodingTask,
+		Favorite, Like, Media, MediaCategory, MediaPlaylist, MediaTag, Notification,
+		Playlist, Subscription, Tag, UploadSession, User []ent.Hook
 	}
 	inters struct {
-		Article, Category, Channel, Comment, EncodeProfile, EncodingTask, Favorite,
-		Like, Media, MediaCategory, MediaPlaylist, MediaTag, Notification, Playlist,
-		Subscription, Tag, UploadSession, User []ent.Interceptor
+		Article, Category, Channel, Comment, CommentLike, EncodeProfile, EncodingTask,
+		Favorite, Like, Media, MediaCategory, MediaPlaylist, MediaTag, Notification,
+		Playlist, Subscription, Tag, UploadSession, User []ent.Interceptor
 	}
 )
