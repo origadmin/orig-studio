@@ -77,8 +77,10 @@ type Media struct {
 	EnableComments bool `json:"enable_comments,omitempty"`
 	// Featured holds the value of the "featured" field.
 	Featured bool `json:"featured,omitempty"`
-	// IsReviewed holds the value of the "is_reviewed" field.
-	IsReviewed bool `json:"is_reviewed,omitempty"`
+	// ReviewStatus holds the value of the "review_status" field.
+	ReviewStatus string `json:"review_status,omitempty"`
+	// Listable holds the value of the "listable" field.
+	Listable bool `json:"listable,omitempty"`
 	// ReportedTimes holds the value of the "reported_times" field.
 	ReportedTimes int `json:"reported_times,omitempty"`
 	// Tags holds the value of the "tags" field.
@@ -211,11 +213,11 @@ func (*Media) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case media.FieldTags:
 			values[i] = new([]byte)
-		case media.FieldAllowDownload, media.FieldEnableComments, media.FieldFeatured, media.FieldIsReviewed:
+		case media.FieldAllowDownload, media.FieldEnableComments, media.FieldFeatured, media.FieldListable:
 			values[i] = new(sql.NullBool)
 		case media.FieldDuration, media.FieldWidth, media.FieldHeight, media.FieldPrivacy, media.FieldViewCount, media.FieldLikeCount, media.FieldDislikeCount, media.FieldCommentCount, media.FieldFavoriteCount, media.FieldDownloadCount, media.FieldReportedTimes:
 			values[i] = new(sql.NullInt64)
-		case media.FieldID, media.FieldTitle, media.FieldDescription, media.FieldShortToken, media.FieldType, media.FieldURL, media.FieldHlsFile, media.FieldThumbnail, media.FieldPoster, media.FieldPreviewFilePath, media.FieldSize, media.FieldMimeType, media.FieldMd5sum, media.FieldExtension, media.FieldEncodingStatus, media.FieldState, media.FieldUserID, media.FieldCategoryID, media.FieldChannelID:
+		case media.FieldID, media.FieldTitle, media.FieldDescription, media.FieldShortToken, media.FieldType, media.FieldURL, media.FieldHlsFile, media.FieldThumbnail, media.FieldPoster, media.FieldPreviewFilePath, media.FieldSize, media.FieldMimeType, media.FieldMd5sum, media.FieldExtension, media.FieldEncodingStatus, media.FieldState, media.FieldReviewStatus, media.FieldUserID, media.FieldCategoryID, media.FieldChannelID:
 			values[i] = new(sql.NullString)
 		case media.FieldPublishedAt, media.FieldCreatedAt, media.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -412,11 +414,17 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Featured = value.Bool
 			}
-		case media.FieldIsReviewed:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field is_reviewed", values[i])
+		case media.FieldReviewStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field review_status", values[i])
 			} else if value.Valid {
-				_m.IsReviewed = value.Bool
+				_m.ReviewStatus = value.String
+			}
+		case media.FieldListable:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field listable", values[i])
+			} else if value.Valid {
+				_m.Listable = value.Bool
 			}
 		case media.FieldReportedTimes:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -642,8 +650,11 @@ func (_m *Media) String() string {
 	builder.WriteString("featured=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Featured))
 	builder.WriteString(", ")
-	builder.WriteString("is_reviewed=")
-	builder.WriteString(fmt.Sprintf("%v", _m.IsReviewed))
+	builder.WriteString("review_status=")
+	builder.WriteString(_m.ReviewStatus)
+	builder.WriteString(", ")
+	builder.WriteString("listable=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Listable))
 	builder.WriteString(", ")
 	builder.WriteString("reported_times=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ReportedTimes))

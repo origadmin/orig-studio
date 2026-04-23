@@ -131,6 +131,12 @@ func (r *mediaRepo) List(
 	if opt.Featured != nil {
 		query = query.Where(media.FeaturedEQ(*opt.Featured))
 	}
+	if opt.Listable != nil {
+		query = query.Where(media.ListableEQ(*opt.Listable))
+	}
+	if opt.ReviewStatus != nil {
+		query = query.Where(media.ReviewStatusEQ(*opt.ReviewStatus))
+	}
 
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -221,6 +227,10 @@ func (r *mediaRepo) Create(
 	if len(in.Tags) > 0 {
 		create = create.SetTags(in.Tags)
 	}
+	if in.ReviewStatus != "" {
+		create = create.SetReviewStatus(in.ReviewStatus)
+	}
+	create = create.SetListable(in.Listable)
 
 	m, err := create.Save(ctx)
 	if err != nil {
@@ -301,6 +311,12 @@ func (r *mediaRepo) Update(
 	}
 	// Update tags
 	update = update.SetTags(in.Tags)
+
+	// Update review_status and listable
+	if in.ReviewStatus != "" {
+		update = update.SetReviewStatus(in.ReviewStatus)
+	}
+	update = update.SetListable(in.Listable)
 
 	m, err := update.Save(ctx)
 	if err != nil {

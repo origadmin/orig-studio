@@ -476,20 +476,26 @@ func init() {
 	mediaDescFeatured := mediaFields[28].Descriptor()
 	// media.DefaultFeatured holds the default value on creation for the featured field.
 	media.DefaultFeatured = mediaDescFeatured.Default.(bool)
-	// mediaDescIsReviewed is the schema descriptor for is_reviewed field.
-	mediaDescIsReviewed := mediaFields[29].Descriptor()
-	// media.DefaultIsReviewed holds the default value on creation for the is_reviewed field.
-	media.DefaultIsReviewed = mediaDescIsReviewed.Default.(bool)
+	// mediaDescReviewStatus is the schema descriptor for review_status field.
+	mediaDescReviewStatus := mediaFields[29].Descriptor()
+	// media.DefaultReviewStatus holds the default value on creation for the review_status field.
+	media.DefaultReviewStatus = mediaDescReviewStatus.Default.(string)
+	// media.ReviewStatusValidator is a validator for the "review_status" field. It is called by the builders before save.
+	media.ReviewStatusValidator = mediaDescReviewStatus.Validators[0].(func(string) error)
+	// mediaDescListable is the schema descriptor for listable field.
+	mediaDescListable := mediaFields[30].Descriptor()
+	// media.DefaultListable holds the default value on creation for the listable field.
+	media.DefaultListable = mediaDescListable.Default.(bool)
 	// mediaDescReportedTimes is the schema descriptor for reported_times field.
-	mediaDescReportedTimes := mediaFields[30].Descriptor()
+	mediaDescReportedTimes := mediaFields[31].Descriptor()
 	// media.DefaultReportedTimes holds the default value on creation for the reported_times field.
 	media.DefaultReportedTimes = mediaDescReportedTimes.Default.(int)
 	// mediaDescCreatedAt is the schema descriptor for created_at field.
-	mediaDescCreatedAt := mediaFields[36].Descriptor()
+	mediaDescCreatedAt := mediaFields[37].Descriptor()
 	// media.DefaultCreatedAt holds the default value on creation for the created_at field.
 	media.DefaultCreatedAt = mediaDescCreatedAt.Default.(func() time.Time)
 	// mediaDescUpdatedAt is the schema descriptor for updated_at field.
-	mediaDescUpdatedAt := mediaFields[37].Descriptor()
+	mediaDescUpdatedAt := mediaFields[38].Descriptor()
 	// media.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	media.DefaultUpdatedAt = mediaDescUpdatedAt.Default.(func() time.Time)
 	// media.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

@@ -55,7 +55,8 @@ func (Media) Fields() []ent.Field {
 		field.Bool("allow_download").Default(true),
 		field.Bool("enable_comments").Default(true),
 		field.Bool("featured").Default(false),
-		field.Bool("is_reviewed").Default(true),
+		field.String("review_status").MaxLen(20).Default("pending_review"),
+		field.Bool("listable").Default(false),
 		field.Int("reported_times").Default(0),
 		field.JSON("tags", []string{}).Optional(),
 		field.String("user_id"),
@@ -78,6 +79,8 @@ func (Media) Indexes() []ent.Index {
 		index.Fields("created_at"),
 		index.Fields("user_id"),
 		index.Fields("short_token").Unique(),
+		index.Fields("review_status", "listable", "state"),
+		index.Fields("listable"),
 	}
 }
 

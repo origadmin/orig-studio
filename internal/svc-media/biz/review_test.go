@@ -6,6 +6,7 @@ package biz
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 
@@ -96,6 +97,27 @@ func (r *MockReviewRepo) CountByEncodingStatus(ctx context.Context) (*dto.Status
 	return &dto.StatusCounts{}, nil
 }
 
+func (r *MockReviewRepo) GetByShortToken(ctx context.Context, shortToken string) (*Media, error) {
+	for _, m := range r.media {
+		if m.ShortToken == shortToken {
+			return m, nil
+		}
+	}
+	return nil, fmt.Errorf("not found")
+}
+
+func (r *MockReviewRepo) GetByID(ctx context.Context, id string) (*Media, error) {
+	return r.media[id], nil
+}
+
+func (r *MockReviewRepo) ResolveToID(ctx context.Context, shortToken string) (string, error) {
+	m, err := r.GetByShortToken(ctx, shortToken)
+	if err != nil {
+		return "", err
+	}
+	return m.Id, nil
+}
+
 func (r *MockReviewRepo) ListFilteredByEncodingStatus(ctx context.Context, statuses []string, page, pageSize int) ([]*Media, int, error) {
 	var mediaList []*Media
 	for _, media := range r.media {
@@ -118,7 +140,6 @@ func TestMediaUseCase_ReviewApprove(t *testing.T) {
 		Id:             "media-123",
 		Title:          "Test Video",
 		EncodingStatus: "success",
-		IsReviewed:     false,
 		ReviewStatus:   "pending_review",
 		Listable:       false,
 		State:          "active",
@@ -132,7 +153,6 @@ func TestMediaUseCase_ReviewApprove(t *testing.T) {
 	updatedMedia, err := uc.ReviewMedia(ctx, "media-123", true, "审核通过", "user-456")
 	assert.NoError(t, err)
 	assert.NotNil(t, updatedMedia)
-	assert.True(t, updatedMedia.IsReviewed)
 	assert.Equal(t, "reviewed", updatedMedia.ReviewStatus)
 	assert.True(t, updatedMedia.Listable)
 }
@@ -151,7 +171,6 @@ func TestMediaUseCase_ReviewReject(t *testing.T) {
 		Id:             "media-123",
 		Title:          "Test Video",
 		EncodingStatus: "success",
-		IsReviewed:     false,
 		ReviewStatus:   "pending_review",
 		Listable:       false,
 		State:          "active",
@@ -165,7 +184,6 @@ func TestMediaUseCase_ReviewReject(t *testing.T) {
 	updatedMedia, err := uc.ReviewMedia(ctx, "media-123", false, "内容不符合规范", "user-456")
 	assert.NoError(t, err)
 	assert.NotNil(t, updatedMedia)
-	assert.False(t, updatedMedia.IsReviewed)
 	assert.Equal(t, "rejected", updatedMedia.ReviewStatus)
 	assert.False(t, updatedMedia.Listable)
 }
@@ -182,7 +200,7 @@ func TestMediaUseCase_ShouldBeListable(t *testing.T) {
 		Id:             "media-123",
 		Title:          "Test Video",
 		EncodingStatus: "success",
-		IsReviewed:     true,
+		ReviewStatus:   "reviewed",
 		State:          "active",
 	}
 	
@@ -194,7 +212,7 @@ func TestMediaUseCase_ShouldBeListable(t *testing.T) {
 		Id:             "media-456",
 		Title:          "Test Video 2",
 		EncodingStatus: "processing",
-		IsReviewed:     true,
+		ReviewStatus:   "reviewed",
 		State:          "active",
 	}
 	
@@ -206,7 +224,7 @@ func TestMediaUseCase_ShouldBeListable(t *testing.T) {
 		Id:             "media-789",
 		Title:          "Test Video 3",
 		EncodingStatus: "success",
-		IsReviewed:     false,
+		ReviewStatus:   "pending_review",
 		State:          "active",
 	}
 	
@@ -218,7 +236,7 @@ func TestMediaUseCase_ShouldBeListable(t *testing.T) {
 		Id:             "media-000",
 		Title:          "Test Video 4",
 		EncodingStatus: "success",
-		IsReviewed:     true,
+		ReviewStatus:   "reviewed",
 		State:          "draft",
 	}
 	

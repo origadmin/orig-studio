@@ -42,7 +42,8 @@ export interface Media {
     allow_download?: boolean;
     enable_comments?: boolean;
     featured?: boolean;
-    is_reviewed?: boolean;
+    review_status?: string;
+    listable?: boolean;
     reported_times?: number;
     tags?: string[];
     user_id: string;
@@ -264,7 +265,7 @@ export const mediaApi = {
         type?: string;
         state?: string;
         keyword?: string;
-    }) => api.get<MediaListResponse>("/medias", params as Record<string, unknown>),
+    }) => api.get<MediaListResponse>("/admin/medias", params as Record<string, unknown>),
 
     // 上传媒体文件（需要 JWT，支持进度回调）
     upload: (

@@ -244,6 +244,27 @@ func (r *MockMediaRepo) ListFilteredByEncodingStatus(ctx context.Context, status
 	return mediaList, len(mediaList), nil
 }
 
+func (r *MockMediaRepo) GetByShortToken(ctx context.Context, shortToken string) (*Media, error) {
+	for _, m := range r.media {
+		if m.ShortToken == shortToken {
+			return m, nil
+		}
+	}
+	return nil, fmt.Errorf("not found")
+}
+
+func (r *MockMediaRepo) GetByID(ctx context.Context, id string) (*Media, error) {
+	return r.media[id], nil
+}
+
+func (r *MockMediaRepo) ResolveToID(ctx context.Context, shortToken string) (string, error) {
+	m, err := r.GetByShortToken(ctx, shortToken)
+	if err != nil {
+		return "", err
+	}
+	return m.Id, nil
+}
+
 // MockEncodeProfileRepo 模拟编码配置仓库
 type MockEncodeProfileRepo struct {
 	profiles map[int]*dto.EncodeProfile

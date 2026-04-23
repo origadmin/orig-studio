@@ -554,16 +554,30 @@ func (_u *MediaUpdate) SetNillableFeatured(v *bool) *MediaUpdate {
 	return _u
 }
 
-// SetIsReviewed sets the "is_reviewed" field.
-func (_u *MediaUpdate) SetIsReviewed(v bool) *MediaUpdate {
-	_u.mutation.SetIsReviewed(v)
+// SetReviewStatus sets the "review_status" field.
+func (_u *MediaUpdate) SetReviewStatus(v string) *MediaUpdate {
+	_u.mutation.SetReviewStatus(v)
 	return _u
 }
 
-// SetNillableIsReviewed sets the "is_reviewed" field if the given value is not nil.
-func (_u *MediaUpdate) SetNillableIsReviewed(v *bool) *MediaUpdate {
+// SetNillableReviewStatus sets the "review_status" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableReviewStatus(v *string) *MediaUpdate {
 	if v != nil {
-		_u.SetIsReviewed(*v)
+		_u.SetReviewStatus(*v)
+	}
+	return _u
+}
+
+// SetListable sets the "listable" field.
+func (_u *MediaUpdate) SetListable(v bool) *MediaUpdate {
+	_u.mutation.SetListable(v)
+	return _u
+}
+
+// SetNillableListable sets the "listable" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableListable(v *bool) *MediaUpdate {
+	if v != nil {
+		_u.SetListable(*v)
 	}
 	return _u
 }
@@ -1027,6 +1041,11 @@ func (_u *MediaUpdate) check() error {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`entity: validator failed for field "Media.state": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ReviewStatus(); ok {
+		if err := media.ReviewStatusValidator(v); err != nil {
+			return &ValidationError{Name: "review_status", err: fmt.Errorf(`entity: validator failed for field "Media.review_status": %w`, err)}
+		}
+	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`entity: clearing a required unique edge "Media.user"`)
 	}
@@ -1192,8 +1211,11 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Featured(); ok {
 		_spec.SetField(media.FieldFeatured, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.IsReviewed(); ok {
-		_spec.SetField(media.FieldIsReviewed, field.TypeBool, value)
+	if value, ok := _u.mutation.ReviewStatus(); ok {
+		_spec.SetField(media.FieldReviewStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Listable(); ok {
+		_spec.SetField(media.FieldListable, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.ReportedTimes(); ok {
 		_spec.SetField(media.FieldReportedTimes, field.TypeInt, value)
@@ -2074,16 +2096,30 @@ func (_u *MediaUpdateOne) SetNillableFeatured(v *bool) *MediaUpdateOne {
 	return _u
 }
 
-// SetIsReviewed sets the "is_reviewed" field.
-func (_u *MediaUpdateOne) SetIsReviewed(v bool) *MediaUpdateOne {
-	_u.mutation.SetIsReviewed(v)
+// SetReviewStatus sets the "review_status" field.
+func (_u *MediaUpdateOne) SetReviewStatus(v string) *MediaUpdateOne {
+	_u.mutation.SetReviewStatus(v)
 	return _u
 }
 
-// SetNillableIsReviewed sets the "is_reviewed" field if the given value is not nil.
-func (_u *MediaUpdateOne) SetNillableIsReviewed(v *bool) *MediaUpdateOne {
+// SetNillableReviewStatus sets the "review_status" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableReviewStatus(v *string) *MediaUpdateOne {
 	if v != nil {
-		_u.SetIsReviewed(*v)
+		_u.SetReviewStatus(*v)
+	}
+	return _u
+}
+
+// SetListable sets the "listable" field.
+func (_u *MediaUpdateOne) SetListable(v bool) *MediaUpdateOne {
+	_u.mutation.SetListable(v)
+	return _u
+}
+
+// SetNillableListable sets the "listable" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableListable(v *bool) *MediaUpdateOne {
+	if v != nil {
+		_u.SetListable(*v)
 	}
 	return _u
 }
@@ -2560,6 +2596,11 @@ func (_u *MediaUpdateOne) check() error {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`entity: validator failed for field "Media.state": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ReviewStatus(); ok {
+		if err := media.ReviewStatusValidator(v); err != nil {
+			return &ValidationError{Name: "review_status", err: fmt.Errorf(`entity: validator failed for field "Media.review_status": %w`, err)}
+		}
+	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`entity: clearing a required unique edge "Media.user"`)
 	}
@@ -2742,8 +2783,11 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	if value, ok := _u.mutation.Featured(); ok {
 		_spec.SetField(media.FieldFeatured, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.IsReviewed(); ok {
-		_spec.SetField(media.FieldIsReviewed, field.TypeBool, value)
+	if value, ok := _u.mutation.ReviewStatus(); ok {
+		_spec.SetField(media.FieldReviewStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Listable(); ok {
+		_spec.SetField(media.FieldListable, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.ReportedTimes(); ok {
 		_spec.SetField(media.FieldReportedTimes, field.TypeInt, value)

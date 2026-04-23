@@ -205,9 +205,14 @@ func Featured(v bool) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldFeatured, v))
 }
 
-// IsReviewed applies equality check predicate on the "is_reviewed" field. It's identical to IsReviewedEQ.
-func IsReviewed(v bool) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldIsReviewed, v))
+// ReviewStatus applies equality check predicate on the "review_status" field. It's identical to ReviewStatusEQ.
+func ReviewStatus(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldReviewStatus, v))
+}
+
+// Listable applies equality check predicate on the "listable" field. It's identical to ListableEQ.
+func Listable(v bool) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldListable, v))
 }
 
 // ReportedTimes applies equality check predicate on the "reported_times" field. It's identical to ReportedTimesEQ.
@@ -1740,14 +1745,79 @@ func FeaturedNEQ(v bool) predicate.Media {
 	return predicate.Media(sql.FieldNEQ(FieldFeatured, v))
 }
 
-// IsReviewedEQ applies the EQ predicate on the "is_reviewed" field.
-func IsReviewedEQ(v bool) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldIsReviewed, v))
+// ReviewStatusEQ applies the EQ predicate on the "review_status" field.
+func ReviewStatusEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldReviewStatus, v))
 }
 
-// IsReviewedNEQ applies the NEQ predicate on the "is_reviewed" field.
-func IsReviewedNEQ(v bool) predicate.Media {
-	return predicate.Media(sql.FieldNEQ(FieldIsReviewed, v))
+// ReviewStatusNEQ applies the NEQ predicate on the "review_status" field.
+func ReviewStatusNEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldReviewStatus, v))
+}
+
+// ReviewStatusIn applies the In predicate on the "review_status" field.
+func ReviewStatusIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldReviewStatus, vs...))
+}
+
+// ReviewStatusNotIn applies the NotIn predicate on the "review_status" field.
+func ReviewStatusNotIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldReviewStatus, vs...))
+}
+
+// ReviewStatusGT applies the GT predicate on the "review_status" field.
+func ReviewStatusGT(v string) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldReviewStatus, v))
+}
+
+// ReviewStatusGTE applies the GTE predicate on the "review_status" field.
+func ReviewStatusGTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldReviewStatus, v))
+}
+
+// ReviewStatusLT applies the LT predicate on the "review_status" field.
+func ReviewStatusLT(v string) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldReviewStatus, v))
+}
+
+// ReviewStatusLTE applies the LTE predicate on the "review_status" field.
+func ReviewStatusLTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldReviewStatus, v))
+}
+
+// ReviewStatusContains applies the Contains predicate on the "review_status" field.
+func ReviewStatusContains(v string) predicate.Media {
+	return predicate.Media(sql.FieldContains(FieldReviewStatus, v))
+}
+
+// ReviewStatusHasPrefix applies the HasPrefix predicate on the "review_status" field.
+func ReviewStatusHasPrefix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasPrefix(FieldReviewStatus, v))
+}
+
+// ReviewStatusHasSuffix applies the HasSuffix predicate on the "review_status" field.
+func ReviewStatusHasSuffix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasSuffix(FieldReviewStatus, v))
+}
+
+// ReviewStatusEqualFold applies the EqualFold predicate on the "review_status" field.
+func ReviewStatusEqualFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldReviewStatus, v))
+}
+
+// ReviewStatusContainsFold applies the ContainsFold predicate on the "review_status" field.
+func ReviewStatusContainsFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldReviewStatus, v))
+}
+
+// ListableEQ applies the EQ predicate on the "listable" field.
+func ListableEQ(v bool) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldListable, v))
+}
+
+// ListableNEQ applies the NEQ predicate on the "listable" field.
+func ListableNEQ(v bool) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldListable, v))
 }
 
 // ReportedTimesEQ applies the EQ predicate on the "reported_times" field.

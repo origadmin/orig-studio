@@ -86,8 +86,8 @@ message Media {
   bool enable_comments = 34 [json_name = "enable_comments"];
   // media.field.featured
   bool featured = 35 [json_name = "featured"];
-  // media.field.is_reviewed
-  bool is_reviewed = 36 [json_name = "is_reviewed"];
+  // media.field.is_reviewed — DEPRECATED: use review_status instead
+  bool is_reviewed = 36 [json_name = "is_reviewed", deprecated = true];
   // media.field.reported_times
   int32 reported_times = 37 [json_name = "reported_times"];
   // media.field.extension

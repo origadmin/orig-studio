@@ -404,16 +404,30 @@ func (_c *MediaCreate) SetNillableFeatured(v *bool) *MediaCreate {
 	return _c
 }
 
-// SetIsReviewed sets the "is_reviewed" field.
-func (_c *MediaCreate) SetIsReviewed(v bool) *MediaCreate {
-	_c.mutation.SetIsReviewed(v)
+// SetReviewStatus sets the "review_status" field.
+func (_c *MediaCreate) SetReviewStatus(v string) *MediaCreate {
+	_c.mutation.SetReviewStatus(v)
 	return _c
 }
 
-// SetNillableIsReviewed sets the "is_reviewed" field if the given value is not nil.
-func (_c *MediaCreate) SetNillableIsReviewed(v *bool) *MediaCreate {
+// SetNillableReviewStatus sets the "review_status" field if the given value is not nil.
+func (_c *MediaCreate) SetNillableReviewStatus(v *string) *MediaCreate {
 	if v != nil {
-		_c.SetIsReviewed(*v)
+		_c.SetReviewStatus(*v)
+	}
+	return _c
+}
+
+// SetListable sets the "listable" field.
+func (_c *MediaCreate) SetListable(v bool) *MediaCreate {
+	_c.mutation.SetListable(v)
+	return _c
+}
+
+// SetNillableListable sets the "listable" field if the given value is not nil.
+func (_c *MediaCreate) SetNillableListable(v *bool) *MediaCreate {
+	if v != nil {
+		_c.SetListable(*v)
 	}
 	return _c
 }
@@ -721,9 +735,13 @@ func (_c *MediaCreate) defaults() {
 		v := media.DefaultFeatured
 		_c.mutation.SetFeatured(v)
 	}
-	if _, ok := _c.mutation.IsReviewed(); !ok {
-		v := media.DefaultIsReviewed
-		_c.mutation.SetIsReviewed(v)
+	if _, ok := _c.mutation.ReviewStatus(); !ok {
+		v := media.DefaultReviewStatus
+		_c.mutation.SetReviewStatus(v)
+	}
+	if _, ok := _c.mutation.Listable(); !ok {
+		v := media.DefaultListable
+		_c.mutation.SetListable(v)
 	}
 	if _, ok := _c.mutation.ReportedTimes(); !ok {
 		v := media.DefaultReportedTimes
@@ -872,8 +890,16 @@ func (_c *MediaCreate) check() error {
 	if _, ok := _c.mutation.Featured(); !ok {
 		return &ValidationError{Name: "featured", err: errors.New(`entity: missing required field "Media.featured"`)}
 	}
-	if _, ok := _c.mutation.IsReviewed(); !ok {
-		return &ValidationError{Name: "is_reviewed", err: errors.New(`entity: missing required field "Media.is_reviewed"`)}
+	if _, ok := _c.mutation.ReviewStatus(); !ok {
+		return &ValidationError{Name: "review_status", err: errors.New(`entity: missing required field "Media.review_status"`)}
+	}
+	if v, ok := _c.mutation.ReviewStatus(); ok {
+		if err := media.ReviewStatusValidator(v); err != nil {
+			return &ValidationError{Name: "review_status", err: fmt.Errorf(`entity: validator failed for field "Media.review_status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Listable(); !ok {
+		return &ValidationError{Name: "listable", err: errors.New(`entity: missing required field "Media.listable"`)}
 	}
 	if _, ok := _c.mutation.ReportedTimes(); !ok {
 		return &ValidationError{Name: "reported_times", err: errors.New(`entity: missing required field "Media.reported_times"`)}
@@ -1042,9 +1068,13 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 		_spec.SetField(media.FieldFeatured, field.TypeBool, value)
 		_node.Featured = value
 	}
-	if value, ok := _c.mutation.IsReviewed(); ok {
-		_spec.SetField(media.FieldIsReviewed, field.TypeBool, value)
-		_node.IsReviewed = value
+	if value, ok := _c.mutation.ReviewStatus(); ok {
+		_spec.SetField(media.FieldReviewStatus, field.TypeString, value)
+		_node.ReviewStatus = value
+	}
+	if value, ok := _c.mutation.Listable(); ok {
+		_spec.SetField(media.FieldListable, field.TypeBool, value)
+		_node.Listable = value
 	}
 	if value, ok := _c.mutation.ReportedTimes(); ok {
 		_spec.SetField(media.FieldReportedTimes, field.TypeInt, value)

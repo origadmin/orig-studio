@@ -8572,7 +8572,8 @@ type MediaMutation struct {
 	allow_download    *bool
 	enable_comments   *bool
 	featured          *bool
-	is_reviewed       *bool
+	review_status     *string
+	listable          *bool
 	reported_times    *int
 	addreported_times *int
 	tags              *[]string
@@ -10036,40 +10037,76 @@ func (m *MediaMutation) ResetFeatured() {
 	m.featured = nil
 }
 
-// SetIsReviewed sets the "is_reviewed" field.
-func (m *MediaMutation) SetIsReviewed(b bool) {
-	m.is_reviewed = &b
+// SetReviewStatus sets the "review_status" field.
+func (m *MediaMutation) SetReviewStatus(s string) {
+	m.review_status = &s
 }
 
-// IsReviewed returns the value of the "is_reviewed" field in the mutation.
-func (m *MediaMutation) IsReviewed() (r bool, exists bool) {
-	v := m.is_reviewed
+// ReviewStatus returns the value of the "review_status" field in the mutation.
+func (m *MediaMutation) ReviewStatus() (r string, exists bool) {
+	v := m.review_status
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldIsReviewed returns the old "is_reviewed" field's value of the Media entity.
+// OldReviewStatus returns the old "review_status" field's value of the Media entity.
 // If the Media object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MediaMutation) OldIsReviewed(ctx context.Context) (v bool, err error) {
+func (m *MediaMutation) OldReviewStatus(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIsReviewed is only allowed on UpdateOne operations")
+		return v, errors.New("OldReviewStatus is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIsReviewed requires an ID field in the mutation")
+		return v, errors.New("OldReviewStatus requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIsReviewed: %w", err)
+		return v, fmt.Errorf("querying old value for OldReviewStatus: %w", err)
 	}
-	return oldValue.IsReviewed, nil
+	return oldValue.ReviewStatus, nil
 }
 
-// ResetIsReviewed resets all changes to the "is_reviewed" field.
-func (m *MediaMutation) ResetIsReviewed() {
-	m.is_reviewed = nil
+// ResetReviewStatus resets all changes to the "review_status" field.
+func (m *MediaMutation) ResetReviewStatus() {
+	m.review_status = nil
+}
+
+// SetListable sets the "listable" field.
+func (m *MediaMutation) SetListable(b bool) {
+	m.listable = &b
+}
+
+// Listable returns the value of the "listable" field in the mutation.
+func (m *MediaMutation) Listable() (r bool, exists bool) {
+	v := m.listable
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldListable returns the old "listable" field's value of the Media entity.
+// If the Media object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaMutation) OldListable(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldListable is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldListable requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldListable: %w", err)
+	}
+	return oldValue.Listable, nil
+}
+
+// ResetListable resets all changes to the "listable" field.
+func (m *MediaMutation) ResetListable() {
+	m.listable = nil
 }
 
 // SetReportedTimes sets the "reported_times" field.
@@ -10833,7 +10870,7 @@ func (m *MediaMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MediaMutation) Fields() []string {
-	fields := make([]string, 0, 37)
+	fields := make([]string, 0, 38)
 	if m.title != nil {
 		fields = append(fields, media.FieldTitle)
 	}
@@ -10918,8 +10955,11 @@ func (m *MediaMutation) Fields() []string {
 	if m.featured != nil {
 		fields = append(fields, media.FieldFeatured)
 	}
-	if m.is_reviewed != nil {
-		fields = append(fields, media.FieldIsReviewed)
+	if m.review_status != nil {
+		fields = append(fields, media.FieldReviewStatus)
+	}
+	if m.listable != nil {
+		fields = append(fields, media.FieldListable)
 	}
 	if m.reported_times != nil {
 		fields = append(fields, media.FieldReportedTimes)
@@ -11009,8 +11049,10 @@ func (m *MediaMutation) Field(name string) (ent.Value, bool) {
 		return m.EnableComments()
 	case media.FieldFeatured:
 		return m.Featured()
-	case media.FieldIsReviewed:
-		return m.IsReviewed()
+	case media.FieldReviewStatus:
+		return m.ReviewStatus()
+	case media.FieldListable:
+		return m.Listable()
 	case media.FieldReportedTimes:
 		return m.ReportedTimes()
 	case media.FieldTags:
@@ -11092,8 +11134,10 @@ func (m *MediaMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldEnableComments(ctx)
 	case media.FieldFeatured:
 		return m.OldFeatured(ctx)
-	case media.FieldIsReviewed:
-		return m.OldIsReviewed(ctx)
+	case media.FieldReviewStatus:
+		return m.OldReviewStatus(ctx)
+	case media.FieldListable:
+		return m.OldListable(ctx)
 	case media.FieldReportedTimes:
 		return m.OldReportedTimes(ctx)
 	case media.FieldTags:
@@ -11315,12 +11359,19 @@ func (m *MediaMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetFeatured(v)
 		return nil
-	case media.FieldIsReviewed:
+	case media.FieldReviewStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReviewStatus(v)
+		return nil
+	case media.FieldListable:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetIsReviewed(v)
+		m.SetListable(v)
 		return nil
 	case media.FieldReportedTimes:
 		v, ok := value.(int)
@@ -11727,8 +11778,11 @@ func (m *MediaMutation) ResetField(name string) error {
 	case media.FieldFeatured:
 		m.ResetFeatured()
 		return nil
-	case media.FieldIsReviewed:
-		m.ResetIsReviewed()
+	case media.FieldReviewStatus:
+		m.ResetReviewStatus()
+		return nil
+	case media.FieldListable:
+		m.ResetListable()
 		return nil
 	case media.FieldReportedTimes:
 		m.ResetReportedTimes()
