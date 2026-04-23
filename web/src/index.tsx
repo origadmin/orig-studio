@@ -1,24 +1,32 @@
-/*
- * Copyright (c) 2024 OrigAdmin. All rights reserved.
- */
-
 import React, {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
-import './i18n';
-import App from './App';
-import './index.css';
-
+import {RouterProvider, createRouter} from '@tanstack/react-router';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {routeTree} from './routes.gen';
+import './i18n';
+import './index.css';
 
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
             refetchOnWindowFocus: false,
             retry: 1,
-            staleTime: 5 * 60 * 1000, // 5 minutes
+            staleTime: 5 * 60 * 1000,
         },
     },
 });
+
+const router = createRouter({
+    routeTree,
+    defaultPreload: 'intent',
+    pathParamsAllowedCharacters: ['@'],
+});
+
+declare module '@tanstack/react-router' {
+    interface Register {
+        router: typeof router;
+    }
+}
 
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Failed to find the root element');
@@ -26,7 +34,7 @@ if (!rootElement) throw new Error('Failed to find the root element');
 createRoot(rootElement).render(
     <StrictMode>
         <QueryClientProvider client={queryClient}>
-            <App/>
+            <RouterProvider router={router}/>
         </QueryClientProvider>
     </StrictMode>
 );
