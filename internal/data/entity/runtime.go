@@ -843,6 +843,14 @@ func init() {
 	uploadsessionDescTitle := uploadsessionFields[7].Descriptor()
 	// uploadsession.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	uploadsession.TitleValidator = uploadsessionDescTitle.Validators[0].(func(string) error)
+	// uploadsessionDescCategoryID is the schema descriptor for category_id field.
+	uploadsessionDescCategoryID := uploadsessionFields[9].Descriptor()
+	// uploadsession.CategoryIDValidator is a validator for the "category_id" field. It is called by the builders before save.
+	uploadsession.CategoryIDValidator = uploadsessionDescCategoryID.Validators[0].(func(string) error)
+	// uploadsessionDescUserID is the schema descriptor for user_id field.
+	uploadsessionDescUserID := uploadsessionFields[11].Descriptor()
+	// uploadsession.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	uploadsession.UserIDValidator = uploadsessionDescUserID.Validators[0].(func(string) error)
 	// uploadsessionDescStatus is the schema descriptor for status field.
 	uploadsessionDescStatus := uploadsessionFields[12].Descriptor()
 	// uploadsession.DefaultStatus holds the default value on creation for the status field.

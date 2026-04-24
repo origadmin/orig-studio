@@ -9,6 +9,8 @@ export interface Category {
     description?: string;
     parent_id?: string;
     order: number;
+    status?: string;
+    media_count?: number;
     created_at: string;
     updated_at: string;
 }

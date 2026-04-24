@@ -8,6 +8,7 @@ import type {NavSection, NavItem} from '../../types/nav';
 
 interface SidebarProps {
     collapsed?: boolean;
+    onToggleCollapse?: () => void;
 }
 
 interface RenderNavItem {
@@ -20,7 +21,7 @@ interface RenderNavItem {
 function toRenderItems(items: NavItem[]): RenderNavItem[] {
     return items.map((item) => ({
         id: item.id,
-        icon: <item.icon size={22}/>,
+        icon: item.icon ? <item.icon size={22}/> : null,
         label: item.label,
         to: item.to,
     }));
@@ -53,7 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
         }).map((section) => {
             const baseItems = toRenderItems(section.items);
             if (section.id === 'subscriptions' && subChannels.length > 0) {
-                return {section, items: [...baseItems, ...subChannels]};
+                return {section, items: [...baseItems, ...subChannels as RenderNavItem[]]};
             }
             return {section, items: baseItems};
         });

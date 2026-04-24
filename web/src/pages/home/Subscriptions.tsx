@@ -30,12 +30,12 @@ const SubscriptionsPage = () => {
             let response;
             if (activeTab === 'subscriptions') {
                 response = await subscriptionApi.getSubscriptions({page, page_size: 20});
-                setSubscriptions(prev => page === 1 ? response.list : [...prev, ...response.list]);
-                setHasMore(response.list.length === 20);
+                setSubscriptions(prev => page === 1 ? response.items : [...prev, ...response.items]);
+                setHasMore(response.items.length === 20);
             } else {
                 response = await subscriptionApi.getFollowers({page, page_size: 20});
-                setFollowers(prev => page === 1 ? response.list : [...prev, ...response.list]);
-                setHasMore(response.list.length === 20);
+                setFollowers(prev => page === 1 ? response.items : [...prev, ...response.items]);
+                setHasMore(response.items.length === 20);
             }
         } catch (err) {
             setError('Failed to fetch data');

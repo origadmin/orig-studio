@@ -44,7 +44,8 @@ export function useMediaList(params: {
                 ...params,
                 keyword: params.search || params.keyword,
                 category_id: params.category_id || undefined,
-                user_id: params.user_id ? Number(params.user_id) : undefined
+                user_id: params.user_id ? Number(params.user_id) : undefined,
+                featured: params.featured != null ? String(params.featured) : undefined,
             });
             return res;
         },
@@ -87,6 +88,9 @@ export function useInfiniteMediaList(params: {
 export function useAdminMediaList(params: {
     page?: number;
     page_size?: number;
+    keyword?: string;
+    state?: string;
+    type?: string;
 }) {
     return useQuery({
         queryKey: mediaKeys.adminList(params),
@@ -154,7 +158,7 @@ export function useAdminMediaDetail(id: string | null) {
 export function useDeleteMedia() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (id: string) => mediaApi.delete(id),
+        mutationFn: (id: string) => adminMediaApi.delete(id),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: mediaKeys.all});
         },
@@ -162,13 +166,13 @@ export function useDeleteMedia() {
 }
 
 /**
- * useUpdateMedia: Handle media update
+ * useUpdateMedia: Handle media update (admin)
  */
 export function useUpdateMedia() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: ({id, data}: { id: string; data: Partial<Media> }) =>
-            mediaApi.update(id, data),
+            adminMediaApi.update(id, data as any),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: mediaKeys.all});
         },
@@ -533,6 +537,49 @@ export function usePermissionList(params?: { page?: number; page_size?: number; 
             const res = await adminPermissionApi.list(params);
             return res;
         },
+    });
+}
+
+export function usePermissionGroups(params?: { page?: number; page_size?: number; is_active?: boolean }) {
+    return useQuery({
+        queryKey: ['permissionGroups', params],
+        queryFn: async () => {
+            const res = await adminPermissionApi.list(params);
+            return res;
+        },
+    });
+}
+
+export function usePermissionGroup(id: string | null) {
+    return useQuery({
+        queryKey: ['permissionGroup', id],
+        queryFn: async () => {
+            const res = await adminPermissionApi.get(id!);
+            return res;
+        },
+        enabled: !!id,
+    });
+}
+
+export function useGroupMembers(groupId: string | null, params?: { page?: number; page_size?: number }) {
+    return useQuery({
+        queryKey: ['groupMembers', groupId, params],
+        queryFn: async () => {
+            const res = await adminPermissionApi.getMembers(groupId!, params);
+            return res;
+        },
+        enabled: !!groupId,
+    });
+}
+
+export function useUserPermissions(userId: string | null) {
+    return useQuery({
+        queryKey: ['userPermissions', userId],
+        queryFn: async () => {
+            const res = await adminPermissionApi.getUserPermissions(userId!);
+            return res;
+        },
+        enabled: !!userId,
     });
 }
 

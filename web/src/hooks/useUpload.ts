@@ -56,10 +56,11 @@ export function useUpload(): UploadState {
             file,
             progress: 0,
             status: 'waiting',
+            parts: [],
             title: metadata?.title || file.name,
             description: metadata?.description,
-            categoryId: metadata?.categoryId,
-            tags: metadata?.tags,
+            categoryId: metadata?.categoryId || 0,
+            tags: metadata?.tags || [],
             ...metadata,
         };
 

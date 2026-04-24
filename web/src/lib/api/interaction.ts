@@ -35,8 +35,10 @@ export interface ToggleFavoriteResponse {
 }
 
 export interface FavoriteListResponse {
-    list: Favorite[];
+    items: Favorite[];
     total: number;
+    page: number;
+    page_size: number;
 }
 
 // ==================== Subscription Types ====================
@@ -46,7 +48,7 @@ export interface SubscriptionStatus {
 }
 
 export interface SubscriptionListResponse {
-    list: {
+    items: {
         id: string;
         user_id: string;
         username: string;
@@ -69,7 +71,7 @@ export const interactionApi = {
     // ==================== Likes ====================
     likes: {
         // 获取点赞列表
-        list: () => api.get<{ list: unknown[]; total: number }>("/interactions/likes"),
+        list: () => api.get<{ items: unknown[]; total: number; page: number; page_size: number }>("/interactions/likes"),
 
         // 点赞/取消点赞/点踩
         toggle: (mediaId: string, type: 'like' | 'dislike' = 'like') =>

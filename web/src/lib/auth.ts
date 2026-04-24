@@ -74,7 +74,7 @@ export {
     pauseUpload,
     shouldUseChunkedUpload,
     updateUploadMetadataApi,
-    DEFAULT_CHUNK_SIZE as CHUNK_SIZE,
+    CHUNK_SIZE,
     MAX_CONCURRENT_CHUNKS,
 } from './upload';
 export type {

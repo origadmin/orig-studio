@@ -36,7 +36,6 @@ import (
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/handler"
-	"origadmin/application/origcms/internal/helpers/ffmpeg"
 	"origadmin/application/origcms/internal/helpers/repo"
 	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 	"origadmin/application/origcms/internal/svc-media/biz"
@@ -124,13 +123,13 @@ func computeFileMD5(r io.Reader) (string, error) {
 
 // MediaHandler handles media requests.
 type MediaHandler struct {
-	jwtMgr                *auth.Manager
-	uc                    *biz.MediaUseCase
-	uploadUC              *biz.UploadUseCase
-	likeFavoriteUC        *contentbiz.LikeFavoriteUseCase
-	playlistChannelUC     *contentbiz.PlaylistChannelUseCase
-	userUC                *userbiz.UserUseCase
-	entityClient          *entity.Client
+	jwtMgr            *auth.Manager
+	uc                *biz.MediaUseCase
+	uploadUC          *biz.UploadUseCase
+	likeFavoriteUC    *contentbiz.LikeFavoriteUseCase
+	playlistChannelUC *contentbiz.PlaylistChannelUseCase
+	userUC            *userbiz.UserUseCase
+	entityClient      *entity.Client
 }
 
 func NewMediaHandler(
@@ -1408,19 +1407,6 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 
 		privacy, _ := strconv.Atoi(privacyStr)
 
-		// For video files, detect if it's a short video based on duration
-		if strings.HasPrefix(mimeType, "video/") {
-			// Get video duration
-			var duration time.Duration
-			if d, err := ffmpeg.GetVideoDuration(ctx, filePath); err == nil {
-				duration = d
-				// Check if it's a short video (duration < 60 seconds)
-				if duration.Seconds() < 60 {
-					mediaType = "short_video"
-				}
-			}
-		}
-
 		m := &biz.Media{
 			Title:          title,
 			Description:    description,
@@ -2324,7 +2310,7 @@ func (h *MediaHandler) toggleFavoriteByShortToken() gin.HandlerFunc {
 		}
 
 		OK(c, gin.H{
-			"is_favorited":  stats.IsFavorited,
+			"is_favorited":   stats.IsFavorited,
 			"favorite_count": stats.FavoriteCount,
 		})
 	}
@@ -2360,7 +2346,7 @@ func (h *MediaHandler) getFavoriteStatusByShortToken() gin.HandlerFunc {
 		}
 
 		OK(c, gin.H{
-			"is_favorited":  stats.IsFavorited,
+			"is_favorited":   stats.IsFavorited,
 			"favorite_count": stats.FavoriteCount,
 		})
 	}
@@ -2418,6 +2404,7 @@ func filterPublicFields(m *biz.Media) map[string]interface{} {
 	result := map[string]interface{}{
 		"id":              m.Id,
 		"short_token":     m.ShortToken,
+		"friendly_token":  m.FriendlyToken,
 		"title":           m.Title,
 		"description":     m.Description,
 		"url":             m.Url,
@@ -2426,13 +2413,18 @@ func filterPublicFields(m *biz.Media) map[string]interface{} {
 		"poster":          m.Poster,
 		"preview_file":    m.PreviewFilePath,
 		"duration":        m.Duration,
+		"size":            m.Size,
 		"width":           m.Width,
 		"height":          m.Height,
+		"mime_type":       m.MimeType,
+		"extension":       m.Extension,
 		"view_count":      m.ViewCount,
 		"like_count":      m.LikeCount,
 		"dislike_count":   m.DislikeCount,
 		"comment_count":   m.CommentCount,
 		"favorite_count":  m.FavoriteCount,
+		"share_count":     m.ShareCount,
+		"download_count":  m.DownloadCount,
 		"user_id":         m.UserId,
 		"category_id":     m.CategoryId,
 		"channel_id":      m.ChannelId,
@@ -2440,9 +2432,16 @@ func filterPublicFields(m *biz.Media) map[string]interface{} {
 		"type":            m.Type,
 		"encoding_status": m.EncodingStatus,
 		"state":           m.State,
+		"privacy":         m.Privacy,
+		"status":          m.Status,
 		"allow_download":  m.AllowDownload,
 		"enable_comments": m.EnableComments,
 		"featured":        m.Featured,
+		"is_reviewed":     m.IsReviewed,
+		"reported_times":  m.ReportedTimes,
+		"review_status":   m.ReviewStatus,
+		"listable":        m.Listable,
+		"uuid":            m.Uuid,
 	}
 
 	if m.CreateTime != nil {
@@ -2478,6 +2477,7 @@ func (h *MediaHandler) adminListMedia() gin.HandlerFunc {
 			MediaType:  c.Query("type"),
 			OrderBy:    c.DefaultQuery("order_by", "created_at"),
 			Descending: c.DefaultQuery("descending", "true") == "true",
+			AdminMode:  true,
 		}
 		opt.Page = int32(page)
 		opt.PageSize = int32(pageSize)
@@ -2500,7 +2500,6 @@ func (h *MediaHandler) adminListMedia() gin.HandlerFunc {
 			opt.ReviewStatus = ptrString(reviewStatus)
 		}
 
-		// Handle tags filtering
 		if tagsStr := c.Query("tags"); tagsStr != "" {
 			tags := strings.Split(tagsStr, ",")
 			for i := range tags {
@@ -2566,15 +2565,29 @@ func (h *MediaHandler) adminGetByID() gin.HandlerFunc {
 			return
 		}
 
-		// ✅ 只使用 GetByID，不接受 short_token
 		m, err := h.uc.GetByID(ctx, idStr)
 		if err != nil {
 			Fail(c, ErrMediaNotFound, "media not found")
 			return
 		}
 
-		// Admin 可以看到完整信息，包括私有视频
-		OK(c, m)
+		result := filterPublicFields(m)
+
+		if m.UserId != "" && m.UserId != "0" && h.userUC != nil {
+			if u, err := h.userUC.GetUser(ctx, m.UserId); err == nil {
+				userMap := map[string]interface{}{
+					"id":       u.Id,
+					"username": u.Username,
+					"nickname": u.Nickname,
+					"avatar":   u.Avatar,
+				}
+				result["edges"] = map[string]interface{}{
+					"user": []map[string]interface{}{userMap},
+				}
+			}
+		}
+
+		OK(c, result)
 	}
 }
 
@@ -2640,7 +2653,7 @@ func (h *MediaHandler) adminUpdateMedia() gin.HandlerFunc {
 		// Re-fetch to get full details
 		updated, _ = h.uc.GetByID(ctx, idStr)
 
-		OK(c, updated)
+		OK(c, filterPublicFields(updated))
 	}
 }
 
@@ -2698,12 +2711,12 @@ func (h *MediaHandler) adminGetStats() gin.HandlerFunc {
 		}
 
 		OK(c, gin.H{
-			"id":             m.Id,
-			"view_count":     m.ViewCount,
-			"like_count":     m.LikeCount,
-			"dislike_count":  m.DislikeCount,
-			"comment_count":  m.CommentCount,
-			"favorite_count": m.FavoriteCount,
+			"id":              m.Id,
+			"view_count":      m.ViewCount,
+			"like_count":      m.LikeCount,
+			"dislike_count":   m.DislikeCount,
+			"comment_count":   m.CommentCount,
+			"favorite_count":  m.FavoriteCount,
 			"encoding_status": m.EncodingStatus,
 		})
 	}

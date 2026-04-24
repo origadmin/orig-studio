@@ -100,12 +100,12 @@ func Description(v string) predicate.UploadSession {
 }
 
 // CategoryID applies equality check predicate on the "category_id" field. It's identical to CategoryIDEQ.
-func CategoryID(v int64) predicate.UploadSession {
+func CategoryID(v string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldEQ(FieldCategoryID, v))
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int64) predicate.UploadSession {
+func UserID(v string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldEQ(FieldUserID, v))
 }
 
@@ -660,43 +660,58 @@ func DescriptionContainsFold(v string) predicate.UploadSession {
 }
 
 // CategoryIDEQ applies the EQ predicate on the "category_id" field.
-func CategoryIDEQ(v int64) predicate.UploadSession {
+func CategoryIDEQ(v string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldEQ(FieldCategoryID, v))
 }
 
 // CategoryIDNEQ applies the NEQ predicate on the "category_id" field.
-func CategoryIDNEQ(v int64) predicate.UploadSession {
+func CategoryIDNEQ(v string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldNEQ(FieldCategoryID, v))
 }
 
 // CategoryIDIn applies the In predicate on the "category_id" field.
-func CategoryIDIn(vs ...int64) predicate.UploadSession {
+func CategoryIDIn(vs ...string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldIn(FieldCategoryID, vs...))
 }
 
 // CategoryIDNotIn applies the NotIn predicate on the "category_id" field.
-func CategoryIDNotIn(vs ...int64) predicate.UploadSession {
+func CategoryIDNotIn(vs ...string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldNotIn(FieldCategoryID, vs...))
 }
 
 // CategoryIDGT applies the GT predicate on the "category_id" field.
-func CategoryIDGT(v int64) predicate.UploadSession {
+func CategoryIDGT(v string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldGT(FieldCategoryID, v))
 }
 
 // CategoryIDGTE applies the GTE predicate on the "category_id" field.
-func CategoryIDGTE(v int64) predicate.UploadSession {
+func CategoryIDGTE(v string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldGTE(FieldCategoryID, v))
 }
 
 // CategoryIDLT applies the LT predicate on the "category_id" field.
-func CategoryIDLT(v int64) predicate.UploadSession {
+func CategoryIDLT(v string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldLT(FieldCategoryID, v))
 }
 
 // CategoryIDLTE applies the LTE predicate on the "category_id" field.
-func CategoryIDLTE(v int64) predicate.UploadSession {
+func CategoryIDLTE(v string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldLTE(FieldCategoryID, v))
+}
+
+// CategoryIDContains applies the Contains predicate on the "category_id" field.
+func CategoryIDContains(v string) predicate.UploadSession {
+	return predicate.UploadSession(sql.FieldContains(FieldCategoryID, v))
+}
+
+// CategoryIDHasPrefix applies the HasPrefix predicate on the "category_id" field.
+func CategoryIDHasPrefix(v string) predicate.UploadSession {
+	return predicate.UploadSession(sql.FieldHasPrefix(FieldCategoryID, v))
+}
+
+// CategoryIDHasSuffix applies the HasSuffix predicate on the "category_id" field.
+func CategoryIDHasSuffix(v string) predicate.UploadSession {
+	return predicate.UploadSession(sql.FieldHasSuffix(FieldCategoryID, v))
 }
 
 // CategoryIDIsNil applies the IsNil predicate on the "category_id" field.
@@ -707,6 +722,16 @@ func CategoryIDIsNil() predicate.UploadSession {
 // CategoryIDNotNil applies the NotNil predicate on the "category_id" field.
 func CategoryIDNotNil() predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldNotNull(FieldCategoryID))
+}
+
+// CategoryIDEqualFold applies the EqualFold predicate on the "category_id" field.
+func CategoryIDEqualFold(v string) predicate.UploadSession {
+	return predicate.UploadSession(sql.FieldEqualFold(FieldCategoryID, v))
+}
+
+// CategoryIDContainsFold applies the ContainsFold predicate on the "category_id" field.
+func CategoryIDContainsFold(v string) predicate.UploadSession {
+	return predicate.UploadSession(sql.FieldContainsFold(FieldCategoryID, v))
 }
 
 // TagsIsNil applies the IsNil predicate on the "tags" field.
@@ -720,43 +745,58 @@ func TagsNotNil() predicate.UploadSession {
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int64) predicate.UploadSession {
+func UserIDEQ(v string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int64) predicate.UploadSession {
+func UserIDNEQ(v string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int64) predicate.UploadSession {
+func UserIDIn(vs ...string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int64) predicate.UploadSession {
+func UserIDNotIn(vs ...string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldNotIn(FieldUserID, vs...))
 }
 
 // UserIDGT applies the GT predicate on the "user_id" field.
-func UserIDGT(v int64) predicate.UploadSession {
+func UserIDGT(v string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldGT(FieldUserID, v))
 }
 
 // UserIDGTE applies the GTE predicate on the "user_id" field.
-func UserIDGTE(v int64) predicate.UploadSession {
+func UserIDGTE(v string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldGTE(FieldUserID, v))
 }
 
 // UserIDLT applies the LT predicate on the "user_id" field.
-func UserIDLT(v int64) predicate.UploadSession {
+func UserIDLT(v string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldLT(FieldUserID, v))
 }
 
 // UserIDLTE applies the LTE predicate on the "user_id" field.
-func UserIDLTE(v int64) predicate.UploadSession {
+func UserIDLTE(v string) predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldLTE(FieldUserID, v))
+}
+
+// UserIDContains applies the Contains predicate on the "user_id" field.
+func UserIDContains(v string) predicate.UploadSession {
+	return predicate.UploadSession(sql.FieldContains(FieldUserID, v))
+}
+
+// UserIDHasPrefix applies the HasPrefix predicate on the "user_id" field.
+func UserIDHasPrefix(v string) predicate.UploadSession {
+	return predicate.UploadSession(sql.FieldHasPrefix(FieldUserID, v))
+}
+
+// UserIDHasSuffix applies the HasSuffix predicate on the "user_id" field.
+func UserIDHasSuffix(v string) predicate.UploadSession {
+	return predicate.UploadSession(sql.FieldHasSuffix(FieldUserID, v))
 }
 
 // UserIDIsNil applies the IsNil predicate on the "user_id" field.
@@ -767,6 +807,16 @@ func UserIDIsNil() predicate.UploadSession {
 // UserIDNotNil applies the NotNil predicate on the "user_id" field.
 func UserIDNotNil() predicate.UploadSession {
 	return predicate.UploadSession(sql.FieldNotNull(FieldUserID))
+}
+
+// UserIDEqualFold applies the EqualFold predicate on the "user_id" field.
+func UserIDEqualFold(v string) predicate.UploadSession {
+	return predicate.UploadSession(sql.FieldEqualFold(FieldUserID, v))
+}
+
+// UserIDContainsFold applies the ContainsFold predicate on the "user_id" field.
+func UserIDContainsFold(v string) predicate.UploadSession {
+	return predicate.UploadSession(sql.FieldContainsFold(FieldUserID, v))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.

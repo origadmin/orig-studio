@@ -108,12 +108,16 @@ func (r *mediaRepo) List(
 	} else if opt.Status != nil {
 		state := fmt.Sprintf("%d", *opt.Status)
 		query = query.Where(media.StateEQ(state))
-	} else {
+	} else if !opt.AdminMode {
 		query = query.Where(media.StateEQ("active"))
 	}
 
 	if opt.MediaType != "" {
-		query = query.Where(media.TypeEQ(opt.MediaType))
+		if opt.MediaType == "video" {
+			query = query.Where(media.TypeIn("video", "short_video"))
+		} else {
+			query = query.Where(media.TypeEQ(opt.MediaType))
+		}
 	}
 	if opt.Keyword != "" {
 		query = query.Where(media.TitleContains(opt.Keyword))

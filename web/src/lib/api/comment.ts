@@ -15,8 +15,8 @@ export interface Comment {
 }
 
 export interface CommentListResponse {
+    items: Comment[];
     total: number;
-    comments: Comment[];
     page: number;
     page_size: number;
 }

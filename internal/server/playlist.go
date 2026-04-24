@@ -13,10 +13,15 @@ func RegisterPlaylistRoutes(group *gin.RouterGroup, client *entity.Client) {
 		playlists.GET("", func(c *gin.Context) {
 			items, err := client.Playlist.Query().All(c.Request.Context())
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				Fail(c, ErrInternal, err.Error())
 				return
 			}
-			c.JSON(http.StatusOK, gin.H{"list": items})
+			OK(c, gin.H{
+				"items":     items,
+				"total":     len(items),
+				"page":      1,
+				"page_size": len(items),
+			})
 		})
 
 		playlists.POST("", func(c *gin.Context) {

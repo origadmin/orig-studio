@@ -22,11 +22,7 @@ export const subtitleApi = {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('language', language);
-        return api.post<Subtitle>(`/medias/${mediaId}/subtitles`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
+        return api.post<Subtitle>(`/medias/${mediaId}/subtitles`, formData);
     },
 
     // 删除字幕

@@ -3,7 +3,7 @@
 import {api} from "../request";
 import {mediaApi, LikeResponse} from "./media";
 
-export {LikeResponse};
+export type {LikeResponse};
 
 export const likeApi = {
     // 获取点赞状态 - 使用新的 /medias/:id/likes 路径

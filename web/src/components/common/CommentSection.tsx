@@ -96,7 +96,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                 case 'popular': sortParams.sort_by = 'like_count'; sortParams.order = 'desc'; break;
             }
             const response = await commentApi.getAll({media_id: mediaId, page: pageNum, page_size: PAGE_SIZE, ...sortParams});
-            const commentsList = response?.comments || [];
+            const commentsList = response?.items || [];
             const formattedComments: Comment[] = commentsList.map((comment: any) => ({
                 id: comment.id || '',
                 content: comment.content || '',
@@ -319,7 +319,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
         return (
             <div className="py-8 text-center text-red-500">
                 <p>{error}</p>
-                <Button variant="ghost" size="sm" onClick={fetchComments} className="mt-2">
+                <Button variant="ghost" size="sm" onClick={() => fetchComments()} className="mt-2">
                     {t('common.retry') || 'Retry'}
                 </Button>
             </div>
@@ -366,7 +366,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                 {isAuthenticated ? (
                     <div className="flex gap-3 items-start">
                         <Avatar className="h-10 w-10 flex-shrink-0 mt-0.5">
-                            <AvatarImage src={user?.avatar}/>
+                            <AvatarImage src={(user as any)?.avatar || (user as any)?.avatarUrl}/>
                             <AvatarFallback className="bg-gray-200 text-gray-600">
                                 {user?.username?.[0]?.toUpperCase() || 'U'}
                             </AvatarFallback>
@@ -488,7 +488,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
                                     <Link
-                                        to={`/@${comment.username?.trim() || 'anonymous'}`}
+                                        to={`/@${comment.username?.trim() || 'anonymous'}` as any}
                                         className="font-semibold text-sm text-gray-900 dark:text-white hover:text-blue-600 cursor-pointer transition-colors"
                                     >
                                         @{comment.username?.trim() || 'Anonymous'}
@@ -497,7 +497,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                                         <>
                                             <span className="text-gray-400 text-xs">→</span>
                                             <Link
-                                                to={`/@${comment.reply_to_username?.trim() || ''}`}
+                                                to={`/@${comment.reply_to_username?.trim() || ''}` as any}
                                                 className="text-blue-600 text-sm font-medium hover:underline"
                                             >
                                                 @{comment.reply_to_username}
@@ -587,7 +587,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                                         {isAuthenticated ? (
                                             <div className="flex gap-3 items-start">
                                                 <Avatar className="h-8 w-8 flex-shrink-0 mt-0.5">
-                                                    <AvatarImage src={user?.avatar}/>
+                                                    <AvatarImage src={(user as any)?.avatar || (user as any)?.avatarUrl}/>
                                                     <AvatarFallback className="bg-gray-200 text-gray-600 text-xs">
                                                         {user?.username?.[0]?.toUpperCase() || 'U'}
                                                     </AvatarFallback>

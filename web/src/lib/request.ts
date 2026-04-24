@@ -290,9 +290,8 @@ async function fetchApi<T>(
                 } else {
                     searchParams.set(key, String(value));
                 }
-            } else if (value === 0 || value === "0") {
-                // 特殊处理0值，确保0能被正确添加到URL参数中
-                searchParams.set(key, String(value));
+            } else if (String(value) === "0") {
+                searchParams.set(key, "0");
             }
         });
     }

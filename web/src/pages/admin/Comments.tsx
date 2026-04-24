@@ -53,7 +53,7 @@ const Comments: React.FC = () => {
                 setLoading(true);
                 // 直接调用getAll()获取所有评论，不需要传递media_id参数
                 const response = await commentApi.getAll();
-                const commentList = Array.isArray(response?.items) ? response.items : [];
+                const commentList = Array.isArray((response as any)?.items) ? (response as any).items : [];
                 // Map API response to our comment interface
                 const mappedComments = commentList.map((comment: any) => ({
                     id: comment.id,

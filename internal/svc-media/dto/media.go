@@ -73,6 +73,7 @@ type MediaQueryOption struct {
 	Tags         []string
 	Listable     *bool
 	ReviewStatus *string
+	AdminMode    bool
 }
 
 func ptrBool(v bool) *bool       { return &v }

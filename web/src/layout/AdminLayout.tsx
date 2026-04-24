@@ -58,7 +58,7 @@ const AdminLayout = () => {
     // 生成面包屑路径
     const getBreadcrumbs = () => {
         const path = routerState.location.pathname;
-        const breadcrumbs = [
+        const breadcrumbs: {label: string; path: string; icon?: any}[] = [
             {label: "首页", path: "/admin", icon: Home}
         ];
 
@@ -205,7 +205,7 @@ const NavItem = ({to, icon, label, exact = false, collapsed = false}: {
             }`}
             title={collapsed ? label : undefined}
         >
-            {collapsed ? React.cloneElement(icon as React.ReactElement, { size: 28 }) : icon}
+            {collapsed ? React.cloneElement(icon as React.ReactElement<any>, { size: 28 }) : icon}
             {!collapsed && <span className="font-medium text-sm">{label}</span>}
         </Link>
     );

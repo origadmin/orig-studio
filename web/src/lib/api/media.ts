@@ -115,6 +115,8 @@ export interface UpdateMediaRequest {
     state?: string;
     privacy?: number;
     featured?: boolean;
+    enable_comments?: boolean;
+    allow_download?: boolean;
 }
 
 export interface EncodeProfile {

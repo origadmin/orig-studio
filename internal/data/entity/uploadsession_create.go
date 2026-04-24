@@ -115,13 +115,13 @@ func (_c *UploadSessionCreate) SetNillableDescription(v *string) *UploadSessionC
 }
 
 // SetCategoryID sets the "category_id" field.
-func (_c *UploadSessionCreate) SetCategoryID(v int64) *UploadSessionCreate {
+func (_c *UploadSessionCreate) SetCategoryID(v string) *UploadSessionCreate {
 	_c.mutation.SetCategoryID(v)
 	return _c
 }
 
 // SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (_c *UploadSessionCreate) SetNillableCategoryID(v *int64) *UploadSessionCreate {
+func (_c *UploadSessionCreate) SetNillableCategoryID(v *string) *UploadSessionCreate {
 	if v != nil {
 		_c.SetCategoryID(*v)
 	}
@@ -135,13 +135,13 @@ func (_c *UploadSessionCreate) SetTags(v []string) *UploadSessionCreate {
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *UploadSessionCreate) SetUserID(v int64) *UploadSessionCreate {
+func (_c *UploadSessionCreate) SetUserID(v string) *UploadSessionCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_c *UploadSessionCreate) SetNillableUserID(v *int64) *UploadSessionCreate {
+func (_c *UploadSessionCreate) SetNillableUserID(v *string) *UploadSessionCreate {
 	if v != nil {
 		_c.SetUserID(*v)
 	}
@@ -363,6 +363,16 @@ func (_c *UploadSessionCreate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "UploadSession.title": %w`, err)}
 		}
 	}
+	if v, ok := _c.mutation.CategoryID(); ok {
+		if err := uploadsession.CategoryIDValidator(v); err != nil {
+			return &ValidationError{Name: "category_id", err: fmt.Errorf(`entity: validator failed for field "UploadSession.category_id": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.UserID(); ok {
+		if err := uploadsession.UserIDValidator(v); err != nil {
+			return &ValidationError{Name: "user_id", err: fmt.Errorf(`entity: validator failed for field "UploadSession.user_id": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`entity: missing required field "UploadSession.status"`)}
 	}
@@ -458,16 +468,16 @@ func (_c *UploadSessionCreate) createSpec() (*UploadSession, *sqlgraph.CreateSpe
 		_node.Description = value
 	}
 	if value, ok := _c.mutation.CategoryID(); ok {
-		_spec.SetField(uploadsession.FieldCategoryID, field.TypeInt64, value)
-		_node.CategoryID = &value
+		_spec.SetField(uploadsession.FieldCategoryID, field.TypeString, value)
+		_node.CategoryID = value
 	}
 	if value, ok := _c.mutation.Tags(); ok {
 		_spec.SetField(uploadsession.FieldTags, field.TypeJSON, value)
 		_node.Tags = value
 	}
 	if value, ok := _c.mutation.UserID(); ok {
-		_spec.SetField(uploadsession.FieldUserID, field.TypeInt64, value)
-		_node.UserID = &value
+		_spec.SetField(uploadsession.FieldUserID, field.TypeString, value)
+		_node.UserID = value
 	}
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(uploadsession.FieldStatus, field.TypeString, value)

@@ -24,7 +24,7 @@ export interface HistoryItem {
 }
 
 export interface HistoryListResponse {
-    list: HistoryItem[];
+    items: HistoryItem[];
     total: number;
     page: number;
     page_size: number;

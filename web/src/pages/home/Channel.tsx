@@ -12,7 +12,8 @@ import {mediaApi} from '../../lib/api/media';
 import type {Channel} from '../../lib/api/channel';
 
 const ChannelPage = () => {
-    const {id} = useParams<{id: string}>();
+    const params = useParams({strict: false}) as {id: string};
+    const id = params.id;
     const {t} = useTranslation();
     const [channel, setChannel] = useState<Channel | null>(null);
     const [videos, setVideos] = useState<any[]>([]);
@@ -23,16 +24,14 @@ const ChannelPage = () => {
         if (!id) return;
         setLoading(true);
         Promise.all([
-            channelApi.get(id),
+            channelApi.get({id}),
             mediaApi.list({channel_id: id, page_size: 12}),
         ])
-            .then(([channelRes, videosRes]) => {
-                if (channelRes.code === 0) {
-                    setChannel(channelRes.data);
-                }
-                if (videosRes.code === 0) {
-                    setVideos(videosRes.data?.items || []);
-                }
+            .then(([channelRes, videosRes]: any[]) => {
+                const ch = channelRes?.data || channelRes;
+                if (ch) setChannel(ch);
+                const vid = videosRes?.data?.items || videosRes?.items || [];
+                setVideos(vid);
             })
             .finally(() => setLoading(false));
     }, [id]);

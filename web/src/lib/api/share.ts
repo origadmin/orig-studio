@@ -2,7 +2,7 @@
 // 推荐使用 mediaApi.shares 替代
 import {mediaApi, ShareResponse} from "./media";
 
-export {ShareResponse};
+export type {ShareResponse};
 
 export const shareApi = {
     // 获取分享链接 - 使用新的 /medias/:id/shares 路径

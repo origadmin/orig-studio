@@ -63,12 +63,7 @@ func (s *MediaService) ListMedias(
 	if req.CategoryId != nil {
 		opts.CategoryID = req.CategoryId
 	}
-	
-	// For short videos, set MediaType filter
-	if req.Type != nil && *req.Type == 4 { // Assuming 4 is the type code for short videos
-		opts.MediaType = "short_video"
-	}
-	
+
 	items, total, err := s.uc.ListMedias(ctx, opts)
 	if err != nil {
 		return nil, err

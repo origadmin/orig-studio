@@ -17,7 +17,7 @@ export interface ReviewItem {
 }
 
 export interface ReviewListResponse {
-    list: ReviewItem[];
+    items: ReviewItem[];
     total: number;
     page: number;
     page_size: number;

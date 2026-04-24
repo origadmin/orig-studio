@@ -16,7 +16,7 @@ const PLACEHOLDER_IMAGES = {
 export const getImageUrl = (path?: string, type: 'thumbnail' | 'avatar' | 'cover' = 'thumbnail'): string => {
     // 如果有路径，使用getFullUrl处理
     if (path) {
-        return getFullUrl(path);
+        return getFullUrl(path) || PLACEHOLDER_IMAGES.videoThumbnail;
     }
 
     // 根据类型返回本地占位图片

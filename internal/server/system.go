@@ -131,8 +131,8 @@ func (h *SystemHandler) getTrafficStats() gin.HandlerFunc {
 		_ = page
 		_ = pageSize
 
-		c.JSON(http.StatusOK, gin.H{
-			"list":      []interface{}{},
+		OK(c, gin.H{
+			"items":     []interface{}{},
 			"total":     0,
 			"page":      page,
 			"page_size": pageSize,

@@ -5,11 +5,11 @@
 import React from 'react';
 import {Link} from '@tanstack/react-router';
 import {Play, Eye, Calendar} from 'lucide-react';
-import {Media} from '../../types';
+import {MediaItem} from '../../types';
 import {formatDate} from '@/lib/format';
 import {getImageUrl, handleImageError} from '@/lib/imageUtils';
 
-const VideoCard = ({video}: { video: Media }) => {
+const VideoCard = ({video}: { video: MediaItem }) => {
     return (
         <div
             className="group cursor-pointer rounded-[2rem] bg-white border border-gray-100 hover:border-blue-100 transition-all overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 duration-500 ease-out">
@@ -30,7 +30,7 @@ const VideoCard = ({video}: { video: Media }) => {
                 </div>
                 <div
                     className="absolute bottom-3 right-3 bg-black/80 text-white text-[10px] font-black px-2 py-1 rounded-lg leading-none backdrop-blur-sm shadow-lg">
-                    {Math.floor(video.duration / 60)}:{String(video.duration % 60).padStart(2, '0')}
+                    {Math.floor((video.duration || 0) / 60)}:{String((video.duration || 0) % 60).padStart(2, '0')}
                 </div>
             </Link>
 
@@ -57,7 +57,7 @@ const VideoCard = ({video}: { video: Media }) => {
                         <div
                             className="flex items-center space-x-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">
                             <span className="flex items-center gap-1"><Eye size={12}
-                                                                           className="text-blue-500"/> {video.view_count.toLocaleString()}</span>
+                                                                           className="text-blue-500"/> {(video.view_count || 0).toLocaleString()}</span>
                             <span>•</span>
                             <span className="flex items-center gap-1"><Calendar size={12}
                                                                                 className="text-blue-500"/> {formatDate(video.create_time)}</span>
