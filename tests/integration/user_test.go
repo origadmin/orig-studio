@@ -63,7 +63,7 @@ func TestUsersCRUD(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := ParseResponse(respBody, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -71,8 +71,8 @@ func TestUsersCRUD(t *testing.T) {
 			if _, ok := result["id"]; !ok {
 				t.Error("expected 'id' field in response")
 			}
-		} else if resp.StatusCode != http.StatusNotFound {
-			t.Errorf("unexpected status: %d", resp.StatusCode)
+		} else if resp.Code != http.StatusNotFound {
+			t.Errorf("unexpected status: %d", resp.Code)
 		}
 	})
 
@@ -118,7 +118,7 @@ func TestUsersCRUD(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusCreated {
+		if resp.Code == http.StatusCreated {
 			var result map[string]interface{}
 			if err := ParseResponse(respBody, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -127,7 +127,7 @@ func TestUsersCRUD(t *testing.T) {
 				t.Error("expected 'username' field in created user")
 			}
 		} else {
-			t.Logf("Create user returned status %d", resp.StatusCode)
+			t.Logf("Create user returned status %d", resp.Code)
 		}
 	})
 
@@ -142,10 +142,10 @@ func TestUsersCRUD(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			t.Log("Successfully deleted user")
 		} else {
-			t.Logf("Delete user returned status %d", resp.StatusCode)
+			t.Logf("Delete user returned status %d", resp.Code)
 		}
 	})
 }
@@ -226,7 +226,7 @@ func TestUserSubscription(t *testing.T) {
 
 			AssertStatus(t, resp, tt.wantStatus)
 
-			if tt.checkField != "" && resp.StatusCode == http.StatusOK {
+			if tt.checkField != "" && resp.Code == http.StatusOK {
 				var result map[string]interface{}
 				if err := ParseResponse(respBody, &result); err != nil {
 					t.Fatalf("failed to parse response: %v", err)
@@ -380,7 +380,7 @@ func TestUserProfileOperations(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := ParseResponse(respBody, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -388,8 +388,8 @@ func TestUserProfileOperations(t *testing.T) {
 			if _, ok := result["username"]; !ok {
 				t.Error("expected 'username' field in response")
 			}
-		} else if resp.StatusCode != http.StatusNotFound {
-			t.Errorf("unexpected status: %d", resp.StatusCode)
+		} else if resp.Code != http.StatusNotFound {
+			t.Errorf("unexpected status: %d", resp.Code)
 		}
 	})
 }

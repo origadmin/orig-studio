@@ -11,16 +11,21 @@ import (
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
 	"origadmin/application/origcms/internal/data/entity/commentlike"
+	"origadmin/application/origcms/internal/data/entity/commentreport"
 	"origadmin/application/origcms/internal/data/entity/encodeprofile"
 	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
+	"origadmin/application/origcms/internal/data/entity/groupmember"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediacategory"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
+	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/mediatag"
 	"origadmin/application/origcms/internal/data/entity/notification"
+	"origadmin/application/origcms/internal/data/entity/permissiongroup"
 	"origadmin/application/origcms/internal/data/entity/playlist"
+	"origadmin/application/origcms/internal/data/entity/setting"
 	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/tag"
 	"origadmin/application/origcms/internal/data/entity/uploadsession"
@@ -91,25 +96,30 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			article.Table:       article.ValidColumn,
-			category.Table:      category.ValidColumn,
-			channel.Table:       channel.ValidColumn,
-			comment.Table:       comment.ValidColumn,
-			commentlike.Table:   commentlike.ValidColumn,
-			encodeprofile.Table: encodeprofile.ValidColumn,
-			encodingtask.Table:  encodingtask.ValidColumn,
-			favorite.Table:      favorite.ValidColumn,
-			like.Table:          like.ValidColumn,
-			media.Table:         media.ValidColumn,
-			mediacategory.Table: mediacategory.ValidColumn,
-			mediaplaylist.Table: mediaplaylist.ValidColumn,
-			mediatag.Table:      mediatag.ValidColumn,
-			notification.Table:  notification.ValidColumn,
-			playlist.Table:      playlist.ValidColumn,
-			subscription.Table:  subscription.ValidColumn,
-			tag.Table:           tag.ValidColumn,
-			uploadsession.Table: uploadsession.ValidColumn,
-			user.Table:          user.ValidColumn,
+			article.Table:         article.ValidColumn,
+			category.Table:        category.ValidColumn,
+			channel.Table:         channel.ValidColumn,
+			comment.Table:         comment.ValidColumn,
+			commentlike.Table:     commentlike.ValidColumn,
+			commentreport.Table:   commentreport.ValidColumn,
+			encodeprofile.Table:   encodeprofile.ValidColumn,
+			encodingtask.Table:    encodingtask.ValidColumn,
+			favorite.Table:        favorite.ValidColumn,
+			groupmember.Table:     groupmember.ValidColumn,
+			like.Table:            like.ValidColumn,
+			media.Table:           media.ValidColumn,
+			mediacategory.Table:   mediacategory.ValidColumn,
+			mediaplaylist.Table:   mediaplaylist.ValidColumn,
+			mediareviewlog.Table:  mediareviewlog.ValidColumn,
+			mediatag.Table:        mediatag.ValidColumn,
+			notification.Table:    notification.ValidColumn,
+			permissiongroup.Table: permissiongroup.ValidColumn,
+			playlist.Table:        playlist.ValidColumn,
+			setting.Table:         setting.ValidColumn,
+			subscription.Table:    subscription.ValidColumn,
+			tag.Table:             tag.ValidColumn,
+			uploadsession.Table:   uploadsession.ValidColumn,
+			user.Table:            user.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

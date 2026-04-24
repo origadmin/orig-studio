@@ -96,6 +96,18 @@ func (m *mockMediaRepo) ResolveToID(ctx context.Context, shortToken string) (str
 	return "", nil
 }
 
+func (m *mockMediaRepo) UpdateSpriteFields(ctx context.Context, mediaID string, spriteStatus string, spritePath string, vttPath string) error {
+	return nil
+}
+
+func (m *mockMediaRepo) UpdateThumbnailFields(ctx context.Context, mediaID string, thumbnail string, thumbnailTime float64) error {
+	return nil
+}
+
+func (m *mockMediaRepo) UpdatePreviewFilePath(ctx context.Context, mediaID string, previewFilePath string) error {
+	return nil
+}
+
 // mockEncodingTaskRepo is a mock of EncodingTaskRepo
 type mockEncodingTaskRepo struct {
 	mock.Mock

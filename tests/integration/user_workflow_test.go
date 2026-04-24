@@ -27,11 +27,11 @@ func TestUserRegistrationWorkflow(t *testing.T) {
 		}
 
 		// Could be 201 Created or 400 if user already exists
-		if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusBadRequest {
-			t.Errorf("Unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusCreated && resp.Code != http.StatusBadRequest {
+			t.Errorf("Unexpected status: %d", resp.Code)
 		}
 
-		if resp.StatusCode == http.StatusCreated {
+		if resp.Code == http.StatusCreated {
 			var result map[string]interface{}
 			if err := ParseResponse(body, &result); err != nil {
 				t.Fatalf("Failed to parse response: %v", err)
@@ -81,8 +81,8 @@ func TestUserRegistrationWorkflow(t *testing.T) {
 		}
 
 		// Should fail with 400
-		if resp.StatusCode != http.StatusBadRequest && resp.StatusCode != http.StatusConflict {
-			t.Errorf("Unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusBadRequest && resp.Code != http.StatusConflict {
+			t.Errorf("Unexpected status: %d", resp.Code)
 		}
 	})
 }
@@ -241,11 +241,11 @@ func TestUserProfileManagement(t *testing.T) {
 		}
 
 		// Could be OK or 404
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
-			t.Errorf("Unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotFound {
+			t.Errorf("Unexpected status: %d", resp.Code)
 		}
 
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := ParseResponse(body, &result); err != nil {
 				t.Fatalf("Failed to parse response: %v", err)
@@ -277,11 +277,11 @@ func TestUserProfileManagement(t *testing.T) {
 		}
 
 		// Could be OK or 404
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
-			t.Errorf("Unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotFound {
+			t.Errorf("Unexpected status: %d", resp.Code)
 		}
 
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := ParseResponse(body, &result); err != nil {
 				t.Fatalf("Failed to parse response: %v", err)
@@ -343,8 +343,8 @@ func TestUserPermissions(t *testing.T) {
 		}
 
 		// Could be OK or maybe not implemented
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
-			t.Errorf("Unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotFound {
+			t.Errorf("Unexpected status: %d", resp.Code)
 		}
 	})
 
@@ -359,8 +359,8 @@ func TestUserPermissions(t *testing.T) {
 		}
 
 		// Should be 403 Forbidden or 401 Unauthorized or 404 Not Found
-		if resp.StatusCode != http.StatusForbidden && resp.StatusCode != http.StatusUnauthorized && resp.StatusCode != http.StatusNotFound {
-			t.Errorf("Unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusForbidden && resp.Code != http.StatusUnauthorized && resp.Code != http.StatusNotFound {
+			t.Errorf("Unexpected status: %d", resp.Code)
 		}
 	})
 
@@ -375,8 +375,8 @@ func TestUserPermissions(t *testing.T) {
 		}
 
 		// Should be 401 Unauthorized or 404 Not Found
-		if resp.StatusCode != http.StatusUnauthorized && resp.StatusCode != http.StatusNotFound {
-			t.Errorf("Unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusUnauthorized && resp.Code != http.StatusNotFound {
+			t.Errorf("Unexpected status: %d", resp.Code)
 		}
 	})
 }
@@ -518,11 +518,11 @@ func TestUserSubscriptionWorkflow(t *testing.T) {
 		}
 
 		// Could be OK or 404 or 500
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound && resp.StatusCode != http.StatusInternalServerError {
-			t.Errorf("Unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotFound && resp.Code != http.StatusInternalServerError {
+			t.Errorf("Unexpected status: %d", resp.Code)
 		}
 
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := ParseResponse(body, &result); err != nil {
 				t.Fatalf("Failed to parse response: %v", err)
@@ -569,8 +569,8 @@ func TestUserSubscriptionWorkflow(t *testing.T) {
 		}
 
 		// Should be 401 Unauthorized
-		if resp.StatusCode != http.StatusUnauthorized {
-			t.Errorf("Unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusUnauthorized {
+			t.Errorf("Unexpected status: %d", resp.Code)
 		}
 	})
 
@@ -637,8 +637,8 @@ func TestUserErrorScenarios(t *testing.T) {
 		}
 
 		// Could be 404 or 500
-		if resp.StatusCode != http.StatusNotFound && resp.StatusCode != http.StatusInternalServerError {
-			t.Errorf("Unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusNotFound && resp.Code != http.StatusInternalServerError {
+			t.Errorf("Unexpected status: %d", resp.Code)
 		}
 	})
 

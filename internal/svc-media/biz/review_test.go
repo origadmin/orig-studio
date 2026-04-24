@@ -126,12 +126,59 @@ func (r *MockReviewRepo) ListFilteredByEncodingStatus(ctx context.Context, statu
 	return mediaList, len(mediaList), nil
 }
 
-// TestMediaUseCase_ReviewApprove 测试审核通过
+func (r *MockReviewRepo) UpdateSpriteFields(ctx context.Context, mediaID string, spriteStatus string, spritePath string, vttPath string) error {
+	return nil
+}
+
+func (r *MockReviewRepo) UpdateThumbnailFields(ctx context.Context, mediaID string, thumbnail string, thumbnailTime float64) error {
+	return nil
+}
+
+func (r *MockReviewRepo) UpdatePreviewFilePath(ctx context.Context, mediaID string, previewFilePath string) error {
+	return nil
+}
+
+// MockReviewLogRepo simulates the review log repository
+type MockReviewLogRepo struct {
+	logs []*ReviewLog
+}
+
+func NewMockReviewLogRepo() *MockReviewLogRepo {
+	return &MockReviewLogRepo{}
+}
+
+func (r *MockReviewLogRepo) Create(ctx context.Context, mediaID string, reviewerID string, action string, comment string, previousStatus string, newStatus string) (*ReviewLog, error) {
+	log := &ReviewLog{
+		ID:             fmt.Sprintf("log-%d", len(r.logs)+1),
+		MediaID:        mediaID,
+		ReviewerID:     reviewerID,
+		Action:         action,
+		Comment:        comment,
+		PreviousStatus: previousStatus,
+		NewStatus:      newStatus,
+		CreatedAt:      "2024-01-01T00:00:00Z",
+	}
+	r.logs = append(r.logs, log)
+	return log, nil
+}
+
+func (r *MockReviewLogRepo) ListByMedia(ctx context.Context, mediaID string) ([]*ReviewLog, error) {
+	var result []*ReviewLog
+	for _, l := range r.logs {
+		if l.MediaID == mediaID {
+			result = append(result, l)
+		}
+	}
+	return result, nil
+}
+
+// TestMediaUseCase_ReviewApprove tests review approval
 func TestMediaUseCase_ReviewApprove(t *testing.T) {
 	repo := NewMockReviewRepo()
+	reviewLogRepo := NewMockReviewLogRepo()
 	logger := log.NewStdLogger(os.Stdout)
-	
-	uc := NewMediaUseCase(repo, nil, nil, nil, nil, logger)
+
+	uc := NewMediaUseCase(repo, nil, nil, reviewLogRepo, nil, nil, logger, nil)
 	
 	ctx := context.Background()
 	
@@ -157,12 +204,13 @@ func TestMediaUseCase_ReviewApprove(t *testing.T) {
 	assert.True(t, updatedMedia.Listable)
 }
 
-// TestMediaUseCase_ReviewReject 测试审核驳回
+// TestMediaUseCase_ReviewReject tests review rejection
 func TestMediaUseCase_ReviewReject(t *testing.T) {
 	repo := NewMockReviewRepo()
+	reviewLogRepo := NewMockReviewLogRepo()
 	logger := log.NewStdLogger(os.Stdout)
-	
-	uc := NewMediaUseCase(repo, nil, nil, nil, nil, logger)
+
+	uc := NewMediaUseCase(repo, nil, nil, reviewLogRepo, nil, nil, logger, nil)
 	
 	ctx := context.Background()
 	
@@ -188,12 +236,12 @@ func TestMediaUseCase_ReviewReject(t *testing.T) {
 	assert.False(t, updatedMedia.Listable)
 }
 
-// TestMediaUseCase_ShouldBeListable 测试可见性计算
+// TestMediaUseCase_ShouldBeListable tests listable computation
 func TestMediaUseCase_ShouldBeListable(t *testing.T) {
 	repo := NewMockReviewRepo()
 	logger := log.NewStdLogger(os.Stdout)
-	
-	uc := NewMediaUseCase(repo, nil, nil, nil, nil, logger)
+
+	uc := NewMediaUseCase(repo, nil, nil, nil, nil, nil, logger, nil)
 	
 	// 测试条件满足
 	media1 := &Media{

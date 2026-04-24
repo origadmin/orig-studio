@@ -83,6 +83,14 @@ type Media struct {
 	Listable bool `json:"listable,omitempty"`
 	// ReportedTimes holds the value of the "reported_times" field.
 	ReportedTimes int `json:"reported_times,omitempty"`
+	// SpriteStatus holds the value of the "sprite_status" field.
+	SpriteStatus string `json:"sprite_status,omitempty"`
+	// SpritePath holds the value of the "sprite_path" field.
+	SpritePath string `json:"sprite_path,omitempty"`
+	// VttPath holds the value of the "vtt_path" field.
+	VttPath string `json:"vtt_path,omitempty"`
+	// ThumbnailTime holds the value of the "thumbnail_time" field.
+	ThumbnailTime float64 `json:"thumbnail_time,omitempty"`
 	// Tags holds the value of the "tags" field.
 	Tags []string `json:"tags,omitempty"`
 	// UserID holds the value of the "user_id" field.
@@ -123,9 +131,11 @@ type MediaEdges struct {
 	Favorites []*Favorite `json:"favorites,omitempty"`
 	// Likes holds the value of the likes edge.
 	Likes []*Like `json:"likes,omitempty"`
+	// ReviewLogs holds the value of the review_logs edge.
+	ReviewLogs []*MediaReviewLog `json:"review_logs,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [8]bool
+	loadedTypes [9]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -206,6 +216,15 @@ func (e MediaEdges) LikesOrErr() ([]*Like, error) {
 	return nil, &NotLoadedError{edge: "likes"}
 }
 
+// ReviewLogsOrErr returns the ReviewLogs value or an error if the edge
+// was not loaded in eager-loading.
+func (e MediaEdges) ReviewLogsOrErr() ([]*MediaReviewLog, error) {
+	if e.loadedTypes[8] {
+		return e.ReviewLogs, nil
+	}
+	return nil, &NotLoadedError{edge: "review_logs"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Media) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -215,9 +234,11 @@ func (*Media) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case media.FieldAllowDownload, media.FieldEnableComments, media.FieldFeatured, media.FieldListable:
 			values[i] = new(sql.NullBool)
+		case media.FieldThumbnailTime:
+			values[i] = new(sql.NullFloat64)
 		case media.FieldDuration, media.FieldWidth, media.FieldHeight, media.FieldPrivacy, media.FieldViewCount, media.FieldLikeCount, media.FieldDislikeCount, media.FieldCommentCount, media.FieldFavoriteCount, media.FieldDownloadCount, media.FieldReportedTimes:
 			values[i] = new(sql.NullInt64)
-		case media.FieldID, media.FieldTitle, media.FieldDescription, media.FieldShortToken, media.FieldType, media.FieldURL, media.FieldHlsFile, media.FieldThumbnail, media.FieldPoster, media.FieldPreviewFilePath, media.FieldSize, media.FieldMimeType, media.FieldMd5sum, media.FieldExtension, media.FieldEncodingStatus, media.FieldState, media.FieldReviewStatus, media.FieldUserID, media.FieldCategoryID, media.FieldChannelID:
+		case media.FieldID, media.FieldTitle, media.FieldDescription, media.FieldShortToken, media.FieldType, media.FieldURL, media.FieldHlsFile, media.FieldThumbnail, media.FieldPoster, media.FieldPreviewFilePath, media.FieldSize, media.FieldMimeType, media.FieldMd5sum, media.FieldExtension, media.FieldEncodingStatus, media.FieldState, media.FieldReviewStatus, media.FieldSpriteStatus, media.FieldSpritePath, media.FieldVttPath, media.FieldUserID, media.FieldCategoryID, media.FieldChannelID:
 			values[i] = new(sql.NullString)
 		case media.FieldPublishedAt, media.FieldCreatedAt, media.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -432,6 +453,30 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ReportedTimes = int(value.Int64)
 			}
+		case media.FieldSpriteStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field sprite_status", values[i])
+			} else if value.Valid {
+				_m.SpriteStatus = value.String
+			}
+		case media.FieldSpritePath:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field sprite_path", values[i])
+			} else if value.Valid {
+				_m.SpritePath = value.String
+			}
+		case media.FieldVttPath:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field vtt_path", values[i])
+			} else if value.Valid {
+				_m.VttPath = value.String
+			}
+		case media.FieldThumbnailTime:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field thumbnail_time", values[i])
+			} else if value.Valid {
+				_m.ThumbnailTime = value.Float64
+			}
 		case media.FieldTags:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field tags", values[i])
@@ -541,6 +586,11 @@ func (_m *Media) QueryFavorites() *FavoriteQuery {
 // QueryLikes queries the "likes" edge of the Media entity.
 func (_m *Media) QueryLikes() *LikeQuery {
 	return NewMediaClient(_m.config).QueryLikes(_m)
+}
+
+// QueryReviewLogs queries the "review_logs" edge of the Media entity.
+func (_m *Media) QueryReviewLogs() *MediaReviewLogQuery {
+	return NewMediaClient(_m.config).QueryReviewLogs(_m)
 }
 
 // Update returns a builder for updating this Media.
@@ -658,6 +708,18 @@ func (_m *Media) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("reported_times=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ReportedTimes))
+	builder.WriteString(", ")
+	builder.WriteString("sprite_status=")
+	builder.WriteString(_m.SpriteStatus)
+	builder.WriteString(", ")
+	builder.WriteString("sprite_path=")
+	builder.WriteString(_m.SpritePath)
+	builder.WriteString(", ")
+	builder.WriteString("vtt_path=")
+	builder.WriteString(_m.VttPath)
+	builder.WriteString(", ")
+	builder.WriteString("thumbnail_time=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ThumbnailTime))
 	builder.WriteString(", ")
 	builder.WriteString("tags=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Tags))

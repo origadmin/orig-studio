@@ -32,6 +32,8 @@ import (
 	"github.com/google/uuid"
 
 	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/helpers/ffmpeg"
@@ -128,6 +130,7 @@ type MediaHandler struct {
 	likeFavoriteUC        *contentbiz.LikeFavoriteUseCase
 	playlistChannelUC     *contentbiz.PlaylistChannelUseCase
 	userUC                *userbiz.UserUseCase
+	entityClient          *entity.Client
 }
 
 func NewMediaHandler(
@@ -137,8 +140,9 @@ func NewMediaHandler(
 	likeFavoriteUC *contentbiz.LikeFavoriteUseCase,
 	playlistChannelUC *contentbiz.PlaylistChannelUseCase,
 	userUC *userbiz.UserUseCase,
+	entityClient *entity.Client,
 ) *MediaHandler {
-	return &MediaHandler{jwtMgr: jwtMgr, uc: uc, uploadUC: uploadUC, likeFavoriteUC: likeFavoriteUC, playlistChannelUC: playlistChannelUC, userUC: userUC}
+	return &MediaHandler{jwtMgr: jwtMgr, uc: uc, uploadUC: uploadUC, likeFavoriteUC: likeFavoriteUC, playlistChannelUC: playlistChannelUC, userUC: userUC, entityClient: entityClient}
 }
 
 func (h *MediaHandler) Register(r handler.Router) {
@@ -192,6 +196,9 @@ func (h *MediaHandler) RegisterGin(rg *gin.RouterGroup) {
 		publicMedias.GET("/:short_token/favorites", OptionalJWTMiddleware(h.jwtMgr), h.getFavoriteStatusByShortToken())
 		publicMedias.GET("/:short_token/shares", h.getShareUrlByShortToken())
 		publicMedias.POST("/:short_token/shares", JWTMiddleware(h.jwtMgr), h.recordShareByShortToken())
+
+		publicMedias.GET("/:short_token/sprite.vtt", h.getSpriteVTT())
+		publicMedias.GET("/:short_token/sprite.jpg", h.getSpriteImage())
 	}
 
 	// ================================
@@ -216,6 +223,14 @@ func (h *MediaHandler) RegisterGin(rg *gin.RouterGroup) {
 
 		// 状态变更
 		adminMedias.PUT("/:id/state", h.adminChangeState())
+
+		// 审核操作
+		adminMedias.PUT("/:id/review", h.reviewMedia())
+		adminMedias.POST("/review/batch", h.batchReviewMedia())
+		adminMedias.GET("/:id/review-logs", h.listReviewLogs())
+
+		adminMedias.POST("/:id/regenerate-sprite", h.regenerateSprite())
+		adminMedias.POST("/:id/regenerate-thumbnail", h.regenerateThumbnail())
 	}
 
 	// ================================
@@ -826,7 +841,7 @@ func (h *MediaHandler) transcodingEventsHandler(w http.ResponseWriter, r *http.R
 				"media_id": "`+ev.MediaId+`",
 				"task_id": "`+ev.Task.Id+`",
 				"status": "`+string(ev.Task.Status)+`",
-				"progress": `+fmt.Sprintf("%f", ev.Progress)+`,
+				"progress": `+fmt.Sprintf("%d", ev.Progress)+`,
 				"speed": "`+ev.Speed+`",
 				"fps": `+fmt.Sprintf("%f", ev.Fps)+`,
 				"time": "`+fmt.Sprintf("%f", ev.Time)+`"
@@ -1446,13 +1461,15 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 
 // updateMediaRequest is the JSON body for PUT /media/:id
 type updateMediaRequest struct {
-	Title       string   `json:"title"`
-	Description string   `json:"description"`
-	CategoryID  *int     `json:"category_id"`
-	Tags        []string `json:"tags"`
-	Privacy     *int     `json:"privacy"`
-	State       *string  `json:"state"`
-	Featured    *bool    `json:"featured"`
+	Title          string   `json:"title"`
+	Description    string   `json:"description"`
+	CategoryID     *int     `json:"category_id"`
+	Tags           []string `json:"tags"`
+	Privacy        *int     `json:"privacy"`
+	State          *string  `json:"state"`
+	Featured       *bool    `json:"featured"`
+	EnableComments *bool    `json:"enable_comments"`
+	AllowDownload  *bool    `json:"allow_download"`
 }
 
 func (h *MediaHandler) updateMedia() gin.HandlerFunc {
@@ -1508,6 +1525,12 @@ func (h *MediaHandler) updateMedia() gin.HandlerFunc {
 		}
 		if req.Featured != nil {
 			m.Featured = *req.Featured
+		}
+		if req.EnableComments != nil {
+			m.EnableComments = *req.EnableComments
+		}
+		if req.AllowDownload != nil {
+			m.AllowDownload = *req.AllowDownload
 		}
 
 		updated, err := h.uc.UpdateMedia(ctx, m)
@@ -2473,6 +2496,10 @@ func (h *MediaHandler) adminListMedia() gin.HandlerFunc {
 			opt.Featured = &v
 		}
 
+		if reviewStatus := c.Query("review_status"); reviewStatus != "" {
+			opt.ReviewStatus = ptrString(reviewStatus)
+		}
+
 		// Handle tags filtering
 		if tagsStr := c.Query("tags"); tagsStr != "" {
 			tags := strings.Split(tagsStr, ",")
@@ -2596,6 +2623,12 @@ func (h *MediaHandler) adminUpdateMedia() gin.HandlerFunc {
 		}
 		if req.Featured != nil {
 			m.Featured = *req.Featured
+		}
+		if req.EnableComments != nil {
+			m.EnableComments = *req.EnableComments
+		}
+		if req.AllowDownload != nil {
+			m.AllowDownload = *req.AllowDownload
 		}
 
 		updated, err := h.uc.UpdateMedia(ctx, m)
@@ -2758,5 +2791,278 @@ func (h *MediaHandler) adminChangeState() gin.HandlerFunc {
 			"updated_at": updated.UpdateTime,
 			"changed_by": changedBy,
 		})
+	}
+}
+
+// reviewMedia handles PUT /admin/medias/:id/review
+func (h *MediaHandler) reviewMedia() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		claims, ok := GetClaims(c)
+		if !ok {
+			Fail(c, ErrUnauthorized, "unauthorized")
+			return
+		}
+
+		if !claims.IsStaff {
+			Fail(c, ErrForbidden, "only staff can review media")
+			return
+		}
+
+		idStr := c.Param("id")
+		if idStr == "" {
+			Fail(c, ErrBadRequest, "Invalid ID")
+			return
+		}
+
+		var req struct {
+			Action  string `json:"action"`
+			Comment string `json:"comment"`
+		}
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+			Fail(c, ErrBadRequest, err.Error())
+			return
+		}
+
+		if req.Action != "approve" && req.Action != "reject" {
+			Fail(c, ErrBadRequest, "action must be 'approve' or 'reject'")
+			return
+		}
+
+		approve := req.Action == "approve"
+
+		updated, err := h.uc.ReviewMedia(ctx, idStr, approve, req.Comment, claims.GetUserID())
+		if err != nil {
+			if strings.Contains(err.Error(), "invalid state transition") {
+				Fail(c, ErrBadRequest, err.Error())
+			} else {
+				Fail(c, ErrInternal, err.Error())
+			}
+			return
+		}
+
+		OK(c, gin.H{
+			"id":            updated.Id,
+			"review_status": updated.ReviewStatus,
+			"listable":      updated.Listable,
+			"updated_at":    updated.UpdateTime,
+		})
+	}
+}
+
+// batchReviewMediaRequest is the JSON body for POST /admin/medias/review/batch
+type batchReviewMediaRequest struct {
+	MediaIDs []string `json:"media_ids"`
+	Action   string   `json:"action"`
+	Comment  string   `json:"comment"`
+}
+
+// batchReviewMedia handles POST /admin/medias/review/batch
+func (h *MediaHandler) batchReviewMedia() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		claims, ok := GetClaims(c)
+		if !ok {
+			Fail(c, ErrUnauthorized, "unauthorized")
+			return
+		}
+
+		if !claims.IsStaff {
+			Fail(c, ErrForbidden, "only staff can review media")
+			return
+		}
+
+		var req batchReviewMediaRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			Fail(c, ErrBadRequest, err.Error())
+			return
+		}
+
+		if len(req.MediaIDs) == 0 {
+			Fail(c, ErrBadRequest, "media_ids is required")
+			return
+		}
+
+		if req.Action != "approve" && req.Action != "reject" {
+			Fail(c, ErrBadRequest, "action must be 'approve' or 'reject'")
+			return
+		}
+
+		approve := req.Action == "approve"
+
+		var succeeded []string
+		var failed []gin.H
+
+		for _, mediaID := range req.MediaIDs {
+			_, err := h.uc.ReviewMedia(ctx, mediaID, approve, req.Comment, claims.GetUserID())
+			if err != nil {
+				failed = append(failed, gin.H{
+					"media_id": mediaID,
+					"error":    err.Error(),
+				})
+			} else {
+				succeeded = append(succeeded, mediaID)
+			}
+		}
+
+		OK(c, gin.H{
+			"succeeded": succeeded,
+			"failed":    failed,
+		})
+	}
+}
+
+// listReviewLogs handles GET /admin/medias/:id/review-logs
+func (h *MediaHandler) listReviewLogs() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		idStr := c.Param("id")
+		if idStr == "" {
+			Fail(c, ErrBadRequest, "Invalid ID")
+			return
+		}
+
+		logs, err := h.uc.ListReviewLogs(ctx, idStr)
+		if err != nil {
+			Fail(c, ErrInternal, err.Error())
+			return
+		}
+
+		OK(c, gin.H{
+			"items": logs,
+		})
+	}
+}
+
+func (h *MediaHandler) regenerateSprite() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		id := c.Param("id")
+		if id == "" {
+			Fail(c, ErrBadRequest, "Invalid ID")
+			return
+		}
+
+		entMedia, err := h.entityClient.Media.Get(ctx, id)
+		if err != nil {
+			Fail(c, ErrNotFound, "media not found")
+			return
+		}
+
+		if entMedia.Type != "video" {
+			Fail(c, ErrBadRequest, "cannot regenerate sprite for non-video media")
+			return
+		}
+
+		if entMedia.SpriteStatus == "processing" {
+			Fail(c, ErrBadRequest, "sprite generation already in progress")
+			return
+		}
+
+		go func() {
+			_ = h.uc.RegenerateSprite(context.Background(), id)
+		}()
+
+		OK(c, gin.H{
+			"media_id":      id,
+			"sprite_status": "pending",
+			"message":       "sprite regeneration scheduled",
+		})
+	}
+}
+
+func (h *MediaHandler) regenerateThumbnail() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		id := c.Param("id")
+		if id == "" {
+			Fail(c, ErrBadRequest, "Invalid ID")
+			return
+		}
+
+		var req struct {
+			Timestamp float64 `json:"timestamp"`
+		}
+		_ = c.ShouldBindJSON(&req)
+
+		if err := h.uc.RegenerateThumbnail(ctx, id, req.Timestamp); err != nil {
+			Fail(c, ErrInternal, err.Error())
+			return
+		}
+
+		entMedia, _ := h.entityClient.Media.Get(ctx, id)
+		thumb := ""
+		var thumbTime float64
+		if entMedia != nil {
+			thumb = entMedia.Thumbnail
+			thumbTime = entMedia.ThumbnailTime
+		}
+
+		OK(c, gin.H{
+			"media_id":       id,
+			"thumbnail":      thumb,
+			"thumbnail_time": thumbTime,
+			"message":        "thumbnail regenerated",
+		})
+	}
+}
+
+func (h *MediaHandler) getSpriteVTT() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		shortToken := c.Param("short_token")
+		if shortToken == "" {
+			Fail(c, ErrBadRequest, "short_token is required")
+			return
+		}
+
+		entMedia, err := h.entityClient.Media.Query().Where(media.ShortToken(shortToken)).Only(ctx)
+		if err != nil || entMedia.SpriteStatus != "success" {
+			Fail(c, ErrNotFound, "sprite not available for this media")
+			return
+		}
+
+		vttPath := filepath.Join(UploadDir, entMedia.VttPath)
+		data, err := os.ReadFile(vttPath)
+		if err != nil {
+			Fail(c, ErrNotFound, "sprite not available for this media")
+			return
+		}
+
+		c.Header("Content-Type", "text/vtt")
+		c.Header("Cache-Control", "public, max-age=86400")
+		c.Data(200, "text/vtt", data)
+	}
+}
+
+func (h *MediaHandler) getSpriteImage() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		shortToken := c.Param("short_token")
+		if shortToken == "" {
+			Fail(c, ErrBadRequest, "short_token is required")
+			return
+		}
+
+		entMedia, err := h.entityClient.Media.Query().Where(media.ShortToken(shortToken)).Only(ctx)
+		if err != nil || entMedia.SpriteStatus != "success" {
+			Fail(c, ErrNotFound, "sprite not available for this media")
+			return
+		}
+
+		spritePath := filepath.Join(UploadDir, entMedia.SpritePath)
+		data, err := os.ReadFile(spritePath)
+		if err != nil {
+			Fail(c, ErrNotFound, "sprite not available for this media")
+			return
+		}
+
+		c.Header("Content-Type", "image/jpeg")
+		c.Header("Cache-Control", "public, max-age=86400")
+		c.Data(200, "image/jpeg", data)
 	}
 }

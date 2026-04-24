@@ -9,6 +9,7 @@ import (
 	"math"
 	"origadmin/application/origcms/internal/data/entity/comment"
 	"origadmin/application/origcms/internal/data/entity/commentlike"
+	"origadmin/application/origcms/internal/data/entity/commentreport"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"origadmin/application/origcms/internal/data/entity/user"
@@ -32,6 +33,8 @@ type CommentQuery struct {
 	withParent       *CommentQuery
 	withReplies      *CommentQuery
 	withCommentLikes *CommentLikeQuery
+	withReports      *CommentReportQuery
+	withModerator    *UserQuery
 	withFKs          bool
 	modifiers        []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -173,6 +176,50 @@ func (_q *CommentQuery) QueryCommentLikes() *CommentLikeQuery {
 			sqlgraph.From(comment.Table, comment.FieldID, selector),
 			sqlgraph.To(commentlike.Table, commentlike.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, comment.CommentLikesTable, comment.CommentLikesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryReports chains the current query on the "reports" edge.
+func (_q *CommentQuery) QueryReports() *CommentReportQuery {
+	query := (&CommentReportClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, selector),
+			sqlgraph.To(commentreport.Table, commentreport.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, comment.ReportsTable, comment.ReportsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryModerator chains the current query on the "moderator" edge.
+func (_q *CommentQuery) QueryModerator() *UserQuery {
+	query := (&UserClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.ModeratorTable, comment.ModeratorColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -377,6 +424,8 @@ func (_q *CommentQuery) Clone() *CommentQuery {
 		withParent:       _q.withParent.Clone(),
 		withReplies:      _q.withReplies.Clone(),
 		withCommentLikes: _q.withCommentLikes.Clone(),
+		withReports:      _q.withReports.Clone(),
+		withModerator:    _q.withModerator.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -436,6 +485,28 @@ func (_q *CommentQuery) WithCommentLikes(opts ...func(*CommentLikeQuery)) *Comme
 		opt(query)
 	}
 	_q.withCommentLikes = query
+	return _q
+}
+
+// WithReports tells the query-builder to eager-load the nodes that are connected to
+// the "reports" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *CommentQuery) WithReports(opts ...func(*CommentReportQuery)) *CommentQuery {
+	query := (&CommentReportClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withReports = query
+	return _q
+}
+
+// WithModerator tells the query-builder to eager-load the nodes that are connected to
+// the "moderator" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *CommentQuery) WithModerator(opts ...func(*UserQuery)) *CommentQuery {
+	query := (&UserClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withModerator = query
 	return _q
 }
 
@@ -518,12 +589,14 @@ func (_q *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 		nodes       = []*Comment{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [7]bool{
 			_q.withMedia != nil,
 			_q.withUser != nil,
 			_q.withParent != nil,
 			_q.withReplies != nil,
 			_q.withCommentLikes != nil,
+			_q.withReports != nil,
+			_q.withModerator != nil,
 		}
 	)
 	if _q.withParent != nil {
@@ -582,6 +655,19 @@ func (_q *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 		if err := _q.loadCommentLikes(ctx, query, nodes,
 			func(n *Comment) { n.Edges.CommentLikes = []*CommentLike{} },
 			func(n *Comment, e *CommentLike) { n.Edges.CommentLikes = append(n.Edges.CommentLikes, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withReports; query != nil {
+		if err := _q.loadReports(ctx, query, nodes,
+			func(n *Comment) { n.Edges.Reports = []*CommentReport{} },
+			func(n *Comment, e *CommentReport) { n.Edges.Reports = append(n.Edges.Reports, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withModerator; query != nil {
+		if err := _q.loadModerator(ctx, query, nodes, nil,
+			func(n *Comment, e *User) { n.Edges.Moderator = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -739,6 +825,65 @@ func (_q *CommentQuery) loadCommentLikes(ctx context.Context, query *CommentLike
 	}
 	return nil
 }
+func (_q *CommentQuery) loadReports(ctx context.Context, query *CommentReportQuery, nodes []*Comment, init func(*Comment), assign func(*Comment, *CommentReport)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Comment)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(commentreport.FieldCommentID)
+	}
+	query.Where(predicate.CommentReport(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(comment.ReportsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.CommentID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "comment_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *CommentQuery) loadModerator(ctx context.Context, query *UserQuery, nodes []*Comment, init func(*Comment), assign func(*Comment, *User)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Comment)
+	for i := range nodes {
+		fk := nodes[i].ModeratedBy
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "moderated_by" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 
 func (_q *CommentQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
@@ -773,6 +918,9 @@ func (_q *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if _q.withUser != nil {
 			_spec.Node.AddColumnOnce(comment.FieldUserID)
+		}
+		if _q.withModerator != nil {
+			_spec.Node.AddColumnOnce(comment.FieldModeratedBy)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

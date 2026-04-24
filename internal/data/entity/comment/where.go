@@ -85,9 +85,19 @@ func UserID(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldUserID, v))
 }
 
-// Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
-func Status(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldEQ(FieldStatus, v))
+// ReportCount applies equality check predicate on the "report_count" field. It's identical to ReportCountEQ.
+func ReportCount(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldReportCount, v))
+}
+
+// ModeratedBy applies equality check predicate on the "moderated_by" field. It's identical to ModeratedByEQ.
+func ModeratedBy(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldModeratedBy, v))
+}
+
+// ModeratedAt applies equality check predicate on the "moderated_at" field. It's identical to ModeratedAtEQ.
+func ModeratedAt(v time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldModeratedAt, v))
 }
 
 // TextEQ applies the EQ predicate on the "text" field.
@@ -326,68 +336,188 @@ func UserIDContainsFold(v string) predicate.Comment {
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.
-func StatusEQ(v string) predicate.Comment {
+func StatusEQ(v Status) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldStatus, v))
 }
 
 // StatusNEQ applies the NEQ predicate on the "status" field.
-func StatusNEQ(v string) predicate.Comment {
+func StatusNEQ(v Status) predicate.Comment {
 	return predicate.Comment(sql.FieldNEQ(FieldStatus, v))
 }
 
 // StatusIn applies the In predicate on the "status" field.
-func StatusIn(vs ...string) predicate.Comment {
+func StatusIn(vs ...Status) predicate.Comment {
 	return predicate.Comment(sql.FieldIn(FieldStatus, vs...))
 }
 
 // StatusNotIn applies the NotIn predicate on the "status" field.
-func StatusNotIn(vs ...string) predicate.Comment {
+func StatusNotIn(vs ...Status) predicate.Comment {
 	return predicate.Comment(sql.FieldNotIn(FieldStatus, vs...))
 }
 
-// StatusGT applies the GT predicate on the "status" field.
-func StatusGT(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldGT(FieldStatus, v))
+// ReportCountEQ applies the EQ predicate on the "report_count" field.
+func ReportCountEQ(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldReportCount, v))
 }
 
-// StatusGTE applies the GTE predicate on the "status" field.
-func StatusGTE(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldGTE(FieldStatus, v))
+// ReportCountNEQ applies the NEQ predicate on the "report_count" field.
+func ReportCountNEQ(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldNEQ(FieldReportCount, v))
 }
 
-// StatusLT applies the LT predicate on the "status" field.
-func StatusLT(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldLT(FieldStatus, v))
+// ReportCountIn applies the In predicate on the "report_count" field.
+func ReportCountIn(vs ...int) predicate.Comment {
+	return predicate.Comment(sql.FieldIn(FieldReportCount, vs...))
 }
 
-// StatusLTE applies the LTE predicate on the "status" field.
-func StatusLTE(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldLTE(FieldStatus, v))
+// ReportCountNotIn applies the NotIn predicate on the "report_count" field.
+func ReportCountNotIn(vs ...int) predicate.Comment {
+	return predicate.Comment(sql.FieldNotIn(FieldReportCount, vs...))
 }
 
-// StatusContains applies the Contains predicate on the "status" field.
-func StatusContains(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldContains(FieldStatus, v))
+// ReportCountGT applies the GT predicate on the "report_count" field.
+func ReportCountGT(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldGT(FieldReportCount, v))
 }
 
-// StatusHasPrefix applies the HasPrefix predicate on the "status" field.
-func StatusHasPrefix(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldHasPrefix(FieldStatus, v))
+// ReportCountGTE applies the GTE predicate on the "report_count" field.
+func ReportCountGTE(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldGTE(FieldReportCount, v))
 }
 
-// StatusHasSuffix applies the HasSuffix predicate on the "status" field.
-func StatusHasSuffix(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldHasSuffix(FieldStatus, v))
+// ReportCountLT applies the LT predicate on the "report_count" field.
+func ReportCountLT(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldLT(FieldReportCount, v))
 }
 
-// StatusEqualFold applies the EqualFold predicate on the "status" field.
-func StatusEqualFold(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldEqualFold(FieldStatus, v))
+// ReportCountLTE applies the LTE predicate on the "report_count" field.
+func ReportCountLTE(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldLTE(FieldReportCount, v))
 }
 
-// StatusContainsFold applies the ContainsFold predicate on the "status" field.
-func StatusContainsFold(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldContainsFold(FieldStatus, v))
+// ModeratedByEQ applies the EQ predicate on the "moderated_by" field.
+func ModeratedByEQ(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldModeratedBy, v))
+}
+
+// ModeratedByNEQ applies the NEQ predicate on the "moderated_by" field.
+func ModeratedByNEQ(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldNEQ(FieldModeratedBy, v))
+}
+
+// ModeratedByIn applies the In predicate on the "moderated_by" field.
+func ModeratedByIn(vs ...string) predicate.Comment {
+	return predicate.Comment(sql.FieldIn(FieldModeratedBy, vs...))
+}
+
+// ModeratedByNotIn applies the NotIn predicate on the "moderated_by" field.
+func ModeratedByNotIn(vs ...string) predicate.Comment {
+	return predicate.Comment(sql.FieldNotIn(FieldModeratedBy, vs...))
+}
+
+// ModeratedByGT applies the GT predicate on the "moderated_by" field.
+func ModeratedByGT(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldGT(FieldModeratedBy, v))
+}
+
+// ModeratedByGTE applies the GTE predicate on the "moderated_by" field.
+func ModeratedByGTE(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldGTE(FieldModeratedBy, v))
+}
+
+// ModeratedByLT applies the LT predicate on the "moderated_by" field.
+func ModeratedByLT(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldLT(FieldModeratedBy, v))
+}
+
+// ModeratedByLTE applies the LTE predicate on the "moderated_by" field.
+func ModeratedByLTE(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldLTE(FieldModeratedBy, v))
+}
+
+// ModeratedByContains applies the Contains predicate on the "moderated_by" field.
+func ModeratedByContains(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldContains(FieldModeratedBy, v))
+}
+
+// ModeratedByHasPrefix applies the HasPrefix predicate on the "moderated_by" field.
+func ModeratedByHasPrefix(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldHasPrefix(FieldModeratedBy, v))
+}
+
+// ModeratedByHasSuffix applies the HasSuffix predicate on the "moderated_by" field.
+func ModeratedByHasSuffix(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldHasSuffix(FieldModeratedBy, v))
+}
+
+// ModeratedByIsNil applies the IsNil predicate on the "moderated_by" field.
+func ModeratedByIsNil() predicate.Comment {
+	return predicate.Comment(sql.FieldIsNull(FieldModeratedBy))
+}
+
+// ModeratedByNotNil applies the NotNil predicate on the "moderated_by" field.
+func ModeratedByNotNil() predicate.Comment {
+	return predicate.Comment(sql.FieldNotNull(FieldModeratedBy))
+}
+
+// ModeratedByEqualFold applies the EqualFold predicate on the "moderated_by" field.
+func ModeratedByEqualFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEqualFold(FieldModeratedBy, v))
+}
+
+// ModeratedByContainsFold applies the ContainsFold predicate on the "moderated_by" field.
+func ModeratedByContainsFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldContainsFold(FieldModeratedBy, v))
+}
+
+// ModeratedAtEQ applies the EQ predicate on the "moderated_at" field.
+func ModeratedAtEQ(v time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldModeratedAt, v))
+}
+
+// ModeratedAtNEQ applies the NEQ predicate on the "moderated_at" field.
+func ModeratedAtNEQ(v time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldNEQ(FieldModeratedAt, v))
+}
+
+// ModeratedAtIn applies the In predicate on the "moderated_at" field.
+func ModeratedAtIn(vs ...time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldIn(FieldModeratedAt, vs...))
+}
+
+// ModeratedAtNotIn applies the NotIn predicate on the "moderated_at" field.
+func ModeratedAtNotIn(vs ...time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldNotIn(FieldModeratedAt, vs...))
+}
+
+// ModeratedAtGT applies the GT predicate on the "moderated_at" field.
+func ModeratedAtGT(v time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldGT(FieldModeratedAt, v))
+}
+
+// ModeratedAtGTE applies the GTE predicate on the "moderated_at" field.
+func ModeratedAtGTE(v time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldGTE(FieldModeratedAt, v))
+}
+
+// ModeratedAtLT applies the LT predicate on the "moderated_at" field.
+func ModeratedAtLT(v time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldLT(FieldModeratedAt, v))
+}
+
+// ModeratedAtLTE applies the LTE predicate on the "moderated_at" field.
+func ModeratedAtLTE(v time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldLTE(FieldModeratedAt, v))
+}
+
+// ModeratedAtIsNil applies the IsNil predicate on the "moderated_at" field.
+func ModeratedAtIsNil() predicate.Comment {
+	return predicate.Comment(sql.FieldIsNull(FieldModeratedAt))
+}
+
+// ModeratedAtNotNil applies the NotNil predicate on the "moderated_at" field.
+func ModeratedAtNotNil() predicate.Comment {
+	return predicate.Comment(sql.FieldNotNull(FieldModeratedAt))
 }
 
 // HasMedia applies the HasEdge predicate on the "media" edge.
@@ -497,6 +627,52 @@ func HasCommentLikes() predicate.Comment {
 func HasCommentLikesWith(preds ...predicate.CommentLike) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		step := newCommentLikesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasReports applies the HasEdge predicate on the "reports" edge.
+func HasReports() predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ReportsTable, ReportsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasReportsWith applies the HasEdge predicate on the "reports" edge with a given conditions (other predicates).
+func HasReportsWith(preds ...predicate.CommentReport) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		step := newReportsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasModerator applies the HasEdge predicate on the "moderator" edge.
+func HasModerator() predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ModeratorTable, ModeratorColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasModeratorWith applies the HasEdge predicate on the "moderator" edge with a given conditions (other predicates).
+func HasModeratorWith(preds ...predicate.User) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		step := newModeratorStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

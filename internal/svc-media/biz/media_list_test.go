@@ -15,7 +15,7 @@ func TestListEncodingTasksFlat_OnlyStats(t *testing.T) {
 	mockEncodeProfileRepo := &MockEncodeProfileRepo{}
 
 	// Create use case
-	uc := NewMediaUseCase(mockMediaRepo, mockEncodeProfileRepo, mockEncodingRepo, nil, nil, nil)
+	uc := NewMediaUseCase(mockMediaRepo, mockEncodeProfileRepo, mockEncodingRepo, nil, nil, nil, nil, nil)
 
 	// Test case 1: only_stats=true should return complete stats
 	filter := &TranscodingStatusFilter{
@@ -46,7 +46,7 @@ func TestListEncodingTasksFlat_FilteredStats(t *testing.T) {
 	mockEncodeProfileRepo := &MockEncodeProfileRepo{}
 
 	// Create use case
-	uc := NewMediaUseCase(mockMediaRepo, mockEncodeProfileRepo, mockEncodingRepo, nil, nil, nil)
+	uc := NewMediaUseCase(mockMediaRepo, mockEncodeProfileRepo, mockEncodingRepo, nil, nil, nil, nil, nil)
 
 	// Test case: filtered stats should respect filters except status
 	filter := &TranscodingStatusFilter{
@@ -74,7 +74,7 @@ func TestListEncodingTasksFlat_StatusFilter(t *testing.T) {
 	mockEncodeProfileRepo := &MockEncodeProfileRepo{}
 
 	// Create use case
-	uc := NewMediaUseCase(mockMediaRepo, mockEncodeProfileRepo, mockEncodingRepo, nil, nil, nil)
+	uc := NewMediaUseCase(mockMediaRepo, mockEncodeProfileRepo, mockEncodingRepo, nil, nil, nil, nil, nil)
 
 	// Test case: status filter should be applied to list but not to stats
 	filter := &TranscodingStatusFilter{
@@ -100,7 +100,7 @@ func TestListEncodingTasksFlat_DefaultValues(t *testing.T) {
 	mockEncodeProfileRepo := &MockEncodeProfileRepo{}
 
 	// Create use case
-	uc := NewMediaUseCase(mockMediaRepo, mockEncodeProfileRepo, mockEncodingRepo, nil, nil, nil)
+	uc := NewMediaUseCase(mockMediaRepo, mockEncodeProfileRepo, mockEncodingRepo, nil, nil, nil, nil, nil)
 
 	// Test case: default values should be handled correctly
 	filter := &TranscodingStatusFilter{

@@ -37,11 +37,15 @@ import (
 
 	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 	contentdata "origadmin/application/origcms/internal/svc-content/data"
+	systembiz "origadmin/application/origcms/internal/svc-system/biz"
 	systemdata "origadmin/application/origcms/internal/svc-system/data"
 
 	adminbiz "origadmin/application/origcms/internal/svc-admin/biz"
 	admindata "origadmin/application/origcms/internal/svc-admin/data"
 	adminservice "origadmin/application/origcms/internal/svc-admin/service"
+
+	authbiz "origadmin/application/origcms/internal/svc-auth/biz"
+	authdata "origadmin/application/origcms/internal/svc-auth/data"
 
 	"github.com/google/wire"
 )
@@ -55,11 +59,13 @@ var ProviderSet = wire.NewSet(
 	NewMediaRepo,
 	NewEncodeProfileRepo,
 	NewEncodingTaskRepo,
+	NewReviewLogRepo,
 	NewUploadRepo,
 	NewStorage,
 	NewMediaUseCase,
 	NewUploadUseCase,
 	NewWorker,
+	NewSpriteUseCase,
 	NewTranscodeHandler,
 	NewRouter,
 	NewContentDB,
@@ -74,6 +80,10 @@ var ProviderSet = wire.NewSet(
 	NewNotificationRepo,
 	NewCategoryTagUseCase,
 	NewCommentUseCase,
+	NewCommentModerationRepo,
+	NewCommentReportRepo,
+	NewCommentModerationUseCase,
+	NewCommentModerationHandler,
 	NewPlaylistChannelUseCase,
 	NewFeedUseCase,
 	NewLikeFavoriteUseCase,
@@ -95,10 +105,18 @@ var ProviderSet = wire.NewSet(
 	NewSearchHandler,
 	NewMeHandler,
 	NewStatsRepo,
+	NewSettingRepo,
+	NewSettingUseCase,
 	NewAdminTagRepo,
 	NewAdminTagUseCase,
 	NewAdminTagService,
 	NewAdminHandler,
+	NewAuthData,
+	NewPermissionGroupRepo,
+	NewGroupMemberRepo,
+	NewUserPermRepo,
+	NewPermissionUseCase,
+	NewPermissionHandler,
 )
 
 // NewDatabase creates a new database client.
@@ -119,6 +137,10 @@ func NewDatabase(cfg *config.Config, logger log.Logger) (*entity.Client, error) 
 	}
 
 	if err := mediadata.SeedEncodeProfiles(ctx, db); err != nil {
+		return nil, err
+	}
+
+	if err := seedSettings(ctx, db); err != nil {
 		return nil, err
 	}
 
@@ -178,16 +200,23 @@ func NewStorage() mediabiz.Storage {
 	return mediadata.NewLocalStorage("./data/uploads")
 }
 
+// NewReviewLogRepo creates a new review log repo.
+func NewReviewLogRepo(db *entity.Client) mediabiz.ReviewLogRepo {
+	return mediadata.NewReviewLogRepo(db)
+}
+
 // NewMediaUseCase creates a new media use case.
 func NewMediaUseCase(
 	mediaRepo mediabiz.MediaRepo,
 	profileRepo mediabiz.EncodeProfileRepo,
 	taskRepo mediabiz.EncodingTaskRepo,
+	reviewLogRepo mediabiz.ReviewLogRepo,
 	storage mediabiz.Storage,
 	publisher message.Publisher,
 	logger log.Logger,
+	spriteUC *mediabiz.SpriteUseCase,
 ) *mediabiz.MediaUseCase {
-	return mediabiz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, storage, publisher, logger)
+	return mediabiz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, reviewLogRepo, storage, publisher, logger, spriteUC)
 }
 
 // NewUploadUseCase creates a new upload use case.
@@ -219,6 +248,14 @@ func NewWorker(logger log.Logger) mediabiz.TranscodeWorker {
 	return mediabiz.NewGoroutineWorker(maxWorkers, log.NewHelper(log.With(logger, "module", "transcode.worker")))
 }
 
+func NewSpriteUseCase(
+	mediaRepo mediabiz.MediaRepo,
+	settingUC *systembiz.SettingUseCase,
+	logger log.Logger,
+) *mediabiz.SpriteUseCase {
+	return mediabiz.NewSpriteUseCase(mediaRepo, settingUC, "./data/uploads", logger)
+}
+
 // NewTranscodeHandler creates a new transcode handler.
 func NewTranscodeHandler(
 	mediaUC *mediabiz.MediaUseCase,
@@ -228,6 +265,7 @@ func NewTranscodeHandler(
 	worker mediabiz.TranscodeWorker,
 	publisher message.Publisher,
 	logger log.Logger,
+	spriteUC *mediabiz.SpriteUseCase,
 ) *mediabiz.TranscodeHandler {
 	return mediabiz.NewTranscodeHandler(
 		mediaUC,
@@ -238,7 +276,8 @@ func NewTranscodeHandler(
 		publisher,
 		logger,
 		"./data/uploads",
-		30*time.Minute, // 30 minute task timeout
+		30*time.Minute,
+		spriteUC,
 	)
 }
 
@@ -334,6 +373,35 @@ func NewCommentUseCase(
 	return contentbiz.NewCommentUseCase(commentRepo, mediaUC, logger)
 }
 
+// NewCommentModerationRepo creates a new comment moderation repo.
+func NewCommentModerationRepo(contentDB *contentdata.Data, logger log.Logger) contentbiz.CommentModerationRepo {
+	return contentdata.NewCommentModerationRepo(contentDB, logger)
+}
+
+// NewCommentReportRepo creates a new comment report repo.
+func NewCommentReportRepo(contentDB *contentdata.Data, logger log.Logger) contentbiz.CommentReportRepo {
+	return contentdata.NewCommentReportRepo(contentDB, logger)
+}
+
+// NewCommentModerationUseCase creates a new comment moderation use case.
+func NewCommentModerationUseCase(
+	commentModerationRepo contentbiz.CommentModerationRepo,
+	commentReportRepo contentbiz.CommentReportRepo,
+	settingUC *systembiz.SettingUseCase,
+	logger log.Logger,
+) *contentbiz.CommentModerationUseCase {
+	return contentbiz.NewCommentModerationUseCase(commentModerationRepo, commentReportRepo, settingUC, logger)
+}
+
+// NewCommentModerationHandler creates a new comment moderation handler.
+func NewCommentModerationHandler(
+	moderationUC *contentbiz.CommentModerationUseCase,
+	db *entity.Client,
+	jwt *auth.Manager,
+) *server.CommentModerationHandler {
+	return server.NewCommentModerationHandler(moderationUC, db, jwt)
+}
+
 // NewPlaylistChannelUseCase creates a new playlist channel use case.
 func NewPlaylistChannelUseCase(
 	playlistRepo contentbiz.PlaylistRepo,
@@ -405,8 +473,11 @@ func NewMediaHandler(
 	mediaUC *mediabiz.MediaUseCase,
 	uploadUC *mediabiz.UploadUseCase,
 	likeFavoriteUC *contentbiz.LikeFavoriteUseCase,
+	playlistChannelUC *contentbiz.PlaylistChannelUseCase,
+	userUC *biz.UserUseCase,
+	entityClient *entity.Client,
 ) *server.MediaHandler {
-	return server.NewMediaHandler(jwt, mediaUC, uploadUC, likeFavoriteUC)
+	return server.NewMediaHandler(jwt, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC, entityClient)
 }
 
 // NewUploadHandler creates a new upload handler.
@@ -451,8 +522,9 @@ func NewNotificationHandler(
 func NewChannelHandler(
 	playlistChannelUC *contentbiz.PlaylistChannelUseCase,
 	jwt *auth.Manager,
+	entityClient *entity.Client,
 ) *server.ChannelHandler {
-	return server.NewChannelHandler(playlistChannelUC, jwt)
+	return server.NewChannelHandler(playlistChannelUC, jwt, entityClient)
 }
 
 // NewShareHandler creates a new share handler.
@@ -467,8 +539,9 @@ func NewShareHandler(
 func NewSystemHandler(
 	jwt *auth.Manager,
 	statsRepo *systemdata.StatsRepo,
+	settingUC *systembiz.SettingUseCase,
 ) *server.SystemHandler {
-	return server.NewSystemHandler(jwt, statsRepo)
+	return server.NewSystemHandler(jwt, statsRepo, settingUC)
 }
 
 // NewStatsHandler creates a new stats handler.
@@ -503,6 +576,20 @@ func NewStatsRepo(db *entity.Client) *systemdata.StatsRepo {
 	return systemdata.NewStatsRepo(db)
 }
 
+func NewSettingRepo(db *entity.Client) *systemdata.SettingRepo {
+	return systemdata.NewSettingRepo(db)
+}
+
+func NewSettingUseCase(settingRepo *systemdata.SettingRepo) *systembiz.SettingUseCase {
+	return systembiz.NewSettingUseCase(settingRepo)
+}
+
+func seedSettings(ctx context.Context, db *entity.Client) error {
+	repo := systemdata.NewSettingRepo(db)
+	uc := systembiz.NewSettingUseCase(repo)
+	return uc.SeedDefaults(ctx)
+}
+
 // NewAdminTagRepo creates a new admin tag repo.
 func NewAdminTagRepo(db *entity.Client) admindata.TagRepository {
 	return admindata.NewTagRepository(db)
@@ -524,32 +611,74 @@ func NewAdminHandler(
 	mediaUC *mediabiz.MediaUseCase,
 	channelUC *contentbiz.PlaylistChannelUseCase,
 	tagService *adminservice.TagService,
+	settingUC *systembiz.SettingUseCase,
 ) *server.AdminHandler {
-	return server.NewAdminHandler(jwt, mediaUC, channelUC, tagService)
+	return server.NewAdminHandler(jwt, mediaUC, channelUC, tagService, settingUC)
+}
+
+// NewAuthData creates a new auth data layer.
+func NewAuthData(db *entity.Client) *authdata.Data {
+	return authdata.NewData(db)
+}
+
+// NewPermissionGroupRepo creates a new permission group repo.
+func NewPermissionGroupRepo(data *authdata.Data, logger log.Logger) authbiz.PermissionGroupRepo {
+	return authdata.NewPermissionGroupRepo(data, logger)
+}
+
+// NewGroupMemberRepo creates a new group member repo.
+func NewGroupMemberRepo(data *authdata.Data, logger log.Logger) authbiz.GroupMemberRepo {
+	return authdata.NewGroupMemberRepo(data, logger)
+}
+
+// NewUserPermRepo creates a new user perm repo.
+func NewUserPermRepo(data *authdata.Data, logger log.Logger) authbiz.UserPermRepo {
+	return authdata.NewUserPermRepo(data, logger)
+}
+
+// NewPermissionUseCase creates a new permission use case.
+func NewPermissionUseCase(
+	groupRepo authbiz.PermissionGroupRepo,
+	memberRepo authbiz.GroupMemberRepo,
+	userRepo authbiz.UserPermRepo,
+	logger log.Logger,
+) *authbiz.PermissionUseCase {
+	return authbiz.NewPermissionUseCase(groupRepo, memberRepo, userRepo, logger)
+}
+
+// NewPermissionHandler creates a new permission handler.
+func NewPermissionHandler(
+	permUC *authbiz.PermissionUseCase,
+	jwt *auth.Manager,
+) *server.PermissionHandler {
+	return server.NewPermissionHandler(permUC, jwt)
 }
 
 // AppDependencies holds all application dependencies.
 type AppDependencies struct {
-	DB                  *entity.Client
-	PubSub              *pubsub.PubSub
-	Router              *message.Router
-	JWTManager          *auth.Manager
-	AuthHandler         *server.AuthHandler
-	UserHandler         *server.UserHandler
-	MediaHandler        *server.MediaHandler
-	UploadHandler       *server.UploadHandler
-	CategoryHandler     *server.CategoryHandler
-	TagHandler          *server.TagHandler
-	FeedHandler         *server.FeedHandler
-	NotificationHandler *server.NotificationHandler
-	ChannelHandler      *server.ChannelHandler
-	ShareHandler        *server.ShareHandler
-	SystemHandler       *server.SystemHandler
-	StatsHandler        *server.StatsHandler
-	SearchHandler       *server.SearchHandler
-	MeHandler           *server.MeHandler
-	AdminHandler        *server.AdminHandler
-	UploadUC            *mediabiz.UploadUseCase
+	DB                       *entity.Client
+	PubSub                   *pubsub.PubSub
+	Router                   *message.Router
+	JWTManager               *auth.Manager
+	AuthHandler              *server.AuthHandler
+	UserHandler              *server.UserHandler
+	MediaHandler             *server.MediaHandler
+	UploadHandler            *server.UploadHandler
+	CategoryHandler          *server.CategoryHandler
+	TagHandler               *server.TagHandler
+	FeedHandler              *server.FeedHandler
+	NotificationHandler      *server.NotificationHandler
+	ChannelHandler           *server.ChannelHandler
+	ShareHandler             *server.ShareHandler
+	SystemHandler            *server.SystemHandler
+	StatsHandler             *server.StatsHandler
+	SearchHandler            *server.SearchHandler
+	MeHandler                *server.MeHandler
+	AdminHandler             *server.AdminHandler
+	UploadUC                 *mediabiz.UploadUseCase
+	CommentLikeUC            *contentbiz.CommentLikeUseCase
+	CommentModerationHandler *server.CommentModerationHandler
+	PermissionHandler        *server.PermissionHandler
 }
 
 // Cleanup closes all resources.
@@ -571,6 +700,7 @@ func wireApp(cfg *config.Config, logger log.Logger) (*AppDependencies, error) {
 		NewMediaRepo,
 		NewEncodeProfileRepo,
 		NewEncodingTaskRepo,
+		NewReviewLogRepo,
 		NewUploadRepo,
 		NewStorage,
 		NewMediaUseCase,
@@ -588,6 +718,10 @@ func wireApp(cfg *config.Config, logger log.Logger) (*AppDependencies, error) {
 		NewFavoriteRepo,
 		NewNotificationRepo,
 		NewCategoryTagUseCase,
+		NewCommentModerationRepo,
+		NewCommentReportRepo,
+		NewCommentModerationUseCase,
+		NewCommentModerationHandler,
 		NewPlaylistChannelUseCase,
 		NewFeedUseCase,
 		NewLikeFavoriteUseCase,
@@ -609,10 +743,18 @@ func wireApp(cfg *config.Config, logger log.Logger) (*AppDependencies, error) {
 		NewSearchHandler,
 		NewMeHandler,
 		NewStatsRepo,
+		NewSettingRepo,
+		NewSettingUseCase,
 		NewAdminTagRepo,
 		NewAdminTagUseCase,
 		NewAdminTagService,
 		NewAdminHandler,
+		NewAuthData,
+		NewPermissionGroupRepo,
+		NewGroupMemberRepo,
+		NewUserPermRepo,
+		NewPermissionUseCase,
+		NewPermissionHandler,
 	)
 	return nil, nil
 }

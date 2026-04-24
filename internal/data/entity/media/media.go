@@ -76,6 +76,14 @@ const (
 	FieldListable = "listable"
 	// FieldReportedTimes holds the string denoting the reported_times field in the database.
 	FieldReportedTimes = "reported_times"
+	// FieldSpriteStatus holds the string denoting the sprite_status field in the database.
+	FieldSpriteStatus = "sprite_status"
+	// FieldSpritePath holds the string denoting the sprite_path field in the database.
+	FieldSpritePath = "sprite_path"
+	// FieldVttPath holds the string denoting the vtt_path field in the database.
+	FieldVttPath = "vtt_path"
+	// FieldThumbnailTime holds the string denoting the thumbnail_time field in the database.
+	FieldThumbnailTime = "thumbnail_time"
 	// FieldTags holds the string denoting the tags field in the database.
 	FieldTags = "tags"
 	// FieldUserID holds the string denoting the user_id field in the database.
@@ -106,6 +114,8 @@ const (
 	EdgeFavorites = "favorites"
 	// EdgeLikes holds the string denoting the likes edge name in mutations.
 	EdgeLikes = "likes"
+	// EdgeReviewLogs holds the string denoting the review_logs edge name in mutations.
+	EdgeReviewLogs = "review_logs"
 	// Table holds the table name of the media in the database.
 	Table = "media"
 	// UserTable is the table that holds the user relation/edge.
@@ -164,6 +174,13 @@ const (
 	LikesInverseTable = "files_like"
 	// LikesColumn is the table column denoting the likes relation/edge.
 	LikesColumn = "media_id"
+	// ReviewLogsTable is the table that holds the review_logs relation/edge.
+	ReviewLogsTable = "media_review_logs"
+	// ReviewLogsInverseTable is the table name for the MediaReviewLog entity.
+	// It exists in this package in order to avoid circular dependency with the "mediareviewlog" package.
+	ReviewLogsInverseTable = "media_review_logs"
+	// ReviewLogsColumn is the table column denoting the review_logs relation/edge.
+	ReviewLogsColumn = "media_id"
 )
 
 // Columns holds all SQL columns for media fields.
@@ -200,6 +217,10 @@ var Columns = []string{
 	FieldReviewStatus,
 	FieldListable,
 	FieldReportedTimes,
+	FieldSpriteStatus,
+	FieldSpritePath,
+	FieldVttPath,
+	FieldThumbnailTime,
 	FieldTags,
 	FieldUserID,
 	FieldCategoryID,
@@ -302,6 +323,14 @@ var (
 	DefaultListable bool
 	// DefaultReportedTimes holds the default value on creation for the "reported_times" field.
 	DefaultReportedTimes int
+	// DefaultSpriteStatus holds the default value on creation for the "sprite_status" field.
+	DefaultSpriteStatus string
+	// SpriteStatusValidator is a validator for the "sprite_status" field. It is called by the builders before save.
+	SpriteStatusValidator func(string) error
+	// SpritePathValidator is a validator for the "sprite_path" field. It is called by the builders before save.
+	SpritePathValidator func(string) error
+	// VttPathValidator is a validator for the "vtt_path" field. It is called by the builders before save.
+	VttPathValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -477,6 +506,26 @@ func ByReportedTimes(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldReportedTimes, opts...).ToFunc()
 }
 
+// BySpriteStatus orders the results by the sprite_status field.
+func BySpriteStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSpriteStatus, opts...).ToFunc()
+}
+
+// BySpritePath orders the results by the sprite_path field.
+func BySpritePath(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSpritePath, opts...).ToFunc()
+}
+
+// ByVttPath orders the results by the vtt_path field.
+func ByVttPath(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVttPath, opts...).ToFunc()
+}
+
+// ByThumbnailTime orders the results by the thumbnail_time field.
+func ByThumbnailTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldThumbnailTime, opts...).ToFunc()
+}
+
 // ByUserID orders the results by the user_id field.
 func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
@@ -597,6 +646,20 @@ func ByLikes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLikesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByReviewLogsCount orders the results by review_logs count.
+func ByReviewLogsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newReviewLogsStep(), opts...)
+	}
+}
+
+// ByReviewLogs orders the results by review_logs terms.
+func ByReviewLogs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newReviewLogsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -651,5 +714,12 @@ func newLikesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LikesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LikesTable, LikesColumn),
+	)
+}
+func newReviewLogsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ReviewLogsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ReviewLogsTable, ReviewLogsColumn),
 	)
 }

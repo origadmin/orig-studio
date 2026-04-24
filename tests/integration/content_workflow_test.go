@@ -97,8 +97,8 @@ func TestCommentWorkflow(t *testing.T) {
 		}
 
 		// Could be OK or 404 if comment doesn't exist
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
-			t.Errorf("Unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotFound {
+			t.Errorf("Unexpected status: %d", resp.Code)
 		}
 	})
 }
@@ -329,8 +329,8 @@ func TestPlaylistWorkflow(t *testing.T) {
 		}
 
 		// Could be OK or 404
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
-			t.Errorf("Unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotFound {
+			t.Errorf("Unexpected status: %d", resp.Code)
 		}
 	})
 
@@ -348,8 +348,8 @@ func TestPlaylistWorkflow(t *testing.T) {
 		}
 
 		// Could be OK or 404
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound && resp.StatusCode != http.StatusUnauthorized {
-			t.Errorf("Unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotFound && resp.Code != http.StatusUnauthorized {
+			t.Errorf("Unexpected status: %d", resp.Code)
 		}
 	})
 
@@ -491,8 +491,8 @@ func TestCategoryTagWorkflow(t *testing.T) {
 		}
 
 		// Could be OK or 404
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
-			t.Errorf("Unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotFound {
+			t.Errorf("Unexpected status: %d", resp.Code)
 		}
 	})
 
@@ -506,7 +506,7 @@ func TestCategoryTagWorkflow(t *testing.T) {
 		}
 
 		// Could be OK or 404
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := ParseResponse(body, &result); err != nil {
 				t.Fatalf("Failed to parse response: %v", err)
@@ -528,7 +528,7 @@ func TestCategoryTagWorkflow(t *testing.T) {
 		}
 
 		// Could be OK or 404
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := ParseResponse(body, &result); err != nil {
 				t.Fatalf("Failed to parse response: %v", err)

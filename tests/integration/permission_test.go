@@ -39,7 +39,7 @@ func TestPermissionGuest(t *testing.T) {
 			}
 
 			// Should not be 401 Unauthorized
-			if resp.StatusCode == http.StatusUnauthorized {
+			if resp.Code == http.StatusUnauthorized {
 				t.Errorf("public endpoint %s returned 401", ep.path)
 			}
 		})
@@ -85,8 +85,8 @@ func TestPermissionGuest(t *testing.T) {
 			}
 
 			// Should be 401 Unauthorized
-			if resp.StatusCode != http.StatusUnauthorized {
-				t.Errorf("protected endpoint %s returned %d, expected 401", ep.path, resp.StatusCode)
+			if resp.Code != http.StatusUnauthorized {
+				t.Errorf("protected endpoint %s returned %d, expected 401", ep.path, resp.Code)
 			}
 		})
 	}
@@ -132,10 +132,10 @@ func TestPermissionUser(t *testing.T) {
 			}
 
 			// Should not be 401 Unauthorized or 403 Forbidden
-			if resp.StatusCode == http.StatusUnauthorized {
+			if resp.Code == http.StatusUnauthorized {
 				t.Errorf("user was denied access (401) to %s", op.path)
 			}
-			if resp.StatusCode == http.StatusForbidden {
+			if resp.Code == http.StatusForbidden {
 				t.Errorf("user was forbidden (403) from %s", op.path)
 			}
 		})
@@ -209,11 +209,11 @@ func TestPermissionStaff(t *testing.T) {
 
 			if tt.wantStatus == 0 {
 				// Just check it's not 403
-				if resp.StatusCode == http.StatusForbidden {
+				if resp.Code == http.StatusForbidden {
 					t.Errorf("%s was forbidden from %s", tt.role, tt.path)
 				}
-			} else if resp.StatusCode != tt.wantStatus {
-				t.Errorf("expected status %d, got %d", tt.wantStatus, resp.StatusCode)
+			} else if resp.Code != tt.wantStatus {
+				t.Errorf("expected status %d, got %d", tt.wantStatus, resp.Code)
 			}
 		})
 	}
@@ -253,9 +253,9 @@ func TestPermissionCrossUser(t *testing.T) {
 			}
 
 			// Should be 403 Forbidden or 404 Not Found
-			if resp.StatusCode != http.StatusForbidden &&
-				resp.StatusCode != http.StatusNotFound {
-				t.Errorf("expected 403 or 404, got %d for %s", resp.StatusCode, op.name)
+			if resp.Code != http.StatusForbidden &&
+				resp.Code != http.StatusNotFound {
+				t.Errorf("expected 403 or 404, got %d for %s", resp.Code, op.name)
 			}
 		})
 	}

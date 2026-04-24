@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"origadmin/application/origcms/internal/auth"
+	authbiz "origadmin/application/origcms/internal/svc-auth/biz"
 )
 
 func GetClaims(c *gin.Context) (*auth.Claims, bool) {
@@ -154,5 +155,70 @@ func AdminMiddleware(jwtMgr *auth.Manager) gin.HandlerFunc {
 			return
 		}
 		c.Next()
+	}
+}
+
+type permissionConfig struct {
+	ownershipExtractor func(*gin.Context) (string, error)
+	categoryExtractor  func(*gin.Context) (string, error)
+}
+
+type PermissionOption func(*permissionConfig)
+
+func WithOwnershipCheck(extractor func(*gin.Context) (string, error)) PermissionOption {
+	return func(c *permissionConfig) {
+		c.ownershipExtractor = extractor
+	}
+}
+
+func WithResourceCategory(extractor func(*gin.Context) (string, error)) PermissionOption {
+	return func(c *permissionConfig) {
+		c.categoryExtractor = extractor
+	}
+}
+
+func RequirePermission(permChecker authbiz.PermissionChecker, permission string, opts ...PermissionOption) gin.HandlerFunc {
+	cfg := &permissionConfig{}
+	for _, opt := range opts {
+		opt(cfg)
+	}
+
+	return func(c *gin.Context) {
+		claims, ok := GetClaims(c)
+		if !ok {
+			Fail(c, ErrUnauthorized, "authentication required")
+			c.Abort()
+			return
+		}
+
+		if claims.Role == "admin" || claims.IsStaff {
+			c.Next()
+			return
+		}
+
+		userID := claims.GetUserID()
+
+		categoryID := ""
+		if cfg.categoryExtractor != nil {
+			if catID, err := cfg.categoryExtractor(c); err == nil && catID != "" {
+				categoryID = catID
+			}
+		}
+
+		allowed, err := permChecker.CheckPermission(c.Request.Context(), userID, permission, categoryID)
+		if err == nil && allowed {
+			c.Next()
+			return
+		}
+
+		if cfg.ownershipExtractor != nil {
+			if ownerID, err := cfg.ownershipExtractor(c); err == nil && ownerID == userID {
+				c.Next()
+				return
+			}
+		}
+
+		Fail(c, ErrForbidden, "insufficient permissions")
+		c.Abort()
 	}
 }

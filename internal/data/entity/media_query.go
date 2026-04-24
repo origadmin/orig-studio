@@ -14,6 +14,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
+	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/mediatag"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"origadmin/application/origcms/internal/data/entity/user"
@@ -28,20 +29,21 @@ import (
 // MediaQuery is the builder for querying Media entities.
 type MediaQuery struct {
 	config
-	ctx           *QueryContext
-	order         []media.OrderOption
-	inters        []Interceptor
-	predicates    []predicate.Media
-	withUser      *UserQuery
-	withCategory  *CategoryQuery
-	withComments  *CommentQuery
-	withChannel   *ChannelQuery
-	withPlaylists *MediaPlaylistQuery
-	withTagsRel   *MediaTagQuery
-	withFavorites *FavoriteQuery
-	withLikes     *LikeQuery
-	withFKs       bool
-	modifiers     []func(*sql.Selector)
+	ctx            *QueryContext
+	order          []media.OrderOption
+	inters         []Interceptor
+	predicates     []predicate.Media
+	withUser       *UserQuery
+	withCategory   *CategoryQuery
+	withComments   *CommentQuery
+	withChannel    *ChannelQuery
+	withPlaylists  *MediaPlaylistQuery
+	withTagsRel    *MediaTagQuery
+	withFavorites  *FavoriteQuery
+	withLikes      *LikeQuery
+	withReviewLogs *MediaReviewLogQuery
+	withFKs        bool
+	modifiers      []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -254,6 +256,28 @@ func (_q *MediaQuery) QueryLikes() *LikeQuery {
 	return query
 }
 
+// QueryReviewLogs chains the current query on the "review_logs" edge.
+func (_q *MediaQuery) QueryReviewLogs() *MediaReviewLogQuery {
+	query := (&MediaReviewLogClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(media.Table, media.FieldID, selector),
+			sqlgraph.To(mediareviewlog.Table, mediareviewlog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, media.ReviewLogsTable, media.ReviewLogsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first Media entity from the query.
 // Returns a *NotFoundError when no Media was found.
 func (_q *MediaQuery) First(ctx context.Context) (*Media, error) {
@@ -441,19 +465,20 @@ func (_q *MediaQuery) Clone() *MediaQuery {
 		return nil
 	}
 	return &MediaQuery{
-		config:        _q.config,
-		ctx:           _q.ctx.Clone(),
-		order:         append([]media.OrderOption{}, _q.order...),
-		inters:        append([]Interceptor{}, _q.inters...),
-		predicates:    append([]predicate.Media{}, _q.predicates...),
-		withUser:      _q.withUser.Clone(),
-		withCategory:  _q.withCategory.Clone(),
-		withComments:  _q.withComments.Clone(),
-		withChannel:   _q.withChannel.Clone(),
-		withPlaylists: _q.withPlaylists.Clone(),
-		withTagsRel:   _q.withTagsRel.Clone(),
-		withFavorites: _q.withFavorites.Clone(),
-		withLikes:     _q.withLikes.Clone(),
+		config:         _q.config,
+		ctx:            _q.ctx.Clone(),
+		order:          append([]media.OrderOption{}, _q.order...),
+		inters:         append([]Interceptor{}, _q.inters...),
+		predicates:     append([]predicate.Media{}, _q.predicates...),
+		withUser:       _q.withUser.Clone(),
+		withCategory:   _q.withCategory.Clone(),
+		withComments:   _q.withComments.Clone(),
+		withChannel:    _q.withChannel.Clone(),
+		withPlaylists:  _q.withPlaylists.Clone(),
+		withTagsRel:    _q.withTagsRel.Clone(),
+		withFavorites:  _q.withFavorites.Clone(),
+		withLikes:      _q.withLikes.Clone(),
+		withReviewLogs: _q.withReviewLogs.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -549,6 +574,17 @@ func (_q *MediaQuery) WithLikes(opts ...func(*LikeQuery)) *MediaQuery {
 	return _q
 }
 
+// WithReviewLogs tells the query-builder to eager-load the nodes that are connected to
+// the "review_logs" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *MediaQuery) WithReviewLogs(opts ...func(*MediaReviewLogQuery)) *MediaQuery {
+	query := (&MediaReviewLogClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withReviewLogs = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -628,7 +664,7 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 		nodes       = []*Media{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [8]bool{
+		loadedTypes = [9]bool{
 			_q.withUser != nil,
 			_q.withCategory != nil,
 			_q.withComments != nil,
@@ -637,6 +673,7 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 			_q.withTagsRel != nil,
 			_q.withFavorites != nil,
 			_q.withLikes != nil,
+			_q.withReviewLogs != nil,
 		}
 	)
 	if withFKs {
@@ -713,6 +750,13 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 		if err := _q.loadLikes(ctx, query, nodes,
 			func(n *Media) { n.Edges.Likes = []*Like{} },
 			func(n *Media, e *Like) { n.Edges.Likes = append(n.Edges.Likes, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withReviewLogs; query != nil {
+		if err := _q.loadReviewLogs(ctx, query, nodes,
+			func(n *Media) { n.Edges.ReviewLogs = []*MediaReviewLog{} },
+			func(n *Media, e *MediaReviewLog) { n.Edges.ReviewLogs = append(n.Edges.ReviewLogs, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -944,6 +988,36 @@ func (_q *MediaQuery) loadLikes(ctx context.Context, query *LikeQuery, nodes []*
 	}
 	query.Where(predicate.Like(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(media.LikesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.MediaID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "media_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *MediaQuery) loadReviewLogs(ctx context.Context, query *MediaReviewLogQuery, nodes []*Media, init func(*Media), assign func(*Media, *MediaReviewLog)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Media)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(mediareviewlog.FieldMediaID)
+	}
+	query.Where(predicate.MediaReviewLog(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(media.ReviewLogsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

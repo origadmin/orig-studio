@@ -5,28 +5,33 @@
 package integration
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"io"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/stretchr/testify/require"
 
+	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/auth"
-	"origadmin/application/origcms/internal/auth/hash"
-	hashtypes "origadmin/application/origcms/internal/auth/hash/types"
-	contentbiz "origadmin/application/origcms/internal/content/biz"
-	contentdata "origadmin/application/origcms/internal/content/data"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/migrate"
-	"origadmin/application/origcms/internal/data/system"
 	"origadmin/application/origcms/internal/server"
+	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
+	contentdata "origadmin/application/origcms/internal/svc-content/data"
 	mediabiz "origadmin/application/origcms/internal/svc-media/biz"
 	mediadata "origadmin/application/origcms/internal/svc-media/data"
+	systemdata "origadmin/application/origcms/internal/svc-system/data"
 	"origadmin/application/origcms/internal/svc-user/biz"
 	"origadmin/application/origcms/internal/svc-user/data"
+	"github.com/origadmin/toolkits/crypto/hash"
+	hashtypes "github.com/origadmin/toolkits/crypto/hash/types"
 )
 
 const (
@@ -39,6 +44,7 @@ type TestRole string
 
 const (
 	RoleAdmin TestRole = "admin"
+	RoleStaff TestRole = "staff"
 	RoleUser  TestRole = "user"
 	RoleGuest TestRole = "guest"
 )
@@ -53,7 +59,6 @@ type TestUser struct {
 	ExpiresAt time.Time
 }
 
-// mockPublisher implements pubsub.Publisher interface for testing
 type mockPublisher struct {
 	messages []*mockMessage
 }
@@ -63,12 +68,17 @@ type mockMessage struct {
 	data  []byte
 }
 
-func (m *mockPublisher) Publish(topic string, data []byte) error {
-	m.messages = append(m.messages, &mockMessage{topic: topic, data: data})
+func (m *mockPublisher) Publish(topic string, msgs ...*message.Message) error {
+	for _, msg := range msgs {
+		m.messages = append(m.messages, &mockMessage{topic: topic, data: msg.Payload})
+	}
 	return nil
 }
 
-// TestServer encapsulates the test environment
+func (m *mockPublisher) Close() error {
+	return nil
+}
+
 type TestServer struct {
 	Router  *gin.Engine
 	DB      *entity.Client
@@ -79,23 +89,19 @@ type TestServer struct {
 	Server  *httptest.Server
 }
 
-// SetupTestServer creates a complete test server with database and all handlers
 func SetupTestServer(t *testing.T) *TestServer {
 	gin.SetMode(gin.TestMode)
 
-	// Create in-memory SQLite database
 	db, err := entity.Open("sqlite3", "file::memory:?cache=shared&_fk=1")
 	if err != nil {
 		t.Fatalf("failed to open test database: %v", err)
 	}
 
-	// Run migrations
 	ctx := context.Background()
 	if err := db.Schema.Create(ctx, migrate.WithForeignKeys(false)); err != nil {
 		t.Fatalf("failed to create schema: %v", err)
 	}
 
-	// Initialize dependencies
 	logger := log.NewStdLogger(nil)
 	hasher, err := hash.NewCrypto(hashtypes.BCRYPT)
 	if err != nil {
@@ -104,29 +110,26 @@ func SetupTestServer(t *testing.T) *TestServer {
 
 	jwtMgr := auth.NewManager(TestJWTSecret, TestJWTExpiry, TestRefreshTokenExpiry)
 
-	// Seed encode profiles
 	if err := mediadata.SeedEncodeProfiles(ctx, db); err != nil {
 		t.Fatalf("failed to seed encode profiles: %v", err)
 	}
 
-	// Initialize repositories and use cases
 	userRepo := data.NewUserRepo(db)
 	userUC := biz.NewUserUseCase(userRepo, hasher, logger)
 
 	mediaRepo := mediadata.NewMediaRepo(db)
 	profileRepo := mediadata.NewEncodeProfileRepo(db)
 	taskRepo := mediadata.NewEncodingTaskRepo(db)
+	reviewLogRepo := mediadata.NewReviewLogRepo(db)
 	uploadRepo := mediadata.NewUploadRepo(db, logger)
-	storage := mediadata.NewLocalStorage("./data/test-uploads", logger)
+	storage := mediadata.NewLocalStorage("./data/test-uploads")
 
-	// Create mock pub/sub (no actual transcode in tests)
 	mockPub := &mockPublisher{}
 
-	mediaUC := mediabiz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, storage, mockPub, logger)
+	mediaUC := mediabiz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, reviewLogRepo, storage, mockPub, logger, nil)
 	uploadUC := mediabiz.NewUploadUseCase(uploadRepo, mediaRepo, profileRepo, taskRepo, mediaUC, storage, 5*1024*1024, logger)
 	uploadUC.SetPublisher(mockPub)
 
-	// Content layer
 	contentDB := contentdata.NewData(db)
 	categoryRepo := contentdata.NewCategoryRepo(contentDB, logger)
 	tagRepo := contentdata.NewTagRepo(contentDB, logger)
@@ -142,11 +145,10 @@ func SetupTestServer(t *testing.T) *TestServer {
 	feedUC := contentbiz.NewFeedUseCase(feedRepo, logger)
 	notificationUC := contentbiz.NewNotificationUseCase(notificationRepo, logger)
 
-	// Create handlers - only use handlers that actually exist
 	authHandler := server.NewAuthHandler(userUC, jwtMgr)
 	userHandler := server.NewUserHandler(userUC, jwtMgr)
-	mediaHandler := server.NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC)
-	uploadHandler := server.NewUploadHandler(uploadUC, jwtMgr)
+	mediaHandler := server.NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC, db)
+	uploadHandler := server.NewUploadHandler(uploadUC, jwtMgr, logger)
 	categoryHandler := server.NewCategoryHandler(categoryTagUC)
 	tagHandler := server.NewTagHandler(categoryTagUC)
 	feedHandler := server.NewFeedHandler(feedUC)
@@ -155,16 +157,13 @@ func SetupTestServer(t *testing.T) *TestServer {
 	shareHandler := server.NewShareHandler(likeFavoriteUC, jwtMgr)
 	meHandler := server.NewMeHandler(userUC, likeFavoriteUC, playlistChannelUC, jwtMgr)
 
-	// Stats repo for stats handler
-	statsRepo := system.NewStatsRepo(db)
+	statsRepo := systemdata.NewStatsRepo(db)
 	statsHandler := server.NewStatsHandler(mediaUC, likeFavoriteUC, statsRepo, jwtMgr)
 	searchHandler := server.NewSearchHandler(mediaUC)
 
-	// Setup router
 	router := gin.New()
 	router.Use(gin.Recovery())
 
-	// CORS middleware
 	router.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
@@ -176,8 +175,7 @@ func SetupTestServer(t *testing.T) *TestServer {
 		c.Next()
 	})
 
-	// Register routes using server.RegisterRoutes
-	server.RegisterRoutes(router,
+	srv := server.NewServer(
 		authHandler,
 		userHandler,
 		mediaHandler,
@@ -188,12 +186,20 @@ func SetupTestServer(t *testing.T) *TestServer {
 		notificationHandler,
 		channelHandler,
 		shareHandler,
+		nil,
 		statsHandler,
 		searchHandler,
 		meHandler,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		db,
+		jwtMgr,
 	)
+	srv.RegisterRoutes(router)
 
-	// Create test server
 	ts := &TestServer{
 		Router:  router,
 		DB:      db,
@@ -203,72 +209,67 @@ func SetupTestServer(t *testing.T) *TestServer {
 		BaseURL: "/api/v1",
 	}
 
-	// Create test users
 	ts.createTestUsers(ctx, t, userUC)
 
-	// Create httptest server
 	ts.Server = httptest.NewServer(router)
 
 	return ts
 }
 
-// createTestUsers creates test users for each role
 func (ts *TestServer) createTestUsers(ctx context.Context, t *testing.T, userUC *biz.UserUseCase) {
 	users := []struct {
-		role  TestRole
-		email string
-		name  string
-		pass  string
+		role    TestRole
+		email   string
+		name    string
+		pass    string
+		isStaff bool
+		roleStr string
 	}{
-		{RoleAdmin, "admin@test.com", "admin", "admin123"},
-		{RoleUser, "user@test.com", "user1", "user123"},
-		{RoleGuest, "guest@test.com", "guest", "guest123"},
+		{RoleAdmin, "admin@test.com", "admin", "admin123", true, "admin"},
+		{RoleUser, "user@test.com", "user1", "user123", false, "user"},
+		{RoleGuest, "guest@test.com", "guest", "guest123", false, "guest"},
 	}
 
 	for _, u := range users {
-		// Create user
-		_, err := userUC.Register(ctx, &biz.RegisterRequest{
-			Email:    u.email,
+		hashedPass, err := userUC.HashPassword(u.pass)
+		if err != nil {
+			t.Fatalf("failed to hash password for %s: %v", u.role, err)
+		}
+
+		created, err := userUC.CreateUser(ctx, &types.User{
 			Username: u.name,
-			Password: u.pass,
-		})
+			Email:    u.email,
+			IsStaff:  u.isStaff,
+		}, hashedPass)
 		if err != nil {
 			t.Fatalf("failed to create test user %s: %v", u.role, err)
 		}
 
-		// Login to get token
-		resp, err := userUC.Login(ctx, &biz.LoginRequest{
-			Email:    u.email,
-			Password: u.pass,
-		})
-		if err != nil {
-			t.Fatalf("failed to login test user %s: %v", u.role, err)
+		if err := userUC.SetUserRole(ctx, created.Id, u.roleStr); err != nil {
+			t.Fatalf("failed to set role for test user %s: %v", u.role, err)
 		}
 
-		// Get user by email to get ID
-		user, err := userUC.GetByEmail(ctx, u.email)
+		token, err := ts.JWTMgr.Generate(created.Id, u.name, u.isStaff, u.roleStr)
 		if err != nil {
-			t.Fatalf("failed to get test user %s: %v", u.role, err)
+			t.Fatalf("failed to generate token for test user %s: %v", u.role, err)
 		}
 
 		ts.Users[u.role] = &TestUser{
-			ID:        user.Id,
+			ID:        created.Id,
 			Email:     u.email,
 			Username:  u.name,
 			Password:  u.pass,
-			Role:      string(u.role),
-			Token:     resp.Token,
+			Role:      u.roleStr,
+			Token:     token,
 			ExpiresAt: time.Now().Add(TestJWTExpiry),
 		}
 	}
 }
 
-// GetAuthToken returns a valid auth token for the given role
 func (ts *TestServer) GetAuthToken(role TestRole) string {
 	return "Bearer " + ts.Users[role].Token
 }
 
-// Cleanup shuts down the test server
 func (ts *TestServer) Cleanup() {
 	if ts.Server != nil {
 		ts.Server.Close()
@@ -278,17 +279,69 @@ func (ts *TestServer) Cleanup() {
 	}
 }
 
-// AssertStatusCode asserts the response status code
 func AssertStatusCode(t *testing.T, resp *httptest.ResponseRecorder, expected int) {
 	require.Equal(t, expected, resp.Code, "unexpected status code: %s", resp.Body.String())
 }
 
-// AssertSuccess asserts a successful response (2xx)
 func AssertSuccess(t *testing.T, resp *httptest.ResponseRecorder) {
 	require.True(t, resp.Code >= 200 && resp.Code < 300, "expected success, got %d: %s", resp.Code, resp.Body.String())
 }
 
-// AssertError asserts an error response (4xx or 5xx)
 func AssertError(t *testing.T, resp *httptest.ResponseRecorder) {
 	require.True(t, resp.Code >= 400, "expected error, got %d", resp.Code)
+}
+
+type RequestOptions struct {
+	Method string
+	Path   string
+	Body   interface{}
+	Token  string
+}
+
+func (ts *TestServer) MakeRequest(opts RequestOptions) (*httptest.ResponseRecorder, *bytes.Buffer, error) {
+	var bodyReader io.Reader
+	if opts.Body != nil {
+		jsonBody, err := json.Marshal(opts.Body)
+		if err != nil {
+			return nil, nil, err
+		}
+		bodyReader = bytes.NewReader(jsonBody)
+	}
+
+	req := httptest.NewRequest(opts.Method, ts.BaseURL+opts.Path, bodyReader)
+	if opts.Token != "" {
+		req.Header.Set("Authorization", opts.Token)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	rec := httptest.NewRecorder()
+	ts.Router.ServeHTTP(rec, req)
+	return rec, rec.Body, nil
+}
+
+func (ts *TestServer) GetToken(role TestRole) string {
+	return "Bearer " + ts.Users[role].Token
+}
+
+func AssertStatus(t *testing.T, resp *httptest.ResponseRecorder, expected int) {
+	require.Equal(t, expected, resp.Code, "unexpected status code: %s", resp.Body.String())
+}
+
+func ParseResponse(body *bytes.Buffer, v interface{}) error {
+	return json.Unmarshal(body.Bytes(), v)
+}
+
+func AssertJSON(t *testing.T, body *bytes.Buffer, expected map[string]interface{}) {
+	var result map[string]interface{}
+	if err := json.Unmarshal(body.Bytes(), &result); err != nil {
+		t.Fatalf("failed to parse response body: %v", err)
+	}
+	for key, expectedVal := range expected {
+		actualVal, ok := result[key]
+		if !ok {
+			t.Errorf("expected key %q in response", key)
+		} else if actualVal != expectedVal {
+			t.Errorf("expected %q=%v, got %v", key, expectedVal, actualVal)
+		}
+	}
 }

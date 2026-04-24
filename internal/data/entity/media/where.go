@@ -220,6 +220,26 @@ func ReportedTimes(v int) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldReportedTimes, v))
 }
 
+// SpriteStatus applies equality check predicate on the "sprite_status" field. It's identical to SpriteStatusEQ.
+func SpriteStatus(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldSpriteStatus, v))
+}
+
+// SpritePath applies equality check predicate on the "sprite_path" field. It's identical to SpritePathEQ.
+func SpritePath(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldSpritePath, v))
+}
+
+// VttPath applies equality check predicate on the "vtt_path" field. It's identical to VttPathEQ.
+func VttPath(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldVttPath, v))
+}
+
+// ThumbnailTime applies equality check predicate on the "thumbnail_time" field. It's identical to ThumbnailTimeEQ.
+func ThumbnailTime(v float64) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldThumbnailTime, v))
+}
+
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v string) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldUserID, v))
@@ -1860,6 +1880,271 @@ func ReportedTimesLTE(v int) predicate.Media {
 	return predicate.Media(sql.FieldLTE(FieldReportedTimes, v))
 }
 
+// SpriteStatusEQ applies the EQ predicate on the "sprite_status" field.
+func SpriteStatusEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldSpriteStatus, v))
+}
+
+// SpriteStatusNEQ applies the NEQ predicate on the "sprite_status" field.
+func SpriteStatusNEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldSpriteStatus, v))
+}
+
+// SpriteStatusIn applies the In predicate on the "sprite_status" field.
+func SpriteStatusIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldSpriteStatus, vs...))
+}
+
+// SpriteStatusNotIn applies the NotIn predicate on the "sprite_status" field.
+func SpriteStatusNotIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldSpriteStatus, vs...))
+}
+
+// SpriteStatusGT applies the GT predicate on the "sprite_status" field.
+func SpriteStatusGT(v string) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldSpriteStatus, v))
+}
+
+// SpriteStatusGTE applies the GTE predicate on the "sprite_status" field.
+func SpriteStatusGTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldSpriteStatus, v))
+}
+
+// SpriteStatusLT applies the LT predicate on the "sprite_status" field.
+func SpriteStatusLT(v string) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldSpriteStatus, v))
+}
+
+// SpriteStatusLTE applies the LTE predicate on the "sprite_status" field.
+func SpriteStatusLTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldSpriteStatus, v))
+}
+
+// SpriteStatusContains applies the Contains predicate on the "sprite_status" field.
+func SpriteStatusContains(v string) predicate.Media {
+	return predicate.Media(sql.FieldContains(FieldSpriteStatus, v))
+}
+
+// SpriteStatusHasPrefix applies the HasPrefix predicate on the "sprite_status" field.
+func SpriteStatusHasPrefix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasPrefix(FieldSpriteStatus, v))
+}
+
+// SpriteStatusHasSuffix applies the HasSuffix predicate on the "sprite_status" field.
+func SpriteStatusHasSuffix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasSuffix(FieldSpriteStatus, v))
+}
+
+// SpriteStatusEqualFold applies the EqualFold predicate on the "sprite_status" field.
+func SpriteStatusEqualFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldSpriteStatus, v))
+}
+
+// SpriteStatusContainsFold applies the ContainsFold predicate on the "sprite_status" field.
+func SpriteStatusContainsFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldSpriteStatus, v))
+}
+
+// SpritePathEQ applies the EQ predicate on the "sprite_path" field.
+func SpritePathEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldSpritePath, v))
+}
+
+// SpritePathNEQ applies the NEQ predicate on the "sprite_path" field.
+func SpritePathNEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldSpritePath, v))
+}
+
+// SpritePathIn applies the In predicate on the "sprite_path" field.
+func SpritePathIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldSpritePath, vs...))
+}
+
+// SpritePathNotIn applies the NotIn predicate on the "sprite_path" field.
+func SpritePathNotIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldSpritePath, vs...))
+}
+
+// SpritePathGT applies the GT predicate on the "sprite_path" field.
+func SpritePathGT(v string) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldSpritePath, v))
+}
+
+// SpritePathGTE applies the GTE predicate on the "sprite_path" field.
+func SpritePathGTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldSpritePath, v))
+}
+
+// SpritePathLT applies the LT predicate on the "sprite_path" field.
+func SpritePathLT(v string) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldSpritePath, v))
+}
+
+// SpritePathLTE applies the LTE predicate on the "sprite_path" field.
+func SpritePathLTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldSpritePath, v))
+}
+
+// SpritePathContains applies the Contains predicate on the "sprite_path" field.
+func SpritePathContains(v string) predicate.Media {
+	return predicate.Media(sql.FieldContains(FieldSpritePath, v))
+}
+
+// SpritePathHasPrefix applies the HasPrefix predicate on the "sprite_path" field.
+func SpritePathHasPrefix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasPrefix(FieldSpritePath, v))
+}
+
+// SpritePathHasSuffix applies the HasSuffix predicate on the "sprite_path" field.
+func SpritePathHasSuffix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasSuffix(FieldSpritePath, v))
+}
+
+// SpritePathIsNil applies the IsNil predicate on the "sprite_path" field.
+func SpritePathIsNil() predicate.Media {
+	return predicate.Media(sql.FieldIsNull(FieldSpritePath))
+}
+
+// SpritePathNotNil applies the NotNil predicate on the "sprite_path" field.
+func SpritePathNotNil() predicate.Media {
+	return predicate.Media(sql.FieldNotNull(FieldSpritePath))
+}
+
+// SpritePathEqualFold applies the EqualFold predicate on the "sprite_path" field.
+func SpritePathEqualFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldSpritePath, v))
+}
+
+// SpritePathContainsFold applies the ContainsFold predicate on the "sprite_path" field.
+func SpritePathContainsFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldSpritePath, v))
+}
+
+// VttPathEQ applies the EQ predicate on the "vtt_path" field.
+func VttPathEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldVttPath, v))
+}
+
+// VttPathNEQ applies the NEQ predicate on the "vtt_path" field.
+func VttPathNEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldVttPath, v))
+}
+
+// VttPathIn applies the In predicate on the "vtt_path" field.
+func VttPathIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldVttPath, vs...))
+}
+
+// VttPathNotIn applies the NotIn predicate on the "vtt_path" field.
+func VttPathNotIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldVttPath, vs...))
+}
+
+// VttPathGT applies the GT predicate on the "vtt_path" field.
+func VttPathGT(v string) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldVttPath, v))
+}
+
+// VttPathGTE applies the GTE predicate on the "vtt_path" field.
+func VttPathGTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldVttPath, v))
+}
+
+// VttPathLT applies the LT predicate on the "vtt_path" field.
+func VttPathLT(v string) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldVttPath, v))
+}
+
+// VttPathLTE applies the LTE predicate on the "vtt_path" field.
+func VttPathLTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldVttPath, v))
+}
+
+// VttPathContains applies the Contains predicate on the "vtt_path" field.
+func VttPathContains(v string) predicate.Media {
+	return predicate.Media(sql.FieldContains(FieldVttPath, v))
+}
+
+// VttPathHasPrefix applies the HasPrefix predicate on the "vtt_path" field.
+func VttPathHasPrefix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasPrefix(FieldVttPath, v))
+}
+
+// VttPathHasSuffix applies the HasSuffix predicate on the "vtt_path" field.
+func VttPathHasSuffix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasSuffix(FieldVttPath, v))
+}
+
+// VttPathIsNil applies the IsNil predicate on the "vtt_path" field.
+func VttPathIsNil() predicate.Media {
+	return predicate.Media(sql.FieldIsNull(FieldVttPath))
+}
+
+// VttPathNotNil applies the NotNil predicate on the "vtt_path" field.
+func VttPathNotNil() predicate.Media {
+	return predicate.Media(sql.FieldNotNull(FieldVttPath))
+}
+
+// VttPathEqualFold applies the EqualFold predicate on the "vtt_path" field.
+func VttPathEqualFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldVttPath, v))
+}
+
+// VttPathContainsFold applies the ContainsFold predicate on the "vtt_path" field.
+func VttPathContainsFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldVttPath, v))
+}
+
+// ThumbnailTimeEQ applies the EQ predicate on the "thumbnail_time" field.
+func ThumbnailTimeEQ(v float64) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldThumbnailTime, v))
+}
+
+// ThumbnailTimeNEQ applies the NEQ predicate on the "thumbnail_time" field.
+func ThumbnailTimeNEQ(v float64) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldThumbnailTime, v))
+}
+
+// ThumbnailTimeIn applies the In predicate on the "thumbnail_time" field.
+func ThumbnailTimeIn(vs ...float64) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldThumbnailTime, vs...))
+}
+
+// ThumbnailTimeNotIn applies the NotIn predicate on the "thumbnail_time" field.
+func ThumbnailTimeNotIn(vs ...float64) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldThumbnailTime, vs...))
+}
+
+// ThumbnailTimeGT applies the GT predicate on the "thumbnail_time" field.
+func ThumbnailTimeGT(v float64) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldThumbnailTime, v))
+}
+
+// ThumbnailTimeGTE applies the GTE predicate on the "thumbnail_time" field.
+func ThumbnailTimeGTE(v float64) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldThumbnailTime, v))
+}
+
+// ThumbnailTimeLT applies the LT predicate on the "thumbnail_time" field.
+func ThumbnailTimeLT(v float64) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldThumbnailTime, v))
+}
+
+// ThumbnailTimeLTE applies the LTE predicate on the "thumbnail_time" field.
+func ThumbnailTimeLTE(v float64) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldThumbnailTime, v))
+}
+
+// ThumbnailTimeIsNil applies the IsNil predicate on the "thumbnail_time" field.
+func ThumbnailTimeIsNil() predicate.Media {
+	return predicate.Media(sql.FieldIsNull(FieldThumbnailTime))
+}
+
+// ThumbnailTimeNotNil applies the NotNil predicate on the "thumbnail_time" field.
+func ThumbnailTimeNotNil() predicate.Media {
+	return predicate.Media(sql.FieldNotNull(FieldThumbnailTime))
+}
+
 // TagsIsNil applies the IsNil predicate on the "tags" field.
 func TagsIsNil() predicate.Media {
 	return predicate.Media(sql.FieldIsNull(FieldTags))
@@ -2391,6 +2676,29 @@ func HasLikes() predicate.Media {
 func HasLikesWith(preds ...predicate.Like) predicate.Media {
 	return predicate.Media(func(s *sql.Selector) {
 		step := newLikesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasReviewLogs applies the HasEdge predicate on the "review_logs" edge.
+func HasReviewLogs() predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ReviewLogsTable, ReviewLogsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasReviewLogsWith applies the HasEdge predicate on the "review_logs" edge with a given conditions (other predicates).
+func HasReviewLogsWith(preds ...predicate.MediaReviewLog) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		step := newReviewLogsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

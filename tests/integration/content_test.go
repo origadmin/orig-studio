@@ -47,8 +47,8 @@ func TestCategories(t *testing.T) {
 
 		// Categories don't currently require auth based on code review
 		// But may change - accept OK or Created
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-			t.Logf("Create category returned status %d (may need auth)", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusCreated {
+			t.Logf("Create category returned status %d (may need auth)", resp.Code)
 		}
 	})
 
@@ -62,8 +62,8 @@ func TestCategories(t *testing.T) {
 		}
 
 		// Currently returns 501 Not Implemented
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotImplemented {
-			t.Logf("Get category returned status %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotImplemented {
+			t.Logf("Get category returned status %d", resp.Code)
 		}
 	})
 
@@ -77,8 +77,8 @@ func TestCategories(t *testing.T) {
 		}
 
 		// Categories don't currently require auth
-		if resp.StatusCode != http.StatusOK {
-			t.Logf("Delete category returned status %d", resp.StatusCode)
+		if resp.Code != http.StatusOK {
+			t.Logf("Delete category returned status %d", resp.Code)
 		}
 	})
 }
@@ -125,8 +125,8 @@ func TestTags(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-			t.Logf("Create tag returned status %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusCreated {
+			t.Logf("Create tag returned status %d", resp.Code)
 		}
 	})
 
@@ -139,8 +139,8 @@ func TestTags(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotImplemented {
-			t.Logf("Get tag returned status %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotImplemented {
+			t.Logf("Get tag returned status %d", resp.Code)
 		}
 	})
 
@@ -153,8 +153,8 @@ func TestTags(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotImplemented {
-			t.Logf("Get media by tag returned status %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotImplemented {
+			t.Logf("Get media by tag returned status %d", resp.Code)
 		}
 	})
 
@@ -167,8 +167,8 @@ func TestTags(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode != http.StatusOK {
-			t.Logf("Delete tag returned status %d", resp.StatusCode)
+		if resp.Code != http.StatusOK {
+			t.Logf("Delete tag returned status %d", resp.Code)
 		}
 	})
 }
@@ -229,7 +229,7 @@ func TestComments(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusCreated || resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := ParseResponse(body, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -238,7 +238,7 @@ func TestComments(t *testing.T) {
 				t.Error("expected 'text' field in created comment")
 			}
 		} else {
-			t.Logf("Create comment returned status %d", resp.StatusCode)
+			t.Logf("Create comment returned status %d", resp.Code)
 		}
 	})
 
@@ -277,8 +277,8 @@ func TestComments(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
-			t.Logf("Create reply returned status %d", resp.StatusCode)
+		if resp.Code != http.StatusCreated && resp.Code != http.StatusOK {
+			t.Logf("Create reply returned status %d", resp.Code)
 		}
 	})
 
@@ -319,10 +319,10 @@ func TestComments(t *testing.T) {
 		}
 
 		// May return OK, Forbidden, or NotFound depending on ownership
-		if resp.StatusCode != http.StatusOK &&
-			resp.StatusCode != http.StatusForbidden &&
-			resp.StatusCode != http.StatusNotFound {
-			t.Errorf("unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK &&
+			resp.Code != http.StatusForbidden &&
+			resp.Code != http.StatusNotFound {
+			t.Errorf("unexpected status: %d", resp.Code)
 		}
 	})
 
@@ -354,10 +354,10 @@ func TestComments(t *testing.T) {
 		}
 
 		// May return OK, Forbidden, or NotFound
-		if resp.StatusCode != http.StatusOK &&
-			resp.StatusCode != http.StatusForbidden &&
-			resp.StatusCode != http.StatusNotFound {
-			t.Errorf("unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK &&
+			resp.Code != http.StatusForbidden &&
+			resp.Code != http.StatusNotFound {
+			t.Errorf("unexpected status: %d", resp.Code)
 		}
 	})
 

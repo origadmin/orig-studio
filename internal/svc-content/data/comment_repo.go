@@ -129,7 +129,7 @@ func (r *commentRepo) ListAll(ctx context.Context, page, pageSize int) ([]*biz.C
 
 func (r *commentRepo) UpdateStatus(ctx context.Context, id string, status string) (*biz.Comment, error) {
 	ent, err := r.data.db.Comment.UpdateOneID(id).
-		SetStatus(status).
+		SetStatus(comment.Status(status)).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -138,7 +138,7 @@ func (r *commentRepo) UpdateStatus(ctx context.Context, id string, status string
 }
 
 func (r *commentRepo) ListByStatus(ctx context.Context, status string, page, pageSize int) ([]*biz.Comment, int, error) {
-	query := r.data.db.Comment.Query().Where(comment.StatusEQ(status))
+	query := r.data.db.Comment.Query().Where(comment.StatusEQ(comment.Status(status)))
 	total, err := query.Count(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -170,7 +170,7 @@ func mapComment(ent *entity.Comment) *biz.Comment {
 		UserID:    ent.UserID,
 		AddDate:   ent.AddDate,
 		UpdatedAt: ent.AddDate,
-		Status:    ent.Status,
+		Status:    string(ent.Status),
 	}
 
 	if ent.Edges.Parent != nil {

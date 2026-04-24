@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/comment"
 	"origadmin/application/origcms/internal/data/entity/commentlike"
+	"origadmin/application/origcms/internal/data/entity/commentreport"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
@@ -56,15 +57,57 @@ func (_c *CommentCreate) SetUserID(v string) *CommentCreate {
 }
 
 // SetStatus sets the "status" field.
-func (_c *CommentCreate) SetStatus(v string) *CommentCreate {
+func (_c *CommentCreate) SetStatus(v comment.Status) *CommentCreate {
 	_c.mutation.SetStatus(v)
 	return _c
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_c *CommentCreate) SetNillableStatus(v *string) *CommentCreate {
+func (_c *CommentCreate) SetNillableStatus(v *comment.Status) *CommentCreate {
 	if v != nil {
 		_c.SetStatus(*v)
+	}
+	return _c
+}
+
+// SetReportCount sets the "report_count" field.
+func (_c *CommentCreate) SetReportCount(v int) *CommentCreate {
+	_c.mutation.SetReportCount(v)
+	return _c
+}
+
+// SetNillableReportCount sets the "report_count" field if the given value is not nil.
+func (_c *CommentCreate) SetNillableReportCount(v *int) *CommentCreate {
+	if v != nil {
+		_c.SetReportCount(*v)
+	}
+	return _c
+}
+
+// SetModeratedBy sets the "moderated_by" field.
+func (_c *CommentCreate) SetModeratedBy(v string) *CommentCreate {
+	_c.mutation.SetModeratedBy(v)
+	return _c
+}
+
+// SetNillableModeratedBy sets the "moderated_by" field if the given value is not nil.
+func (_c *CommentCreate) SetNillableModeratedBy(v *string) *CommentCreate {
+	if v != nil {
+		_c.SetModeratedBy(*v)
+	}
+	return _c
+}
+
+// SetModeratedAt sets the "moderated_at" field.
+func (_c *CommentCreate) SetModeratedAt(v time.Time) *CommentCreate {
+	_c.mutation.SetModeratedAt(v)
+	return _c
+}
+
+// SetNillableModeratedAt sets the "moderated_at" field if the given value is not nil.
+func (_c *CommentCreate) SetNillableModeratedAt(v *time.Time) *CommentCreate {
+	if v != nil {
+		_c.SetModeratedAt(*v)
 	}
 	return _c
 }
@@ -142,6 +185,40 @@ func (_c *CommentCreate) AddCommentLikes(v ...*CommentLike) *CommentCreate {
 	return _c.AddCommentLikeIDs(ids...)
 }
 
+// AddReportIDs adds the "reports" edge to the CommentReport entity by IDs.
+func (_c *CommentCreate) AddReportIDs(ids ...string) *CommentCreate {
+	_c.mutation.AddReportIDs(ids...)
+	return _c
+}
+
+// AddReports adds the "reports" edges to the CommentReport entity.
+func (_c *CommentCreate) AddReports(v ...*CommentReport) *CommentCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddReportIDs(ids...)
+}
+
+// SetModeratorID sets the "moderator" edge to the User entity by ID.
+func (_c *CommentCreate) SetModeratorID(id string) *CommentCreate {
+	_c.mutation.SetModeratorID(id)
+	return _c
+}
+
+// SetNillableModeratorID sets the "moderator" edge to the User entity by ID if the given value is not nil.
+func (_c *CommentCreate) SetNillableModeratorID(id *string) *CommentCreate {
+	if id != nil {
+		_c = _c.SetModeratorID(*id)
+	}
+	return _c
+}
+
+// SetModerator sets the "moderator" edge to the User entity.
+func (_c *CommentCreate) SetModerator(v *User) *CommentCreate {
+	return _c.SetModeratorID(v.ID)
+}
+
 // Mutation returns the CommentMutation object of the builder.
 func (_c *CommentCreate) Mutation() *CommentMutation {
 	return _c.mutation
@@ -185,6 +262,10 @@ func (_c *CommentCreate) defaults() {
 		v := comment.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
+	if _, ok := _c.mutation.ReportCount(); !ok {
+		v := comment.DefaultReportCount
+		_c.mutation.SetReportCount(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := comment.DefaultID()
 		_c.mutation.SetID(v)
@@ -207,6 +288,14 @@ func (_c *CommentCreate) check() error {
 	}
 	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`entity: missing required field "Comment.status"`)}
+	}
+	if v, ok := _c.mutation.Status(); ok {
+		if err := comment.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "Comment.status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ReportCount(); !ok {
+		return &ValidationError{Name: "report_count", err: errors.New(`entity: missing required field "Comment.report_count"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := comment.IDValidator(v); err != nil {
@@ -263,8 +352,16 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		_node.AddDate = value
 	}
 	if value, ok := _c.mutation.Status(); ok {
-		_spec.SetField(comment.FieldStatus, field.TypeString, value)
+		_spec.SetField(comment.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
+	}
+	if value, ok := _c.mutation.ReportCount(); ok {
+		_spec.SetField(comment.FieldReportCount, field.TypeInt, value)
+		_node.ReportCount = value
+	}
+	if value, ok := _c.mutation.ModeratedAt(); ok {
+		_spec.SetField(comment.FieldModeratedAt, field.TypeTime, value)
+		_node.ModeratedAt = value
 	}
 	if nodes := _c.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -347,6 +444,39 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ReportsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   comment.ReportsTable,
+			Columns: []string{comment.ReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(commentreport.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ModeratorIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   comment.ModeratorTable,
+			Columns: []string{comment.ModeratorColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ModeratedBy = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

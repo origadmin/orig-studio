@@ -9,6 +9,7 @@ import "github.com/google/wire"
 // ProviderSet is biz providers.
 var ProviderSet = wire.NewSet(
 	NewCommentUseCase,
+	NewCommentModerationUseCase,
 	NewNotificationUseCase,
 	NewLikeFavoriteUseCase,
 	NewCategoryTagUseCase,

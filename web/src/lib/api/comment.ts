@@ -60,3 +60,11 @@ export const commentApi = {
             api.post<CommentLikeResponse>(`/comments/${commentId}/dislikes`),
     },
 };
+
+export const adminCommentApi = {
+    list: (params?: { page?: number; page_size?: number; media_id?: string; status?: string }) =>
+        api.get<CommentListResponse>('/admin/comments', params),
+
+    delete: (id: string) =>
+        api.del<void>(`/admin/comments/${id}`),
+};

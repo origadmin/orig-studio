@@ -12,17 +12,22 @@ import (
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
 	"origadmin/application/origcms/internal/data/entity/commentlike"
+	"origadmin/application/origcms/internal/data/entity/commentreport"
 	"origadmin/application/origcms/internal/data/entity/encodeprofile"
 	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
+	"origadmin/application/origcms/internal/data/entity/groupmember"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediacategory"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
+	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/mediatag"
 	"origadmin/application/origcms/internal/data/entity/notification"
+	"origadmin/application/origcms/internal/data/entity/permissiongroup"
 	"origadmin/application/origcms/internal/data/entity/playlist"
 	"origadmin/application/origcms/internal/data/entity/predicate"
+	"origadmin/application/origcms/internal/data/entity/setting"
 	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/tag"
 	"origadmin/application/origcms/internal/data/entity/uploadsession"
@@ -222,6 +227,33 @@ func (f TraverseCommentLike) Traverse(ctx context.Context, q entity.Query) error
 	return fmt.Errorf("unexpected query type %T. expect *entity.CommentLikeQuery", q)
 }
 
+// The CommentReportFunc type is an adapter to allow the use of ordinary function as a Querier.
+type CommentReportFunc func(context.Context, *entity.CommentReportQuery) (entity.Value, error)
+
+// Query calls f(ctx, q).
+func (f CommentReportFunc) Query(ctx context.Context, q entity.Query) (entity.Value, error) {
+	if q, ok := q.(*entity.CommentReportQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *entity.CommentReportQuery", q)
+}
+
+// The TraverseCommentReport type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseCommentReport func(context.Context, *entity.CommentReportQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseCommentReport) Intercept(next entity.Querier) entity.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseCommentReport) Traverse(ctx context.Context, q entity.Query) error {
+	if q, ok := q.(*entity.CommentReportQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *entity.CommentReportQuery", q)
+}
+
 // The EncodeProfileFunc type is an adapter to allow the use of ordinary function as a Querier.
 type EncodeProfileFunc func(context.Context, *entity.EncodeProfileQuery) (entity.Value, error)
 
@@ -301,6 +333,33 @@ func (f TraverseFavorite) Traverse(ctx context.Context, q entity.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *entity.FavoriteQuery", q)
+}
+
+// The GroupMemberFunc type is an adapter to allow the use of ordinary function as a Querier.
+type GroupMemberFunc func(context.Context, *entity.GroupMemberQuery) (entity.Value, error)
+
+// Query calls f(ctx, q).
+func (f GroupMemberFunc) Query(ctx context.Context, q entity.Query) (entity.Value, error) {
+	if q, ok := q.(*entity.GroupMemberQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *entity.GroupMemberQuery", q)
+}
+
+// The TraverseGroupMember type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseGroupMember func(context.Context, *entity.GroupMemberQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseGroupMember) Intercept(next entity.Querier) entity.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseGroupMember) Traverse(ctx context.Context, q entity.Query) error {
+	if q, ok := q.(*entity.GroupMemberQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *entity.GroupMemberQuery", q)
 }
 
 // The LikeFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -411,6 +470,33 @@ func (f TraverseMediaPlaylist) Traverse(ctx context.Context, q entity.Query) err
 	return fmt.Errorf("unexpected query type %T. expect *entity.MediaPlaylistQuery", q)
 }
 
+// The MediaReviewLogFunc type is an adapter to allow the use of ordinary function as a Querier.
+type MediaReviewLogFunc func(context.Context, *entity.MediaReviewLogQuery) (entity.Value, error)
+
+// Query calls f(ctx, q).
+func (f MediaReviewLogFunc) Query(ctx context.Context, q entity.Query) (entity.Value, error) {
+	if q, ok := q.(*entity.MediaReviewLogQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *entity.MediaReviewLogQuery", q)
+}
+
+// The TraverseMediaReviewLog type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseMediaReviewLog func(context.Context, *entity.MediaReviewLogQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseMediaReviewLog) Intercept(next entity.Querier) entity.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseMediaReviewLog) Traverse(ctx context.Context, q entity.Query) error {
+	if q, ok := q.(*entity.MediaReviewLogQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *entity.MediaReviewLogQuery", q)
+}
+
 // The MediaTagFunc type is an adapter to allow the use of ordinary function as a Querier.
 type MediaTagFunc func(context.Context, *entity.MediaTagQuery) (entity.Value, error)
 
@@ -465,6 +551,33 @@ func (f TraverseNotification) Traverse(ctx context.Context, q entity.Query) erro
 	return fmt.Errorf("unexpected query type %T. expect *entity.NotificationQuery", q)
 }
 
+// The PermissionGroupFunc type is an adapter to allow the use of ordinary function as a Querier.
+type PermissionGroupFunc func(context.Context, *entity.PermissionGroupQuery) (entity.Value, error)
+
+// Query calls f(ctx, q).
+func (f PermissionGroupFunc) Query(ctx context.Context, q entity.Query) (entity.Value, error) {
+	if q, ok := q.(*entity.PermissionGroupQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *entity.PermissionGroupQuery", q)
+}
+
+// The TraversePermissionGroup type is an adapter to allow the use of ordinary function as Traverser.
+type TraversePermissionGroup func(context.Context, *entity.PermissionGroupQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraversePermissionGroup) Intercept(next entity.Querier) entity.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraversePermissionGroup) Traverse(ctx context.Context, q entity.Query) error {
+	if q, ok := q.(*entity.PermissionGroupQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *entity.PermissionGroupQuery", q)
+}
+
 // The PlaylistFunc type is an adapter to allow the use of ordinary function as a Querier.
 type PlaylistFunc func(context.Context, *entity.PlaylistQuery) (entity.Value, error)
 
@@ -490,6 +603,33 @@ func (f TraversePlaylist) Traverse(ctx context.Context, q entity.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *entity.PlaylistQuery", q)
+}
+
+// The SettingFunc type is an adapter to allow the use of ordinary function as a Querier.
+type SettingFunc func(context.Context, *entity.SettingQuery) (entity.Value, error)
+
+// Query calls f(ctx, q).
+func (f SettingFunc) Query(ctx context.Context, q entity.Query) (entity.Value, error) {
+	if q, ok := q.(*entity.SettingQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *entity.SettingQuery", q)
+}
+
+// The TraverseSetting type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseSetting func(context.Context, *entity.SettingQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseSetting) Intercept(next entity.Querier) entity.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseSetting) Traverse(ctx context.Context, q entity.Query) error {
+	if q, ok := q.(*entity.SettingQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *entity.SettingQuery", q)
 }
 
 // The SubscriptionFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -613,12 +753,16 @@ func NewQuery(q entity.Query) (Query, error) {
 		return &query[*entity.CommentQuery, predicate.Comment, comment.OrderOption]{typ: entity.TypeComment, tq: q}, nil
 	case *entity.CommentLikeQuery:
 		return &query[*entity.CommentLikeQuery, predicate.CommentLike, commentlike.OrderOption]{typ: entity.TypeCommentLike, tq: q}, nil
+	case *entity.CommentReportQuery:
+		return &query[*entity.CommentReportQuery, predicate.CommentReport, commentreport.OrderOption]{typ: entity.TypeCommentReport, tq: q}, nil
 	case *entity.EncodeProfileQuery:
 		return &query[*entity.EncodeProfileQuery, predicate.EncodeProfile, encodeprofile.OrderOption]{typ: entity.TypeEncodeProfile, tq: q}, nil
 	case *entity.EncodingTaskQuery:
 		return &query[*entity.EncodingTaskQuery, predicate.EncodingTask, encodingtask.OrderOption]{typ: entity.TypeEncodingTask, tq: q}, nil
 	case *entity.FavoriteQuery:
 		return &query[*entity.FavoriteQuery, predicate.Favorite, favorite.OrderOption]{typ: entity.TypeFavorite, tq: q}, nil
+	case *entity.GroupMemberQuery:
+		return &query[*entity.GroupMemberQuery, predicate.GroupMember, groupmember.OrderOption]{typ: entity.TypeGroupMember, tq: q}, nil
 	case *entity.LikeQuery:
 		return &query[*entity.LikeQuery, predicate.Like, like.OrderOption]{typ: entity.TypeLike, tq: q}, nil
 	case *entity.MediaQuery:
@@ -627,12 +771,18 @@ func NewQuery(q entity.Query) (Query, error) {
 		return &query[*entity.MediaCategoryQuery, predicate.MediaCategory, mediacategory.OrderOption]{typ: entity.TypeMediaCategory, tq: q}, nil
 	case *entity.MediaPlaylistQuery:
 		return &query[*entity.MediaPlaylistQuery, predicate.MediaPlaylist, mediaplaylist.OrderOption]{typ: entity.TypeMediaPlaylist, tq: q}, nil
+	case *entity.MediaReviewLogQuery:
+		return &query[*entity.MediaReviewLogQuery, predicate.MediaReviewLog, mediareviewlog.OrderOption]{typ: entity.TypeMediaReviewLog, tq: q}, nil
 	case *entity.MediaTagQuery:
 		return &query[*entity.MediaTagQuery, predicate.MediaTag, mediatag.OrderOption]{typ: entity.TypeMediaTag, tq: q}, nil
 	case *entity.NotificationQuery:
 		return &query[*entity.NotificationQuery, predicate.Notification, notification.OrderOption]{typ: entity.TypeNotification, tq: q}, nil
+	case *entity.PermissionGroupQuery:
+		return &query[*entity.PermissionGroupQuery, predicate.PermissionGroup, permissiongroup.OrderOption]{typ: entity.TypePermissionGroup, tq: q}, nil
 	case *entity.PlaylistQuery:
 		return &query[*entity.PlaylistQuery, predicate.Playlist, playlist.OrderOption]{typ: entity.TypePlaylist, tq: q}, nil
+	case *entity.SettingQuery:
+		return &query[*entity.SettingQuery, predicate.Setting, setting.OrderOption]{typ: entity.TypeSetting, tq: q}, nil
 	case *entity.SubscriptionQuery:
 		return &query[*entity.SubscriptionQuery, predicate.Subscription, subscription.OrderOption]{typ: entity.TypeSubscription, tq: q}, nil
 	case *entity.TagQuery:
