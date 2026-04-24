@@ -17,9 +17,10 @@ import {
     PlayCircle,
     Cpu,
     Activity,
-    ChevronLeft,
-    ChevronRight,
-    Home
+    PanelLeftClose,
+    PanelLeftOpen,
+    Home,
+    FileText
 } from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {Separator} from '@/components/ui/separator';
@@ -50,7 +51,7 @@ const AdminLayout = () => {
         {id: "tags", icon: Tags, label: t('admin.tags'), path: "/admin/tags"},
         {id: "comments", icon: MessageSquare, label: t('admin.comments'), path: "/admin/comments"},
         {id: "playlists", icon: PlayCircle, label: t('admin.playlists'), path: "/admin/playlists"},
-        {id: "content", icon: Settings, label: t('admin.content'), path: "/admin/content"},
+        {id: "content", icon: FileText, label: t('admin.content'), path: "/admin/content"},
         {id: "settings", icon: Settings, label: t('admin.settings'), path: "/admin/settings"},
     ];
 
@@ -97,28 +98,28 @@ const AdminLayout = () => {
             {/* Sidebar */}
             <aside
                 className={`${sidebarCollapsed ? 'w-20' : 'w-64'} bg-slate-900 text-white flex-shrink-0 flex flex-col transition-all duration-300 ease-in-out`}>
-                <div className="p-6 flex items-center justify-center">
-                    <Link to="/admin" className={`flex items-center transition-all duration-300 ease-in-out ${sidebarCollapsed ? 'w-8 h-8' : 'w-full'}`}>
+                <div className={`${sidebarCollapsed ? 'p-2' : 'p-6'} flex items-center justify-center`}>
+                    <Link to="/admin" className={`flex items-center justify-center transition-all duration-300 ease-in-out ${sidebarCollapsed ? '' : 'w-full'}`}>
                         {sidebarCollapsed ? (
-                            <div className="w-8 h-8 bg-blue-400 rounded flex items-center justify-center text-white font-bold">OC</div>
+                            <div className="w-14 h-14 bg-blue-400 rounded-lg flex items-center justify-center text-white font-bold text-xl">OC</div>
                         ) : (
                             <span className="text-xl font-bold tracking-tight text-blue-400">OrigCMS Admin</span>
                         )}
                     </Link>
                 </div>
-                <nav className="flex-grow px-4 space-y-2">
+                <nav className={`flex-grow space-y-2 ${sidebarCollapsed ? 'px-2' : 'px-4'}`}>
                     {menuItems.map((item) => (
                         <NavItem
                             key={item.path}
                             to={item.path}
-                            icon={<item.icon size={20}/>}
+                            icon={<item.icon size={24}/>}
                             label={item.label}
                             exact={item.path === "/admin"}
                             collapsed={sidebarCollapsed}
                         />
                     ))}
                 </nav>
-                <div className="p-6 border-t border-slate-800">
+                <div className={`${sidebarCollapsed ? 'p-3' : 'p-6'} border-t border-slate-800`}>
                     <Link
                         to="/"
                         className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-3'} text-slate-400 hover:text-white transition-colors`}
@@ -130,19 +131,23 @@ const AdminLayout = () => {
             </aside>
 
             {/* Main Content */}
-            <div className="flex-grow flex flex-col min-w-0">
+            <div className="flex-grow flex flex-col min-w-0 relative">
+                {/* Floating toggle button on the divider line */}
+                <button
+                    onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                    className="absolute top-12 z-50 w-8 h-8 bg-white dark:bg-gray-800 border border-slate-200 dark:border-slate-700 rounded-full shadow-md flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110"
+                    style={{ left: -16 }}
+                    title={sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
+                >
+                    {sidebarCollapsed ? (
+                        <PanelLeftOpen size={18} className="text-slate-600 dark:text-slate-300" />
+                    ) : (
+                        <PanelLeftClose size={18} className="text-slate-600 dark:text-slate-300" />
+                    )}
+                </button>
+
                 <header className="h-16 bg-card border-b flex items-center justify-between px-8">
-                    <div className="flex items-center gap-2 -ml-4">
-                        <button
-                            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                            className="flex flex-col items-center justify-center gap-1 p-1 text-muted-foreground hover:text-foreground transition-colors"
-                            title={sidebarCollapsed ? '展开' : '缩放'}
-                        >
-                            <div className="w-4 h-0.5 bg-current rounded"></div>
-                            <div className="w-4 h-0.5 bg-current rounded"></div>
-                            <div className="w-4 h-0.5 bg-current rounded"></div>
-                        </button>
-                        <span className="text-muted-foreground">|</span>
+                    <div className="flex items-center gap-2">
                         {breadcrumbs.map((crumb, index) => (
                             <React.Fragment key={crumb.path}>
                                 {index > 0 && (
@@ -191,13 +196,17 @@ const NavItem = ({to, icon, label, exact = false, collapsed = false}: {
     return (
         <Link
             to={to}
-            className={`flex items-center ${collapsed ? 'justify-center w-12 h-12 mx-auto' : 'space-x-3 px-4'} py-3 rounded-lg transition-all duration-300 ease-in-out ${
+            className={`flex items-center rounded-lg transition-all duration-300 ease-in-out ${
+                collapsed
+                    ? 'justify-center w-12 h-12 mx-auto'
+                    : 'space-x-3 px-4 py-2'
+            } ${
                 isActive ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
             }`}
             title={collapsed ? label : undefined}
         >
-            {icon}
-            <span className={`font-medium text-sm transition-all duration-300 ease-in-out ${collapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>{label}</span>
+            {collapsed ? React.cloneElement(icon as React.ReactElement, { size: 28 }) : icon}
+            {!collapsed && <span className="font-medium text-sm">{label}</span>}
         </Link>
     );
 };
