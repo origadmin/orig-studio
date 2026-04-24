@@ -12,10 +12,14 @@ import (
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
 	"origadmin/application/origcms/internal/data/entity/commentlike"
+	"origadmin/application/origcms/internal/data/entity/commentreport"
 	"origadmin/application/origcms/internal/data/entity/favorite"
+	"origadmin/application/origcms/internal/data/entity/groupmember"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
+	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/notification"
+	"origadmin/application/origcms/internal/data/entity/permissiongroup"
 	"origadmin/application/origcms/internal/data/entity/playlist"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"origadmin/application/origcms/internal/data/entity/subscription"
@@ -32,24 +36,29 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx               *QueryContext
-	order             []user.OrderOption
-	inters            []Interceptor
-	predicates        []predicate.User
-	withMedia         *MediaQuery
-	withArticles      *ArticleQuery
-	withChannels      *ChannelQuery
-	withPlaylists     *PlaylistQuery
-	withComments      *CommentQuery
-	withNotifications *NotificationQuery
-	withCategories    *CategoryQuery
-	withTags          *TagQuery
-	withFavorites     *FavoriteQuery
-	withLikes         *LikeQuery
-	withCommentLikes  *CommentLikeQuery
-	withSubscriptions *SubscriptionQuery
-	withSubscribers   *SubscriptionQuery
-	modifiers         []func(*sql.Selector)
+	ctx                   *QueryContext
+	order                 []user.OrderOption
+	inters                []Interceptor
+	predicates            []predicate.User
+	withMedia             *MediaQuery
+	withArticles          *ArticleQuery
+	withChannels          *ChannelQuery
+	withPlaylists         *PlaylistQuery
+	withComments          *CommentQuery
+	withNotifications     *NotificationQuery
+	withCategories        *CategoryQuery
+	withTags              *TagQuery
+	withFavorites         *FavoriteQuery
+	withLikes             *LikeQuery
+	withCommentLikes      *CommentLikeQuery
+	withSubscriptions     *SubscriptionQuery
+	withSubscribers       *SubscriptionQuery
+	withReviewLogs        *MediaReviewLogQuery
+	withCommentReports    *CommentReportQuery
+	withModeratedComments *CommentQuery
+	withGroupMemberships  *GroupMemberQuery
+	withCreatedGroups     *PermissionGroupQuery
+	modifiers             []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -372,6 +381,116 @@ func (_q *UserQuery) QuerySubscribers() *SubscriptionQuery {
 	return query
 }
 
+// QueryReviewLogs chains the current query on the "review_logs" edge.
+func (_q *UserQuery) QueryReviewLogs() *MediaReviewLogQuery {
+	query := (&MediaReviewLogClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(mediareviewlog.Table, mediareviewlog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ReviewLogsTable, user.ReviewLogsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCommentReports chains the current query on the "comment_reports" edge.
+func (_q *UserQuery) QueryCommentReports() *CommentReportQuery {
+	query := (&CommentReportClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(commentreport.Table, commentreport.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CommentReportsTable, user.CommentReportsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryModeratedComments chains the current query on the "moderated_comments" edge.
+func (_q *UserQuery) QueryModeratedComments() *CommentQuery {
+	query := (&CommentClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ModeratedCommentsTable, user.ModeratedCommentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryGroupMemberships chains the current query on the "group_memberships" edge.
+func (_q *UserQuery) QueryGroupMemberships() *GroupMemberQuery {
+	query := (&GroupMemberClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(groupmember.Table, groupmember.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.GroupMembershipsTable, user.GroupMembershipsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCreatedGroups chains the current query on the "created_groups" edge.
+func (_q *UserQuery) QueryCreatedGroups() *PermissionGroupQuery {
+	query := (&PermissionGroupClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(permissiongroup.Table, permissiongroup.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CreatedGroupsTable, user.CreatedGroupsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first User entity from the query.
 // Returns a *NotFoundError when no User was found.
 func (_q *UserQuery) First(ctx context.Context) (*User, error) {
@@ -559,24 +678,29 @@ func (_q *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:            _q.config,
-		ctx:               _q.ctx.Clone(),
-		order:             append([]user.OrderOption{}, _q.order...),
-		inters:            append([]Interceptor{}, _q.inters...),
-		predicates:        append([]predicate.User{}, _q.predicates...),
-		withMedia:         _q.withMedia.Clone(),
-		withArticles:      _q.withArticles.Clone(),
-		withChannels:      _q.withChannels.Clone(),
-		withPlaylists:     _q.withPlaylists.Clone(),
-		withComments:      _q.withComments.Clone(),
-		withNotifications: _q.withNotifications.Clone(),
-		withCategories:    _q.withCategories.Clone(),
-		withTags:          _q.withTags.Clone(),
-		withFavorites:     _q.withFavorites.Clone(),
-		withLikes:         _q.withLikes.Clone(),
-		withCommentLikes:  _q.withCommentLikes.Clone(),
-		withSubscriptions: _q.withSubscriptions.Clone(),
-		withSubscribers:   _q.withSubscribers.Clone(),
+		config:                _q.config,
+		ctx:                   _q.ctx.Clone(),
+		order:                 append([]user.OrderOption{}, _q.order...),
+		inters:                append([]Interceptor{}, _q.inters...),
+		predicates:            append([]predicate.User{}, _q.predicates...),
+		withMedia:             _q.withMedia.Clone(),
+		withArticles:          _q.withArticles.Clone(),
+		withChannels:          _q.withChannels.Clone(),
+		withPlaylists:         _q.withPlaylists.Clone(),
+		withComments:          _q.withComments.Clone(),
+		withNotifications:     _q.withNotifications.Clone(),
+		withCategories:        _q.withCategories.Clone(),
+		withTags:              _q.withTags.Clone(),
+		withFavorites:         _q.withFavorites.Clone(),
+		withLikes:             _q.withLikes.Clone(),
+		withCommentLikes:      _q.withCommentLikes.Clone(),
+		withSubscriptions:     _q.withSubscriptions.Clone(),
+		withSubscribers:       _q.withSubscribers.Clone(),
+		withReviewLogs:        _q.withReviewLogs.Clone(),
+		withCommentReports:    _q.withCommentReports.Clone(),
+		withModeratedComments: _q.withModeratedComments.Clone(),
+		withGroupMemberships:  _q.withGroupMemberships.Clone(),
+		withCreatedGroups:     _q.withCreatedGroups.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -727,6 +851,61 @@ func (_q *UserQuery) WithSubscribers(opts ...func(*SubscriptionQuery)) *UserQuer
 	return _q
 }
 
+// WithReviewLogs tells the query-builder to eager-load the nodes that are connected to
+// the "review_logs" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithReviewLogs(opts ...func(*MediaReviewLogQuery)) *UserQuery {
+	query := (&MediaReviewLogClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withReviewLogs = query
+	return _q
+}
+
+// WithCommentReports tells the query-builder to eager-load the nodes that are connected to
+// the "comment_reports" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithCommentReports(opts ...func(*CommentReportQuery)) *UserQuery {
+	query := (&CommentReportClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withCommentReports = query
+	return _q
+}
+
+// WithModeratedComments tells the query-builder to eager-load the nodes that are connected to
+// the "moderated_comments" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithModeratedComments(opts ...func(*CommentQuery)) *UserQuery {
+	query := (&CommentClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withModeratedComments = query
+	return _q
+}
+
+// WithGroupMemberships tells the query-builder to eager-load the nodes that are connected to
+// the "group_memberships" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithGroupMemberships(opts ...func(*GroupMemberQuery)) *UserQuery {
+	query := (&GroupMemberClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withGroupMemberships = query
+	return _q
+}
+
+// WithCreatedGroups tells the query-builder to eager-load the nodes that are connected to
+// the "created_groups" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithCreatedGroups(opts ...func(*PermissionGroupQuery)) *UserQuery {
+	query := (&PermissionGroupClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withCreatedGroups = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -805,7 +984,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [13]bool{
+		loadedTypes = [18]bool{
 			_q.withMedia != nil,
 			_q.withArticles != nil,
 			_q.withChannels != nil,
@@ -819,6 +998,11 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			_q.withCommentLikes != nil,
 			_q.withSubscriptions != nil,
 			_q.withSubscribers != nil,
+			_q.withReviewLogs != nil,
+			_q.withCommentReports != nil,
+			_q.withModeratedComments != nil,
+			_q.withGroupMemberships != nil,
+			_q.withCreatedGroups != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -930,6 +1114,41 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadSubscribers(ctx, query, nodes,
 			func(n *User) { n.Edges.Subscribers = []*Subscription{} },
 			func(n *User, e *Subscription) { n.Edges.Subscribers = append(n.Edges.Subscribers, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withReviewLogs; query != nil {
+		if err := _q.loadReviewLogs(ctx, query, nodes,
+			func(n *User) { n.Edges.ReviewLogs = []*MediaReviewLog{} },
+			func(n *User, e *MediaReviewLog) { n.Edges.ReviewLogs = append(n.Edges.ReviewLogs, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withCommentReports; query != nil {
+		if err := _q.loadCommentReports(ctx, query, nodes,
+			func(n *User) { n.Edges.CommentReports = []*CommentReport{} },
+			func(n *User, e *CommentReport) { n.Edges.CommentReports = append(n.Edges.CommentReports, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withModeratedComments; query != nil {
+		if err := _q.loadModeratedComments(ctx, query, nodes,
+			func(n *User) { n.Edges.ModeratedComments = []*Comment{} },
+			func(n *User, e *Comment) { n.Edges.ModeratedComments = append(n.Edges.ModeratedComments, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withGroupMemberships; query != nil {
+		if err := _q.loadGroupMemberships(ctx, query, nodes,
+			func(n *User) { n.Edges.GroupMemberships = []*GroupMember{} },
+			func(n *User, e *GroupMember) { n.Edges.GroupMemberships = append(n.Edges.GroupMemberships, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withCreatedGroups; query != nil {
+		if err := _q.loadCreatedGroups(ctx, query, nodes,
+			func(n *User) { n.Edges.CreatedGroups = []*PermissionGroup{} },
+			func(n *User, e *PermissionGroup) { n.Edges.CreatedGroups = append(n.Edges.CreatedGroups, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1417,6 +1636,157 @@ func (_q *UserQuery) loadSubscribers(ctx context.Context, query *SubscriptionQue
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "channel_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadReviewLogs(ctx context.Context, query *MediaReviewLogQuery, nodes []*User, init func(*User), assign func(*User, *MediaReviewLog)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(mediareviewlog.FieldReviewerID)
+	}
+	query.Where(predicate.MediaReviewLog(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ReviewLogsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ReviewerID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "reviewer_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadCommentReports(ctx context.Context, query *CommentReportQuery, nodes []*User, init func(*User), assign func(*User, *CommentReport)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(commentreport.FieldReporterID)
+	}
+	query.Where(predicate.CommentReport(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.CommentReportsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ReporterID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "reporter_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadModeratedComments(ctx context.Context, query *CommentQuery, nodes []*User, init func(*User), assign func(*User, *Comment)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(comment.FieldModeratedBy)
+	}
+	query.Where(predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ModeratedCommentsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ModeratedBy
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "moderated_by" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadGroupMemberships(ctx context.Context, query *GroupMemberQuery, nodes []*User, init func(*User), assign func(*User, *GroupMember)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(groupmember.FieldUserID)
+	}
+	query.Where(predicate.GroupMember(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.GroupMembershipsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadCreatedGroups(ctx context.Context, query *PermissionGroupQuery, nodes []*User, init func(*User), assign func(*User, *PermissionGroup)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(permissiongroup.FieldCreatedBy)
+	}
+	query.Where(predicate.PermissionGroup(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.CreatedGroupsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.CreatedBy
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "created_by" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

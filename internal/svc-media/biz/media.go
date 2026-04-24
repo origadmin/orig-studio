@@ -46,13 +46,33 @@ type EncodingTask = dto.EncodingTask
 // EncodingTaskRepo defines the storage operations for encoding tasks.
 type EncodingTaskRepo = dto.EncodingTaskRepo
 
+// ReviewLog represents a single review log entry.
+type ReviewLog struct {
+	ID             string `json:"id"`
+	MediaID        string `json:"media_id"`
+	ReviewerID     string `json:"reviewer_id"`
+	Action         string `json:"action"`
+	Comment        string `json:"comment"`
+	PreviousStatus string `json:"previous_status"`
+	NewStatus      string `json:"new_status"`
+	CreatedAt      string `json:"created_at"`
+}
+
+// ReviewLogRepo defines the storage operations for review logs.
+type ReviewLogRepo interface {
+	Create(ctx context.Context, mediaID string, reviewerID string, action string, comment string, previousStatus string, newStatus string) (*ReviewLog, error)
+	ListByMedia(ctx context.Context, mediaID string) ([]*ReviewLog, error)
+}
+
 type MediaUseCase struct {
-	repo         MediaRepo
-	profileRepo  EncodeProfileRepo
-	encodingRepo EncodingTaskRepo
-	storage      Storage
-	publisher    message.Publisher
-	log          *log.Helper
+	repo          MediaRepo
+	profileRepo   EncodeProfileRepo
+	encodingRepo  EncodingTaskRepo
+	reviewLogRepo ReviewLogRepo
+	storage       Storage
+	publisher     message.Publisher
+	log           *log.Helper
+	spriteUC      *SpriteUseCase
 
 	mu   sync.RWMutex
 	subs map[string][]chan *EncodingEvent
@@ -62,18 +82,22 @@ func NewMediaUseCase(
 	repo MediaRepo,
 	profileRepo EncodeProfileRepo,
 	encodingRepo EncodingTaskRepo,
+	reviewLogRepo ReviewLogRepo,
 	storage Storage,
 	publisher message.Publisher,
 	logger log.Logger,
+	spriteUC *SpriteUseCase,
 ) *MediaUseCase {
 	return &MediaUseCase{
-		repo:         repo,
-		profileRepo:  profileRepo,
-		encodingRepo: encodingRepo,
-		storage:      storage,
-		publisher:    publisher,
-		log:          log.NewHelper(log.With(logger, "module", "media.biz")),
-		subs:         make(map[string][]chan *EncodingEvent),
+		repo:          repo,
+		profileRepo:   profileRepo,
+		encodingRepo:  encodingRepo,
+		reviewLogRepo: reviewLogRepo,
+		storage:       storage,
+		publisher:     publisher,
+		log:           log.NewHelper(log.With(logger, "module", "media.biz")),
+		spriteUC:      spriteUC,
+		subs:          make(map[string][]chan *EncodingEvent),
 	}
 }
 
@@ -895,30 +919,53 @@ func (uc *MediaUseCase) DeleteEncodeProfile(ctx context.Context, id int) error {
 	return uc.profileRepo.Delete(ctx, id)
 }
 
-// ReviewMedia 审核媒体
+// ReviewMedia reviews a media item with state transition validation and audit logging.
 func (uc *MediaUseCase) ReviewMedia(ctx context.Context, mediaID string, approve bool, comment string, reviewerID string) (*Media, error) {
 	media, err := uc.repo.Get(ctx, mediaID)
 	if err != nil {
 		return nil, err
 	}
 
-	if approve {
-		media.ReviewStatus = "reviewed"
-	} else {
-		media.ReviewStatus = "rejected"
+	previousStatus := media.ReviewStatus
+
+	if previousStatus != "pending_review" && previousStatus != "rejected" {
+		return nil, fmt.Errorf("invalid state transition: cannot review media with status %q, expected 'pending_review' or 'rejected'", previousStatus)
 	}
 
-	// 计算可见性
+	var newStatus string
+	var action string
+	if approve {
+		newStatus = "reviewed"
+		action = "approve"
+	} else {
+		newStatus = "rejected"
+		action = "reject"
+	}
+
+	media.ReviewStatus = newStatus
 	media.Listable = uc.ShouldBeListable(media)
 
-	// 保存更新
 	updated, err := uc.repo.Update(ctx, media)
 	if err != nil {
 		return nil, err
 	}
 
-	uc.log.Infof("Media %s reviewed by %s: %v, comment: %s", mediaID, reviewerID, approve, comment)
+	if uc.reviewLogRepo != nil {
+		if _, logErr := uc.reviewLogRepo.Create(ctx, mediaID, reviewerID, action, comment, previousStatus, newStatus); logErr != nil {
+			uc.log.Warnf("failed to create review log for media %s: %v", mediaID, logErr)
+		}
+	}
+
+	uc.log.Infof("Media %s reviewed by %s: %s (previous: %s, new: %s)", mediaID, reviewerID, action, previousStatus, newStatus)
 	return updated, nil
+}
+
+// ListReviewLogs returns the review log entries for a given media.
+func (uc *MediaUseCase) ListReviewLogs(ctx context.Context, mediaID string) ([]*ReviewLog, error) {
+	if uc.reviewLogRepo == nil {
+		return []*ReviewLog{}, nil
+	}
+	return uc.reviewLogRepo.ListByMedia(ctx, mediaID)
 }
 
 // ShouldBeListable 计算媒体是否应该可见
@@ -926,4 +973,18 @@ func (uc *MediaUseCase) ShouldBeListable(media *Media) bool {
 	return media.EncodingStatus == "success" && 
 		   media.ReviewStatus == "reviewed" && 
 		   media.State == "active"
+}
+
+func (uc *MediaUseCase) RegenerateSprite(ctx context.Context, mediaID string) error {
+	if uc.spriteUC == nil {
+		return fmt.Errorf("sprite use case not initialized")
+	}
+	return uc.spriteUC.GenerateSpriteAndVTT(ctx, mediaID)
+}
+
+func (uc *MediaUseCase) RegenerateThumbnail(ctx context.Context, mediaID string, timestamp float64) error {
+	if uc.spriteUC == nil {
+		return fmt.Errorf("sprite use case not initialized")
+	}
+	return uc.spriteUC.RegenerateThumbnail(ctx, mediaID, timestamp)
 }

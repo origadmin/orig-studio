@@ -1,13 +1,13 @@
 package integration
 
 import (
+	"bytes"
 	"net/http"
 	"testing"
 	"time"
 )
 
-// getResponseData extracts the data field from the standard response {code, message, data}
-func getResponseData(body []byte) (map[string]interface{}, error) {
+func getResponseData(body *bytes.Buffer) (map[string]interface{}, error) {
 	var result map[string]interface{}
 	if err := ParseResponse(body, &result); err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func TestCompleteEncodingWorkflow(t *testing.T) {
 
 		// Verify profiles exist
 		if _, ok := data["profiles"]; !ok {
-			t.Logf("Response: %s", string(body))
+			t.Logf("Response: %s", body.String())
 			t.Error("Expected 'profiles' field in response data")
 		}
 
@@ -86,7 +86,7 @@ func TestMultipleEncodingProfiles(t *testing.T) {
 
 		profiles, ok := data["profiles"].([]interface{})
 		if !ok {
-			t.Logf("Response: %s", string(body))
+			t.Logf("Response: %s", body.String())
 			t.Fatalf("Expected 'profiles' to be an array")
 		}
 
@@ -162,8 +162,8 @@ func TestEncodingRetry(t *testing.T) {
 		}
 
 		// Could be OK or 404 if no failed tasks exist
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
-			t.Errorf("Unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotFound {
+			t.Errorf("Unexpected status: %d", resp.Code)
 		}
 	})
 
@@ -179,8 +179,8 @@ func TestEncodingRetry(t *testing.T) {
 		}
 
 		// Could be OK or 404 if task doesn't exist or 400 if task_id is missing
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound && resp.StatusCode != http.StatusBadRequest {
-			t.Errorf("Unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotFound && resp.Code != http.StatusBadRequest {
+			t.Errorf("Unexpected status: %d", resp.Code)
 		}
 	})
 }
@@ -244,7 +244,7 @@ func TestHLSGenerationVerification(t *testing.T) {
 		}
 
 		// Could be OK or 404 if media doesn't exist
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			data, err := getResponseData(body)
 			if err != nil {
 				t.Fatalf("Failed to parse variants response: %v", err)
@@ -317,7 +317,7 @@ func TestEncodingProfileCRUD(t *testing.T) {
 		}
 
 		if _, ok := data["profiles"]; !ok {
-			t.Logf("Response: %s", string(body))
+			t.Logf("Response: %s", body.String())
 			t.Error("Expected 'profiles' field in response data")
 		}
 	})
@@ -332,8 +332,8 @@ func TestEncodingProfileCRUD(t *testing.T) {
 		}
 
 		// Could be OK or 404 if profile doesn't exist
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
-			t.Errorf("Unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotFound {
+			t.Errorf("Unexpected status: %d", resp.Code)
 		}
 	})
 

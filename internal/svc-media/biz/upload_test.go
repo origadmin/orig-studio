@@ -265,6 +265,18 @@ func (r *MockMediaRepo) ResolveToID(ctx context.Context, shortToken string) (str
 	return m.Id, nil
 }
 
+func (r *MockMediaRepo) UpdateSpriteFields(ctx context.Context, mediaID string, spriteStatus string, spritePath string, vttPath string) error {
+	return nil
+}
+
+func (r *MockMediaRepo) UpdateThumbnailFields(ctx context.Context, mediaID string, thumbnail string, thumbnailTime float64) error {
+	return nil
+}
+
+func (r *MockMediaRepo) UpdatePreviewFilePath(ctx context.Context, mediaID string, previewFilePath string) error {
+	return nil
+}
+
 // MockEncodeProfileRepo 模拟编码配置仓库
 type MockEncodeProfileRepo struct {
 	profiles map[int]*dto.EncodeProfile

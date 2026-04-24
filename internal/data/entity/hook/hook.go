@@ -68,6 +68,18 @@ func (f CommentLikeFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.CommentLikeMutation", m)
 }
 
+// The CommentReportFunc type is an adapter to allow the use of ordinary
+// function as CommentReport mutator.
+type CommentReportFunc func(context.Context, *entity.CommentReportMutation) (entity.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CommentReportFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Value, error) {
+	if mv, ok := m.(*entity.CommentReportMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.CommentReportMutation", m)
+}
+
 // The EncodeProfileFunc type is an adapter to allow the use of ordinary
 // function as EncodeProfile mutator.
 type EncodeProfileFunc func(context.Context, *entity.EncodeProfileMutation) (entity.Value, error)
@@ -102,6 +114,18 @@ func (f FavoriteFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Val
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.FavoriteMutation", m)
+}
+
+// The GroupMemberFunc type is an adapter to allow the use of ordinary
+// function as GroupMember mutator.
+type GroupMemberFunc func(context.Context, *entity.GroupMemberMutation) (entity.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GroupMemberFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Value, error) {
+	if mv, ok := m.(*entity.GroupMemberMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.GroupMemberMutation", m)
 }
 
 // The LikeFunc type is an adapter to allow the use of ordinary
@@ -152,6 +176,18 @@ func (f MediaPlaylistFunc) Mutate(ctx context.Context, m entity.Mutation) (entit
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.MediaPlaylistMutation", m)
 }
 
+// The MediaReviewLogFunc type is an adapter to allow the use of ordinary
+// function as MediaReviewLog mutator.
+type MediaReviewLogFunc func(context.Context, *entity.MediaReviewLogMutation) (entity.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MediaReviewLogFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Value, error) {
+	if mv, ok := m.(*entity.MediaReviewLogMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.MediaReviewLogMutation", m)
+}
+
 // The MediaTagFunc type is an adapter to allow the use of ordinary
 // function as MediaTag mutator.
 type MediaTagFunc func(context.Context, *entity.MediaTagMutation) (entity.Value, error)
@@ -176,6 +212,18 @@ func (f NotificationFunc) Mutate(ctx context.Context, m entity.Mutation) (entity
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.NotificationMutation", m)
 }
 
+// The PermissionGroupFunc type is an adapter to allow the use of ordinary
+// function as PermissionGroup mutator.
+type PermissionGroupFunc func(context.Context, *entity.PermissionGroupMutation) (entity.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PermissionGroupFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Value, error) {
+	if mv, ok := m.(*entity.PermissionGroupMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.PermissionGroupMutation", m)
+}
+
 // The PlaylistFunc type is an adapter to allow the use of ordinary
 // function as Playlist mutator.
 type PlaylistFunc func(context.Context, *entity.PlaylistMutation) (entity.Value, error)
@@ -186,6 +234,18 @@ func (f PlaylistFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Val
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.PlaylistMutation", m)
+}
+
+// The SettingFunc type is an adapter to allow the use of ordinary
+// function as Setting mutator.
+type SettingFunc func(context.Context, *entity.SettingMutation) (entity.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SettingFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Value, error) {
+	if mv, ok := m.(*entity.SettingMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.SettingMutation", m)
 }
 
 // The SubscriptionFunc type is an adapter to allow the use of ordinary

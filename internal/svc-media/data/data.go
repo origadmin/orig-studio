@@ -25,6 +25,7 @@ var ProviderSet = wire.NewSet(
 	NewUploadRepo,
 	NewEncodeProfileRepo,
 	NewEncodingTaskRepo,
+	NewReviewLogRepo,
 	NewLocalStorage,
 )
 

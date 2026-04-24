@@ -541,6 +541,31 @@ func (r *mediaRepo) getMediaID(ctx context.Context, idOrShortToken string) (stri
 	return m.ID, nil
 }
 
+func (r *mediaRepo) UpdateSpriteFields(ctx context.Context, mediaID string, spriteStatus string, spritePath string, vttPath string) error {
+	update := r.db.Media.UpdateOneID(mediaID).
+		SetSpriteStatus(spriteStatus)
+	if spritePath != "" {
+		update = update.SetSpritePath(spritePath)
+	}
+	if vttPath != "" {
+		update = update.SetVttPath(vttPath)
+	}
+	return update.Exec(ctx)
+}
+
+func (r *mediaRepo) UpdateThumbnailFields(ctx context.Context, mediaID string, thumbnail string, thumbnailTime float64) error {
+	return r.db.Media.UpdateOneID(mediaID).
+		SetThumbnail(thumbnail).
+		SetThumbnailTime(thumbnailTime).
+		Exec(ctx)
+}
+
+func (r *mediaRepo) UpdatePreviewFilePath(ctx context.Context, mediaID string, previewFilePath string) error {
+	return r.db.Media.UpdateOneID(mediaID).
+		SetPreviewFilePath(previewFilePath).
+		Exec(ctx)
+}
+
 // convertCategoryToProto converts entity.Category → proto types.Category.
 func convertCategoryToProto(c *entity.Category) *types.Category {
 	return &types.Category{

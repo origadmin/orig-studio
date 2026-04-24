@@ -91,6 +91,16 @@ const (
 	EdgeSubscriptions = "subscriptions"
 	// EdgeSubscribers holds the string denoting the subscribers edge name in mutations.
 	EdgeSubscribers = "subscribers"
+	// EdgeReviewLogs holds the string denoting the review_logs edge name in mutations.
+	EdgeReviewLogs = "review_logs"
+	// EdgeCommentReports holds the string denoting the comment_reports edge name in mutations.
+	EdgeCommentReports = "comment_reports"
+	// EdgeModeratedComments holds the string denoting the moderated_comments edge name in mutations.
+	EdgeModeratedComments = "moderated_comments"
+	// EdgeGroupMemberships holds the string denoting the group_memberships edge name in mutations.
+	EdgeGroupMemberships = "group_memberships"
+	// EdgeCreatedGroups holds the string denoting the created_groups edge name in mutations.
+	EdgeCreatedGroups = "created_groups"
 	// Table holds the table name of the user in the database.
 	Table = "users_user"
 	// MediaTable is the table that holds the media relation/edge.
@@ -178,6 +188,41 @@ const (
 	SubscribersInverseTable = "subscriptions_subscription"
 	// SubscribersColumn is the table column denoting the subscribers relation/edge.
 	SubscribersColumn = "channel_id"
+	// ReviewLogsTable is the table that holds the review_logs relation/edge.
+	ReviewLogsTable = "media_review_logs"
+	// ReviewLogsInverseTable is the table name for the MediaReviewLog entity.
+	// It exists in this package in order to avoid circular dependency with the "mediareviewlog" package.
+	ReviewLogsInverseTable = "media_review_logs"
+	// ReviewLogsColumn is the table column denoting the review_logs relation/edge.
+	ReviewLogsColumn = "reviewer_id"
+	// CommentReportsTable is the table that holds the comment_reports relation/edge.
+	CommentReportsTable = "content_comment_reports"
+	// CommentReportsInverseTable is the table name for the CommentReport entity.
+	// It exists in this package in order to avoid circular dependency with the "commentreport" package.
+	CommentReportsInverseTable = "content_comment_reports"
+	// CommentReportsColumn is the table column denoting the comment_reports relation/edge.
+	CommentReportsColumn = "reporter_id"
+	// ModeratedCommentsTable is the table that holds the moderated_comments relation/edge.
+	ModeratedCommentsTable = "files_comment"
+	// ModeratedCommentsInverseTable is the table name for the Comment entity.
+	// It exists in this package in order to avoid circular dependency with the "comment" package.
+	ModeratedCommentsInverseTable = "files_comment"
+	// ModeratedCommentsColumn is the table column denoting the moderated_comments relation/edge.
+	ModeratedCommentsColumn = "moderated_by"
+	// GroupMembershipsTable is the table that holds the group_memberships relation/edge.
+	GroupMembershipsTable = "auth_group_members"
+	// GroupMembershipsInverseTable is the table name for the GroupMember entity.
+	// It exists in this package in order to avoid circular dependency with the "groupmember" package.
+	GroupMembershipsInverseTable = "auth_group_members"
+	// GroupMembershipsColumn is the table column denoting the group_memberships relation/edge.
+	GroupMembershipsColumn = "user_id"
+	// CreatedGroupsTable is the table that holds the created_groups relation/edge.
+	CreatedGroupsTable = "auth_permission_groups"
+	// CreatedGroupsInverseTable is the table name for the PermissionGroup entity.
+	// It exists in this package in order to avoid circular dependency with the "permissiongroup" package.
+	CreatedGroupsInverseTable = "auth_permission_groups"
+	// CreatedGroupsColumn is the table column denoting the created_groups relation/edge.
+	CreatedGroupsColumn = "created_by"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -622,6 +667,76 @@ func BySubscribers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newSubscribersStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByReviewLogsCount orders the results by review_logs count.
+func ByReviewLogsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newReviewLogsStep(), opts...)
+	}
+}
+
+// ByReviewLogs orders the results by review_logs terms.
+func ByReviewLogs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newReviewLogsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCommentReportsCount orders the results by comment_reports count.
+func ByCommentReportsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCommentReportsStep(), opts...)
+	}
+}
+
+// ByCommentReports orders the results by comment_reports terms.
+func ByCommentReports(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCommentReportsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByModeratedCommentsCount orders the results by moderated_comments count.
+func ByModeratedCommentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newModeratedCommentsStep(), opts...)
+	}
+}
+
+// ByModeratedComments orders the results by moderated_comments terms.
+func ByModeratedComments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newModeratedCommentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByGroupMembershipsCount orders the results by group_memberships count.
+func ByGroupMembershipsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newGroupMembershipsStep(), opts...)
+	}
+}
+
+// ByGroupMemberships orders the results by group_memberships terms.
+func ByGroupMemberships(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newGroupMembershipsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCreatedGroupsCount orders the results by created_groups count.
+func ByCreatedGroupsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCreatedGroupsStep(), opts...)
+	}
+}
+
+// ByCreatedGroups orders the results by created_groups terms.
+func ByCreatedGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCreatedGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newMediaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -711,5 +826,40 @@ func newSubscribersStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SubscribersInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, SubscribersTable, SubscribersColumn),
+	)
+}
+func newReviewLogsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ReviewLogsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ReviewLogsTable, ReviewLogsColumn),
+	)
+}
+func newCommentReportsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CommentReportsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CommentReportsTable, CommentReportsColumn),
+	)
+}
+func newModeratedCommentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ModeratedCommentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ModeratedCommentsTable, ModeratedCommentsColumn),
+	)
+}
+func newGroupMembershipsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(GroupMembershipsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, GroupMembershipsTable, GroupMembershipsColumn),
+	)
+}
+func newCreatedGroupsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CreatedGroupsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CreatedGroupsTable, CreatedGroupsColumn),
 	)
 }

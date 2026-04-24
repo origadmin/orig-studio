@@ -12,42 +12,47 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/data/entity/setting"
 	"origadmin/application/origcms/internal/handler"
+	systembiz "origadmin/application/origcms/internal/svc-system/biz"
 	systemData "origadmin/application/origcms/internal/svc-system/data"
 )
 
-// SystemHandler handles system-related routes
 type SystemHandler struct {
 	jwtMgr    *auth.Manager
 	statsRepo *systemData.StatsRepo
+	settingUC *systembiz.SettingUseCase
 }
 
-// NewSystemHandler creates a new SystemHandler
-func NewSystemHandler(jwtMgr *auth.Manager, statsRepo *systemData.StatsRepo) *SystemHandler {
+func NewSystemHandler(
+	jwtMgr *auth.Manager,
+	statsRepo *systemData.StatsRepo,
+	settingUC *systembiz.SettingUseCase,
+) *SystemHandler {
 	return &SystemHandler{
 		jwtMgr:    jwtMgr,
 		statsRepo: statsRepo,
+		settingUC: settingUC,
 	}
 }
 
-// Register registers all system routes
 func (h *SystemHandler) Register(r handler.Router) {
 	system := r.Group("/system")
-	// All system routes require auth
 	{
-		// ========== 1. Stats sub-module ==========
 		h.registerStats(system)
-
-		// ========== 2. Settings sub-module ==========
 		h.registerSettings(system)
+	}
+
+	config := r.Group("/config")
+	{
+		config.GET("", GinHandlerToHTTP(h.getPublicConfig()))
 	}
 }
 
-// registerStats handles all statistics routes
 func (h *SystemHandler) registerStats(g handler.Router) {
 	stats := g.Group("/stats")
 	{
-		// Static routes first (alphabetical order)
 		stats.GET("/dashboard", GinHandlerToHTTP(h.getDashboardStats()))
 		stats.GET("/media", GinHandlerToHTTP(h.getMediaStats()))
 		stats.GET("/traffic", GinHandlerToHTTP(h.getTrafficStats()))
@@ -55,13 +60,13 @@ func (h *SystemHandler) registerStats(g handler.Router) {
 	}
 }
 
-// registerSettings handles all settings routes
 func (h *SystemHandler) registerSettings(g handler.Router) {
 	settings := g.Group("/settings")
 	{
-		// Collection routes
 		settings.GET("", GinHandlerToHTTP(h.getSettings()))
 		settings.PUT("", GinHandlerToHTTP(h.updateSettings()))
+		settings.GET("/:key", GinHandlerToHTTP(h.getSettingByKey()))
+		settings.POST("/:key/reset", GinHandlerToHTTP(h.resetSetting()))
 	}
 }
 
@@ -123,7 +128,6 @@ func (h *SystemHandler) getTrafficStats() gin.HandlerFunc {
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 
-		// TODO: Implement real traffic stats
 		_ = page
 		_ = pageSize
 
@@ -140,20 +144,196 @@ func (h *SystemHandler) getTrafficStats() gin.HandlerFunc {
 
 func (h *SystemHandler) getSettings() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// TODO: Implement get settings
+		if h.settingUC == nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "settings service not available"})
+			return
+		}
+
+		items, err := h.settingUC.ListAll(c.Request.Context())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		grouped := make(map[string][]*entity.Setting)
+		for _, item := range items {
+			masked := h.settingUC.MaskSensitive(item)
+			cat := string(item.Category)
+			grouped[cat] = append(grouped[cat], masked)
+		}
+
 		c.JSON(http.StatusOK, gin.H{
-			"site_name":        "OrigCMS",
-			"site_description": "A modern media content management system",
-			"allow_register":   true,
-			"allow_upload":     true,
-			"max_upload_size":  1073741824, // 1GB
+			"code":    0,
+			"message": "ok",
+			"data":    grouped,
 		})
 	}
 }
 
 func (h *SystemHandler) updateSettings() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// TODO: Implement update settings
-		c.JSON(http.StatusOK, gin.H{"success": true})
+		if h.settingUC == nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "settings service not available"})
+			return
+		}
+
+		var req struct {
+			Settings []struct {
+				Key   string `json:"key" binding:"required"`
+				Value string `json:"value"`
+			} `json:"settings" binding:"required"`
+		}
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
+			return
+		}
+
+		var updated []*entity.Setting
+		for _, item := range req.Settings {
+			existing, err := h.settingUC.GetByKey(c.Request.Context(), item.Key)
+			if err != nil {
+				c.JSON(
+					http.StatusNotFound,
+					gin.H{"code": ErrNotFound, "message": "setting not found: " + item.Key},
+				)
+				return
+			}
+
+			if err := validateSettingValue(item.Value, existing.Type); err != nil {
+				c.JSON(
+					http.StatusBadRequest,
+					gin.H{
+						"code":    ErrBadRequest,
+						"message": "invalid value for " + item.Key + ": " + err.Error(),
+					},
+				)
+				return
+			}
+
+			s := &entity.Setting{
+				Key:           existing.Key,
+				Value:         item.Value,
+				Type:          existing.Type,
+				Category:      existing.Category,
+				Description:   existing.Description,
+				IsSensitive:   existing.IsSensitive,
+				FallbackValue: existing.FallbackValue,
+				IsBuiltin:     existing.IsBuiltin,
+			}
+			result, err := h.settingUC.Upsert(c.Request.Context(), s)
+			if err != nil {
+				c.JSON(
+					http.StatusInternalServerError,
+					gin.H{"code": ErrInternal, "message": err.Error()},
+				)
+				return
+			}
+			updated = append(updated, result)
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    updated,
+		})
 	}
+}
+
+func (h *SystemHandler) getSettingByKey() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if h.settingUC == nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "settings service not available"})
+			return
+		}
+
+		key := c.Param("key")
+		if key == "" {
+			c.JSON(
+				http.StatusBadRequest,
+				gin.H{"code": ErrBadRequest, "message": "key is required"},
+			)
+			return
+		}
+
+		s, err := h.settingUC.GetByKey(c.Request.Context(), key)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"code": ErrNotFound, "message": "setting not found"})
+			return
+		}
+
+		masked := h.settingUC.MaskSensitive(s)
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    masked,
+		})
+	}
+}
+
+func (h *SystemHandler) resetSetting() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if h.settingUC == nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "settings service not available"})
+			return
+		}
+
+		key := c.Param("key")
+		if key == "" {
+			c.JSON(
+				http.StatusBadRequest,
+				gin.H{"code": ErrBadRequest, "message": "key is required"},
+			)
+			return
+		}
+
+		s, err := h.settingUC.ResetToDefault(c.Request.Context(), key)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"code": ErrNotFound, "message": "setting not found"})
+			return
+		}
+
+		masked := h.settingUC.MaskSensitive(s)
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    masked,
+		})
+	}
+}
+
+// ==================== Public Config Endpoint ====================
+
+func (h *SystemHandler) getPublicConfig() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if h.settingUC == nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "settings service not available"})
+			return
+		}
+
+		publicSettings := h.settingUC.GetPublicSettings(c.Request.Context())
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    publicSettings,
+		})
+	}
+}
+
+// ==================== Validation Helpers ====================
+
+func validateSettingValue(value string, typ setting.Type) error {
+	switch typ {
+	case setting.TypeBool:
+		if _, err := strconv.ParseBool(value); err != nil {
+			return err
+		}
+	case setting.TypeInt:
+		if _, err := strconv.Atoi(value); err != nil {
+			return err
+		}
+	case setting.TypeString:
+	case setting.TypeJSON:
+	}
+	return nil
 }

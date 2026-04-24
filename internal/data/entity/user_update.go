@@ -11,10 +11,14 @@ import (
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
 	"origadmin/application/origcms/internal/data/entity/commentlike"
+	"origadmin/application/origcms/internal/data/entity/commentreport"
 	"origadmin/application/origcms/internal/data/entity/favorite"
+	"origadmin/application/origcms/internal/data/entity/groupmember"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
+	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/notification"
+	"origadmin/application/origcms/internal/data/entity/permissiongroup"
 	"origadmin/application/origcms/internal/data/entity/playlist"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"origadmin/application/origcms/internal/data/entity/subscription"
@@ -641,6 +645,81 @@ func (_u *UserUpdate) AddSubscribers(v ...*Subscription) *UserUpdate {
 	return _u.AddSubscriberIDs(ids...)
 }
 
+// AddReviewLogIDs adds the "review_logs" edge to the MediaReviewLog entity by IDs.
+func (_u *UserUpdate) AddReviewLogIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddReviewLogIDs(ids...)
+	return _u
+}
+
+// AddReviewLogs adds the "review_logs" edges to the MediaReviewLog entity.
+func (_u *UserUpdate) AddReviewLogs(v ...*MediaReviewLog) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddReviewLogIDs(ids...)
+}
+
+// AddCommentReportIDs adds the "comment_reports" edge to the CommentReport entity by IDs.
+func (_u *UserUpdate) AddCommentReportIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddCommentReportIDs(ids...)
+	return _u
+}
+
+// AddCommentReports adds the "comment_reports" edges to the CommentReport entity.
+func (_u *UserUpdate) AddCommentReports(v ...*CommentReport) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCommentReportIDs(ids...)
+}
+
+// AddModeratedCommentIDs adds the "moderated_comments" edge to the Comment entity by IDs.
+func (_u *UserUpdate) AddModeratedCommentIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddModeratedCommentIDs(ids...)
+	return _u
+}
+
+// AddModeratedComments adds the "moderated_comments" edges to the Comment entity.
+func (_u *UserUpdate) AddModeratedComments(v ...*Comment) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddModeratedCommentIDs(ids...)
+}
+
+// AddGroupMembershipIDs adds the "group_memberships" edge to the GroupMember entity by IDs.
+func (_u *UserUpdate) AddGroupMembershipIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddGroupMembershipIDs(ids...)
+	return _u
+}
+
+// AddGroupMemberships adds the "group_memberships" edges to the GroupMember entity.
+func (_u *UserUpdate) AddGroupMemberships(v ...*GroupMember) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddGroupMembershipIDs(ids...)
+}
+
+// AddCreatedGroupIDs adds the "created_groups" edge to the PermissionGroup entity by IDs.
+func (_u *UserUpdate) AddCreatedGroupIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddCreatedGroupIDs(ids...)
+	return _u
+}
+
+// AddCreatedGroups adds the "created_groups" edges to the PermissionGroup entity.
+func (_u *UserUpdate) AddCreatedGroups(v ...*PermissionGroup) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCreatedGroupIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
@@ -917,6 +996,111 @@ func (_u *UserUpdate) RemoveSubscribers(v ...*Subscription) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveSubscriberIDs(ids...)
+}
+
+// ClearReviewLogs clears all "review_logs" edges to the MediaReviewLog entity.
+func (_u *UserUpdate) ClearReviewLogs() *UserUpdate {
+	_u.mutation.ClearReviewLogs()
+	return _u
+}
+
+// RemoveReviewLogIDs removes the "review_logs" edge to MediaReviewLog entities by IDs.
+func (_u *UserUpdate) RemoveReviewLogIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemoveReviewLogIDs(ids...)
+	return _u
+}
+
+// RemoveReviewLogs removes "review_logs" edges to MediaReviewLog entities.
+func (_u *UserUpdate) RemoveReviewLogs(v ...*MediaReviewLog) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveReviewLogIDs(ids...)
+}
+
+// ClearCommentReports clears all "comment_reports" edges to the CommentReport entity.
+func (_u *UserUpdate) ClearCommentReports() *UserUpdate {
+	_u.mutation.ClearCommentReports()
+	return _u
+}
+
+// RemoveCommentReportIDs removes the "comment_reports" edge to CommentReport entities by IDs.
+func (_u *UserUpdate) RemoveCommentReportIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemoveCommentReportIDs(ids...)
+	return _u
+}
+
+// RemoveCommentReports removes "comment_reports" edges to CommentReport entities.
+func (_u *UserUpdate) RemoveCommentReports(v ...*CommentReport) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCommentReportIDs(ids...)
+}
+
+// ClearModeratedComments clears all "moderated_comments" edges to the Comment entity.
+func (_u *UserUpdate) ClearModeratedComments() *UserUpdate {
+	_u.mutation.ClearModeratedComments()
+	return _u
+}
+
+// RemoveModeratedCommentIDs removes the "moderated_comments" edge to Comment entities by IDs.
+func (_u *UserUpdate) RemoveModeratedCommentIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemoveModeratedCommentIDs(ids...)
+	return _u
+}
+
+// RemoveModeratedComments removes "moderated_comments" edges to Comment entities.
+func (_u *UserUpdate) RemoveModeratedComments(v ...*Comment) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveModeratedCommentIDs(ids...)
+}
+
+// ClearGroupMemberships clears all "group_memberships" edges to the GroupMember entity.
+func (_u *UserUpdate) ClearGroupMemberships() *UserUpdate {
+	_u.mutation.ClearGroupMemberships()
+	return _u
+}
+
+// RemoveGroupMembershipIDs removes the "group_memberships" edge to GroupMember entities by IDs.
+func (_u *UserUpdate) RemoveGroupMembershipIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemoveGroupMembershipIDs(ids...)
+	return _u
+}
+
+// RemoveGroupMemberships removes "group_memberships" edges to GroupMember entities.
+func (_u *UserUpdate) RemoveGroupMemberships(v ...*GroupMember) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveGroupMembershipIDs(ids...)
+}
+
+// ClearCreatedGroups clears all "created_groups" edges to the PermissionGroup entity.
+func (_u *UserUpdate) ClearCreatedGroups() *UserUpdate {
+	_u.mutation.ClearCreatedGroups()
+	return _u
+}
+
+// RemoveCreatedGroupIDs removes the "created_groups" edge to PermissionGroup entities by IDs.
+func (_u *UserUpdate) RemoveCreatedGroupIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemoveCreatedGroupIDs(ids...)
+	return _u
+}
+
+// RemoveCreatedGroups removes "created_groups" edges to PermissionGroup entities.
+func (_u *UserUpdate) RemoveCreatedGroups(v ...*PermissionGroup) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCreatedGroupIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -1706,6 +1890,231 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.ReviewLogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ReviewLogsTable,
+			Columns: []string{user.ReviewLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareviewlog.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedReviewLogsIDs(); len(nodes) > 0 && !_u.mutation.ReviewLogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ReviewLogsTable,
+			Columns: []string{user.ReviewLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareviewlog.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ReviewLogsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ReviewLogsTable,
+			Columns: []string{user.ReviewLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareviewlog.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CommentReportsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CommentReportsTable,
+			Columns: []string{user.CommentReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(commentreport.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCommentReportsIDs(); len(nodes) > 0 && !_u.mutation.CommentReportsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CommentReportsTable,
+			Columns: []string{user.CommentReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(commentreport.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CommentReportsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CommentReportsTable,
+			Columns: []string{user.CommentReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(commentreport.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ModeratedCommentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModeratedCommentsTable,
+			Columns: []string{user.ModeratedCommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedModeratedCommentsIDs(); len(nodes) > 0 && !_u.mutation.ModeratedCommentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModeratedCommentsTable,
+			Columns: []string{user.ModeratedCommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ModeratedCommentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModeratedCommentsTable,
+			Columns: []string{user.ModeratedCommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.GroupMembershipsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.GroupMembershipsTable,
+			Columns: []string{user.GroupMembershipsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(groupmember.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedGroupMembershipsIDs(); len(nodes) > 0 && !_u.mutation.GroupMembershipsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.GroupMembershipsTable,
+			Columns: []string{user.GroupMembershipsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(groupmember.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.GroupMembershipsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.GroupMembershipsTable,
+			Columns: []string{user.GroupMembershipsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(groupmember.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CreatedGroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CreatedGroupsTable,
+			Columns: []string{user.CreatedGroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissiongroup.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCreatedGroupsIDs(); len(nodes) > 0 && !_u.mutation.CreatedGroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CreatedGroupsTable,
+			Columns: []string{user.CreatedGroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissiongroup.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CreatedGroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CreatedGroupsTable,
+			Columns: []string{user.CreatedGroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissiongroup.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -2328,6 +2737,81 @@ func (_u *UserUpdateOne) AddSubscribers(v ...*Subscription) *UserUpdateOne {
 	return _u.AddSubscriberIDs(ids...)
 }
 
+// AddReviewLogIDs adds the "review_logs" edge to the MediaReviewLog entity by IDs.
+func (_u *UserUpdateOne) AddReviewLogIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddReviewLogIDs(ids...)
+	return _u
+}
+
+// AddReviewLogs adds the "review_logs" edges to the MediaReviewLog entity.
+func (_u *UserUpdateOne) AddReviewLogs(v ...*MediaReviewLog) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddReviewLogIDs(ids...)
+}
+
+// AddCommentReportIDs adds the "comment_reports" edge to the CommentReport entity by IDs.
+func (_u *UserUpdateOne) AddCommentReportIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddCommentReportIDs(ids...)
+	return _u
+}
+
+// AddCommentReports adds the "comment_reports" edges to the CommentReport entity.
+func (_u *UserUpdateOne) AddCommentReports(v ...*CommentReport) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCommentReportIDs(ids...)
+}
+
+// AddModeratedCommentIDs adds the "moderated_comments" edge to the Comment entity by IDs.
+func (_u *UserUpdateOne) AddModeratedCommentIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddModeratedCommentIDs(ids...)
+	return _u
+}
+
+// AddModeratedComments adds the "moderated_comments" edges to the Comment entity.
+func (_u *UserUpdateOne) AddModeratedComments(v ...*Comment) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddModeratedCommentIDs(ids...)
+}
+
+// AddGroupMembershipIDs adds the "group_memberships" edge to the GroupMember entity by IDs.
+func (_u *UserUpdateOne) AddGroupMembershipIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddGroupMembershipIDs(ids...)
+	return _u
+}
+
+// AddGroupMemberships adds the "group_memberships" edges to the GroupMember entity.
+func (_u *UserUpdateOne) AddGroupMemberships(v ...*GroupMember) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddGroupMembershipIDs(ids...)
+}
+
+// AddCreatedGroupIDs adds the "created_groups" edge to the PermissionGroup entity by IDs.
+func (_u *UserUpdateOne) AddCreatedGroupIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddCreatedGroupIDs(ids...)
+	return _u
+}
+
+// AddCreatedGroups adds the "created_groups" edges to the PermissionGroup entity.
+func (_u *UserUpdateOne) AddCreatedGroups(v ...*PermissionGroup) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCreatedGroupIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
@@ -2604,6 +3088,111 @@ func (_u *UserUpdateOne) RemoveSubscribers(v ...*Subscription) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveSubscriberIDs(ids...)
+}
+
+// ClearReviewLogs clears all "review_logs" edges to the MediaReviewLog entity.
+func (_u *UserUpdateOne) ClearReviewLogs() *UserUpdateOne {
+	_u.mutation.ClearReviewLogs()
+	return _u
+}
+
+// RemoveReviewLogIDs removes the "review_logs" edge to MediaReviewLog entities by IDs.
+func (_u *UserUpdateOne) RemoveReviewLogIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemoveReviewLogIDs(ids...)
+	return _u
+}
+
+// RemoveReviewLogs removes "review_logs" edges to MediaReviewLog entities.
+func (_u *UserUpdateOne) RemoveReviewLogs(v ...*MediaReviewLog) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveReviewLogIDs(ids...)
+}
+
+// ClearCommentReports clears all "comment_reports" edges to the CommentReport entity.
+func (_u *UserUpdateOne) ClearCommentReports() *UserUpdateOne {
+	_u.mutation.ClearCommentReports()
+	return _u
+}
+
+// RemoveCommentReportIDs removes the "comment_reports" edge to CommentReport entities by IDs.
+func (_u *UserUpdateOne) RemoveCommentReportIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemoveCommentReportIDs(ids...)
+	return _u
+}
+
+// RemoveCommentReports removes "comment_reports" edges to CommentReport entities.
+func (_u *UserUpdateOne) RemoveCommentReports(v ...*CommentReport) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCommentReportIDs(ids...)
+}
+
+// ClearModeratedComments clears all "moderated_comments" edges to the Comment entity.
+func (_u *UserUpdateOne) ClearModeratedComments() *UserUpdateOne {
+	_u.mutation.ClearModeratedComments()
+	return _u
+}
+
+// RemoveModeratedCommentIDs removes the "moderated_comments" edge to Comment entities by IDs.
+func (_u *UserUpdateOne) RemoveModeratedCommentIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemoveModeratedCommentIDs(ids...)
+	return _u
+}
+
+// RemoveModeratedComments removes "moderated_comments" edges to Comment entities.
+func (_u *UserUpdateOne) RemoveModeratedComments(v ...*Comment) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveModeratedCommentIDs(ids...)
+}
+
+// ClearGroupMemberships clears all "group_memberships" edges to the GroupMember entity.
+func (_u *UserUpdateOne) ClearGroupMemberships() *UserUpdateOne {
+	_u.mutation.ClearGroupMemberships()
+	return _u
+}
+
+// RemoveGroupMembershipIDs removes the "group_memberships" edge to GroupMember entities by IDs.
+func (_u *UserUpdateOne) RemoveGroupMembershipIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemoveGroupMembershipIDs(ids...)
+	return _u
+}
+
+// RemoveGroupMemberships removes "group_memberships" edges to GroupMember entities.
+func (_u *UserUpdateOne) RemoveGroupMemberships(v ...*GroupMember) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveGroupMembershipIDs(ids...)
+}
+
+// ClearCreatedGroups clears all "created_groups" edges to the PermissionGroup entity.
+func (_u *UserUpdateOne) ClearCreatedGroups() *UserUpdateOne {
+	_u.mutation.ClearCreatedGroups()
+	return _u
+}
+
+// RemoveCreatedGroupIDs removes the "created_groups" edge to PermissionGroup entities by IDs.
+func (_u *UserUpdateOne) RemoveCreatedGroupIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemoveCreatedGroupIDs(ids...)
+	return _u
+}
+
+// RemoveCreatedGroups removes "created_groups" edges to PermissionGroup entities.
+func (_u *UserUpdateOne) RemoveCreatedGroups(v ...*PermissionGroup) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCreatedGroupIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -3416,6 +4005,231 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ReviewLogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ReviewLogsTable,
+			Columns: []string{user.ReviewLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareviewlog.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedReviewLogsIDs(); len(nodes) > 0 && !_u.mutation.ReviewLogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ReviewLogsTable,
+			Columns: []string{user.ReviewLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareviewlog.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ReviewLogsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ReviewLogsTable,
+			Columns: []string{user.ReviewLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareviewlog.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CommentReportsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CommentReportsTable,
+			Columns: []string{user.CommentReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(commentreport.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCommentReportsIDs(); len(nodes) > 0 && !_u.mutation.CommentReportsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CommentReportsTable,
+			Columns: []string{user.CommentReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(commentreport.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CommentReportsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CommentReportsTable,
+			Columns: []string{user.CommentReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(commentreport.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ModeratedCommentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModeratedCommentsTable,
+			Columns: []string{user.ModeratedCommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedModeratedCommentsIDs(); len(nodes) > 0 && !_u.mutation.ModeratedCommentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModeratedCommentsTable,
+			Columns: []string{user.ModeratedCommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ModeratedCommentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModeratedCommentsTable,
+			Columns: []string{user.ModeratedCommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.GroupMembershipsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.GroupMembershipsTable,
+			Columns: []string{user.GroupMembershipsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(groupmember.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedGroupMembershipsIDs(); len(nodes) > 0 && !_u.mutation.GroupMembershipsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.GroupMembershipsTable,
+			Columns: []string{user.GroupMembershipsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(groupmember.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.GroupMembershipsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.GroupMembershipsTable,
+			Columns: []string{user.GroupMembershipsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(groupmember.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CreatedGroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CreatedGroupsTable,
+			Columns: []string{user.CreatedGroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissiongroup.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCreatedGroupsIDs(); len(nodes) > 0 && !_u.mutation.CreatedGroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CreatedGroupsTable,
+			Columns: []string{user.CreatedGroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissiongroup.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CreatedGroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CreatedGroupsTable,
+			Columns: []string{user.CreatedGroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissiongroup.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

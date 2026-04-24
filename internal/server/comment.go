@@ -14,7 +14,7 @@ import (
 	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 )
 
-func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr *auth.Manager, commentLikeUC *contentbiz.CommentLikeUseCase) {
+func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr *auth.Manager, commentLikeUC *contentbiz.CommentLikeUseCase, moderationUC *contentbiz.CommentModerationUseCase) {
 	// Public routes (no auth required)
 	publicComments := group.Group("/comments")
 	{
@@ -51,6 +51,16 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 			}
 			if parentID != "" {
 				query = query.Where(comment.HasParentWith(comment.ID(parentID)))
+			}
+
+			if claims, ok := GetClaims(c); ok && (claims.IsStaff || claims.Role == "admin") {
+			} else if currentUserID != "" {
+				query = query.Where(comment.Or(
+					comment.StatusEQ(comment.StatusAPPROVED),
+					comment.UserID(currentUserID),
+				))
+			} else {
+				query = query.Where(comment.StatusEQ(comment.StatusAPPROVED))
 			}
 
 			total, err := query.Count(ctx)
@@ -163,7 +173,7 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 			createBuilder := client.Comment.Create().
 				SetText(input.Comment.Content).
 				SetUserID(claims.GetUserID()).
-				SetStatus("PENDING")
+				SetStatus(comment.Status(moderationUC.GetInitialStatus(ctx)))
 
 			if input.Comment.MediaID != "" {
 				createBuilder = createBuilder.SetMediaID(input.Comment.MediaID)
@@ -206,7 +216,7 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 				updateBuilder = updateBuilder.SetText(input.Comment.Content)
 			}
 			if input.Comment.Status != "" {
-				updateBuilder = updateBuilder.SetStatus(input.Comment.Status)
+				updateBuilder = updateBuilder.SetStatus(comment.Status(input.Comment.Status))
 			}
 
 			commentObj, err := updateBuilder.Save(ctx)

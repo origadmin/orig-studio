@@ -13,6 +13,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
+	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/mediatag"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"origadmin/application/origcms/internal/data/entity/user"
@@ -603,6 +604,87 @@ func (_u *MediaUpdate) AddReportedTimes(v int) *MediaUpdate {
 	return _u
 }
 
+// SetSpriteStatus sets the "sprite_status" field.
+func (_u *MediaUpdate) SetSpriteStatus(v string) *MediaUpdate {
+	_u.mutation.SetSpriteStatus(v)
+	return _u
+}
+
+// SetNillableSpriteStatus sets the "sprite_status" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableSpriteStatus(v *string) *MediaUpdate {
+	if v != nil {
+		_u.SetSpriteStatus(*v)
+	}
+	return _u
+}
+
+// SetSpritePath sets the "sprite_path" field.
+func (_u *MediaUpdate) SetSpritePath(v string) *MediaUpdate {
+	_u.mutation.SetSpritePath(v)
+	return _u
+}
+
+// SetNillableSpritePath sets the "sprite_path" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableSpritePath(v *string) *MediaUpdate {
+	if v != nil {
+		_u.SetSpritePath(*v)
+	}
+	return _u
+}
+
+// ClearSpritePath clears the value of the "sprite_path" field.
+func (_u *MediaUpdate) ClearSpritePath() *MediaUpdate {
+	_u.mutation.ClearSpritePath()
+	return _u
+}
+
+// SetVttPath sets the "vtt_path" field.
+func (_u *MediaUpdate) SetVttPath(v string) *MediaUpdate {
+	_u.mutation.SetVttPath(v)
+	return _u
+}
+
+// SetNillableVttPath sets the "vtt_path" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableVttPath(v *string) *MediaUpdate {
+	if v != nil {
+		_u.SetVttPath(*v)
+	}
+	return _u
+}
+
+// ClearVttPath clears the value of the "vtt_path" field.
+func (_u *MediaUpdate) ClearVttPath() *MediaUpdate {
+	_u.mutation.ClearVttPath()
+	return _u
+}
+
+// SetThumbnailTime sets the "thumbnail_time" field.
+func (_u *MediaUpdate) SetThumbnailTime(v float64) *MediaUpdate {
+	_u.mutation.ResetThumbnailTime()
+	_u.mutation.SetThumbnailTime(v)
+	return _u
+}
+
+// SetNillableThumbnailTime sets the "thumbnail_time" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableThumbnailTime(v *float64) *MediaUpdate {
+	if v != nil {
+		_u.SetThumbnailTime(*v)
+	}
+	return _u
+}
+
+// AddThumbnailTime adds value to the "thumbnail_time" field.
+func (_u *MediaUpdate) AddThumbnailTime(v float64) *MediaUpdate {
+	_u.mutation.AddThumbnailTime(v)
+	return _u
+}
+
+// ClearThumbnailTime clears the value of the "thumbnail_time" field.
+func (_u *MediaUpdate) ClearThumbnailTime() *MediaUpdate {
+	_u.mutation.ClearThumbnailTime()
+	return _u
+}
+
 // SetTags sets the "tags" field.
 func (_u *MediaUpdate) SetTags(v []string) *MediaUpdate {
 	_u.mutation.SetTags(v)
@@ -805,6 +887,21 @@ func (_u *MediaUpdate) AddLikes(v ...*Like) *MediaUpdate {
 	return _u.AddLikeIDs(ids...)
 }
 
+// AddReviewLogIDs adds the "review_logs" edge to the MediaReviewLog entity by IDs.
+func (_u *MediaUpdate) AddReviewLogIDs(ids ...string) *MediaUpdate {
+	_u.mutation.AddReviewLogIDs(ids...)
+	return _u
+}
+
+// AddReviewLogs adds the "review_logs" edges to the MediaReviewLog entity.
+func (_u *MediaUpdate) AddReviewLogs(v ...*MediaReviewLog) *MediaUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddReviewLogIDs(ids...)
+}
+
 // Mutation returns the MediaMutation object of the builder.
 func (_u *MediaUpdate) Mutation() *MediaMutation {
 	return _u.mutation
@@ -933,6 +1030,27 @@ func (_u *MediaUpdate) RemoveLikes(v ...*Like) *MediaUpdate {
 	return _u.RemoveLikeIDs(ids...)
 }
 
+// ClearReviewLogs clears all "review_logs" edges to the MediaReviewLog entity.
+func (_u *MediaUpdate) ClearReviewLogs() *MediaUpdate {
+	_u.mutation.ClearReviewLogs()
+	return _u
+}
+
+// RemoveReviewLogIDs removes the "review_logs" edge to MediaReviewLog entities by IDs.
+func (_u *MediaUpdate) RemoveReviewLogIDs(ids ...string) *MediaUpdate {
+	_u.mutation.RemoveReviewLogIDs(ids...)
+	return _u
+}
+
+// RemoveReviewLogs removes "review_logs" edges to MediaReviewLog entities.
+func (_u *MediaUpdate) RemoveReviewLogs(v ...*MediaReviewLog) *MediaUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveReviewLogIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *MediaUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
@@ -1044,6 +1162,21 @@ func (_u *MediaUpdate) check() error {
 	if v, ok := _u.mutation.ReviewStatus(); ok {
 		if err := media.ReviewStatusValidator(v); err != nil {
 			return &ValidationError{Name: "review_status", err: fmt.Errorf(`entity: validator failed for field "Media.review_status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.SpriteStatus(); ok {
+		if err := media.SpriteStatusValidator(v); err != nil {
+			return &ValidationError{Name: "sprite_status", err: fmt.Errorf(`entity: validator failed for field "Media.sprite_status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.SpritePath(); ok {
+		if err := media.SpritePathValidator(v); err != nil {
+			return &ValidationError{Name: "sprite_path", err: fmt.Errorf(`entity: validator failed for field "Media.sprite_path": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.VttPath(); ok {
+		if err := media.VttPathValidator(v); err != nil {
+			return &ValidationError{Name: "vtt_path", err: fmt.Errorf(`entity: validator failed for field "Media.vtt_path": %w`, err)}
 		}
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
@@ -1222,6 +1355,30 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedReportedTimes(); ok {
 		_spec.AddField(media.FieldReportedTimes, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.SpriteStatus(); ok {
+		_spec.SetField(media.FieldSpriteStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SpritePath(); ok {
+		_spec.SetField(media.FieldSpritePath, field.TypeString, value)
+	}
+	if _u.mutation.SpritePathCleared() {
+		_spec.ClearField(media.FieldSpritePath, field.TypeString)
+	}
+	if value, ok := _u.mutation.VttPath(); ok {
+		_spec.SetField(media.FieldVttPath, field.TypeString, value)
+	}
+	if _u.mutation.VttPathCleared() {
+		_spec.ClearField(media.FieldVttPath, field.TypeString)
+	}
+	if value, ok := _u.mutation.ThumbnailTime(); ok {
+		_spec.SetField(media.FieldThumbnailTime, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedThumbnailTime(); ok {
+		_spec.AddField(media.FieldThumbnailTime, field.TypeFloat64, value)
+	}
+	if _u.mutation.ThumbnailTimeCleared() {
+		_spec.ClearField(media.FieldThumbnailTime, field.TypeFloat64)
 	}
 	if value, ok := _u.mutation.Tags(); ok {
 		_spec.SetField(media.FieldTags, field.TypeJSON, value)
@@ -1551,6 +1708,51 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ReviewLogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ReviewLogsTable,
+			Columns: []string{media.ReviewLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareviewlog.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedReviewLogsIDs(); len(nodes) > 0 && !_u.mutation.ReviewLogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ReviewLogsTable,
+			Columns: []string{media.ReviewLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareviewlog.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ReviewLogsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ReviewLogsTable,
+			Columns: []string{media.ReviewLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareviewlog.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -2145,6 +2347,87 @@ func (_u *MediaUpdateOne) AddReportedTimes(v int) *MediaUpdateOne {
 	return _u
 }
 
+// SetSpriteStatus sets the "sprite_status" field.
+func (_u *MediaUpdateOne) SetSpriteStatus(v string) *MediaUpdateOne {
+	_u.mutation.SetSpriteStatus(v)
+	return _u
+}
+
+// SetNillableSpriteStatus sets the "sprite_status" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableSpriteStatus(v *string) *MediaUpdateOne {
+	if v != nil {
+		_u.SetSpriteStatus(*v)
+	}
+	return _u
+}
+
+// SetSpritePath sets the "sprite_path" field.
+func (_u *MediaUpdateOne) SetSpritePath(v string) *MediaUpdateOne {
+	_u.mutation.SetSpritePath(v)
+	return _u
+}
+
+// SetNillableSpritePath sets the "sprite_path" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableSpritePath(v *string) *MediaUpdateOne {
+	if v != nil {
+		_u.SetSpritePath(*v)
+	}
+	return _u
+}
+
+// ClearSpritePath clears the value of the "sprite_path" field.
+func (_u *MediaUpdateOne) ClearSpritePath() *MediaUpdateOne {
+	_u.mutation.ClearSpritePath()
+	return _u
+}
+
+// SetVttPath sets the "vtt_path" field.
+func (_u *MediaUpdateOne) SetVttPath(v string) *MediaUpdateOne {
+	_u.mutation.SetVttPath(v)
+	return _u
+}
+
+// SetNillableVttPath sets the "vtt_path" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableVttPath(v *string) *MediaUpdateOne {
+	if v != nil {
+		_u.SetVttPath(*v)
+	}
+	return _u
+}
+
+// ClearVttPath clears the value of the "vtt_path" field.
+func (_u *MediaUpdateOne) ClearVttPath() *MediaUpdateOne {
+	_u.mutation.ClearVttPath()
+	return _u
+}
+
+// SetThumbnailTime sets the "thumbnail_time" field.
+func (_u *MediaUpdateOne) SetThumbnailTime(v float64) *MediaUpdateOne {
+	_u.mutation.ResetThumbnailTime()
+	_u.mutation.SetThumbnailTime(v)
+	return _u
+}
+
+// SetNillableThumbnailTime sets the "thumbnail_time" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableThumbnailTime(v *float64) *MediaUpdateOne {
+	if v != nil {
+		_u.SetThumbnailTime(*v)
+	}
+	return _u
+}
+
+// AddThumbnailTime adds value to the "thumbnail_time" field.
+func (_u *MediaUpdateOne) AddThumbnailTime(v float64) *MediaUpdateOne {
+	_u.mutation.AddThumbnailTime(v)
+	return _u
+}
+
+// ClearThumbnailTime clears the value of the "thumbnail_time" field.
+func (_u *MediaUpdateOne) ClearThumbnailTime() *MediaUpdateOne {
+	_u.mutation.ClearThumbnailTime()
+	return _u
+}
+
 // SetTags sets the "tags" field.
 func (_u *MediaUpdateOne) SetTags(v []string) *MediaUpdateOne {
 	_u.mutation.SetTags(v)
@@ -2347,6 +2630,21 @@ func (_u *MediaUpdateOne) AddLikes(v ...*Like) *MediaUpdateOne {
 	return _u.AddLikeIDs(ids...)
 }
 
+// AddReviewLogIDs adds the "review_logs" edge to the MediaReviewLog entity by IDs.
+func (_u *MediaUpdateOne) AddReviewLogIDs(ids ...string) *MediaUpdateOne {
+	_u.mutation.AddReviewLogIDs(ids...)
+	return _u
+}
+
+// AddReviewLogs adds the "review_logs" edges to the MediaReviewLog entity.
+func (_u *MediaUpdateOne) AddReviewLogs(v ...*MediaReviewLog) *MediaUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddReviewLogIDs(ids...)
+}
+
 // Mutation returns the MediaMutation object of the builder.
 func (_u *MediaUpdateOne) Mutation() *MediaMutation {
 	return _u.mutation
@@ -2475,6 +2773,27 @@ func (_u *MediaUpdateOne) RemoveLikes(v ...*Like) *MediaUpdateOne {
 	return _u.RemoveLikeIDs(ids...)
 }
 
+// ClearReviewLogs clears all "review_logs" edges to the MediaReviewLog entity.
+func (_u *MediaUpdateOne) ClearReviewLogs() *MediaUpdateOne {
+	_u.mutation.ClearReviewLogs()
+	return _u
+}
+
+// RemoveReviewLogIDs removes the "review_logs" edge to MediaReviewLog entities by IDs.
+func (_u *MediaUpdateOne) RemoveReviewLogIDs(ids ...string) *MediaUpdateOne {
+	_u.mutation.RemoveReviewLogIDs(ids...)
+	return _u
+}
+
+// RemoveReviewLogs removes "review_logs" edges to MediaReviewLog entities.
+func (_u *MediaUpdateOne) RemoveReviewLogs(v ...*MediaReviewLog) *MediaUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveReviewLogIDs(ids...)
+}
+
 // Where appends a list predicates to the MediaUpdate builder.
 func (_u *MediaUpdateOne) Where(ps ...predicate.Media) *MediaUpdateOne {
 	_u.mutation.Where(ps...)
@@ -2599,6 +2918,21 @@ func (_u *MediaUpdateOne) check() error {
 	if v, ok := _u.mutation.ReviewStatus(); ok {
 		if err := media.ReviewStatusValidator(v); err != nil {
 			return &ValidationError{Name: "review_status", err: fmt.Errorf(`entity: validator failed for field "Media.review_status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.SpriteStatus(); ok {
+		if err := media.SpriteStatusValidator(v); err != nil {
+			return &ValidationError{Name: "sprite_status", err: fmt.Errorf(`entity: validator failed for field "Media.sprite_status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.SpritePath(); ok {
+		if err := media.SpritePathValidator(v); err != nil {
+			return &ValidationError{Name: "sprite_path", err: fmt.Errorf(`entity: validator failed for field "Media.sprite_path": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.VttPath(); ok {
+		if err := media.VttPathValidator(v); err != nil {
+			return &ValidationError{Name: "vtt_path", err: fmt.Errorf(`entity: validator failed for field "Media.vtt_path": %w`, err)}
 		}
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
@@ -2794,6 +3128,30 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	}
 	if value, ok := _u.mutation.AddedReportedTimes(); ok {
 		_spec.AddField(media.FieldReportedTimes, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.SpriteStatus(); ok {
+		_spec.SetField(media.FieldSpriteStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SpritePath(); ok {
+		_spec.SetField(media.FieldSpritePath, field.TypeString, value)
+	}
+	if _u.mutation.SpritePathCleared() {
+		_spec.ClearField(media.FieldSpritePath, field.TypeString)
+	}
+	if value, ok := _u.mutation.VttPath(); ok {
+		_spec.SetField(media.FieldVttPath, field.TypeString, value)
+	}
+	if _u.mutation.VttPathCleared() {
+		_spec.ClearField(media.FieldVttPath, field.TypeString)
+	}
+	if value, ok := _u.mutation.ThumbnailTime(); ok {
+		_spec.SetField(media.FieldThumbnailTime, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedThumbnailTime(); ok {
+		_spec.AddField(media.FieldThumbnailTime, field.TypeFloat64, value)
+	}
+	if _u.mutation.ThumbnailTimeCleared() {
+		_spec.ClearField(media.FieldThumbnailTime, field.TypeFloat64)
 	}
 	if value, ok := _u.mutation.Tags(); ok {
 		_spec.SetField(media.FieldTags, field.TypeJSON, value)
@@ -3123,6 +3481,51 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ReviewLogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ReviewLogsTable,
+			Columns: []string{media.ReviewLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareviewlog.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedReviewLogsIDs(); len(nodes) > 0 && !_u.mutation.ReviewLogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ReviewLogsTable,
+			Columns: []string{media.ReviewLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareviewlog.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ReviewLogsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ReviewLogsTable,
+			Columns: []string{media.ReviewLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareviewlog.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

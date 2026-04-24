@@ -16,16 +16,21 @@ import (
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
 	"origadmin/application/origcms/internal/data/entity/commentlike"
+	"origadmin/application/origcms/internal/data/entity/commentreport"
 	"origadmin/application/origcms/internal/data/entity/encodeprofile"
 	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
+	"origadmin/application/origcms/internal/data/entity/groupmember"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediacategory"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
+	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/mediatag"
 	"origadmin/application/origcms/internal/data/entity/notification"
+	"origadmin/application/origcms/internal/data/entity/permissiongroup"
 	"origadmin/application/origcms/internal/data/entity/playlist"
+	"origadmin/application/origcms/internal/data/entity/setting"
 	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/tag"
 	"origadmin/application/origcms/internal/data/entity/uploadsession"
@@ -52,12 +57,16 @@ type Client struct {
 	Comment *CommentClient
 	// CommentLike is the client for interacting with the CommentLike builders.
 	CommentLike *CommentLikeClient
+	// CommentReport is the client for interacting with the CommentReport builders.
+	CommentReport *CommentReportClient
 	// EncodeProfile is the client for interacting with the EncodeProfile builders.
 	EncodeProfile *EncodeProfileClient
 	// EncodingTask is the client for interacting with the EncodingTask builders.
 	EncodingTask *EncodingTaskClient
 	// Favorite is the client for interacting with the Favorite builders.
 	Favorite *FavoriteClient
+	// GroupMember is the client for interacting with the GroupMember builders.
+	GroupMember *GroupMemberClient
 	// Like is the client for interacting with the Like builders.
 	Like *LikeClient
 	// Media is the client for interacting with the Media builders.
@@ -66,12 +75,18 @@ type Client struct {
 	MediaCategory *MediaCategoryClient
 	// MediaPlaylist is the client for interacting with the MediaPlaylist builders.
 	MediaPlaylist *MediaPlaylistClient
+	// MediaReviewLog is the client for interacting with the MediaReviewLog builders.
+	MediaReviewLog *MediaReviewLogClient
 	// MediaTag is the client for interacting with the MediaTag builders.
 	MediaTag *MediaTagClient
 	// Notification is the client for interacting with the Notification builders.
 	Notification *NotificationClient
+	// PermissionGroup is the client for interacting with the PermissionGroup builders.
+	PermissionGroup *PermissionGroupClient
 	// Playlist is the client for interacting with the Playlist builders.
 	Playlist *PlaylistClient
+	// Setting is the client for interacting with the Setting builders.
+	Setting *SettingClient
 	// Subscription is the client for interacting with the Subscription builders.
 	Subscription *SubscriptionClient
 	// Tag is the client for interacting with the Tag builders.
@@ -96,16 +111,21 @@ func (c *Client) init() {
 	c.Channel = NewChannelClient(c.config)
 	c.Comment = NewCommentClient(c.config)
 	c.CommentLike = NewCommentLikeClient(c.config)
+	c.CommentReport = NewCommentReportClient(c.config)
 	c.EncodeProfile = NewEncodeProfileClient(c.config)
 	c.EncodingTask = NewEncodingTaskClient(c.config)
 	c.Favorite = NewFavoriteClient(c.config)
+	c.GroupMember = NewGroupMemberClient(c.config)
 	c.Like = NewLikeClient(c.config)
 	c.Media = NewMediaClient(c.config)
 	c.MediaCategory = NewMediaCategoryClient(c.config)
 	c.MediaPlaylist = NewMediaPlaylistClient(c.config)
+	c.MediaReviewLog = NewMediaReviewLogClient(c.config)
 	c.MediaTag = NewMediaTagClient(c.config)
 	c.Notification = NewNotificationClient(c.config)
+	c.PermissionGroup = NewPermissionGroupClient(c.config)
 	c.Playlist = NewPlaylistClient(c.config)
+	c.Setting = NewSettingClient(c.config)
 	c.Subscription = NewSubscriptionClient(c.config)
 	c.Tag = NewTagClient(c.config)
 	c.UploadSession = NewUploadSessionClient(c.config)
@@ -200,27 +220,32 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:           ctx,
-		config:        cfg,
-		Article:       NewArticleClient(cfg),
-		Category:      NewCategoryClient(cfg),
-		Channel:       NewChannelClient(cfg),
-		Comment:       NewCommentClient(cfg),
-		CommentLike:   NewCommentLikeClient(cfg),
-		EncodeProfile: NewEncodeProfileClient(cfg),
-		EncodingTask:  NewEncodingTaskClient(cfg),
-		Favorite:      NewFavoriteClient(cfg),
-		Like:          NewLikeClient(cfg),
-		Media:         NewMediaClient(cfg),
-		MediaCategory: NewMediaCategoryClient(cfg),
-		MediaPlaylist: NewMediaPlaylistClient(cfg),
-		MediaTag:      NewMediaTagClient(cfg),
-		Notification:  NewNotificationClient(cfg),
-		Playlist:      NewPlaylistClient(cfg),
-		Subscription:  NewSubscriptionClient(cfg),
-		Tag:           NewTagClient(cfg),
-		UploadSession: NewUploadSessionClient(cfg),
-		User:          NewUserClient(cfg),
+		ctx:             ctx,
+		config:          cfg,
+		Article:         NewArticleClient(cfg),
+		Category:        NewCategoryClient(cfg),
+		Channel:         NewChannelClient(cfg),
+		Comment:         NewCommentClient(cfg),
+		CommentLike:     NewCommentLikeClient(cfg),
+		CommentReport:   NewCommentReportClient(cfg),
+		EncodeProfile:   NewEncodeProfileClient(cfg),
+		EncodingTask:    NewEncodingTaskClient(cfg),
+		Favorite:        NewFavoriteClient(cfg),
+		GroupMember:     NewGroupMemberClient(cfg),
+		Like:            NewLikeClient(cfg),
+		Media:           NewMediaClient(cfg),
+		MediaCategory:   NewMediaCategoryClient(cfg),
+		MediaPlaylist:   NewMediaPlaylistClient(cfg),
+		MediaReviewLog:  NewMediaReviewLogClient(cfg),
+		MediaTag:        NewMediaTagClient(cfg),
+		Notification:    NewNotificationClient(cfg),
+		PermissionGroup: NewPermissionGroupClient(cfg),
+		Playlist:        NewPlaylistClient(cfg),
+		Setting:         NewSettingClient(cfg),
+		Subscription:    NewSubscriptionClient(cfg),
+		Tag:             NewTagClient(cfg),
+		UploadSession:   NewUploadSessionClient(cfg),
+		User:            NewUserClient(cfg),
 	}, nil
 }
 
@@ -238,27 +263,32 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:           ctx,
-		config:        cfg,
-		Article:       NewArticleClient(cfg),
-		Category:      NewCategoryClient(cfg),
-		Channel:       NewChannelClient(cfg),
-		Comment:       NewCommentClient(cfg),
-		CommentLike:   NewCommentLikeClient(cfg),
-		EncodeProfile: NewEncodeProfileClient(cfg),
-		EncodingTask:  NewEncodingTaskClient(cfg),
-		Favorite:      NewFavoriteClient(cfg),
-		Like:          NewLikeClient(cfg),
-		Media:         NewMediaClient(cfg),
-		MediaCategory: NewMediaCategoryClient(cfg),
-		MediaPlaylist: NewMediaPlaylistClient(cfg),
-		MediaTag:      NewMediaTagClient(cfg),
-		Notification:  NewNotificationClient(cfg),
-		Playlist:      NewPlaylistClient(cfg),
-		Subscription:  NewSubscriptionClient(cfg),
-		Tag:           NewTagClient(cfg),
-		UploadSession: NewUploadSessionClient(cfg),
-		User:          NewUserClient(cfg),
+		ctx:             ctx,
+		config:          cfg,
+		Article:         NewArticleClient(cfg),
+		Category:        NewCategoryClient(cfg),
+		Channel:         NewChannelClient(cfg),
+		Comment:         NewCommentClient(cfg),
+		CommentLike:     NewCommentLikeClient(cfg),
+		CommentReport:   NewCommentReportClient(cfg),
+		EncodeProfile:   NewEncodeProfileClient(cfg),
+		EncodingTask:    NewEncodingTaskClient(cfg),
+		Favorite:        NewFavoriteClient(cfg),
+		GroupMember:     NewGroupMemberClient(cfg),
+		Like:            NewLikeClient(cfg),
+		Media:           NewMediaClient(cfg),
+		MediaCategory:   NewMediaCategoryClient(cfg),
+		MediaPlaylist:   NewMediaPlaylistClient(cfg),
+		MediaReviewLog:  NewMediaReviewLogClient(cfg),
+		MediaTag:        NewMediaTagClient(cfg),
+		Notification:    NewNotificationClient(cfg),
+		PermissionGroup: NewPermissionGroupClient(cfg),
+		Playlist:        NewPlaylistClient(cfg),
+		Setting:         NewSettingClient(cfg),
+		Subscription:    NewSubscriptionClient(cfg),
+		Tag:             NewTagClient(cfg),
+		UploadSession:   NewUploadSessionClient(cfg),
+		User:            NewUserClient(cfg),
 	}, nil
 }
 
@@ -288,10 +318,11 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Article, c.Category, c.Channel, c.Comment, c.CommentLike, c.EncodeProfile,
-		c.EncodingTask, c.Favorite, c.Like, c.Media, c.MediaCategory, c.MediaPlaylist,
-		c.MediaTag, c.Notification, c.Playlist, c.Subscription, c.Tag, c.UploadSession,
-		c.User,
+		c.Article, c.Category, c.Channel, c.Comment, c.CommentLike, c.CommentReport,
+		c.EncodeProfile, c.EncodingTask, c.Favorite, c.GroupMember, c.Like, c.Media,
+		c.MediaCategory, c.MediaPlaylist, c.MediaReviewLog, c.MediaTag, c.Notification,
+		c.PermissionGroup, c.Playlist, c.Setting, c.Subscription, c.Tag,
+		c.UploadSession, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -301,10 +332,11 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Article, c.Category, c.Channel, c.Comment, c.CommentLike, c.EncodeProfile,
-		c.EncodingTask, c.Favorite, c.Like, c.Media, c.MediaCategory, c.MediaPlaylist,
-		c.MediaTag, c.Notification, c.Playlist, c.Subscription, c.Tag, c.UploadSession,
-		c.User,
+		c.Article, c.Category, c.Channel, c.Comment, c.CommentLike, c.CommentReport,
+		c.EncodeProfile, c.EncodingTask, c.Favorite, c.GroupMember, c.Like, c.Media,
+		c.MediaCategory, c.MediaPlaylist, c.MediaReviewLog, c.MediaTag, c.Notification,
+		c.PermissionGroup, c.Playlist, c.Setting, c.Subscription, c.Tag,
+		c.UploadSession, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -323,12 +355,16 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Comment.mutate(ctx, m)
 	case *CommentLikeMutation:
 		return c.CommentLike.mutate(ctx, m)
+	case *CommentReportMutation:
+		return c.CommentReport.mutate(ctx, m)
 	case *EncodeProfileMutation:
 		return c.EncodeProfile.mutate(ctx, m)
 	case *EncodingTaskMutation:
 		return c.EncodingTask.mutate(ctx, m)
 	case *FavoriteMutation:
 		return c.Favorite.mutate(ctx, m)
+	case *GroupMemberMutation:
+		return c.GroupMember.mutate(ctx, m)
 	case *LikeMutation:
 		return c.Like.mutate(ctx, m)
 	case *MediaMutation:
@@ -337,12 +373,18 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.MediaCategory.mutate(ctx, m)
 	case *MediaPlaylistMutation:
 		return c.MediaPlaylist.mutate(ctx, m)
+	case *MediaReviewLogMutation:
+		return c.MediaReviewLog.mutate(ctx, m)
 	case *MediaTagMutation:
 		return c.MediaTag.mutate(ctx, m)
 	case *NotificationMutation:
 		return c.Notification.mutate(ctx, m)
+	case *PermissionGroupMutation:
+		return c.PermissionGroup.mutate(ctx, m)
 	case *PlaylistMutation:
 		return c.Playlist.mutate(ctx, m)
+	case *SettingMutation:
+		return c.Setting.mutate(ctx, m)
 	case *SubscriptionMutation:
 		return c.Subscription.mutate(ctx, m)
 	case *TagMutation:
@@ -1103,6 +1145,38 @@ func (c *CommentClient) QueryCommentLikes(_m *Comment) *CommentLikeQuery {
 	return query
 }
 
+// QueryReports queries the reports edge of a Comment.
+func (c *CommentClient) QueryReports(_m *Comment) *CommentReportQuery {
+	query := (&CommentReportClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, id),
+			sqlgraph.To(commentreport.Table, commentreport.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, comment.ReportsTable, comment.ReportsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryModerator queries the moderator edge of a Comment.
+func (c *CommentClient) QueryModerator(_m *Comment) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.ModeratorTable, comment.ModeratorColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *CommentClient) Hooks() []Hook {
 	return c.hooks.Comment
@@ -1290,6 +1364,171 @@ func (c *CommentLikeClient) mutate(ctx context.Context, m *CommentLikeMutation) 
 		return (&CommentLikeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("entity: unknown CommentLike mutation op: %q", m.Op())
+	}
+}
+
+// CommentReportClient is a client for the CommentReport schema.
+type CommentReportClient struct {
+	config
+}
+
+// NewCommentReportClient returns a client for the CommentReport from the given config.
+func NewCommentReportClient(c config) *CommentReportClient {
+	return &CommentReportClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `commentreport.Hooks(f(g(h())))`.
+func (c *CommentReportClient) Use(hooks ...Hook) {
+	c.hooks.CommentReport = append(c.hooks.CommentReport, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `commentreport.Intercept(f(g(h())))`.
+func (c *CommentReportClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CommentReport = append(c.inters.CommentReport, interceptors...)
+}
+
+// Create returns a builder for creating a CommentReport entity.
+func (c *CommentReportClient) Create() *CommentReportCreate {
+	mutation := newCommentReportMutation(c.config, OpCreate)
+	return &CommentReportCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CommentReport entities.
+func (c *CommentReportClient) CreateBulk(builders ...*CommentReportCreate) *CommentReportCreateBulk {
+	return &CommentReportCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CommentReportClient) MapCreateBulk(slice any, setFunc func(*CommentReportCreate, int)) *CommentReportCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CommentReportCreateBulk{err: fmt.Errorf("calling to CommentReportClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CommentReportCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CommentReportCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CommentReport.
+func (c *CommentReportClient) Update() *CommentReportUpdate {
+	mutation := newCommentReportMutation(c.config, OpUpdate)
+	return &CommentReportUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CommentReportClient) UpdateOne(_m *CommentReport) *CommentReportUpdateOne {
+	mutation := newCommentReportMutation(c.config, OpUpdateOne, withCommentReport(_m))
+	return &CommentReportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CommentReportClient) UpdateOneID(id string) *CommentReportUpdateOne {
+	mutation := newCommentReportMutation(c.config, OpUpdateOne, withCommentReportID(id))
+	return &CommentReportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CommentReport.
+func (c *CommentReportClient) Delete() *CommentReportDelete {
+	mutation := newCommentReportMutation(c.config, OpDelete)
+	return &CommentReportDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CommentReportClient) DeleteOne(_m *CommentReport) *CommentReportDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CommentReportClient) DeleteOneID(id string) *CommentReportDeleteOne {
+	builder := c.Delete().Where(commentreport.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CommentReportDeleteOne{builder}
+}
+
+// Query returns a query builder for CommentReport.
+func (c *CommentReportClient) Query() *CommentReportQuery {
+	return &CommentReportQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCommentReport},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CommentReport entity by its id.
+func (c *CommentReportClient) Get(ctx context.Context, id string) (*CommentReport, error) {
+	return c.Query().Where(commentreport.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CommentReportClient) GetX(ctx context.Context, id string) *CommentReport {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryComment queries the comment edge of a CommentReport.
+func (c *CommentReportClient) QueryComment(_m *CommentReport) *CommentQuery {
+	query := (&CommentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(commentreport.Table, commentreport.FieldID, id),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, commentreport.CommentTable, commentreport.CommentColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryReporter queries the reporter edge of a CommentReport.
+func (c *CommentReportClient) QueryReporter(_m *CommentReport) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(commentreport.Table, commentreport.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, commentreport.ReporterTable, commentreport.ReporterColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CommentReportClient) Hooks() []Hook {
+	return c.hooks.CommentReport
+}
+
+// Interceptors returns the client interceptors.
+func (c *CommentReportClient) Interceptors() []Interceptor {
+	return c.inters.CommentReport
+}
+
+func (c *CommentReportClient) mutate(ctx context.Context, m *CommentReportMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CommentReportCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CommentReportUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CommentReportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CommentReportDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entity: unknown CommentReport mutation op: %q", m.Op())
 	}
 }
 
@@ -1724,6 +1963,171 @@ func (c *FavoriteClient) mutate(ctx context.Context, m *FavoriteMutation) (Value
 	}
 }
 
+// GroupMemberClient is a client for the GroupMember schema.
+type GroupMemberClient struct {
+	config
+}
+
+// NewGroupMemberClient returns a client for the GroupMember from the given config.
+func NewGroupMemberClient(c config) *GroupMemberClient {
+	return &GroupMemberClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `groupmember.Hooks(f(g(h())))`.
+func (c *GroupMemberClient) Use(hooks ...Hook) {
+	c.hooks.GroupMember = append(c.hooks.GroupMember, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `groupmember.Intercept(f(g(h())))`.
+func (c *GroupMemberClient) Intercept(interceptors ...Interceptor) {
+	c.inters.GroupMember = append(c.inters.GroupMember, interceptors...)
+}
+
+// Create returns a builder for creating a GroupMember entity.
+func (c *GroupMemberClient) Create() *GroupMemberCreate {
+	mutation := newGroupMemberMutation(c.config, OpCreate)
+	return &GroupMemberCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of GroupMember entities.
+func (c *GroupMemberClient) CreateBulk(builders ...*GroupMemberCreate) *GroupMemberCreateBulk {
+	return &GroupMemberCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *GroupMemberClient) MapCreateBulk(slice any, setFunc func(*GroupMemberCreate, int)) *GroupMemberCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &GroupMemberCreateBulk{err: fmt.Errorf("calling to GroupMemberClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*GroupMemberCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &GroupMemberCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for GroupMember.
+func (c *GroupMemberClient) Update() *GroupMemberUpdate {
+	mutation := newGroupMemberMutation(c.config, OpUpdate)
+	return &GroupMemberUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GroupMemberClient) UpdateOne(_m *GroupMember) *GroupMemberUpdateOne {
+	mutation := newGroupMemberMutation(c.config, OpUpdateOne, withGroupMember(_m))
+	return &GroupMemberUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GroupMemberClient) UpdateOneID(id string) *GroupMemberUpdateOne {
+	mutation := newGroupMemberMutation(c.config, OpUpdateOne, withGroupMemberID(id))
+	return &GroupMemberUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for GroupMember.
+func (c *GroupMemberClient) Delete() *GroupMemberDelete {
+	mutation := newGroupMemberMutation(c.config, OpDelete)
+	return &GroupMemberDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *GroupMemberClient) DeleteOne(_m *GroupMember) *GroupMemberDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *GroupMemberClient) DeleteOneID(id string) *GroupMemberDeleteOne {
+	builder := c.Delete().Where(groupmember.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GroupMemberDeleteOne{builder}
+}
+
+// Query returns a query builder for GroupMember.
+func (c *GroupMemberClient) Query() *GroupMemberQuery {
+	return &GroupMemberQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeGroupMember},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a GroupMember entity by its id.
+func (c *GroupMemberClient) Get(ctx context.Context, id string) (*GroupMember, error) {
+	return c.Query().Where(groupmember.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GroupMemberClient) GetX(ctx context.Context, id string) *GroupMember {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a GroupMember.
+func (c *GroupMemberClient) QueryUser(_m *GroupMember) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(groupmember.Table, groupmember.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, groupmember.UserTable, groupmember.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGroup queries the group edge of a GroupMember.
+func (c *GroupMemberClient) QueryGroup(_m *GroupMember) *PermissionGroupQuery {
+	query := (&PermissionGroupClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(groupmember.Table, groupmember.FieldID, id),
+			sqlgraph.To(permissiongroup.Table, permissiongroup.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, groupmember.GroupTable, groupmember.GroupColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *GroupMemberClient) Hooks() []Hook {
+	return c.hooks.GroupMember
+}
+
+// Interceptors returns the client interceptors.
+func (c *GroupMemberClient) Interceptors() []Interceptor {
+	return c.inters.GroupMember
+}
+
+func (c *GroupMemberClient) mutate(ctx context.Context, m *GroupMemberMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&GroupMemberCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&GroupMemberUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&GroupMemberUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&GroupMemberDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entity: unknown GroupMember mutation op: %q", m.Op())
+	}
+}
+
 // LikeClient is a client for the Like schema.
 type LikeClient struct {
 	config
@@ -2125,6 +2529,22 @@ func (c *MediaClient) QueryLikes(_m *Media) *LikeQuery {
 	return query
 }
 
+// QueryReviewLogs queries the review_logs edge of a Media.
+func (c *MediaClient) QueryReviewLogs(_m *Media) *MediaReviewLogQuery {
+	query := (&MediaReviewLogClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(media.Table, media.FieldID, id),
+			sqlgraph.To(mediareviewlog.Table, mediareviewlog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, media.ReviewLogsTable, media.ReviewLogsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *MediaClient) Hooks() []Hook {
 	return c.hooks.Media
@@ -2480,6 +2900,171 @@ func (c *MediaPlaylistClient) mutate(ctx context.Context, m *MediaPlaylistMutati
 	}
 }
 
+// MediaReviewLogClient is a client for the MediaReviewLog schema.
+type MediaReviewLogClient struct {
+	config
+}
+
+// NewMediaReviewLogClient returns a client for the MediaReviewLog from the given config.
+func NewMediaReviewLogClient(c config) *MediaReviewLogClient {
+	return &MediaReviewLogClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `mediareviewlog.Hooks(f(g(h())))`.
+func (c *MediaReviewLogClient) Use(hooks ...Hook) {
+	c.hooks.MediaReviewLog = append(c.hooks.MediaReviewLog, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `mediareviewlog.Intercept(f(g(h())))`.
+func (c *MediaReviewLogClient) Intercept(interceptors ...Interceptor) {
+	c.inters.MediaReviewLog = append(c.inters.MediaReviewLog, interceptors...)
+}
+
+// Create returns a builder for creating a MediaReviewLog entity.
+func (c *MediaReviewLogClient) Create() *MediaReviewLogCreate {
+	mutation := newMediaReviewLogMutation(c.config, OpCreate)
+	return &MediaReviewLogCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of MediaReviewLog entities.
+func (c *MediaReviewLogClient) CreateBulk(builders ...*MediaReviewLogCreate) *MediaReviewLogCreateBulk {
+	return &MediaReviewLogCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *MediaReviewLogClient) MapCreateBulk(slice any, setFunc func(*MediaReviewLogCreate, int)) *MediaReviewLogCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &MediaReviewLogCreateBulk{err: fmt.Errorf("calling to MediaReviewLogClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*MediaReviewLogCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &MediaReviewLogCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for MediaReviewLog.
+func (c *MediaReviewLogClient) Update() *MediaReviewLogUpdate {
+	mutation := newMediaReviewLogMutation(c.config, OpUpdate)
+	return &MediaReviewLogUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MediaReviewLogClient) UpdateOne(_m *MediaReviewLog) *MediaReviewLogUpdateOne {
+	mutation := newMediaReviewLogMutation(c.config, OpUpdateOne, withMediaReviewLog(_m))
+	return &MediaReviewLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MediaReviewLogClient) UpdateOneID(id string) *MediaReviewLogUpdateOne {
+	mutation := newMediaReviewLogMutation(c.config, OpUpdateOne, withMediaReviewLogID(id))
+	return &MediaReviewLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for MediaReviewLog.
+func (c *MediaReviewLogClient) Delete() *MediaReviewLogDelete {
+	mutation := newMediaReviewLogMutation(c.config, OpDelete)
+	return &MediaReviewLogDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *MediaReviewLogClient) DeleteOne(_m *MediaReviewLog) *MediaReviewLogDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *MediaReviewLogClient) DeleteOneID(id string) *MediaReviewLogDeleteOne {
+	builder := c.Delete().Where(mediareviewlog.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MediaReviewLogDeleteOne{builder}
+}
+
+// Query returns a query builder for MediaReviewLog.
+func (c *MediaReviewLogClient) Query() *MediaReviewLogQuery {
+	return &MediaReviewLogQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeMediaReviewLog},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a MediaReviewLog entity by its id.
+func (c *MediaReviewLogClient) Get(ctx context.Context, id string) (*MediaReviewLog, error) {
+	return c.Query().Where(mediareviewlog.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MediaReviewLogClient) GetX(ctx context.Context, id string) *MediaReviewLog {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryMedia queries the media edge of a MediaReviewLog.
+func (c *MediaReviewLogClient) QueryMedia(_m *MediaReviewLog) *MediaQuery {
+	query := (&MediaClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(mediareviewlog.Table, mediareviewlog.FieldID, id),
+			sqlgraph.To(media.Table, media.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, mediareviewlog.MediaTable, mediareviewlog.MediaColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryReviewer queries the reviewer edge of a MediaReviewLog.
+func (c *MediaReviewLogClient) QueryReviewer(_m *MediaReviewLog) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(mediareviewlog.Table, mediareviewlog.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, mediareviewlog.ReviewerTable, mediareviewlog.ReviewerColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *MediaReviewLogClient) Hooks() []Hook {
+	return c.hooks.MediaReviewLog
+}
+
+// Interceptors returns the client interceptors.
+func (c *MediaReviewLogClient) Interceptors() []Interceptor {
+	return c.inters.MediaReviewLog
+}
+
+func (c *MediaReviewLogClient) mutate(ctx context.Context, m *MediaReviewLogMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&MediaReviewLogCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&MediaReviewLogUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&MediaReviewLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&MediaReviewLogDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entity: unknown MediaReviewLog mutation op: %q", m.Op())
+	}
+}
+
 // MediaTagClient is a client for the MediaTag schema.
 type MediaTagClient struct {
 	config
@@ -2794,6 +3379,171 @@ func (c *NotificationClient) mutate(ctx context.Context, m *NotificationMutation
 	}
 }
 
+// PermissionGroupClient is a client for the PermissionGroup schema.
+type PermissionGroupClient struct {
+	config
+}
+
+// NewPermissionGroupClient returns a client for the PermissionGroup from the given config.
+func NewPermissionGroupClient(c config) *PermissionGroupClient {
+	return &PermissionGroupClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `permissiongroup.Hooks(f(g(h())))`.
+func (c *PermissionGroupClient) Use(hooks ...Hook) {
+	c.hooks.PermissionGroup = append(c.hooks.PermissionGroup, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `permissiongroup.Intercept(f(g(h())))`.
+func (c *PermissionGroupClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PermissionGroup = append(c.inters.PermissionGroup, interceptors...)
+}
+
+// Create returns a builder for creating a PermissionGroup entity.
+func (c *PermissionGroupClient) Create() *PermissionGroupCreate {
+	mutation := newPermissionGroupMutation(c.config, OpCreate)
+	return &PermissionGroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PermissionGroup entities.
+func (c *PermissionGroupClient) CreateBulk(builders ...*PermissionGroupCreate) *PermissionGroupCreateBulk {
+	return &PermissionGroupCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PermissionGroupClient) MapCreateBulk(slice any, setFunc func(*PermissionGroupCreate, int)) *PermissionGroupCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PermissionGroupCreateBulk{err: fmt.Errorf("calling to PermissionGroupClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PermissionGroupCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PermissionGroupCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PermissionGroup.
+func (c *PermissionGroupClient) Update() *PermissionGroupUpdate {
+	mutation := newPermissionGroupMutation(c.config, OpUpdate)
+	return &PermissionGroupUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PermissionGroupClient) UpdateOne(_m *PermissionGroup) *PermissionGroupUpdateOne {
+	mutation := newPermissionGroupMutation(c.config, OpUpdateOne, withPermissionGroup(_m))
+	return &PermissionGroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PermissionGroupClient) UpdateOneID(id string) *PermissionGroupUpdateOne {
+	mutation := newPermissionGroupMutation(c.config, OpUpdateOne, withPermissionGroupID(id))
+	return &PermissionGroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PermissionGroup.
+func (c *PermissionGroupClient) Delete() *PermissionGroupDelete {
+	mutation := newPermissionGroupMutation(c.config, OpDelete)
+	return &PermissionGroupDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PermissionGroupClient) DeleteOne(_m *PermissionGroup) *PermissionGroupDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PermissionGroupClient) DeleteOneID(id string) *PermissionGroupDeleteOne {
+	builder := c.Delete().Where(permissiongroup.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PermissionGroupDeleteOne{builder}
+}
+
+// Query returns a query builder for PermissionGroup.
+func (c *PermissionGroupClient) Query() *PermissionGroupQuery {
+	return &PermissionGroupQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePermissionGroup},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PermissionGroup entity by its id.
+func (c *PermissionGroupClient) Get(ctx context.Context, id string) (*PermissionGroup, error) {
+	return c.Query().Where(permissiongroup.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PermissionGroupClient) GetX(ctx context.Context, id string) *PermissionGroup {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryMembers queries the members edge of a PermissionGroup.
+func (c *PermissionGroupClient) QueryMembers(_m *PermissionGroup) *GroupMemberQuery {
+	query := (&GroupMemberClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(permissiongroup.Table, permissiongroup.FieldID, id),
+			sqlgraph.To(groupmember.Table, groupmember.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, permissiongroup.MembersTable, permissiongroup.MembersColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCreator queries the creator edge of a PermissionGroup.
+func (c *PermissionGroupClient) QueryCreator(_m *PermissionGroup) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(permissiongroup.Table, permissiongroup.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, permissiongroup.CreatorTable, permissiongroup.CreatorColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PermissionGroupClient) Hooks() []Hook {
+	return c.hooks.PermissionGroup
+}
+
+// Interceptors returns the client interceptors.
+func (c *PermissionGroupClient) Interceptors() []Interceptor {
+	return c.inters.PermissionGroup
+}
+
+func (c *PermissionGroupClient) mutate(ctx context.Context, m *PermissionGroupMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PermissionGroupCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PermissionGroupUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PermissionGroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PermissionGroupDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entity: unknown PermissionGroup mutation op: %q", m.Op())
+	}
+}
+
 // PlaylistClient is a client for the Playlist schema.
 type PlaylistClient struct {
 	config
@@ -2940,6 +3690,139 @@ func (c *PlaylistClient) mutate(ctx context.Context, m *PlaylistMutation) (Value
 		return (&PlaylistDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("entity: unknown Playlist mutation op: %q", m.Op())
+	}
+}
+
+// SettingClient is a client for the Setting schema.
+type SettingClient struct {
+	config
+}
+
+// NewSettingClient returns a client for the Setting from the given config.
+func NewSettingClient(c config) *SettingClient {
+	return &SettingClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `setting.Hooks(f(g(h())))`.
+func (c *SettingClient) Use(hooks ...Hook) {
+	c.hooks.Setting = append(c.hooks.Setting, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `setting.Intercept(f(g(h())))`.
+func (c *SettingClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Setting = append(c.inters.Setting, interceptors...)
+}
+
+// Create returns a builder for creating a Setting entity.
+func (c *SettingClient) Create() *SettingCreate {
+	mutation := newSettingMutation(c.config, OpCreate)
+	return &SettingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Setting entities.
+func (c *SettingClient) CreateBulk(builders ...*SettingCreate) *SettingCreateBulk {
+	return &SettingCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SettingClient) MapCreateBulk(slice any, setFunc func(*SettingCreate, int)) *SettingCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SettingCreateBulk{err: fmt.Errorf("calling to SettingClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SettingCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SettingCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Setting.
+func (c *SettingClient) Update() *SettingUpdate {
+	mutation := newSettingMutation(c.config, OpUpdate)
+	return &SettingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SettingClient) UpdateOne(_m *Setting) *SettingUpdateOne {
+	mutation := newSettingMutation(c.config, OpUpdateOne, withSetting(_m))
+	return &SettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SettingClient) UpdateOneID(id string) *SettingUpdateOne {
+	mutation := newSettingMutation(c.config, OpUpdateOne, withSettingID(id))
+	return &SettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Setting.
+func (c *SettingClient) Delete() *SettingDelete {
+	mutation := newSettingMutation(c.config, OpDelete)
+	return &SettingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SettingClient) DeleteOne(_m *Setting) *SettingDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SettingClient) DeleteOneID(id string) *SettingDeleteOne {
+	builder := c.Delete().Where(setting.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SettingDeleteOne{builder}
+}
+
+// Query returns a query builder for Setting.
+func (c *SettingClient) Query() *SettingQuery {
+	return &SettingQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSetting},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Setting entity by its id.
+func (c *SettingClient) Get(ctx context.Context, id string) (*Setting, error) {
+	return c.Query().Where(setting.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SettingClient) GetX(ctx context.Context, id string) *Setting {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SettingClient) Hooks() []Hook {
+	return c.hooks.Setting
+}
+
+// Interceptors returns the client interceptors.
+func (c *SettingClient) Interceptors() []Interceptor {
+	return c.inters.Setting
+}
+
+func (c *SettingClient) mutate(ctx context.Context, m *SettingMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SettingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SettingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SettingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entity: unknown Setting mutation op: %q", m.Op())
 	}
 }
 
@@ -3706,6 +4589,86 @@ func (c *UserClient) QuerySubscribers(_m *User) *SubscriptionQuery {
 	return query
 }
 
+// QueryReviewLogs queries the review_logs edge of a User.
+func (c *UserClient) QueryReviewLogs(_m *User) *MediaReviewLogQuery {
+	query := (&MediaReviewLogClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(mediareviewlog.Table, mediareviewlog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ReviewLogsTable, user.ReviewLogsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCommentReports queries the comment_reports edge of a User.
+func (c *UserClient) QueryCommentReports(_m *User) *CommentReportQuery {
+	query := (&CommentReportClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(commentreport.Table, commentreport.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CommentReportsTable, user.CommentReportsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryModeratedComments queries the moderated_comments edge of a User.
+func (c *UserClient) QueryModeratedComments(_m *User) *CommentQuery {
+	query := (&CommentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ModeratedCommentsTable, user.ModeratedCommentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGroupMemberships queries the group_memberships edge of a User.
+func (c *UserClient) QueryGroupMemberships(_m *User) *GroupMemberQuery {
+	query := (&GroupMemberClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(groupmember.Table, groupmember.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.GroupMembershipsTable, user.GroupMembershipsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCreatedGroups queries the created_groups edge of a User.
+func (c *UserClient) QueryCreatedGroups(_m *User) *PermissionGroupQuery {
+	query := (&PermissionGroupClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(permissiongroup.Table, permissiongroup.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CreatedGroupsTable, user.CreatedGroupsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -3734,13 +4697,15 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Article, Category, Channel, Comment, CommentLike, EncodeProfile, EncodingTask,
-		Favorite, Like, Media, MediaCategory, MediaPlaylist, MediaTag, Notification,
-		Playlist, Subscription, Tag, UploadSession, User []ent.Hook
+		Article, Category, Channel, Comment, CommentLike, CommentReport, EncodeProfile,
+		EncodingTask, Favorite, GroupMember, Like, Media, MediaCategory, MediaPlaylist,
+		MediaReviewLog, MediaTag, Notification, PermissionGroup, Playlist, Setting,
+		Subscription, Tag, UploadSession, User []ent.Hook
 	}
 	inters struct {
-		Article, Category, Channel, Comment, CommentLike, EncodeProfile, EncodingTask,
-		Favorite, Like, Media, MediaCategory, MediaPlaylist, MediaTag, Notification,
-		Playlist, Subscription, Tag, UploadSession, User []ent.Interceptor
+		Article, Category, Channel, Comment, CommentLike, CommentReport, EncodeProfile,
+		EncodingTask, Favorite, GroupMember, Like, Media, MediaCategory, MediaPlaylist,
+		MediaReviewLog, MediaTag, Notification, PermissionGroup, Playlist, Setting,
+		Subscription, Tag, UploadSession, User []ent.Interceptor
 	}
 )

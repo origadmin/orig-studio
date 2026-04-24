@@ -2,6 +2,7 @@ package integration
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -294,20 +295,15 @@ func TestAuthTokenValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Direct request with custom header
-			req, _ := http.NewRequest("GET", ts.Server.URL+ts.BaseURL+"/auth/me", nil)
+			req := httptest.NewRequest("GET", ts.BaseURL+"/auth/me", nil)
 			if tt.authHeader != "" {
 				req.Header.Set("Authorization", tt.authHeader)
 			}
 
-			client := &http.Client{}
-			resp, err := client.Do(req)
-			if err != nil {
-				t.Fatalf("request failed: %v", err)
-			}
-			defer resp.Body.Close()
+			rec := httptest.NewRecorder()
+			ts.Router.ServeHTTP(rec, req)
 
-			AssertStatus(t, resp, tt.wantStatus)
+			AssertStatus(t, rec, tt.wantStatus)
 		})
 	}
 }

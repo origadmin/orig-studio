@@ -58,6 +58,10 @@ func (Media) Fields() []ent.Field {
 		field.String("review_status").MaxLen(20).Default("pending_review"),
 		field.Bool("listable").Default(false),
 		field.Int("reported_times").Default(0),
+		field.String("sprite_status").MaxLen(20).Default("pending"),
+		field.String("sprite_path").MaxLen(512).Optional(),
+		field.String("vtt_path").MaxLen(512).Optional(),
+		field.Float("thumbnail_time").Optional(),
 		field.JSON("tags", []string{}).Optional(),
 		field.String("user_id"),
 		field.String("category_id").Optional(),
@@ -81,6 +85,7 @@ func (Media) Indexes() []ent.Index {
 		index.Fields("short_token").Unique(),
 		index.Fields("review_status", "listable", "state"),
 		index.Fields("listable"),
+		index.Fields("sprite_status"),
 	}
 }
 
@@ -94,6 +99,7 @@ func (Media) Edges() []ent.Edge {
 		edge.To("tags_rel", MediaTag.Type),
 		edge.To("favorites", Favorite.Type),
 		edge.To("likes", Like.Type),
+		edge.To("review_logs", MediaReviewLog.Type),
 		// edge.To("tasks", EncodingTask.Type),
 	}
 }

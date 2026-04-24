@@ -150,7 +150,7 @@ func (s *MediaService) ListEncodingTasks(
 		result[i] = &types.EncodingTask{
 			Id:           t.Id,
 			MediaId:      t.MediaId,
-			ProfileId:    strconv.Itoa(t.ProfileId),
+			ProfileId:    int64(t.ProfileId),
 			Status:       string(t.Status),
 			OutputPath:   t.OutputPath,
 			ErrorMessage: t.ErrorMessage,
@@ -174,7 +174,7 @@ func (s *MediaService) GetEncodingStatus(
 		PendingCount:    int32(status.PendingCount),
 		FailedCount:     int32(status.FailedCount),
 		SuccessCount:    int32(status.SuccessCount),
-		TotalFiltered:   0,
+		Total:           0,
 		Page:            req.Page,
 		PageSize:        req.PageSize,
 		Items:           []*media.TranscodingMediaItem{},
@@ -194,7 +194,7 @@ func (s *MediaService) ListEncodeProfiles(
 	result := make([]*types.EncodeProfile, len(profiles))
 	for i, p := range profiles {
 		result[i] = &types.EncodeProfile{
-			Id:          strconv.Itoa(p.Id),
+			Id:          int64(p.Id),
 			Name:        p.Name,
 			Description: p.Description,
 			Extension:   p.Extension,
@@ -219,7 +219,7 @@ func (s *MediaService) GetEncodeProfile(
 	}
 	return &media.GetEncodeProfileResponse{
 		Profile: &types.EncodeProfile{
-			Id:          strconv.Itoa(p.Id),
+			Id:          int64(p.Id),
 			Name:        p.Name,
 			Description: p.Description,
 			Extension:   p.Extension,
@@ -236,7 +236,7 @@ func (s *MediaService) CreateEncodeProfile(
 	ctx context.Context,
 	req *media.CreateEncodeProfileRequest,
 ) (*media.CreateEncodeProfileResponse, error) {
-	p, err := s.uc.CreateEncodeProfile(ctx, &biz.EncodeProfile{
+	p, err := s.uc.CreateEncodeProfile(ctx, &dto.EncodeProfile{
 		Name:        req.Profile.Name,
 		Description: req.Profile.Description,
 		Extension:   req.Profile.Extension,
@@ -250,7 +250,7 @@ func (s *MediaService) CreateEncodeProfile(
 	}
 	return &media.CreateEncodeProfileResponse{
 		Profile: &types.EncodeProfile{
-			Id:          strconv.Itoa(p.Id),
+			Id:          int64(p.Id),
 			Name:        p.Name,
 			Description: p.Description,
 			Extension:   p.Extension,
@@ -267,8 +267,8 @@ func (s *MediaService) UpdateEncodeProfile(
 	ctx context.Context,
 	req *media.UpdateEncodeProfileRequest,
 ) (*media.UpdateEncodeProfileResponse, error) {
-	profileID, _ := strconv.Atoi(req.Profile.Id)
-	p, err := s.uc.UpdateEncodeProfile(ctx, &biz.EncodeProfile{
+	profileID := int(req.Profile.Id)
+	p, err := s.uc.UpdateEncodeProfile(ctx, &dto.EncodeProfile{
 		Id:          profileID,
 		Name:        req.Profile.Name,
 		Description: req.Profile.Description,
@@ -283,7 +283,7 @@ func (s *MediaService) UpdateEncodeProfile(
 	}
 	return &media.UpdateEncodeProfileResponse{
 		Profile: &types.EncodeProfile{
-			Id:          strconv.Itoa(p.Id),
+			Id:          int64(p.Id),
 			Name:        p.Name,
 			Description: p.Description,
 			Extension:   p.Extension,

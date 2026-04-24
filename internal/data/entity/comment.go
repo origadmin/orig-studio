@@ -28,7 +28,13 @@ type Comment struct {
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
 	// Status holds the value of the "status" field.
-	Status string `json:"status,omitempty"`
+	Status comment.Status `json:"status,omitempty"`
+	// ReportCount holds the value of the "report_count" field.
+	ReportCount int `json:"report_count,omitempty"`
+	// ModeratedBy holds the value of the "moderated_by" field.
+	ModeratedBy string `json:"moderated_by,omitempty"`
+	// ModeratedAt holds the value of the "moderated_at" field.
+	ModeratedAt time.Time `json:"moderated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CommentQuery when eager-loading is set.
 	Edges            CommentEdges `json:"edges"`
@@ -49,9 +55,13 @@ type CommentEdges struct {
 	Replies []*Comment `json:"replies,omitempty"`
 	// CommentLikes holds the value of the comment_likes edge.
 	CommentLikes []*CommentLike `json:"comment_likes,omitempty"`
+	// Reports holds the value of the reports edge.
+	Reports []*CommentReport `json:"reports,omitempty"`
+	// Moderator holds the value of the moderator edge.
+	Moderator *User `json:"moderator,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [7]bool
 }
 
 // MediaOrErr returns the Media value or an error if the edge
@@ -105,14 +115,36 @@ func (e CommentEdges) CommentLikesOrErr() ([]*CommentLike, error) {
 	return nil, &NotLoadedError{edge: "comment_likes"}
 }
 
+// ReportsOrErr returns the Reports value or an error if the edge
+// was not loaded in eager-loading.
+func (e CommentEdges) ReportsOrErr() ([]*CommentReport, error) {
+	if e.loadedTypes[5] {
+		return e.Reports, nil
+	}
+	return nil, &NotLoadedError{edge: "reports"}
+}
+
+// ModeratorOrErr returns the Moderator value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e CommentEdges) ModeratorOrErr() (*User, error) {
+	if e.Moderator != nil {
+		return e.Moderator, nil
+	} else if e.loadedTypes[6] {
+		return nil, &NotFoundError{label: user.Label}
+	}
+	return nil, &NotLoadedError{edge: "moderator"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Comment) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case comment.FieldID, comment.FieldText, comment.FieldMediaID, comment.FieldUserID, comment.FieldStatus:
+		case comment.FieldReportCount:
+			values[i] = new(sql.NullInt64)
+		case comment.FieldID, comment.FieldText, comment.FieldMediaID, comment.FieldUserID, comment.FieldStatus, comment.FieldModeratedBy:
 			values[i] = new(sql.NullString)
-		case comment.FieldAddDate:
+		case comment.FieldAddDate, comment.FieldModeratedAt:
 			values[i] = new(sql.NullTime)
 		case comment.ForeignKeys[0]: // article_comments
 			values[i] = new(sql.NullString)
@@ -167,7 +199,25 @@ func (_m *Comment) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				_m.Status = value.String
+				_m.Status = comment.Status(value.String)
+			}
+		case comment.FieldReportCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field report_count", values[i])
+			} else if value.Valid {
+				_m.ReportCount = int(value.Int64)
+			}
+		case comment.FieldModeratedBy:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field moderated_by", values[i])
+			} else if value.Valid {
+				_m.ModeratedBy = value.String
+			}
+		case comment.FieldModeratedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field moderated_at", values[i])
+			} else if value.Valid {
+				_m.ModeratedAt = value.Time
 			}
 		case comment.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -221,6 +271,16 @@ func (_m *Comment) QueryCommentLikes() *CommentLikeQuery {
 	return NewCommentClient(_m.config).QueryCommentLikes(_m)
 }
 
+// QueryReports queries the "reports" edge of the Comment entity.
+func (_m *Comment) QueryReports() *CommentReportQuery {
+	return NewCommentClient(_m.config).QueryReports(_m)
+}
+
+// QueryModerator queries the "moderator" edge of the Comment entity.
+func (_m *Comment) QueryModerator() *UserQuery {
+	return NewCommentClient(_m.config).QueryModerator(_m)
+}
+
 // Update returns a builder for updating this Comment.
 // Note that you need to call Comment.Unwrap() before calling this method if this Comment
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -257,7 +317,16 @@ func (_m *Comment) String() string {
 	builder.WriteString(_m.UserID)
 	builder.WriteString(", ")
 	builder.WriteString("status=")
-	builder.WriteString(_m.Status)
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString(", ")
+	builder.WriteString("report_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ReportCount))
+	builder.WriteString(", ")
+	builder.WriteString("moderated_by=")
+	builder.WriteString(_m.ModeratedBy)
+	builder.WriteString(", ")
+	builder.WriteString("moderated_at=")
+	builder.WriteString(_m.ModeratedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

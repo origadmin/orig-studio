@@ -222,11 +222,14 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "text", Type: field.TypeString, Size: 2147483647},
 		{Name: "add_date", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeString, Default: "PENDING"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "APPROVED", "REJECTED"}, Default: "PENDING"},
+		{Name: "report_count", Type: field.TypeInt, Default: 0},
+		{Name: "moderated_at", Type: field.TypeTime, Nullable: true},
 		{Name: "article_comments", Type: field.TypeString, Nullable: true, Size: 36},
 		{Name: "comment_replies", Type: field.TypeString, Nullable: true, Size: 36},
 		{Name: "media_comments", Type: field.TypeString, Size: 36},
 		{Name: "user_comments", Type: field.TypeString, Size: 36},
+		{Name: "moderated_by", Type: field.TypeString, Nullable: true, Size: 36},
 	}
 	// FilesCommentTable holds the schema information for the "files_comment" table.
 	FilesCommentTable = &schema.Table{
@@ -236,27 +239,33 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "files_comment_articles_comments",
-				Columns:    []*schema.Column{FilesCommentColumns[4]},
+				Columns:    []*schema.Column{FilesCommentColumns[6]},
 				RefColumns: []*schema.Column{ArticlesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "files_comment_files_comment_replies",
-				Columns:    []*schema.Column{FilesCommentColumns[5]},
+				Columns:    []*schema.Column{FilesCommentColumns[7]},
 				RefColumns: []*schema.Column{FilesCommentColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "files_comment_media_comments",
-				Columns:    []*schema.Column{FilesCommentColumns[6]},
+				Columns:    []*schema.Column{FilesCommentColumns[8]},
 				RefColumns: []*schema.Column{MediaColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "files_comment_users_user_comments",
-				Columns:    []*schema.Column{FilesCommentColumns[7]},
+				Columns:    []*schema.Column{FilesCommentColumns[9]},
 				RefColumns: []*schema.Column{UsersUserColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "files_comment_users_user_moderated_comments",
+				Columns:    []*schema.Column{FilesCommentColumns[10]},
+				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				OnDelete:   schema.SetNull,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -268,12 +277,22 @@ var (
 			{
 				Name:    "comment_media_comments",
 				Unique:  false,
-				Columns: []*schema.Column{FilesCommentColumns[6]},
+				Columns: []*schema.Column{FilesCommentColumns[8]},
 			},
 			{
 				Name:    "comment_user_comments",
 				Unique:  false,
-				Columns: []*schema.Column{FilesCommentColumns[7]},
+				Columns: []*schema.Column{FilesCommentColumns[9]},
+			},
+			{
+				Name:    "comment_status",
+				Unique:  false,
+				Columns: []*schema.Column{FilesCommentColumns[3]},
+			},
+			{
+				Name:    "comment_media_comments_status",
+				Unique:  false,
+				Columns: []*schema.Column{FilesCommentColumns[8], FilesCommentColumns[3]},
 			},
 		},
 	}
@@ -314,6 +333,57 @@ var (
 				Name:    "commentlike_comment_id",
 				Unique:  false,
 				Columns: []*schema.Column{ContentCommentLikesColumns[3]},
+			},
+		},
+	}
+	// ContentCommentReportsColumns holds the columns for the "content_comment_reports" table.
+	ContentCommentReportsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "reason", Type: field.TypeEnum, Enums: []string{"SPAM", "HARASSMENT", "INAPPROPRIATE", "OTHER"}},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "comment_id", Type: field.TypeString, Size: 36},
+		{Name: "reporter_id", Type: field.TypeString, Size: 36},
+	}
+	// ContentCommentReportsTable holds the schema information for the "content_comment_reports" table.
+	ContentCommentReportsTable = &schema.Table{
+		Name:       "content_comment_reports",
+		Columns:    ContentCommentReportsColumns,
+		PrimaryKey: []*schema.Column{ContentCommentReportsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "content_comment_reports_files_comment_reports",
+				Columns:    []*schema.Column{ContentCommentReportsColumns[4]},
+				RefColumns: []*schema.Column{FilesCommentColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "content_comment_reports_users_user_comment_reports",
+				Columns:    []*schema.Column{ContentCommentReportsColumns[5]},
+				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "commentreport_reporter_id_comment_id",
+				Unique:  true,
+				Columns: []*schema.Column{ContentCommentReportsColumns[5], ContentCommentReportsColumns[4]},
+			},
+			{
+				Name:    "commentreport_comment_id",
+				Unique:  false,
+				Columns: []*schema.Column{ContentCommentReportsColumns[4]},
+			},
+			{
+				Name:    "commentreport_reason",
+				Unique:  false,
+				Columns: []*schema.Column{ContentCommentReportsColumns[1]},
+			},
+			{
+				Name:    "commentreport_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{ContentCommentReportsColumns[3]},
 			},
 		},
 	}
@@ -420,6 +490,50 @@ var (
 			},
 		},
 	}
+	// AuthGroupMembersColumns holds the columns for the "auth_group_members" table.
+	AuthGroupMembersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "joined_at", Type: field.TypeTime},
+		{Name: "group_id", Type: field.TypeString, Size: 36},
+		{Name: "user_id", Type: field.TypeString, Size: 36},
+	}
+	// AuthGroupMembersTable holds the schema information for the "auth_group_members" table.
+	AuthGroupMembersTable = &schema.Table{
+		Name:       "auth_group_members",
+		Columns:    AuthGroupMembersColumns,
+		PrimaryKey: []*schema.Column{AuthGroupMembersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "auth_group_members_auth_permission_groups_members",
+				Columns:    []*schema.Column{AuthGroupMembersColumns[2]},
+				RefColumns: []*schema.Column{AuthPermissionGroupsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "auth_group_members_users_user_group_memberships",
+				Columns:    []*schema.Column{AuthGroupMembersColumns[3]},
+				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "groupmember_user_id_group_id",
+				Unique:  true,
+				Columns: []*schema.Column{AuthGroupMembersColumns[3], AuthGroupMembersColumns[2]},
+			},
+			{
+				Name:    "groupmember_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{AuthGroupMembersColumns[3]},
+			},
+			{
+				Name:    "groupmember_group_id",
+				Unique:  false,
+				Columns: []*schema.Column{AuthGroupMembersColumns[2]},
+			},
+		},
+	}
 	// FilesLikeColumns holds the columns for the "files_like" table.
 	FilesLikeColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
@@ -489,6 +603,10 @@ var (
 		{Name: "review_status", Type: field.TypeString, Size: 20, Default: "pending_review"},
 		{Name: "listable", Type: field.TypeBool, Default: false},
 		{Name: "reported_times", Type: field.TypeInt, Default: 0},
+		{Name: "sprite_status", Type: field.TypeString, Size: 20, Default: "pending"},
+		{Name: "sprite_path", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "vtt_path", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "thumbnail_time", Type: field.TypeFloat64, Nullable: true},
 		{Name: "tags", Type: field.TypeJSON, Nullable: true},
 		{Name: "published_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
@@ -507,31 +625,31 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "media_categories_media",
-				Columns:    []*schema.Column{MediaColumns[36]},
+				Columns:    []*schema.Column{MediaColumns[40]},
 				RefColumns: []*schema.Column{CategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_users_channel_media",
-				Columns:    []*schema.Column{MediaColumns[37]},
+				Columns:    []*schema.Column{MediaColumns[41]},
 				RefColumns: []*schema.Column{UsersChannelColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_files_media_category_media",
-				Columns:    []*schema.Column{MediaColumns[38]},
+				Columns:    []*schema.Column{MediaColumns[42]},
 				RefColumns: []*schema.Column{FilesMediaCategoryColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_files_media_tags_media",
-				Columns:    []*schema.Column{MediaColumns[39]},
+				Columns:    []*schema.Column{MediaColumns[43]},
 				RefColumns: []*schema.Column{FilesMediaTagsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "media_users_user_media",
-				Columns:    []*schema.Column{MediaColumns[40]},
+				Columns:    []*schema.Column{MediaColumns[44]},
 				RefColumns: []*schema.Column{UsersUserColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -570,12 +688,12 @@ var (
 			{
 				Name:    "media_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[34]},
+				Columns: []*schema.Column{MediaColumns[38]},
 			},
 			{
 				Name:    "media_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[40]},
+				Columns: []*schema.Column{MediaColumns[44]},
 			},
 			{
 				Name:    "media_short_token",
@@ -591,6 +709,11 @@ var (
 				Name:    "media_listable",
 				Unique:  false,
 				Columns: []*schema.Column{MediaColumns[30]},
+			},
+			{
+				Name:    "media_sprite_status",
+				Unique:  false,
+				Columns: []*schema.Column{MediaColumns[32]},
 			},
 		},
 	}
@@ -636,6 +759,54 @@ var (
 				Columns:    []*schema.Column{FilesPlaylistmediaColumns[5]},
 				RefColumns: []*schema.Column{FilesPlaylistColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// MediaReviewLogsColumns holds the columns for the "media_review_logs" table.
+	MediaReviewLogsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "action", Type: field.TypeString, Size: 20},
+		{Name: "comment", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "previous_status", Type: field.TypeString, Size: 20},
+		{Name: "new_status", Type: field.TypeString, Size: 20},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "media_id", Type: field.TypeString, Size: 36},
+		{Name: "reviewer_id", Type: field.TypeString, Size: 36},
+	}
+	// MediaReviewLogsTable holds the schema information for the "media_review_logs" table.
+	MediaReviewLogsTable = &schema.Table{
+		Name:       "media_review_logs",
+		Columns:    MediaReviewLogsColumns,
+		PrimaryKey: []*schema.Column{MediaReviewLogsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "media_review_logs_media_review_logs",
+				Columns:    []*schema.Column{MediaReviewLogsColumns[6]},
+				RefColumns: []*schema.Column{MediaColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "media_review_logs_users_user_review_logs",
+				Columns:    []*schema.Column{MediaReviewLogsColumns[7]},
+				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "mediareviewlog_media_id",
+				Unique:  false,
+				Columns: []*schema.Column{MediaReviewLogsColumns[6]},
+			},
+			{
+				Name:    "mediareviewlog_reviewer_id",
+				Unique:  false,
+				Columns: []*schema.Column{MediaReviewLogsColumns[7]},
+			},
+			{
+				Name:    "mediareviewlog_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{MediaReviewLogsColumns[5]},
 			},
 		},
 	}
@@ -691,6 +862,44 @@ var (
 			},
 		},
 	}
+	// AuthPermissionGroupsColumns holds the columns for the "auth_permission_groups" table.
+	AuthPermissionGroupsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "name", Type: field.TypeString, Unique: true, Size: 128},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "permissions", Type: field.TypeJSON},
+		{Name: "category_scope", Type: field.TypeJSON, Nullable: true},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "created_by", Type: field.TypeString, Nullable: true, Size: 36},
+	}
+	// AuthPermissionGroupsTable holds the schema information for the "auth_permission_groups" table.
+	AuthPermissionGroupsTable = &schema.Table{
+		Name:       "auth_permission_groups",
+		Columns:    AuthPermissionGroupsColumns,
+		PrimaryKey: []*schema.Column{AuthPermissionGroupsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "auth_permission_groups_users_user_created_groups",
+				Columns:    []*schema.Column{AuthPermissionGroupsColumns[8]},
+				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "permissiongroup_name",
+				Unique:  true,
+				Columns: []*schema.Column{AuthPermissionGroupsColumns[1]},
+			},
+			{
+				Name:    "permissiongroup_is_active",
+				Unique:  false,
+				Columns: []*schema.Column{AuthPermissionGroupsColumns[5]},
+			},
+		},
+	}
 	// FilesPlaylistColumns holds the columns for the "files_playlist" table.
 	FilesPlaylistColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
@@ -726,6 +935,38 @@ var (
 				Name:    "playlist_add_date",
 				Unique:  false,
 				Columns: []*schema.Column{FilesPlaylistColumns[6]},
+			},
+		},
+	}
+	// SystemSettingColumns holds the columns for the "system_setting" table.
+	SystemSettingColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "key", Type: field.TypeString, Unique: true, Size: 200},
+		{Name: "value", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"string", "int", "bool", "json"}, Default: "string"},
+		{Name: "category", Type: field.TypeEnum, Enums: []string{"general", "upload", "review", "email"}, Default: "general"},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "is_sensitive", Type: field.TypeBool, Default: false},
+		{Name: "fallback_value", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "is_builtin", Type: field.TypeBool, Default: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// SystemSettingTable holds the schema information for the "system_setting" table.
+	SystemSettingTable = &schema.Table{
+		Name:       "system_setting",
+		Columns:    SystemSettingColumns,
+		PrimaryKey: []*schema.Column{SystemSettingColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "setting_key",
+				Unique:  true,
+				Columns: []*schema.Column{SystemSettingColumns[1]},
+			},
+			{
+				Name:    "setting_category",
+				Unique:  false,
+				Columns: []*schema.Column{SystemSettingColumns[4]},
 			},
 		},
 	}
@@ -1008,16 +1249,21 @@ var (
 		UsersChannelTable,
 		FilesCommentTable,
 		ContentCommentLikesTable,
+		ContentCommentReportsTable,
 		EncodeProfilesTable,
 		EncodingTasksTable,
 		FilesFavoriteTable,
+		AuthGroupMembersTable,
 		FilesLikeTable,
 		MediaTable,
 		FilesMediaCategoryTable,
 		FilesPlaylistmediaTable,
+		MediaReviewLogsTable,
 		FilesMediaTagsTable,
 		UsersNotificationTable,
+		AuthPermissionGroupsTable,
 		FilesPlaylistTable,
+		SystemSettingTable,
 		SubscriptionsSubscriptionTable,
 		FilesTagTable,
 		UploadSessionsTable,
@@ -1042,6 +1288,7 @@ func init() {
 	FilesCommentTable.ForeignKeys[1].RefTable = FilesCommentTable
 	FilesCommentTable.ForeignKeys[2].RefTable = MediaTable
 	FilesCommentTable.ForeignKeys[3].RefTable = UsersUserTable
+	FilesCommentTable.ForeignKeys[4].RefTable = UsersUserTable
 	FilesCommentTable.Annotation = &entsql.Annotation{
 		Table: "files_comment",
 	}
@@ -1050,10 +1297,20 @@ func init() {
 	ContentCommentLikesTable.Annotation = &entsql.Annotation{
 		Table: "content_comment_likes",
 	}
+	ContentCommentReportsTable.ForeignKeys[0].RefTable = FilesCommentTable
+	ContentCommentReportsTable.ForeignKeys[1].RefTable = UsersUserTable
+	ContentCommentReportsTable.Annotation = &entsql.Annotation{
+		Table: "content_comment_reports",
+	}
 	FilesFavoriteTable.ForeignKeys[0].RefTable = MediaTable
 	FilesFavoriteTable.ForeignKeys[1].RefTable = UsersUserTable
 	FilesFavoriteTable.Annotation = &entsql.Annotation{
 		Table: "files_favorite",
+	}
+	AuthGroupMembersTable.ForeignKeys[0].RefTable = AuthPermissionGroupsTable
+	AuthGroupMembersTable.ForeignKeys[1].RefTable = UsersUserTable
+	AuthGroupMembersTable.Annotation = &entsql.Annotation{
+		Table: "auth_group_members",
 	}
 	FilesLikeTable.ForeignKeys[0].RefTable = MediaTable
 	FilesLikeTable.ForeignKeys[1].RefTable = UsersUserTable
@@ -1074,6 +1331,8 @@ func init() {
 	FilesPlaylistmediaTable.Annotation = &entsql.Annotation{
 		Table: "files_playlistmedia",
 	}
+	MediaReviewLogsTable.ForeignKeys[0].RefTable = MediaTable
+	MediaReviewLogsTable.ForeignKeys[1].RefTable = UsersUserTable
 	FilesMediaTagsTable.ForeignKeys[0].RefTable = MediaTable
 	FilesMediaTagsTable.Annotation = &entsql.Annotation{
 		Table: "files_media_tags",
@@ -1081,8 +1340,15 @@ func init() {
 	UsersNotificationTable.Annotation = &entsql.Annotation{
 		Table: "users_notification",
 	}
+	AuthPermissionGroupsTable.ForeignKeys[0].RefTable = UsersUserTable
+	AuthPermissionGroupsTable.Annotation = &entsql.Annotation{
+		Table: "auth_permission_groups",
+	}
 	FilesPlaylistTable.Annotation = &entsql.Annotation{
 		Table: "files_playlist",
+	}
+	SystemSettingTable.Annotation = &entsql.Annotation{
+		Table: "system_setting",
 	}
 	SubscriptionsSubscriptionTable.ForeignKeys[0].RefTable = UsersUserTable
 	SubscriptionsSubscriptionTable.ForeignKeys[1].RefTable = UsersUserTable

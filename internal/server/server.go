@@ -36,6 +36,8 @@ type Server struct {
 	adminHandler       *AdminHandler
 	exploreHandler     *ExploreHandler
 	commentLikeUC      *contentbiz.CommentLikeUseCase
+	commentModerationHandler *CommentModerationHandler
+	permissionHandler  *PermissionHandler
 	entityClient       *entity.Client
 	jwtMgr             *auth.Manager
 }
@@ -59,6 +61,8 @@ func NewServer(
 	adminHandler *AdminHandler,
 	exploreHandler *ExploreHandler,
 	commentLikeUC *contentbiz.CommentLikeUseCase,
+	commentModerationHandler *CommentModerationHandler,
+	permissionHandler *PermissionHandler,
 	entityClient *entity.Client,
 	jwtMgr *auth.Manager,
 ) *Server {
@@ -80,6 +84,8 @@ func NewServer(
 		adminHandler:       adminHandler,
 		exploreHandler:     exploreHandler,
 		commentLikeUC:      commentLikeUC,
+		commentModerationHandler: commentModerationHandler,
+		permissionHandler:  permissionHandler,
 		entityClient:       entityClient,
 		jwtMgr:             jwtMgr,
 	}
@@ -149,7 +155,13 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 	}
 
 	// Comment routes (direct gin registration for entity access)
-	RegisterCommentRoutes(apiV1, s.entityClient, s.jwtMgr, s.commentLikeUC)
+	RegisterCommentRoutes(apiV1, s.entityClient, s.jwtMgr, s.commentLikeUC, s.commentModerationHandler.moderationUC)
+
+	// Comment moderation routes
+	s.commentModerationHandler.RegisterRoutes(apiV1)
+
+	// Permission routes
+	s.permissionHandler.RegisterRoutes(apiV1)
 }
 
 // getEnv gets an environment variable or returns the default value.

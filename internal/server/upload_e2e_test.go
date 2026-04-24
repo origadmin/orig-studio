@@ -54,8 +54,8 @@ func TestUploadE2E(t *testing.T) {
 	mediaRepo := data.NewMediaRepo(client)
 	profileRepo := data.NewEncodeProfileRepo(client)
 	taskRepo := data.NewEncodingTaskRepo(client)
-	storage := data.NewLocalStorage("data/uploads", logger)
-	mediaUC := biz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, storage, nil, logger)
+	storage := data.NewLocalStorage("data/uploads")
+	mediaUC := biz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, nil, storage, nil, logger, nil)
 
 	uploadUC := biz.NewUploadUseCase(
 		uploadRepo,
@@ -64,6 +64,7 @@ func TestUploadE2E(t *testing.T) {
 		taskRepo,
 		mediaUC,
 		storage,
+		5*1024*1024,
 		logger,
 	)
 
@@ -76,8 +77,8 @@ func TestUploadE2E(t *testing.T) {
 	// Setup Router
 	router := gin.Default()
 	RegisterRoutes(router,
-		NewUploadHandler(uploadUC, jwtMgr),
-		NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC, nil, nil),
+		NewUploadHandler(uploadUC, jwtMgr, logger),
+		NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC, nil, nil, client),
 	)
 
 	// 2. Register & Login to get token
@@ -95,7 +96,7 @@ func TestUploadE2E(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate Token manually for testing (simulating a login)
-	token, err := jwtMgr.Generate(int64(user.ID), username, true, "admin")
+	token, err := jwtMgr.Generate(user.ID, username, true, "admin")
 	require.NoError(t, err)
 	authHeader := "Bearer " + token
 
@@ -200,7 +201,7 @@ func TestUploadE2E(t *testing.T) {
 	mediaData, ok := completeResp["media"].(map[string]interface{})
 	require.True(t, ok, "media field missing in response")
 	mediaID := int64(mediaData["id"].(float64))
-	dbMedia, err := client.Media.Get(context.Background(), int(mediaID))
+	dbMedia, err := client.Media.Get(context.Background(), fmt.Sprintf("%d", int(mediaID)))
 	require.NoError(t, err)
 	assert.Equal(t, "My E2E Video", dbMedia.Title)
 	assert.Equal(t, "video/mp4", dbMedia.MimeType)

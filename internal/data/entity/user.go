@@ -101,9 +101,19 @@ type UserEdges struct {
 	Subscriptions []*Subscription `json:"subscriptions,omitempty"`
 	// Subscribers holds the value of the subscribers edge.
 	Subscribers []*Subscription `json:"subscribers,omitempty"`
+	// ReviewLogs holds the value of the review_logs edge.
+	ReviewLogs []*MediaReviewLog `json:"review_logs,omitempty"`
+	// CommentReports holds the value of the comment_reports edge.
+	CommentReports []*CommentReport `json:"comment_reports,omitempty"`
+	// ModeratedComments holds the value of the moderated_comments edge.
+	ModeratedComments []*Comment `json:"moderated_comments,omitempty"`
+	// GroupMemberships holds the value of the group_memberships edge.
+	GroupMemberships []*GroupMember `json:"group_memberships,omitempty"`
+	// CreatedGroups holds the value of the created_groups edge.
+	CreatedGroups []*PermissionGroup `json:"created_groups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [13]bool
+	loadedTypes [18]bool
 }
 
 // MediaOrErr returns the Media value or an error if the edge
@@ -221,6 +231,51 @@ func (e UserEdges) SubscribersOrErr() ([]*Subscription, error) {
 		return e.Subscribers, nil
 	}
 	return nil, &NotLoadedError{edge: "subscribers"}
+}
+
+// ReviewLogsOrErr returns the ReviewLogs value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ReviewLogsOrErr() ([]*MediaReviewLog, error) {
+	if e.loadedTypes[13] {
+		return e.ReviewLogs, nil
+	}
+	return nil, &NotLoadedError{edge: "review_logs"}
+}
+
+// CommentReportsOrErr returns the CommentReports value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) CommentReportsOrErr() ([]*CommentReport, error) {
+	if e.loadedTypes[14] {
+		return e.CommentReports, nil
+	}
+	return nil, &NotLoadedError{edge: "comment_reports"}
+}
+
+// ModeratedCommentsOrErr returns the ModeratedComments value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ModeratedCommentsOrErr() ([]*Comment, error) {
+	if e.loadedTypes[15] {
+		return e.ModeratedComments, nil
+	}
+	return nil, &NotLoadedError{edge: "moderated_comments"}
+}
+
+// GroupMembershipsOrErr returns the GroupMemberships value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) GroupMembershipsOrErr() ([]*GroupMember, error) {
+	if e.loadedTypes[16] {
+		return e.GroupMemberships, nil
+	}
+	return nil, &NotLoadedError{edge: "group_memberships"}
+}
+
+// CreatedGroupsOrErr returns the CreatedGroups value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) CreatedGroupsOrErr() ([]*PermissionGroup, error) {
+	if e.loadedTypes[17] {
+		return e.CreatedGroups, nil
+	}
+	return nil, &NotLoadedError{edge: "created_groups"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -483,6 +538,31 @@ func (_m *User) QuerySubscriptions() *SubscriptionQuery {
 // QuerySubscribers queries the "subscribers" edge of the User entity.
 func (_m *User) QuerySubscribers() *SubscriptionQuery {
 	return NewUserClient(_m.config).QuerySubscribers(_m)
+}
+
+// QueryReviewLogs queries the "review_logs" edge of the User entity.
+func (_m *User) QueryReviewLogs() *MediaReviewLogQuery {
+	return NewUserClient(_m.config).QueryReviewLogs(_m)
+}
+
+// QueryCommentReports queries the "comment_reports" edge of the User entity.
+func (_m *User) QueryCommentReports() *CommentReportQuery {
+	return NewUserClient(_m.config).QueryCommentReports(_m)
+}
+
+// QueryModeratedComments queries the "moderated_comments" edge of the User entity.
+func (_m *User) QueryModeratedComments() *CommentQuery {
+	return NewUserClient(_m.config).QueryModeratedComments(_m)
+}
+
+// QueryGroupMemberships queries the "group_memberships" edge of the User entity.
+func (_m *User) QueryGroupMemberships() *GroupMemberQuery {
+	return NewUserClient(_m.config).QueryGroupMemberships(_m)
+}
+
+// QueryCreatedGroups queries the "created_groups" edge of the User entity.
+func (_m *User) QueryCreatedGroups() *PermissionGroupQuery {
+	return NewUserClient(_m.config).QueryCreatedGroups(_m)
 }
 
 // Update returns a builder for updating this User.

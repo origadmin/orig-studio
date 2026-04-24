@@ -12,13 +12,14 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/internal/auth"
-	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/svc-admin/service"
 	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 	mediabiz "origadmin/application/origcms/internal/svc-media/biz"
 	"origadmin/application/origcms/internal/svc-media/dto"
+	systembiz "origadmin/application/origcms/internal/svc-system/biz"
 	"origadmin/application/origcms/internal/validation"
 )
 
@@ -28,11 +29,23 @@ type AdminHandler struct {
 	mediaUC    *mediabiz.MediaUseCase
 	channelUC  *contentbiz.PlaylistChannelUseCase
 	tagService *service.TagService
+	settingUC  *systembiz.SettingUseCase
 }
 
-// NewAdminHandler creates a new AdminHandler.
-func NewAdminHandler(jwt *auth.Manager, mediaUC *mediabiz.MediaUseCase, channelUC *contentbiz.PlaylistChannelUseCase, tagService *service.TagService) *AdminHandler {
-	return &AdminHandler{jwt: jwt, mediaUC: mediaUC, channelUC: channelUC, tagService: tagService}
+func NewAdminHandler(
+	jwt *auth.Manager,
+	mediaUC *mediabiz.MediaUseCase,
+	channelUC *contentbiz.PlaylistChannelUseCase,
+	tagService *service.TagService,
+	settingUC *systembiz.SettingUseCase,
+) *AdminHandler {
+	return &AdminHandler{
+		jwt:        jwt,
+		mediaUC:    mediaUC,
+		channelUC:  channelUC,
+		tagService: tagService,
+		settingUC:  settingUC,
+	}
 }
 
 func (h *AdminHandler) Register(r handler.Router) {
@@ -56,8 +69,8 @@ func (h *AdminHandler) Register(r handler.Router) {
 		{
 			channels.GET("", WithAdmin(h.jwt, h.adminListChannels()))
 			channels.GET("/:id", WithAdmin(h.jwt, h.adminGetChannelDetail())) // :id = UUID
-			channels.PUT("/:id", WithAdmin(h.jwt, h.adminUpdateChannel()))     // :id = UUID
-			channels.DELETE("/:id", WithAdmin(h.jwt, h.adminDeleteChannel()))  // :id = UUID
+			channels.PUT("/:id", WithAdmin(h.jwt, h.adminUpdateChannel()))    // :id = UUID
+			channels.DELETE("/:id", WithAdmin(h.jwt, h.adminDeleteChannel())) // :id = UUID
 		}
 
 		// ================================
@@ -112,8 +125,8 @@ func (h *AdminHandler) Register(r handler.Router) {
 			playlists.GET("", WithAdmin(h.jwt, h.adminListPlaylists()))
 			playlists.GET("/:id", WithAdmin(h.jwt, h.adminGetPlaylistDetail())) // :id = UUID
 			playlists.POST("", WithAdmin(h.jwt, h.adminCreatePlaylist()))
-			playlists.PUT("/:id", WithAdmin(h.jwt, h.adminUpdatePlaylist()))     // :id = UUID
-			playlists.DELETE("/:id", WithAdmin(h.jwt, h.adminDeletePlaylist()))  // :id = UUID
+			playlists.PUT("/:id", WithAdmin(h.jwt, h.adminUpdatePlaylist()))    // :id = UUID
+			playlists.DELETE("/:id", WithAdmin(h.jwt, h.adminDeletePlaylist())) // :id = UUID
 		}
 	}
 }
@@ -354,33 +367,102 @@ func (h *AdminHandler) deleteEncodeProfile() gin.HandlerFunc {
 
 func (h *AdminHandler) getSystemSettings() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// TODO: Implement get system settings
+		if h.settingUC == nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "settings service not available"})
+			return
+		}
+
+		items, err := h.settingUC.ListAll(c.Request.Context())
+		if err != nil {
+			c.JSON(
+				http.StatusInternalServerError,
+				gin.H{"code": ErrInternal, "message": err.Error()},
+			)
+			return
+		}
+
+		grouped := make(map[string][]*entity.Setting)
+		for _, item := range items {
+			masked := h.settingUC.MaskSensitive(item)
+			cat := string(item.Category)
+			grouped[cat] = append(grouped[cat], masked)
+		}
+
 		c.JSON(http.StatusOK, gin.H{
-			"site_name":           "OrigCMS",
-			"max_upload_size":     "5GB",
-			"enable_registration": true,
-			"default_privacy":     "public",
-			"encoding_queue_size": 10,
+			"code":    0,
+			"message": "ok",
+			"data":    grouped,
 		})
 	}
 }
 
 func (h *AdminHandler) updateSystemSettings() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// TODO: Implement update system settings
-		var settings struct {
-			SiteName           string `json:"site_name"`
-			MaxUploadSize      string `json:"max_upload_size"`
-			EnableRegistration bool   `json:"enable_registration"`
-			DefaultPrivacy     string `json:"default_privacy"`
-			EncodingQueueSize  int    `json:"encoding_queue_size"`
-		}
-		if err := c.ShouldBindJSON(&settings); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		if h.settingUC == nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "settings service not available"})
 			return
 		}
-		// TODO: Save settings to database
-		c.JSON(http.StatusOK, gin.H{"message": "Settings updated", "settings": settings})
+
+		var req struct {
+			Settings []struct {
+				Key   string `json:"key" binding:"required"`
+				Value string `json:"value"`
+			} `json:"settings" binding:"required"`
+		}
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
+			return
+		}
+
+		var updated []*entity.Setting
+		for _, item := range req.Settings {
+			existing, err := h.settingUC.GetByKey(c.Request.Context(), item.Key)
+			if err != nil {
+				c.JSON(
+					http.StatusNotFound,
+					gin.H{"code": ErrNotFound, "message": "setting not found: " + item.Key},
+				)
+				return
+			}
+
+			if err := validateSettingValue(item.Value, existing.Type); err != nil {
+				c.JSON(
+					http.StatusBadRequest,
+					gin.H{
+						"code":    ErrBadRequest,
+						"message": "invalid value for " + item.Key + ": " + err.Error(),
+					},
+				)
+				return
+			}
+
+			s := &entity.Setting{
+				Key:           existing.Key,
+				Value:         item.Value,
+				Type:          existing.Type,
+				Category:      existing.Category,
+				Description:   existing.Description,
+				IsSensitive:   existing.IsSensitive,
+				FallbackValue: existing.FallbackValue,
+				IsBuiltin:     existing.IsBuiltin,
+			}
+			result, err := h.settingUC.Upsert(c.Request.Context(), s)
+			if err != nil {
+				c.JSON(
+					http.StatusInternalServerError,
+					gin.H{"code": ErrInternal, "message": err.Error()},
+				)
+				return
+			}
+			updated = append(updated, result)
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    updated,
+		})
 	}
 }
 
@@ -397,9 +479,20 @@ func (h *AdminHandler) listTags() gin.HandlerFunc {
 		sortOrder := c.DefaultQuery("sort_order", "desc")
 
 		// Get tags
-		tags, total, err := h.tagService.List(c.Request.Context(), page, pageSize, search, status, sortBy, sortOrder)
+		tags, total, err := h.tagService.List(
+			c.Request.Context(),
+			page,
+			pageSize,
+			search,
+			status,
+			sortBy,
+			sortOrder,
+		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"code": 10000, "message": "Failed to list tags"})
+			c.JSON(
+				http.StatusInternalServerError,
+				gin.H{"code": 10000, "message": "Failed to list tags"},
+			)
 			return
 		}
 
@@ -408,13 +501,13 @@ func (h *AdminHandler) listTags() gin.HandlerFunc {
 
 		// Return response
 		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
+			"code":    0,
 			"message": "ok",
 			"data": gin.H{
-				"list":       tags,
-				"total":      total,
-				"page":       page,
-				"page_size":  pageSize,
+				"list":        tags,
+				"total":       total,
+				"page":        page,
+				"page_size":   pageSize,
 				"total_pages": totalPages,
 			},
 		})
@@ -432,9 +525,9 @@ func (h *AdminHandler) getTag() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
+			"code":    0,
 			"message": "ok",
-			"data": tag,
+			"data":    tag,
 		})
 	}
 }
@@ -465,9 +558,9 @@ func (h *AdminHandler) createTag() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
+			"code":    0,
 			"message": "Tag created successfully",
-			"data": createdTag,
+			"data":    createdTag,
 		})
 	}
 }
@@ -500,9 +593,9 @@ func (h *AdminHandler) updateTag() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
+			"code":    0,
 			"message": "Tag updated successfully",
-			"data": updatedTag,
+			"data":    updatedTag,
 		})
 	}
 }
@@ -517,7 +610,7 @@ func (h *AdminHandler) deleteTag() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
+			"code":    0,
 			"message": "Tag deleted successfully",
 		})
 	}
@@ -547,7 +640,7 @@ func (h *AdminHandler) bulkTagOperation() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
+			"code":    0,
 			"message": "Bulk operation completed",
 			"data": gin.H{
 				"success": count,
@@ -561,7 +654,7 @@ func (h *AdminHandler) exportTags() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// TODO: Implement export functionality
 		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
+			"code":    0,
 			"message": "Export functionality not implemented yet",
 		})
 	}
@@ -591,7 +684,10 @@ func (h *AdminHandler) adminListChannels() gin.HandlerFunc {
 
 		items, total, err := h.channelUC.ListChannels(c.Request.Context(), page, pageSize)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			c.JSON(
+				http.StatusInternalServerError,
+				gin.H{"code": ErrInternal, "message": err.Error()},
+			)
 			return
 		}
 
@@ -612,7 +708,10 @@ func (h *AdminHandler) adminGetChannelDetail() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		if id == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "channel id is required"})
+			c.JSON(
+				http.StatusBadRequest,
+				gin.H{"code": ErrBadRequest, "message": "channel id is required"},
+			)
 			return
 		}
 
@@ -647,7 +746,10 @@ func (h *AdminHandler) adminUpdateChannel() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		if id == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "channel id is required"})
+			c.JSON(
+				http.StatusBadRequest,
+				gin.H{"code": ErrBadRequest, "message": "channel id is required"},
+			)
 			return
 		}
 
@@ -679,13 +781,13 @@ func (h *AdminHandler) adminUpdateChannel() gin.HandlerFunc {
 		}
 
 		chItem := &contentbiz.Channel{
-			ID:            id,
-			Title:         input.Title,
-			Description:   input.Description,
-			BannerLogo:    input.BannerLogo,
-			IsPublic:      existingCh.IsPublic,
-			UserID:        existingCh.UserID,
-			CreatedAt:     existingCh.CreatedAt,
+			ID:          id,
+			Title:       input.Title,
+			Description: input.Description,
+			BannerLogo:  input.BannerLogo,
+			IsPublic:    existingCh.IsPublic,
+			UserID:      existingCh.UserID,
+			CreatedAt:   existingCh.CreatedAt,
 		}
 
 		if input.IsPublic != nil {
@@ -697,7 +799,10 @@ func (h *AdminHandler) adminUpdateChannel() gin.HandlerFunc {
 
 		updated, err := h.channelUC.UpdateChannel(c.Request.Context(), chItem, "", true)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			c.JSON(
+				http.StatusInternalServerError,
+				gin.H{"code": ErrInternal, "message": err.Error()},
+			)
 			return
 		}
 
@@ -713,7 +818,10 @@ func (h *AdminHandler) adminDeleteChannel() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		if id == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "channel id is required"})
+			c.JSON(
+				http.StatusBadRequest,
+				gin.H{"code": ErrBadRequest, "message": "channel id is required"},
+			)
 			return
 		}
 
@@ -728,7 +836,10 @@ func (h *AdminHandler) adminDeleteChannel() gin.HandlerFunc {
 
 		err := h.channelUC.DeleteChannel(c.Request.Context(), id, "", true)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			c.JSON(
+				http.StatusInternalServerError,
+				gin.H{"code": ErrInternal, "message": err.Error()},
+			)
 			return
 		}
 
@@ -754,7 +865,10 @@ func (h *AdminHandler) adminListPlaylists() gin.HandlerFunc {
 
 		items, total, err := h.channelUC.ListPlaylists(c.Request.Context(), page, pageSize)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			c.JSON(
+				http.StatusInternalServerError,
+				gin.H{"code": ErrInternal, "message": err.Error()},
+			)
 			return
 		}
 
@@ -775,7 +889,10 @@ func (h *AdminHandler) adminGetPlaylistDetail() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		if id == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "playlist id is required"})
+			c.JSON(
+				http.StatusBadRequest,
+				gin.H{"code": ErrBadRequest, "message": "playlist id is required"},
+			)
 			return
 		}
 
@@ -833,7 +950,10 @@ func (h *AdminHandler) adminCreatePlaylist() gin.HandlerFunc {
 
 		created, err := h.channelUC.CreatePlaylist(c.Request.Context(), playlist)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			c.JSON(
+				http.StatusInternalServerError,
+				gin.H{"code": ErrInternal, "message": err.Error()},
+			)
 			return
 		}
 
@@ -849,7 +969,10 @@ func (h *AdminHandler) adminUpdatePlaylist() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		if id == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "playlist id is required"})
+			c.JSON(
+				http.StatusBadRequest,
+				gin.H{"code": ErrBadRequest, "message": "playlist id is required"},
+			)
 			return
 		}
 
@@ -893,7 +1016,10 @@ func (h *AdminHandler) adminUpdatePlaylist() gin.HandlerFunc {
 
 		updated, err := h.channelUC.UpdatePlaylist(c.Request.Context(), playlistItem, "", true)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			c.JSON(
+				http.StatusInternalServerError,
+				gin.H{"code": ErrInternal, "message": err.Error()},
+			)
 			return
 		}
 
@@ -909,7 +1035,10 @@ func (h *AdminHandler) adminDeletePlaylist() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		if id == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "playlist id is required"})
+			c.JSON(
+				http.StatusBadRequest,
+				gin.H{"code": ErrBadRequest, "message": "playlist id is required"},
+			)
 			return
 		}
 
@@ -924,7 +1053,10 @@ func (h *AdminHandler) adminDeletePlaylist() gin.HandlerFunc {
 
 		err := h.channelUC.DeletePlaylist(c.Request.Context(), id, "", true)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			c.JSON(
+				http.StatusInternalServerError,
+				gin.H{"code": ErrInternal, "message": err.Error()},
+			)
 			return
 		}
 

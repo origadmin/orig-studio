@@ -84,5 +84,10 @@ func (User) Edges() []ent.Edge {
 		edge.To("comment_likes", CommentLike.Type),
 		edge.To("subscriptions", Subscription.Type),
 		edge.To("subscribers", Subscription.Type),
+		edge.To("review_logs", MediaReviewLog.Type),
+		edge.To("comment_reports", CommentReport.Type),
+		edge.To("moderated_comments", Comment.Type),
+		edge.To("group_memberships", GroupMember.Type),
+		edge.To("created_groups", PermissionGroup.Type),
 	}
 }

@@ -13,6 +13,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
+	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/mediatag"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
@@ -446,6 +447,62 @@ func (_c *MediaCreate) SetNillableReportedTimes(v *int) *MediaCreate {
 	return _c
 }
 
+// SetSpriteStatus sets the "sprite_status" field.
+func (_c *MediaCreate) SetSpriteStatus(v string) *MediaCreate {
+	_c.mutation.SetSpriteStatus(v)
+	return _c
+}
+
+// SetNillableSpriteStatus sets the "sprite_status" field if the given value is not nil.
+func (_c *MediaCreate) SetNillableSpriteStatus(v *string) *MediaCreate {
+	if v != nil {
+		_c.SetSpriteStatus(*v)
+	}
+	return _c
+}
+
+// SetSpritePath sets the "sprite_path" field.
+func (_c *MediaCreate) SetSpritePath(v string) *MediaCreate {
+	_c.mutation.SetSpritePath(v)
+	return _c
+}
+
+// SetNillableSpritePath sets the "sprite_path" field if the given value is not nil.
+func (_c *MediaCreate) SetNillableSpritePath(v *string) *MediaCreate {
+	if v != nil {
+		_c.SetSpritePath(*v)
+	}
+	return _c
+}
+
+// SetVttPath sets the "vtt_path" field.
+func (_c *MediaCreate) SetVttPath(v string) *MediaCreate {
+	_c.mutation.SetVttPath(v)
+	return _c
+}
+
+// SetNillableVttPath sets the "vtt_path" field if the given value is not nil.
+func (_c *MediaCreate) SetNillableVttPath(v *string) *MediaCreate {
+	if v != nil {
+		_c.SetVttPath(*v)
+	}
+	return _c
+}
+
+// SetThumbnailTime sets the "thumbnail_time" field.
+func (_c *MediaCreate) SetThumbnailTime(v float64) *MediaCreate {
+	_c.mutation.SetThumbnailTime(v)
+	return _c
+}
+
+// SetNillableThumbnailTime sets the "thumbnail_time" field if the given value is not nil.
+func (_c *MediaCreate) SetNillableThumbnailTime(v *float64) *MediaCreate {
+	if v != nil {
+		_c.SetThumbnailTime(*v)
+	}
+	return _c
+}
+
 // SetTags sets the "tags" field.
 func (_c *MediaCreate) SetTags(v []string) *MediaCreate {
 	_c.mutation.SetTags(v)
@@ -632,6 +689,21 @@ func (_c *MediaCreate) AddLikes(v ...*Like) *MediaCreate {
 	return _c.AddLikeIDs(ids...)
 }
 
+// AddReviewLogIDs adds the "review_logs" edge to the MediaReviewLog entity by IDs.
+func (_c *MediaCreate) AddReviewLogIDs(ids ...string) *MediaCreate {
+	_c.mutation.AddReviewLogIDs(ids...)
+	return _c
+}
+
+// AddReviewLogs adds the "review_logs" edges to the MediaReviewLog entity.
+func (_c *MediaCreate) AddReviewLogs(v ...*MediaReviewLog) *MediaCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddReviewLogIDs(ids...)
+}
+
 // Mutation returns the MediaMutation object of the builder.
 func (_c *MediaCreate) Mutation() *MediaMutation {
 	return _c.mutation
@@ -746,6 +818,10 @@ func (_c *MediaCreate) defaults() {
 	if _, ok := _c.mutation.ReportedTimes(); !ok {
 		v := media.DefaultReportedTimes
 		_c.mutation.SetReportedTimes(v)
+	}
+	if _, ok := _c.mutation.SpriteStatus(); !ok {
+		v := media.DefaultSpriteStatus
+		_c.mutation.SetSpriteStatus(v)
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := media.DefaultCreatedAt()
@@ -903,6 +979,24 @@ func (_c *MediaCreate) check() error {
 	}
 	if _, ok := _c.mutation.ReportedTimes(); !ok {
 		return &ValidationError{Name: "reported_times", err: errors.New(`entity: missing required field "Media.reported_times"`)}
+	}
+	if _, ok := _c.mutation.SpriteStatus(); !ok {
+		return &ValidationError{Name: "sprite_status", err: errors.New(`entity: missing required field "Media.sprite_status"`)}
+	}
+	if v, ok := _c.mutation.SpriteStatus(); ok {
+		if err := media.SpriteStatusValidator(v); err != nil {
+			return &ValidationError{Name: "sprite_status", err: fmt.Errorf(`entity: validator failed for field "Media.sprite_status": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.SpritePath(); ok {
+		if err := media.SpritePathValidator(v); err != nil {
+			return &ValidationError{Name: "sprite_path", err: fmt.Errorf(`entity: validator failed for field "Media.sprite_path": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.VttPath(); ok {
+		if err := media.VttPathValidator(v); err != nil {
+			return &ValidationError{Name: "vtt_path", err: fmt.Errorf(`entity: validator failed for field "Media.vtt_path": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`entity: missing required field "Media.user_id"`)}
@@ -1080,6 +1174,22 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 		_spec.SetField(media.FieldReportedTimes, field.TypeInt, value)
 		_node.ReportedTimes = value
 	}
+	if value, ok := _c.mutation.SpriteStatus(); ok {
+		_spec.SetField(media.FieldSpriteStatus, field.TypeString, value)
+		_node.SpriteStatus = value
+	}
+	if value, ok := _c.mutation.SpritePath(); ok {
+		_spec.SetField(media.FieldSpritePath, field.TypeString, value)
+		_node.SpritePath = value
+	}
+	if value, ok := _c.mutation.VttPath(); ok {
+		_spec.SetField(media.FieldVttPath, field.TypeString, value)
+		_node.VttPath = value
+	}
+	if value, ok := _c.mutation.ThumbnailTime(); ok {
+		_spec.SetField(media.FieldThumbnailTime, field.TypeFloat64, value)
+		_node.ThumbnailTime = value
+	}
 	if value, ok := _c.mutation.Tags(); ok {
 		_spec.SetField(media.FieldTags, field.TypeJSON, value)
 		_node.Tags = value
@@ -1220,6 +1330,22 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ReviewLogsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ReviewLogsTable,
+			Columns: []string{media.ReviewLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareviewlog.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

@@ -52,6 +52,10 @@ type MediaRepo interface {
 	ResetStaleProcessing(context.Context) (int, error)
 	CountByEncodingStatus(context.Context) (*StatusCounts, error)
 	ListFilteredByEncodingStatus(context.Context, []string, int, int) ([]*types.Media, int, error)
+
+	UpdateSpriteFields(ctx context.Context, mediaID string, spriteStatus string, spritePath string, vttPath string) error
+	UpdateThumbnailFields(ctx context.Context, mediaID string, thumbnail string, thumbnailTime float64) error
+	UpdatePreviewFilePath(ctx context.Context, mediaID string, previewFilePath string) error
 }
 
 // MediaQueryOption specifies options for querying media.

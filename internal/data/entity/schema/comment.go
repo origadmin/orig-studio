@@ -24,12 +24,15 @@ type Comment struct {
 
 func (Comment) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.DefaultUUIDv7()), // UUIDv7 for distributed system
+		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.DefaultUUIDv7()),
 		field.Text("text"),
 		field.Time("add_date").Default(time.Now),
 		field.String("media_id").StorageKey("media_comments"),
 		field.String("user_id").StorageKey("user_comments"),
-		field.String("status").Default("PENDING"), // PENDING, APPROVED, REJECTED
+		field.Enum("status").Values("PENDING", "APPROVED", "REJECTED").Default("PENDING"),
+		field.Int("report_count").Default(0),
+		field.String("moderated_by").Optional(),
+		field.Time("moderated_at").Optional(),
 	}
 }
 
@@ -38,6 +41,8 @@ func (Comment) Indexes() []ent.Index {
 		index.Fields("add_date"),
 		index.Fields("media_id"),
 		index.Fields("user_id"),
+		index.Fields("status"),
+		index.Fields("media_id", "status"),
 	}
 }
 
@@ -64,5 +69,10 @@ func (Comment) Edges() []ent.Edge {
 			From("parent").
 			Unique(),
 		edge.To("comment_likes", CommentLike.Type),
+		edge.To("reports", CommentReport.Type),
+		edge.From("moderator", User.Type).
+			Ref("moderated_comments").
+			Field("moderated_by").
+			Unique(),
 	}
 }

@@ -11,10 +11,14 @@ import (
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
 	"origadmin/application/origcms/internal/data/entity/commentlike"
+	"origadmin/application/origcms/internal/data/entity/commentreport"
 	"origadmin/application/origcms/internal/data/entity/favorite"
+	"origadmin/application/origcms/internal/data/entity/groupmember"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
+	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/notification"
+	"origadmin/application/origcms/internal/data/entity/permissiongroup"
 	"origadmin/application/origcms/internal/data/entity/playlist"
 	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/tag"
@@ -559,6 +563,81 @@ func (_c *UserCreate) AddSubscribers(v ...*Subscription) *UserCreate {
 	return _c.AddSubscriberIDs(ids...)
 }
 
+// AddReviewLogIDs adds the "review_logs" edge to the MediaReviewLog entity by IDs.
+func (_c *UserCreate) AddReviewLogIDs(ids ...string) *UserCreate {
+	_c.mutation.AddReviewLogIDs(ids...)
+	return _c
+}
+
+// AddReviewLogs adds the "review_logs" edges to the MediaReviewLog entity.
+func (_c *UserCreate) AddReviewLogs(v ...*MediaReviewLog) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddReviewLogIDs(ids...)
+}
+
+// AddCommentReportIDs adds the "comment_reports" edge to the CommentReport entity by IDs.
+func (_c *UserCreate) AddCommentReportIDs(ids ...string) *UserCreate {
+	_c.mutation.AddCommentReportIDs(ids...)
+	return _c
+}
+
+// AddCommentReports adds the "comment_reports" edges to the CommentReport entity.
+func (_c *UserCreate) AddCommentReports(v ...*CommentReport) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddCommentReportIDs(ids...)
+}
+
+// AddModeratedCommentIDs adds the "moderated_comments" edge to the Comment entity by IDs.
+func (_c *UserCreate) AddModeratedCommentIDs(ids ...string) *UserCreate {
+	_c.mutation.AddModeratedCommentIDs(ids...)
+	return _c
+}
+
+// AddModeratedComments adds the "moderated_comments" edges to the Comment entity.
+func (_c *UserCreate) AddModeratedComments(v ...*Comment) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddModeratedCommentIDs(ids...)
+}
+
+// AddGroupMembershipIDs adds the "group_memberships" edge to the GroupMember entity by IDs.
+func (_c *UserCreate) AddGroupMembershipIDs(ids ...string) *UserCreate {
+	_c.mutation.AddGroupMembershipIDs(ids...)
+	return _c
+}
+
+// AddGroupMemberships adds the "group_memberships" edges to the GroupMember entity.
+func (_c *UserCreate) AddGroupMemberships(v ...*GroupMember) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddGroupMembershipIDs(ids...)
+}
+
+// AddCreatedGroupIDs adds the "created_groups" edge to the PermissionGroup entity by IDs.
+func (_c *UserCreate) AddCreatedGroupIDs(ids ...string) *UserCreate {
+	_c.mutation.AddCreatedGroupIDs(ids...)
+	return _c
+}
+
+// AddCreatedGroups adds the "created_groups" edges to the PermissionGroup entity.
+func (_c *UserCreate) AddCreatedGroups(v ...*PermissionGroup) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddCreatedGroupIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_c *UserCreate) Mutation() *UserMutation {
 	return _c.mutation
@@ -1096,6 +1175,86 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ReviewLogsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ReviewLogsTable,
+			Columns: []string{user.ReviewLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareviewlog.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CommentReportsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CommentReportsTable,
+			Columns: []string{user.CommentReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(commentreport.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ModeratedCommentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModeratedCommentsTable,
+			Columns: []string{user.ModeratedCommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.GroupMembershipsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.GroupMembershipsTable,
+			Columns: []string{user.GroupMembershipsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(groupmember.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CreatedGroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CreatedGroupsTable,
+			Columns: []string{user.CreatedGroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissiongroup.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

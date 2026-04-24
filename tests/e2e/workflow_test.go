@@ -7,7 +7,6 @@ import (
 	"origadmin/application/origcms/tests/integration"
 )
 
-// TestCompleteUserWorkflow tests a complete user workflow from signup to interaction
 func TestCompleteUserWorkflow(t *testing.T) {
 	ts := integration.SetupTestServer(t)
 	defer ts.Cleanup()
@@ -31,8 +30,8 @@ func TestCompleteUserWorkflow(t *testing.T) {
 			t.Fatalf("signup failed: %v", err)
 		}
 
-		if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
-			t.Fatalf("signup returned %d, expected 201/200", resp.StatusCode)
+		if resp.Code != http.StatusCreated && resp.Code != http.StatusOK {
+			t.Fatalf("signup returned %d, expected 201/200", resp.Code)
 		}
 
 		var result map[string]interface{}
@@ -45,8 +44,6 @@ func TestCompleteUserWorkflow(t *testing.T) {
 		} else {
 			t.Fatal("no access_token in signup response")
 		}
-
-
 	})
 
 	if authToken == "" {
@@ -126,7 +123,7 @@ func TestCompleteUserWorkflow(t *testing.T) {
 			t.Fatalf("get media failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := integration.ParseResponse(body, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -134,8 +131,8 @@ func TestCompleteUserWorkflow(t *testing.T) {
 			if _, ok := result["id"]; !ok {
 				t.Error("expected 'id' in media response")
 			}
-		} else if resp.StatusCode != http.StatusNotFound {
-			t.Errorf("unexpected status: %d", resp.StatusCode)
+		} else if resp.Code != http.StatusNotFound {
+			t.Errorf("unexpected status: %d", resp.Code)
 		}
 	})
 
@@ -171,7 +168,7 @@ func TestCompleteUserWorkflow(t *testing.T) {
 			t.Fatalf("like failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := integration.ParseResponse(body, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -180,7 +177,7 @@ func TestCompleteUserWorkflow(t *testing.T) {
 				t.Error("expected 'is_liked' in response")
 			}
 		} else {
-			t.Logf("Like returned status %d", resp.StatusCode)
+			t.Logf("Like returned status %d", resp.Code)
 		}
 	})
 
@@ -216,7 +213,7 @@ func TestCompleteUserWorkflow(t *testing.T) {
 			t.Fatalf("favorite failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := integration.ParseResponse(body, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -225,7 +222,7 @@ func TestCompleteUserWorkflow(t *testing.T) {
 				t.Error("expected 'is_favorited' in response")
 			}
 		} else {
-			t.Logf("Favorite returned status %d", resp.StatusCode)
+			t.Logf("Favorite returned status %d", resp.Code)
 		}
 	})
 
@@ -267,7 +264,7 @@ func TestCompleteUserWorkflow(t *testing.T) {
 			t.Fatalf("create comment failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusCreated || resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := integration.ParseResponse(body, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -276,7 +273,7 @@ func TestCompleteUserWorkflow(t *testing.T) {
 				t.Errorf("expected comment text, got %v", result["text"])
 			}
 		} else {
-			t.Logf("Create comment returned status %d", resp.StatusCode)
+			t.Logf("Create comment returned status %d", resp.Code)
 		}
 	})
 
@@ -318,7 +315,7 @@ func TestCompleteUserWorkflow(t *testing.T) {
 			t.Fatalf("create playlist failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusCreated || resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := integration.ParseResponse(body, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -327,7 +324,7 @@ func TestCompleteUserWorkflow(t *testing.T) {
 				t.Error("expected 'name' in playlist response")
 			}
 		} else {
-			t.Logf("Create playlist returned status %d", resp.StatusCode)
+			t.Logf("Create playlist returned status %d", resp.Code)
 		}
 	})
 
@@ -341,7 +338,7 @@ func TestCompleteUserWorkflow(t *testing.T) {
 			t.Fatalf("subscribe failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := integration.ParseResponse(body, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -350,7 +347,7 @@ func TestCompleteUserWorkflow(t *testing.T) {
 				t.Error("expected 'success' in response")
 			}
 		} else {
-			t.Logf("Subscribe returned status %d", resp.StatusCode)
+			t.Logf("Subscribe returned status %d", resp.Code)
 		}
 	})
 
@@ -390,7 +387,6 @@ func TestCompleteUserWorkflow(t *testing.T) {
 	})
 }
 
-// TestAdminWorkflow tests admin-specific workflows
 func TestAdminWorkflow(t *testing.T) {
 	ts := integration.SetupTestServer(t)
 	defer ts.Cleanup()
@@ -414,7 +410,6 @@ func TestAdminWorkflow(t *testing.T) {
 			t.Fatalf("failed to parse response: %v", err)
 		}
 
-		// Check for expected stats fields
 		fields := []string{"total_media", "total_users", "total_views"}
 		for _, field := range fields {
 			if _, ok := result[field]; !ok {
@@ -439,7 +434,7 @@ func TestAdminWorkflow(t *testing.T) {
 			t.Fatalf("create category failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusCreated || resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := integration.ParseResponse(body, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -448,7 +443,7 @@ func TestAdminWorkflow(t *testing.T) {
 				t.Error("expected 'name' in category response")
 			}
 		} else {
-			t.Logf("Create category returned status %d", resp.StatusCode)
+			t.Logf("Create category returned status %d", resp.Code)
 		}
 	})
 
@@ -478,7 +473,6 @@ func TestAdminWorkflow(t *testing.T) {
 	})
 }
 
-// TestContentCreatorWorkflow tests content creator specific workflows
 func TestContentCreatorWorkflow(t *testing.T) {
 	ts := integration.SetupTestServer(t)
 	defer ts.Cleanup()
@@ -503,7 +497,7 @@ func TestContentCreatorWorkflow(t *testing.T) {
 			t.Fatalf("create channel failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusCreated || resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := integration.ParseResponse(body, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -512,7 +506,7 @@ func TestContentCreatorWorkflow(t *testing.T) {
 				t.Error("expected 'title' in channel response")
 			}
 		} else {
-			t.Logf("Create channel returned status %d", resp.StatusCode)
+			t.Logf("Create channel returned status %d", resp.Code)
 		}
 	})
 

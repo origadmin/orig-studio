@@ -110,6 +110,8 @@ func main() {
 		deps.AdminHandler,
 		server.NewExploreHandler(deps.DB),
 		deps.CommentLikeUC,
+		deps.CommentModerationHandler,
+		deps.PermissionHandler,
 		deps.DB,
 		deps.JWTManager,
 	)

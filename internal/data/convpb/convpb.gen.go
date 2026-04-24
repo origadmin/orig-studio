@@ -9,6 +9,7 @@ package convpb
 import (
 	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/data/entity/comment"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
 
@@ -169,7 +170,7 @@ func ConvertCommentPBToComment(from *CommentPB) *Comment {
 		ID:      from.Id,
 		MediaID: from.MediaId,
 		UserID:  from.UserId,
-		Status:  from.Status,
+		Status:  comment.Status(from.Status),
 	}
 	return to
 }
@@ -184,7 +185,7 @@ func ConvertCommentToCommentPB(from *Comment) *CommentPB {
 		Id:      from.ID,
 		UserId:  from.UserID,
 		MediaId: from.MediaID,
-		Status:  from.Status,
+		Status:  string(from.Status),
 	}
 	return to
 }

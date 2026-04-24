@@ -51,8 +51,9 @@ type TranscodeHandler struct {
 	worker       TranscodeWorker
 	publisher    message.Publisher
 	logger       *log.Helper
-	baseDir      string // e.g., "./data/uploads"
+	baseDir      string
 	taskTimeout  time.Duration
+	spriteUC     *SpriteUseCase
 }
 
 // NewTranscodeHandler creates a new TranscodeHandler.
@@ -66,6 +67,7 @@ func NewTranscodeHandler(
 	logger log.Logger,
 	baseDir string,
 	taskTimeout time.Duration,
+	spriteUC *SpriteUseCase,
 ) *TranscodeHandler {
 	return &TranscodeHandler{
 		mediaUC:      mediaUC,
@@ -77,6 +79,7 @@ func NewTranscodeHandler(
 		logger:       log.NewHelper(log.With(logger, "module", "transcode.handler")),
 		baseDir:      baseDir,
 		taskTimeout:  taskTimeout,
+		spriteUC:     spriteUC,
 	}
 }
 
@@ -457,6 +460,14 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 
 	h.logger.Infof("media processing complete: media=%s uuid=%s status=%s (video: %d ok / %d fail)",
 		mediaID, mediaUUID, media.EncodingStatus, videoSuccessCount, videoFailedCount)
+
+	if media.Type == "video" && h.spriteUC != nil {
+		go func() {
+			if err := h.spriteUC.ProcessPostTranscode(context.Background(), mediaID); err != nil {
+				h.logger.Warnf("post-transcode processing failed for media %s: %v", mediaID, err)
+			}
+		}()
+	}
 
 	return nil
 }

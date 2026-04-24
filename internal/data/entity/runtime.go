@@ -8,15 +8,20 @@ import (
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
 	"origadmin/application/origcms/internal/data/entity/commentlike"
+	"origadmin/application/origcms/internal/data/entity/commentreport"
 	"origadmin/application/origcms/internal/data/entity/encodeprofile"
 	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
+	"origadmin/application/origcms/internal/data/entity/groupmember"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
+	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/notification"
+	"origadmin/application/origcms/internal/data/entity/permissiongroup"
 	"origadmin/application/origcms/internal/data/entity/playlist"
 	"origadmin/application/origcms/internal/data/entity/schema"
+	"origadmin/application/origcms/internal/data/entity/setting"
 	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/tag"
 	"origadmin/application/origcms/internal/data/entity/uploadsession"
@@ -206,10 +211,10 @@ func init() {
 	commentDescAddDate := commentFields[2].Descriptor()
 	// comment.DefaultAddDate holds the default value on creation for the add_date field.
 	comment.DefaultAddDate = commentDescAddDate.Default.(func() time.Time)
-	// commentDescStatus is the schema descriptor for status field.
-	commentDescStatus := commentFields[5].Descriptor()
-	// comment.DefaultStatus holds the default value on creation for the status field.
-	comment.DefaultStatus = commentDescStatus.Default.(string)
+	// commentDescReportCount is the schema descriptor for report_count field.
+	commentDescReportCount := commentFields[6].Descriptor()
+	// comment.DefaultReportCount holds the default value on creation for the report_count field.
+	comment.DefaultReportCount = commentDescReportCount.Default.(int)
 	// commentDescID is the schema descriptor for id field.
 	commentDescID := commentFields[0].Descriptor()
 	// comment.DefaultID holds the default value on creation for the id field.
@@ -234,6 +239,18 @@ func init() {
 	commentlike.DefaultID = commentlikeDescID.Default.(func() string)
 	// commentlike.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	commentlike.IDValidator = commentlikeDescID.Validators[0].(func(string) error)
+	commentreportFields := schema.CommentReport{}.Fields()
+	_ = commentreportFields
+	// commentreportDescCreatedAt is the schema descriptor for created_at field.
+	commentreportDescCreatedAt := commentreportFields[5].Descriptor()
+	// commentreport.DefaultCreatedAt holds the default value on creation for the created_at field.
+	commentreport.DefaultCreatedAt = commentreportDescCreatedAt.Default.(func() time.Time)
+	// commentreportDescID is the schema descriptor for id field.
+	commentreportDescID := commentreportFields[0].Descriptor()
+	// commentreport.DefaultID holds the default value on creation for the id field.
+	commentreport.DefaultID = commentreportDescID.Default.(func() string)
+	// commentreport.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	commentreport.IDValidator = commentreportDescID.Validators[0].(func(string) error)
 	encodeprofileFields := schema.EncodeProfile{}.Fields()
 	_ = encodeprofileFields
 	// encodeprofileDescName is the schema descriptor for name field.
@@ -326,6 +343,18 @@ func init() {
 	favorite.DefaultID = favoriteDescID.Default.(func() string)
 	// favorite.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	favorite.IDValidator = favoriteDescID.Validators[0].(func(string) error)
+	groupmemberFields := schema.GroupMember{}.Fields()
+	_ = groupmemberFields
+	// groupmemberDescJoinedAt is the schema descriptor for joined_at field.
+	groupmemberDescJoinedAt := groupmemberFields[3].Descriptor()
+	// groupmember.DefaultJoinedAt holds the default value on creation for the joined_at field.
+	groupmember.DefaultJoinedAt = groupmemberDescJoinedAt.Default.(func() time.Time)
+	// groupmemberDescID is the schema descriptor for id field.
+	groupmemberDescID := groupmemberFields[0].Descriptor()
+	// groupmember.DefaultID holds the default value on creation for the id field.
+	groupmember.DefaultID = groupmemberDescID.Default.(func() string)
+	// groupmember.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	groupmember.IDValidator = groupmemberDescID.Validators[0].(func(string) error)
 	likeFields := schema.Like{}.Fields()
 	_ = likeFields
 	// likeDescLikeType is the schema descriptor for like_type field.
@@ -490,12 +519,26 @@ func init() {
 	mediaDescReportedTimes := mediaFields[31].Descriptor()
 	// media.DefaultReportedTimes holds the default value on creation for the reported_times field.
 	media.DefaultReportedTimes = mediaDescReportedTimes.Default.(int)
+	// mediaDescSpriteStatus is the schema descriptor for sprite_status field.
+	mediaDescSpriteStatus := mediaFields[32].Descriptor()
+	// media.DefaultSpriteStatus holds the default value on creation for the sprite_status field.
+	media.DefaultSpriteStatus = mediaDescSpriteStatus.Default.(string)
+	// media.SpriteStatusValidator is a validator for the "sprite_status" field. It is called by the builders before save.
+	media.SpriteStatusValidator = mediaDescSpriteStatus.Validators[0].(func(string) error)
+	// mediaDescSpritePath is the schema descriptor for sprite_path field.
+	mediaDescSpritePath := mediaFields[33].Descriptor()
+	// media.SpritePathValidator is a validator for the "sprite_path" field. It is called by the builders before save.
+	media.SpritePathValidator = mediaDescSpritePath.Validators[0].(func(string) error)
+	// mediaDescVttPath is the schema descriptor for vtt_path field.
+	mediaDescVttPath := mediaFields[34].Descriptor()
+	// media.VttPathValidator is a validator for the "vtt_path" field. It is called by the builders before save.
+	media.VttPathValidator = mediaDescVttPath.Validators[0].(func(string) error)
 	// mediaDescCreatedAt is the schema descriptor for created_at field.
-	mediaDescCreatedAt := mediaFields[37].Descriptor()
+	mediaDescCreatedAt := mediaFields[41].Descriptor()
 	// media.DefaultCreatedAt holds the default value on creation for the created_at field.
 	media.DefaultCreatedAt = mediaDescCreatedAt.Default.(func() time.Time)
 	// mediaDescUpdatedAt is the schema descriptor for updated_at field.
-	mediaDescUpdatedAt := mediaFields[38].Descriptor()
+	mediaDescUpdatedAt := mediaFields[42].Descriptor()
 	// media.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	media.DefaultUpdatedAt = mediaDescUpdatedAt.Default.(func() time.Time)
 	// media.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -522,6 +565,30 @@ func init() {
 	mediaplaylist.DefaultID = mediaplaylistDescID.Default.(func() string)
 	// mediaplaylist.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	mediaplaylist.IDValidator = mediaplaylistDescID.Validators[0].(func(string) error)
+	mediareviewlogFields := schema.MediaReviewLog{}.Fields()
+	_ = mediareviewlogFields
+	// mediareviewlogDescAction is the schema descriptor for action field.
+	mediareviewlogDescAction := mediareviewlogFields[3].Descriptor()
+	// mediareviewlog.ActionValidator is a validator for the "action" field. It is called by the builders before save.
+	mediareviewlog.ActionValidator = mediareviewlogDescAction.Validators[0].(func(string) error)
+	// mediareviewlogDescPreviousStatus is the schema descriptor for previous_status field.
+	mediareviewlogDescPreviousStatus := mediareviewlogFields[5].Descriptor()
+	// mediareviewlog.PreviousStatusValidator is a validator for the "previous_status" field. It is called by the builders before save.
+	mediareviewlog.PreviousStatusValidator = mediareviewlogDescPreviousStatus.Validators[0].(func(string) error)
+	// mediareviewlogDescNewStatus is the schema descriptor for new_status field.
+	mediareviewlogDescNewStatus := mediareviewlogFields[6].Descriptor()
+	// mediareviewlog.NewStatusValidator is a validator for the "new_status" field. It is called by the builders before save.
+	mediareviewlog.NewStatusValidator = mediareviewlogDescNewStatus.Validators[0].(func(string) error)
+	// mediareviewlogDescCreatedAt is the schema descriptor for created_at field.
+	mediareviewlogDescCreatedAt := mediareviewlogFields[7].Descriptor()
+	// mediareviewlog.DefaultCreatedAt holds the default value on creation for the created_at field.
+	mediareviewlog.DefaultCreatedAt = mediareviewlogDescCreatedAt.Default.(func() time.Time)
+	// mediareviewlogDescID is the schema descriptor for id field.
+	mediareviewlogDescID := mediareviewlogFields[0].Descriptor()
+	// mediareviewlog.DefaultID holds the default value on creation for the id field.
+	mediareviewlog.DefaultID = mediareviewlogDescID.Default.(func() string)
+	// mediareviewlog.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	mediareviewlog.IDValidator = mediareviewlogDescID.Validators[0].(func(string) error)
 	notificationFields := schema.Notification{}.Fields()
 	_ = notificationFields
 	// notificationDescAction is the schema descriptor for action field.
@@ -546,6 +613,46 @@ func init() {
 	notificationDescCreatedAt := notificationFields[5].Descriptor()
 	// notification.DefaultCreatedAt holds the default value on creation for the created_at field.
 	notification.DefaultCreatedAt = notificationDescCreatedAt.Default.(func() time.Time)
+	permissiongroupFields := schema.PermissionGroup{}.Fields()
+	_ = permissiongroupFields
+	// permissiongroupDescName is the schema descriptor for name field.
+	permissiongroupDescName := permissiongroupFields[1].Descriptor()
+	// permissiongroup.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	permissiongroup.NameValidator = func() func(string) error {
+		validators := permissiongroupDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// permissiongroupDescIsActive is the schema descriptor for is_active field.
+	permissiongroupDescIsActive := permissiongroupFields[5].Descriptor()
+	// permissiongroup.DefaultIsActive holds the default value on creation for the is_active field.
+	permissiongroup.DefaultIsActive = permissiongroupDescIsActive.Default.(bool)
+	// permissiongroupDescCreatedAt is the schema descriptor for created_at field.
+	permissiongroupDescCreatedAt := permissiongroupFields[7].Descriptor()
+	// permissiongroup.DefaultCreatedAt holds the default value on creation for the created_at field.
+	permissiongroup.DefaultCreatedAt = permissiongroupDescCreatedAt.Default.(func() time.Time)
+	// permissiongroupDescUpdatedAt is the schema descriptor for updated_at field.
+	permissiongroupDescUpdatedAt := permissiongroupFields[8].Descriptor()
+	// permissiongroup.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	permissiongroup.DefaultUpdatedAt = permissiongroupDescUpdatedAt.Default.(func() time.Time)
+	// permissiongroup.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	permissiongroup.UpdateDefaultUpdatedAt = permissiongroupDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// permissiongroupDescID is the schema descriptor for id field.
+	permissiongroupDescID := permissiongroupFields[0].Descriptor()
+	// permissiongroup.DefaultID holds the default value on creation for the id field.
+	permissiongroup.DefaultID = permissiongroupDescID.Default.(func() string)
+	// permissiongroup.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	permissiongroup.IDValidator = permissiongroupDescID.Validators[0].(func(string) error)
 	playlistFields := schema.Playlist{}.Fields()
 	_ = playlistFields
 	// playlistDescTitle is the schema descriptor for title field.
@@ -586,6 +693,54 @@ func init() {
 	playlist.DefaultID = playlistDescID.Default.(func() string)
 	// playlist.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	playlist.IDValidator = playlistDescID.Validators[0].(func(string) error)
+	settingFields := schema.Setting{}.Fields()
+	_ = settingFields
+	// settingDescKey is the schema descriptor for key field.
+	settingDescKey := settingFields[1].Descriptor()
+	// setting.KeyValidator is a validator for the "key" field. It is called by the builders before save.
+	setting.KeyValidator = func() func(string) error {
+		validators := settingDescKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(key string) error {
+			for _, fn := range fns {
+				if err := fn(key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// settingDescValue is the schema descriptor for value field.
+	settingDescValue := settingFields[2].Descriptor()
+	// setting.DefaultValue holds the default value on creation for the value field.
+	setting.DefaultValue = settingDescValue.Default.(string)
+	// settingDescIsSensitive is the schema descriptor for is_sensitive field.
+	settingDescIsSensitive := settingFields[6].Descriptor()
+	// setting.DefaultIsSensitive holds the default value on creation for the is_sensitive field.
+	setting.DefaultIsSensitive = settingDescIsSensitive.Default.(bool)
+	// settingDescIsBuiltin is the schema descriptor for is_builtin field.
+	settingDescIsBuiltin := settingFields[8].Descriptor()
+	// setting.DefaultIsBuiltin holds the default value on creation for the is_builtin field.
+	setting.DefaultIsBuiltin = settingDescIsBuiltin.Default.(bool)
+	// settingDescCreatedAt is the schema descriptor for created_at field.
+	settingDescCreatedAt := settingFields[9].Descriptor()
+	// setting.DefaultCreatedAt holds the default value on creation for the created_at field.
+	setting.DefaultCreatedAt = settingDescCreatedAt.Default.(func() time.Time)
+	// settingDescUpdatedAt is the schema descriptor for updated_at field.
+	settingDescUpdatedAt := settingFields[10].Descriptor()
+	// setting.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	setting.DefaultUpdatedAt = settingDescUpdatedAt.Default.(func() time.Time)
+	// setting.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	setting.UpdateDefaultUpdatedAt = settingDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// settingDescID is the schema descriptor for id field.
+	settingDescID := settingFields[0].Descriptor()
+	// setting.DefaultID holds the default value on creation for the id field.
+	setting.DefaultID = settingDescID.Default.(func() string)
+	// setting.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	setting.IDValidator = settingDescID.Validators[0].(func(string) error)
 	subscriptionFields := schema.Subscription{}.Fields()
 	_ = subscriptionFields
 	// subscriptionDescCreatedAt is the schema descriptor for created_at field.

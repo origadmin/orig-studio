@@ -3,6 +3,7 @@
 package comment
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -24,6 +25,12 @@ const (
 	FieldUserID = "user_comments"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldReportCount holds the string denoting the report_count field in the database.
+	FieldReportCount = "report_count"
+	// FieldModeratedBy holds the string denoting the moderated_by field in the database.
+	FieldModeratedBy = "moderated_by"
+	// FieldModeratedAt holds the string denoting the moderated_at field in the database.
+	FieldModeratedAt = "moderated_at"
 	// EdgeMedia holds the string denoting the media edge name in mutations.
 	EdgeMedia = "media"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -34,6 +41,10 @@ const (
 	EdgeReplies = "replies"
 	// EdgeCommentLikes holds the string denoting the comment_likes edge name in mutations.
 	EdgeCommentLikes = "comment_likes"
+	// EdgeReports holds the string denoting the reports edge name in mutations.
+	EdgeReports = "reports"
+	// EdgeModerator holds the string denoting the moderator edge name in mutations.
+	EdgeModerator = "moderator"
 	// Table holds the table name of the comment in the database.
 	Table = "files_comment"
 	// MediaTable is the table that holds the media relation/edge.
@@ -65,6 +76,20 @@ const (
 	CommentLikesInverseTable = "content_comment_likes"
 	// CommentLikesColumn is the table column denoting the comment_likes relation/edge.
 	CommentLikesColumn = "comment_id"
+	// ReportsTable is the table that holds the reports relation/edge.
+	ReportsTable = "content_comment_reports"
+	// ReportsInverseTable is the table name for the CommentReport entity.
+	// It exists in this package in order to avoid circular dependency with the "commentreport" package.
+	ReportsInverseTable = "content_comment_reports"
+	// ReportsColumn is the table column denoting the reports relation/edge.
+	ReportsColumn = "comment_id"
+	// ModeratorTable is the table that holds the moderator relation/edge.
+	ModeratorTable = "files_comment"
+	// ModeratorInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	ModeratorInverseTable = "users_user"
+	// ModeratorColumn is the table column denoting the moderator relation/edge.
+	ModeratorColumn = "moderated_by"
 )
 
 // Columns holds all SQL columns for comment fields.
@@ -75,6 +100,9 @@ var Columns = []string{
 	FieldMediaID,
 	FieldUserID,
 	FieldStatus,
+	FieldReportCount,
+	FieldModeratedBy,
+	FieldModeratedAt,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "files_comment"
@@ -102,13 +130,40 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultAddDate holds the default value on creation for the "add_date" field.
 	DefaultAddDate func() time.Time
-	// DefaultStatus holds the default value on creation for the "status" field.
-	DefaultStatus string
+	// DefaultReportCount holds the default value on creation for the "report_count" field.
+	DefaultReportCount int
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
+
+// Status defines the type for the "status" enum field.
+type Status string
+
+// StatusPENDING is the default value of the Status enum.
+const DefaultStatus = StatusPENDING
+
+// Status values.
+const (
+	StatusPENDING  Status = "PENDING"
+	StatusAPPROVED Status = "APPROVED"
+	StatusREJECTED Status = "REJECTED"
+)
+
+func (s Status) String() string {
+	return string(s)
+}
+
+// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
+func StatusValidator(s Status) error {
+	switch s {
+	case StatusPENDING, StatusAPPROVED, StatusREJECTED:
+		return nil
+	default:
+		return fmt.Errorf("comment: invalid enum value for status field: %q", s)
+	}
+}
 
 // OrderOption defines the ordering options for the Comment queries.
 type OrderOption func(*sql.Selector)
@@ -141,6 +196,21 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByReportCount orders the results by the report_count field.
+func ByReportCount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReportCount, opts...).ToFunc()
+}
+
+// ByModeratedBy orders the results by the moderated_by field.
+func ByModeratedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldModeratedBy, opts...).ToFunc()
+}
+
+// ByModeratedAt orders the results by the moderated_at field.
+func ByModeratedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldModeratedAt, opts...).ToFunc()
 }
 
 // ByMediaField orders the results by media field.
@@ -191,6 +261,27 @@ func ByCommentLikes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newCommentLikesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByReportsCount orders the results by reports count.
+func ByReportsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newReportsStep(), opts...)
+	}
+}
+
+// ByReports orders the results by reports terms.
+func ByReports(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newReportsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByModeratorField orders the results by moderator field.
+func ByModeratorField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newModeratorStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newMediaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -224,5 +315,19 @@ func newCommentLikesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CommentLikesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, CommentLikesTable, CommentLikesColumn),
+	)
+}
+func newReportsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ReportsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ReportsTable, ReportsColumn),
+	)
+}
+func newModeratorStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ModeratorInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ModeratorTable, ModeratorColumn),
 	)
 }

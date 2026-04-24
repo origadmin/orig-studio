@@ -20,8 +20,8 @@ func TestMeHandler(t *testing.T) {
 		t.Fatalf("Failed to get me: %v", err)
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("Expected status 200, got %d", resp.StatusCode)
-		t.Logf("Response body: %s", string(body))
+	if resp.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", resp.Code)
+		t.Logf("Response body: %s", body.String())
 	}
 }

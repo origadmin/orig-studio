@@ -22,12 +22,16 @@ type Tx struct {
 	Comment *CommentClient
 	// CommentLike is the client for interacting with the CommentLike builders.
 	CommentLike *CommentLikeClient
+	// CommentReport is the client for interacting with the CommentReport builders.
+	CommentReport *CommentReportClient
 	// EncodeProfile is the client for interacting with the EncodeProfile builders.
 	EncodeProfile *EncodeProfileClient
 	// EncodingTask is the client for interacting with the EncodingTask builders.
 	EncodingTask *EncodingTaskClient
 	// Favorite is the client for interacting with the Favorite builders.
 	Favorite *FavoriteClient
+	// GroupMember is the client for interacting with the GroupMember builders.
+	GroupMember *GroupMemberClient
 	// Like is the client for interacting with the Like builders.
 	Like *LikeClient
 	// Media is the client for interacting with the Media builders.
@@ -36,12 +40,18 @@ type Tx struct {
 	MediaCategory *MediaCategoryClient
 	// MediaPlaylist is the client for interacting with the MediaPlaylist builders.
 	MediaPlaylist *MediaPlaylistClient
+	// MediaReviewLog is the client for interacting with the MediaReviewLog builders.
+	MediaReviewLog *MediaReviewLogClient
 	// MediaTag is the client for interacting with the MediaTag builders.
 	MediaTag *MediaTagClient
 	// Notification is the client for interacting with the Notification builders.
 	Notification *NotificationClient
+	// PermissionGroup is the client for interacting with the PermissionGroup builders.
+	PermissionGroup *PermissionGroupClient
 	// Playlist is the client for interacting with the Playlist builders.
 	Playlist *PlaylistClient
+	// Setting is the client for interacting with the Setting builders.
+	Setting *SettingClient
 	// Subscription is the client for interacting with the Subscription builders.
 	Subscription *SubscriptionClient
 	// Tag is the client for interacting with the Tag builders.
@@ -186,16 +196,21 @@ func (tx *Tx) init() {
 	tx.Channel = NewChannelClient(tx.config)
 	tx.Comment = NewCommentClient(tx.config)
 	tx.CommentLike = NewCommentLikeClient(tx.config)
+	tx.CommentReport = NewCommentReportClient(tx.config)
 	tx.EncodeProfile = NewEncodeProfileClient(tx.config)
 	tx.EncodingTask = NewEncodingTaskClient(tx.config)
 	tx.Favorite = NewFavoriteClient(tx.config)
+	tx.GroupMember = NewGroupMemberClient(tx.config)
 	tx.Like = NewLikeClient(tx.config)
 	tx.Media = NewMediaClient(tx.config)
 	tx.MediaCategory = NewMediaCategoryClient(tx.config)
 	tx.MediaPlaylist = NewMediaPlaylistClient(tx.config)
+	tx.MediaReviewLog = NewMediaReviewLogClient(tx.config)
 	tx.MediaTag = NewMediaTagClient(tx.config)
 	tx.Notification = NewNotificationClient(tx.config)
+	tx.PermissionGroup = NewPermissionGroupClient(tx.config)
 	tx.Playlist = NewPlaylistClient(tx.config)
+	tx.Setting = NewSettingClient(tx.config)
 	tx.Subscription = NewSubscriptionClient(tx.config)
 	tx.Tag = NewTagClient(tx.config)
 	tx.UploadSession = NewUploadSessionClient(tx.config)

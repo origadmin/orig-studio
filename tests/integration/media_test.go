@@ -154,13 +154,13 @@ func TestMediaCreateUpdateDelete(t *testing.T) {
 		}
 
 		// Might be 200, 403 (if not owner), or 404
-		if resp.StatusCode != http.StatusOK &&
-			resp.StatusCode != http.StatusForbidden &&
-			resp.StatusCode != http.StatusNotFound {
-			t.Errorf("unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK &&
+			resp.Code != http.StatusForbidden &&
+			resp.Code != http.StatusNotFound {
+			t.Errorf("unexpected status: %d", resp.Code)
 		}
 
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := ParseResponse(body, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -202,10 +202,10 @@ func TestMediaCreateUpdateDelete(t *testing.T) {
 		}
 
 		// Might be 200, 403, or 404 depending on data state
-		if resp.StatusCode != http.StatusOK &&
-			resp.StatusCode != http.StatusForbidden &&
-			resp.StatusCode != http.StatusNotFound {
-			t.Errorf("unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK &&
+			resp.Code != http.StatusForbidden &&
+			resp.Code != http.StatusNotFound {
+			t.Errorf("unexpected status: %d", resp.Code)
 		}
 	})
 }

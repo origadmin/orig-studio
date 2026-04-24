@@ -21,6 +21,9 @@ type Comment func(*sql.Selector)
 // CommentLike is the predicate function for commentlike builders.
 type CommentLike func(*sql.Selector)
 
+// CommentReport is the predicate function for commentreport builders.
+type CommentReport func(*sql.Selector)
+
 // EncodeProfile is the predicate function for encodeprofile builders.
 type EncodeProfile func(*sql.Selector)
 
@@ -29,6 +32,9 @@ type EncodingTask func(*sql.Selector)
 
 // Favorite is the predicate function for favorite builders.
 type Favorite func(*sql.Selector)
+
+// GroupMember is the predicate function for groupmember builders.
+type GroupMember func(*sql.Selector)
 
 // Like is the predicate function for like builders.
 type Like func(*sql.Selector)
@@ -42,14 +48,23 @@ type MediaCategory func(*sql.Selector)
 // MediaPlaylist is the predicate function for mediaplaylist builders.
 type MediaPlaylist func(*sql.Selector)
 
+// MediaReviewLog is the predicate function for mediareviewlog builders.
+type MediaReviewLog func(*sql.Selector)
+
 // MediaTag is the predicate function for mediatag builders.
 type MediaTag func(*sql.Selector)
 
 // Notification is the predicate function for notification builders.
 type Notification func(*sql.Selector)
 
+// PermissionGroup is the predicate function for permissiongroup builders.
+type PermissionGroup func(*sql.Selector)
+
 // Playlist is the predicate function for playlist builders.
 type Playlist func(*sql.Selector)
+
+// Setting is the predicate function for setting builders.
+type Setting func(*sql.Selector)
 
 // Subscription is the predicate function for subscription builders.
 type Subscription func(*sql.Selector)

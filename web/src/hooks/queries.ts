@@ -1,8 +1,14 @@
 import {useQuery, useMutation, useQueryClient, useInfiniteQuery} from '@tanstack/react-query';
-import {mediaApi, publicMediaApi, adminMediaApi, type Media} from '@/lib/api/media';
+import {mediaApi, publicMediaApi, adminMediaApi, type Media, type UpdateMediaRequest} from '@/lib/api/media';
 import {categoryApi, type Category} from '@/lib/api/category';
 import {channelApi, type ChannelDetail} from '@/lib/api/channel';
 import {playlistApi, type Playlist, type PlaylistListResponse} from '@/lib/api/playlist';
+import {portalApi, adminPortalApi} from '@/lib/api/portal';
+import {reviewApi} from '@/lib/api/review';
+import {adminCommentApi} from '@/lib/api/comment';
+import {configApi, type SettingCategory} from '@/lib/api/config';
+import {adminPermissionApi} from '@/lib/api/permission';
+import {spriteApi} from '@/lib/api/sprite';
 
 /**
  * keys factory
@@ -29,6 +35,7 @@ export function useMediaList(params: {
     user_id?: string | number;
     keyword?: string;
     search?: string;
+    featured?: boolean | string;
 }) {
     return useQuery({
         queryKey: mediaKeys.list(params),
@@ -277,5 +284,298 @@ export function useChannelPlaylists(channelToken: string | null) {
             return res as PlaylistListResponse;
         },
         enabled: !!channelToken,
+    });
+}
+
+// ==================== Portal Hooks ====================
+
+/**
+ * usePortalConfig: Fetch portal configuration (navigation, banners, featured users, site info)
+ */
+export function usePortalConfig() {
+    return useQuery({
+        queryKey: ['portal', 'config'],
+        queryFn: async () => {
+            const res = await portalApi.getConfig();
+            return res;
+        },
+    });
+}
+
+/**
+ * useAdminNavItems: Fetch admin navigation items list
+ */
+export function useAdminNavItems() {
+    return useQuery({
+        queryKey: ['admin', 'navItems'],
+        queryFn: async () => {
+            const res = await adminPortalApi.listNavItems();
+            return res;
+        },
+    });
+}
+
+/**
+ * useAdminBanners: Fetch admin banners list
+ */
+export function useAdminBanners() {
+    return useQuery({
+        queryKey: ['admin', 'banners'],
+        queryFn: async () => {
+            const res = await adminPortalApi.listBanners();
+            return res;
+        },
+    });
+}
+
+/**
+ * useCreateNavItem: Create a new navigation item
+ */
+export function useCreateNavItem() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: Parameters<typeof adminPortalApi.createNavItem>[0]) =>
+            adminPortalApi.createNavItem(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['admin', 'navItems']});
+            queryClient.invalidateQueries({queryKey: ['portal', 'config']});
+        },
+    });
+}
+
+/**
+ * useUpdateNavItem: Update an existing navigation item
+ */
+export function useUpdateNavItem() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({id, data}: {id: string; data: Parameters<typeof adminPortalApi.updateNavItem>[1]}) =>
+            adminPortalApi.updateNavItem(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['admin', 'navItems']});
+            queryClient.invalidateQueries({queryKey: ['portal', 'config']});
+        },
+    });
+}
+
+/**
+ * useDeleteNavItem: Delete a navigation item
+ */
+export function useDeleteNavItem() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => adminPortalApi.deleteNavItem(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['admin', 'navItems']});
+            queryClient.invalidateQueries({queryKey: ['portal', 'config']});
+        },
+    });
+}
+
+/**
+ * useCreateBanner: Create a new banner
+ */
+export function useCreateBanner() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: Parameters<typeof adminPortalApi.createBanner>[0]) =>
+            adminPortalApi.createBanner(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['admin', 'banners']});
+            queryClient.invalidateQueries({queryKey: ['portal', 'config']});
+        },
+    });
+}
+
+/**
+ * useUpdateBanner: Update an existing banner
+ */
+export function useUpdateBanner() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({id, data}: {id: string; data: Parameters<typeof adminPortalApi.updateBanner>[1]}) =>
+            adminPortalApi.updateBanner(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['admin', 'banners']});
+            queryClient.invalidateQueries({queryKey: ['portal', 'config']});
+        },
+    });
+}
+
+/**
+ * useToggleBanner: Toggle banner active status
+ */
+export function useToggleBanner() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => adminPortalApi.toggleBanner(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['admin', 'banners']});
+            queryClient.invalidateQueries({queryKey: ['portal', 'config']});
+        },
+    });
+}
+
+// ==================== Review Hooks ====================
+
+/**
+ * useReviewList: Fetch review list (pending or history)
+ */
+export function useReviewList(params?: { page?: number; page_size?: number; type?: string; status?: string }) {
+    const isHistory = !!params?.status;
+    return useQuery({
+        queryKey: ['reviews', params],
+        queryFn: async () => {
+            if (isHistory) {
+                const res = await reviewApi.getHistory(params);
+                return res;
+            }
+            const res = await reviewApi.getPending(params);
+            return res;
+        },
+    });
+}
+
+/**
+ * useApproveReview: Approve a review item
+ */
+export function useApproveReview() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) =>
+            reviewApi.review(id, {status: 'approved'}),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['reviews']});
+        },
+    });
+}
+
+/**
+ * useRejectReview: Reject a review item
+ */
+export function useRejectReview() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({id, reason}: {id: string; reason?: string}) =>
+            reviewApi.review(id, {status: 'rejected', reason}),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['reviews']});
+        },
+    });
+}
+
+// ==================== Admin Comment Hooks ====================
+
+/**
+ * useAdminCommentList: Fetch admin comment list with optional filters
+ */
+export function useAdminCommentList(params?: { page?: number; page_size?: number; media_id?: string; status?: string }) {
+    return useQuery({
+        queryKey: ['admin', 'comments', params],
+        queryFn: async () => {
+            const res = await adminCommentApi.list(params);
+            return res;
+        },
+    });
+}
+
+/**
+ * useDeleteComment: Delete a comment (admin)
+ */
+export function useDeleteComment() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => adminCommentApi.delete(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['admin', 'comments']});
+        },
+    });
+}
+
+// ==================== Config Hooks ====================
+
+/**
+ * useSettingCategories: Fetch all setting categories
+ */
+export function useSettingCategories() {
+    return useQuery({
+        queryKey: ['settings', 'categories'],
+        queryFn: async () => {
+            const res = await configApi.getAll();
+            return res;
+        },
+    });
+}
+
+/**
+ * useUpdateSetting: Update a single setting by key
+ */
+export function useUpdateSetting() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({key, value}: {key: string; value: string}) =>
+            configApi.updateOne(key, {value}),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['settings']});
+        },
+    });
+}
+
+// ==================== Permission Hooks ====================
+
+/**
+ * usePermissionList: Fetch permission groups list
+ */
+export function usePermissionList(params?: { page?: number; page_size?: number; is_active?: boolean }) {
+    return useQuery({
+        queryKey: ['permissions', params],
+        queryFn: async () => {
+            const res = await adminPermissionApi.list(params);
+            return res;
+        },
+    });
+}
+
+/**
+ * useUpdatePermission: Update a permission group
+ */
+export function useUpdatePermission() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({id, data}: {id: string; data: Parameters<typeof adminPermissionApi.update>[1]}) =>
+            adminPermissionApi.update(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['permissions']});
+        },
+    });
+}
+
+// ==================== Sprite Hooks ====================
+
+/**
+ * useSpriteList: Get sprite URLs for a media item
+ */
+export function useSpriteList(mediaId: string | null) {
+    return useQuery({
+        queryKey: ['sprite', mediaId],
+        queryFn: async () => {
+            const vttUrl = spriteApi.getVttUrl(mediaId!);
+            const spriteUrl = spriteApi.getSpriteUrl(mediaId!);
+            return {vttUrl, spriteUrl};
+        },
+        enabled: !!mediaId,
+    });
+}
+
+/**
+ * useGenerateSprite: Regenerate sprite for a media item
+ */
+export function useGenerateSprite() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (mediaId: string) => spriteApi.regenerateSprite(mediaId),
+        onSuccess: (_data, mediaId) => {
+            queryClient.invalidateQueries({queryKey: ['sprite', mediaId]});
+        },
     });
 }

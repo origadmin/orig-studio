@@ -28,7 +28,7 @@ func TestLikes(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := ParseResponse(respBody, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -37,7 +37,7 @@ func TestLikes(t *testing.T) {
 				t.Error("expected 'liked' field in response")
 			}
 		} else {
-			t.Logf("Toggle like returned status %d", resp.StatusCode)
+			t.Logf("Toggle like returned status %d", resp.Code)
 		}
 	})
 
@@ -57,7 +57,7 @@ func TestLikes(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := ParseResponse(respBody, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -157,7 +157,7 @@ func TestFavorites(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := ParseResponse(respBody, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -229,7 +229,7 @@ func TestSubscriptions(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := ParseResponse(respBody, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -238,7 +238,7 @@ func TestSubscriptions(t *testing.T) {
 				t.Error("expected 'success' field in response")
 			}
 		} else {
-			t.Logf("Subscribe returned status %d", resp.StatusCode)
+			t.Logf("Subscribe returned status %d", resp.Code)
 		}
 	})
 
@@ -252,7 +252,7 @@ func TestSubscriptions(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := ParseResponse(respBody, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -343,8 +343,8 @@ func TestPlaylists(t *testing.T) {
 		}
 
 		// May be 200 or 404 depending on if playlists exist
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
-			t.Errorf("unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotFound {
+			t.Errorf("unexpected status: %d", resp.Code)
 		}
 	})
 
@@ -365,7 +365,7 @@ func TestPlaylists(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusCreated || resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := ParseResponse(respBody, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -374,7 +374,7 @@ func TestPlaylists(t *testing.T) {
 				t.Error("expected 'name' field in created playlist")
 			}
 		} else {
-			t.Logf("Create playlist returned status %d", resp.StatusCode)
+			t.Logf("Create playlist returned status %d", resp.Code)
 		}
 	})
 
@@ -415,10 +415,10 @@ func TestPlaylists(t *testing.T) {
 		}
 
 		// May be 200, 403 (not owner), or 404
-		if resp.StatusCode != http.StatusOK &&
-			resp.StatusCode != http.StatusForbidden &&
-			resp.StatusCode != http.StatusNotFound {
-			t.Errorf("unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK &&
+			resp.Code != http.StatusForbidden &&
+			resp.Code != http.StatusNotFound {
+			t.Errorf("unexpected status: %d", resp.Code)
 		}
 	})
 
@@ -433,8 +433,8 @@ func TestPlaylists(t *testing.T) {
 		}
 
 		// Currently returns 501 Not Implemented
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotImplemented {
-			t.Logf("Remove media from playlist returned status %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotImplemented {
+			t.Logf("Remove media from playlist returned status %d", resp.Code)
 		}
 	})
 }
@@ -475,8 +475,8 @@ func TestChannels(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
-			t.Errorf("unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotFound {
+			t.Errorf("unexpected status: %d", resp.Code)
 		}
 	})
 
@@ -518,7 +518,7 @@ func TestChannels(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK {
+		if resp.Code == http.StatusCreated || resp.Code == http.StatusOK {
 			var result map[string]interface{}
 			if err := ParseResponse(respBody, &result); err != nil {
 				t.Fatalf("failed to parse response: %v", err)
@@ -527,7 +527,7 @@ func TestChannels(t *testing.T) {
 				t.Error("expected 'title' field in created channel")
 			}
 		} else {
-			t.Logf("Create channel returned status %d", resp.StatusCode)
+			t.Logf("Create channel returned status %d", resp.Code)
 		}
 	})
 
@@ -546,10 +546,10 @@ func TestChannels(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode != http.StatusOK &&
-			resp.StatusCode != http.StatusForbidden &&
-			resp.StatusCode != http.StatusNotFound {
-			t.Errorf("unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK &&
+			resp.Code != http.StatusForbidden &&
+			resp.Code != http.StatusNotFound {
+			t.Errorf("unexpected status: %d", resp.Code)
 		}
 	})
 
@@ -563,10 +563,10 @@ func TestChannels(t *testing.T) {
 			t.Fatalf("request failed: %v", err)
 		}
 
-		if resp.StatusCode != http.StatusOK &&
-			resp.StatusCode != http.StatusForbidden &&
-			resp.StatusCode != http.StatusNotFound {
-			t.Errorf("unexpected status: %d", resp.StatusCode)
+		if resp.Code != http.StatusOK &&
+			resp.Code != http.StatusForbidden &&
+			resp.Code != http.StatusNotFound {
+			t.Errorf("unexpected status: %d", resp.Code)
 		}
 	})
 }
@@ -622,8 +622,8 @@ func TestNotifications(t *testing.T) {
 		}
 
 		// May be OK or NotFound
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
-			t.Logf("Mark notification read returned status %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusNotFound {
+			t.Logf("Mark notification read returned status %d", resp.Code)
 		}
 	})
 }
@@ -668,8 +668,8 @@ func TestStats(t *testing.T) {
 		}
 
 		// Should be forbidden or OK depending on implementation
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusForbidden {
-			t.Logf("User accessing stats returned status %d", resp.StatusCode)
+		if resp.Code != http.StatusOK && resp.Code != http.StatusForbidden {
+			t.Logf("User accessing stats returned status %d", resp.Code)
 		}
 	})
 
