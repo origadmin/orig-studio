@@ -26,7 +26,7 @@ const MembersPage = () => {
             try {
                 setLoading(true);
                 const response = await userApi.list({page_size: 100});
-                setMembers(response.list || []);
+                setMembers(response.items || []);
             } catch (err) {
                 setError(t('common.error'));
                 console.error('Failed to fetch members:', err);

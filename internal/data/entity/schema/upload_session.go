@@ -51,13 +51,13 @@ func (UploadSession) Fields() []ent.Field {
 		field.Text("description").Optional().
 			Comment("Media description"),
 		// Category ID (optional)
-		field.Int64("category_id").Optional().Nillable().
+		field.String("category_id").Optional().MaxLen(36).
 			Comment("Category ID"),
 		// Tags (optional)
 		field.JSON("tags", []string{}).Optional().
 			Comment("Tags for the media"),
 		// User ID who initiated the upload
-		field.Int64("user_id").Optional().Nillable().
+		field.String("user_id").Optional().MaxLen(36).
 			Comment("User ID who initiated the upload"),
 		// Session status: pending, uploading, completed, aborted
 		field.String("status").MaxLen(20).Default("pending").

@@ -4,7 +4,7 @@
  */
 
 import {useState, useEffect} from 'react';
-import {useLocation, useSearchParams} from '@tanstack/react-router';
+import {useLocation, useNavigate, useRouterState, Link} from '@tanstack/react-router';
 import {
     Play,
     Eye,
@@ -67,30 +67,19 @@ import {
 import {Label} from "@/components/ui/label";
 import {mediaApi, encodingApi, type Media, type MediaVariantSummary} from '@/lib/api/media';
 import {API_BASE_URL} from '@/lib/request';
-import {useAdminMediaList, useUpdateMedia, useDeleteMedia} from '@/hooks/queries';
+import {useAdminMediaList, useDeleteMedia} from '@/hooks/queries';
 import {UploadComponent} from '@/components/upload/UploadComponent';
 import {formatFileSize, formatDate} from '@/lib/format';
 
 export default function MediaPage() {
-    // Read incoming search term from URL params (e.g. from TranscodingStatus link)
     const location = useLocation();
+    const navigate = useNavigate();
     const urlSearch = new URLSearchParams(location.search).get("q");
 
     // 弹窗状态
     const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
     // 编辑状态
-    const [editDialogOpen, setEditDialogOpen] = useState(false);
-    const [editingMedia, setEditingMedia] = useState<Media | null>(null);
-    const [editForm, setEditForm] = useState({
-        title: '',
-        description: '',
-        status: 'draft',
-        category: '',
-        tags: '',
-    });
-
-    // 删除状态
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [deletingMedia, setDeletingMedia] = useState<Media | null>(null);
 
@@ -99,11 +88,10 @@ export default function MediaPage() {
     const [variantData, setVariantData] = useState<MediaVariantSummary | null>(null);
     const [retryingAllId, setRetryingAllId] = useState<number | null>(null);
 
-    const [searchParams, setSearchParams] = useState({keyword: urlSearch || '', status: 'all', page: 1});
+    const [searchParams, setSearchParams] = useState({keyword: urlSearch || '', state: '', page: 1});
 
     // React Query Hooks
     const {data: mediaData, isLoading: loading, refetch: loadMedia} = useAdminMediaList(searchParams);
-    const updateMutation = useUpdateMedia();
     const deleteMutation = useDeleteMedia();
 
     const mediaList = mediaData?.items || (Array.isArray(mediaData) ? mediaData : []) as Media[];
@@ -127,34 +115,7 @@ export default function MediaPage() {
     };
 
     const handleEditClick = (media: Media) => {
-        setEditingMedia(media);
-        setEditForm({
-            title: media.title || '',
-            description: media.description || '',
-            status: media.state || 'draft',
-            category: media.edges?.category?.name || '',
-            tags: media.tags?.join(', ') || '',
-        });
-        setEditDialogOpen(true);
-    };
-
-    const handleSaveEdit = async () => {
-        if (!editingMedia) return;
-        try {
-            await updateMutation.mutateAsync({
-                id: String(editingMedia.id),
-                data: {
-                    title: editForm.title,
-                    description: editForm.description,
-                    state: editForm.status,
-                    tags: editForm.tags.split(',').map(s => s.trim()).filter(Boolean),
-                }
-            });
-            setEditDialogOpen(false);
-            loadMedia();
-        } catch (err) {
-            console.error("Failed to update media", err);
-        }
+        navigate({to: '/admin/media/$id', params: {id: String(media.id)}});
     };
 
     const handleDeleteClick = (media: Media) => {
@@ -290,11 +251,11 @@ export default function MediaPage() {
                                     </div>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-2">
-                                    <Select value={searchParams.status} onValueChange={(v) => setSearchParams({...searchParams, status: v})}>
+                                    <Select value={searchParams.state || 'all'} onValueChange={(v) => setSearchParams({...searchParams, state: v === 'all' ? '' : v})}>
                                         <SelectTrigger className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
                                             <div className="flex items-center gap-2">
                                                 <Filter className="h-4 w-4"/>
-                                                {searchParams.status === 'all' ? (
+                                                {!searchParams.state ? (
                                                     <span className="text-muted-foreground">Status</span>
                                                 ) : (
                                                     <SelectValue placeholder="Status"/>
@@ -314,7 +275,7 @@ export default function MediaPage() {
                                             size="sm"
                                             className="h-9 px-3"
                                             onClick={() => {
-                                                const newParams = {keyword: '', status: 'all', page: 1};
+                                                const newParams = {keyword: '', state: '', page: 1};
                                                 setSearchParams(newParams);
                                                 loadMedia();
                                             }}
@@ -532,9 +493,11 @@ export default function MediaPage() {
                                                         <Eye className="w-4 h-4 mr-2"/>
                                                         查看
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleEditClick(media)}>
-                                                        <Edit className="w-4 h-4 mr-2"/>
-                                                        编辑
+                                                    <DropdownMenuItem asChild>
+                                                        <Link to="/admin/media/$id" params={{id: String(media.id)}}>
+                                                            <Edit className="w-4 h-4 mr-2"/>
+                                                            编辑
+                                                        </Link>
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem 
                                                         className="text-destructive focus:text-destructive"
@@ -576,55 +539,6 @@ export default function MediaPage() {
                             }}
                             onCancel={() => setUploadDialogOpen(false)}
                         />
-                    </div>
-                </DialogContent>
-            </Dialog>
-
-            {/* 编辑模态框 */}
-            <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>编辑媒体信息</DialogTitle>
-                        <DialogDescription>
-                            更新媒体文件的基本信息
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="title">标题</Label>
-                            <Input
-                                id="title"
-                                value={editForm.title}
-                                onChange={(e) => setEditForm({...editForm, title: e.target.value})}
-                            />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="status">状态</Label>
-                            <Select value={editForm.status}
-                                    onValueChange={(val) => setEditForm({...editForm, status: val})}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="选择状态"/>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="draft">草稿 (Draft)</SelectItem>
-                                    <SelectItem value="active">已发布 (Active)</SelectItem>
-                                    <SelectItem value="deleted">已删除 (Deleted)</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="tags">标签 (逗号分隔)</Label>
-                            <Input
-                                id="tags"
-                                value={editForm.tags}
-                                onChange={(e) => setEditForm({...editForm, tags: e.target.value})}
-                                placeholder="如：编程, 运维"
-                            />
-                        </div>
-                    </div>
-                    <div className="flex justify-end gap-3">
-                        <Button variant="outline" onClick={() => setEditDialogOpen(false)}>取消</Button>
-                        <Button onClick={handleSaveEdit}>保存修改</Button>
                     </div>
                 </DialogContent>
             </Dialog>

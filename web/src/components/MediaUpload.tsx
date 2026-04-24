@@ -33,7 +33,6 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({onSuccess, userId}) => 
             const media = await mediaApi.upload(file, {
                 title,
                 description,
-                user_id: userId
             });
             setFile(null);
             setTitle('');

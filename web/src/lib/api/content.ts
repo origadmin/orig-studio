@@ -20,7 +20,7 @@ export interface Content {
 }
 
 export interface ContentListResponse {
-    list: Content[];
+    items: Content[];
     total: number;
     page: number;
     page_size: number;

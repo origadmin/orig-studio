@@ -26,7 +26,7 @@ const NotificationCenter: React.FC = () => {
             setLoading(true);
             setError(null);
             const response = await notificationApi.getAll({page_size: 20});
-            setNotifications(response || []);
+            setNotifications((response as any)?.items || response || []);
         } catch (err) {
             setError('Failed to fetch notifications');
             console.error('Failed to fetch notifications:', err);
@@ -38,7 +38,7 @@ const NotificationCenter: React.FC = () => {
     const fetchUnreadCount = async () => {
         try {
             const response = await notificationApi.getUnreadCount();
-            setUnreadCount(response.count || 0);
+            setUnreadCount((response as any)?.unread_count || (response as any)?.count || 0);
         } catch (err) {
             console.error('Failed to fetch unread count:', err);
         }

@@ -43,7 +43,7 @@ const ProfilePage = () => {
 
                 // Fetch user videos
                 const videosResponse = await mediaApi.list({user_id: userResponse.id});
-                setVideos(videosResponse.list || []);
+                setVideos(videosResponse.items || []);
             } catch (err: any) {
                 // Check if the error is due to user not found
                 if (err.response && err.response.status === 404) {

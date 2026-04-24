@@ -13,7 +13,7 @@ export interface Playlist {
 }
 
 export interface PlaylistListResponse {
-    list: Playlist[];
+    items: Playlist[];
     total: number;
     page: number;
     page_size: number;
@@ -30,15 +30,28 @@ export interface UpdatePlaylistRequest {
 }
 
 export const playlistApi = {
+    list: (params?: { page?: number; page_size?: number; user_id?: string }) =>
+        api.get<PlaylistListResponse>("/playlists", params as Record<string, unknown>),
+
     getMyPlaylists: (params?: { page?: number; page_size?: number }) =>
         api.get<any>("/me/playlists", params),
 
+    get: (id: string) => api.get<{ playlist: Playlist }>(`/playlists/${id}`),
+
     create: (data: CreatePlaylistRequest) =>
         api.post<{ playlist: Playlist }>("/me/playlists", data),
+
+    update: (id: string, data: UpdatePlaylistRequest) =>
+        api.put<{ playlist: Playlist }>(`/playlists/${id}`, data),
+
+    delete: (id: string) => api.del<void>(`/playlists/${id}`),
 
     addMedia: (playlistId: string, mediaId: string) =>
         api.post<void>(`/me/playlists/${playlistId}/media`, {media_id: mediaId}),
 
     removeMedia: (playlistId: string, mediaId: string) =>
         api.del<void>(`/me/playlists/${playlistId}/media/${mediaId}`),
+
+    reorderMedia: (playlistId: string, mediaOrders: Record<number, number>) =>
+        api.put<void>(`/playlists/${playlistId}/reorder`, {media_orders: mediaOrders}),
 };

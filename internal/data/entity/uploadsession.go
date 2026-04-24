@@ -37,11 +37,11 @@ type UploadSession struct {
 	// Media description
 	Description string `json:"description,omitempty"`
 	// Category ID
-	CategoryID *int64 `json:"category_id,omitempty"`
+	CategoryID string `json:"category_id,omitempty"`
 	// Tags for the media
 	Tags []string `json:"tags,omitempty"`
 	// User ID who initiated the upload
-	UserID *int64 `json:"user_id,omitempty"`
+	UserID string `json:"user_id,omitempty"`
 	// Session status: pending, uploading, completed, aborted
 	Status string `json:"status,omitempty"`
 	// Map of part_number -> etag for uploaded parts
@@ -68,9 +68,9 @@ func (*UploadSession) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case uploadsession.FieldTags, uploadsession.FieldParts:
 			values[i] = new([]byte)
-		case uploadsession.FieldID, uploadsession.FieldFileSize, uploadsession.FieldTotalParts, uploadsession.FieldChunkSize, uploadsession.FieldUploadedSize, uploadsession.FieldCategoryID, uploadsession.FieldUserID:
+		case uploadsession.FieldID, uploadsession.FieldFileSize, uploadsession.FieldTotalParts, uploadsession.FieldChunkSize, uploadsession.FieldUploadedSize:
 			values[i] = new(sql.NullInt64)
-		case uploadsession.FieldUploadID, uploadsession.FieldFilename, uploadsession.FieldContentType, uploadsession.FieldTitle, uploadsession.FieldDescription, uploadsession.FieldStatus, uploadsession.FieldSha256, uploadsession.FieldStoragePath, uploadsession.FieldTempDir:
+		case uploadsession.FieldUploadID, uploadsession.FieldFilename, uploadsession.FieldContentType, uploadsession.FieldTitle, uploadsession.FieldDescription, uploadsession.FieldCategoryID, uploadsession.FieldUserID, uploadsession.FieldStatus, uploadsession.FieldSha256, uploadsession.FieldStoragePath, uploadsession.FieldTempDir:
 			values[i] = new(sql.NullString)
 		case uploadsession.FieldExpiresAt, uploadsession.FieldCreatedAt, uploadsession.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -150,11 +150,10 @@ func (_m *UploadSession) assignValues(columns []string, values []any) error {
 				_m.Description = value.String
 			}
 		case uploadsession.FieldCategoryID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field category_id", values[i])
 			} else if value.Valid {
-				_m.CategoryID = new(int64)
-				*_m.CategoryID = value.Int64
+				_m.CategoryID = value.String
 			}
 		case uploadsession.FieldTags:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -165,11 +164,10 @@ func (_m *UploadSession) assignValues(columns []string, values []any) error {
 				}
 			}
 		case uploadsession.FieldUserID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				_m.UserID = new(int64)
-				*_m.UserID = value.Int64
+				_m.UserID = value.String
 			}
 		case uploadsession.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -284,18 +282,14 @@ func (_m *UploadSession) String() string {
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
 	builder.WriteString(", ")
-	if v := _m.CategoryID; v != nil {
-		builder.WriteString("category_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("category_id=")
+	builder.WriteString(_m.CategoryID)
 	builder.WriteString(", ")
 	builder.WriteString("tags=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Tags))
 	builder.WriteString(", ")
-	if v := _m.UserID; v != nil {
-		builder.WriteString("user_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("user_id=")
+	builder.WriteString(_m.UserID)
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(_m.Status)

@@ -25,7 +25,7 @@ export default function MediaPage() {
                 categoryApi.getAll()
             ]);
             const mediaRes = await mediaApi.list(params);
-            setMediaList(mediaRes.list);
+            setMediaList(mediaRes.items);
             setCategories(catRes);
         } catch (err: any) {
             setError(err.message);

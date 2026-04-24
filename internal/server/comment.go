@@ -106,8 +106,8 @@ func RegisterCommentRoutes(group *gin.RouterGroup, client *entity.Client, jwtMgr
 				"code":    0,
 				"message": "success",
 				"data": gin.H{
+					"items":     comments,
 					"total":     total,
-					"comments":  comments,
 					"page":      page,
 					"page_size": pageSize,
 				},

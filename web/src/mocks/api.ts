@@ -2,10 +2,10 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-import { Media } from '../types/media';
+import { MediaItem } from '../types/media';
 
 // Mock media data
-export const mockMedias: Media[] = [
+export const mockMedias: MediaItem[] = [
   {
     id: 1,
     title: 'Introduction to OrigAdmin',

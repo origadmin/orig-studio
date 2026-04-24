@@ -27,13 +27,13 @@ export {commentApi} from "./api/comment";
 export type {Comment} from "./api/comment";
 
 export {likeApi} from "./api/like";
-export type {LikeResponse, ToggleLikeResponse} from "./api/like";
+export type {LikeResponse} from "./api/like";
 
 export {favoriteApi} from "./api/favorite";
 export type {Favorite, ToggleFavoriteResponse} from "./api/favorite";
 
 export {playlistApi} from "./api/playlist";
-export type {Playlist, PlaylistDetail} from "./api/playlist";
+export type {Playlist, PlaylistListResponse} from "./api/playlist";
 
 export {searchApi} from "./api/search";
 export type {SearchResponse} from "./api/search";
@@ -41,7 +41,8 @@ export type {SearchResponse} from "./api/search";
 export {subscriptionApi} from "./api/subscription";
 export type {SubscriptionStatus, SubscriptionListResponse} from "./api/subscription";
 
-// Stats API
+import {api} from "./request";
+
 export const statsApi = {
     get: () => api.get<{ users: number; media: number; content: number; storage: string; views: number }>("/stats"),
 };

@@ -9,11 +9,12 @@ export interface CurrentUser {
     avatar?: string;
     role: string;
     status: string;
+    is_staff?: boolean;
     created_at: string;
 }
 
-interface SignInResponse extends Token {
-    user: CurrentUser;
+interface SignInResponse extends Omit<Token, 'user'> {
+    user: CurrentUser & { is_staff?: boolean };
 }
 
 // 登录

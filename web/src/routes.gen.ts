@@ -18,7 +18,9 @@ import { Route as AuthSigninRouteImport } from "./routes/auth.signin";
 import { Route as AdminUsersRouteImport } from "./routes/admin.users";
 import { Route as AdminTagsRouteImport } from "./routes/admin.tags";
 import { Route as AdminSettingsRouteImport } from "./routes/admin.settings";
+import { Route as AdminPortalRouteImport } from "./routes/admin.portal";
 import { Route as AdminPlaylistsRouteImport } from "./routes/admin.playlists";
+import { Route as AdminPermissionsRouteImport } from "./routes/admin.permissions";
 import { Route as AdminMediaRouteImport } from "./routes/admin.media";
 import { Route as AdminContentRouteImport } from "./routes/admin.content";
 import { Route as AdminCommentsRouteImport } from "./routes/admin.comments";
@@ -40,8 +42,10 @@ import { Route as PortalCookiesRouteImport } from "./routes/_portal.cookies";
 import { Route as PortalCategoriesRouteImport } from "./routes/_portal.categories";
 import { Route as PortalAboutRouteImport } from "./routes/_portal.about";
 import { Route as PortalHandleRouteImport } from "./routes/_portal.$handle";
+import { Route as AdminMediaIndexRouteImport } from "./routes/admin.media.index";
 import { Route as AdminTranscodingStatusRouteImport } from "./routes/admin.transcoding.status";
 import { Route as AdminTranscodingProfilesRouteImport } from "./routes/admin.transcoding.profiles";
+import { Route as AdminMediaIdRouteImport } from "./routes/admin.media.$id";
 import { Route as PortalUIdRouteImport } from "./routes/_portal.u.$id";
 import { Route as PortalPlaylistIdRouteImport } from "./routes/_portal.playlist.$id";
 import { Route as PortalMeVideosRouteImport } from "./routes/_portal.me.videos";
@@ -98,9 +102,19 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
   path: "/settings",
   getParentRoute: () => AdminRoute,
 } as any);
+const AdminPortalRoute = AdminPortalRouteImport.update({
+  id: "/portal",
+  path: "/portal",
+  getParentRoute: () => AdminRoute,
+} as any);
 const AdminPlaylistsRoute = AdminPlaylistsRouteImport.update({
   id: "/playlists",
   path: "/playlists",
+  getParentRoute: () => AdminRoute,
+} as any);
+const AdminPermissionsRoute = AdminPermissionsRouteImport.update({
+  id: "/permissions",
+  path: "/permissions",
   getParentRoute: () => AdminRoute,
 } as any);
 const AdminMediaRoute = AdminMediaRouteImport.update({
@@ -208,6 +222,11 @@ const PortalHandleRoute = PortalHandleRouteImport.update({
   path: "/$handle",
   getParentRoute: () => PortalRoute,
 } as any);
+const AdminMediaIndexRoute = AdminMediaIndexRouteImport.update({
+  id: "/",
+  path: "/",
+  getParentRoute: () => AdminMediaRoute,
+} as any);
 const AdminTranscodingStatusRoute = AdminTranscodingStatusRouteImport.update({
   id: "/transcoding/status",
   path: "/transcoding/status",
@@ -219,6 +238,11 @@ const AdminTranscodingProfilesRoute =
     path: "/transcoding/profiles",
     getParentRoute: () => AdminRoute,
   } as any);
+const AdminMediaIdRoute = AdminMediaIdRouteImport.update({
+  id: "/$id",
+  path: "/$id",
+  getParentRoute: () => AdminMediaRoute,
+} as any);
 const PortalUIdRoute = PortalUIdRouteImport.update({
   id: "/u/$id",
   path: "/u/$id",
@@ -298,8 +322,10 @@ export interface FileRoutesByFullPath {
   "/admin/channels": typeof AdminChannelsRoute;
   "/admin/comments": typeof AdminCommentsRoute;
   "/admin/content": typeof AdminContentRoute;
-  "/admin/media": typeof AdminMediaRoute;
+  "/admin/media": typeof AdminMediaRouteWithChildren;
+  "/admin/permissions": typeof AdminPermissionsRoute;
   "/admin/playlists": typeof AdminPlaylistsRoute;
+  "/admin/portal": typeof AdminPortalRoute;
   "/admin/settings": typeof AdminSettingsRoute;
   "/admin/tags": typeof AdminTagsRoute;
   "/admin/users": typeof AdminUsersRoute;
@@ -317,8 +343,10 @@ export interface FileRoutesByFullPath {
   "/me/videos": typeof PortalMeVideosRoute;
   "/playlist/$id": typeof PortalPlaylistIdRoute;
   "/u/$id": typeof PortalUIdRoute;
+  "/admin/media/$id": typeof AdminMediaIdRoute;
   "/admin/transcoding/profiles": typeof AdminTranscodingProfilesRoute;
   "/admin/transcoding/status": typeof AdminTranscodingStatusRoute;
+  "/admin/media/": typeof AdminMediaIndexRoute;
 }
 export interface FileRoutesByTo {
   "/$handle": typeof PortalHandleRoute;
@@ -341,8 +369,9 @@ export interface FileRoutesByTo {
   "/admin/channels": typeof AdminChannelsRoute;
   "/admin/comments": typeof AdminCommentsRoute;
   "/admin/content": typeof AdminContentRoute;
-  "/admin/media": typeof AdminMediaRoute;
+  "/admin/permissions": typeof AdminPermissionsRoute;
   "/admin/playlists": typeof AdminPlaylistsRoute;
+  "/admin/portal": typeof AdminPortalRoute;
   "/admin/settings": typeof AdminSettingsRoute;
   "/admin/tags": typeof AdminTagsRoute;
   "/admin/users": typeof AdminUsersRoute;
@@ -361,8 +390,10 @@ export interface FileRoutesByTo {
   "/me/videos": typeof PortalMeVideosRoute;
   "/playlist/$id": typeof PortalPlaylistIdRoute;
   "/u/$id": typeof PortalUIdRoute;
+  "/admin/media/$id": typeof AdminMediaIdRoute;
   "/admin/transcoding/profiles": typeof AdminTranscodingProfilesRoute;
   "/admin/transcoding/status": typeof AdminTranscodingStatusRoute;
+  "/admin/media": typeof AdminMediaIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
@@ -388,8 +419,10 @@ export interface FileRoutesById {
   "/admin/channels": typeof AdminChannelsRoute;
   "/admin/comments": typeof AdminCommentsRoute;
   "/admin/content": typeof AdminContentRoute;
-  "/admin/media": typeof AdminMediaRoute;
+  "/admin/media": typeof AdminMediaRouteWithChildren;
+  "/admin/permissions": typeof AdminPermissionsRoute;
   "/admin/playlists": typeof AdminPlaylistsRoute;
+  "/admin/portal": typeof AdminPortalRoute;
   "/admin/settings": typeof AdminSettingsRoute;
   "/admin/tags": typeof AdminTagsRoute;
   "/admin/users": typeof AdminUsersRoute;
@@ -408,8 +441,10 @@ export interface FileRoutesById {
   "/_portal/me/videos": typeof PortalMeVideosRoute;
   "/_portal/playlist/$id": typeof PortalPlaylistIdRoute;
   "/_portal/u/$id": typeof PortalUIdRoute;
+  "/admin/media/$id": typeof AdminMediaIdRoute;
   "/admin/transcoding/profiles": typeof AdminTranscodingProfilesRoute;
   "/admin/transcoding/status": typeof AdminTranscodingStatusRoute;
+  "/admin/media/": typeof AdminMediaIndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
@@ -437,7 +472,9 @@ export interface FileRouteTypes {
     | "/admin/comments"
     | "/admin/content"
     | "/admin/media"
+    | "/admin/permissions"
     | "/admin/playlists"
+    | "/admin/portal"
     | "/admin/settings"
     | "/admin/tags"
     | "/admin/users"
@@ -455,8 +492,10 @@ export interface FileRouteTypes {
     | "/me/videos"
     | "/playlist/$id"
     | "/u/$id"
+    | "/admin/media/$id"
     | "/admin/transcoding/profiles"
-    | "/admin/transcoding/status";
+    | "/admin/transcoding/status"
+    | "/admin/media/";
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/$handle"
@@ -479,8 +518,9 @@ export interface FileRouteTypes {
     | "/admin/channels"
     | "/admin/comments"
     | "/admin/content"
-    | "/admin/media"
+    | "/admin/permissions"
     | "/admin/playlists"
+    | "/admin/portal"
     | "/admin/settings"
     | "/admin/tags"
     | "/admin/users"
@@ -499,8 +539,10 @@ export interface FileRouteTypes {
     | "/me/videos"
     | "/playlist/$id"
     | "/u/$id"
+    | "/admin/media/$id"
     | "/admin/transcoding/profiles"
-    | "/admin/transcoding/status";
+    | "/admin/transcoding/status"
+    | "/admin/media";
   id:
     | "__root__"
     | "/_portal"
@@ -526,7 +568,9 @@ export interface FileRouteTypes {
     | "/admin/comments"
     | "/admin/content"
     | "/admin/media"
+    | "/admin/permissions"
     | "/admin/playlists"
+    | "/admin/portal"
     | "/admin/settings"
     | "/admin/tags"
     | "/admin/users"
@@ -545,8 +589,10 @@ export interface FileRouteTypes {
     | "/_portal/me/videos"
     | "/_portal/playlist/$id"
     | "/_portal/u/$id"
+    | "/admin/media/$id"
     | "/admin/transcoding/profiles"
-    | "/admin/transcoding/status";
+    | "/admin/transcoding/status"
+    | "/admin/media/";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -621,11 +667,25 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AdminSettingsRouteImport;
       parentRoute: typeof AdminRoute;
     };
+    "/admin/portal": {
+      id: "/admin/portal";
+      path: "/portal";
+      fullPath: "/admin/portal";
+      preLoaderRoute: typeof AdminPortalRouteImport;
+      parentRoute: typeof AdminRoute;
+    };
     "/admin/playlists": {
       id: "/admin/playlists";
       path: "/playlists";
       fullPath: "/admin/playlists";
       preLoaderRoute: typeof AdminPlaylistsRouteImport;
+      parentRoute: typeof AdminRoute;
+    };
+    "/admin/permissions": {
+      id: "/admin/permissions";
+      path: "/permissions";
+      fullPath: "/admin/permissions";
+      preLoaderRoute: typeof AdminPermissionsRouteImport;
       parentRoute: typeof AdminRoute;
     };
     "/admin/media": {
@@ -775,6 +835,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PortalHandleRouteImport;
       parentRoute: typeof PortalRoute;
     };
+    "/admin/media/": {
+      id: "/admin/media/";
+      path: "/";
+      fullPath: "/admin/media/";
+      preLoaderRoute: typeof AdminMediaIndexRouteImport;
+      parentRoute: typeof AdminMediaRoute;
+    };
     "/admin/transcoding/status": {
       id: "/admin/transcoding/status";
       path: "/transcoding/status";
@@ -788,6 +855,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/admin/transcoding/profiles";
       preLoaderRoute: typeof AdminTranscodingProfilesRouteImport;
       parentRoute: typeof AdminRoute;
+    };
+    "/admin/media/$id": {
+      id: "/admin/media/$id";
+      path: "/$id";
+      fullPath: "/admin/media/$id";
+      preLoaderRoute: typeof AdminMediaIdRouteImport;
+      parentRoute: typeof AdminMediaRoute;
     };
     "/_portal/u/$id": {
       id: "/_portal/u/$id";
@@ -944,13 +1018,29 @@ const PortalRouteChildren: PortalRouteChildren = {
 const PortalRouteWithChildren =
   PortalRoute._addFileChildren(PortalRouteChildren);
 
+interface AdminMediaRouteChildren {
+  AdminMediaIdRoute: typeof AdminMediaIdRoute;
+  AdminMediaIndexRoute: typeof AdminMediaIndexRoute;
+}
+
+const AdminMediaRouteChildren: AdminMediaRouteChildren = {
+  AdminMediaIdRoute: AdminMediaIdRoute,
+  AdminMediaIndexRoute: AdminMediaIndexRoute,
+};
+
+const AdminMediaRouteWithChildren = AdminMediaRoute._addFileChildren(
+  AdminMediaRouteChildren,
+);
+
 interface AdminRouteChildren {
   AdminCategoriesRoute: typeof AdminCategoriesRoute;
   AdminChannelsRoute: typeof AdminChannelsRoute;
   AdminCommentsRoute: typeof AdminCommentsRoute;
   AdminContentRoute: typeof AdminContentRoute;
-  AdminMediaRoute: typeof AdminMediaRoute;
+  AdminMediaRoute: typeof AdminMediaRouteWithChildren;
+  AdminPermissionsRoute: typeof AdminPermissionsRoute;
   AdminPlaylistsRoute: typeof AdminPlaylistsRoute;
+  AdminPortalRoute: typeof AdminPortalRoute;
   AdminSettingsRoute: typeof AdminSettingsRoute;
   AdminTagsRoute: typeof AdminTagsRoute;
   AdminUsersRoute: typeof AdminUsersRoute;
@@ -964,8 +1054,10 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminChannelsRoute: AdminChannelsRoute,
   AdminCommentsRoute: AdminCommentsRoute,
   AdminContentRoute: AdminContentRoute,
-  AdminMediaRoute: AdminMediaRoute,
+  AdminMediaRoute: AdminMediaRouteWithChildren,
+  AdminPermissionsRoute: AdminPermissionsRoute,
   AdminPlaylistsRoute: AdminPlaylistsRoute,
+  AdminPortalRoute: AdminPortalRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTagsRoute: AdminTagsRoute,
   AdminUsersRoute: AdminUsersRoute,

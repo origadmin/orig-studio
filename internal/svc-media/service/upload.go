@@ -1,44 +1,71 @@
-/*
- * Copyright (c) 2024 OrigAdmin. All rights reserved.
- */
-
 package service
 
 import (
 	"context"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"google.golang.org/grpc/metadata"
 
 	pb "origadmin/application/origcms/api/gen/v1/upload"
+	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/svc-media/biz"
 )
 
-// UploadService is a service for handling file uploads.
 type UploadService struct {
 	pb.UnimplementedUploadServiceServer
-	uc  *biz.UploadUseCase
-	log *log.Helper
+	uc     *biz.UploadUseCase
+	jwtMgr *auth.Manager
+	log    *log.Helper
 }
 
-// NewUploadService creates a new UploadService.
-func NewUploadService(uc *biz.UploadUseCase, logger log.Logger) *UploadService {
+func NewUploadService(uc *biz.UploadUseCase, jwtMgr *auth.Manager, logger log.Logger) *UploadService {
 	return &UploadService{
-		uc:  uc,
-		log: log.NewHelper(log.With(logger, "module", "service/upload")),
+		uc:     uc,
+		jwtMgr: jwtMgr,
+		log:    log.NewHelper(log.With(logger, "module", "service/upload")),
 	}
 }
 
-// InitiateMultipartUpload implements pb.UploadServiceServer.
-func (s *UploadService) InitiateMultipartUpload(ctx context.Context, req *pb.InitiateMultipartUploadRequest) (*pb.InitiateMultipartUploadResponse, error) {
-	// Extract user ID from context (assuming it's set by middleware)
-	var userID *string
-	if id, ok := ctx.Value("user_id").(int64); ok {
-		idStr := strconv.FormatInt(id, 10)
-		userID = &idStr
+func (s *UploadService) extractUserID(ctx context.Context) *string {
+	if id, ok := ctx.Value("user_id").(string); ok && id != "" {
+		return &id
 	}
+	if id, ok := ctx.Value("user_id").(int64); ok && id != 0 {
+		idStr := strconv.FormatInt(id, 10)
+		return &idStr
+	}
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil
+	}
+	authHeaders := md.Get("authorization")
+	if len(authHeaders) == 0 {
+		authHeaders = md.Get("grpcgateway-authorization")
+	}
+	for _, header := range authHeaders {
+		token := strings.TrimPrefix(header, "Bearer ")
+		if token == header {
+			continue
+		}
+		claims, err := s.jwtMgr.Parse(token)
+		if err != nil {
+			s.log.Warnf("failed to parse JWT token from gRPC metadata: %v", err)
+			continue
+		}
+		userID := claims.GetUserID()
+		if userID != "" {
+			return &userID
+		}
+	}
+	return nil
+}
+
+func (s *UploadService) InitiateMultipartUpload(ctx context.Context, req *pb.InitiateMultipartUploadRequest) (*pb.InitiateMultipartUploadResponse, error) {
+	userID := s.extractUserID(ctx)
 
 	var categoryID *string
 	if req.CategoryId != 0 {
@@ -55,7 +82,7 @@ func (s *UploadService) InitiateMultipartUpload(ctx context.Context, req *pb.Ini
 		req.Description,
 		categoryID,
 		req.Tags,
-		"", // thumbnail not supported in proto
+		"",
 		userID,
 	)
 	if err != nil {
@@ -70,7 +97,6 @@ func (s *UploadService) InitiateMultipartUpload(ctx context.Context, req *pb.Ini
 	}, nil
 }
 
-// UploadPart implements pb.UploadServiceServer.
 func (s *UploadService) UploadPart(ctx context.Context, req *pb.UploadPartRequest) (*pb.UploadPartResponse, error) {
 	etag, err := s.uc.UploadPart(ctx, req.UploadId, int(req.PartNumber), req.Data)
 	if err != nil {
@@ -84,7 +110,6 @@ func (s *UploadService) UploadPart(ctx context.Context, req *pb.UploadPartReques
 	}, nil
 }
 
-// ListParts implements pb.UploadServiceServer.
 func (s *UploadService) ListParts(ctx context.Context, req *pb.ListPartsRequest) (*pb.ListPartsResponse, error) {
 	session, err := s.uc.GetSession(ctx, req.UploadId)
 	if err != nil {
@@ -97,7 +122,7 @@ func (s *UploadService) ListParts(ctx context.Context, req *pb.ListPartsRequest)
 		parts = append(parts, &pb.PartInfo{
 			PartNumber: int32(partNum),
 			Etag:       etag,
-			Size:       0, // Placeholder
+			Size:       0,
 		})
 	}
 
@@ -110,7 +135,6 @@ func (s *UploadService) ListParts(ctx context.Context, req *pb.ListPartsRequest)
 	}, nil
 }
 
-// CompleteMultipartUpload implements pb.UploadServiceServer.
 func (s *UploadService) CompleteMultipartUpload(ctx context.Context, req *pb.CompleteMultipartUploadRequest) (*pb.CompleteMultipartUploadResponse, error) {
 	media, err := s.uc.CompleteMultipartUpload(ctx, req.UploadId, req.Sha256,
 		"", "", nil, nil, "")
@@ -124,7 +148,6 @@ func (s *UploadService) CompleteMultipartUpload(ctx context.Context, req *pb.Com
 	}, nil
 }
 
-// AbortMultipartUpload implements pb.UploadServiceServer.
 func (s *UploadService) AbortMultipartUpload(ctx context.Context, req *pb.AbortMultipartUploadRequest) (*pb.AbortMultipartUploadResponse, error) {
 	err := s.uc.AbortMultipartUpload(ctx, req.UploadId)
 	if err != nil {
@@ -134,13 +157,8 @@ func (s *UploadService) AbortMultipartUpload(ctx context.Context, req *pb.AbortM
 	return &pb.AbortMultipartUploadResponse{}, nil
 }
 
-// UploadFile implements pb.UploadServiceServer.
 func (s *UploadService) UploadFile(ctx context.Context, req *pb.UploadFileRequest) (*pb.UploadFileResponse, error) {
-	var userID *string
-	if id, ok := ctx.Value("user_id").(int64); ok {
-		idStr := strconv.FormatInt(id, 10)
-		userID = &idStr
-	}
+	userID := s.extractUserID(ctx)
 
 	var categoryID *string
 	if req.CategoryId != 0 {
@@ -157,7 +175,7 @@ func (s *UploadService) UploadFile(ctx context.Context, req *pb.UploadFileReques
 		req.Description,
 		categoryID,
 		req.Tags,
-		"", // thumbnail not supported in proto
+		"",
 		userID,
 	)
 	if err != nil {
@@ -182,7 +200,6 @@ func (s *UploadService) UploadFile(ctx context.Context, req *pb.UploadFileReques
 	}, nil
 }
 
-// GetUploadSession implements pb.UploadServiceServer.
 func (s *UploadService) GetUploadSession(ctx context.Context, req *pb.GetUploadSessionRequest) (*pb.GetUploadSessionResponse, error) {
 	session, err := s.uc.GetSession(ctx, req.UploadId)
 	if err != nil {
@@ -212,11 +229,10 @@ func (s *UploadService) GetUploadSession(ctx context.Context, req *pb.GetUploadS
 	}, nil
 }
 
-// ListUploadSessions implements pb.UploadServiceServer.
 func (s *UploadService) ListUploadSessions(ctx context.Context, req *pb.ListUploadSessionsRequest) (*pb.ListUploadSessionsResponse, error) {
 	var userID string
-	if id, ok := ctx.Value("user_id").(int64); ok {
-		userID = strconv.FormatInt(id, 10)
+	if uid := s.extractUserID(ctx); uid != nil {
+		userID = *uid
 	}
 
 	sessions, total, err := s.uc.ListSessions(ctx, userID, enums.UploadStatus(req.GetStatus()), int(req.Page), int(req.PageSize))
@@ -227,17 +243,17 @@ func (s *UploadService) ListUploadSessions(ctx context.Context, req *pb.ListUplo
 	pbSessions := make([]*pb.GetUploadSessionResponse, len(sessions))
 	for i, session := range sessions {
 		pbSessions[i] = &pb.GetUploadSessionResponse{
-				UploadId:     session.UploadID,
-				Filename:     session.Filename,
-				FileSize:     session.FileSize,
-				ContentType:  session.ContentType,
-				TotalParts:   int32(session.TotalParts),
-				ChunkSize:    int32(session.ChunkSize),
-				UploadedSize: session.UploadedSize,
-				Status:       string(session.Status),
-				CreatedAt:    session.CreatedAt.Format(time.RFC3339),
-				ExpiresAt:    session.ExpiresAt.Format(time.RFC3339),
-			}
+			UploadId:     session.UploadID,
+			Filename:     session.Filename,
+			FileSize:     session.FileSize,
+			ContentType:  session.ContentType,
+			TotalParts:   int32(session.TotalParts),
+			ChunkSize:    int32(session.ChunkSize),
+			UploadedSize: session.UploadedSize,
+			Status:       string(session.Status),
+			CreatedAt:    session.CreatedAt.Format(time.RFC3339),
+			ExpiresAt:    session.ExpiresAt.Format(time.RFC3339),
+		}
 	}
 
 	return &pb.ListUploadSessionsResponse{

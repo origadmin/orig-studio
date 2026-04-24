@@ -504,7 +504,7 @@ func (h *AdminHandler) listTags() gin.HandlerFunc {
 			"code":    0,
 			"message": "ok",
 			"data": gin.H{
-				"list":        tags,
+				"items":       tags,
 				"total":       total,
 				"page":        page,
 				"page_size":   pageSize,

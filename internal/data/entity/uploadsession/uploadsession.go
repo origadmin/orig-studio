@@ -109,6 +109,10 @@ var (
 	DefaultUploadedSize int64
 	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	TitleValidator func(string) error
+	// CategoryIDValidator is a validator for the "category_id" field. It is called by the builders before save.
+	CategoryIDValidator func(string) error
+	// UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	UserIDValidator func(string) error
 	// DefaultStatus holds the default value on creation for the "status" field.
 	DefaultStatus string
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.

@@ -35,6 +35,18 @@ export interface Channel {
 
 export interface ChannelDetail extends Channel {}
 
+export interface ChannelPlaylist {
+    id: string;
+    title: string;
+    name?: string;
+    description?: string;
+    media_count: number;
+    video_count?: number;
+    thumbnail?: string;
+    cover_images?: string[];
+    updated_at?: string;
+}
+
 export interface ChannelList {
     items: Channel[];
     total: number;
@@ -150,4 +162,6 @@ export const channelApi = {
 
     getSubscriberCount: (channelToken: string) =>
         api.get<{count: number}>(`/channels/${channelToken}/subscribers`, {params: {count: 'true'}}),
+
+    getAll: () => api.get<PaginatedResponse<Channel>>('/channels'),
 };

@@ -17,4 +17,5 @@ export interface MediaItem {
     likes?: number;
     dislikes?: number;
     is_premium?: boolean;
+    short_token?: string;
 }

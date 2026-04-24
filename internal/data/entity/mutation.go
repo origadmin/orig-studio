@@ -20725,12 +20725,10 @@ type UploadSessionMutation struct {
 	adduploaded_size *int64
 	title            *string
 	description      *string
-	category_id      *int64
-	addcategory_id   *int64
+	category_id      *string
 	tags             *[]string
 	appendtags       []string
-	user_id          *int64
-	adduser_id       *int64
+	user_id          *string
 	status           *string
 	parts            *map[int]string
 	sha256           *string
@@ -21287,13 +21285,12 @@ func (m *UploadSessionMutation) ResetDescription() {
 }
 
 // SetCategoryID sets the "category_id" field.
-func (m *UploadSessionMutation) SetCategoryID(i int64) {
-	m.category_id = &i
-	m.addcategory_id = nil
+func (m *UploadSessionMutation) SetCategoryID(s string) {
+	m.category_id = &s
 }
 
 // CategoryID returns the value of the "category_id" field in the mutation.
-func (m *UploadSessionMutation) CategoryID() (r int64, exists bool) {
+func (m *UploadSessionMutation) CategoryID() (r string, exists bool) {
 	v := m.category_id
 	if v == nil {
 		return
@@ -21304,7 +21301,7 @@ func (m *UploadSessionMutation) CategoryID() (r int64, exists bool) {
 // OldCategoryID returns the old "category_id" field's value of the UploadSession entity.
 // If the UploadSession object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UploadSessionMutation) OldCategoryID(ctx context.Context) (v *int64, err error) {
+func (m *UploadSessionMutation) OldCategoryID(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCategoryID is only allowed on UpdateOne operations")
 	}
@@ -21318,28 +21315,9 @@ func (m *UploadSessionMutation) OldCategoryID(ctx context.Context) (v *int64, er
 	return oldValue.CategoryID, nil
 }
 
-// AddCategoryID adds i to the "category_id" field.
-func (m *UploadSessionMutation) AddCategoryID(i int64) {
-	if m.addcategory_id != nil {
-		*m.addcategory_id += i
-	} else {
-		m.addcategory_id = &i
-	}
-}
-
-// AddedCategoryID returns the value that was added to the "category_id" field in this mutation.
-func (m *UploadSessionMutation) AddedCategoryID() (r int64, exists bool) {
-	v := m.addcategory_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ClearCategoryID clears the value of the "category_id" field.
 func (m *UploadSessionMutation) ClearCategoryID() {
 	m.category_id = nil
-	m.addcategory_id = nil
 	m.clearedFields[uploadsession.FieldCategoryID] = struct{}{}
 }
 
@@ -21352,7 +21330,6 @@ func (m *UploadSessionMutation) CategoryIDCleared() bool {
 // ResetCategoryID resets all changes to the "category_id" field.
 func (m *UploadSessionMutation) ResetCategoryID() {
 	m.category_id = nil
-	m.addcategory_id = nil
 	delete(m.clearedFields, uploadsession.FieldCategoryID)
 }
 
@@ -21422,13 +21399,12 @@ func (m *UploadSessionMutation) ResetTags() {
 }
 
 // SetUserID sets the "user_id" field.
-func (m *UploadSessionMutation) SetUserID(i int64) {
-	m.user_id = &i
-	m.adduser_id = nil
+func (m *UploadSessionMutation) SetUserID(s string) {
+	m.user_id = &s
 }
 
 // UserID returns the value of the "user_id" field in the mutation.
-func (m *UploadSessionMutation) UserID() (r int64, exists bool) {
+func (m *UploadSessionMutation) UserID() (r string, exists bool) {
 	v := m.user_id
 	if v == nil {
 		return
@@ -21439,7 +21415,7 @@ func (m *UploadSessionMutation) UserID() (r int64, exists bool) {
 // OldUserID returns the old "user_id" field's value of the UploadSession entity.
 // If the UploadSession object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UploadSessionMutation) OldUserID(ctx context.Context) (v *int64, err error) {
+func (m *UploadSessionMutation) OldUserID(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
 	}
@@ -21453,28 +21429,9 @@ func (m *UploadSessionMutation) OldUserID(ctx context.Context) (v *int64, err er
 	return oldValue.UserID, nil
 }
 
-// AddUserID adds i to the "user_id" field.
-func (m *UploadSessionMutation) AddUserID(i int64) {
-	if m.adduser_id != nil {
-		*m.adduser_id += i
-	} else {
-		m.adduser_id = &i
-	}
-}
-
-// AddedUserID returns the value that was added to the "user_id" field in this mutation.
-func (m *UploadSessionMutation) AddedUserID() (r int64, exists bool) {
-	v := m.adduser_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ClearUserID clears the value of the "user_id" field.
 func (m *UploadSessionMutation) ClearUserID() {
 	m.user_id = nil
-	m.adduser_id = nil
 	m.clearedFields[uploadsession.FieldUserID] = struct{}{}
 }
 
@@ -21487,7 +21444,6 @@ func (m *UploadSessionMutation) UserIDCleared() bool {
 // ResetUserID resets all changes to the "user_id" field.
 func (m *UploadSessionMutation) ResetUserID() {
 	m.user_id = nil
-	m.adduser_id = nil
 	delete(m.clearedFields, uploadsession.FieldUserID)
 }
 
@@ -22096,7 +22052,7 @@ func (m *UploadSessionMutation) SetField(name string, value ent.Value) error {
 		m.SetDescription(v)
 		return nil
 	case uploadsession.FieldCategoryID:
-		v, ok := value.(int64)
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -22110,7 +22066,7 @@ func (m *UploadSessionMutation) SetField(name string, value ent.Value) error {
 		m.SetTags(v)
 		return nil
 	case uploadsession.FieldUserID:
-		v, ok := value.(int64)
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -22192,12 +22148,6 @@ func (m *UploadSessionMutation) AddedFields() []string {
 	if m.adduploaded_size != nil {
 		fields = append(fields, uploadsession.FieldUploadedSize)
 	}
-	if m.addcategory_id != nil {
-		fields = append(fields, uploadsession.FieldCategoryID)
-	}
-	if m.adduser_id != nil {
-		fields = append(fields, uploadsession.FieldUserID)
-	}
 	return fields
 }
 
@@ -22214,10 +22164,6 @@ func (m *UploadSessionMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedChunkSize()
 	case uploadsession.FieldUploadedSize:
 		return m.AddedUploadedSize()
-	case uploadsession.FieldCategoryID:
-		return m.AddedCategoryID()
-	case uploadsession.FieldUserID:
-		return m.AddedUserID()
 	}
 	return nil, false
 }
@@ -22254,20 +22200,6 @@ func (m *UploadSessionMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddUploadedSize(v)
-		return nil
-	case uploadsession.FieldCategoryID:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddCategoryID(v)
-		return nil
-	case uploadsession.FieldUserID:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddUserID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown UploadSession numeric field %s", name)

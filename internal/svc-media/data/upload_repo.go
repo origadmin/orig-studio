@@ -1,12 +1,7 @@
-/*
- * Copyright (c) 2024 OrigAdmin. All rights reserved.
- */
-
 package data
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -22,7 +17,6 @@ type uploadRepo struct {
 	log  *log.Helper
 }
 
-// NewUploadRepo .
 func NewUploadRepo(data *entity.Client, logger log.Logger) dto.UploadRepo {
 	return &uploadRepo{
 		data: data,
@@ -49,13 +43,11 @@ func (r *uploadRepo) CreateSession(ctx context.Context, session *dto.UploadSessi
 		SetTempDir(session.TempDir).
 		SetExpiresAt(session.ExpiresAt)
 
-	if session.CategoryID != nil {
-		categoryID, _ := strconv.Atoi(*session.CategoryID)
-		builder.SetCategoryID(int64(categoryID))
+	if session.CategoryID != nil && *session.CategoryID != "" {
+		builder.SetCategoryID(*session.CategoryID)
 	}
-	if session.UserID != nil {
-		userID, _ := strconv.Atoi(*session.UserID)
-		builder.SetUserID(int64(userID))
+	if session.UserID != nil && *session.UserID != "" {
+		builder.SetUserID(*session.UserID)
 	}
 
 	_, err := builder.Save(ctx)
@@ -94,8 +86,7 @@ func (r *uploadRepo) DeleteSession(ctx context.Context, uploadID string) error {
 func (r *uploadRepo) ListSessions(ctx context.Context, userID string, status enums.UploadStatus, page, pageSize int) ([]*dto.UploadSession, int, error) {
 	query := r.data.UploadSession.Query()
 	if userID != "" {
-		userIDInt, _ := strconv.Atoi(userID)
-		query = query.Where(uploadsession.UserID(int64(userIDInt)))
+		query = query.Where(uploadsession.UserIDEQ(userID))
 	}
 	if status != "" {
 		query = query.Where(uploadsession.Status(string(status)))
@@ -120,7 +111,6 @@ func (r *uploadRepo) ListSessions(ctx context.Context, userID string, status enu
 }
 
 func (r *uploadRepo) DeleteExpiredSessions(ctx context.Context, now time.Time) ([]string, error) {
-	// Find expired sessions that are not completed
 	expired, err := r.data.UploadSession.Query().
 		Where(
 			uploadsession.ExpiresAtLT(now),
@@ -140,7 +130,6 @@ func (r *uploadRepo) DeleteExpiredSessions(ctx context.Context, now time.Time) (
 		ids[i] = s.UploadID
 	}
 
-	// Delete from database
 	_, err = r.data.UploadSession.Delete().
 		Where(uploadsession.UploadIDIn(ids...)).
 		Exec(ctx)
@@ -153,15 +142,13 @@ func (r *uploadRepo) DeleteExpiredSessions(ctx context.Context, now time.Time) (
 
 func (r *uploadRepo) entToBiz(s *entity.UploadSession) *dto.UploadSession {
 	var categoryID *string
-	if s.CategoryID != nil {
-		idStr := strconv.FormatInt(*s.CategoryID, 10)
-		categoryID = &idStr
+	if s.CategoryID != "" {
+		categoryID = &s.CategoryID
 	}
 
 	var userID *string
-	if s.UserID != nil {
-		idStr := strconv.FormatInt(*s.UserID, 10)
-		userID = &idStr
+	if s.UserID != "" {
+		userID = &s.UserID
 	}
 
 	return &dto.UploadSession{

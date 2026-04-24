@@ -66,7 +66,7 @@ const ReviewFlow: React.FC = () => {
                     status: statusFilter,
                 });
             }
-            setReviewItems(response.list || []);
+            setReviewItems(response.items || []);
             setTotal(response.total || 0);
         } catch (err) {
             setError('Failed to fetch review items');

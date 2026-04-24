@@ -124,10 +124,11 @@ func (h *InteractionHandler) registerShares(g *gin.RouterGroup) {
 
 func (h *InteractionHandler) getLikes() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// TODO: Implement get likes
-		c.JSON(http.StatusOK, gin.H{
-			"list":  []interface{}{},
-			"total": 0,
+		OK(c, gin.H{
+			"items":     []interface{}{},
+			"total":     0,
+			"page":      1,
+			"page_size": 20,
 		})
 	}
 }
@@ -150,10 +151,11 @@ func (h *InteractionHandler) getLikeStatusBatch() gin.HandlerFunc {
 
 func (h *InteractionHandler) getFavorites() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// TODO: Implement get favorites
-		c.JSON(http.StatusOK, gin.H{
-			"list":  []interface{}{},
-			"total": 0,
+		OK(c, gin.H{
+			"items":     []interface{}{},
+			"total":     0,
+			"page":      1,
+			"page_size": 20,
 		})
 	}
 }
@@ -191,8 +193,8 @@ func (h *InteractionHandler) getSubscriptions() gin.HandlerFunc {
 		_ = page
 		_ = pageSize
 
-		c.JSON(http.StatusOK, gin.H{
-			"list":      []interface{}{},
+		OK(c, gin.H{
+			"items":     []interface{}{},
 			"total":     0,
 			"page":      page,
 			"page_size": pageSize,
@@ -224,8 +226,8 @@ func (h *InteractionHandler) getFollowers() gin.HandlerFunc {
 		_ = page
 		_ = pageSize
 
-		c.JSON(http.StatusOK, gin.H{
-			"list":      []interface{}{},
+		OK(c, gin.H{
+			"items":     []interface{}{},
 			"total":     0,
 			"page":      page,
 			"page_size": pageSize,

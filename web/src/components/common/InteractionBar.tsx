@@ -278,7 +278,7 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
         try {
             setIsSaving(true);
             const response = await playlistApi.getMyPlaylists();
-            const items = response.items || response.list || [];
+            const items = response.items || [];
             setPlaylists(items.map((p: any) => ({id: String(p.id), name: p.title || p.name})));
             setShowSaveModal(true);
         } catch (err) {
@@ -535,7 +535,7 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
                                     <span className="text-xs text-gray-600 dark:text-gray-400">Telegram</span>
                                 </a>
                             )}
-                            {navigator.share && (
+                            {'share' in navigator && (
                                 <button
                                     onClick={handleNativeShare}
                                     className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
