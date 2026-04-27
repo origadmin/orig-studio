@@ -6,7 +6,9 @@
 package server
 
 import (
+	"mime"
 	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 
@@ -40,6 +42,7 @@ type Server struct {
 	permissionHandler  *PermissionHandler
 	entityClient       *entity.Client
 	jwtMgr             *auth.Manager
+	storageBasePath    string // base directory for static file serving (resolved to absolute path)
 }
 
 // NewServer creates a new server instance.
@@ -65,6 +68,7 @@ func NewServer(
 	permissionHandler *PermissionHandler,
 	entityClient *entity.Client,
 	jwtMgr *auth.Manager,
+	storageBasePath string,
 ) *Server {
 	return &Server{
 		authHandler:        authHandler,
@@ -88,6 +92,7 @@ func NewServer(
 		permissionHandler:  permissionHandler,
 		entityClient:       entityClient,
 		jwtMgr:             jwtMgr,
+		storageBasePath:    storageBasePath,
 	}
 }
 
@@ -96,6 +101,12 @@ func (s *Server) Start(addr string) error {
 	if getEnv("GIN_MODE", "debug") == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
+
+	// Register HLS-related MIME types so that .m3u8 and .ts files
+	// are served with the correct Content-Type header.
+	mime.AddExtensionType(".m3u8", "application/vnd.apple.mpegurl")
+	mime.AddExtensionType(".ts", "video/mp2t")
+
 	r := gin.Default()
 
 	// CORS
@@ -113,10 +124,25 @@ func (s *Server) Start(addr string) error {
 		c.Next()
 	})
 
-	// Static files for media uploads
-	r.Static("/uploads", "./data/uploads/uploads")
-	r.Static("/thumbnails", "./data/uploads/thumbnails")
-	r.Static("/hls", "./data/uploads/hls")
+	// Resolve storage base path to absolute path to avoid working directory dependency.
+	// When the server is started from a different directory (e.g., framework root
+	// instead of project root), relative paths like "./data/uploads/hls" would
+	// resolve incorrectly, causing 404 errors for static file requests.
+	storageBase := s.storageBasePath
+	if storageBase == "" {
+		storageBase = "./data/uploads"
+	}
+	absStorageBase, err := filepath.Abs(storageBase)
+	if err != nil {
+		log.Warnf("failed to resolve storage base path %q: %v, using as-is", storageBase, err)
+		absStorageBase = storageBase
+	}
+	log.Infof("static file storage base: %s (resolved to %s)", storageBase, absStorageBase)
+
+	// Static files for media uploads — use absolute paths
+	r.Static("/uploads", filepath.Join(absStorageBase, "uploads"))
+	r.Static("/thumbnails", filepath.Join(absStorageBase, "thumbnails"))
+	r.Static("/hls", filepath.Join(absStorageBase, "hls"))
 
 	// Register all module routes
 	s.RegisterRoutes(r)
