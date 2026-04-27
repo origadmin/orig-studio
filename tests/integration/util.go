@@ -197,6 +197,7 @@ func SetupTestServer(t *testing.T) *TestServer {
 		nil,
 		db,
 		jwtMgr,
+		"./data/uploads", // storageBasePath
 	)
 	srv.RegisterRoutes(router)
 

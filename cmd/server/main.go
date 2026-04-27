@@ -114,6 +114,7 @@ func main() {
 		deps.PermissionHandler,
 		deps.DB,
 		deps.JWTManager,
+		"./data/uploads", // storageBasePath: base directory for static file serving
 	)
 
 	// Start server
