@@ -73,6 +73,7 @@ type MediaQueryOption struct {
 	Tags         []string
 	Listable     *bool
 	ReviewStatus *string
+	Privacy      *int32
 	AdminMode    bool
 }
 

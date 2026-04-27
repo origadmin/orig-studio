@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * Header: Logo | QuickLinks + 更多下拉 | 搜索框 | 用户菜单
  */
@@ -162,7 +162,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                             className={`px-3 py-1.5 text-sm rounded-full transition-colors whitespace-nowrap ${
                                 isActive(link.to)
                                     ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 font-medium'
-                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                    : 'text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
                             }`}
                         >
                             {link.label}
@@ -174,7 +174,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                         <div className="relative" ref={moreMenuRef}>
                             <button
                                 onClick={() => setMoreMenuOpen(!moreMenuOpen)}
-                                className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                                className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
                             >
                                 {t('nav.more')}
                                 <ChevronDown size={14}
@@ -208,7 +208,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                     <div className="relative">
                         <Search
                             size={16}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                         />
                         <input
                             type="search"
@@ -286,7 +286,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                                             <p className="text-sm font-medium text-gray-900 dark:text-white">
                                                 {user.displayName || user.username}
                                             </p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                            <p className="text-xs text-gray-500 dark:text-muted-foreground">
                                                 @{user.username}
                                             </p>
                                         </div>
@@ -332,7 +332,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                                                 logout();
                                                 navigate({to: '/'});
                                             }}
-                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-destructive dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                                         >
                                             <LogOut size={16}/> {t('nav.logout')}
                                         </button>

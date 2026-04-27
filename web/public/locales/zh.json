@@ -160,7 +160,8 @@
     "sortOldest": "最早",
     "sortPopular": "最热",
     "confirmDelete": "确定要删除此视频吗？此操作无法撤销。",
-    "retryTranscode": "重试转码"
+    "retryTranscode": "重试转码",
+    "subtitleComingSoon": "字幕功能即将上线"
   },
   "channel": {
     "manageChannel": "管理频道",

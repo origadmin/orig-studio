@@ -1,3 +1,4 @@
+﻿import {Spinner} from "@/components/ui/spinner"
 import React, {useState, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
@@ -25,6 +26,7 @@ import {MoreHorizontal, Search, Eye, Trash2, MessageCircle, ThumbsUp, Flag, Ban,
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {commentApi} from '@/lib/api/comment';
 import ErrorPage from '@/components/error/ErrorPage';
+import {TablePagination} from '@/components/common/TablePagination';
 
 interface Comment {
     id: number;
@@ -45,16 +47,20 @@ const Comments: React.FC = () => {
     const [comments, setComments] = useState<Comment[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(20);
+    const [total, setTotal] = useState(0);
 
     // Fetch comments from API
     useEffect(() => {
         const fetchComments = async () => {
             try {
                 setLoading(true);
-                // 直接调用getAll()获取所有评论，不需要传递media_id参数
-                const response = await commentApi.getAll();
+                const response = await commentApi.getAll({page, page_size: pageSize});
                 const commentList = Array.isArray((response as any)?.items) ? (response as any).items : [];
-                // Map API response to our comment interface
+                if ((response as any)?.total !== undefined) {
+                    setTotal((response as any).total);
+                }
                 const mappedComments = commentList.map((comment: any) => ({
                     id: comment.id,
                     user: {
@@ -84,7 +90,7 @@ const Comments: React.FC = () => {
         };
 
         fetchComments();
-    }, [t]);
+    }, [t, page]);
 
     const filteredComments = comments.filter(comment => {
         const matchesSearch = comment.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -117,7 +123,7 @@ const Comments: React.FC = () => {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"/>
+                <Spinner />
             </div>
         );
     }
@@ -134,7 +140,7 @@ const Comments: React.FC = () => {
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
                                 <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{t('admin.comments')}</h2>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5">
                                     Manage your user comments
                                 </p>
                             </div>
@@ -153,13 +159,13 @@ const Comments: React.FC = () => {
                                         placeholder={t('admin.search') || t('admin.comments') + '...'}
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                        className="pl-10 h-8 rounded-btn-sm w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
                                     />
                                 </div>
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
                                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                    <SelectTrigger className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                    <SelectTrigger className="w-[140px] h-8 rounded-btn-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
                                             {statusFilter === 'all' ? (
@@ -180,7 +186,6 @@ const Comments: React.FC = () => {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="h-9 px-3"
                                         onClick={() => {
                                             setSearchTerm('');
                                             setStatusFilter('all');
@@ -192,9 +197,7 @@ const Comments: React.FC = () => {
                                     <Button
                                         variant="default"
                                         size="sm"
-                                        className="h-9 px-4"
                                         onClick={() => {
-                                            // 这里可以添加搜索逻辑
                                         }}
                                     >
                                         <Search className="h-4 w-4 mr-2"/>
@@ -212,7 +215,7 @@ const Comments: React.FC = () => {
                 <Card className="bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800">
                     <CardContent className="p-4">
                         <div className="flex items-center gap-2">
-                            <Ban className="h-5 w-5 text-red-600 dark:text-red-400"/>
+                            <Ban className="h-5 w-5 text-destructive dark:text-red-400"/>
                             <p className="text-red-700 dark:text-red-300">{error}</p>
                         </div>
                     </CardContent>
@@ -224,35 +227,35 @@ const Comments: React.FC = () => {
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="flex items-center gap-2">
-                            <MessageCircle className="h-5 w-5 text-blue-600"/>
+                            <MessageCircle className="h-5 w-5 text-info"/>
                             <div>
-                                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{totalComments}</div>
+                                <div className="text-2xl font-bold text-info dark:text-blue-400">{totalComments}</div>
                                 <p className="text-sm text-muted-foreground">{t('admin.totalComments')}</p>
                             </div>
                         </div>
                     </CardContent>
-                    <div className="absolute bottom-0 left-0 h-1 bg-blue-500 w-full opacity-10"/>
+                    <div className="absolute bottom-0 left-0 h-1 bg-info w-full opacity-10"/>
                 </Card>
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">{approvedCount}</div>
+                        <div className="text-2xl font-bold text-success dark:text-green-400">{approvedCount}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.approved')}</p>
                     </CardContent>
-                    <div className="absolute bottom-0 left-0 h-1 bg-green-500 w-full opacity-10"/>
+                    <div className="absolute bottom-0 left-0 h-1 bg-success w-full opacity-10"/>
                 </Card>
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{pendingCount}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.pending')}</p>
                     </CardContent>
-                    <div className="absolute bottom-0 left-0 h-1 bg-yellow-500 w-full opacity-10"/>
+                    <div className="absolute bottom-0 left-0 h-1 bg-warning w-full opacity-10"/>
                 </Card>
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-red-600 dark:text-red-400">{reportedCount}</div>
+                        <div className="text-2xl font-bold text-destructive dark:text-red-400">{reportedCount}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.spam')}</p>
                     </CardContent>
-                    <div className="absolute bottom-0 left-0 h-1 bg-red-500 w-full opacity-10"/>
+                    <div className="absolute bottom-0 left-0 h-1 bg-destructive w-full opacity-10"/>
                 </Card>
             </div>
 
@@ -268,7 +271,7 @@ const Comments: React.FC = () => {
                 <CardContent>
                     {loading ? (
                         <div className="flex items-center justify-center min-h-[400px]">
-                            <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"/>
+                            <Spinner />
                         </div>
                     ) : (
                         <Table>
@@ -381,6 +384,13 @@ const Comments: React.FC = () => {
                     )}
                 </CardContent>
             </Card>
+
+            <TablePagination
+                page={page}
+                pageSize={pageSize}
+                total={total}
+                onPageChange={setPage}
+            />
         </div>
     );
 };

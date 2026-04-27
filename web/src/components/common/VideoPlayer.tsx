@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect, useCallback, useMemo, forwardRef, useImperativeHandle} from 'react';
+﻿import React, {useState, useRef, useEffect, useCallback, useMemo, forwardRef, useImperativeHandle} from 'react';
 import {
     Play, Pause, Volume2, VolumeX, Maximize, Minimize,
     SkipBack, SkipForward, Settings, Subtitles, PictureInPicture,
@@ -728,7 +728,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                     role="alert"
                     aria-live="assertive"
                 >
-                    <AlertCircle size={64} className="text-red-500"/>
+                    <AlertCircle size={64} className="text-destructive"/>
                     <p className="text-white text-lg font-medium text-center max-w-md">{errorMessage}</p>
                     <Button
                         variant="secondary"
@@ -900,7 +900,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                                 size="sm"
                                 className={`h-8 px-2 text-xs font-medium rounded-full transition-colors ${
                                     autoPlayNext
-                                        ? 'text-blue-400 hover:text-blue-300 hover:bg-blue-500/10'
+                                        ? 'text-blue-400 hover:text-blue-300 hover:bg-info/10'
                                         : 'text-white/50 hover:text-white/80 hover:bg-white/10'
                                 }`}
                                 onClick={(e) => {
@@ -1013,7 +1013,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                                     >
                                         {/* Quality header */}
                                         <div
-                                            className="px-3 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-white/10">
+                                            className="px-3 py-2 text-xs font-bold text-muted-foreground uppercase tracking-wider border-b border-white/10">
                                             Quality
                                         </div>
 
@@ -1053,7 +1053,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                                                 {currentQuality === q.name ? (
                                                     <span className="text-blue-400 text-xs">✓</span>
                                                 ) : q.isRecommended ? (
-                                                    <span className="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded">推荐</span>
+                                                    <span className="text-[10px] bg-info/20 text-blue-400 px-1.5 py-0.5 rounded">推荐</span>
                                                 ) : null}
                                             </button>
                                         ))}

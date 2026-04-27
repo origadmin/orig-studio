@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * 关于页面
  */
@@ -32,12 +32,12 @@ const AboutPage = () => {
                         <p className="text-xs text-gray-500 mt-1">{t('about.modernStack')}</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                        <Heart size={28} className="mx-auto text-red-500 mb-2"/>
+                        <Heart size={28} className="mx-auto text-destructive mb-2"/>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">{t('about.openSource')}</p>
                         <p className="text-xs text-gray-500 mt-1">AGPLv3 License</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                        <Users size={28} className="mx-auto text-blue-500 mb-2"/>
+                        <Users size={28} className="mx-auto text-info mb-2"/>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">{t('about.communityDriven')}</p>
                         <p className="text-xs text-gray-500 mt-1">{t('about.welcomeContrib')}</p>
                     </div>
@@ -74,7 +74,7 @@ const AboutPage = () => {
                 </div>
 
                 <div className="text-center pt-4 border-t border-gray-100 dark:border-gray-700">
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                         Powered by <span
                         className="font-medium text-gray-600 dark:text-gray-300">OrigAdmin</span> &middot;
                         <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener noreferrer"

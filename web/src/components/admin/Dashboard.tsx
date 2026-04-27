@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+﻿import React, {useState, useEffect} from 'react';
 import {
     LineChart,
     Line,
@@ -59,7 +59,7 @@ const Dashboard: React.FC = () => {
                     {Array.from({length: 4}).map((_, i) => (
                         <Card key={i}>
                             <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                <CardTitle className="text-sm font-medium text-gray-600 dark:text-muted-foreground">
                                     <Skeleton className="h-4 w-24"/>
                                 </CardTitle>
                             </CardHeader>
@@ -147,7 +147,7 @@ const Dashboard: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <Card>
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        <CardTitle className="text-sm font-medium text-gray-600 dark:text-muted-foreground">
                             {t('admin.totalUsers')}
                         </CardTitle>
                     </CardHeader>
@@ -157,12 +157,12 @@ const Dashboard: React.FC = () => {
                                 <p className="text-3xl font-bold text-gray-900 dark:text-white">
                                     {formatNumber(stats.total_users)}
                                 </p>
-                                <p className="text-sm text-green-600 dark:text-green-400">
+                                <p className="text-sm text-success dark:text-green-400">
                                     +{stats.new_users_today} {t('admin.today')}
                                 </p>
                             </div>
                             <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
-                                <Users className="h-6 w-6 text-blue-600 dark:text-blue-300"/>
+                                <Users className="h-6 w-6 text-info dark:text-blue-300"/>
                             </div>
                         </div>
                     </CardContent>
@@ -170,7 +170,7 @@ const Dashboard: React.FC = () => {
 
                 <Card>
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        <CardTitle className="text-sm font-medium text-gray-600 dark:text-muted-foreground">
                             {t('admin.totalMedia')}
                         </CardTitle>
                     </CardHeader>
@@ -180,12 +180,12 @@ const Dashboard: React.FC = () => {
                                 <p className="text-3xl font-bold text-gray-900 dark:text-white">
                                     {formatNumber(stats.total_media)}
                                 </p>
-                                <p className="text-sm text-green-600 dark:text-green-400">
+                                <p className="text-sm text-success dark:text-green-400">
                                     +{stats.new_media_today} {t('admin.today')}
                                 </p>
                             </div>
                             <div className="p-2 bg-green-100 dark:bg-green-900 rounded-full">
-                                <Video className="h-6 w-6 text-green-600 dark:text-green-300"/>
+                                <Video className="h-6 w-6 text-success dark:text-green-300"/>
                             </div>
                         </div>
                     </CardContent>
@@ -193,7 +193,7 @@ const Dashboard: React.FC = () => {
 
                 <Card>
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        <CardTitle className="text-sm font-medium text-gray-600 dark:text-muted-foreground">
                             {t('admin.totalViews')}
                         </CardTitle>
                     </CardHeader>
@@ -203,12 +203,12 @@ const Dashboard: React.FC = () => {
                                 <p className="text-3xl font-bold text-gray-900 dark:text-white">
                                     {formatNumber(stats.total_views)}
                                 </p>
-                                <p className="text-sm text-green-600 dark:text-green-400">
+                                <p className="text-sm text-success dark:text-green-400">
                                     +{stats.new_views_today} {t('admin.today')}
                                 </p>
                             </div>
                             <div className="p-2 bg-amber-100 dark:bg-amber-900 rounded-full">
-                                <Eye className="h-6 w-6 text-amber-600 dark:text-amber-300"/>
+                                <Eye className="h-6 w-6 text-warning dark:text-amber-300"/>
                             </div>
                         </div>
                     </CardContent>
@@ -216,7 +216,7 @@ const Dashboard: React.FC = () => {
 
                 <Card>
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        <CardTitle className="text-sm font-medium text-gray-600 dark:text-muted-foreground">
                             {t('admin.totalSubscribers')}
                         </CardTitle>
                     </CardHeader>
@@ -226,7 +226,7 @@ const Dashboard: React.FC = () => {
                                 <p className="text-3xl font-bold text-gray-900 dark:text-white">
                                     {formatNumber(stats.total_subscribers)}
                                 </p>
-                                <p className="text-sm text-green-600 dark:text-green-400">
+                                <p className="text-sm text-success dark:text-green-400">
                                     +{stats.new_subscribers_today} {t('admin.today')}
                                 </p>
                             </div>
@@ -332,7 +332,7 @@ const Dashboard: React.FC = () => {
                       {category.name}
                     </span>
                                     </div>
-                                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                                    <span className="text-sm text-gray-600 dark:text-muted-foreground">
                     {category.count} {t('admin.media')}
                   </span>
                                 </div>
@@ -363,7 +363,7 @@ const Dashboard: React.FC = () => {
                       {creator.name}
                     </span>
                                     </div>
-                                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                                    <span className="text-sm text-gray-600 dark:text-muted-foreground">
                     {creator.media_count} {t('admin.videos')}
                   </span>
                                 </div>
@@ -395,7 +395,7 @@ const Dashboard: React.FC = () => {
                       {media.title}
                     </span>
                                     </div>
-                                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                                    <span className="text-sm text-gray-600 dark:text-muted-foreground">
                     {formatNumber(media.views)} {t('admin.views')}
                   </span>
                                 </div>

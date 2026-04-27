@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+﻿import React, {useState} from 'react';
 import {Link, useLocation} from '@tanstack/react-router';
 import {Filter, Eye, Play, Loader2, Search as SearchIcon} from 'lucide-react';
 import {formatDuration, formatViews, formatDate} from '@/lib/format';
@@ -6,6 +6,7 @@ import {useTranslation} from 'react-i18next';
 import {useMediaList} from '@/hooks/queries';
 import {getFullUrl} from '@/lib/utils';
 import {Input} from '@/components/ui/input';
+import {Spinner} from '@/components/ui/spinner';
 import {Button} from '@/components/ui/button';
 import {useCategoryList} from '@/hooks/queries';
 
@@ -70,7 +71,7 @@ const SearchPage = () => {
             <div className="pb-6 border-b border-slate-100 dark:border-gray-700">
                 <form onSubmit={handleSearch} className="flex gap-3">
                     <div className="relative flex-1">
-                        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"/>
+                        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground"/>
                         <Input
                             type="text"
                             placeholder={t('search.placeholder') || 'Search videos...'}
@@ -153,8 +154,7 @@ const SearchPage = () => {
             {/* Loading State */}
             {isLoading && (
                 <div className="flex items-center justify-center min-h-[300px]">
-                    <div
-                        className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"/>
+                    <Spinner />
                 </div>
             )}
 
@@ -162,7 +162,7 @@ const SearchPage = () => {
             {!isLoading && error && (
                 <div className="py-20 text-center space-y-4">
                     <div className="text-gray-500 text-lg">{t('common.error') || 'Error loading results'}</div>
-                    <p className="text-sm text-gray-400">{(error as Error).message}</p>
+                    <p className="text-sm text-muted-foreground">{(error as Error).message}</p>
                     <Link to="/">
                         <button
                             className="flex items-center space-x-2 px-6 py-2.5 bg-slate-900 dark:bg-gray-800 text-white rounded-2xl text-xs font-black hover:bg-emerald-600 transition-all mx-auto">
@@ -220,7 +220,7 @@ const SearchPage = () => {
                                         {item.title}
                                     </h3>
                                     <div
-                                        className="flex items-center space-x-3 text-xs font-medium text-slate-500 dark:text-gray-400">
+                                        className="flex items-center space-x-3 text-xs font-medium text-slate-500 dark:text-muted-foreground">
                                         <span>{item.edges?.user?.[0]?.username || 'Unknown'}</span>
                                         <span>·</span>
                                         <span className="flex items-center gap-1">
@@ -230,7 +230,7 @@ const SearchPage = () => {
                                         <span>·</span>
                                         <span>{formatDate(item.created_at)}</span>
                                     </div>
-                                    <p className="text-sm text-slate-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                                    <p className="text-sm text-slate-500 dark:text-muted-foreground line-clamp-2 leading-relaxed">
                                         {item.description || t('watch.noDescription')}
                                     </p>
                                     {item.tags && item.tags.length > 0 && (
@@ -255,7 +255,7 @@ const SearchPage = () => {
                                 <button
                                     onClick={() => setPage(p => Math.max(1, p - 1))}
                                     disabled={page === 1}
-                                    className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-muted dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {t('common.previous') || 'Previous'}
                                 </button>
@@ -268,7 +268,7 @@ const SearchPage = () => {
                                             className={`px-4 py-2 rounded-lg ${
                                                 page === pageNum
                                                     ? 'bg-emerald-600 text-white'
-                                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-muted dark:hover:bg-gray-700'
                                             }`}
                                         >
                                             {pageNum}
@@ -278,7 +278,7 @@ const SearchPage = () => {
                                 <button
                                     onClick={() => setPage(p => p + 1)}
                                     disabled={page >= Math.ceil(totalResults / pageSize)}
-                                    className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-muted dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {t('common.next') || 'Next'}
                                 </button>

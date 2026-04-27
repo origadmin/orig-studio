@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
@@ -27,15 +27,15 @@ export const UploadList: React.FC = () => {
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'success':
-                return 'text-green-500';
+                return 'text-success';
             case 'error':
-                return 'text-red-500';
+                return 'text-destructive';
             case 'aborted':
-                return 'text-gray-400';
+                return 'text-muted-foreground';
             case 'completing':
-                return 'text-blue-500 font-bold';
+                return 'text-info font-bold';
             default:
-                return 'text-blue-500';
+                return 'text-info';
         }
     };
 
@@ -47,7 +47,7 @@ export const UploadList: React.FC = () => {
                 </h3>
                 <button
                     onClick={clearCompleted}
-                    className="text-sm text-blue-600 hover:text-blue-800"
+                    className="text-sm text-info hover:text-blue-800"
                 >
                     Clear Completed
                 </button>
@@ -69,7 +69,7 @@ export const UploadList: React.FC = () => {
                                 {task.status !== 'success' && task.status !== 'error' && task.status !== 'aborted' && (
                                     <button
                                         onClick={() => cancelTask(task.id)}
-                                        className="p-1 hover:bg-gray-200 rounded text-gray-400"
+                                        className="p-1 hover:bg-muted rounded text-muted-foreground"
                                         title="Cancel upload"
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,7 +80,7 @@ export const UploadList: React.FC = () => {
                                 )}
                                 <button
                                     onClick={() => removeTask(task.id)}
-                                    className="p-1 hover:bg-gray-200 rounded text-gray-400"
+                                    className="p-1 hover:bg-muted rounded text-muted-foreground"
                                     title="Remove from list"
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,11 +91,11 @@ export const UploadList: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1 relative overflow-hidden">
+                        <div className="w-full bg-muted rounded-full h-2.5 mb-1 relative overflow-hidden">
                             <div
                                 className={`h-full rounded-full transition-all duration-300 ${
-                                    task.status === 'success' ? 'bg-green-500' :
-                                        task.status === 'error' ? 'bg-red-500' :
+                                    task.status === 'success' ? 'bg-success' :
+                                        task.status === 'error' ? 'bg-destructive' :
                                             task.status === 'aborted' ? 'bg-gray-400' :
                                                 'bg-blue-600'
                                 }`}
@@ -104,13 +104,13 @@ export const UploadList: React.FC = () => {
                         </div>
 
                         {task.error && (
-                            <p className="text-xs text-red-500 mt-1 italic">
+                            <p className="text-xs text-destructive mt-1 italic">
                                 Error: {task.error}
                             </p>
                         )}
 
                         {task.status === 'completing' && (
-                            <p className="text-xs text-blue-500 mt-1 animate-pulse">
+                            <p className="text-xs text-info mt-1 animate-pulse">
                                 Merging parts on server... please wait
                             </p>
                         )}

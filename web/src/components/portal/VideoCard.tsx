@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
@@ -57,7 +57,7 @@ const VideoCard = ({video}: { video: MediaItem }) => {
             </Link>
 
             <div className="p-6 space-y-4">
-                <h3 className="font-black text-slate-900 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors text-lg tracking-tight">
+                <h3 className="font-black text-slate-900 line-clamp-2 leading-tight group-hover:text-info transition-colors text-lg tracking-tight">
                     <Link to="/watch" search={{v: video.short_token}}>{video.title}</Link>
                 </h3>
 
@@ -73,16 +73,16 @@ const VideoCard = ({video}: { video: MediaItem }) => {
                         />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <p className="font-black text-slate-800 truncate hover:text-blue-500 transition-colors cursor-pointer text-sm">
+                        <p className="font-black text-slate-800 truncate hover:text-info transition-colors cursor-pointer text-sm">
                             {video.author_name || 'OrigAdmin Contributor'}
                         </p>
                         <div
-                            className="flex items-center space-x-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">
+                            className="flex items-center space-x-2 text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-0.5">
                             <span className="flex items-center gap-1"><Eye size={12}
-                                                                           className="text-blue-500"/> {formatViews(video.view_count)}</span>
+                                                                           className="text-info"/> {formatViews(video.view_count)}</span>
                             <span>•</span>
                             <span className="flex items-center gap-1"><Calendar size={12}
-                                                                                className="text-blue-500"/> {formatDate(video.create_time)}</span>
+                                                                                className="text-info"/> {formatDate(video.create_time)}</span>
                         </div>
                     </div>
                 </div>

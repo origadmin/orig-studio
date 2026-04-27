@@ -1,3 +1,4 @@
+﻿import {Spinner} from "@/components/ui/spinner"
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * 我的播放列表页
@@ -41,14 +42,14 @@ const PlaylistsPage = () => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"/>
+                <Spinner />
             </div>
         );
     }
 
     if (error || !user) {
         return (
-            <div className="text-center py-20 text-gray-400">
+            <div className="text-center py-20 text-muted-foreground">
                 <ListVideo size={48} className="mx-auto mb-3 opacity-30"/>
                 <p className="text-lg mb-1">{t('playlists.empty')}</p>
                 <p className="text-sm">{t('playlists.emptyDesc')}</p>
@@ -115,14 +116,14 @@ const PlaylistsPage = () => {
                                 <h3 className="font-semibold text-gray-900 dark:text-white mb-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                                     {pl.name}
                                 </h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{pl.description}</p>
-                                <p className="text-xs text-gray-400 mt-2">{t('playlists.updated', {date: formatDate(pl.updated_at)})}</p>
+                                <p className="text-sm text-gray-500 dark:text-muted-foreground line-clamp-1">{pl.description}</p>
+                                <p className="text-xs text-muted-foreground mt-2">{t('playlists.updated', {date: formatDate(pl.updated_at)})}</p>
                             </div>
                         </div>
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-20 text-gray-400">
+                <div className="text-center py-20 text-muted-foreground">
                     <ListVideo size={48} className="mx-auto mb-3 opacity-30"/>
                     <p className="text-lg mb-1">{t('playlists.empty')}</p>
                     <p className="text-sm">{t('playlists.emptyDesc')}</p>

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * Home Page - Feed + Infinite Scroll (Connected to Real API)
  */
@@ -7,6 +7,7 @@ import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {Link} from '@tanstack/react-router';
 import {Play, Eye, TrendingUp, Star} from 'lucide-react';
 import {Button} from '@/components/ui/button';
+import {Spinner} from '@/components/ui/spinner';
 import {Badge} from '@/components/ui/badge';
 import {formatDuration, formatViews, formatDate} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
@@ -117,7 +118,7 @@ const HomePage = () => {
             <section className="mb-12">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <Star className="w-6 h-6 text-yellow-500"/>
+                        <Star className="w-6 h-6 text-warning"/>
                         {t('home.featuredVideos')}
                     </h2>
                     <Link to="/featured"
@@ -163,10 +164,10 @@ const HomePage = () => {
                                                 onError={(e) => handleImageError(e, 'avatar')}
                                                 className="w-5 h-5 rounded-full object-cover"/>
                                             <span
-                                                className="text-xs text-gray-500 dark:text-gray-400">{user?.nickname || user?.username || 'Unknown'}</span>
+                                                className="text-xs text-gray-500 dark:text-muted-foreground">{user?.nickname || user?.username || 'Unknown'}</span>
                                         </div>
                                         <div
-                                            className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
+                                            className="flex items-center gap-3 text-xs text-muted-foreground dark:text-gray-500">
                                                 <span className="flex items-center gap-1"><Eye
                                                     size={12}/>{formatViews(media?.view_count || 0)}</span>
                                         </div>
@@ -227,10 +228,10 @@ const HomePage = () => {
                                                 onError={(e) => handleImageError(e, 'avatar')}
                                                 className="w-5 h-5 rounded-full object-cover"/>
                                             <span
-                                                className="text-xs text-gray-500 dark:text-gray-400">{user?.nickname || user?.username || 'Unknown'}</span>
+                                                className="text-xs text-gray-500 dark:text-muted-foreground">{user?.nickname || user?.username || 'Unknown'}</span>
                                         </div>
                                         <div
-                                            className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
+                                            className="flex items-center gap-3 text-xs text-muted-foreground dark:text-gray-500">
                                                 <span className="flex items-center gap-1"><Eye
                                                     size={12}/>{formatViews(media?.view_count || 0)}</span>
                                         </div>
@@ -299,10 +300,10 @@ const HomePage = () => {
                                                     onError={(e) => handleImageError(e, 'avatar')}
                                                     className="w-5 h-5 rounded-full object-cover"/>
                                                 <span
-                                                    className="text-xs text-gray-500 dark:text-gray-400">{user?.nickname || user?.username || 'Unknown'}</span>
+                                                    className="text-xs text-gray-500 dark:text-muted-foreground">{user?.nickname || user?.username || 'Unknown'}</span>
                                             </div>
                                             <div
-                                                className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
+                                                className="flex items-center gap-3 text-xs text-muted-foreground dark:text-gray-500">
                                                 <span className="flex items-center gap-1"><Eye
                                                     size={12}/>{formatViews(media?.view_count || 0)}</span>
                                                 <span>{formatDate(media?.created_at || new Date().toISOString())}</span>
@@ -325,14 +326,13 @@ const HomePage = () => {
             {/* Infinite Scroll Sentinel */}
             <div ref={sentinelRef} className="flex flex-col items-center py-8">
                 {isFetchingNextPage && (
-                    <div className="flex items-center gap-3 text-gray-400 py-2">
-                        <div
-                            className="animate-spin w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full"/>
+                    <div className="flex items-center gap-3 text-muted-foreground py-2">
+                        <Spinner size="sm"/>
                         <span className="text-sm">{t('common.loading')}</span>
                     </div>
                 )}
                 {!hasNextPage && items.length > 0 && (
-                    <p className="text-sm text-gray-400 py-4">— {t('common.allLoaded')} —</p>
+                    <p className="text-sm text-muted-foreground py-4">— {t('common.allLoaded')} —</p>
                 )}
             </div>
         </div>

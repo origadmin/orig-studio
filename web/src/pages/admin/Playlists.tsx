@@ -25,6 +25,7 @@ import {MoreHorizontal, Search, Edit, Trash2, Eye, PlayCircle, Lock, Globe, User
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {playlistApi, Playlist} from '@/lib/api/playlist';
 import {extractList} from '@/lib/extract';
+import {TablePagination} from '@/components/common/TablePagination';
 
 const Playlists: React.FC = () => {
     const {t} = useTranslation();
@@ -33,6 +34,9 @@ const Playlists: React.FC = () => {
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(20);
+    const [total, setTotal] = useState(0);
 
     // 加载播放列表数据
     useEffect(() => {
@@ -40,10 +44,12 @@ const Playlists: React.FC = () => {
             setLoading(true);
             setError(null);
             try {
-                const response = await playlistApi.list({page_size: 100});
-                // 提取列表数据，防止因格式不匹配导致崩溃
+                const response = await playlistApi.list({page, page_size: pageSize});
                 const playlistList = extractList<Playlist>(response);
                 setPlaylists(playlistList);
+                if ((response as any)?.total !== undefined) {
+                    setTotal((response as any).total);
+                }
             } catch (err) {
                 setError('Failed to load playlists');
                 console.error('Error loading playlists:', err);
@@ -53,7 +59,7 @@ const Playlists: React.FC = () => {
         };
 
         loadPlaylists();
-    }, []);
+    }, [page]);
 
     const filteredPlaylists = playlists.filter(playlist => {
         const matchesSearch = playlist.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -98,7 +104,7 @@ const Playlists: React.FC = () => {
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
                                 <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{t('admin.playlists')}</h2>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5">
                                     Manage your playlists
                                 </p>
                             </div>
@@ -117,13 +123,13 @@ const Playlists: React.FC = () => {
                                         placeholder={t('admin.search') || t('admin.playlists') + '...'}
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                        className="pl-10 h-8 rounded-btn-sm w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
                                     />
                                 </div>
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
                                 <Select value={visibilityFilter} onValueChange={setVisibilityFilter}>
-                                    <SelectTrigger className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                    <SelectTrigger className="w-[140px] h-8 rounded-btn-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
                                             {visibilityFilter === 'all' ? (
@@ -144,7 +150,6 @@ const Playlists: React.FC = () => {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="h-9 px-3"
                                         onClick={() => {
                                             setSearchTerm('');
                                             setVisibilityFilter('all');
@@ -156,9 +161,7 @@ const Playlists: React.FC = () => {
                                     <Button
                                         variant="default"
                                         size="sm"
-                                        className="h-9 px-4"
                                         onClick={() => {
-                                            // 这里可以添加搜索逻辑
                                         }}
                                     >
                                         <Search className="h-4 w-4 mr-2"/>
@@ -187,17 +190,17 @@ const Playlists: React.FC = () => {
                 </Card>
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">{publicCount}</div>
+                        <div className="text-2xl font-bold text-success dark:text-green-400">{publicCount}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.publicLists')}</p>
                     </CardContent>
-                    <div className="absolute bottom-0 left-0 h-1 bg-green-500 w-full opacity-10"/>
+                    <div className="absolute bottom-0 left-0 h-1 bg-success w-full opacity-10"/>
                 </Card>
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{privateCount}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.privateLists')}</p>
                     </CardContent>
-                    <div className="absolute bottom-0 left-0 h-1 bg-yellow-500 w-full opacity-10"/>
+                    <div className="absolute bottom-0 left-0 h-1 bg-warning w-full opacity-10"/>
                 </Card>
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
@@ -216,7 +219,7 @@ const Playlists: React.FC = () => {
                             <CardTitle>{t('admin.playlistList')}</CardTitle>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button>
+                            <Button size="sm">
                                 <PlayCircle className="mr-2 h-4 w-4"/>
                                 {t('admin.newPlaylist')}
                             </Button>
@@ -247,7 +250,7 @@ const Playlists: React.FC = () => {
                             ) : error ? (
                                 <TableRow>
                                     <TableCell colSpan={8} className="text-center py-8">
-                                        <div className="text-red-600">{error}</div>
+                                        <div className="text-destructive">{error}</div>
                                         <Button 
                                             variant="outline" 
                                             size="sm" 
@@ -331,6 +334,13 @@ const Playlists: React.FC = () => {
                     </Table>
                 </CardContent>
             </Card>
+
+            <TablePagination
+                page={page}
+                pageSize={pageSize}
+                total={total}
+                onPageChange={setPage}
+            />
         </div>
     );
 };

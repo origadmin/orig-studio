@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+﻿import React, {useState, useEffect, useRef} from 'react';
 import {MessageCircle, ThumbsUp, ThumbsDown, Send, Loader2, LogIn, MoreVertical, List, Reply, SmilePlus, X, Trash2, ChevronDown} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {Button} from '@/components/ui/button';
@@ -310,14 +310,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-6 h-6 animate-spin text-blue-600"/>
+                <Loader2 className="w-6 h-6 animate-spin text-info"/>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="py-8 text-center text-red-500">
+            <div className="py-8 text-center text-destructive">
                 <p>{error}</p>
                 <Button variant="ghost" size="sm" onClick={() => fetchComments()} className="mt-2">
                     {t('common.retry') || 'Retry'}
@@ -348,14 +348,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                             <button
                                 key={option}
                                 className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                                    sortBy === option ? 'text-blue-600 font-medium' : 'text-gray-700 dark:text-gray-300'
+                                    sortBy === option ? 'text-info font-medium' : 'text-gray-700 dark:text-gray-300'
                                 }`}
                                 onClick={() => { setSortBy(option); setShowSortMenu(false); }}
                             >
                                 {option === 'newest' ? (t('watch.sortNewest') || 'Newest') :
                                  option === 'oldest' ? (t('watch.sortOldest') || 'Oldest') :
                                  (t('watch.sortPopular') || 'Popular')}
-                                {sortBy === option && <span className="ml-2 text-blue-600">✓</span>}
+                                {sortBy === option && <span className="ml-2 text-info">✓</span>}
                             </button>
                         ))}
                     </div>
@@ -367,7 +367,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                     <div className="flex gap-3 items-start">
                         <Avatar className="h-10 w-10 flex-shrink-0 mt-0.5">
                             <AvatarImage src={(user as any)?.avatar || (user as any)?.avatarUrl}/>
-                            <AvatarFallback className="bg-gray-200 text-gray-600">
+                            <AvatarFallback className="bg-muted text-gray-600">
                                 {user?.username?.[0]?.toUpperCase() || 'U'}
                             </AvatarFallback>
                         </Avatar>
@@ -425,7 +425,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                                                 className={`font-medium px-4 ${
                                                     commentText.trim()
                                                         ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                                        : 'bg-transparent text-gray-400 cursor-not-allowed'
+                                                        : 'bg-transparent text-muted-foreground cursor-not-allowed'
                                                 }`}
                                             >
                                                 {isSubmitting ? (
@@ -440,7 +440,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                             ) : (
                                 <div
                                     onClick={() => setIsFocused(true)}
-                                    className="w-full px-4 py-2.5 border border-transparent bg-gray-50 dark:bg-gray-800 hover:bg-white dark:hover:bg-gray-900 rounded-full cursor-text transition-colors text-sm text-gray-500 dark:text-gray-400 select-none"
+                                    className="w-full px-4 py-2.5 border border-transparent bg-gray-50 dark:bg-gray-800 hover:bg-white dark:hover:bg-gray-900 rounded-full cursor-text transition-colors text-sm text-gray-500 dark:text-muted-foreground select-none"
                                 >
                                     {t('watch.addComment') || 'Add a comment...'}
                                 </div>
@@ -453,14 +453,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                             <AvatarFallback className="bg-gray-300 text-gray-500">?</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                            <p className="text-sm text-gray-500 dark:text-muted-foreground mb-3">
                                 {t('watch.pleaseLoginToComment') || 'Sign in to add a comment...'}
                             </p>
                             <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => navigate({to: '/auth/signin'})}
-                                className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                                className="border-blue-600 text-info hover:bg-blue-50"
                             >
                                 <LogIn className="w-4 h-4 mr-2"/>
                                 {t('auth.signin') || 'Sign in'}
@@ -471,7 +471,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
             </div>
 
             {comments.length === 0 ? (
-                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-12 text-gray-500 dark:text-muted-foreground">
                     <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-30"/>
                     <p>{t('watch.noComments') || 'No comments yet. Be the first to comment!'}</p>
                 </div>
@@ -489,43 +489,43 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                                 <div className="flex items-center gap-2 flex-wrap">
                                     <Link
                                         to={`/@${comment.username?.trim() || 'anonymous'}` as any}
-                                        className="font-semibold text-sm text-gray-900 dark:text-white hover:text-blue-600 cursor-pointer transition-colors"
+                                        className="font-semibold text-sm text-gray-900 dark:text-white hover:text-info cursor-pointer transition-colors"
                                     >
                                         @{comment.username?.trim() || 'Anonymous'}
                                     </Link>
                                     {comment.is_reply && comment.reply_to_username && (
                                         <>
-                                            <span className="text-gray-400 text-xs">→</span>
+                                            <span className="text-muted-foreground text-xs">→</span>
                                             <Link
                                                 to={`/@${comment.reply_to_username?.trim() || ''}` as any}
-                                                className="text-blue-600 text-sm font-medium hover:underline"
+                                                className="text-info text-sm font-medium hover:underline"
                                             >
                                                 @{comment.reply_to_username}
                                             </Link>
                                         </>
                                     )}
-                                    <span className="text-gray-500 dark:text-gray-400 text-xs">
+                                    <span className="text-gray-500 dark:text-muted-foreground text-xs">
                                         {formatDate(comment.create_time)}
                                     </span>
                                 </div>
 
                                 {comment.is_reply && comment.reply_to_content && (
                                     <div className="mt-1 px-3 py-1.5 bg-gray-50 dark:bg-gray-800/50 rounded-lg border-l-2 border-blue-200 dark:border-blue-800">
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 italic line-clamp-2">
+                                        <p className="text-xs text-gray-500 dark:text-muted-foreground italic line-clamp-2">
                                             {comment.reply_to_content}
                                         </p>
                                     </div>
                                 )}
 
                                 <p className="text-[15px] text-gray-800 dark:text-gray-200 mt-1.5 leading-relaxed whitespace-pre-wrap break-words">
-                                    {comment.content || <span className="text-gray-400 italic">No content</span>}
+                                    {comment.content || <span className="text-muted-foreground italic">No content</span>}
                                 </p>
 
                                 <div className="flex items-center gap-1 mt-2">
                                     <button
                                         className={`flex items-center gap-1.5 rounded-full p-1.5 transition-colors ${
                                             commentLikes.get(comment.id)?.is_liked
-                                                ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20'
+                                                ? 'text-info bg-blue-50 dark:bg-blue-900/20'
                                                 : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
                                         } ${likingComments.has(comment.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         onClick={() => handleLikeComment(comment.id)}
@@ -537,7 +537,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                                             <ThumbsUp className={`w-4 h-4 ${commentLikes.get(comment.id)?.is_liked ? 'fill-current' : ''}`}/>
                                         )}
                                         <span className={`text-xs font-medium ${
-                                            commentLikes.get(comment.id)?.is_liked ? 'text-blue-600' : ''
+                                            commentLikes.get(comment.id)?.is_liked ? 'text-info' : ''
                                         }`}>
                                             {(commentLikes.get(comment.id)?.like_count ?? comment.like_count ?? 0) || ''}
                                         </span>
@@ -546,7 +546,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                                     <button
                                         className={`flex items-center gap-1.5 rounded-full p-1.5 transition-colors ${
                                             commentLikes.get(comment.id)?.is_disliked
-                                                ? 'text-red-600 bg-red-50 dark:bg-red-900/20'
+                                                ? 'text-destructive bg-red-50 dark:bg-red-900/20'
                                                 : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
                                         } ${likingComments.has(comment.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         onClick={() => handleDislikeComment(comment.id)}
@@ -560,7 +560,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                                     </button>
 
                                     <button
-                                        className="flex items-center gap-1.5 text-gray-500 hover:text-blue-600 font-medium text-sm px-2 py-1 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                                        className="flex items-center gap-1.5 text-gray-500 hover:text-info font-medium text-sm px-2 py-1 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                                         onClick={() => setReplyingTo({id: comment.id, username: comment.username || 'Anonymous'})}
                                     >
                                         <Reply className="w-4 h-4"/>
@@ -569,7 +569,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
 
                                     {isAuthenticated && user && (String(comment.user_id) === String(user.id) || user.roles?.includes('admin')) && (
                                         <button
-                                            className="flex items-center gap-1.5 text-gray-500 hover:text-red-600 font-medium text-sm px-2 py-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                            className="flex items-center gap-1.5 text-gray-500 hover:text-destructive font-medium text-sm px-2 py-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                             onClick={() => handleDeleteComment(comment.id)}
                                             disabled={deletingCommentId === comment.id}
                                         >
@@ -583,18 +583,18 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                                 </div>
 
                                 {replyingTo?.id === comment.id && (
-                                    <div className="mt-3 space-y-2 border-l-2 border-gray-300 dark:border-gray-600 pl-5 ml-1">
+                                    <div className="mt-3 space-y-2 border-l-2 border-input dark:border-gray-600 pl-5 ml-1">
                                         {isAuthenticated ? (
                                             <div className="flex gap-3 items-start">
                                                 <Avatar className="h-8 w-8 flex-shrink-0 mt-0.5">
                                                     <AvatarImage src={(user as any)?.avatar || (user as any)?.avatarUrl}/>
-                                                    <AvatarFallback className="bg-gray-200 text-gray-600 text-xs">
+                                                    <AvatarFallback className="bg-muted text-gray-600 text-xs">
                                                         {user?.username?.[0]?.toUpperCase() || 'U'}
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 <div className="flex-1 space-y-2 min-w-0">
                                                     <div className="text-xs text-gray-500">
-                                                        Replying to <span className="font-medium text-blue-600">@{replyingTo.username}</span>
+                                                        Replying to <span className="font-medium text-info">@{replyingTo.username}</span>
                                                     </div>
                                                     <div className="border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 overflow-hidden">
                                                         <textarea
@@ -646,7 +646,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                                                                     className={`font-medium px-3 ${
                                                                         replyText.trim()
                                                                             ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                                                            : 'bg-transparent text-gray-400 cursor-not-allowed'
+                                                                            : 'bg-transparent text-muted-foreground cursor-not-allowed'
                                                                     }`}
                                                                 >
                                                                     {isSubmittingReply ? (
@@ -667,7 +667,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                                                     variant="outline"
                                                     size="sm"
                                                     onClick={() => navigate({to: '/auth/signin'})}
-                                                    className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                                                    className="border-blue-600 text-info hover:bg-blue-50"
                                                 >
                                                     <LogIn className="w-4 h-4 mr-2"/>
                                                     {t('auth.signin') || 'Sign in'}
@@ -687,7 +687,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                     <button
                         onClick={loadMore}
                         disabled={loadingMore}
-                        className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-full transition-colors disabled:opacity-50"
+                        className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-info bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-full transition-colors disabled:opacity-50"
                     >
                         {loadingMore ? (
                             <>

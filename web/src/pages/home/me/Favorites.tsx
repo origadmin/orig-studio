@@ -1,3 +1,4 @@
+﻿import {Spinner} from "@/components/ui/spinner"
 import React, {useState} from 'react';
 import {Link} from '@tanstack/react-router';
 import {Play, Heart, Trash2, Loader2} from 'lucide-react';
@@ -35,7 +36,7 @@ const FavoritesPage = () => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"/>
+                <Spinner />
             </div>
         );
     }
@@ -44,8 +45,8 @@ const FavoritesPage = () => {
         return (
             <div className="text-center py-20">
                 <Heart className="w-16 h-16 text-slate-200 dark:text-gray-700 mx-auto mb-4"/>
-                <p className="text-slate-500 dark:text-gray-400">{t('favorites.empty')}</p>
-                <p className="text-sm text-slate-400 dark:text-gray-500 mt-1">{t('favorites.emptyDesc')}</p>
+                <p className="text-slate-500 dark:text-muted-foreground">{t('favorites.empty')}</p>
+                <p className="text-sm text-muted-foreground dark:text-gray-500 mt-1">{t('favorites.emptyDesc')}</p>
             </div>
         );
     }
@@ -58,7 +59,7 @@ const FavoritesPage = () => {
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <Heart className="w-6 h-6 text-rose-500 fill-current"/>{t('favorites.title')}
                 </h1>
-                <p className="text-slate-500 dark:text-gray-400 text-sm mt-1">{t('favorites.savedCount', {count: favorites.length})}</p>
+                <p className="text-slate-500 dark:text-muted-foreground text-sm mt-1">{t('favorites.savedCount', {count: favorites.length})}</p>
             </div>
 
             {favorites.length > 0 ? (
@@ -92,11 +93,11 @@ const FavoritesPage = () => {
                                     <div className="p-3">
                                         <h3 className="font-semibold text-slate-900 dark:text-white line-clamp-2 text-sm group-hover:text-emerald-600 transition-colors">{video.title}</h3>
                                         <div className="flex items-center gap-2 mt-2">
-                                            <span className="text-xs text-slate-500 dark:text-gray-400">
+                                            <span className="text-xs text-slate-500 dark:text-muted-foreground">
                                                 {video.edges?.user?.[0]?.username || 'Unknown'}
                                             </span>
                                         </div>
-                                        <p className="text-xs text-slate-400 dark:text-gray-500 mt-1">
+                                        <p className="text-xs text-muted-foreground dark:text-gray-500 mt-1">
                                             {formatViews(video.view_count)} {t('common.views')} · {formatDate(video.created_at)}
                                         </p>
                                     </div>
@@ -108,8 +109,8 @@ const FavoritesPage = () => {
             ) : (
                 <div className="text-center py-20">
                     <Heart className="w-16 h-16 text-slate-200 dark:text-gray-700 mx-auto mb-4"/>
-                    <p className="text-slate-500 dark:text-gray-400">{t('favorites.empty')}</p>
-                    <p className="text-sm text-slate-400 dark:text-gray-500 mt-1">{t('favorites.emptyDesc')}</p>
+                    <p className="text-slate-500 dark:text-muted-foreground">{t('favorites.empty')}</p>
+                    <p className="text-sm text-muted-foreground dark:text-gray-500 mt-1">{t('favorites.emptyDesc')}</p>
                 </div>
             )}
         </div>

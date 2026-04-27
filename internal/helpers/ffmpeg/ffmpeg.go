@@ -424,48 +424,4 @@ func GenerateGIFPreview(ctx context.Context, inputPath, outputPath string, scale
 	return nil
 }
 
-// GeneratePreviewFrames generates multiple preview frames from the video at fixed intervals.
-// This is used for progress bar preview when the user hovers over the timeline.
-// Output: {outputDir}/frame_001.jpg, frame_002.jpg, etc.
-func GeneratePreviewFrames(
-	ctx context.Context,
-	inputPath string,
-	outputDir string,
-	frameCount int,
-	scale string,
-) error {
-	if err := os.MkdirAll(outputDir, 0o755); err != nil {
-		return fmt.Errorf("failed to create preview frames directory: %w", err)
-	}
 
-	// Get video duration first to calculate frame interval
-	duration, err := GetVideoDuration(ctx, inputPath)
-	if err != nil {
-		return fmt.Errorf("failed to get video duration: %w", err)
-	}
-
-	// Calculate frame interval (in seconds)
-	interval := duration.Seconds() / float64(frameCount)
-	if interval < 1.0 {
-		interval = 1.0 // Minimum 1 second interval
-	}
-
-	// ffmpeg command to generate frames at fixed intervals
-	framePattern := filepath.Join(outputDir, "frame_%03d.jpg")
-
-	args := []string{
-		"-i", inputPath,
-		"-vf", fmt.Sprintf("fps=1/%f,scale=%s", interval, scale),
-		"-q:v", "3", // Quality 2-31, lower is better
-		"-y",
-		framePattern,
-	}
-
-	cmd := exec.CommandContext(ctx, ffmpegPath, args...)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("ffmpeg preview frames generation failed: %w, output: %s", err, string(output))
-	}
-
-	return nil
-}

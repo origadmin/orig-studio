@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
@@ -70,7 +70,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={`border-2 border-dashed rounded-lg p-10 flex flex-col items-center justify-center transition-colors cursor-pointer ${
-                isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
+                isDragActive ? 'border-blue-500 bg-blue-50' : 'border-input hover:border-gray-400'
             }`}
             onClick={() => document.getElementById('file-input')?.click()}
         >
@@ -82,7 +82,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
                 onChange={handleFileInput}
                 className="hidden"
             />
-            <div className="text-4xl mb-4 text-gray-400">
+            <div className="text-4xl mb-4 text-muted-foreground">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24"
                      stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -92,7 +92,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
             <p className="text-lg font-medium text-gray-600">
                 Drag & drop files here or click to browse
             </p>
-            <p className="text-sm text-gray-400 mt-2">
+            <p className="text-sm text-muted-foreground mt-2">
                 Supports videos and images up to {maxSize / (1024 * 1024)}MB
             </p>
         </div>

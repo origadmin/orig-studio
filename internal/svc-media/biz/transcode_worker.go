@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -160,9 +161,9 @@ func executeTranscodeJob(ctx context.Context, job TranscodeJob, logger *log.Help
 		// GIF preview generation
 		execErr = executePreviewJob(ctx, job, logger)
 
-	case IsFramesProfile(profile):
-		// Preview frames generation for progress bar hover
-		execErr = executeFramesJob(ctx, job, logger)
+	case IsSpriteProfile(profile):
+		// Sprite sheet + WebVTT generation
+		execErr = executeSpriteJob(ctx, job, logger)
 
 	case IsVideoProfile(profile):
 		// Direct HLS transcoding (no intermediate MP4)
@@ -205,83 +206,9 @@ func IsPreviewProfile(p *dto.EncodeProfile) bool {
 	return p.Extension == "gif" || strings.EqualFold(p.Name, "preview")
 }
 
-// IsFramesProfile returns true if this is the preview frames profile.
-func IsFramesProfile(p *dto.EncodeProfile) bool {
-	return p.Extension == "jpg" || strings.EqualFold(p.Name, "frames") || strings.EqualFold(p.Name, "preview-frames")
-}
-
-// executeFramesJob generates multiple preview frames for progress bar hover preview.
-// Output: {baseDir}/frames/{id}/frame_001.jpg, frame_002.jpg, etc.
-func executeFramesJob(ctx context.Context, job TranscodeJob, logger *log.Helper) error {
-	framesDir := filepath.Join(job.OutputDir, "..", "frames") // up from hls/{id} to base dir
-	if err := os.MkdirAll(framesDir, 0o755); err != nil {
-		return fmt.Errorf("failed to create frames directory: %w", err)
-	}
-
-	scale := extractScaleParam(job.Profile.BentoParameters)
-	frameCount := 30 // Default 30 frames
-
-	// Extract frame count from parameters if specified
-	fields := strings.Fields(job.Profile.BentoParameters)
-	for i, f := range fields {
-		if (f == "-frames" || f == "--frames") && i+1 < len(fields) {
-			fmt.Sscanf(fields[i+1], "%d", &frameCount)
-			break
-		}
-	}
-
-	logger.Infof("[Frames] generating preview frames: media=%s frames=%d scale=%s", job.MediaID, frameCount, scale)
-
-	// Update task status to processing
-	if job.EncodingRepo != nil {
-		task, err := job.EncodingRepo.Get(ctx, job.TaskID)
-		if err == nil && task != nil {
-			task.Status = "processing"
-			if _, err := job.EncodingRepo.Update(ctx, task); err != nil {
-				logger.Warnf("failed to update task %s status: %v", job.TaskID, err)
-			}
-			if job.MediaUC != nil {
-				job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
-			}
-		}
-	}
-
-	err := ffmpeg.GeneratePreviewFrames(ctx, job.InputPath, framesDir, frameCount, scale)
-	if err != nil {
-		// Update task status to failed
-		if job.EncodingRepo != nil {
-			task, getErr := job.EncodingRepo.Get(ctx, job.TaskID)
-			if getErr == nil && task != nil {
-				task.Status = "failed"
-				task.ErrorMessage = err.Error()
-				if _, updateErr := job.EncodingRepo.Update(ctx, task); updateErr != nil {
-					logger.Warnf("failed to update task %s status to failed: %v", job.TaskID, updateErr)
-				}
-				if job.MediaUC != nil {
-					job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
-				}
-			}
-		}
-		return fmt.Errorf("preview frames failed for profile %s: %w", job.Profile.Name, err)
-	}
-
-	// Update task status to success
-	if job.EncodingRepo != nil {
-		task, err := job.EncodingRepo.Get(ctx, job.TaskID)
-		if err == nil && task != nil {
-			task.Status = "success"
-			task.OutputPath = fmt.Sprintf("frames/%s/", job.MediaID)
-			if _, err := job.EncodingRepo.Update(ctx, task); err != nil {
-				logger.Warnf("failed to update task %s status to success: %v", job.TaskID, err)
-			}
-			if job.MediaUC != nil {
-				job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
-			}
-		}
-	}
-
-	logger.Infof("[Frames] complete: media=%s → %s/", job.MediaID, framesDir)
-	return nil
+// IsSpriteProfile returns true if this is the sprite sheet profile.
+func IsSpriteProfile(p *dto.EncodeProfile) bool {
+	return p.Extension == "sprite"
 }
 
 // executeVideoHLSJob runs direct HLS transcoding from source video to HLS segments.
@@ -425,6 +352,161 @@ func executePreviewJob(ctx context.Context, job TranscodeJob, logger *log.Helper
 	}
 
 	logger.Infof("[GIF] complete: media=%s → %s", job.MediaID, gifPath)
+	return nil
+}
+
+// SpriteParams holds the parameters for sprite sheet generation.
+type SpriteParams struct {
+	FrameInterval int
+	Columns       int
+	FrameWidth    int
+	FrameHeight   int
+	MaxFrames     int
+}
+
+// parseSpriteParams parses sprite parameters from BentoParameters string.
+// Supported flags: --frame-interval, --columns, --frame-width, --frame-height, --max-frames
+func parseSpriteParams(bentoParams string) SpriteParams {
+	params := SpriteParams{
+		FrameInterval: 10,
+		Columns:       5,
+		FrameWidth:    160,
+		FrameHeight:   90,
+		MaxFrames:     100,
+	}
+
+	if bentoParams == "" {
+		return params
+	}
+
+	fields := strings.Fields(bentoParams)
+	for i := 0; i < len(fields); i++ {
+		switch fields[i] {
+		case "--frame-interval":
+			if i+1 < len(fields) {
+				if v, err := strconv.Atoi(fields[i+1]); err == nil && v > 0 {
+					params.FrameInterval = v
+				}
+			}
+		case "--columns":
+			if i+1 < len(fields) {
+				if v, err := strconv.Atoi(fields[i+1]); err == nil && v > 0 {
+					params.Columns = v
+				}
+			}
+		case "--frame-width":
+			if i+1 < len(fields) {
+				if v, err := strconv.Atoi(fields[i+1]); err == nil && v > 0 {
+					params.FrameWidth = v
+				}
+			}
+		case "--frame-height":
+			if i+1 < len(fields) {
+				if v, err := strconv.Atoi(fields[i+1]); err == nil && v > 0 {
+					params.FrameHeight = v
+				}
+			}
+		case "--max-frames":
+			if i+1 < len(fields) {
+				if v, err := strconv.Atoi(fields[i+1]); err == nil && v > 0 {
+					params.MaxFrames = v
+				}
+			}
+		}
+	}
+
+	return params
+}
+
+// executeSpriteJob generates a sprite sheet and WebVTT from the source video.
+// Output: {baseDir}/sprites/{id}.jpg + {baseDir}/sprites/{id}.vtt
+func executeSpriteJob(ctx context.Context, job TranscodeJob, logger *log.Helper) error {
+	spriteDir := filepath.Join(job.OutputDir, "..", "sprites") // up from hls/{id} to base dir
+	if err := os.MkdirAll(spriteDir, 0o755); err != nil {
+		return fmt.Errorf("failed to create sprite directory: %w", err)
+	}
+
+	params := parseSpriteParams(job.Profile.BentoParameters)
+
+	spritePath := filepath.Join(spriteDir, fmt.Sprintf("%s.jpg", job.MediaID))
+	vttPath := filepath.Join(spriteDir, fmt.Sprintf("%s.vtt", job.MediaID))
+
+	logger.Infof("[Sprite] generating sprite sheet: media=%s interval=%d cols=%d w=%d h=%d → %s",
+		job.MediaID, params.FrameInterval, params.Columns, params.FrameWidth, params.FrameHeight, spritePath)
+
+	// Update task status to processing
+	if job.EncodingRepo != nil {
+		task, err := job.EncodingRepo.Get(ctx, job.TaskID)
+		if err == nil && task != nil {
+			task.Status = "processing"
+			if _, err := job.EncodingRepo.Update(ctx, task); err != nil {
+				logger.Warnf("failed to update task %s status: %v", job.TaskID, err)
+			}
+			if job.MediaUC != nil {
+				job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
+			}
+		}
+	}
+
+	// Generate sprite sheet
+	frameCount, err := ffmpeg.GenerateSpriteSheet(ctx, job.InputPath, spritePath, params.FrameInterval, params.FrameWidth, params.FrameHeight, params.Columns)
+	if err != nil {
+		// Update task status to failed
+		if job.EncodingRepo != nil {
+			task, getErr := job.EncodingRepo.Get(ctx, job.TaskID)
+			if getErr == nil && task != nil {
+				task.Status = "failed"
+				task.ErrorMessage = err.Error()
+				if _, updateErr := job.EncodingRepo.Update(ctx, task); updateErr != nil {
+					logger.Warnf("failed to update task %s status to failed: %v", job.TaskID, updateErr)
+				}
+				if job.MediaUC != nil {
+					job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
+				}
+			}
+		}
+		return fmt.Errorf("sprite sheet generation failed for profile %s: %w", job.Profile.Name, err)
+	}
+
+	// Get video duration for VTT generation
+	duration, _ := ffmpeg.GetVideoDurationSeconds(ctx, job.InputPath)
+
+	// Generate WebVTT
+	spriteFileName := filepath.Base(spritePath)
+	if err := ffmpeg.GenerateWebVTT(vttPath, spriteFileName, frameCount, float64(params.FrameInterval), params.Columns, params.FrameWidth, params.FrameHeight, duration); err != nil {
+		// Update task status to failed
+		if job.EncodingRepo != nil {
+			task, getErr := job.EncodingRepo.Get(ctx, job.TaskID)
+			if getErr == nil && task != nil {
+				task.Status = "failed"
+				task.ErrorMessage = err.Error()
+				if _, updateErr := job.EncodingRepo.Update(ctx, task); updateErr != nil {
+					logger.Warnf("failed to update task %s status to failed: %v", job.TaskID, updateErr)
+				}
+				if job.MediaUC != nil {
+					job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
+				}
+			}
+		}
+		return fmt.Errorf("WebVTT generation failed for profile %s: %w", job.Profile.Name, err)
+	}
+
+	// Update task status to success
+	if job.EncodingRepo != nil {
+		task, err := job.EncodingRepo.Get(ctx, job.TaskID)
+		if err == nil && task != nil {
+			task.Status = "success"
+			task.OutputPath = fmt.Sprintf("sprites/%s.jpg", job.MediaID)
+			if _, err := job.EncodingRepo.Update(ctx, task); err != nil {
+				logger.Warnf("failed to update task %s status to success: %v", job.TaskID, err)
+			}
+			if job.MediaUC != nil {
+				job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
+			}
+		}
+	}
+
+	logger.Infof("[Sprite] complete: media=%s frames=%d → %s", job.MediaID, frameCount, spritePath)
 	return nil
 }
 

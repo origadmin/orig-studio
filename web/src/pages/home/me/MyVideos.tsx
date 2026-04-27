@@ -1,3 +1,4 @@
+import {Spinner} from "@/components/ui/spinner"
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {useMediaList, useDeleteMedia} from '@/hooks/queries';
@@ -56,7 +57,7 @@ const MyVideos = () => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"/>
+                <Spinner />
             </div>
         );
     }
@@ -66,7 +67,7 @@ const MyVideos = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">我的上传</h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">管理你上传的所有媒体内容</p>
+                    <p className="text-sm text-gray-500 dark:text-muted-foreground">管理你上传的所有媒体内容</p>
                 </div>
                 <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white">
                     <Link to="/me/upload">
@@ -81,7 +82,7 @@ const MyVideos = () => {
                     <CardContent className="flex flex-col items-center justify-center py-20 space-y-4">
                         <div
                             className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                            <Video className="w-8 h-8 text-gray-400"/>
+                            <Video className="w-8 h-8 text-muted-foreground"/>
                         </div>
                         <div className="text-center">
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white">暂无上传内容</h3>
@@ -114,7 +115,7 @@ const MyVideos = () => {
                                 </div>
                                 <div
                                     className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                    <Button size="sm" variant="secondary" className="h-8 w-8 p-0 rounded-full" asChild>
+                                    <Button size="icon-sm" variant="secondary" className="rounded-full" asChild>
                                         <Link to="/watch" search={{v: item.short_token || item.id?.toString() || ''}}>
                                             <ExternalLink className="w-4 h-4"/>
                                         </Link>
@@ -152,7 +153,7 @@ const MyVideos = () => {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="h-8 text-gray-500 hover:text-red-600"
+                                        className="h-8 text-gray-500 hover:text-destructive"
                                         onClick={() => handleDelete(item.id)}
                                     >
                                         <Trash2 className="w-3.5 h-3.5 mr-1"/>

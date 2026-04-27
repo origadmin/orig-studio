@@ -43,13 +43,15 @@ import {
 import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, Hash, Filter, RotateCcw} from 'lucide-react';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {tagApi, Tag, CreateTagRequest, UpdateTagRequest} from '@/lib/api/admin-tags';
+import {TablePagination} from '@/components/common/TablePagination';
 
 const Tags: React.FC = () => {
     const {t} = useTranslation();
-    const [searchParams, setSearchParams] = useState({keyword: '', page: 1});
+    const [searchParams, setSearchParams] = useState({keyword: '', page: 1, page_size: 20});
     const [tags, setTags] = useState<Tag[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [total, setTotal] = useState(0);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -65,19 +67,22 @@ const Tags: React.FC = () => {
     // 加载标签数据
     useEffect(() => {
         loadTags();
-    }, []);
+    }, [searchParams.page]);
 
     const loadTags = async (params = searchParams) => {
         setLoading(true);
         setError(null);
         try {
-            const apiParams: any = {page_size: 100};
+            const apiParams: any = {page: params.page, page_size: params.page_size};
             if (params.keyword) {
                 apiParams.keyword = params.keyword;
             }
             const response = await tagApi.list(apiParams);
             const tagList = Array.isArray(response?.items) ? response.items : [];
             setTags(tagList);
+            if (response?.total !== undefined) {
+                setTotal(response.total);
+            }
         } catch (err) {
             setError('Failed to load tags');
             console.error('Error loading tags:', err);
@@ -175,7 +180,7 @@ const Tags: React.FC = () => {
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
                                 <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{t('admin.tags')}</h2>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5">
                                     Manage your content tags
                                 </p>
                             </div>
@@ -194,7 +199,7 @@ const Tags: React.FC = () => {
                                         placeholder={t('admin.search') || t('admin.tags') + '...'}
                                         value={searchParams.keyword}
                                         onChange={(e) => setSearchParams({...searchParams, keyword: e.target.value})}
-                                        className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                        className="pl-10 h-8 rounded-btn-sm w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
                                     />
                                 </div>
                             </div>
@@ -202,9 +207,8 @@ const Tags: React.FC = () => {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className="h-9 px-3"
                                     onClick={() => {
-                                        const newParams = {keyword: '', page: 1};
+                                        const newParams = {keyword: '', page: 1, page_size: 20};
                                         setSearchParams(newParams);
                                         loadTags(newParams);
                                     }}
@@ -215,7 +219,6 @@ const Tags: React.FC = () => {
                                 <Button
                                     variant="default"
                                     size="sm"
-                                    className="h-9 px-4"
                                     onClick={() => loadTags()}
                                 >
                                     <Search className="h-4 w-4 mr-2"/>
@@ -243,10 +246,10 @@ const Tags: React.FC = () => {
                 </Card>
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">{activeTags}</div>
+                        <div className="text-2xl font-bold text-success dark:text-green-400">{activeTags}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.activeTags')}</p>
                     </CardContent>
-                    <div className="absolute bottom-0 left-0 h-1 bg-green-500 w-full opacity-10"/>
+                    <div className="absolute bottom-0 left-0 h-1 bg-success w-full opacity-10"/>
                 </Card>
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
@@ -257,10 +260,10 @@ const Tags: React.FC = () => {
                 </Card>
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{totalMedia}</div>
+                        <div className="text-2xl font-bold text-info dark:text-blue-400">{totalMedia}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.relatedMedia')}</p>
                     </CardContent>
-                    <div className="absolute bottom-0 left-0 h-1 bg-blue-500 w-full opacity-10"/>
+                    <div className="absolute bottom-0 left-0 h-1 bg-info w-full opacity-10"/>
                 </Card>
             </div>
 
@@ -272,7 +275,7 @@ const Tags: React.FC = () => {
                             <CardTitle>{t('admin.tagList')}</CardTitle>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button onClick={openCreateDialog}>
+                            <Button size="sm" onClick={openCreateDialog}>
                                 <Plus className="mr-2 h-4 w-4"/>
                                 {t('admin.newTag')}
                             </Button>
@@ -301,7 +304,7 @@ const Tags: React.FC = () => {
                             ) : error ? (
                                 <TableRow>
                                     <TableCell colSpan={6} className="text-center py-8">
-                                        <div className="text-red-600">{error}</div>
+                                        <div className="text-destructive">{error}</div>
                                         <Button 
                                             variant="outline" 
                                             size="sm" 
@@ -374,6 +377,13 @@ const Tags: React.FC = () => {
                     </Table>
                 </CardContent>
             </Card>
+
+            <TablePagination
+                page={searchParams.page}
+                pageSize={searchParams.page_size}
+                total={total}
+                onPageChange={(p) => setSearchParams({...searchParams, page: p})}
+            />
 
             {/* Create Tag Dialog */}
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>

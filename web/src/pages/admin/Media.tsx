@@ -1,9 +1,9 @@
-/*
+﻿/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * 管理端 - 媒体管理页面
  */
 
-import {useState, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useLocation, useNavigate, useRouterState, Link} from '@tanstack/react-router';
 import {
     Play,
@@ -70,6 +70,7 @@ import {API_BASE_URL} from '@/lib/request';
 import {useAdminMediaList, useDeleteMedia} from '@/hooks/queries';
 import {UploadComponent} from '@/components/upload/UploadComponent';
 import {formatFileSize, formatDate} from '@/lib/format';
+import {TablePagination} from '@/components/common/TablePagination';
 
 export default function MediaPage() {
     const location = useLocation();
@@ -88,13 +89,21 @@ export default function MediaPage() {
     const [variantData, setVariantData] = useState<MediaVariantSummary | null>(null);
     const [retryingAllId, setRetryingAllId] = useState<number | null>(null);
 
-    const [searchParams, setSearchParams] = useState({keyword: urlSearch || '', state: '', page: 1});
+    const [searchParams, setSearchParams] = useState({keyword: urlSearch || '', state: '', page: 1, page_size: 20});
+
+    const [total, setTotal] = useState(0);
 
     // React Query Hooks
     const {data: mediaData, isLoading: loading, refetch: loadMedia} = useAdminMediaList(searchParams);
     const deleteMutation = useDeleteMedia();
 
     const mediaList = mediaData?.items || (Array.isArray(mediaData) ? mediaData : []) as Media[];
+
+    React.useEffect(() => {
+        if (mediaData?.total !== undefined) {
+            setTotal(mediaData.total);
+        }
+    }, [mediaData?.total]);
 
     const formatDuration = (seconds: number) => {
         if (!seconds) return '-';
@@ -180,15 +189,15 @@ export default function MediaPage() {
     const encStatusDot = (status?: string) => {
         switch (status) {
             case "processing":
-                return "bg-blue-500";
+                return "bg-info";
             case "pending":
-                return "bg-yellow-500";
+                return "bg-warning";
             case "partial":
                 return "bg-orange-500";
             case "failed":
-                return "bg-red-500";
+                return "bg-destructive";
             case "success":
-                return "bg-green-500";
+                return "bg-success";
             default:
                 return "bg-gray-300";
         }
@@ -206,15 +215,15 @@ export default function MediaPage() {
     const statusTextColor = (status?: string) => {
         switch (status) {
             case "success":
-                return "text-green-600";
+                return "text-success";
             case "processing":
-                return "text-blue-600";
+                return "text-info";
             case "pending":
                 return "text-yellow-600";
             case "partial":
                 return "text-orange-600";
             case "failed":
-                return "text-red-600";
+                return "text-destructive";
             default:
                 return "text-muted-foreground";
         }
@@ -230,7 +239,7 @@ export default function MediaPage() {
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <div>
                                     <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">媒体管理</h2>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">在这里集中管理所有的视频与图片资源</p>
+                                    <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5">在这里集中管理所有的视频与图片资源</p>
                                 </div>
                             </div>
 
@@ -246,13 +255,13 @@ export default function MediaPage() {
                                             placeholder="搜索媒体..."
                                             value={searchParams.keyword}
                                             onChange={(e) => setSearchParams({...searchParams, keyword: e.target.value})}
-                                            className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                            className="pl-10 h-8 rounded-btn-sm w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
                                         />
                                     </div>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-2">
                                     <Select value={searchParams.state || 'all'} onValueChange={(v) => setSearchParams({...searchParams, state: v === 'all' ? '' : v})}>
-                                        <SelectTrigger className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                        <SelectTrigger className="w-[140px] h-8 rounded-btn-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
                                             <div className="flex items-center gap-2">
                                                 <Filter className="h-4 w-4"/>
                                                 {!searchParams.state ? (
@@ -273,9 +282,8 @@ export default function MediaPage() {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className="h-9 px-3"
                                             onClick={() => {
-                                                const newParams = {keyword: '', state: '', page: 1};
+                                                const newParams = {keyword: '', state: '', page: 1, page_size: 20};
                                                 setSearchParams(newParams);
                                                 loadMedia();
                                             }}
@@ -286,7 +294,6 @@ export default function MediaPage() {
                                         <Button
                                             variant="default"
                                             size="sm"
-                                            className="h-9 px-4"
                                             onClick={() => loadMedia()}
                                         >
                                             <Search className="h-4 w-4 mr-2"/>
@@ -306,13 +313,13 @@ export default function MediaPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-slate-500">媒体总数</p>
-                                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{mediaList.length}</p>
+                                <p className="text-2xl font-bold text-info dark:text-blue-400">{mediaList.length}</p>
                             </div>
                             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                                <Video className="w-6 h-6 text-blue-600"/>
+                                <Video className="w-6 h-6 text-info"/>
                             </div>
                         </div>
-                        <div className="absolute bottom-0 left-0 h-1 bg-blue-500 w-full opacity-10"/>
+                        <div className="absolute bottom-0 left-0 h-1 bg-info w-full opacity-10"/>
                     </CardContent>
                 </Card>
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
@@ -334,13 +341,13 @@ export default function MediaPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-slate-500">图片</p>
-                                <p className="text-2xl font-bold text-green-600 dark:text-green-400">{mediaList.filter(m => m.type === 'image' || !m.type).length}</p>
+                                <p className="text-2xl font-bold text-success dark:text-green-400">{mediaList.filter(m => m.type === 'image' || !m.type).length}</p>
                             </div>
                             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                                <ImageIcon className="w-6 h-6 text-green-600"/>
+                                <ImageIcon className="w-6 h-6 text-success"/>
                             </div>
                         </div>
-                        <div className="absolute bottom-0 left-0 h-1 bg-green-500 w-full opacity-10"/>
+                        <div className="absolute bottom-0 left-0 h-1 bg-success w-full opacity-10"/>
                     </CardContent>
                 </Card>
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
@@ -369,7 +376,7 @@ export default function MediaPage() {
                         </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button onClick={() => setUploadDialogOpen(true)}>
+                        <Button size="sm" onClick={() => setUploadDialogOpen(true)}>
                             <Upload className="w-4 h-4 mr-2"/>
                             上传媒体
                         </Button>
@@ -377,7 +384,7 @@ export default function MediaPage() {
                 </CardHeader>
                 <CardContent>
                     {loading ? (
-                        <div className="py-12 text-center text-slate-400">正在加载数据...</div>
+                        <div className="py-12 text-center text-muted-foreground">正在加载数据...</div>
                     ) : (
                         <Table>
                             <TableHeader>
@@ -407,8 +414,8 @@ export default function MediaPage() {
                                                             alt="" className="w-full h-full object-cover transition-opacity duration-300"/>
                                                     ) : (
                                                         media.type === 'video' ?
-                                                            <Video className="w-4 h-4 text-slate-400"/> :
-                                                            <ImageIcon className="w-4 h-4 text-slate-400"/>
+                                                            <Video className="w-4 h-4 text-muted-foreground"/> :
+                                                            <ImageIcon className="w-4 h-4 text-muted-foreground"/>
                                                     )}
                                                     {(media.preview_file_path || media.preview_file) && (
                                                         <img
@@ -511,7 +518,7 @@ export default function MediaPage() {
                                     </TableRow>
                                 )) : (
                                     <TableRow key="empty">
-                                        <TableCell colSpan={10} className="h-24 text-center text-slate-400">
+                                        <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
                                             没有找到匹配的媒体数据
                                         </TableCell>
                                     </TableRow>
@@ -521,6 +528,13 @@ export default function MediaPage() {
                     )}
                 </CardContent>
             </Card>
+
+            <TablePagination
+                page={searchParams.page}
+                pageSize={searchParams.page_size}
+                total={total}
+                onPageChange={(p) => setSearchParams({...searchParams, page: p})}
+            />
 
             {/* 上传模态框 */}
             <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
@@ -587,15 +601,15 @@ export default function MediaPage() {
                                     <p className="text-[11px] text-muted-foreground">排队</p>
                                 </div>
                                 <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 p-3">
-                                    <p className="text-lg font-bold text-blue-600">{variantData.video_processing_count ?? 0}</p>
+                                    <p className="text-lg font-bold text-info">{variantData.video_processing_count ?? 0}</p>
                                     <p className="text-[11px] text-muted-foreground">转码中</p>
                                 </div>
                                 <div className="rounded-lg bg-green-50 dark:bg-green-950/20 p-3">
-                                    <p className="text-lg font-bold text-green-600">{variantData.video_success_count}</p>
+                                    <p className="text-lg font-bold text-success">{variantData.video_success_count}</p>
                                     <p className="text-[11px] text-muted-foreground">成功</p>
                                 </div>
                                 <div className="rounded-lg bg-red-50 dark:bg-red-950/20 p-3">
-                                    <p className="text-lg font-bold text-red-600">{variantData.video_failed_count}</p>
+                                    <p className="text-lg font-bold text-destructive">{variantData.video_failed_count}</p>
                                     <p className="text-[11px] text-muted-foreground">失败</p>
                                 </div>
                                 <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-3">
@@ -675,7 +689,7 @@ export default function MediaPage() {
                                                         className="text-[10px] text-green-700 dark:text-green-400 max-w-[150px] truncate block">{v.output_path}</code>
                                                 )}
                                                 {v.error_message && (
-                                                    <span className="text-red-500 max-w-[200px] truncate block"
+                                                    <span className="text-destructive max-w-[200px] truncate block"
                                                           title={v.error_message}>{v.error_message}</span>
                                                 )}
                                             </div>
@@ -690,7 +704,7 @@ export default function MediaPage() {
                                     href={`/admin/transcoding/status?media_id=${variantData.media_id}`}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                                    className="inline-flex items-center gap-1.5 text-xs text-info hover:text-blue-800 hover:underline"
                                 >
                                     在转码任务页面查看完整任务列表
                                     <ExternalLink className="w-3 h-3"/>

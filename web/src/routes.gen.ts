@@ -57,6 +57,7 @@ import { Route as PortalMeFavoritesRouteImport } from "./routes/_portal.me.favor
 import { Route as PortalMeChannelRouteImport } from "./routes/_portal.me.channel";
 import { Route as PortalChannelIdRouteImport } from "./routes/_portal.channel.$id";
 import { Route as PortalCIdRouteImport } from "./routes/_portal.c.$id";
+import { Route as PortalWatchShortTokenEditRouteImport } from "./routes/_portal.watch.$shortToken.edit";
 
 const AdminRoute = AdminRouteImport.update({
   id: "/admin",
@@ -298,6 +299,12 @@ const PortalCIdRoute = PortalCIdRouteImport.update({
   path: "/c/$id",
   getParentRoute: () => PortalRoute,
 } as any);
+const PortalWatchShortTokenEditRoute =
+  PortalWatchShortTokenEditRouteImport.update({
+    id: "/$shortToken/edit",
+    path: "/$shortToken/edit",
+    getParentRoute: () => PortalWatchRoute,
+  } as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof PortalIndexRoute;
@@ -317,7 +324,7 @@ export interface FileRoutesByFullPath {
   "/tags": typeof PortalTagsRoute;
   "/terms": typeof PortalTermsRoute;
   "/test": typeof PortalTestRoute;
-  "/watch": typeof PortalWatchRoute;
+  "/watch": typeof PortalWatchRouteWithChildren;
   "/admin/categories": typeof AdminCategoriesRoute;
   "/admin/channels": typeof AdminChannelsRoute;
   "/admin/comments": typeof AdminCommentsRoute;
@@ -347,6 +354,7 @@ export interface FileRoutesByFullPath {
   "/admin/transcoding/profiles": typeof AdminTranscodingProfilesRoute;
   "/admin/transcoding/status": typeof AdminTranscodingStatusRoute;
   "/admin/media/": typeof AdminMediaIndexRoute;
+  "/watch/$shortToken/edit": typeof PortalWatchShortTokenEditRoute;
 }
 export interface FileRoutesByTo {
   "/$handle": typeof PortalHandleRoute;
@@ -364,7 +372,7 @@ export interface FileRoutesByTo {
   "/tags": typeof PortalTagsRoute;
   "/terms": typeof PortalTermsRoute;
   "/test": typeof PortalTestRoute;
-  "/watch": typeof PortalWatchRoute;
+  "/watch": typeof PortalWatchRouteWithChildren;
   "/admin/categories": typeof AdminCategoriesRoute;
   "/admin/channels": typeof AdminChannelsRoute;
   "/admin/comments": typeof AdminCommentsRoute;
@@ -394,6 +402,7 @@ export interface FileRoutesByTo {
   "/admin/transcoding/profiles": typeof AdminTranscodingProfilesRoute;
   "/admin/transcoding/status": typeof AdminTranscodingStatusRoute;
   "/admin/media": typeof AdminMediaIndexRoute;
+  "/watch/$shortToken/edit": typeof PortalWatchShortTokenEditRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
@@ -414,7 +423,7 @@ export interface FileRoutesById {
   "/_portal/tags": typeof PortalTagsRoute;
   "/_portal/terms": typeof PortalTermsRoute;
   "/_portal/test": typeof PortalTestRoute;
-  "/_portal/watch": typeof PortalWatchRoute;
+  "/_portal/watch": typeof PortalWatchRouteWithChildren;
   "/admin/categories": typeof AdminCategoriesRoute;
   "/admin/channels": typeof AdminChannelsRoute;
   "/admin/comments": typeof AdminCommentsRoute;
@@ -445,6 +454,7 @@ export interface FileRoutesById {
   "/admin/transcoding/profiles": typeof AdminTranscodingProfilesRoute;
   "/admin/transcoding/status": typeof AdminTranscodingStatusRoute;
   "/admin/media/": typeof AdminMediaIndexRoute;
+  "/_portal/watch/$shortToken/edit": typeof PortalWatchShortTokenEditRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
@@ -495,7 +505,8 @@ export interface FileRouteTypes {
     | "/admin/media/$id"
     | "/admin/transcoding/profiles"
     | "/admin/transcoding/status"
-    | "/admin/media/";
+    | "/admin/media/"
+    | "/watch/$shortToken/edit";
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/$handle"
@@ -542,7 +553,8 @@ export interface FileRouteTypes {
     | "/admin/media/$id"
     | "/admin/transcoding/profiles"
     | "/admin/transcoding/status"
-    | "/admin/media";
+    | "/admin/media"
+    | "/watch/$shortToken/edit";
   id:
     | "__root__"
     | "/_portal"
@@ -592,7 +604,8 @@ export interface FileRouteTypes {
     | "/admin/media/$id"
     | "/admin/transcoding/profiles"
     | "/admin/transcoding/status"
-    | "/admin/media/";
+    | "/admin/media/"
+    | "/_portal/watch/$shortToken/edit";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -940,6 +953,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PortalCIdRouteImport;
       parentRoute: typeof PortalRoute;
     };
+    "/_portal/watch/$shortToken/edit": {
+      id: "/_portal/watch/$shortToken/edit";
+      path: "/$shortToken/edit";
+      fullPath: "/watch/$shortToken/edit";
+      preLoaderRoute: typeof PortalWatchShortTokenEditRouteImport;
+      parentRoute: typeof PortalWatchRoute;
+    };
   }
 }
 
@@ -967,6 +987,18 @@ const PortalMeRouteWithChildren = PortalMeRoute._addFileChildren(
   PortalMeRouteChildren,
 );
 
+interface PortalWatchRouteChildren {
+  PortalWatchShortTokenEditRoute: typeof PortalWatchShortTokenEditRoute;
+}
+
+const PortalWatchRouteChildren: PortalWatchRouteChildren = {
+  PortalWatchShortTokenEditRoute: PortalWatchShortTokenEditRoute,
+};
+
+const PortalWatchRouteWithChildren = PortalWatchRoute._addFileChildren(
+  PortalWatchRouteChildren,
+);
+
 interface PortalRouteChildren {
   PortalHandleRoute: typeof PortalHandleRoute;
   PortalAboutRoute: typeof PortalAboutRoute;
@@ -983,7 +1015,7 @@ interface PortalRouteChildren {
   PortalTagsRoute: typeof PortalTagsRoute;
   PortalTermsRoute: typeof PortalTermsRoute;
   PortalTestRoute: typeof PortalTestRoute;
-  PortalWatchRoute: typeof PortalWatchRoute;
+  PortalWatchRoute: typeof PortalWatchRouteWithChildren;
   PortalIndexRoute: typeof PortalIndexRoute;
   PortalCIdRoute: typeof PortalCIdRoute;
   PortalChannelIdRoute: typeof PortalChannelIdRoute;
@@ -1007,7 +1039,7 @@ const PortalRouteChildren: PortalRouteChildren = {
   PortalTagsRoute: PortalTagsRoute,
   PortalTermsRoute: PortalTermsRoute,
   PortalTestRoute: PortalTestRoute,
-  PortalWatchRoute: PortalWatchRoute,
+  PortalWatchRoute: PortalWatchRouteWithChildren,
   PortalIndexRoute: PortalIndexRoute,
   PortalCIdRoute: PortalCIdRoute,
   PortalChannelIdRoute: PortalChannelIdRoute,

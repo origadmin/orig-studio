@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * 标签页 - 展示所有标签及对应媒体数量
  */
@@ -51,7 +51,7 @@ const TagsPage = () => {
 
             {/* 搜索 */}
             <div className="relative max-w-md">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
                 <input
                     type="text"
                     value={filter}
@@ -75,14 +75,14 @@ const TagsPage = () => {
                             <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                                 {tag.name}
                             </p>
-                            <p className="text-xs text-gray-400">{t('tags.videosCount', {count: tag.count})}</p>
+                            <p className="text-xs text-muted-foreground">{t('tags.videosCount', {count: tag.count})}</p>
                         </div>
                     </Link>
                 ))}
             </div>
 
             {filteredTags.length === 0 && (
-                <div className="text-center py-16 text-gray-400">
+                <div className="text-center py-16 text-muted-foreground">
                     <Tag size={48} className="mx-auto mb-3 opacity-30"/>
                     <p>{t('tags.noMatch')}</p>
                 </div>

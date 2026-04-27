@@ -1,3 +1,4 @@
+import {Spinner} from "@/components/ui/spinner"
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * 管理端 - 用户管理页面
@@ -49,12 +50,14 @@ import {
 import {userApi, User, CreateUserRequest, UpdateUserRequest} from '@/lib/api/user';
 import {useTranslation} from 'react-i18next';
 import {getFullUrl} from '@/lib/utils';
+import {TablePagination} from '@/components/common/TablePagination';
 
 export default function UsersPage() {
     const {t} = useTranslation();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchParams, setSearchParams] = useState({keyword: '', role: 'all', page: 1});
+    const [searchParams, setSearchParams] = useState({keyword: '', role: 'all', page: 1, page_size: 20});
+    const [total, setTotal] = useState(0);
     
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
@@ -72,12 +75,12 @@ export default function UsersPage() {
 
     useEffect(() => {
         loadUsers();
-    }, []);
+    }, [searchParams.page]);
 
     const loadUsers = async (params = searchParams) => {
         try {
             setLoading(true);
-            const apiParams: any = {page_size: 100};
+            const apiParams: any = {page: params.page, page_size: params.page_size};
             if (params.keyword) {
                 apiParams.keyword = params.keyword;
             }
@@ -87,6 +90,9 @@ export default function UsersPage() {
             const response = await userApi.list(apiParams);
             const userList = Array.isArray(response?.items) ? response.items : [];
             setUsers(userList);
+            if (response?.total !== undefined) {
+                setTotal(response.total);
+            }
         } catch (error) {
             console.error('Failed to fetch users:', error);
         } finally {
@@ -204,7 +210,7 @@ export default function UsersPage() {
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
                                 <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{t('admin.users')}</h2>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5">
                                     {t('admin.manageUsers') || "Manage users, roles, and permissions"}
                                 </p>
                             </div>
@@ -223,13 +229,13 @@ export default function UsersPage() {
                                         placeholder={t('admin.search') || "Search users..."}
                                         value={searchParams.keyword}
                                         onChange={(e) => setSearchParams({...searchParams, keyword: e.target.value})}
-                                        className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                        className="pl-10 h-8 rounded-btn-sm w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
                                     />
                                 </div>
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
                                 <Select value={searchParams.role} onValueChange={(v) => setSearchParams({...searchParams, role: v})}>
-                                    <SelectTrigger className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                    <SelectTrigger className="w-[140px] h-8 rounded-btn-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
                                             {searchParams.role === 'all' ? (
@@ -250,9 +256,8 @@ export default function UsersPage() {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="h-9 px-3"
                                         onClick={() => {
-                                            const newParams = {keyword: '', role: 'all', page: 1};
+                                            const newParams = {keyword: '', role: 'all', page: 1, page_size: 20};
                                             setSearchParams(newParams);
                                             loadUsers(newParams);
                                         }}
@@ -263,7 +268,6 @@ export default function UsersPage() {
                                     <Button
                                         variant="default"
                                         size="sm"
-                                        className="h-9 px-4"
                                         onClick={() => loadUsers()}
                                     >
                                         <Search className="h-4 w-4 mr-2"/>
@@ -283,28 +287,28 @@ export default function UsersPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-slate-500">{t('admin.totalUsers') || "Total Users"}</p>
-                                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{users.length}</p>
+                                <p className="text-2xl font-bold text-info dark:text-blue-400">{users.length}</p>
                             </div>
                             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                                <UserIcon className="w-6 h-6 text-blue-600"/>
+                                <UserIcon className="w-6 h-6 text-info"/>
                             </div>
                         </div>
                     </CardContent>
-                    <div className="absolute bottom-0 left-0 h-1 bg-blue-500 w-full opacity-10"/>
+                    <div className="absolute bottom-0 left-0 h-1 bg-info w-full opacity-10"/>
                 </Card>
                 <Card key="active-users" className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-slate-500">{t('admin.activeUsers') || "Active Users"}</p>
-                                <p className="text-2xl font-bold text-green-600 dark:text-green-400">{users.filter(u => u.status === 'active').length}</p>
+                                <p className="text-2xl font-bold text-success dark:text-green-400">{users.filter(u => u.status === 'active').length}</p>
                             </div>
                             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                                <Shield className="w-6 h-6 text-green-600"/>
+                                <Shield className="w-6 h-6 text-success"/>
                             </div>
                         </div>
                     </CardContent>
-                    <div className="absolute bottom-0 left-0 h-1 bg-green-500 w-full opacity-10"/>
+                    <div className="absolute bottom-0 left-0 h-1 bg-success w-full opacity-10"/>
                 </Card>
                 <Card key="admins" className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
@@ -345,7 +349,7 @@ export default function UsersPage() {
                             <CardDescription>{t('admin.manageUserAccounts') || "Manage user accounts and permissions"}</CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button className="bg-blue-600 hover:bg-blue-700" onClick={openCreateDialog}>
+                            <Button size="sm" onClick={openCreateDialog}>
                                 <Plus className="w-4 h-4 mr-2"/>
                                 {t('admin.addUser') || "Add User"}
                             </Button>
@@ -355,8 +359,7 @@ export default function UsersPage() {
                 <CardContent>
                     {loading ? (
                         <div className="py-12 text-center">
-                            <div
-                                className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full mx-auto"/>
+                            <Spinner className="mx-auto" />
                         </div>
                     ) : (
                         <Table>
@@ -397,7 +400,7 @@ export default function UsersPage() {
                                         </TableCell>
                                         <TableCell>
                                             {user.status === "active" ? (
-                                                <Badge variant="default" className="bg-green-500">{t('admin.active') || "Active"}</Badge>
+                                                <Badge variant="default" className="bg-success">{t('admin.active') || "Active"}</Badge>
                                             ) : (
                                                 <Badge variant="secondary">{t('admin.inactive') || "Inactive"}</Badge>
                                             )}
@@ -453,6 +456,13 @@ export default function UsersPage() {
                     )}
                 </CardContent>
             </Card>
+
+            <TablePagination
+                page={searchParams.page}
+                pageSize={searchParams.page_size}
+                total={total}
+                onPageChange={(p) => setSearchParams({...searchParams, page: p})}
+            />
 
             {/* Create User Dialog */}
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>

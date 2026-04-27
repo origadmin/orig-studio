@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+﻿import React, {useState, useEffect} from 'react';
 import {Info, Clock, Monitor, File, BarChart2, Text, Image, PlayCircle} from 'lucide-react';
 import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
@@ -125,43 +125,43 @@ const MediaMetadata: React.FC<MediaMetadataProps> = ({mediaId}) => {
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">Title</h4>
+                            <h4 className="text-sm font-medium text-gray-500 dark:text-muted-foreground">Title</h4>
                             <p className="text-sm text-gray-900 dark:text-white">{metadata.title}</p>
                         </div>
                         <div>
-                            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">Description</h4>
+                            <h4 className="text-sm font-medium text-gray-500 dark:text-muted-foreground">Description</h4>
                             <p className="text-sm text-gray-900 dark:text-white">{metadata.description}</p>
                         </div>
                         <div>
-                            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">Duration</h4>
+                            <h4 className="text-sm font-medium text-gray-500 dark:text-muted-foreground">Duration</h4>
                             <p className="text-sm text-gray-900 dark:text-white">{formatDuration(metadata.duration)}</p>
                         </div>
                         <div>
-                            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">Resolution</h4>
+                            <h4 className="text-sm font-medium text-gray-500 dark:text-muted-foreground">Resolution</h4>
                             <p className="text-sm text-gray-900 dark:text-white">{metadata.resolution} ({metadata.width}x{metadata.height})</p>
                         </div>
                         <div>
-                            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">Format</h4>
+                            <h4 className="text-sm font-medium text-gray-500 dark:text-muted-foreground">Format</h4>
                             <p className="text-sm text-gray-900 dark:text-white">{metadata.format}</p>
                         </div>
                         <div>
-                            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">Codec</h4>
+                            <h4 className="text-sm font-medium text-gray-500 dark:text-muted-foreground">Codec</h4>
                             <p className="text-sm text-gray-900 dark:text-white">{metadata.codec}</p>
                         </div>
                         <div>
-                            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">Bitrate</h4>
+                            <h4 className="text-sm font-medium text-gray-500 dark:text-muted-foreground">Bitrate</h4>
                             <p className="text-sm text-gray-900 dark:text-white">{metadata.bitrate} kbps</p>
                         </div>
                         <div>
-                            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">File Size</h4>
+                            <h4 className="text-sm font-medium text-gray-500 dark:text-muted-foreground">File Size</h4>
                             <p className="text-sm text-gray-900 dark:text-white">{formatFileSize(metadata.file_size)}</p>
                         </div>
                         <div>
-                            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">Frame Rate</h4>
+                            <h4 className="text-sm font-medium text-gray-500 dark:text-muted-foreground">Frame Rate</h4>
                             <p className="text-sm text-gray-900 dark:text-white">{metadata.frame_rate} fps</p>
                         </div>
                         <div>
-                            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">Aspect Ratio</h4>
+                            <h4 className="text-sm font-medium text-gray-500 dark:text-muted-foreground">Aspect Ratio</h4>
                             <p className="text-sm text-gray-900 dark:text-white">{metadata.aspect_ratio}</p>
                         </div>
                     </div>
@@ -187,7 +187,7 @@ const MediaMetadata: React.FC<MediaMetadataProps> = ({mediaId}) => {
                                              alt={`Key frame at ${formatDuration(frame.time)}`}
                                              className="w-full h-full object-cover"/>
                                     </div>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatDuration(frame.time)}</p>
+                                    <p className="text-xs text-gray-500 dark:text-muted-foreground">{formatDuration(frame.time)}</p>
                                 </div>
                             ))}
                         </div>
@@ -209,13 +209,13 @@ const MediaMetadata: React.FC<MediaMetadataProps> = ({mediaId}) => {
                         <div className="space-y-4">
                             {metadata.text_content.transcript && (
                                 <div>
-                                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Transcript</h4>
+                                    <h4 className="text-sm font-medium text-gray-500 dark:text-muted-foreground mb-2">Transcript</h4>
                                     <p className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">{metadata.text_content.transcript}</p>
                                 </div>
                             )}
                             {metadata.text_content.keywords && metadata.text_content.keywords.length > 0 && (
                                 <div>
-                                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Keywords</h4>
+                                    <h4 className="text-sm font-medium text-gray-500 dark:text-muted-foreground mb-2">Keywords</h4>
                                     <div className="flex flex-wrap gap-2">
                                         {metadata.text_content.keywords.map((keyword, index) => (
                                             <span key={index}
@@ -228,7 +228,7 @@ const MediaMetadata: React.FC<MediaMetadataProps> = ({mediaId}) => {
                             )}
                             {metadata.text_content.entities && metadata.text_content.entities.length > 0 && (
                                 <div>
-                                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Entities</h4>
+                                    <h4 className="text-sm font-medium text-gray-500 dark:text-muted-foreground mb-2">Entities</h4>
                                     <div className="space-y-2">
                                         {metadata.text_content.entities.map((entity, index) => (
                                             <div key={index} className="flex items-center gap-2">
@@ -238,7 +238,7 @@ const MediaMetadata: React.FC<MediaMetadataProps> = ({mediaId}) => {
                         </span>
                                                 <span
                                                     className="text-sm text-gray-900 dark:text-white">{entity.text}</span>
-                                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                <span className="text-xs text-gray-500 dark:text-muted-foreground">
                           {Math.round(entity.confidence * 100)}%
                         </span>
                                             </div>
@@ -269,7 +269,7 @@ const MediaMetadata: React.FC<MediaMetadataProps> = ({mediaId}) => {
                                         <span
                                             className="text-sm font-medium text-gray-900 dark:text-white">{formatDuration(scene.time)}</span>
                                     </div>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{scene.description}</p>
+                                    <p className="text-sm text-gray-600 dark:text-muted-foreground mt-1">{scene.description}</p>
                                 </div>
                             ))}
                         </div>

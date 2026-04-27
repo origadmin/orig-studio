@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
@@ -27,7 +27,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
             {title}
           </h1>
           {description && (
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <p className="mt-2 text-sm text-gray-600 dark:text-muted-foreground">
               {description}
             </p>
           )}

@@ -43,6 +43,7 @@ import {
 import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, UserPlus, Users, Filter, Loader2, RotateCcw} from 'lucide-react';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {channelApi, Channel} from '@/lib/api/channel';
+import {TablePagination} from '@/components/common/TablePagination';
 
 const Channels: React.FC = () => {
     const {t} = useTranslation();
@@ -51,6 +52,9 @@ const Channels: React.FC = () => {
     const [channels, setChannels] = useState<Channel[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(20);
+    const [total, setTotal] = useState(0);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -65,15 +69,18 @@ const Channels: React.FC = () => {
     // 加载频道数据
     useEffect(() => {
         loadChannels();
-    }, []);
+    }, [page]);
 
     const loadChannels = async () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await channelApi.getAll();
+            const response = await channelApi.getAll({page, page_size: pageSize});
             const channelList = Array.isArray(response?.items) ? response.items : [];
             setChannels(channelList);
+            if (response?.total !== undefined) {
+                setTotal(response.total);
+            }
         } catch (err) {
             setError('Failed to load channels');
             console.error('Error loading channels:', err);
@@ -193,7 +200,7 @@ const Channels: React.FC = () => {
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
                                 <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{t('admin.channels')}</h2>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5">
                                     Manage your content channels
                                 </p>
                             </div>
@@ -212,13 +219,13 @@ const Channels: React.FC = () => {
                                         placeholder={t('admin.search') || t('admin.channels') + '...'}
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                        className="pl-10 h-8 rounded-btn-sm w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
                                     />
                                 </div>
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
                                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                    <SelectTrigger className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                    <SelectTrigger className="w-[140px] h-8 rounded-btn-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
                                             {statusFilter === 'all' ? (
@@ -239,7 +246,6 @@ const Channels: React.FC = () => {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="h-9 px-3"
                                         onClick={() => {
                                             setSearchTerm('');
                                             setStatusFilter('all');
@@ -251,9 +257,7 @@ const Channels: React.FC = () => {
                                     <Button
                                         variant="default"
                                         size="sm"
-                                        className="h-9 px-4"
                                         onClick={() => {
-                                            // 这里可以添加搜索逻辑
                                         }}
                                     >
                                         <Search className="h-4 w-4 mr-2"/>
@@ -273,13 +277,13 @@ const Channels: React.FC = () => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-slate-500">{t('admin.channelTotal')}</p>
-                                <p className="text-2xl font-bold text-blue-600">{channels.length}</p>
+                                <p className="text-2xl font-bold text-info">{channels.length}</p>
                             </div>
                             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                                <Users className="w-6 h-6 text-blue-600"/>
+                                <Users className="w-6 h-6 text-info"/>
                             </div>
                         </div>
-                        <div className="absolute bottom-0 left-0 h-1 bg-blue-500 w-full opacity-10"/>
+                        <div className="absolute bottom-0 left-0 h-1 bg-info w-full opacity-10"/>
                     </CardContent>
                 </Card>
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
@@ -301,13 +305,13 @@ const Channels: React.FC = () => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-slate-500">{t('admin.verifiedChannels')}</p>
-                                <p className="text-2xl font-bold text-green-600">{verifiedCount}</p>
+                                <p className="text-2xl font-bold text-success">{verifiedCount}</p>
                             </div>
                             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                                <Eye className="w-6 h-6 text-green-600"/>
+                                <Eye className="w-6 h-6 text-success"/>
                             </div>
                         </div>
-                        <div className="absolute bottom-0 left-0 h-1 bg-green-500 w-full opacity-10"/>
+                        <div className="absolute bottom-0 left-0 h-1 bg-success w-full opacity-10"/>
                     </CardContent>
                 </Card>
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
@@ -321,7 +325,7 @@ const Channels: React.FC = () => {
                                 <Loader2 className="w-6 h-6 text-yellow-600"/>
                             </div>
                         </div>
-                        <div className="absolute bottom-0 left-0 h-1 bg-yellow-500 w-full opacity-10"/>
+                        <div className="absolute bottom-0 left-0 h-1 bg-warning w-full opacity-10"/>
                     </CardContent>
                 </Card>
             </div>
@@ -334,7 +338,7 @@ const Channels: React.FC = () => {
                             <CardTitle>{t('admin.channelList')}</CardTitle>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button onClick={openCreateDialog}>
+                            <Button size="sm" onClick={openCreateDialog}>
                                 <Plus className="mr-2 h-4 w-4"/>
                                 {t('admin.newChannel')}
                             </Button>
@@ -365,7 +369,7 @@ const Channels: React.FC = () => {
                             ) : error ? (
                                 <TableRow key="error">
                                     <TableCell colSpan={8} className="text-center py-8">
-                                        <div className="text-red-600">{error}</div>
+                                        <div className="text-destructive">{error}</div>
                                         <Button 
                                             variant="outline" 
                                             size="sm" 
@@ -462,6 +466,13 @@ const Channels: React.FC = () => {
                     </Table>
                 </CardContent>
             </Card>
+
+            <TablePagination
+                page={page}
+                pageSize={pageSize}
+                total={total}
+                onPageChange={setPage}
+            />
 
             {/* Create Channel Dialog */}
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>

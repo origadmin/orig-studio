@@ -180,6 +180,21 @@ export function useUpdateMedia() {
 }
 
 /**
+ * useUpdatePublicMedia: Handle media update via short_token (owner/admin)
+ */
+export function useUpdatePublicMedia() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({shortToken, data}: { shortToken: string; data: UpdateMediaRequest }) =>
+            publicMediaApi.update(shortToken, data),
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({queryKey: ['publicMedia', 'detail', variables.shortToken]});
+            queryClient.invalidateQueries({queryKey: mediaKeys.all});
+        },
+    });
+}
+
+/**
  * useCategoryList: Fetch all categories
  */
 export function useCategoryList() {

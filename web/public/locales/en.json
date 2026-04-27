@@ -160,7 +160,8 @@
     "sortOldest": "Oldest",
     "sortPopular": "Popular",
     "confirmDelete": "Are you sure you want to delete this video? This action cannot be undone.",
-    "retryTranscode": "Retry Transcoding"
+    "retryTranscode": "Retry Transcoding",
+    "subtitleComingSoon": "Subtitles feature coming soon"
   },
   "channel": {
     "manageChannel": "Manage Channel",

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
@@ -122,7 +122,7 @@ const AdminLayout = () => {
                 <div className={`${sidebarCollapsed ? 'p-3' : 'p-6'} border-t border-slate-800`}>
                     <Link
                         to="/"
-                        className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-3'} text-slate-400 hover:text-white transition-colors`}
+                        className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-3'} text-muted-foreground hover:text-white transition-colors`}
                     >
                         <LogOut size={20}/>
                         {!sidebarCollapsed && <span>Exit Admin</span>}
@@ -169,7 +169,7 @@ const AdminLayout = () => {
                     </div>
                     <div className="flex items-center space-x-4">
                         <div
-                            className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">A
+                            className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-info font-bold">A
                         </div>
                         <span className="text-sm font-medium text-foreground">Administrator</span>
                     </div>
@@ -201,7 +201,7 @@ const NavItem = ({to, icon, label, exact = false, collapsed = false}: {
                     ? 'justify-center w-12 h-12 mx-auto'
                     : 'space-x-3 px-4 py-2'
             } ${
-                isActive ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                isActive ? 'bg-blue-600 text-white' : 'text-muted-foreground hover:bg-slate-800 hover:text-white'
             }`}
             title={collapsed ? label : undefined}
         >

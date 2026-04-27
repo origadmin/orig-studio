@@ -166,11 +166,11 @@ func (uc *MediaUseCase) CreateMedia(ctx context.Context, media *Media) (*Media, 
 }
 
 func (uc *MediaUseCase) UpdateMedia(ctx context.Context, media *Media) (*Media, error) {
-	// 验证媒体必须关联且仅关联一个分类
-	if media.CategoryId == "" {
-		return nil, fmt.Errorf("media must have a category")
-	}
-
+	// Note: CategoryId validation is intentionally NOT enforced on update.
+	// The admin update handler (adminUpdateMedia) fetches the existing record first,
+	// then merges partial fields. If category_id was not provided in the request,
+	// the existing CategoryId from the database is preserved.
+	// CategoryId is still required on CREATE (see CreateMedia).
 	return uc.repo.Update(ctx, media)
 }
 
@@ -693,8 +693,8 @@ func (uc *MediaUseCase) getMediaVariantsByID(
 
 		variants = append(variants, vi)
 
-		// Count video task outcomes by status (exclude preview and frames)
-		if !IsPreviewProfileFromName(profile.Name) && !IsFramesProfileFromName(profile.Name) {
+		// Count video task outcomes by status (exclude preview)
+		if !IsPreviewProfileFromName(profile.Name) {
 			switch t.Status {
 			case "success":
 				videoSuccessCount++
@@ -738,11 +738,6 @@ func (uc *MediaUseCase) GetMediaVariantsByUUID(
 // IsPreviewProfileFromName returns true if the profile name indicates it's a preview/GIF type.
 func IsPreviewProfileFromName(name string) bool {
 	return strings.EqualFold(name, "preview") || strings.EqualFold(name, "gif")
-}
-
-// IsFramesProfileFromName returns true if the profile name indicates it's a frames type.
-func IsFramesProfileFromName(name string) bool {
-	return strings.EqualFold(name, "frames") || strings.EqualFold(name, "preview-frames")
 }
 
 // estimateProfileBandwidth estimates bandwidth in bps from profile settings.

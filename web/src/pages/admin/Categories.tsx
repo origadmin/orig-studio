@@ -1,3 +1,4 @@
+import {Spinner} from "@/components/ui/spinner"
 import React, {useState, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
@@ -41,12 +42,14 @@ import {
 } from '@/components/ui/alert-dialog';
 import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, RotateCcw} from 'lucide-react';
 import {categoryApi, Category} from '@/lib/api/category';
+import {TablePagination} from '@/components/common/TablePagination';
 
 const Categories: React.FC = () => {
     const {t} = useTranslation();
-    const [searchParams, setSearchParams] = useState({keyword: '', page: 1});
+    const [searchParams, setSearchParams] = useState({keyword: '', page: 1, page_size: 20});
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
+    const [total, setTotal] = useState(0);
     
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
@@ -63,14 +66,17 @@ const Categories: React.FC = () => {
 
     useEffect(() => {
         loadCategories();
-    }, []);
+    }, [searchParams.page]);
 
     const loadCategories = async (params = searchParams) => {
         try {
             setLoading(true);
-            const response = await categoryApi.getAll();
+            const response = await categoryApi.getAll({page: params.page, page_size: params.page_size});
             const categoryList = Array.isArray(response?.items) ? response.items : [];
             setCategories(categoryList);
+            if (response?.total !== undefined) {
+                setTotal(response.total);
+            }
         } catch (error) {
             console.error('Failed to fetch categories:', error);
         } finally {
@@ -165,7 +171,7 @@ const Categories: React.FC = () => {
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
                                 <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{t('admin.categories')}</h2>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5">
                                     Manage your content categories
                                 </p>
                             </div>
@@ -184,7 +190,7 @@ const Categories: React.FC = () => {
                                         placeholder={t('admin.search') || t('admin.categories') + '...'}
                                         value={searchParams.keyword}
                                         onChange={(e) => setSearchParams({...searchParams, keyword: e.target.value})}
-                                        className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                        className="pl-10 h-8 rounded-btn-sm w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
                                     />
                                 </div>
                             </div>
@@ -192,9 +198,8 @@ const Categories: React.FC = () => {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className="h-9 px-3"
                                     onClick={() => {
-                                        const newParams = {keyword: '', page: 1};
+                                        const newParams = {keyword: '', page: 1, page_size: 20};
                                         setSearchParams(newParams);
                                         loadCategories(newParams);
                                     }}
@@ -205,7 +210,6 @@ const Categories: React.FC = () => {
                                 <Button
                                     variant="default"
                                     size="sm"
-                                    className="h-9 px-4"
                                     onClick={() => loadCategories()}
                                 >
                                     <Search className="h-4 w-4 mr-2"/>
@@ -221,17 +225,17 @@ const Categories: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{categories.length}</div>
+                        <div className="text-2xl font-bold text-info dark:text-blue-400">{categories.length}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.totalCategories')}</p>
                     </CardContent>
-                    <div className="absolute bottom-0 left-0 h-1 bg-blue-500 w-full opacity-10"/>
+                    <div className="absolute bottom-0 left-0 h-1 bg-info w-full opacity-10"/>
                 </Card>
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">{activeCount}</div>
+                        <div className="text-2xl font-bold text-success dark:text-green-400">{activeCount}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.activeCategories')}</p>
                     </CardContent>
-                    <div className="absolute bottom-0 left-0 h-1 bg-green-500 w-full opacity-10"/>
+                    <div className="absolute bottom-0 left-0 h-1 bg-success w-full opacity-10"/>
                 </Card>
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
@@ -242,7 +246,7 @@ const Categories: React.FC = () => {
                 </Card>
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{Math.min(categories.length, 5)}</div>
+                        <div className="text-2xl font-bold text-warning dark:text-amber-400">{Math.min(categories.length, 5)}</div>
                         <p className="text-sm text-muted-foreground">{t('admin.topCategories')}</p>
                     </CardContent>
                     <div className="absolute bottom-0 left-0 h-1 bg-amber-500 w-full opacity-10"/>
@@ -257,7 +261,7 @@ const Categories: React.FC = () => {
                             <CardTitle>{t('admin.categoryList')}</CardTitle>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button onClick={openCreateDialog}>
+                            <Button size="sm" onClick={openCreateDialog}>
                                 <Plus className="mr-2 h-4 w-4"/>
                                 {t('admin.newCategory')}
                             </Button>
@@ -267,8 +271,7 @@ const Categories: React.FC = () => {
                 <CardContent>
                     {loading ? (
                         <div className="py-12 text-center">
-                            <div
-                                className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full mx-auto"/>
+                            <Spinner className="mx-auto" />
                         </div>
                     ) : (
                         <Table>
@@ -349,6 +352,13 @@ const Categories: React.FC = () => {
                     )}
                 </CardContent>
             </Card>
+
+            <TablePagination
+                page={searchParams.page}
+                pageSize={searchParams.page_size}
+                total={total}
+                onPageChange={(p) => setSearchParams({...searchParams, page: p})}
+            />
 
             {/* Create Category Dialog */}
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>

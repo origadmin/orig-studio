@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+﻿import React, {useState, useEffect} from 'react';
 import {
     Plus,
     Edit,
@@ -218,7 +218,7 @@ const CategoryManager: React.FC = () => {
                             <Button
                                 size="sm"
                                 variant="outline"
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                className="text-destructive hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                                 onClick={() => handleDelete(category.id)}
                             >
                                 <Trash2 className="w-4 h-4"/>

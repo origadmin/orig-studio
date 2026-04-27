@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
@@ -50,11 +50,11 @@ const Footer = () => {
                 </div>
 
                 <div
-                    className="pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                    className="pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
                     <div className="flex items-center gap-4">
-                        <Link to="/privacy" className="hover:text-blue-600 transition-colors">Privacy Policy</Link>
-                        <Link to="/terms" className="hover:text-blue-600 transition-colors">Terms of Service</Link>
-                        <Link to="/cookies" className="hover:text-blue-600 transition-colors">Cookie Policy</Link>
+                        <Link to="/privacy" className="hover:text-info transition-colors">Privacy Policy</Link>
+                        <Link to="/terms" className="hover:text-info transition-colors">Terms of Service</Link>
+                        <Link to="/cookies" className="hover:text-info transition-colors">Cookie Policy</Link>
                     </div>
                     <p className="flex items-center gap-1.5">
                         Made with <Heart size={12} className="text-rose-500 fill-rose-500"/> by
@@ -76,7 +76,7 @@ const FooterSection = ({title, links}: {
             {links.map((link) => (
                 <li key={link.label}>
                     <Link to={link.to} search={link.search}
-                          className="text-sm text-slate-500 font-bold hover:text-blue-600 transition-all hover:translate-x-1 inline-block">
+                          className="text-sm text-slate-500 font-bold hover:text-info transition-all hover:translate-x-1 inline-block">
                         {link.label}
                     </Link>
                 </li>
@@ -87,7 +87,7 @@ const FooterSection = ({title, links}: {
 
 const SocialIcon = ({icon}: any) => (
     <button
-        className="w-9 h-9 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm hover:shadow-md active:scale-95">
+        className="w-9 h-9 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-muted-foreground hover:text-info hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm hover:shadow-md active:scale-95">
         {icon}
     </button>
 );

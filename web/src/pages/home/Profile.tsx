@@ -1,3 +1,4 @@
+﻿import {Spinner} from "@/components/ui/spinner"
 import React, {useState, useEffect} from 'react';
 import {useParams} from '@tanstack/react-router';
 import {Link} from '@tanstack/react-router';
@@ -66,7 +67,7 @@ const ProfilePage = () => {
         <div className="space-y-8">
             {loading ? (
                 <div className="flex justify-center items-center py-20">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-600"></div>
+                    <Spinner size="lg" />
                 </div>
             ) : error ? (
                 <ErrorPage message={error}/>
@@ -105,20 +106,20 @@ const ProfilePage = () => {
                             {user.is_verified &&
                                 <Badge variant="default" className="bg-emerald-500">{t('common.verified')}</Badge>}
                         </div>
-                        <p className="text-slate-500 dark:text-gray-400">@{user.username}</p>
+                        <p className="text-slate-500 dark:text-muted-foreground">@{user.username}</p>
                         <p className="text-slate-600 dark:text-gray-300 max-w-2xl">{user.bio || t('profile.noBio')}</p>
                         <div className="flex flex-wrap gap-6 text-sm">
-                            <div className="flex items-center gap-2"><UserPlus className="w-4 h-4 text-slate-400"/><span
+                            <div className="flex items-center gap-2"><UserPlus className="w-4 h-4 text-muted-foreground"/><span
                                 className="font-semibold text-slate-900 dark:text-white">{formatViews(user.subscriber_count || 0)}</span><span
-                                className="text-slate-500 dark:text-gray-400">{t('common.subscribers')}</span></div>
-                            <div className="flex items-center gap-2"><Play className="w-4 h-4 text-slate-400"/><span
+                                className="text-slate-500 dark:text-muted-foreground">{t('common.subscribers')}</span></div>
+                            <div className="flex items-center gap-2"><Play className="w-4 h-4 text-muted-foreground"/><span
                                 className="font-semibold text-slate-900 dark:text-white">{user.video_count || 0}</span><span
-                                className="text-slate-500 dark:text-gray-400">{t('common.videos_count')}</span></div>
-                            <div className="flex items-center gap-2"><Eye className="w-4 h-4 text-slate-400"/><span
+                                className="text-slate-500 dark:text-muted-foreground">{t('common.videos_count')}</span></div>
+                            <div className="flex items-center gap-2"><Eye className="w-4 h-4 text-muted-foreground"/><span
                                 className="font-semibold text-slate-900 dark:text-white">{formatViews(user.total_views || 0)}</span><span
-                                className="text-slate-500 dark:text-gray-400">{t('common.views')}</span></div>
-                            <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-slate-400"/><span
-                                className="text-slate-500 dark:text-gray-400">{t('common.joinedAt', {date: formatDate(user.created_at || new Date().toISOString())})}</span>
+                                className="text-slate-500 dark:text-muted-foreground">{t('common.views')}</span></div>
+                            <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-muted-foreground"/><span
+                                className="text-slate-500 dark:text-muted-foreground">{t('common.joinedAt', {date: formatDate(user.created_at || new Date().toISOString())})}</span>
                             </div>
                         </div>
                     </div>
@@ -166,7 +167,7 @@ const ProfilePage = () => {
                                                 </div>
                                                 <div className="p-3">
                                                     <h3 className="font-semibold text-slate-900 dark:text-white line-clamp-2 text-sm group-hover:text-emerald-600 transition-colors">{video.title}</h3>
-                                                    <p className="text-xs text-slate-500 dark:text-gray-400 mt-2">{formatViews(video.view_count || 0)} {t('common.views')}
+                                                    <p className="text-xs text-slate-500 dark:text-muted-foreground mt-2">{formatViews(video.view_count || 0)} {t('common.views')}
                                                         · {formatDate(video.created_at || video.create_time || new Date().toISOString())}</p>
                                                 </div>
                                             </div>
@@ -174,22 +175,22 @@ const ProfilePage = () => {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="text-center py-12 text-slate-500 dark:text-gray-400">
+                                <div className="text-center py-12 text-slate-500 dark:text-muted-foreground">
                                     {t('profile.noVideos')}
                                 </div>
                             )}
                         </TabsContent>
                         <TabsContent value="playlists" className="mt-6">
                             <div
-                                className="text-center py-12 text-slate-500 dark:text-gray-400">{t('profile.noPlaylists')}</div>
+                                className="text-center py-12 text-slate-500 dark:text-muted-foreground">{t('profile.noPlaylists')}</div>
                         </TabsContent>
                         <TabsContent value="favorites" className="mt-6">
                             <div
-                                className="text-center py-12 text-slate-500 dark:text-gray-400">{t('profile.noFavorites')}</div>
+                                className="text-center py-12 text-slate-500 dark:text-muted-foreground">{t('profile.noFavorites')}</div>
                         </TabsContent>
                         <TabsContent value="community" className="mt-6">
                             <div
-                                className="text-center py-12 text-slate-500 dark:text-gray-400">{t('profile.noCommunity')}</div>
+                                className="text-center py-12 text-slate-500 dark:text-muted-foreground">{t('profile.noCommunity')}</div>
                         </TabsContent>
                     </Tabs>
                 </>

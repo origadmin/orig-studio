@@ -43,6 +43,7 @@ import {
     Pause, Settings, ArrowUpDown, Download, AlertCircle
 } from "lucide-react";
 import {formatDate, formatRelativeTime} from "../../lib/format";
+import {TablePagination} from '@/components/common/TablePagination';
 
 // ─── Types ─────────────────────────────────────────────
 
@@ -122,7 +123,7 @@ const badgeStyle: Record<string, string> = {
     amber: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800",
     emerald: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800",
     rose: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-800",
-    slate: "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
+    slate: "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-muted-foreground dark:border-slate-700",
 };
 
 // ─── Task Row Component ──────────────────────────────
@@ -166,18 +167,18 @@ function TaskRow({
                 {/* ENCODING */}
                 <TableCell className="w-[220px]">
                     <a href={mediaLink(task.media_id)}
-                       className="group/media inline-flex items-center gap-3 text-sm font-medium text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200">
+                       className="group/media inline-flex items-center gap-3 text-sm font-medium text-slate-900 dark:text-slate-100 hover:text-info dark:hover:text-blue-400 transition-all duration-200">
                         <span
                             className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-50 to-slate-100 dark:from-blue-950/30 dark:to-slate-800 flex items-center justify-center shrink-0 group-hover/media:from-blue-100 group-hover/media:to-blue-50 dark:group-hover/media:from-blue-900/30 dark:group-hover/media:to-blue-950/50 transition-all duration-200 shadow-sm">
                             <Video
-                                className="w-4 h-4 text-blue-500 group-hover/media:text-blue-600 dark:group-hover/media:text-blue-400 transition-colors"/>
+                                className="w-4 h-4 text-info group-hover/media:text-info dark:group-hover/media:text-blue-400 transition-colors"/>
                         </span>
                         <div className="min-w-0 flex-1">
                             <span className="block truncate max-w-[150px] font-medium text-slate-900 dark:text-slate-100">Media</span>
                             <span className="block truncate max-w-[150px] text-xs text-muted-foreground">{task.media_id.substring(0, 8)}...</span>
                         </div>
                         <ExternalLink
-                            className="w-3.5 h-3.5 opacity-0 group-hover/media:opacity-100 text-blue-500 shrink-0 transition-opacity"/>
+                            className="w-3.5 h-3.5 opacity-0 group-hover/media:opacity-100 text-info shrink-0 transition-opacity"/>
                     </a>
                 </TableCell>
 
@@ -197,7 +198,7 @@ function TaskRow({
                                 <span
                                     className="text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-tight">Processing</span>
                                 <span
-                                    className="text-[10px] tabular-nums font-bold text-slate-600 dark:text-slate-400">{task.progress ?? 0}%</span>
+                                    className="text-[10px] tabular-nums font-bold text-slate-600 dark:text-muted-foreground">{task.progress ?? 0}%</span>
                             </div>
                             <div className="h-2.5 w-full bg-sky-100 dark:bg-sky-950/30 rounded-full overflow-hidden">
                                 <div
@@ -229,7 +230,7 @@ function TaskRow({
                             <div className="flex items-center justify-between">
                                 <span
                                     className="text-[10px] font-bold uppercase tracking-tight">{task.status === 'pending' ? 'Queued' : 'Waiting'}</span>
-                                <span className="text-[10px] tabular-nums font-bold text-slate-600 dark:text-slate-400">0%</span>
+                                <span className="text-[10px] tabular-nums font-bold text-slate-600 dark:text-muted-foreground">0%</span>
                             </div>
                             <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"/>
                         </div>
@@ -269,7 +270,7 @@ function TaskRow({
                 <TableCell className="w-[180px] text-right">
                     <div className="flex items-center justify-end gap-1">
                         {canRetry && (
-                            <Button variant="ghost" size="icon" className="h-6 w-6"
+                            <Button variant="ghost" size="icon-sm"
                                     title={showError ? 'Hide Details' : 'Show Details'}
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -279,7 +280,7 @@ function TaskRow({
                             </Button>
                         )}
                         {canRetry && (
-                            <Button variant="ghost" size="icon" className="h-6 w-6" title="Retry"
+                            <Button variant="ghost" size="icon-sm" title="Retry"
                                     disabled={isRetrying}
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -292,7 +293,7 @@ function TaskRow({
                         )}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-6 w-6" title="More Actions">
+                                <Button variant="ghost" size="icon-sm" title="More Actions">
                                     <MoreVertical className="h-3 w-3"/>
                                 </Button>
                             </DropdownMenuTrigger>
@@ -324,7 +325,7 @@ function TaskRow({
                                 <div className="flex-shrink-0">
                                     <div
                                         className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                                        <svg className="w-4 h-4 text-red-600 dark:text-red-400" fill="none"
+                                        <svg className="w-4 h-4 text-destructive dark:text-red-400" fill="none"
                                              viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                                   d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -355,7 +356,7 @@ function TaskRow({
                                         <div
                                             className="mt-3 flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                                             <svg
-                                                className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5"
+                                                className="w-4 h-4 text-info dark:text-blue-400 flex-shrink-0 mt-0.5"
                                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                                       d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -863,8 +864,6 @@ const filteredTasks = useMemo(() => {
         {value: "failed", label: "失败", count: filteredData?.failed_count ?? 0},
     ];
 
-    const totalPages = Math.ceil((filteredData?.total ?? 0) / (filteredData?.page_size ?? 25));
-
     // Loading skeleton
     if (loading && !filteredData) {
         return (
@@ -891,14 +890,14 @@ const filteredTasks = useMemo(() => {
                             <div>
                                 <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">Transcoding
                                     Status</h2>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-2">
+                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5 flex items-center gap-2">
                                     <span className="inline-block w-2 h-2 rounded-full bg-sky-500 animate-pulse"/>
                                     Live monitoring of video processing workflows
                                 </p>
                             </div>
                             <div className="flex items-center gap-3">
                                 <Badge variant="outline"
-                                       className={`gap-2 text-[11px] font-bold px-3 py-1 border-2 ${sseStatus.connected ? "text-emerald-500 border-emerald-100 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-900" : "text-slate-400 border-slate-100 bg-slate-50/50 dark:bg-slate-900/20 dark:border-slate-800"}`}>
+                                       className={`gap-2 text-[11px] font-bold px-3 py-1 border-2 ${sseStatus.connected ? "text-emerald-500 border-emerald-100 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-900" : "text-muted-foreground border-slate-100 bg-slate-50/50 dark:bg-slate-900/20 dark:border-slate-800"}`}>
                                     <div
                                         className={`w-1.5 h-1.5 rounded-full ${sseStatus.connected ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-300"}`}/>
                                     {sseStatus.connected ? "CONNECTED" : "DISCONNECTED"}
@@ -931,7 +930,7 @@ const filteredTasks = useMemo(() => {
                                         placeholder="Search tasks by media ID, profile, or status..."
                                         value={pendingSearchQuery}
                                         onChange={(e) => setPendingSearchQuery(e.target.value)}
-                                        className="pl-10 h-10 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                        className="pl-10 h-8 rounded-btn-sm w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
                                     />
                                 </div>
                             </div>
@@ -941,7 +940,7 @@ const filteredTasks = useMemo(() => {
                                     onValueChange={(val) => setPendingProfileFilter(val === 'all' ? '' : val)}
                                 >
                                     <SelectTrigger
-                                        className="w-[140px] h-10 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                        className="w-[140px] h-8 rounded-btn-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
                                             <SelectValue placeholder="Profile"/>
@@ -965,7 +964,7 @@ const filteredTasks = useMemo(() => {
                                     onValueChange={(val) => setPendingChunkFilter(val === 'all' ? '' : val)}
                                 >
                                     <SelectTrigger
-                                        className="w-[140px] h-10 focus:ring-1 focus:ring-ring focus:ring-offset-0">
+                                        className="w-[140px] h-8 rounded-btn-sm focus:ring-1 focus:ring-ring focus:ring-offset-0">
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
                                             <SelectValue placeholder="Chunk"/>
@@ -984,7 +983,6 @@ const filteredTasks = useMemo(() => {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="h-9 px-3"
                                         onClick={handleReset}
                                     >
                                         <RotateCcw className="h-4 w-4 mr-2"/>
@@ -993,7 +991,6 @@ const filteredTasks = useMemo(() => {
                                     <Button
                                         variant="default"
                                         size="sm"
-                                        className="h-9 px-4"
                                         onClick={handleSearch}
                                     >
                                         <Search className="h-4 w-4 mr-2"/>
@@ -1044,9 +1041,9 @@ const filteredTasks = useMemo(() => {
                             <CardContent className="p-5">
                                 <div className="flex items-start justify-between">
                                     <div className="space-y-1">
-                                        <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">{card.label}</p>
+                                        <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground dark:text-slate-500">{card.label}</p>
                                         <h3 className={`text-3xl font-bold tabular-nums text-${card.color}-600 dark:text-${card.color}-400`}>{card.value}</h3>
-                                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{card.desc}</p>
+                                        <p className="text-[10px] text-muted-foreground dark:text-slate-500 font-medium">{card.desc}</p>
                                     </div>
                                     <div
                                         className={`p-2.5 rounded-xl bg-${card.color}-50 dark:bg-${card.color}-950/30 text-${card.color}-500 dark:text-${card.color}-400`}>
@@ -1154,7 +1151,7 @@ const filteredTasks = useMemo(() => {
                         <div className="overflow-x-auto">
                             <Table>
                                 <TableHeader>
-                                    <TableRow className="border-b hover:bg-transparent bg-muted/50">
+                                    <TableRow className="border-b hover:bg-transparent">
                                         <TableHead className="w-[50px]">
                                             <Checkbox
                                                 checked={filteredTasks.length > 0 && selectedRows.length === filteredTasks.length}
@@ -1224,22 +1221,13 @@ const filteredTasks = useMemo(() => {
             </Card>
 
             {/* Pagination */}
-            {filteredData && filteredData.total > (filteredData.page_size ?? 25) && (
-                <div className="flex items-center justify-between pt-1 text-xs text-muted-foreground">
-                    <span className="tabular-nums">
-                        Page {filteredData.page} of {totalPages} · {filteredData.total} total
-                    </span>
-                    <div className="flex gap-1.5">
-                        <Button variant="outline" size="sm" className="h-9 px-3"
-                                disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
-                            ← Previous
-                        </Button>
-                        <Button variant="outline" size="sm" className="h-9 px-3"
-                                disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>
-                            Next →
-                        </Button>
-                    </div>
-                </div>
+            {filteredData && (
+                <TablePagination
+                    page={page}
+                    pageSize={filteredData.page_size ?? 25}
+                    total={filteredData.total}
+                    onPageChange={setPage}
+                />
             )}
         </div>
     );

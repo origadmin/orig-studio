@@ -1,8 +1,9 @@
-import React, {useState, useEffect} from 'react';
+﻿import React, {useState, useEffect} from 'react';
 import {Link} from '@tanstack/react-router';
 import {Users, UserPlus, Search, Loader2} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {Button} from '@/components/ui/button';
+import {Spinner} from '@/components/ui/spinner';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {formatDate} from '@/lib/format';
 import {subscriptionApi} from '@/lib/api/subscription';
@@ -57,8 +58,7 @@ const SubscriptionsPage = () => {
         if (loading && page === 1) {
             return (
                 <div className="flex items-center justify-center min-h-[400px]">
-                    <div
-                        className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"/>
+                    <Spinner />
                 </div>
             );
         }
@@ -69,7 +69,7 @@ const SubscriptionsPage = () => {
 
         if (list.length === 0) {
             return (
-                <div className="text-center py-16 text-gray-400">
+                <div className="text-center py-16 text-muted-foreground">
                     <Users size={48} className="mx-auto mb-3 opacity-30"/>
                     <p>{activeTab === 'subscriptions' ? t('subscriptions.noSubscriptions') : t('subscriptions.noFollowers')}</p>
                 </div>
@@ -88,7 +88,7 @@ const SubscriptionsPage = () => {
                             </Avatar>
                             <div>
                                 <p className="font-medium text-gray-900 dark:text-white">{user.username}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                <p className="text-xs text-gray-500 dark:text-muted-foreground">
                                     {t('subscriptions.subscribedAt', {date: formatDate(user.subscribed_at)})}
                                 </p>
                             </div>
@@ -132,7 +132,7 @@ const SubscriptionsPage = () => {
                 <button
                     className={`px-4 py-3 font-medium ${activeTab === 'subscriptions'
                         ? 'border-b-2 border-emerald-600 text-emerald-600'
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'}
+                        : 'text-gray-500 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-gray-100'}
                     `}
                     onClick={() => setActiveTab('subscriptions')}
                 >
@@ -141,7 +141,7 @@ const SubscriptionsPage = () => {
                 <button
                     className={`px-4 py-3 font-medium ${activeTab === 'followers'
                         ? 'border-b-2 border-emerald-600 text-emerald-600'
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'}
+                        : 'text-gray-500 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-gray-100'}
                     `}
                     onClick={() => setActiveTab('followers')}
                 >

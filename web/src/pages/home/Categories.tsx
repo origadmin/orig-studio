@@ -1,3 +1,4 @@
+﻿import {Spinner} from "@/components/ui/spinner"
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * Categories Page
@@ -42,14 +43,14 @@ const CategoriesPage = () => {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"/>
+                <Spinner />
             </div>
         );
     }
 
     if (error || categories.length === 0) {
         return (
-            <div className="text-center py-16 text-gray-400">
+            <div className="text-center py-16 text-muted-foreground">
                 <Folder size={48} className="mx-auto mb-3 opacity-30"/>
                 <p>{error || t('categories.noCategories')}</p>
             </div>
@@ -110,12 +111,12 @@ const CategoriesPage = () => {
                                                 alt={media.edges?.user?.[0]?.username}
                                                 className="w-5 h-5 rounded-full object-cover"
                                             />
-                                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                                            <span className="text-xs text-gray-500 dark:text-muted-foreground">
                                                 {media.edges?.user?.[0]?.username || 'Unknown'}
                                             </span>
                                         </div>
                                         <div
-                                            className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
+                                            className="flex items-center gap-3 text-xs text-muted-foreground dark:text-gray-500">
                                             <span className="flex items-center gap-1">
                                                 <Eye size={12}/>
                                                 {formatViews(media.view_count)}
@@ -125,7 +126,7 @@ const CategoriesPage = () => {
                                 </div>
                             </Link>
                         )) || (
-                            <div className="col-span-full text-center py-8 text-gray-400">
+                            <div className="col-span-full text-center py-8 text-muted-foreground">
                                 <p>{t('categories.noVideos')}</p>
                             </div>
                         )}

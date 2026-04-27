@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {contentApi, Content} from '@/lib/api/content';
 import {extractList} from '@/lib/extract';
+import {TablePagination} from '@/components/common/TablePagination';
 
 export default function ContentPage() {
     const [contents, setContents] = useState<Content[]>([]);
@@ -35,6 +36,9 @@ export default function ContentPage() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(20);
+    const [total, setTotal] = useState(0);
 
     // 加载内容数据
     useEffect(() => {
@@ -42,10 +46,12 @@ export default function ContentPage() {
             setLoading(true);
             setError(null);
             try {
-                const response = await contentApi.adminList({page_size: 100});
-                // 提取列表数据，防止因格式不匹配导致崩溃
+                const response = await contentApi.adminList({page, page_size: pageSize});
                 const contentList = extractList<Content>(response);
                 setContents(contentList);
+                if ((response as any)?.total !== undefined) {
+                    setTotal((response as any).total);
+                }
             } catch (err) {
                 setError('Failed to load content');
                 console.error('Error loading content:', err);
@@ -55,7 +61,7 @@ export default function ContentPage() {
         };
 
         loadContent();
-    }, []);
+    }, [page]);
 
     const filteredContent = contents.filter(item => {
         const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -79,7 +85,7 @@ export default function ContentPage() {
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
                                 <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">Content Management</h2>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5">
                                     Manage articles, pages, and static content
                                 </p>
                             </div>
@@ -98,13 +104,13 @@ export default function ContentPage() {
                                         placeholder="Search content..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-10 h-10 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        className="pl-10 h-8 rounded-btn-sm w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                                     />
                                 </div>
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
                                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                    <SelectTrigger className="w-[140px] h-10 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <SelectTrigger className="w-[140px] h-8 rounded-btn-sm focus:ring-2 focus:ring-primary focus:border-transparent">
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
                                             <SelectValue placeholder="All Status"/>
@@ -132,7 +138,7 @@ export default function ContentPage() {
                             <CardDescription>Manage your articles and pages</CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button className="bg-blue-600 hover:bg-blue-700">
+                            <Button size="sm">
                                 <Plus className="w-4 h-4 mr-2"/>
                                 Create Content
                             </Button>
@@ -162,7 +168,7 @@ export default function ContentPage() {
                             ) : error ? (
                                 <TableRow key="error">
                                     <TableCell colSpan={7} className="text-center py-8">
-                                        <div className="text-red-600">{error}</div>
+                                        <div className="text-destructive">{error}</div>
                                         <Button 
                                             variant="outline" 
                                             size="sm" 
@@ -239,6 +245,13 @@ export default function ContentPage() {
                     </Table>
                 </CardContent>
             </Card>
+
+            <TablePagination
+                page={page}
+                pageSize={pageSize}
+                total={total}
+                onPageChange={setPage}
+            />
         </div>
     );
 }

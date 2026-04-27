@@ -1,3 +1,4 @@
+﻿import {Spinner} from "@/components/ui/spinner"
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * 历史记录页
@@ -78,7 +79,7 @@ const HistoryPage = () => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"/>
+                <Spinner />
             </div>
         );
     }
@@ -92,7 +93,7 @@ const HistoryPage = () => {
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('history.title')}</h1>
                     </div>
                 </div>
-                <div className="text-center py-20 text-gray-400">
+                <div className="text-center py-20 text-muted-foreground">
                     <History size={48} className="mx-auto mb-3 opacity-30"/>
                     <p className="text-lg mb-1">{t('history.empty')}</p>
                     <p className="text-sm">{t('history.emptyDesc')}</p>
@@ -115,7 +116,7 @@ const HistoryPage = () => {
                 <Button
                     onClick={clearHistory}
                     variant="ghost"
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-destructive hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                 >
                     <Trash2 size={14}/> {t('history.clear')}
                 </Button>
@@ -152,8 +153,8 @@ const HistoryPage = () => {
                             <h3 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                                 {item.media?.title}
                             </h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{item.media?.edges?.user?.[0]?.username || 'Unknown'}</p>
-                            <p className="text-xs text-gray-400 mt-0.5">{formatDate(item.watched_at)}</p>
+                            <p className="text-xs text-gray-500 dark:text-muted-foreground mt-1">{item.media?.edges?.user?.[0]?.username || 'Unknown'}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{formatDate(item.watched_at)}</p>
                         </div>
 
                         {/* 移除按钮 */}
@@ -164,7 +165,7 @@ const HistoryPage = () => {
                             }}
                             variant="ghost"
                             size="sm"
-                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                            className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                         >
                             <X size={14}/>
                         </Button>
@@ -175,9 +176,7 @@ const HistoryPage = () => {
             {/* 无限滚动哨兵 */}
             <div ref={sentinelRef} className="flex items-center justify-center py-6">
                 {loading && (
-                    <div
-                        className="animate-spin w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full"
-                    />
+                    <Spinner size="sm"/>
                 )}
             </div>
         </div>
