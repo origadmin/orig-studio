@@ -1,4 +1,4 @@
-import React, {useState, useRef, useCallback, useEffect} from 'react';
+﻿import React, {useState, useRef, useCallback, useEffect} from 'react';
 import {
     Upload, X, File, Image, Video, CheckCircle,
     AlertCircle, Edit2
@@ -210,9 +210,9 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
     const getStatusIcon = (status: UploadStatus) => {
         switch (status) {
             case 'success':
-                return <CheckCircle className="w-5 h-5 text-green-500"/>;
+                return <CheckCircle className="w-5 h-5 text-success"/>;
             case 'error':
-                return <AlertCircle className="w-5 h-5 text-red-500"/>;
+                return <AlertCircle className="w-5 h-5 text-destructive"/>;
             case 'uploading':
                 return <div
                     className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"/>;
@@ -227,7 +227,7 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
             <div className="lg:col-span-7 space-y-6">
                 <div
                     className={`border-2 border-dashed rounded-2xl p-8 text-center transition-colors cursor-pointer ${
-                        isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                        isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-input'
                     }`}
                     onDragOver={(e) => {
                         e.preventDefault();
@@ -247,9 +247,9 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
                         }}
                         className="hidden"
                     />
-                    <Upload className="w-10 h-10 text-blue-600 mx-auto mb-3"/>
+                    <Upload className="w-10 h-10 text-info mx-auto mb-3"/>
                     <p className="text-sm font-medium text-gray-700">{t('upload.dropzoneTitle')}</p>
-                    <p className="text-xs text-gray-400 mt-1">{t('upload.supportedFormats')}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t('upload.supportedFormats')}</p>
                 </div>
 
                 <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
@@ -272,8 +272,8 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center">
                                         {fileItem.file.type.startsWith('video/') ?
-                                            <Video className="w-6 h-6 text-blue-500"/> :
-                                            <File className="w-6 h-6 text-gray-400"/>}
+                                            <Video className="w-6 h-6 text-info"/> :
+                                            <File className="w-6 h-6 text-muted-foreground"/>}
                                     </div>
                                 )}
                             </div>
@@ -281,12 +281,12 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
                                 <div className="flex justify-between items-start">
                                     <p className="font-medium text-sm text-gray-900 truncate">{fileItem.title || fileItem.file.name}</p>
                                     <span
-                                        className="text-[10px] text-gray-400">{formatFileSize(fileItem.file.size)}</span>
+                                        className="text-[10px] text-muted-foreground">{formatFileSize(fileItem.file.size)}</span>
                                 </div>
 
                                 {['uploading', 'initiating', 'completing'].includes(fileItem.status) ? (
                                     <div className="mt-1.5 space-y-1">
-                                        <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
+                                        <div className="h-1 bg-muted rounded-full overflow-hidden">
                                             <div className="h-full bg-blue-600 transition-all"
                                                  style={{width: `${fileItem.progress}%`}}/>
                                         </div>
@@ -296,7 +296,7 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
                                         </div>
                                     </div>
                                 ) : (
-                                    <p className={`text-[10px] mt-1 ${fileItem.status === 'success' ? 'text-green-500' : fileItem.status === 'error' ? 'text-red-500' : 'text-gray-400'}`}>
+                                    <p className={`text-[10px] mt-1 ${fileItem.status === 'success' ? 'text-success' : fileItem.status === 'error' ? 'text-destructive' : 'text-muted-foreground'}`}>
                                         {t(`upload.status${fileItem.status.charAt(0).toUpperCase()}${fileItem.status.slice(1)}`)}
                                     </p>
                                 )}
@@ -306,7 +306,7 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8 text-gray-400 hover:text-red-500"
+                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         removeFile(fileItem.id);
@@ -318,7 +318,7 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
                         </div>
                     ))}
                     {files.length === 0 && (
-                        <div className="text-center py-8 text-gray-400 text-sm">暂无上传文件</div>
+                        <div className="text-center py-8 text-muted-foreground text-sm">暂无上传文件</div>
                     )}
                 </div>
             </div>
@@ -329,7 +329,7 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
                     <Card className="sticky top-0 shadow-md border-gray-200 max-h-[600px] overflow-y-auto">
                         <CardHeader className="pb-3 border-b">
                             <CardTitle className="text-lg flex items-center gap-2">
-                                <Edit2 className="w-4 h-4 text-blue-600"/>
+                                <Edit2 className="w-4 h-4 text-info"/>
                                 编辑信息
                             </CardTitle>
                         </CardHeader>
@@ -394,7 +394,7 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
                                         <Badge key={tag} variant="secondary"
                                                className="px-2 py-0.5 text-[10px] flex items-center gap-1">
                                             {tag}
-                                            <X className="w-3 h-3 cursor-pointer hover:text-red-500"
+                                            <X className="w-3 h-3 cursor-pointer hover:text-destructive"
                                                onClick={() => removeTag(tag)}/>
                                         </Badge>
                                     ))}
@@ -405,7 +405,7 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
                                 <label className="text-xs font-bold text-gray-500 uppercase">封面图 (可选)</label>
                                 <div className="flex items-center gap-4">
                                     <div
-                                        className="relative w-24 h-16 bg-gray-100 rounded-lg overflow-hidden border border-dashed border-gray-300 flex items-center justify-center group flex-shrink-0">
+                                        className="relative w-24 h-16 bg-gray-100 rounded-lg overflow-hidden border border-dashed border-input flex items-center justify-center group flex-shrink-0">
                                         {selectedFile.coverUrl || selectedFile.coverFile ? (
                                             <img
                                                 src={selectedFile.coverUrl || (selectedFile.coverFile ? URL.createObjectURL(selectedFile.coverFile) : '')}
@@ -423,7 +423,7 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
                                         </div>
                                     </div>
                                     <div className="flex-1 space-y-1">
-                                        <p className="text-xs text-gray-400">手动上传封面图，否则将自动截取视频画面</p>
+                                        <p className="text-xs text-muted-foreground">手动上传封面图，否则将自动截取视频画面</p>
                                         <Button
                                             variant="outline"
                                             size="sm"
@@ -465,7 +465,7 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
                                     </Button>
                                 )}
                                 {onCancel && (
-                                    <Button variant="ghost" className="w-full text-gray-400"
+                                    <Button variant="ghost" className="w-full text-muted-foreground"
                                             onClick={onCancel}>
                                         关闭
                                     </Button>
@@ -475,7 +475,7 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
                     </Card>
                 ) : (
                     <div
-                        className="h-[400px] flex flex-col items-center justify-center text-gray-400 border-2 border-dashed rounded-2xl p-12">
+                        className="h-[400px] flex flex-col items-center justify-center text-muted-foreground border-2 border-dashed rounded-2xl p-12">
                         <File className="w-12 h-12 mb-4 opacity-20"/>
                         <p className="text-sm italic">选择左侧文件以编辑详情</p>
                     </div>

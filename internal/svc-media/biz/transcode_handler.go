@@ -161,13 +161,13 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		return fmt.Errorf("list profiles: %w", err)
 	}
 
-	// Separate video, preview, and frames profiles
-	var videoProfiles, previewProfiles, framesProfiles []*dto.EncodeProfile
+	// Separate video, preview, and sprite profiles
+	var videoProfiles, previewProfiles, spriteProfiles []*dto.EncodeProfile
 	for _, p := range profiles {
 		if IsPreviewProfile(p) {
 			previewProfiles = append(previewProfiles, p)
-		} else if IsFramesProfile(p) {
-			framesProfiles = append(framesProfiles, p)
+		} else if IsSpriteProfile(p) {
+			spriteProfiles = append(spriteProfiles, p)
 		} else if IsVideoProfile(p) {
 			// Use all active video profiles regardless of video type
 			videoProfiles = append(videoProfiles, p)
@@ -176,7 +176,8 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		}
 	}
 
-	allProfiles := append(append(videoProfiles, previewProfiles...), framesProfiles...)
+	allProfiles := append(videoProfiles, previewProfiles...)
+	allProfiles = append(allProfiles, spriteProfiles...)
 
 	// Get existing tasks for this media
 	existingTasks, err := h.encodingRepo.ListByMedia(procCtx, mediaID)
@@ -275,9 +276,6 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		var outputDir string
 		if IsVideoProfile(profile) {
 			outputDir = filepath.Join(hlsBaseDir, profile.Name)
-		} else if IsFramesProfile(profile) {
-			// Frames: output goes to frames/ dir; we pass hlsBaseDir as anchor
-			outputDir = hlsBaseDir // executeFramesJob will navigate up to frames/
 		} else {
 			// Preview: output goes to previews/ dir; we pass hlsBaseDir as anchor
 			outputDir = hlsBaseDir // executePreviewJob will navigate up to previews/
@@ -344,8 +342,8 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 					t.OutputPath = fmt.Sprintf("%s/%s/index.m3u8", mediaUUID, profile.Name)
 				} else if IsPreviewProfile(profile) {
 					t.OutputPath = fmt.Sprintf("previews/%s.gif", mediaUUID)
-				} else if IsFramesProfile(profile) {
-					t.OutputPath = fmt.Sprintf("frames/%s/", mediaUUID)
+				} else if IsSpriteProfile(profile) {
+					t.OutputPath = fmt.Sprintf("sprites/%s.jpg", mediaUUID)
 				}
 			}
 		}
@@ -404,7 +402,18 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 			continue
 		}
 
-		if IsFramesProfile(profile) {
+		if IsSpriteProfile(profile) {
+			if t.Status == enums.EncodingTaskStatusSuccess {
+				spritePath := fmt.Sprintf("sprites/%s.jpg", mediaUUID)
+				vttPath := fmt.Sprintf("sprites/%s.vtt", mediaUUID)
+				if err := h.mediaRepo.UpdateSpriteFields(procCtx, mediaID, "success", spritePath, vttPath); err != nil {
+					h.logger.Warnf("failed to update sprite fields for media %s: %v", mediaID, err)
+				}
+			} else if t.Status == enums.EncodingTaskStatusFailed {
+				if err := h.mediaRepo.UpdateSpriteFields(procCtx, mediaID, "failed", "", ""); err != nil {
+					h.logger.Warnf("failed to update sprite fields (failed) for media %s: %v", mediaID, err)
+				}
+			}
 			continue
 		}
 
@@ -434,6 +443,9 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		media.EncodingStatus = "failed"
 	}
 
+	// Recalculate listable now that encoding_status may have changed
+	media.Listable = h.mediaUC.ShouldBeListable(media)
+
 	// Regenerate master playlist if we have any successful variants
 	if len(variantInfos) > 0 {
 		masterRelPath := fmt.Sprintf("hls/%s/master.m3u8", mediaUUID)
@@ -461,10 +473,10 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 	h.logger.Infof("media processing complete: media=%s uuid=%s status=%s (video: %d ok / %d fail)",
 		mediaID, mediaUUID, media.EncodingStatus, videoSuccessCount, videoFailedCount)
 
-	if media.Type == "video" && h.spriteUC != nil {
+	if media.Thumbnail == "" && h.spriteUC != nil {
 		go func() {
-			if err := h.spriteUC.ProcessPostTranscode(context.Background(), mediaID); err != nil {
-				h.logger.Warnf("post-transcode processing failed for media %s: %v", mediaID, err)
+			if err := h.spriteUC.RegenerateThumbnail(context.Background(), mediaID, 0); err != nil {
+				h.logger.Warnf("thumbnail regeneration failed for media %s: %v", mediaID, err)
 			}
 		}()
 	}
@@ -488,9 +500,8 @@ func (h *TranscodeHandler) waitForOutput(
 		expectedFile = filepath.Join(job.OutputDir, "index.m3u8")
 	} else if IsPreviewProfile(job.Profile) {
 		expectedFile = filepath.Join(job.OutputDir, "..", "previews", fmt.Sprintf("%s.gif", job.MediaID))
-	} else if IsFramesProfile(job.Profile) {
-		// For frames, we just wait for the directory to be created
-		expectedFile = filepath.Join(job.OutputDir, "..", "frames")
+	} else if IsSpriteProfile(job.Profile) {
+		expectedFile = filepath.Join(job.OutputDir, "..", "sprites", fmt.Sprintf("%s.jpg", job.MediaID))
 	} else {
 		return nil // unknown type, nothing to wait for
 	}
@@ -529,9 +540,9 @@ func (h *TranscodeHandler) waitForOutput(
 			return fmt.Errorf("task %s failed: %s", task.Id, currentTask.ErrorMessage)
 		}
 
-		// For preview and frames profiles, provide basic progress updates
+		// For preview/sprite profiles, provide basic progress updates
 		// Video profiles have their own progress updates from ffmpeg
-		if (IsPreviewProfile(job.Profile) || IsFramesProfile(job.Profile)) && currentTask != nil {
+		if (IsPreviewProfile(job.Profile) || IsSpriteProfile(job.Profile)) && currentTask != nil {
 			// Basic progress: 20% to 90%
 			progress := 20 + (i * 70 / maxAttempts)
 			if progress > 90 {
@@ -556,15 +567,6 @@ func (h *TranscodeHandler) waitForOutput(
 
 		// Check if expected file/directory exists
 		if _, err := os.Stat(expectedFile); err == nil {
-			// For frames profile, we also check if at least one frame exists
-			if IsFramesProfile(job.Profile) {
-				framesDir := expectedFile
-				frameFile := filepath.Join(framesDir, "frame_001.jpg")
-				if _, err := os.Stat(frameFile); err == nil {
-					return nil // directory and first frame exist
-				}
-				continue // wait more for frames to be generated
-			}
 			return nil // file/directory exists
 		}
 	}

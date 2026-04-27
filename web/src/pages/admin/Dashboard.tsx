@@ -1,3 +1,4 @@
+﻿import {Spinner} from "@/components/ui/spinner"
 import React from 'react';
 import {
     Film,
@@ -32,14 +33,14 @@ const Dashboard = () => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"/>
+                <Spinner />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="text-center py-20 text-gray-400">
+            <div className="text-center py-20 text-muted-foreground">
                 <p className="text-lg mb-1">{t('common.loading')}</p>
                 <p className="text-sm">{(error as Error).message}</p>
             </div>
@@ -184,20 +185,20 @@ const Dashboard = () => {
                 <Card className="shadow-sm relative overflow-hidden">
                     <CardContent className="p-6">
                         <h3 className="font-bold text-slate-900 dark:text-slate-50 mb-6 flex items-center gap-2">
-                            <BarChart3 size={20} className="text-blue-500"/>
+                            <BarChart3 size={20} className="text-info"/>
                             {t('admin.mediaByType') || 'Media by Type'}
                         </h3>
                         <div className="space-y-4">
                             <TypeBar label="Videos" count={stats.media_by_type?.video || 0} total={stats.total_media}
-                                     color="bg-blue-500"/>
+                                     color="bg-info"/>
                             <TypeBar label="Images" count={stats.media_by_type?.image || 0} total={stats.total_media}
-                                     color="bg-green-500"/>
+                                     color="bg-success"/>
                             <TypeBar label="Audio" count={stats.media_by_type?.audio || 0} total={stats.total_media}
                                      color="bg-purple-500"/>
                             <TypeBar label="Other" count={stats.media_by_type?.other || 0} total={stats.total_media}
                                      color="bg-gray-500"/>
                         </div>
-                        <div className="absolute bottom-0 left-0 h-1 bg-blue-500 w-full opacity-10"/>
+                        <div className="absolute bottom-0 left-0 h-1 bg-info w-full opacity-10"/>
                     </CardContent>
                 </Card>
 
@@ -205,18 +206,18 @@ const Dashboard = () => {
                 <Card className="shadow-sm relative overflow-hidden">
                     <CardContent className="p-6">
                         <h3 className="font-bold text-slate-900 dark:text-slate-50 mb-6 flex items-center gap-2">
-                            <Users size={20} className="text-red-500"/>
+                            <Users size={20} className="text-destructive"/>
                             {t('admin.usersByRole') || 'Users by Role'}
                         </h3>
                         <div className="space-y-4">
                             <TypeBar label="Admins" count={stats.users_by_role?.admin || 0} total={stats.total_users}
-                                     color="bg-red-500"/>
+                                     color="bg-destructive"/>
                             <TypeBar label="Editors" count={stats.users_by_role?.editor || 0} total={stats.total_users}
                                      color="bg-amber-500"/>
                             <TypeBar label="Users" count={stats.users_by_role?.user || 0} total={stats.total_users}
                                      color="bg-emerald-500"/>
                         </div>
-                        <div className="absolute bottom-0 left-0 h-1 bg-red-500 w-full opacity-10"/>
+                        <div className="absolute bottom-0 left-0 h-1 bg-destructive w-full opacity-10"/>
                     </CardContent>
                 </Card>
 
@@ -224,7 +225,7 @@ const Dashboard = () => {
                 <Card className="shadow-sm relative overflow-hidden">
                     <CardContent className="p-6">
                         <h3 className="font-bold text-slate-900 dark:text-slate-50 mb-6 flex items-center gap-2">
-                            <TrendingUp size={20} className="text-green-500"/>
+                            <TrendingUp size={20} className="text-success"/>
                             {t('admin.trendingContent') || 'Trending Content'}
                         </h3>
                         <div className="space-y-4">
@@ -240,7 +241,7 @@ const Dashboard = () => {
                                 <p className="text-sm text-gray-500 text-center py-4">No trending content yet</p>
                             )}
                         </div>
-                        <div className="absolute bottom-0 left-0 h-1 bg-green-500 w-full opacity-10"/>
+                        <div className="absolute bottom-0 left-0 h-1 bg-success w-full opacity-10"/>
                     </CardContent>
                 </Card>
             </div>
@@ -281,17 +282,17 @@ const Dashboard = () => {
                 <Card className="shadow-sm relative overflow-hidden">
                     <CardContent className="p-6">
                         <h3 className="font-bold text-slate-900 dark:text-slate-50 mb-6 flex items-center gap-2">
-                            <Users size={20} className="text-blue-500"/>
+                            <Users size={20} className="text-info"/>
                             {t('admin.topCreators') || 'Top Creators'}
                         </h3>
-                        <div className="absolute bottom-0 left-0 h-1 bg-blue-500 w-full opacity-10"/>
+                        <div className="absolute bottom-0 left-0 h-1 bg-info w-full opacity-10"/>
                         <div className="space-y-3">
                             {stats.top_creators?.map((creator: any, index: number) => (
                                 <div key={creator.id}
                                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                     <div className="flex items-center gap-3">
                                         <span
-                                            className="w-6 h-6 flex items-center justify-center bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 text-xs font-bold rounded">
+                                            className="w-6 h-6 flex items-center justify-center bg-blue-100 dark:bg-blue-900 text-info dark:text-blue-400 text-xs font-bold rounded">
                                             {index + 1}
                                         </span>
                                         <div>
@@ -319,8 +320,8 @@ const StatCard = ({icon, label, value, trend, trendUp, small = false, color = "p
     const colorMap = {
         primary: {
             bg: 'bg-blue-50 dark:bg-blue-950/30',
-            text: 'text-blue-500 dark:text-blue-400',
-            bar: 'bg-blue-500'
+            text: 'text-info dark:text-blue-400',
+            bar: 'bg-info'
         },
         pink: {
             bg: 'bg-pink-50 dark:bg-pink-950/30',
@@ -339,8 +340,8 @@ const StatCard = ({icon, label, value, trend, trendUp, small = false, color = "p
         },
         green: {
             bg: 'bg-green-50 dark:bg-green-950/30',
-            text: 'text-green-500 dark:text-green-400',
-            bar: 'bg-green-500'
+            text: 'text-success dark:text-green-400',
+            bar: 'bg-success'
         },
         sky: {
             bg: 'bg-sky-50 dark:bg-sky-950/30',
@@ -359,8 +360,8 @@ const StatCard = ({icon, label, value, trend, trendUp, small = false, color = "p
         },
         red: {
             bg: 'bg-red-50 dark:bg-red-950/30',
-            text: 'text-red-500 dark:text-red-400',
-            bar: 'bg-red-500'
+            text: 'text-destructive dark:text-red-400',
+            bar: 'bg-destructive'
         }
     };
     
@@ -372,7 +373,7 @@ const StatCard = ({icon, label, value, trend, trendUp, small = false, color = "p
             <CardContent className={`p-5 ${small ? 'p-4' : ''}`}>
                 <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                        <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">{label}</p>
+                        <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground dark:text-slate-500">{label}</p>
                         <h3 className={`text-3xl font-bold tabular-nums ${validColor.text} ${small ? 'text-xl' : ''}`}>{value}</h3>
                     </div>
                     <div
@@ -383,7 +384,7 @@ const StatCard = ({icon, label, value, trend, trendUp, small = false, color = "p
                     </div>
                 </div>
                 <div
-                    className={`mt-4 pt-4 border-t border-gray-50 dark:border-gray-700 flex items-center text-[11px] font-semibold ${trendUp === true ? 'text-green-600' : trendUp === false ? 'text-red-600' : 'text-gray-500'}`}>
+                    className={`mt-4 pt-4 border-t border-gray-50 dark:border-gray-700 flex items-center text-[11px] font-semibold ${trendUp === true ? 'text-success' : trendUp === false ? 'text-destructive' : 'text-gray-500'}`}>
                     {trendUp === true ? <TrendingUp size={14} className="mr-1"/> : trendUp === false ? <TrendingDown size={14} className="mr-1"/> : <Minus size={14} className="mr-1"/>}
                     {trend}
                 </div>
@@ -413,14 +414,14 @@ const TypeBar = ({label, count, total, color}: { label: string, count: number, t
 const TrendingItem = ({title, views, index}: { title: string, views: string, index: number }) => (
     <div className="flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
         <span
-            className="w-6 h-6 flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-bold rounded shrink-0">
+            className="w-6 h-6 flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-muted-foreground text-xs font-bold rounded shrink-0">
             {index}
         </span>
         <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-slate-800 dark:text-gray-200 truncate">{title}</p>
             <p className="text-xs text-slate-500">{views} views</p>
         </div>
-        <TrendingUp size={16} className="text-green-500 shrink-0"/>
+        <TrendingUp size={16} className="text-success shrink-0"/>
     </div>
 );
 

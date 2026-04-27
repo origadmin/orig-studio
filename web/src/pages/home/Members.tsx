@@ -1,3 +1,4 @@
+﻿import {Spinner} from "@/components/ui/spinner"
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * 成员页 - 展示平台用户
@@ -46,7 +47,7 @@ const MembersPage = () => {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"/>
+                <Spinner />
             </div>
         );
     }
@@ -57,7 +58,7 @@ const MembersPage = () => {
 
     if (members.length === 0) {
         return (
-            <div className="text-center py-16 text-gray-400">
+            <div className="text-center py-16 text-muted-foreground">
                 <Users size={48} className="mx-auto mb-3 opacity-30"/>
                 <p>{t('members.noMatch')}</p>
             </div>
@@ -77,7 +78,7 @@ const MembersPage = () => {
 
             {/* 搜索 */}
             <div className="relative max-w-md">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
                 <input
                     type="text"
                     value={filter}
@@ -106,11 +107,11 @@ const MembersPage = () => {
                                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                                     {member.username}
                                 </h3>
-                                <p className="text-xs text-gray-400">@{member.username}</p>
+                                <p className="text-xs text-muted-foreground">@{member.username}</p>
                             </div>
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 line-clamp-2">{member.email}</p>
-                        <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
+                        <p className="text-xs text-gray-500 dark:text-muted-foreground mt-3 line-clamp-2">{member.email}</p>
+                        <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
                             <span>{member.role} {t('members.role')}</span>
                             <span>{member.status} {t('members.status')}</span>
                         </div>
@@ -119,7 +120,7 @@ const MembersPage = () => {
             </div>
 
             {filtered.length === 0 && (
-                <div className="text-center py-16 text-gray-400">
+                <div className="text-center py-16 text-muted-foreground">
                     <Users size={48} className="mx-auto mb-3 opacity-30"/>
                     <p>{t('members.noMatch')}</p>
                 </div>

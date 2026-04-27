@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+﻿import React, {useState, useEffect, useRef} from 'react';
 import {Button} from '@/components/ui/button';
 import {UserPlus, UserCheck, Loader2, ChevronDown, Bell, BellOff, AlertTriangle} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
@@ -157,7 +157,7 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
 
     const buttonVariant = isSubscribed ? 'outline' : 'default';
     const buttonClass = isSubscribed
-        ? 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+        ? 'border-input dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
         : 'bg-red-600 hover:bg-red-700 text-white';
 
     return (
@@ -171,7 +171,7 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
                     className={`
                         ${className} 
                         ${isSubscribed
-                            ? 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 relative group'
+                            ? 'border-input dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 relative group'
                             : 'bg-red-600 hover:bg-red-700 text-white hover:shadow-lg transition-all duration-200'
                         }
                         ${size === 'lg' ? 'px-6 py-2.5' : size === 'sm' ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'}
@@ -198,7 +198,7 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
 
                 {subscriberCount > 0 && (
                     <span className={`ml-2 text-xs sm:text-sm ${
-                        isSubscribed ? 'text-gray-500 dark:text-gray-400' : 'text-gray-600 dark:text-gray-300'
+                        isSubscribed ? 'text-gray-500 dark:text-muted-foreground' : 'text-gray-600 dark:text-gray-300'
                     }`}>
                         {formatCount(subscriberCount)} {t('common.subscribers')}
                     </span>
@@ -212,7 +212,7 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
                         py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200
                     ">
                         <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-800">
-                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <p className="text-xs font-semibold text-gray-500 dark:text-muted-foreground uppercase tracking-wider">
                                 {t('subscriptions.notifications') || 'Notifications'}
                             </p>
                         </div>
@@ -223,7 +223,7 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
                             className={`
                                 w-full px-4 py-2.5 flex items-center gap-3 text-left
                                 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors
-                                ${notificationPref === 'all' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}
+                                ${notificationPref === 'all' ? 'bg-blue-50 dark:bg-blue-900/20 text-info dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}
                             `}
                         >
                             <Bell className="w-4 h-4"/>
@@ -241,7 +241,7 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
                             className={`
                                 w-full px-4 py-2.5 flex items-center gap-3 text-left
                                 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors
-                                ${notificationPref === 'personalized' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}
+                                ${notificationPref === 'personalized' ? 'bg-blue-50 dark:bg-blue-900/20 text-info dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}
                             `}
                         >
                             <Bell className="w-4 h-4"/>
@@ -259,7 +259,7 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
                             className={`
                                 w-full px-4 py-2.5 flex items-center gap-3 text-left
                                 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors
-                                ${notificationPref === 'none' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}
+                                ${notificationPref === 'none' ? 'bg-blue-50 dark:bg-blue-900/20 text-info dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}
                             `}
                         >
                             <BellOff className="w-4 h-4"/>
@@ -280,7 +280,7 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
                             }}
                             className="
                                 w-full px-4 py-2.5 flex items-center gap-3 text-left
-                                text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors font-medium
+                                text-destructive dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors font-medium
                             "
                         >
                             <UserPlus className="w-4 h-4 rotate-180"/>
@@ -320,7 +320,7 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
                 <DialogContent className="max-w-md">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 text-left">
-                            <AlertTriangle className="w-5 h-5 text-yellow-500"/>
+                            <AlertTriangle className="w-5 h-5 text-warning"/>
                             {t('subscriptions.confirmUnsubscribe') || 'Unsubscribe?'}
                         </DialogTitle>
                         <DialogDescription>

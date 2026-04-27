@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo, useRef} from 'react';
+﻿import React, {useState, useEffect, useMemo, useRef} from 'react';
 import {Link, useLocation} from '@tanstack/react-router';
 import {useTranslation} from 'react-i18next';
 import {useAuth} from '../../hooks/useAuth';
@@ -143,7 +143,7 @@ const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
     const FullNavSection = ({items, title}: { items: RenderNavItem[]; title?: string }) => (
         <div className="py-0.5">
             {title && (
-                <h3 className="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <h3 className="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-muted-foreground uppercase tracking-wider">
                     {title}
                 </h3>
             )}
@@ -209,7 +209,7 @@ const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
                                 onMouseLeave={handlePopupLeave}
                             >
                                 <div className="px-3 py-1.5 border-b border-gray-100 dark:border-gray-800">
-                                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    <span className="text-xs font-semibold text-gray-500 dark:text-muted-foreground uppercase tracking-wider">
                                         {t(hoveredSection.title)}
                                     </span>
                                 </div>

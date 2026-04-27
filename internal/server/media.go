@@ -185,7 +185,7 @@ func (h *MediaHandler) RegisterGin(rg *gin.RouterGroup) {
 	publicMedias := rg.Group("/medias")
 	{
 		// 核心：使用 short_token，不接受 ID
-		publicMedias.GET("/:short_token", h.getPublicDetail())
+		publicMedias.GET("/:short_token", OptionalJWTMiddleware(h.jwtMgr), h.getPublicDetail())
 
 		// 交互操作（支持可选JWT）
 		publicMedias.POST("/:short_token/likes", JWTMiddleware(h.jwtMgr), h.toggleLikeByShortToken())
@@ -196,8 +196,11 @@ func (h *MediaHandler) RegisterGin(rg *gin.RouterGroup) {
 		publicMedias.GET("/:short_token/shares", h.getShareUrlByShortToken())
 		publicMedias.POST("/:short_token/shares", JWTMiddleware(h.jwtMgr), h.recordShareByShortToken())
 
-		publicMedias.GET("/:short_token/sprite.vtt", h.getSpriteVTT())
+			publicMedias.GET("/:short_token/sprite.vtt", h.getSpriteVTT())
 		publicMedias.GET("/:short_token/sprite.jpg", h.getSpriteImage())
+
+		// Owner edit (via short_token)
+		publicMedias.PUT("/:short_token", JWTMiddleware(h.jwtMgr), h.updateMediaByShortToken())
 	}
 
 	// ================================
@@ -1177,6 +1180,7 @@ func (h *MediaHandler) reviewMediaHandler(w http.ResponseWriter, r *http.Request
 
 func ptrBool(v bool) *bool       { return &v }
 func ptrString(v string) *string { return &v }
+func ptrInt32(v int32) *int32    { return &v }
 
 func (h *MediaHandler) listMedia() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -1209,6 +1213,8 @@ func (h *MediaHandler) listMedia() gin.HandlerFunc {
 		}
 
 		opt.Listable = ptrBool(true)
+		opt.ReviewStatus = ptrString("reviewed")
+		opt.Privacy = ptrInt32(1)
 
 		// Handle tags filtering
 		if tagsStr := c.Query("tags"); tagsStr != "" {
@@ -1456,6 +1462,7 @@ type updateMediaRequest struct {
 	Featured       *bool    `json:"featured"`
 	EnableComments *bool    `json:"enable_comments"`
 	AllowDownload  *bool    `json:"allow_download"`
+	Listable       *bool    `json:"listable"`
 }
 
 func (h *MediaHandler) updateMedia() gin.HandlerFunc {
@@ -1517,6 +1524,12 @@ func (h *MediaHandler) updateMedia() gin.HandlerFunc {
 		}
 		if req.AllowDownload != nil {
 			m.AllowDownload = *req.AllowDownload
+		}
+		if req.Listable != nil {
+			m.Listable = *req.Listable
+			if *req.Listable && (m.ReviewStatus == "pending_review" || m.ReviewStatus == "rejected") {
+				m.ReviewStatus = "reviewed"
+			}
 		}
 
 		updated, err := h.uc.UpdateMedia(ctx, m)
@@ -2108,14 +2121,24 @@ func (h *MediaHandler) getPublicDetail() gin.HandlerFunc {
 			return
 		}
 
-		if media.State == "private" || media.Privacy == 2 {
-			Fail(c, ErrForbidden, "private media")
-			return
+		var userID string
+		var isStaff bool
+		if claims, ok := GetClaims(c); ok {
+			userID = claims.GetUserID()
+			isStaff = claims.IsStaff
 		}
+		isUploader := userID != "" && userID == media.UserId
+		isPrivileged := isUploader || isStaff
 
-		if !media.Listable || media.ReviewStatus != "reviewed" {
-			Fail(c, ErrForbidden, "media not available")
-			return
+		if !isPrivileged {
+			if media.Privacy == 2 {
+				Fail(c, ErrForbidden, "private media")
+				return
+			}
+			if !media.Listable || media.ReviewStatus != "reviewed" {
+				Fail(c, ErrForbidden, "media not available")
+				return
+			}
 		}
 
 		go func() {
@@ -2160,6 +2183,95 @@ func (h *MediaHandler) getPublicDetail() gin.HandlerFunc {
 		}
 
 		OK(c, result)
+	}
+}
+
+// updateMediaByShortToken 通过 short_token 更新媒体 (用户侧 API)
+func (h *MediaHandler) updateMediaByShortToken() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		shortToken := c.Param("short_token")
+
+		if shortToken == "" {
+			Fail(c, ErrBadRequest, "short_token is required")
+			return
+		}
+
+		claims, ok := GetClaims(c)
+		if !ok {
+			Fail(c, ErrUnauthorized, "unauthorized")
+			return
+		}
+
+		mediaID, err := h.uc.ResolveToID(ctx, shortToken)
+		if err != nil {
+			Fail(c, ErrMediaNotFound, "media not found")
+			return
+		}
+
+		m, err := h.uc.GetMedia(ctx, mediaID)
+		if err != nil {
+			Fail(c, ErrMediaNotFound, "media not found")
+			return
+		}
+
+		if m.UserId != claims.GetUserID() && !claims.IsStaff {
+			Fail(c, ErrForbidden, "only the owner or admin can edit this media")
+			return
+		}
+
+		var req updateMediaRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			Fail(c, ErrBadRequest, err.Error())
+			return
+		}
+
+		if req.Title != "" {
+			m.Title = req.Title
+		}
+		if req.Description != "" {
+			m.Description = req.Description
+		}
+		if req.CategoryID != nil {
+			m.CategoryId = strconv.Itoa(*req.CategoryID)
+		}
+		if req.Tags != nil {
+			m.Tags = req.Tags
+		}
+		if req.Privacy != nil {
+			m.Privacy = int32(*req.Privacy)
+		}
+		if req.EnableComments != nil {
+			m.EnableComments = *req.EnableComments
+		}
+		if req.AllowDownload != nil {
+			m.AllowDownload = *req.AllowDownload
+		}
+
+		if claims.IsStaff {
+			if req.State != nil {
+				m.State = *req.State
+			}
+			if req.Featured != nil {
+				m.Featured = *req.Featured
+			}
+			if req.Listable != nil {
+				m.Listable = *req.Listable
+				if *req.Listable && (m.ReviewStatus == "pending_review" || m.ReviewStatus == "rejected") {
+					m.ReviewStatus = "reviewed"
+				}
+			}
+		}
+
+		updated, err := h.uc.UpdateMedia(ctx, m)
+		if err != nil {
+			Fail(c, ErrInternal, err.Error())
+			return
+		}
+
+		updated, _ = h.uc.GetMedia(ctx, mediaID)
+
+		OK(c, filterPublicFields(updated))
 	}
 }
 
@@ -2404,7 +2516,6 @@ func filterPublicFields(m *biz.Media) map[string]interface{} {
 	result := map[string]interface{}{
 		"id":              m.Id,
 		"short_token":     m.ShortToken,
-		"friendly_token":  m.FriendlyToken,
 		"title":           m.Title,
 		"description":     m.Description,
 		"url":             m.Url,
@@ -2433,15 +2544,12 @@ func filterPublicFields(m *biz.Media) map[string]interface{} {
 		"encoding_status": m.EncodingStatus,
 		"state":           m.State,
 		"privacy":         m.Privacy,
-		"status":          m.Status,
 		"allow_download":  m.AllowDownload,
 		"enable_comments": m.EnableComments,
 		"featured":        m.Featured,
-		"is_reviewed":     m.IsReviewed,
 		"reported_times":  m.ReportedTimes,
 		"review_status":   m.ReviewStatus,
 		"listable":        m.Listable,
-		"uuid":            m.Uuid,
 	}
 
 	if m.CreateTime != nil {
@@ -2451,6 +2559,13 @@ func filterPublicFields(m *biz.Media) map[string]interface{} {
 	}
 	if m.UpdateTime != nil {
 		result["updated_at"] = m.UpdateTime.AsTime().Format(time.RFC3339)
+	} else {
+		// Fallback: use create_time if update_time is not set
+		if m.CreateTime != nil {
+			result["updated_at"] = m.CreateTime.AsTime().Format(time.RFC3339)
+		} else {
+			result["updated_at"] = time.Now().Format(time.RFC3339)
+		}
 	}
 	if m.PublishedAt != nil {
 		result["published_at"] = m.PublishedAt.AsTime().Format(time.RFC3339)
@@ -2642,6 +2757,12 @@ func (h *MediaHandler) adminUpdateMedia() gin.HandlerFunc {
 		}
 		if req.AllowDownload != nil {
 			m.AllowDownload = *req.AllowDownload
+		}
+		if req.Listable != nil {
+			m.Listable = *req.Listable
+			if *req.Listable && (m.ReviewStatus == "pending_review" || m.ReviewStatus == "rejected") {
+				m.ReviewStatus = "reviewed"
+			}
 		}
 
 		updated, err := h.uc.UpdateMedia(ctx, m)
@@ -2971,9 +3092,15 @@ func (h *MediaHandler) regenerateSprite() gin.HandlerFunc {
 			return
 		}
 
+		// Allow regeneration if sprite_status is "processing" but was started more than 10 minutes ago.
+		// This prevents stuck "processing" states from blocking regeneration.
 		if entMedia.SpriteStatus == "processing" {
-			Fail(c, ErrBadRequest, "sprite generation already in progress")
-			return
+			// Check if the media was updated recently (within 10 minutes = processing likely still running)
+			if entMedia.UpdatedAt.After(time.Now().Add(-10*time.Minute)) {
+				Fail(c, ErrBadRequest, "sprite generation already in progress")
+				return
+			}
+			// Stale processing state - allow override
 		}
 
 		go func() {

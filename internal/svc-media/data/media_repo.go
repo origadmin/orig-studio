@@ -141,6 +141,9 @@ func (r *mediaRepo) List(
 	if opt.ReviewStatus != nil {
 		query = query.Where(media.ReviewStatusEQ(*opt.ReviewStatus))
 	}
+	if opt.Privacy != nil {
+		query = query.Where(media.PrivacyEQ(int(*opt.Privacy)))
+	}
 
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -211,7 +214,13 @@ func (r *mediaRepo) Create(
 		SetURL(in.Url).
 		SetType(in.Type).
 		SetMimeType(in.MimeType).
-		SetSize(fmt.Sprintf("%d", in.Size))
+		SetSize(fmt.Sprintf("%d", in.Size)).
+		SetState(in.State).
+		SetPrivacy(int(in.Privacy)).
+		SetEncodingStatus(in.EncodingStatus).
+		SetAllowDownload(in.AllowDownload).
+		SetEnableComments(in.EnableComments).
+		SetFeatured(in.Featured)
 
 	if in.Description != "" {
 		create = create.SetDescription(in.Description)
@@ -235,6 +244,15 @@ func (r *mediaRepo) Create(
 		create = create.SetReviewStatus(in.ReviewStatus)
 	}
 	create = create.SetListable(in.Listable)
+	if in.Extension != "" {
+		create = create.SetExtension(in.Extension)
+	}
+	if in.Md5Sum != "" {
+		create = create.SetMd5sum(in.Md5Sum)
+	}
+	if in.Poster != "" {
+		create = create.SetPoster(in.Poster)
+	}
 
 	m, err := create.Save(ctx)
 	if err != nil {
@@ -321,6 +339,13 @@ func (r *mediaRepo) Update(
 		update = update.SetReviewStatus(in.ReviewStatus)
 	}
 	update = update.SetListable(in.Listable)
+	if in.State != "" {
+		update = update.SetState(in.State)
+	}
+	update = update.SetPrivacy(int(in.Privacy))
+	update = update.SetFeatured(in.Featured)
+	update = update.SetAllowDownload(in.AllowDownload)
+	update = update.SetEnableComments(in.EnableComments)
 
 	m, err := update.Save(ctx)
 	if err != nil {

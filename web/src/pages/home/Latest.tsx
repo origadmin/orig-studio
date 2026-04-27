@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * Latest Page — infinite scroll
  */
@@ -7,6 +7,7 @@ import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {Link} from '@tanstack/react-router';
 import {Clock, Play, Eye} from 'lucide-react';
 import {Button} from '@/components/ui/button';
+import {Spinner} from '@/components/ui/spinner';
 import {formatDuration, formatViews, formatDate} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
 import {useMediaList, useCategoryList} from '@/hooks/queries';
@@ -136,9 +137,9 @@ const LatestPage = () => {
                                          alt={media.edges?.user?.[0]?.username}
                                          className="w-5 h-5 rounded-full object-cover"/>
                                     <span
-                                        className="text-xs text-gray-500 dark:text-gray-400">{media.edges?.user?.[0]?.username || 'Unknown'}</span>
+                                        className="text-xs text-gray-500 dark:text-muted-foreground">{media.edges?.user?.[0]?.username || 'Unknown'}</span>
                                 </div>
-                                <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
+                                <div className="flex items-center gap-3 text-xs text-muted-foreground dark:text-gray-500">
                                     <span className="flex items-center gap-1"><Eye
                                         size={12}/>{formatViews(media.view_count)}</span>
                                     <span>{formatDate(media.created_at)}</span>
@@ -151,17 +152,16 @@ const LatestPage = () => {
 
             <div ref={sentinelRef} className="flex flex-col items-center py-8">
                 {isLoading && (
-                    <div className="flex items-center gap-3 text-gray-400">
-                        <div
-                            className="animate-spin w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full"/>
+                    <div className="flex items-center gap-3 text-muted-foreground">
+                        <Spinner size="sm"/>
                         <span className="text-sm">{t('common.loading')}</span>
                     </div>
                 )}
                 {!hasMore && items.length > 0 && (
-                    <p className="text-sm text-gray-400 py-4">— {t('common.allLoaded')} —</p>
+                    <p className="text-sm text-muted-foreground py-4">— {t('common.allLoaded')} —</p>
                 )}
                 {error && items.length > 0 && (
-                    <p className="text-sm text-red-500 py-4">{t('common.error')}</p>
+                    <p className="text-sm text-destructive py-4">{t('common.error')}</p>
                 )}
             </div>
         </div>

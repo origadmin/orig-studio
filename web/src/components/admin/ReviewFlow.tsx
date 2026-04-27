@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+﻿import React, {useState, useEffect} from 'react';
 import {Check, X, Clock, User, File, Search, Filter, Trash2} from 'lucide-react';
 import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
@@ -21,6 +21,7 @@ import {formatDate, formatViews} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
 import {reviewApi, type ReviewItem} from '@/lib/api/review';
 import ErrorPage from '@/components/common/ErrorPage';
+import {TablePagination} from '@/components/common/TablePagination';
 
 const ReviewFlow: React.FC = () => {
     const {t} = useTranslation();
@@ -246,7 +247,7 @@ const ReviewFlow: React.FC = () => {
                     <div className="flex flex-wrap items-center gap-4">
                         <div className="flex-1">
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
                                 <Input
                                     placeholder={t('common.search')}
                                     value={search}
@@ -290,7 +291,7 @@ const ReviewFlow: React.FC = () => {
             {selectedItems.length > 0 && (
                 <Card>
                     <CardContent className="flex items-center justify-between">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-gray-600 dark:text-muted-foreground">
                             {t('review.selectedItems', {count: selectedItems.length})}
                         </p>
                         <div className="flex items-center gap-2">
@@ -357,24 +358,24 @@ const ReviewFlow: React.FC = () => {
                                         <TableCell>
                                             <div className="space-y-1">
                                                 <p className="font-medium text-gray-900 dark:text-white">{item.media_title}</p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">{item.media_type}</p>
+                                                <p className="text-xs text-gray-500 dark:text-muted-foreground">{item.media_type}</p>
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             <div className="space-y-1">
                                                 <p className="font-medium text-gray-900 dark:text-white">{item.username}</p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">ID: {item.user_id}</p>
+                                                <p className="text-xs text-gray-500 dark:text-muted-foreground">ID: {item.user_id}</p>
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             {getStatusBadge(item.status)}
                                         </TableCell>
                                         <TableCell>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">{formatDate(item.created_at)}</p>
+                                            <p className="text-sm text-gray-600 dark:text-muted-foreground">{formatDate(item.created_at)}</p>
                                         </TableCell>
                                         {activeTab === 'history' && (
                                             <TableCell>
-                                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                <p className="text-sm text-gray-600 dark:text-muted-foreground">
                                                     {item.reviewer_name || 'N/A'}
                                                 </p>
                                             </TableCell>
@@ -420,34 +421,12 @@ const ReviewFlow: React.FC = () => {
                         </TableBody>
                     </Table>
 
-                    {/* Pagination */}
-                    <div className="flex items-center justify-between mt-6">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {t('common.pagination', {
-                                start: (page - 1) * pageSize + 1,
-                                end: Math.min(page * pageSize, total),
-                                total,
-                            })}
-                        </p>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setPage(prev => Math.max(prev - 1, 1))}
-                                disabled={page === 1}
-                            >
-                                {t('common.previous')}
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setPage(prev => prev + 1)}
-                                disabled={page * pageSize >= total}
-                            >
-                                {t('common.next')}
-                            </Button>
-                        </div>
-                    </div>
+                    <TablePagination
+                        page={page}
+                        pageSize={pageSize}
+                        total={total}
+                        onPageChange={setPage}
+                    />
                 </CardContent>
             </Card>
 
@@ -522,14 +501,14 @@ const ReviewFlow: React.FC = () => {
                                     {t('common.media')}
                                 </h4>
                                 <p className="text-sm text-gray-900 dark:text-white">{currentItem.media_title}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{currentItem.media_type}</p>
+                                <p className="text-xs text-gray-500 dark:text-muted-foreground">{currentItem.media_type}</p>
                             </div>
                             <div className="space-y-2">
                                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                     {t('common.user')}
                                 </h4>
                                 <p className="text-sm text-gray-900 dark:text-white">{currentItem.username}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">ID: {currentItem.user_id}</p>
+                                <p className="text-xs text-gray-500 dark:text-muted-foreground">ID: {currentItem.user_id}</p>
                             </div>
                             <div className="space-y-2">
                                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -541,14 +520,14 @@ const ReviewFlow: React.FC = () => {
                                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                     {t('common.createdAt')}
                                 </h4>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">{formatDate(currentItem.created_at)}</p>
+                                <p className="text-sm text-gray-600 dark:text-muted-foreground">{formatDate(currentItem.created_at)}</p>
                             </div>
                             {currentItem.reason && (
                                 <div className="space-y-2">
                                     <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                         {t('review.reason')}
                                     </h4>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400">{currentItem.reason}</p>
+                                    <p className="text-sm text-gray-600 dark:text-muted-foreground">{currentItem.reason}</p>
                                 </div>
                             )}
                             {activeTab === 'pending' && (

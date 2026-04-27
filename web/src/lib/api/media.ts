@@ -117,6 +117,7 @@ export interface UpdateMediaRequest {
     featured?: boolean;
     enable_comments?: boolean;
     allow_download?: boolean;
+    listable?: boolean;
 }
 
 export interface EncodeProfile {
@@ -129,6 +130,7 @@ export interface EncodeProfile {
     video_bitrate: string;
     audio_codec: string;
     audio_bitrate: string;
+    bento_parameters?: string;
     is_active: boolean;
 }
 
@@ -557,6 +559,10 @@ export const publicMediaApi = {
             xhr.send(formData);
         });
     },
+
+    // 更新媒体（需要 JWT + owner 权限，使用 short_token）
+    update: (shortToken: string, data: UpdateMediaRequest) =>
+        api.put<Media>(`/medias/${shortToken}`, data),
 
     // ==================== 点赞/点踩 API (使用 short_token) ====================
     likes: {

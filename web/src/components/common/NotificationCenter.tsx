@@ -1,3 +1,4 @@
+﻿import {Spinner} from "@/components/ui/spinner"
 import React, {useState, useEffect} from 'react';
 import {Bell, Check, Trash2, Loader2, X} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
@@ -81,7 +82,7 @@ const NotificationCenter: React.FC = () => {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[200px]">
-                <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"/>
+                <Spinner />
             </div>
         );
     }
@@ -129,7 +130,7 @@ const NotificationCenter: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                     {notifications.length === 0 ? (
-                        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                        <div className="text-center py-12 text-gray-500 dark:text-muted-foreground">
                             {t('notifications.noNotifications')}
                         </div>
                     ) : (
@@ -148,7 +149,7 @@ const NotificationCenter: React.FC = () => {
                                                 {notification.body}
                                             </p>
                                             <div className="flex items-center gap-4">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-xs text-gray-500 dark:text-muted-foreground">
                           {formatDate(notification.created_at)}
                         </span>
                                                 <span
@@ -172,7 +173,7 @@ const NotificationCenter: React.FC = () => {
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                className="h-8 w-8 p-0 text-red-600 dark:text-red-400"
+                                                className="h-8 w-8 p-0 text-destructive dark:text-red-400"
                                                 onClick={() => handleDelete(notification.id)}
                                                 title={t('common.delete')}
                                             >

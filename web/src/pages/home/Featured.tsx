@@ -1,3 +1,4 @@
+﻿import {Spinner} from "@/components/ui/spinner"
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * Featured Page
@@ -27,7 +28,7 @@ const FeaturedPage = () => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"/>
+                <Spinner />
             </div>
         );
     }
@@ -57,7 +58,7 @@ const FeaturedPage = () => {
                     <Star size={24} className="text-emerald-600"/>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('featured.title')}</h1>
                 </div>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
+                <span className="text-sm text-gray-500 dark:text-muted-foreground">
                     {t('featured.featuredCount', {count: featuredMedia.length})}
                 </span>
             </div>
@@ -99,7 +100,7 @@ const FeaturedPage = () => {
                                          alt={item.edges?.user?.[0]?.username}
                                          className="w-8 h-8 rounded-full"/>
                                     <span
-                                        className="text-gray-400 text-sm">{item.edges?.user?.[0]?.username || 'Unknown'}</span>
+                                        className="text-muted-foreground text-sm">{item.edges?.user?.[0]?.username || 'Unknown'}</span>
                                     <span className="text-gray-500 text-sm flex items-center gap-1">
                                         <Eye size={14}/>{formatViews(item.view_count)} {t('common.views')}
                                     </span>
@@ -128,7 +129,7 @@ const FeaturedPage = () => {
                                 <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 mb-2 group-hover:text-emerald-600 transition-colors">
                                     {item.title}
                                 </h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{item.description || t('watch.noDescription')}</p>
+                                <p className="text-sm text-gray-500 dark:text-muted-foreground line-clamp-1">{item.description || t('watch.noDescription')}</p>
                             </div>
                         </div>
                     </Link>

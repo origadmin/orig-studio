@@ -49,6 +49,11 @@ func NewEntClient(app *runtime.App) (*entity.Client, func(), error) {
 		return nil, nil, fmt.Errorf("failed to seed encode profiles: %w", err)
 	}
 
+	// Ensure sprite profile exists (idempotent migration for existing databases)
+	if err := EnsureSpriteProfile(context.Background(), client); err != nil {
+		return nil, nil, fmt.Errorf("failed to ensure sprite profile: %w", err)
+	}
+
 	cleanup := func() {
 		_ = client.Close()
 	}

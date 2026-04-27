@@ -16,7 +16,7 @@ export interface Category {
 }
 
 export const categoryApi = {
-    getAll: () => api.get<PaginatedResponse<Category>>("/categories"),
+    getAll: (params?: {page?: number; page_size?: number}) => api.get<PaginatedResponse<Category>>("/categories", {params}),
     get: (id: string) => api.get<Category>(`/categories/${id}`),
     create: (data: Partial<Category>) => api.post<Category>("/categories", data),
     update: (id: string, data: Partial<Category>) => api.put<Category>(`/categories/${id}`, data),

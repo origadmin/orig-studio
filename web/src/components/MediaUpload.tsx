@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+﻿import React, {useState} from 'react';
 import {mediaApi} from '../lib/api/media';
 import {Button} from './ui/button';
 import {Card, CardHeader, CardTitle, CardContent, CardFooter} from './ui/card';
@@ -80,7 +80,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({onSuccess, userId}) => 
                         className="w-full border rounded p-2 text-sm h-24"
                     />
                 </div>
-                {error && <p className="text-red-500 text-sm">{error}</p>}
+                {error && <p className="text-destructive text-sm">{error}</p>}
             </CardContent>
             <CardFooter>
                 <Button

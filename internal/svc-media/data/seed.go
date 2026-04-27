@@ -2,10 +2,12 @@ package data
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"strings"
 
 	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/data/entity/encodeprofile"
 )
 
 // SeedEncodeProfiles ensures default encoding profiles exist in the system.
@@ -64,6 +66,7 @@ func SeedEncodeProfiles(ctx context.Context, client *entity.Client) error {
 
 		{"preview", "gif", "-", "-", true, "--fps 10 --scale 320"},
 		{"preview-frames", "jpg", "-", "-", true, "--frames 30 --scale 160"},
+		{"sprite", "sprite", "-", "-", true, "--frame-interval 10 --columns 5 --frame-width 160 --frame-height 90 --max-frames 100"},
 	}
 
 	for _, p := range profiles {
@@ -85,7 +88,42 @@ func SeedEncodeProfiles(ctx context.Context, client *entity.Client) error {
 		}
 	}
 
-	slog.Info("Successfully seeded 22 Bento4-ready profiles")
+	slog.Info("Successfully seeded Bento4-ready profiles")
+	return nil
+}
+
+// EnsureSpriteProfile ensures the sprite profile exists in the database.
+// This is an idempotent migration: if a profile with extension="sprite" already exists, it does nothing.
+func EnsureSpriteProfile(ctx context.Context, client *entity.Client) error {
+	// Check if any sprite profile already exists
+	count, err := client.EncodeProfile.Query().
+		Where(encodeprofile.ExtensionEQ("sprite")).
+		Count(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to query sprite profile: %w", err)
+	}
+
+	if count > 0 {
+		slog.Info("Sprite profile already exists, skipping migration")
+		return nil
+	}
+
+	// Create the default sprite profile
+	_, err = client.EncodeProfile.Create().
+		SetName("sprite").
+		SetDescription("Sprite sheet + WebVTT for video seek preview").
+		SetExtension("sprite").
+		SetResolution("-").
+		SetVideoCodec("-").
+		SetAudioCodec("aac").
+		SetBentoParameters("--frame-interval 10 --columns 5 --frame-width 160 --frame-height 90 --max-frames 100").
+		SetIsActive(true).
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to create sprite profile: %w", err)
+	}
+
+	slog.Info("Successfully created sprite profile via migration")
 	return nil
 }
 

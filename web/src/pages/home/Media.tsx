@@ -1,4 +1,4 @@
-// 用户端 - 媒体浏览页面
+﻿// 用户端 - 媒体浏览页面
 import {useState, useEffect} from "react";
 import {Link} from "@tanstack/react-router";
 import {mediaApi, categoryApi, type Media, type Category} from "@/lib/api";
@@ -52,14 +52,14 @@ export default function MediaPage() {
             <div className="min-h-screen bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4 py-8">
                     <div className="animate-pulse space-y-4">
-                        <div className="h-8 bg-gray-200 rounded w-48"></div>
+                        <div className="h-8 bg-muted rounded w-48"></div>
                         <div className="grid grid-cols-4 gap-6">
                             {[1, 2, 3, 4].map(i => (
                                 <div key={i} className="bg-white rounded-lg overflow-hidden">
-                                    <div className="h-48 bg-gray-200"></div>
+                                    <div className="h-48 bg-muted"></div>
                                     <div className="p-4 space-y-2">
-                                        <div className="h-4 bg-gray-200 rounded"></div>
-                                        <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                                        <div className="h-4 bg-muted rounded"></div>
+                                        <div className="h-3 bg-muted rounded w-2/3"></div>
                                     </div>
                                 </div>
                             ))}
@@ -74,7 +74,7 @@ export default function MediaPage() {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
-                    <p className="text-red-500 mb-2">{t('media.loadFailed', {error})}</p>
+                    <p className="text-destructive mb-2">{t('media.loadFailed', {error})}</p>
                     <button onClick={loadData} className="text-indigo-600 hover:underline">
                         {t('media.retry')}
                     </button>
@@ -160,7 +160,7 @@ export default function MediaPage() {
                                     <p className="text-sm text-gray-500 mt-1 line-clamp-2">
                                         {media.description}
                                     </p>
-                                    <div className="flex items-center justify-between mt-3 text-xs text-gray-400">
+                                    <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
                                         <span>👁 {media.views}</span>
                                         <span>❤️ {media.likes}</span>
                                         <span>{formatSize(media.size)}</span>

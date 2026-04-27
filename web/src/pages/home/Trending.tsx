@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+﻿import {useState, useEffect} from 'react';
 import {Link} from '@tanstack/react-router';
 import {TrendingUp, Play, Eye, Heart, Clock} from 'lucide-react';
 import {exploreApi} from '../../lib/api/explore';
@@ -47,9 +47,9 @@ export default function Trending() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {Array.from({length: 12}).map((_, i) => (
                         <div key={i} className="animate-pulse">
-                            <div className="aspect-video bg-gray-200 dark:bg-gray-800 rounded-lg mb-3"/>
-                            <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mb-2"/>
-                            <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/2"/>
+                            <div className="aspect-video bg-muted dark:bg-gray-800 rounded-lg mb-3"/>
+                            <div className="h-4 bg-muted dark:bg-gray-800 rounded w-3/4 mb-2"/>
+                            <div className="h-3 bg-muted dark:bg-gray-800 rounded w-1/2"/>
                         </div>
                     ))}
                 </div>
@@ -60,7 +60,7 @@ export default function Trending() {
     if (error) {
         return (
             <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-                <p className="text-red-500">{error}</p>
+                <p className="text-destructive">{error}</p>
             </div>
         );
     }
@@ -88,7 +88,7 @@ export default function Trending() {
                             search={{v: item.short_token}}
                             className="group block"
                         >
-                            <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-800 mb-3">
+                            <div className="relative aspect-video rounded-lg overflow-hidden bg-muted dark:bg-gray-800 mb-3">
                                 {item.thumbnail ? (
                                     <img
                                         src={item.thumbnail}

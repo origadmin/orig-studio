@@ -6,7 +6,7 @@
 import React, {useState, useEffect, useRef} from 'react';
 import {useSearch, useNavigate, Link} from '@tanstack/react-router';
 import {
-    Loader2, RefreshCw, AlertTriangle, Edit, Trash2, FileText, Eye
+    Loader2, RefreshCw, AlertTriangle, Trash2, FileText, Eye, Pencil
 } from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
@@ -25,6 +25,8 @@ import SubscribeButton from '@/components/common/SubscribeButton';
 import CommentSection from '@/components/common/CommentSection';
 import InteractionBar from '@/components/common/InteractionBar';
 import VideoPlayer, {VideoPlayerHandle} from '@/components/common/VideoPlayer';
+import {DeleteConfirmDialog} from '@/components/common/DeleteConfirmDialog';
+import {toast} from 'sonner';
 
 const WatchPage = () => {
     const {t} = useTranslation();
@@ -32,7 +34,7 @@ const WatchPage = () => {
     const navigate = useNavigate();
     // ✅ 使用新的 usePublicMediaDetail hook (short_token based)
     const {data: media, isLoading: isMediaLoading, error: mediaError} = usePublicMediaDetail(shortToken as string);
-    const {user} = useAuth();
+    const {user, isAdmin} = useAuth();
     const deleteMutation = useDeleteMedia();
 
     const [retrying, setRetrying] = useState(false);
@@ -201,6 +203,39 @@ const WatchPage = () => {
                         {media.title}
                     </h1>
 
+                    {(user && (String(user.id) === String(media.user_id) || isAdmin)) && (
+                        <div className="flex items-center gap-2 mt-2">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="gap-1.5"
+                                onClick={() => navigate({to: '/watch/$shortToken/edit', params: {shortToken: media.short_token || (shortToken as string)}} as any)}
+                            >
+                                <Pencil className="w-4 h-4"/>
+                                {t('common.edit')}
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="gap-1.5"
+                                disabled
+                                onClick={() => toast.info(t('watch.subtitleComingSoon') || '字幕功能即将上线')}
+                            >
+                                <FileText className="w-4 h-4"/>
+                                {t('common.subtitles')}
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="gap-1.5 text-destructive hover:text-destructive"
+                                onClick={() => setShowDeleteConfirm(true)}
+                            >
+                                <Trash2 className="w-4 h-4"/>
+                                {t('common.delete')}
+                            </Button>
+                        </div>
+                    )}
+
                     <div
                         className="flex flex-wrap items-center justify-between gap-4 py-2 border-b dark:border-gray-800">
                         <div className="flex flex-col gap-3">
@@ -222,13 +257,13 @@ const WatchPage = () => {
                                     {mediaUser ? (
                                         <>
                                             <Link to={`/@${mediaUser.username}`}
-                                                  className="font-bold text-gray-900 dark:text-white hover:text-blue-600 transition-colors">
+                                                  className="font-bold text-gray-900 dark:text-white hover:text-info transition-colors">
                                                 {mediaUser.nickname || mediaUser.username}
                                             </Link>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">{formatViews(mediaUser.subscriber_count || 0)} {t('common.subscribers')}</p>
+                                            <p className="text-xs text-gray-500 dark:text-muted-foreground">{formatViews(mediaUser.subscriber_count || 0)} {t('common.subscribers')}</p>
                                         </>
                                     ) : (
-                                        <span className="font-bold text-gray-400 dark:text-gray-500">{t('watch.deletedUser') || 'Deleted User'}</span>
+                                        <span className="font-bold text-muted-foreground dark:text-gray-500">{t('watch.deletedUser') || 'Deleted User'}</span>
                                     )}
                                 </div>
                                 <SubscribeButton
@@ -236,31 +271,6 @@ const WatchPage = () => {
                                     className="ml-4 rounded-full"
                                 />
                             </div>
-
-                            {/* Media owner controls */}
-                            {user && media && String(user.id) === String(media.user_id) && (
-                                <div className="flex items-center gap-2 flex-nowrap">
-                                    <Button variant="secondary" size="sm"
-                                            className="gap-1 text-xs h-8 px-3 flex-shrink-0">
-                                        <Edit className="w-3.5 h-3.5"/>
-                                        <span>{t('common.edit')}</span>
-                                    </Button>
-                                    <Button variant="secondary" size="sm"
-                                            className="gap-1 text-xs h-8 px-3 flex-shrink-0">
-                                        <FileText className="w-3.5 h-3.5"/>
-                                        <span>{t('common.subtitles')}</span>
-                                    </Button>
-                                    <Button
-                                        variant="destructive"
-                                        size="sm"
-                                        className="gap-1 text-xs h-8 px-3 flex-shrink-0"
-                                        onClick={() => setShowDeleteConfirm(true)}
-                                    >
-                                        <Trash2 className="w-3.5 h-3.5"/>
-                                        <span>{t('common.delete')}</span>
-                                    </Button>
-                                </div>
-                            )}
                         </div>
 
                         <div className="flex items-center">
@@ -284,7 +294,7 @@ const WatchPage = () => {
                                 <span>{formatDate(media.created_at)}</span>
                                 {media.tags?.map(tag => (
                                     <span key={tag}
-                                          className="text-blue-600 dark:text-blue-400 cursor-pointer hover:underline">#{tag}</span>
+                                          className="text-info dark:text-blue-400 cursor-pointer hover:underline">#{tag}</span>
                                 ))}
                             </div>
                             <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
@@ -335,11 +345,11 @@ const WatchPage = () => {
                                         </div>
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-snug group-hover:text-blue-600 transition-colors">
+                                        <h4 className="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-snug group-hover:text-info transition-colors">
                                             {item.title}
                                         </h4>
                                         <p className="text-xs text-gray-500 mt-1">{recUser?.nickname || recUser?.username || 'Unknown'}</p>
-                                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                             <span>{formatViews(item.view_count)} views</span>
                                             <span>·</span>
                                             <span>{formatDate(item.created_at)}</span>
@@ -352,34 +362,13 @@ const WatchPage = () => {
                 </div>
             </div>
 
-            {/* Custom Delete Confirmation Dialog */}
-            {showDeleteConfirm && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl p-6 max-w-md w-full">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{t('common.delete')}</h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-4">{t('watch.confirmDelete') || 'Are you sure you want to delete this video? This action cannot be undone.'}</p>
-                        <div className="flex justify-end gap-2">
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => setShowDeleteConfirm(false)}
-                            >
-                                {t('common.cancel')}
-                            </Button>
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => {
-                                    setShowDeleteConfirm(false);
-                                    handleDeleteMedia();
-                                }}
-                            >
-                                {t('common.delete')}
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <DeleteConfirmDialog
+                open={showDeleteConfirm}
+                onOpenChange={setShowDeleteConfirm}
+                title={media.title}
+                isDeleting={deleteMutation.isPending}
+                onConfirm={handleDeleteMedia}
+            />
         </div>
     );
 };

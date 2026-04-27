@@ -41,11 +41,43 @@ export default {
                     DEFAULT: "hsl(var(--card))",
                     foreground: "hsl(var(--card-foreground))",
                 },
+                success: {
+                    DEFAULT: "hsl(var(--success))",
+                    foreground: "hsl(var(--success-foreground))",
+                },
+                warning: {
+                    DEFAULT: "hsl(var(--warning))",
+                    foreground: "hsl(var(--warning-foreground))",
+                },
+                info: {
+                    DEFAULT: "hsl(var(--info))",
+                    foreground: "hsl(var(--info-foreground))",
+                },
             },
             borderRadius: {
                 lg: "var(--radius)",
                 md: "calc(var(--radius) - 2px)",
                 sm: "calc(var(--radius) - 4px)",
+                btn: "var(--radius-btn)",
+                "btn-sm": "var(--radius-btn-sm)",
+                input: "var(--radius-input)",
+                card: "var(--radius-card)",
+                badge: "var(--radius-badge)",
+            },
+            spacing: {
+                "control-sm": "var(--size-control-sm)",
+                control: "var(--size-control)",
+                "control-lg": "var(--size-control-lg)",
+            },
+            height: {
+                "control-sm": "var(--size-control-sm)",
+                control: "var(--size-control)",
+                "control-lg": "var(--size-control-lg)",
+            },
+            width: {
+                "control-sm": "var(--size-control-sm)",
+                control: "var(--size-control)",
+                "control-lg": "var(--size-control-lg)",
             },
         },
     },

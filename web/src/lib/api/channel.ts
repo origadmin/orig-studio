@@ -163,5 +163,5 @@ export const channelApi = {
     getSubscriberCount: (channelToken: string) =>
         api.get<{count: number}>(`/channels/${channelToken}/subscribers`, {params: {count: 'true'}}),
 
-    getAll: () => api.get<PaginatedResponse<Channel>>('/channels'),
+    getAll: (params?: {page?: number; page_size?: number}) => api.get<PaginatedResponse<Channel>>('/channels', {params}),
 };

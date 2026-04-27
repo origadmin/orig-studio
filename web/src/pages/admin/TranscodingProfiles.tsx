@@ -315,7 +315,7 @@ export default function TranscodingProfiles() {
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
                                 <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">Encoding Profiles</h2>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5">
                                     Manage and configure your video encoding presets
                                 </p>
                             </div>
@@ -376,13 +376,13 @@ export default function TranscodingProfiles() {
                                         placeholder="Search..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="pl-10 h-9 w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+                                        className="pl-10 h-8 rounded-btn-sm w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
                                     />
                                 </div>
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
                                 <Select value={extensionFilter} onValueChange={setExtensionFilter}>
-                                    <SelectTrigger className="w-[130px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                    <SelectTrigger className="w-[130px] h-8 rounded-btn-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
                                             <SelectValue placeholder="Extension"/>
@@ -403,6 +403,8 @@ export default function TranscodingProfiles() {
                                                         return 'QuickTime';
                                                     case 'gif':
                                                         return 'GIF';
+                                                    case 'sprite':
+                                                        return 'Sprite';
                                                     case 'avi':
                                                         return 'AVI';
                                                     case 'flv':
@@ -422,7 +424,7 @@ export default function TranscodingProfiles() {
                                     </SelectContent>
                                 </Select>
                                 <Select value={resolutionFilter} onValueChange={setResolutionFilter}>
-                                    <SelectTrigger className="w-[140px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                    <SelectTrigger className="w-[140px] h-8 rounded-btn-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
                                             <SelectValue placeholder="Resolution"/>
@@ -438,7 +440,7 @@ export default function TranscodingProfiles() {
                                     </SelectContent>
                                 </Select>
                                 <Select value={codecFilter} onValueChange={setCodecFilter}>
-                                    <SelectTrigger className="w-[120px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                    <SelectTrigger className="w-[120px] h-8 rounded-btn-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
                                             <SelectValue placeholder="Codec"/>
@@ -454,7 +456,7 @@ export default function TranscodingProfiles() {
                                     </SelectContent>
                                 </Select>
                                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                    <SelectTrigger className="w-[120px] h-9 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
+                                    <SelectTrigger className="w-[120px] h-8 rounded-btn-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0">
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
                                             <SelectValue placeholder="Status"/>
@@ -470,7 +472,6 @@ export default function TranscodingProfiles() {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="h-9 px-3"
                                         onClick={() => {
                                             setSearchQuery('');
                                             setStatusFilter('');
@@ -485,9 +486,7 @@ export default function TranscodingProfiles() {
                                     <Button
                                         variant="default"
                                         size="sm"
-                                        className="h-9 px-4"
                                         onClick={() => {
-                                            // 这里可以添加搜索逻辑
                                         }}
                                     >
                                         <Search className="h-4 w-4 mr-2"/>
@@ -513,7 +512,7 @@ export default function TranscodingProfiles() {
                         <div className="flex items-center gap-2">
                             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                                 <DialogTrigger asChild>
-                                    <Button variant="outline" size="sm" onClick={() => setEditingProfile({is_active: true})}>
+                                    <Button size="sm" onClick={() => setEditingProfile({is_active: true})}>
                                         <PlusCircle className="h-4 w-4 mr-2"/>
                                         Add Profile
                                     </Button>
@@ -554,18 +553,19 @@ export default function TranscodingProfiles() {
                                                     <SelectItem value="mkv">Matroska</SelectItem>
                                                     <SelectItem value="mov">QuickTime</SelectItem>
                                                     <SelectItem value="gif">GIF</SelectItem>
+                                                    <SelectItem value="sprite">Sprite</SelectItem>
                                                     <SelectItem value="avi">AVI</SelectItem>
                                                     <SelectItem value="flv">FLV</SelectItem>
                                                     <SelectItem value="wmv">WMV</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
+                                        {editingProfile?.extension !== 'sprite' && (<>
                                         <div className="grid grid-cols-4 items-center gap-4">
                                             <Label htmlFor="res" className="text-right">Resolution</Label>
                                             <Select
                                                 value={editingProfile?.resolution?.split('x')[1] || editingProfile?.resolution || ""}
                                                 onValueChange={(value) => {
-                                                    // 根据高度自动选择完整分辨率
                                                     const resolutionMap: Record<string, string> = {
                                                         '240': '426x240',
                                                         '360': '640x360',
@@ -612,6 +612,20 @@ export default function TranscodingProfiles() {
                                                 </SelectContent>
                                             </Select>
                                         </div>
+                                        </>)}
+                                        {editingProfile?.extension === 'sprite' && (
+                                        <div className="grid grid-cols-4 items-center gap-4">
+                                            <Label htmlFor="bento_params" className="text-right">Parameters</Label>
+                                            <Input id="bento_params"
+                                                   value={editingProfile?.bento_parameters || ""}
+                                                   onChange={(e) => setEditingProfile({
+                                                       ...editingProfile,
+                                                       bento_parameters: e.target.value
+                                                   })}
+                                                   placeholder="--frame-interval 10 --columns 5 --frame-width 160 --frame-height 90"
+                                                   className="col-span-3"/>
+                                        </div>
+                                        )}
                                         <div className="grid grid-cols-4 items-center gap-4">
                                             <div className="col-span-4">
                                                 <Button
@@ -626,7 +640,7 @@ export default function TranscodingProfiles() {
                                                 </Button>
                                             </div>
                                         </div>
-                                        {showAdvancedOptions && (
+                                        {showAdvancedOptions && editingProfile?.extension !== 'sprite' && (
                                             <>
                                                 <div className="grid grid-cols-4 items-center gap-4">
                                                     <Label htmlFor="vbitrate" className="text-right">Video Bitrate</Label>
@@ -748,7 +762,7 @@ export default function TranscodingProfiles() {
                     <div className="overflow-x-auto">
                         <Table>
                             <TableHeader>
-                                <TableRow className="bg-muted/50">
+                                <TableRow>
                                     <TableHead className="w-[50px]">
                                         <Checkbox
                                             checked={filteredProfiles.length > 0 && selectedRows.length === filteredProfiles.length}
@@ -837,6 +851,8 @@ export default function TranscodingProfiles() {
                                                     return 'QuickTime';
                                                 case 'gif':
                                                     return 'GIF';
+                                                case 'sprite':
+                                                    return 'Sprite';
                                                 case 'avi':
                                                     return 'AVI';
                                                 case 'flv':
@@ -916,7 +932,7 @@ export default function TranscodingProfiles() {
                                                         </Button>
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
-                                                                <Button variant="ghost" size="icon" className="h-6 w-6" title="More Actions">
+                                                                <Button variant="ghost" size="icon-sm" title="More Actions">
                                                                     <MoreVertical className="h-3 w-3"/>
                                                                 </Button>
                                                             </DropdownMenuTrigger>
