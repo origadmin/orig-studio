@@ -239,14 +239,14 @@ export default function UsersPage() {
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
                                             {searchParams.role === 'all' ? (
-                                                <span className="text-muted-foreground">Roles</span>
+                                                <span className="text-muted-foreground">{t('admin.roles') || "Roles"}</span>
                                             ) : (
                                                 <SelectValue placeholder="Roles"/>
                                             )}
                                         </div>
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all" className="justify-center text-center font-medium opacity-70">--- All ---</SelectItem>
+                                        <SelectItem value="all" className="justify-center text-center font-medium opacity-70">{t('admin.all') || "--- All ---"}</SelectItem>
                                         <SelectItem value="admin">{t('admin.admin') || "Admin"}</SelectItem>
                                         <SelectItem value="editor">{t('admin.editor') || "Editor"}</SelectItem>
                                         <SelectItem value="user">{t('admin.user') || "User"}</SelectItem>
@@ -263,7 +263,7 @@ export default function UsersPage() {
                                         }}
                                     >
                                         <RotateCcw className="h-4 w-4 mr-2"/>
-                                        Reset
+                                        {t('admin.reset') || "Reset"}
                                     </Button>
                                     <Button
                                         variant="default"
@@ -271,7 +271,7 @@ export default function UsersPage() {
                                         onClick={() => loadUsers()}
                                     >
                                         <Search className="h-4 w-4 mr-2"/>
-                                        Search
+                                        {t('admin.search') || "Search"}
                                     </Button>
                                 </div>
                             </div>
@@ -419,7 +419,7 @@ export default function UsersPage() {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuLabel>{t('admin.actions') || "Actions"}</DropdownMenuLabel>
                                                     <DropdownMenuSeparator/>
                                                     <DropdownMenuItem onClick={() => handleViewProfile(user)}>
                                                         <Eye className="w-4 h-4 mr-2"/>

@@ -44,7 +44,7 @@ const CategoryManager: React.FC = () => {
         parent_id: undefined,
         order: 0,
     });
-    const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+    const [expanded, setExpanded] = useState<Record<string | number, boolean>>({});
 
     useEffect(() => {
         fetchCategories();
@@ -89,7 +89,7 @@ const CategoryManager: React.FC = () => {
         }
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (id: number | string) => {
         if (!confirm('Are you sure you want to delete this category?')) return;
 
         try {
@@ -100,7 +100,7 @@ const CategoryManager: React.FC = () => {
         }
     };
 
-    const handleOrderChange = async (id: string, direction: 'up' | 'down') => {
+    const handleOrderChange = async (id: number | string, direction: 'up' | 'down') => {
         const category = categories.find(c => c.id === id);
         if (!category) return;
 
@@ -120,7 +120,7 @@ const CategoryManager: React.FC = () => {
         await fetchCategories();
     };
 
-    const handleExpand = (id: string) => {
+    const handleExpand = (id: number | string) => {
         setExpanded(prev => ({
             ...prev,
             [id]: !prev[id],
@@ -154,13 +154,13 @@ const CategoryManager: React.FC = () => {
         setShowCreateDialog(true);
     };
 
-    const getParentName = (parentId: string | undefined) => {
+    const getParentName = (parentId: number | undefined) => {
         if (!parentId) return t('admin.noParent');
         const parent = categories.find(c => c.id === parentId);
         return parent ? parent.name : t('admin.parentNotFound');
     };
 
-    const renderCategoryTree = (parentId: string | undefined = undefined, level: number = 0) => {
+    const renderCategoryTree = (parentId: number | undefined = undefined, level: number = 0) => {
         const children = categories
             .filter(c => c.parent_id === parentId)
             .sort((a, b) => a.order - b.order);
@@ -365,8 +365,8 @@ const CategoryManager: React.FC = () => {
                                 {t('admin.parent')}
                             </h4>
                             <Select
-                                value={formData.parent_id || ''}
-                                onValueChange={(value) => setFormData({...formData, parent_id: value || undefined})}
+                                value={formData.parent_id !== undefined && formData.parent_id !== null ? String(formData.parent_id) : ''}
+                                onValueChange={(value) => setFormData({...formData, parent_id: value ? Number(value) : undefined})}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder={t('admin.selectParentCategory')}/>
@@ -374,7 +374,7 @@ const CategoryManager: React.FC = () => {
                                 <SelectContent>
                                     <SelectItem value="">{t('admin.noParent')}</SelectItem>
                                     {categories.map(category => (
-                                        <SelectItem key={category.id} value={category.id}>
+                                        <SelectItem key={category.id} value={String(category.id)}>
                                             {category.name}
                                         </SelectItem>
                                     ))}
@@ -448,8 +448,8 @@ const CategoryManager: React.FC = () => {
                                 {t('admin.parent')}
                             </h4>
                             <Select
-                                value={formData.parent_id || ''}
-                                onValueChange={(value) => setFormData({...formData, parent_id: value || undefined})}
+                                value={formData.parent_id !== undefined && formData.parent_id !== null ? String(formData.parent_id) : ''}
+                                onValueChange={(value) => setFormData({...formData, parent_id: value ? Number(value) : undefined})}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder={t('admin.selectParentCategory')}/>
@@ -459,7 +459,7 @@ const CategoryManager: React.FC = () => {
                                     {categories
                                         .filter(category => !currentCategory || category.id !== currentCategory.id)
                                         .map(category => (
-                                            <SelectItem key={category.id} value={category.id}>
+                                            <SelectItem key={category.id} value={String(category.id)}>
                                                 {category.name}
                                             </SelectItem>
                                         ))}

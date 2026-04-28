@@ -101,6 +101,58 @@ func (r *userRepo) List(
 	return result, int32(total), nil
 }
 
+// ListEntities returns raw entity.User list (includes role field not in proto types).
+func (r *userRepo) ListEntities(
+	ctx context.Context,
+	opts ...*dto.UserQueryOption,
+) ([]*entity.User, int32, error) {
+	opt := &dto.UserQueryOption{}
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
+
+	query := r.db.User.Query()
+
+	if opt.Keyword != "" {
+		query = query.Where(
+			user.Or(
+				user.UsernameContains(opt.Keyword),
+				user.NameContains(opt.Keyword),
+				user.EmailContains(opt.Keyword),
+			),
+		)
+	}
+
+	if opt.Status != nil {
+		isActive := *opt.Status == 1
+		query = query.Where(user.IsActive(isActive))
+	}
+
+	total, err := query.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	page := opt.Page
+	pageSize := opt.PageSize
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+
+	offset := (page - 1) * pageSize
+	query = query.Offset(int(offset)).Limit(int(pageSize))
+
+	users, err := query.All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return users, int32(total), nil
+}
+
 // Create creates a new user and automatically creates a default channel.
 func (r *userRepo) Create(
 	ctx context.Context,

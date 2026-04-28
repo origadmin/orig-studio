@@ -137,14 +137,14 @@ ifeq ($(GOHOSTOS), windows)
     GIT_TAG      := $(shell powershell -Command "if ('${GIT_HEAD_TAG}') { '${GIT_HEAD_TAG}' } else { '${GIT_COMMIT}' }")
     RMDIR        = powershell -Command "if (Test-Path '$(1)') { Remove-Item -Recurse -Force '$(1)' }"
     CPDIR        = powershell -Command "Copy-Item -Recurse -Path '$(1)' -Destination '$(2)'"
+    EXE_SUFFIX   := .exe
 else
     BUILD_DATE   := $(shell TZ=Asia/Shanghai date +%FT%T%z)
-    # Check for uncommitted changes. git status --porcelain is reliable.
     GIT_TREE_STATE := $(if $(shell git status --porcelain),dirty,clean)
-    # Use the tag if it exists, otherwise use the short commit hash.
     GIT_TAG      := $(if $(GIT_HEAD_TAG),$(GIT_HEAD_TAG),$(GIT_COMMIT))
     RMDIR        = rm -rf $(1)
     CPDIR        = cp -r $(1) $(2)
+    EXE_SUFFIX   :=
 endif
 
 # If the tree is dirty, append a suffix to the version string.
@@ -197,23 +197,41 @@ release-%:
 #                     Frontend & Server Build Targets                         #
 # ---------------------------------------------------------------------------- #
 
-.PHONY: build-frontend build-server build-server-dev
+.PHONY: build-frontend build-server build-server-dev run-server run-server-dev
 
-build-frontend: ## Build frontend React SPA
-	@echo "Building frontend..."
+build-frontend: ## 🎨 Build frontend React SPA and copy to embed directory
+	@echo "==> Building frontend..."
 	cd web && bun install && bun run build
-	@echo "Copying frontend dist to internal/frontend/dist/..."
+	@echo "==> Copying web/dist -> internal/frontend/dist/"
 	@$(call RMDIR,internal/frontend/dist)
 	@$(call CPDIR,web/dist,internal/frontend/dist)
-	@echo "Frontend build complete."
+	@echo "✅ Frontend build complete."
 
-build-server: build-frontend ## Build server binary with embedded frontend
-	@echo "--> Building server binary with frontend"
-	@go build -ldflags="$(LDFLAGS)" -o ./bin/server ./cmd/server
+build-server: build-frontend ## 📦 Build production server (frontend embedded, single binary)
+	@echo "==> Building server binary (production, frontend embedded)..."
+	@go build -ldflags="$(LDFLAGS)" -o ./bin/server$(EXE_SUFFIX) ./cmd/server
+	@echo ""
+	@echo "✅ Build complete!"
+	@echo "   Binary: ./bin/server$(EXE_SUFFIX)"
+	@echo "   Run:    ./bin/server$(EXE_SUFFIX) -conf configs"
+	@echo ""
 
-build-server-dev: ## Build server binary without frontend (dev mode)
-	@echo "--> Building server binary (dev mode, no frontend)"
-	@go build -tags dev -ldflags="$(LDFLAGS)" -o ./bin/server ./cmd/server
+build-server-dev: ## 🔧 Build dev server (frontend from disk, no embed)
+	@echo "==> Building server binary (dev mode, frontend from disk)..."
+	@go build -tags dev -ldflags="$(LDFLAGS)" -o ./bin/server$(EXE_SUFFIX) ./cmd/server
+	@echo ""
+	@echo "✅ Build complete!"
+	@echo "   Binary: ./bin/server$(EXE_SUFFIX)"
+	@echo "   Run:    ./bin/server$(EXE_SUFFIX) -conf configs"
+	@echo ""
+
+run-server: build-server ## 🚀 Build and run production server
+	@echo "==> Starting server..."
+	@./bin/server$(EXE_SUFFIX) -conf configs
+
+run-server-dev: build-server-dev ## 🏃 Build and run dev server
+	@echo "==> Starting dev server..."
+	@./bin/server$(EXE_SUFFIX) -conf configs
 
 
 # ---------------------------------------------------------------------------- #

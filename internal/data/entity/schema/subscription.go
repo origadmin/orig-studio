@@ -42,7 +42,7 @@ func (Subscription) Indexes() []ent.Index {
 
 func (Subscription) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Table("users_subscriptions"),
+		entsql.Table("user_subscriptions"),
 		entsql.WithComments(true),
 	}
 }

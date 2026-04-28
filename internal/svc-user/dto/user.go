@@ -18,6 +18,8 @@ import (
 type UserRepo interface {
 	Get(context.Context, string, ...*UserQueryOption) (*types.User, error)
 	List(context.Context, ...*UserQueryOption) ([]*types.User, int32, error)
+	// ListEntities returns raw entity.User list (includes role field not in proto types).
+	ListEntities(context.Context, ...*UserQueryOption) ([]*entity.User, int32, error)
 	Create(context.Context, *types.User, string, ...*UserCreateOption) (*types.User, error)
 	Update(context.Context, *types.User, ...*UserUpdateOption) (*types.User, error)
 	Delete(context.Context, string) error

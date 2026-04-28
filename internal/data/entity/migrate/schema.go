@@ -164,8 +164,8 @@ var (
 			},
 		},
 	}
-	// UsersChannelsColumns holds the columns for the "users_channels" table.
-	UsersChannelsColumns = []*schema.Column{
+	// UserChannelsColumns holds the columns for the "user_channels" table.
+	UserChannelsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "title", Type: field.TypeString, Size: 90},
 		{Name: "slug", Type: field.TypeString, Unique: true, Size: 100},
@@ -176,15 +176,15 @@ var (
 		{Name: "add_date", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeString, Size: 36},
 	}
-	// UsersChannelsTable holds the schema information for the "users_channels" table.
-	UsersChannelsTable = &schema.Table{
-		Name:       "users_channels",
-		Columns:    UsersChannelsColumns,
-		PrimaryKey: []*schema.Column{UsersChannelsColumns[0]},
+	// UserChannelsTable holds the schema information for the "user_channels" table.
+	UserChannelsTable = &schema.Table{
+		Name:       "user_channels",
+		Columns:    UserChannelsColumns,
+		PrimaryKey: []*schema.Column{UserChannelsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "users_channels_users_channels",
-				Columns:    []*schema.Column{UsersChannelsColumns[8]},
+				Symbol:     "user_channels_users_channels",
+				Columns:    []*schema.Column{UserChannelsColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -193,27 +193,27 @@ var (
 			{
 				Name:    "channel_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{UsersChannelsColumns[8]},
+				Columns: []*schema.Column{UserChannelsColumns[8]},
 			},
 			{
 				Name:    "channel_title",
 				Unique:  false,
-				Columns: []*schema.Column{UsersChannelsColumns[1]},
+				Columns: []*schema.Column{UserChannelsColumns[1]},
 			},
 			{
 				Name:    "channel_slug",
 				Unique:  false,
-				Columns: []*schema.Column{UsersChannelsColumns[2]},
+				Columns: []*schema.Column{UserChannelsColumns[2]},
 			},
 			{
 				Name:    "channel_short_token",
 				Unique:  false,
-				Columns: []*schema.Column{UsersChannelsColumns[4]},
+				Columns: []*schema.Column{UserChannelsColumns[4]},
 			},
 			{
 				Name:    "channel_add_date",
 				Unique:  false,
-				Columns: []*schema.Column{UsersChannelsColumns[7]},
+				Columns: []*schema.Column{UserChannelsColumns[7]},
 			},
 		},
 	}
@@ -630,9 +630,9 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "content_media_users_channels_media",
+				Symbol:     "content_media_user_channels_media",
 				Columns:    []*schema.Column{ContentMediaColumns[41]},
-				RefColumns: []*schema.Column{UsersChannelsColumns[0]},
+				RefColumns: []*schema.Column{UserChannelsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
@@ -829,8 +829,8 @@ var (
 			},
 		},
 	}
-	// UsersNotificationsColumns holds the columns for the "users_notifications" table.
-	UsersNotificationsColumns = []*schema.Column{
+	// UserNotificationsColumns holds the columns for the "user_notifications" table.
+	UserNotificationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "action", Type: field.TypeString, Size: 30},
 		{Name: "notify", Type: field.TypeBool, Default: false},
@@ -839,26 +839,26 @@ var (
 		{Name: "is_read", Type: field.TypeBool, Default: false},
 		{Name: "created_at", Type: field.TypeTime},
 	}
-	// UsersNotificationsTable holds the schema information for the "users_notifications" table.
-	UsersNotificationsTable = &schema.Table{
-		Name:       "users_notifications",
-		Columns:    UsersNotificationsColumns,
-		PrimaryKey: []*schema.Column{UsersNotificationsColumns[0]},
+	// UserNotificationsTable holds the schema information for the "user_notifications" table.
+	UserNotificationsTable = &schema.Table{
+		Name:       "user_notifications",
+		Columns:    UserNotificationsColumns,
+		PrimaryKey: []*schema.Column{UserNotificationsColumns[0]},
 		Indexes: []*schema.Index{
 			{
 				Name:    "notification_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{UsersNotificationsColumns[4]},
+				Columns: []*schema.Column{UserNotificationsColumns[4]},
 			},
 			{
 				Name:    "notification_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{UsersNotificationsColumns[6]},
+				Columns: []*schema.Column{UserNotificationsColumns[6]},
 			},
 			{
 				Name:    "notification_is_read",
 				Unique:  false,
-				Columns: []*schema.Column{UsersNotificationsColumns[5]},
+				Columns: []*schema.Column{UserNotificationsColumns[5]},
 			},
 		},
 	}
@@ -970,28 +970,28 @@ var (
 			},
 		},
 	}
-	// UsersSubscriptionsColumns holds the columns for the "users_subscriptions" table.
-	UsersSubscriptionsColumns = []*schema.Column{
+	// UserSubscriptionsColumns holds the columns for the "user_subscriptions" table.
+	UserSubscriptionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "subscriber_id", Type: field.TypeString, Size: 36},
 		{Name: "channel_id", Type: field.TypeString, Size: 36},
 	}
-	// UsersSubscriptionsTable holds the schema information for the "users_subscriptions" table.
-	UsersSubscriptionsTable = &schema.Table{
-		Name:       "users_subscriptions",
-		Columns:    UsersSubscriptionsColumns,
-		PrimaryKey: []*schema.Column{UsersSubscriptionsColumns[0]},
+	// UserSubscriptionsTable holds the schema information for the "user_subscriptions" table.
+	UserSubscriptionsTable = &schema.Table{
+		Name:       "user_subscriptions",
+		Columns:    UserSubscriptionsColumns,
+		PrimaryKey: []*schema.Column{UserSubscriptionsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "users_subscriptions_users_subscriptions",
-				Columns:    []*schema.Column{UsersSubscriptionsColumns[2]},
+				Symbol:     "user_subscriptions_users_subscriptions",
+				Columns:    []*schema.Column{UserSubscriptionsColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "users_subscriptions_users_subscribers",
-				Columns:    []*schema.Column{UsersSubscriptionsColumns[3]},
+				Symbol:     "user_subscriptions_users_subscribers",
+				Columns:    []*schema.Column{UserSubscriptionsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -1000,22 +1000,22 @@ var (
 			{
 				Name:    "subscription_subscriber_id_channel_id",
 				Unique:  true,
-				Columns: []*schema.Column{UsersSubscriptionsColumns[2], UsersSubscriptionsColumns[3]},
+				Columns: []*schema.Column{UserSubscriptionsColumns[2], UserSubscriptionsColumns[3]},
 			},
 			{
 				Name:    "subscription_subscriber_id",
 				Unique:  false,
-				Columns: []*schema.Column{UsersSubscriptionsColumns[2]},
+				Columns: []*schema.Column{UserSubscriptionsColumns[2]},
 			},
 			{
 				Name:    "subscription_channel_id",
 				Unique:  false,
-				Columns: []*schema.Column{UsersSubscriptionsColumns[3]},
+				Columns: []*schema.Column{UserSubscriptionsColumns[3]},
 			},
 			{
 				Name:    "subscription_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{UsersSubscriptionsColumns[1]},
+				Columns: []*schema.Column{UserSubscriptionsColumns[1]},
 			},
 		},
 	}
@@ -1192,27 +1192,27 @@ var (
 			},
 		},
 	}
-	// UserNotificationsColumns holds the columns for the "user_notifications" table.
-	UserNotificationsColumns = []*schema.Column{
+	// UserNotificationMappingsColumns holds the columns for the "user_notification_mappings" table.
+	UserNotificationMappingsColumns = []*schema.Column{
 		{Name: "user_id", Type: field.TypeString, Size: 36},
 		{Name: "notification_id", Type: field.TypeInt},
 	}
-	// UserNotificationsTable holds the schema information for the "user_notifications" table.
-	UserNotificationsTable = &schema.Table{
-		Name:       "user_notifications",
-		Columns:    UserNotificationsColumns,
-		PrimaryKey: []*schema.Column{UserNotificationsColumns[0], UserNotificationsColumns[1]},
+	// UserNotificationMappingsTable holds the schema information for the "user_notification_mappings" table.
+	UserNotificationMappingsTable = &schema.Table{
+		Name:       "user_notification_mappings",
+		Columns:    UserNotificationMappingsColumns,
+		PrimaryKey: []*schema.Column{UserNotificationMappingsColumns[0], UserNotificationMappingsColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "user_notifications_user_id",
-				Columns:    []*schema.Column{UserNotificationsColumns[0]},
+				Symbol:     "user_notification_mappings_user_id",
+				Columns:    []*schema.Column{UserNotificationMappingsColumns[0]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "user_notifications_notification_id",
-				Columns:    []*schema.Column{UserNotificationsColumns[1]},
-				RefColumns: []*schema.Column{UsersNotificationsColumns[0]},
+				Symbol:     "user_notification_mappings_notification_id",
+				Columns:    []*schema.Column{UserNotificationMappingsColumns[1]},
+				RefColumns: []*schema.Column{UserNotificationsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
@@ -1246,7 +1246,7 @@ var (
 	Tables = []*schema.Table{
 		ContentArticlesTable,
 		ContentCategoriesTable,
-		UsersChannelsTable,
+		UserChannelsTable,
 		ContentCommentsTable,
 		ContentCommentLikesTable,
 		ContentCommentReportsTable,
@@ -1260,16 +1260,16 @@ var (
 		ContentPlaylistMediaTable,
 		ContentMediaReviewLogsTable,
 		ContentMediaTagsTable,
-		UsersNotificationsTable,
+		UserNotificationsTable,
 		AuthPermissionGroupsTable,
 		ContentPlaylistsTable,
 		SystemSettingsTable,
-		UsersSubscriptionsTable,
+		UserSubscriptionsTable,
 		ContentTagsTable,
 		SystemUploadSessionsTable,
 		UsersTable,
 		UserPlaylistsTable,
-		UserNotificationsTable,
+		UserNotificationMappingsTable,
 		UserTagsTable,
 	}
 )
@@ -1286,9 +1286,9 @@ func init() {
 	ContentCategoriesTable.Annotation = &entsql.Annotation{
 		Table: "content_categories",
 	}
-	UsersChannelsTable.ForeignKeys[0].RefTable = UsersTable
-	UsersChannelsTable.Annotation = &entsql.Annotation{
-		Table: "users_channels",
+	UserChannelsTable.ForeignKeys[0].RefTable = UsersTable
+	UserChannelsTable.Annotation = &entsql.Annotation{
+		Table: "user_channels",
 	}
 	ContentCommentsTable.ForeignKeys[0].RefTable = ContentArticlesTable
 	ContentCommentsTable.ForeignKeys[1].RefTable = ContentCommentsTable
@@ -1330,7 +1330,7 @@ func init() {
 		Table: "content_likes",
 	}
 	ContentMediaTable.ForeignKeys[0].RefTable = ContentCategoriesTable
-	ContentMediaTable.ForeignKeys[1].RefTable = UsersChannelsTable
+	ContentMediaTable.ForeignKeys[1].RefTable = UserChannelsTable
 	ContentMediaTable.ForeignKeys[2].RefTable = ContentMediaCategoriesTable
 	ContentMediaTable.ForeignKeys[3].RefTable = ContentMediaTagsTable
 	ContentMediaTable.ForeignKeys[4].RefTable = UsersTable
@@ -1355,8 +1355,8 @@ func init() {
 	ContentMediaTagsTable.Annotation = &entsql.Annotation{
 		Table: "content_media_tags",
 	}
-	UsersNotificationsTable.Annotation = &entsql.Annotation{
-		Table: "users_notifications",
+	UserNotificationsTable.Annotation = &entsql.Annotation{
+		Table: "user_notifications",
 	}
 	AuthPermissionGroupsTable.ForeignKeys[0].RefTable = UsersTable
 	AuthPermissionGroupsTable.Annotation = &entsql.Annotation{
@@ -1368,10 +1368,10 @@ func init() {
 	SystemSettingsTable.Annotation = &entsql.Annotation{
 		Table: "system_settings",
 	}
-	UsersSubscriptionsTable.ForeignKeys[0].RefTable = UsersTable
-	UsersSubscriptionsTable.ForeignKeys[1].RefTable = UsersTable
-	UsersSubscriptionsTable.Annotation = &entsql.Annotation{
-		Table: "users_subscriptions",
+	UserSubscriptionsTable.ForeignKeys[0].RefTable = UsersTable
+	UserSubscriptionsTable.ForeignKeys[1].RefTable = UsersTable
+	UserSubscriptionsTable.Annotation = &entsql.Annotation{
+		Table: "user_subscriptions",
 	}
 	ContentTagsTable.ForeignKeys[0].RefTable = ContentMediaTagsTable
 	ContentTagsTable.Annotation = &entsql.Annotation{
@@ -1385,8 +1385,8 @@ func init() {
 	}
 	UserPlaylistsTable.ForeignKeys[0].RefTable = UsersTable
 	UserPlaylistsTable.ForeignKeys[1].RefTable = ContentPlaylistsTable
-	UserNotificationsTable.ForeignKeys[0].RefTable = UsersTable
-	UserNotificationsTable.ForeignKeys[1].RefTable = UsersNotificationsTable
+	UserNotificationMappingsTable.ForeignKeys[0].RefTable = UsersTable
+	UserNotificationMappingsTable.ForeignKeys[1].RefTable = UserNotificationsTable
 	UserTagsTable.ForeignKeys[0].RefTable = UsersTable
 	UserTagsTable.ForeignKeys[1].RefTable = ContentTagsTable
 }

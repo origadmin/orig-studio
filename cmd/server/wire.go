@@ -12,13 +12,15 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
-	_ "github.com/lib/pq" // PostgreSQL driver
+	_ "github.com/lib/pq"           // PostgreSQL driver
+	_ "github.com/sqlite3ent/sqlite3" // SQLite3 driver
 	"github.com/origadmin/runtime/log"
 	"github.com/origadmin/toolkits/crypto/hash"
 	hashtypes "github.com/origadmin/toolkits/crypto/hash/types"
@@ -47,6 +49,9 @@ import (
 	authbiz "origadmin/application/origcms/internal/svc-auth/biz"
 	authdata "origadmin/application/origcms/internal/svc-auth/data"
 
+	atlasmigrate "ariga.io/atlas/sql/migrate"
+	"entgo.io/ent/dialect"
+	dbschema "entgo.io/ent/dialect/sql/schema"
 	"github.com/google/wire"
 )
 
@@ -128,11 +133,37 @@ func NewDatabase(cfg *config.Config, logger log.Logger) (*entity.Client, error) 
 	}
 
 	ctx := context.Background()
-	if err := db.Schema.Create(ctx,
-		migrate.WithForeignKeys(false),
+
+	// Build migration options based on database dialect
+	migrateOpts := []dbschema.MigrateOption{
 		migrate.WithDropIndex(true),
 		migrate.WithDropColumn(true),
-	); err != nil {
+	}
+
+	if dbDialect == "postgres" {
+		// PostgreSQL: disable foreign keys during migration to avoid ordering issues
+		migrateOpts = append(migrateOpts, migrate.WithForeignKeys(false))
+		// Fix: PostgreSQL auto-migration may fail with "relation already exists" when
+		// indexes already exist in the database but Atlas's InspectSchema does not
+		// detect them (e.g., due to custom table names via entsql.Table annotation).
+		// Use WithApplyHook to inject IF NOT EXISTS into CREATE INDEX statements,
+		// making the migration idempotent on PostgreSQL.
+		migrateOpts = append(migrateOpts, dbschema.WithApplyHook(func(next dbschema.Applier) dbschema.Applier {
+			return dbschema.ApplyFunc(func(ctx context.Context, conn dialect.ExecQuerier, plan *atlasmigrate.Plan) error {
+				for i, c := range plan.Changes {
+					if strings.HasPrefix(c.Cmd, "CREATE INDEX ") || strings.HasPrefix(c.Cmd, "CREATE UNIQUE INDEX ") {
+						// Insert "IF NOT EXISTS" after "CREATE INDEX" or "CREATE UNIQUE INDEX"
+						c.Cmd = strings.Replace(c.Cmd, "CREATE INDEX ", "CREATE INDEX IF NOT EXISTS ", 1)
+						c.Cmd = strings.Replace(c.Cmd, "CREATE UNIQUE INDEX ", "CREATE UNIQUE INDEX IF NOT EXISTS ", 1)
+						plan.Changes[i] = c
+					}
+				}
+				return next.Apply(ctx, conn, plan)
+			})
+		}))
+	}
+
+	if err := db.Schema.Create(ctx, migrateOpts...); err != nil {
 		return nil, err
 	}
 
@@ -783,8 +814,37 @@ func openDB(dsn, dbType string, logger log.Logger) (*entity.Client, error) {
 				dsn = dsn + " sslmode=disable"
 			}
 		}
+	} else {
+		// SQLite3: ensure the parent directory for the database file exists
+		if err := ensureSQLiteDir(dsn); err != nil {
+			return nil, fmt.Errorf("failed to create sqlite data directory: %w", err)
+		}
+		// Enable foreign keys pragma if not already set
+		if !strings.Contains(dsn, "_fk=") {
+			if strings.Contains(dsn, "?") {
+				dsn = dsn + "&_fk=1"
+			} else {
+				dsn = dsn + "?_fk=1"
+			}
+		}
 	}
 	return entity.Open(driverName, dsn)
+}
+
+// ensureSQLiteDir ensures the parent directory for the SQLite database file exists.
+func ensureSQLiteDir(dsn string) error {
+	// Extract file path from DSN (remove query parameters if present)
+	dbPath := dsn
+	if idx := strings.Index(dsn, "?"); idx >= 0 {
+		dbPath = dsn[:idx]
+	}
+	dir := filepath.Dir(dbPath)
+	if dir != "" && dir != "." {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func ensurePostgresDB(dsn string, logger log.Logger) error {

@@ -60,7 +60,7 @@ const Categories: React.FC = () => {
         name: '',
         slug: '',
         description: '',
-        parent_id: '',
+        parent_id: undefined,
         order: 0,
     });
 
@@ -89,7 +89,7 @@ const Categories: React.FC = () => {
             name: '',
             slug: '',
             description: '',
-            parent_id: '',
+            parent_id: undefined,
             order: 0,
         });
     };
@@ -143,7 +143,7 @@ const Categories: React.FC = () => {
             name: category.name,
             slug: category.slug,
             description: category.description || '',
-            parent_id: category.parent_id || '',
+            parent_id: category.parent_id ?? undefined,
             order: category.order || 0,
         });
         setShowEditDialog(true);
@@ -158,7 +158,7 @@ const Categories: React.FC = () => {
         window.open(`/categories/${category.slug}`, '_blank');
     };
 
-    const activeCount = categories.filter(c => c.status === 'active' || c.status === 'Enabled').length;
+    const activeCount = categories.filter(c => c.status === 1 || String(c.status) === 'active' || String(c.status) === 'Enabled').length;
     const totalMedia = categories.reduce((sum, c) => sum + (c.media_count || 0), 0);
 
     return (
@@ -302,8 +302,8 @@ const Categories: React.FC = () => {
                                         <TableCell>{category.order || 0}</TableCell>
                                         <TableCell>
                                             <Badge
-                                                variant={(category.status === 'active' || category.status === 'Enabled') ? 'default' : 'secondary'}>
-                                                {(category.status === 'active' || category.status === 'Enabled') ? t('admin.enabled') : t('admin.disabled')}
+                                                variant={(category.status === 1 || String(category.status) === 'active' || String(category.status) === 'Enabled') ? 'default' : 'secondary'}>
+                                                {(category.status === 1 || String(category.status) === 'active' || String(category.status) === 'Enabled') ? t('admin.enabled') : t('admin.disabled')}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">

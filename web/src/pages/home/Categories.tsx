@@ -1,4 +1,4 @@
-﻿import {Spinner} from "@/components/ui/spinner"
+import {Spinner} from "@/components/ui/spinner"
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * Categories Page
@@ -26,7 +26,7 @@ const CategoriesPage = () => {
             try {
                 setLoading(true);
                 const response = await categoryApi.getAll();
-                setCategories(response || []);
+                setCategories((response as any)?.items || response || []);
             } catch (err) {
                 setError(t('common.error'));
                 console.error('Failed to fetch categories:', err);

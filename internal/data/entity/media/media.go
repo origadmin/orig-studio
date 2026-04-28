@@ -143,7 +143,7 @@ const (
 	ChannelTable = "content_media"
 	// ChannelInverseTable is the table name for the Channel entity.
 	// It exists in this package in order to avoid circular dependency with the "channel" package.
-	ChannelInverseTable = "users_channels"
+	ChannelInverseTable = "user_channels"
 	// ChannelColumn is the table column denoting the channel relation/edge.
 	ChannelColumn = "channel_id"
 	// PlaylistsTable is the table that holds the playlists relation/edge.
