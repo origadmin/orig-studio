@@ -203,16 +203,23 @@ func (_u *UploadSessionUpdate) ClearDescription() *UploadSessionUpdate {
 }
 
 // SetCategoryID sets the "category_id" field.
-func (_u *UploadSessionUpdate) SetCategoryID(v string) *UploadSessionUpdate {
+func (_u *UploadSessionUpdate) SetCategoryID(v int64) *UploadSessionUpdate {
+	_u.mutation.ResetCategoryID()
 	_u.mutation.SetCategoryID(v)
 	return _u
 }
 
 // SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (_u *UploadSessionUpdate) SetNillableCategoryID(v *string) *UploadSessionUpdate {
+func (_u *UploadSessionUpdate) SetNillableCategoryID(v *int64) *UploadSessionUpdate {
 	if v != nil {
 		_u.SetCategoryID(*v)
 	}
+	return _u
+}
+
+// AddCategoryID adds value to the "category_id" field.
+func (_u *UploadSessionUpdate) AddCategoryID(v int64) *UploadSessionUpdate {
+	_u.mutation.AddCategoryID(v)
 	return _u
 }
 
@@ -453,11 +460,6 @@ func (_u *UploadSessionUpdate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "UploadSession.title": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.CategoryID(); ok {
-		if err := uploadsession.CategoryIDValidator(v); err != nil {
-			return &ValidationError{Name: "category_id", err: fmt.Errorf(`entity: validator failed for field "UploadSession.category_id": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.UserID(); ok {
 		if err := uploadsession.UserIDValidator(v); err != nil {
 			return &ValidationError{Name: "user_id", err: fmt.Errorf(`entity: validator failed for field "UploadSession.user_id": %w`, err)}
@@ -553,10 +555,13 @@ func (_u *UploadSessionUpdate) sqlSave(ctx context.Context) (_node int, err erro
 		_spec.ClearField(uploadsession.FieldDescription, field.TypeString)
 	}
 	if value, ok := _u.mutation.CategoryID(); ok {
-		_spec.SetField(uploadsession.FieldCategoryID, field.TypeString, value)
+		_spec.SetField(uploadsession.FieldCategoryID, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCategoryID(); ok {
+		_spec.AddField(uploadsession.FieldCategoryID, field.TypeInt64, value)
 	}
 	if _u.mutation.CategoryIDCleared() {
-		_spec.ClearField(uploadsession.FieldCategoryID, field.TypeString)
+		_spec.ClearField(uploadsession.FieldCategoryID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.Tags(); ok {
 		_spec.SetField(uploadsession.FieldTags, field.TypeJSON, value)
@@ -806,16 +811,23 @@ func (_u *UploadSessionUpdateOne) ClearDescription() *UploadSessionUpdateOne {
 }
 
 // SetCategoryID sets the "category_id" field.
-func (_u *UploadSessionUpdateOne) SetCategoryID(v string) *UploadSessionUpdateOne {
+func (_u *UploadSessionUpdateOne) SetCategoryID(v int64) *UploadSessionUpdateOne {
+	_u.mutation.ResetCategoryID()
 	_u.mutation.SetCategoryID(v)
 	return _u
 }
 
 // SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (_u *UploadSessionUpdateOne) SetNillableCategoryID(v *string) *UploadSessionUpdateOne {
+func (_u *UploadSessionUpdateOne) SetNillableCategoryID(v *int64) *UploadSessionUpdateOne {
 	if v != nil {
 		_u.SetCategoryID(*v)
 	}
+	return _u
+}
+
+// AddCategoryID adds value to the "category_id" field.
+func (_u *UploadSessionUpdateOne) AddCategoryID(v int64) *UploadSessionUpdateOne {
+	_u.mutation.AddCategoryID(v)
 	return _u
 }
 
@@ -1069,11 +1081,6 @@ func (_u *UploadSessionUpdateOne) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "UploadSession.title": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.CategoryID(); ok {
-		if err := uploadsession.CategoryIDValidator(v); err != nil {
-			return &ValidationError{Name: "category_id", err: fmt.Errorf(`entity: validator failed for field "UploadSession.category_id": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.UserID(); ok {
 		if err := uploadsession.UserIDValidator(v); err != nil {
 			return &ValidationError{Name: "user_id", err: fmt.Errorf(`entity: validator failed for field "UploadSession.user_id": %w`, err)}
@@ -1186,10 +1193,13 @@ func (_u *UploadSessionUpdateOne) sqlSave(ctx context.Context) (_node *UploadSes
 		_spec.ClearField(uploadsession.FieldDescription, field.TypeString)
 	}
 	if value, ok := _u.mutation.CategoryID(); ok {
-		_spec.SetField(uploadsession.FieldCategoryID, field.TypeString, value)
+		_spec.SetField(uploadsession.FieldCategoryID, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCategoryID(); ok {
+		_spec.AddField(uploadsession.FieldCategoryID, field.TypeInt64, value)
 	}
 	if _u.mutation.CategoryIDCleared() {
-		_spec.ClearField(uploadsession.FieldCategoryID, field.TypeString)
+		_spec.ClearField(uploadsession.FieldCategoryID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.Tags(); ok {
 		_spec.SetField(uploadsession.FieldTags, field.TypeJSON, value)

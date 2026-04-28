@@ -17,19 +17,19 @@ const (
 	// EdgeTag holds the string denoting the tag edge name in mutations.
 	EdgeTag = "tag"
 	// Table holds the table name of the mediatag in the database.
-	Table = "files_media_tags"
+	Table = "content_media_tags"
 	// MediaTable is the table that holds the media relation/edge.
-	MediaTable = "media"
+	MediaTable = "content_media"
 	// MediaInverseTable is the table name for the Media entity.
 	// It exists in this package in order to avoid circular dependency with the "media" package.
-	MediaInverseTable = "media"
+	MediaInverseTable = "content_media"
 	// MediaColumn is the table column denoting the media relation/edge.
 	MediaColumn = "media_tag_media"
 	// TagTable is the table that holds the tag relation/edge.
-	TagTable = "files_tag"
+	TagTable = "content_tags"
 	// TagInverseTable is the table name for the Tag entity.
 	// It exists in this package in order to avoid circular dependency with the "tag" package.
-	TagInverseTable = "files_tag"
+	TagInverseTable = "content_tags"
 	// TagColumn is the table column denoting the tag relation/edge.
 	TagColumn = "media_tag_tag"
 )
@@ -39,7 +39,7 @@ var Columns = []string{
 	FieldID,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "files_media_tags"
+// ForeignKeys holds the SQL foreign-keys that are owned by the "content_media_tags"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"media_tags_rel",

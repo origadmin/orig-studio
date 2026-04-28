@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 
@@ -30,6 +32,13 @@ func (EncodingTask) Fields() []ent.Field {
 		field.Bool("chunk").Default(false),
 		field.Time("created_at").Default(time.Now),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+	}
+}
+
+// Annotations of the EncodingTask.
+func (EncodingTask) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Table("system_encoding_tasks"),
 	}
 }
 

@@ -8,6 +8,7 @@ package data
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"origadmin/application/origcms/api/gen/v1/types"
@@ -234,7 +235,7 @@ func (r *mediaRepo) Create(
 	if in.UserId != "" {
 		create = create.SetUserID(in.UserId)
 	}
-	if in.CategoryId != "" {
+	if in.CategoryId != 0 {
 		create = create.SetNillableCategoryID(&in.CategoryId)
 	}
 	if len(in.Tags) > 0 {
@@ -285,7 +286,7 @@ func (r *mediaRepo) CreateWithEntity(
 	if in.UserId != "" {
 		create = create.SetUserID(in.UserId)
 	}
-	if in.CategoryId != "" {
+	if in.CategoryId != 0 {
 		create = create.SetNillableCategoryID(&in.CategoryId)
 	}
 
@@ -328,7 +329,7 @@ func (r *mediaRepo) Update(
 	if in.Duration > 0 {
 		update = update.SetDuration(int(in.Duration))
 	}
-	if in.CategoryId != "" {
+	if in.CategoryId != 0 {
 		update = update.SetNillableCategoryID(&in.CategoryId)
 	}
 	// Update tags
@@ -382,7 +383,11 @@ func (r *mediaRepo) ListCategories(
 }
 
 func (r *mediaRepo) GetCategory(ctx context.Context, id string) (*types.Category, error) {
-	c, err := r.db.Category.Get(ctx, id)
+	catID, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid category id: %w", err)
+	}
+	c, err := r.db.Category.Get(ctx, catID)
 	if err != nil {
 		return nil, err
 	}
@@ -592,6 +597,13 @@ func (r *mediaRepo) UpdateThumbnailFields(ctx context.Context, mediaID string, t
 func (r *mediaRepo) UpdatePreviewFilePath(ctx context.Context, mediaID string, previewFilePath string) error {
 	return r.db.Media.UpdateOneID(mediaID).
 		SetPreviewFilePath(previewFilePath).
+		Exec(ctx)
+}
+
+func (r *mediaRepo) UpdateDimensions(ctx context.Context, mediaID string, width, height int) error {
+	return r.db.Media.UpdateOneID(mediaID).
+		SetWidth(width).
+		SetHeight(height).
 		Exec(ctx)
 }
 

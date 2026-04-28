@@ -246,7 +246,7 @@ func UserID(v string) predicate.Media {
 }
 
 // CategoryID applies equality check predicate on the "category_id" field. It's identical to CategoryIDEQ.
-func CategoryID(v string) predicate.Media {
+func CategoryID(v int64) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldCategoryID, v))
 }
 
@@ -2221,58 +2221,23 @@ func UserIDContainsFold(v string) predicate.Media {
 }
 
 // CategoryIDEQ applies the EQ predicate on the "category_id" field.
-func CategoryIDEQ(v string) predicate.Media {
+func CategoryIDEQ(v int64) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldCategoryID, v))
 }
 
 // CategoryIDNEQ applies the NEQ predicate on the "category_id" field.
-func CategoryIDNEQ(v string) predicate.Media {
+func CategoryIDNEQ(v int64) predicate.Media {
 	return predicate.Media(sql.FieldNEQ(FieldCategoryID, v))
 }
 
 // CategoryIDIn applies the In predicate on the "category_id" field.
-func CategoryIDIn(vs ...string) predicate.Media {
+func CategoryIDIn(vs ...int64) predicate.Media {
 	return predicate.Media(sql.FieldIn(FieldCategoryID, vs...))
 }
 
 // CategoryIDNotIn applies the NotIn predicate on the "category_id" field.
-func CategoryIDNotIn(vs ...string) predicate.Media {
+func CategoryIDNotIn(vs ...int64) predicate.Media {
 	return predicate.Media(sql.FieldNotIn(FieldCategoryID, vs...))
-}
-
-// CategoryIDGT applies the GT predicate on the "category_id" field.
-func CategoryIDGT(v string) predicate.Media {
-	return predicate.Media(sql.FieldGT(FieldCategoryID, v))
-}
-
-// CategoryIDGTE applies the GTE predicate on the "category_id" field.
-func CategoryIDGTE(v string) predicate.Media {
-	return predicate.Media(sql.FieldGTE(FieldCategoryID, v))
-}
-
-// CategoryIDLT applies the LT predicate on the "category_id" field.
-func CategoryIDLT(v string) predicate.Media {
-	return predicate.Media(sql.FieldLT(FieldCategoryID, v))
-}
-
-// CategoryIDLTE applies the LTE predicate on the "category_id" field.
-func CategoryIDLTE(v string) predicate.Media {
-	return predicate.Media(sql.FieldLTE(FieldCategoryID, v))
-}
-
-// CategoryIDContains applies the Contains predicate on the "category_id" field.
-func CategoryIDContains(v string) predicate.Media {
-	return predicate.Media(sql.FieldContains(FieldCategoryID, v))
-}
-
-// CategoryIDHasPrefix applies the HasPrefix predicate on the "category_id" field.
-func CategoryIDHasPrefix(v string) predicate.Media {
-	return predicate.Media(sql.FieldHasPrefix(FieldCategoryID, v))
-}
-
-// CategoryIDHasSuffix applies the HasSuffix predicate on the "category_id" field.
-func CategoryIDHasSuffix(v string) predicate.Media {
-	return predicate.Media(sql.FieldHasSuffix(FieldCategoryID, v))
 }
 
 // CategoryIDIsNil applies the IsNil predicate on the "category_id" field.
@@ -2283,16 +2248,6 @@ func CategoryIDIsNil() predicate.Media {
 // CategoryIDNotNil applies the NotNil predicate on the "category_id" field.
 func CategoryIDNotNil() predicate.Media {
 	return predicate.Media(sql.FieldNotNull(FieldCategoryID))
-}
-
-// CategoryIDEqualFold applies the EqualFold predicate on the "category_id" field.
-func CategoryIDEqualFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldEqualFold(FieldCategoryID, v))
-}
-
-// CategoryIDContainsFold applies the ContainsFold predicate on the "category_id" field.
-func CategoryIDContainsFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldContainsFold(FieldCategoryID, v))
 }
 
 // ChannelIDEQ applies the EQ predicate on the "channel_id" field.

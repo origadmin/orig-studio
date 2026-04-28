@@ -9,15 +9,6 @@ import (
 	"origadmin/application/origcms/internal/data/enums"
 )
 
-func ConvertInt32ToString(from int32) string {
-	return strconv.FormatInt(int64(from), 10)
-}
-
-func ConvertStringToInt32(from string) int32 {
-	i, _ := strconv.ParseInt(from, 10, 32)
-	return int32(i)
-}
-
 func ConvertEnumsEncodingTaskStatusToString(from enums.EncodingTaskStatus) string {
 	return from.String()
 }
@@ -26,17 +17,8 @@ func ConvertInt64ToString(from int64) string {
 	return strconv.FormatInt(from, 10)
 }
 
-func ConvertIntToString(from int) string {
-	return strconv.Itoa(from)
-}
-
 func ConvertStringToEnumsEncodingTaskStatus(from string) enums.EncodingTaskStatus {
 	return enums.ParseEncodingTaskStatus(from)
-}
-
-func ConvertStringToInt(from string) int {
-	i, _ := strconv.Atoi(from)
-	return i
 }
 
 func ConvertStringToInt64(from string) int64 {

@@ -32,7 +32,7 @@ func (MediaPlaylist) Fields() []ent.Field {
 
 func (MediaPlaylist) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Table("files_playlistmedia"),
+		entsql.Table("content_playlist_media"),
 		entsql.WithComments(true),
 	}
 }

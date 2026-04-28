@@ -41,7 +41,7 @@ type Article struct {
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
 	// CategoryID holds the value of the "category_id" field.
-	CategoryID string `json:"category_id,omitempty"`
+	CategoryID int64 `json:"category_id,omitempty"`
 	// PublishedAt holds the value of the "published_at" field.
 	PublishedAt time.Time `json:"published_at,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -107,9 +107,9 @@ func (*Article) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case article.FieldFeatured:
 			values[i] = new(sql.NullBool)
-		case article.FieldViewCount, article.FieldCommentCount:
+		case article.FieldViewCount, article.FieldCommentCount, article.FieldCategoryID:
 			values[i] = new(sql.NullInt64)
-		case article.FieldID, article.FieldTitle, article.FieldContent, article.FieldSummary, article.FieldSlug, article.FieldState, article.FieldUserID, article.FieldCategoryID:
+		case article.FieldID, article.FieldTitle, article.FieldContent, article.FieldSummary, article.FieldSlug, article.FieldState, article.FieldUserID:
 			values[i] = new(sql.NullString)
 		case article.FieldPublishedAt, article.FieldCreatedAt, article.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -197,10 +197,10 @@ func (_m *Article) assignValues(columns []string, values []any) error {
 				_m.UserID = value.String
 			}
 		case article.FieldCategoryID:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field category_id", values[i])
 			} else if value.Valid {
-				_m.CategoryID = value.String
+				_m.CategoryID = value.Int64
 			}
 		case article.FieldPublishedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -302,7 +302,7 @@ func (_m *Article) String() string {
 	builder.WriteString(_m.UserID)
 	builder.WriteString(", ")
 	builder.WriteString("category_id=")
-	builder.WriteString(_m.CategoryID)
+	builder.WriteString(fmt.Sprintf("%v", _m.CategoryID))
 	builder.WriteString(", ")
 	builder.WriteString("published_at=")
 	builder.WriteString(_m.PublishedAt.Format(time.ANSIC))

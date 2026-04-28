@@ -27,19 +27,19 @@ const (
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the like in the database.
-	Table = "files_like"
+	Table = "content_likes"
 	// MediaTable is the table that holds the media relation/edge.
-	MediaTable = "files_like"
+	MediaTable = "content_likes"
 	// MediaInverseTable is the table name for the Media entity.
 	// It exists in this package in order to avoid circular dependency with the "media" package.
-	MediaInverseTable = "media"
+	MediaInverseTable = "content_media"
 	// MediaColumn is the table column denoting the media relation/edge.
 	MediaColumn = "media_id"
 	// UserTable is the table that holds the user relation/edge.
-	UserTable = "files_like"
+	UserTable = "content_likes"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users_user"
+	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
 )

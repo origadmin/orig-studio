@@ -59,34 +59,34 @@ const (
 	// EdgeChildren holds the string denoting the children edge name in mutations.
 	EdgeChildren = "children"
 	// Table holds the table name of the category in the database.
-	Table = "categories"
+	Table = "content_categories"
 	// UserTable is the table that holds the user relation/edge.
-	UserTable = "categories"
+	UserTable = "content_categories"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users_user"
+	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
 	// MediaTable is the table that holds the media relation/edge.
-	MediaTable = "media"
+	MediaTable = "content_media"
 	// MediaInverseTable is the table name for the Media entity.
 	// It exists in this package in order to avoid circular dependency with the "media" package.
-	MediaInverseTable = "media"
+	MediaInverseTable = "content_media"
 	// MediaColumn is the table column denoting the media relation/edge.
 	MediaColumn = "category_id"
 	// ArticlesTable is the table that holds the articles relation/edge.
-	ArticlesTable = "articles"
+	ArticlesTable = "content_articles"
 	// ArticlesInverseTable is the table name for the Article entity.
 	// It exists in this package in order to avoid circular dependency with the "article" package.
-	ArticlesInverseTable = "articles"
+	ArticlesInverseTable = "content_articles"
 	// ArticlesColumn is the table column denoting the articles relation/edge.
 	ArticlesColumn = "category_id"
 	// ParentTable is the table that holds the parent relation/edge.
-	ParentTable = "categories"
+	ParentTable = "content_categories"
 	// ParentColumn is the table column denoting the parent relation/edge.
 	ParentColumn = "parent_id"
 	// ChildrenTable is the table that holds the children relation/edge.
-	ChildrenTable = "categories"
+	ChildrenTable = "content_categories"
 	// ChildrenColumn is the table column denoting the children relation/edge.
 	ChildrenColumn = "parent_id"
 )
@@ -113,7 +113,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "categories"
+// ForeignKeys holds the SQL foreign-keys that are owned by the "content_categories"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"media_category_category",
@@ -163,10 +163,8 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
-	// DefaultID holds the default value on creation for the "id" field.
-	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(string) error
+	IDValidator func(int64) error
 )
 
 // OrderOption defines the ordering options for the Category queries.

@@ -56,6 +56,7 @@ type MediaRepo interface {
 	UpdateSpriteFields(ctx context.Context, mediaID string, spriteStatus string, spritePath string, vttPath string) error
 	UpdateThumbnailFields(ctx context.Context, mediaID string, thumbnail string, thumbnailTime float64) error
 	UpdatePreviewFilePath(ctx context.Context, mediaID string, previewFilePath string) error
+	UpdateDimensions(ctx context.Context, mediaID string, width, height int) error
 }
 
 // MediaQueryOption specifies options for querying media.
@@ -63,7 +64,7 @@ type MediaQueryOption struct {
 	repo.QueryOption
 	Type         *int32
 	UserID       *string
-	CategoryID   *string
+	CategoryID   *int64
 	Status       *int32
 	State        string
 	MediaType    string

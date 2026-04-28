@@ -43,7 +43,7 @@ func (r *uploadRepo) CreateSession(ctx context.Context, session *dto.UploadSessi
 		SetTempDir(session.TempDir).
 		SetExpiresAt(session.ExpiresAt)
 
-	if session.CategoryID != nil && *session.CategoryID != "" {
+	if session.CategoryID != nil && *session.CategoryID != 0 {
 		builder.SetCategoryID(*session.CategoryID)
 	}
 	if session.UserID != nil && *session.UserID != "" {
@@ -141,8 +141,8 @@ func (r *uploadRepo) DeleteExpiredSessions(ctx context.Context, now time.Time) (
 }
 
 func (r *uploadRepo) entToBiz(s *entity.UploadSession) *dto.UploadSession {
-	var categoryID *string
-	if s.CategoryID != "" {
+	var categoryID *int64
+	if s.CategoryID != 0 {
 		categoryID = &s.CategoryID
 	}
 

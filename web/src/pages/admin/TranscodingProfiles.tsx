@@ -38,7 +38,7 @@ import {
 import {
     PlusCircle, Edit, Trash2, CheckCircle, XCircle, Play, Pause, Settings,
     Search, Filter, MoreVertical, Download, Upload, Copy,
-    Trash, CheckSquare, Square, ArrowUpDown, ChevronDown, ChevronUp, RotateCcw
+    Trash, CheckSquare, Square, ArrowUpDown, ChevronDown, ChevronUp, RotateCcw, Terminal
 } from "lucide-react";
 import {Separator} from "../../components/ui/separator";
 
@@ -58,6 +58,12 @@ export default function TranscodingProfiles() {
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     const [sortConfig, setSortConfig] = useState<{ key: keyof EncodeProfile, direction: 'asc' | 'desc' } | null>(null);
 
+    // Command preview states
+    const [commandPreview, setCommandPreview] = useState<string>('');
+    const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+    const [previewProfile, setPreviewProfile] = useState<EncodeProfile | null>(null);
+    const [previewCommand, setPreviewCommand] = useState('');
+
     const fetchProfiles = async () => {
         try {
             setLoading(true);
@@ -73,6 +79,27 @@ export default function TranscodingProfiles() {
     useEffect(() => {
         fetchProfiles();
     }, []);
+
+    // Auto-fetch command preview when editing profile parameters change
+    useEffect(() => {
+        if (!editingProfile || !editingProfile.extension) {
+            setCommandPreview('');
+            return;
+        }
+        const timer = setTimeout(async () => {
+            try {
+                const response = await encodingApi.profiles.preview(editingProfile);
+                if (response.command) {
+                    setCommandPreview(response.command);
+                } else {
+                    setCommandPreview('');
+                }
+            } catch {
+                setCommandPreview('');
+            }
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [editingProfile?.extension, editingProfile?.resolution, editingProfile?.video_codec, editingProfile?.video_bitrate, editingProfile?.audio_codec, editingProfile?.audio_bitrate]);
 
     // 筛选和排序逻辑
     const filteredProfiles = useMemo(() => {
@@ -397,20 +424,8 @@ export default function TranscodingProfiles() {
                                                         return 'MP4';
                                                     case 'webm':
                                                         return 'WebM';
-                                                    case 'mkv':
-                                                        return 'Matroska';
-                                                    case 'mov':
-                                                        return 'QuickTime';
                                                     case 'gif':
                                                         return 'GIF';
-                                                    case 'sprite':
-                                                        return 'Sprite';
-                                                    case 'avi':
-                                                        return 'AVI';
-                                                    case 'flv':
-                                                        return 'FLV';
-                                                    case 'wmv':
-                                                        return 'WMV';
                                                     default:
                                                         return e.toUpperCase();
                                                 }
@@ -510,7 +525,10 @@ export default function TranscodingProfiles() {
                             </CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                            <Dialog open={isDialogOpen} onOpenChange={(open) => {
+                                setIsDialogOpen(open);
+                                if (!open) setCommandPreview('');
+                            }}>
                                 <DialogTrigger asChild>
                                     <Button size="sm" onClick={() => setEditingProfile({is_active: true})}>
                                         <PlusCircle className="h-4 w-4 mr-2"/>
@@ -550,13 +568,7 @@ export default function TranscodingProfiles() {
                                                 <SelectContent>
                                                     <SelectItem value="mp4">MP4</SelectItem>
                                                     <SelectItem value="webm">WebM</SelectItem>
-                                                    <SelectItem value="mkv">Matroska</SelectItem>
-                                                    <SelectItem value="mov">QuickTime</SelectItem>
                                                     <SelectItem value="gif">GIF</SelectItem>
-                                                    <SelectItem value="sprite">Sprite</SelectItem>
-                                                    <SelectItem value="avi">AVI</SelectItem>
-                                                    <SelectItem value="flv">FLV</SelectItem>
-                                                    <SelectItem value="wmv">WMV</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -606,26 +618,13 @@ export default function TranscodingProfiles() {
                                                     <SelectValue placeholder="Select video codec"/>
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="libx264">libx264 (H.264)</SelectItem>
-                                                    <SelectItem value="libx265">libx265 (H.265/HEVC)</SelectItem>
-                                                    <SelectItem value="libvpx-vp9">libvpx-vp9 (VP9)</SelectItem>
+                                                    <SelectItem value="h264">H.264</SelectItem>
+                                                    <SelectItem value="h265">H.265/HEVC</SelectItem>
+                                                    <SelectItem value="vp9">VP9</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
                                         </>)}
-                                        {editingProfile?.extension === 'sprite' && (
-                                        <div className="grid grid-cols-4 items-center gap-4">
-                                            <Label htmlFor="bento_params" className="text-right">Parameters</Label>
-                                            <Input id="bento_params"
-                                                   value={editingProfile?.bento_parameters || ""}
-                                                   onChange={(e) => setEditingProfile({
-                                                       ...editingProfile,
-                                                       bento_parameters: e.target.value
-                                                   })}
-                                                   placeholder="--frame-interval 10 --columns 5 --frame-width 160 --frame-height 90"
-                                                   className="col-span-3"/>
-                                        </div>
-                                        )}
                                         <div className="grid grid-cols-4 items-center gap-4">
                                             <div className="col-span-4">
                                                 <Button
@@ -640,7 +639,7 @@ export default function TranscodingProfiles() {
                                                 </Button>
                                             </div>
                                         </div>
-                                        {showAdvancedOptions && editingProfile?.extension !== 'sprite' && (
+                                        {showAdvancedOptions && (
                                             <>
                                                 <div className="grid grid-cols-4 items-center gap-4">
                                                     <Label htmlFor="vbitrate" className="text-right">Video Bitrate</Label>
@@ -728,6 +727,17 @@ export default function TranscodingProfiles() {
                                                 </label>
                                             </div>
                                         </div>
+                                        {/* Command Preview */}
+                                        {editingProfile && (
+                                            <div className="grid grid-cols-4 items-start gap-4">
+                                                <Label className="text-right mt-2">Command Preview</Label>
+                                                <div className="col-span-3">
+                                                    <pre className="bg-muted p-3 rounded-md text-xs font-mono whitespace-pre-wrap break-all max-h-32 overflow-auto">
+                                                        {commandPreview || 'Fill in the fields above to see the command preview'}
+                                                    </pre>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                     <DialogFooter>
                                         <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
@@ -845,20 +855,8 @@ export default function TranscodingProfiles() {
                                                     return 'MP4';
                                                 case 'webm':
                                                     return 'WebM';
-                                                case 'mkv':
-                                                    return 'Matroska';
-                                                case 'mov':
-                                                    return 'QuickTime';
                                                 case 'gif':
                                                     return 'GIF';
-                                                case 'sprite':
-                                                    return 'Sprite';
-                                                case 'avi':
-                                                    return 'AVI';
-                                                case 'flv':
-                                                    return 'FLV';
-                                                case 'wmv':
-                                                    return 'WMV';
                                                 default:
                                                     return ext.toUpperCase();
                                             }
@@ -930,6 +928,26 @@ export default function TranscodingProfiles() {
                                                         >
                                                             <Edit className="h-4 w-4"/>
                                                         </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={async () => {
+                                                                try {
+                                                                    const response = await encodingApi.profiles.preview(p);
+                                                                    setPreviewCommand(response.command || 'No command available for this profile type');
+                                                                    setPreviewProfile(p);
+                                                                    setPreviewDialogOpen(true);
+                                                                } catch {
+                                                                    setPreviewCommand('Failed to generate command preview');
+                                                                    setPreviewProfile(p);
+                                                                    setPreviewDialogOpen(true);
+                                                                }
+                                                            }}
+                                                            title="View Command"
+                                                            className="h-8 w-8"
+                                                        >
+                                                            <Terminal className="h-4 w-4"/>
+                                                        </Button>
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
                                                                 <Button variant="ghost" size="icon-sm" title="More Actions">
@@ -967,6 +985,21 @@ export default function TranscodingProfiles() {
                     </div>
                 </CardContent>
             </Card>
+
+            {/* Command Preview Dialog */}
+            <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>FFmpeg Command - {previewProfile?.name}</DialogTitle>
+                        <DialogDescription>
+                            The ffmpeg command that will be executed for this profile
+                        </DialogDescription>
+                    </DialogHeader>
+                    <pre className="bg-muted p-4 rounded-md text-xs font-mono whitespace-pre-wrap break-all max-h-96 overflow-auto">
+                        {previewCommand}
+                    </pre>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

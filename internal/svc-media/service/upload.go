@@ -67,10 +67,9 @@ func (s *UploadService) extractUserID(ctx context.Context) *string {
 func (s *UploadService) InitiateMultipartUpload(ctx context.Context, req *pb.InitiateMultipartUploadRequest) (*pb.InitiateMultipartUploadResponse, error) {
 	userID := s.extractUserID(ctx)
 
-	var categoryID *string
+	var categoryID *int64
 	if req.CategoryId != 0 {
-		idStr := strconv.FormatInt(req.CategoryId, 10)
-		categoryID = &idStr
+		categoryID = &req.CategoryId
 	}
 
 	session, err := s.uc.InitiateMultipartUpload(
@@ -160,10 +159,9 @@ func (s *UploadService) AbortMultipartUpload(ctx context.Context, req *pb.AbortM
 func (s *UploadService) UploadFile(ctx context.Context, req *pb.UploadFileRequest) (*pb.UploadFileResponse, error) {
 	userID := s.extractUserID(ctx)
 
-	var categoryID *string
+	var categoryID *int64
 	if req.CategoryId != 0 {
-		idStr := strconv.FormatInt(req.CategoryId, 10)
-		categoryID = &idStr
+		categoryID = &req.CategoryId
 	}
 
 	session, err := s.uc.InitiateMultipartUpload(

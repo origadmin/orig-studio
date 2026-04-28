@@ -87,7 +87,7 @@ func (uc *UploadUseCase) InitiateMultipartUpload(
 	fileSize int64,
 	contentType string,
 	title, description string,
-	categoryID *string,
+	categoryID *int64,
 	tags []string,
 	thumbnail string,
 	userID *string,
@@ -160,7 +160,7 @@ func (uc *UploadUseCase) UpdateUploadMetadata(
 	ctx context.Context,
 	uploadID string,
 	title, description string,
-	categoryID *string,
+	categoryID *int64,
 	tags []string,
 	thumbnail string,
 ) error {
@@ -195,7 +195,7 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 	uploadID string,
 	sha256 string,
 	title, description string,
-	categoryID *string,
+	categoryID *int64,
 	tags []string,
 	thumbnail string,
 ) (*Media, error) {

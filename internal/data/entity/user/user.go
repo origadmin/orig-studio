@@ -102,69 +102,69 @@ const (
 	// EdgeCreatedGroups holds the string denoting the created_groups edge name in mutations.
 	EdgeCreatedGroups = "created_groups"
 	// Table holds the table name of the user in the database.
-	Table = "users_user"
+	Table = "users"
 	// MediaTable is the table that holds the media relation/edge.
-	MediaTable = "media"
+	MediaTable = "content_media"
 	// MediaInverseTable is the table name for the Media entity.
 	// It exists in this package in order to avoid circular dependency with the "media" package.
-	MediaInverseTable = "media"
+	MediaInverseTable = "content_media"
 	// MediaColumn is the table column denoting the media relation/edge.
 	MediaColumn = "user_id"
 	// ArticlesTable is the table that holds the articles relation/edge.
-	ArticlesTable = "articles"
+	ArticlesTable = "content_articles"
 	// ArticlesInverseTable is the table name for the Article entity.
 	// It exists in this package in order to avoid circular dependency with the "article" package.
-	ArticlesInverseTable = "articles"
+	ArticlesInverseTable = "content_articles"
 	// ArticlesColumn is the table column denoting the articles relation/edge.
 	ArticlesColumn = "user_id"
 	// ChannelsTable is the table that holds the channels relation/edge.
-	ChannelsTable = "users_channel"
+	ChannelsTable = "users_channels"
 	// ChannelsInverseTable is the table name for the Channel entity.
 	// It exists in this package in order to avoid circular dependency with the "channel" package.
-	ChannelsInverseTable = "users_channel"
+	ChannelsInverseTable = "users_channels"
 	// ChannelsColumn is the table column denoting the channels relation/edge.
 	ChannelsColumn = "user_id"
 	// PlaylistsTable is the table that holds the playlists relation/edge. The primary key declared below.
 	PlaylistsTable = "user_playlists"
 	// PlaylistsInverseTable is the table name for the Playlist entity.
 	// It exists in this package in order to avoid circular dependency with the "playlist" package.
-	PlaylistsInverseTable = "files_playlist"
+	PlaylistsInverseTable = "content_playlists"
 	// CommentsTable is the table that holds the comments relation/edge.
-	CommentsTable = "files_comment"
+	CommentsTable = "content_comments"
 	// CommentsInverseTable is the table name for the Comment entity.
 	// It exists in this package in order to avoid circular dependency with the "comment" package.
-	CommentsInverseTable = "files_comment"
+	CommentsInverseTable = "content_comments"
 	// CommentsColumn is the table column denoting the comments relation/edge.
 	CommentsColumn = "user_comments"
 	// NotificationsTable is the table that holds the notifications relation/edge. The primary key declared below.
 	NotificationsTable = "user_notifications"
 	// NotificationsInverseTable is the table name for the Notification entity.
 	// It exists in this package in order to avoid circular dependency with the "notification" package.
-	NotificationsInverseTable = "users_notification"
+	NotificationsInverseTable = "users_notifications"
 	// CategoriesTable is the table that holds the categories relation/edge.
-	CategoriesTable = "categories"
+	CategoriesTable = "content_categories"
 	// CategoriesInverseTable is the table name for the Category entity.
 	// It exists in this package in order to avoid circular dependency with the "category" package.
-	CategoriesInverseTable = "categories"
+	CategoriesInverseTable = "content_categories"
 	// CategoriesColumn is the table column denoting the categories relation/edge.
 	CategoriesColumn = "user_id"
 	// TagsTable is the table that holds the tags relation/edge. The primary key declared below.
 	TagsTable = "user_tags"
 	// TagsInverseTable is the table name for the Tag entity.
 	// It exists in this package in order to avoid circular dependency with the "tag" package.
-	TagsInverseTable = "files_tag"
+	TagsInverseTable = "content_tags"
 	// FavoritesTable is the table that holds the favorites relation/edge.
-	FavoritesTable = "files_favorite"
+	FavoritesTable = "content_favorites"
 	// FavoritesInverseTable is the table name for the Favorite entity.
 	// It exists in this package in order to avoid circular dependency with the "favorite" package.
-	FavoritesInverseTable = "files_favorite"
+	FavoritesInverseTable = "content_favorites"
 	// FavoritesColumn is the table column denoting the favorites relation/edge.
 	FavoritesColumn = "user_id"
 	// LikesTable is the table that holds the likes relation/edge.
-	LikesTable = "files_like"
+	LikesTable = "content_likes"
 	// LikesInverseTable is the table name for the Like entity.
 	// It exists in this package in order to avoid circular dependency with the "like" package.
-	LikesInverseTable = "files_like"
+	LikesInverseTable = "content_likes"
 	// LikesColumn is the table column denoting the likes relation/edge.
 	LikesColumn = "user_id"
 	// CommentLikesTable is the table that holds the comment_likes relation/edge.
@@ -175,24 +175,24 @@ const (
 	// CommentLikesColumn is the table column denoting the comment_likes relation/edge.
 	CommentLikesColumn = "user_id"
 	// SubscriptionsTable is the table that holds the subscriptions relation/edge.
-	SubscriptionsTable = "subscriptions_subscription"
+	SubscriptionsTable = "users_subscriptions"
 	// SubscriptionsInverseTable is the table name for the Subscription entity.
 	// It exists in this package in order to avoid circular dependency with the "subscription" package.
-	SubscriptionsInverseTable = "subscriptions_subscription"
+	SubscriptionsInverseTable = "users_subscriptions"
 	// SubscriptionsColumn is the table column denoting the subscriptions relation/edge.
 	SubscriptionsColumn = "subscriber_id"
 	// SubscribersTable is the table that holds the subscribers relation/edge.
-	SubscribersTable = "subscriptions_subscription"
+	SubscribersTable = "users_subscriptions"
 	// SubscribersInverseTable is the table name for the Subscription entity.
 	// It exists in this package in order to avoid circular dependency with the "subscription" package.
-	SubscribersInverseTable = "subscriptions_subscription"
+	SubscribersInverseTable = "users_subscriptions"
 	// SubscribersColumn is the table column denoting the subscribers relation/edge.
 	SubscribersColumn = "channel_id"
 	// ReviewLogsTable is the table that holds the review_logs relation/edge.
-	ReviewLogsTable = "media_review_logs"
+	ReviewLogsTable = "content_media_review_logs"
 	// ReviewLogsInverseTable is the table name for the MediaReviewLog entity.
 	// It exists in this package in order to avoid circular dependency with the "mediareviewlog" package.
-	ReviewLogsInverseTable = "media_review_logs"
+	ReviewLogsInverseTable = "content_media_review_logs"
 	// ReviewLogsColumn is the table column denoting the review_logs relation/edge.
 	ReviewLogsColumn = "reviewer_id"
 	// CommentReportsTable is the table that holds the comment_reports relation/edge.
@@ -203,10 +203,10 @@ const (
 	// CommentReportsColumn is the table column denoting the comment_reports relation/edge.
 	CommentReportsColumn = "reporter_id"
 	// ModeratedCommentsTable is the table that holds the moderated_comments relation/edge.
-	ModeratedCommentsTable = "files_comment"
+	ModeratedCommentsTable = "content_comments"
 	// ModeratedCommentsInverseTable is the table name for the Comment entity.
 	// It exists in this package in order to avoid circular dependency with the "comment" package.
-	ModeratedCommentsInverseTable = "files_comment"
+	ModeratedCommentsInverseTable = "content_comments"
 	// ModeratedCommentsColumn is the table column denoting the moderated_comments relation/edge.
 	ModeratedCommentsColumn = "moderated_by"
 	// GroupMembershipsTable is the table that holds the group_memberships relation/edge.

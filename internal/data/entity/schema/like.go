@@ -39,7 +39,7 @@ func (Like) Indexes() []ent.Index {
 
 func (Like) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Table("files_like"),
+		entsql.Table("content_likes"),
 		entsql.WithComments(true),
 	}
 }

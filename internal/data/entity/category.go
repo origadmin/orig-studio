@@ -17,7 +17,7 @@ import (
 type Category struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int64 `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Slug holds the value of the "slug" field.
@@ -33,7 +33,7 @@ type Category struct {
 	// Color holds the value of the "color" field.
 	Color string `json:"color,omitempty"`
 	// ParentID holds the value of the "parent_id" field.
-	ParentID string `json:"parent_id,omitempty"`
+	ParentID int64 `json:"parent_id,omitempty"`
 	// Sequence holds the value of the "sequence" field.
 	Sequence int `json:"sequence,omitempty"`
 	// Status holds the value of the "status" field.
@@ -132,9 +132,9 @@ func (*Category) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case category.FieldIsGlobal, category.FieldIsRbacCategory:
 			values[i] = new(sql.NullBool)
-		case category.FieldSequence, category.FieldStatus, category.FieldMediaCount:
+		case category.FieldID, category.FieldParentID, category.FieldSequence, category.FieldStatus, category.FieldMediaCount:
 			values[i] = new(sql.NullInt64)
-		case category.FieldID, category.FieldName, category.FieldSlug, category.FieldDescription, category.FieldThumbnail, category.FieldListingsThumbnail, category.FieldIcon, category.FieldColor, category.FieldParentID, category.FieldIdentityProvider, category.FieldUserID:
+		case category.FieldName, category.FieldSlug, category.FieldDescription, category.FieldThumbnail, category.FieldListingsThumbnail, category.FieldIcon, category.FieldColor, category.FieldIdentityProvider, category.FieldUserID:
 			values[i] = new(sql.NullString)
 		case category.FieldCreatedAt, category.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -156,11 +156,11 @@ func (_m *Category) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case category.FieldID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value.Valid {
-				_m.ID = value.String
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
 			}
+			_m.ID = int64(value.Int64)
 		case category.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -204,10 +204,10 @@ func (_m *Category) assignValues(columns []string, values []any) error {
 				_m.Color = value.String
 			}
 		case category.FieldParentID:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
 			} else if value.Valid {
-				_m.ParentID = value.String
+				_m.ParentID = value.Int64
 			}
 		case category.FieldSequence:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -353,7 +353,7 @@ func (_m *Category) String() string {
 	builder.WriteString(_m.Color)
 	builder.WriteString(", ")
 	builder.WriteString("parent_id=")
-	builder.WriteString(_m.ParentID)
+	builder.WriteString(fmt.Sprintf("%v", _m.ParentID))
 	builder.WriteString(", ")
 	builder.WriteString("sequence=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Sequence))

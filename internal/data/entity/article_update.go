@@ -204,13 +204,13 @@ func (_u *ArticleUpdate) SetNillableUserID(v *string) *ArticleUpdate {
 }
 
 // SetCategoryID sets the "category_id" field.
-func (_u *ArticleUpdate) SetCategoryID(v string) *ArticleUpdate {
+func (_u *ArticleUpdate) SetCategoryID(v int64) *ArticleUpdate {
 	_u.mutation.SetCategoryID(v)
 	return _u
 }
 
 // SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (_u *ArticleUpdate) SetNillableCategoryID(v *string) *ArticleUpdate {
+func (_u *ArticleUpdate) SetNillableCategoryID(v *int64) *ArticleUpdate {
 	if v != nil {
 		_u.SetCategoryID(*v)
 	}
@@ -504,7 +504,7 @@ func (_u *ArticleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{article.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -517,7 +517,7 @@ func (_u *ArticleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{article.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -763,13 +763,13 @@ func (_u *ArticleUpdateOne) SetNillableUserID(v *string) *ArticleUpdateOne {
 }
 
 // SetCategoryID sets the "category_id" field.
-func (_u *ArticleUpdateOne) SetCategoryID(v string) *ArticleUpdateOne {
+func (_u *ArticleUpdateOne) SetCategoryID(v int64) *ArticleUpdateOne {
 	_u.mutation.SetCategoryID(v)
 	return _u
 }
 
 // SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (_u *ArticleUpdateOne) SetNillableCategoryID(v *string) *ArticleUpdateOne {
+func (_u *ArticleUpdateOne) SetNillableCategoryID(v *int64) *ArticleUpdateOne {
 	if v != nil {
 		_u.SetCategoryID(*v)
 	}
@@ -1093,7 +1093,7 @@ func (_u *ArticleUpdateOne) sqlSave(ctx context.Context) (_node *Article, err er
 			Columns: []string{article.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1106,7 +1106,7 @@ func (_u *ArticleUpdateOne) sqlSave(ctx context.Context) (_node *Article, err er
 			Columns: []string{article.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

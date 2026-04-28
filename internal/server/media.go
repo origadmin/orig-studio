@@ -291,7 +291,9 @@ func (h *MediaHandler) listMediaHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if catIDStr := c.Query("category_id"); catIDStr != "" {
-		opt.CategoryID = &catIDStr
+		if catID, err := strconv.ParseInt(catIDStr, 10, 64); err == nil {
+			opt.CategoryID = &catID
+		}
 	}
 
 	if c.Query("featured") == "true" {
@@ -331,7 +333,7 @@ func (h *MediaHandler) listMediaHandler(w http.ResponseWriter, r *http.Request) 
 			}
 		}
 
-		if m.CategoryId != "" {
+		if m.CategoryId != 0 {
 			catMap := map[string]interface{}{
 				"id": m.CategoryId,
 			}
@@ -513,7 +515,7 @@ func (h *MediaHandler) uploadMediaHandler(w http.ResponseWriter, r *http.Request
 		Extension:      strings.TrimPrefix(ext, "."),
 		Privacy:        int32(privacy),
 		Tags:           tags,
-		CategoryId:     strconv.Itoa(categoryID),
+		CategoryId:     int64(categoryID),
 		ReviewStatus:   "pending_review",
 		Listable:       false,
 	}
@@ -581,7 +583,7 @@ func (h *MediaHandler) updateMediaHandler(w http.ResponseWriter, r *http.Request
 		m.Description = req.Description
 	}
 	if req.CategoryID != nil {
-		m.CategoryId = strconv.Itoa(*req.CategoryID)
+		m.CategoryId = int64(*req.CategoryID)
 	}
 	if req.Tags != nil {
 		m.Tags = req.Tags
@@ -1204,7 +1206,9 @@ func (h *MediaHandler) listMedia() gin.HandlerFunc {
 		}
 
 		if catIDStr := c.Query("category_id"); catIDStr != "" {
-			opt.CategoryID = &catIDStr
+			if catID, err := strconv.ParseInt(catIDStr, 10, 64); err == nil {
+				opt.CategoryID = &catID
+			}
 		}
 
 		if c.Query("featured") == "true" {
@@ -1248,7 +1252,7 @@ func (h *MediaHandler) listMedia() gin.HandlerFunc {
 				}
 			}
 
-			if m.CategoryId != "" {
+			if m.CategoryId != 0 {
 				catMap := map[string]interface{}{
 					"id": m.CategoryId,
 				}
@@ -1427,7 +1431,7 @@ func (h *MediaHandler) uploadMedia() gin.HandlerFunc {
 			Extension:      strings.TrimPrefix(ext, "."),
 			Privacy:        int32(privacy),
 			Tags:           tags,
-			CategoryId:     strconv.Itoa(categoryID),
+			CategoryId:     int64(categoryID),
 			ReviewStatus:   "pending_review",
 			Listable:       false,
 		}
@@ -1505,7 +1509,7 @@ func (h *MediaHandler) updateMedia() gin.HandlerFunc {
 			m.Description = req.Description
 		}
 		if req.CategoryID != nil {
-			m.CategoryId = strconv.Itoa(*req.CategoryID)
+			m.CategoryId = int64(*req.CategoryID)
 		}
 		if req.Tags != nil {
 			m.Tags = req.Tags
@@ -2135,8 +2139,8 @@ func (h *MediaHandler) getPublicDetail() gin.HandlerFunc {
 				Fail(c, ErrForbidden, "private media")
 				return
 			}
-			if !media.Listable || media.ReviewStatus != "reviewed" {
-				Fail(c, ErrForbidden, "media not available")
+			if media.ReviewStatus != "reviewed" {
+				Fail(c, ErrForbidden, "media not reviewed")
 				return
 			}
 		}
@@ -2233,7 +2237,7 @@ func (h *MediaHandler) updateMediaByShortToken() gin.HandlerFunc {
 			m.Description = req.Description
 		}
 		if req.CategoryID != nil {
-			m.CategoryId = strconv.Itoa(*req.CategoryID)
+			m.CategoryId = int64(*req.CategoryID)
 		}
 		if req.Tags != nil {
 			m.Tags = req.Tags
@@ -2603,7 +2607,9 @@ func (h *MediaHandler) adminListMedia() gin.HandlerFunc {
 		}
 
 		if catIDStr := c.Query("category_id"); catIDStr != "" {
-			opt.CategoryID = &catIDStr
+			if catID, err := strconv.ParseInt(catIDStr, 10, 64); err == nil {
+				opt.CategoryID = &catID
+			}
 		}
 
 		if c.Query("featured") == "true" {
@@ -2646,7 +2652,7 @@ func (h *MediaHandler) adminListMedia() gin.HandlerFunc {
 				}
 			}
 
-			if m.CategoryId != "" {
+			if m.CategoryId != 0 {
 				catMap := map[string]interface{}{
 					"id": m.CategoryId,
 				}
@@ -2738,7 +2744,7 @@ func (h *MediaHandler) adminUpdateMedia() gin.HandlerFunc {
 			m.Description = req.Description
 		}
 		if req.CategoryID != nil {
-			m.CategoryId = strconv.Itoa(*req.CategoryID)
+			m.CategoryId = int64(*req.CategoryID)
 		}
 		if req.Tags != nil {
 			m.Tags = req.Tags

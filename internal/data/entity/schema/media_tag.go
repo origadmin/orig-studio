@@ -22,7 +22,7 @@ func (MediaTag) Fields() []ent.Field {
 
 func (MediaTag) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Table("files_media_tags"),
+		entsql.Table("content_media_tags"),
 		entsql.WithComments(true),
 	}
 }

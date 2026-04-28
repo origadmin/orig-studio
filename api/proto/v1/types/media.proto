@@ -61,7 +61,7 @@ message Media {
   // media.field.channel_id
   string channel_id = 44 [json_name = "channel_id"];
   // media.field.category_id
-  string category_id = 24 [json_name = "category_id"];
+  int64 category_id = 24 [json_name = "category_id"];
   // media.field.tags
   repeated string tags = 25 [json_name = "tags"];
   // media.field.hls_file
@@ -130,7 +130,7 @@ message EncodingTask {
 // Category is the model entity for Category.
 message Category {
   // ID of the ent.
-  string id = 1 [json_name = "id"];
+  int64 id = 1 [json_name = "id"];
   // create_time.field.comment
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
   // update_time.field.comment
@@ -146,7 +146,7 @@ message Category {
   // category.field.color
   string color = 8 [json_name = "color"];
   // category.field.parent_id
-  string parent_id = 9 [json_name = "parent_id"];
+  int64 parent_id = 9 [json_name = "parent_id"];
   // category.field.sequence
   int32 sequence = 10 [json_name = "sequence"];
   // category.field.status

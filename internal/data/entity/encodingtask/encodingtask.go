@@ -32,7 +32,7 @@ const (
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the encodingtask in the database.
-	Table = "encoding_tasks"
+	Table = "system_encoding_tasks"
 )
 
 // Columns holds all SQL columns for encodingtask fields.

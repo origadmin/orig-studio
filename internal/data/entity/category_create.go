@@ -114,13 +114,13 @@ func (_c *CategoryCreate) SetNillableColor(v *string) *CategoryCreate {
 }
 
 // SetParentID sets the "parent_id" field.
-func (_c *CategoryCreate) SetParentID(v string) *CategoryCreate {
+func (_c *CategoryCreate) SetParentID(v int64) *CategoryCreate {
 	_c.mutation.SetParentID(v)
 	return _c
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_c *CategoryCreate) SetNillableParentID(v *string) *CategoryCreate {
+func (_c *CategoryCreate) SetNillableParentID(v *int64) *CategoryCreate {
 	if v != nil {
 		_c.SetParentID(*v)
 	}
@@ -254,16 +254,8 @@ func (_c *CategoryCreate) SetNillableUpdatedAt(v *time.Time) *CategoryCreate {
 }
 
 // SetID sets the "id" field.
-func (_c *CategoryCreate) SetID(v string) *CategoryCreate {
+func (_c *CategoryCreate) SetID(v int64) *CategoryCreate {
 	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (_c *CategoryCreate) SetNillableID(v *string) *CategoryCreate {
-	if v != nil {
-		_c.SetID(*v)
-	}
 	return _c
 }
 
@@ -308,14 +300,14 @@ func (_c *CategoryCreate) SetParent(v *Category) *CategoryCreate {
 }
 
 // AddChildIDs adds the "children" edge to the Category entity by IDs.
-func (_c *CategoryCreate) AddChildIDs(ids ...string) *CategoryCreate {
+func (_c *CategoryCreate) AddChildIDs(ids ...int64) *CategoryCreate {
 	_c.mutation.AddChildIDs(ids...)
 	return _c
 }
 
 // AddChildren adds the "children" edges to the Category entity.
 func (_c *CategoryCreate) AddChildren(v ...*Category) *CategoryCreate {
-	ids := make([]string, len(v))
+	ids := make([]int64, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -384,10 +376,6 @@ func (_c *CategoryCreate) defaults() {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := category.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
-	}
-	if _, ok := _c.mutation.ID(); !ok {
-		v := category.DefaultID()
-		_c.mutation.SetID(v)
 	}
 }
 
@@ -466,12 +454,9 @@ func (_c *CategoryCreate) sqlSave(ctx context.Context) (*Category, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(string); ok {
-			_node.ID = id
-		} else {
-			return nil, fmt.Errorf("unexpected Category.ID type: %T", _spec.ID.Value)
-		}
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = int64(id)
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
@@ -481,7 +466,7 @@ func (_c *CategoryCreate) sqlSave(ctx context.Context) (*Category, error) {
 func (_c *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Category{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(category.Table, sqlgraph.NewFieldSpec(category.FieldID, field.TypeString))
+		_spec = sqlgraph.NewCreateSpec(category.Table, sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64))
 	)
 	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
@@ -604,7 +589,7 @@ func (_c *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 			Columns: []string{category.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -621,7 +606,7 @@ func (_c *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 			Columns: []string{category.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -677,6 +662,10 @@ func (_c *CategoryCreateBulk) Save(ctx context.Context) ([]*Category, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int64(id)
+				}
 				mutation.done = true
 				return nodes[i], nil
 			})

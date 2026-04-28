@@ -172,7 +172,7 @@ export interface EncodingTaskListResponse {
     total: number;
     page: number;
     page_size: number;
-    items: (EncodingTask & { profile_name?: string })[];
+    items: (EncodingTask & { profile_name?: string; media_title?: string; thumbnail?: string })[];
 }
 
 // 点赞/收藏响应
@@ -213,6 +213,9 @@ export const encodingApi = {
         page_size?: number;
         media_id?: string;
         only_stats?: boolean;
+        profile?: string;
+        chunk?: string;
+        search?: string;
     }) => api.get<EncodingTaskListResponse>('/admin/encoding/tasks', params as Record<string, unknown>),
 
     // 重试单个任务
@@ -237,6 +240,8 @@ export const encodingApi = {
         update: (id: number, data: Partial<EncodeProfile>) =>
             api.put<{ profile: EncodeProfile }>(`/admin/encoding/profiles/${id}`, data),
         delete: (id: number) => api.del<void>(`/admin/encoding/profiles/${id}`),
+        preview: (data: Partial<EncodeProfile>) =>
+            api.post<{ command: string }>('/admin/encoding/profiles/preview', data),
     },
 };
 
@@ -349,15 +354,15 @@ export const mediaApi = {
 
     // 转码相关（单个媒体）
     encoding: {
-        // 获取媒体转码任务
+        /** @deprecated 使用 adminMediaApi.getTasks(id) 代替。此方法使用不存在的 public 路径 /medias/${mediaId}/tasks，后端仅有 /admin/medias/:id/tasks */
         getTasks: (mediaId: number | string) =>
             api.get<{ tasks: EncodingTask[] }>(`/medias/${mediaId}/tasks`),
 
-        // 获取媒体转码变体
+        /** @deprecated 使用 adminMediaApi.getVariants(id) 代替。此方法使用不存在的 public 路径 /medias/${mediaId}/variants，后端仅有 /admin/medias/:id/variants */
         getVariants: (mediaId: number | string) =>
             api.get<MediaVariantSummary>(`/medias/${mediaId}/variants`),
 
-        // 重试媒体转码
+        /** @deprecated 使用 encodingApi.retryAllFailed(mediaId) 或 adminMediaApi.retryTask(id, taskId) 代替。此方法使用不存在的 public 路径，且 :taskId 为字面量未替换 */
         retry: (mediaId: number | string) =>
             api.post<{ message: string; media_id: number }>(`/medias/${mediaId}/tasks/:taskId/retry`),
     },
@@ -452,9 +457,13 @@ export const legacyMediaApi = {
         page_size?: number;
         media_id?: number;
     }) => api.get<EncodingTaskListResponse>("/admin/encoding/tasks", params as Record<string, unknown>),
-    listTasks: (mediaId: number) => api.get<{ tasks: EncodingTask[] }>(`/medias/${mediaId}/tasks`),
+    /** @deprecated 使用 adminMediaApi.getTasks(id) 代替。此方法使用不存在的 public 路径 */
+    listTasks: (mediaId: number) => api.get<{ tasks: EncodingTask[] }>(`/admin/medias/${mediaId}/tasks`),
+    /** @deprecated 使用 encodingApi.retryAllFailed(mediaId) 或 adminMediaApi.retryTask(id, taskId) 代替 */
     retryTranscode: (mediaId: number) =>
-        api.post<{ message: string; media_id: number }>(`/medias/${mediaId}/tasks/:taskId/retry`),
+        api.post<{ message: string; retried_count: number }>('/admin/encoding/retry-failed', null, {
+            params: {media_id: mediaId}
+        }),
     retryTask: (taskId: string) => {
         return api.post<{ message: string; task: any }>(`/admin/encoding/tasks/${taskId}/retry`);
     },
@@ -463,8 +472,9 @@ export const legacyMediaApi = {
             params: {media_id: mediaId}
         });
     },
+    /** @deprecated 使用 adminMediaApi.getVariants(id) 代替。此方法使用不存在的 public 路径 */
     getVariants: (mediaId: number) =>
-        api.get<MediaVariantSummary>(`/medias/${mediaId}/variants`),
+        api.get<MediaVariantSummary>(`/admin/medias/${mediaId}/variants`),
     getSSEUrl: (mediaId?: number) => {
         return `/api/v1/admin/encoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
     },

@@ -132,13 +132,13 @@ func (_c *ArticleCreate) SetUserID(v string) *ArticleCreate {
 }
 
 // SetCategoryID sets the "category_id" field.
-func (_c *ArticleCreate) SetCategoryID(v string) *ArticleCreate {
+func (_c *ArticleCreate) SetCategoryID(v int64) *ArticleCreate {
 	_c.mutation.SetCategoryID(v)
 	return _c
 }
 
 // SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (_c *ArticleCreate) SetNillableCategoryID(v *string) *ArticleCreate {
+func (_c *ArticleCreate) SetNillableCategoryID(v *int64) *ArticleCreate {
 	if v != nil {
 		_c.SetCategoryID(*v)
 	}
@@ -456,7 +456,7 @@ func (_c *ArticleCreate) createSpec() (*Article, *sqlgraph.CreateSpec) {
 			Columns: []string{article.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

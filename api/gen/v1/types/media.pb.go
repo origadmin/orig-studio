@@ -74,7 +74,7 @@ type Media struct {
 	// media.field.channel_id
 	ChannelId string `protobuf:"bytes,44,opt,name=channel_id,proto3" json:"channel_id,omitempty"`
 	// media.field.category_id
-	CategoryId string `protobuf:"bytes,24,opt,name=category_id,proto3" json:"category_id,omitempty"`
+	CategoryId int64 `protobuf:"varint,24,opt,name=category_id,proto3" json:"category_id,omitempty"`
 	// media.field.tags
 	Tags []string `protobuf:"bytes,25,rep,name=tags,proto3" json:"tags,omitempty"`
 	// media.field.hls_file
@@ -317,11 +317,11 @@ func (x *Media) GetChannelId() string {
 	return ""
 }
 
-func (x *Media) GetCategoryId() string {
+func (x *Media) GetCategoryId() int64 {
 	if x != nil {
 		return x.CategoryId
 	}
-	return ""
+	return 0
 }
 
 func (x *Media) GetTags() []string {
@@ -672,7 +672,7 @@ func (x *EncodingTask) GetUpdateTime() *timestamppb.Timestamp {
 type Category struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// ID of the ent.
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	// create_time.field.comment
 	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
 	// update_time.field.comment
@@ -688,7 +688,7 @@ type Category struct {
 	// category.field.color
 	Color string `protobuf:"bytes,8,opt,name=color,proto3" json:"color,omitempty"`
 	// category.field.parent_id
-	ParentId string `protobuf:"bytes,9,opt,name=parent_id,proto3" json:"parent_id,omitempty"`
+	ParentId int64 `protobuf:"varint,9,opt,name=parent_id,proto3" json:"parent_id,omitempty"`
 	// category.field.sequence
 	Sequence int32 `protobuf:"varint,10,opt,name=sequence,proto3" json:"sequence,omitempty"`
 	// category.field.status
@@ -729,11 +729,11 @@ func (*Category) Descriptor() ([]byte, []int) {
 	return file_v1_types_media_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *Category) GetId() string {
+func (x *Category) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
-	return ""
+	return 0
 }
 
 func (x *Category) GetCreateTime() *timestamppb.Timestamp {
@@ -785,11 +785,11 @@ func (x *Category) GetColor() string {
 	return ""
 }
 
-func (x *Category) GetParentId() string {
+func (x *Category) GetParentId() int64 {
 	if x != nil {
 		return x.ParentId
 	}
-	return ""
+	return 0
 }
 
 func (x *Category) GetSequence() int32 {
@@ -2086,7 +2086,7 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\n" +
 	"channel_id\x18, \x01(\tR\n" +
 	"channel_id\x12 \n" +
-	"\vcategory_id\x18\x18 \x01(\tR\vcategory_id\x12\x12\n" +
+	"\vcategory_id\x18\x18 \x01(\x03R\vcategory_id\x12\x12\n" +
 	"\x04tags\x18\x19 \x03(\tR\x04tags\x12\x1a\n" +
 	"\bhls_file\x18\x1a \x01(\tR\bhls_file\x12(\n" +
 	"\x0fencoding_status\x18\x1b \x01(\tR\x0fencoding_status\x12\x12\n" +
@@ -2130,7 +2130,7 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\vcreate_time\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
 	"\vupdate_time\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\"\xfe\x02\n" +
 	"\bCategory\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
 	"\vupdate_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\x12\x12\n" +
 	"\x04name\x18\x04 \x01(\tR\x04name\x12\x12\n" +
@@ -2138,7 +2138,7 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\vdescription\x18\x06 \x01(\tR\vdescription\x12\x12\n" +
 	"\x04icon\x18\a \x01(\tR\x04icon\x12\x14\n" +
 	"\x05color\x18\b \x01(\tR\x05color\x12\x1c\n" +
-	"\tparent_id\x18\t \x01(\tR\tparent_id\x12\x1a\n" +
+	"\tparent_id\x18\t \x01(\x03R\tparent_id\x12\x1a\n" +
 	"\bsequence\x18\n" +
 	" \x01(\x05R\bsequence\x12\x16\n" +
 	"\x06status\x18\v \x01(\x05R\x06status\x12 \n" +

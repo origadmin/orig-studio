@@ -19,6 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"origadmin/application/origcms/api/gen/v1/types"
+	_ "github.com/sqlite3ent/sqlite3"
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/migrate"

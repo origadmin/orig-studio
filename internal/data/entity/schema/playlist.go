@@ -44,7 +44,7 @@ func (Playlist) Indexes() []ent.Index {
 
 func (Playlist) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Table("files_playlist"),
+		entsql.Table("content_playlists"),
 		entsql.WithComments(true),
 	}
 }

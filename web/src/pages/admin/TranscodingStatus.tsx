@@ -52,6 +52,8 @@ type StatusFilter = "all" | "pending" | "processing" | "success" | "failed" | "s
 interface EncodingTask {
     id: number | string;
     media_id: string;
+    media_title?: string;
+    thumbnail?: string;
     profile_id: number;
     profile_name?: string;
     status: string;
@@ -144,12 +146,17 @@ function TaskRow({
     const st = getStatus(task.status);
     const StIcon = st.icon;
     const [showError, setShowError] = useState(false);
+    const [thumbError, setThumbError] = useState(false);
 
     const isProcessing = task.status === "processing";
     const isSkipped = task.status === "skipped";
     const isFailed = task.status === "failed";
     const isSuccess = task.status === "success";
     const canRetry = isSkipped || isFailed;
+
+    const thumbSrc = task.thumbnail && !thumbError
+        ? (task.thumbnail.startsWith('http') ? task.thumbnail : `${API_BASE_URL}${task.thumbnail.startsWith('/') ? '' : '/'}${task.thumbnail}`)
+        : '';
 
     return (
         <>
@@ -165,17 +172,22 @@ function TaskRow({
                     />
                 </TableCell>
                 {/* ENCODING */}
-                <TableCell className="w-[220px]">
+                <TableCell className="max-w-[320px]">
                     <a href={mediaLink(task.media_id)}
-                       className="group/media inline-flex items-center gap-3 text-sm font-medium text-slate-900 dark:text-slate-100 hover:text-info dark:hover:text-blue-400 transition-all duration-200">
+                       className="group/media flex items-center gap-3 text-sm font-medium text-slate-900 dark:text-slate-100 hover:text-info dark:hover:text-blue-400 transition-all duration-200">
                         <span
-                            className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-50 to-slate-100 dark:from-blue-950/30 dark:to-slate-800 flex items-center justify-center shrink-0 group-hover/media:from-blue-100 group-hover/media:to-blue-50 dark:group-hover/media:from-blue-900/30 dark:group-hover/media:to-blue-950/50 transition-all duration-200 shadow-sm">
-                            <Video
-                                className="w-4 h-4 text-info group-hover/media:text-info dark:group-hover/media:text-blue-400 transition-colors"/>
+                            className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-50 to-slate-100 dark:from-blue-950/30 dark:to-slate-800 flex items-center justify-center shrink-0 group-hover/media:from-blue-100 group-hover/media:to-blue-50 dark:group-hover/media:from-blue-900/30 dark:group-hover/media:to-blue-950/50 transition-all duration-200 shadow-sm overflow-hidden">
+                            {thumbSrc ? (
+                                <img src={thumbSrc}
+                                     alt="" className="w-full h-full object-cover"
+                                     onError={() => setThumbError(true)}/>
+                            ) : (
+                                <Video className="w-4 h-4 text-info group-hover/media:text-info dark:group-hover/media:text-blue-400 transition-colors"/>
+                            )}
                         </span>
-                        <div className="min-w-0 flex-1">
-                            <span className="block truncate max-w-[150px] font-medium text-slate-900 dark:text-slate-100">Media</span>
-                            <span className="block truncate max-w-[150px] text-xs text-muted-foreground">{task.media_id.substring(0, 8)}...</span>
+                        <div className="flex-1 min-w-0">
+                            {task.media_title && <span className="block truncate font-medium text-slate-900 dark:text-slate-100" title={task.media_title}>{task.media_title}</span>}
+                            <span className="block font-mono text-[11px] leading-tight text-muted-foreground" title={task.media_id}>{task.media_id}</span>
                         </div>
                         <ExternalLink
                             className="w-3.5 h-3.5 opacity-0 group-hover/media:opacity-100 text-info shrink-0 transition-opacity"/>
@@ -1160,7 +1172,7 @@ const filteredTasks = useMemo(() => {
                                             />
                                         </TableHead>
                                         <TableHead
-                                            className="w-[200px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">MEDIA</TableHead>
+                                            className="max-w-[320px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">MEDIA</TableHead>
                                         <TableHead
                                             className="w-[120px] py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer hover:bg-muted/80"
                                             onClick={() => handleSort('profile_id')}

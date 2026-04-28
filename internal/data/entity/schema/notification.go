@@ -40,7 +40,7 @@ func (Notification) Indexes() []ent.Index {
 
 func (Notification) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Table("users_notification"),
+		entsql.Table("users_notifications"),
 		entsql.WithComments(true),
 	}
 }

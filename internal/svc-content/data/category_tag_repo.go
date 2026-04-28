@@ -6,9 +6,7 @@ package data
 
 import (
 	"context"
-	"fmt"
 	"sync"
-	"strconv"
 
 	"github.com/go-kratos/kratos/v2/log"
 
@@ -57,8 +55,7 @@ func (r *categoryRepo) Create(ctx context.Context, c *biz.Category) (*biz.Catego
 }
 
 func (r *categoryRepo) Get(ctx context.Context, id int) (*biz.Category, error) {
-	// 由于实体的ID是string类型，我们使用字符串格式查询
-	ent, err := r.data.db.Category.Query().Where(category.ID(fmt.Sprintf("%d", id))).First(ctx)
+	ent, err := r.data.db.Category.Query().Where(category.ID(int64(id))).First(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +63,7 @@ func (r *categoryRepo) Get(ctx context.Context, id int) (*biz.Category, error) {
 }
 
 func (r *categoryRepo) Update(ctx context.Context, c *biz.Category) (*biz.Category, error) {
-	ent, err := r.data.db.Category.UpdateOneID(fmt.Sprintf("%d", c.ID)).
+	ent, err := r.data.db.Category.UpdateOneID(int64(c.ID)).
 		SetName(c.Name).
 		SetSlug(c.Slug).
 		SetDescription(c.Description).
@@ -78,7 +75,7 @@ func (r *categoryRepo) Update(ctx context.Context, c *biz.Category) (*biz.Catego
 }
 
 func (r *categoryRepo) Delete(ctx context.Context, id int) error {
-	return r.data.db.Category.DeleteOneID(fmt.Sprintf("%d", id)).Exec(ctx)
+	return r.data.db.Category.DeleteOneID(int64(id)).Exec(ctx)
 }
 
 func (r *categoryRepo) ListAll(ctx context.Context) ([]*biz.Category, error) {
@@ -228,21 +225,8 @@ func (r *tagRepo) ListAll(ctx context.Context, page, pageSize int) ([]*biz.Tag, 
 }
 
 func mapCategory(ent *entity.Category) *biz.Category {
-	// 由于实体的ID是string类型，而业务模型使用int类型
-	// 尝试将字符串ID转换为整数
-	id := 0
-	if ent.ID != "" {
-		// 尝试将字符串ID解析为整数
-		// 注意：在实际生产环境中，可能需要根据ID生成策略调整
-		if parsedID, err := strconv.Atoi(ent.ID); err == nil {
-			id = parsedID
-		} else {
-			// 如果转换失败，使用一个默认值或基于字符串的哈希值
-			id = len(ent.ID)
-		}
-	}
 	return &biz.Category{
-		ID:          id,
+		ID:          int(ent.ID),
 		Name:        ent.Name,
 		Slug:        ent.Slug,
 		Description: ent.Description,

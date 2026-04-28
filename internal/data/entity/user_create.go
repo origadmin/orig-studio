@@ -459,14 +459,14 @@ func (_c *UserCreate) AddNotifications(v ...*Notification) *UserCreate {
 }
 
 // AddCategoryIDs adds the "categories" edge to the Category entity by IDs.
-func (_c *UserCreate) AddCategoryIDs(ids ...string) *UserCreate {
+func (_c *UserCreate) AddCategoryIDs(ids ...int64) *UserCreate {
 	_c.mutation.AddCategoryIDs(ids...)
 	return _c
 }
 
 // AddCategories adds the "categories" edges to the Category entity.
 func (_c *UserCreate) AddCategories(v ...*Category) *UserCreate {
-	ids := make([]string, len(v))
+	ids := make([]int64, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -1078,7 +1078,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.CategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

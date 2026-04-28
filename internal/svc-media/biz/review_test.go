@@ -138,6 +138,10 @@ func (r *MockReviewRepo) UpdatePreviewFilePath(ctx context.Context, mediaID stri
 	return nil
 }
 
+func (r *MockReviewRepo) UpdateDimensions(ctx context.Context, mediaID string, width, height int) error {
+	return nil
+}
+
 // MockReviewLogRepo simulates the review log repository
 type MockReviewLogRepo struct {
 	logs []*ReviewLog

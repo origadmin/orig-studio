@@ -541,14 +541,14 @@ func (_u *UserUpdate) AddNotifications(v ...*Notification) *UserUpdate {
 }
 
 // AddCategoryIDs adds the "categories" edge to the Category entity by IDs.
-func (_u *UserUpdate) AddCategoryIDs(ids ...string) *UserUpdate {
+func (_u *UserUpdate) AddCategoryIDs(ids ...int64) *UserUpdate {
 	_u.mutation.AddCategoryIDs(ids...)
 	return _u
 }
 
 // AddCategories adds the "categories" edges to the Category entity.
 func (_u *UserUpdate) AddCategories(v ...*Category) *UserUpdate {
-	ids := make([]string, len(v))
+	ids := make([]int64, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -858,14 +858,14 @@ func (_u *UserUpdate) ClearCategories() *UserUpdate {
 }
 
 // RemoveCategoryIDs removes the "categories" edge to Category entities by IDs.
-func (_u *UserUpdate) RemoveCategoryIDs(ids ...string) *UserUpdate {
+func (_u *UserUpdate) RemoveCategoryIDs(ids ...int64) *UserUpdate {
 	_u.mutation.RemoveCategoryIDs(ids...)
 	return _u
 }
 
 // RemoveCategories removes "categories" edges to Category entities.
 func (_u *UserUpdate) RemoveCategories(v ...*Category) *UserUpdate {
-	ids := make([]string, len(v))
+	ids := make([]int64, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -1583,7 +1583,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.CategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1596,7 +1596,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.CategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -1612,7 +1612,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.CategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -2633,14 +2633,14 @@ func (_u *UserUpdateOne) AddNotifications(v ...*Notification) *UserUpdateOne {
 }
 
 // AddCategoryIDs adds the "categories" edge to the Category entity by IDs.
-func (_u *UserUpdateOne) AddCategoryIDs(ids ...string) *UserUpdateOne {
+func (_u *UserUpdateOne) AddCategoryIDs(ids ...int64) *UserUpdateOne {
 	_u.mutation.AddCategoryIDs(ids...)
 	return _u
 }
 
 // AddCategories adds the "categories" edges to the Category entity.
 func (_u *UserUpdateOne) AddCategories(v ...*Category) *UserUpdateOne {
-	ids := make([]string, len(v))
+	ids := make([]int64, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -2950,14 +2950,14 @@ func (_u *UserUpdateOne) ClearCategories() *UserUpdateOne {
 }
 
 // RemoveCategoryIDs removes the "categories" edge to Category entities by IDs.
-func (_u *UserUpdateOne) RemoveCategoryIDs(ids ...string) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveCategoryIDs(ids ...int64) *UserUpdateOne {
 	_u.mutation.RemoveCategoryIDs(ids...)
 	return _u
 }
 
 // RemoveCategories removes "categories" edges to Category entities.
 func (_u *UserUpdateOne) RemoveCategories(v ...*Category) *UserUpdateOne {
-	ids := make([]string, len(v))
+	ids := make([]int64, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -3705,7 +3705,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.CategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -3718,7 +3718,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.CategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -3734,7 +3734,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.CategoriesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

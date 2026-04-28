@@ -35,19 +35,19 @@ const (
 	// EdgeMedia holds the string denoting the media edge name in mutations.
 	EdgeMedia = "media"
 	// Table holds the table name of the channel in the database.
-	Table = "users_channel"
+	Table = "users_channels"
 	// UserTable is the table that holds the user relation/edge.
-	UserTable = "users_channel"
+	UserTable = "users_channels"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users_user"
+	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
 	// MediaTable is the table that holds the media relation/edge.
-	MediaTable = "media"
+	MediaTable = "content_media"
 	// MediaInverseTable is the table name for the Media entity.
 	// It exists in this package in order to avoid circular dependency with the "media" package.
-	MediaInverseTable = "media"
+	MediaInverseTable = "content_media"
 	// MediaColumn is the table column denoting the media relation/edge.
 	MediaColumn = "channel_id"
 )

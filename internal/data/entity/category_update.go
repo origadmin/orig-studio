@@ -167,13 +167,13 @@ func (_u *CategoryUpdate) ClearColor() *CategoryUpdate {
 }
 
 // SetParentID sets the "parent_id" field.
-func (_u *CategoryUpdate) SetParentID(v string) *CategoryUpdate {
+func (_u *CategoryUpdate) SetParentID(v int64) *CategoryUpdate {
 	_u.mutation.SetParentID(v)
 	return _u
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_u *CategoryUpdate) SetNillableParentID(v *string) *CategoryUpdate {
+func (_u *CategoryUpdate) SetNillableParentID(v *int64) *CategoryUpdate {
 	if v != nil {
 		_u.SetParentID(*v)
 	}
@@ -378,14 +378,14 @@ func (_u *CategoryUpdate) SetParent(v *Category) *CategoryUpdate {
 }
 
 // AddChildIDs adds the "children" edge to the Category entity by IDs.
-func (_u *CategoryUpdate) AddChildIDs(ids ...string) *CategoryUpdate {
+func (_u *CategoryUpdate) AddChildIDs(ids ...int64) *CategoryUpdate {
 	_u.mutation.AddChildIDs(ids...)
 	return _u
 }
 
 // AddChildren adds the "children" edges to the Category entity.
 func (_u *CategoryUpdate) AddChildren(v ...*Category) *CategoryUpdate {
-	ids := make([]string, len(v))
+	ids := make([]int64, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -458,14 +458,14 @@ func (_u *CategoryUpdate) ClearChildren() *CategoryUpdate {
 }
 
 // RemoveChildIDs removes the "children" edge to Category entities by IDs.
-func (_u *CategoryUpdate) RemoveChildIDs(ids ...string) *CategoryUpdate {
+func (_u *CategoryUpdate) RemoveChildIDs(ids ...int64) *CategoryUpdate {
 	_u.mutation.RemoveChildIDs(ids...)
 	return _u
 }
 
 // RemoveChildren removes "children" edges to Category entities.
 func (_u *CategoryUpdate) RemoveChildren(v ...*Category) *CategoryUpdate {
-	ids := make([]string, len(v))
+	ids := make([]int64, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -553,7 +553,7 @@ func (_u *CategoryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(category.Table, category.Columns, sqlgraph.NewFieldSpec(category.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(category.Table, category.Columns, sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -763,7 +763,7 @@ func (_u *CategoryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{category.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -776,7 +776,7 @@ func (_u *CategoryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{category.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -792,7 +792,7 @@ func (_u *CategoryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{category.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -805,7 +805,7 @@ func (_u *CategoryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{category.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -821,7 +821,7 @@ func (_u *CategoryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{category.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -986,13 +986,13 @@ func (_u *CategoryUpdateOne) ClearColor() *CategoryUpdateOne {
 }
 
 // SetParentID sets the "parent_id" field.
-func (_u *CategoryUpdateOne) SetParentID(v string) *CategoryUpdateOne {
+func (_u *CategoryUpdateOne) SetParentID(v int64) *CategoryUpdateOne {
 	_u.mutation.SetParentID(v)
 	return _u
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_u *CategoryUpdateOne) SetNillableParentID(v *string) *CategoryUpdateOne {
+func (_u *CategoryUpdateOne) SetNillableParentID(v *int64) *CategoryUpdateOne {
 	if v != nil {
 		_u.SetParentID(*v)
 	}
@@ -1197,14 +1197,14 @@ func (_u *CategoryUpdateOne) SetParent(v *Category) *CategoryUpdateOne {
 }
 
 // AddChildIDs adds the "children" edge to the Category entity by IDs.
-func (_u *CategoryUpdateOne) AddChildIDs(ids ...string) *CategoryUpdateOne {
+func (_u *CategoryUpdateOne) AddChildIDs(ids ...int64) *CategoryUpdateOne {
 	_u.mutation.AddChildIDs(ids...)
 	return _u
 }
 
 // AddChildren adds the "children" edges to the Category entity.
 func (_u *CategoryUpdateOne) AddChildren(v ...*Category) *CategoryUpdateOne {
-	ids := make([]string, len(v))
+	ids := make([]int64, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -1277,14 +1277,14 @@ func (_u *CategoryUpdateOne) ClearChildren() *CategoryUpdateOne {
 }
 
 // RemoveChildIDs removes the "children" edge to Category entities by IDs.
-func (_u *CategoryUpdateOne) RemoveChildIDs(ids ...string) *CategoryUpdateOne {
+func (_u *CategoryUpdateOne) RemoveChildIDs(ids ...int64) *CategoryUpdateOne {
 	_u.mutation.RemoveChildIDs(ids...)
 	return _u
 }
 
 // RemoveChildren removes "children" edges to Category entities.
 func (_u *CategoryUpdateOne) RemoveChildren(v ...*Category) *CategoryUpdateOne {
-	ids := make([]string, len(v))
+	ids := make([]int64, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -1385,7 +1385,7 @@ func (_u *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err 
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(category.Table, category.Columns, sqlgraph.NewFieldSpec(category.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(category.Table, category.Columns, sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`entity: missing "Category.id" for update`)}
@@ -1612,7 +1612,7 @@ func (_u *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err 
 			Columns: []string{category.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1625,7 +1625,7 @@ func (_u *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err 
 			Columns: []string{category.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -1641,7 +1641,7 @@ func (_u *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err 
 			Columns: []string{category.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1654,7 +1654,7 @@ func (_u *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err 
 			Columns: []string{category.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -1670,7 +1670,7 @@ func (_u *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err 
 			Columns: []string{category.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

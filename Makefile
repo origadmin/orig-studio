@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------------- #
 
 # List of applications to build/release, corresponding to directories in ./cmd/
-APPS := svc-api-gateway svc-user svc-media svc-content
+APPS := svc-api-gateway svc-user svc-media svc-content server
 
 # Path to the third_party directory for external protobufs (optional, created by make deps)
 THIRD_PARTY_PATH := third_party
@@ -92,12 +92,14 @@ gen-convpb: ## 🔀 Generate entity↔proto type conversion code
 
 clean: ## 🧹 Clean up build artifacts and generated code
 	@echo "Cleaning up..."
-	@rm -rf ./bin ./dist ./coverage.out
-	@rm -rf ./api/gen
-	@rm -rf ./docs/api
-	@rm -rf ./web/src/types/api.ts
-	@rm -rf ./internal/data/entity/ent/*  # 注意: 不删除 schema/ 和 generate.go
-	@rm -rf ./third_party
+	@$(call RMDIR,./bin)
+	@$(call RMDIR,./dist)
+	@$(call RMDIR,./coverage.out)
+	@$(call RMDIR,./api/gen)
+	@$(call RMDIR,./docs/api)
+	@$(call RMDIR,./web/src/types/api.ts)
+	@$(call RMDIR,./internal/data/entity/ent)
+	@$(call RMDIR,./third_party)
 
 
 # ---------------------------------------------------------------------------- #
@@ -132,14 +134,17 @@ GIT_HEAD_TAG    := $(shell git tag --points-at HEAD 2>/dev/null)
 ifeq ($(GOHOSTOS), windows)
     BUILD_DATE   := $(shell powershell -Command "Get-Date -Format 'yyyy-MM-ddTHH:mm:ssK'")
     GIT_TREE_STATE := $(shell powershell -Command "if ((git status --porcelain)) { 'dirty' } else { 'clean' }")
-    # Use the tag if it exists, otherwise use the short commit hash.
     GIT_TAG      := $(shell powershell -Command "if ('${GIT_HEAD_TAG}') { '${GIT_HEAD_TAG}' } else { '${GIT_COMMIT}' }")
+    RMDIR        = powershell -Command "if (Test-Path '$(1)') { Remove-Item -Recurse -Force '$(1)' }"
+    CPDIR        = powershell -Command "Copy-Item -Recurse -Path '$(1)' -Destination '$(2)'"
 else
     BUILD_DATE   := $(shell TZ=Asia/Shanghai date +%FT%T%z)
     # Check for uncommitted changes. git status --porcelain is reliable.
     GIT_TREE_STATE := $(if $(shell git status --porcelain),dirty,clean)
     # Use the tag if it exists, otherwise use the short commit hash.
     GIT_TAG      := $(if $(GIT_HEAD_TAG),$(GIT_HEAD_TAG),$(GIT_COMMIT))
+    RMDIR        = rm -rf $(1)
+    CPDIR        = cp -r $(1) $(2)
 endif
 
 # If the tree is dirty, append a suffix to the version string.
@@ -186,6 +191,29 @@ build-docker-%:
 release-%:
 	@echo "--> Releasing application: $*"
 	@goreleaser release --clean --config ./.goreleaser.yml --id $*
+
+
+# ---------------------------------------------------------------------------- #
+#                     Frontend & Server Build Targets                         #
+# ---------------------------------------------------------------------------- #
+
+.PHONY: build-frontend build-server build-server-dev
+
+build-frontend: ## Build frontend React SPA
+	@echo "Building frontend..."
+	cd web && bun install && bun run build
+	@echo "Copying frontend dist to internal/frontend/dist/..."
+	@$(call RMDIR,internal/frontend/dist)
+	@$(call CPDIR,web/dist,internal/frontend/dist)
+	@echo "Frontend build complete."
+
+build-server: build-frontend ## Build server binary with embedded frontend
+	@echo "--> Building server binary with frontend"
+	@go build -ldflags="$(LDFLAGS)" -o ./bin/server ./cmd/server
+
+build-server-dev: ## Build server binary without frontend (dev mode)
+	@echo "--> Building server binary (dev mode, no frontend)"
+	@go build -tags dev -ldflags="$(LDFLAGS)" -o ./bin/server ./cmd/server
 
 
 # ---------------------------------------------------------------------------- #

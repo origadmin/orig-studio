@@ -21,12 +21,12 @@ const (
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the tag in the database.
-	Table = "files_tag"
+	Table = "content_tags"
 	// UserTable is the table that holds the user relation/edge. The primary key declared below.
 	UserTable = "user_tags"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users_user"
+	UserInverseTable = "users"
 )
 
 // Columns holds all SQL columns for tag fields.
@@ -37,7 +37,7 @@ var Columns = []string{
 	FieldListingsThumbnail,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "files_tag"
+// ForeignKeys holds the SQL foreign-keys that are owned by the "content_tags"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"media_tag_tag",

@@ -36,14 +36,14 @@ func (_c *MediaCategoryCreate) AddMedia(v ...*Media) *MediaCategoryCreate {
 }
 
 // AddCategoryIDs adds the "category" edge to the Category entity by IDs.
-func (_c *MediaCategoryCreate) AddCategoryIDs(ids ...string) *MediaCategoryCreate {
+func (_c *MediaCategoryCreate) AddCategoryIDs(ids ...int64) *MediaCategoryCreate {
 	_c.mutation.AddCategoryIDs(ids...)
 	return _c
 }
 
 // AddCategory adds the "category" edges to the Category entity.
 func (_c *MediaCategoryCreate) AddCategory(v ...*Category) *MediaCategoryCreate {
-	ids := make([]string, len(v))
+	ids := make([]int64, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -134,7 +134,7 @@ func (_c *MediaCategoryCreate) createSpec() (*MediaCategory, *sqlgraph.CreateSpe
 			Columns: []string{mediacategory.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

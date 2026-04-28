@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -17,6 +18,7 @@ import (
 
 	"origadmin/application/origcms/api/gen/v1/types" // Import the generated Media type
 	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origcms/internal/helpers/ffmpeg"
 	"origadmin/application/origcms/internal/pubsub"
 	"origadmin/application/origcms/internal/svc-media/dto"
 )
@@ -136,7 +138,7 @@ func (uc *MediaUseCase) ListMedias(
 
 func (uc *MediaUseCase) CreateMedia(ctx context.Context, media *Media) (*Media, error) {
 	// 验证媒体必须关联且仅关联一个分类
-	if media.CategoryId == "" {
+	if media.CategoryId == 0 {
 		return nil, fmt.Errorf("media must have a category")
 	}
 
@@ -591,7 +593,26 @@ func (uc *MediaUseCase) ListEncodingTasksFlat(
 
 	var items []FlatTaskItem
 	if !filter.OnlyStats {
-		// Enrich with profile names
+		// Collect unique media IDs for batch lookup
+		mediaIDSet := make(map[string]struct{})
+		for _, t := range tasks {
+			if t.MediaId != "" {
+				mediaIDSet[t.MediaId] = struct{}{}
+			}
+		}
+		mediaCache := make(map[string]*types.Media)
+		for mid := range mediaIDSet {
+			m, err := uc.repo.Get(ctx, mid)
+			if err != nil {
+				uc.log.Warnf("ListEncodingTasksFlat: failed to get media %s: %v", mid, err)
+				continue
+			}
+			if m != nil {
+				mediaCache[mid] = m
+			}
+		}
+
+		// Enrich with profile names and media info
 		items = make([]FlatTaskItem, len(tasks))
 		for i, t := range tasks {
 			item := FlatTaskItem{
@@ -607,6 +628,11 @@ func (uc *MediaUseCase) ListEncodingTasksFlat(
 			// Look up profile name
 			if profile, perr := uc.profileRepo.Get(ctx, t.ProfileId); perr == nil && profile != nil {
 				item.ProfileName = profile.Name
+			}
+			// Look up media title and thumbnail
+			if m, ok := mediaCache[t.MediaId]; ok {
+				item.MediaTitle = m.Title
+				item.Thumbnail = m.Thumbnail
 			}
 			items[i] = item
 		}
@@ -982,4 +1008,26 @@ func (uc *MediaUseCase) RegenerateThumbnail(ctx context.Context, mediaID string,
 		return fmt.Errorf("sprite use case not initialized")
 	}
 	return uc.spriteUC.RegenerateThumbnail(ctx, mediaID, timestamp)
+}
+
+// GenerateCommandPreview generates a preview of the ffmpeg command that would be
+// executed for the given encode profile. This does not execute the command, only
+// produces the command string for display purposes.
+func (uc *MediaUseCase) GenerateCommandPreview(ctx context.Context, profile *dto.EncodeProfile) string {
+	inputPath := "<input_file>"
+	switch {
+	case IsVideoProfile(profile):
+		outputDir := filepath.Join("<output_dir>", profile.Name)
+		return ffmpeg.PreviewHLSCommand(
+			inputPath, outputDir, profile.Name, profile.Resolution,
+			profile.VideoCodec, profile.AudioCodec,
+			profile.VideoBitrate, profile.AudioBitrate,
+		)
+	case IsPreviewProfile(profile):
+		scale := extractScaleParam(profile.BentoParameters)
+		outputPath := filepath.Join("<output_dir>", "previews", "<id>.gif")
+		return ffmpeg.PreviewGIFCommand(inputPath, outputPath, scale)
+	default:
+		return ""
+	}
 }

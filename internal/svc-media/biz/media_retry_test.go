@@ -108,6 +108,10 @@ func (m *mockMediaRepo) UpdatePreviewFilePath(ctx context.Context, mediaID strin
 	return nil
 }
 
+func (m *mockMediaRepo) UpdateDimensions(ctx context.Context, mediaID string, width, height int) error {
+	return nil
+}
+
 // mockEncodingTaskRepo is a mock of EncodingTaskRepo
 type mockEncodingTaskRepo struct {
 	mock.Mock

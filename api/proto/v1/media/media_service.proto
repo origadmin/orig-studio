@@ -513,7 +513,7 @@ message ListMediasRequest {
   string keyword = 4 [json_name = "keyword"];
   optional int32 type = 5 [json_name = "type"];
   optional int32 status = 6 [json_name = "status"];
-  optional string category_id = 7 [json_name = "category_id"];
+  optional int64 category_id = 7 [json_name = "category_id"];
   optional string user_id = 8 [json_name = "user_id"];
   string order_by = 9 [json_name = "order_by"];
   bool descending = 10 [json_name = "descending"];

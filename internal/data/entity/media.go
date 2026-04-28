@@ -96,7 +96,7 @@ type Media struct {
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
 	// CategoryID holds the value of the "category_id" field.
-	CategoryID string `json:"category_id,omitempty"`
+	CategoryID int64 `json:"category_id,omitempty"`
 	// ChannelID holds the value of the "channel_id" field.
 	ChannelID string `json:"channel_id,omitempty"`
 	// PublishedAt holds the value of the "published_at" field.
@@ -236,9 +236,9 @@ func (*Media) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case media.FieldThumbnailTime:
 			values[i] = new(sql.NullFloat64)
-		case media.FieldDuration, media.FieldWidth, media.FieldHeight, media.FieldPrivacy, media.FieldViewCount, media.FieldLikeCount, media.FieldDislikeCount, media.FieldCommentCount, media.FieldFavoriteCount, media.FieldDownloadCount, media.FieldReportedTimes:
+		case media.FieldDuration, media.FieldWidth, media.FieldHeight, media.FieldPrivacy, media.FieldViewCount, media.FieldLikeCount, media.FieldDislikeCount, media.FieldCommentCount, media.FieldFavoriteCount, media.FieldDownloadCount, media.FieldReportedTimes, media.FieldCategoryID:
 			values[i] = new(sql.NullInt64)
-		case media.FieldID, media.FieldTitle, media.FieldDescription, media.FieldShortToken, media.FieldType, media.FieldURL, media.FieldHlsFile, media.FieldThumbnail, media.FieldPoster, media.FieldPreviewFilePath, media.FieldSize, media.FieldMimeType, media.FieldMd5sum, media.FieldExtension, media.FieldEncodingStatus, media.FieldState, media.FieldReviewStatus, media.FieldSpriteStatus, media.FieldSpritePath, media.FieldVttPath, media.FieldUserID, media.FieldCategoryID, media.FieldChannelID:
+		case media.FieldID, media.FieldTitle, media.FieldDescription, media.FieldShortToken, media.FieldType, media.FieldURL, media.FieldHlsFile, media.FieldThumbnail, media.FieldPoster, media.FieldPreviewFilePath, media.FieldSize, media.FieldMimeType, media.FieldMd5sum, media.FieldExtension, media.FieldEncodingStatus, media.FieldState, media.FieldReviewStatus, media.FieldSpriteStatus, media.FieldSpritePath, media.FieldVttPath, media.FieldUserID, media.FieldChannelID:
 			values[i] = new(sql.NullString)
 		case media.FieldPublishedAt, media.FieldCreatedAt, media.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -492,10 +492,10 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 				_m.UserID = value.String
 			}
 		case media.FieldCategoryID:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field category_id", values[i])
 			} else if value.Valid {
-				_m.CategoryID = value.String
+				_m.CategoryID = value.Int64
 			}
 		case media.FieldChannelID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -728,7 +728,7 @@ func (_m *Media) String() string {
 	builder.WriteString(_m.UserID)
 	builder.WriteString(", ")
 	builder.WriteString("category_id=")
-	builder.WriteString(_m.CategoryID)
+	builder.WriteString(fmt.Sprintf("%v", _m.CategoryID))
 	builder.WriteString(", ")
 	builder.WriteString("channel_id=")
 	builder.WriteString(_m.ChannelID)

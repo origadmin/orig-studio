@@ -35,7 +35,7 @@ func (Tag) Indexes() []ent.Index {
 
 func (Tag) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Table("files_tag"),
+		entsql.Table("content_tags"),
 		entsql.WithComments(true),
 	}
 }
