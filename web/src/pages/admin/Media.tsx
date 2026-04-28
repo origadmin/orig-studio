@@ -65,7 +65,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {Label} from "@/components/ui/label";
-import {mediaApi, encodingApi, type Media, type MediaVariantSummary} from '@/lib/api/media';
+import {mediaApi, encodingApi, adminMediaApi, type Media, type MediaVariantSummary} from '@/lib/api/media';
 import {API_BASE_URL} from '@/lib/request';
 import {useAdminMediaList, useDeleteMedia} from '@/hooks/queries';
 import {UploadComponent} from '@/components/upload/UploadComponent';
@@ -146,7 +146,7 @@ export default function MediaPage() {
     // Show transcoding variant details for a media
     const handleShowVariants = async (media: Media) => {
         try {
-            const data = await mediaApi.encoding.getVariants(media.id);
+            const data = await adminMediaApi.getVariants(media.id);
             setVariantData(data as unknown as MediaVariantSummary);
             setVariantDetailOpen(true);
         } catch (err: any) {
@@ -170,36 +170,37 @@ export default function MediaPage() {
         }
     };
 
-    // Helper: encoding status badge color
-    const encStatusBadge = (status?: string) => {
+    const encStatusBadge = (status?: string): "default" | "secondary" | "destructive" | "outline" | "success" | "warning" | "info" => {
         switch (status) {
             case "success":
-                return "outline" as const;
+                return "success";
             case "processing":
-                return "default" as const;
+                return "info";
+            case "pending":
+                return "warning";
             case "partial":
-                return "secondary" as const;
+                return "warning";
             case "failed":
-                return "destructive" as const;
+                return "destructive";
             default:
-                return "secondary" as const;
+                return "secondary";
         }
     };
 
-    const encStatusDot = (status?: string) => {
+    const encStatusLabel = (status?: string) => {
         switch (status) {
-            case "processing":
-                return "bg-info";
-            case "pending":
-                return "bg-warning";
-            case "partial":
-                return "bg-orange-500";
-            case "failed":
-                return "bg-destructive";
             case "success":
-                return "bg-success";
+                return "完成";
+            case "processing":
+                return "转码中";
+            case "pending":
+                return "排队中";
+            case "partial":
+                return "部分完成";
+            case "failed":
+                return "失败";
             default:
-                return "bg-gray-300";
+                return status || "--";
         }
     };
 
@@ -209,24 +210,6 @@ export default function MediaPage() {
         if (path.startsWith("http")) return path;
         const base = API_BASE_URL;
         return `${base}${path.startsWith("/") ? "" : "/"}${path}`;
-    };
-
-    // Helper: text color for task status in variant list
-    const statusTextColor = (status?: string) => {
-        switch (status) {
-            case "success":
-                return "text-success";
-            case "processing":
-                return "text-info";
-            case "pending":
-                return "text-yellow-600";
-            case "partial":
-                return "text-orange-600";
-            case "failed":
-                return "text-destructive";
-            default:
-                return "text-muted-foreground";
-        }
     };
 
     return (
@@ -411,7 +394,8 @@ export default function MediaPage() {
                                                     {media.thumbnail ? (
                                                         <img
                                                             src={media.thumbnail.startsWith('http') ? media.thumbnail : `${API_BASE_URL}${media.thumbnail.startsWith('/') ? '' : '/'}${media.thumbnail}`}
-                                                            alt="" className="w-full h-full object-cover transition-opacity duration-300"/>
+                                                            alt="" className="w-full h-full object-cover transition-opacity duration-300"
+                                                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}/>
                                                     ) : (
                                                         media.type === 'video' ?
                                                             <Video className="w-4 h-4 text-muted-foreground"/> :
@@ -421,10 +405,11 @@ export default function MediaPage() {
                                                         <img
                                                             src={(media.preview_file_path || media.preview_file).startsWith('http') ? (media.preview_file_path || media.preview_file) : `${API_BASE_URL}${(media.preview_file_path || media.preview_file).startsWith('/') ? '' : '/'}${media.preview_file_path || media.preview_file}`}
                                                             alt="preview" 
-                                                            className="w-full h-full object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"/>
+                                                            className="w-full h-full object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                                            onError={(e) => { (e.target as HTMLImageElement).remove(); }}/>
                                                     )}
                                                 </div>
-                                                <span className="font-medium line-clamp-1 max-w-[200px]"
+                                                <span className="font-medium line-clamp-2"
                                                       title={media.title}>
                                                     {media.title || '未命名媒体'}
                                                 </span>
@@ -449,15 +434,12 @@ export default function MediaPage() {
                                                 {media.state || 'draft'}
                                             </Badge>
                                         </TableCell>
-                                        {/* Transcoding Status column — shows encoding status + link to task detail */}
                                         <TableCell>
-                                            {media.encoding_status && media.encoding_status !== 'pending' ? (
-                                                <div className="flex items-center gap-2">
-                                                    <span
-                                                        className={`w-2 h-2 rounded-full ${encStatusDot(media.encoding_status)}`}/>
+                                            {media.encoding_status ? (
+                                                <div className="flex items-center gap-1.5">
                                                     <Badge variant={encStatusBadge(media.encoding_status)}
                                                            className="text-[10px] px-1.5 py-0 h-4">
-                                                        {media.encoding_status}
+                                                        {encStatusLabel(media.encoding_status)}
                                                     </Badge>
                                                     <Button
                                                         variant="ghost"
@@ -583,7 +565,7 @@ export default function MediaPage() {
                             转码概况
                             {variantData?.encoding_status && (
                                 <Badge variant={encStatusBadge(variantData.encoding_status)} className="text-xs">
-                                    {variantData.encoding_status}
+                                    {encStatusLabel(variantData.encoding_status)}
                                 </Badge>
                             )}
                         </DialogTitle>
@@ -673,8 +655,6 @@ export default function MediaPage() {
                                             }`}
                                         >
                                             <div className="flex items-center gap-2 min-w-0">
-                                                <span
-                                                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${encStatusDot(v.status)}`}/>
                                                 <span className="font-mono font-medium truncate">{v.profile_name}</span>
                                                 {v.resolution && (
                                                     <span
@@ -682,8 +662,9 @@ export default function MediaPage() {
                                                 )}
                                             </div>
                                             <div className="flex items-center gap-2 shrink-0 ml-2">
-                                                <span
-                                                    className={`capitalize ${statusTextColor(v.status)}`}>{v.status}</span>
+                                                <Badge variant={encStatusBadge(v.status)} className="text-[10px] px-1.5 py-0 h-4">
+                                                    {encStatusLabel(v.status)}
+                                                </Badge>
                                                 {v.output_path && v.status === "success" && (
                                                     <code
                                                         className="text-[10px] text-green-700 dark:text-green-400 max-w-[150px] truncate block">{v.output_path}</code>

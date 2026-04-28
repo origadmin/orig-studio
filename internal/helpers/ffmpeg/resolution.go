@@ -25,6 +25,17 @@ func ResolutionToSize(resolution string) string {
 	return resolution
 }
 
+// ResolutionToWidthHeight returns the width and height strings for a resolution.
+// It first resolves short-form names via ResolutionToSize, then splits the WxH format.
+func ResolutionToWidthHeight(resolution string) (width, height string) {
+	size := ResolutionToSize(resolution)
+	parts := strings.SplitN(size, "x", 2)
+	if len(parts) == 2 {
+		return parts[0], parts[1]
+	}
+	return resolution, resolution
+}
+
 // IsSkipResolution returns true for sentinel values that indicate
 // the profile should not perform standard video transcoding.
 func IsSkipResolution(resolution string) bool {

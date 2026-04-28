@@ -49,26 +49,26 @@ const (
 	// EdgeComments holds the string denoting the comments edge name in mutations.
 	EdgeComments = "comments"
 	// Table holds the table name of the article in the database.
-	Table = "articles"
+	Table = "content_articles"
 	// UserTable is the table that holds the user relation/edge.
-	UserTable = "articles"
+	UserTable = "content_articles"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users_user"
+	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
 	// CategoryTable is the table that holds the category relation/edge.
-	CategoryTable = "articles"
+	CategoryTable = "content_articles"
 	// CategoryInverseTable is the table name for the Category entity.
 	// It exists in this package in order to avoid circular dependency with the "category" package.
-	CategoryInverseTable = "categories"
+	CategoryInverseTable = "content_categories"
 	// CategoryColumn is the table column denoting the category relation/edge.
 	CategoryColumn = "category_id"
 	// CommentsTable is the table that holds the comments relation/edge.
-	CommentsTable = "files_comment"
+	CommentsTable = "content_comments"
 	// CommentsInverseTable is the table name for the Comment entity.
 	// It exists in this package in order to avoid circular dependency with the "comment" package.
-	CommentsInverseTable = "files_comment"
+	CommentsInverseTable = "content_comments"
 	// CommentsColumn is the table column denoting the comments relation/edge.
 	CommentsColumn = "article_comments"
 )

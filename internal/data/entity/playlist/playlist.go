@@ -29,12 +29,12 @@ const (
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the playlist in the database.
-	Table = "files_playlist"
+	Table = "content_playlists"
 	// UserTable is the table that holds the user relation/edge. The primary key declared below.
 	UserTable = "user_playlists"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users_user"
+	UserInverseTable = "users"
 )
 
 // Columns holds all SQL columns for playlist fields.

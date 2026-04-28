@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -51,7 +53,7 @@ func (UploadSession) Fields() []ent.Field {
 		field.Text("description").Optional().
 			Comment("Media description"),
 		// Category ID (optional)
-		field.String("category_id").Optional().MaxLen(36).
+		field.Int64("category_id").Optional().
 			Comment("Category ID"),
 		// Tags (optional)
 		field.JSON("tags", []string{}).Optional().
@@ -85,6 +87,13 @@ func (UploadSession) Fields() []ent.Field {
 		// Last update time
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now).
 			Comment("Last update time"),
+	}
+}
+
+// Annotations of the UploadSession.
+func (UploadSession) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Table("system_upload_sessions"),
 	}
 }
 

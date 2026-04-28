@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -28,6 +30,13 @@ func (EncodeProfile) Fields() []ent.Field {
 		field.Bool("is_active").Default(true),
 		field.Time("created_at").Default(time.Now),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+	}
+}
+
+// Annotations of the EncodeProfile.
+func (EncodeProfile) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Table("system_encode_profiles"),
 	}
 }
 

@@ -33,7 +33,7 @@ type ListMediasRequest struct {
 	Keyword       string                 `protobuf:"bytes,4,opt,name=keyword,proto3" json:"keyword,omitempty"`
 	Type          *int32                 `protobuf:"varint,5,opt,name=type,proto3,oneof" json:"type,omitempty"`
 	Status        *int32                 `protobuf:"varint,6,opt,name=status,proto3,oneof" json:"status,omitempty"`
-	CategoryId    *string                `protobuf:"bytes,7,opt,name=category_id,proto3,oneof" json:"category_id,omitempty"`
+	CategoryId    *int64                 `protobuf:"varint,7,opt,name=category_id,proto3,oneof" json:"category_id,omitempty"`
 	UserId        *string                `protobuf:"bytes,8,opt,name=user_id,proto3,oneof" json:"user_id,omitempty"`
 	OrderBy       string                 `protobuf:"bytes,9,opt,name=order_by,proto3" json:"order_by,omitempty"`
 	Descending    bool                   `protobuf:"varint,10,opt,name=descending,proto3" json:"descending,omitempty"`
@@ -113,11 +113,11 @@ func (x *ListMediasRequest) GetStatus() int32 {
 	return 0
 }
 
-func (x *ListMediasRequest) GetCategoryId() string {
+func (x *ListMediasRequest) GetCategoryId() int64 {
 	if x != nil && x.CategoryId != nil {
 		return *x.CategoryId
 	}
-	return ""
+	return 0
 }
 
 func (x *ListMediasRequest) GetUserId() string {
@@ -8955,7 +8955,7 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\akeyword\x18\x04 \x01(\tR\akeyword\x12\x17\n" +
 	"\x04type\x18\x05 \x01(\x05H\x00R\x04type\x88\x01\x01\x12\x1b\n" +
 	"\x06status\x18\x06 \x01(\x05H\x01R\x06status\x88\x01\x01\x12%\n" +
-	"\vcategory_id\x18\a \x01(\tH\x02R\vcategory_id\x88\x01\x01\x12\x1d\n" +
+	"\vcategory_id\x18\a \x01(\x03H\x02R\vcategory_id\x88\x01\x01\x12\x1d\n" +
 	"\auser_id\x18\b \x01(\tH\x03R\auser_id\x88\x01\x01\x12\x1a\n" +
 	"\border_by\x18\t \x01(\tR\border_by\x12\x1e\n" +
 	"\n" +

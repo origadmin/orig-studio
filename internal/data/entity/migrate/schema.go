@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	// ArticlesColumns holds the columns for the "articles" table.
-	ArticlesColumns = []*schema.Column{
+	// ContentArticlesColumns holds the columns for the "content_articles" table.
+	ContentArticlesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "title", Type: field.TypeString, Size: 255},
 		{Name: "content", Type: field.TypeString, Size: 2147483647},
@@ -24,25 +24,25 @@ var (
 		{Name: "published_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "category_id", Type: field.TypeString, Nullable: true, Size: 36},
+		{Name: "category_id", Type: field.TypeInt64, Nullable: true},
 		{Name: "user_id", Type: field.TypeString, Size: 36},
 	}
-	// ArticlesTable holds the schema information for the "articles" table.
-	ArticlesTable = &schema.Table{
-		Name:       "articles",
-		Columns:    ArticlesColumns,
-		PrimaryKey: []*schema.Column{ArticlesColumns[0]},
+	// ContentArticlesTable holds the schema information for the "content_articles" table.
+	ContentArticlesTable = &schema.Table{
+		Name:       "content_articles",
+		Columns:    ContentArticlesColumns,
+		PrimaryKey: []*schema.Column{ContentArticlesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "articles_categories_articles",
-				Columns:    []*schema.Column{ArticlesColumns[13]},
-				RefColumns: []*schema.Column{CategoriesColumns[0]},
+				Symbol:     "content_articles_content_categories_articles",
+				Columns:    []*schema.Column{ContentArticlesColumns[13]},
+				RefColumns: []*schema.Column{ContentCategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "articles_users_user_articles",
-				Columns:    []*schema.Column{ArticlesColumns[14]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				Symbol:     "content_articles_users_articles",
+				Columns:    []*schema.Column{ContentArticlesColumns[14]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -50,48 +50,48 @@ var (
 			{
 				Name:    "article_title",
 				Unique:  false,
-				Columns: []*schema.Column{ArticlesColumns[1]},
+				Columns: []*schema.Column{ContentArticlesColumns[1]},
 			},
 			{
 				Name:    "article_slug",
 				Unique:  false,
-				Columns: []*schema.Column{ArticlesColumns[4]},
+				Columns: []*schema.Column{ContentArticlesColumns[4]},
 			},
 			{
 				Name:    "article_state",
 				Unique:  false,
-				Columns: []*schema.Column{ArticlesColumns[5]},
+				Columns: []*schema.Column{ContentArticlesColumns[5]},
 			},
 			{
 				Name:    "article_featured",
 				Unique:  false,
-				Columns: []*schema.Column{ArticlesColumns[8]},
+				Columns: []*schema.Column{ContentArticlesColumns[8]},
 			},
 			{
 				Name:    "article_view_count",
 				Unique:  false,
-				Columns: []*schema.Column{ArticlesColumns[6]},
+				Columns: []*schema.Column{ContentArticlesColumns[6]},
 			},
 			{
 				Name:    "article_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{ArticlesColumns[11]},
+				Columns: []*schema.Column{ContentArticlesColumns[11]},
 			},
 			{
 				Name:    "article_published_at",
 				Unique:  false,
-				Columns: []*schema.Column{ArticlesColumns[10]},
+				Columns: []*schema.Column{ContentArticlesColumns[10]},
 			},
 			{
 				Name:    "article_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{ArticlesColumns[14]},
+				Columns: []*schema.Column{ContentArticlesColumns[14]},
 			},
 		},
 	}
-	// CategoriesColumns holds the columns for the "categories" table.
-	CategoriesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+	// ContentCategoriesColumns holds the columns for the "content_categories" table.
+	ContentCategoriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "name", Type: field.TypeString, Unique: true, Size: 128},
 		{Name: "slug", Type: field.TypeString, Unique: true, Nullable: true, Size: 128},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
@@ -107,32 +107,32 @@ var (
 		{Name: "identity_provider", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "parent_id", Type: field.TypeString, Nullable: true, Size: 36},
+		{Name: "parent_id", Type: field.TypeInt64, Nullable: true},
 		{Name: "media_category_category", Type: field.TypeInt, Nullable: true},
 		{Name: "user_id", Type: field.TypeString, Nullable: true, Size: 36},
 	}
-	// CategoriesTable holds the schema information for the "categories" table.
-	CategoriesTable = &schema.Table{
-		Name:       "categories",
-		Columns:    CategoriesColumns,
-		PrimaryKey: []*schema.Column{CategoriesColumns[0]},
+	// ContentCategoriesTable holds the schema information for the "content_categories" table.
+	ContentCategoriesTable = &schema.Table{
+		Name:       "content_categories",
+		Columns:    ContentCategoriesColumns,
+		PrimaryKey: []*schema.Column{ContentCategoriesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "categories_categories_children",
-				Columns:    []*schema.Column{CategoriesColumns[16]},
-				RefColumns: []*schema.Column{CategoriesColumns[0]},
+				Symbol:     "content_categories_content_categories_children",
+				Columns:    []*schema.Column{ContentCategoriesColumns[16]},
+				RefColumns: []*schema.Column{ContentCategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "categories_files_media_category_category",
-				Columns:    []*schema.Column{CategoriesColumns[17]},
-				RefColumns: []*schema.Column{FilesMediaCategoryColumns[0]},
+				Symbol:     "content_categories_content_media_categories_category",
+				Columns:    []*schema.Column{ContentCategoriesColumns[17]},
+				RefColumns: []*schema.Column{ContentMediaCategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "categories_users_user_categories",
-				Columns:    []*schema.Column{CategoriesColumns[18]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				Symbol:     "content_categories_users_categories",
+				Columns:    []*schema.Column{ContentCategoriesColumns[18]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -140,32 +140,32 @@ var (
 			{
 				Name:    "category_name",
 				Unique:  false,
-				Columns: []*schema.Column{CategoriesColumns[1]},
+				Columns: []*schema.Column{ContentCategoriesColumns[1]},
 			},
 			{
 				Name:    "category_slug",
 				Unique:  false,
-				Columns: []*schema.Column{CategoriesColumns[2]},
+				Columns: []*schema.Column{ContentCategoriesColumns[2]},
 			},
 			{
 				Name:    "category_parent_id",
 				Unique:  false,
-				Columns: []*schema.Column{CategoriesColumns[16]},
+				Columns: []*schema.Column{ContentCategoriesColumns[16]},
 			},
 			{
 				Name:    "category_status",
 				Unique:  false,
-				Columns: []*schema.Column{CategoriesColumns[9]},
+				Columns: []*schema.Column{ContentCategoriesColumns[9]},
 			},
 			{
 				Name:    "category_is_global",
 				Unique:  false,
-				Columns: []*schema.Column{CategoriesColumns[11]},
+				Columns: []*schema.Column{ContentCategoriesColumns[11]},
 			},
 		},
 	}
-	// UsersChannelColumns holds the columns for the "users_channel" table.
-	UsersChannelColumns = []*schema.Column{
+	// UsersChannelsColumns holds the columns for the "users_channels" table.
+	UsersChannelsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "title", Type: field.TypeString, Size: 90},
 		{Name: "slug", Type: field.TypeString, Unique: true, Size: 100},
@@ -176,16 +176,16 @@ var (
 		{Name: "add_date", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeString, Size: 36},
 	}
-	// UsersChannelTable holds the schema information for the "users_channel" table.
-	UsersChannelTable = &schema.Table{
-		Name:       "users_channel",
-		Columns:    UsersChannelColumns,
-		PrimaryKey: []*schema.Column{UsersChannelColumns[0]},
+	// UsersChannelsTable holds the schema information for the "users_channels" table.
+	UsersChannelsTable = &schema.Table{
+		Name:       "users_channels",
+		Columns:    UsersChannelsColumns,
+		PrimaryKey: []*schema.Column{UsersChannelsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "users_channel_users_user_channels",
-				Columns:    []*schema.Column{UsersChannelColumns[8]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				Symbol:     "users_channels_users_channels",
+				Columns:    []*schema.Column{UsersChannelsColumns[8]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -193,32 +193,32 @@ var (
 			{
 				Name:    "channel_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{UsersChannelColumns[8]},
+				Columns: []*schema.Column{UsersChannelsColumns[8]},
 			},
 			{
 				Name:    "channel_title",
 				Unique:  false,
-				Columns: []*schema.Column{UsersChannelColumns[1]},
+				Columns: []*schema.Column{UsersChannelsColumns[1]},
 			},
 			{
 				Name:    "channel_slug",
 				Unique:  false,
-				Columns: []*schema.Column{UsersChannelColumns[2]},
+				Columns: []*schema.Column{UsersChannelsColumns[2]},
 			},
 			{
 				Name:    "channel_short_token",
 				Unique:  false,
-				Columns: []*schema.Column{UsersChannelColumns[4]},
+				Columns: []*schema.Column{UsersChannelsColumns[4]},
 			},
 			{
 				Name:    "channel_add_date",
 				Unique:  false,
-				Columns: []*schema.Column{UsersChannelColumns[7]},
+				Columns: []*schema.Column{UsersChannelsColumns[7]},
 			},
 		},
 	}
-	// FilesCommentColumns holds the columns for the "files_comment" table.
-	FilesCommentColumns = []*schema.Column{
+	// ContentCommentsColumns holds the columns for the "content_comments" table.
+	ContentCommentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "text", Type: field.TypeString, Size: 2147483647},
 		{Name: "add_date", Type: field.TypeTime},
@@ -231,40 +231,40 @@ var (
 		{Name: "user_comments", Type: field.TypeString, Size: 36},
 		{Name: "moderated_by", Type: field.TypeString, Nullable: true, Size: 36},
 	}
-	// FilesCommentTable holds the schema information for the "files_comment" table.
-	FilesCommentTable = &schema.Table{
-		Name:       "files_comment",
-		Columns:    FilesCommentColumns,
-		PrimaryKey: []*schema.Column{FilesCommentColumns[0]},
+	// ContentCommentsTable holds the schema information for the "content_comments" table.
+	ContentCommentsTable = &schema.Table{
+		Name:       "content_comments",
+		Columns:    ContentCommentsColumns,
+		PrimaryKey: []*schema.Column{ContentCommentsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "files_comment_articles_comments",
-				Columns:    []*schema.Column{FilesCommentColumns[6]},
-				RefColumns: []*schema.Column{ArticlesColumns[0]},
+				Symbol:     "content_comments_content_articles_comments",
+				Columns:    []*schema.Column{ContentCommentsColumns[6]},
+				RefColumns: []*schema.Column{ContentArticlesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "files_comment_files_comment_replies",
-				Columns:    []*schema.Column{FilesCommentColumns[7]},
-				RefColumns: []*schema.Column{FilesCommentColumns[0]},
+				Symbol:     "content_comments_content_comments_replies",
+				Columns:    []*schema.Column{ContentCommentsColumns[7]},
+				RefColumns: []*schema.Column{ContentCommentsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "files_comment_media_comments",
-				Columns:    []*schema.Column{FilesCommentColumns[8]},
-				RefColumns: []*schema.Column{MediaColumns[0]},
+				Symbol:     "content_comments_content_media_comments",
+				Columns:    []*schema.Column{ContentCommentsColumns[8]},
+				RefColumns: []*schema.Column{ContentMediaColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "files_comment_users_user_comments",
-				Columns:    []*schema.Column{FilesCommentColumns[9]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				Symbol:     "content_comments_users_comments",
+				Columns:    []*schema.Column{ContentCommentsColumns[9]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "files_comment_users_user_moderated_comments",
-				Columns:    []*schema.Column{FilesCommentColumns[10]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				Symbol:     "content_comments_users_moderated_comments",
+				Columns:    []*schema.Column{ContentCommentsColumns[10]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -272,27 +272,27 @@ var (
 			{
 				Name:    "comment_add_date",
 				Unique:  false,
-				Columns: []*schema.Column{FilesCommentColumns[2]},
+				Columns: []*schema.Column{ContentCommentsColumns[2]},
 			},
 			{
 				Name:    "comment_media_comments",
 				Unique:  false,
-				Columns: []*schema.Column{FilesCommentColumns[8]},
+				Columns: []*schema.Column{ContentCommentsColumns[8]},
 			},
 			{
 				Name:    "comment_user_comments",
 				Unique:  false,
-				Columns: []*schema.Column{FilesCommentColumns[9]},
+				Columns: []*schema.Column{ContentCommentsColumns[9]},
 			},
 			{
 				Name:    "comment_status",
 				Unique:  false,
-				Columns: []*schema.Column{FilesCommentColumns[3]},
+				Columns: []*schema.Column{ContentCommentsColumns[3]},
 			},
 			{
 				Name:    "comment_media_comments_status",
 				Unique:  false,
-				Columns: []*schema.Column{FilesCommentColumns[8], FilesCommentColumns[3]},
+				Columns: []*schema.Column{ContentCommentsColumns[8], ContentCommentsColumns[3]},
 			},
 		},
 	}
@@ -311,15 +311,15 @@ var (
 		PrimaryKey: []*schema.Column{ContentCommentLikesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "content_comment_likes_files_comment_comment_likes",
+				Symbol:     "content_comment_likes_content_comments_comment_likes",
 				Columns:    []*schema.Column{ContentCommentLikesColumns[3]},
-				RefColumns: []*schema.Column{FilesCommentColumns[0]},
+				RefColumns: []*schema.Column{ContentCommentsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "content_comment_likes_users_user_comment_likes",
+				Symbol:     "content_comment_likes_users_comment_likes",
 				Columns:    []*schema.Column{ContentCommentLikesColumns[4]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -352,15 +352,15 @@ var (
 		PrimaryKey: []*schema.Column{ContentCommentReportsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "content_comment_reports_files_comment_reports",
+				Symbol:     "content_comment_reports_content_comments_reports",
 				Columns:    []*schema.Column{ContentCommentReportsColumns[4]},
-				RefColumns: []*schema.Column{FilesCommentColumns[0]},
+				RefColumns: []*schema.Column{ContentCommentsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "content_comment_reports_users_user_comment_reports",
+				Symbol:     "content_comment_reports_users_comment_reports",
 				Columns:    []*schema.Column{ContentCommentReportsColumns[5]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -387,8 +387,8 @@ var (
 			},
 		},
 	}
-	// EncodeProfilesColumns holds the columns for the "encode_profiles" table.
-	EncodeProfilesColumns = []*schema.Column{
+	// SystemEncodeProfilesColumns holds the columns for the "system_encode_profiles" table.
+	SystemEncodeProfilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString, Unique: true, Size: 100},
 		{Name: "description", Type: field.TypeString, Nullable: true},
@@ -403,26 +403,26 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
-	// EncodeProfilesTable holds the schema information for the "encode_profiles" table.
-	EncodeProfilesTable = &schema.Table{
-		Name:       "encode_profiles",
-		Columns:    EncodeProfilesColumns,
-		PrimaryKey: []*schema.Column{EncodeProfilesColumns[0]},
+	// SystemEncodeProfilesTable holds the schema information for the "system_encode_profiles" table.
+	SystemEncodeProfilesTable = &schema.Table{
+		Name:       "system_encode_profiles",
+		Columns:    SystemEncodeProfilesColumns,
+		PrimaryKey: []*schema.Column{SystemEncodeProfilesColumns[0]},
 		Indexes: []*schema.Index{
 			{
 				Name:    "encodeprofile_name",
 				Unique:  false,
-				Columns: []*schema.Column{EncodeProfilesColumns[1]},
+				Columns: []*schema.Column{SystemEncodeProfilesColumns[1]},
 			},
 			{
 				Name:    "encodeprofile_is_active",
 				Unique:  false,
-				Columns: []*schema.Column{EncodeProfilesColumns[10]},
+				Columns: []*schema.Column{SystemEncodeProfilesColumns[10]},
 			},
 		},
 	}
-	// EncodingTasksColumns holds the columns for the "encoding_tasks" table.
-	EncodingTasksColumns = []*schema.Column{
+	// SystemEncodingTasksColumns holds the columns for the "system_encoding_tasks" table.
+	SystemEncodingTasksColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "media_id", Type: field.TypeString, Size: 36},
 		{Name: "profile_id", Type: field.TypeInt},
@@ -433,52 +433,52 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
-	// EncodingTasksTable holds the schema information for the "encoding_tasks" table.
-	EncodingTasksTable = &schema.Table{
-		Name:       "encoding_tasks",
-		Columns:    EncodingTasksColumns,
-		PrimaryKey: []*schema.Column{EncodingTasksColumns[0]},
+	// SystemEncodingTasksTable holds the schema information for the "system_encoding_tasks" table.
+	SystemEncodingTasksTable = &schema.Table{
+		Name:       "system_encoding_tasks",
+		Columns:    SystemEncodingTasksColumns,
+		PrimaryKey: []*schema.Column{SystemEncodingTasksColumns[0]},
 		Indexes: []*schema.Index{
 			{
 				Name:    "encodingtask_media_id",
 				Unique:  false,
-				Columns: []*schema.Column{EncodingTasksColumns[1]},
+				Columns: []*schema.Column{SystemEncodingTasksColumns[1]},
 			},
 			{
 				Name:    "encodingtask_status",
 				Unique:  false,
-				Columns: []*schema.Column{EncodingTasksColumns[3]},
+				Columns: []*schema.Column{SystemEncodingTasksColumns[3]},
 			},
 			{
 				Name:    "encodingtask_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{EncodingTasksColumns[7]},
+				Columns: []*schema.Column{SystemEncodingTasksColumns[7]},
 			},
 		},
 	}
-	// FilesFavoriteColumns holds the columns for the "files_favorite" table.
-	FilesFavoriteColumns = []*schema.Column{
+	// ContentFavoritesColumns holds the columns for the "content_favorites" table.
+	ContentFavoritesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "media_id", Type: field.TypeString, Size: 36},
 		{Name: "user_id", Type: field.TypeString, Size: 36},
 	}
-	// FilesFavoriteTable holds the schema information for the "files_favorite" table.
-	FilesFavoriteTable = &schema.Table{
-		Name:       "files_favorite",
-		Columns:    FilesFavoriteColumns,
-		PrimaryKey: []*schema.Column{FilesFavoriteColumns[0]},
+	// ContentFavoritesTable holds the schema information for the "content_favorites" table.
+	ContentFavoritesTable = &schema.Table{
+		Name:       "content_favorites",
+		Columns:    ContentFavoritesColumns,
+		PrimaryKey: []*schema.Column{ContentFavoritesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "files_favorite_media_favorites",
-				Columns:    []*schema.Column{FilesFavoriteColumns[2]},
-				RefColumns: []*schema.Column{MediaColumns[0]},
+				Symbol:     "content_favorites_content_media_favorites",
+				Columns:    []*schema.Column{ContentFavoritesColumns[2]},
+				RefColumns: []*schema.Column{ContentMediaColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "files_favorite_users_user_favorites",
-				Columns:    []*schema.Column{FilesFavoriteColumns[3]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				Symbol:     "content_favorites_users_favorites",
+				Columns:    []*schema.Column{ContentFavoritesColumns[3]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -486,7 +486,7 @@ var (
 			{
 				Name:    "favorite_user_id_media_id",
 				Unique:  true,
-				Columns: []*schema.Column{FilesFavoriteColumns[3], FilesFavoriteColumns[2]},
+				Columns: []*schema.Column{ContentFavoritesColumns[3], ContentFavoritesColumns[2]},
 			},
 		},
 	}
@@ -510,9 +510,9 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "auth_group_members_users_user_group_memberships",
+				Symbol:     "auth_group_members_users_group_memberships",
 				Columns:    []*schema.Column{AuthGroupMembersColumns[3]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -534,30 +534,30 @@ var (
 			},
 		},
 	}
-	// FilesLikeColumns holds the columns for the "files_like" table.
-	FilesLikeColumns = []*schema.Column{
+	// ContentLikesColumns holds the columns for the "content_likes" table.
+	ContentLikesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "like_type", Type: field.TypeString, Size: 10, Default: "like"},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "media_id", Type: field.TypeString, Size: 36},
 		{Name: "user_id", Type: field.TypeString, Size: 36},
 	}
-	// FilesLikeTable holds the schema information for the "files_like" table.
-	FilesLikeTable = &schema.Table{
-		Name:       "files_like",
-		Columns:    FilesLikeColumns,
-		PrimaryKey: []*schema.Column{FilesLikeColumns[0]},
+	// ContentLikesTable holds the schema information for the "content_likes" table.
+	ContentLikesTable = &schema.Table{
+		Name:       "content_likes",
+		Columns:    ContentLikesColumns,
+		PrimaryKey: []*schema.Column{ContentLikesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "files_like_media_likes",
-				Columns:    []*schema.Column{FilesLikeColumns[3]},
-				RefColumns: []*schema.Column{MediaColumns[0]},
+				Symbol:     "content_likes_content_media_likes",
+				Columns:    []*schema.Column{ContentLikesColumns[3]},
+				RefColumns: []*schema.Column{ContentMediaColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "files_like_users_user_likes",
-				Columns:    []*schema.Column{FilesLikeColumns[4]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				Symbol:     "content_likes_users_likes",
+				Columns:    []*schema.Column{ContentLikesColumns[4]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -565,12 +565,12 @@ var (
 			{
 				Name:    "like_user_id_media_id",
 				Unique:  true,
-				Columns: []*schema.Column{FilesLikeColumns[4], FilesLikeColumns[3]},
+				Columns: []*schema.Column{ContentLikesColumns[4], ContentLikesColumns[3]},
 			},
 		},
 	}
-	// MediaColumns holds the columns for the "media" table.
-	MediaColumns = []*schema.Column{
+	// ContentMediaColumns holds the columns for the "content_media" table.
+	ContentMediaColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "title", Type: field.TypeString, Size: 255},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
@@ -611,46 +611,46 @@ var (
 		{Name: "published_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "category_id", Type: field.TypeString, Nullable: true, Size: 36},
+		{Name: "category_id", Type: field.TypeInt64, Nullable: true},
 		{Name: "channel_id", Type: field.TypeString, Nullable: true, Size: 36},
 		{Name: "media_category_media", Type: field.TypeInt, Nullable: true},
 		{Name: "media_tag_media", Type: field.TypeInt, Nullable: true},
 		{Name: "user_id", Type: field.TypeString, Size: 36},
 	}
-	// MediaTable holds the schema information for the "media" table.
-	MediaTable = &schema.Table{
-		Name:       "media",
-		Columns:    MediaColumns,
-		PrimaryKey: []*schema.Column{MediaColumns[0]},
+	// ContentMediaTable holds the schema information for the "content_media" table.
+	ContentMediaTable = &schema.Table{
+		Name:       "content_media",
+		Columns:    ContentMediaColumns,
+		PrimaryKey: []*schema.Column{ContentMediaColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "media_categories_media",
-				Columns:    []*schema.Column{MediaColumns[40]},
-				RefColumns: []*schema.Column{CategoriesColumns[0]},
+				Symbol:     "content_media_content_categories_media",
+				Columns:    []*schema.Column{ContentMediaColumns[40]},
+				RefColumns: []*schema.Column{ContentCategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "media_users_channel_media",
-				Columns:    []*schema.Column{MediaColumns[41]},
-				RefColumns: []*schema.Column{UsersChannelColumns[0]},
+				Symbol:     "content_media_users_channels_media",
+				Columns:    []*schema.Column{ContentMediaColumns[41]},
+				RefColumns: []*schema.Column{UsersChannelsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "media_files_media_category_media",
-				Columns:    []*schema.Column{MediaColumns[42]},
-				RefColumns: []*schema.Column{FilesMediaCategoryColumns[0]},
+				Symbol:     "content_media_content_media_categories_media",
+				Columns:    []*schema.Column{ContentMediaColumns[42]},
+				RefColumns: []*schema.Column{ContentMediaCategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "media_files_media_tags_media",
-				Columns:    []*schema.Column{MediaColumns[43]},
-				RefColumns: []*schema.Column{FilesMediaTagsColumns[0]},
+				Symbol:     "content_media_content_media_tags_media",
+				Columns:    []*schema.Column{ContentMediaColumns[43]},
+				RefColumns: []*schema.Column{ContentMediaTagsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "media_users_user_media",
-				Columns:    []*schema.Column{MediaColumns[44]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				Symbol:     "content_media_users_media",
+				Columns:    []*schema.Column{ContentMediaColumns[44]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -658,77 +658,77 @@ var (
 			{
 				Name:    "media_title",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[1]},
+				Columns: []*schema.Column{ContentMediaColumns[1]},
 			},
 			{
 				Name:    "media_type",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[4]},
+				Columns: []*schema.Column{ContentMediaColumns[4]},
 			},
 			{
 				Name:    "media_state",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[19]},
+				Columns: []*schema.Column{ContentMediaColumns[19]},
 			},
 			{
 				Name:    "media_encoding_status",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[18]},
+				Columns: []*schema.Column{ContentMediaColumns[18]},
 			},
 			{
 				Name:    "media_featured",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[28]},
+				Columns: []*schema.Column{ContentMediaColumns[28]},
 			},
 			{
 				Name:    "media_view_count",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[20]},
+				Columns: []*schema.Column{ContentMediaColumns[20]},
 			},
 			{
 				Name:    "media_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[38]},
+				Columns: []*schema.Column{ContentMediaColumns[38]},
 			},
 			{
 				Name:    "media_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[44]},
+				Columns: []*schema.Column{ContentMediaColumns[44]},
 			},
 			{
 				Name:    "media_short_token",
 				Unique:  true,
-				Columns: []*schema.Column{MediaColumns[3]},
+				Columns: []*schema.Column{ContentMediaColumns[3]},
 			},
 			{
 				Name:    "media_review_status_listable_state",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[29], MediaColumns[30], MediaColumns[19]},
+				Columns: []*schema.Column{ContentMediaColumns[29], ContentMediaColumns[30], ContentMediaColumns[19]},
 			},
 			{
 				Name:    "media_listable",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[30]},
+				Columns: []*schema.Column{ContentMediaColumns[30]},
 			},
 			{
 				Name:    "media_sprite_status",
 				Unique:  false,
-				Columns: []*schema.Column{MediaColumns[32]},
+				Columns: []*schema.Column{ContentMediaColumns[32]},
 			},
 		},
 	}
-	// FilesMediaCategoryColumns holds the columns for the "files_media_category" table.
-	FilesMediaCategoryColumns = []*schema.Column{
+	// ContentMediaCategoriesColumns holds the columns for the "content_media_categories" table.
+	ContentMediaCategoriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 	}
-	// FilesMediaCategoryTable holds the schema information for the "files_media_category" table.
-	FilesMediaCategoryTable = &schema.Table{
-		Name:       "files_media_category",
-		Columns:    FilesMediaCategoryColumns,
-		PrimaryKey: []*schema.Column{FilesMediaCategoryColumns[0]},
+	// ContentMediaCategoriesTable holds the schema information for the "content_media_categories" table.
+	ContentMediaCategoriesTable = &schema.Table{
+		Name:       "content_media_categories",
+		Columns:    ContentMediaCategoriesColumns,
+		PrimaryKey: []*schema.Column{ContentMediaCategoriesColumns[0]},
 	}
-	// FilesPlaylistmediaColumns holds the columns for the "files_playlistmedia" table.
-	FilesPlaylistmediaColumns = []*schema.Column{
+	// ContentPlaylistMediaColumns holds the columns for the "content_playlist_media" table.
+	ContentPlaylistMediaColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "ordering", Type: field.TypeInt, Default: 1},
 		{Name: "action_date", Type: field.TypeTime},
@@ -736,34 +736,34 @@ var (
 		{Name: "media_id", Type: field.TypeString, Size: 36},
 		{Name: "playlist_id", Type: field.TypeString, Size: 36},
 	}
-	// FilesPlaylistmediaTable holds the schema information for the "files_playlistmedia" table.
-	FilesPlaylistmediaTable = &schema.Table{
-		Name:       "files_playlistmedia",
-		Columns:    FilesPlaylistmediaColumns,
-		PrimaryKey: []*schema.Column{FilesPlaylistmediaColumns[0]},
+	// ContentPlaylistMediaTable holds the schema information for the "content_playlist_media" table.
+	ContentPlaylistMediaTable = &schema.Table{
+		Name:       "content_playlist_media",
+		Columns:    ContentPlaylistMediaColumns,
+		PrimaryKey: []*schema.Column{ContentPlaylistMediaColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "files_playlistmedia_media_playlists",
-				Columns:    []*schema.Column{FilesPlaylistmediaColumns[3]},
-				RefColumns: []*schema.Column{MediaColumns[0]},
+				Symbol:     "content_playlist_media_content_media_playlists",
+				Columns:    []*schema.Column{ContentPlaylistMediaColumns[3]},
+				RefColumns: []*schema.Column{ContentMediaColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "files_playlistmedia_media_media",
-				Columns:    []*schema.Column{FilesPlaylistmediaColumns[4]},
-				RefColumns: []*schema.Column{MediaColumns[0]},
+				Symbol:     "content_playlist_media_content_media_media",
+				Columns:    []*schema.Column{ContentPlaylistMediaColumns[4]},
+				RefColumns: []*schema.Column{ContentMediaColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "files_playlistmedia_files_playlist_playlist",
-				Columns:    []*schema.Column{FilesPlaylistmediaColumns[5]},
-				RefColumns: []*schema.Column{FilesPlaylistColumns[0]},
+				Symbol:     "content_playlist_media_content_playlists_playlist",
+				Columns:    []*schema.Column{ContentPlaylistMediaColumns[5]},
+				RefColumns: []*schema.Column{ContentPlaylistsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 	}
-	// MediaReviewLogsColumns holds the columns for the "media_review_logs" table.
-	MediaReviewLogsColumns = []*schema.Column{
+	// ContentMediaReviewLogsColumns holds the columns for the "content_media_review_logs" table.
+	ContentMediaReviewLogsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "action", Type: field.TypeString, Size: 20},
 		{Name: "comment", Type: field.TypeString, Nullable: true, Size: 2147483647},
@@ -773,22 +773,22 @@ var (
 		{Name: "media_id", Type: field.TypeString, Size: 36},
 		{Name: "reviewer_id", Type: field.TypeString, Size: 36},
 	}
-	// MediaReviewLogsTable holds the schema information for the "media_review_logs" table.
-	MediaReviewLogsTable = &schema.Table{
-		Name:       "media_review_logs",
-		Columns:    MediaReviewLogsColumns,
-		PrimaryKey: []*schema.Column{MediaReviewLogsColumns[0]},
+	// ContentMediaReviewLogsTable holds the schema information for the "content_media_review_logs" table.
+	ContentMediaReviewLogsTable = &schema.Table{
+		Name:       "content_media_review_logs",
+		Columns:    ContentMediaReviewLogsColumns,
+		PrimaryKey: []*schema.Column{ContentMediaReviewLogsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "media_review_logs_media_review_logs",
-				Columns:    []*schema.Column{MediaReviewLogsColumns[6]},
-				RefColumns: []*schema.Column{MediaColumns[0]},
+				Symbol:     "content_media_review_logs_content_media_review_logs",
+				Columns:    []*schema.Column{ContentMediaReviewLogsColumns[6]},
+				RefColumns: []*schema.Column{ContentMediaColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "media_review_logs_users_user_review_logs",
-				Columns:    []*schema.Column{MediaReviewLogsColumns[7]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				Symbol:     "content_media_review_logs_users_review_logs",
+				Columns:    []*schema.Column{ContentMediaReviewLogsColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -796,41 +796,41 @@ var (
 			{
 				Name:    "mediareviewlog_media_id",
 				Unique:  false,
-				Columns: []*schema.Column{MediaReviewLogsColumns[6]},
+				Columns: []*schema.Column{ContentMediaReviewLogsColumns[6]},
 			},
 			{
 				Name:    "mediareviewlog_reviewer_id",
 				Unique:  false,
-				Columns: []*schema.Column{MediaReviewLogsColumns[7]},
+				Columns: []*schema.Column{ContentMediaReviewLogsColumns[7]},
 			},
 			{
 				Name:    "mediareviewlog_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{MediaReviewLogsColumns[5]},
+				Columns: []*schema.Column{ContentMediaReviewLogsColumns[5]},
 			},
 		},
 	}
-	// FilesMediaTagsColumns holds the columns for the "files_media_tags" table.
-	FilesMediaTagsColumns = []*schema.Column{
+	// ContentMediaTagsColumns holds the columns for the "content_media_tags" table.
+	ContentMediaTagsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "media_tags_rel", Type: field.TypeString, Nullable: true, Size: 36},
 	}
-	// FilesMediaTagsTable holds the schema information for the "files_media_tags" table.
-	FilesMediaTagsTable = &schema.Table{
-		Name:       "files_media_tags",
-		Columns:    FilesMediaTagsColumns,
-		PrimaryKey: []*schema.Column{FilesMediaTagsColumns[0]},
+	// ContentMediaTagsTable holds the schema information for the "content_media_tags" table.
+	ContentMediaTagsTable = &schema.Table{
+		Name:       "content_media_tags",
+		Columns:    ContentMediaTagsColumns,
+		PrimaryKey: []*schema.Column{ContentMediaTagsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "files_media_tags_media_tags_rel",
-				Columns:    []*schema.Column{FilesMediaTagsColumns[1]},
-				RefColumns: []*schema.Column{MediaColumns[0]},
+				Symbol:     "content_media_tags_content_media_tags_rel",
+				Columns:    []*schema.Column{ContentMediaTagsColumns[1]},
+				RefColumns: []*schema.Column{ContentMediaColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
 	}
-	// UsersNotificationColumns holds the columns for the "users_notification" table.
-	UsersNotificationColumns = []*schema.Column{
+	// UsersNotificationsColumns holds the columns for the "users_notifications" table.
+	UsersNotificationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "action", Type: field.TypeString, Size: 30},
 		{Name: "notify", Type: field.TypeBool, Default: false},
@@ -839,26 +839,26 @@ var (
 		{Name: "is_read", Type: field.TypeBool, Default: false},
 		{Name: "created_at", Type: field.TypeTime},
 	}
-	// UsersNotificationTable holds the schema information for the "users_notification" table.
-	UsersNotificationTable = &schema.Table{
-		Name:       "users_notification",
-		Columns:    UsersNotificationColumns,
-		PrimaryKey: []*schema.Column{UsersNotificationColumns[0]},
+	// UsersNotificationsTable holds the schema information for the "users_notifications" table.
+	UsersNotificationsTable = &schema.Table{
+		Name:       "users_notifications",
+		Columns:    UsersNotificationsColumns,
+		PrimaryKey: []*schema.Column{UsersNotificationsColumns[0]},
 		Indexes: []*schema.Index{
 			{
 				Name:    "notification_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{UsersNotificationColumns[4]},
+				Columns: []*schema.Column{UsersNotificationsColumns[4]},
 			},
 			{
 				Name:    "notification_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{UsersNotificationColumns[6]},
+				Columns: []*schema.Column{UsersNotificationsColumns[6]},
 			},
 			{
 				Name:    "notification_is_read",
 				Unique:  false,
-				Columns: []*schema.Column{UsersNotificationColumns[5]},
+				Columns: []*schema.Column{UsersNotificationsColumns[5]},
 			},
 		},
 	}
@@ -881,9 +881,9 @@ var (
 		PrimaryKey: []*schema.Column{AuthPermissionGroupsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "auth_permission_groups_users_user_created_groups",
+				Symbol:     "auth_permission_groups_users_created_groups",
 				Columns:    []*schema.Column{AuthPermissionGroupsColumns[8]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -900,8 +900,8 @@ var (
 			},
 		},
 	}
-	// FilesPlaylistColumns holds the columns for the "files_playlist" table.
-	FilesPlaylistColumns = []*schema.Column{
+	// ContentPlaylistsColumns holds the columns for the "content_playlists" table.
+	ContentPlaylistsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "title", Type: field.TypeString, Size: 100},
 		{Name: "description", Type: field.TypeString, Size: 2147483647},
@@ -910,36 +910,36 @@ var (
 		{Name: "privacy", Type: field.TypeInt, Default: 1},
 		{Name: "add_date", Type: field.TypeTime},
 	}
-	// FilesPlaylistTable holds the schema information for the "files_playlist" table.
-	FilesPlaylistTable = &schema.Table{
-		Name:       "files_playlist",
-		Columns:    FilesPlaylistColumns,
-		PrimaryKey: []*schema.Column{FilesPlaylistColumns[0]},
+	// ContentPlaylistsTable holds the schema information for the "content_playlists" table.
+	ContentPlaylistsTable = &schema.Table{
+		Name:       "content_playlists",
+		Columns:    ContentPlaylistsColumns,
+		PrimaryKey: []*schema.Column{ContentPlaylistsColumns[0]},
 		Indexes: []*schema.Index{
 			{
 				Name:    "playlist_title",
 				Unique:  false,
-				Columns: []*schema.Column{FilesPlaylistColumns[1]},
+				Columns: []*schema.Column{ContentPlaylistsColumns[1]},
 			},
 			{
 				Name:    "playlist_short_token",
 				Unique:  false,
-				Columns: []*schema.Column{FilesPlaylistColumns[3]},
+				Columns: []*schema.Column{ContentPlaylistsColumns[3]},
 			},
 			{
 				Name:    "playlist_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{FilesPlaylistColumns[4]},
+				Columns: []*schema.Column{ContentPlaylistsColumns[4]},
 			},
 			{
 				Name:    "playlist_add_date",
 				Unique:  false,
-				Columns: []*schema.Column{FilesPlaylistColumns[6]},
+				Columns: []*schema.Column{ContentPlaylistsColumns[6]},
 			},
 		},
 	}
-	// SystemSettingColumns holds the columns for the "system_setting" table.
-	SystemSettingColumns = []*schema.Column{
+	// SystemSettingsColumns holds the columns for the "system_settings" table.
+	SystemSettingsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "key", Type: field.TypeString, Unique: true, Size: 200},
 		{Name: "value", Type: field.TypeString, Size: 2147483647, Default: ""},
@@ -952,47 +952,47 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
-	// SystemSettingTable holds the schema information for the "system_setting" table.
-	SystemSettingTable = &schema.Table{
-		Name:       "system_setting",
-		Columns:    SystemSettingColumns,
-		PrimaryKey: []*schema.Column{SystemSettingColumns[0]},
+	// SystemSettingsTable holds the schema information for the "system_settings" table.
+	SystemSettingsTable = &schema.Table{
+		Name:       "system_settings",
+		Columns:    SystemSettingsColumns,
+		PrimaryKey: []*schema.Column{SystemSettingsColumns[0]},
 		Indexes: []*schema.Index{
 			{
 				Name:    "setting_key",
 				Unique:  true,
-				Columns: []*schema.Column{SystemSettingColumns[1]},
+				Columns: []*schema.Column{SystemSettingsColumns[1]},
 			},
 			{
 				Name:    "setting_category",
 				Unique:  false,
-				Columns: []*schema.Column{SystemSettingColumns[4]},
+				Columns: []*schema.Column{SystemSettingsColumns[4]},
 			},
 		},
 	}
-	// SubscriptionsSubscriptionColumns holds the columns for the "subscriptions_subscription" table.
-	SubscriptionsSubscriptionColumns = []*schema.Column{
+	// UsersSubscriptionsColumns holds the columns for the "users_subscriptions" table.
+	UsersSubscriptionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "subscriber_id", Type: field.TypeString, Size: 36},
 		{Name: "channel_id", Type: field.TypeString, Size: 36},
 	}
-	// SubscriptionsSubscriptionTable holds the schema information for the "subscriptions_subscription" table.
-	SubscriptionsSubscriptionTable = &schema.Table{
-		Name:       "subscriptions_subscription",
-		Columns:    SubscriptionsSubscriptionColumns,
-		PrimaryKey: []*schema.Column{SubscriptionsSubscriptionColumns[0]},
+	// UsersSubscriptionsTable holds the schema information for the "users_subscriptions" table.
+	UsersSubscriptionsTable = &schema.Table{
+		Name:       "users_subscriptions",
+		Columns:    UsersSubscriptionsColumns,
+		PrimaryKey: []*schema.Column{UsersSubscriptionsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "subscriptions_subscription_users_user_subscriptions",
-				Columns:    []*schema.Column{SubscriptionsSubscriptionColumns[2]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				Symbol:     "users_subscriptions_users_subscriptions",
+				Columns:    []*schema.Column{UsersSubscriptionsColumns[2]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "subscriptions_subscription_users_user_subscribers",
-				Columns:    []*schema.Column{SubscriptionsSubscriptionColumns[3]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				Symbol:     "users_subscriptions_users_subscribers",
+				Columns:    []*schema.Column{UsersSubscriptionsColumns[3]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -1000,43 +1000,43 @@ var (
 			{
 				Name:    "subscription_subscriber_id_channel_id",
 				Unique:  true,
-				Columns: []*schema.Column{SubscriptionsSubscriptionColumns[2], SubscriptionsSubscriptionColumns[3]},
+				Columns: []*schema.Column{UsersSubscriptionsColumns[2], UsersSubscriptionsColumns[3]},
 			},
 			{
 				Name:    "subscription_subscriber_id",
 				Unique:  false,
-				Columns: []*schema.Column{SubscriptionsSubscriptionColumns[2]},
+				Columns: []*schema.Column{UsersSubscriptionsColumns[2]},
 			},
 			{
 				Name:    "subscription_channel_id",
 				Unique:  false,
-				Columns: []*schema.Column{SubscriptionsSubscriptionColumns[3]},
+				Columns: []*schema.Column{UsersSubscriptionsColumns[3]},
 			},
 			{
 				Name:    "subscription_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{SubscriptionsSubscriptionColumns[1]},
+				Columns: []*schema.Column{UsersSubscriptionsColumns[1]},
 			},
 		},
 	}
-	// FilesTagColumns holds the columns for the "files_tag" table.
-	FilesTagColumns = []*schema.Column{
+	// ContentTagsColumns holds the columns for the "content_tags" table.
+	ContentTagsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "title", Type: field.TypeString, Unique: true, Size: 100},
 		{Name: "media_count", Type: field.TypeInt, Default: 0},
 		{Name: "listings_thumbnail", Type: field.TypeString, Size: 400},
 		{Name: "media_tag_tag", Type: field.TypeInt, Nullable: true},
 	}
-	// FilesTagTable holds the schema information for the "files_tag" table.
-	FilesTagTable = &schema.Table{
-		Name:       "files_tag",
-		Columns:    FilesTagColumns,
-		PrimaryKey: []*schema.Column{FilesTagColumns[0]},
+	// ContentTagsTable holds the schema information for the "content_tags" table.
+	ContentTagsTable = &schema.Table{
+		Name:       "content_tags",
+		Columns:    ContentTagsColumns,
+		PrimaryKey: []*schema.Column{ContentTagsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "files_tag_files_media_tags_tag",
-				Columns:    []*schema.Column{FilesTagColumns[4]},
-				RefColumns: []*schema.Column{FilesMediaTagsColumns[0]},
+				Symbol:     "content_tags_content_media_tags_tag",
+				Columns:    []*schema.Column{ContentTagsColumns[4]},
+				RefColumns: []*schema.Column{ContentMediaTagsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -1044,17 +1044,17 @@ var (
 			{
 				Name:    "tag_title",
 				Unique:  false,
-				Columns: []*schema.Column{FilesTagColumns[1]},
+				Columns: []*schema.Column{ContentTagsColumns[1]},
 			},
 			{
 				Name:    "tag_media_count",
 				Unique:  false,
-				Columns: []*schema.Column{FilesTagColumns[2]},
+				Columns: []*schema.Column{ContentTagsColumns[2]},
 			},
 		},
 	}
-	// UploadSessionsColumns holds the columns for the "upload_sessions" table.
-	UploadSessionsColumns = []*schema.Column{
+	// SystemUploadSessionsColumns holds the columns for the "system_upload_sessions" table.
+	SystemUploadSessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "upload_id", Type: field.TypeString, Unique: true, Size: 64},
 		{Name: "filename", Type: field.TypeString, Size: 255},
@@ -1065,7 +1065,7 @@ var (
 		{Name: "uploaded_size", Type: field.TypeInt64, Default: 0},
 		{Name: "title", Type: field.TypeString, Nullable: true, Size: 255},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
-		{Name: "category_id", Type: field.TypeString, Nullable: true, Size: 36},
+		{Name: "category_id", Type: field.TypeInt64, Nullable: true},
 		{Name: "tags", Type: field.TypeJSON, Nullable: true},
 		{Name: "user_id", Type: field.TypeString, Nullable: true, Size: 36},
 		{Name: "status", Type: field.TypeString, Size: 20, Default: "pending"},
@@ -1077,36 +1077,36 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
-	// UploadSessionsTable holds the schema information for the "upload_sessions" table.
-	UploadSessionsTable = &schema.Table{
-		Name:       "upload_sessions",
-		Columns:    UploadSessionsColumns,
-		PrimaryKey: []*schema.Column{UploadSessionsColumns[0]},
+	// SystemUploadSessionsTable holds the schema information for the "system_upload_sessions" table.
+	SystemUploadSessionsTable = &schema.Table{
+		Name:       "system_upload_sessions",
+		Columns:    SystemUploadSessionsColumns,
+		PrimaryKey: []*schema.Column{SystemUploadSessionsColumns[0]},
 		Indexes: []*schema.Index{
 			{
 				Name:    "uploadsession_upload_id",
 				Unique:  true,
-				Columns: []*schema.Column{UploadSessionsColumns[1]},
+				Columns: []*schema.Column{SystemUploadSessionsColumns[1]},
 			},
 			{
 				Name:    "uploadsession_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{UploadSessionsColumns[12]},
+				Columns: []*schema.Column{SystemUploadSessionsColumns[12]},
 			},
 			{
 				Name:    "uploadsession_status",
 				Unique:  false,
-				Columns: []*schema.Column{UploadSessionsColumns[13]},
+				Columns: []*schema.Column{SystemUploadSessionsColumns[13]},
 			},
 			{
 				Name:    "uploadsession_expires_at",
 				Unique:  false,
-				Columns: []*schema.Column{UploadSessionsColumns[18]},
+				Columns: []*schema.Column{SystemUploadSessionsColumns[18]},
 			},
 		},
 	}
-	// UsersUserColumns holds the columns for the "users_user" table.
-	UsersUserColumns = []*schema.Column{
+	// UsersColumns holds the columns for the "users" table.
+	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "username", Type: field.TypeString, Unique: true, Size: 150},
 		{Name: "email", Type: field.TypeString, Unique: true, Size: 254},
@@ -1134,36 +1134,36 @@ var (
 		{Name: "date_added", Type: field.TypeTime},
 		{Name: "last_login", Type: field.TypeTime, Nullable: true},
 	}
-	// UsersUserTable holds the schema information for the "users_user" table.
-	UsersUserTable = &schema.Table{
-		Name:       "users_user",
-		Columns:    UsersUserColumns,
-		PrimaryKey: []*schema.Column{UsersUserColumns[0]},
+	// UsersTable holds the schema information for the "users" table.
+	UsersTable = &schema.Table{
+		Name:       "users",
+		Columns:    UsersColumns,
+		PrimaryKey: []*schema.Column{UsersColumns[0]},
 		Indexes: []*schema.Index{
 			{
 				Name:    "user_username",
 				Unique:  false,
-				Columns: []*schema.Column{UsersUserColumns[1]},
+				Columns: []*schema.Column{UsersColumns[1]},
 			},
 			{
 				Name:    "user_email",
 				Unique:  false,
-				Columns: []*schema.Column{UsersUserColumns[2]},
+				Columns: []*schema.Column{UsersColumns[2]},
 			},
 			{
 				Name:    "user_is_active",
 				Unique:  false,
-				Columns: []*schema.Column{UsersUserColumns[7]},
+				Columns: []*schema.Column{UsersColumns[7]},
 			},
 			{
 				Name:    "user_is_staff",
 				Unique:  false,
-				Columns: []*schema.Column{UsersUserColumns[8]},
+				Columns: []*schema.Column{UsersColumns[8]},
 			},
 			{
 				Name:    "user_date_added",
 				Unique:  false,
-				Columns: []*schema.Column{UsersUserColumns[24]},
+				Columns: []*schema.Column{UsersColumns[24]},
 			},
 		},
 	}
@@ -1181,13 +1181,13 @@ var (
 			{
 				Symbol:     "user_playlists_user_id",
 				Columns:    []*schema.Column{UserPlaylistsColumns[0]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "user_playlists_playlist_id",
 				Columns:    []*schema.Column{UserPlaylistsColumns[1]},
-				RefColumns: []*schema.Column{FilesPlaylistColumns[0]},
+				RefColumns: []*schema.Column{ContentPlaylistsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
@@ -1206,13 +1206,13 @@ var (
 			{
 				Symbol:     "user_notifications_user_id",
 				Columns:    []*schema.Column{UserNotificationsColumns[0]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "user_notifications_notification_id",
 				Columns:    []*schema.Column{UserNotificationsColumns[1]},
-				RefColumns: []*schema.Column{UsersNotificationColumns[0]},
+				RefColumns: []*schema.Column{UsersNotificationsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
@@ -1231,43 +1231,43 @@ var (
 			{
 				Symbol:     "user_tags_user_id",
 				Columns:    []*schema.Column{UserTagsColumns[0]},
-				RefColumns: []*schema.Column{UsersUserColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "user_tags_tag_id",
 				Columns:    []*schema.Column{UserTagsColumns[1]},
-				RefColumns: []*schema.Column{FilesTagColumns[0]},
+				RefColumns: []*schema.Column{ContentTagsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		ArticlesTable,
-		CategoriesTable,
-		UsersChannelTable,
-		FilesCommentTable,
+		ContentArticlesTable,
+		ContentCategoriesTable,
+		UsersChannelsTable,
+		ContentCommentsTable,
 		ContentCommentLikesTable,
 		ContentCommentReportsTable,
-		EncodeProfilesTable,
-		EncodingTasksTable,
-		FilesFavoriteTable,
+		SystemEncodeProfilesTable,
+		SystemEncodingTasksTable,
+		ContentFavoritesTable,
 		AuthGroupMembersTable,
-		FilesLikeTable,
-		MediaTable,
-		FilesMediaCategoryTable,
-		FilesPlaylistmediaTable,
-		MediaReviewLogsTable,
-		FilesMediaTagsTable,
-		UsersNotificationTable,
+		ContentLikesTable,
+		ContentMediaTable,
+		ContentMediaCategoriesTable,
+		ContentPlaylistMediaTable,
+		ContentMediaReviewLogsTable,
+		ContentMediaTagsTable,
+		UsersNotificationsTable,
 		AuthPermissionGroupsTable,
-		FilesPlaylistTable,
-		SystemSettingTable,
-		SubscriptionsSubscriptionTable,
-		FilesTagTable,
-		UploadSessionsTable,
-		UsersUserTable,
+		ContentPlaylistsTable,
+		SystemSettingsTable,
+		UsersSubscriptionsTable,
+		ContentTagsTable,
+		SystemUploadSessionsTable,
+		UsersTable,
 		UserPlaylistsTable,
 		UserNotificationsTable,
 		UserTagsTable,
@@ -1275,97 +1275,118 @@ var (
 )
 
 func init() {
-	ArticlesTable.ForeignKeys[0].RefTable = CategoriesTable
-	ArticlesTable.ForeignKeys[1].RefTable = UsersUserTable
-	CategoriesTable.ForeignKeys[0].RefTable = CategoriesTable
-	CategoriesTable.ForeignKeys[1].RefTable = FilesMediaCategoryTable
-	CategoriesTable.ForeignKeys[2].RefTable = UsersUserTable
-	UsersChannelTable.ForeignKeys[0].RefTable = UsersUserTable
-	UsersChannelTable.Annotation = &entsql.Annotation{
-		Table: "users_channel",
+	ContentArticlesTable.ForeignKeys[0].RefTable = ContentCategoriesTable
+	ContentArticlesTable.ForeignKeys[1].RefTable = UsersTable
+	ContentArticlesTable.Annotation = &entsql.Annotation{
+		Table: "content_articles",
 	}
-	FilesCommentTable.ForeignKeys[0].RefTable = ArticlesTable
-	FilesCommentTable.ForeignKeys[1].RefTable = FilesCommentTable
-	FilesCommentTable.ForeignKeys[2].RefTable = MediaTable
-	FilesCommentTable.ForeignKeys[3].RefTable = UsersUserTable
-	FilesCommentTable.ForeignKeys[4].RefTable = UsersUserTable
-	FilesCommentTable.Annotation = &entsql.Annotation{
-		Table: "files_comment",
+	ContentCategoriesTable.ForeignKeys[0].RefTable = ContentCategoriesTable
+	ContentCategoriesTable.ForeignKeys[1].RefTable = ContentMediaCategoriesTable
+	ContentCategoriesTable.ForeignKeys[2].RefTable = UsersTable
+	ContentCategoriesTable.Annotation = &entsql.Annotation{
+		Table: "content_categories",
 	}
-	ContentCommentLikesTable.ForeignKeys[0].RefTable = FilesCommentTable
-	ContentCommentLikesTable.ForeignKeys[1].RefTable = UsersUserTable
+	UsersChannelsTable.ForeignKeys[0].RefTable = UsersTable
+	UsersChannelsTable.Annotation = &entsql.Annotation{
+		Table: "users_channels",
+	}
+	ContentCommentsTable.ForeignKeys[0].RefTable = ContentArticlesTable
+	ContentCommentsTable.ForeignKeys[1].RefTable = ContentCommentsTable
+	ContentCommentsTable.ForeignKeys[2].RefTable = ContentMediaTable
+	ContentCommentsTable.ForeignKeys[3].RefTable = UsersTable
+	ContentCommentsTable.ForeignKeys[4].RefTable = UsersTable
+	ContentCommentsTable.Annotation = &entsql.Annotation{
+		Table: "content_comments",
+	}
+	ContentCommentLikesTable.ForeignKeys[0].RefTable = ContentCommentsTable
+	ContentCommentLikesTable.ForeignKeys[1].RefTable = UsersTable
 	ContentCommentLikesTable.Annotation = &entsql.Annotation{
 		Table: "content_comment_likes",
 	}
-	ContentCommentReportsTable.ForeignKeys[0].RefTable = FilesCommentTable
-	ContentCommentReportsTable.ForeignKeys[1].RefTable = UsersUserTable
+	ContentCommentReportsTable.ForeignKeys[0].RefTable = ContentCommentsTable
+	ContentCommentReportsTable.ForeignKeys[1].RefTable = UsersTable
 	ContentCommentReportsTable.Annotation = &entsql.Annotation{
 		Table: "content_comment_reports",
 	}
-	FilesFavoriteTable.ForeignKeys[0].RefTable = MediaTable
-	FilesFavoriteTable.ForeignKeys[1].RefTable = UsersUserTable
-	FilesFavoriteTable.Annotation = &entsql.Annotation{
-		Table: "files_favorite",
+	SystemEncodeProfilesTable.Annotation = &entsql.Annotation{
+		Table: "system_encode_profiles",
+	}
+	SystemEncodingTasksTable.Annotation = &entsql.Annotation{
+		Table: "system_encoding_tasks",
+	}
+	ContentFavoritesTable.ForeignKeys[0].RefTable = ContentMediaTable
+	ContentFavoritesTable.ForeignKeys[1].RefTable = UsersTable
+	ContentFavoritesTable.Annotation = &entsql.Annotation{
+		Table: "content_favorites",
 	}
 	AuthGroupMembersTable.ForeignKeys[0].RefTable = AuthPermissionGroupsTable
-	AuthGroupMembersTable.ForeignKeys[1].RefTable = UsersUserTable
+	AuthGroupMembersTable.ForeignKeys[1].RefTable = UsersTable
 	AuthGroupMembersTable.Annotation = &entsql.Annotation{
 		Table: "auth_group_members",
 	}
-	FilesLikeTable.ForeignKeys[0].RefTable = MediaTable
-	FilesLikeTable.ForeignKeys[1].RefTable = UsersUserTable
-	FilesLikeTable.Annotation = &entsql.Annotation{
-		Table: "files_like",
+	ContentLikesTable.ForeignKeys[0].RefTable = ContentMediaTable
+	ContentLikesTable.ForeignKeys[1].RefTable = UsersTable
+	ContentLikesTable.Annotation = &entsql.Annotation{
+		Table: "content_likes",
 	}
-	MediaTable.ForeignKeys[0].RefTable = CategoriesTable
-	MediaTable.ForeignKeys[1].RefTable = UsersChannelTable
-	MediaTable.ForeignKeys[2].RefTable = FilesMediaCategoryTable
-	MediaTable.ForeignKeys[3].RefTable = FilesMediaTagsTable
-	MediaTable.ForeignKeys[4].RefTable = UsersUserTable
-	FilesMediaCategoryTable.Annotation = &entsql.Annotation{
-		Table: "files_media_category",
+	ContentMediaTable.ForeignKeys[0].RefTable = ContentCategoriesTable
+	ContentMediaTable.ForeignKeys[1].RefTable = UsersChannelsTable
+	ContentMediaTable.ForeignKeys[2].RefTable = ContentMediaCategoriesTable
+	ContentMediaTable.ForeignKeys[3].RefTable = ContentMediaTagsTable
+	ContentMediaTable.ForeignKeys[4].RefTable = UsersTable
+	ContentMediaTable.Annotation = &entsql.Annotation{
+		Table: "content_media",
 	}
-	FilesPlaylistmediaTable.ForeignKeys[0].RefTable = MediaTable
-	FilesPlaylistmediaTable.ForeignKeys[1].RefTable = MediaTable
-	FilesPlaylistmediaTable.ForeignKeys[2].RefTable = FilesPlaylistTable
-	FilesPlaylistmediaTable.Annotation = &entsql.Annotation{
-		Table: "files_playlistmedia",
+	ContentMediaCategoriesTable.Annotation = &entsql.Annotation{
+		Table: "content_media_categories",
 	}
-	MediaReviewLogsTable.ForeignKeys[0].RefTable = MediaTable
-	MediaReviewLogsTable.ForeignKeys[1].RefTable = UsersUserTable
-	FilesMediaTagsTable.ForeignKeys[0].RefTable = MediaTable
-	FilesMediaTagsTable.Annotation = &entsql.Annotation{
-		Table: "files_media_tags",
+	ContentPlaylistMediaTable.ForeignKeys[0].RefTable = ContentMediaTable
+	ContentPlaylistMediaTable.ForeignKeys[1].RefTable = ContentMediaTable
+	ContentPlaylistMediaTable.ForeignKeys[2].RefTable = ContentPlaylistsTable
+	ContentPlaylistMediaTable.Annotation = &entsql.Annotation{
+		Table: "content_playlist_media",
 	}
-	UsersNotificationTable.Annotation = &entsql.Annotation{
-		Table: "users_notification",
+	ContentMediaReviewLogsTable.ForeignKeys[0].RefTable = ContentMediaTable
+	ContentMediaReviewLogsTable.ForeignKeys[1].RefTable = UsersTable
+	ContentMediaReviewLogsTable.Annotation = &entsql.Annotation{
+		Table: "content_media_review_logs",
 	}
-	AuthPermissionGroupsTable.ForeignKeys[0].RefTable = UsersUserTable
+	ContentMediaTagsTable.ForeignKeys[0].RefTable = ContentMediaTable
+	ContentMediaTagsTable.Annotation = &entsql.Annotation{
+		Table: "content_media_tags",
+	}
+	UsersNotificationsTable.Annotation = &entsql.Annotation{
+		Table: "users_notifications",
+	}
+	AuthPermissionGroupsTable.ForeignKeys[0].RefTable = UsersTable
 	AuthPermissionGroupsTable.Annotation = &entsql.Annotation{
 		Table: "auth_permission_groups",
 	}
-	FilesPlaylistTable.Annotation = &entsql.Annotation{
-		Table: "files_playlist",
+	ContentPlaylistsTable.Annotation = &entsql.Annotation{
+		Table: "content_playlists",
 	}
-	SystemSettingTable.Annotation = &entsql.Annotation{
-		Table: "system_setting",
+	SystemSettingsTable.Annotation = &entsql.Annotation{
+		Table: "system_settings",
 	}
-	SubscriptionsSubscriptionTable.ForeignKeys[0].RefTable = UsersUserTable
-	SubscriptionsSubscriptionTable.ForeignKeys[1].RefTable = UsersUserTable
-	SubscriptionsSubscriptionTable.Annotation = &entsql.Annotation{
-		Table: "subscriptions_subscription",
+	UsersSubscriptionsTable.ForeignKeys[0].RefTable = UsersTable
+	UsersSubscriptionsTable.ForeignKeys[1].RefTable = UsersTable
+	UsersSubscriptionsTable.Annotation = &entsql.Annotation{
+		Table: "users_subscriptions",
 	}
-	FilesTagTable.ForeignKeys[0].RefTable = FilesMediaTagsTable
-	FilesTagTable.Annotation = &entsql.Annotation{
-		Table: "files_tag",
+	ContentTagsTable.ForeignKeys[0].RefTable = ContentMediaTagsTable
+	ContentTagsTable.Annotation = &entsql.Annotation{
+		Table: "content_tags",
 	}
-	UsersUserTable.Annotation = &entsql.Annotation{
-		Table: "users_user",
+	SystemUploadSessionsTable.Annotation = &entsql.Annotation{
+		Table: "system_upload_sessions",
 	}
-	UserPlaylistsTable.ForeignKeys[0].RefTable = UsersUserTable
-	UserPlaylistsTable.ForeignKeys[1].RefTable = FilesPlaylistTable
-	UserNotificationsTable.ForeignKeys[0].RefTable = UsersUserTable
-	UserNotificationsTable.ForeignKeys[1].RefTable = UsersNotificationTable
-	UserTagsTable.ForeignKeys[0].RefTable = UsersUserTable
-	UserTagsTable.ForeignKeys[1].RefTable = FilesTagTable
+	UsersTable.Annotation = &entsql.Annotation{
+		Table: "users",
+	}
+	UserPlaylistsTable.ForeignKeys[0].RefTable = UsersTable
+	UserPlaylistsTable.ForeignKeys[1].RefTable = ContentPlaylistsTable
+	UserNotificationsTable.ForeignKeys[0].RefTable = UsersTable
+	UserNotificationsTable.ForeignKeys[1].RefTable = UsersNotificationsTable
+	UserTagsTable.ForeignKeys[0].RefTable = UsersTable
+	UserTagsTable.ForeignKeys[1].RefTable = ContentTagsTable
 }

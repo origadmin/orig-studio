@@ -25,19 +25,19 @@ const (
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the favorite in the database.
-	Table = "files_favorite"
+	Table = "content_favorites"
 	// MediaTable is the table that holds the media relation/edge.
-	MediaTable = "files_favorite"
+	MediaTable = "content_favorites"
 	// MediaInverseTable is the table name for the Media entity.
 	// It exists in this package in order to avoid circular dependency with the "media" package.
-	MediaInverseTable = "media"
+	MediaInverseTable = "content_media"
 	// MediaColumn is the table column denoting the media relation/edge.
 	MediaColumn = "media_id"
 	// UserTable is the table that holds the user relation/edge.
-	UserTable = "files_favorite"
+	UserTable = "content_favorites"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users_user"
+	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
 )

@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/handler"
 	authbiz "origadmin/application/origcms/internal/svc-auth/biz"
 )
 
@@ -27,34 +28,43 @@ func GetClaims(c *gin.Context) (*auth.Claims, bool) {
 
 // GinMiddlewareAdapter adapts a gin.HandlerFunc to http.HandlerFunc with shared context
 // The middleware and handler share the same gin.Context
-func GinMiddlewareAdapter(middleware gin.HandlerFunc, handler gin.HandlerFunc) http.HandlerFunc {
+func GinMiddlewareAdapter(middleware gin.HandlerFunc, h gin.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c, _ := gin.CreateTestContext(w)
 		c.Request = r
+		if params := handler.GetGinParams(r); params != nil {
+			c.Params = params
+		}
 
 		middleware(c)
 
 		if !c.IsAborted() {
-			handler(c)
+			h(c)
 		}
 	}
 }
 
 // GinHandlerToHTTP converts a gin.HandlerFunc to http.HandlerFunc
-func GinHandlerToHTTP(handler gin.HandlerFunc) http.HandlerFunc {
+func GinHandlerToHTTP(h gin.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c, _ := gin.CreateTestContext(w)
 		c.Request = r
-		handler(c)
+		if params := handler.GetGinParams(r); params != nil {
+			c.Params = params
+		}
+		h(c)
 	}
 }
 
 // WithJWT wraps a handler with JWT middleware
 // Supports both gin.HandlerFunc and http.HandlerFunc
-func WithJWT(jwtMgr *auth.Manager, handler interface{}) http.HandlerFunc {
+func WithJWT(jwtMgr *auth.Manager, h interface{}) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c, _ := gin.CreateTestContext(w)
 		c.Request = r
+		if params := handler.GetGinParams(r); params != nil {
+			c.Params = params
+		}
 
 		JWTMiddleware(jwtMgr)(c)
 		if c.IsAborted() {
@@ -65,7 +75,7 @@ func WithJWT(jwtMgr *auth.Manager, handler interface{}) http.HandlerFunc {
 			r = r.WithContext(context.WithValue(r.Context(), claimsKey, claimsVal))
 		}
 
-		switch h := handler.(type) {
+		switch h := h.(type) {
 		case gin.HandlerFunc:
 			h(c)
 		case http.HandlerFunc:
@@ -75,10 +85,13 @@ func WithJWT(jwtMgr *auth.Manager, handler interface{}) http.HandlerFunc {
 }
 
 // WithAdmin wraps a gin.HandlerFunc with JWT + Admin middleware
-func WithAdmin(jwtMgr *auth.Manager, handler gin.HandlerFunc) http.HandlerFunc {
+func WithAdmin(jwtMgr *auth.Manager, h gin.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c, _ := gin.CreateTestContext(w)
 		c.Request = r
+		if params := handler.GetGinParams(r); params != nil {
+			c.Params = params
+		}
 
 		JWTMiddleware(jwtMgr)(c)
 		if c.IsAborted() {
@@ -94,7 +107,7 @@ func WithAdmin(jwtMgr *auth.Manager, handler gin.HandlerFunc) http.HandlerFunc {
 			r = r.WithContext(context.WithValue(r.Context(), claimsKey, claimsVal))
 		}
 
-		handler(c)
+		h(c)
 	}
 }
 

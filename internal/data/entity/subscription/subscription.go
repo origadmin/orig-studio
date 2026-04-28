@@ -25,19 +25,19 @@ const (
 	// EdgeChannel holds the string denoting the channel edge name in mutations.
 	EdgeChannel = "channel"
 	// Table holds the table name of the subscription in the database.
-	Table = "subscriptions_subscription"
+	Table = "users_subscriptions"
 	// SubscriberTable is the table that holds the subscriber relation/edge.
-	SubscriberTable = "subscriptions_subscription"
+	SubscriberTable = "users_subscriptions"
 	// SubscriberInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	SubscriberInverseTable = "users_user"
+	SubscriberInverseTable = "users"
 	// SubscriberColumn is the table column denoting the subscriber relation/edge.
 	SubscriberColumn = "subscriber_id"
 	// ChannelTable is the table that holds the channel relation/edge.
-	ChannelTable = "subscriptions_subscription"
+	ChannelTable = "users_subscriptions"
 	// ChannelInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	ChannelInverseTable = "users_user"
+	ChannelInverseTable = "users"
 	// ChannelColumn is the table column denoting the channel relation/edge.
 	ChannelColumn = "channel_id"
 )

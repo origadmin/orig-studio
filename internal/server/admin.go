@@ -87,6 +87,7 @@ func (h *AdminHandler) Register(r handler.Router) {
 			{
 				profiles.GET("", WithAdmin(h.jwt, h.listEncodeProfiles()))
 				profiles.POST("", WithAdmin(h.jwt, h.createEncodeProfile()))
+				profiles.POST("/preview", WithAdmin(h.jwt, h.previewEncodeCommand()))
 				profiles.GET("/:id", WithAdmin(h.jwt, h.getEncodeProfile()))
 				profiles.PUT("/:id", WithAdmin(h.jwt, h.updateEncodeProfile()))
 				profiles.DELETE("/:id", WithAdmin(h.jwt, h.deleteEncodeProfile()))
@@ -193,23 +194,39 @@ func (h *AdminHandler) getAllEncodingTasks() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		status := c.Query("status")
 
-		// Validate status parameter
-		if status != "" {
-			if status == "active" || status == "all" {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid status parameter"})
-				return
-			}
+		var filterType mediabiz.FilterType
+		var specificStatus string
+
+		switch status {
+		case "":
+			filterType = mediabiz.FilterTypeAll
+		case "active":
+			filterType = mediabiz.FilterTypeActive
+		case "all":
+			filterType = mediabiz.FilterTypeAll
+		default:
 			parsedStatus := enums.ParseEncodingTaskStatus(status)
 			if parsedStatus == enums.EncodingTaskStatusUnknown {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid status parameter"})
 				return
 			}
+			filterType = mediabiz.FilterTypeSpecific
+			specificStatus = status
 		}
 
 		filter := &mediabiz.TranscodingStatusFilter{
-			Status:   status,
-			Page:     1,
-			PageSize: 25,
+			FilterType:    filterType,
+			Status:        specificStatus,
+			Page:          1,
+			PageSize:      25,
+			OnlyStats:     false,
+			ProfileFilter: c.Query("profile"),
+			ChunkFilter:   c.Query("chunk"),
+			SearchQuery:   c.Query("search"),
+		}
+
+		if os := c.Query("only_stats"); os == "true" {
+			filter.OnlyStats = true
 		}
 
 		if p, err := strconv.Atoi(c.DefaultQuery("page", "1")); err == nil && p >= 1 {
@@ -360,6 +377,18 @@ func (h *AdminHandler) deleteEncodeProfile() gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "deleted"})
+	}
+}
+
+func (h *AdminHandler) previewEncodeCommand() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var profile dto.EncodeProfile
+		if err := c.ShouldBindJSON(&profile); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		preview := h.mediaUC.GenerateCommandPreview(c.Request.Context(), &profile)
+		c.JSON(http.StatusOK, gin.H{"command": preview})
 	}
 }
 

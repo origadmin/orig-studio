@@ -17,19 +17,19 @@ const (
 	// EdgeCategory holds the string denoting the category edge name in mutations.
 	EdgeCategory = "category"
 	// Table holds the table name of the mediacategory in the database.
-	Table = "files_media_category"
+	Table = "content_media_categories"
 	// MediaTable is the table that holds the media relation/edge.
-	MediaTable = "media"
+	MediaTable = "content_media"
 	// MediaInverseTable is the table name for the Media entity.
 	// It exists in this package in order to avoid circular dependency with the "media" package.
-	MediaInverseTable = "media"
+	MediaInverseTable = "content_media"
 	// MediaColumn is the table column denoting the media relation/edge.
 	MediaColumn = "media_category_media"
 	// CategoryTable is the table that holds the category relation/edge.
-	CategoryTable = "categories"
+	CategoryTable = "content_categories"
 	// CategoryInverseTable is the table name for the Category entity.
 	// It exists in this package in order to avoid circular dependency with the "category" package.
-	CategoryInverseTable = "categories"
+	CategoryInverseTable = "content_categories"
 	// CategoryColumn is the table column denoting the category relation/edge.
 	CategoryColumn = "media_category_category"
 )

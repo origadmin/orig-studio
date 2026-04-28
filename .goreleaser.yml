@@ -91,6 +91,31 @@ builds:
       - -X github.com/origadmin/toolkits/version.GitBranch={{.Branch}}
       - -X github.com/origadmin/toolkits/version.BuildDate={{.Date}}
 
+  - id: "server"
+    main: ./cmd/server/
+    binary: server
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X github.com/origadmin/toolkits/version.Version={{.Version}}
+      - -X github.com/origadmin/toolkits/version.GitCommit={{.Commit}}
+      - -X github.com/origadmin/toolkits/version.GitBranch={{.Branch}}
+      - -X github.com/origadmin/toolkits/version.BuildDate={{.Date}}
+    hooks:
+      pre:
+        - cmd: sh -c "cd web && bun install && bun run build && rm -rf ../internal/frontend/dist && cp -r dist ../internal/frontend/dist"
+          output: true
+
 # Archive configuration
 archives:
   - id: "{{ .ProjectName }}"
@@ -166,6 +191,19 @@ dockers:
     extra_files:
       - LICENSE
       - README.md
+
+  - id: "server"
+    builds:
+      - server
+    image_templates:
+      - "ghcr.io/origadmin/orig-cms/server:{{ .Tag }}"
+      - "ghcr.io/origadmin/orig-cms/server:latest"
+    dockerfile: Dockerfile.server
+    use: buildx
+    extra_files:
+      - LICENSE
+      - README.md
+      - configs/bootstrap.yaml
 
 # GitHub/GitLab/Gitea releases configuration
 release:

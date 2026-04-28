@@ -38,7 +38,7 @@ const (
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the encodeprofile in the database.
-	Table = "encode_profiles"
+	Table = "system_encode_profiles"
 )
 
 // Columns holds all SQL columns for encodeprofile fields.

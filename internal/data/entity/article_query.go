@@ -525,8 +525,8 @@ func (_q *ArticleQuery) loadUser(ctx context.Context, query *UserQuery, nodes []
 	return nil
 }
 func (_q *ArticleQuery) loadCategory(ctx context.Context, query *CategoryQuery, nodes []*Article, init func(*Article), assign func(*Article, *Category)) error {
-	ids := make([]string, 0, len(nodes))
-	nodeids := make(map[string][]*Article)
+	ids := make([]int64, 0, len(nodes))
+	nodeids := make(map[int64][]*Article)
 	for i := range nodes {
 		fk := nodes[i].CategoryID
 		if _, ok := nodeids[fk]; !ok {

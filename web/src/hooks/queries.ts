@@ -175,6 +175,7 @@ export function useUpdateMedia() {
             adminMediaApi.update(id, data as any),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: mediaKeys.all});
+            queryClient.invalidateQueries({queryKey: ['adminMedia']});
         },
     });
 }

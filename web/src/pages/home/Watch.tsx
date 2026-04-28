@@ -15,7 +15,7 @@ import {Card, CardContent} from '@/components/ui/card';
 import {Skeleton} from '@/components/ui/skeleton';
 import {formatViews, formatDate, formatDuration} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
-import {publicMediaApi, mediaApi} from '@/lib/api/media';
+import {publicMediaApi, adminMediaApi, encodingApi} from '@/lib/api/media';
 import {commentApi} from '@/lib/api/comment';
 import {usePublicMediaDetail, useMediaList, useDeleteMedia} from '@/hooks/queries';
 import {useAuth} from '@/hooks/useAuth';
@@ -73,8 +73,9 @@ const WatchPage = () => {
         if (!media || retrying) return;
         setRetrying(true);
         try {
-            // 使用 publicMediaApi 的转码重试（如果支持）或保留旧的 mediaApi
-            await mediaApi.encoding.retry(media.id);
+            // 使用 encodingApi 的 admin 路径重试所有失败任务
+            // mediaApi.encoding.retry 使用了不存在的 public 路径，且 :taskId 未替换
+            await encodingApi.retryAllFailed(media.id);
             setTimeout(() => window.location.reload(), 1000);
         } catch {
         } finally {
@@ -209,7 +210,7 @@ const WatchPage = () => {
                                 variant="ghost"
                                 size="sm"
                                 className="gap-1.5"
-                                onClick={() => navigate({to: '/watch/$shortToken/edit', params: {shortToken: media.short_token || (shortToken as string)}} as any)}
+                                onClick={() => navigate({to: '/media/$shortToken/edit', params: {shortToken: media.short_token || (shortToken as string)}} as any)}
                             >
                                 <Pencil className="w-4 h-4"/>
                                 {t('common.edit')}

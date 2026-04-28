@@ -46,27 +46,27 @@ const (
 	// EdgeModerator holds the string denoting the moderator edge name in mutations.
 	EdgeModerator = "moderator"
 	// Table holds the table name of the comment in the database.
-	Table = "files_comment"
+	Table = "content_comments"
 	// MediaTable is the table that holds the media relation/edge.
-	MediaTable = "files_comment"
+	MediaTable = "content_comments"
 	// MediaInverseTable is the table name for the Media entity.
 	// It exists in this package in order to avoid circular dependency with the "media" package.
-	MediaInverseTable = "media"
+	MediaInverseTable = "content_media"
 	// MediaColumn is the table column denoting the media relation/edge.
 	MediaColumn = "media_comments"
 	// UserTable is the table that holds the user relation/edge.
-	UserTable = "files_comment"
+	UserTable = "content_comments"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users_user"
+	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_comments"
 	// ParentTable is the table that holds the parent relation/edge.
-	ParentTable = "files_comment"
+	ParentTable = "content_comments"
 	// ParentColumn is the table column denoting the parent relation/edge.
 	ParentColumn = "comment_replies"
 	// RepliesTable is the table that holds the replies relation/edge.
-	RepliesTable = "files_comment"
+	RepliesTable = "content_comments"
 	// RepliesColumn is the table column denoting the replies relation/edge.
 	RepliesColumn = "comment_replies"
 	// CommentLikesTable is the table that holds the comment_likes relation/edge.
@@ -84,10 +84,10 @@ const (
 	// ReportsColumn is the table column denoting the reports relation/edge.
 	ReportsColumn = "comment_id"
 	// ModeratorTable is the table that holds the moderator relation/edge.
-	ModeratorTable = "files_comment"
+	ModeratorTable = "content_comments"
 	// ModeratorInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	ModeratorInverseTable = "users_user"
+	ModeratorInverseTable = "users"
 	// ModeratorColumn is the table column denoting the moderator relation/edge.
 	ModeratorColumn = "moderated_by"
 )
@@ -105,7 +105,7 @@ var Columns = []string{
 	FieldModeratedAt,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "files_comment"
+// ForeignKeys holds the SQL foreign-keys that are owned by the "content_comments"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"article_comments",

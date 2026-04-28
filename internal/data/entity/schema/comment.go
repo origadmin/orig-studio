@@ -48,7 +48,7 @@ func (Comment) Indexes() []ent.Index {
 
 func (Comment) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Table("files_comment"),
+		entsql.Table("content_comments"),
 		entsql.WithComments(true),
 	}
 }

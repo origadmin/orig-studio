@@ -277,6 +277,10 @@ func (r *MockMediaRepo) UpdatePreviewFilePath(ctx context.Context, mediaID strin
 	return nil
 }
 
+func (r *MockMediaRepo) UpdateDimensions(ctx context.Context, mediaID string, width, height int) error {
+	return nil
+}
+
 // MockEncodeProfileRepo 模拟编码配置仓库
 type MockEncodeProfileRepo struct {
 	profiles map[int]*dto.EncodeProfile

@@ -516,13 +516,13 @@ func (_c *MediaCreate) SetUserID(v string) *MediaCreate {
 }
 
 // SetCategoryID sets the "category_id" field.
-func (_c *MediaCreate) SetCategoryID(v string) *MediaCreate {
+func (_c *MediaCreate) SetCategoryID(v int64) *MediaCreate {
 	_c.mutation.SetCategoryID(v)
 	return _c
 }
 
 // SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (_c *MediaCreate) SetNillableCategoryID(v *string) *MediaCreate {
+func (_c *MediaCreate) SetNillableCategoryID(v *int64) *MediaCreate {
 	if v != nil {
 		_c.SetCategoryID(*v)
 	}
@@ -1231,7 +1231,7 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 			Columns: []string{media.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

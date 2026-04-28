@@ -27,19 +27,19 @@ const (
 	// EdgePlaylist holds the string denoting the playlist edge name in mutations.
 	EdgePlaylist = "playlist"
 	// Table holds the table name of the mediaplaylist in the database.
-	Table = "files_playlistmedia"
+	Table = "content_playlist_media"
 	// MediaTable is the table that holds the media relation/edge.
-	MediaTable = "files_playlistmedia"
+	MediaTable = "content_playlist_media"
 	// MediaInverseTable is the table name for the Media entity.
 	// It exists in this package in order to avoid circular dependency with the "media" package.
-	MediaInverseTable = "media"
+	MediaInverseTable = "content_media"
 	// MediaColumn is the table column denoting the media relation/edge.
 	MediaColumn = "media_id"
 	// PlaylistTable is the table that holds the playlist relation/edge.
-	PlaylistTable = "files_playlistmedia"
+	PlaylistTable = "content_playlist_media"
 	// PlaylistInverseTable is the table name for the Playlist entity.
 	// It exists in this package in order to avoid circular dependency with the "playlist" package.
-	PlaylistInverseTable = "files_playlist"
+	PlaylistInverseTable = "content_playlists"
 	// PlaylistColumn is the table column denoting the playlist relation/edge.
 	PlaylistColumn = "playlist_id"
 )
@@ -53,7 +53,7 @@ var Columns = []string{
 	FieldActionDate,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "files_playlistmedia"
+// ForeignKeys holds the SQL foreign-keys that are owned by the "content_playlist_media"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"media_playlists",

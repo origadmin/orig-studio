@@ -98,7 +98,7 @@ type ArticleMutation struct {
 	clearedFields    map[string]struct{}
 	user             *string
 	cleareduser      bool
-	category         *string
+	category         *int64
 	clearedcategory  bool
 	comments         map[string]struct{}
 	removedcomments  map[string]struct{}
@@ -668,12 +668,12 @@ func (m *ArticleMutation) ResetUserID() {
 }
 
 // SetCategoryID sets the "category_id" field.
-func (m *ArticleMutation) SetCategoryID(s string) {
-	m.category = &s
+func (m *ArticleMutation) SetCategoryID(i int64) {
+	m.category = &i
 }
 
 // CategoryID returns the value of the "category_id" field in the mutation.
-func (m *ArticleMutation) CategoryID() (r string, exists bool) {
+func (m *ArticleMutation) CategoryID() (r int64, exists bool) {
 	v := m.category
 	if v == nil {
 		return
@@ -684,7 +684,7 @@ func (m *ArticleMutation) CategoryID() (r string, exists bool) {
 // OldCategoryID returns the old "category_id" field's value of the Article entity.
 // If the Article object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ArticleMutation) OldCategoryID(ctx context.Context) (v string, err error) {
+func (m *ArticleMutation) OldCategoryID(ctx context.Context) (v int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCategoryID is only allowed on UpdateOne operations")
 	}
@@ -878,7 +878,7 @@ func (m *ArticleMutation) CategoryCleared() bool {
 // CategoryIDs returns the "category" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // CategoryID instead. It exists only for internal usage by the builders.
-func (m *ArticleMutation) CategoryIDs() (ids []string) {
+func (m *ArticleMutation) CategoryIDs() (ids []int64) {
 	if id := m.category; id != nil {
 		ids = append(ids, *id)
 	}
@@ -1175,7 +1175,7 @@ func (m *ArticleMutation) SetField(name string, value ent.Value) error {
 		m.SetUserID(v)
 		return nil
 	case article.FieldCategoryID:
-		v, ok := value.(string)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1482,7 +1482,7 @@ type CategoryMutation struct {
 	config
 	op                 Op
 	typ                string
-	id                 *string
+	id                 *int64
 	name               *string
 	slug               *string
 	description        *string
@@ -1510,10 +1510,10 @@ type CategoryMutation struct {
 	articles           map[string]struct{}
 	removedarticles    map[string]struct{}
 	clearedarticles    bool
-	parent             *string
+	parent             *int64
 	clearedparent      bool
-	children           map[string]struct{}
-	removedchildren    map[string]struct{}
+	children           map[int64]struct{}
+	removedchildren    map[int64]struct{}
 	clearedchildren    bool
 	done               bool
 	oldValue           func(context.Context) (*Category, error)
@@ -1540,7 +1540,7 @@ func newCategoryMutation(c config, op Op, opts ...categoryOption) *CategoryMutat
 }
 
 // withCategoryID sets the ID field of the mutation.
-func withCategoryID(id string) categoryOption {
+func withCategoryID(id int64) categoryOption {
 	return func(m *CategoryMutation) {
 		var (
 			err   error
@@ -1592,13 +1592,13 @@ func (m CategoryMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Category entities.
-func (m *CategoryMutation) SetID(id string) {
+func (m *CategoryMutation) SetID(id int64) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *CategoryMutation) ID() (id string, exists bool) {
+func (m *CategoryMutation) ID() (id int64, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -1609,12 +1609,12 @@ func (m *CategoryMutation) ID() (id string, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *CategoryMutation) IDs(ctx context.Context) ([]string, error) {
+func (m *CategoryMutation) IDs(ctx context.Context) ([]int64, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []string{id}, nil
+			return []int64{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -1955,12 +1955,12 @@ func (m *CategoryMutation) ResetColor() {
 }
 
 // SetParentID sets the "parent_id" field.
-func (m *CategoryMutation) SetParentID(s string) {
-	m.parent = &s
+func (m *CategoryMutation) SetParentID(i int64) {
+	m.parent = &i
 }
 
 // ParentID returns the value of the "parent_id" field in the mutation.
-func (m *CategoryMutation) ParentID() (r string, exists bool) {
+func (m *CategoryMutation) ParentID() (r int64, exists bool) {
 	v := m.parent
 	if v == nil {
 		return
@@ -1971,7 +1971,7 @@ func (m *CategoryMutation) ParentID() (r string, exists bool) {
 // OldParentID returns the old "parent_id" field's value of the Category entity.
 // If the Category object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CategoryMutation) OldParentID(ctx context.Context) (v string, err error) {
+func (m *CategoryMutation) OldParentID(ctx context.Context) (v int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldParentID is only allowed on UpdateOne operations")
 	}
@@ -2562,7 +2562,7 @@ func (m *CategoryMutation) ParentCleared() bool {
 // ParentIDs returns the "parent" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // ParentID instead. It exists only for internal usage by the builders.
-func (m *CategoryMutation) ParentIDs() (ids []string) {
+func (m *CategoryMutation) ParentIDs() (ids []int64) {
 	if id := m.parent; id != nil {
 		ids = append(ids, *id)
 	}
@@ -2576,9 +2576,9 @@ func (m *CategoryMutation) ResetParent() {
 }
 
 // AddChildIDs adds the "children" edge to the Category entity by ids.
-func (m *CategoryMutation) AddChildIDs(ids ...string) {
+func (m *CategoryMutation) AddChildIDs(ids ...int64) {
 	if m.children == nil {
-		m.children = make(map[string]struct{})
+		m.children = make(map[int64]struct{})
 	}
 	for i := range ids {
 		m.children[ids[i]] = struct{}{}
@@ -2596,9 +2596,9 @@ func (m *CategoryMutation) ChildrenCleared() bool {
 }
 
 // RemoveChildIDs removes the "children" edge to the Category entity by IDs.
-func (m *CategoryMutation) RemoveChildIDs(ids ...string) {
+func (m *CategoryMutation) RemoveChildIDs(ids ...int64) {
 	if m.removedchildren == nil {
-		m.removedchildren = make(map[string]struct{})
+		m.removedchildren = make(map[int64]struct{})
 	}
 	for i := range ids {
 		delete(m.children, ids[i])
@@ -2607,7 +2607,7 @@ func (m *CategoryMutation) RemoveChildIDs(ids ...string) {
 }
 
 // RemovedChildren returns the removed IDs of the "children" edge to the Category entity.
-func (m *CategoryMutation) RemovedChildrenIDs() (ids []string) {
+func (m *CategoryMutation) RemovedChildrenIDs() (ids []int64) {
 	for id := range m.removedchildren {
 		ids = append(ids, id)
 	}
@@ -2615,7 +2615,7 @@ func (m *CategoryMutation) RemovedChildrenIDs() (ids []string) {
 }
 
 // ChildrenIDs returns the "children" edge IDs in the mutation.
-func (m *CategoryMutation) ChildrenIDs() (ids []string) {
+func (m *CategoryMutation) ChildrenIDs() (ids []int64) {
 	for id := range m.children {
 		ids = append(ids, id)
 	}
@@ -2859,7 +2859,7 @@ func (m *CategoryMutation) SetField(name string, value ent.Value) error {
 		m.SetColor(v)
 		return nil
 	case category.FieldParentID:
-		v, ok := value.(string)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -10190,7 +10190,7 @@ type MediaMutation struct {
 	clearedFields      map[string]struct{}
 	user               *string
 	cleareduser        bool
-	category           *string
+	category           *int64
 	clearedcategory    bool
 	comments           map[string]struct{}
 	removedcomments    map[string]struct{}
@@ -12080,12 +12080,12 @@ func (m *MediaMutation) ResetUserID() {
 }
 
 // SetCategoryID sets the "category_id" field.
-func (m *MediaMutation) SetCategoryID(s string) {
-	m.category = &s
+func (m *MediaMutation) SetCategoryID(i int64) {
+	m.category = &i
 }
 
 // CategoryID returns the value of the "category_id" field in the mutation.
-func (m *MediaMutation) CategoryID() (r string, exists bool) {
+func (m *MediaMutation) CategoryID() (r int64, exists bool) {
 	v := m.category
 	if v == nil {
 		return
@@ -12096,7 +12096,7 @@ func (m *MediaMutation) CategoryID() (r string, exists bool) {
 // OldCategoryID returns the old "category_id" field's value of the Media entity.
 // If the Media object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MediaMutation) OldCategoryID(ctx context.Context) (v string, err error) {
+func (m *MediaMutation) OldCategoryID(ctx context.Context) (v int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCategoryID is only allowed on UpdateOne operations")
 	}
@@ -12339,7 +12339,7 @@ func (m *MediaMutation) CategoryCleared() bool {
 // CategoryIDs returns the "category" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // CategoryID instead. It exists only for internal usage by the builders.
-func (m *MediaMutation) CategoryIDs() (ids []string) {
+func (m *MediaMutation) CategoryIDs() (ids []int64) {
 	if id := m.category; id != nil {
 		ids = append(ids, *id)
 	}
@@ -13318,7 +13318,7 @@ func (m *MediaMutation) SetField(name string, value ent.Value) error {
 		m.SetUserID(v)
 		return nil
 	case media.FieldCategoryID:
-		v, ok := value.(string)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -14055,8 +14055,8 @@ type MediaCategoryMutation struct {
 	media           map[string]struct{}
 	removedmedia    map[string]struct{}
 	clearedmedia    bool
-	category        map[string]struct{}
-	removedcategory map[string]struct{}
+	category        map[int64]struct{}
+	removedcategory map[int64]struct{}
 	clearedcategory bool
 	done            bool
 	oldValue        func(context.Context) (*MediaCategory, error)
@@ -14216,9 +14216,9 @@ func (m *MediaCategoryMutation) ResetMedia() {
 }
 
 // AddCategoryIDs adds the "category" edge to the Category entity by ids.
-func (m *MediaCategoryMutation) AddCategoryIDs(ids ...string) {
+func (m *MediaCategoryMutation) AddCategoryIDs(ids ...int64) {
 	if m.category == nil {
-		m.category = make(map[string]struct{})
+		m.category = make(map[int64]struct{})
 	}
 	for i := range ids {
 		m.category[ids[i]] = struct{}{}
@@ -14236,9 +14236,9 @@ func (m *MediaCategoryMutation) CategoryCleared() bool {
 }
 
 // RemoveCategoryIDs removes the "category" edge to the Category entity by IDs.
-func (m *MediaCategoryMutation) RemoveCategoryIDs(ids ...string) {
+func (m *MediaCategoryMutation) RemoveCategoryIDs(ids ...int64) {
 	if m.removedcategory == nil {
-		m.removedcategory = make(map[string]struct{})
+		m.removedcategory = make(map[int64]struct{})
 	}
 	for i := range ids {
 		delete(m.category, ids[i])
@@ -14247,7 +14247,7 @@ func (m *MediaCategoryMutation) RemoveCategoryIDs(ids ...string) {
 }
 
 // RemovedCategory returns the removed IDs of the "category" edge to the Category entity.
-func (m *MediaCategoryMutation) RemovedCategoryIDs() (ids []string) {
+func (m *MediaCategoryMutation) RemovedCategoryIDs() (ids []int64) {
 	for id := range m.removedcategory {
 		ids = append(ids, id)
 	}
@@ -14255,7 +14255,7 @@ func (m *MediaCategoryMutation) RemovedCategoryIDs() (ids []string) {
 }
 
 // CategoryIDs returns the "category" edge IDs in the mutation.
-func (m *MediaCategoryMutation) CategoryIDs() (ids []string) {
+func (m *MediaCategoryMutation) CategoryIDs() (ids []int64) {
 	for id := range m.category {
 		ids = append(ids, id)
 	}
@@ -20725,7 +20725,8 @@ type UploadSessionMutation struct {
 	adduploaded_size *int64
 	title            *string
 	description      *string
-	category_id      *string
+	category_id      *int64
+	addcategory_id   *int64
 	tags             *[]string
 	appendtags       []string
 	user_id          *string
@@ -21285,12 +21286,13 @@ func (m *UploadSessionMutation) ResetDescription() {
 }
 
 // SetCategoryID sets the "category_id" field.
-func (m *UploadSessionMutation) SetCategoryID(s string) {
-	m.category_id = &s
+func (m *UploadSessionMutation) SetCategoryID(i int64) {
+	m.category_id = &i
+	m.addcategory_id = nil
 }
 
 // CategoryID returns the value of the "category_id" field in the mutation.
-func (m *UploadSessionMutation) CategoryID() (r string, exists bool) {
+func (m *UploadSessionMutation) CategoryID() (r int64, exists bool) {
 	v := m.category_id
 	if v == nil {
 		return
@@ -21301,7 +21303,7 @@ func (m *UploadSessionMutation) CategoryID() (r string, exists bool) {
 // OldCategoryID returns the old "category_id" field's value of the UploadSession entity.
 // If the UploadSession object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UploadSessionMutation) OldCategoryID(ctx context.Context) (v string, err error) {
+func (m *UploadSessionMutation) OldCategoryID(ctx context.Context) (v int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCategoryID is only allowed on UpdateOne operations")
 	}
@@ -21315,9 +21317,28 @@ func (m *UploadSessionMutation) OldCategoryID(ctx context.Context) (v string, er
 	return oldValue.CategoryID, nil
 }
 
+// AddCategoryID adds i to the "category_id" field.
+func (m *UploadSessionMutation) AddCategoryID(i int64) {
+	if m.addcategory_id != nil {
+		*m.addcategory_id += i
+	} else {
+		m.addcategory_id = &i
+	}
+}
+
+// AddedCategoryID returns the value that was added to the "category_id" field in this mutation.
+func (m *UploadSessionMutation) AddedCategoryID() (r int64, exists bool) {
+	v := m.addcategory_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ClearCategoryID clears the value of the "category_id" field.
 func (m *UploadSessionMutation) ClearCategoryID() {
 	m.category_id = nil
+	m.addcategory_id = nil
 	m.clearedFields[uploadsession.FieldCategoryID] = struct{}{}
 }
 
@@ -21330,6 +21351,7 @@ func (m *UploadSessionMutation) CategoryIDCleared() bool {
 // ResetCategoryID resets all changes to the "category_id" field.
 func (m *UploadSessionMutation) ResetCategoryID() {
 	m.category_id = nil
+	m.addcategory_id = nil
 	delete(m.clearedFields, uploadsession.FieldCategoryID)
 }
 
@@ -22052,7 +22074,7 @@ func (m *UploadSessionMutation) SetField(name string, value ent.Value) error {
 		m.SetDescription(v)
 		return nil
 	case uploadsession.FieldCategoryID:
-		v, ok := value.(string)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -22148,6 +22170,9 @@ func (m *UploadSessionMutation) AddedFields() []string {
 	if m.adduploaded_size != nil {
 		fields = append(fields, uploadsession.FieldUploadedSize)
 	}
+	if m.addcategory_id != nil {
+		fields = append(fields, uploadsession.FieldCategoryID)
+	}
 	return fields
 }
 
@@ -22164,6 +22189,8 @@ func (m *UploadSessionMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedChunkSize()
 	case uploadsession.FieldUploadedSize:
 		return m.AddedUploadedSize()
+	case uploadsession.FieldCategoryID:
+		return m.AddedCategoryID()
 	}
 	return nil, false
 }
@@ -22200,6 +22227,13 @@ func (m *UploadSessionMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddUploadedSize(v)
+		return nil
+	case uploadsession.FieldCategoryID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCategoryID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown UploadSession numeric field %s", name)
@@ -22454,8 +22488,8 @@ type UserMutation struct {
 	notifications             map[int]struct{}
 	removednotifications      map[int]struct{}
 	clearednotifications      bool
-	categories                map[string]struct{}
-	removedcategories         map[string]struct{}
+	categories                map[int64]struct{}
+	removedcategories         map[int64]struct{}
 	clearedcategories         bool
 	tags                      map[int]struct{}
 	removedtags               map[int]struct{}
@@ -23948,9 +23982,9 @@ func (m *UserMutation) ResetNotifications() {
 }
 
 // AddCategoryIDs adds the "categories" edge to the Category entity by ids.
-func (m *UserMutation) AddCategoryIDs(ids ...string) {
+func (m *UserMutation) AddCategoryIDs(ids ...int64) {
 	if m.categories == nil {
-		m.categories = make(map[string]struct{})
+		m.categories = make(map[int64]struct{})
 	}
 	for i := range ids {
 		m.categories[ids[i]] = struct{}{}
@@ -23968,9 +24002,9 @@ func (m *UserMutation) CategoriesCleared() bool {
 }
 
 // RemoveCategoryIDs removes the "categories" edge to the Category entity by IDs.
-func (m *UserMutation) RemoveCategoryIDs(ids ...string) {
+func (m *UserMutation) RemoveCategoryIDs(ids ...int64) {
 	if m.removedcategories == nil {
-		m.removedcategories = make(map[string]struct{})
+		m.removedcategories = make(map[int64]struct{})
 	}
 	for i := range ids {
 		delete(m.categories, ids[i])
@@ -23979,7 +24013,7 @@ func (m *UserMutation) RemoveCategoryIDs(ids ...string) {
 }
 
 // RemovedCategories returns the removed IDs of the "categories" edge to the Category entity.
-func (m *UserMutation) RemovedCategoriesIDs() (ids []string) {
+func (m *UserMutation) RemovedCategoriesIDs() (ids []int64) {
 	for id := range m.removedcategories {
 		ids = append(ids, id)
 	}
@@ -23987,7 +24021,7 @@ func (m *UserMutation) RemovedCategoriesIDs() (ids []string) {
 }
 
 // CategoriesIDs returns the "categories" edge IDs in the mutation.
-func (m *UserMutation) CategoriesIDs() (ids []string) {
+func (m *UserMutation) CategoriesIDs() (ids []int64) {
 	for id := range m.categories {
 		ids = append(ids, id)
 	}

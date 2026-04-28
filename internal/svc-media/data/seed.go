@@ -2,12 +2,9 @@ package data
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
-	"strings"
-
 	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/encodeprofile"
+	"strings"
 )
 
 // SeedEncodeProfiles ensures default encoding profiles exist in the system.
@@ -22,8 +19,6 @@ func SeedEncodeProfiles(ctx context.Context, client *entity.Client) error {
 		return nil
 	}
 
-	// Exactly 22 profiles matching the MotoPlayer requirement table
-	// RESOLUTION and CODEC are stored EXACTLY as provided for Bento4 usage
 	profiles := []struct {
 		Name        string
 		Ext         string
@@ -32,41 +27,32 @@ func SeedEncodeProfiles(ctx context.Context, client *entity.Client) error {
 		Active      bool
 		BentoParams string
 	}{
-		{"h265-240", "mp4", "240", "h265", false, "--video-bitrate 400k --audio-bitrate 64k"},
-		{"vp9-240", "webm", "240", "vp9", false, "--video-bitrate 350k --audio-bitrate 64k"},
-		{"h264-240", "mp4", "240", "h264", false, "--video-bitrate 500k --audio-bitrate 64k"},
-
-		{"h265-360", "mp4", "360", "h265", false, "--video-bitrate 800k --audio-bitrate 96k"},
-		{"vp9-360", "webm", "360", "vp9", false, "--video-bitrate 700k --audio-bitrate 96k"},
-		{"h264-360", "mp4", "360", "h264", false, "--video-bitrate 1000k --audio-bitrate 96k"},
-
-		{"h265-480", "mp4", "480", "h265", false, "--video-bitrate 1500k --audio-bitrate 128k"},
-		{"vp9-480", "webm", "480", "vp9", false, "--video-bitrate 1200k --audio-bitrate 128k"},
-		{"h264-480", "mp4", "480", "h264", false, "--video-bitrate 2000k --audio-bitrate 128k"},
-
-		{"h265-720", "mp4", "720", "h265", true, "--video-bitrate 3500k --audio-bitrate 128k"},
-		{"vp9-720", "webm", "720", "vp9", false, "--video-bitrate 3000k --audio-bitrate 128k"},
+		{"h264-360", "mp4", "360", "h264", true, "--video-bitrate 1000k --audio-bitrate 96k"},
 		{"h264-720", "mp4", "720", "h264", true, "--video-bitrate 4000k --audio-bitrate 128k"},
-
-		{"h265-1080", "mp4", "1080", "h265", true, "--video-bitrate 6500k --audio-bitrate 192k"},
-		{"vp9-1080", "webm", "1080", "vp9", false, "--video-bitrate 6000k --audio-bitrate 192k"},
 		{"h264-1080", "mp4", "1080", "h264", true, "--video-bitrate 8000k --audio-bitrate 192k"},
 
-		{"h265-1440", "mp4", "1440", "h265", false, "--video-bitrate 12000k --audio-bitrate 256k"},
-		{"vp9-1440", "webm", "1440", "vp9", false, "--video-bitrate 10000k --audio-bitrate 256k"},
+		{"h264-240", "mp4", "240", "h264", false, "--video-bitrate 500k --audio-bitrate 64k"},
+		{"h264-480", "mp4", "480", "h264", false, "--video-bitrate 2000k --audio-bitrate 128k"},
 		{"h264-1440", "mp4", "1440", "h264", false, "--video-bitrate 15000k --audio-bitrate 256k"},
-
-		{"vp9-2160", "webm", "2160", "vp9", false, "--video-bitrate 20000k --audio-bitrate 320k"},
 		{"h264-2160", "mp4", "2160", "h264", false, "--video-bitrate 25000k --audio-bitrate 320k"},
+
+		{"h265-360", "mp4", "360", "h265", false, "--video-bitrate 800k --audio-bitrate 96k"},
+		{"h265-720", "mp4", "720", "h265", false, "--video-bitrate 3500k --audio-bitrate 128k"},
+		{"h265-1080", "mp4", "1080", "h265", false, "--video-bitrate 6500k --audio-bitrate 192k"},
+		{"h265-240", "mp4", "240", "h265", false, "--video-bitrate 400k --audio-bitrate 64k"},
+		{"h265-480", "mp4", "480", "h265", false, "--video-bitrate 1500k --audio-bitrate 128k"},
+		{"h265-1440", "mp4", "1440", "h265", false, "--video-bitrate 12000k --audio-bitrate 256k"},
 		{"h265-2160", "mp4", "2160", "h265", false, "--video-bitrate 22000k --audio-bitrate 320k"},
 
-		// Short video profiles
-		{"h264-short-360", "mp4", "360", "h264", false, "--video-bitrate 800k --audio-bitrate 96k"},
-		{"h265-short-360", "mp4", "360", "h265", false, "--video-bitrate 600k --audio-bitrate 96k"},
+		{"vp9-360", "webm", "360", "vp9", false, "--video-bitrate 700k --audio-bitrate 96k"},
+		{"vp9-720", "webm", "720", "vp9", false, "--video-bitrate 3000k --audio-bitrate 128k"},
+		{"vp9-1080", "webm", "1080", "vp9", false, "--video-bitrate 6000k --audio-bitrate 192k"},
+		{"vp9-240", "webm", "240", "vp9", false, "--video-bitrate 350k --audio-bitrate 64k"},
+		{"vp9-480", "webm", "480", "vp9", false, "--video-bitrate 1200k --audio-bitrate 128k"},
+		{"vp9-1440", "webm", "1440", "vp9", false, "--video-bitrate 10000k --audio-bitrate 256k"},
+		{"vp9-2160", "webm", "2160", "vp9", false, "--video-bitrate 20000k --audio-bitrate 320k"},
 
 		{"preview", "gif", "-", "-", true, "--fps 10 --scale 320"},
-		{"preview-frames", "jpg", "-", "-", true, "--frames 30 --scale 160"},
-		{"sprite", "sprite", "-", "-", true, "--frame-interval 10 --columns 5 --frame-width 160 --frame-height 90 --max-frames 100"},
 	}
 
 	for _, p := range profiles {
@@ -89,41 +75,6 @@ func SeedEncodeProfiles(ctx context.Context, client *entity.Client) error {
 	}
 
 	slog.Info("Successfully seeded Bento4-ready profiles")
-	return nil
-}
-
-// EnsureSpriteProfile ensures the sprite profile exists in the database.
-// This is an idempotent migration: if a profile with extension="sprite" already exists, it does nothing.
-func EnsureSpriteProfile(ctx context.Context, client *entity.Client) error {
-	// Check if any sprite profile already exists
-	count, err := client.EncodeProfile.Query().
-		Where(encodeprofile.ExtensionEQ("sprite")).
-		Count(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to query sprite profile: %w", err)
-	}
-
-	if count > 0 {
-		slog.Info("Sprite profile already exists, skipping migration")
-		return nil
-	}
-
-	// Create the default sprite profile
-	_, err = client.EncodeProfile.Create().
-		SetName("sprite").
-		SetDescription("Sprite sheet + WebVTT for video seek preview").
-		SetExtension("sprite").
-		SetResolution("-").
-		SetVideoCodec("-").
-		SetAudioCodec("aac").
-		SetBentoParameters("--frame-interval 10 --columns 5 --frame-width 160 --frame-height 90 --max-frames 100").
-		SetIsActive(true).
-		Save(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to create sprite profile: %w", err)
-	}
-
-	slog.Info("Successfully created sprite profile via migration")
 	return nil
 }
 

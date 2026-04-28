@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -155,21 +156,38 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		}
 	}
 
+	// --- Step 2.5: Get video resolution and save ---
+	sourceHeight := 0
+	if strings.HasPrefix(media.MimeType, "video/") {
+		if srcW, srcH, err := ffmpeg.GetVideoResolution(procCtx, fullPath); err != nil {
+			h.logger.Warnf("failed to get video resolution for media %s: %v", mediaID, err)
+		} else {
+			sourceHeight = srcH
+			if err := h.mediaRepo.UpdateDimensions(procCtx, mediaID, srcW, srcH); err != nil {
+				h.logger.Warnf("failed to save video dimensions for media %s: %v", mediaID, err)
+			}
+			h.logger.Infof("media %s resolution: %dx%d", mediaID, srcW, srcH)
+		}
+	}
+
 	// --- Step 3: Fetch active profiles and get or create encoding tasks ---
 	profiles, err := h.profileRepo.ListActive(procCtx)
 	if err != nil {
 		return fmt.Errorf("list profiles: %w", err)
 	}
 
-	// Separate video, preview, and sprite profiles
-	var videoProfiles, previewProfiles, spriteProfiles []*dto.EncodeProfile
+	// Separate video and preview profiles
+	var videoProfiles, previewProfiles []*dto.EncodeProfile
 	for _, p := range profiles {
 		if IsPreviewProfile(p) {
 			previewProfiles = append(previewProfiles, p)
-		} else if IsSpriteProfile(p) {
-			spriteProfiles = append(spriteProfiles, p)
 		} else if IsVideoProfile(p) {
-			// Use all active video profiles regardless of video type
+			profileHeight := resolutionToHeight(p.Resolution)
+			if sourceHeight > 0 && profileHeight > sourceHeight {
+				h.logger.Infof("skipping profile %s (height=%d) for media %s (source height=%d): would upscale",
+					p.Name, profileHeight, mediaID, sourceHeight)
+				continue
+			}
 			videoProfiles = append(videoProfiles, p)
 		} else {
 			h.logger.Infof("skipping unknown profile type: name=%s ext=%s", p.Name, p.Extension)
@@ -177,7 +195,6 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 	}
 
 	allProfiles := append(videoProfiles, previewProfiles...)
-	allProfiles = append(allProfiles, spriteProfiles...)
 
 	// Get existing tasks for this media
 	existingTasks, err := h.encodingRepo.ListByMedia(procCtx, mediaID)
@@ -342,8 +359,6 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 					t.OutputPath = fmt.Sprintf("%s/%s/index.m3u8", mediaUUID, profile.Name)
 				} else if IsPreviewProfile(profile) {
 					t.OutputPath = fmt.Sprintf("previews/%s.gif", mediaUUID)
-				} else if IsSpriteProfile(profile) {
-					t.OutputPath = fmt.Sprintf("sprites/%s.jpg", mediaUUID)
 				}
 			}
 		}
@@ -398,21 +413,6 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 			if t.Status == enums.EncodingTaskStatusSuccess {
 				media.PreviewFilePath = fmt.Sprintf("hls/previews/%s.gif", mediaUUID)
 				h.logger.Infof("set preview file path to: %s", media.PreviewFilePath)
-			}
-			continue
-		}
-
-		if IsSpriteProfile(profile) {
-			if t.Status == enums.EncodingTaskStatusSuccess {
-				spritePath := fmt.Sprintf("sprites/%s.jpg", mediaUUID)
-				vttPath := fmt.Sprintf("sprites/%s.vtt", mediaUUID)
-				if err := h.mediaRepo.UpdateSpriteFields(procCtx, mediaID, "success", spritePath, vttPath); err != nil {
-					h.logger.Warnf("failed to update sprite fields for media %s: %v", mediaID, err)
-				}
-			} else if t.Status == enums.EncodingTaskStatusFailed {
-				if err := h.mediaRepo.UpdateSpriteFields(procCtx, mediaID, "failed", "", ""); err != nil {
-					h.logger.Warnf("failed to update sprite fields (failed) for media %s: %v", mediaID, err)
-				}
 			}
 			continue
 		}
@@ -473,10 +473,10 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 	h.logger.Infof("media processing complete: media=%s uuid=%s status=%s (video: %d ok / %d fail)",
 		mediaID, mediaUUID, media.EncodingStatus, videoSuccessCount, videoFailedCount)
 
-	if media.Thumbnail == "" && h.spriteUC != nil {
+	if media.Type == "video" && h.spriteUC != nil {
 		go func() {
-			if err := h.spriteUC.RegenerateThumbnail(context.Background(), mediaID, 0); err != nil {
-				h.logger.Warnf("thumbnail regeneration failed for media %s: %v", mediaID, err)
+			if err := h.spriteUC.ProcessPostTranscode(context.Background(), mediaID); err != nil {
+				h.logger.Warnf("post-transcode processing failed for media %s: %v", mediaID, err)
 			}
 		}()
 	}
@@ -500,8 +500,6 @@ func (h *TranscodeHandler) waitForOutput(
 		expectedFile = filepath.Join(job.OutputDir, "index.m3u8")
 	} else if IsPreviewProfile(job.Profile) {
 		expectedFile = filepath.Join(job.OutputDir, "..", "previews", fmt.Sprintf("%s.gif", job.MediaID))
-	} else if IsSpriteProfile(job.Profile) {
-		expectedFile = filepath.Join(job.OutputDir, "..", "sprites", fmt.Sprintf("%s.jpg", job.MediaID))
 	} else {
 		return nil // unknown type, nothing to wait for
 	}
@@ -540,9 +538,9 @@ func (h *TranscodeHandler) waitForOutput(
 			return fmt.Errorf("task %s failed: %s", task.Id, currentTask.ErrorMessage)
 		}
 
-		// For preview/sprite profiles, provide basic progress updates
+		// For preview profiles, provide basic progress updates
 		// Video profiles have their own progress updates from ffmpeg
-		if (IsPreviewProfile(job.Profile) || IsSpriteProfile(job.Profile)) && currentTask != nil {
+		if IsPreviewProfile(job.Profile) && currentTask != nil {
 			// Basic progress: 20% to 90%
 			progress := 20 + (i * 70 / maxAttempts)
 			if progress > 90 {
@@ -639,4 +637,25 @@ func estimateBandwidth(p *dto.EncodeProfile) int {
 	default:
 		return 1_000_000
 	}
+}
+
+// resolutionToHeight converts a resolution string to its height value.
+// Accepts formats: "720", "1280x720", returns 0 for non-numeric values.
+func resolutionToHeight(resolution string) int {
+	if resolution == "" || resolution == "-" {
+		return 0
+	}
+	if strings.Contains(resolution, "x") {
+		parts := strings.SplitN(resolution, "x", 2)
+		h, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return 0
+		}
+		return h
+	}
+	h, err := strconv.Atoi(resolution)
+	if err != nil {
+		return 0
+	}
+	return h
 }

@@ -117,68 +117,68 @@ const (
 	// EdgeReviewLogs holds the string denoting the review_logs edge name in mutations.
 	EdgeReviewLogs = "review_logs"
 	// Table holds the table name of the media in the database.
-	Table = "media"
+	Table = "content_media"
 	// UserTable is the table that holds the user relation/edge.
-	UserTable = "media"
+	UserTable = "content_media"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users_user"
+	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
 	// CategoryTable is the table that holds the category relation/edge.
-	CategoryTable = "media"
+	CategoryTable = "content_media"
 	// CategoryInverseTable is the table name for the Category entity.
 	// It exists in this package in order to avoid circular dependency with the "category" package.
-	CategoryInverseTable = "categories"
+	CategoryInverseTable = "content_categories"
 	// CategoryColumn is the table column denoting the category relation/edge.
 	CategoryColumn = "category_id"
 	// CommentsTable is the table that holds the comments relation/edge.
-	CommentsTable = "files_comment"
+	CommentsTable = "content_comments"
 	// CommentsInverseTable is the table name for the Comment entity.
 	// It exists in this package in order to avoid circular dependency with the "comment" package.
-	CommentsInverseTable = "files_comment"
+	CommentsInverseTable = "content_comments"
 	// CommentsColumn is the table column denoting the comments relation/edge.
 	CommentsColumn = "media_comments"
 	// ChannelTable is the table that holds the channel relation/edge.
-	ChannelTable = "media"
+	ChannelTable = "content_media"
 	// ChannelInverseTable is the table name for the Channel entity.
 	// It exists in this package in order to avoid circular dependency with the "channel" package.
-	ChannelInverseTable = "users_channel"
+	ChannelInverseTable = "users_channels"
 	// ChannelColumn is the table column denoting the channel relation/edge.
 	ChannelColumn = "channel_id"
 	// PlaylistsTable is the table that holds the playlists relation/edge.
-	PlaylistsTable = "files_playlistmedia"
+	PlaylistsTable = "content_playlist_media"
 	// PlaylistsInverseTable is the table name for the MediaPlaylist entity.
 	// It exists in this package in order to avoid circular dependency with the "mediaplaylist" package.
-	PlaylistsInverseTable = "files_playlistmedia"
+	PlaylistsInverseTable = "content_playlist_media"
 	// PlaylistsColumn is the table column denoting the playlists relation/edge.
 	PlaylistsColumn = "media_playlists"
 	// TagsRelTable is the table that holds the tags_rel relation/edge.
-	TagsRelTable = "files_media_tags"
+	TagsRelTable = "content_media_tags"
 	// TagsRelInverseTable is the table name for the MediaTag entity.
 	// It exists in this package in order to avoid circular dependency with the "mediatag" package.
-	TagsRelInverseTable = "files_media_tags"
+	TagsRelInverseTable = "content_media_tags"
 	// TagsRelColumn is the table column denoting the tags_rel relation/edge.
 	TagsRelColumn = "media_tags_rel"
 	// FavoritesTable is the table that holds the favorites relation/edge.
-	FavoritesTable = "files_favorite"
+	FavoritesTable = "content_favorites"
 	// FavoritesInverseTable is the table name for the Favorite entity.
 	// It exists in this package in order to avoid circular dependency with the "favorite" package.
-	FavoritesInverseTable = "files_favorite"
+	FavoritesInverseTable = "content_favorites"
 	// FavoritesColumn is the table column denoting the favorites relation/edge.
 	FavoritesColumn = "media_id"
 	// LikesTable is the table that holds the likes relation/edge.
-	LikesTable = "files_like"
+	LikesTable = "content_likes"
 	// LikesInverseTable is the table name for the Like entity.
 	// It exists in this package in order to avoid circular dependency with the "like" package.
-	LikesInverseTable = "files_like"
+	LikesInverseTable = "content_likes"
 	// LikesColumn is the table column denoting the likes relation/edge.
 	LikesColumn = "media_id"
 	// ReviewLogsTable is the table that holds the review_logs relation/edge.
-	ReviewLogsTable = "media_review_logs"
+	ReviewLogsTable = "content_media_review_logs"
 	// ReviewLogsInverseTable is the table name for the MediaReviewLog entity.
 	// It exists in this package in order to avoid circular dependency with the "mediareviewlog" package.
-	ReviewLogsInverseTable = "media_review_logs"
+	ReviewLogsInverseTable = "content_media_review_logs"
 	// ReviewLogsColumn is the table column denoting the review_logs relation/edge.
 	ReviewLogsColumn = "media_id"
 )
@@ -230,7 +230,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "media"
+// ForeignKeys holds the SQL foreign-keys that are owned by the "content_media"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"media_category_media",

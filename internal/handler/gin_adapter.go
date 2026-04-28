@@ -27,29 +27,50 @@ func (a *GinRouterAdapter) Group(prefix string) Router {
 	return &GinRouterAdapter{group: a.group.Group(prefix)}
 }
 
+type contextKey string
+
+const ginParamsKey contextKey = "gin_params"
+
+// GetGinParams retrieves gin.Params from the request context.
+func GetGinParams(r *http.Request) gin.Params {
+	if params, ok := r.Context().Value(ginParamsKey).(gin.Params); ok {
+		return params
+	}
+	return nil
+}
+
+// wrapWithParams wraps an http.HandlerFunc to store gin.Params in the request context.
+func wrapWithParams(h http.HandlerFunc) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := context.WithValue(c.Request.Context(), ginParamsKey, c.Params)
+		c.Request = c.Request.WithContext(ctx)
+		h.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
 // GET registers a GET route.
 func (a *GinRouterAdapter) GET(path string, handler http.HandlerFunc) {
-	a.group.GET(path, gin.WrapH(handler))
+	a.group.GET(path, wrapWithParams(handler))
 }
 
 // POST registers a POST route.
 func (a *GinRouterAdapter) POST(path string, handler http.HandlerFunc) {
-	a.group.POST(path, gin.WrapH(handler))
+	a.group.POST(path, wrapWithParams(handler))
 }
 
 // PUT registers a PUT route.
 func (a *GinRouterAdapter) PUT(path string, handler http.HandlerFunc) {
-	a.group.PUT(path, gin.WrapH(handler))
+	a.group.PUT(path, wrapWithParams(handler))
 }
 
 // DELETE registers a DELETE route.
 func (a *GinRouterAdapter) DELETE(path string, handler http.HandlerFunc) {
-	a.group.DELETE(path, gin.WrapH(handler))
+	a.group.DELETE(path, wrapWithParams(handler))
 }
 
 // PATCH registers a PATCH route.
 func (a *GinRouterAdapter) PATCH(path string, handler http.HandlerFunc) {
-	a.group.PATCH(path, gin.WrapH(handler))
+	a.group.PATCH(path, wrapWithParams(handler))
 }
 
 // GinContextAdapter adapts a gin.Context to the Context interface.
@@ -66,6 +87,9 @@ func NewGinContextAdapter(c *gin.Context) *GinContextAdapter {
 func NewGinContextAdapterFromHTTP(w http.ResponseWriter, r *http.Request) *GinContextAdapter {
 	c, _ := gin.CreateTestContext(w)
 	c.Request = r
+	if params := GetGinParams(r); params != nil {
+		c.Params = params
+	}
 	return &GinContextAdapter{c: c}
 }
 

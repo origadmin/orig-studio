@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -34,7 +36,7 @@ func (Article) Fields() []ent.Field {
 		field.Bool("featured").Default(false),
 		field.JSON("tags", []string{}).Optional(),
 		field.String("user_id"),
-		field.String("category_id").Optional(),
+		field.Int64("category_id").Optional().StructTag(`json:"category_id,omitempty"`),
 		field.Time("published_at").Optional(),
 		field.Time("created_at").Default(time.Now),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
@@ -51,6 +53,12 @@ func (Article) Indexes() []ent.Index {
 		index.Fields("created_at"),
 		index.Fields("published_at"),
 		index.Fields("user_id"),
+	}
+}
+
+func (Article) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Table("content_articles"),
 	}
 }
 

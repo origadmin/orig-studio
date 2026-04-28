@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -97,6 +98,161 @@ func GetVideoDuration(ctx context.Context, inputPath string) (time.Duration, err
 	return time.Duration(seconds * float64(time.Second)), nil
 }
 
+// GetVideoResolution returns the width and height of the video using ffprobe.
+func GetVideoResolution(ctx context.Context, inputPath string) (width, height int, err error) {
+	args := []string{
+		"-v", "error",
+		"-select_streams", "v:0",
+		"-show_entries", "stream=width,height",
+		"-of", "csv=s=x:p=0",
+		inputPath,
+	}
+
+	cmd := exec.CommandContext(ctx, ffprobePath, args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return 0, 0, fmt.Errorf("ffprobe resolution failed: %w, output: %s", err, string(output))
+	}
+
+	parts := strings.Split(strings.TrimSpace(string(output)), "x")
+	if len(parts) != 2 {
+		return 0, 0, fmt.Errorf("unexpected ffprobe resolution output: %s", string(output))
+	}
+
+	w, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to parse width %q: %w", parts[0], err)
+	}
+
+	h, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to parse height %q: %w", parts[1], err)
+	}
+
+	return w, h, nil
+}
+
+// MapCodecName converts short codec names to ffmpeg encoder names.
+// Only short names are accepted: h264, h265, hevc, vp9.
+func MapCodecName(videoCodec string) string {
+	switch videoCodec {
+	case "h264":
+		return "libx264"
+	case "h265", "hevc":
+		return "libx265"
+	case "vp9":
+		return "libvpx-vp9"
+	default:
+		return "libx264"
+	}
+}
+
+// MapAudioCodec selects the appropriate audio codec based on the requested codec
+// and the video encoder in use. When audioCodec is empty or "-", it defaults to
+// aac for H.264/H.265 and libopus for VP9.
+func MapAudioCodec(audioCodec string, videoEncoder string) string {
+	if audioCodec != "" && audioCodec != "-" {
+		switch audioCodec {
+		case "aac", "libaac":
+			return "aac"
+		case "opus", "libopus":
+			return "libopus"
+		}
+	}
+	// Default: aac for H.264/H.265, libopus for VP9
+	if videoEncoder == "libvpx-vp9" {
+		return "libopus"
+	}
+	return "aac"
+}
+
+// levelForResolution returns the appropriate H.264 level for a given resolution.
+func levelForResolution(resolution string) string {
+	height := resolution
+	if strings.Contains(resolution, "x") {
+		parts := strings.SplitN(resolution, "x", 2)
+		height = parts[1]
+	}
+	switch height {
+	case "240", "360", "480":
+		return "3.0"
+	case "720":
+		return "4.1"
+	case "1080":
+		return "4.2"
+	case "1440":
+		return "5.1"
+	case "2160":
+		return "5.2"
+	default:
+		return "4.1"
+	}
+}
+
+// buildVideoArgs constructs ffmpeg encoding arguments based on codec, resolution, and bitrate.
+// It produces quality-controlled parameters including proper scaling with aspect ratio
+// preservation, CRF, maxrate/bufsize, preset, profile/level, key frame control, and pix_fmt.
+func buildVideoArgs(videoCodec string, resolution string, videoBitrate string, audioCodec string, audioBitrate string) []string {
+	width, height := ResolutionToWidthHeight(resolution)
+
+	// Scale filter with aspect ratio preservation
+	scaleFilter := fmt.Sprintf("scale=%s:%s:force_original_aspect_ratio=decrease:force_divisible_by=2:flags=lanczos", width, height)
+
+	args := []string{}
+
+	// Video codec and quality
+	vcodec := MapCodecName(videoCodec)
+	switch vcodec {
+	case "libx264":
+		args = append(args,
+			"-c:v", "libx264",
+			"-filter:v", scaleFilter,
+			"-pix_fmt", "yuv420p",
+			"-crf", "23",
+			"-preset", "medium",
+			"-profile:v", "main",
+			"-level", levelForResolution(resolution),
+			"-force_key_frames", "expr:gte(t,n_forced*4)",
+			"-x264-params", "keyint=240:keyint_min=120",
+		)
+	case "libx265":
+		args = append(args,
+			"-c:v", "libx265",
+			"-filter:v", scaleFilter,
+			"-pix_fmt", "yuv420p",
+			"-crf", "28",
+			"-preset", "medium",
+			"-profile:v", "main",
+			"-level", levelForResolution(resolution),
+			"-force_key_frames", "expr:gte(t,n_forced*4)",
+			"-x265-params", "keyint=240:keyint_min=120",
+		)
+	case "libvpx-vp9":
+		args = append(args,
+			"-c:v", "libvpx-vp9",
+			"-filter:v", scaleFilter,
+			"-crf", "31",
+			"-b:v", "0",
+			"-quality", "good",
+			"-cpu-used", "2",
+		)
+	}
+
+	// Maxrate/Bufsize: use video_bitrate from profile if specified
+	if videoBitrate != "" && videoBitrate != "auto" {
+		args = append(args, "-maxrate", videoBitrate, "-bufsize", videoBitrate)
+	}
+
+	// Audio codec
+	acodec := MapAudioCodec(audioCodec, vcodec)
+	args = append(args, "-c:a", acodec)
+	if audioBitrate != "" {
+		args = append(args, "-b:a", audioBitrate)
+	}
+
+	return args
+}
+
 // TranscodeToMP4 transcodes the input file to a standard MP4 file with specific resolution and codec.
 // DEPRECATED: Use TranscodeToHLS instead for direct HLS output (no intermediate MP4 needed).
 // Kept for backward compatibility with non-HLS use cases.
@@ -113,35 +269,8 @@ func TranscodeToMP4(
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
-	size := ResolutionToSize(resolution)
-
-	// Select video codec
-	vcodec := "libx264"
-	if videoCodec == "h265" || videoCodec == "hevc" {
-		vcodec = "libx265"
-	} else if videoCodec == "vp9" {
-		vcodec = "libvpx-vp9"
-	}
-
-	args := []string{
-		"-i", inputPath,
-		"-s", size,
-		"-c:v", vcodec,
-	}
-
-	// Apply video bitrate if specified and not "auto"
-	if videoBitrate != "" && videoBitrate != "auto" {
-		args = append(args, "-b:v", videoBitrate)
-	}
-
-	// Audio codec: always aac for MP4 compatibility
-	args = append(args, "-c:a", "aac")
-
-	// Apply audio bitrate if specified
-	if audioBitrate != "" {
-		args = append(args, "-b:a", audioBitrate)
-	}
-
+	args := []string{"-i", inputPath}
+	args = append(args, buildVideoArgs(videoCodec, resolution, videoBitrate, audioCodec, audioBitrate)...)
 	args = append(args,
 		"-movflags", "faststart+frag_keyframe+empty_moov",
 		"-y",
@@ -182,40 +311,18 @@ func TranscodeToHLS(
 		return fmt.Errorf("failed to create HLS output directory: %w", err)
 	}
 
-	size := ResolutionToSize(resolution)
-
-	// Select video codec
-	vcodec := "libx264"
-	if videoCodec == "h265" || videoCodec == "hevc" {
-		vcodec = "libx265"
-	} else if videoCodec == "vp9" {
-		vcodec = "libvpx-vp9"
-	}
-
 	segmentPattern := filepath.Join(outputDir, "segment_%03d.ts")
 	playlistPath := filepath.Join(outputDir, "index.m3u8")
 
-	args := []string{
-		"-i", inputPath,
-		"-s", size,
-		"-c:v", vcodec,
-		"-c:a", "aac",
-		// HLS muxer settings
+	args := []string{"-i", inputPath}
+	args = append(args, buildVideoArgs(videoCodec, resolution, videoBitrate, audioCodec, audioBitrate)...)
+	args = append(args,
 		"-f", "hls",
 		"-hls_time", "6",
 		"-hls_list_size", "0",
 		"-hls_segment_filename", segmentPattern,
-	}
-
-	// Apply bitrates if specified
-	if videoBitrate != "" && videoBitrate != "auto" {
-		args = append(args, "-b:v", videoBitrate)
-	}
-	if audioBitrate != "" {
-		args = append(args, "-b:a", audioBitrate)
-	}
-
-	args = append(args, "-y", playlistPath)
+		"-y", playlistPath,
+	)
 
 	cmd := exec.CommandContext(ctx, ffmpegPath, args...)
 	output, err := cmd.CombinedOutput()
@@ -245,18 +352,9 @@ func TranscodeToHLSWithProgress(
 	if err := os.RemoveAll(outputDir); err != nil {
 		return fmt.Errorf("failed to clean output directory: %w", err)
 	}
-	
+
 	if err := os.MkdirAll(outputDir, 0o755); err != nil {
 		return fmt.Errorf("failed to create HLS output directory: %w", err)
-	}
-
-	size := ResolutionToSize(resolution)
-
-	vcodec := "libx264"
-	if videoCodec == "h265" || videoCodec == "hevc" {
-		vcodec = "libx265"
-	} else if videoCodec == "vp9" {
-		vcodec = "libvpx-vp9"
 	}
 
 	segmentPattern := filepath.Join(outputDir, "segment_%03d.ts")
@@ -265,23 +363,15 @@ func TranscodeToHLSWithProgress(
 	args := []string{
 		"-progress", "pipe:1",
 		"-i", inputPath,
-		"-s", size,
-		"-c:v", vcodec,
-		"-c:a", "aac",
+	}
+	args = append(args, buildVideoArgs(videoCodec, resolution, videoBitrate, audioCodec, audioBitrate)...)
+	args = append(args,
 		"-f", "hls",
 		"-hls_time", "6",
 		"-hls_list_size", "0",
 		"-hls_segment_filename", segmentPattern,
-	}
-
-	if videoBitrate != "" && videoBitrate != "auto" {
-		args = append(args, "-b:v", videoBitrate)
-	}
-	if audioBitrate != "" {
-		args = append(args, "-b:a", audioBitrate)
-	}
-
-	args = append(args, "-y", playlistPath)
+		"-y", playlistPath,
+	)
 
 	cmd := exec.CommandContext(ctx, ffmpegPath, args...)
 
@@ -422,6 +512,39 @@ func GenerateGIFPreview(ctx context.Context, inputPath, outputPath string, scale
 	os.Remove(palettePath)
 
 	return nil
+}
+
+// PreviewHLSCommand returns the full ffmpeg command string for HLS transcoding preview.
+// This does not execute the command, only generates it for display.
+func PreviewHLSCommand(inputPath, outputDir, profileName, resolution, videoCodec, audioCodec, videoBitrate, audioBitrate string) string {
+	args := []string{ffmpegPath}
+	args = append(args, "-i", inputPath)
+	args = append(args, buildVideoArgs(videoCodec, resolution, videoBitrate, audioCodec, audioBitrate)...)
+	args = append(args,
+		"-f", "hls",
+		"-hls_time", "6",
+		"-hls_list_size", "0",
+		"-hls_segment_filename", filepath.Join(outputDir, "segment_%03d.ts"),
+		"-y", filepath.Join(outputDir, "index.m3u8"),
+	)
+	return strings.Join(args, " ")
+}
+
+// PreviewGIFCommand returns the full ffmpeg command string for GIF preview generation.
+// This does not execute the command, only generates it for display.
+func PreviewGIFCommand(inputPath, outputPath, scale string) string {
+	palettePath := outputPath + ".png"
+	paletteCmd := strings.Join([]string{
+		ffmpegPath, "-i", inputPath,
+		"-vf", fmt.Sprintf("fps=5,scale=%s:flags=lanczos,palettegen", scale),
+		"-t", "3", "-y", palettePath,
+	}, " ")
+	gifCmd := strings.Join([]string{
+		ffmpegPath, "-i", inputPath, "-i", palettePath,
+		"-lavfi", fmt.Sprintf("fps=5,scale=%s:flags=lanczos[x];[x][1:v]paletteuse", scale),
+		"-t", "3", "-y", outputPath,
+	}, " ")
+	return paletteCmd + " && " + gifCmd
 }
 
 

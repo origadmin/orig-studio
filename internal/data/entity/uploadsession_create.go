@@ -115,13 +115,13 @@ func (_c *UploadSessionCreate) SetNillableDescription(v *string) *UploadSessionC
 }
 
 // SetCategoryID sets the "category_id" field.
-func (_c *UploadSessionCreate) SetCategoryID(v string) *UploadSessionCreate {
+func (_c *UploadSessionCreate) SetCategoryID(v int64) *UploadSessionCreate {
 	_c.mutation.SetCategoryID(v)
 	return _c
 }
 
 // SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (_c *UploadSessionCreate) SetNillableCategoryID(v *string) *UploadSessionCreate {
+func (_c *UploadSessionCreate) SetNillableCategoryID(v *int64) *UploadSessionCreate {
 	if v != nil {
 		_c.SetCategoryID(*v)
 	}
@@ -363,11 +363,6 @@ func (_c *UploadSessionCreate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "UploadSession.title": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.CategoryID(); ok {
-		if err := uploadsession.CategoryIDValidator(v); err != nil {
-			return &ValidationError{Name: "category_id", err: fmt.Errorf(`entity: validator failed for field "UploadSession.category_id": %w`, err)}
-		}
-	}
 	if v, ok := _c.mutation.UserID(); ok {
 		if err := uploadsession.UserIDValidator(v); err != nil {
 			return &ValidationError{Name: "user_id", err: fmt.Errorf(`entity: validator failed for field "UploadSession.user_id": %w`, err)}
@@ -468,7 +463,7 @@ func (_c *UploadSessionCreate) createSpec() (*UploadSession, *sqlgraph.CreateSpe
 		_node.Description = value
 	}
 	if value, ok := _c.mutation.CategoryID(); ok {
-		_spec.SetField(uploadsession.FieldCategoryID, field.TypeString, value)
+		_spec.SetField(uploadsession.FieldCategoryID, field.TypeInt64, value)
 		_node.CategoryID = value
 	}
 	if value, ok := _c.mutation.Tags(); ok {

@@ -15,6 +15,7 @@ import (
 	"github.com/origadmin/runtime/log"
 	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/frontend"
 	"origadmin/application/origcms/internal/handler"
 	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 )
@@ -146,6 +147,9 @@ func (s *Server) Start(addr string) error {
 
 	// Register all module routes
 	s.RegisterRoutes(r)
+
+	// Register frontend SPA routes (auto-detect: serves embedded dist if present)
+	frontend.RegisterRoutes(r)
 
 	log.Infof("origcms server starting, addr: %s", addr)
 	return r.Run(addr)

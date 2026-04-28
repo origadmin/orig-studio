@@ -38,7 +38,7 @@ func (Favorite) Indexes() []ent.Index {
 
 func (Favorite) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Table("files_favorite"),
+		entsql.Table("content_favorites"),
 		entsql.WithComments(true),
 	}
 }

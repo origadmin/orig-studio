@@ -153,10 +153,8 @@ func init() {
 	category.UpdateDefaultUpdatedAt = categoryDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// categoryDescID is the schema descriptor for id field.
 	categoryDescID := categoryFields[0].Descriptor()
-	// category.DefaultID holds the default value on creation for the id field.
-	category.DefaultID = categoryDescID.Default.(func() string)
 	// category.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	category.IDValidator = categoryDescID.Validators[0].(func(string) error)
+	category.IDValidator = categoryDescID.Validators[0].(func(int64) error)
 	channelFields := schema.Channel{}.Fields()
 	_ = channelFields
 	// channelDescTitle is the schema descriptor for title field.
@@ -843,10 +841,6 @@ func init() {
 	uploadsessionDescTitle := uploadsessionFields[7].Descriptor()
 	// uploadsession.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	uploadsession.TitleValidator = uploadsessionDescTitle.Validators[0].(func(string) error)
-	// uploadsessionDescCategoryID is the schema descriptor for category_id field.
-	uploadsessionDescCategoryID := uploadsessionFields[9].Descriptor()
-	// uploadsession.CategoryIDValidator is a validator for the "category_id" field. It is called by the builders before save.
-	uploadsession.CategoryIDValidator = uploadsessionDescCategoryID.Validators[0].(func(string) error)
 	// uploadsessionDescUserID is the schema descriptor for user_id field.
 	uploadsessionDescUserID := uploadsessionFields[11].Descriptor()
 	// uploadsession.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.

@@ -718,13 +718,13 @@ func (_u *MediaUpdate) SetNillableUserID(v *string) *MediaUpdate {
 }
 
 // SetCategoryID sets the "category_id" field.
-func (_u *MediaUpdate) SetCategoryID(v string) *MediaUpdate {
+func (_u *MediaUpdate) SetCategoryID(v int64) *MediaUpdate {
 	_u.mutation.SetCategoryID(v)
 	return _u
 }
 
 // SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (_u *MediaUpdate) SetNillableCategoryID(v *string) *MediaUpdate {
+func (_u *MediaUpdate) SetNillableCategoryID(v *int64) *MediaUpdate {
 	if v != nil {
 		_u.SetCategoryID(*v)
 	}
@@ -1440,7 +1440,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1453,7 +1453,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{media.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -2461,13 +2461,13 @@ func (_u *MediaUpdateOne) SetNillableUserID(v *string) *MediaUpdateOne {
 }
 
 // SetCategoryID sets the "category_id" field.
-func (_u *MediaUpdateOne) SetCategoryID(v string) *MediaUpdateOne {
+func (_u *MediaUpdateOne) SetCategoryID(v int64) *MediaUpdateOne {
 	_u.mutation.SetCategoryID(v)
 	return _u
 }
 
 // SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (_u *MediaUpdateOne) SetNillableCategoryID(v *string) *MediaUpdateOne {
+func (_u *MediaUpdateOne) SetNillableCategoryID(v *int64) *MediaUpdateOne {
 	if v != nil {
 		_u.SetCategoryID(*v)
 	}
@@ -3213,7 +3213,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -3226,7 +3226,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Columns: []string{media.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

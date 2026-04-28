@@ -83,3 +83,7 @@ web/tsc-output.txt
 
 # Added by code-review-graph
 .code-review-graph/
+
+# Frontend embedded dist (built by make build-frontend, not committed)
+internal/frontend/dist/
+!internal/frontend/dist/.gitkeep

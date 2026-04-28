@@ -793,8 +793,8 @@ func (_q *MediaQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*M
 	return nil
 }
 func (_q *MediaQuery) loadCategory(ctx context.Context, query *CategoryQuery, nodes []*Media, init func(*Media), assign func(*Media, *Category)) error {
-	ids := make([]string, 0, len(nodes))
-	nodeids := make(map[string][]*Media)
+	ids := make([]int64, 0, len(nodes))
+	nodeids := make(map[int64][]*Media)
 	for i := range nodes {
 		fk := nodes[i].CategoryID
 		if _, ok := nodeids[fk]; !ok {

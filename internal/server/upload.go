@@ -70,7 +70,7 @@ func (h *UploadHandler) initiateMultipartUpload() gin.HandlerFunc {
 			ContentType string   `json:"content_type"`
 			Title       string   `json:"title"`
 			Description string   `json:"description"`
-			CategoryID  *string  `json:"category_id"`
+			CategoryID  *int64   `json:"category_id"`
 			Tags        []string `json:"tags"`
 			Thumbnail   string   `json:"thumbnail"`
 		}
@@ -187,7 +187,7 @@ func (h *UploadHandler) completeMultipartUpload() gin.HandlerFunc {
 			Sha256      string   `json:"sha256"`
 			Title       string   `json:"title"`
 			Description string   `json:"description"`
-			CategoryID  *string  `json:"category_id"`
+			CategoryID  *int64   `json:"category_id"`
 			Tags        []string `json:"tags"`
 			Thumbnail   string   `json:"thumbnail"`
 		}
