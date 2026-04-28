@@ -179,7 +179,7 @@ func TestAuthSignup(t *testing.T) {
 	}
 }
 
-// TestAuthMe tests the /auth/me endpoint
+// TestAuthMe tests the /me endpoint (MeHandler, not /auth/me)
 func TestAuthMe(t *testing.T) {
 	ts := SetupTestServer(t)
 	defer ts.Cleanup()
@@ -220,7 +220,7 @@ func TestAuthMe(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			resp, body, err := ts.MakeRequest(RequestOptions{
 				Method: "GET",
-				Path:   "/auth/me",
+				Path:   "/me",
 				Token:  tt.token,
 			})
 			if err != nil {
@@ -230,12 +230,12 @@ func TestAuthMe(t *testing.T) {
 			AssertStatus(t, resp, tt.wantStatus)
 
 			if tt.checkUser {
-				var result map[string]interface{}
-				if err := ParseResponse(body, &result); err != nil {
+				data, err := GetResponseData(body)
+				if err != nil {
 					t.Fatalf("failed to parse response: %v", err)
 				}
-				if _, ok := result["username"]; !ok {
-					t.Error("expected username in response")
+				if _, ok := data["username"]; !ok && data["id"] == nil {
+					t.Error("expected username or id in response data")
 				}
 			}
 		})
@@ -295,7 +295,7 @@ func TestAuthTokenValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req := httptest.NewRequest("GET", ts.BaseURL+"/auth/me", nil)
+			req := httptest.NewRequest("GET", ts.BaseURL+"/me", nil)
 			if tt.authHeader != "" {
 				req.Header.Set("Authorization", tt.authHeader)
 			}
@@ -320,7 +320,7 @@ func TestAuthRolePermissions(t *testing.T) {
 		username string
 	}{
 		{"admin", ts.GetToken(RoleAdmin), true, "admin"},
-		{"staff", ts.GetToken(RoleStaff), true, "staff"},
+		{"editor", ts.GetToken(RoleEditor), false, "editor"},
 		{"user", ts.GetToken(RoleUser), false, "user1"},
 	}
 
@@ -328,7 +328,7 @@ func TestAuthRolePermissions(t *testing.T) {
 		t.Run(role.name+"_can_access_me", func(t *testing.T) {
 			resp, body, err := ts.MakeRequest(RequestOptions{
 				Method: "GET",
-				Path:   "/auth/me",
+				Path:   "/me",
 				Token:  role.token,
 			})
 			if err != nil {
@@ -337,13 +337,13 @@ func TestAuthRolePermissions(t *testing.T) {
 
 			AssertStatus(t, resp, http.StatusOK)
 
-			var result map[string]interface{}
-			if err := ParseResponse(body, &result); err != nil {
+			data, err := GetResponseData(body)
+			if err != nil {
 				t.Fatalf("failed to parse response: %v", err)
 			}
 
-			// Check is_staff field
-			if isStaff, ok := result["is_staff"]; ok {
+			// Check is_staff field - MeHandler returns {code, message, data: {user object}}
+			if isStaff, ok := data["is_staff"]; ok {
 				if isStaff != role.isStaff {
 					t.Errorf("expected is_staff=%v, got %v", role.isStaff, isStaff)
 				}

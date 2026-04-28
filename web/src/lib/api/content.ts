@@ -10,7 +10,7 @@ export interface Content {
     type: "article" | "page" | "post";
     status: string;
     author_id: string;
-    category_id?: string;
+    category_id?: number;
     tags?: string[];
     featured_image?: string;
     views: number;
@@ -32,7 +32,7 @@ export interface CreateContentRequest {
     content: string;
     excerpt?: string;
     type: Content["type"];
-    category_id?: string;
+    category_id?: number;
     tags?: string[];
     featured_image?: string;
     published_at?: string;
@@ -43,7 +43,7 @@ export interface UpdateContentRequest {
     slug?: string;
     content?: string;
     excerpt?: string;
-    category_id?: string;
+    category_id?: number;
     tags?: string[];
     featured_image?: string;
     status?: string;
@@ -56,7 +56,7 @@ export const contentApi = {
         page?: number;
         page_size?: number;
         type?: string;
-        category_id?: string;
+        category_id?: number;
         keyword?: string;
         status?: string;
     }) => api.get<ContentListResponse>("/content", {...params, status: params?.status || "published"}),

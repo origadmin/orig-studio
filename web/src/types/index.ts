@@ -26,6 +26,7 @@ export interface Media {
             nickname?: string;
         }>;
         category?: {
+            id: number;
             name: string;
         };
     };

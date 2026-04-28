@@ -8,7 +8,7 @@ import type {Media} from '@/lib/api/media';
 export interface MediaEditFormState {
     title: string;
     description: string;
-    category_id: string;
+    category_id: string | number;
     tags: string;
     privacy: number;
     state: string;
@@ -56,7 +56,7 @@ export function MediaEditForm({form, setForm, media, categories, isAdmin}: Media
             <div className="space-y-2">
                 <Label>Category</Label>
                 <Select
-                    value={form.category_id || '_none_'}
+                    value={form.category_id !== '' && form.category_id !== undefined ? String(form.category_id) : '_none_'}
                     onValueChange={val => setForm({...form, category_id: val === '_none_' ? '' : val})}
                 >
                     <SelectTrigger>

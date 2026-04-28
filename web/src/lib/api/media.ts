@@ -48,7 +48,7 @@ export interface Media {
     tags?: string[];
     user_id: string;
     channel_id?: string;
-    category_id?: string;
+    category_id?: number;
     published_at?: string;
     created_at: string;
     updated_at?: string;
@@ -621,7 +621,7 @@ export const adminMediaApi = {
         state?: string;
         keyword?: string;
         user_id?: number | string;
-        category_id?: number | string;
+        category_id?: number;
         featured?: boolean;
         tags?: string[];
         order_by?: string;

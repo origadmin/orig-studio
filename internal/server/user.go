@@ -142,16 +142,22 @@ func (h *UserHandler) Register(r handler.Router) {
 		// List users
 		users.GET("", func(w http.ResponseWriter, r *http.Request) {
 			c := handler.NewGinContextAdapterFromHTTP(w, r)
+			// Support both "limit" and "page_size" query params for compatibility
 			limit, _ := strconv.Atoi(c.Query("limit"))
-			if limit == 0 {
+			pageSize, _ := strconv.Atoi(c.Query("page_size"))
+			if limit == 0 && pageSize == 0 {
 				limit = 20
+			}
+			if limit == 0 {
+				limit = pageSize
 			}
 			page, _ := strconv.Atoi(c.Query("page"))
 			if page == 0 {
 				page = 1
 			}
 
-			items, total, err := h.uc.ListUsers(r.Context(), &dto.UserQueryOption{
+			// Use ListUserEntities to get role field directly from entity
+			entities, total, err := h.uc.ListUserEntities(r.Context(), &dto.UserQueryOption{
 				QueryOption: repo.QueryOption{
 					Page:     int32(page),
 					PageSize: int32(limit),
@@ -162,11 +168,44 @@ func (h *UserHandler) Register(r handler.Router) {
 				return
 			}
 
+			// Convert entity users to frontend-friendly format
+			userList := make([]gin.H, len(entities))
+			for i, u := range entities {
+				role := "user"
+				if u.Role != "" {
+					role = string(u.Role)
+				}
+
+				status := "inactive"
+				if u.IsActive {
+					status = "active"
+				}
+
+				createdAt := ""
+				if !u.DateJoined.IsZero() {
+					createdAt = u.DateJoined.Format("2006-01-02 15:04:05")
+				}
+
+				userList[i] = gin.H{
+					"id":         u.ID,
+					"username":   u.Username,
+					"email":      u.Email,
+					"avatar":     u.Logo,
+					"role":       role,
+					"status":     status,
+					"created_at": createdAt,
+				}
+			}
+
 			c.JSON(http.StatusOK, gin.H{
-				"items":     items,
-				"total":     total,
-				"page":      page,
-				"page_size": limit,
+				"code":    0,
+				"message": "ok",
+				"data": gin.H{
+					"items":     userList,
+					"total":     total,
+					"page":      page,
+					"page_size": limit,
+				},
 			})
 		})
 

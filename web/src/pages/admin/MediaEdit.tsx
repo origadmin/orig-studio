@@ -139,7 +139,7 @@ export default function MediaEditPage() {
         title: '',
         description: '',
         state: 'draft',
-        category_id: '',
+        category_id: '' as string | number,
         tags: '',
         privacy: 1,
         featured: false,
@@ -165,7 +165,7 @@ export default function MediaEditPage() {
                 title: media.title || '',
                 description: media.description || '',
                 state: media.state || 'draft',
-                category_id: media.category_id || '',
+                category_id: media.category_id ?? '',
                 tags: media.tags?.join(', ') || '',
                 privacy: media.privacy ?? 1,
                 featured: media.featured || false,
@@ -195,7 +195,7 @@ export default function MediaEditPage() {
                     title: form.title,
                     description: form.description,
                     state: form.state,
-                    category_id: form.category_id ? Number(form.category_id) : undefined,
+                    category_id: form.category_id !== '' && form.category_id !== undefined ? Number(form.category_id) : undefined,
                     tags: form.tags.split(',').map(s => s.trim()).filter(Boolean),
                     privacy: form.privacy,
                     featured: form.featured,
@@ -466,7 +466,7 @@ export default function MediaEditPage() {
                                 </div>
                                 <div className="space-y-2">
                                     <Label>分类</Label>
-                                    <Select value={form.category_id || '_none_'} onValueChange={val => setForm({...form, category_id: val === '_none_' ? '' : val})}>
+                                    <Select value={form.category_id !== '' && form.category_id !== undefined ? String(form.category_id) : '_none_'} onValueChange={val => setForm({...form, category_id: val === '_none_' ? '' : val})}>
                                         <SelectTrigger><SelectValue placeholder="选择分类"/></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="_none_">无分类</SelectItem>
@@ -629,31 +629,23 @@ export default function MediaEditPage() {
 
                         <div className="bg-card rounded-lg border p-4 space-y-3">
                             <h3 className="font-medium">基本信息</h3>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">ID</span>
-                                    <span className="font-mono text-xs">{media.id}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Short Token</span>
-                                    <span className="font-mono text-xs">{media.short_token || 'N/A'}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">创建时间</span>
-                                    <span className="text-xs">{formatDate(media.created_at)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">更新时间</span>
-                                    <span className="text-xs">{formatDate(media.updated_at)}</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-muted-foreground">编码状态</span>
+                            <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+                                <span className="text-muted-foreground">ID</span>
+                                <span className="font-mono text-xs text-right break-all">{media.id}</span>
+                                <span className="text-muted-foreground">Short Token</span>
+                                <span className="font-mono text-xs text-right break-all">{media.short_token || 'N/A'}</span>
+                                <span className="text-muted-foreground">创建时间</span>
+                                <span className="text-xs text-right whitespace-nowrap">{formatDate(media.created_at)}</span>
+                                <span className="text-muted-foreground">更新时间</span>
+                                <span className="text-xs text-right whitespace-nowrap">{formatDate(media.updated_at)}</span>
+                                <span className="text-muted-foreground">编码状态</span>
+                                <div className="flex justify-end">
                                     <Badge variant={encodingStatusBadge(media.encoding_status)} className="text-[10px] px-1.5 py-0 h-4">
                                         {encodingStatusLabel(media.encoding_status)}
                                     </Badge>
                                 </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-muted-foreground">审核状态</span>
+                                <span className="text-muted-foreground">审核状态</span>
+                                <div className="flex justify-end">
                                     <Badge variant={reviewStatusBadge(media.review_status)} className="text-[10px] px-1.5 py-0 h-4">
                                         {reviewStatusLabel(media.review_status)}
                                     </Badge>

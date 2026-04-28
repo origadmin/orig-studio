@@ -56,7 +56,7 @@ func (c *Config) GetDefaultDB() (dialect, source string) {
 			return db.Dialect, db.Source
 		}
 	}
-	return "postgres", ""
+	return "sqlite3", ""
 }
 
 // GetJWTConfig returns the first JWT authn config found.

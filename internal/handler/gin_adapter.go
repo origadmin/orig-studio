@@ -30,6 +30,7 @@ func (a *GinRouterAdapter) Group(prefix string) Router {
 type contextKey string
 
 const ginParamsKey contextKey = "gin_params"
+const claimsContextKey contextKey = "claims"
 
 // GetGinParams retrieves gin.Params from the request context.
 func GetGinParams(r *http.Request) gin.Params {
@@ -90,7 +91,19 @@ func NewGinContextAdapterFromHTTP(w http.ResponseWriter, r *http.Request) *GinCo
 	if params := GetGinParams(r); params != nil {
 		c.Params = params
 	}
+	// Copy claims from request context to gin context so that c.Get("claims") works
+	// in handlers that use this adapter. The WithJWT middleware stores claims in
+	// the request context using SetClaimsInContext.
+	if claims := r.Context().Value(claimsContextKey); claims != nil {
+		c.Set("claims", claims)
+	}
 	return &GinContextAdapter{c: c}
+}
+
+// SetClaimsInContext stores claims in the request context so that
+// NewGinContextAdapterFromHTTP can copy them to the gin context.
+func SetClaimsInContext(r *http.Request, claims interface{}) *http.Request {
+	return r.WithContext(context.WithValue(r.Context(), claimsContextKey, claims))
 }
 
 // Context returns the underlying context.Context.

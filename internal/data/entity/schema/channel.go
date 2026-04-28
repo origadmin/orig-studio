@@ -47,7 +47,7 @@ func (Channel) Indexes() []ent.Index {
 
 func (Channel) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Table("users_channels"),
+		entsql.Table("user_channels"),
 		entsql.WithComments(true),
 	}
 }

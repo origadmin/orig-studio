@@ -118,10 +118,10 @@ const (
 	// ArticlesColumn is the table column denoting the articles relation/edge.
 	ArticlesColumn = "user_id"
 	// ChannelsTable is the table that holds the channels relation/edge.
-	ChannelsTable = "users_channels"
+	ChannelsTable = "user_channels"
 	// ChannelsInverseTable is the table name for the Channel entity.
 	// It exists in this package in order to avoid circular dependency with the "channel" package.
-	ChannelsInverseTable = "users_channels"
+	ChannelsInverseTable = "user_channels"
 	// ChannelsColumn is the table column denoting the channels relation/edge.
 	ChannelsColumn = "user_id"
 	// PlaylistsTable is the table that holds the playlists relation/edge. The primary key declared below.
@@ -137,10 +137,10 @@ const (
 	// CommentsColumn is the table column denoting the comments relation/edge.
 	CommentsColumn = "user_comments"
 	// NotificationsTable is the table that holds the notifications relation/edge. The primary key declared below.
-	NotificationsTable = "user_notifications"
+	NotificationsTable = "user_notification_mappings"
 	// NotificationsInverseTable is the table name for the Notification entity.
 	// It exists in this package in order to avoid circular dependency with the "notification" package.
-	NotificationsInverseTable = "users_notifications"
+	NotificationsInverseTable = "user_notifications"
 	// CategoriesTable is the table that holds the categories relation/edge.
 	CategoriesTable = "content_categories"
 	// CategoriesInverseTable is the table name for the Category entity.
@@ -175,17 +175,17 @@ const (
 	// CommentLikesColumn is the table column denoting the comment_likes relation/edge.
 	CommentLikesColumn = "user_id"
 	// SubscriptionsTable is the table that holds the subscriptions relation/edge.
-	SubscriptionsTable = "users_subscriptions"
+	SubscriptionsTable = "user_subscriptions"
 	// SubscriptionsInverseTable is the table name for the Subscription entity.
 	// It exists in this package in order to avoid circular dependency with the "subscription" package.
-	SubscriptionsInverseTable = "users_subscriptions"
+	SubscriptionsInverseTable = "user_subscriptions"
 	// SubscriptionsColumn is the table column denoting the subscriptions relation/edge.
 	SubscriptionsColumn = "subscriber_id"
 	// SubscribersTable is the table that holds the subscribers relation/edge.
-	SubscribersTable = "users_subscriptions"
+	SubscribersTable = "user_subscriptions"
 	// SubscribersInverseTable is the table name for the Subscription entity.
 	// It exists in this package in order to avoid circular dependency with the "subscription" package.
-	SubscribersInverseTable = "users_subscriptions"
+	SubscribersInverseTable = "user_subscriptions"
 	// SubscribersColumn is the table column denoting the subscribers relation/edge.
 	SubscribersColumn = "channel_id"
 	// ReviewLogsTable is the table that holds the review_logs relation/edge.

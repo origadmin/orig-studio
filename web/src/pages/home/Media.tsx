@@ -10,7 +10,7 @@ export default function MediaPage() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [activeCategory, setActiveCategory] = useState<string>("all");
+    const [activeCategory, setActiveCategory] = useState<number | "all">("all");
 
     useEffect(() => {
         loadData();
@@ -26,7 +26,7 @@ export default function MediaPage() {
             ]);
             const mediaRes = await mediaApi.list(params);
             setMediaList(mediaRes.items);
-            setCategories(catRes);
+            setCategories((catRes as any)?.items || catRes || []);
         } catch (err: any) {
             setError(err.message);
         } finally {

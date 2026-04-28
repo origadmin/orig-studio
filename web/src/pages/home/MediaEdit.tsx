@@ -74,7 +74,7 @@ export default function MediaEditPage() {
     const {form, setForm, isDirty, resetDirty} = useDirtyState<MediaEditFormState>({
         title: '',
         description: '',
-        category_id: '',
+        category_id: '' as string | number,
         tags: '',
         privacy: 1,
         state: 'draft',
@@ -93,7 +93,7 @@ export default function MediaEditPage() {
             setForm({
                 title: media.title || '',
                 description: media.description || '',
-                category_id: media.category_id || '',
+                category_id: media.category_id ?? '',
                 tags: media.tags?.join(', ') || '',
                 privacy: media.privacy ?? 1,
                 state: media.state || 'draft',
@@ -114,7 +114,7 @@ export default function MediaEditPage() {
                 data: {
                     title: form.title,
                     description: form.description,
-                    category_id: form.category_id ? Number(form.category_id) : undefined,
+                    category_id: form.category_id !== '' && form.category_id !== undefined ? Number(form.category_id) : undefined,
                     tags: form.tags.split(',').map(s => s.trim()).filter(Boolean),
                     privacy: form.privacy,
                     state: isAdmin ? form.state : undefined,

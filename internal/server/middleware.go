@@ -73,12 +73,15 @@ func WithJWT(jwtMgr *auth.Manager, h interface{}) http.HandlerFunc {
 
 		if claimsVal, exists := c.Get("claims"); exists {
 			r = r.WithContext(context.WithValue(r.Context(), claimsKey, claimsVal))
+			r = handler.SetClaimsInContext(r, claimsVal)
 		}
 
 		switch h := h.(type) {
 		case gin.HandlerFunc:
 			h(c)
 		case http.HandlerFunc:
+			h(w, r)
+		case func(http.ResponseWriter, *http.Request):
 			h(w, r)
 		}
 	}
@@ -105,6 +108,7 @@ func WithAdmin(jwtMgr *auth.Manager, h gin.HandlerFunc) http.HandlerFunc {
 
 		if claimsVal, exists := c.Get("claims"); exists {
 			r = r.WithContext(context.WithValue(r.Context(), claimsKey, claimsVal))
+			r = handler.SetClaimsInContext(r, claimsVal)
 		}
 
 		h(c)

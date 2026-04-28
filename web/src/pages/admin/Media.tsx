@@ -87,7 +87,7 @@ export default function MediaPage() {
     // 转码详情弹窗
     const [variantDetailOpen, setVariantDetailOpen] = useState(false);
     const [variantData, setVariantData] = useState<MediaVariantSummary | null>(null);
-    const [retryingAllId, setRetryingAllId] = useState<number | null>(null);
+    const [retryingAllId, setRetryingAllId] = useState<string | number | null>(null);
 
     const [searchParams, setSearchParams] = useState({keyword: urlSearch || '', state: '', page: 1, page_size: 20});
 
@@ -155,10 +155,10 @@ export default function MediaPage() {
     };
 
     // Retry all failed tasks for a media (from media management page)
-    const handleRetryAllFailed = async (mediaId: number) => {
+    const handleRetryAllFailed = async (mediaId: string | number) => {
         setRetryingAllId(mediaId);
         try {
-            await encodingApi.retryAllFailed(mediaId);
+            await encodingApi.retryAllFailed(String(mediaId));
             // Refresh variant detail if open, or just refresh the list
             if (variantData?.media_id === mediaId) {
                 handleShowVariants({id: mediaId} as Media);

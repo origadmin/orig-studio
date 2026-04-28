@@ -21,13 +21,19 @@ import (
 	"origadmin/application/origcms/api/gen/v1/types"
 	_ "github.com/sqlite3ent/sqlite3"
 	"origadmin/application/origcms/internal/auth"
+	authbiz "origadmin/application/origcms/internal/svc-auth/biz"
+	authdata "origadmin/application/origcms/internal/svc-auth/data"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/migrate"
 	"origadmin/application/origcms/internal/server"
+	adminbiz "origadmin/application/origcms/internal/svc-admin/biz"
+	admindata "origadmin/application/origcms/internal/svc-admin/data"
+	"origadmin/application/origcms/internal/svc-admin/service"
 	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 	contentdata "origadmin/application/origcms/internal/svc-content/data"
 	mediabiz "origadmin/application/origcms/internal/svc-media/biz"
 	mediadata "origadmin/application/origcms/internal/svc-media/data"
+	systembiz "origadmin/application/origcms/internal/svc-system/biz"
 	systemdata "origadmin/application/origcms/internal/svc-system/data"
 	"origadmin/application/origcms/internal/svc-user/biz"
 	"origadmin/application/origcms/internal/svc-user/data"
@@ -44,10 +50,9 @@ const (
 type TestRole string
 
 const (
-	RoleAdmin TestRole = "admin"
-	RoleStaff TestRole = "staff"
-	RoleUser  TestRole = "user"
-	RoleGuest TestRole = "guest"
+	RoleAdmin  TestRole = "admin"
+	RoleEditor TestRole = "editor"
+	RoleUser   TestRole = "user"
 )
 
 type TestUser struct {
@@ -93,7 +98,7 @@ type TestServer struct {
 func SetupTestServer(t *testing.T) *TestServer {
 	gin.SetMode(gin.TestMode)
 
-	db, err := entity.Open("sqlite3", "file::memory:?cache=shared&_fk=1")
+	db, err := entity.Open("sqlite3", "file::memory:?_fk=1")
 	if err != nil {
 		t.Fatalf("failed to open test database: %v", err)
 	}
@@ -142,7 +147,8 @@ func SetupTestServer(t *testing.T) *TestServer {
 
 	categoryTagUC := contentbiz.NewCategoryTagUseCase(categoryRepo, tagRepo, logger)
 	likeFavoriteUC := contentbiz.NewLikeFavoriteUseCase(likeRepo, favoriteRepo, mediaUC, logger)
-	playlistChannelUC := contentbiz.NewPlaylistChannelUseCase(nil, channelRepo, logger)
+	playlistRepo := contentdata.NewPlaylistRepo(contentDB, logger)
+	playlistChannelUC := contentbiz.NewPlaylistChannelUseCase(playlistRepo, channelRepo, logger)
 	feedUC := contentbiz.NewFeedUseCase(feedRepo, logger)
 	notificationUC := contentbiz.NewNotificationUseCase(notificationRepo, logger)
 
@@ -161,6 +167,38 @@ func SetupTestServer(t *testing.T) *TestServer {
 	statsRepo := systemdata.NewStatsRepo(db)
 	statsHandler := server.NewStatsHandler(mediaUC, likeFavoriteUC, statsRepo, jwtMgr)
 	searchHandler := server.NewSearchHandler(mediaUC)
+
+	// System handler
+	settingRepo := systemdata.NewSettingRepo(db)
+	settingUC := systembiz.NewSettingUseCase(settingRepo)
+	systemHandler := server.NewSystemHandler(jwtMgr, statsRepo, settingUC)
+
+	// Admin handler (needs TagService from svc-admin)
+	adminTagRepo := admindata.NewTagRepository(db)
+	tagUC := adminbiz.NewTagUseCase(adminTagRepo)
+	tagService := service.NewTagService(tagUC)
+	adminHandler := server.NewAdminHandler(jwtMgr, mediaUC, playlistChannelUC, tagService, settingUC)
+
+	// Explore handler
+	exploreHandler := server.NewExploreHandler(db)
+
+	// Comment like use case
+	commentLikeRepo := contentdata.NewCommentLikeRepo(contentDB, logger)
+	commentLikeUC := contentbiz.NewCommentLikeUseCase(commentLikeRepo, logger)
+
+	// Comment moderation handler
+	commentModRepo := contentdata.NewCommentModerationRepo(contentDB, logger)
+	commentReportRepo := contentdata.NewCommentReportRepo(contentDB, logger)
+	commentModUC := contentbiz.NewCommentModerationUseCase(commentModRepo, commentReportRepo, settingUC, logger)
+	commentModerationHandler := server.NewCommentModerationHandler(commentModUC, db, jwtMgr)
+
+	// Permission handler
+	authData := authdata.NewData(db)
+	permGroupRepo := authdata.NewPermissionGroupRepo(authData, logger)
+	permMemberRepo := authdata.NewGroupMemberRepo(authData, logger)
+	permUserRepo := authdata.NewUserPermRepo(authData, logger)
+	permUC := authbiz.NewPermissionUseCase(permGroupRepo, permMemberRepo, permUserRepo, logger)
+	permissionHandler := server.NewPermissionHandler(permUC, jwtMgr)
 
 	router := gin.New()
 	router.Use(gin.Recovery())
@@ -187,15 +225,15 @@ func SetupTestServer(t *testing.T) *TestServer {
 		notificationHandler,
 		channelHandler,
 		shareHandler,
-		nil,
+		systemHandler,
 		statsHandler,
 		searchHandler,
 		meHandler,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
+		adminHandler,
+		exploreHandler,
+		commentLikeUC,
+		commentModerationHandler,
+		permissionHandler,
 		db,
 		jwtMgr,
 		"./data/uploads", // storageBasePath
@@ -229,7 +267,7 @@ func (ts *TestServer) createTestUsers(ctx context.Context, t *testing.T, userUC 
 	}{
 		{RoleAdmin, "admin@test.com", "admin", "admin123", true, "admin"},
 		{RoleUser, "user@test.com", "user1", "user123", false, "user"},
-		{RoleGuest, "guest@test.com", "guest", "guest123", false, "guest"},
+		{RoleEditor, "editor@test.com", "editor", "editor123", false, "editor"},
 	}
 
 	for _, u := range users {
@@ -346,4 +384,23 @@ func AssertJSON(t *testing.T, body *bytes.Buffer, expected map[string]interface{
 			t.Errorf("expected %q=%v, got %v", key, expectedVal, actualVal)
 		}
 	}
+}
+
+// GetResponseData extracts the "data" field from a standard API response.
+// Most API handlers return {"code": 0, "message": "ok", "data": {...}}.
+// If the "data" field exists and is a map, it returns that map.
+// Otherwise, it returns the top-level result (for handlers that don't use the wrapper).
+func GetResponseData(body *bytes.Buffer) (map[string]interface{}, error) {
+	var result map[string]interface{}
+	if err := ParseResponse(body, &result); err != nil {
+		return nil, err
+	}
+
+	// Check if response has data field
+	if data, ok := result["data"]; ok {
+		if dataMap, ok := data.(map[string]interface{}); ok {
+			return dataMap, nil
+		}
+	}
+	return result, nil
 }

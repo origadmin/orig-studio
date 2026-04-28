@@ -55,6 +55,11 @@ func (uc *UserUseCase) ListUsers(ctx context.Context, opts ...*dto.UserQueryOpti
 	return uc.repo.List(ctx, opts...)
 }
 
+// ListUserEntities returns raw entity.User list (includes role field not in proto types).
+func (uc *UserUseCase) ListUserEntities(ctx context.Context, opts ...*dto.UserQueryOption) ([]*entity.User, int32, error) {
+	return uc.repo.ListEntities(ctx, opts...)
+}
+
 func (uc *UserUseCase) GetUser(ctx context.Context, id string, opts ...*dto.UserQueryOption) (*types.User, error) {
 	return uc.repo.Get(ctx, id, opts...)
 }

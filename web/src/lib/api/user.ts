@@ -60,7 +60,7 @@ export interface SubscriptionListResponse {
 
 export const userApi = {
     // 获取用户列表
-    list: (params?: { page?: number; page_size?: number; keyword?: string; status?: string }) =>
+    list: (params?: { page?: number; page_size?: number; keyword?: string; status?: string; role?: string }) =>
         api.get<UserListResponse>("/users", params),
 
     // 获取用户详情
