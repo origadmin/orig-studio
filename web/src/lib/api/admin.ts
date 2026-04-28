@@ -27,13 +27,18 @@ export const adminApi = {
         api.get<ChannelList>('/admin/channels', {params: filters}),
 
     /**
-     * Get channel detail by UUID (Admin) ⭐
+     * Get channel detail by UUID (Admin)
      *
      * @param id - Channel UUID (not short_token!)
-     * @example getChannelById('550e8400-e29b-41d4-a716-446655440000')
      */
     getChannelById: (id: string) =>
         api.get<AdminChannelDetail>(`/admin/channels/${id}`),
+
+    /**
+     * Create a new channel (Admin)
+     */
+    createChannel: (data: Partial<Channel>) =>
+        api.post<Channel>('/admin/channels', data),
 
     /**
      * Update any channel by UUID (Admin)

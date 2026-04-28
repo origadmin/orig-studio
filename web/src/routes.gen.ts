@@ -22,7 +22,7 @@ import { Route as AdminPortalRouteImport } from "./routes/admin.portal";
 import { Route as AdminPlaylistsRouteImport } from "./routes/admin.playlists";
 import { Route as AdminPermissionsRouteImport } from "./routes/admin.permissions";
 import { Route as AdminMediaRouteImport } from "./routes/admin.media";
-import { Route as AdminContentRouteImport } from "./routes/admin.content";
+import { Route as AdminArticlesRouteImport } from "./routes/admin.articles";
 import { Route as AdminCommentsRouteImport } from "./routes/admin.comments";
 import { Route as AdminChannelsRouteImport } from "./routes/admin.channels";
 import { Route as AdminCategoriesRouteImport } from "./routes/admin.categories";
@@ -123,9 +123,9 @@ const AdminMediaRoute = AdminMediaRouteImport.update({
   path: "/media",
   getParentRoute: () => AdminRoute,
 } as any);
-const AdminContentRoute = AdminContentRouteImport.update({
-  id: "/content",
-  path: "/content",
+const AdminArticlesRoute = AdminArticlesRouteImport.update({
+  id: "/articles",
+  path: "/articles",
   getParentRoute: () => AdminRoute,
 } as any);
 const AdminCommentsRoute = AdminCommentsRouteImport.update({
@@ -328,7 +328,7 @@ export interface FileRoutesByFullPath {
   "/admin/categories": typeof AdminCategoriesRoute;
   "/admin/channels": typeof AdminChannelsRoute;
   "/admin/comments": typeof AdminCommentsRoute;
-  "/admin/content": typeof AdminContentRoute;
+  "/admin/articles": typeof AdminArticlesRoute;
   "/admin/media": typeof AdminMediaRouteWithChildren;
   "/admin/permissions": typeof AdminPermissionsRoute;
   "/admin/playlists": typeof AdminPlaylistsRoute;
@@ -376,7 +376,7 @@ export interface FileRoutesByTo {
   "/admin/categories": typeof AdminCategoriesRoute;
   "/admin/channels": typeof AdminChannelsRoute;
   "/admin/comments": typeof AdminCommentsRoute;
-  "/admin/content": typeof AdminContentRoute;
+  "/admin/articles": typeof AdminArticlesRoute;
   "/admin/permissions": typeof AdminPermissionsRoute;
   "/admin/playlists": typeof AdminPlaylistsRoute;
   "/admin/portal": typeof AdminPortalRoute;
@@ -427,7 +427,7 @@ export interface FileRoutesById {
   "/admin/categories": typeof AdminCategoriesRoute;
   "/admin/channels": typeof AdminChannelsRoute;
   "/admin/comments": typeof AdminCommentsRoute;
-  "/admin/content": typeof AdminContentRoute;
+  "/admin/articles": typeof AdminArticlesRoute;
   "/admin/media": typeof AdminMediaRouteWithChildren;
   "/admin/permissions": typeof AdminPermissionsRoute;
   "/admin/playlists": typeof AdminPlaylistsRoute;
@@ -480,7 +480,7 @@ export interface FileRouteTypes {
     | "/admin/categories"
     | "/admin/channels"
     | "/admin/comments"
-    | "/admin/content"
+    | "/admin/articles"
     | "/admin/media"
     | "/admin/permissions"
     | "/admin/playlists"
@@ -528,7 +528,7 @@ export interface FileRouteTypes {
     | "/admin/categories"
     | "/admin/channels"
     | "/admin/comments"
-    | "/admin/content"
+    | "/admin/articles"
     | "/admin/permissions"
     | "/admin/playlists"
     | "/admin/portal"
@@ -578,7 +578,7 @@ export interface FileRouteTypes {
     | "/admin/categories"
     | "/admin/channels"
     | "/admin/comments"
-    | "/admin/content"
+    | "/admin/articles"
     | "/admin/media"
     | "/admin/permissions"
     | "/admin/playlists"
@@ -708,11 +708,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AdminMediaRouteImport;
       parentRoute: typeof AdminRoute;
     };
-    "/admin/content": {
-      id: "/admin/content";
-      path: "/content";
-      fullPath: "/admin/content";
-      preLoaderRoute: typeof AdminContentRouteImport;
+    "/admin/articles": {
+      id: "/admin/articles";
+      path: "/articles";
+      fullPath: "/admin/articles";
+      preLoaderRoute: typeof AdminArticlesRouteImport;
       parentRoute: typeof AdminRoute;
     };
     "/admin/comments": {
@@ -1058,7 +1058,7 @@ interface AdminRouteChildren {
   AdminCategoriesRoute: typeof AdminCategoriesRoute;
   AdminChannelsRoute: typeof AdminChannelsRoute;
   AdminCommentsRoute: typeof AdminCommentsRoute;
-  AdminContentRoute: typeof AdminContentRoute;
+  AdminArticlesRoute: typeof AdminArticlesRoute;
   AdminMediaRoute: typeof AdminMediaRouteWithChildren;
   AdminPermissionsRoute: typeof AdminPermissionsRoute;
   AdminPlaylistsRoute: typeof AdminPlaylistsRoute;
@@ -1075,7 +1075,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminChannelsRoute: AdminChannelsRoute,
   AdminCommentsRoute: AdminCommentsRoute,
-  AdminContentRoute: AdminContentRoute,
+  AdminArticlesRoute: AdminArticlesRoute,
   AdminMediaRoute: AdminMediaRouteWithChildren,
   AdminPermissionsRoute: AdminPermissionsRoute,
   AdminPlaylistsRoute: AdminPlaylistsRoute,

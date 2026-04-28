@@ -47,7 +47,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {userApi, User, CreateUserRequest, UpdateUserRequest} from '@/lib/api/user';
+import {adminUserApi, userApi, User, CreateUserRequest, UpdateUserRequest} from '@/lib/api/user';
 import {useTranslation} from 'react-i18next';
 import {getFullUrl} from '@/lib/utils';
 import {TablePagination} from '@/components/common/TablePagination';
@@ -87,7 +87,7 @@ export default function UsersPage() {
             if (params.role && params.role !== 'all') {
                 apiParams.role = params.role;
             }
-            const response = await userApi.list(apiParams);
+            const response = await adminUserApi.list(apiParams);
             const userList = Array.isArray(response?.items) ? response.items : [];
             setUsers(userList);
             if (response?.total !== undefined) {
@@ -125,7 +125,7 @@ export default function UsersPage() {
         if (!currentUser) return;
 
         try {
-            await userApi.update(currentUser.id, formData as UpdateUserRequest);
+            await adminUserApi.update(currentUser.id, formData as UpdateUserRequest);
             await loadUsers();
             setShowEditDialog(false);
             resetForm();
@@ -139,7 +139,7 @@ export default function UsersPage() {
         if (!currentUser) return;
 
         try {
-            await userApi.update(currentUser.id, {role: newRole});
+            await adminUserApi.updateRole(currentUser.id, newRole);
             await loadUsers();
             setShowChangeRoleDialog(false);
             setCurrentUser(null);
@@ -152,7 +152,7 @@ export default function UsersPage() {
         if (!currentUser) return;
 
         try {
-            await userApi.delete(currentUser.id);
+            await adminUserApi.delete(currentUser.id);
             await loadUsers();
             setShowDeleteDialog(false);
             setCurrentUser(null);

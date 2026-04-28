@@ -24,23 +24,23 @@ export interface ReviewListResponse {
 }
 
 export const reviewApi = {
-    // 获取待审核内容列表
+    // Get pending review items (Admin)
     getPending: (params?: { page?: number; page_size?: number; type?: string }) =>
-        api.get<ReviewListResponse>('/review/pending', params),
+        api.get<ReviewListResponse>('/admin/medias/review/pending', params),
 
-    // 获取审核历史
+    // Get review history (Admin)
     getHistory: (params?: { page?: number; page_size?: number; type?: string; status?: string }) =>
-        api.get<ReviewListResponse>('/review/history', params),
+        api.get<ReviewListResponse>('/admin/medias/review/history', params),
 
-    // 审核内容
-    review: (id: string, data: { status: string; reason?: string }) =>
-        api.put<{ success: boolean; message: string }>(`/review/${id}`, data),
+    // Review a media item (Admin)
+    review: (mediaId: string, data: { status: string; reason?: string }) =>
+        api.put<{ success: boolean; message: string }>(`/admin/medias/${mediaId}/review`, data),
 
-    // 获取审核详情
-    getDetail: (id: string) =>
-        api.get<ReviewItem>(`/review/${id}`),
+    // Get review detail for a media item (Admin)
+    getDetail: (mediaId: string) =>
+        api.get<ReviewItem>(`/admin/medias/${mediaId}/review-logs`),
 
-    // 批量审核
+    // Batch review (Admin)
     batchReview: (data: { ids: string[]; status: string; reason?: string }) =>
-        api.put<{ success: boolean; message: string }>('/review/batch', data),
+        api.post<{ success: boolean; message: string }>('/admin/medias/review/batch', data),
 };

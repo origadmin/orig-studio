@@ -6,16 +6,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/svc-content/biz"
 )
 
 type CategoryHandler struct {
-	uc *biz.CategoryTagUseCase
+	uc  *biz.CategoryTagUseCase
+	jwt *auth.Manager
 }
 
-func NewCategoryHandler(uc *biz.CategoryTagUseCase) *CategoryHandler {
-	return &CategoryHandler{uc: uc}
+func NewCategoryHandler(uc *biz.CategoryTagUseCase, jwt *auth.Manager) *CategoryHandler {
+	return &CategoryHandler{uc: uc, jwt: jwt}
 }
 
 func (h *CategoryHandler) Register(r handler.Router) {
@@ -25,7 +27,7 @@ func (h *CategoryHandler) Register(r handler.Router) {
 		// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST
 		// ================================
 		categories.GET("", h.listCategories())
-		categories.POST("", func(w http.ResponseWriter, r *http.Request) {
+		categories.POST("", WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
 			c := handler.NewGinContextAdapterFromHTTP(w, r)
 			var input struct {
 				Name        string `json:"name"`
@@ -48,7 +50,7 @@ func (h *CategoryHandler) Register(r handler.Router) {
 			}
 
 			c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": cat})
-		})
+		}))
 
 		// ================================
 		// 2. PARAMETER ROUTES (WITH :id) - MUST BE LAST
@@ -68,14 +70,14 @@ func (h *CategoryHandler) Register(r handler.Router) {
 			c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": cat})
 		})
 
-		categories.PUT("/:id", func(w http.ResponseWriter, r *http.Request) {
+		categories.PUT("/:id", WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
 			c := handler.NewGinContextAdapterFromHTTP(w, r)
 			id, err := strconv.Atoi(c.Param("id"))
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "invalid category id"})
 				return
 			}
-			
+
 			var input struct {
 				Name        string `json:"name"`
 				Description string `json:"description"`
@@ -98,9 +100,32 @@ func (h *CategoryHandler) Register(r handler.Router) {
 			}
 
 			c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": cat})
-		})
+		}))
 
-		categories.DELETE("/:id", func(w http.ResponseWriter, r *http.Request) {
+		categories.PATCH("/:id", WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
+			id, err := strconv.Atoi(c.Param("id"))
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "invalid category id"})
+				return
+			}
+
+			var input biz.UpdateCategoryInput
+			if err := c.Bind(&input); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
+				return
+			}
+
+			cat, err := h.uc.UpdateCategoryPartial(r.Context(), id, &input)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": cat})
+		}))
+
+		categories.DELETE("/:id", WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
 			c := handler.NewGinContextAdapterFromHTTP(w, r)
 			id, err := strconv.Atoi(c.Param("id"))
 			if err != nil {
@@ -113,7 +138,7 @@ func (h *CategoryHandler) Register(r handler.Router) {
 				return
 			}
 			c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": gin.H{"message": "deleted"}})
-		})
+		}))
 	}
 }
 

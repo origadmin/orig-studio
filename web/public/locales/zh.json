@@ -386,6 +386,8 @@
     "tags": "标签",
     "comments": "评论",
     "content": "内容",
+    "articles": "文章",
+    "manageArticles": "管理文章",
     "playlists": "播放列表",
     "settings": "系统设置",
     "exitAdmin": "返回用户端",

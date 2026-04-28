@@ -1,14 +1,14 @@
 // Search API
 import {api} from "../request";
 import {Media} from "./media";
-import {Content} from "./content";
+import {Article} from "./article";
 
 export interface SearchResponse {
     media?: Media[];
-    content?: Content[];
+    articles?: Article[];
 }
 
 export const searchApi = {
-    search: (query: string, type?: "media" | "content" | "all") =>
+    search: (query: string, type?: "media" | "articles" | "all") =>
         api.get<SearchResponse>("/search", {q: query, type}),
 };

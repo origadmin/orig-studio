@@ -14,8 +14,8 @@ export type {User, UserListResponse, CreateUserRequest, UpdateUserRequest} from 
 export {mediaApi} from "./api/media";
 export type {Media, MediaListResponse, CreateMediaRequest, UpdateMediaRequest} from "./api/media";
 
-export {contentApi} from "./api/content";
-export type {Content, ContentListResponse, CreateContentRequest, UpdateContentRequest} from "./api/content";
+export {articleApi} from "./api/article";
+export type {Article, ArticleListResponse, CreateArticleRequest, UpdateArticleRequest} from "./api/article";
 
 export {categoryApi} from "./api/category";
 export type {Category} from "./api/category";

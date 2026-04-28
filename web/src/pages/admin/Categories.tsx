@@ -41,7 +41,7 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, RotateCcw} from 'lucide-react';
-import {categoryApi, Category} from '@/lib/api/category';
+import {adminCategoryApi, Category} from '@/lib/api/category';
 import {TablePagination} from '@/components/common/TablePagination';
 
 const Categories: React.FC = () => {
@@ -71,7 +71,7 @@ const Categories: React.FC = () => {
     const loadCategories = async (params = searchParams) => {
         try {
             setLoading(true);
-            const response = await categoryApi.getAll({page: params.page, page_size: params.page_size});
+            const response = await adminCategoryApi.list({page: params.page, page_size: params.page_size});
             const categoryList = Array.isArray(response?.items) ? response.items : [];
             setCategories(categoryList);
             if (response?.total !== undefined) {
@@ -96,7 +96,7 @@ const Categories: React.FC = () => {
 
     const handleCreate = async () => {
         try {
-            await categoryApi.create(formData as Partial<Category>);
+            await adminCategoryApi.create(formData as Partial<Category>);
             await loadCategories();
             setShowCreateDialog(false);
             resetForm();
@@ -109,7 +109,7 @@ const Categories: React.FC = () => {
         if (!currentCategory) return;
 
         try {
-            await categoryApi.update(currentCategory.id, formData as Partial<Category>);
+            await adminCategoryApi.update(currentCategory.id, formData as Partial<Category>);
             await loadCategories();
             setShowEditDialog(false);
             resetForm();
@@ -123,7 +123,7 @@ const Categories: React.FC = () => {
         if (!currentCategory) return;
 
         try {
-            await categoryApi.delete(currentCategory.id);
+            await adminCategoryApi.delete(currentCategory.id);
             await loadCategories();
             setShowDeleteDialog(false);
             setCurrentCategory(null);

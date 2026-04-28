@@ -51,7 +51,7 @@ const AdminLayout = () => {
         {id: "tags", icon: Tags, label: t('admin.tags'), path: "/admin/tags"},
         {id: "comments", icon: MessageSquare, label: t('admin.comments'), path: "/admin/comments"},
         {id: "playlists", icon: PlayCircle, label: t('admin.playlists'), path: "/admin/playlists"},
-        {id: "content", icon: FileText, label: t('admin.content'), path: "/admin/content"},
+        {id: "articles", icon: FileText, label: t('admin.articles'), path: "/admin/articles"},
         {id: "settings", icon: Settings, label: t('admin.settings'), path: "/admin/settings"},
     ];
 
@@ -82,8 +82,8 @@ const AdminLayout = () => {
             breadcrumbs.push({label: "Comments", path: "/admin/comments"});
         } else if (path.startsWith("/admin/playlists")) {
             breadcrumbs.push({label: "Playlists", path: "/admin/playlists"});
-        } else if (path.startsWith("/admin/content")) {
-            breadcrumbs.push({label: "Content", path: "/admin/content"});
+        } else if (path.startsWith("/admin/articles")) {
+            breadcrumbs.push({label: "Articles", path: "/admin/articles"});
         } else if (path.startsWith("/admin/settings")) {
             breadcrumbs.push({label: "Settings", path: "/admin/settings"});
         }

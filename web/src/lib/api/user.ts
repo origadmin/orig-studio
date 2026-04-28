@@ -112,9 +112,36 @@ export const userApi = {
     getSubscriptions: (params?: { page?: number; page_size?: number }) =>
         api.get<SubscriptionListResponse>("/me/subscriptions", params),
 
-    // 获取我的粉丝列表
+    // Get my followers list
     getFollowers: (params?: { page?: number; page_size?: number }) =>
         api.get<SubscriptionListResponse>("/me/followers", params),
+};
+
+// ==================== Admin User API (UUID based, requires JWT + Admin) ====================
+export const adminUserApi = {
+    // List all users (Admin)
+    list: (params?: { page?: number; page_size?: number; keyword?: string; status?: string; role?: string }) =>
+        api.get<UserListResponse>("/admin/users", params),
+
+    // Get user detail by ID (Admin)
+    get: (id: string) =>
+        api.get<User>(`/admin/users/${id}`),
+
+    // Update user by ID (Admin)
+    update: (id: string, data: UpdateUserRequest) =>
+        api.put<User>(`/admin/users/${id}`, data),
+
+    // Delete user by ID (Admin)
+    delete: (id: string) =>
+        api.del<void>(`/admin/users/${id}`),
+
+    // Update user status (Admin)
+    updateStatus: (id: string, status: number) =>
+        api.patch<void>(`/admin/users/${id}/status`, {status}),
+
+    // Update user role (Admin)
+    updateRole: (id: string, role: string) =>
+        api.patch<void>(`/admin/users/${id}/role`, {role}),
 };
 
 export default userApi;

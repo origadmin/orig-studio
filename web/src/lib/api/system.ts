@@ -68,28 +68,28 @@ export interface UpdateSettingsRequest {
 
 // ==================== Stats API ====================
 export const statsApi = {
-    // 获取 Dashboard 统计数据
-    getDashboard: () => api.get<DashboardStats>("/system/stats/dashboard"),
+    // Get Dashboard stats (Admin)
+    getDashboard: () => api.get<DashboardStats>("/admin/stats/dashboard"),
 
-    // 获取媒体统计
-    getMedia: () => api.get<MediaStats>("/system/stats/media"),
+    // Get media stats (Admin)
+    getMedia: () => api.get<MediaStats>("/admin/stats/medias"),
 
-    // 获取用户统计
-    getUsers: () => api.get<UserStats>("/system/stats/users"),
+    // Get user stats (Admin)
+    getUsers: () => api.get<UserStats>("/admin/stats/users"),
 
-    // 获取流量统计
+    // Get traffic stats (Admin)
     getTraffic: (params?: { page?: number; page_size?: number }) =>
-        api.get<TrafficStatsResponse>("/system/stats/traffic", params),
+        api.get<TrafficStatsResponse>("/admin/stats/traffic", params),
 };
 
 // ==================== Settings API ====================
 export const settingsApi = {
-    // 获取系统配置
-    get: () => api.get<SystemSettings>("/system/settings"),
+    // Get system settings (Admin)
+    get: () => api.get<SystemSettings>("/admin/settings"),
 
-    // 更新系统配置
+    // Update system settings (Admin)
     update: (data: UpdateSettingsRequest) =>
-        api.put<SystemSettings>("/system/settings", data),
+        api.put<SystemSettings>("/admin/settings", data),
 };
 
 // ==================== System API ====================

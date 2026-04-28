@@ -90,19 +90,19 @@ export interface UserStats {
 }
 
 export const statsApi = {
-    // 获取仪表盘统计数据
+    // Get dashboard stats (Admin)
     getDashboard: () =>
-        api.get<DashboardStats>('/stats/dashboard'),
+        api.get<DashboardStats>('/admin/stats/dashboard'),
 
-    // 获取媒体统计数据
+    // Get media stats (Admin)
     getMedia: () =>
-        api.get<MediaStats>('/stats/media'),
+        api.get<MediaStats>('/admin/stats/medias'),
 
-    // 获取用户统计数据
+    // Get user stats (Admin)
     getUsers: () =>
-        api.get<UserStats>('/stats/users'),
+        api.get<UserStats>('/admin/stats/users'),
 
-    // 获取流量统计数据
+    // Get traffic stats (Admin)
     getTraffic: (params?: { days?: number }) =>
         api.get<{
             views: Array<{
@@ -113,14 +113,14 @@ export const statsApi = {
                 date: string;
                 visitors: number;
             }>;
-        }>('/stats/traffic', params),
+        }>('/admin/stats/traffic', params),
 
-    // 获取收入统计数据
+    // Get revenue stats (Admin)
     getRevenue: (params?: { days?: number; type?: 'daily' | 'weekly' | 'monthly' }) =>
         api.get<{
             revenue: Array<{
                 date: string;
                 amount: number;
             }>;
-        }>('/stats/revenue', params),
+        }>('/admin/stats/revenue', params),
 };

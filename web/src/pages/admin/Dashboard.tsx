@@ -1,4 +1,4 @@
-﻿import {Spinner} from "@/components/ui/spinner"
+import {Spinner} from "@/components/ui/spinner"
 import React from 'react';
 import {
     Film,
@@ -98,12 +98,12 @@ const Dashboard = () => {
                                 >
                                     {t('admin.exportReport') || 'Export Report'}
                                 </Button>
-                                <Link to="/admin/content">
+                                <Link to="/admin/articles">
                                     <Button
                                         variant="default"
                                         size="sm"
                                     >
-                                        {t('admin.manageContent') || 'Manage Content'}
+                                        {t('admin.manageArticles') || 'Manage Articles'}
                                     </Button>
                                 </Link>
                             </div>

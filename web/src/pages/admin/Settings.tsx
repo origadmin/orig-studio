@@ -145,7 +145,7 @@ const Settings: React.FC = () => {
 
     const fetchSystemInfo = async () => {
         try {
-            const response = await fetch('/api/v1/system/info');
+            const response = await fetch('/api/v1/admin/settings/info');
             if (response.ok) {
                 const info = await response.json();
                 if (info.data) {

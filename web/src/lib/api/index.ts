@@ -10,7 +10,7 @@ export {signIn, signUp, signOut, refreshToken, getCurrentUser, isAuthenticated, 
 export type {CurrentUser} from "./auth";
 
 // ==================== Users ====================
-export {userApi} from "./user";
+export {userApi, adminUserApi} from "./user";
 export type {
     User,
     UserListResponse,
@@ -38,12 +38,12 @@ export type {
     ShareResponse,
 } from "./media";
 
-// ==================== Content ====================
-export {contentApi} from "./content";
-export type {Content, ContentListResponse, CreateContentRequest, UpdateContentRequest} from "./content";
+// ==================== Articles ====================
+export {articleApi, adminArticleApi} from "./article";
+export type {Article, ArticleListResponse, CreateArticleRequest, UpdateArticleRequest} from "./article";
 
 // ==================== Categories ====================
-export {categoryApi} from "./category";
+export {categoryApi, adminCategoryApi} from "./category";
 export type {Category} from "./category";
 
 // ==================== Tags ====================
@@ -55,7 +55,7 @@ export {commentApi} from "./comment";
 export type {Comment} from "./comment";
 
 // ==================== Playlists ====================
-export {playlistApi} from "./playlist";
+export {playlistApi, adminPlaylistApi} from "./playlist";
 export type {Playlist, PlaylistListResponse, CreatePlaylistRequest, UpdatePlaylistRequest} from "./playlist";
 
 // ==================== Search ====================
