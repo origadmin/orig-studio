@@ -20,6 +20,7 @@ import (
 	mediabiz "origadmin/application/origcms/internal/svc-media/biz"
 	"origadmin/application/origcms/internal/svc-media/dto"
 	systembiz "origadmin/application/origcms/internal/svc-system/biz"
+	userbiz "origadmin/application/origcms/internal/svc-user/biz"
 	"origadmin/application/origcms/internal/validation"
 )
 
@@ -30,6 +31,9 @@ type AdminHandler struct {
 	channelUC  *contentbiz.PlaylistChannelUseCase
 	tagService *service.TagService
 	settingUC  *systembiz.SettingUseCase
+	categoryUC *contentbiz.CategoryTagUseCase
+	articleUC  *contentbiz.ArticleUseCase
+	userUC     *userbiz.UserUseCase
 }
 
 func NewAdminHandler(
@@ -38,6 +42,9 @@ func NewAdminHandler(
 	channelUC *contentbiz.PlaylistChannelUseCase,
 	tagService *service.TagService,
 	settingUC *systembiz.SettingUseCase,
+	categoryUC *contentbiz.CategoryTagUseCase,
+	articleUC *contentbiz.ArticleUseCase,
+	userUC *userbiz.UserUseCase,
 ) *AdminHandler {
 	return &AdminHandler{
 		jwt:        jwt,
@@ -45,6 +52,9 @@ func NewAdminHandler(
 		channelUC:  channelUC,
 		tagService: tagService,
 		settingUC:  settingUC,
+		categoryUC: categoryUC,
+		articleUC:  articleUC,
+		userUC:     userUC,
 	}
 }
 
@@ -128,6 +138,45 @@ func (h *AdminHandler) Register(r handler.Router) {
 			playlists.POST("", WithAdmin(h.jwt, h.adminCreatePlaylist()))
 			playlists.PUT("/:id", WithAdmin(h.jwt, h.adminUpdatePlaylist()))    // :id = UUID
 			playlists.DELETE("/:id", WithAdmin(h.jwt, h.adminDeletePlaylist())) // :id = UUID
+		}
+
+		// ================================
+		// 6. User Management
+		// ================================
+		users := admin.Group("/users")
+		{
+			users.GET("", WithAdmin(h.jwt, h.adminListUsers()))
+			users.GET("/:id", WithAdmin(h.jwt, h.adminGetUser()))
+			users.PUT("/:id", WithAdmin(h.jwt, h.adminUpdateUser()))
+			users.DELETE("/:id", WithAdmin(h.jwt, h.adminDeleteUser()))
+			users.PATCH("/:id/status", WithAdmin(h.jwt, h.adminUpdateUserStatus()))
+			users.PATCH("/:id/role", WithAdmin(h.jwt, h.adminUpdateUserRole()))
+		}
+
+		// ================================
+		// 7. Category Management
+		// ================================
+		categories := admin.Group("/categories")
+		{
+			categories.GET("", WithAdmin(h.jwt, h.adminListCategories()))
+			categories.GET("/:id", WithAdmin(h.jwt, h.adminGetCategory()))
+			categories.POST("", WithAdmin(h.jwt, h.adminCreateCategory()))
+			categories.PUT("/:id", WithAdmin(h.jwt, h.adminUpdateCategory()))
+			categories.PATCH("/:id", WithAdmin(h.jwt, h.adminPatchCategory()))
+			categories.DELETE("/:id", WithAdmin(h.jwt, h.adminDeleteCategory()))
+		}
+
+		// ================================
+		// 8. Article Management
+		// ================================
+		articles := admin.Group("/articles")
+		{
+			articles.GET("", WithAdmin(h.jwt, h.adminListArticles()))
+			articles.GET("/:id", WithAdmin(h.jwt, h.adminGetArticle()))
+			articles.POST("", WithAdmin(h.jwt, h.adminCreateArticle()))
+			articles.PUT("/:id", WithAdmin(h.jwt, h.adminUpdateArticle()))
+			articles.DELETE("/:id", WithAdmin(h.jwt, h.adminDeleteArticle()))
+			articles.PATCH("/:id/state", WithAdmin(h.jwt, h.adminUpdateArticleState()))
 		}
 	}
 }
@@ -1093,6 +1142,597 @@ func (h *AdminHandler) adminDeletePlaylist() gin.HandlerFunc {
 			"code":    0,
 			"message": "ok",
 			"data":    gin.H{"message": "playlist deleted"},
+		})
+	}
+}
+
+// ================================
+// Admin User Management Handlers
+// ================================
+
+func (h *AdminHandler) adminListUsers() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+		if pageSize > 100 {
+			pageSize = 100
+		}
+
+		users, total, err := h.userUC.ListUsers(c.Request.Context())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		// Paginate the results manually since ListUsers doesn't support pagination
+		start := (page - 1) * pageSize
+		end := start + pageSize
+		totalInt := int(total)
+		if start > totalInt {
+			start = totalInt
+		}
+		if end > totalInt {
+			end = totalInt
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data": gin.H{
+				"items":     users[start:end],
+				"total":     total,
+				"page":      page,
+				"page_size": pageSize,
+			},
+		})
+	}
+}
+
+func (h *AdminHandler) adminGetUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		if id == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "user id is required"})
+			return
+		}
+
+		user, err := h.userUC.GetUser(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"code": ErrNotFound, "message": "user not found"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    user,
+		})
+	}
+}
+
+func (h *AdminHandler) adminUpdateUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		if id == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "user id is required"})
+			return
+		}
+
+		existing, err := h.userUC.GetUser(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"code": ErrNotFound, "message": "user not found"})
+			return
+		}
+
+		var input struct {
+			Nickname string `json:"nickname"`
+			Email    string `json:"email"`
+			Avatar   string `json:"avatar"`
+			Phone    string `json:"phone"`
+		}
+
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
+			return
+		}
+
+		if input.Nickname != "" {
+			existing.Nickname = input.Nickname
+		}
+		if input.Email != "" {
+			existing.Email = input.Email
+		}
+		if input.Avatar != "" {
+			existing.Avatar = input.Avatar
+		}
+		if input.Phone != "" {
+			existing.Phone = input.Phone
+		}
+
+		updated, err := h.userUC.UpdateUser(c.Request.Context(), existing)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    updated,
+		})
+	}
+}
+
+func (h *AdminHandler) adminDeleteUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		if id == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "user id is required"})
+			return
+		}
+
+		if err := h.userUC.DeleteUser(c.Request.Context(), id); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    gin.H{"message": "deleted"},
+		})
+	}
+}
+
+func (h *AdminHandler) adminUpdateUserStatus() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		if id == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "user id is required"})
+			return
+		}
+
+		var input struct {
+			Status int32 `json:"status" binding:"required"`
+		}
+
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
+			return
+		}
+
+		if err := h.userUC.UpdateUserStatus(c.Request.Context(), id, int8(input.Status)); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+		})
+	}
+}
+
+// ================================
+// Admin Article Management Handlers
+// ================================
+
+func (h *AdminHandler) adminListArticles() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+		if pageSize > 100 {
+			pageSize = 100
+		}
+
+		filters := make(map[string]interface{})
+		if v := c.Query("status"); v != "" {
+			filters["status"] = v
+		}
+		if v := c.Query("category_id"); v != "" {
+			filters["category_id"] = v
+		}
+		if v := c.Query("keyword"); v != "" {
+			filters["keyword"] = v
+		}
+
+		articles, total, err := h.articleUC.List(c.Request.Context(), page, pageSize, filters)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data": gin.H{
+				"items":     articles,
+				"total":     total,
+				"page":      page,
+				"page_size": pageSize,
+			},
+		})
+	}
+}
+
+func (h *AdminHandler) adminGetArticle() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		if id == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "article id is required"})
+			return
+		}
+
+		article, err := h.articleUC.Get(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"code": ErrNotFound, "message": "article not found"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    article,
+		})
+	}
+}
+
+func (h *AdminHandler) adminCreateArticle() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var input struct {
+			Title      string `json:"title" binding:"required"`
+			Slug       string `json:"slug" binding:"required"`
+			Content    string `json:"content"`
+			Summary    string `json:"summary"`
+			CategoryID int64  `json:"category_id"`
+			State      string `json:"state"`
+		}
+
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
+			return
+		}
+
+		article := &contentbiz.Article{
+			Title:      input.Title,
+			Slug:       input.Slug,
+			Content:    input.Content,
+			Summary:    input.Summary,
+			CategoryID: input.CategoryID,
+			State:      input.State,
+		}
+
+		created, err := h.articleUC.Create(c.Request.Context(), article)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    created,
+		})
+	}
+}
+
+func (h *AdminHandler) adminUpdateArticle() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		if id == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "article id is required"})
+			return
+		}
+
+		var input struct {
+			Title      string `json:"title"`
+			Slug       string `json:"slug"`
+			Content    string `json:"content"`
+			Summary    string `json:"summary"`
+			CategoryID int64  `json:"category_id"`
+			State      string `json:"state"`
+		}
+
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
+			return
+		}
+
+		existing, err := h.articleUC.Get(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"code": ErrNotFound, "message": "article not found"})
+			return
+		}
+
+		if input.Title != "" {
+			existing.Title = input.Title
+		}
+		if input.Slug != "" {
+			existing.Slug = input.Slug
+		}
+		if input.Content != "" {
+			existing.Content = input.Content
+		}
+		if input.Summary != "" {
+			existing.Summary = input.Summary
+		}
+		if input.CategoryID != 0 {
+			existing.CategoryID = input.CategoryID
+		}
+		if input.State != "" {
+			existing.State = input.State
+		}
+
+		updated, err := h.articleUC.Update(c.Request.Context(), existing)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    updated,
+		})
+	}
+}
+
+func (h *AdminHandler) adminDeleteArticle() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		if id == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "article id is required"})
+			return
+		}
+
+		if err := h.articleUC.Delete(c.Request.Context(), id); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+		})
+	}
+}
+
+func (h *AdminHandler) adminUpdateArticleState() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		if id == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "article id is required"})
+			return
+		}
+
+		var input struct {
+			State string `json:"state" binding:"required"`
+		}
+
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
+			return
+		}
+
+		if err := h.articleUC.UpdateState(c.Request.Context(), id, input.State); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+		})
+	}
+}
+
+// ================================
+// Admin Category Management Handlers
+// ================================
+
+func (h *AdminHandler) adminListCategories() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		categories, err := h.categoryUC.ListCategories(c.Request.Context())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+		if pageSize > 100 {
+			pageSize = 100
+		}
+
+		total := len(categories)
+		start := (page - 1) * pageSize
+		end := start + pageSize
+		if start > total {
+			start = total
+		}
+		if end > total {
+			end = total
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data": gin.H{
+				"items":     categories[start:end],
+				"total":     total,
+				"page":      page,
+				"page_size": pageSize,
+			},
+		})
+	}
+}
+
+func (h *AdminHandler) adminGetCategory() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		idStr := c.Param("id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "invalid category id"})
+			return
+		}
+
+		cat, err := h.categoryUC.GetCategory(c.Request.Context(), id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"code": ErrNotFound, "message": "category not found"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    cat,
+		})
+	}
+}
+
+func (h *AdminHandler) adminCreateCategory() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var input struct {
+			Name        string `json:"name" binding:"required"`
+			Slug        string `json:"slug" binding:"required"`
+			Description string `json:"description"`
+		}
+
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
+			return
+		}
+
+		cat := &contentbiz.Category{
+			Name:        input.Name,
+			Slug:        input.Slug,
+			Description: input.Description,
+		}
+
+		created, err := h.categoryUC.CreateCategory(c.Request.Context(), cat)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    created,
+		})
+	}
+}
+
+func (h *AdminHandler) adminUpdateCategory() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		idStr := c.Param("id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "invalid category id"})
+			return
+		}
+
+		var input contentbiz.UpdateCategoryInput
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
+			return
+		}
+
+		updated, err := h.categoryUC.UpdateCategoryPartial(c.Request.Context(), id, &input)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    updated,
+		})
+	}
+}
+
+func (h *AdminHandler) adminPatchCategory() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		idStr := c.Param("id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "invalid category id"})
+			return
+		}
+
+		var input contentbiz.UpdateCategoryInput
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
+			return
+		}
+
+		updated, err := h.categoryUC.UpdateCategoryPartial(c.Request.Context(), id, &input)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+			"data":    updated,
+		})
+	}
+}
+
+func (h *AdminHandler) adminDeleteCategory() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		idStr := c.Param("id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "invalid category id"})
+			return
+		}
+
+		if err := h.categoryUC.DeleteCategory(c.Request.Context(), id); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
+		})
+	}
+}
+
+func (h *AdminHandler) adminUpdateUserRole() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		if id == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "user id is required"})
+			return
+		}
+
+		var input struct {
+			Role string `json:"role" binding:"required"`
+		}
+
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": err.Error()})
+			return
+		}
+
+		validRoles := map[string]bool{"user": true, "admin": true, "moderator": true}
+		if !validRoles[input.Role] {
+			c.JSON(http.StatusBadRequest, gin.H{"code": ErrBadRequest, "message": "invalid role, must be one of: user, admin, moderator"})
+			return
+		}
+
+		if err := h.userUC.SetUserRole(c.Request.Context(), id, input.Role); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": ErrInternal, "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "ok",
 		})
 	}
 }

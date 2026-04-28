@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {MoreHorizontal, Search, Eye, Trash2, MessageCircle, ThumbsUp, Flag, Ban, Loader2, Filter, RotateCcw} from 'lucide-react';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
-import {commentApi} from '@/lib/api/comment';
+import {adminCommentApi} from '@/lib/api/comment';
 import ErrorPage from '@/components/error/ErrorPage';
 import {TablePagination} from '@/components/common/TablePagination';
 
@@ -56,7 +56,7 @@ const Comments: React.FC = () => {
         const fetchComments = async () => {
             try {
                 setLoading(true);
-                const response = await commentApi.getAll({page, page_size: pageSize});
+                const response = await adminCommentApi.list({page, page_size: pageSize});
                 const commentList = Array.isArray((response as any)?.items) ? (response as any).items : [];
                 if ((response as any)?.total !== undefined) {
                     setTotal((response as any).total);

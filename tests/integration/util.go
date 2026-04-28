@@ -156,8 +156,8 @@ func SetupTestServer(t *testing.T) *TestServer {
 	userHandler := server.NewUserHandler(userUC, jwtMgr)
 	mediaHandler := server.NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC, db)
 	uploadHandler := server.NewUploadHandler(uploadUC, jwtMgr, logger)
-	categoryHandler := server.NewCategoryHandler(categoryTagUC)
-	tagHandler := server.NewTagHandler(categoryTagUC)
+	categoryHandler := server.NewCategoryHandler(categoryTagUC, jwtMgr)
+	tagHandler := server.NewTagHandler(categoryTagUC, jwtMgr)
 	feedHandler := server.NewFeedHandler(feedUC)
 	notificationHandler := server.NewNotificationHandler(notificationUC, jwtMgr)
 	channelHandler := server.NewChannelHandler(playlistChannelUC, jwtMgr, db)
@@ -177,7 +177,12 @@ func SetupTestServer(t *testing.T) *TestServer {
 	adminTagRepo := admindata.NewTagRepository(db)
 	tagUC := adminbiz.NewTagUseCase(adminTagRepo)
 	tagService := service.NewTagService(tagUC)
-	adminHandler := server.NewAdminHandler(jwtMgr, mediaUC, playlistChannelUC, tagService, settingUC)
+
+	// Article use case for admin content management
+	articleRepo := contentdata.NewArticleRepo(contentDB, logger)
+	articleUC := contentbiz.NewArticleUseCase(articleRepo, logger)
+
+	adminHandler := server.NewAdminHandler(jwtMgr, mediaUC, playlistChannelUC, tagService, settingUC, categoryTagUC, articleUC, userUC)
 
 	// Explore handler
 	exploreHandler := server.NewExploreHandler(db)

@@ -76,6 +76,8 @@ var ProviderSet = wire.NewSet(
 	NewContentDB,
 	NewCategoryRepo,
 	NewTagRepo,
+	NewArticleRepo,
+	NewArticleUseCase,
 	NewCommentRepo,
 	NewPlaylistRepo,
 	NewChannelRepo,
@@ -351,6 +353,16 @@ func NewTagRepo(contentDB *contentdata.Data, logger log.Logger) contentbiz.TagRe
 	return contentdata.NewTagRepo(contentDB, logger)
 }
 
+// NewArticleRepo creates a new article repo.
+func NewArticleRepo(contentDB *contentdata.Data, logger log.Logger) contentbiz.ArticleRepo {
+	return contentdata.NewArticleRepo(contentDB, logger)
+}
+
+// NewArticleUseCase creates a new article use case.
+func NewArticleUseCase(articleRepo contentbiz.ArticleRepo, logger log.Logger) *contentbiz.ArticleUseCase {
+	return contentbiz.NewArticleUseCase(articleRepo, logger)
+}
+
 // NewCommentRepo creates a new comment repo.
 func NewCommentRepo(contentDB *contentdata.Data, logger log.Logger) contentbiz.CommentRepo {
 	return contentdata.NewCommentRepo(contentDB, logger)
@@ -523,15 +535,17 @@ func NewUploadHandler(
 // NewCategoryHandler creates a new category handler.
 func NewCategoryHandler(
 	categoryTagUC *contentbiz.CategoryTagUseCase,
+	jwt *auth.Manager,
 ) *server.CategoryHandler {
-	return server.NewCategoryHandler(categoryTagUC)
+	return server.NewCategoryHandler(categoryTagUC, jwt)
 }
 
 // NewTagHandler creates a new tag handler.
 func NewTagHandler(
 	categoryTagUC *contentbiz.CategoryTagUseCase,
+	jwt *auth.Manager,
 ) *server.TagHandler {
-	return server.NewTagHandler(categoryTagUC)
+	return server.NewTagHandler(categoryTagUC, jwt)
 }
 
 // NewFeedHandler creates a new feed handler.
@@ -643,8 +657,11 @@ func NewAdminHandler(
 	channelUC *contentbiz.PlaylistChannelUseCase,
 	tagService *adminservice.TagService,
 	settingUC *systembiz.SettingUseCase,
+	categoryUC *contentbiz.CategoryTagUseCase,
+	articleUC *contentbiz.ArticleUseCase,
+	userUC *biz.UserUseCase,
 ) *server.AdminHandler {
-	return server.NewAdminHandler(jwt, mediaUC, channelUC, tagService, settingUC)
+	return server.NewAdminHandler(jwt, mediaUC, channelUC, tagService, settingUC, categoryUC, articleUC, userUC)
 }
 
 // NewAuthData creates a new auth data layer.

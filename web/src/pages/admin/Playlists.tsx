@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {MoreHorizontal, Search, Edit, Trash2, Eye, PlayCircle, Lock, Globe, User, Filter, RotateCcw} from 'lucide-react';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
-import {playlistApi, Playlist} from '@/lib/api/playlist';
+import {adminPlaylistApi, Playlist} from '@/lib/api/playlist';
 import {extractList} from '@/lib/extract';
 import {TablePagination} from '@/components/common/TablePagination';
 
@@ -44,7 +44,7 @@ const Playlists: React.FC = () => {
             setLoading(true);
             setError(null);
             try {
-                const response = await playlistApi.list({page, page_size: pageSize});
+                const response = await adminPlaylistApi.list({page, page_size: pageSize});
                 const playlistList = extractList<Playlist>(response);
                 setPlaylists(playlistList);
                 if ((response as any)?.total !== undefined) {

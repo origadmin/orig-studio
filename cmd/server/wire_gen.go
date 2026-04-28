@@ -100,8 +100,8 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	categoryRepo := NewCategoryRepo(data, logger)
 	tagRepo := NewTagRepo(data, logger)
 	categoryTagUseCase := NewCategoryTagUseCase(categoryRepo, tagRepo, logger)
-	categoryHandler := NewCategoryHandler(categoryTagUseCase)
-	tagHandler := NewTagHandler(categoryTagUseCase)
+	categoryHandler := NewCategoryHandler(categoryTagUseCase, manager)
+	tagHandler := NewTagHandler(categoryTagUseCase, manager)
 	feedRepo := NewFeedRepo(data, logger)
 	feedUseCase := NewFeedUseCase(feedRepo, logger)
 	feedHandler := NewFeedHandler(feedUseCase)
@@ -118,7 +118,9 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	tagRepository := NewAdminTagRepo(client)
 	tagUseCase := NewAdminTagUseCase(tagRepository)
 	tagService := NewAdminTagService(tagUseCase)
-	adminHandler := NewAdminHandler(manager, mediaUseCase, playlistChannelUseCase, tagService, settingUseCase)
+	articleRepo := NewArticleRepo(data, logger)
+	articleUseCase := NewArticleUseCase(articleRepo, logger)
+	adminHandler := NewAdminHandler(manager, mediaUseCase, playlistChannelUseCase, tagService, settingUseCase, categoryTagUseCase, articleUseCase, userUseCase)
 	commentLikeRepo := NewCommentLikeRepo(data, logger)
 	commentLikeUseCase := NewCommentLikeUseCase(commentLikeRepo, logger)
 	commentModerationRepo := NewCommentModerationRepo(data, logger)
@@ -182,6 +184,8 @@ var ProviderSet = wire.NewSet(
 	NewContentDB,
 	NewCategoryRepo,
 	NewTagRepo,
+	NewArticleRepo,
+	NewArticleUseCase,
 	NewCommentRepo,
 	NewPlaylistRepo,
 	NewChannelRepo,
@@ -445,6 +449,16 @@ func NewTagRepo(contentDB *data2.Data, logger log.Logger) biz2.TagRepo {
 	return data2.NewTagRepo(contentDB, logger)
 }
 
+// NewArticleRepo creates a new article repo.
+func NewArticleRepo(contentDB *data2.Data, logger log.Logger) biz2.ArticleRepo {
+	return data2.NewArticleRepo(contentDB, logger)
+}
+
+// NewArticleUseCase creates a new article use case.
+func NewArticleUseCase(articleRepo biz2.ArticleRepo, logger log.Logger) *biz2.ArticleUseCase {
+	return biz2.NewArticleUseCase(articleRepo, logger)
+}
+
 // NewCommentRepo creates a new comment repo.
 func NewCommentRepo(contentDB *data2.Data, logger log.Logger) biz2.CommentRepo {
 	return data2.NewCommentRepo(contentDB, logger)
@@ -588,15 +602,17 @@ func NewUploadHandler(
 // NewCategoryHandler creates a new category handler.
 func NewCategoryHandler(
 	categoryTagUC *biz2.CategoryTagUseCase,
+	jwt *auth.Manager,
 ) *server.CategoryHandler {
-	return server.NewCategoryHandler(categoryTagUC)
+	return server.NewCategoryHandler(categoryTagUC, jwt)
 }
 
 // NewTagHandler creates a new tag handler.
 func NewTagHandler(
 	categoryTagUC *biz2.CategoryTagUseCase,
+	jwt *auth.Manager,
 ) *server.TagHandler {
-	return server.NewTagHandler(categoryTagUC)
+	return server.NewTagHandler(categoryTagUC, jwt)
 }
 
 // NewFeedHandler creates a new feed handler.
@@ -747,8 +763,11 @@ func NewAdminHandler(
 	channelUC *biz2.PlaylistChannelUseCase,
 	tagService *service.TagService,
 	settingUC *systembiz.SettingUseCase,
+	categoryUC *biz2.CategoryTagUseCase,
+	articleUC *biz2.ArticleUseCase,
+	userUC *biz3.UserUseCase,
 ) *server.AdminHandler {
-	return server.NewAdminHandler(jwt, mediaUC, channelUC, tagService, settingUC)
+	return server.NewAdminHandler(jwt, mediaUC, channelUC, tagService, settingUC, categoryUC, articleUC, userUC)
 }
 
 // NewAuthData creates a new auth data layer.

@@ -55,3 +55,26 @@ export const playlistApi = {
     reorderMedia: (playlistId: string, mediaOrders: Record<number, number>) =>
         api.put<void>(`/playlists/${playlistId}/reorder`, {media_orders: mediaOrders}),
 };
+
+// ==================== Admin Playlist API (UUID based, requires JWT + Admin) ====================
+export const adminPlaylistApi = {
+    // List all playlists (Admin, includes non-public)
+    list: (params?: { page?: number; page_size?: number }) =>
+        api.get<PlaylistListResponse>("/admin/playlists", params as Record<string, unknown>),
+
+    // Get playlist detail by UUID (Admin)
+    get: (id: string) =>
+        api.get<{ playlist: Playlist }>(`/admin/playlists/${id}`),
+
+    // Create playlist (Admin)
+    create: (data: CreatePlaylistRequest & { user_id: string }) =>
+        api.post<{ playlist: Playlist }>("/admin/playlists", data),
+
+    // Update playlist by UUID (Admin)
+    update: (id: string, data: UpdatePlaylistRequest) =>
+        api.put<{ playlist: Playlist }>(`/admin/playlists/${id}`, data),
+
+    // Delete playlist by UUID (Admin)
+    delete: (id: string) =>
+        api.del<void>(`/admin/playlists/${id}`),
+};

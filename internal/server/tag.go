@@ -6,16 +6,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"origadmin/application/origcms/internal/auth"
 	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/svc-content/biz"
 )
 
 type TagHandler struct {
-	uc *biz.CategoryTagUseCase
+	uc  *biz.CategoryTagUseCase
+	jwt *auth.Manager
 }
 
-func NewTagHandler(uc *biz.CategoryTagUseCase) *TagHandler {
-	return &TagHandler{uc: uc}
+func NewTagHandler(uc *biz.CategoryTagUseCase, jwt *auth.Manager) *TagHandler {
+	return &TagHandler{uc: uc, jwt: jwt}
 }
 
 func (h *TagHandler) Register(r handler.Router) {
@@ -25,7 +27,7 @@ func (h *TagHandler) Register(r handler.Router) {
 		// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST
 		// ================================
 		tags.GET("", h.listTags())
-		tags.POST("", func(w http.ResponseWriter, r *http.Request) {
+		tags.POST("", WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
 			c := handler.NewGinContextAdapterFromHTTP(w, r)
 			var input struct {
 				Title string `json:"title"`
@@ -44,7 +46,7 @@ func (h *TagHandler) Register(r handler.Router) {
 			}
 
 			c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": t})
-		})
+		}))
 
 		// ================================
 		// 2. NESTED RESOURCE ROUTES (WITH :id) - MUST BE BEFORE MAIN :id ROUTES
@@ -70,7 +72,7 @@ func (h *TagHandler) Register(r handler.Router) {
 			c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": t})
 		})
 
-		tags.PUT("/:id", func(w http.ResponseWriter, r *http.Request) {
+		tags.PUT("/:id", WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
 			c := handler.NewGinContextAdapterFromHTTP(w, r)
 			id, err := strconv.Atoi(c.Param("id"))
 			if err != nil {
@@ -95,9 +97,9 @@ func (h *TagHandler) Register(r handler.Router) {
 			}
 
 			c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": t})
-		})
+		}))
 
-		tags.DELETE("/:id", func(w http.ResponseWriter, r *http.Request) {
+		tags.DELETE("/:id", WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
 			c := handler.NewGinContextAdapterFromHTTP(w, r)
 			id, _ := strconv.Atoi(c.Param("id"))
 			err := h.uc.DeleteTag(r.Context(), id)
@@ -106,7 +108,7 @@ func (h *TagHandler) Register(r handler.Router) {
 				return
 			}
 			c.JSON(http.StatusOK, gin.H{"code": 0, "message": "ok", "data": gin.H{"message": "deleted"}})
-		})
+		}))
 	}
 }
 

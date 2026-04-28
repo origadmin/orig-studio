@@ -42,7 +42,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, UserPlus, Users, Filter, Loader2, RotateCcw} from 'lucide-react';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
-import {channelApi, Channel} from '@/lib/api/channel';
+import {adminApi, Channel} from '@/lib/api/admin';
 import {TablePagination} from '@/components/common/TablePagination';
 
 const Channels: React.FC = () => {
@@ -75,7 +75,7 @@ const Channels: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await channelApi.getAll({page, page_size: pageSize});
+            const response = await adminApi.getChannels({page, page_size: pageSize});
             const channelList = Array.isArray(response?.items) ? response.items : [];
             setChannels(channelList);
             if (response?.total !== undefined) {
@@ -100,7 +100,7 @@ const Channels: React.FC = () => {
 
     const handleCreate = async () => {
         try {
-            await channelApi.create(formData);
+            await adminApi.createChannel(formData);
             await loadChannels();
             setShowCreateDialog(false);
             resetForm();
@@ -113,7 +113,7 @@ const Channels: React.FC = () => {
         if (!currentChannel) return;
 
         try {
-            await channelApi.update(currentChannel.id, formData);
+            await adminApi.updateChannel(currentChannel.id, formData);
             await loadChannels();
             setShowEditDialog(false);
             resetForm();
@@ -127,7 +127,7 @@ const Channels: React.FC = () => {
         if (!currentChannel) return;
 
         try {
-            await channelApi.delete(currentChannel.id);
+            await adminApi.deleteChannel(currentChannel.id);
             await loadChannels();
             setShowDeleteDialog(false);
             setCurrentChannel(null);

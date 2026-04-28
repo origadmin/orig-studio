@@ -17,8 +17,22 @@ type Category struct {
 	Name        string    `json:"name"`
 	Slug        string    `json:"slug"`
 	Description string    `json:"description"`
+	Status      int       `json:"status"`
+	ParentID    int64     `json:"parent_id"`
+	Sequence    int       `json:"order"`
+	MediaCount  int       `json:"media_count"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+// UpdateCategoryInput represents partial update input for a category.
+type UpdateCategoryInput struct {
+	Name        *string `json:"name"`
+	Slug        *string `json:"slug"`
+	Description *string `json:"description"`
+	Status      *int    `json:"status"`
+	ParentID    *int64  `json:"parent_id"`
+	Sequence    *int    `json:"order"`
 }
 
 // Tag represents a media tag.
@@ -76,6 +90,33 @@ func (uc *CategoryTagUseCase) CreateCategory(ctx context.Context, c *Category) (
 
 func (uc *CategoryTagUseCase) UpdateCategory(ctx context.Context, c *Category) (*Category, error) {
 	return uc.categoryRepo.Update(ctx, c)
+}
+
+func (uc *CategoryTagUseCase) UpdateCategoryPartial(ctx context.Context, id int, input *UpdateCategoryInput) (*Category, error) {
+	cat, err := uc.categoryRepo.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	// Apply partial updates: only update fields that are provided (non-nil)
+	if input.Name != nil {
+		cat.Name = *input.Name
+	}
+	if input.Slug != nil {
+		cat.Slug = *input.Slug
+	}
+	if input.Description != nil {
+		cat.Description = *input.Description
+	}
+	if input.Status != nil {
+		cat.Status = *input.Status
+	}
+	if input.ParentID != nil {
+		cat.ParentID = *input.ParentID
+	}
+	if input.Sequence != nil {
+		cat.Sequence = *input.Sequence
+	}
+	return uc.categoryRepo.Update(ctx, cat)
 }
 
 func (uc *CategoryTagUseCase) DeleteCategory(ctx context.Context, id int) error {

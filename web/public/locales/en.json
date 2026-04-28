@@ -386,6 +386,8 @@
     "tags": "Tags",
     "comments": "Comments",
     "content": "Content",
+    "articles": "Articles",
+    "manageArticles": "Manage Articles",
     "playlists": "Playlists",
     "settings": "System Settings",
     "exitAdmin": "Back to Home",
