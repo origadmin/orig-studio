@@ -1,0 +1,23 @@
+import {Spinner} from "@/components/ui/spinner"
+import { createFileRoute, redirect } from '@tanstack/react-router';
+import { lazy, Suspense } from 'react';
+import { getStoredToken } from '@/hooks/useAuth';
+import { isTokenExpired } from '@/lib/request';
+
+const Page = lazy(() => import('@/pages/auth/SignIn/index'));
+
+const PageLoader = () => (
+    <div className="flex items-center justify-center min-h-[60vh] bg-background text-foreground">
+        <Spinner />
+    </div>
+);
+
+function redirectIfAuth() {
+    const token = getStoredToken();
+    if (token && !isTokenExpired()) throw redirect({ to: '/' });
+}
+
+export const Route = createFileRoute('/auth/signin')({
+    beforeLoad: redirectIfAuth,
+    component: () => <Suspense fallback={<PageLoader />}><Page /></Suspense>,
+});
