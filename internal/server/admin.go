@@ -16,6 +16,7 @@ import (
 	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/svc-admin/service"
+	authbiz "origadmin/application/origcms/internal/svc-auth/biz"
 	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 	mediabiz "origadmin/application/origcms/internal/svc-media/biz"
 	"origadmin/application/origcms/internal/svc-media/dto"
@@ -26,14 +27,15 @@ import (
 
 // AdminHandler handles admin-related routes.
 type AdminHandler struct {
-	jwt        *auth.Manager
-	mediaUC    *mediabiz.MediaUseCase
-	channelUC  *contentbiz.PlaylistChannelUseCase
-	tagService *service.TagService
-	settingUC  *systembiz.SettingUseCase
-	categoryUC *contentbiz.CategoryTagUseCase
-	articleUC  *contentbiz.ArticleUseCase
-	userUC     *userbiz.UserUseCase
+	jwt         *auth.Manager
+	mediaUC     *mediabiz.MediaUseCase
+	channelUC   *contentbiz.PlaylistChannelUseCase
+	tagService  *service.TagService
+	settingUC   *systembiz.SettingUseCase
+	categoryUC  *contentbiz.CategoryTagUseCase
+	articleUC   *contentbiz.ArticleUseCase
+	userUC      *userbiz.UserUseCase
+	permChecker authbiz.PermissionChecker
 }
 
 func NewAdminHandler(
@@ -45,16 +47,18 @@ func NewAdminHandler(
 	categoryUC *contentbiz.CategoryTagUseCase,
 	articleUC *contentbiz.ArticleUseCase,
 	userUC *userbiz.UserUseCase,
+	permChecker authbiz.PermissionChecker,
 ) *AdminHandler {
 	return &AdminHandler{
-		jwt:        jwt,
-		mediaUC:    mediaUC,
-		channelUC:  channelUC,
-		tagService: tagService,
-		settingUC:  settingUC,
-		categoryUC: categoryUC,
-		articleUC:  articleUC,
-		userUC:     userUC,
+		jwt:         jwt,
+		mediaUC:     mediaUC,
+		channelUC:   channelUC,
+		tagService:  tagService,
+		settingUC:   settingUC,
+		categoryUC:  categoryUC,
+		articleUC:   articleUC,
+		userUC:      userUC,
+		permChecker: permChecker,
 	}
 }
 
@@ -78,9 +82,9 @@ func (h *AdminHandler) Register(r handler.Router) {
 		channels := admin.Group("/channels")
 		{
 			channels.GET("", WithAdmin(h.jwt, h.adminListChannels()))
-			channels.GET("/:id", WithAdmin(h.jwt, h.adminGetChannelDetail())) // :id = UUID
-			channels.PUT("/:id", WithAdmin(h.jwt, h.adminUpdateChannel()))    // :id = UUID
-			channels.DELETE("/:id", WithAdmin(h.jwt, h.adminDeleteChannel())) // :id = UUID
+			channels.GET("/:id", WithAdmin(h.jwt, h.adminGetChannelDetail()))
+			channels.PUT("/:id", WithAdminAndPerm(h.jwt, h.permChecker, "media:write", h.adminUpdateChannel()))
+			channels.DELETE("/:id", WithAdminAndPerm(h.jwt, h.permChecker, "media:delete", h.adminDeleteChannel()))
 		}
 
 		// ================================
@@ -110,7 +114,7 @@ func (h *AdminHandler) Register(r handler.Router) {
 		settings := admin.Group("/settings")
 		{
 			settings.GET("", WithAdmin(h.jwt, h.getSystemSettings()))
-			settings.PUT("", WithAdmin(h.jwt, h.updateSystemSettings()))
+			settings.PUT("", WithAdminAndPerm(h.jwt, h.permChecker, "system:config", h.updateSystemSettings()))
 		}
 
 		// ================================
@@ -147,10 +151,10 @@ func (h *AdminHandler) Register(r handler.Router) {
 		{
 			users.GET("", WithAdmin(h.jwt, h.adminListUsers()))
 			users.GET("/:id", WithAdmin(h.jwt, h.adminGetUser()))
-			users.PUT("/:id", WithAdmin(h.jwt, h.adminUpdateUser()))
-			users.DELETE("/:id", WithAdmin(h.jwt, h.adminDeleteUser()))
-			users.PATCH("/:id/status", WithAdmin(h.jwt, h.adminUpdateUserStatus()))
-			users.PATCH("/:id/role", WithAdmin(h.jwt, h.adminUpdateUserRole()))
+			users.PUT("/:id", WithAdminAndPerm(h.jwt, h.permChecker, "user:manage", h.adminUpdateUser()))
+			users.DELETE("/:id", WithAdminAndPerm(h.jwt, h.permChecker, "user:manage", h.adminDeleteUser()))
+			users.PATCH("/:id/status", WithAdminAndPerm(h.jwt, h.permChecker, "user:manage", h.adminUpdateUserStatus()))
+			users.PATCH("/:id/role", WithAdminAndPerm(h.jwt, h.permChecker, "user:manage", h.adminUpdateUserRole()))
 		}
 
 		// ================================

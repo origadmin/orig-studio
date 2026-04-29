@@ -95,7 +95,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	playlistRepo := NewPlaylistRepo(data, logger)
 	channelRepo := NewChannelRepo(data, logger)
 	playlistChannelUseCase := NewPlaylistChannelUseCase(playlistRepo, channelRepo, logger)
-	mediaHandler := NewMediaHandler(manager, mediaUseCase, uploadUseCase, likeFavoriteUseCase, playlistChannelUseCase, userUseCase, client)
+	mediaHandler := NewMediaHandler(manager, mediaUseCase, uploadUseCase, likeFavoriteUseCase, playlistChannelUseCase, userUseCase, client, permissionUseCase)
 	uploadHandler := NewUploadHandler(uploadUseCase, manager, logger)
 	categoryRepo := NewCategoryRepo(data, logger)
 	tagRepo := NewTagRepo(data, logger)
@@ -120,7 +120,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	tagService := NewAdminTagService(tagUseCase)
 	articleRepo := NewArticleRepo(data, logger)
 	articleUseCase := NewArticleUseCase(articleRepo, logger)
-	adminHandler := NewAdminHandler(manager, mediaUseCase, playlistChannelUseCase, tagService, settingUseCase, categoryTagUseCase, articleUseCase, userUseCase)
+	adminHandler := NewAdminHandler(manager, mediaUseCase, playlistChannelUseCase, tagService, settingUseCase, categoryTagUseCase, articleUseCase, userUseCase, permissionUseCase)
 	commentLikeRepo := NewCommentLikeRepo(data, logger)
 	commentLikeUseCase := NewCommentLikeUseCase(commentLikeRepo, logger)
 	commentModerationRepo := NewCommentModerationRepo(data, logger)
@@ -586,8 +586,9 @@ func NewMediaHandler(
 	playlistChannelUC *biz2.PlaylistChannelUseCase,
 	userUC *biz3.UserUseCase,
 	entityClient *entity.Client,
+	permChecker authbiz.PermissionChecker,
 ) *server.MediaHandler {
-	return server.NewMediaHandler(jwt, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC, entityClient)
+	return server.NewMediaHandler(jwt, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC, entityClient, permChecker)
 }
 
 // NewUploadHandler creates a new upload handler.
@@ -766,8 +767,9 @@ func NewAdminHandler(
 	categoryUC *biz2.CategoryTagUseCase,
 	articleUC *biz2.ArticleUseCase,
 	userUC *biz3.UserUseCase,
+	permChecker authbiz.PermissionChecker,
 ) *server.AdminHandler {
-	return server.NewAdminHandler(jwt, mediaUC, channelUC, tagService, settingUC, categoryUC, articleUC, userUC)
+	return server.NewAdminHandler(jwt, mediaUC, channelUC, tagService, settingUC, categoryUC, articleUC, userUC, permChecker)
 }
 
 // NewAuthData creates a new auth data layer.

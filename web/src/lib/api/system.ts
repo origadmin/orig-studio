@@ -1,5 +1,3 @@
-// API 客户端 - 系统模块（统计、配置）
-// 对应后端 /api/v1/system 路径
 import {api} from "../request";
 
 // ==================== Stats Types ====================
@@ -49,47 +47,52 @@ export interface TrafficStatsResponse {
 }
 
 // ==================== Settings Types ====================
-export interface SystemSettings {
-    site_name: string;
-    site_description: string;
-    allow_register: boolean;
-    allow_upload: boolean;
-    max_upload_size: number; // bytes
-    // 可以添加更多配置项
+export type SettingType = 'string' | 'int' | 'bool' | 'json';
+export type SettingCategory = 'general' | 'upload' | 'review' | 'email';
+
+export interface SettingItem {
+    id: string;
+    key: string;
+    value: string;
+    type: SettingType;
+    category: SettingCategory;
+    description?: string;
+    is_sensitive: boolean;
+    fallback_value?: string;
+    is_builtin: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export type GroupedSettings = Record<SettingCategory, SettingItem[]>;
+
+export interface UpdateSettingItem {
+    key: string;
+    value: string;
 }
 
 export interface UpdateSettingsRequest {
-    site_name?: string;
-    site_description?: string;
-    allow_register?: boolean;
-    allow_upload?: boolean;
-    max_upload_size?: number;
+    settings: UpdateSettingItem[];
 }
 
 // ==================== Stats API ====================
 export const statsApi = {
-    // Get Dashboard stats (Admin)
     getDashboard: () => api.get<DashboardStats>("/admin/stats/dashboard"),
-
-    // Get media stats (Admin)
     getMedia: () => api.get<MediaStats>("/admin/stats/medias"),
-
-    // Get user stats (Admin)
     getUsers: () => api.get<UserStats>("/admin/stats/users"),
-
-    // Get traffic stats (Admin)
     getTraffic: (params?: { page?: number; page_size?: number }) =>
         api.get<TrafficStatsResponse>("/admin/stats/traffic", params),
 };
 
 // ==================== Settings API ====================
 export const settingsApi = {
-    // Get system settings (Admin)
-    get: () => api.get<SystemSettings>("/admin/settings"),
-
-    // Update system settings (Admin)
+    get: () => api.get<GroupedSettings>("/admin/settings"),
     update: (data: UpdateSettingsRequest) =>
-        api.put<SystemSettings>("/admin/settings", data),
+        api.put<GroupedSettings>("/admin/settings", data),
+    getByKey: (key: string) =>
+        api.get<SettingItem>(`/system/settings/${key}`),
+    resetKey: (key: string) =>
+        api.post<SettingItem>(`/system/settings/${key}/reset`),
 };
 
 // ==================== System API ====================

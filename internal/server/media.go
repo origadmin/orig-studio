@@ -37,6 +37,7 @@ import (
 	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/helpers/repo"
+	authbiz "origadmin/application/origcms/internal/svc-auth/biz"
 	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 	"origadmin/application/origcms/internal/svc-media/biz"
 	"origadmin/application/origcms/internal/svc-media/dto"
@@ -130,6 +131,7 @@ type MediaHandler struct {
 	playlistChannelUC *contentbiz.PlaylistChannelUseCase
 	userUC            *userbiz.UserUseCase
 	entityClient      *entity.Client
+	permChecker       authbiz.PermissionChecker
 }
 
 func NewMediaHandler(
@@ -140,8 +142,9 @@ func NewMediaHandler(
 	playlistChannelUC *contentbiz.PlaylistChannelUseCase,
 	userUC *userbiz.UserUseCase,
 	entityClient *entity.Client,
+	permChecker authbiz.PermissionChecker,
 ) *MediaHandler {
-	return &MediaHandler{jwtMgr: jwtMgr, uc: uc, uploadUC: uploadUC, likeFavoriteUC: likeFavoriteUC, playlistChannelUC: playlistChannelUC, userUC: userUC, entityClient: entityClient}
+	return &MediaHandler{jwtMgr: jwtMgr, uc: uc, uploadUC: uploadUC, likeFavoriteUC: likeFavoriteUC, playlistChannelUC: playlistChannelUC, userUC: userUC, entityClient: entityClient, permChecker: permChecker}
 }
 
 func (h *MediaHandler) Register(r handler.Router) {
@@ -209,30 +212,27 @@ func (h *MediaHandler) RegisterGin(rg *gin.RouterGroup) {
 	// ================================
 	adminMedias := rg.Group("/admin/medias").Use(JWTMiddleware(h.jwtMgr), AdminMiddleware(h.jwtMgr))
 	{
-		// 管理列表（支持更多过滤条件）
 		adminMedias.GET("", h.adminListMedia())
 
-		// 核心管理操作：使用 ID，返回完整信息
 		adminMedias.GET("/:id", h.adminGetByID())
-		adminMedias.PUT("/:id", h.adminUpdateMedia())
-		adminMedias.DELETE("/:id", h.adminDeleteMedia())
+		adminMedias.PUT("/:id", RequirePermission(h.permChecker, "media:write"), h.adminUpdateMedia())
+		adminMedias.DELETE("/:id", RequirePermission(h.permChecker, "media:delete"), h.adminDeleteMedia())
 
-		// 统计和变体信息
 		adminMedias.GET("/:id/stats", h.adminGetStats())
 		adminMedias.GET("/:id/variants", h.adminGetVariants())
 		adminMedias.GET("/:id/tasks", h.listEncodingTasks())
-		adminMedias.POST("/:id/tasks/:taskId/retry", h.retryTranscode())
+		adminMedias.POST("/:id/tasks/:taskId/retry", RequirePermission(h.permChecker, "media:write"), h.retryTranscode())
 
-		// 状态变更
-		adminMedias.PUT("/:id/state", h.adminChangeState())
+		adminMedias.PUT("/:id/state", RequirePermission(h.permChecker, "media:publish"), h.adminChangeState())
 
-		// 审核操作
-		adminMedias.PUT("/:id/review", h.reviewMedia())
-		adminMedias.POST("/review/batch", h.batchReviewMedia())
+		adminMedias.PUT("/:id/review", RequirePermission(h.permChecker, "media:moderate"), h.reviewMedia())
+		adminMedias.POST("/review/batch", RequirePermission(h.permChecker, "media:moderate"), h.batchReviewMedia())
+		adminMedias.GET("/review/pending", h.listPendingReviews())
+		adminMedias.GET("/review/history", h.listReviewHistory())
 		adminMedias.GET("/:id/review-logs", h.listReviewLogs())
 
-		adminMedias.POST("/:id/regenerate-sprite", h.regenerateSprite())
-		adminMedias.POST("/:id/regenerate-thumbnail", h.regenerateThumbnail())
+		adminMedias.POST("/:id/regenerate-sprite", RequirePermission(h.permChecker, "media:write"), h.regenerateSprite())
+		adminMedias.POST("/:id/regenerate-thumbnail", RequirePermission(h.permChecker, "media:write"), h.regenerateThumbnail())
 	}
 
 	// ================================
@@ -3074,6 +3074,129 @@ func (h *MediaHandler) listReviewLogs() gin.HandlerFunc {
 
 		OK(c, gin.H{
 			"items": logs,
+		})
+	}
+}
+
+func (h *MediaHandler) listPendingReviews() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+
+		opt := &dto.MediaQueryOption{
+			ReviewStatus: ptrString("pending_review"),
+			OrderBy:      c.DefaultQuery("order_by", "created_at"),
+			Descending:   c.DefaultQuery("descending", "true") == "true",
+			AdminMode:    true,
+		}
+		opt.Page = int32(page)
+		opt.PageSize = int32(pageSize)
+
+		if mediaType := c.Query("type"); mediaType != "" {
+			opt.MediaType = mediaType
+		}
+
+		items, total, err := h.uc.ListMedias(ctx, opt)
+		if err != nil {
+			Fail(c, ErrInternal, err.Error())
+			return
+		}
+
+		resultItems := make([]map[string]interface{}, len(items))
+		for i, m := range items {
+			item := filterPublicFields(m)
+			edges := map[string]interface{}{}
+
+			if m.UserId != "" && m.UserId != "0" && h.userUC != nil {
+				if u, err := h.userUC.GetUser(ctx, m.UserId); err == nil {
+					userMap := map[string]interface{}{
+						"id":       u.Id,
+						"username": u.Username,
+						"nickname": u.Nickname,
+						"avatar":   u.Avatar,
+					}
+					edges["user"] = []map[string]interface{}{userMap}
+				}
+			}
+
+			if len(edges) > 0 {
+				item["edges"] = edges
+			}
+
+			resultItems[i] = item
+		}
+
+		OK(c, gin.H{
+			"items":     resultItems,
+			"total":     total,
+			"page":      page,
+			"page_size": pageSize,
+		})
+	}
+}
+
+func (h *MediaHandler) listReviewHistory() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+
+		opt := &dto.MediaQueryOption{
+			OrderBy:    c.DefaultQuery("order_by", "updated_at"),
+			Descending: c.DefaultQuery("descending", "true") == "true",
+			AdminMode:  true,
+		}
+		opt.Page = int32(page)
+		opt.PageSize = int32(pageSize)
+
+		if status := c.Query("status"); status != "" {
+			opt.ReviewStatus = ptrString(status)
+		} else {
+			opt.ReviewStatus = ptrString("reviewed")
+		}
+
+		if mediaType := c.Query("type"); mediaType != "" {
+			opt.MediaType = mediaType
+		}
+
+		items, total, err := h.uc.ListMedias(ctx, opt)
+		if err != nil {
+			Fail(c, ErrInternal, err.Error())
+			return
+		}
+
+		resultItems := make([]map[string]interface{}, len(items))
+		for i, m := range items {
+			item := filterPublicFields(m)
+			edges := map[string]interface{}{}
+
+			if m.UserId != "" && m.UserId != "0" && h.userUC != nil {
+				if u, err := h.userUC.GetUser(ctx, m.UserId); err == nil {
+					userMap := map[string]interface{}{
+						"id":       u.Id,
+						"username": u.Username,
+						"nickname": u.Nickname,
+						"avatar":   u.Avatar,
+					}
+					edges["user"] = []map[string]interface{}{userMap}
+				}
+			}
+
+			if len(edges) > 0 {
+				item["edges"] = edges
+			}
+
+			resultItems[i] = item
+		}
+
+		OK(c, gin.H{
+			"items":     resultItems,
+			"total":     total,
+			"page":      page,
+			"page_size": pageSize,
 		})
 	}
 }

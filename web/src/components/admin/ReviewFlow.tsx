@@ -37,11 +37,11 @@ const ReviewFlow: React.FC = () => {
     const [statusFilter, setStatusFilter] = useState('');
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
     const [showBatchDialog, setShowBatchDialog] = useState(false);
-    const [batchStatus, setBatchStatus] = useState<'approved' | 'rejected'>('approved');
+    const [batchStatus, setBatchStatus] = useState<'approve' | 'reject'>('approve');
     const [batchReason, setBatchReason] = useState('');
     const [showSingleDialog, setShowSingleDialog] = useState(false);
     const [currentItem, setCurrentItem] = useState<ReviewItem | null>(null);
-    const [singleStatus, setSingleStatus] = useState<'approved' | 'rejected'>('approved');
+    const [singleStatus, setSingleStatus] = useState<'approve' | 'reject'>('approve');
     const [singleReason, setSingleReason] = useState('');
 
     useEffect(() => {
@@ -77,9 +77,9 @@ const ReviewFlow: React.FC = () => {
         }
     };
 
-    const handleReview = async (id: string, status: string, reason?: string) => {
+    const handleReview = async (id: string, action: 'approve' | 'reject', comment?: string) => {
         try {
-            await reviewApi.review(id, {status, reason});
+            await reviewApi.review(id, {action, comment});
             // 重新获取审核列表
             await fetchReviewItems();
         } catch (err) {
@@ -92,15 +92,15 @@ const ReviewFlow: React.FC = () => {
 
         try {
             await reviewApi.batchReview({
-                ids: selectedItems,
-                status: batchStatus,
-                reason: batchReason,
+                media_ids: selectedItems,
+                action: batchStatus,
+                comment: batchReason,
             });
             // 重新获取审核列表
             await fetchReviewItems();
             setShowBatchDialog(false);
             setSelectedItems([]);
-            setBatchStatus('approved');
+            setBatchStatus('approve');
             setBatchReason('');
         } catch (err) {
             console.error('Failed to batch review items:', err);
@@ -127,7 +127,7 @@ const ReviewFlow: React.FC = () => {
 
     const openSingleDialog = (item: ReviewItem) => {
         setCurrentItem(item);
-        setSingleStatus('approved');
+        setSingleStatus('approve');
         setSingleReason('');
         setShowSingleDialog(true);
     };
@@ -386,14 +386,14 @@ const ReviewFlow: React.FC = () => {
                                                     <Button
                                                         size="sm"
                                                         className="bg-green-600 hover:bg-green-700"
-                                                        onClick={() => handleReview(item.id, 'approved')}
+                                                        onClick={() => handleReview(item.id, 'approve')}
                                                     >
                                                         <Check className="w-4 h-4"/>
                                                     </Button>
                                                     <Button
                                                         size="sm"
                                                         className="bg-red-600 hover:bg-red-700"
-                                                        onClick={() => handleReview(item.id, 'rejected')}
+                                                        onClick={() => handleReview(item.id, 'reject')}
                                                     >
                                                         <X className="w-4 h-4"/>
                                                     </Button>
@@ -446,22 +446,22 @@ const ReviewFlow: React.FC = () => {
                             </h4>
                             <div className="flex items-center gap-2">
                                 <Button
-                                    variant={batchStatus === 'approved' ? 'default' : 'outline'}
-                                    onClick={() => setBatchStatus('approved')}
+                                    variant={batchStatus === 'approve' ? 'default' : 'outline'}
+                                    onClick={() => setBatchStatus('approve')}
                                 >
                                     <Check className="w-4 h-4 mr-2"/>
                                     {t('review.approved')}
                                 </Button>
                                 <Button
-                                    variant={batchStatus === 'rejected' ? 'default' : 'outline'}
-                                    onClick={() => setBatchStatus('rejected')}
+                                    variant={batchStatus === 'reject' ? 'default' : 'outline'}
+                                    onClick={() => setBatchStatus('reject')}
                                 >
                                     <X className="w-4 h-4 mr-2"/>
                                     {t('review.rejected')}
                                 </Button>
                             </div>
                         </div>
-                        {batchStatus === 'rejected' && (
+                        {batchStatus === 'reject' && (
                             <div>
                                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     {t('review.reason')}
@@ -538,22 +538,22 @@ const ReviewFlow: React.FC = () => {
                                         </h4>
                                         <div className="flex items-center gap-2">
                                             <Button
-                                                variant={singleStatus === 'approved' ? 'default' : 'outline'}
-                                                onClick={() => setSingleStatus('approved')}
+                                                variant={singleStatus === 'approve' ? 'default' : 'outline'}
+                                                onClick={() => setSingleStatus('approve')}
                                             >
                                                 <Check className="w-4 h-4 mr-2"/>
                                                 {t('review.approved')}
                                             </Button>
                                             <Button
-                                                variant={singleStatus === 'rejected' ? 'default' : 'outline'}
-                                                onClick={() => setSingleStatus('rejected')}
+                                                variant={singleStatus === 'reject' ? 'default' : 'outline'}
+                                                onClick={() => setSingleStatus('reject')}
                                             >
                                                 <X className="w-4 h-4 mr-2"/>
                                                 {t('review.rejected')}
                                             </Button>
                                         </div>
                                     </div>
-                                    {singleStatus === 'rejected' && (
+                                    {singleStatus === 'reject' && (
                                         <div>
                                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                                 {t('review.reason')}
