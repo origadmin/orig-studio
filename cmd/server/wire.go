@@ -416,6 +416,16 @@ func NewCommentUseCase(
 	return contentbiz.NewCommentUseCase(commentRepo, mediaUC, logger)
 }
 
+// NewCommentLikeRepo creates a new comment like repo.
+func NewCommentLikeRepo(contentDB *contentdata.Data, logger log.Logger) contentbiz.CommentLikeRepo {
+	return contentdata.NewCommentLikeRepo(contentDB, logger)
+}
+
+// NewCommentLikeUseCase creates a new comment like use case.
+func NewCommentLikeUseCase(repo contentbiz.CommentLikeRepo, logger log.Logger) *contentbiz.CommentLikeUseCase {
+	return contentbiz.NewCommentLikeUseCase(repo, logger)
+}
+
 // NewCommentModerationRepo creates a new comment moderation repo.
 func NewCommentModerationRepo(contentDB *contentdata.Data, logger log.Logger) contentbiz.CommentModerationRepo {
 	return contentdata.NewCommentModerationRepo(contentDB, logger)
@@ -519,8 +529,9 @@ func NewMediaHandler(
 	playlistChannelUC *contentbiz.PlaylistChannelUseCase,
 	userUC *biz.UserUseCase,
 	entityClient *entity.Client,
+	permChecker authbiz.PermissionChecker,
 ) *server.MediaHandler {
-	return server.NewMediaHandler(jwt, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC, entityClient)
+	return server.NewMediaHandler(jwt, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC, entityClient, permChecker)
 }
 
 // NewUploadHandler creates a new upload handler.
@@ -660,8 +671,9 @@ func NewAdminHandler(
 	categoryUC *contentbiz.CategoryTagUseCase,
 	articleUC *contentbiz.ArticleUseCase,
 	userUC *biz.UserUseCase,
+	permChecker authbiz.PermissionChecker,
 ) *server.AdminHandler {
-	return server.NewAdminHandler(jwt, mediaUC, channelUC, tagService, settingUC, categoryUC, articleUC, userUC)
+	return server.NewAdminHandler(jwt, mediaUC, channelUC, tagService, settingUC, categoryUC, articleUC, userUC, permChecker)
 }
 
 // NewAuthData creates a new auth data layer.
@@ -754,6 +766,7 @@ func wireApp(cfg *config.Config, logger log.Logger) (*AppDependencies, error) {
 		NewMediaUseCase,
 		NewUploadUseCase,
 		NewWorker,
+		NewSpriteUseCase,
 		NewTranscodeHandler,
 		NewRouter,
 		NewContentDB,
@@ -766,6 +779,8 @@ func wireApp(cfg *config.Config, logger log.Logger) (*AppDependencies, error) {
 		NewFavoriteRepo,
 		NewNotificationRepo,
 		NewCategoryTagUseCase,
+		NewCommentLikeRepo,
+		NewCommentLikeUseCase,
 		NewCommentModerationRepo,
 		NewCommentReportRepo,
 		NewCommentModerationUseCase,
@@ -802,6 +817,7 @@ func wireApp(cfg *config.Config, logger log.Logger) (*AppDependencies, error) {
 		NewGroupMemberRepo,
 		NewUserPermRepo,
 		NewPermissionUseCase,
+		wire.Bind(new(authbiz.PermissionChecker), new(*authbiz.PermissionUseCase)),
 		NewPermissionHandler,
 	)
 	return nil, nil

@@ -463,7 +463,7 @@ export function useApproveReview() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (id: string) =>
-            reviewApi.review(id, {status: 'approved'}),
+            reviewApi.review(id, {action: 'approve'}),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['reviews']});
         },
@@ -477,7 +477,7 @@ export function useRejectReview() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: ({id, reason}: {id: string; reason?: string}) =>
-            reviewApi.review(id, {status: 'rejected', reason}),
+            reviewApi.review(id, {action: 'reject', comment: reason}),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['reviews']});
         },

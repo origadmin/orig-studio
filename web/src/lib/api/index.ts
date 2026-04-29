@@ -87,8 +87,10 @@ export type {
 // ==================== System ====================
 export {systemApi, settingsApi} from "./system";
 export type {
-    SystemSettings,
+    GroupedSettings,
+    SettingItem,
     UpdateSettingsRequest,
+    UpdateSettingItem,
 } from "./system";
 
 // ==================== History ====================

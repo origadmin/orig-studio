@@ -1,4 +1,3 @@
-// Review API
 import {api} from "../request";
 
 export interface ReviewItem {
@@ -8,7 +7,7 @@ export interface ReviewItem {
     media_type: string;
     user_id: string;
     username: string;
-    status: string; // "pending" | "approved" | "rejected"
+    review_status: string;
     reason?: string;
     created_at: string;
     updated_at: string;
@@ -24,23 +23,18 @@ export interface ReviewListResponse {
 }
 
 export const reviewApi = {
-    // Get pending review items (Admin)
     getPending: (params?: { page?: number; page_size?: number; type?: string }) =>
         api.get<ReviewListResponse>('/admin/medias/review/pending', params),
 
-    // Get review history (Admin)
     getHistory: (params?: { page?: number; page_size?: number; type?: string; status?: string }) =>
         api.get<ReviewListResponse>('/admin/medias/review/history', params),
 
-    // Review a media item (Admin)
-    review: (mediaId: string, data: { status: string; reason?: string }) =>
-        api.put<{ success: boolean; message: string }>(`/admin/medias/${mediaId}/review`, data),
+    review: (mediaId: string, data: { action: 'approve' | 'reject'; comment?: string }) =>
+        api.put<{ id: string; review_status: string; listable: boolean; updated_at: string }>(`/admin/medias/${mediaId}/review`, data),
 
-    // Get review detail for a media item (Admin)
     getDetail: (mediaId: string) =>
-        api.get<ReviewItem>(`/admin/medias/${mediaId}/review-logs`),
+        api.get<{ items: ReviewItem[] }>(`/admin/medias/${mediaId}/review-logs`),
 
-    // Batch review (Admin)
-    batchReview: (data: { ids: string[]; status: string; reason?: string }) =>
-        api.post<{ success: boolean; message: string }>('/admin/medias/review/batch', data),
+    batchReview: (data: { media_ids: string[]; action: 'approve' | 'reject'; comment?: string }) =>
+        api.post<{ succeeded: string[]; failed: { media_id: string; error: string }[] }>('/admin/medias/review/batch', data),
 };

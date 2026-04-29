@@ -115,6 +115,39 @@ func WithAdmin(jwtMgr *auth.Manager, h gin.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// WithAdminAndPerm wraps a gin.HandlerFunc with JWT + Admin + Permission middleware
+func WithAdminAndPerm(jwtMgr *auth.Manager, permChecker authbiz.PermissionChecker, permission string, h gin.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		c, _ := gin.CreateTestContext(w)
+		c.Request = r
+		if params := handler.GetGinParams(r); params != nil {
+			c.Params = params
+		}
+
+		JWTMiddleware(jwtMgr)(c)
+		if c.IsAborted() {
+			return
+		}
+
+		AdminMiddleware(jwtMgr)(c)
+		if c.IsAborted() {
+			return
+		}
+
+		RequirePermission(permChecker, permission)(c)
+		if c.IsAborted() {
+			return
+		}
+
+		if claimsVal, exists := c.Get("claims"); exists {
+			r = r.WithContext(context.WithValue(r.Context(), claimsKey, claimsVal))
+			r = handler.SetClaimsInContext(r, claimsVal)
+		}
+
+		h(c)
+	}
+}
+
 // JWTMiddleware validates Bearer token and injects claims into context.
 func JWTMiddleware(jwtMgr *auth.Manager) gin.HandlerFunc {
 	return func(c *gin.Context) {

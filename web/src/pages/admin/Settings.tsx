@@ -22,7 +22,7 @@ import {
     CheckCircle,
     AlertCircle
 } from 'lucide-react';
-import {settingsApi, type SystemSettings} from '@/lib/api/system';
+import {settingsApi, type GroupedSettings, type SettingItem} from '@/lib/api/system';
 
 interface FormData {
     site_name: string;
@@ -125,12 +125,29 @@ const Settings: React.FC = () => {
 
     const fetchSettings = async () => {
         try {
-            const settings = await settingsApi.get();
-            if (settings) {
+            const grouped = await settingsApi.get();
+            if (grouped) {
+                const getSettingValue = (key: string): string => {
+                    for (const category of Object.values(grouped)) {
+                        const items = category as SettingItem[];
+                        const found = items?.find(s => s.key === key);
+                        if (found) return found.value;
+                    }
+                    return '';
+                };
                 setFormData(prev => ({
                     ...prev,
-                    site_name: settings.site_name || prev.site_name,
-                    site_description: settings.site_description || prev.site_description,
+                    site_name: getSettingValue('site_name') || prev.site_name,
+                    site_description: getSettingValue('site_description') || prev.site_description,
+                    base_url: getSettingValue('base_url') || prev.base_url,
+                    enable_register: getSettingValue('allow_registration') || prev.enable_register,
+                    allow_upload: getSettingValue('allow_upload') || prev.allow_upload,
+                    max_file_size: getSettingValue('max_upload_size_video') || prev.max_file_size,
+                    auto_transcode: getSettingValue('auto_approve') || prev.auto_transcode,
+                    smtp_server: getSettingValue('smtp_host') || prev.smtp_server,
+                    smtp_port: getSettingValue('smtp_port') || prev.smtp_port,
+                    smtp_username: getSettingValue('smtp_user') || prev.smtp_username,
+                    smtp_password: getSettingValue('smtp_password') || prev.smtp_password,
                 }));
             }
         } catch (error) {
@@ -165,13 +182,21 @@ const Settings: React.FC = () => {
     const handleSave = async () => {
         try {
             setSaving(true);
-            await settingsApi.update({
-                site_name: formData.site_name,
-                site_description: formData.site_description,
-                allow_register: formData.enable_register === 'true',
-                allow_upload: true,
-                max_upload_size: parseInt(formData.max_file_size) * 1024 * 1024,
-            });
+            const settings = [
+                {key: 'site_name', value: formData.site_name},
+                {key: 'site_description', value: formData.site_description},
+                {key: 'base_url', value: formData.base_url},
+                {key: 'allow_registration', value: formData.enable_register},
+                {key: 'allow_upload', value: formData.allow_upload || 'true'},
+                {key: 'max_upload_size_video', value: String(parseInt(formData.max_file_size) * 1024 * 1024 || 5368709120)},
+                {key: 'auto_approve', value: formData.auto_transcode},
+                {key: 'require_review', value: formData.auto_transcode === 'true' ? 'false' : 'true'},
+                {key: 'smtp_host', value: formData.smtp_server},
+                {key: 'smtp_port', value: formData.smtp_port},
+                {key: 'smtp_user', value: formData.smtp_username},
+                {key: 'smtp_password', value: formData.smtp_password},
+            ];
+            await settingsApi.update({settings});
             setMessage({type: 'success', text: t('settings.saveSuccess') || 'Settings saved successfully'});
             setTimeout(() => setMessage(null), 3000);
         } catch (error) {
