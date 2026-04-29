@@ -1,7 +1,7 @@
 ﻿import React, {useState, useEffect} from 'react';
 import {useNavigate} from '@tanstack/react-router';
 import {useTranslation} from 'react-i18next';
-import {CheckCircle, Users, ChevronRight, Loader2} from 'lucide-react';
+import {CheckCircle, Users, ChevronRight} from 'lucide-react';
 import {channelApi} from '@/lib/api/channel';
 
 interface RecommendedChannelsProps {

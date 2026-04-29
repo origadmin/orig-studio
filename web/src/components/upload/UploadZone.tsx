@@ -1,9 +1,9 @@
-﻿/*
+/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
 import React, {useCallback, useState} from 'react';
-import {useUpload} from '../../hooks/useUpload';
+import {useUpload} from '@/hooks/useUpload';
 
 export interface UploadZoneProps {
     onFilesAdded?: (files: File[]) => void;

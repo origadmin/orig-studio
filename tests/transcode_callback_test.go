@@ -16,9 +16,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"origadmin/application/origcms/internal/data/enums"
-	"origadmin/application/origcms/internal/pubsub"
-	"origadmin/application/origcms/internal/svc-media/biz"
-	"origadmin/application/origcms/internal/svc-media/data"
+	"origadmin/application/origcms/internal/infra/pubsub"
+	"origadmin/application/origcms/internal/features/media/biz"
+	"origadmin/application/origcms/internal/features/media/dal"
 )
 
 // MockPublisher implements message.Publisher interface for testing
@@ -66,9 +66,9 @@ func (m *MockMediaUseCaseWithPublish) Publish(mediaID string, event *biz.Encodin
 func TestTranscodeCompleteCallback(t *testing.T) {
 	// Setup dependencies
 	mockStorage := NewMockStorage()
-	mediaRepo := data.NewInMemoryMediaRepo()
-	profileRepo := data.NewInMemoryEncodeProfileRepo()
-	encodingRepo := data.NewInMemoryEncodingTaskRepo()
+	mediaRepo := dal.NewInMemoryMediaRepo()
+	profileRepo := dal.NewInMemoryEncodeProfileRepo()
+	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	mockWorker := NewMockTranscodeWorker()
 	mockPublisher := NewMockPublisher()
 	
@@ -343,9 +343,9 @@ func TestTranscodeCompleteCallback(t *testing.T) {
 func TestTranscodeProgressCallback(t *testing.T) {
 	// Setup dependencies
 	mockStorage := NewMockStorage()
-	mediaRepo := data.NewInMemoryMediaRepo()
-	profileRepo := data.NewInMemoryEncodeProfileRepo()
-	encodingRepo := data.NewInMemoryEncodingTaskRepo()
+	mediaRepo := dal.NewInMemoryMediaRepo()
+	profileRepo := dal.NewInMemoryEncodeProfileRepo()
+	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	mockWorker := NewMockTranscodeWorker()
 	mockPublisher := NewMockPublisher()
 	
@@ -438,9 +438,9 @@ func TestTranscodeProgressCallback(t *testing.T) {
 func TestTranscodeTaskStatusCallback(t *testing.T) {
 	// Setup dependencies
 	mockStorage := NewMockStorage()
-	mediaRepo := data.NewInMemoryMediaRepo()
-	profileRepo := data.NewInMemoryEncodeProfileRepo()
-	encodingRepo := data.NewInMemoryEncodingTaskRepo()
+	mediaRepo := dal.NewInMemoryMediaRepo()
+	profileRepo := dal.NewInMemoryEncodeProfileRepo()
+	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	mockWorker := NewMockTranscodeWorker()
 	mockPublisher := NewMockPublisher()
 	

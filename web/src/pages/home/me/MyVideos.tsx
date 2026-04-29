@@ -140,7 +140,7 @@ const MyVideos = () => {
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <Clock className="w-3 h-3"/>
-                                        {formatRelativeTime(item.created_at)}
+                                        {formatRelativeTime(item.create_time)}
                                     </div>
                                 </div>
 

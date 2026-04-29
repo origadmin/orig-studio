@@ -4519,9 +4519,9 @@ components:
                 user_id:
                     type: string
                     description: channel.field.user_id
-                friendly_token:
+                short_token:
                     type: string
-                    description: channel.field.friendly_token
+                    description: channel.field.short_token — URL-friendly token for public access
                 subscriber_count:
                     type: string
                     description: channel.field.subscriber_count
@@ -4764,9 +4764,6 @@ components:
                 state:
                     type: string
                     description: 'media.field.state — publication state: draft, active, deleted'
-                friendly_token:
-                    type: string
-                    description: media.field.friendly_token — URL-friendly token for public access
                 short_token:
                     type: string
                     description: media.field.short_token — URL-friendly token for public access
@@ -4805,6 +4802,20 @@ components:
                 listable:
                     type: boolean
                     description: media.field.listable
+                user:
+                    allOf:
+                        - $ref: '#/components/schemas/api.v1.services.types.User'
+                    description: |-
+                        Edge fields - abgen auto-matches entity.Media.Edges.Xxx
+                         User holds the value of the user edge.
+                category:
+                    allOf:
+                        - $ref: '#/components/schemas/api.v1.services.types.Category'
+                    description: Category holds the value of the category edge.
+                channel:
+                    allOf:
+                        - $ref: '#/components/schemas/api.v1.services.types.Channel'
+                    description: Channel holds the value of the channel edge.
             description: Media is the model entity for Media.
         api.v1.services.types.MediaMetadata:
             type: object
@@ -5158,6 +5169,9 @@ components:
                     type: string
                     description: user.field.login_time
                     format: date-time
+                slug:
+                    type: string
+                    description: user.field.slug — public identifier (separate from login username)
                 profile:
                     allOf:
                         - $ref: '#/components/schemas/api.v1.services.types.UserProfile'

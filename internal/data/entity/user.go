@@ -25,6 +25,8 @@ type User struct {
 	Password string `json:"password,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Slug holds the value of the "slug" field.
+	Slug string `json:"slug,omitempty"`
 	// FirstName holds the value of the "first_name" field.
 	FirstName string `json:"first_name,omitempty"`
 	// LastName holds the value of the "last_name" field.
@@ -287,7 +289,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case user.FieldMediaCount:
 			values[i] = new(sql.NullInt64)
-		case user.FieldID, user.FieldUsername, user.FieldEmail, user.FieldPassword, user.FieldName, user.FieldFirstName, user.FieldLastName, user.FieldRole, user.FieldTitle, user.FieldDescription, user.FieldLogo, user.FieldLocation:
+		case user.FieldID, user.FieldUsername, user.FieldEmail, user.FieldPassword, user.FieldName, user.FieldSlug, user.FieldFirstName, user.FieldLastName, user.FieldRole, user.FieldTitle, user.FieldDescription, user.FieldLogo, user.FieldLocation:
 			values[i] = new(sql.NullString)
 		case user.FieldDateJoined, user.FieldDateAdded, user.FieldLastLogin:
 			values[i] = new(sql.NullTime)
@@ -335,6 +337,12 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				_m.Name = value.String
+			}
+		case user.FieldSlug:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field slug", values[i])
+			} else if value.Valid {
+				_m.Slug = value.String
 			}
 		case user.FieldFirstName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -599,6 +607,9 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
+	builder.WriteString(", ")
+	builder.WriteString("slug=")
+	builder.WriteString(_m.Slug)
 	builder.WriteString(", ")
 	builder.WriteString("first_name=")
 	builder.WriteString(_m.FirstName)

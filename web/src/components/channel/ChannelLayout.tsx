@@ -455,7 +455,7 @@ const AboutTabContent: React.FC<{
         {label: t('channel.subscribers'), value: formatCount(subscriberCount), icon: '👥'},
         {label: t('channel.videoCount'), value: String(channel.video_count || channel.media_count || 0), icon: '🎬'},
         {label: t('channel.views'), value: formatCount(channel.total_views || 0), icon: '👁️'},
-        {label: t('channel.joinDate'), value: channel.created_at ? new Date(channel.created_at).toLocaleDateString() : '-', icon: '📅'},
+        {label: t('channel.joinDate'), value: channel.create_time ? new Date(channel.create_time).toLocaleDateString() : '-', icon: '📅'},
     ];
 
     const links = channel.links || [];
@@ -592,7 +592,7 @@ function mapMediaToVideo(media: any): {
         thumbnail: media.thumbnail || media.poster,
         duration: media.duration,
         view_count: media.view_count,
-        published_at: media.published_at || media.created_at,
+        published_at: media.published_at || media.create_time,
         progress: 0,
     };
 }

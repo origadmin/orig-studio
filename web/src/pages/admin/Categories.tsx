@@ -1,7 +1,7 @@
 import {Spinner} from "@/components/ui/spinner"
 import React, {useState, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
-import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
+import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
@@ -40,8 +40,9 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, RotateCcw} from 'lucide-react';
+import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, RotateCcw, ToggleLeft, ToggleRight} from 'lucide-react';
 import {adminCategoryApi, Category} from '@/lib/api/category';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {TablePagination} from '@/components/common/TablePagination';
 
 const Categories: React.FC = () => {
@@ -152,6 +153,17 @@ const Categories: React.FC = () => {
     const openDeleteDialog = (category: Category) => {
         setCurrentCategory(category);
         setShowDeleteDialog(true);
+    };
+
+    const handleToggleStatus = async (category: Category) => {
+        const isEnabled = category.status === 1 || String(category.status) === 'active' || String(category.status) === 'Enabled';
+        const newStatus = isEnabled ? 0 : 1;
+        try {
+            await adminCategoryApi.patch(category.id, {status: newStatus});
+            await loadCategories();
+        } catch (err) {
+            console.error('Failed to toggle category status:', err);
+        }
     };
 
     const handleView = (category: Category) => {
@@ -329,6 +341,12 @@ const Categories: React.FC = () => {
                                                         <Edit className="mr-2 h-4 w-4"/>
                                                         {t('admin.edit')}
                                                     </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleToggleStatus(category)}>
+                                                        {(category.status === 1 || String(category.status) === 'active' || String(category.status) === 'Enabled')
+                                                            ? <><ToggleRight className="mr-2 h-4 w-4"/>{t('admin.disable') || "Disable"}</>
+                                                            : <><ToggleLeft className="mr-2 h-4 w-4"/>{t('admin.enable') || "Enable"}</>
+                                                        }
+                                                    </DropdownMenuItem>
                                                     <DropdownMenuItem 
                                                         className="text-destructive focus:text-destructive" 
                                                         onClick={() => openDeleteDialog(category)}
@@ -390,6 +408,25 @@ const Categories: React.FC = () => {
                             />
                         </div>
                         <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.parent') || "Parent Category"}</label>
+                            <Select
+                                value={formData.parent_id !== undefined && formData.parent_id !== null ? String(formData.parent_id) : ''}
+                                onValueChange={(value) => setFormData({...formData, parent_id: value ? Number(value) : undefined})}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder={t('admin.selectParentCategory') || "Select parent category"}/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="">{t('admin.noParent') || "No Parent (Top Level)"}</SelectItem>
+                                    {categories.map(cat => (
+                                        <SelectItem key={cat.id} value={String(cat.id)}>
+                                            {cat.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div>
                             <label className="block text-sm font-medium mb-1">{t('admin.order') || "Order"}</label>
                             <Input
                                 type="number"
@@ -437,6 +474,25 @@ const Categories: React.FC = () => {
                                 value={formData.description}
                                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                             />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.parent') || "Parent Category"}</label>
+                            <Select
+                                value={formData.parent_id !== undefined && formData.parent_id !== null ? String(formData.parent_id) : ''}
+                                onValueChange={(value) => setFormData({...formData, parent_id: value ? Number(value) : undefined})}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder={t('admin.selectParentCategory') || "Select parent category"}/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="">{t('admin.noParent') || "No Parent (Top Level)"}</SelectItem>
+                                    {categories.filter(cat => cat.id !== currentCategory?.id).map(cat => (
+                                        <SelectItem key={cat.id} value={String(cat.id)}>
+                                            {cat.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-1">{t('admin.order') || "Order"}</label>

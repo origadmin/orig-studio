@@ -43,6 +43,26 @@ func (_u *TagUpdate) SetNillableTitle(v *string) *TagUpdate {
 	return _u
 }
 
+// SetSlug sets the "slug" field.
+func (_u *TagUpdate) SetSlug(v string) *TagUpdate {
+	_u.mutation.SetSlug(v)
+	return _u
+}
+
+// SetNillableSlug sets the "slug" field if the given value is not nil.
+func (_u *TagUpdate) SetNillableSlug(v *string) *TagUpdate {
+	if v != nil {
+		_u.SetSlug(*v)
+	}
+	return _u
+}
+
+// ClearSlug clears the value of the "slug" field.
+func (_u *TagUpdate) ClearSlug() *TagUpdate {
+	_u.mutation.ClearSlug()
+	return _u
+}
+
 // SetMediaCount sets the "media_count" field.
 func (_u *TagUpdate) SetMediaCount(v int) *TagUpdate {
 	_u.mutation.ResetMediaCount()
@@ -153,6 +173,11 @@ func (_u *TagUpdate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Tag.title": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Slug(); ok {
+		if err := tag.SlugValidator(v); err != nil {
+			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "Tag.slug": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.ListingsThumbnail(); ok {
 		if err := tag.ListingsThumbnailValidator(v); err != nil {
 			return &ValidationError{Name: "listings_thumbnail", err: fmt.Errorf(`entity: validator failed for field "Tag.listings_thumbnail": %w`, err)}
@@ -181,6 +206,12 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(tag.FieldTitle, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Slug(); ok {
+		_spec.SetField(tag.FieldSlug, field.TypeString, value)
+	}
+	if _u.mutation.SlugCleared() {
+		_spec.ClearField(tag.FieldSlug, field.TypeString)
 	}
 	if value, ok := _u.mutation.MediaCount(); ok {
 		_spec.SetField(tag.FieldMediaCount, field.TypeInt, value)
@@ -269,6 +300,26 @@ func (_u *TagUpdateOne) SetNillableTitle(v *string) *TagUpdateOne {
 	if v != nil {
 		_u.SetTitle(*v)
 	}
+	return _u
+}
+
+// SetSlug sets the "slug" field.
+func (_u *TagUpdateOne) SetSlug(v string) *TagUpdateOne {
+	_u.mutation.SetSlug(v)
+	return _u
+}
+
+// SetNillableSlug sets the "slug" field if the given value is not nil.
+func (_u *TagUpdateOne) SetNillableSlug(v *string) *TagUpdateOne {
+	if v != nil {
+		_u.SetSlug(*v)
+	}
+	return _u
+}
+
+// ClearSlug clears the value of the "slug" field.
+func (_u *TagUpdateOne) ClearSlug() *TagUpdateOne {
+	_u.mutation.ClearSlug()
 	return _u
 }
 
@@ -395,6 +446,11 @@ func (_u *TagUpdateOne) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Tag.title": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Slug(); ok {
+		if err := tag.SlugValidator(v); err != nil {
+			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "Tag.slug": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.ListingsThumbnail(); ok {
 		if err := tag.ListingsThumbnailValidator(v); err != nil {
 			return &ValidationError{Name: "listings_thumbnail", err: fmt.Errorf(`entity: validator failed for field "Tag.listings_thumbnail": %w`, err)}
@@ -440,6 +496,12 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(tag.FieldTitle, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Slug(); ok {
+		_spec.SetField(tag.FieldSlug, field.TypeString, value)
+	}
+	if _u.mutation.SlugCleared() {
+		_spec.ClearField(tag.FieldSlug, field.TypeString)
 	}
 	if value, ok := _u.mutation.MediaCount(); ok {
 		_spec.SetField(tag.FieldMediaCount, field.TypeInt, value)

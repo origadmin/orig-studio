@@ -6,98 +6,110 @@ import (
 	"origadmin/application/origcms/internal/data/entity"
 )
 
-func TestConvertMediaWithEdges_NilInput(t *testing.T) {
-	result := ConvertMediaWithEdges(nil)
+func TestConvertMediaToMediaPB_NilInput(t *testing.T) {
+	result := ConvertMediaToMediaPB(nil)
 	if result != nil {
 		t.Errorf("expected nil, got %v", result)
 	}
 }
 
-func TestConvertMediaWithEdges_NoEdges(t *testing.T) {
+func TestConvertMediaToMediaPB_BasicFieldsOnly(t *testing.T) {
 	from := &entity.Media{
-		ID:    "test-id",
-		Title: "Test Media",
+		ID:       "media-1",
+		Title:    "Test Video",
+		Type:     "video",
+		URL:      "https://example.com/video.mp4",
+		Duration: 120,
+		UserID:   "user-1",
 	}
 
-	result := ConvertMediaWithEdges(from)
+	result := ConvertMediaToMediaPB(from)
 	if result == nil {
 		t.Fatal("expected non-nil result")
 	}
-	if result.Media == nil {
-		t.Fatal("expected non-nil Media")
+	if result.Id != "media-1" {
+		t.Errorf("expected Id=media-1, got %s", result.Id)
 	}
-	if result.Media.Id != "test-id" {
-		t.Errorf("expected Id=test-id, got %s", result.Media.Id)
+	if result.Title != "Test Video" {
+		t.Errorf("expected Title=Test Video, got %s", result.Title)
 	}
-	if result.Media.Title != "Test Media" {
-		t.Errorf("expected Title=Test Media, got %s", result.Media.Title)
+	if result.Type != "video" {
+		t.Errorf("expected Type=video, got %s", result.Type)
 	}
+	if result.Url != "https://example.com/video.mp4" {
+		t.Errorf("expected Url=https://example.com/video.mp4, got %s", result.Url)
+	}
+	if result.Duration != 120 {
+		t.Errorf("expected Duration=120, got %d", result.Duration)
+	}
+	if result.UserId != "user-1" {
+		t.Errorf("expected UserId=user-1, got %s", result.UserId)
+	}
+	// No edges set, so edge fields should be nil
 	if result.User != nil {
-		t.Errorf("expected nil User, got %v", result.User)
+		t.Errorf("expected nil User edge, got %v", result.User)
 	}
 	if result.Category != nil {
-		t.Errorf("expected nil Category, got %v", result.Category)
+		t.Errorf("expected nil Category edge, got %v", result.Category)
 	}
 	if result.Channel != nil {
-		t.Errorf("expected nil Channel, got %v", result.Channel)
+		t.Errorf("expected nil Channel edge, got %v", result.Channel)
 	}
 }
 
-func TestConvertMediaWithEdges_WithUserEdge(t *testing.T) {
+func TestConvertMediaToMediaPB_WithUserEdge(t *testing.T) {
 	from := &entity.Media{
-		ID:     "media-1",
-		Title:  "Test Media",
-		UserID: "user-1",
-	}
-	from.Edges.User = &entity.User{
-		ID:       "user-1",
-		Username: "testuser",
-		Name:     "Test Nickname",
-		Logo:     "https://example.com/avatar.png",
+		ID:    "media-1",
+		Title: "Test Video",
+		Edges: entity.MediaEdges{
+			User: &entity.User{
+				ID:       "user-1",
+				Username: "testuser",
+				Email:    "test@example.com",
+			},
+		},
 	}
 
-	result := ConvertMediaWithEdges(from)
+	result := ConvertMediaToMediaPB(from)
 	if result == nil {
 		t.Fatal("expected non-nil result")
 	}
 	if result.User == nil {
 		t.Fatal("expected non-nil User edge")
 	}
-	if result.User.ID != "user-1" {
-		t.Errorf("expected User.ID=user-1, got %s", result.User.ID)
+	if result.User.Id != "user-1" {
+		t.Errorf("expected User.Id=user-1, got %s", result.User.Id)
 	}
 	if result.User.Username != "testuser" {
 		t.Errorf("expected User.Username=testuser, got %s", result.User.Username)
 	}
-	if result.User.Nickname != "Test Nickname" {
-		t.Errorf("expected User.Nickname=Test Nickname, got %s", result.User.Nickname)
-	}
-	if result.User.Avatar != "https://example.com/avatar.png" {
-		t.Errorf("expected User.Avatar=https://example.com/avatar.png, got %s", result.User.Avatar)
+	if result.User.Email != "test@example.com" {
+		t.Errorf("expected User.Email=test@example.com, got %s", result.User.Email)
 	}
 }
 
-func TestConvertMediaWithEdges_WithCategoryEdge(t *testing.T) {
+func TestConvertMediaToMediaPB_WithCategoryEdge(t *testing.T) {
 	from := &entity.Media{
-		ID:         "media-1",
-		Title:      "Test Media",
-		CategoryID: 42,
-	}
-	from.Edges.Category = &entity.Category{
-		ID:   42,
-		Name: "Tech",
-		Slug: "tech",
+		ID:    "media-1",
+		Title: "Test Video",
+		Edges: entity.MediaEdges{
+			Category: &entity.Category{
+				ID:   42,
+				Name: "Tech",
+				Slug: "tech",
+			},
+		},
 	}
 
-	result := ConvertMediaWithEdges(from)
+	result := ConvertMediaToMediaPB(from)
 	if result == nil {
 		t.Fatal("expected non-nil result")
 	}
 	if result.Category == nil {
 		t.Fatal("expected non-nil Category edge")
 	}
-	if result.Category.ID != 42 {
-		t.Errorf("expected Category.ID=42, got %d", result.Category.ID)
+	if result.Category.Id != 42 {
+		t.Errorf("expected Category.Id=42, got %d", result.Category.Id)
 	}
 	if result.Category.Name != "Tech" {
 		t.Errorf("expected Category.Name=Tech, got %s", result.Category.Name)
@@ -107,74 +119,87 @@ func TestConvertMediaWithEdges_WithCategoryEdge(t *testing.T) {
 	}
 }
 
-func TestConvertMediaWithEdges_WithChannelEdge(t *testing.T) {
+func TestConvertMediaToMediaPB_WithChannelEdge(t *testing.T) {
 	from := &entity.Media{
-		ID:        "media-1",
-		Title:     "Test Media",
-		ChannelID: "ch-1",
-	}
-	from.Edges.Channel = &entity.Channel{
-		ID:    "ch-1",
-		Title: "My Channel",
+		ID:    "media-1",
+		Title: "Test Video",
+		Edges: entity.MediaEdges{
+			Channel: &entity.Channel{
+				ID:    "ch-1",
+				Title: "My Channel",
+			},
+		},
 	}
 
-	result := ConvertMediaWithEdges(from)
+	result := ConvertMediaToMediaPB(from)
 	if result == nil {
 		t.Fatal("expected non-nil result")
 	}
 	if result.Channel == nil {
 		t.Fatal("expected non-nil Channel edge")
 	}
-	if result.Channel.ID != "ch-1" {
-		t.Errorf("expected Channel.ID=ch-1, got %s", result.Channel.ID)
+	if result.Channel.Id != "ch-1" {
+		t.Errorf("expected Channel.Id=ch-1, got %s", result.Channel.Id)
 	}
 	if result.Channel.Title != "My Channel" {
 		t.Errorf("expected Channel.Title=My Channel, got %s", result.Channel.Title)
 	}
 }
 
-func TestConvertMediaWithEdges_AllEdges(t *testing.T) {
+func TestConvertMediaToMediaPB_AllEdges(t *testing.T) {
 	from := &entity.Media{
-		ID:         "media-1",
-		Title:      "Full Media",
-		UserID:     "user-1",
-		CategoryID: 5,
-		ChannelID:  "ch-1",
-	}
-	from.Edges.User = &entity.User{
-		ID:       "user-1",
-		Username: "john",
-		Name:     "John Doe",
-		Logo:     "avatar.jpg",
-	}
-	from.Edges.Category = &entity.Category{
-		ID:   5,
-		Name: "Music",
-		Slug: "music",
-	}
-	from.Edges.Channel = &entity.Channel{
-		ID:    "ch-1",
-		Title: "John's Channel",
+		ID:    "media-1",
+		Title: "Test Video",
+		Edges: entity.MediaEdges{
+			User: &entity.User{
+				ID:       "user-1",
+				Username: "john",
+				Email:    "john@example.com",
+			},
+			Category: &entity.Category{
+				ID:   5,
+				Name: "Music",
+				Slug: "music",
+			},
+			Channel: &entity.Channel{
+				ID:    "ch-1",
+				Title: "John's Channel",
+			},
+		},
 	}
 
-	result := ConvertMediaWithEdges(from)
+	result := ConvertMediaToMediaPB(from)
 	if result == nil {
 		t.Fatal("expected non-nil result")
 	}
+	// Verify User edge
 	if result.User == nil {
 		t.Fatal("expected non-nil User edge")
 	}
+	if result.User.Id != "user-1" {
+		t.Errorf("expected User.Id=user-1, got %s", result.User.Id)
+	}
+	if result.User.Username != "john" {
+		t.Errorf("expected User.Username=john, got %s", result.User.Username)
+	}
+	// Verify Category edge
 	if result.Category == nil {
 		t.Fatal("expected non-nil Category edge")
 	}
+	if result.Category.Id != 5 {
+		t.Errorf("expected Category.Id=5, got %d", result.Category.Id)
+	}
+	if result.Category.Name != "Music" {
+		t.Errorf("expected Category.Name=Music, got %s", result.Category.Name)
+	}
+	// Verify Channel edge
 	if result.Channel == nil {
 		t.Fatal("expected non-nil Channel edge")
 	}
-	// Verify base Media fields are still populated
-	if result.Media.Id != "media-1" {
-		t.Errorf("expected Media.Id=media-1, got %s", result.Media.Id)
+	if result.Channel.Id != "ch-1" {
+		t.Errorf("expected Channel.Id=ch-1, got %s", result.Channel.Id)
 	}
-	if result.Media.UserId != "user-1" {
-		t.Errorf("expected Media.UserId=user-1, got %s", result.Media.UserId)
+	if result.Channel.Title != "John's Channel" {
+		t.Errorf("expected Channel.Title=John's Channel, got %s", result.Channel.Title)
 	}
 }

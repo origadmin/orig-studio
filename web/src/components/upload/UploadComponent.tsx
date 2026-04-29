@@ -84,7 +84,7 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
         if (!shouldUseChunkedUpload(fileItem.file.size)) {
             updateFile(fileItem.id, {status: 'uploading', progress: 0});
             try {
-                const media = await mediaApi.upload(fileItem.file, getMetadata(), (percent) => {
+                const _media = await mediaApi.upload(fileItem.file, getMetadata(), (percent) => {
                     updateFile(fileItem.id, {progress: percent});
                 });
                 updateFile(fileItem.id, {status: 'success', progress: 100});

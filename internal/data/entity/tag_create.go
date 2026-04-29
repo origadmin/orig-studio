@@ -26,6 +26,20 @@ func (_c *TagCreate) SetTitle(v string) *TagCreate {
 	return _c
 }
 
+// SetSlug sets the "slug" field.
+func (_c *TagCreate) SetSlug(v string) *TagCreate {
+	_c.mutation.SetSlug(v)
+	return _c
+}
+
+// SetNillableSlug sets the "slug" field if the given value is not nil.
+func (_c *TagCreate) SetNillableSlug(v *string) *TagCreate {
+	if v != nil {
+		_c.SetSlug(*v)
+	}
+	return _c
+}
+
 // SetMediaCount sets the "media_count" field.
 func (_c *TagCreate) SetMediaCount(v int) *TagCreate {
 	_c.mutation.SetMediaCount(v)
@@ -112,6 +126,11 @@ func (_c *TagCreate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Tag.title": %w`, err)}
 		}
 	}
+	if v, ok := _c.mutation.Slug(); ok {
+		if err := tag.SlugValidator(v); err != nil {
+			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "Tag.slug": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.MediaCount(); !ok {
 		return &ValidationError{Name: "media_count", err: errors.New(`entity: missing required field "Tag.media_count"`)}
 	}
@@ -152,6 +171,10 @@ func (_c *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Title(); ok {
 		_spec.SetField(tag.FieldTitle, field.TypeString, value)
 		_node.Title = value
+	}
+	if value, ok := _c.mutation.Slug(); ok {
+		_spec.SetField(tag.FieldSlug, field.TypeString, value)
+		_node.Slug = value
 	}
 	if value, ok := _c.mutation.MediaCount(); ok {
 		_spec.SetField(tag.FieldMediaCount, field.TypeInt, value)

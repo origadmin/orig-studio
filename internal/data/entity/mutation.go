@@ -3307,7 +3307,6 @@ type ChannelMutation struct {
 	typ           string
 	id            *string
 	title         *string
-	slug          *string
 	description   *string
 	short_token   *string
 	banner_logo   *string
@@ -3498,42 +3497,6 @@ func (m *ChannelMutation) OldTitle(ctx context.Context) (v string, err error) {
 // ResetTitle resets all changes to the "title" field.
 func (m *ChannelMutation) ResetTitle() {
 	m.title = nil
-}
-
-// SetSlug sets the "slug" field.
-func (m *ChannelMutation) SetSlug(s string) {
-	m.slug = &s
-}
-
-// Slug returns the value of the "slug" field in the mutation.
-func (m *ChannelMutation) Slug() (r string, exists bool) {
-	v := m.slug
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSlug returns the old "slug" field's value of the Channel entity.
-// If the Channel object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ChannelMutation) OldSlug(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSlug is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSlug requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSlug: %w", err)
-	}
-	return oldValue.Slug, nil
-}
-
-// ResetSlug resets all changes to the "slug" field.
-func (m *ChannelMutation) ResetSlug() {
-	m.slug = nil
 }
 
 // SetDescription sets the "description" field.
@@ -3831,15 +3794,12 @@ func (m *ChannelMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ChannelMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 7)
 	if m.user != nil {
 		fields = append(fields, channel.FieldUserID)
 	}
 	if m.title != nil {
 		fields = append(fields, channel.FieldTitle)
-	}
-	if m.slug != nil {
-		fields = append(fields, channel.FieldSlug)
 	}
 	if m.description != nil {
 		fields = append(fields, channel.FieldDescription)
@@ -3868,8 +3828,6 @@ func (m *ChannelMutation) Field(name string) (ent.Value, bool) {
 		return m.UserID()
 	case channel.FieldTitle:
 		return m.Title()
-	case channel.FieldSlug:
-		return m.Slug()
 	case channel.FieldDescription:
 		return m.Description()
 	case channel.FieldShortToken:
@@ -3893,8 +3851,6 @@ func (m *ChannelMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldUserID(ctx)
 	case channel.FieldTitle:
 		return m.OldTitle(ctx)
-	case channel.FieldSlug:
-		return m.OldSlug(ctx)
 	case channel.FieldDescription:
 		return m.OldDescription(ctx)
 	case channel.FieldShortToken:
@@ -3927,13 +3883,6 @@ func (m *ChannelMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTitle(v)
-		return nil
-	case channel.FieldSlug:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSlug(v)
 		return nil
 	case channel.FieldDescription:
 		v, ok := value.(string)
@@ -4024,9 +3973,6 @@ func (m *ChannelMutation) ResetField(name string) error {
 		return nil
 	case channel.FieldTitle:
 		m.ResetTitle()
-		return nil
-	case channel.FieldSlug:
-		m.ResetSlug()
 		return nil
 	case channel.FieldDescription:
 		m.ResetDescription()
@@ -20150,6 +20096,7 @@ type TagMutation struct {
 	typ                string
 	id                 *int
 	title              *string
+	slug               *string
 	media_count        *int
 	addmedia_count     *int
 	listings_thumbnail *string
@@ -20294,6 +20241,55 @@ func (m *TagMutation) OldTitle(ctx context.Context) (v string, err error) {
 // ResetTitle resets all changes to the "title" field.
 func (m *TagMutation) ResetTitle() {
 	m.title = nil
+}
+
+// SetSlug sets the "slug" field.
+func (m *TagMutation) SetSlug(s string) {
+	m.slug = &s
+}
+
+// Slug returns the value of the "slug" field in the mutation.
+func (m *TagMutation) Slug() (r string, exists bool) {
+	v := m.slug
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSlug returns the old "slug" field's value of the Tag entity.
+// If the Tag object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TagMutation) OldSlug(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSlug is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSlug requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSlug: %w", err)
+	}
+	return oldValue.Slug, nil
+}
+
+// ClearSlug clears the value of the "slug" field.
+func (m *TagMutation) ClearSlug() {
+	m.slug = nil
+	m.clearedFields[tag.FieldSlug] = struct{}{}
+}
+
+// SlugCleared returns if the "slug" field was cleared in this mutation.
+func (m *TagMutation) SlugCleared() bool {
+	_, ok := m.clearedFields[tag.FieldSlug]
+	return ok
+}
+
+// ResetSlug resets all changes to the "slug" field.
+func (m *TagMutation) ResetSlug() {
+	m.slug = nil
+	delete(m.clearedFields, tag.FieldSlug)
 }
 
 // SetMediaCount sets the "media_count" field.
@@ -20476,9 +20472,12 @@ func (m *TagMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TagMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.title != nil {
 		fields = append(fields, tag.FieldTitle)
+	}
+	if m.slug != nil {
+		fields = append(fields, tag.FieldSlug)
 	}
 	if m.media_count != nil {
 		fields = append(fields, tag.FieldMediaCount)
@@ -20496,6 +20495,8 @@ func (m *TagMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case tag.FieldTitle:
 		return m.Title()
+	case tag.FieldSlug:
+		return m.Slug()
 	case tag.FieldMediaCount:
 		return m.MediaCount()
 	case tag.FieldListingsThumbnail:
@@ -20511,6 +20512,8 @@ func (m *TagMutation) OldField(ctx context.Context, name string) (ent.Value, err
 	switch name {
 	case tag.FieldTitle:
 		return m.OldTitle(ctx)
+	case tag.FieldSlug:
+		return m.OldSlug(ctx)
 	case tag.FieldMediaCount:
 		return m.OldMediaCount(ctx)
 	case tag.FieldListingsThumbnail:
@@ -20530,6 +20533,13 @@ func (m *TagMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTitle(v)
+		return nil
+	case tag.FieldSlug:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSlug(v)
 		return nil
 	case tag.FieldMediaCount:
 		v, ok := value.(int)
@@ -20589,7 +20599,11 @@ func (m *TagMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *TagMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(tag.FieldSlug) {
+		fields = append(fields, tag.FieldSlug)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -20602,6 +20616,11 @@ func (m *TagMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *TagMutation) ClearField(name string) error {
+	switch name {
+	case tag.FieldSlug:
+		m.ClearSlug()
+		return nil
+	}
 	return fmt.Errorf("unknown Tag nullable field %s", name)
 }
 
@@ -20611,6 +20630,9 @@ func (m *TagMutation) ResetField(name string) error {
 	switch name {
 	case tag.FieldTitle:
 		m.ResetTitle()
+		return nil
+	case tag.FieldSlug:
+		m.ResetSlug()
 		return nil
 	case tag.FieldMediaCount:
 		m.ResetMediaCount()
@@ -22447,6 +22469,7 @@ type UserMutation struct {
 	email                     *string
 	password                  *string
 	name                      *string
+	slug                      *string
 	first_name                *string
 	last_name                 *string
 	is_active                 *bool
@@ -22775,6 +22798,55 @@ func (m *UserMutation) OldName(ctx context.Context) (v string, err error) {
 // ResetName resets all changes to the "name" field.
 func (m *UserMutation) ResetName() {
 	m.name = nil
+}
+
+// SetSlug sets the "slug" field.
+func (m *UserMutation) SetSlug(s string) {
+	m.slug = &s
+}
+
+// Slug returns the value of the "slug" field in the mutation.
+func (m *UserMutation) Slug() (r string, exists bool) {
+	v := m.slug
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSlug returns the old "slug" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldSlug(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSlug is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSlug requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSlug: %w", err)
+	}
+	return oldValue.Slug, nil
+}
+
+// ClearSlug clears the value of the "slug" field.
+func (m *UserMutation) ClearSlug() {
+	m.slug = nil
+	m.clearedFields[user.FieldSlug] = struct{}{}
+}
+
+// SlugCleared returns if the "slug" field was cleared in this mutation.
+func (m *UserMutation) SlugCleared() bool {
+	_, ok := m.clearedFields[user.FieldSlug]
+	return ok
+}
+
+// ResetSlug resets all changes to the "slug" field.
+func (m *UserMutation) ResetSlug() {
+	m.slug = nil
+	delete(m.clearedFields, user.FieldSlug)
 }
 
 // SetFirstName sets the "first_name" field.
@@ -24663,7 +24735,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 25)
+	fields := make([]string, 0, 26)
 	if m.username != nil {
 		fields = append(fields, user.FieldUsername)
 	}
@@ -24675,6 +24747,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
+	}
+	if m.slug != nil {
+		fields = append(fields, user.FieldSlug)
 	}
 	if m.first_name != nil {
 		fields = append(fields, user.FieldFirstName)
@@ -24755,6 +24830,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Password()
 	case user.FieldName:
 		return m.Name()
+	case user.FieldSlug:
+		return m.Slug()
 	case user.FieldFirstName:
 		return m.FirstName()
 	case user.FieldLastName:
@@ -24814,6 +24891,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldPassword(ctx)
 	case user.FieldName:
 		return m.OldName(ctx)
+	case user.FieldSlug:
+		return m.OldSlug(ctx)
 	case user.FieldFirstName:
 		return m.OldFirstName(ctx)
 	case user.FieldLastName:
@@ -24892,6 +24971,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case user.FieldSlug:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSlug(v)
 		return nil
 	case user.FieldFirstName:
 		v, ok := value.(string)
@@ -25085,6 +25171,9 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *UserMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(user.FieldSlug) {
+		fields = append(fields, user.FieldSlug)
+	}
 	if m.FieldCleared(user.FieldFirstName) {
 		fields = append(fields, user.FieldFirstName)
 	}
@@ -25123,6 +25212,9 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
 	switch name {
+	case user.FieldSlug:
+		m.ClearSlug()
+		return nil
 	case user.FieldFirstName:
 		m.ClearFirstName()
 		return nil
@@ -25166,6 +25258,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldName:
 		m.ResetName()
+		return nil
+	case user.FieldSlug:
+		m.ResetSlug()
 		return nil
 	case user.FieldFirstName:
 		m.ResetFirstName()

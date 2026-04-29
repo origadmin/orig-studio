@@ -9,74 +9,74 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./routes/__root";
-import { Route as AdminRouteImport } from "./routes/admin";
-import { Route as PortalRouteImport } from "./routes/_portal";
-import { Route as AdminIndexRouteImport } from "./routes/admin.index";
-import { Route as PortalIndexRouteImport } from "./routes/_portal.index";
-import { Route as AuthSignupRouteImport } from "./routes/auth.signup";
-import { Route as AuthSigninRouteImport } from "./routes/auth.signin";
-import { Route as AdminUsersRouteImport } from "./routes/admin.users";
-import { Route as AdminTagsRouteImport } from "./routes/admin.tags";
-import { Route as AdminSettingsRouteImport } from "./routes/admin.settings";
-import { Route as AdminPortalRouteImport } from "./routes/admin.portal";
-import { Route as AdminPlaylistsRouteImport } from "./routes/admin.playlists";
-import { Route as AdminPermissionsRouteImport } from "./routes/admin.permissions";
-import { Route as AdminMediaRouteImport } from "./routes/admin.media";
-import { Route as AdminArticlesRouteImport } from "./routes/admin.articles";
-import { Route as AdminCommentsRouteImport } from "./routes/admin.comments";
-import { Route as AdminChannelsRouteImport } from "./routes/admin.channels";
-import { Route as AdminCategoriesRouteImport } from "./routes/admin.categories";
-import { Route as PortalWatchRouteImport } from "./routes/_portal.watch";
-import { Route as PortalTestRouteImport } from "./routes/_portal.test";
-import { Route as PortalTermsRouteImport } from "./routes/_portal.terms";
-import { Route as PortalTagsRouteImport } from "./routes/_portal.tags";
-import { Route as PortalSubscriptionsRouteImport } from "./routes/_portal.subscriptions";
-import { Route as PortalSearchRouteImport } from "./routes/_portal.search";
-import { Route as PortalPrivacyRouteImport } from "./routes/_portal.privacy";
-import { Route as PortalMembersRouteImport } from "./routes/_portal.members";
-import { Route as PortalMeRouteImport } from "./routes/_portal.me";
-import { Route as PortalLatestRouteImport } from "./routes/_portal.latest";
-import { Route as PortalFeaturedRouteImport } from "./routes/_portal.featured";
-import { Route as PortalExploreRouteImport } from "./routes/_portal.explore";
-import { Route as PortalCookiesRouteImport } from "./routes/_portal.cookies";
-import { Route as PortalCategoriesRouteImport } from "./routes/_portal.categories";
-import { Route as PortalAboutRouteImport } from "./routes/_portal.about";
-import { Route as PortalHandleRouteImport } from "./routes/_portal.$handle";
-import { Route as AdminMediaIndexRouteImport } from "./routes/admin.media.index";
-import { Route as AdminTranscodingStatusRouteImport } from "./routes/admin.transcoding.status";
-import { Route as AdminTranscodingProfilesRouteImport } from "./routes/admin.transcoding.profiles";
-import { Route as AdminMediaIdRouteImport } from "./routes/admin.media.$id";
-import { Route as PortalUIdRouteImport } from "./routes/_portal.u.$id";
-import { Route as PortalPlaylistIdRouteImport } from "./routes/_portal.playlist.$id";
-import { Route as PortalMeVideosRouteImport } from "./routes/_portal.me.videos";
-import { Route as PortalMeUploadRouteImport } from "./routes/_portal.me.upload";
-import { Route as PortalMePlaylistsRouteImport } from "./routes/_portal.me.playlists";
-import { Route as PortalMeNotificationsRouteImport } from "./routes/_portal.me.notifications";
-import { Route as PortalMeHistoryRouteImport } from "./routes/_portal.me.history";
-import { Route as PortalMeFavoritesRouteImport } from "./routes/_portal.me.favorites";
-import { Route as PortalMeChannelRouteImport } from "./routes/_portal.me.channel";
-import { Route as PortalChannelIdRouteImport } from "./routes/_portal.channel.$id";
-import { Route as PortalCIdRouteImport } from "./routes/_portal.c.$id";
-import { Route as PortalMediaShortTokenEditRouteImport } from "./routes/_portal.media.$shortToken.edit";
+import { Route as AdminRouteRouteImport } from "./routes/admin/route";
+import { Route as PortalRouteRouteImport } from "./routes/_portal/route";
+import { Route as AdminIndexRouteImport } from "./routes/admin/index";
+import { Route as PortalIndexRouteImport } from "./routes/_portal/index";
+import { Route as AuthSignupRouteImport } from "./routes/auth/signup";
+import { Route as AuthSigninRouteImport } from "./routes/auth/signin";
+import { Route as AdminUsersRouteImport } from "./routes/admin/users";
+import { Route as AdminTagsRouteImport } from "./routes/admin/tags";
+import { Route as AdminSettingsRouteImport } from "./routes/admin/settings";
+import { Route as AdminPortalRouteImport } from "./routes/admin/portal";
+import { Route as AdminPlaylistsRouteImport } from "./routes/admin/playlists";
+import { Route as AdminPermissionsRouteImport } from "./routes/admin/permissions";
+import { Route as AdminCommentsRouteImport } from "./routes/admin/comments";
+import { Route as AdminChannelsRouteImport } from "./routes/admin/channels";
+import { Route as AdminCategoriesRouteImport } from "./routes/admin/categories";
+import { Route as AdminArticlesRouteImport } from "./routes/admin/articles";
+import { Route as PortalWatchRouteImport } from "./routes/_portal/watch";
+import { Route as PortalTestRouteImport } from "./routes/_portal/test";
+import { Route as PortalTermsRouteImport } from "./routes/_portal/terms";
+import { Route as PortalTagsRouteImport } from "./routes/_portal/tags";
+import { Route as PortalSubscriptionsRouteImport } from "./routes/_portal/subscriptions";
+import { Route as PortalSearchRouteImport } from "./routes/_portal/search";
+import { Route as PortalPrivacyRouteImport } from "./routes/_portal/privacy";
+import { Route as PortalMembersRouteImport } from "./routes/_portal/members";
+import { Route as PortalLatestRouteImport } from "./routes/_portal/latest";
+import { Route as PortalFeaturedRouteImport } from "./routes/_portal/featured";
+import { Route as PortalExploreRouteImport } from "./routes/_portal/explore";
+import { Route as PortalCookiesRouteImport } from "./routes/_portal/cookies";
+import { Route as PortalCategoriesRouteImport } from "./routes/_portal/categories";
+import { Route as PortalAboutRouteImport } from "./routes/_portal/about";
+import { Route as PortalHandleRouteImport } from "./routes/_portal/$handle";
+import { Route as AdminMediaRouteRouteImport } from "./routes/admin/media/route";
+import { Route as PortalMeRouteRouteImport } from "./routes/_portal/me/route";
+import { Route as AdminMediaIndexRouteImport } from "./routes/admin/media/index";
+import { Route as AdminTranscodingStatusRouteImport } from "./routes/admin/transcoding.status";
+import { Route as AdminTranscodingProfilesRouteImport } from "./routes/admin/transcoding.profiles";
+import { Route as AdminMediaIdRouteImport } from "./routes/admin/media/$id";
+import { Route as PortalUIdRouteImport } from "./routes/_portal/u.$id";
+import { Route as PortalPlaylistIdRouteImport } from "./routes/_portal/playlist.$id";
+import { Route as PortalMeVideosRouteImport } from "./routes/_portal/me/videos";
+import { Route as PortalMeUploadRouteImport } from "./routes/_portal/me/upload";
+import { Route as PortalMePlaylistsRouteImport } from "./routes/_portal/me/playlists";
+import { Route as PortalMeNotificationsRouteImport } from "./routes/_portal/me/notifications";
+import { Route as PortalMeHistoryRouteImport } from "./routes/_portal/me/history";
+import { Route as PortalMeFavoritesRouteImport } from "./routes/_portal/me/favorites";
+import { Route as PortalMeChannelRouteImport } from "./routes/_portal/me/channel";
+import { Route as PortalChannelIdRouteImport } from "./routes/_portal/channel.$id";
+import { Route as PortalCIdRouteImport } from "./routes/_portal/c.$id";
+import { Route as PortalMediaShortTokenEditRouteImport } from "./routes/_portal/media.$shortToken.edit";
 
-const AdminRoute = AdminRouteImport.update({
+const AdminRouteRoute = AdminRouteRouteImport.update({
   id: "/admin",
   path: "/admin",
   getParentRoute: () => rootRouteImport,
 } as any);
-const PortalRoute = PortalRouteImport.update({
+const PortalRouteRoute = PortalRouteRouteImport.update({
   id: "/_portal",
   getParentRoute: () => rootRouteImport,
 } as any);
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: "/",
   path: "/",
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => AdminRouteRoute,
 } as any);
 const PortalIndexRoute = PortalIndexRouteImport.update({
   id: "/",
   path: "/",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const AuthSignupRoute = AuthSignupRouteImport.update({
   id: "/auth/signup",
@@ -91,224 +91,226 @@ const AuthSigninRoute = AuthSigninRouteImport.update({
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: "/users",
   path: "/users",
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => AdminRouteRoute,
 } as any);
 const AdminTagsRoute = AdminTagsRouteImport.update({
   id: "/tags",
   path: "/tags",
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => AdminRouteRoute,
 } as any);
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: "/settings",
   path: "/settings",
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => AdminRouteRoute,
 } as any);
 const AdminPortalRoute = AdminPortalRouteImport.update({
   id: "/portal",
   path: "/portal",
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => AdminRouteRoute,
 } as any);
 const AdminPlaylistsRoute = AdminPlaylistsRouteImport.update({
   id: "/playlists",
   path: "/playlists",
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => AdminRouteRoute,
 } as any);
 const AdminPermissionsRoute = AdminPermissionsRouteImport.update({
   id: "/permissions",
   path: "/permissions",
-  getParentRoute: () => AdminRoute,
-} as any);
-const AdminMediaRoute = AdminMediaRouteImport.update({
-  id: "/media",
-  path: "/media",
-  getParentRoute: () => AdminRoute,
-} as any);
-const AdminArticlesRoute = AdminArticlesRouteImport.update({
-  id: "/articles",
-  path: "/articles",
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => AdminRouteRoute,
 } as any);
 const AdminCommentsRoute = AdminCommentsRouteImport.update({
   id: "/comments",
   path: "/comments",
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => AdminRouteRoute,
 } as any);
 const AdminChannelsRoute = AdminChannelsRouteImport.update({
   id: "/channels",
   path: "/channels",
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => AdminRouteRoute,
 } as any);
 const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   id: "/categories",
   path: "/categories",
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => AdminRouteRoute,
+} as any);
+const AdminArticlesRoute = AdminArticlesRouteImport.update({
+  id: "/articles",
+  path: "/articles",
+  getParentRoute: () => AdminRouteRoute,
 } as any);
 const PortalWatchRoute = PortalWatchRouteImport.update({
   id: "/watch",
   path: "/watch",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalTestRoute = PortalTestRouteImport.update({
   id: "/test",
   path: "/test",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalTermsRoute = PortalTermsRouteImport.update({
   id: "/terms",
   path: "/terms",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalTagsRoute = PortalTagsRouteImport.update({
   id: "/tags",
   path: "/tags",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalSubscriptionsRoute = PortalSubscriptionsRouteImport.update({
   id: "/subscriptions",
   path: "/subscriptions",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalSearchRoute = PortalSearchRouteImport.update({
   id: "/search",
   path: "/search",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalPrivacyRoute = PortalPrivacyRouteImport.update({
   id: "/privacy",
   path: "/privacy",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalMembersRoute = PortalMembersRouteImport.update({
   id: "/members",
   path: "/members",
-  getParentRoute: () => PortalRoute,
-} as any);
-const PortalMeRoute = PortalMeRouteImport.update({
-  id: "/me",
-  path: "/me",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalLatestRoute = PortalLatestRouteImport.update({
   id: "/latest",
   path: "/latest",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalFeaturedRoute = PortalFeaturedRouteImport.update({
   id: "/featured",
   path: "/featured",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalExploreRoute = PortalExploreRouteImport.update({
   id: "/explore",
   path: "/explore",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalCookiesRoute = PortalCookiesRouteImport.update({
   id: "/cookies",
   path: "/cookies",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalCategoriesRoute = PortalCategoriesRouteImport.update({
   id: "/categories",
   path: "/categories",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalAboutRoute = PortalAboutRouteImport.update({
   id: "/about",
   path: "/about",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalHandleRoute = PortalHandleRouteImport.update({
   id: "/$handle",
   path: "/$handle",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
+} as any);
+const AdminMediaRouteRoute = AdminMediaRouteRouteImport.update({
+  id: "/media",
+  path: "/media",
+  getParentRoute: () => AdminRouteRoute,
+} as any);
+const PortalMeRouteRoute = PortalMeRouteRouteImport.update({
+  id: "/me",
+  path: "/me",
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const AdminMediaIndexRoute = AdminMediaIndexRouteImport.update({
   id: "/",
   path: "/",
-  getParentRoute: () => AdminMediaRoute,
+  getParentRoute: () => AdminMediaRouteRoute,
 } as any);
 const AdminTranscodingStatusRoute = AdminTranscodingStatusRouteImport.update({
   id: "/transcoding/status",
   path: "/transcoding/status",
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => AdminRouteRoute,
 } as any);
 const AdminTranscodingProfilesRoute =
   AdminTranscodingProfilesRouteImport.update({
     id: "/transcoding/profiles",
     path: "/transcoding/profiles",
-    getParentRoute: () => AdminRoute,
+    getParentRoute: () => AdminRouteRoute,
   } as any);
 const AdminMediaIdRoute = AdminMediaIdRouteImport.update({
   id: "/$id",
   path: "/$id",
-  getParentRoute: () => AdminMediaRoute,
+  getParentRoute: () => AdminMediaRouteRoute,
 } as any);
 const PortalUIdRoute = PortalUIdRouteImport.update({
   id: "/u/$id",
   path: "/u/$id",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalPlaylistIdRoute = PortalPlaylistIdRouteImport.update({
   id: "/playlist/$id",
   path: "/playlist/$id",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalMeVideosRoute = PortalMeVideosRouteImport.update({
   id: "/videos",
   path: "/videos",
-  getParentRoute: () => PortalMeRoute,
+  getParentRoute: () => PortalMeRouteRoute,
 } as any);
 const PortalMeUploadRoute = PortalMeUploadRouteImport.update({
   id: "/upload",
   path: "/upload",
-  getParentRoute: () => PortalMeRoute,
+  getParentRoute: () => PortalMeRouteRoute,
 } as any);
 const PortalMePlaylistsRoute = PortalMePlaylistsRouteImport.update({
   id: "/playlists",
   path: "/playlists",
-  getParentRoute: () => PortalMeRoute,
+  getParentRoute: () => PortalMeRouteRoute,
 } as any);
 const PortalMeNotificationsRoute = PortalMeNotificationsRouteImport.update({
   id: "/notifications",
   path: "/notifications",
-  getParentRoute: () => PortalMeRoute,
+  getParentRoute: () => PortalMeRouteRoute,
 } as any);
 const PortalMeHistoryRoute = PortalMeHistoryRouteImport.update({
   id: "/history",
   path: "/history",
-  getParentRoute: () => PortalMeRoute,
+  getParentRoute: () => PortalMeRouteRoute,
 } as any);
 const PortalMeFavoritesRoute = PortalMeFavoritesRouteImport.update({
   id: "/favorites",
   path: "/favorites",
-  getParentRoute: () => PortalMeRoute,
+  getParentRoute: () => PortalMeRouteRoute,
 } as any);
 const PortalMeChannelRoute = PortalMeChannelRouteImport.update({
   id: "/channel",
   path: "/channel",
-  getParentRoute: () => PortalMeRoute,
+  getParentRoute: () => PortalMeRouteRoute,
 } as any);
 const PortalChannelIdRoute = PortalChannelIdRouteImport.update({
   id: "/channel/$id",
   path: "/channel/$id",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalCIdRoute = PortalCIdRouteImport.update({
   id: "/c/$id",
   path: "/c/$id",
-  getParentRoute: () => PortalRoute,
+  getParentRoute: () => PortalRouteRoute,
 } as any);
 const PortalMediaShortTokenEditRoute =
   PortalMediaShortTokenEditRouteImport.update({
     id: "/media/$shortToken/edit",
     path: "/media/$shortToken/edit",
-    getParentRoute: () => PortalRoute,
+    getParentRoute: () => PortalRouteRoute,
   } as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof PortalIndexRoute;
-  "/admin": typeof AdminRouteWithChildren;
+  "/admin": typeof AdminRouteRouteWithChildren;
+  "/me": typeof PortalMeRouteRouteWithChildren;
+  "/admin/media": typeof AdminMediaRouteRouteWithChildren;
   "/$handle": typeof PortalHandleRoute;
   "/about": typeof PortalAboutRoute;
   "/categories": typeof PortalCategoriesRoute;
@@ -316,7 +318,6 @@ export interface FileRoutesByFullPath {
   "/explore": typeof PortalExploreRoute;
   "/featured": typeof PortalFeaturedRoute;
   "/latest": typeof PortalLatestRoute;
-  "/me": typeof PortalMeRouteWithChildren;
   "/members": typeof PortalMembersRoute;
   "/privacy": typeof PortalPrivacyRoute;
   "/search": typeof PortalSearchRoute;
@@ -325,11 +326,10 @@ export interface FileRoutesByFullPath {
   "/terms": typeof PortalTermsRoute;
   "/test": typeof PortalTestRoute;
   "/watch": typeof PortalWatchRoute;
+  "/admin/articles": typeof AdminArticlesRoute;
   "/admin/categories": typeof AdminCategoriesRoute;
   "/admin/channels": typeof AdminChannelsRoute;
   "/admin/comments": typeof AdminCommentsRoute;
-  "/admin/articles": typeof AdminArticlesRoute;
-  "/admin/media": typeof AdminMediaRouteWithChildren;
   "/admin/permissions": typeof AdminPermissionsRoute;
   "/admin/playlists": typeof AdminPlaylistsRoute;
   "/admin/portal": typeof AdminPortalRoute;
@@ -357,6 +357,7 @@ export interface FileRoutesByFullPath {
   "/media/$shortToken/edit": typeof PortalMediaShortTokenEditRoute;
 }
 export interface FileRoutesByTo {
+  "/me": typeof PortalMeRouteRouteWithChildren;
   "/$handle": typeof PortalHandleRoute;
   "/about": typeof PortalAboutRoute;
   "/categories": typeof PortalCategoriesRoute;
@@ -364,7 +365,6 @@ export interface FileRoutesByTo {
   "/explore": typeof PortalExploreRoute;
   "/featured": typeof PortalFeaturedRoute;
   "/latest": typeof PortalLatestRoute;
-  "/me": typeof PortalMeRouteWithChildren;
   "/members": typeof PortalMembersRoute;
   "/privacy": typeof PortalPrivacyRoute;
   "/search": typeof PortalSearchRoute;
@@ -373,10 +373,10 @@ export interface FileRoutesByTo {
   "/terms": typeof PortalTermsRoute;
   "/test": typeof PortalTestRoute;
   "/watch": typeof PortalWatchRoute;
+  "/admin/articles": typeof AdminArticlesRoute;
   "/admin/categories": typeof AdminCategoriesRoute;
   "/admin/channels": typeof AdminChannelsRoute;
   "/admin/comments": typeof AdminCommentsRoute;
-  "/admin/articles": typeof AdminArticlesRoute;
   "/admin/permissions": typeof AdminPermissionsRoute;
   "/admin/playlists": typeof AdminPlaylistsRoute;
   "/admin/portal": typeof AdminPortalRoute;
@@ -406,8 +406,10 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
-  "/_portal": typeof PortalRouteWithChildren;
-  "/admin": typeof AdminRouteWithChildren;
+  "/_portal": typeof PortalRouteRouteWithChildren;
+  "/admin": typeof AdminRouteRouteWithChildren;
+  "/_portal/me": typeof PortalMeRouteRouteWithChildren;
+  "/admin/media": typeof AdminMediaRouteRouteWithChildren;
   "/_portal/$handle": typeof PortalHandleRoute;
   "/_portal/about": typeof PortalAboutRoute;
   "/_portal/categories": typeof PortalCategoriesRoute;
@@ -415,7 +417,6 @@ export interface FileRoutesById {
   "/_portal/explore": typeof PortalExploreRoute;
   "/_portal/featured": typeof PortalFeaturedRoute;
   "/_portal/latest": typeof PortalLatestRoute;
-  "/_portal/me": typeof PortalMeRouteWithChildren;
   "/_portal/members": typeof PortalMembersRoute;
   "/_portal/privacy": typeof PortalPrivacyRoute;
   "/_portal/search": typeof PortalSearchRoute;
@@ -424,11 +425,10 @@ export interface FileRoutesById {
   "/_portal/terms": typeof PortalTermsRoute;
   "/_portal/test": typeof PortalTestRoute;
   "/_portal/watch": typeof PortalWatchRoute;
+  "/admin/articles": typeof AdminArticlesRoute;
   "/admin/categories": typeof AdminCategoriesRoute;
   "/admin/channels": typeof AdminChannelsRoute;
   "/admin/comments": typeof AdminCommentsRoute;
-  "/admin/articles": typeof AdminArticlesRoute;
-  "/admin/media": typeof AdminMediaRouteWithChildren;
   "/admin/permissions": typeof AdminPermissionsRoute;
   "/admin/playlists": typeof AdminPlaylistsRoute;
   "/admin/portal": typeof AdminPortalRoute;
@@ -461,6 +461,8 @@ export interface FileRouteTypes {
   fullPaths:
     | "/"
     | "/admin"
+    | "/me"
+    | "/admin/media"
     | "/$handle"
     | "/about"
     | "/categories"
@@ -468,7 +470,6 @@ export interface FileRouteTypes {
     | "/explore"
     | "/featured"
     | "/latest"
-    | "/me"
     | "/members"
     | "/privacy"
     | "/search"
@@ -477,11 +478,10 @@ export interface FileRouteTypes {
     | "/terms"
     | "/test"
     | "/watch"
+    | "/admin/articles"
     | "/admin/categories"
     | "/admin/channels"
     | "/admin/comments"
-    | "/admin/articles"
-    | "/admin/media"
     | "/admin/permissions"
     | "/admin/playlists"
     | "/admin/portal"
@@ -509,6 +509,7 @@ export interface FileRouteTypes {
     | "/media/$shortToken/edit";
   fileRoutesByTo: FileRoutesByTo;
   to:
+    | "/me"
     | "/$handle"
     | "/about"
     | "/categories"
@@ -516,7 +517,6 @@ export interface FileRouteTypes {
     | "/explore"
     | "/featured"
     | "/latest"
-    | "/me"
     | "/members"
     | "/privacy"
     | "/search"
@@ -525,10 +525,10 @@ export interface FileRouteTypes {
     | "/terms"
     | "/test"
     | "/watch"
+    | "/admin/articles"
     | "/admin/categories"
     | "/admin/channels"
     | "/admin/comments"
-    | "/admin/articles"
     | "/admin/permissions"
     | "/admin/playlists"
     | "/admin/portal"
@@ -559,6 +559,8 @@ export interface FileRouteTypes {
     | "__root__"
     | "/_portal"
     | "/admin"
+    | "/_portal/me"
+    | "/admin/media"
     | "/_portal/$handle"
     | "/_portal/about"
     | "/_portal/categories"
@@ -566,7 +568,6 @@ export interface FileRouteTypes {
     | "/_portal/explore"
     | "/_portal/featured"
     | "/_portal/latest"
-    | "/_portal/me"
     | "/_portal/members"
     | "/_portal/privacy"
     | "/_portal/search"
@@ -575,11 +576,10 @@ export interface FileRouteTypes {
     | "/_portal/terms"
     | "/_portal/test"
     | "/_portal/watch"
+    | "/admin/articles"
     | "/admin/categories"
     | "/admin/channels"
     | "/admin/comments"
-    | "/admin/articles"
-    | "/admin/media"
     | "/admin/permissions"
     | "/admin/playlists"
     | "/admin/portal"
@@ -609,8 +609,8 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  PortalRoute: typeof PortalRouteWithChildren;
-  AdminRoute: typeof AdminRouteWithChildren;
+  PortalRouteRoute: typeof PortalRouteRouteWithChildren;
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren;
   AuthSigninRoute: typeof AuthSigninRoute;
   AuthSignupRoute: typeof AuthSignupRoute;
 }
@@ -621,14 +621,14 @@ declare module "@tanstack/react-router" {
       id: "/admin";
       path: "/admin";
       fullPath: "/admin";
-      preLoaderRoute: typeof AdminRouteImport;
+      preLoaderRoute: typeof AdminRouteRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/_portal": {
       id: "/_portal";
       path: "";
       fullPath: "/";
-      preLoaderRoute: typeof PortalRouteImport;
+      preLoaderRoute: typeof PortalRouteRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/admin/": {
@@ -636,14 +636,14 @@ declare module "@tanstack/react-router" {
       path: "/";
       fullPath: "/admin/";
       preLoaderRoute: typeof AdminIndexRouteImport;
-      parentRoute: typeof AdminRoute;
+      parentRoute: typeof AdminRouteRoute;
     };
     "/_portal/": {
       id: "/_portal/";
       path: "/";
       fullPath: "/";
       preLoaderRoute: typeof PortalIndexRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/auth/signup": {
       id: "/auth/signup";
@@ -664,306 +664,306 @@ declare module "@tanstack/react-router" {
       path: "/users";
       fullPath: "/admin/users";
       preLoaderRoute: typeof AdminUsersRouteImport;
-      parentRoute: typeof AdminRoute;
+      parentRoute: typeof AdminRouteRoute;
     };
     "/admin/tags": {
       id: "/admin/tags";
       path: "/tags";
       fullPath: "/admin/tags";
       preLoaderRoute: typeof AdminTagsRouteImport;
-      parentRoute: typeof AdminRoute;
+      parentRoute: typeof AdminRouteRoute;
     };
     "/admin/settings": {
       id: "/admin/settings";
       path: "/settings";
       fullPath: "/admin/settings";
       preLoaderRoute: typeof AdminSettingsRouteImport;
-      parentRoute: typeof AdminRoute;
+      parentRoute: typeof AdminRouteRoute;
     };
     "/admin/portal": {
       id: "/admin/portal";
       path: "/portal";
       fullPath: "/admin/portal";
       preLoaderRoute: typeof AdminPortalRouteImport;
-      parentRoute: typeof AdminRoute;
+      parentRoute: typeof AdminRouteRoute;
     };
     "/admin/playlists": {
       id: "/admin/playlists";
       path: "/playlists";
       fullPath: "/admin/playlists";
       preLoaderRoute: typeof AdminPlaylistsRouteImport;
-      parentRoute: typeof AdminRoute;
+      parentRoute: typeof AdminRouteRoute;
     };
     "/admin/permissions": {
       id: "/admin/permissions";
       path: "/permissions";
       fullPath: "/admin/permissions";
       preLoaderRoute: typeof AdminPermissionsRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/admin/media": {
-      id: "/admin/media";
-      path: "/media";
-      fullPath: "/admin/media";
-      preLoaderRoute: typeof AdminMediaRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/admin/articles": {
-      id: "/admin/articles";
-      path: "/articles";
-      fullPath: "/admin/articles";
-      preLoaderRoute: typeof AdminArticlesRouteImport;
-      parentRoute: typeof AdminRoute;
+      parentRoute: typeof AdminRouteRoute;
     };
     "/admin/comments": {
       id: "/admin/comments";
       path: "/comments";
       fullPath: "/admin/comments";
       preLoaderRoute: typeof AdminCommentsRouteImport;
-      parentRoute: typeof AdminRoute;
+      parentRoute: typeof AdminRouteRoute;
     };
     "/admin/channels": {
       id: "/admin/channels";
       path: "/channels";
       fullPath: "/admin/channels";
       preLoaderRoute: typeof AdminChannelsRouteImport;
-      parentRoute: typeof AdminRoute;
+      parentRoute: typeof AdminRouteRoute;
     };
     "/admin/categories": {
       id: "/admin/categories";
       path: "/categories";
       fullPath: "/admin/categories";
       preLoaderRoute: typeof AdminCategoriesRouteImport;
-      parentRoute: typeof AdminRoute;
+      parentRoute: typeof AdminRouteRoute;
+    };
+    "/admin/articles": {
+      id: "/admin/articles";
+      path: "/articles";
+      fullPath: "/admin/articles";
+      preLoaderRoute: typeof AdminArticlesRouteImport;
+      parentRoute: typeof AdminRouteRoute;
     };
     "/_portal/watch": {
       id: "/_portal/watch";
       path: "/watch";
       fullPath: "/watch";
       preLoaderRoute: typeof PortalWatchRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/test": {
       id: "/_portal/test";
       path: "/test";
       fullPath: "/test";
       preLoaderRoute: typeof PortalTestRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/terms": {
       id: "/_portal/terms";
       path: "/terms";
       fullPath: "/terms";
       preLoaderRoute: typeof PortalTermsRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/tags": {
       id: "/_portal/tags";
       path: "/tags";
       fullPath: "/tags";
       preLoaderRoute: typeof PortalTagsRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/subscriptions": {
       id: "/_portal/subscriptions";
       path: "/subscriptions";
       fullPath: "/subscriptions";
       preLoaderRoute: typeof PortalSubscriptionsRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/search": {
       id: "/_portal/search";
       path: "/search";
       fullPath: "/search";
       preLoaderRoute: typeof PortalSearchRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/privacy": {
       id: "/_portal/privacy";
       path: "/privacy";
       fullPath: "/privacy";
       preLoaderRoute: typeof PortalPrivacyRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/members": {
       id: "/_portal/members";
       path: "/members";
       fullPath: "/members";
       preLoaderRoute: typeof PortalMembersRouteImport;
-      parentRoute: typeof PortalRoute;
-    };
-    "/_portal/me": {
-      id: "/_portal/me";
-      path: "/me";
-      fullPath: "/me";
-      preLoaderRoute: typeof PortalMeRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/latest": {
       id: "/_portal/latest";
       path: "/latest";
       fullPath: "/latest";
       preLoaderRoute: typeof PortalLatestRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/featured": {
       id: "/_portal/featured";
       path: "/featured";
       fullPath: "/featured";
       preLoaderRoute: typeof PortalFeaturedRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/explore": {
       id: "/_portal/explore";
       path: "/explore";
       fullPath: "/explore";
       preLoaderRoute: typeof PortalExploreRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/cookies": {
       id: "/_portal/cookies";
       path: "/cookies";
       fullPath: "/cookies";
       preLoaderRoute: typeof PortalCookiesRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/categories": {
       id: "/_portal/categories";
       path: "/categories";
       fullPath: "/categories";
       preLoaderRoute: typeof PortalCategoriesRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/about": {
       id: "/_portal/about";
       path: "/about";
       fullPath: "/about";
       preLoaderRoute: typeof PortalAboutRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/$handle": {
       id: "/_portal/$handle";
       path: "/$handle";
       fullPath: "/$handle";
       preLoaderRoute: typeof PortalHandleRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
+    };
+    "/admin/media": {
+      id: "/admin/media";
+      path: "/media";
+      fullPath: "/admin/media";
+      preLoaderRoute: typeof AdminMediaRouteRouteImport;
+      parentRoute: typeof AdminRouteRoute;
+    };
+    "/_portal/me": {
+      id: "/_portal/me";
+      path: "/me";
+      fullPath: "/me";
+      preLoaderRoute: typeof PortalMeRouteRouteImport;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/admin/media/": {
       id: "/admin/media/";
       path: "/";
       fullPath: "/admin/media/";
       preLoaderRoute: typeof AdminMediaIndexRouteImport;
-      parentRoute: typeof AdminMediaRoute;
+      parentRoute: typeof AdminMediaRouteRoute;
     };
     "/admin/transcoding/status": {
       id: "/admin/transcoding/status";
       path: "/transcoding/status";
       fullPath: "/admin/transcoding/status";
       preLoaderRoute: typeof AdminTranscodingStatusRouteImport;
-      parentRoute: typeof AdminRoute;
+      parentRoute: typeof AdminRouteRoute;
     };
     "/admin/transcoding/profiles": {
       id: "/admin/transcoding/profiles";
       path: "/transcoding/profiles";
       fullPath: "/admin/transcoding/profiles";
       preLoaderRoute: typeof AdminTranscodingProfilesRouteImport;
-      parentRoute: typeof AdminRoute;
+      parentRoute: typeof AdminRouteRoute;
     };
     "/admin/media/$id": {
       id: "/admin/media/$id";
       path: "/$id";
       fullPath: "/admin/media/$id";
       preLoaderRoute: typeof AdminMediaIdRouteImport;
-      parentRoute: typeof AdminMediaRoute;
+      parentRoute: typeof AdminMediaRouteRoute;
     };
     "/_portal/u/$id": {
       id: "/_portal/u/$id";
       path: "/u/$id";
       fullPath: "/u/$id";
       preLoaderRoute: typeof PortalUIdRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/playlist/$id": {
       id: "/_portal/playlist/$id";
       path: "/playlist/$id";
       fullPath: "/playlist/$id";
       preLoaderRoute: typeof PortalPlaylistIdRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/me/videos": {
       id: "/_portal/me/videos";
       path: "/videos";
       fullPath: "/me/videos";
       preLoaderRoute: typeof PortalMeVideosRouteImport;
-      parentRoute: typeof PortalMeRoute;
+      parentRoute: typeof PortalMeRouteRoute;
     };
     "/_portal/me/upload": {
       id: "/_portal/me/upload";
       path: "/upload";
       fullPath: "/me/upload";
       preLoaderRoute: typeof PortalMeUploadRouteImport;
-      parentRoute: typeof PortalMeRoute;
+      parentRoute: typeof PortalMeRouteRoute;
     };
     "/_portal/me/playlists": {
       id: "/_portal/me/playlists";
       path: "/playlists";
       fullPath: "/me/playlists";
       preLoaderRoute: typeof PortalMePlaylistsRouteImport;
-      parentRoute: typeof PortalMeRoute;
+      parentRoute: typeof PortalMeRouteRoute;
     };
     "/_portal/me/notifications": {
       id: "/_portal/me/notifications";
       path: "/notifications";
       fullPath: "/me/notifications";
       preLoaderRoute: typeof PortalMeNotificationsRouteImport;
-      parentRoute: typeof PortalMeRoute;
+      parentRoute: typeof PortalMeRouteRoute;
     };
     "/_portal/me/history": {
       id: "/_portal/me/history";
       path: "/history";
       fullPath: "/me/history";
       preLoaderRoute: typeof PortalMeHistoryRouteImport;
-      parentRoute: typeof PortalMeRoute;
+      parentRoute: typeof PortalMeRouteRoute;
     };
     "/_portal/me/favorites": {
       id: "/_portal/me/favorites";
       path: "/favorites";
       fullPath: "/me/favorites";
       preLoaderRoute: typeof PortalMeFavoritesRouteImport;
-      parentRoute: typeof PortalMeRoute;
+      parentRoute: typeof PortalMeRouteRoute;
     };
     "/_portal/me/channel": {
       id: "/_portal/me/channel";
       path: "/channel";
       fullPath: "/me/channel";
       preLoaderRoute: typeof PortalMeChannelRouteImport;
-      parentRoute: typeof PortalMeRoute;
+      parentRoute: typeof PortalMeRouteRoute;
     };
     "/_portal/channel/$id": {
       id: "/_portal/channel/$id";
       path: "/channel/$id";
       fullPath: "/channel/$id";
       preLoaderRoute: typeof PortalChannelIdRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/c/$id": {
       id: "/_portal/c/$id";
       path: "/c/$id";
       fullPath: "/c/$id";
       preLoaderRoute: typeof PortalCIdRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
     "/_portal/media/$shortToken/edit": {
       id: "/_portal/media/$shortToken/edit";
       path: "/media/$shortToken/edit";
       fullPath: "/media/$shortToken/edit";
       preLoaderRoute: typeof PortalMediaShortTokenEditRouteImport;
-      parentRoute: typeof PortalRoute;
+      parentRoute: typeof PortalRouteRoute;
     };
   }
 }
 
-interface PortalMeRouteChildren {
+interface PortalMeRouteRouteChildren {
   PortalMeChannelRoute: typeof PortalMeChannelRoute;
   PortalMeFavoritesRoute: typeof PortalMeFavoritesRoute;
   PortalMeHistoryRoute: typeof PortalMeHistoryRoute;
@@ -973,7 +973,7 @@ interface PortalMeRouteChildren {
   PortalMeVideosRoute: typeof PortalMeVideosRoute;
 }
 
-const PortalMeRouteChildren: PortalMeRouteChildren = {
+const PortalMeRouteRouteChildren: PortalMeRouteRouteChildren = {
   PortalMeChannelRoute: PortalMeChannelRoute,
   PortalMeFavoritesRoute: PortalMeFavoritesRoute,
   PortalMeHistoryRoute: PortalMeHistoryRoute,
@@ -983,11 +983,12 @@ const PortalMeRouteChildren: PortalMeRouteChildren = {
   PortalMeVideosRoute: PortalMeVideosRoute,
 };
 
-const PortalMeRouteWithChildren = PortalMeRoute._addFileChildren(
-  PortalMeRouteChildren,
+const PortalMeRouteRouteWithChildren = PortalMeRouteRoute._addFileChildren(
+  PortalMeRouteRouteChildren,
 );
 
-interface PortalRouteChildren {
+interface PortalRouteRouteChildren {
+  PortalMeRouteRoute: typeof PortalMeRouteRouteWithChildren;
   PortalHandleRoute: typeof PortalHandleRoute;
   PortalAboutRoute: typeof PortalAboutRoute;
   PortalCategoriesRoute: typeof PortalCategoriesRoute;
@@ -995,7 +996,6 @@ interface PortalRouteChildren {
   PortalExploreRoute: typeof PortalExploreRoute;
   PortalFeaturedRoute: typeof PortalFeaturedRoute;
   PortalLatestRoute: typeof PortalLatestRoute;
-  PortalMeRoute: typeof PortalMeRouteWithChildren;
   PortalMembersRoute: typeof PortalMembersRoute;
   PortalPrivacyRoute: typeof PortalPrivacyRoute;
   PortalSearchRoute: typeof PortalSearchRoute;
@@ -1012,7 +1012,8 @@ interface PortalRouteChildren {
   PortalMediaShortTokenEditRoute: typeof PortalMediaShortTokenEditRoute;
 }
 
-const PortalRouteChildren: PortalRouteChildren = {
+const PortalRouteRouteChildren: PortalRouteRouteChildren = {
+  PortalMeRouteRoute: PortalMeRouteRouteWithChildren,
   PortalHandleRoute: PortalHandleRoute,
   PortalAboutRoute: PortalAboutRoute,
   PortalCategoriesRoute: PortalCategoriesRoute,
@@ -1020,7 +1021,6 @@ const PortalRouteChildren: PortalRouteChildren = {
   PortalExploreRoute: PortalExploreRoute,
   PortalFeaturedRoute: PortalFeaturedRoute,
   PortalLatestRoute: PortalLatestRoute,
-  PortalMeRoute: PortalMeRouteWithChildren,
   PortalMembersRoute: PortalMembersRoute,
   PortalPrivacyRoute: PortalPrivacyRoute,
   PortalSearchRoute: PortalSearchRoute,
@@ -1037,29 +1037,30 @@ const PortalRouteChildren: PortalRouteChildren = {
   PortalMediaShortTokenEditRoute: PortalMediaShortTokenEditRoute,
 };
 
-const PortalRouteWithChildren =
-  PortalRoute._addFileChildren(PortalRouteChildren);
+const PortalRouteRouteWithChildren = PortalRouteRoute._addFileChildren(
+  PortalRouteRouteChildren,
+);
 
-interface AdminMediaRouteChildren {
+interface AdminMediaRouteRouteChildren {
   AdminMediaIdRoute: typeof AdminMediaIdRoute;
   AdminMediaIndexRoute: typeof AdminMediaIndexRoute;
 }
 
-const AdminMediaRouteChildren: AdminMediaRouteChildren = {
+const AdminMediaRouteRouteChildren: AdminMediaRouteRouteChildren = {
   AdminMediaIdRoute: AdminMediaIdRoute,
   AdminMediaIndexRoute: AdminMediaIndexRoute,
 };
 
-const AdminMediaRouteWithChildren = AdminMediaRoute._addFileChildren(
-  AdminMediaRouteChildren,
+const AdminMediaRouteRouteWithChildren = AdminMediaRouteRoute._addFileChildren(
+  AdminMediaRouteRouteChildren,
 );
 
-interface AdminRouteChildren {
+interface AdminRouteRouteChildren {
+  AdminMediaRouteRoute: typeof AdminMediaRouteRouteWithChildren;
+  AdminArticlesRoute: typeof AdminArticlesRoute;
   AdminCategoriesRoute: typeof AdminCategoriesRoute;
   AdminChannelsRoute: typeof AdminChannelsRoute;
   AdminCommentsRoute: typeof AdminCommentsRoute;
-  AdminArticlesRoute: typeof AdminArticlesRoute;
-  AdminMediaRoute: typeof AdminMediaRouteWithChildren;
   AdminPermissionsRoute: typeof AdminPermissionsRoute;
   AdminPlaylistsRoute: typeof AdminPlaylistsRoute;
   AdminPortalRoute: typeof AdminPortalRoute;
@@ -1071,12 +1072,12 @@ interface AdminRouteChildren {
   AdminTranscodingStatusRoute: typeof AdminTranscodingStatusRoute;
 }
 
-const AdminRouteChildren: AdminRouteChildren = {
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminMediaRouteRoute: AdminMediaRouteRouteWithChildren,
+  AdminArticlesRoute: AdminArticlesRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminChannelsRoute: AdminChannelsRoute,
   AdminCommentsRoute: AdminCommentsRoute,
-  AdminArticlesRoute: AdminArticlesRoute,
-  AdminMediaRoute: AdminMediaRouteWithChildren,
   AdminPermissionsRoute: AdminPermissionsRoute,
   AdminPlaylistsRoute: AdminPlaylistsRoute,
   AdminPortalRoute: AdminPortalRoute,
@@ -1088,11 +1089,13 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminTranscodingStatusRoute: AdminTranscodingStatusRoute,
 };
 
-const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren);
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+);
 
 const rootRouteChildren: RootRouteChildren = {
-  PortalRoute: PortalRouteWithChildren,
-  AdminRoute: AdminRouteWithChildren,
+  PortalRouteRoute: PortalRouteRouteWithChildren,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
   AuthSigninRoute: AuthSigninRoute,
   AuthSignupRoute: AuthSignupRoute,
 };

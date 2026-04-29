@@ -142,7 +142,7 @@ const LatestPage = () => {
                                 <div className="flex items-center gap-3 text-xs text-muted-foreground dark:text-gray-500">
                                     <span className="flex items-center gap-1"><Eye
                                         size={12}/>{formatViews(media.view_count)}</span>
-                                    <span>{formatDate(media.created_at)}</span>
+                                    <span>{formatDate(media.create_time)}</span>
                                 </div>
                             </div>
                         </div>

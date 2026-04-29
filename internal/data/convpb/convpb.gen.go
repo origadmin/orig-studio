@@ -10,6 +10,7 @@ import (
 	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/commentreport"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
 
@@ -18,72 +19,86 @@ import (
 
 // Local type aliases for external types.
 type (
-	Article            = entity.Article
-	ArticleEdges       = entity.ArticleEdges
-	Articles           = []*entity.Article
-	Category           = entity.Category
-	CategoryEdges      = entity.CategoryEdges
-	CategoryPB         = types.Category
-	Categorys          = []*entity.Category
-	Channel            = entity.Channel
-	ChannelEdges       = entity.ChannelEdges
-	ChannelPB          = types.Channel
-	Channels           = []*entity.Channel
-	Comment            = entity.Comment
-	CommentEdges       = entity.CommentEdges
-	CommentLike        = entity.CommentLike
-	CommentLikeEdges   = entity.CommentLikeEdges
-	CommentLikes       = []*entity.CommentLike
-	CommentPB          = types.Comment
-	Comments           = []*entity.Comment
-	EncodeProfile      = entity.EncodeProfile
-	EncodeProfilePB    = types.EncodeProfile
-	EncodingTask       = entity.EncodingTask
-	EncodingTaskPB     = types.EncodingTask
-	Favorite           = entity.Favorite
-	FavoriteEdges      = entity.FavoriteEdges
-	FavoritePB         = types.Favorite
-	Favorites          = []*entity.Favorite
-	Like               = entity.Like
-	LikeEdges          = entity.LikeEdges
-	LikePB             = types.Like
-	Likes              = []*entity.Like
-	Media              = entity.Media
-	MediaEdges         = entity.MediaEdges
-	MediaPB            = types.Media
-	MediaPlaylist      = entity.MediaPlaylist
-	MediaPlaylistEdges = entity.MediaPlaylistEdges
-	MediaPlaylists     = []*entity.MediaPlaylist
-	MediaTag           = entity.MediaTag
-	MediaTagEdges      = entity.MediaTagEdges
-	MediaTags          = []*entity.MediaTag
-	Medias             = []*entity.Media
-	Notification       = entity.Notification
-	NotificationEdges  = entity.NotificationEdges
-	Notifications      = []*entity.Notification
-	PermissionPB       = types.Permission
-	PermissionsPB      = []*types.Permission
-	Playlist           = entity.Playlist
-	PlaylistEdges      = entity.PlaylistEdges
-	PlaylistPB         = types.Playlist
-	Playlists          = []*entity.Playlist
-	RolePB             = types.Role
-	RolesPB            = []*types.Role
-	Subscription       = entity.Subscription
-	SubscriptionEdges  = entity.SubscriptionEdges
-	Subscriptions      = []*entity.Subscription
-	Tag                = entity.Tag
-	TagEdges           = entity.TagEdges
-	TagPB              = types.Tag
-	Tags               = []*entity.Tag
-	User               = entity.User
-	UserEdges          = entity.UserEdges
-	UserPB             = types.User
-	UserProfilePB      = types.UserProfile
-	UserRole           = user.Role
-	UserSettingPB      = types.UserSetting
-	Users              = []*entity.User
-	UsersPB            = []*types.User
+	Article              = entity.Article
+	ArticleEdges         = entity.ArticleEdges
+	Articles             = []*entity.Article
+	Category             = entity.Category
+	CategoryEdges        = entity.CategoryEdges
+	CategoryPB           = types.Category
+	Categorys            = []*entity.Category
+	Channel              = entity.Channel
+	ChannelEdges         = entity.ChannelEdges
+	ChannelPB            = types.Channel
+	Channels             = []*entity.Channel
+	Comment              = entity.Comment
+	CommentEdges         = entity.CommentEdges
+	CommentLike          = entity.CommentLike
+	CommentLikeEdges     = entity.CommentLikeEdges
+	CommentLikes         = []*entity.CommentLike
+	CommentPB            = types.Comment
+	CommentReport        = entity.CommentReport
+	CommentReportEdges   = entity.CommentReportEdges
+	CommentReports       = []*entity.CommentReport
+	CommentStatus        = comment.Status
+	CommentreportReason  = commentreport.Reason
+	Comments             = []*entity.Comment
+	EncodeProfile        = entity.EncodeProfile
+	EncodeProfilePB      = types.EncodeProfile
+	EncodingTask         = entity.EncodingTask
+	EncodingTaskPB       = types.EncodingTask
+	Favorite             = entity.Favorite
+	FavoriteEdges        = entity.FavoriteEdges
+	FavoritePB           = types.Favorite
+	Favorites            = []*entity.Favorite
+	GroupMember          = entity.GroupMember
+	GroupMemberEdges     = entity.GroupMemberEdges
+	GroupMembers         = []*entity.GroupMember
+	Like                 = entity.Like
+	LikeEdges            = entity.LikeEdges
+	LikePB               = types.Like
+	Likes                = []*entity.Like
+	Media                = entity.Media
+	MediaEdges           = entity.MediaEdges
+	MediaPB              = types.Media
+	MediaPlaylist        = entity.MediaPlaylist
+	MediaPlaylistEdges   = entity.MediaPlaylistEdges
+	MediaPlaylists       = []*entity.MediaPlaylist
+	MediaReviewLog       = entity.MediaReviewLog
+	MediaReviewLogEdges  = entity.MediaReviewLogEdges
+	MediaReviewLogs      = []*entity.MediaReviewLog
+	MediaTag             = entity.MediaTag
+	MediaTagEdges        = entity.MediaTagEdges
+	MediaTags            = []*entity.MediaTag
+	Medias               = []*entity.Media
+	Notification         = entity.Notification
+	NotificationEdges    = entity.NotificationEdges
+	Notifications        = []*entity.Notification
+	PermissionGroup      = entity.PermissionGroup
+	PermissionGroupEdges = entity.PermissionGroupEdges
+	PermissionGroups     = []*entity.PermissionGroup
+	PermissionPB         = types.Permission
+	PermissionsPB        = []*types.Permission
+	Playlist             = entity.Playlist
+	PlaylistEdges        = entity.PlaylistEdges
+	PlaylistPB           = types.Playlist
+	Playlists            = []*entity.Playlist
+	RolePB               = types.Role
+	RolesPB              = []*types.Role
+	Subscription         = entity.Subscription
+	SubscriptionEdges    = entity.SubscriptionEdges
+	Subscriptions        = []*entity.Subscription
+	Tag                  = entity.Tag
+	TagEdges             = entity.TagEdges
+	TagPB                = types.Tag
+	Tags                 = []*entity.Tag
+	User                 = entity.User
+	UserEdges            = entity.UserEdges
+	UserPB               = types.User
+	UserProfilePB        = types.UserProfile
+	UserRole             = user.Role
+	UserSettingPB        = types.UserSetting
+	Users                = []*entity.User
+	UsersPB              = []*types.User
 )
 
 // ConvertCategoryPBToCategory converts CategoryPB to Category.
@@ -124,6 +139,8 @@ func ConvertCategoryToCategoryPB(from *Category) *CategoryPB {
 		Sequence:    int32(from.Sequence),
 		Status:      int32(from.Status),
 		MediaCount:  int64(from.MediaCount),
+		CreateTime:  ConvertTimeToTimestamp(from.CreatedAt),
+		UpdateTime:  ConvertTimeToTimestamp(from.UpdatedAt),
 	}
 	return to
 }
@@ -170,7 +187,7 @@ func ConvertCommentPBToComment(from *CommentPB) *Comment {
 		ID:      from.Id,
 		MediaID: from.MediaId,
 		UserID:  from.UserId,
-		Status:  comment.Status(from.Status),
+		Status:  ConvertStringToCommentStatus(from.Status),
 	}
 	return to
 }
@@ -182,10 +199,10 @@ func ConvertCommentToCommentPB(from *Comment) *CommentPB {
 	}
 
 	to := &CommentPB{
-		Id:      from.ID,
-		UserId:  from.UserID,
+		Id:     from.ID,
+		UserId: from.UserID,
 		MediaId: from.MediaID,
-		Status:  string(from.Status),
+		Status: ConvertCommentStatusToString(from.Status),
 	}
 	return to
 }
@@ -258,6 +275,8 @@ func ConvertEncodingTaskToEncodingTaskPB(from *EncodingTask) *EncodingTaskPB {
 		Status:       ConvertEnumsEncodingTaskStatusToString(from.Status),
 		OutputPath:   from.OutputPath,
 		ErrorMessage: from.ErrorMessage,
+		CreateTime:   ConvertTimeToTimestamp(from.CreatedAt),
+		UpdateTime:   ConvertTimeToTimestamp(from.UpdatedAt),
 	}
 	return to
 }
@@ -283,9 +302,10 @@ func ConvertFavoriteToFavoritePB(from *Favorite) *FavoritePB {
 	}
 
 	to := &FavoritePB{
-		Id:      from.ID,
-		UserId:  from.UserID,
-		MediaId: from.MediaID,
+		Id:         from.ID,
+		UserId:     from.UserID,
+		MediaId:    from.MediaID,
+		CreateTime: ConvertTimeToTimestamp(from.CreatedAt),
 	}
 	return to
 }
@@ -311,9 +331,10 @@ func ConvertLikeToLikePB(from *Like) *LikePB {
 	}
 
 	to := &LikePB{
-		Id:      from.ID,
-		UserId:  from.UserID,
-		MediaId: from.MediaID,
+		Id:         from.ID,
+		UserId:     from.UserID,
+		MediaId:    from.MediaID,
+		CreateTime: ConvertTimeToTimestamp(from.CreatedAt),
 	}
 	return to
 }
@@ -401,6 +422,8 @@ func ConvertMediaToMediaPB(from *Media) *MediaPB {
 		State:           from.State,
 		ShortToken:      from.ShortToken,
 		PublishedAt:     ConvertTimeToTimestamp(from.PublishedAt),
+		CreateTime:      ConvertTimeToTimestamp(from.CreatedAt),
+		UpdateTime:      ConvertTimeToTimestamp(from.UpdatedAt),
 		AllowDownload:   from.AllowDownload,
 		EnableComments:  from.EnableComments,
 		Featured:        from.Featured,
@@ -410,6 +433,9 @@ func ConvertMediaToMediaPB(from *Media) *MediaPB {
 		Poster:          from.Poster,
 		ReviewStatus:    from.ReviewStatus,
 		Listable:        from.Listable,
+		User:            ConvertUserToUserPB(from.Edges.User),
+		Category:        ConvertCategoryToCategoryPB(from.Edges.Category),
+		Channel:         ConvertChannelToChannelPB(from.Edges.Channel),
 	}
 	return to
 }

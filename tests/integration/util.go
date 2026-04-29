@@ -20,23 +20,29 @@ import (
 
 	"origadmin/application/origcms/api/gen/v1/types"
 	_ "github.com/sqlite3ent/sqlite3"
-	"origadmin/application/origcms/internal/auth"
-	authbiz "origadmin/application/origcms/internal/svc-auth/biz"
-	authdata "origadmin/application/origcms/internal/svc-auth/data"
+	"origadmin/application/origcms/internal/infra/auth"
+	authbiz "origadmin/application/origcms/internal/features/auth/biz"
+	authdal "origadmin/application/origcms/internal/features/auth/dal"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/migrate"
+	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/server"
-	adminbiz "origadmin/application/origcms/internal/svc-admin/biz"
-	admindata "origadmin/application/origcms/internal/svc-admin/data"
-	"origadmin/application/origcms/internal/svc-admin/service"
-	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
-	contentdata "origadmin/application/origcms/internal/svc-content/data"
-	mediabiz "origadmin/application/origcms/internal/svc-media/biz"
-	mediadata "origadmin/application/origcms/internal/svc-media/data"
-	systembiz "origadmin/application/origcms/internal/svc-system/biz"
-	systemdata "origadmin/application/origcms/internal/svc-system/data"
-	"origadmin/application/origcms/internal/svc-user/biz"
-	"origadmin/application/origcms/internal/svc-user/data"
+	adminbiz "origadmin/application/origcms/internal/features/admin/biz"
+	admindal "origadmin/application/origcms/internal/features/admin/dal"
+	adminservice "origadmin/application/origcms/internal/features/admin/service"
+	authservice "origadmin/application/origcms/internal/features/auth/service"
+	contentbiz "origadmin/application/origcms/internal/features/content/biz"
+	contentdal "origadmin/application/origcms/internal/features/content/dal"
+	contentservice "origadmin/application/origcms/internal/features/content/service"
+	mediabiz "origadmin/application/origcms/internal/features/media/biz"
+	mediadal "origadmin/application/origcms/internal/features/media/dal"
+	mediaservice "origadmin/application/origcms/internal/features/media/service"
+	systembiz "origadmin/application/origcms/internal/features/system/biz"
+	systemdal "origadmin/application/origcms/internal/features/system/dal"
+	systemservice "origadmin/application/origcms/internal/features/system/service"
+	"origadmin/application/origcms/internal/features/user/biz"
+	"origadmin/application/origcms/internal/features/user/dal"
+	userservice "origadmin/application/origcms/internal/features/user/service"
 	"github.com/origadmin/toolkits/crypto/hash"
 	hashtypes "github.com/origadmin/toolkits/crypto/hash/types"
 )
@@ -116,19 +122,19 @@ func SetupTestServer(t *testing.T) *TestServer {
 
 	jwtMgr := auth.NewManager(TestJWTSecret, TestJWTExpiry, TestRefreshTokenExpiry)
 
-	if err := mediadata.SeedEncodeProfiles(ctx, db); err != nil {
+	if err := mediadal.SeedEncodeProfiles(ctx, db); err != nil {
 		t.Fatalf("failed to seed encode profiles: %v", err)
 	}
 
-	userRepo := data.NewUserRepo(db)
+	userRepo := dal.NewUserRepo(db)
 	userUC := biz.NewUserUseCase(userRepo, hasher, logger)
 
-	mediaRepo := mediadata.NewMediaRepo(db)
-	profileRepo := mediadata.NewEncodeProfileRepo(db)
-	taskRepo := mediadata.NewEncodingTaskRepo(db)
-	reviewLogRepo := mediadata.NewReviewLogRepo(db)
-	uploadRepo := mediadata.NewUploadRepo(db, logger)
-	storage := mediadata.NewLocalStorage("./data/test-uploads")
+	mediaRepo := mediadal.NewMediaRepo(db)
+	profileRepo := mediadal.NewEncodeProfileRepo(db)
+	taskRepo := mediadal.NewEncodingTaskRepo(db)
+	reviewLogRepo := mediadal.NewReviewLogRepo(db)
+	uploadRepo := mediadal.NewUploadRepo(db, logger)
+	storage := mediadal.NewLocalStorage("./data/test-uploads")
 
 	mockPub := &mockPublisher{}
 
@@ -136,74 +142,74 @@ func SetupTestServer(t *testing.T) *TestServer {
 	uploadUC := mediabiz.NewUploadUseCase(uploadRepo, mediaRepo, profileRepo, taskRepo, mediaUC, storage, 5*1024*1024, logger)
 	uploadUC.SetPublisher(mockPub)
 
-	contentDB := contentdata.NewData(db)
-	categoryRepo := contentdata.NewCategoryRepo(contentDB, logger)
-	tagRepo := contentdata.NewTagRepo(contentDB, logger)
-	channelRepo := contentdata.NewChannelRepo(contentDB, logger)
-	feedRepo := contentdata.NewFeedRepo(contentDB, logger)
-	likeRepo := contentdata.NewLikeRepo(contentDB, logger)
-	favoriteRepo := contentdata.NewFavoriteRepo(contentDB, logger)
-	notificationRepo := contentdata.NewNotificationRepo(contentDB, logger)
+	contentDB := contentdal.NewData(db)
+	categoryRepo := contentdal.NewCategoryRepo(contentDB, logger)
+	tagRepo := contentdal.NewTagRepo(contentDB, logger)
+	channelRepo := contentdal.NewChannelRepo(contentDB, logger)
+	feedRepo := contentdal.NewFeedRepo(contentDB, logger)
+	likeRepo := contentdal.NewLikeRepo(contentDB, logger)
+	favoriteRepo := contentdal.NewFavoriteRepo(contentDB, logger)
+	notificationRepo := contentdal.NewNotificationRepo(contentDB, logger)
 
 	categoryTagUC := contentbiz.NewCategoryTagUseCase(categoryRepo, tagRepo, logger)
 	likeFavoriteUC := contentbiz.NewLikeFavoriteUseCase(likeRepo, favoriteRepo, mediaUC, logger)
-	playlistRepo := contentdata.NewPlaylistRepo(contentDB, logger)
+	playlistRepo := contentdal.NewPlaylistRepo(contentDB, logger)
 	playlistChannelUC := contentbiz.NewPlaylistChannelUseCase(playlistRepo, channelRepo, logger)
 	feedUC := contentbiz.NewFeedUseCase(feedRepo, logger)
 	notificationUC := contentbiz.NewNotificationUseCase(notificationRepo, logger)
 
-	authHandler := server.NewAuthHandler(userUC, jwtMgr)
-	userHandler := server.NewUserHandler(userUC, jwtMgr)
-	mediaHandler := server.NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC, db, nil)
-	uploadHandler := server.NewUploadHandler(uploadUC, jwtMgr, logger)
-	categoryHandler := server.NewCategoryHandler(categoryTagUC, jwtMgr)
-	tagHandler := server.NewTagHandler(categoryTagUC, jwtMgr)
-	feedHandler := server.NewFeedHandler(feedUC)
-	notificationHandler := server.NewNotificationHandler(notificationUC, jwtMgr)
-	channelHandler := server.NewChannelHandler(playlistChannelUC, jwtMgr, db)
-	shareHandler := server.NewShareHandler(likeFavoriteUC, jwtMgr)
-	meHandler := server.NewMeHandler(userUC, likeFavoriteUC, playlistChannelUC, jwtMgr)
+	authHandler := authservice.NewAuthHandler(userUC, jwtMgr)
+	userHandler := userservice.NewUserHandler(userUC, jwtMgr)
+	mediaHandler := mediaservice.NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC, nil)
+	uploadHandler := mediaservice.NewUploadHandler(uploadUC, jwtMgr, logger)
+	categoryHandler := contentservice.NewCategoryHandler(categoryTagUC, jwtMgr)
+	tagHandler := contentservice.NewTagHandler(categoryTagUC, jwtMgr)
+	feedHandler := contentservice.NewFeedHandler(feedUC)
+	notificationHandler := contentservice.NewNotificationHandler(notificationUC, jwtMgr)
+	channelHandler := contentservice.NewChannelHandler(playlistChannelUC, jwtMgr)
+	shareHandler := contentservice.NewShareHandler(likeFavoriteUC, jwtMgr)
+	meHandler := userservice.NewMeHandler(userUC, likeFavoriteUC, playlistChannelUC, jwtMgr)
 
-	statsRepo := systemdata.NewStatsRepo(db)
-	statsHandler := server.NewStatsHandler(mediaUC, likeFavoriteUC, statsRepo, jwtMgr)
-	searchHandler := server.NewSearchHandler(mediaUC)
+	statsRepo := systemdal.NewStatsRepo(db)
+	statsHandler := systemservice.NewStatsHandler(mediaUC, likeFavoriteUC, statsRepo, jwtMgr)
+	searchHandler := mediaservice.NewSearchHandler(mediaUC)
 
 	// System handler
-	settingRepo := systemdata.NewSettingRepo(db)
+	settingRepo := systemdal.NewSettingRepo(db)
 	settingUC := systembiz.NewSettingUseCase(settingRepo)
-	systemHandler := server.NewSystemHandler(jwtMgr, statsRepo, settingUC)
+	systemHandler := systemservice.NewSystemHandler(jwtMgr, statsRepo, settingUC)
 
 	// Admin handler (needs TagService from svc-admin)
-	adminTagRepo := admindata.NewTagRepository(db)
+	adminTagRepo := admindal.NewTagRepository(db)
 	tagUC := adminbiz.NewTagUseCase(adminTagRepo)
-	tagService := service.NewTagService(tagUC)
+	tagService := adminservice.NewTagService(tagUC)
 
 	// Article use case for admin content management
-	articleRepo := contentdata.NewArticleRepo(contentDB, logger)
+	articleRepo := contentdal.NewArticleRepo(contentDB, logger)
 	articleUC := contentbiz.NewArticleUseCase(articleRepo, logger)
 
-	adminHandler := server.NewAdminHandler(jwtMgr, mediaUC, playlistChannelUC, tagService, settingUC, categoryTagUC, articleUC, userUC, nil)
+	adminHandler := adminservice.NewAdminHandler(jwtMgr, mediaUC, playlistChannelUC, tagService, settingUC, categoryTagUC, articleUC, userUC, nil)
 
 	// Explore handler
-	exploreHandler := server.NewExploreHandler(db)
+	exploreHandler := contentservice.NewExploreHandler(db)
 
 	// Comment like use case
-	commentLikeRepo := contentdata.NewCommentLikeRepo(contentDB, logger)
-	commentLikeUC := contentbiz.NewCommentLikeUseCase(commentLikeRepo, logger)
+	commentLikeRepo := contentdal.NewCommentLikeRepo(contentDB, logger)
+	_ = contentbiz.NewCommentLikeUseCase(commentLikeRepo, logger)
 
 	// Comment moderation handler
-	commentModRepo := contentdata.NewCommentModerationRepo(contentDB, logger)
-	commentReportRepo := contentdata.NewCommentReportRepo(contentDB, logger)
+	commentModRepo := contentdal.NewCommentModerationRepo(contentDB, logger)
+	commentReportRepo := contentdal.NewCommentReportRepo(contentDB, logger)
 	commentModUC := contentbiz.NewCommentModerationUseCase(commentModRepo, commentReportRepo, settingUC, logger)
-	commentModerationHandler := server.NewCommentModerationHandler(commentModUC, db, jwtMgr)
+	commentModerationHandler := contentservice.NewCommentModerationHandler(commentModUC, jwtMgr)
 
 	// Permission handler
-	authData := authdata.NewData(db)
-	permGroupRepo := authdata.NewPermissionGroupRepo(authData, logger)
-	permMemberRepo := authdata.NewGroupMemberRepo(authData, logger)
-	permUserRepo := authdata.NewUserPermRepo(authData, logger)
+	authData := authdal.NewData(db)
+	permGroupRepo := authdal.NewPermissionGroupRepo(authData, logger)
+	permMemberRepo := authdal.NewGroupMemberRepo(authData, logger)
+	permUserRepo := authdal.NewUserPermRepo(authData, logger)
 	permUC := authbiz.NewPermissionUseCase(permGroupRepo, permMemberRepo, permUserRepo, logger)
-	permissionHandler := server.NewPermissionHandler(permUC, jwtMgr)
+	permissionHandler := authservice.NewPermissionHandler(permUC, jwtMgr)
 
 	router := gin.New()
 	router.Use(gin.Recovery())
@@ -220,25 +226,26 @@ func SetupTestServer(t *testing.T) *TestServer {
 	})
 
 	srv := server.NewServer(
-		authHandler,
-		userHandler,
-		mediaHandler,
-		uploadHandler,
-		categoryHandler,
-		tagHandler,
-		feedHandler,
-		notificationHandler,
-		channelHandler,
-		shareHandler,
-		systemHandler,
-		statsHandler,
-		searchHandler,
-		meHandler,
-		adminHandler,
-		exploreHandler,
-		commentLikeUC,
-		commentModerationHandler,
-		permissionHandler,
+		[]handler.Module{
+			authHandler,
+			userHandler,
+			mediaHandler,
+			uploadHandler,
+			categoryHandler,
+			tagHandler,
+			feedHandler,
+			notificationHandler,
+			channelHandler,
+			shareHandler,
+			systemHandler,
+			statsHandler,
+			searchHandler,
+			meHandler,
+			adminHandler,
+			exploreHandler,
+			commentModerationHandler,
+			permissionHandler,
+		},
 		db,
 		jwtMgr,
 		"./data/uploads", // storageBasePath

@@ -18,6 +18,8 @@ type Tag struct {
 	ID int `json:"id,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
+	// Slug holds the value of the "slug" field.
+	Slug string `json:"slug,omitempty"`
 	// MediaCount holds the value of the "media_count" field.
 	MediaCount int `json:"media_count,omitempty"`
 	// ListingsThumbnail holds the value of the "listings_thumbnail" field.
@@ -54,7 +56,7 @@ func (*Tag) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case tag.FieldID, tag.FieldMediaCount:
 			values[i] = new(sql.NullInt64)
-		case tag.FieldTitle, tag.FieldListingsThumbnail:
+		case tag.FieldTitle, tag.FieldSlug, tag.FieldListingsThumbnail:
 			values[i] = new(sql.NullString)
 		case tag.ForeignKeys[0]: // media_tag_tag
 			values[i] = new(sql.NullInt64)
@@ -84,6 +86,12 @@ func (_m *Tag) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
 			} else if value.Valid {
 				_m.Title = value.String
+			}
+		case tag.FieldSlug:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field slug", values[i])
+			} else if value.Valid {
+				_m.Slug = value.String
 			}
 		case tag.FieldMediaCount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -147,6 +155,9 @@ func (_m *Tag) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("title=")
 	builder.WriteString(_m.Title)
+	builder.WriteString(", ")
+	builder.WriteString("slug=")
+	builder.WriteString(_m.Slug)
 	builder.WriteString(", ")
 	builder.WriteString("media_count=")
 	builder.WriteString(fmt.Sprintf("%v", _m.MediaCount))

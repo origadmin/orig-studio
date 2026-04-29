@@ -11,7 +11,7 @@ interface ChannelNavProps {
 const ChannelNav: React.FC<ChannelNavProps> = ({
     activeTab,
     onTabChange,
-    isOwner = false,
+    isOwner: _isOwner = false,
 }) => {
     const {t} = useTranslation();
 

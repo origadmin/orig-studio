@@ -3,7 +3,7 @@
  */
 
 import {useEffect, useState, useCallback, useRef} from "react";
-import {mediaApi} from "../lib/api/media";
+import {mediaApi} from "@/lib/api/media";
 
 interface TranscodingEvent {
     media_id: string;

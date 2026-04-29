@@ -39,7 +39,7 @@ interface ChannelHeaderProps {
 const ChannelHeader: React.FC<ChannelHeaderProps> = ({
     channel,
     isOwner,
-    isFromMeChannel = false,
+    isFromMeChannel: _isFromMeChannel = false,
     isSubscribed = false,
     subscriberCount = 0,
     subscribing = false,
@@ -89,7 +89,7 @@ const ChannelHeader: React.FC<ChannelHeaderProps> = ({
                         onClick={() =>
                             navigate({
                                 to: '/u/$id',
-                                params: {id: channel?.friendly_token || channel?.slug || ''},
+                                params: {id: channel?.short_token || ''},
                                 search: {tab: 'appearance'},
                             })
                         }
@@ -172,7 +172,7 @@ const ChannelHeader: React.FC<ChannelHeaderProps> = ({
                                         onClick={() =>
                                             navigate({
                                                 to: '/u/$id',
-                                                params: {id: channel?.friendly_token || channel?.slug || ''},
+                                                params: {id: channel?.short_token || ''},
                                                 search: {tab: 'branding'},
                                             })
                                         }
@@ -220,7 +220,7 @@ const ChannelHeader: React.FC<ChannelHeaderProps> = ({
                             <>
                                 <Button
                                     variant="outline"
-                                    onClick={() => navigate({to: '/u/$id', params: {id: channel?.friendly_token || channel?.slug || ''}})}
+                                    onClick={() => navigate({to: '/u/$id', params: {id: channel?.short_token || ''}})}
                                 >
                                     <Settings className="w-4 h-4 mr-1"/>
                                     {t('channel.manageChannel')}

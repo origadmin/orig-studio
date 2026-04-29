@@ -292,7 +292,7 @@ const WatchPage = () => {
                         <CardContent className="p-4 space-y-2">
                             <div className="flex gap-3 text-sm font-bold text-gray-900 dark:text-white">
                                 <span>{formatViews(media.view_count)} {t('watch.views')}</span>
-                                <span>{formatDate(media.created_at)}</span>
+                                <span>{formatDate(media.create_time)}</span>
                                 {media.tags?.map(tag => (
                                     <span key={tag}
                                           className="text-info dark:text-blue-400 cursor-pointer hover:underline">#{tag}</span>
@@ -353,7 +353,7 @@ const WatchPage = () => {
                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                             <span>{formatViews(item.view_count)} views</span>
                                             <span>·</span>
-                                            <span>{formatDate(item.created_at)}</span>
+                                            <span>{formatDate(item.create_time)}</span>
                                         </div>
                                     </div>
                                 </Link>

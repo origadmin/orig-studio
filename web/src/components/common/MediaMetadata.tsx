@@ -1,9 +1,9 @@
-﻿import React, {useState, useEffect} from 'react';
-import {Info, Clock, Monitor, File, BarChart2, Text, Image, PlayCircle} from 'lucide-react';
+import React, {useState, useEffect} from 'react';
+import {Info, Text, Image, PlayCircle} from 'lucide-react';
 import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import {Skeleton} from '@/components/ui/skeleton';
-import {formatDate, formatDuration, formatFileSize} from '@/lib/format';
+import {formatDuration, formatFileSize} from '@/lib/format';
 import {metadataApi, type MediaMetadata} from '@/lib/api/metadata';
 import ErrorPage from '@/components/common/ErrorPage';
 
@@ -15,7 +15,7 @@ const MediaMetadata: React.FC<MediaMetadataProps> = ({mediaId}) => {
     const [metadata, setMetadata] = useState<MediaMetadata | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [miningStatus, setMiningStatus] = useState<{
+    const [_miningStatus, setMiningStatus] = useState<{
         status: string;
         progress: number;
         message: string

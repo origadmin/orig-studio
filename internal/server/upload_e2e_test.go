@@ -2,7 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-package server
+package server_test
 
 import (
 	"bytes"
@@ -22,12 +22,13 @@ import (
 
 	_ "github.com/sqlite3ent/sqlite3"
 	pb "origadmin/application/origcms/api/gen/v1/upload"
-	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/entity"
-	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
-	contentdata "origadmin/application/origcms/internal/svc-content/data"
-	"origadmin/application/origcms/internal/svc-media/biz"
-	"origadmin/application/origcms/internal/svc-media/data"
+	contentbiz "origadmin/application/origcms/internal/features/content/biz"
+	contentdal "origadmin/application/origcms/internal/features/content/dal"
+	"origadmin/application/origcms/internal/features/media/biz"
+	"origadmin/application/origcms/internal/features/media/dal"
+	mediaservice "origadmin/application/origcms/internal/features/media/service"
 )
 
 func TestUploadE2E(t *testing.T) {
@@ -50,11 +51,11 @@ func TestUploadE2E(t *testing.T) {
 
 	// Setup svc-media dependencies
 	logger := log.NewStdLogger(os.Stderr)
-	uploadRepo := data.NewUploadRepo(client, logger)
-	mediaRepo := data.NewMediaRepo(client)
-	profileRepo := data.NewEncodeProfileRepo(client)
-	taskRepo := data.NewEncodingTaskRepo(client)
-	storage := data.NewLocalStorage("data/uploads")
+	uploadRepo := dal.NewUploadRepo(client, logger)
+	mediaRepo := dal.NewMediaRepo(client)
+	profileRepo := dal.NewEncodeProfileRepo(client)
+	taskRepo := dal.NewEncodingTaskRepo(client)
+	storage := dal.NewLocalStorage("data/uploads")
 	mediaUC := biz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, nil, storage, nil, logger, nil)
 
 	uploadUC := biz.NewUploadUseCase(
@@ -69,17 +70,20 @@ func TestUploadE2E(t *testing.T) {
 	)
 
 	// Setup content layer dependencies
-	contentDB := contentdata.NewData(client)
-	likeRepo := contentdata.NewLikeRepo(contentDB, logger)
-	favoriteRepo := contentdata.NewFavoriteRepo(contentDB, logger)
+	contentDB := contentdal.NewData(client)
+	likeRepo := contentdal.NewLikeRepo(contentDB, logger)
+	favoriteRepo := contentdal.NewFavoriteRepo(contentDB, logger)
 	likeFavoriteUC := contentbiz.NewLikeFavoriteUseCase(likeRepo, favoriteRepo, mediaUC, logger)
 
 	// Setup Router
 	router := gin.Default()
-	RegisterRoutes(router,
-		NewUploadHandler(uploadUC, jwtMgr, logger),
-		NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC, nil, nil, client, nil),
-	)
+	apiV1 := router.Group("/api/v1")
+
+	uploadHandler := mediaservice.NewUploadHandler(uploadUC, jwtMgr, logger)
+	mediaHandler := mediaservice.NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC, nil, nil, nil)
+
+	uploadHandler.RegisterRoutes(apiV1)
+	mediaHandler.RegisterRoutes(apiV1)
 
 	// 2. Register & Login to get token
 	username := "testuser"

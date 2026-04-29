@@ -23,7 +23,6 @@ import {
     FileText
 } from 'lucide-react';
 import {useTranslation} from 'react-i18next';
-import {Separator} from '@/components/ui/separator';
 
 const AdminLayout = () => {
     const {t} = useTranslation();

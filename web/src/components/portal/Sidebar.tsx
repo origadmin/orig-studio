@@ -1,10 +1,10 @@
 ﻿import React, {useState, useEffect, useMemo, useRef} from 'react';
 import {Link, useLocation} from '@tanstack/react-router';
 import {useTranslation} from 'react-i18next';
-import {useAuth} from '../../hooks/useAuth';
-import {useSubscribedChannels} from '../../hooks/useSubscriptions';
-import {NAV_CONFIG} from '../../config/navigation';
-import type {NavSection, NavItem} from '../../types/nav';
+import {useAuth} from '@/hooks/useAuth';
+import {useSubscribedChannels} from '@/hooks/useSubscriptions';
+import {NAV_CONFIG} from '@/config/navigation';
+import type {NavSection, NavItem} from '@/types/nav';
 
 interface SidebarProps {
     collapsed?: boolean;

@@ -371,7 +371,7 @@ const ReviewFlow: React.FC = () => {
                                             {getStatusBadge(item.status)}
                                         </TableCell>
                                         <TableCell>
-                                            <p className="text-sm text-gray-600 dark:text-muted-foreground">{formatDate(item.created_at)}</p>
+                                            <p className="text-sm text-gray-600 dark:text-muted-foreground">{formatDate(item.create_time)}</p>
                                         </TableCell>
                                         {activeTab === 'history' && (
                                             <TableCell>
@@ -520,7 +520,7 @@ const ReviewFlow: React.FC = () => {
                                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                     {t('common.createdAt')}
                                 </h4>
-                                <p className="text-sm text-gray-600 dark:text-muted-foreground">{formatDate(currentItem.created_at)}</p>
+                                <p className="text-sm text-gray-600 dark:text-muted-foreground">{formatDate(currentItem.create_time)}</p>
                             </div>
                             {currentItem.reason && (
                                 <div className="space-y-2">

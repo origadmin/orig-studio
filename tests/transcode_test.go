@@ -16,8 +16,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"origadmin/application/origcms/internal/data/enums"
-	"origadmin/application/origcms/internal/svc-media/biz"
-	"origadmin/application/origcms/internal/svc-media/data"
+	"origadmin/application/origcms/internal/features/media/biz"
+	"origadmin/application/origcms/internal/features/media/dal"
 )
 
 // MockTranscodeWorker implements TranscodeWorker interface for testing
@@ -165,9 +165,9 @@ func (w *MockTranscodeWorkerWithFailure) Shutdown(ctx context.Context) error {
 func TestTranscode_Success(t *testing.T) {
 	// Setup dependencies
 	mockStorage := NewMockStorage()
-	mediaRepo := data.NewInMemoryMediaRepo()
-	profileRepo := data.NewInMemoryEncodeProfileRepo()
-	encodingRepo := data.NewInMemoryEncodingTaskRepo()
+	mediaRepo := dal.NewInMemoryMediaRepo()
+	profileRepo := dal.NewInMemoryEncodeProfileRepo()
+	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	mockWorker := NewMockTranscodeWorker()
 	
 	// Create test profiles
@@ -250,9 +250,9 @@ func TestTranscode_Success(t *testing.T) {
 func TestTranscode_Failure(t *testing.T) {
 	// Setup dependencies
 	mockStorage := NewMockStorage()
-	mediaRepo := data.NewInMemoryMediaRepo()
-	profileRepo := data.NewInMemoryEncodeProfileRepo()
-	encodingRepo := data.NewInMemoryEncodingTaskRepo()
+	mediaRepo := dal.NewInMemoryMediaRepo()
+	profileRepo := dal.NewInMemoryEncodeProfileRepo()
+	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	
 	// Create test profiles
 	createTestProfiles(t, profileRepo)
@@ -411,9 +411,9 @@ func TestTranscode_Failure(t *testing.T) {
 func TestTranscode_Retry(t *testing.T) {
 	// Setup dependencies
 	mockStorage := NewMockStorage()
-	mediaRepo := data.NewInMemoryMediaRepo()
-	profileRepo := data.NewInMemoryEncodeProfileRepo()
-	encodingRepo := data.NewInMemoryEncodingTaskRepo()
+	mediaRepo := dal.NewInMemoryMediaRepo()
+	profileRepo := dal.NewInMemoryEncodeProfileRepo()
+	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	
 	// Create test profiles
 	createTestProfiles(t, profileRepo)
@@ -504,9 +504,9 @@ func TestTranscode_Retry(t *testing.T) {
 func TestTranscode_DifferentProfileTypes(t *testing.T) {
 	// Setup dependencies
 	mockStorage := NewMockStorage()
-	mediaRepo := data.NewInMemoryMediaRepo()
-	profileRepo := data.NewInMemoryEncodeProfileRepo()
-	encodingRepo := data.NewInMemoryEncodingTaskRepo()
+	mediaRepo := dal.NewInMemoryMediaRepo()
+	profileRepo := dal.NewInMemoryEncodeProfileRepo()
+	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	mockWorker := NewMockTranscodeWorker()
 	
 	// Create test profiles including preview and frames

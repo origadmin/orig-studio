@@ -34,12 +34,6 @@ func (_c *ChannelCreate) SetTitle(v string) *ChannelCreate {
 	return _c
 }
 
-// SetSlug sets the "slug" field.
-func (_c *ChannelCreate) SetSlug(v string) *ChannelCreate {
-	_c.mutation.SetSlug(v)
-	return _c
-}
-
 // SetDescription sets the "description" field.
 func (_c *ChannelCreate) SetDescription(v string) *ChannelCreate {
 	_c.mutation.SetDescription(v)
@@ -194,14 +188,6 @@ func (_c *ChannelCreate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Channel.title": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Slug(); !ok {
-		return &ValidationError{Name: "slug", err: errors.New(`entity: missing required field "Channel.slug"`)}
-	}
-	if v, ok := _c.mutation.Slug(); ok {
-		if err := channel.SlugValidator(v); err != nil {
-			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "Channel.slug": %w`, err)}
-		}
-	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`entity: missing required field "Channel.description"`)}
 	}
@@ -273,10 +259,6 @@ func (_c *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Title(); ok {
 		_spec.SetField(channel.FieldTitle, field.TypeString, value)
 		_node.Title = value
-	}
-	if value, ok := _c.mutation.Slug(); ok {
-		_spec.SetField(channel.FieldSlug, field.TypeString, value)
-		_node.Slug = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(channel.FieldDescription, field.TypeString, value)

@@ -13,87 +13,32 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/origadmin/runtime/log"
-	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/frontend"
 	"origadmin/application/origcms/internal/handler"
-	contentbiz "origadmin/application/origcms/internal/svc-content/biz"
 )
 
 // Server represents the application server.
 type Server struct {
-	authHandler        *AuthHandler
-	userHandler        *UserHandler
-	mediaHandler       *MediaHandler
-	uploadHandler      *UploadHandler
-	categoryHandler    *CategoryHandler
-	tagHandler         *TagHandler
-	feedHandler        *FeedHandler
-	notificationHandler *NotificationHandler
-	channelHandler     *ChannelHandler
-	shareHandler       *ShareHandler
-	systemHandler      *SystemHandler
-	statsHandler       *StatsHandler
-	searchHandler      *SearchHandler
-	meHandler          *MeHandler
-	adminHandler       *AdminHandler
-	exploreHandler     *ExploreHandler
-	commentLikeUC      *contentbiz.CommentLikeUseCase
-	commentModerationHandler *CommentModerationHandler
-	permissionHandler  *PermissionHandler
-	entityClient       *entity.Client
-	jwtMgr             *auth.Manager
-	storageBasePath    string // base directory for static file serving (resolved to absolute path)
+	modules         []handler.Module
+	entityClient    *entity.Client
+	jwtMgr          *auth.Manager
+	storageBasePath string // base directory for static file serving (resolved to absolute path)
 }
 
 // NewServer creates a new server instance.
 func NewServer(
-	authHandler *AuthHandler,
-	userHandler *UserHandler,
-	mediaHandler *MediaHandler,
-	uploadHandler *UploadHandler,
-	categoryHandler *CategoryHandler,
-	tagHandler *TagHandler,
-	feedHandler *FeedHandler,
-	notificationHandler *NotificationHandler,
-	channelHandler *ChannelHandler,
-	shareHandler *ShareHandler,
-	systemHandler *SystemHandler,
-	statsHandler *StatsHandler,
-	searchHandler *SearchHandler,
-	meHandler *MeHandler,
-	adminHandler *AdminHandler,
-	exploreHandler *ExploreHandler,
-	commentLikeUC *contentbiz.CommentLikeUseCase,
-	commentModerationHandler *CommentModerationHandler,
-	permissionHandler *PermissionHandler,
+	modules []handler.Module,
 	entityClient *entity.Client,
 	jwtMgr *auth.Manager,
 	storageBasePath string,
 ) *Server {
 	return &Server{
-		authHandler:        authHandler,
-		userHandler:        userHandler,
-		mediaHandler:       mediaHandler,
-		uploadHandler:      uploadHandler,
-		categoryHandler:    categoryHandler,
-		tagHandler:         tagHandler,
-		feedHandler:        feedHandler,
-		notificationHandler: notificationHandler,
-		channelHandler:     channelHandler,
-		shareHandler:       shareHandler,
-		systemHandler:      systemHandler,
-		statsHandler:       statsHandler,
-		searchHandler:      searchHandler,
-		meHandler:          meHandler,
-		adminHandler:       adminHandler,
-		exploreHandler:     exploreHandler,
-		commentLikeUC:      commentLikeUC,
-		commentModerationHandler: commentModerationHandler,
-		permissionHandler:  permissionHandler,
-		entityClient:       entityClient,
-		jwtMgr:             jwtMgr,
-		storageBasePath:    storageBasePath,
+		modules:         modules,
+		entityClient:    entityClient,
+		jwtMgr:          jwtMgr,
+		storageBasePath: storageBasePath,
 	}
 }
 
@@ -162,36 +107,11 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 
 	// API v1 routes
 	apiV1 := r.Group("/api/v1")
-	adapter := handler.NewGinRouterAdapter(apiV1)
-	{
-		s.authHandler.Register(adapter)
-		s.userHandler.Register(adapter)
-		// Media handler uses direct gin registration for proper middleware
-		s.mediaHandler.RegisterGin(apiV1)
-		// Upload handler uses direct gin registration for proper middleware
-		s.uploadHandler.RegisterGin(apiV1)
-		s.categoryHandler.Register(adapter)
-		s.tagHandler.Register(adapter)
-		s.feedHandler.Register(adapter)
-		s.notificationHandler.Register(adapter)
-		s.channelHandler.Register(adapter)
-		s.shareHandler.Register(adapter)
-		s.systemHandler.Register(adapter)
-		s.statsHandler.Register(adapter)
-		s.searchHandler.Register(adapter)
-		s.meHandler.Register(adapter)
-		s.adminHandler.Register(adapter)
-		s.exploreHandler.Register(adapter)
+
+	// Register all handler modules
+	for _, mod := range s.modules {
+		mod.RegisterRoutes(apiV1)
 	}
-
-	// Comment routes (direct gin registration for entity access)
-	RegisterCommentRoutes(apiV1, s.entityClient, s.jwtMgr, s.commentLikeUC, s.commentModerationHandler.moderationUC)
-
-	// Comment moderation routes
-	s.commentModerationHandler.RegisterRoutes(apiV1)
-
-	// Permission routes
-	s.permissionHandler.RegisterRoutes(apiV1)
 }
 
 // getEnv gets an environment variable or returns the default value.

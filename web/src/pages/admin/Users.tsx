@@ -405,7 +405,7 @@ export default function UsersPage() {
                                                 <Badge variant="secondary">{t('admin.inactive') || "Inactive"}</Badge>
                                             )}
                                         </TableCell>
-                                        <TableCell className="text-sm text-slate-500">{user.created_at}</TableCell>
+                                        <TableCell className="text-sm text-slate-500">{user.create_time}</TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>

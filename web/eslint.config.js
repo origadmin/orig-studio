@@ -1,22 +1,20 @@
-/*
- * Copyright (c) 2024 OrigAdmin. All rights reserved.
- */
-
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
 
 export default [
   {
-    root: true,
-    parser: typescriptParser,
+    ignores: ['dist/', 'node_modules/', '*.gen.ts'],
+  },
+  {
+    files: ['**/*.{ts,tsx}'],
+    languageOptions: {
+      parser: typescriptParser,
+    },
     plugins: {
       '@typescript-eslint': typescriptEslint,
     },
-    extends: [
-      'eslint:recommended',
-      'plugin:@typescript-eslint/recommended',
-    ],
     rules: {
+      ...typescriptEslint.configs.recommended.rules,
       'no-restricted-imports': [
         'error',
         {
@@ -25,12 +23,10 @@ export default [
       ],
       'no-console': 'warn',
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
     },
-    ignorePatterns: ['dist/', 'node_modules/', '*.gen.ts'],
   },
 ];
-

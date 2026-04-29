@@ -46,6 +46,9 @@ interface VideoPlayerProps {
     onPlayingChange?: (playing: boolean) => void;
     onTimeChange?: (time: number) => void;
     onAutoPlayNext?: () => void;
+    /** When true, the video is still being processed (transcoding) and
+     *  should not attempt playback. Shows a processing overlay instead. */
+    isProcessing?: boolean;
 }
 
 const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
@@ -68,6 +71,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                                                                              onPlayingChange,
                                                                              onTimeChange,
                                                                              onAutoPlayNext,
+                                                                             isProcessing = false,
                                                                          }, ref) => {
 
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -144,26 +148,104 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
     const supportsPiP = useMemo(() => typeof document !== 'undefined' && 'pictureInPictureEnabled' in document, []);
     const supportsFullscreen = useMemo(() => typeof document !== 'undefined' && !!document.fullscreenEnabled, []);
 
+    // Validate HLS source: must be a non-empty path that looks like an HLS manifest
+    const isValidHlsSrc = useCallback((src?: string): boolean => {
+        if (!src) return false;
+        // Accept paths containing "hls/" or ending with ".m3u8" — these are
+        // the only valid HLS sources produced by the backend transcoder.
+        return src.includes('hls/') || src.endsWith('.m3u8');
+    }, []);
+
     // Initialize HLS player with quality levels
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
 
-        const fullHlsSrc = hlsSrc ? getFullUrl(hlsSrc) : undefined;
+        // When the video is still being processed (transcoding), do NOT
+        // attempt to load any source.  Loading the raw upload (e.g. MKV/AVI)
+        // causes DEMUXER_ERROR_COULD_NOT_OPEN because the browser cannot
+        // demux non-web-friendly containers.
+        if (isProcessing) {
+            // Clear any previous source to avoid stale playback attempts
+            video.removeAttribute('src');
+            video.load();
+            if (hlsRef.current) {
+                hlsRef.current.destroy();
+                hlsRef.current = null;
+            }
+            setHasError(false);
+            setErrorMessage('');
+            return;
+        }
+
+        const validHls = isValidHlsSrc(hlsSrc) ? hlsSrc : undefined;
+        const fullHlsSrc = validHls ? getFullUrl(validHls) : undefined;
         const fullSrc = getFullUrl(src);
 
         // Reset error state
         setHasError(false);
         setErrorMessage('');
 
-        if (hlsSrc && fullHlsSrc && Hls.isSupported()) {
+        if (validHls && fullHlsSrc && Hls.isSupported()) {
             if (hlsRef.current) {
                 hlsRef.current.destroy();
             }
 
             const hls = new Hls({
+                // Worker: enable for offloaded demuxing
                 enableWorker: true,
-                lowLatencyMode: true,
+                // VOD mode: lowLatencyMode is for live streams; disable for on-demand
+                // to avoid aggressive small-segment fetching that causes stuttering
+                lowLatencyMode: false,
+
+                // === Buffer configuration (optimized for VOD playback) ===
+                // Maximum forward buffer length in seconds (default 30s is too short for VOD;
+                // 60s provides smoother playback without excessive memory usage)
+                maxBufferLength: 60,
+                // Absolute maximum buffer length cap in seconds (default 600s is excessive;
+                // 120s prevents memory bloat on long videos while ensuring smooth seeking)
+                maxMaxBufferLength: 120,
+                // Maximum buffer size in bytes (default 60MB; 80MB for higher quality streams)
+                maxBufferSize: 80 * 1024 * 1024,
+                // Maximum inter-buffer hole tolerance in seconds (default 0.1s is too strict;
+                // 0.5s avoids unnecessary rebuffering on small segment gaps after seek)
+                maxBufferHole: 0.5,
+                // Back buffer length in seconds — clear already-played content from memory
+                // (default Infinity causes unbounded memory growth on long videos; 30s is sufficient)
+                backBufferLength: 30,
+
+                // === ABR (Adaptive Bitrate) configuration ===
+                // Default bandwidth estimate in bps (default 500kbps is too conservative;
+                // 1Mbps starts at a reasonable quality instead of always beginning at 240p)
+                abrEwmaDefaultEstimate: 1000000,
+                // Maximum default estimate cap (prevents overestimation on fast connections)
+                abrEwmaDefaultEstimateMax: 5000000,
+
+                // === Startup optimization ===
+                // Prefetch the first fragment before attaching to reduce time-to-first-frame
+                startFragPrefetch: true,
+                // Start from the highest matching quality level instead of lowest
+                // (let ABR downgrade if needed rather than always starting low)
+                startLevel: -1,
+
+                // === Network resilience ===
+                // Fragment loading timeout in ms (default 20s; 30s for slower connections)
+                fragLoadingTimeOut: 30000,
+                // Fragment loading max retries (default 6; increase for unreliable networks)
+                fragLoadingMaxRetry: 8,
+                // Fragment loading retry delay in ms (default 1s)
+                fragLoadingRetryDelay: 1000,
+                // Manifest loading timeout in ms (default 15s; 20s for slower connections)
+                manifestLoadingTimeOut: 20000,
+                // Manifest loading max retries (default 1; increase for reliability)
+                manifestLoadingMaxRetry: 4,
+                // Level loading timeout in ms (for loading child playlists in multi-variant streams)
+                levelLoadingTimeOut: 20000,
+
+                // === Buffer watchdog ===
+                // High buffer watchdog period in seconds (default 2s; increase to reduce
+                // unnecessary buffer trimming on momentary speed fluctuations)
+                highBufferWatchdogPeriod: 3,
             });
 
             hls.loadSource(fullHlsSrc);
@@ -188,35 +270,66 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                 }
             });
 
-            // Handle errors
+            // Handle errors with enhanced recovery strategy
             hls.on(Hls.Events.ERROR, (_event, data) => {
-                if (data.fatal) {
-                    switch (data.type) {
-                        case Hls.ErrorTypes.NETWORK_ERROR:
-                            console.error('Fatal network error encountered, trying to recover...');
-                            hls.startLoad();
-                            break;
-                        case Hls.ErrorTypes.MEDIA_ERROR:
-                            console.error('Fatal media error encountered, trying to recover...');
-                            hls.recoverMediaError();
-                            break;
-                        default:
-                            console.error('Fatal error:', data);
-                            hls.destroy();
-                            setHasError(true);
-                            setErrorMessage('Failed to load video. Please try again.');
-                            onError?.(new Error(data.type));
-                            break;
-                    }
+                // Log non-fatal errors for diagnostics but don't disrupt playback
+                if (!data.fatal) {
+                    console.warn('[HLS] Non-fatal error:', data.type, data.details);
+                    return;
+                }
+
+                console.error('[HLS] Fatal error:', data.type, data.details);
+
+                switch (data.type) {
+                    case Hls.ErrorTypes.NETWORK_ERROR:
+                        // Network errors: retry loading with a short delay to allow
+                        // transient network issues to resolve
+                        console.error('[HLS] Fatal network error, retrying load in 2s...');
+                        setTimeout(() => {
+                            if (hlsRef.current) {
+                                hlsRef.current.startLoad();
+                            }
+                        }, 2000);
+                        break;
+                    case Hls.ErrorTypes.MEDIA_ERROR:
+                        // Media errors: attempt recovery via hls.js built-in mechanism
+                        console.error('[HLS] Fatal media error, attempting recovery...');
+                        hls.recoverMediaError();
+                        break;
+                    default:
+                        // Unrecoverable errors: destroy player and show error UI
+                        console.error('[HLS] Unrecoverable fatal error, destroying player.');
+                        hls.destroy();
+                        setHasError(true);
+                        setErrorMessage('Failed to load video. Please try again.');
+                        onError?.(new Error(data.type));
+                        break;
                 }
             });
 
             // Handle quality level changes
+            // Only update currentQuality when user manually selected a specific level.
+            // In auto mode, only update autoResolution (shown as "Auto (720p)").
+            // Also clear buffering state — HLS level switches do NOT trigger the
+            // HTML5 video `canplay` event, so the spinner set by handleQualityChange
+            // would otherwise remain visible forever.
             hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
                 const level = hls.levels[data.level];
                 if (level) {
-                    setCurrentQuality(`${level.height}p`);
-                    setAutoResolution(`${level.height}p`);
+                    const resolution = `${level.height}p`;
+                    setAutoResolution(resolution);
+                    // currentLevel === -1 means auto mode; do NOT overwrite currentQuality
+                    if (hls.currentLevel !== -1) {
+                        setCurrentQuality(resolution);
+                    }
+                }
+
+                // Resume playback if the video was playing before the quality switch.
+                // The buffering spinner is managed entirely by the HTML5 video
+                // `waiting`/`playing` events — no manual setIsBuffering needed.
+                if (wasPlayingBeforeQualitySwitch.current) {
+                    wasPlayingBeforeQualitySwitch.current = false;
+                    video.play().catch(console.error);
                 }
             });
 
@@ -241,7 +354,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
         }
 
         return () => {};
-    }, [src, hlsSrc, autoPlay, onError]);
+    }, [src, hlsSrc, autoPlay, onError, isProcessing]);
 
     // Apply global settings to video element
     useEffect(() => {
@@ -298,22 +411,25 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
     // ========== 基础操作函数 (必须在 handleVideoClick 之前定义) ==========
 
     // Play/Pause toggle
+    // Read video.paused directly instead of relying on the React `isPlaying`
+    // state.  `isPlaying` is captured in the useCallback closure and can be
+    // stale when the user clicks rapidly — the state update from the previous
+    // click may not have re-rendered yet, causing every click to take the same
+    // branch (e.g. always play, never pause).  The DOM property `paused` is
+    // always in sync with the actual playback state.
     const togglePlay = useCallback(async () => {
-        if (!videoRef.current) return;
-        if (isPlaying) {
-            videoRef.current.pause();
-            setIsPlaying(false);
-            onPlayingChange?.(false);
-        } else {
+        const video = videoRef.current;
+        if (!video) return;
+        if (video.paused) {
             try {
-                await videoRef.current.play();
-                setIsPlaying(true);
-                onPlayingChange?.(true);
+                await video.play();
             } catch (err) {
                 console.error('Play error:', err);
             }
+        } else {
+            video.pause();
         }
-    }, [isPlaying, onPlayingChange]);
+    }, []);
 
     // Mute toggle
     const toggleMute = useCallback(() => {
@@ -375,10 +491,18 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
         } else {
             // Single click - toggle play/pause
             lastClickTimeRef.current = now;
+            // Read video.paused directly to determine the correct icon.
+            // Using the `isPlaying` state here would show the wrong icon on
+            // rapid clicks because the React state update hasn't re-rendered yet.
+            const video = videoRef.current;
+            const wasPaused = video ? video.paused : true;
             togglePlay();
-            showCenterIcon(isPlaying ? 'pause' : 'play');
+            // After toggle: if it was paused, we're now playing → show 'play' icon
+            // (meaning "play action just happened"); if it was playing, we're now
+            // paused → show 'pause' icon (meaning "pause action just happened").
+            showCenterIcon(wasPaused ? 'play' : 'pause');
         }
-    }, [isPlaying, togglePlay, toggleFullscreen, showCenterIcon]);
+    }, [togglePlay, toggleFullscreen, showCenterIcon]);
 
     // Handle video events
     const handleTimeUpdate = useCallback(() => {
@@ -388,10 +512,19 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
         onTimeUpdate?.(time);
         onTimeChange?.(time);
 
-        // Update buffered
+        // Update buffered progress — only update state when the change is
+        // significant (>1%) to avoid excessive re-renders on every timeUpdate tick
         if (videoRef.current.buffered.length > 0) {
             const bufferedEnd = videoRef.current.buffered.end(videoRef.current.buffered.length - 1);
-            setBuffered(bufferedEnd / videoRef.current.duration);
+            const duration = videoRef.current.duration;
+            if (duration > 0) {
+                const newBuffered = bufferedEnd / duration;
+                setBuffered(prev => {
+                    // Skip update if change is less than 1% to reduce re-renders
+                    if (Math.abs(newBuffered - prev) < 0.01) return prev;
+                    return newBuffered;
+                });
+            }
         }
     }, [onTimeUpdate, onTimeChange]);
 
@@ -419,10 +552,6 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
 
     const handleCanPlay = useCallback(() => {
         setIsBuffering(false);
-        if (wasPlayingBeforeQualitySwitch.current) {
-            wasPlayingBeforeQualitySwitch.current = false;
-            videoRef.current?.play().catch(console.error);
-        }
     }, []);
 
     const handleError = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
@@ -475,8 +604,16 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
             return;
         }
 
-        wasPlayingBeforeQualitySwitch.current = isPlaying;
-        setIsBuffering(true);
+        // Read video.paused directly instead of the `isPlaying` state to avoid
+        // stale closure values.
+        const video = videoRef.current;
+        wasPlayingBeforeQualitySwitch.current = video ? !video.paused : false;
+        // Do NOT manually set setIsBuffering(true) here.  The HTML5 video
+        // element's `waiting`/`playing` events naturally manage the buffering
+        // spinner.  If the quality switch causes a stall, `waiting` fires and
+        // the spinner appears; when playback resumes, `playing` fires and the
+        // spinner disappears.  If the switch is seamless (no stall), no
+        // spinner should appear at all — this matches YouTube's behavior.
 
         if (quality === 'auto') {
             hlsRef.current.currentLevel = -1;
@@ -492,7 +629,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
         }
 
         setShowSettingsMenu(false);
-    }, [isPlaying]);
+    }, []);
 
     // Skip forward/backward
     const skip = useCallback((seconds: number) => {
@@ -583,8 +720,12 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                 case ' ':
                 case 'k':
                     e.preventDefault();
-                    togglePlay();
-                    showCenterIcon(isPlaying ? 'pause' : 'play');
+                    {
+                        const video = videoRef.current;
+                        const wasPaused = video ? video.paused : true;
+                        togglePlay();
+                        showCenterIcon(wasPaused ? 'play' : 'pause');
+                    }
                     break;
                 case 'm':
                     e.preventDefault();
@@ -627,14 +768,14 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [togglePlay, toggleMute, toggleFullscreen, togglePiP, skip, isPlaying, showCenterIcon, setVolume]);
+    }, [togglePlay, toggleMute, toggleFullscreen, togglePiP, skip, showCenterIcon, setVolume]);
 
     const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
     return (
         <div
             ref={containerRef}
-            className={`relative bg-black rounded-2xl overflow-hidden aspect-video group video-player-container ${className}`}
+            className={`relative bg-black overflow-hidden aspect-video group video-player-container ${className}`}
             tabIndex={0}
             role="application"
             aria-label="Video Player"
@@ -664,6 +805,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                 poster={poster ? getFullUrl(poster) : undefined}
                 className="w-full h-full cursor-pointer"
                 playsInline
+                preload="metadata"
             />
 
             {/* Center overlay icon (shows on click) */}
@@ -740,9 +882,25 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                 </div>
             )}
 
+            {/* Processing overlay — shown when video is still transcoding */}
+            {isProcessing && (
+                <div
+                    className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 z-20 gap-4 p-8"
+                    role="status"
+                    aria-live="polite"
+                    aria-label="Video is being processed"
+                >
+                    <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin"/>
+                    <p className="text-white text-lg font-medium text-center">Video is being processed</p>
+                    <p className="text-white/60 text-sm text-center max-w-sm">
+                        This video is currently being transcoded and will be available for playback once processing is complete.
+                    </p>
+                </div>
+            )}
+
             {/* Controls overlay */}
             <div
-                className={`absolute inset-0 flex flex-col justify-end transition-opacity duration-300 z-10 ${
+                className={`absolute inset-0 flex flex-col justify-end transition-opacity duration-300 z-10 pointer-events-none ${
                     showControls || !isPlaying ? 'opacity-100' : 'opacity-0'
                 }`}
                 role="toolbar"
@@ -756,7 +914,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                 <div className="relative flex-1"/>
 
                 {/* Bottom controls */}
-                <div className="relative px-4 pb-4 pt-12">
+                <div className="relative px-4 pb-4 pt-12 pointer-events-auto">
                     {/* Progress bar */}
                     <div
                         className="relative h-1.5 group/hover:h-2.5 transition-all mb-4 cursor-pointer"

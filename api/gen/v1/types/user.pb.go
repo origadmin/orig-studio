@@ -219,6 +219,8 @@ type User struct {
 	LastLoginTime *timestamppb.Timestamp `protobuf:"bytes,19,opt,name=last_login_time,proto3" json:"last_login_time,omitempty"`
 	// user.field.login_time
 	LoginTime *timestamppb.Timestamp `protobuf:"bytes,20,opt,name=login_time,proto3" json:"login_time,omitempty"`
+	// user.field.slug — public identifier (separate from login username)
+	Slug string `protobuf:"bytes,21,opt,name=slug,proto3" json:"slug,omitempty"`
 	// The user's profile information.
 	Profile *UserProfile `protobuf:"bytes,50,opt,name=profile,proto3" json:"profile,omitempty"`
 	// The user's settings.
@@ -397,6 +399,13 @@ func (x *User) GetLoginTime() *timestamppb.Timestamp {
 		return x.LoginTime
 	}
 	return nil
+}
+
+func (x *User) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
 }
 
 func (x *User) GetProfile() *UserProfile {
@@ -784,7 +793,7 @@ const file_v1_types_user_proto_rawDesc = "" +
 	"\vpreferences\x18\x04 \x03(\v23.api.v1.services.types.UserSetting.PreferencesEntryR\vpreferences\x1a>\n" +
 	"\x10PreferencesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xf3\x06\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x87\a\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12$\n" +
 	"\rcreate_author\x18\x02 \x01(\tR\rcreate_author\x12$\n" +
@@ -808,7 +817,8 @@ const file_v1_types_user_proto_rawDesc = "" +
 	"\x0flast_login_time\x18\x13 \x01(\v2\x1a.google.protobuf.TimestampR\x0flast_login_time\x12:\n" +
 	"\n" +
 	"login_time\x18\x14 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"login_time\x12<\n" +
+	"login_time\x12\x12\n" +
+	"\x04slug\x18\x15 \x01(\tR\x04slug\x12<\n" +
 	"\aprofile\x182 \x01(\v2\".api.v1.services.types.UserProfileR\aprofile\x12<\n" +
 	"\asetting\x183 \x01(\v2\".api.v1.services.types.UserSettingR\asetting\x121\n" +
 	"\x05roles\x18d \x03(\v2\x1b.api.v1.services.types.RoleR\x05roles\"\xa2\x03\n" +

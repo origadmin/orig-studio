@@ -6,6 +6,7 @@ package convpb
 import (
 	"strconv"
 
+	"origadmin/application/origcms/internal/data/entity/comment"
 	"origadmin/application/origcms/internal/data/enums"
 )
 
@@ -24,4 +25,19 @@ func ConvertStringToEnumsEncodingTaskStatus(from string) enums.EncodingTaskStatu
 func ConvertStringToInt64(from string) int64 {
 	i, _ := strconv.ParseInt(from, 10, 64)
 	return i
+}
+
+// ConvertCommentStatusToString is a custom conversion function stub.
+// Please implement this function to complete the conversion.
+func ConvertCommentStatusToString(from comment.Status) string {
+	return from.String()
+}
+
+// ConvertStringToCommentStatus is a custom conversion function stub.
+// Please implement this function to complete the conversion.
+func ConvertStringToCommentStatus(from string) comment.Status {
+	switch from {
+	default:
+		return comment.StatusPENDING
+	}
 }

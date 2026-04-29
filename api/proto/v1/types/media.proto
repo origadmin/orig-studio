@@ -3,6 +3,7 @@ syntax = "proto3";
 package api.v1.services.types;
 
 import "google/protobuf/timestamp.proto";
+import "v1/types/user.proto";
 
 option go_package = "origadmin/application/origcms/api/gen/v1/types;types";
 option java_multiple_files = true;
@@ -74,8 +75,6 @@ message Media {
   string preview_file_path = 29 [json_name = "preview_file_path"];
   // media.field.state — publication state: draft, active, deleted
   string state = 30 [json_name = "state"];
-  // media.field.friendly_token — URL-friendly token for public access
-  string friendly_token = 31 [json_name = "friendly_token"];
   // media.field.short_token — URL-friendly token for public access
   string short_token = 43 [json_name = "short_token"];
   // media.field.published_at
@@ -100,6 +99,14 @@ message Media {
   string review_status = 41 [json_name = "review_status"];
   // media.field.listable
   bool listable = 42 [json_name = "listable"];
+
+  // Edge fields - abgen auto-matches entity.Media.Edges.Xxx
+  // User holds the value of the user edge.
+  User user = 50 [json_name = "user"];
+  // Category holds the value of the category edge.
+  Category category = 51 [json_name = "category"];
+  // Channel holds the value of the channel edge.
+  Channel channel = 52 [json_name = "channel"];
 }
 
 // EncodeProfile is the model entity for EncodeProfile.
@@ -267,8 +274,8 @@ message Channel {
   string banner_logo = 6 [json_name = "banner_logo"];
   // channel.field.user_id
   string user_id = 7 [json_name = "user_id"];
-  // channel.field.friendly_token
-  string friendly_token = 8 [json_name = "friendly_token"];
+  // channel.field.short_token — URL-friendly token for public access
+  string short_token = 11 [json_name = "short_token"];
   // channel.field.subscriber_count
   int64 subscriber_count = 9 [json_name = "subscriber_count"];
   // channel.field.media_count

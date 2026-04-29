@@ -21,6 +21,7 @@ type Tag struct {
 func (Tag) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("title").NotEmpty().Unique().MaxLen(100),
+		field.String("slug").MaxLen(100).Unique().Optional(),
 		field.Int("media_count").Default(0),
 		field.String("listings_thumbnail").MaxLen(400),
 	}
@@ -29,6 +30,7 @@ func (Tag) Fields() []ent.Field {
 func (Tag) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("title"),
+		index.Fields("slug"),
 		index.Fields("media_count"),
 	}
 }

@@ -148,10 +148,10 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
                         <ListVideo className="w-3 h-3"/>
                         {videoCount} {videoCount === 1 ? 'video' : 'videos'}
                     </span>
-                    {playlist.updated_at && (
+                    {playlist.update_time && (
                         <span className="flex items-center gap-1">
                             <Clock className="w-3 h-3"/>
-                            {timeAgo(playlist.updated_at)}
+                            {timeAgo(playlist.update_time)}
                         </span>
                     )}
                 </div>
