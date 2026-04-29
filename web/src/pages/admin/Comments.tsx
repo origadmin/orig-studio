@@ -77,7 +77,7 @@ const Comments: React.FC = () => {
                     replies: comment.reply_count || 0,
                     status: comment.status || 'approved',
                     isSpam: comment.is_spam || false,
-                    createdAt: comment.create_time || comment.created_at || new Date().toISOString()
+                    createdAt: comment.create_time || new Date().toISOString()
                 }));
                 setComments(mappedComments);
             } catch (err: any) {

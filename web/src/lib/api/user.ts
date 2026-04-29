@@ -90,9 +90,9 @@ export const userApi = {
     // 更新当前用户信息 - 使用 /me 路径
     updateMe: (data: UpdateProfileRequest) => api.put<User>("/me", data),
 
-    // 修改密码 - 使用 /me/password 路径
+    // 修改密码 - 使用 /me/password 路径 (后端为 PUT 方法)
     changePassword: (data: ChangePasswordRequest) =>
-        api.post<void>("/me/password", data),
+        api.put<void>("/me/password", data),
 
     // ==================== Subscription APIs ====================
 

@@ -40,7 +40,7 @@ export interface MediaItem extends Media {
     url: string;
     author_name: string;
     author_avatar: string;
-    create_time: string;
+    created_at: string;
 }
 
 export interface Comment {

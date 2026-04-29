@@ -1,5 +1,5 @@
 import type {Config} from './types';
-import {API_BASE_URL, API_PREFIX, REQUEST_TIMEOUT} from '../lib/request';
+import {API_BASE_URL, API_PREFIX, REQUEST_TIMEOUT} from '@/lib/request';
 
 const config: Config = {
     api: {

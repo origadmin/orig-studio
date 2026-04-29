@@ -50,8 +50,8 @@ export interface Media {
     channel_id?: string;
     category_id?: number;
     published_at?: string;
-    created_at: string;
-    updated_at?: string;
+    create_time?: string;
+    update_time?: string;
     edges?: {
         user?: UserSummary[];
         category?: CategorySummary;
@@ -660,7 +660,7 @@ export const adminMediaApi = {
         api.put<{
             id: string;
             state: string;
-            updated_at: string;
+            update_time: string;
             changed_by: string;
         }>(`/admin/medias/${id}/state`, {state, comment}),
 

@@ -22,8 +22,6 @@ type Channel struct {
 	UserID string `json:"user_id,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
-	// Slug holds the value of the "slug" field.
-	Slug string `json:"slug,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
 	// ShortToken holds the value of the "short_token" field.
@@ -78,7 +76,7 @@ func (*Channel) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case channel.FieldIsPublic:
 			values[i] = new(sql.NullBool)
-		case channel.FieldID, channel.FieldUserID, channel.FieldTitle, channel.FieldSlug, channel.FieldDescription, channel.FieldShortToken, channel.FieldBannerLogo:
+		case channel.FieldID, channel.FieldUserID, channel.FieldTitle, channel.FieldDescription, channel.FieldShortToken, channel.FieldBannerLogo:
 			values[i] = new(sql.NullString)
 		case channel.FieldAddDate:
 			values[i] = new(sql.NullTime)
@@ -114,12 +112,6 @@ func (_m *Channel) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
 			} else if value.Valid {
 				_m.Title = value.String
-			}
-		case channel.FieldSlug:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field slug", values[i])
-			} else if value.Valid {
-				_m.Slug = value.String
 			}
 		case channel.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -202,9 +194,6 @@ func (_m *Channel) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("title=")
 	builder.WriteString(_m.Title)
-	builder.WriteString(", ")
-	builder.WriteString("slug=")
-	builder.WriteString(_m.Slug)
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)

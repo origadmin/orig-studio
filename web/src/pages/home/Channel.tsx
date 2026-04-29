@@ -1,15 +1,12 @@
 ﻿import React, {useState, useEffect} from 'react';
 import {useParams, Link} from '@tanstack/react-router';
-import {Play, Eye, Settings, Bell, Crown} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
-import {Button} from '@/components/ui/button';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
-import {Badge} from '@/components/ui/badge';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
-import {formatDuration, formatViews, formatDate} from '@/lib/format';
-import {channelApi} from '../../lib/api/channel';
-import {mediaApi} from '../../lib/api/media';
-import type {Channel} from '../../lib/api/channel';
+import {formatDuration, formatViews} from '@/lib/format';
+import {channelApi} from '@/lib/api/channel';
+import {mediaApi} from '@/lib/api/media';
+import type {Channel} from '@/lib/api/channel';
 
 const ChannelPage = () => {
     const params = useParams({strict: false}) as {id: string};

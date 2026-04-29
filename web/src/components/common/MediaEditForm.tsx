@@ -26,7 +26,7 @@ interface MediaEditFormProps {
     isAdmin: boolean;
 }
 
-export function MediaEditForm({form, setForm, media, categories, isAdmin}: MediaEditFormProps) {
+export function MediaEditForm({form, setForm, media: _media, categories, isAdmin}: MediaEditFormProps) {
     const categoriesList = (categories as any)?.items
         ? (categories as any).items
         : Array.isArray(categories) ? categories : [];

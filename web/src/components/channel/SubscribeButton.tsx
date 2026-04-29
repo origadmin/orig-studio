@@ -15,7 +15,7 @@ interface SubscribeButtonProps {
 const SubscribeButton: React.FC<SubscribeButtonProps> = ({
     isSubscribed,
     isOwner,
-    subscriberCount = 0,
+    subscriberCount: _subscriberCount = 0,
     subscribing = false,
     onSubscribe,
     onUnsubscribeClick,

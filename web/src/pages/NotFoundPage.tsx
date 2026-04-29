@@ -1,7 +1,7 @@
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {useNavigate, Link} from '@tanstack/react-router';
-import {Home, ArrowLeft, Search} from 'lucide-react';
+import {Home, Search} from 'lucide-react';
 
 const NotFoundPage: React.FC = () => {
     const {t} = useTranslation();

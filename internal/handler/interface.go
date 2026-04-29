@@ -8,12 +8,21 @@ package handler
 import (
 	"context"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Handler defines the interface for all transport-agnostic handlers.
 type Handler interface {
 	// Register registers the handler's routes.
 	Register(r Router)
+}
+
+// Module defines the interface for route registration using gin.RouterGroup.
+// All feature-module handlers must implement this interface so that the
+// server can iterate over them uniformly.
+type Module interface {
+	RegisterRoutes(rg *gin.RouterGroup)
 }
 
 // Router defines the interface for a router that handlers can register with.

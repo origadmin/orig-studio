@@ -13,8 +13,8 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
                                                        previewFile,
                                                        duration,
                                                        currentTime,
-                                                       width,
-                                                       height,
+                                                       width: _width,
+                                                       height: _height,
                                                        thumbnailCount = 10,
                                                    }) => {
     const [hoverTime, setHoverTime] = useState<number | null>(null);

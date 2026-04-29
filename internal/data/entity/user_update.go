@@ -101,6 +101,26 @@ func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
 	return _u
 }
 
+// SetSlug sets the "slug" field.
+func (_u *UserUpdate) SetSlug(v string) *UserUpdate {
+	_u.mutation.SetSlug(v)
+	return _u
+}
+
+// SetNillableSlug sets the "slug" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableSlug(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetSlug(*v)
+	}
+	return _u
+}
+
+// ClearSlug clears the value of the "slug" field.
+func (_u *UserUpdate) ClearSlug() *UserUpdate {
+	_u.mutation.ClearSlug()
+	return _u
+}
+
 // SetFirstName sets the "first_name" field.
 func (_u *UserUpdate) SetFirstName(v string) *UserUpdate {
 	_u.mutation.SetFirstName(v)
@@ -1152,6 +1172,11 @@ func (_u *UserUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`entity: validator failed for field "User.name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Slug(); ok {
+		if err := user.SlugValidator(v); err != nil {
+			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "User.slug": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.FirstName(); ok {
 		if err := user.FirstNameValidator(v); err != nil {
 			return &ValidationError{Name: "first_name", err: fmt.Errorf(`entity: validator failed for field "User.first_name": %w`, err)}
@@ -1214,6 +1239,12 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Slug(); ok {
+		_spec.SetField(user.FieldSlug, field.TypeString, value)
+	}
+	if _u.mutation.SlugCleared() {
+		_spec.ClearField(user.FieldSlug, field.TypeString)
 	}
 	if value, ok := _u.mutation.FirstName(); ok {
 		_spec.SetField(user.FieldFirstName, field.TypeString, value)
@@ -2190,6 +2221,26 @@ func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
 	if v != nil {
 		_u.SetName(*v)
 	}
+	return _u
+}
+
+// SetSlug sets the "slug" field.
+func (_u *UserUpdateOne) SetSlug(v string) *UserUpdateOne {
+	_u.mutation.SetSlug(v)
+	return _u
+}
+
+// SetNillableSlug sets the "slug" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableSlug(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetSlug(*v)
+	}
+	return _u
+}
+
+// ClearSlug clears the value of the "slug" field.
+func (_u *UserUpdateOne) ClearSlug() *UserUpdateOne {
+	_u.mutation.ClearSlug()
 	return _u
 }
 
@@ -3257,6 +3308,11 @@ func (_u *UserUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`entity: validator failed for field "User.name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Slug(); ok {
+		if err := user.SlugValidator(v); err != nil {
+			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "User.slug": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.FirstName(); ok {
 		if err := user.FirstNameValidator(v); err != nil {
 			return &ValidationError{Name: "first_name", err: fmt.Errorf(`entity: validator failed for field "User.first_name": %w`, err)}
@@ -3336,6 +3392,12 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Slug(); ok {
+		_spec.SetField(user.FieldSlug, field.TypeString, value)
+	}
+	if _u.mutation.SlugCleared() {
+		_spec.ClearField(user.FieldSlug, field.TypeString)
 	}
 	if value, ok := _u.mutation.FirstName(); ok {
 		_spec.SetField(user.FieldFirstName, field.TypeString, value)

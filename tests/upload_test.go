@@ -19,11 +19,11 @@ import (
 	"github.com/stretchr/testify/require"
 
 	pb "origadmin/application/origcms/api/gen/v1/upload"
-	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/enums"
-	"origadmin/application/origcms/internal/svc-media/biz"
-	"origadmin/application/origcms/internal/svc-media/data"
-	"origadmin/application/origcms/internal/svc-media/service"
+	"origadmin/application/origcms/internal/features/media/biz"
+	"origadmin/application/origcms/internal/features/media/dal"
+	"origadmin/application/origcms/internal/features/media/service"
 )
 
 // MockStorage implements Storage interface for testing
@@ -84,10 +84,10 @@ func (m *MockStorage) GetFile(ctx context.Context, path string) ([]byte, error) 
 func TestUploadService_Success(t *testing.T) {
 	// Setup dependencies
 	mockStorage := NewMockStorage()
-	uploadRepo := data.NewInMemoryUploadRepo()
-	mediaRepo := data.NewInMemoryMediaRepo()
-	profileRepo := data.NewInMemoryEncodeProfileRepo()
-	encodingRepo := data.NewInMemoryEncodingTaskRepo()
+	uploadRepo := dal.NewInMemoryUploadRepo()
+	mediaRepo := dal.NewInMemoryMediaRepo()
+	profileRepo := dal.NewInMemoryEncodeProfileRepo()
+	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	
 	mediaUC := biz.NewMediaUseCase(
 		mediaRepo,
@@ -195,10 +195,10 @@ func TestUploadService_Success(t *testing.T) {
 func TestUploadService_Failure(t *testing.T) {
 	// Setup dependencies
 	mockStorage := NewMockStorage()
-	uploadRepo := data.NewInMemoryUploadRepo()
-	mediaRepo := data.NewInMemoryMediaRepo()
-	profileRepo := data.NewInMemoryEncodeProfileRepo()
-	encodingRepo := data.NewInMemoryEncodingTaskRepo()
+	uploadRepo := dal.NewInMemoryUploadRepo()
+	mediaRepo := dal.NewInMemoryMediaRepo()
+	profileRepo := dal.NewInMemoryEncodeProfileRepo()
+	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	
 	mediaUC := biz.NewMediaUseCase(
 		mediaRepo,
@@ -313,10 +313,10 @@ func TestUploadService_Failure(t *testing.T) {
 func TestUploadService_Retry(t *testing.T) {
 	// Setup dependencies
 	mockStorage := NewMockStorage()
-	uploadRepo := data.NewInMemoryUploadRepo()
-	mediaRepo := data.NewInMemoryMediaRepo()
-	profileRepo := data.NewInMemoryEncodeProfileRepo()
-	encodingRepo := data.NewInMemoryEncodingTaskRepo()
+	uploadRepo := dal.NewInMemoryUploadRepo()
+	mediaRepo := dal.NewInMemoryMediaRepo()
+	profileRepo := dal.NewInMemoryEncodeProfileRepo()
+	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	
 	mediaUC := biz.NewMediaUseCase(
 		mediaRepo,
@@ -413,10 +413,10 @@ func TestUploadService_Retry(t *testing.T) {
 func TestUploadService_SHA256Verification(t *testing.T) {
 	// Setup dependencies
 	mockStorage := NewMockStorage()
-	uploadRepo := data.NewInMemoryUploadRepo()
-	mediaRepo := data.NewInMemoryMediaRepo()
-	profileRepo := data.NewInMemoryEncodeProfileRepo()
-	encodingRepo := data.NewInMemoryEncodingTaskRepo()
+	uploadRepo := dal.NewInMemoryUploadRepo()
+	mediaRepo := dal.NewInMemoryMediaRepo()
+	profileRepo := dal.NewInMemoryEncodeProfileRepo()
+	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	
 	mediaUC := biz.NewMediaUseCase(
 		mediaRepo,

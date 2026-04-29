@@ -161,3 +161,10 @@ func (a *GinContextAdapter) Get(key string) interface{} {
 func (a *GinContextAdapter) Set(key string, value interface{}) {
 	a.c.Set(key, value)
 }
+
+// GinContext returns the underlying *gin.Context.
+// This allows server response helpers (server.OK, server.Fail, etc.) to work
+// with handlers that use GinContextAdapter.
+func (a *GinContextAdapter) GinContext() *gin.Context {
+	return a.c
+}

@@ -334,7 +334,7 @@ const Tags: React.FC = () => {
                                         <TableCell className="text-right">{tag.count || 0}</TableCell>
                                         <TableCell>
                                             <span className="text-sm text-muted-foreground">
-                                                {new Date(tag.created_at).toLocaleDateString()}
+                                                {new Date(tag.create_time).toLocaleDateString()}
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-right">

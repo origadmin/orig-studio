@@ -1,4 +1,4 @@
-import {api} from "../request";
+import {api} from "@/lib/request";
 
 export interface PermissionGroup {
     id: string;

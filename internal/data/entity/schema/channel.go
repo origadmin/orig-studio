@@ -26,7 +26,6 @@ func (Channel) Fields() []ent.Field {
 		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.GenUUIDv7), // UUIDv7 for distributed system
 		field.String("user_id"),
 		field.String("title").NotEmpty().MaxLen(90),
-		field.String("slug").MaxLen(100).Unique(),
 		field.Text("description"),
 		field.String("short_token").MaxLen(12).Unique().DefaultFunc(idutil.GenShortID),
 		field.String("banner_logo").MaxLen(500),
@@ -39,7 +38,6 @@ func (Channel) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("user_id"),
 		index.Fields("title"),
-		index.Fields("slug"),
 		index.Fields("short_token"),
 		index.Fields("add_date"),
 	}

@@ -295,7 +295,7 @@ const Playlists: React.FC = () => {
                                             <Badge variant="outline">-</Badge>
                                         </TableCell>
                                         <TableCell className="text-muted-foreground">
-                                            {new Date(playlist.created_at).toLocaleDateString()}
+                                            {new Date(playlist.create_time).toLocaleDateString()}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>

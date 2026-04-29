@@ -10,7 +10,7 @@ interface EmptyStateProps {
     channelId?: string;
 }
 
-const EmptyState: React.FC<EmptyStateProps> = ({type, isOwner = false, channelId}) => {
+const EmptyState: React.FC<EmptyStateProps> = ({type, isOwner = false, channelId: _channelId}) => {
     const {t} = useTranslation();
     const navigate = useNavigate();
 

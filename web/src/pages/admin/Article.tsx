@@ -207,7 +207,7 @@ export default function ArticlePage() {
                                         </TableCell>
                                         <TableCell className="text-sm text-slate-500">Author ID: {item.author_id}</TableCell>
                                         <TableCell className="text-sm text-slate-500">{formatViews(item.views)}</TableCell>
-                                        <TableCell className="text-sm text-slate-500">{new Date(item.created_at).toLocaleDateString()}</TableCell>
+                                        <TableCell className="text-sm text-slate-500">{new Date(item.create_time).toLocaleDateString()}</TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>

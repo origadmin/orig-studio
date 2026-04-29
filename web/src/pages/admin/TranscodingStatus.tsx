@@ -274,7 +274,7 @@ function TaskRow({
                 {/* Time */}
                 <TableCell className="w-[120px] text-right">
                     <span className="text-[11px] text-muted-foreground tabular-nums whitespace-nowrap">
-                        {formatRelativeTime(task.update_time || task.created_at)}
+                        {formatRelativeTime(task.update_time || task.create_time)}
                     </span>
                 </TableCell>
 

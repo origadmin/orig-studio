@@ -12,7 +12,8 @@ import (
 	"context"
 	"flag"
 
-	"origadmin/application/origcms/internal/conf"
+	"origadmin/application/origcms/internal/handler"
+	"origadmin/application/origcms/internal/infra/conf"
 	confhelper "origadmin/application/origcms/internal/helpers/conf"
 	"origadmin/application/origcms/internal/server"
 
@@ -93,25 +94,32 @@ func main() {
 
 	// Create server
 	srv := server.NewServer(
-		deps.AuthHandler,
-		deps.UserHandler,
-		deps.MediaHandler,
-		deps.UploadHandler,
-		deps.CategoryHandler,
-		deps.TagHandler,
-		deps.FeedHandler,
-		deps.NotificationHandler,
-		deps.ChannelHandler,
-		deps.ShareHandler,
-		deps.SystemHandler,
-		deps.StatsHandler,
-		deps.SearchHandler,
-		deps.MeHandler,
-		deps.AdminHandler,
-		server.NewExploreHandler(deps.DB),
-		deps.CommentLikeUC,
-		deps.CommentModerationHandler,
-		deps.PermissionHandler,
+		[]handler.Module{
+			deps.AuthHandler,
+			deps.PermissionHandler,
+			deps.UserHandler,
+			deps.MeHandler,
+			deps.MediaHandler,
+			deps.UploadHandler,
+			deps.SearchHandler,
+			deps.CategoryHandler,
+			deps.TagHandler,
+			deps.ArticleHandler,
+			deps.CommentHandler,
+			deps.CommentModerationHandler,
+			deps.FeedHandler,
+			deps.ChannelHandler,
+			deps.PlaylistHandler,
+			deps.InteractionHandler,
+			deps.NotificationHandler,
+			deps.ShareHandler,
+			deps.ExploreHandler,
+			deps.AdminHandler,
+			deps.AdminTagHandler,
+			deps.StubHandler,
+			deps.SystemHandler,
+			deps.StatsHandler,
+		},
 		deps.DB,
 		deps.JWTManager,
 		"./data/uploads", // storageBasePath: base directory for static file serving

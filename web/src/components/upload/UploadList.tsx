@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import {useUpload} from '../../hooks/useUpload';
+import {useUpload} from '@/hooks/useUpload';
 
 export const UploadList: React.FC = () => {
     const {tasks, removeTask, cancelTask, clearCompleted} = useUpload();
@@ -24,7 +24,7 @@ export const UploadList: React.FC = () => {
         return formatSize(bytesPerSec) + '/s';
     };
 
-    const getStatusColor = (status: string) => {
+    const _getStatusColor = (status: string) => {
         switch (status) {
             case 'success':
                 return 'text-success';

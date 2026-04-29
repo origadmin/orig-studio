@@ -1,5 +1,5 @@
 ﻿import React, {useState, useEffect, useRef} from 'react';
-import {MessageCircle, ThumbsUp, ThumbsDown, Send, Loader2, LogIn, MoreVertical, List, Reply, SmilePlus, X, Trash2, ChevronDown} from 'lucide-react';
+import {MessageCircle, ThumbsUp, ThumbsDown, Loader2, LogIn, List, Reply, SmilePlus, Trash2, ChevronDown} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {Button} from '@/components/ui/button';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';

@@ -13,17 +13,17 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"origadmin/application/origcms/internal/data/enums"
-	"origadmin/application/origcms/internal/svc-media/biz"
-	"origadmin/application/origcms/internal/svc-media/data"
+	"origadmin/application/origcms/internal/features/media/biz"
+	"origadmin/application/origcms/internal/features/media/dal"
 )
 
 // TestMediaCreation tests media creation after upload
 func TestMediaCreation(t *testing.T) {
 	// Setup dependencies
 	mockStorage := NewMockStorage()
-	mediaRepo := data.NewInMemoryMediaRepo()
-	profileRepo := data.NewInMemoryEncodeProfileRepo()
-	encodingRepo := data.NewInMemoryEncodingTaskRepo()
+	mediaRepo := dal.NewInMemoryMediaRepo()
+	profileRepo := dal.NewInMemoryEncodeProfileRepo()
+	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	
 	mediaUC := biz.NewMediaUseCase(
 		mediaRepo,
@@ -205,9 +205,9 @@ func TestMediaCreation(t *testing.T) {
 func TestMediaValidation(t *testing.T) {
 	// Setup dependencies
 	mockStorage := NewMockStorage()
-	mediaRepo := data.NewInMemoryMediaRepo()
-	profileRepo := data.NewInMemoryEncodeProfileRepo()
-	encodingRepo := data.NewInMemoryEncodingTaskRepo()
+	mediaRepo := dal.NewInMemoryMediaRepo()
+	profileRepo := dal.NewInMemoryEncodeProfileRepo()
+	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	
 	mediaUC := biz.NewMediaUseCase(
 		mediaRepo,
@@ -269,9 +269,9 @@ func TestMediaValidation(t *testing.T) {
 func TestMediaUpdate(t *testing.T) {
 	// Setup dependencies
 	mockStorage := NewMockStorage()
-	mediaRepo := data.NewInMemoryMediaRepo()
-	profileRepo := data.NewInMemoryEncodeProfileRepo()
-	encodingRepo := data.NewInMemoryEncodingTaskRepo()
+	mediaRepo := dal.NewInMemoryMediaRepo()
+	profileRepo := dal.NewInMemoryEncodeProfileRepo()
+	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	
 	mediaUC := biz.NewMediaUseCase(
 		mediaRepo,
@@ -356,9 +356,9 @@ func TestMediaUpdate(t *testing.T) {
 func TestMediaRetrieval(t *testing.T) {
 	// Setup dependencies
 	mockStorage := NewMockStorage()
-	mediaRepo := data.NewInMemoryMediaRepo()
-	profileRepo := data.NewInMemoryEncodeProfileRepo()
-	encodingRepo := data.NewInMemoryEncodingTaskRepo()
+	mediaRepo := dal.NewInMemoryMediaRepo()
+	profileRepo := dal.NewInMemoryEncodeProfileRepo()
+	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	
 	mediaUC := biz.NewMediaUseCase(
 		mediaRepo,

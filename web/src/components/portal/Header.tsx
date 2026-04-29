@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * Header: Logo | QuickLinks + 更多下拉 | 搜索框 | 用户菜单
  */
@@ -21,8 +21,8 @@ import {
     Globe,
 } from 'lucide-react';
 import {useTranslation} from 'react-i18next';
-import {useAuth} from '../../hooks/useAuth';
-// import NotificationBadge from '../../components/common/NotificationBadge';
+import {useAuth} from '@/hooks/useAuth';
+// import NotificationBadge from '@/components/common/NotificationBadge';
 
 /* ── QuickLink 定义 ──────────────────────────────────────────────────────── */
 
@@ -77,7 +77,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
     const {isAuthenticated, user, logout, isAdmin} = useAuth();
 
     // 从 localStorage 读取自定义 QuickLinks
-    const [customLinks, setCustomLinks] = useState<QuickLink[]>(() => {
+    const [customLinks] = useState<QuickLink[]>(() => {
         try {
             const raw = localStorage.getItem('origcms_quicklinks');
             return raw ? JSON.parse(raw) : [];

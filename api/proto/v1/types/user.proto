@@ -70,6 +70,8 @@ message User {
   google.protobuf.Timestamp last_login_time = 19 [json_name = "last_login_time"];
   // user.field.login_time
   google.protobuf.Timestamp login_time = 20 [json_name = "login_time"];
+  // user.field.slug — public identifier (separate from login username)
+  string slug = 21 [json_name = "slug"];
 
   // The user's profile information.
   UserProfile profile = 50 [json_name = "profile"];

@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {
     Shield, Plus, Edit, Trash2, Users, ToggleLeft, ToggleRight,
-    ChevronRight, Loader2, Search, ArrowLeft,
+    Search, ArrowLeft,
 } from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';

@@ -150,7 +150,7 @@ const NotificationCenter: React.FC = () => {
                                             </p>
                                             <div className="flex items-center gap-4">
                         <span className="text-xs text-gray-500 dark:text-muted-foreground">
-                          {formatDate(notification.created_at)}
+                          {formatDate(notification.create_time)}
                         </span>
                                                 <span
                                                     className={`text-xs font-medium px-2 py-0.5 rounded-full ${notification.read ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200'}`}>

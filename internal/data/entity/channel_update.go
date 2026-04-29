@@ -59,20 +59,6 @@ func (_u *ChannelUpdate) SetNillableTitle(v *string) *ChannelUpdate {
 	return _u
 }
 
-// SetSlug sets the "slug" field.
-func (_u *ChannelUpdate) SetSlug(v string) *ChannelUpdate {
-	_u.mutation.SetSlug(v)
-	return _u
-}
-
-// SetNillableSlug sets the "slug" field if the given value is not nil.
-func (_u *ChannelUpdate) SetNillableSlug(v *string) *ChannelUpdate {
-	if v != nil {
-		_u.SetSlug(*v)
-	}
-	return _u
-}
-
 // SetDescription sets the "description" field.
 func (_u *ChannelUpdate) SetDescription(v string) *ChannelUpdate {
 	_u.mutation.SetDescription(v)
@@ -229,11 +215,6 @@ func (_u *ChannelUpdate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Channel.title": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Slug(); ok {
-		if err := channel.SlugValidator(v); err != nil {
-			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "Channel.slug": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.ShortToken(); ok {
 		if err := channel.ShortTokenValidator(v); err != nil {
 			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Channel.short_token": %w`, err)}
@@ -270,9 +251,6 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(channel.FieldTitle, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Slug(); ok {
-		_spec.SetField(channel.FieldSlug, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(channel.FieldDescription, field.TypeString, value)
@@ -409,20 +387,6 @@ func (_u *ChannelUpdateOne) SetTitle(v string) *ChannelUpdateOne {
 func (_u *ChannelUpdateOne) SetNillableTitle(v *string) *ChannelUpdateOne {
 	if v != nil {
 		_u.SetTitle(*v)
-	}
-	return _u
-}
-
-// SetSlug sets the "slug" field.
-func (_u *ChannelUpdateOne) SetSlug(v string) *ChannelUpdateOne {
-	_u.mutation.SetSlug(v)
-	return _u
-}
-
-// SetNillableSlug sets the "slug" field if the given value is not nil.
-func (_u *ChannelUpdateOne) SetNillableSlug(v *string) *ChannelUpdateOne {
-	if v != nil {
-		_u.SetSlug(*v)
 	}
 	return _u
 }
@@ -596,11 +560,6 @@ func (_u *ChannelUpdateOne) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Channel.title": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Slug(); ok {
-		if err := channel.SlugValidator(v); err != nil {
-			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "Channel.slug": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.ShortToken(); ok {
 		if err := channel.ShortTokenValidator(v); err != nil {
 			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Channel.short_token": %w`, err)}
@@ -654,9 +613,6 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(channel.FieldTitle, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Slug(); ok {
-		_spec.SetField(channel.FieldSlug, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(channel.FieldDescription, field.TypeString, value)

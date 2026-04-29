@@ -14,6 +14,8 @@ const (
 	FieldID = "id"
 	// FieldTitle holds the string denoting the title field in the database.
 	FieldTitle = "title"
+	// FieldSlug holds the string denoting the slug field in the database.
+	FieldSlug = "slug"
 	// FieldMediaCount holds the string denoting the media_count field in the database.
 	FieldMediaCount = "media_count"
 	// FieldListingsThumbnail holds the string denoting the listings_thumbnail field in the database.
@@ -33,6 +35,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldTitle,
+	FieldSlug,
 	FieldMediaCount,
 	FieldListingsThumbnail,
 }
@@ -67,6 +70,8 @@ func ValidColumn(column string) bool {
 var (
 	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	TitleValidator func(string) error
+	// SlugValidator is a validator for the "slug" field. It is called by the builders before save.
+	SlugValidator func(string) error
 	// DefaultMediaCount holds the default value on creation for the "media_count" field.
 	DefaultMediaCount int
 	// ListingsThumbnailValidator is a validator for the "listings_thumbnail" field. It is called by the builders before save.
@@ -84,6 +89,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByTitle orders the results by the title field.
 func ByTitle(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTitle, opts...).ToFunc()
+}
+
+// BySlug orders the results by the slug field.
+func BySlug(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSlug, opts...).ToFunc()
 }
 
 // ByMediaCount orders the results by the media_count field.

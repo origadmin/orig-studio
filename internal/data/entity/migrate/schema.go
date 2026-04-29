@@ -168,7 +168,6 @@ var (
 	UserChannelsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "title", Type: field.TypeString, Size: 90},
-		{Name: "slug", Type: field.TypeString, Unique: true, Size: 100},
 		{Name: "description", Type: field.TypeString, Size: 2147483647},
 		{Name: "short_token", Type: field.TypeString, Unique: true, Size: 12},
 		{Name: "banner_logo", Type: field.TypeString, Size: 500},
@@ -184,7 +183,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "user_channels_users_channels",
-				Columns:    []*schema.Column{UserChannelsColumns[8]},
+				Columns:    []*schema.Column{UserChannelsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -193,7 +192,7 @@ var (
 			{
 				Name:    "channel_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{UserChannelsColumns[8]},
+				Columns: []*schema.Column{UserChannelsColumns[7]},
 			},
 			{
 				Name:    "channel_title",
@@ -201,19 +200,14 @@ var (
 				Columns: []*schema.Column{UserChannelsColumns[1]},
 			},
 			{
-				Name:    "channel_slug",
-				Unique:  false,
-				Columns: []*schema.Column{UserChannelsColumns[2]},
-			},
-			{
 				Name:    "channel_short_token",
 				Unique:  false,
-				Columns: []*schema.Column{UserChannelsColumns[4]},
+				Columns: []*schema.Column{UserChannelsColumns[3]},
 			},
 			{
 				Name:    "channel_add_date",
 				Unique:  false,
-				Columns: []*schema.Column{UserChannelsColumns[7]},
+				Columns: []*schema.Column{UserChannelsColumns[6]},
 			},
 		},
 	}
@@ -1023,6 +1017,7 @@ var (
 	ContentTagsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "title", Type: field.TypeString, Unique: true, Size: 100},
+		{Name: "slug", Type: field.TypeString, Unique: true, Nullable: true, Size: 100},
 		{Name: "media_count", Type: field.TypeInt, Default: 0},
 		{Name: "listings_thumbnail", Type: field.TypeString, Size: 400},
 		{Name: "media_tag_tag", Type: field.TypeInt, Nullable: true},
@@ -1035,7 +1030,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "content_tags_content_media_tags_tag",
-				Columns:    []*schema.Column{ContentTagsColumns[4]},
+				Columns:    []*schema.Column{ContentTagsColumns[5]},
 				RefColumns: []*schema.Column{ContentMediaTagsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -1047,9 +1042,14 @@ var (
 				Columns: []*schema.Column{ContentTagsColumns[1]},
 			},
 			{
-				Name:    "tag_media_count",
+				Name:    "tag_slug",
 				Unique:  false,
 				Columns: []*schema.Column{ContentTagsColumns[2]},
+			},
+			{
+				Name:    "tag_media_count",
+				Unique:  false,
+				Columns: []*schema.Column{ContentTagsColumns[3]},
 			},
 		},
 	}
@@ -1112,6 +1112,7 @@ var (
 		{Name: "email", Type: field.TypeString, Unique: true, Size: 254},
 		{Name: "password", Type: field.TypeString, Size: 256},
 		{Name: "name", Type: field.TypeString, Size: 250, SchemaType: map[string]string{"postgres": "VARCHAR(250)"}},
+		{Name: "slug", Type: field.TypeString, Unique: true, Nullable: true, Size: 64},
 		{Name: "first_name", Type: field.TypeString, Nullable: true, Size: 150},
 		{Name: "last_name", Type: field.TypeString, Nullable: true, Size: 150},
 		{Name: "is_active", Type: field.TypeBool, Default: true},
@@ -1151,19 +1152,24 @@ var (
 				Columns: []*schema.Column{UsersColumns[2]},
 			},
 			{
-				Name:    "user_is_active",
+				Name:    "user_slug",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[7]},
+				Columns: []*schema.Column{UsersColumns[5]},
 			},
 			{
-				Name:    "user_is_staff",
+				Name:    "user_is_active",
 				Unique:  false,
 				Columns: []*schema.Column{UsersColumns[8]},
 			},
 			{
+				Name:    "user_is_staff",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[9]},
+			},
+			{
 				Name:    "user_date_added",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[24]},
+				Columns: []*schema.Column{UsersColumns[25]},
 			},
 		},
 	}

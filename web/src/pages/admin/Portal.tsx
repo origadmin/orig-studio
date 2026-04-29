@@ -1,7 +1,7 @@
 ﻿import React, {useState} from 'react';
 import {
-    Layout, Image, Plus, Edit, Trash2, ToggleLeft, ToggleRight,
-    GripVertical, Loader2, ExternalLink, ArrowUp, ArrowDown,
+    Layout, Plus, Edit, Trash2, ToggleLeft, ToggleRight,
+    GripVertical, ArrowUp, ArrowDown,
 } from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Spinner} from '@/components/ui/spinner';
@@ -13,14 +13,13 @@ import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import {
-    Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+    Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog';
 import {
     AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
     AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {Label} from '@/components/ui/label';
-import {Textarea} from '@/components/ui/textarea';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {
     useAdminNavItems, useAdminBanners,

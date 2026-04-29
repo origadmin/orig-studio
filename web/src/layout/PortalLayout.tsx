@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {Outlet} from '@tanstack/react-router';
-import Header from '../components/portal/Header';
-import Sidebar from '../components/portal/Sidebar';
+import Header from '@/components/portal/Header';
+import Sidebar from '@/components/portal/Sidebar';
 
 const PortalLayout = () => {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

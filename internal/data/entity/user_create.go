@@ -60,6 +60,20 @@ func (_c *UserCreate) SetName(v string) *UserCreate {
 	return _c
 }
 
+// SetSlug sets the "slug" field.
+func (_c *UserCreate) SetSlug(v string) *UserCreate {
+	_c.mutation.SetSlug(v)
+	return _c
+}
+
+// SetNillableSlug sets the "slug" field if the given value is not nil.
+func (_c *UserCreate) SetNillableSlug(v *string) *UserCreate {
+	if v != nil {
+		_c.SetSlug(*v)
+	}
+	return _c
+}
+
 // SetFirstName sets the "first_name" field.
 func (_c *UserCreate) SetFirstName(v string) *UserCreate {
 	_c.mutation.SetFirstName(v)
@@ -765,6 +779,11 @@ func (_c *UserCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`entity: validator failed for field "User.name": %w`, err)}
 		}
 	}
+	if v, ok := _c.mutation.Slug(); ok {
+		if err := user.SlugValidator(v); err != nil {
+			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "User.slug": %w`, err)}
+		}
+	}
 	if v, ok := _c.mutation.FirstName(); ok {
 		if err := user.FirstNameValidator(v); err != nil {
 			return &ValidationError{Name: "first_name", err: fmt.Errorf(`entity: validator failed for field "User.first_name": %w`, err)}
@@ -889,6 +908,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := _c.mutation.Slug(); ok {
+		_spec.SetField(user.FieldSlug, field.TypeString, value)
+		_node.Slug = value
 	}
 	if value, ok := _c.mutation.FirstName(); ok {
 		_spec.SetField(user.FieldFirstName, field.TypeString, value)

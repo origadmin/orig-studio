@@ -418,7 +418,7 @@ const Channels: React.FC = () => {
                                         </TableCell>
                                         <TableCell>{getStatusBadge(channel.status)}</TableCell>
                                         <TableCell className="text-muted-foreground">
-                                            {new Date(channel.created_at).toLocaleDateString()}
+                                            {new Date(channel.create_time).toLocaleDateString()}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>

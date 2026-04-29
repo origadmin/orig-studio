@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------------- #
 
 # List of applications to build/release, corresponding to directories in ./cmd/
-APPS := svc-api-gateway svc-user svc-media svc-content server
+APPS := server
 
 # Path to the third_party directory for external protobufs (optional, created by make deps)
 THIRD_PARTY_PATH := third_party

@@ -58,7 +58,7 @@ const UnifiedChannelPage: React.FC = () => {
     const error = activeQuery.error;
 
     // Fetch subscription status when channel is loaded and user is not the owner
-    const channelToken = channel?.friendly_token || channel?.slug || null;
+    const channelToken = channel?.short_token || null;
     const isOwner = useMemo(() => {
         if (!user || !channel) return false;
         if (isFromMeChannel) return true;

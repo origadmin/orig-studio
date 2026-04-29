@@ -16,7 +16,7 @@ import (
 	"github.com/origadmin/runtime/log"
 	"github.com/origadmin/toolkits/crypto/hash"
 	hashtypes "github.com/origadmin/toolkits/crypto/hash/types"
-	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/infra/auth"
 )
 
 const (

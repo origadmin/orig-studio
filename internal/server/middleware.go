@@ -9,10 +9,23 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"origadmin/application/origcms/internal/auth"
+	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/handler"
-	authbiz "origadmin/application/origcms/internal/svc-auth/biz"
+	authbiz "origadmin/application/origcms/internal/features/auth/biz"
 )
+
+// claimsKey is the context key for storing claims.
+type contextKey string
+
+const claimsKey contextKey = "claims"
+
+// claimsFromContext retrieves claims from the request context.
+func claimsFromContext(ctx context.Context) (*auth.Claims, bool) {
+	if val, ok := ctx.Value(claimsKey).(*auth.Claims); ok {
+		return val, true
+	}
+	return nil, false
+}
 
 func GetClaims(c *gin.Context) (*auth.Claims, bool) {
 	if val, exists := c.Get("claims"); exists {

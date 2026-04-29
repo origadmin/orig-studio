@@ -9,7 +9,6 @@ import {
     TrendingUp,
     TrendingDown,
     Minus,
-    Loader2,
     MessageCircle,
     DollarSign
 } from 'lucide-react';
