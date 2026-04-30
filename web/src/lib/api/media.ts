@@ -52,6 +52,11 @@ export interface Media {
     published_at?: string;
     create_time?: string;
     update_time?: string;
+    // Flat edge fields returned by proto-based API (backend returns these at top level)
+    user?: UserSummary;
+    category?: CategorySummary;
+    channel?: ChannelSummary;
+    // Nested edges structure (used by frontend components)
     edges?: {
         user?: UserSummary[];
         category?: CategorySummary;
@@ -62,6 +67,65 @@ export interface Media {
         favorites?: unknown[];
         likes?: unknown[];
     };
+}
+
+/**
+ * normalizeMedia converts flat edge fields from the proto-based API response
+ * into the nested `edges` structure that frontend components expect.
+ *
+ * The backend proto types.Media returns edge data as flat fields:
+ *   { user: {...}, category: {...}, channel: {...} }
+ *
+ * But frontend components access them as:
+ *   { edges: { user: [{...}], category: {...}, channels: [{...}] } }
+ *
+ * This function ensures both access patterns work by populating `edges`
+ * from the flat fields when they are not already set.
+ */
+export function normalizeMedia<T extends Media>(media: T): T {
+    if (!media) return media;
+
+    // Build edges from flat fields if edges are not already populated
+    const flatUser = media.user;
+    const flatCategory = media.category;
+    const flatChannel = media.channel;
+
+    const existingEdges = media.edges || {};
+
+    // Only populate edges.user from flat user if edges.user is not already set
+    const edgesUser = existingEdges.user?.length
+        ? existingEdges.user
+        : flatUser
+            ? [flatUser]
+            : undefined;
+
+    // Only populate edges.category from flat category if edges.category is not already set
+    const edgesCategory = existingEdges.category || flatCategory || undefined;
+
+    // Only populate edges.channels from flat channel if edges.channels is not already set
+    const edgesChannels = existingEdges.channels?.length
+        ? existingEdges.channels
+        : flatChannel
+            ? [flatChannel]
+            : undefined;
+
+    return {
+        ...media,
+        edges: {
+            ...existingEdges,
+            ...(edgesUser ? {user: edgesUser} : {}),
+            ...(edgesCategory ? {category: edgesCategory} : {}),
+            ...(edgesChannels ? {channels: edgesChannels} : {}),
+        },
+    };
+}
+
+/**
+ * normalizeMediaList normalizes an array of media items.
+ */
+export function normalizeMediaList<T extends Media>(items: T[]): T[] {
+    if (!items) return items;
+    return items.map(normalizeMedia);
 }
 
 export interface UserSummary {

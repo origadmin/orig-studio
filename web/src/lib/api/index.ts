@@ -23,7 +23,7 @@ export type {
 } from "./user";
 
 // ==================== Media ====================
-export {mediaApi, encodingApi, legacyMediaApi} from "./media";
+export {mediaApi, encodingApi, legacyMediaApi, normalizeMedia, normalizeMediaList} from "./media";
 export type {
     Media,
     MediaListResponse,

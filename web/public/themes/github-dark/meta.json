@@ -1,0 +1,20 @@
+{
+  "id": "github-dark",
+  "name": "GitHub深灰",
+  "nameEn": "GitHub Dark",
+  "description": "灵感来自GitHub的深灰色，极简开发者风格",
+  "category": "minimal",
+  "preview": {
+    "primary": "#4B5563",
+    "accent": "#e5e7eb",
+    "background": "#ffffff",
+    "surface": "#f3f4f6"
+  },
+  "tags": [
+    "minimal",
+    "developer",
+    "gray"
+  ],
+  "author": "OrigCMS",
+  "version": "1.0.0"
+}

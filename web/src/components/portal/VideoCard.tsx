@@ -82,7 +82,7 @@ const VideoCard = ({video}: { video: MediaItem }) => {
                                                                            className="text-info"/> {formatViews(video.view_count)}</span>
                             <span>•</span>
                             <span className="flex items-center gap-1"><Calendar size={12}
-                                                                                className="text-info"/> {formatDate(video.create_time)}</span>
+                                                                                className="text-info"/> {formatDate(video.create_time || video.created_at)}</span>
                         </div>
                     </div>
                 </div>

@@ -11,7 +11,9 @@ export interface Comment {
     like_count?: number;
     status?: string;
     create_time?: string;
+    created_at?: string;
     update_time?: string;
+    updated_at?: string;
 }
 
 export interface CommentListResponse {

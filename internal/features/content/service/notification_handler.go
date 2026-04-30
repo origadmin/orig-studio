@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/internal/infra/auth"
+	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/server"
 	"origadmin/application/origcms/internal/features/content/biz"
 )
@@ -65,6 +66,8 @@ func (h *NotificationHandler) listNotifications(w http.ResponseWriter, r *http.R
 	if page == 0 {
 		page = 1
 	}
+	// Normalize pagination parameters
+	page, limit = repo.NormalizeHTTPPagination(page, limit)
 
 	userID, _ := strconv.Atoi(claims.GetUserID())
 	items, total, err := h.uc.ListUserNotifications(

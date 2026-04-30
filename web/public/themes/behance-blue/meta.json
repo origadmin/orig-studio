@@ -1,0 +1,20 @@
+{
+  "id": "behance-blue",
+  "name": "Behance亮蓝",
+  "nameEn": "Behance Blue",
+  "description": "灵感来自Behance的亮蓝色，专业设计平台风格",
+  "category": "creative",
+  "preview": {
+    "primary": "#0057FF",
+    "accent": "#dce8ff",
+    "background": "#ffffff",
+    "surface": "#f5f7fc"
+  },
+  "tags": [
+    "creative",
+    "design",
+    "blue"
+  ],
+  "author": "OrigCMS",
+  "version": "1.0.0"
+}

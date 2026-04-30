@@ -1,18 +1,8 @@
 import {renderHook, act} from '@testing-library/react';
 import {useAuth} from './useAuth';
-import {authApi} from '../lib/api/auth';
+import {AuthProvider} from '@/contexts/auth/AuthProvider';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import React from 'react';
-
-// Mock API
-jest.mock('../lib/api/auth', () => ({
-    authApi: {
-        login: jest.fn(),
-        register: jest.fn(),
-        getCurrentUser: jest.fn(),
-        logout: jest.fn(),
-    },
-}));
 
 let queryClient: QueryClient;
 
@@ -26,7 +16,9 @@ const createWrapper = () => {
         },
     });
     return ({children}: { children: React.ReactNode }) => (
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+            <AuthProvider>{children}</AuthProvider>
+        </QueryClientProvider>
     );
 };
 
@@ -48,14 +40,17 @@ describe('useAuth Hook', () => {
                 displayName: 'Test User',
                 roles: ['user']
             };
-            const token = 'token-123';
+            // Create a mock JWT token that won't be considered expired
+            const header = btoa(JSON.stringify({alg: 'HS256', typ: 'JWT'}));
+            const payload = btoa(JSON.stringify({exp: Math.floor(Date.now() / 1000) + 3600, sub: '1'}));
+            const token = `${header}.${payload}.mock-signature`;
 
             const {result} = renderHook(() => useAuth(), {
                 wrapper: createWrapper(),
             });
 
             await act(async () => {
-                result.current.login(token, mockUser);
+                result.current.login(token, 'refresh-token-123', mockUser);
             });
 
             expect(localStorage.getItem('origcms_token')).toBe(token);
@@ -69,7 +64,10 @@ describe('useAuth Hook', () => {
     describe('logout', () => {
         it('should logout and clear state', async () => {
             // Setup: logged in state
-            localStorage.setItem('origcms_token', 'token-123');
+            const header = btoa(JSON.stringify({alg: 'HS256', typ: 'JWT'}));
+            const payload = btoa(JSON.stringify({exp: Math.floor(Date.now() / 1000) + 3600, sub: '1'}));
+            const token = `${header}.${payload}.mock-signature`;
+            localStorage.setItem('origcms_token', token);
             localStorage.setItem('origcms_user', JSON.stringify({
                 id: 1,
                 username: 'testuser',
@@ -94,8 +92,11 @@ describe('useAuth Hook', () => {
     });
 
     describe('isAuthenticated', () => {
-        it('should return true when token exists', () => {
-            localStorage.setItem('origcms_token', 'token-123');
+        it('should return true when token exists and not expired', () => {
+            const header = btoa(JSON.stringify({alg: 'HS256', typ: 'JWT'}));
+            const payload = btoa(JSON.stringify({exp: Math.floor(Date.now() / 1000) + 3600, sub: '1'}));
+            const token = `${header}.${payload}.mock-signature`;
+            localStorage.setItem('origcms_token', token);
             localStorage.setItem('origcms_user', JSON.stringify({
                 id: 1,
                 username: 'testuser',
@@ -121,6 +122,10 @@ describe('useAuth Hook', () => {
 
     describe('isAdmin', () => {
         it('should return true for admin user', () => {
+            const header = btoa(JSON.stringify({alg: 'HS256', typ: 'JWT'}));
+            const payload = btoa(JSON.stringify({exp: Math.floor(Date.now() / 1000) + 3600, sub: '1'}));
+            const token = `${header}.${payload}.mock-signature`;
+            localStorage.setItem('origcms_token', token);
             localStorage.setItem(
                 'origcms_user',
                 JSON.stringify({id: 1, username: 'admin', displayName: 'Admin', roles: ['admin']})
@@ -134,6 +139,10 @@ describe('useAuth Hook', () => {
         });
 
         it('should return false for regular user', () => {
+            const header = btoa(JSON.stringify({alg: 'HS256', typ: 'JWT'}));
+            const payload = btoa(JSON.stringify({exp: Math.floor(Date.now() / 1000) + 3600, sub: '1'}));
+            const token = `${header}.${payload}.mock-signature`;
+            localStorage.setItem('origcms_token', token);
             localStorage.setItem(
                 'origcms_user',
                 JSON.stringify({id: 2, username: 'user', displayName: 'User', roles: ['user']})
@@ -144,6 +153,15 @@ describe('useAuth Hook', () => {
             });
 
             expect(result.current.isAdmin).toBe(false);
+        });
+    });
+
+    describe('AuthProvider context', () => {
+        it('should throw error when useAuth is called outside AuthProvider', () => {
+            // Suppress console.error for expected error
+            const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            expect(() => useAuth()).toThrow('useAuth must be used within an AuthProvider');
+            spy.mockRestore();
         });
     });
 });

@@ -11,6 +11,7 @@ import (
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/helpers/repo"
 	contentbiz "origadmin/application/origcms/internal/features/content/biz"
 	"origadmin/application/origcms/internal/server"
 )
@@ -84,12 +85,8 @@ func (h *CommentHandler) listComments(c *gin.Context) {
 		currentUserID = claims.GetUserID()
 	}
 
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 || pageSize > 100 {
-		pageSize = 20
-	}
+	// Normalize pagination parameters
+	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 	query := h.client.Comment.Query()
 	if mediaID != "" {

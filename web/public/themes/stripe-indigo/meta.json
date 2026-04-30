@@ -1,0 +1,11 @@
+{
+  "id": "stripe-indigo",
+  "name": "Stripe靛紫",
+  "nameEn": "Stripe Indigo",
+  "description": "灵感来自Stripe的靛紫色，科技感十足",
+  "category": "professional",
+  "preview": { "primary": "#635BFF", "accent": "#ece8ff", "background": "#ffffff", "surface": "#f5f5fa" },
+  "tags": ["business", "tech", "indigo"],
+  "author": "OrigCMS",
+  "version": "1.0.0"
+}

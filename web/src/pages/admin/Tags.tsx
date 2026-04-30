@@ -44,10 +44,11 @@ import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, Hash, Filter, RotateCcw
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {tagApi, Tag, CreateTagRequest, UpdateTagRequest} from '@/lib/api/admin-tags';
 import {TablePagination} from '@/components/common/TablePagination';
+import {PAGINATION} from '@/config/pagination';
 
 const Tags: React.FC = () => {
     const {t} = useTranslation();
-    const [searchParams, setSearchParams] = useState({keyword: '', page: 1, page_size: 20});
+    const [searchParams, setSearchParams] = useState({keyword: '', page: 1, page_size: PAGINATION.DEFAULT_PAGE_SIZE});
     const [tags, setTags] = useState<Tag[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -208,7 +209,7 @@ const Tags: React.FC = () => {
                                     variant="outline"
                                     size="sm"
                                     onClick={() => {
-                                        const newParams = {keyword: '', page: 1, page_size: 20};
+                                        const newParams = {keyword: '', page: 1, page_size: PAGINATION.DEFAULT_PAGE_SIZE};
                                         setSearchParams(newParams);
                                         loadTags(newParams);
                                     }}
@@ -334,7 +335,7 @@ const Tags: React.FC = () => {
                                         <TableCell className="text-right">{tag.count || 0}</TableCell>
                                         <TableCell>
                                             <span className="text-sm text-muted-foreground">
-                                                {new Date(tag.create_time).toLocaleDateString()}
+                                                {new Date(tag.created_at || tag.create_time).toLocaleDateString()}
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-right">

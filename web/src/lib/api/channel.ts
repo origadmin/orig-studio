@@ -24,6 +24,7 @@ export interface Channel {
     video_count?: number;
     is_verified?: boolean;
     created_at?: string;
+    create_time?: string;
     links?: Array<{
         type: 'website' | 'social' | 'custom';
         platform?: string;

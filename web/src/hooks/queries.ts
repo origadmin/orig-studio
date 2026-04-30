@@ -1,5 +1,5 @@
 import {useQuery, useMutation, useQueryClient, useInfiniteQuery} from '@tanstack/react-query';
-import {mediaApi, publicMediaApi, adminMediaApi, type Media, type UpdateMediaRequest} from '@/lib/api/media';
+import {mediaApi, publicMediaApi, adminMediaApi, type Media, type UpdateMediaRequest, normalizeMedia, normalizeMediaList} from '@/lib/api/media';
 import {categoryApi, type Category} from '@/lib/api/category';
 import {channelApi, type ChannelDetail} from '@/lib/api/channel';
 import {playlistApi, type Playlist, type PlaylistListResponse} from '@/lib/api/playlist';
@@ -9,6 +9,7 @@ import {adminCommentApi} from '@/lib/api/comment';
 import {configApi, type SettingCategory} from '@/lib/api/config';
 import {adminPermissionApi} from '@/lib/api/permission';
 import {spriteApi} from '@/lib/api/sprite';
+import {PAGINATION} from '@/config/pagination';
 
 /**
  * keys factory
@@ -47,6 +48,10 @@ export function useMediaList(params: {
                 user_id: params.user_id ? Number(params.user_id) : undefined,
                 featured: params.featured != null ? String(params.featured) : undefined,
             });
+            // Normalize flat edge fields (user, category, channel) to edges structure
+            if (res?.items) {
+                res.items = normalizeMediaList(res.items);
+            }
             return res;
         },
     });
@@ -71,11 +76,15 @@ export function useInfiniteMediaList(params: {
                 category_id: params.category_id || undefined,
                 user_id: params.user_id ? Number(params.user_id) : undefined
             });
+            // Normalize flat edge fields (user, category, channel) to edges structure
+            if (res?.items) {
+                res.items = normalizeMediaList(res.items);
+            }
             return res;
         },
         initialPageParam: 1,
         getNextPageParam: (lastPage, allPages) => {
-            const size = params.page_size || 20;
+            const size = params.page_size || PAGINATION.DEFAULT_PAGE_SIZE;
             const items = lastPage.items || [];
             return items.length === size ? allPages.length + 1 : undefined;
         },
@@ -96,6 +105,10 @@ export function useAdminMediaList(params: {
         queryKey: mediaKeys.adminList(params),
         queryFn: async () => {
             const res = await mediaApi.adminList(params);
+            // Normalize flat edge fields (user, category, channel) to edges structure
+            if (res?.items) {
+                res.items = normalizeMediaList(res.items);
+            }
             return res;
         },
     });
@@ -111,7 +124,7 @@ export function useMediaDetail(id: string | null) {
         queryKey: mediaKeys.detail(cleanId!),
         queryFn: async () => {
             const res = await mediaApi.get(cleanId!);
-            return res;
+            return normalizeMedia(res);
         },
         enabled: !!cleanId,
     });
@@ -129,7 +142,7 @@ export function usePublicMediaDetail(shortToken: string | null) {
         queryKey: ['publicMedia', 'detail', cleanToken!],
         queryFn: async () => {
             const res = await publicMediaApi.get(cleanToken!);
-            return res;
+            return normalizeMedia(res);
         },
         enabled: !!cleanToken && cleanToken.length > 0,
     });
@@ -146,7 +159,7 @@ export function useAdminMediaDetail(id: string | null) {
         queryKey: ['adminMedia', 'detail', cleanId!],
         queryFn: async () => {
             const res = await adminMediaApi.getById(cleanId!);
-            return res;
+            return normalizeMedia(res);
         },
         enabled: !!cleanId,
     });

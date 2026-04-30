@@ -1,7 +1,7 @@
 ﻿// 用户端 - 媒体浏览页面
 import {useState, useEffect} from "react";
 import {Link} from "@tanstack/react-router";
-import {mediaApi, categoryApi, type Media, type Category} from "@/lib/api";
+import {mediaApi, categoryApi, type Media, type Category, normalizeMediaList} from "@/lib/api";
 import {useTranslation} from 'react-i18next';
 
 export default function MediaPage() {
@@ -25,7 +25,7 @@ export default function MediaPage() {
                 categoryApi.getAll()
             ]);
             const mediaRes = await mediaApi.list(params);
-            setMediaList(mediaRes.items);
+            setMediaList(normalizeMediaList(mediaRes.items || []));
             setCategories((catRes as any)?.items || catRes || []);
         } catch (err: any) {
             setError(err.message);

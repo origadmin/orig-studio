@@ -9,6 +9,7 @@ export interface MediaItem {
     duration: number;
     view_count: number;
     created_at: string | { seconds: number; nanos: number };
+    create_time?: string;
     user_id: number;
     author_name: string;
     author_avatar?: string;

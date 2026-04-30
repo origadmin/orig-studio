@@ -525,6 +525,7 @@ message ListMediasResponse {
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
   string next_page_token = 5 [json_name = "next_page_token"];
+  int32 total_pages = 6 [json_name = "total_pages"];
 }
 
 message GetMediaRequest {
@@ -651,6 +652,7 @@ message GetEncodingStatusResponse {
   int32 page = 6 [json_name = "page"];
   int32 page_size = 7 [json_name = "page_size"];
   repeated TranscodingMediaItem items = 8 [json_name = "items"];
+  int32 total_pages = 9 [json_name = "total_pages"];
 }
 
 message ListAllEncodingTasksRequest {
@@ -665,6 +667,7 @@ message ListAllEncodingTasksResponse {
   repeated api.v1.services.types.EncodingTask tasks = 2 [json_name = "tasks"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
+  int32 total_pages = 5 [json_name = "total_pages"];
 }
 
 message RetryAllFailedTasksRequest {
@@ -775,6 +778,7 @@ message GetMediaCommentsResponse {
   repeated api.v1.services.types.Comment comments = 2 [json_name = "comments"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
+  int32 total_pages = 5 [json_name = "total_pages"];
 }
 
 // ========== Subtitle Messages ==========
@@ -863,6 +867,7 @@ message ListCategoriesResponse {
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
   string next_page_token = 5 [json_name = "next_page_token"];
+  int32 total_pages = 6 [json_name = "total_pages"];
 }
 
 message GetCategoryRequest {
@@ -914,6 +919,7 @@ message ListTagsResponse {
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
   string next_page_token = 5 [json_name = "next_page_token"];
+  int32 total_pages = 6 [json_name = "total_pages"];
 }
 
 message GetTagRequest {
@@ -967,6 +973,7 @@ message ListCommentsResponse {
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
   string next_page_token = 5 [json_name = "next_page_token"];
+  int32 total_pages = 6 [json_name = "total_pages"];
 }
 
 message GetCommentRequest {

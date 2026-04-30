@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/internal/features/content/biz"
+	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/server"
 )
 
@@ -56,6 +57,8 @@ func (h *FeedHandler) GetFeed(w http.ResponseWriter, r *http.Request) {
 	if pageSize == 0 {
 		pageSize = 20
 	}
+	// Normalize pagination parameters
+	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 	medias, total, err := h.uc.ListLatest(ctx, page, pageSize)
 	if err != nil {

@@ -53,6 +53,20 @@ export default {
                     DEFAULT: "hsl(var(--info))",
                     foreground: "hsl(var(--info-foreground))",
                 },
+                brand: {
+                    DEFAULT: "hsl(var(--brand))",
+                    foreground: "hsl(var(--brand-foreground))",
+                    muted: "hsl(var(--brand-muted))",
+                    "muted-foreground": "hsl(var(--brand-muted-foreground))",
+                    subtle: "hsl(var(--brand-subtle))",
+                },
+                sidebar: {
+                    DEFAULT: "hsl(var(--sidebar))",
+                    foreground: "hsl(var(--sidebar-foreground))",
+                    border: "hsl(var(--sidebar-border))",
+                    accent: "hsl(var(--sidebar-accent))",
+                    "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+                },
             },
             borderRadius: {
                 lg: "var(--radius)",

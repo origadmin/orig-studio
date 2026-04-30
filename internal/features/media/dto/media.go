@@ -112,14 +112,21 @@ type CategoryQueryOption struct {
 }
 
 // ListMediasRequestToQueryOption converts an API request to a query option object.
+// Pagination parameters are automatically normalized.
 func ListMediasRequestToQueryOption(req *media.ListMediasRequest) *MediaQueryOption {
 	if req == nil {
-		return &MediaQueryOption{}
+		return &MediaQueryOption{
+			QueryOption: repo.QueryOption{
+				Page:     1,
+				PageSize: 20,
+			},
+		}
 	}
+	page, pageSize := repo.NormalizePagination(int(req.Page), int(req.PageSize))
 	opts := &MediaQueryOption{
 		QueryOption: repo.QueryOption{
-			Page:     req.Page,
-			PageSize: req.PageSize,
+			Page:     int32(page),
+			PageSize: int32(pageSize),
 			Keyword:  req.Keyword,
 		},
 	}

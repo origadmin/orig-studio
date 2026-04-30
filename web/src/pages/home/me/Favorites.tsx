@@ -98,7 +98,7 @@ const FavoritesPage = () => {
                                             </span>
                                         </div>
                                         <p className="text-xs text-muted-foreground dark:text-gray-500 mt-1">
-                                            {formatViews(video.view_count)} {t('common.views')} · {formatDate(video.create_time)}
+                                            {formatViews(video.view_count)} {t('common.views')} · {formatDate(video.create_time || video.created_at)}
                                         </p>
                                     </div>
                                 </div>

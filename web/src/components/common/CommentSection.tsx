@@ -106,7 +106,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                 avatar: comment.avatar || '',
                 parent_id: comment.parent_id || null,
                 status: comment.status || '',
-                create_time: comment.create_time || '',
+                create_time: comment.create_time || comment.created_at || '',
                 update_time: comment.update_time || '',
                 like_count: comment.like_count || 0,
                 is_liked: comment.is_liked || false,
@@ -505,7 +505,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                                         </>
                                     )}
                                     <span className="text-gray-500 dark:text-muted-foreground text-xs">
-                                        {formatDate(comment.create_time)}
+                                        {formatDate(comment.create_time || comment.created_at)}
                                     </span>
                                 </div>
 

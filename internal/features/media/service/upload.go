@@ -13,6 +13,7 @@ import (
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/features/media/biz"
+	"origadmin/application/origcms/internal/helpers/repo"
 )
 
 type UploadService struct {
@@ -233,7 +234,10 @@ func (s *UploadService) ListUploadSessions(ctx context.Context, req *pb.ListUplo
 		userID = *uid
 	}
 
-	sessions, total, err := s.uc.ListSessions(ctx, userID, enums.UploadStatus(req.GetStatus()), int(req.Page), int(req.PageSize))
+	// Normalize pagination parameters
+	page, pageSize := repo.NormalizePagination(int(req.GetPage()), int(req.GetPageSize()))
+
+	sessions, total, err := s.uc.ListSessions(ctx, userID, enums.UploadStatus(req.GetStatus()), page, pageSize)
 	if err != nil {
 		return nil, err
 	}

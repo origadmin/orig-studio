@@ -1,0 +1,20 @@
+{
+  "id": "spotify-green",
+  "name": "Spotify翠绿",
+  "nameEn": "Spotify Green",
+  "description": "灵感来自Spotify的标志性绿色，清新自然",
+  "category": "creative",
+  "preview": {
+    "primary": "#1DB954",
+    "accent": "#d4f5e0",
+    "background": "#ffffff",
+    "surface": "#f2faf5"
+  },
+  "tags": [
+    "creative",
+    "music",
+    "green"
+  ],
+  "author": "OrigCMS",
+  "version": "1.0.0"
+}

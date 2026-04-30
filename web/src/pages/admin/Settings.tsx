@@ -7,6 +7,7 @@ import {Input} from '@/components/ui/input';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Separator} from '@/components/ui/separator';
 import {Skeleton} from '@/components/ui/skeleton';
+import {ThemeSwitcher} from '@/themes';
 import {
     Settings as SettingsIcon,
     Database,
@@ -350,30 +351,8 @@ const Settings: React.FC = () => {
                             </CardTitle>
                             <CardDescription>{t('settings.appearanceDesc')}</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.defaultTheme')}</label>
-                                    <select
-                                        className="w-full px-3 py-2 border rounded-md bg-background"
-                                        value={formData.default_theme}
-                                        onChange={(e) => handleInputChange('default_theme', e.target.value)}
-                                    >
-                                        <option value="light">{t('settings.light')}</option>
-                                        <option value="dark">{t('settings.dark')}</option>
-                                        <option value="system">{t('settings.system')}</option>
-                                    </select>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.themeColor')}</label>
-                                    <Input
-                                        type="color"
-                                        value={formData.theme_color}
-                                        onChange={(e) => handleInputChange('theme_color', e.target.value)}
-                                        className="h-10"
-                                    />
-                                </div>
-                            </div>
+                        <CardContent>
+                            <ThemeSwitcher/>
                         </CardContent>
                     </Card>
                 </TabsContent>

@@ -39,11 +39,14 @@ func (s *MediaService) ListMedias(
 	ctx context.Context,
 	req *media.ListMediasRequest,
 ) (*media.ListMediasResponse, error) {
+	// Normalize pagination parameters
+	page, pageSize := repo.NormalizePagination(int(req.Page), int(req.PageSize))
+
 	// Create query options from request
 	opts := &dto.MediaQueryOption{
 		QueryOption: repo.QueryOption{
-			Page:     req.Page,
-			PageSize: req.PageSize,
+			Page:     int32(page),
+			PageSize: int32(pageSize),
 			Keyword:  req.Keyword,
 		},
 		OrderBy:    req.OrderBy,
@@ -71,8 +74,8 @@ func (s *MediaService) ListMedias(
 	return &media.ListMediasResponse{
 		Medias:   items,
 		Total:    total,
-		Page:     req.Page,
-		PageSize: req.PageSize,
+		Page:     int32(page),
+		PageSize: int32(pageSize),
 	}, nil
 }
 
@@ -164,14 +167,17 @@ func (s *MediaService) GetEncodingStatus(
 		return nil, err
 	}
 
+	// Normalize pagination parameters
+	page, pageSize := repo.NormalizePagination(int(req.Page), int(req.PageSize))
+
 	return &media.GetEncodingStatusResponse{
 		ProcessingCount: int32(status.ProcessingCount),
 		PendingCount:    int32(status.PendingCount),
 		FailedCount:     int32(status.FailedCount),
 		SuccessCount:    int32(status.SuccessCount),
 		Total:           0,
-		Page:            req.Page,
-		PageSize:        req.PageSize,
+		Page:            int32(page),
+		PageSize:        int32(pageSize),
 		Items:           []*media.TranscodingMediaItem{},
 	}, nil
 }
@@ -544,15 +550,19 @@ func (s *MediaService) EncodingTasksHTTPHandler(w stdhttp.ResponseWriter, r *std
 		filter.Status = "all"
 	}
 	if p := r.URL.Query().Get("page"); p != "" {
-		if v, err := strconv.Atoi(p); err == nil && v > 0 {
+		if v, err := strconv.Atoi(p); err == nil {
 			filter.Page = v
 		}
 	}
 	if ps := r.URL.Query().Get("page_size"); ps != "" {
-		if v, err := strconv.Atoi(ps); err == nil && v > 0 && v <= 100 {
+		if v, err := strconv.Atoi(ps); err == nil {
 			filter.PageSize = v
 		}
 	}
+	// Normalize pagination parameters
+	page, pageSize := repo.NormalizePagination(filter.Page, filter.PageSize)
+	filter.Page = page
+	filter.PageSize = pageSize
 	if pr := r.URL.Query().Get("profile"); pr != "" {
 		filter.ProfileFilter = pr
 	}

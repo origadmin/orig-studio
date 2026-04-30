@@ -160,6 +160,8 @@ func (h *UserHandler) listUsers(c *gin.Context) {
 	if page == 0 {
 		page = 1
 	}
+	// Normalize pagination parameters
+	page, limit = repo.NormalizeHTTPPagination(page, limit)
 
 	// Use ListUserEntities to get role field directly from entity
 	entities, total, err := h.uc.ListUserEntities(c.Request.Context(), &dto.UserQueryOption{
@@ -369,6 +371,8 @@ func (h *UserHandler) getUserSubscriptions(c *gin.Context) {
 	if pageSize == 0 {
 		pageSize = 20
 	}
+	// Normalize pagination parameters
+	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 	list, total, err := h.uc.GetSubscriptions(
 		c.Request.Context(),
@@ -411,6 +415,8 @@ func (h *UserHandler) getUserFollowers(c *gin.Context) {
 	if pageSize == 0 {
 		pageSize = 20
 	}
+	// Normalize pagination parameters
+	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 	list, total, err := h.uc.GetSubscribers(
 		c.Request.Context(),
@@ -465,6 +471,8 @@ func (h *UserHandler) getUserChannels(c *gin.Context) {
 	if page == 0 {
 		page = 1
 	}
+	// Normalize pagination parameters
+	page, limit = repo.NormalizeHTTPPagination(page, limit)
 
 	// TODO: Implement ListUserChannels
 	server.OK(c, gin.H{

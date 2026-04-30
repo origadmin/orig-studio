@@ -26,8 +26,9 @@ import (
 
 	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/infra/auth"
-	"origadmin/application/origcms/internal/server"
+	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/features/content/biz"
+	"origadmin/application/origcms/internal/server"
 	"origadmin/application/origcms/internal/validation"
 
 	"github.com/gin-gonic/gin"
@@ -156,6 +157,8 @@ func (h *ChannelHandler) ListChannels(w http.ResponseWriter, r *http.Request) {
 	if page == 0 {
 		page = 1
 	}
+	// Normalize pagination parameters
+	page, limit = repo.NormalizeHTTPPagination(page, limit)
 
 	switch {
 	case username != "":
@@ -444,6 +447,8 @@ func (h *ChannelHandler) GetChannelSubscribers(w http.ResponseWriter, r *http.Re
 	if pageSize == 0 {
 		pageSize = 20
 	}
+	// Normalize pagination parameters
+	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 	subscribers, total, err := h.uc.GetChannelSubscribers(r.Context(), token, page, pageSize)
 	if err != nil {
@@ -782,9 +787,8 @@ func (h *ChannelHandler) GetSubscriptionVideos(w http.ResponseWriter, r *http.Re
 	if limit < 1 {
 		limit = 20
 	}
-	if limit > 100 {
-		limit = 100
-	}
+	// Normalize pagination parameters
+	page, limit = repo.NormalizeHTTPPagination(page, limit)
 
 	sortBy := c.Query("sort_by")
 	switch sortBy {
@@ -859,9 +863,8 @@ func (h *ChannelHandler) GetChannelVideos(w http.ResponseWriter, r *http.Request
 	if limit < 1 {
 		limit = 20
 	}
-	if limit > 100 {
-		limit = 100
-	}
+	// Normalize pagination parameters
+	page, limit = repo.NormalizeHTTPPagination(page, limit)
 
 	sortBy := c.Query("sort_by")
 	switch sortBy {
@@ -913,9 +916,8 @@ func (h *ChannelHandler) GetChannelPlaylists(w http.ResponseWriter, r *http.Requ
 	if limit < 1 {
 		limit = 20
 	}
-	if limit > 100 {
-		limit = 100
-	}
+	// Normalize pagination parameters
+	page, limit = repo.NormalizeHTTPPagination(page, limit)
 
 	// Query channel playlists via biz layer
 	items, total, err := h.uc.GetChannelPlaylists(r.Context(), token, page, limit)
