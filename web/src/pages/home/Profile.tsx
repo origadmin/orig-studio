@@ -10,7 +10,7 @@ import {Badge} from '@/components/ui/badge';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {formatDuration, formatViews, formatDate} from '@/lib/format';
 import {userApi} from '@/lib/api/user';
-import {mediaApi} from '@/lib/api/media';
+import {mediaApi, normalizeMediaList} from '@/lib/api/media';
 import {getImageUrl, handleImageError} from '@/lib/imageUtils';
 import ErrorPage from '@/components/common/ErrorPage';
 import SubscribeButton from '@/components/common/SubscribeButton';
@@ -44,7 +44,7 @@ const ProfilePage = () => {
 
                 // Fetch user videos
                 const videosResponse = await mediaApi.list({user_id: userResponse.id});
-                setVideos(videosResponse.items || []);
+                setVideos(normalizeMediaList(videosResponse.items || []));
             } catch (err: any) {
                 // Check if the error is due to user not found
                 if (err.response && err.response.status === 404) {
@@ -119,7 +119,7 @@ const ProfilePage = () => {
                                 className="font-semibold text-slate-900 dark:text-white">{formatViews(user.total_views || 0)}</span><span
                                 className="text-slate-500 dark:text-muted-foreground">{t('common.views')}</span></div>
                             <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-muted-foreground"/><span
-                                className="text-slate-500 dark:text-muted-foreground">{t('common.joinedAt', {date: formatDate(user.create_time || new Date().toISOString())})}</span>
+                                className="text-slate-500 dark:text-muted-foreground">{t('common.joinedAt', {date: formatDate(user.created_at || user.create_time || new Date().toISOString())})}</span>
                             </div>
                         </div>
                     </div>
@@ -168,7 +168,7 @@ const ProfilePage = () => {
                                                 <div className="p-3">
                                                     <h3 className="font-semibold text-slate-900 dark:text-white line-clamp-2 text-sm group-hover:text-emerald-600 transition-colors">{video.title}</h3>
                                                     <p className="text-xs text-slate-500 dark:text-muted-foreground mt-2">{formatViews(video.view_count || 0)} {t('common.views')}
-                                                        · {formatDate(video.create_time || new Date().toISOString())}</p>
+                                                        · {formatDate(video.create_time || video.created_at || new Date().toISOString())}</p>
                                                 </div>
                                             </div>
                                         </Link>

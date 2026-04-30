@@ -27,6 +27,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/c
 import {adminCommentApi} from '@/lib/api/comment';
 import ErrorPage from '@/components/error/ErrorPage';
 import {TablePagination} from '@/components/common/TablePagination';
+import {PAGINATION} from '@/config/pagination';
 
 interface Comment {
     id: number;
@@ -48,7 +49,7 @@ const Comments: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(1);
-    const [pageSize] = useState(20);
+    const [pageSize] = useState(PAGINATION.DEFAULT_PAGE_SIZE);
     const [total, setTotal] = useState(0);
 
     // Fetch comments from API
@@ -77,7 +78,7 @@ const Comments: React.FC = () => {
                     replies: comment.reply_count || 0,
                     status: comment.status || 'approved',
                     isSpam: comment.is_spam || false,
-                    createdAt: comment.create_time || new Date().toISOString()
+                    createdAt: comment.create_time || comment.created_at || new Date().toISOString()
                 }));
                 setComments(mappedComments);
             } catch (err: any) {

@@ -11,6 +11,7 @@ import {useTranslation} from 'react-i18next';
 import {userApi} from '@/lib/api/user';
 import {getFullUrl} from '@/lib/utils';
 import ErrorPage from '@/components/common/ErrorPage';
+import {PAGINATION} from '@/config/pagination';
 
 const formatNumber = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}万` : n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
 
@@ -26,7 +27,7 @@ const MembersPage = () => {
         const fetchMembers = async () => {
             try {
                 setLoading(true);
-                const response = await userApi.list({page_size: 100});
+                const response = await userApi.list({page_size: PAGINATION.MAX_PAGE_SIZE});
                 setMembers(response.items || []);
             } catch (err) {
                 setError(t('common.error'));

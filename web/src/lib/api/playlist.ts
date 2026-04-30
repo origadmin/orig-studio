@@ -9,7 +9,9 @@ export interface Playlist {
     media_count: number;
     media?: Media[];
     created_at: string;
+    create_time?: string;
     updated_at: string;
+    update_time?: string;
 }
 
 export interface PlaylistListResponse {

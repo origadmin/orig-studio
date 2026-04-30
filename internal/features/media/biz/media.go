@@ -478,7 +478,7 @@ type FlatTaskItem struct {
 	Status       enums.EncodingTaskStatus `json:"status"`
 	OutputPath   string                   `json:"output_path,omitempty"`
 	ErrorMessage string                   `json:"error_message,omitempty"`
-	CreateTime   string                   `json:"created_at,omitempty"`
+	CreateTime   string                   `json:"create_time,omitempty"`
 	UpdateTime   string                   `json:"update_time,omitempty"`
 }
 

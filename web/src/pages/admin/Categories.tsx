@@ -44,10 +44,11 @@ import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, RotateCcw, ToggleLeft, 
 import {adminCategoryApi, Category} from '@/lib/api/category';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {TablePagination} from '@/components/common/TablePagination';
+import {PAGINATION} from '@/config/pagination';
 
 const Categories: React.FC = () => {
     const {t} = useTranslation();
-    const [searchParams, setSearchParams] = useState({keyword: '', page: 1, page_size: 20});
+    const [searchParams, setSearchParams] = useState({keyword: '', page: 1, page_size: PAGINATION.DEFAULT_PAGE_SIZE});
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
     const [total, setTotal] = useState(0);
@@ -211,7 +212,7 @@ const Categories: React.FC = () => {
                                     variant="outline"
                                     size="sm"
                                     onClick={() => {
-                                        const newParams = {keyword: '', page: 1, page_size: 20};
+                                        const newParams = {keyword: '', page: 1, page_size: PAGINATION.DEFAULT_PAGE_SIZE};
                                         setSearchParams(newParams);
                                         loadCategories(newParams);
                                     }}

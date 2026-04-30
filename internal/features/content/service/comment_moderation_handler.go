@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/internal/infra/auth"
+	"origadmin/application/origcms/internal/helpers/repo"
 	contentbiz "origadmin/application/origcms/internal/features/content/biz"
 	"origadmin/application/origcms/internal/server"
 )
@@ -113,13 +114,8 @@ func (h *CommentModerationHandler) listAdminComments() gin.HandlerFunc {
 		mediaID := c.Query("media_id")
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
-
-		if page < 1 {
-			page = 1
-		}
-		if pageSize < 1 || pageSize > 100 {
-			pageSize = 20
-		}
+		// Normalize pagination parameters
+		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 		items, total, err := h.moderationUC.ListByMedia(ctx, mediaID, status, page, pageSize)
 		if err != nil {

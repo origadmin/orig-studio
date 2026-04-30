@@ -39,14 +39,17 @@ func (h *SearchHandler) search(c *gin.Context) {
 	pageSizeStr := c.DefaultQuery("page_size", "20")
 
 	page, err := strconv.Atoi(pageStr)
-	if err != nil || page < 1 {
+	if err != nil {
 		page = 1
 	}
 
 	pageSize, err := strconv.Atoi(pageSizeStr)
-	if err != nil || pageSize < 1 || pageSize > 100 {
+	if err != nil {
 		pageSize = 20
 	}
+
+	// Normalize pagination parameters
+	page, pageSize = repo.NormalizePagination(page, pageSize)
 
 	opts := &dto.MediaQueryOption{
 		QueryOption: repo.QueryOption{

@@ -22,8 +22,8 @@ interface EncodingTask {
     profile: string;
     status: string;
     progress: number;
-    created_at: string;
-    updated_at: string;
+    create_time: string;
+    update_time: string;
 }
 
 interface MediaStats {
@@ -635,9 +635,9 @@ export default function MediaEditPage() {
                                 <span className="text-muted-foreground">Short Token</span>
                                 <span className="font-mono text-xs text-right break-all">{media.short_token || 'N/A'}</span>
                                 <span className="text-muted-foreground">创建时间</span>
-                                <span className="text-xs text-right whitespace-nowrap">{formatDate(media.create_time)}</span>
+                                <span className="text-xs text-right whitespace-nowrap">{formatDate(media.create_time || media.created_at)}</span>
                                 <span className="text-muted-foreground">更新时间</span>
-                                <span className="text-xs text-right whitespace-nowrap">{formatDate(media.update_time)}</span>
+                                <span className="text-xs text-right whitespace-nowrap">{formatDate(media.update_time || media.updated_at)}</span>
                                 <span className="text-muted-foreground">编码状态</span>
                                 <div className="flex justify-end">
                                     <Badge variant={encodingStatusBadge(media.encoding_status)} className="text-[10px] px-1.5 py-0 h-4">

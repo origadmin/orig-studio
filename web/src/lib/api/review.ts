@@ -10,7 +10,9 @@ export interface ReviewItem {
     review_status: string;
     reason?: string;
     created_at: string;
+    create_time?: string;
     updated_at: string;
+    update_time?: string;
     reviewer_id?: string;
     reviewer_name?: string;
 }

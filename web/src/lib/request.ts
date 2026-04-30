@@ -1,6 +1,7 @@
-// API 请求库 - 按照 webui 项目模式重写
+// API request library
 
 import axios from "axios";
+import type {User} from '@/contexts/auth/types';
 
 // Use relative path by default, let rsbuild proxy handle the actual URL
 const getApiBaseUrl = (): string => {
@@ -11,7 +12,7 @@ export const API_BASE_URL = getApiBaseUrl();
 export const API_PREFIX = "/api/v1";
 export const REQUEST_TIMEOUT = 30000;
 
-// 统一响应格式接口
+// Unified response format interface
 export interface ApiResponse<T> {
     code: number;
     message: string;
@@ -38,21 +39,55 @@ interface ApiError {
     details?: unknown;
 }
 
-// Token 管理 - 与 useAuth.ts 共享同一套 localStorage key
+// Token management - shared localStorage keys with useAuth.ts
 const TOKEN_KEY = "origcms_token";
 const USER_KEY = "origcms_user";
+const REFRESH_TOKEN_KEY = "origcms_refresh_token";
+const EXPIRES_KEY = "token_expires_at";
 
 let accessToken: string | null = localStorage.getItem(TOKEN_KEY);
 
-// 确保每次获取token时都从localStorage读取最新值
+// Callback mechanism: AuthProvider registers a callback to receive
+// setAuth/clearAuth notifications, replacing the StorageEvent hack (P5 fix).
+type AuthCallback = ((token: string | null, user: User | null) => void) | null;
+let authCallback: AuthCallback = null;
+
+/** AuthProvider registers a callback to receive setAuth/clearAuth notifications */
+export function registerAuthCallback(callback: AuthCallback) {
+    authCallback = callback;
+}
+
+// Ensure token is always read from localStorage for latest value
 export const getAccessToken = () => {
     accessToken = localStorage.getItem(TOKEN_KEY);
     return accessToken;
 };
 
-// 获取刷新token
+// Get refresh token
 export const getRefreshToken = () => {
-    return localStorage.getItem('origcms_refresh_token');
+    return localStorage.getItem(REFRESH_TOKEN_KEY);
+};
+
+/** Check if a refresh token exists in localStorage */
+export const hasRefreshToken = (): boolean => {
+    return !!localStorage.getItem(REFRESH_TOKEN_KEY);
+};
+
+/** Attempt to refresh the access token using the refresh token */
+export const attemptRefresh = async (): Promise<boolean> => {
+    const refreshToken = getRefreshToken();
+    if (!refreshToken) return false;
+
+    try {
+        const {data: newToken} = await axios.post<Token>(
+            (API_BASE_URL || "") + API_PREFIX + "/auth/refresh",
+            {refresh_token: refreshToken}
+        );
+        setAuth(newToken);
+        return true;
+    } catch {
+        return false;
+    }
 };
 
 /** Called by useAuth.login() after a successful signin/signup */
@@ -60,45 +95,44 @@ export const setAuth = (token: Token) => {
     accessToken = token.access_token;
     localStorage.setItem(TOKEN_KEY, token.access_token);
     if (token.refresh_token) {
-        localStorage.setItem('origcms_refresh_token', token.refresh_token);
+        localStorage.setItem(REFRESH_TOKEN_KEY, token.refresh_token);
     }
-    // 确保 expires_in 是数字
-    const expiresIn = typeof token.expires_in === 'string' 
-        ? parseInt(token.expires_in, 10) 
+    // Ensure expires_in is a number
+    const expiresIn = typeof token.expires_in === 'string'
+        ? parseInt(token.expires_in, 10)
         : token.expires_in;
-    localStorage.setItem("token_expires_at", String(Date.now() + expiresIn * 1000));
-    
-    // 如果响应中包含 user 信息，保存它
+    localStorage.setItem(EXPIRES_KEY, String(Date.now() + expiresIn * 1000));
+
+    // Save user info if present in the token response
+    let user: User | null = null;
     if (token.user) {
-        const user = {
-            id: token.user.id,
+        user = {
+            id: typeof token.user.id === 'string' ? parseInt(token.user.id, 10) : token.user.id,
             username: token.user.username,
             displayName: token.user.nickname || token.user.username,
             avatarUrl: undefined,
             roles: token.user.is_staff ? ['admin', 'user'] : ['user']
         };
         localStorage.setItem(USER_KEY, JSON.stringify(user));
-        
-        // 触发事件通知 useAuth 更新
-        window.dispatchEvent(new StorageEvent('storage', {
-            key: USER_KEY,
-            newValue: JSON.stringify(user),
-        }));
     }
-    
-    // 触发事件通知 useAuth 更新
-    window.dispatchEvent(new StorageEvent('storage', {
-        key: TOKEN_KEY,
-        newValue: token.access_token,
-    }));
+
+    // Notify AuthProvider via callback (replaces StorageEvent hack)
+    if (authCallback) {
+        authCallback(token.access_token, user);
+    }
 };
 
 export const clearAuth = () => {
     accessToken = null;
     localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem('origcms_refresh_token');
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
-    localStorage.removeItem("token_expires_at");
+    localStorage.removeItem(EXPIRES_KEY);
+
+    // Notify AuthProvider via callback
+    if (authCallback) {
+        authCallback(null, null);
+    }
 };
 
 export const isTokenExpired = (bufferSeconds: number = 60): boolean => {

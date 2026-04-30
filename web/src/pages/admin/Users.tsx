@@ -51,12 +51,13 @@ import {adminUserApi, userApi, User, CreateUserRequest, UpdateUserRequest} from 
 import {useTranslation} from 'react-i18next';
 import {getFullUrl} from '@/lib/utils';
 import {TablePagination} from '@/components/common/TablePagination';
+import {PAGINATION} from '@/config/pagination';
 
 export default function UsersPage() {
     const {t} = useTranslation();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchParams, setSearchParams] = useState({keyword: '', role: 'all', page: 1, page_size: 20});
+    const [searchParams, setSearchParams] = useState({keyword: '', role: 'all', page: 1, page_size: PAGINATION.DEFAULT_PAGE_SIZE});
     const [total, setTotal] = useState(0);
     
     const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -257,7 +258,7 @@ export default function UsersPage() {
                                         variant="outline"
                                         size="sm"
                                         onClick={() => {
-                                            const newParams = {keyword: '', role: 'all', page: 1, page_size: 20};
+                                            const newParams = {keyword: '', role: 'all', page: 1, page_size: PAGINATION.DEFAULT_PAGE_SIZE};
                                             setSearchParams(newParams);
                                             loadUsers(newParams);
                                         }}
@@ -405,7 +406,7 @@ export default function UsersPage() {
                                                 <Badge variant="secondary">{t('admin.inactive') || "Inactive"}</Badge>
                                             )}
                                         </TableCell>
-                                        <TableCell className="text-sm text-slate-500">{user.create_time}</TableCell>
+                                        <TableCell className="text-sm text-slate-500">{user.created_at || user.create_time}</TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>

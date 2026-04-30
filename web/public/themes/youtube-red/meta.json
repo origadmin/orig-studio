@@ -1,0 +1,20 @@
+{
+  "id": "youtube-red",
+  "name": "YouTube红焰",
+  "nameEn": "YouTube Red",
+  "description": "灵感来自YouTube的标志性红色，热情活力",
+  "category": "social",
+  "preview": {
+    "primary": "#E60012",
+    "accent": "#ffe0e3",
+    "background": "#ffffff",
+    "surface": "#f9f5f5"
+  },
+  "tags": [
+    "social",
+    "video",
+    "red"
+  ],
+  "author": "OrigCMS",
+  "version": "1.0.0"
+}

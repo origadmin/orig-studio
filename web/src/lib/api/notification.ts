@@ -9,7 +9,9 @@ export interface Notification {
     body: string;
     read: boolean;
     created_at: string;
+    create_time?: string;
     updated_at: string;
+    update_time?: string;
     data?: Record<string, any>;
 }
 

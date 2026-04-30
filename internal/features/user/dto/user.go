@@ -85,14 +85,21 @@ func GetUserRequestToQueryOption(req *user.GetUserRequest) *UserQueryOption {
 }
 
 // ListUsersRequestToQueryOption converts an API request to a query option object.
+// Pagination parameters are automatically normalized.
 func ListUsersRequestToQueryOption(req *user.ListUsersRequest) *UserQueryOption {
 	if req == nil {
-		return &UserQueryOption{}
+		return &UserQueryOption{
+			QueryOption: repo.QueryOption{
+				Page:     1,
+				PageSize: 20,
+			},
+		}
 	}
+	page, pageSize := repo.NormalizePagination(int(req.Page), int(req.PageSize))
 	opts := &UserQueryOption{
 		QueryOption: repo.QueryOption{
-			Page:     req.Page,
-			PageSize: req.PageSize,
+			Page:     int32(page),
+			PageSize: int32(pageSize),
 			Keyword:  req.Keyword,
 		},
 	}

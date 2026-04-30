@@ -44,6 +44,7 @@ import {
 } from "lucide-react";
 import {formatDate, formatRelativeTime} from "../../lib/format";
 import {TablePagination} from '@/components/common/TablePagination';
+import {PAGINATION} from '@/config/pagination';
 
 // ─── Types ─────────────────────────────────────────────
 
@@ -59,7 +60,7 @@ interface EncodingTask {
     status: string;
     output_path: string;
     error_message: string;
-    created_at?: any;
+    create_time?: any;
     update_time?: any;
     progress?: number;
     speed?: string;
@@ -474,7 +475,7 @@ export default function TranscodingStatus() {
         try {
             const params: any = {
                 page: pageNum,
-                page_size: 25,
+                page_size: PAGINATION.DEFAULT_PAGE_SIZE,
             };
             
             if (status !== '') {

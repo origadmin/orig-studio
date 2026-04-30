@@ -29,6 +29,7 @@ import {
 import {adminArticleApi, Article} from '@/lib/api/article';
 import {extractList} from '@/lib/extract';
 import {TablePagination} from '@/components/common/TablePagination';
+import {PAGINATION} from '@/config/pagination';
 
 export default function ArticlePage() {
     const [articles, setArticles] = useState<Article[]>([]);
@@ -37,7 +38,7 @@ export default function ArticlePage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(1);
-    const [pageSize] = useState(20);
+    const [pageSize] = useState(PAGINATION.DEFAULT_PAGE_SIZE);
     const [total, setTotal] = useState(0);
 
     // 加载文章数据
@@ -207,7 +208,7 @@ export default function ArticlePage() {
                                         </TableCell>
                                         <TableCell className="text-sm text-slate-500">Author ID: {item.author_id}</TableCell>
                                         <TableCell className="text-sm text-slate-500">{formatViews(item.views)}</TableCell>
-                                        <TableCell className="text-sm text-slate-500">{new Date(item.create_time).toLocaleDateString()}</TableCell>
+                                        <TableCell className="text-sm text-slate-500">{new Date(item.created_at || item.create_time).toLocaleDateString()}</TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>

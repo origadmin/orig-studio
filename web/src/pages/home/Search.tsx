@@ -228,7 +228,7 @@ const SearchPage = () => {
                                             {formatViews(item.view_count)} {t('common.views')}
                                         </span>
                                         <span>·</span>
-                                        <span>{formatDate(item.create_time)}</span>
+                                        <span>{formatDate(item.create_time || item.created_at)}</span>
                                     </div>
                                     <p className="text-sm text-slate-500 dark:text-muted-foreground line-clamp-2 leading-relaxed">
                                         {item.description || t('watch.noDescription')}

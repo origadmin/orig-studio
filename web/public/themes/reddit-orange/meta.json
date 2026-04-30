@@ -1,0 +1,20 @@
+{
+  "id": "reddit-orange",
+  "name": "Reddit橙焰",
+  "nameEn": "Reddit Orange",
+  "description": "灵感来自Reddit的温暖橙色，社区氛围",
+  "category": "social",
+  "preview": {
+    "primary": "#E85D26",
+    "accent": "#ffe8de",
+    "background": "#ffffff",
+    "surface": "#faf7f5"
+  },
+  "tags": [
+    "social",
+    "community",
+    "orange"
+  ],
+  "author": "OrigCMS",
+  "version": "1.0.0"
+}

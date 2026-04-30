@@ -5,7 +5,7 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {formatDuration, formatViews} from '@/lib/format';
 import {channelApi} from '@/lib/api/channel';
-import {mediaApi} from '@/lib/api/media';
+import {mediaApi, normalizeMediaList} from '@/lib/api/media';
 import type {Channel} from '@/lib/api/channel';
 
 const ChannelPage = () => {
@@ -28,7 +28,7 @@ const ChannelPage = () => {
                 const ch = channelRes?.data || channelRes;
                 if (ch) setChannel(ch);
                 const vid = videosRes?.data?.items || videosRes?.items || [];
-                setVideos(vid);
+                setVideos(normalizeMediaList(vid));
             })
             .finally(() => setLoading(false));
     }, [id]);

@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/internal/infra/auth"
+	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/server"
 	"origadmin/application/origcms/internal/features/content/biz"
 )
@@ -78,9 +79,8 @@ func (h *ArticleHandler) listArticles() http.HandlerFunc {
 		if pageSize == 0 {
 			pageSize = 20
 		}
-		if pageSize > 100 {
-			pageSize = 100
-		}
+		// Normalize pagination parameters
+		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 		filters := map[string]interface{}{}
 

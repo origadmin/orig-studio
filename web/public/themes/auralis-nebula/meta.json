@@ -1,0 +1,20 @@
+{
+  "id": "auralis-nebula",
+  "name": "Auralis星云",
+  "nameEn": "Auralis Nebula",
+  "description": "基于Auralis设计规范，indigo/cyan渐变风格",
+  "category": "custom",
+  "preview": {
+    "primary": "#818CF8",
+    "accent": "#e0e7ff",
+    "background": "#ffffff",
+    "surface": "#f5f3ff"
+  },
+  "tags": [
+    "custom",
+    "gradient",
+    "indigo"
+  ],
+  "author": "OrigCMS",
+  "version": "1.0.0"
+}

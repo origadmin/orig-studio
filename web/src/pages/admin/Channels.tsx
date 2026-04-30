@@ -44,6 +44,7 @@ import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, UserPlus, Users, Filter
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {adminApi, Channel} from '@/lib/api/admin';
 import {TablePagination} from '@/components/common/TablePagination';
+import {PAGINATION} from '@/config/pagination';
 
 const Channels: React.FC = () => {
     const {t} = useTranslation();
@@ -53,7 +54,7 @@ const Channels: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(1);
-    const [pageSize] = useState(20);
+    const [pageSize] = useState(PAGINATION.DEFAULT_PAGE_SIZE);
     const [total, setTotal] = useState(0);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
@@ -418,7 +419,7 @@ const Channels: React.FC = () => {
                                         </TableCell>
                                         <TableCell>{getStatusBadge(channel.status)}</TableCell>
                                         <TableCell className="text-muted-foreground">
-                                            {new Date(channel.create_time).toLocaleDateString()}
+                                            {new Date(channel.created_at || channel.create_time).toLocaleDateString()}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>

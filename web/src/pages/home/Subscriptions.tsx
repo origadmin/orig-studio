@@ -8,6 +8,7 @@ import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {formatDate} from '@/lib/format';
 import {subscriptionApi} from '@/lib/api/subscription';
 import ErrorPage from '@/components/common/ErrorPage';
+import {PAGINATION} from '@/config/pagination';
 
 const SubscriptionsPage = () => {
     const {t} = useTranslation();
@@ -30,13 +31,13 @@ const SubscriptionsPage = () => {
 
             let response;
             if (activeTab === 'subscriptions') {
-                response = await subscriptionApi.getSubscriptions({page, page_size: 20});
+                response = await subscriptionApi.getSubscriptions({page, page_size: PAGINATION.DEFAULT_PAGE_SIZE});
                 setSubscriptions(prev => page === 1 ? response.items : [...prev, ...response.items]);
-                setHasMore(response.items.length === 20);
+                setHasMore(response.items.length === PAGINATION.DEFAULT_PAGE_SIZE);
             } else {
-                response = await subscriptionApi.getFollowers({page, page_size: 20});
+                response = await subscriptionApi.getFollowers({page, page_size: PAGINATION.DEFAULT_PAGE_SIZE});
                 setFollowers(prev => page === 1 ? response.items : [...prev, ...response.items]);
-                setHasMore(response.items.length === 20);
+                setHasMore(response.items.length === PAGINATION.DEFAULT_PAGE_SIZE);
             }
         } catch (err) {
             setError('Failed to fetch data');

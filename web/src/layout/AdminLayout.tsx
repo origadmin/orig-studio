@@ -23,9 +23,11 @@ import {
     FileText
 } from 'lucide-react';
 import {useTranslation} from 'react-i18next';
+import {useTheme} from '@/themes';
 
 const AdminLayout = () => {
     const {t} = useTranslation();
+    const {isDark, toggleDark} = useTheme();
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const routerState = useRouterState();
 
@@ -96,13 +98,13 @@ const AdminLayout = () => {
         <div className="min-h-screen bg-background flex">
             {/* Sidebar */}
             <aside
-                className={`${sidebarCollapsed ? 'w-20' : 'w-64'} bg-slate-900 text-white flex-shrink-0 flex flex-col transition-all duration-300 ease-in-out`}>
+                className={`${sidebarCollapsed ? 'w-20' : 'w-64'} bg-sidebar text-sidebar-foreground flex-shrink-0 flex flex-col transition-all duration-300 ease-in-out`}>
                 <div className={`${sidebarCollapsed ? 'p-2' : 'p-6'} flex items-center justify-center`}>
                     <Link to="/admin" className={`flex items-center justify-center transition-all duration-300 ease-in-out ${sidebarCollapsed ? '' : 'w-full'}`}>
                         {sidebarCollapsed ? (
-                            <div className="w-14 h-14 bg-blue-400 rounded-lg flex items-center justify-center text-white font-bold text-xl">OC</div>
+                            <div className="w-14 h-14 bg-brand rounded-lg flex items-center justify-center text-brand-foreground font-bold text-xl">OC</div>
                         ) : (
-                            <span className="text-xl font-bold tracking-tight text-blue-400">OrigCMS Admin</span>
+                            <span className="text-xl font-bold tracking-tight text-brand">OrigCMS Admin</span>
                         )}
                     </Link>
                 </div>
@@ -118,10 +120,10 @@ const AdminLayout = () => {
                         />
                     ))}
                 </nav>
-                <div className={`${sidebarCollapsed ? 'p-3' : 'p-6'} border-t border-slate-800`}>
+                <div className={`${sidebarCollapsed ? 'p-3' : 'p-6'} border-t border-sidebar-border`}>
                     <Link
                         to="/"
-                        className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-3'} text-muted-foreground hover:text-white transition-colors`}
+                        className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-3'} text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors`}
                     >
                         <LogOut size={20}/>
                         {!sidebarCollapsed && <span>Exit Admin</span>}
@@ -134,14 +136,14 @@ const AdminLayout = () => {
                 {/* Floating toggle button on the divider line */}
                 <button
                     onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                    className="absolute top-12 z-50 w-8 h-8 bg-white dark:bg-gray-800 border border-slate-200 dark:border-slate-700 rounded-full shadow-md flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110"
+                    className="absolute top-12 z-50 w-8 h-8 bg-card border border-border rounded-full shadow-md flex items-center justify-center hover:bg-accent transition-all duration-200 hover:scale-110"
                     style={{ left: -16 }}
                     title={sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
                 >
                     {sidebarCollapsed ? (
-                        <PanelLeftOpen size={18} className="text-slate-600 dark:text-slate-300" />
+                        <PanelLeftOpen size={18} className="text-muted-foreground" />
                     ) : (
-                        <PanelLeftClose size={18} className="text-slate-600 dark:text-slate-300" />
+                        <PanelLeftClose size={18} className="text-muted-foreground" />
                     )}
                 </button>
 
@@ -168,7 +170,7 @@ const AdminLayout = () => {
                     </div>
                     <div className="flex items-center space-x-4">
                         <div
-                            className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-info font-bold">A
+                            className="w-8 h-8 rounded-full bg-brand-muted flex items-center justify-center text-brand font-bold">A
                         </div>
                         <span className="text-sm font-medium text-foreground">Administrator</span>
                     </div>
@@ -200,7 +202,7 @@ const NavItem = ({to, icon, label, exact = false, collapsed = false}: {
                     ? 'justify-center w-12 h-12 mx-auto'
                     : 'space-x-3 px-4 py-2'
             } ${
-                isActive ? 'bg-blue-600 text-white' : 'text-muted-foreground hover:bg-slate-800 hover:text-white'
+                isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
             }`}
             title={collapsed ? label : undefined}
         >

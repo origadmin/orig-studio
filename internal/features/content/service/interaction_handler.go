@@ -13,6 +13,7 @@ package service
 
 import (
 	"origadmin/application/origcms/internal/server"
+	"origadmin/application/origcms/internal/helpers/repo"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -187,6 +188,8 @@ func (h *InteractionHandler) getSubscriptions() gin.HandlerFunc {
 
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+		// Normalize pagination parameters
+		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 		// TODO: Implement get subscriptions from use case
 		_ = claims
@@ -220,6 +223,8 @@ func (h *InteractionHandler) getFollowers() gin.HandlerFunc {
 
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+		// Normalize pagination parameters
+		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 		// TODO: Implement get followers from use case
 		_ = claims

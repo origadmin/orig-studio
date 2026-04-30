@@ -15,6 +15,7 @@ import (
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/server"
 	"origadmin/application/origcms/internal/validation"
 	authbiz "origadmin/application/origcms/internal/features/auth/biz"
@@ -275,13 +276,16 @@ func (h *AdminHandler) getAllEncodingTasks() gin.HandlerFunc {
 			filter.OnlyStats = true
 		}
 
-		if p, err := strconv.Atoi(c.DefaultQuery("page", "1")); err == nil && p >= 1 {
+		if p, err := strconv.Atoi(c.DefaultQuery("page", "1")); err == nil {
 			filter.Page = p
 		}
-		if ps, err := strconv.Atoi(c.DefaultQuery("page_size", "25")); err == nil && ps >= 1 &&
-			ps <= 100 {
+		if ps, err := strconv.Atoi(c.DefaultQuery("page_size", "25")); err == nil {
 			filter.PageSize = ps
 		}
+		// Normalize pagination parameters
+		page, pageSize := repo.NormalizeHTTPPagination(filter.Page, filter.PageSize)
+		filter.Page = page
+		filter.PageSize = pageSize
 
 		var mediaID *string
 		if m := c.Query("media_id"); m != "" {
@@ -553,6 +557,9 @@ func (h *AdminHandler) listTags() gin.HandlerFunc {
 		sortBy := c.DefaultQuery("sort_by", "created_at")
 		sortOrder := c.DefaultQuery("sort_order", "desc")
 
+		// Normalize pagination parameters
+		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+
 		// Get tags
 		tags, total, err := h.tagService.List(
 			c.Request.Context(),
@@ -753,9 +760,8 @@ func (h *AdminHandler) adminListChannels() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
-		if pageSize > 100 {
-			pageSize = 100
-		}
+		// Normalize pagination parameters
+		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 		items, total, err := h.channelUC.ListChannels(c.Request.Context(), page, pageSize)
 		if err != nil {
@@ -934,9 +940,8 @@ func (h *AdminHandler) adminListPlaylists() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
-		if pageSize > 100 {
-			pageSize = 100
-		}
+		// Normalize pagination parameters
+		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 		items, total, err := h.channelUC.ListPlaylists(c.Request.Context(), page, pageSize)
 		if err != nil {
@@ -1151,9 +1156,8 @@ func (h *AdminHandler) adminListUsers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
-		if pageSize > 100 {
-			pageSize = 100
-		}
+		// Normalize pagination parameters
+		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 		users, total, err := h.userUC.ListUsers(c.Request.Context())
 		if err != nil {
@@ -1318,9 +1322,8 @@ func (h *AdminHandler) adminListArticles() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
-		if pageSize > 100 {
-			pageSize = 100
-		}
+		// Normalize pagination parameters
+		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 		filters := make(map[string]interface{})
 		if v := c.Query("status"); v != "" {
@@ -1537,9 +1540,8 @@ func (h *AdminHandler) adminListCategories() gin.HandlerFunc {
 
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
-		if pageSize > 100 {
-			pageSize = 100
-		}
+		// Normalize pagination parameters
+		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 		total := len(categories)
 		start := (page - 1) * pageSize

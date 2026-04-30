@@ -1,14 +1,16 @@
 import {Button} from '@/components/ui/button';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
+import {PAGINATION} from '@/config/pagination';
 
 interface TablePaginationProps {
     page: number;
     pageSize: number;
     total: number;
     onPageChange: (page: number) => void;
+    onPageSizeChange?: (pageSize: number) => void;
 }
 
-export function TablePagination({page, pageSize, total, onPageChange}: TablePaginationProps) {
+export function TablePagination({page, pageSize, total, onPageChange, onPageSizeChange}: TablePaginationProps) {
     const totalPages = Math.ceil(total / pageSize);
 
     if (total <= pageSize) {
@@ -17,9 +19,22 @@ export function TablePagination({page, pageSize, total, onPageChange}: TablePagi
 
     return (
         <div className="flex items-center justify-between pt-1 text-xs text-muted-foreground">
-            <span className="tabular-nums">
-                Page {page} of {totalPages} · {total} total
-            </span>
+            <div className="flex items-center gap-2">
+                <span className="tabular-nums">
+                    Page {page} of {totalPages} · {total} total
+                </span>
+                {onPageSizeChange && (
+                    <select
+                        className="h-7 rounded border border-input bg-background px-1 text-xs"
+                        value={pageSize}
+                        onChange={(e) => onPageSizeChange(Number(e.target.value))}
+                    >
+                        {PAGINATION.PAGE_SIZE_OPTIONS.map((opt) => (
+                            <option key={opt} value={opt}>{opt} / page</option>
+                        ))}
+                    </select>
+                )}
+            </div>
             <div className="flex gap-1.5">
                 <Button
                     variant="outline"

@@ -26,6 +26,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/c
 import {adminPlaylistApi, Playlist} from '@/lib/api/playlist';
 import {extractList} from '@/lib/extract';
 import {TablePagination} from '@/components/common/TablePagination';
+import {PAGINATION} from '@/config/pagination';
 
 const Playlists: React.FC = () => {
     const {t} = useTranslation();
@@ -35,7 +36,7 @@ const Playlists: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(1);
-    const [pageSize] = useState(20);
+    const [pageSize] = useState(PAGINATION.DEFAULT_PAGE_SIZE);
     const [total, setTotal] = useState(0);
 
     // 加载播放列表数据
@@ -295,7 +296,7 @@ const Playlists: React.FC = () => {
                                             <Badge variant="outline">-</Badge>
                                         </TableCell>
                                         <TableCell className="text-muted-foreground">
-                                            {new Date(playlist.create_time).toLocaleDateString()}
+                                            {new Date(playlist.created_at || playlist.create_time).toLocaleDateString()}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>

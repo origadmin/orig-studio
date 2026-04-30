@@ -1,0 +1,171 @@
+{
+  "version": 1,
+  "defaultTheme": "default",
+  "themes": [
+    {
+      "id": "default",
+      "name": "默认蓝",
+      "nameEn": "Default Blue",
+      "description": "OrigCMS 默认蓝色主题，专业稳重",
+      "category": "professional",
+      "preview": { "primary": "#0B6CFA", "accent": "#e0edff", "background": "#ffffff", "surface": "#f5f6f7" },
+      "tags": ["business", "default", "blue"],
+      "author": "OrigCMS",
+      "version": "1.0.0"
+    },
+    {
+      "id": "feishu-blue",
+      "name": "飞书蓝",
+      "nameEn": "Feishu Blue",
+      "description": "灵感来自飞书的清爽蓝色，专业商务风格",
+      "category": "professional",
+      "preview": { "primary": "#3370ff", "accent": "#e8f0ff", "background": "#ffffff", "surface": "#f5f6f7" },
+      "tags": ["business", "clean", "blue"],
+      "author": "OrigCMS",
+      "version": "1.0.0"
+    },
+    {
+      "id": "stripe-indigo",
+      "name": "Stripe靛紫",
+      "nameEn": "Stripe Indigo",
+      "description": "灵感来自Stripe的靛紫色，科技感十足",
+      "category": "professional",
+      "preview": { "primary": "#635BFF", "accent": "#ece8ff", "background": "#ffffff", "surface": "#f5f5fa" },
+      "tags": ["business", "tech", "indigo"],
+      "author": "OrigCMS",
+      "version": "1.0.0"
+    },
+    {
+      "id": "dingtalk-blue",
+      "name": "钉钉蓝",
+      "nameEn": "DingTalk Blue",
+      "description": "灵感来自钉钉的明亮蓝色，高效协作风格",
+      "category": "professional",
+      "preview": { "primary": "#0089FF", "accent": "#e0f0ff", "background": "#ffffff", "surface": "#f5f8fc" },
+      "tags": ["business", "collaboration", "blue"],
+      "author": "OrigCMS",
+      "version": "1.0.0"
+    },
+    {
+      "id": "youtube-red",
+      "name": "YouTube红焰",
+      "nameEn": "YouTube Red",
+      "description": "灵感来自YouTube的标志性红色，热情活力",
+      "category": "social",
+      "preview": { "primary": "#E60012", "accent": "#ffe0e3", "background": "#ffffff", "surface": "#f9f5f5" },
+      "tags": ["social", "video", "red"],
+      "author": "OrigCMS",
+      "version": "1.0.0"
+    },
+    {
+      "id": "reddit-orange",
+      "name": "Reddit橙焰",
+      "nameEn": "Reddit Orange",
+      "description": "灵感来自Reddit的温暖橙色，社区氛围",
+      "category": "social",
+      "preview": { "primary": "#E85D26", "accent": "#ffe8de", "background": "#ffffff", "surface": "#faf7f5" },
+      "tags": ["social", "community", "orange"],
+      "author": "OrigCMS",
+      "version": "1.0.0"
+    },
+    {
+      "id": "bilibili-pink",
+      "name": "B站粉",
+      "nameEn": "Bilibili Pink",
+      "description": "灵感来自B站的标志性粉色，年轻活力",
+      "category": "social",
+      "preview": { "primary": "#E4407A", "accent": "#ffe0eb", "background": "#ffffff", "surface": "#fdf5f8" },
+      "tags": ["social", "video", "pink"],
+      "author": "OrigCMS",
+      "version": "1.0.0"
+    },
+    {
+      "id": "dribbble-hot-pink",
+      "name": "Dribbble热粉",
+      "nameEn": "Dribbble Hot Pink",
+      "description": "灵感来自Dribbble的热粉色，创意设计风格",
+      "category": "creative",
+      "preview": { "primary": "#EA4C89", "accent": "#ffe0ec", "background": "#ffffff", "surface": "#fdf5f8" },
+      "tags": ["creative", "design", "pink"],
+      "author": "OrigCMS",
+      "version": "1.0.0"
+    },
+    {
+      "id": "spotify-green",
+      "name": "Spotify翠绿",
+      "nameEn": "Spotify Green",
+      "description": "灵感来自Spotify的标志性绿色，清新自然",
+      "category": "creative",
+      "preview": { "primary": "#1DB954", "accent": "#d4f5e0", "background": "#ffffff", "surface": "#f2faf5" },
+      "tags": ["creative", "music", "green"],
+      "author": "OrigCMS",
+      "version": "1.0.0"
+    },
+    {
+      "id": "behance-blue",
+      "name": "Behance亮蓝",
+      "nameEn": "Behance Blue",
+      "description": "灵感来自Behance的亮蓝色，专业设计平台风格",
+      "category": "creative",
+      "preview": { "primary": "#0057FF", "accent": "#dce8ff", "background": "#ffffff", "surface": "#f5f7fc" },
+      "tags": ["creative", "design", "blue"],
+      "author": "OrigCMS",
+      "version": "1.0.0"
+    },
+    {
+      "id": "github-dark",
+      "name": "GitHub深灰",
+      "nameEn": "GitHub Dark",
+      "description": "灵感来自GitHub的深灰色，极简开发者风格",
+      "category": "minimal",
+      "preview": { "primary": "#4B5563", "accent": "#e5e7eb", "background": "#ffffff", "surface": "#f3f4f6" },
+      "tags": ["minimal", "developer", "gray"],
+      "author": "OrigCMS",
+      "version": "1.0.0"
+    },
+    {
+      "id": "linear-indigo",
+      "name": "Linear靛夜",
+      "nameEn": "Linear Indigo",
+      "description": "灵感来自Linear的靛蓝色，高效项目管理风格",
+      "category": "minimal",
+      "preview": { "primary": "#5E6AD2", "accent": "#e8eaff", "background": "#ffffff", "surface": "#f5f5fc" },
+      "tags": ["minimal", "productivity", "indigo"],
+      "author": "OrigCMS",
+      "version": "1.0.0"
+    },
+    {
+      "id": "vercel-dark",
+      "name": "Vercel暗夜",
+      "nameEn": "Vercel Dark",
+      "description": "灵感来自Vercel的极简黑白风格，高端大气",
+      "category": "minimal",
+      "preview": { "primary": "#FFFFFF", "accent": "#e0e0e0", "background": "#000000", "surface": "#111111" },
+      "tags": ["minimal", "developer", "monochrome"],
+      "author": "OrigCMS",
+      "version": "1.0.0"
+    },
+    {
+      "id": "auralis-nebula",
+      "name": "Auralis星云",
+      "nameEn": "Auralis Nebula",
+      "description": "基于Auralis设计规范，indigo/cyan渐变风格",
+      "category": "custom",
+      "preview": { "primary": "#818CF8", "accent": "#e0e7ff", "background": "#ffffff", "surface": "#f5f3ff" },
+      "tags": ["custom", "gradient", "indigo"],
+      "author": "OrigCMS",
+      "version": "1.0.0"
+    },
+    {
+      "id": "youtube-studio",
+      "name": "YouTube Studio",
+      "nameEn": "YouTube Studio",
+      "description": "YouTube Studio专业管理工具风格，深红配色",
+      "category": "custom",
+      "preview": { "primary": "#D93025", "accent": "#fce8e6", "background": "#ffffff", "surface": "#fef7f7" },
+      "tags": ["custom", "studio", "red"],
+      "author": "OrigCMS",
+      "version": "1.0.0"
+    }
+  ]
+}

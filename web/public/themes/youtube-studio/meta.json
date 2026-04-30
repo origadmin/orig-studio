@@ -1,0 +1,20 @@
+{
+  "id": "youtube-studio",
+  "name": "YouTube Studio",
+  "nameEn": "YouTube Studio",
+  "description": "YouTube Studio专业管理工具风格，深红配色",
+  "category": "custom",
+  "preview": {
+    "primary": "#D93025",
+    "accent": "#fce8e6",
+    "background": "#ffffff",
+    "surface": "#fef7f7"
+  },
+  "tags": [
+    "custom",
+    "studio",
+    "red"
+  ],
+  "author": "OrigCMS",
+  "version": "1.0.0"
+}

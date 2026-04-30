@@ -107,6 +107,15 @@ func ConvertCategoryPBToCategory(from *CategoryPB) *Category {
 		return nil
 	}
 
+	// miss: Thumbnail            // target struct [Category] has this field, but source struct [Category] has no corresponding field
+	// miss: ListingsThumbnail    // target struct [Category] has this field, but source struct [Category] has no corresponding field
+	// miss: IsGlobal             // target struct [Category] has this field, but source struct [Category] has no corresponding field
+	// miss: IsRbacCategory       // target struct [Category] has this field, but source struct [Category] has no corresponding field
+	// miss: IdentityProvider     // target struct [Category] has this field, but source struct [Category] has no corresponding field
+	// miss: UserID               // target struct [Category] has this field, but source struct [Category] has no corresponding field
+	// miss: CreatedAt            // target struct [Category] has this field, but source struct [Category] has no corresponding field
+	// miss: UpdatedAt            // target struct [Category] has this field, but source struct [Category] has no corresponding field
+	// miss: Edges                // target struct [Category] has this field, but source struct [Category] has no corresponding field
 	to := &Category{
 		ID:          from.Id,
 		Name:        from.Name,
@@ -128,6 +137,8 @@ func ConvertCategoryToCategoryPB(from *Category) *CategoryPB {
 		return nil
 	}
 
+	// miss: CreateTime           // target struct [Category] has this field, but source struct [Category] has no corresponding field
+	// miss: UpdateTime           // target struct [Category] has this field, but source struct [Category] has no corresponding field
 	to := &CategoryPB{
 		Id:          from.ID,
 		Name:        from.Name,
@@ -139,8 +150,6 @@ func ConvertCategoryToCategoryPB(from *Category) *CategoryPB {
 		Sequence:    int32(from.Sequence),
 		Status:      int32(from.Status),
 		MediaCount:  int64(from.MediaCount),
-		CreateTime:  ConvertTimeToTimestamp(from.CreatedAt),
-		UpdateTime:  ConvertTimeToTimestamp(from.UpdatedAt),
 	}
 	return to
 }
@@ -151,11 +160,15 @@ func ConvertChannelPBToChannel(from *ChannelPB) *Channel {
 		return nil
 	}
 
+	// miss: IsPublic             // target struct [Channel] has this field, but source struct [Channel] has no corresponding field
+	// miss: AddDate              // target struct [Channel] has this field, but source struct [Channel] has no corresponding field
+	// miss: Edges                // target struct [Channel] has this field, but source struct [Channel] has no corresponding field
 	to := &Channel{
 		ID:          from.Id,
 		UserID:      from.UserId,
 		Title:       from.Title,
 		Description: from.Description,
+		ShortToken:  from.ShortToken,
 		BannerLogo:  from.BannerLogo,
 	}
 	return to
@@ -167,12 +180,17 @@ func ConvertChannelToChannelPB(from *Channel) *ChannelPB {
 		return nil
 	}
 
+	// miss: CreateTime           // target struct [Channel] has this field, but source struct [Channel] has no corresponding field
+	// miss: UpdateTime           // target struct [Channel] has this field, but source struct [Channel] has no corresponding field
+	// miss: SubscriberCount      // target struct [Channel] has this field, but source struct [Channel] has no corresponding field
+	// miss: MediaCount           // target struct [Channel] has this field, but source struct [Channel] has no corresponding field
 	to := &ChannelPB{
 		Id:          from.ID,
 		Title:       from.Title,
 		Description: from.Description,
 		BannerLogo:  from.BannerLogo,
 		UserId:      from.UserID,
+		ShortToken:  from.ShortToken,
 	}
 	return to
 }
@@ -183,6 +201,12 @@ func ConvertCommentPBToComment(from *CommentPB) *Comment {
 		return nil
 	}
 
+	// miss: Text                 // target struct [Comment] has this field, but source struct [Comment] has no corresponding field
+	// miss: AddDate              // target struct [Comment] has this field, but source struct [Comment] has no corresponding field
+	// miss: ReportCount          // target struct [Comment] has this field, but source struct [Comment] has no corresponding field
+	// miss: ModeratedBy          // target struct [Comment] has this field, but source struct [Comment] has no corresponding field
+	// miss: ModeratedAt          // target struct [Comment] has this field, but source struct [Comment] has no corresponding field
+	// miss: Edges                // target struct [Comment] has this field, but source struct [Comment] has no corresponding field
 	to := &Comment{
 		ID:      from.Id,
 		MediaID: from.MediaId,
@@ -198,11 +222,16 @@ func ConvertCommentToCommentPB(from *Comment) *CommentPB {
 		return nil
 	}
 
+	// miss: CreateTime           // target struct [Comment] has this field, but source struct [Comment] has no corresponding field
+	// miss: UpdateTime           // target struct [Comment] has this field, but source struct [Comment] has no corresponding field
+	// miss: Content              // target struct [Comment] has this field, but source struct [Comment] has no corresponding field
+	// miss: ParentId             // target struct [Comment] has this field, but source struct [Comment] has no corresponding field
+	// miss: LikeCount            // target struct [Comment] has this field, but source struct [Comment] has no corresponding field
 	to := &CommentPB{
-		Id:     from.ID,
-		UserId: from.UserID,
+		Id:      from.ID,
+		UserId:  from.UserID,
 		MediaId: from.MediaID,
-		Status: ConvertCommentStatusToString(from.Status),
+		Status:  ConvertCommentStatusToString(from.Status),
 	}
 	return to
 }
@@ -213,6 +242,11 @@ func ConvertEncodeProfilePBToEncodeProfile(from *EncodeProfilePB) *EncodeProfile
 		return nil
 	}
 
+	// miss: VideoBitrate         // target struct [EncodeProfile] has this field, but source struct [EncodeProfile] has no corresponding field
+	// miss: AudioBitrate         // target struct [EncodeProfile] has this field, but source struct [EncodeProfile] has no corresponding field
+	// miss: BentoParameters      // target struct [EncodeProfile] has this field, but source struct [EncodeProfile] has no corresponding field
+	// miss: CreatedAt            // target struct [EncodeProfile] has this field, but source struct [EncodeProfile] has no corresponding field
+	// miss: UpdatedAt            // target struct [EncodeProfile] has this field, but source struct [EncodeProfile] has no corresponding field
 	to := &EncodeProfile{
 		ID:          int(from.Id),
 		Name:        from.Name,
@@ -251,6 +285,9 @@ func ConvertEncodingTaskPBToEncodingTask(from *EncodingTaskPB) *EncodingTask {
 		return nil
 	}
 
+	// miss: Chunk                // target struct [EncodingTask] has this field, but source struct [EncodingTask] has no corresponding field
+	// miss: CreatedAt            // target struct [EncodingTask] has this field, but source struct [EncodingTask] has no corresponding field
+	// miss: UpdatedAt            // target struct [EncodingTask] has this field, but source struct [EncodingTask] has no corresponding field
 	to := &EncodingTask{
 		ID:           from.Id,
 		MediaID:      from.MediaId,
@@ -268,6 +305,9 @@ func ConvertEncodingTaskToEncodingTaskPB(from *EncodingTask) *EncodingTaskPB {
 		return nil
 	}
 
+	// miss: Progress             // target struct [EncodingTask] has this field, but source struct [EncodingTask] has no corresponding field
+	// miss: CreateTime           // target struct [EncodingTask] has this field, but source struct [EncodingTask] has no corresponding field
+	// miss: UpdateTime           // target struct [EncodingTask] has this field, but source struct [EncodingTask] has no corresponding field
 	to := &EncodingTaskPB{
 		Id:           from.ID,
 		MediaId:      from.MediaID,
@@ -275,8 +315,6 @@ func ConvertEncodingTaskToEncodingTaskPB(from *EncodingTask) *EncodingTaskPB {
 		Status:       ConvertEnumsEncodingTaskStatusToString(from.Status),
 		OutputPath:   from.OutputPath,
 		ErrorMessage: from.ErrorMessage,
-		CreateTime:   ConvertTimeToTimestamp(from.CreatedAt),
-		UpdateTime:   ConvertTimeToTimestamp(from.UpdatedAt),
 	}
 	return to
 }
@@ -287,6 +325,8 @@ func ConvertFavoritePBToFavorite(from *FavoritePB) *Favorite {
 		return nil
 	}
 
+	// miss: CreatedAt            // target struct [Favorite] has this field, but source struct [Favorite] has no corresponding field
+	// miss: Edges                // target struct [Favorite] has this field, but source struct [Favorite] has no corresponding field
 	to := &Favorite{
 		ID:      from.Id,
 		MediaID: from.MediaId,
@@ -301,11 +341,12 @@ func ConvertFavoriteToFavoritePB(from *Favorite) *FavoritePB {
 		return nil
 	}
 
+	// miss: CreateTime           // target struct [Favorite] has this field, but source struct [Favorite] has no corresponding field
+	// miss: PlaylistId           // target struct [Favorite] has this field, but source struct [Favorite] has no corresponding field
 	to := &FavoritePB{
-		Id:         from.ID,
-		UserId:     from.UserID,
-		MediaId:    from.MediaID,
-		CreateTime: ConvertTimeToTimestamp(from.CreatedAt),
+		Id:      from.ID,
+		UserId:  from.UserID,
+		MediaId: from.MediaID,
 	}
 	return to
 }
@@ -316,6 +357,9 @@ func ConvertLikePBToLike(from *LikePB) *Like {
 		return nil
 	}
 
+	// miss: LikeType             // target struct [Like] has this field, but source struct [Like] has no corresponding field
+	// miss: CreatedAt            // target struct [Like] has this field, but source struct [Like] has no corresponding field
+	// miss: Edges                // target struct [Like] has this field, but source struct [Like] has no corresponding field
 	to := &Like{
 		ID:      from.Id,
 		MediaID: from.MediaId,
@@ -330,11 +374,12 @@ func ConvertLikeToLikePB(from *Like) *LikePB {
 		return nil
 	}
 
+	// miss: CreateTime           // target struct [Like] has this field, but source struct [Like] has no corresponding field
+	// miss: Type                 // target struct [Like] has this field, but source struct [Like] has no corresponding field
 	to := &LikePB{
-		Id:         from.ID,
-		UserId:     from.UserID,
-		MediaId:    from.MediaID,
-		CreateTime: ConvertTimeToTimestamp(from.CreatedAt),
+		Id:      from.ID,
+		UserId:  from.UserID,
+		MediaId: from.MediaID,
 	}
 	return to
 }
@@ -345,6 +390,13 @@ func ConvertMediaPBToMedia(from *MediaPB) *Media {
 		return nil
 	}
 
+	// miss: SpriteStatus         // target struct [Media] has this field, but source struct [Media] has no corresponding field
+	// miss: SpritePath           // target struct [Media] has this field, but source struct [Media] has no corresponding field
+	// miss: VttPath              // target struct [Media] has this field, but source struct [Media] has no corresponding field
+	// miss: ThumbnailTime        // target struct [Media] has this field, but source struct [Media] has no corresponding field
+	// miss: CreatedAt            // target struct [Media] has this field, but source struct [Media] has no corresponding field
+	// miss: UpdatedAt            // target struct [Media] has this field, but source struct [Media] has no corresponding field
+	// miss: Edges                // target struct [Media] has this field, but source struct [Media] has no corresponding field
 	to := &Media{
 		ID:              from.Id,
 		Title:           from.Title,
@@ -393,6 +445,12 @@ func ConvertMediaToMediaPB(from *Media) *MediaPB {
 		return nil
 	}
 
+	// miss: CreateTime           // target struct [Media] has this field, but source struct [Media] has no corresponding field
+	// miss: UpdateTime           // target struct [Media] has this field, but source struct [Media] has no corresponding field
+	// miss: Status               // target struct [Media] has this field, but source struct [Media] has no corresponding field
+	// miss: ShareCount           // target struct [Media] has this field, but source struct [Media] has no corresponding field
+	// miss: Uuid                 // target struct [Media] has this field, but source struct [Media] has no corresponding field
+	// miss: IsReviewed           // target struct [Media] has this field, but source struct [Media] has no corresponding field
 	to := &MediaPB{
 		Id:              from.ID,
 		Title:           from.Title,
@@ -422,8 +480,6 @@ func ConvertMediaToMediaPB(from *Media) *MediaPB {
 		State:           from.State,
 		ShortToken:      from.ShortToken,
 		PublishedAt:     ConvertTimeToTimestamp(from.PublishedAt),
-		CreateTime:      ConvertTimeToTimestamp(from.CreatedAt),
-		UpdateTime:      ConvertTimeToTimestamp(from.UpdatedAt),
 		AllowDownload:   from.AllowDownload,
 		EnableComments:  from.EnableComments,
 		Featured:        from.Featured,
@@ -446,6 +502,11 @@ func ConvertPlaylistPBToPlaylist(from *PlaylistPB) *Playlist {
 		return nil
 	}
 
+	// miss: Title                // target struct [Playlist] has this field, but source struct [Playlist] has no corresponding field
+	// miss: ShortToken           // target struct [Playlist] has this field, but source struct [Playlist] has no corresponding field
+	// miss: Privacy              // target struct [Playlist] has this field, but source struct [Playlist] has no corresponding field
+	// miss: AddDate              // target struct [Playlist] has this field, but source struct [Playlist] has no corresponding field
+	// miss: Edges                // target struct [Playlist] has this field, but source struct [Playlist] has no corresponding field
 	to := &Playlist{
 		ID:          from.Id,
 		Description: from.Description,
@@ -460,6 +521,13 @@ func ConvertPlaylistToPlaylistPB(from *Playlist) *PlaylistPB {
 		return nil
 	}
 
+	// miss: CreateTime           // target struct [Playlist] has this field, but source struct [Playlist] has no corresponding field
+	// miss: UpdateTime           // target struct [Playlist] has this field, but source struct [Playlist] has no corresponding field
+	// miss: Name                 // target struct [Playlist] has this field, but source struct [Playlist] has no corresponding field
+	// miss: Thumbnail            // target struct [Playlist] has this field, but source struct [Playlist] has no corresponding field
+	// miss: IsPublic             // target struct [Playlist] has this field, but source struct [Playlist] has no corresponding field
+	// miss: Status               // target struct [Playlist] has this field, but source struct [Playlist] has no corresponding field
+	// miss: MediaCount           // target struct [Playlist] has this field, but source struct [Playlist] has no corresponding field
 	to := &PlaylistPB{
 		Id:          from.ID,
 		Description: from.Description,
@@ -474,8 +542,12 @@ func ConvertTagPBToTag(from *TagPB) *Tag {
 		return nil
 	}
 
+	// miss: Title                // target struct [Tag] has this field, but source struct [Tag] has no corresponding field
+	// miss: ListingsThumbnail    // target struct [Tag] has this field, but source struct [Tag] has no corresponding field
+	// miss: Edges                // target struct [Tag] has this field, but source struct [Tag] has no corresponding field
 	to := &Tag{
 		ID:         int(from.Id),
+		Slug:       from.Slug,
 		MediaCount: int(from.MediaCount),
 	}
 	return to
@@ -487,8 +559,15 @@ func ConvertTagToTagPB(from *Tag) *TagPB {
 		return nil
 	}
 
+	// miss: CreateTime           // target struct [Tag] has this field, but source struct [Tag] has no corresponding field
+	// miss: UpdateTime           // target struct [Tag] has this field, but source struct [Tag] has no corresponding field
+	// miss: Name                 // target struct [Tag] has this field, but source struct [Tag] has no corresponding field
+	// miss: Description          // target struct [Tag] has this field, but source struct [Tag] has no corresponding field
+	// miss: Color                // target struct [Tag] has this field, but source struct [Tag] has no corresponding field
+	// miss: Status               // target struct [Tag] has this field, but source struct [Tag] has no corresponding field
 	to := &TagPB{
 		Id:         int64(from.ID),
+		Slug:       from.Slug,
 		MediaCount: int64(from.MediaCount),
 	}
 	return to
@@ -500,11 +579,32 @@ func ConvertUserPBToUser(from *UserPB) *User {
 		return nil
 	}
 
+	// miss: Name                 // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: FirstName            // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: LastName             // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: Role                 // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: IsApproved           // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: IsFeatured           // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: AdvancedUser         // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: IsEditor             // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: IsManager            // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: Title                // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: Description          // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: Logo                 // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: Location             // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: MediaCount           // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: NotificationOnComments // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: AllowContact         // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: DateJoined           // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: DateAdded            // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: LastLogin            // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: Edges                // target struct [User] has this field, but source struct [User] has no corresponding field
 	to := &User{
 		ID:          from.Id,
 		Username:    from.Username,
 		Email:       from.Email,
 		Password:    from.Password,
+		Slug:        from.Slug,
 		IsActive:    from.IsActive,
 		IsStaff:     from.IsStaff,
 		IsSuperuser: from.IsSuperuser,
@@ -518,6 +618,22 @@ func ConvertUserToUserPB(from *User) *UserPB {
 		return nil
 	}
 
+	// miss: CreateAuthor         // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: UpdateAuthor         // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: CreateTime           // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: UpdateTime           // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: Uuid                 // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: Nickname             // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: Phone                // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: Avatar               // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: Status               // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: LastLoginIp          // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: LoginIp              // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: LastLoginTime        // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: LoginTime            // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: Profile              // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: Setting              // target struct [User] has this field, but source struct [User] has no corresponding field
+	// miss: Roles                // target struct [User] has this field, but source struct [User] has no corresponding field
 	to := &UserPB{
 		Id:          from.ID,
 		Username:    from.Username,
@@ -526,6 +642,7 @@ func ConvertUserToUserPB(from *User) *UserPB {
 		IsSuperuser: from.IsSuperuser,
 		IsStaff:     from.IsStaff,
 		IsActive:    from.IsActive,
+		Slug:        from.Slug,
 	}
 	return to
 }

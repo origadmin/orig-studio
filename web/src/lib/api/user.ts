@@ -9,7 +9,9 @@ export interface User {
     role: string;
     status: string;
     created_at: string;
+    create_time?: string;
     updated_at?: string;
+    update_time?: string;
 }
 
 export interface UserListResponse {

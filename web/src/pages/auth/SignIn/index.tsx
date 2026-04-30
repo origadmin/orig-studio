@@ -1,6 +1,6 @@
-﻿// SignIn 登录页面 - 使用 shadcn/ui 组件
+// SignIn page - uses shadcn/ui components
 import {useState} from "react";
-import {useNavigate, Link} from "@tanstack/react-router";
+import {useNavigate, useSearch, Link} from "@tanstack/react-router";
 import {api, setAuth} from "@/lib/request";
 import {useAuth} from "@/hooks/useAuth";
 import {Button} from "@/components/ui/button";
@@ -28,6 +28,9 @@ export default function SignInPage() {
     const navigate = useNavigate();
     const {login} = useAuth();
 
+    // Read redirect param from search params (set by _authenticated layout route)
+    const search = useSearch({strict: false}) as { redirect?: string };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
@@ -47,9 +50,17 @@ export default function SignInPage() {
                 displayName: res.user.nickname || res.user.username,
                 roles: res.user.is_staff ? ["admin"] : ["user"],
             });
-            navigate({to: "/"});
+
+            // Navigate to redirect target or home page
+            // Security: only allow internal paths (starting with /)
+            const redirectUrl = search.redirect;
+            if (redirectUrl && redirectUrl.startsWith('/')) {
+                navigate({to: redirectUrl});
+            } else {
+                navigate({to: "/"});
+            }
         } catch (err) {
-            setError(err instanceof Error ? err.message : "登录失败");
+            setError(err instanceof Error ? err.message : "Login failed");
         } finally {
             setLoading(false);
         }
@@ -57,7 +68,7 @@ export default function SignInPage() {
 
     return (
         <div className="min-h-screen flex">
-            {/* 左侧背景 */}
+            {/* Left background panel */}
             <div
                 className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex-col justify-between p-12">
                 <div className="flex items-center gap-2 text-white">
@@ -70,10 +81,10 @@ export default function SignInPage() {
                 <blockquote className="text-white/90 text-xl italic">
                     "A powerful content management system that helps you manage your media and content with ease."
                 </blockquote>
-                <div className="text-white/40 text-sm">© 2026 OrigCMS. All rights reserved.</div>
+                <div className="text-white/40 text-sm">&copy; 2026 OrigCMS. All rights reserved.</div>
             </div>
 
-            {/* 右侧表单 */}
+            {/* Right form panel */}
             <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
                 <Card className="w-full max-w-md">
                     <CardHeader>

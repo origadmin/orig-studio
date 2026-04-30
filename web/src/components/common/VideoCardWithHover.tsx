@@ -119,7 +119,7 @@ const VideoCardWithHover: React.FC<VideoCardWithHoverProps> = ({video}) => {
                     </span>
                     <span className="flex items-center gap-1">
                         <Clock size={12}/>
-                        {formatDate(video.published_at || video.create_time)}
+                        {formatDate(video.published_at || video.create_time || video.created_at)}
                     </span>
                 </div>
             </div>

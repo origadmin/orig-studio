@@ -15,10 +15,26 @@ export interface Media {
     view_count?: number;
     likes?: number;
     created_at?: string;
+    create_time?: string;
     type?: string;
     size?: string;
     user_id?: string;
     channel_id?: string;
+    // Flat edge fields (proto-based API returns these at top level)
+    user?: {
+        id: string;
+        username: string;
+        nickname?: string;
+    };
+    category?: {
+        id: number;
+        name: string;
+    };
+    channel?: {
+        id: string;
+        name: string;
+    };
+    // Nested edges structure (used by frontend components)
     edges?: {
         user?: Array<{
             id: string;
@@ -29,6 +45,10 @@ export interface Media {
             id: number;
             name: string;
         };
+        channels?: Array<{
+            id: string;
+            name: string;
+        }>;
     };
     encoding_status?: string;
     short_token?: string;

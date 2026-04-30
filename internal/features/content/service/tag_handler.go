@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/internal/infra/auth"
+	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/server"
 	"origadmin/application/origcms/internal/features/content/biz"
 )
@@ -125,6 +126,8 @@ func (h *TagHandler) listTags() http.HandlerFunc {
 		if limit == 0 {
 			limit = 100
 		}
+		// Normalize pagination parameters
+		page, limit = repo.NormalizeHTTPPagination(page, limit)
 		items, total, err := h.uc.ListTags(r.Context(), page, limit)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"code": server.ErrInternal, "message": err.Error()})
