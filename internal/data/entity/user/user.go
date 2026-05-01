@@ -29,16 +29,14 @@ const (
 	FieldFirstName = "first_name"
 	// FieldLastName holds the string denoting the last_name field in the database.
 	FieldLastName = "last_name"
-	// FieldIsActive holds the string denoting the is_active field in the database.
-	FieldIsActive = "is_active"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 	// FieldIsStaff holds the string denoting the is_staff field in the database.
 	FieldIsStaff = "is_staff"
 	// FieldRole holds the string denoting the role field in the database.
 	FieldRole = "role"
 	// FieldIsSuperuser holds the string denoting the is_superuser field in the database.
 	FieldIsSuperuser = "is_superuser"
-	// FieldIsApproved holds the string denoting the is_approved field in the database.
-	FieldIsApproved = "is_approved"
 	// FieldIsFeatured holds the string denoting the is_featured field in the database.
 	FieldIsFeatured = "is_featured"
 	// FieldAdvancedUser holds the string denoting the advanced_user field in the database.
@@ -67,6 +65,28 @@ const (
 	FieldDateAdded = "date_added"
 	// FieldLastLogin holds the string denoting the last_login field in the database.
 	FieldLastLogin = "last_login"
+	// FieldNickname holds the string denoting the nickname field in the database.
+	FieldNickname = "nickname"
+	// FieldPhone holds the string denoting the phone field in the database.
+	FieldPhone = "phone"
+	// FieldAvatar holds the string denoting the avatar field in the database.
+	FieldAvatar = "avatar"
+	// FieldLastLoginIP holds the string denoting the last_login_ip field in the database.
+	FieldLastLoginIP = "last_login_ip"
+	// FieldLoginIP holds the string denoting the login_ip field in the database.
+	FieldLoginIP = "login_ip"
+	// FieldLastLoginTime holds the string denoting the last_login_time field in the database.
+	FieldLastLoginTime = "last_login_time"
+	// FieldLoginTime holds the string denoting the login_time field in the database.
+	FieldLoginTime = "login_time"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
+	// FieldUpdateTime holds the string denoting the update_time field in the database.
+	FieldUpdateTime = "update_time"
+	// FieldCreateAuthor holds the string denoting the create_author field in the database.
+	FieldCreateAuthor = "create_author"
+	// FieldUpdateAuthor holds the string denoting the update_author field in the database.
+	FieldUpdateAuthor = "update_author"
 	// EdgeMedia holds the string denoting the media edge name in mutations.
 	EdgeMedia = "media"
 	// EdgeArticles holds the string denoting the articles edge name in mutations.
@@ -237,11 +257,10 @@ var Columns = []string{
 	FieldSlug,
 	FieldFirstName,
 	FieldLastName,
-	FieldIsActive,
+	FieldStatus,
 	FieldIsStaff,
 	FieldRole,
 	FieldIsSuperuser,
-	FieldIsApproved,
 	FieldIsFeatured,
 	FieldAdvancedUser,
 	FieldIsEditor,
@@ -256,6 +275,17 @@ var Columns = []string{
 	FieldDateJoined,
 	FieldDateAdded,
 	FieldLastLogin,
+	FieldNickname,
+	FieldPhone,
+	FieldAvatar,
+	FieldLastLoginIP,
+	FieldLoginIP,
+	FieldLastLoginTime,
+	FieldLoginTime,
+	FieldCreateTime,
+	FieldUpdateTime,
+	FieldCreateAuthor,
+	FieldUpdateAuthor,
 }
 
 var (
@@ -295,8 +325,6 @@ var (
 	FirstNameValidator func(string) error
 	// LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
 	LastNameValidator func(string) error
-	// DefaultIsActive holds the default value on creation for the "is_active" field.
-	DefaultIsActive bool
 	// DefaultIsStaff holds the default value on creation for the "is_staff" field.
 	DefaultIsStaff bool
 	// DefaultIsSuperuser holds the default value on creation for the "is_superuser" field.
@@ -325,11 +353,60 @@ var (
 	DefaultDateJoined func() time.Time
 	// DefaultDateAdded holds the default value on creation for the "date_added" field.
 	DefaultDateAdded func() time.Time
+	// NicknameValidator is a validator for the "nickname" field. It is called by the builders before save.
+	NicknameValidator func(string) error
+	// PhoneValidator is a validator for the "phone" field. It is called by the builders before save.
+	PhoneValidator func(string) error
+	// AvatarValidator is a validator for the "avatar" field. It is called by the builders before save.
+	AvatarValidator func(string) error
+	// LastLoginIPValidator is a validator for the "last_login_ip" field. It is called by the builders before save.
+	LastLoginIPValidator func(string) error
+	// LoginIPValidator is a validator for the "login_ip" field. It is called by the builders before save.
+	LoginIPValidator func(string) error
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
+	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
+	DefaultUpdateTime func() time.Time
+	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
+	UpdateDefaultUpdateTime func() time.Time
+	// DefaultCreateAuthor holds the default value on creation for the "create_author" field.
+	DefaultCreateAuthor string
+	// DefaultUpdateAuthor holds the default value on creation for the "update_author" field.
+	DefaultUpdateAuthor string
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
+
+// Status defines the type for the "status" enum field.
+type Status string
+
+// StatusACTIVE is the default value of the Status enum.
+const DefaultStatus = StatusACTIVE
+
+// Status values.
+const (
+	StatusPENDING   Status = "PENDING"
+	StatusACTIVE    Status = "ACTIVE"
+	StatusINACTIVE  Status = "INACTIVE"
+	StatusSUSPENDED Status = "SUSPENDED"
+	StatusREJECTED  Status = "REJECTED"
+)
+
+func (s Status) String() string {
+	return string(s)
+}
+
+// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
+func StatusValidator(s Status) error {
+	switch s {
+	case StatusPENDING, StatusACTIVE, StatusINACTIVE, StatusSUSPENDED, StatusREJECTED:
+		return nil
+	default:
+		return fmt.Errorf("user: invalid enum value for status field: %q", s)
+	}
+}
 
 // Role defines the type for the "role" enum field.
 type Role string
@@ -401,9 +478,9 @@ func ByLastName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastName, opts...).ToFunc()
 }
 
-// ByIsActive orders the results by the is_active field.
-func ByIsActive(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIsActive, opts...).ToFunc()
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
 }
 
 // ByIsStaff orders the results by the is_staff field.
@@ -419,11 +496,6 @@ func ByRole(opts ...sql.OrderTermOption) OrderOption {
 // ByIsSuperuser orders the results by the is_superuser field.
 func ByIsSuperuser(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsSuperuser, opts...).ToFunc()
-}
-
-// ByIsApproved orders the results by the is_approved field.
-func ByIsApproved(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIsApproved, opts...).ToFunc()
 }
 
 // ByIsFeatured orders the results by the is_featured field.
@@ -494,6 +566,61 @@ func ByDateAdded(opts ...sql.OrderTermOption) OrderOption {
 // ByLastLogin orders the results by the last_login field.
 func ByLastLogin(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastLogin, opts...).ToFunc()
+}
+
+// ByNickname orders the results by the nickname field.
+func ByNickname(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNickname, opts...).ToFunc()
+}
+
+// ByPhone orders the results by the phone field.
+func ByPhone(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPhone, opts...).ToFunc()
+}
+
+// ByAvatar orders the results by the avatar field.
+func ByAvatar(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAvatar, opts...).ToFunc()
+}
+
+// ByLastLoginIP orders the results by the last_login_ip field.
+func ByLastLoginIP(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastLoginIP, opts...).ToFunc()
+}
+
+// ByLoginIP orders the results by the login_ip field.
+func ByLoginIP(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLoginIP, opts...).ToFunc()
+}
+
+// ByLastLoginTime orders the results by the last_login_time field.
+func ByLastLoginTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastLoginTime, opts...).ToFunc()
+}
+
+// ByLoginTime orders the results by the login_time field.
+func ByLoginTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLoginTime, opts...).ToFunc()
+}
+
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
+}
+
+// ByUpdateTime orders the results by the update_time field.
+func ByUpdateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdateTime, opts...).ToFunc()
+}
+
+// ByCreateAuthor orders the results by the create_author field.
+func ByCreateAuthor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateAuthor, opts...).ToFunc()
+}
+
+// ByUpdateAuthor orders the results by the update_author field.
+func ByUpdateAuthor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdateAuthor, opts...).ToFunc()
 }
 
 // ByMediaCount orders the results by media count.

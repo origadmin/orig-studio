@@ -31,10 +31,10 @@ type PermissionGroup struct {
 	IsActive bool `json:"is_active,omitempty"`
 	// CreatedBy holds the value of the "created_by" field.
 	CreatedBy string `json:"created_by,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PermissionGroupQuery when eager-loading is set.
 	Edges        PermissionGroupEdges `json:"edges"`
@@ -83,7 +83,7 @@ func (*PermissionGroup) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case permissiongroup.FieldID, permissiongroup.FieldName, permissiongroup.FieldDescription, permissiongroup.FieldCreatedBy:
 			values[i] = new(sql.NullString)
-		case permissiongroup.FieldCreatedAt, permissiongroup.FieldUpdatedAt:
+		case permissiongroup.FieldCreateTime, permissiongroup.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -146,17 +146,17 @@ func (_m *PermissionGroup) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.CreatedBy = value.String
 			}
-		case permissiongroup.FieldCreatedAt:
+		case permissiongroup.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				_m.CreatedAt = value.Time
+				_m.CreateTime = value.Time
 			}
-		case permissiongroup.FieldUpdatedAt:
+		case permissiongroup.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				_m.UpdatedAt = value.Time
+				_m.UpdateTime = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -222,11 +222,11 @@ func (_m *PermissionGroup) String() string {
 	builder.WriteString("created_by=")
 	builder.WriteString(_m.CreatedBy)
 	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString("create_time=")
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString("update_time=")
+	builder.WriteString(_m.UpdateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

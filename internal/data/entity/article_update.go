@@ -9,6 +9,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
@@ -223,6 +224,46 @@ func (_u *ArticleUpdate) ClearCategoryID() *ArticleUpdate {
 	return _u
 }
 
+// SetMediaID sets the "media_id" field.
+func (_u *ArticleUpdate) SetMediaID(v string) *ArticleUpdate {
+	_u.mutation.SetMediaID(v)
+	return _u
+}
+
+// SetNillableMediaID sets the "media_id" field if the given value is not nil.
+func (_u *ArticleUpdate) SetNillableMediaID(v *string) *ArticleUpdate {
+	if v != nil {
+		_u.SetMediaID(*v)
+	}
+	return _u
+}
+
+// ClearMediaID clears the value of the "media_id" field.
+func (_u *ArticleUpdate) ClearMediaID() *ArticleUpdate {
+	_u.mutation.ClearMediaID()
+	return _u
+}
+
+// SetThumbnail sets the "thumbnail" field.
+func (_u *ArticleUpdate) SetThumbnail(v string) *ArticleUpdate {
+	_u.mutation.SetThumbnail(v)
+	return _u
+}
+
+// SetNillableThumbnail sets the "thumbnail" field if the given value is not nil.
+func (_u *ArticleUpdate) SetNillableThumbnail(v *string) *ArticleUpdate {
+	if v != nil {
+		_u.SetThumbnail(*v)
+	}
+	return _u
+}
+
+// ClearThumbnail clears the value of the "thumbnail" field.
+func (_u *ArticleUpdate) ClearThumbnail() *ArticleUpdate {
+	_u.mutation.ClearThumbnail()
+	return _u
+}
+
 // SetPublishedAt sets the "published_at" field.
 func (_u *ArticleUpdate) SetPublishedAt(v time.Time) *ArticleUpdate {
 	_u.mutation.SetPublishedAt(v)
@@ -243,23 +284,23 @@ func (_u *ArticleUpdate) ClearPublishedAt() *ArticleUpdate {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *ArticleUpdate) SetCreatedAt(v time.Time) *ArticleUpdate {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *ArticleUpdate) SetCreateTime(v time.Time) *ArticleUpdate {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *ArticleUpdate) SetNillableCreatedAt(v *time.Time) *ArticleUpdate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *ArticleUpdate) SetNillableCreateTime(v *time.Time) *ArticleUpdate {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *ArticleUpdate) SetUpdatedAt(v time.Time) *ArticleUpdate {
-	_u.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_u *ArticleUpdate) SetUpdateTime(v time.Time) *ArticleUpdate {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -271,6 +312,11 @@ func (_u *ArticleUpdate) SetUser(v *User) *ArticleUpdate {
 // SetCategory sets the "category" edge to the Category entity.
 func (_u *ArticleUpdate) SetCategory(v *Category) *ArticleUpdate {
 	return _u.SetCategoryID(v.ID)
+}
+
+// SetMedia sets the "media" edge to the Media entity.
+func (_u *ArticleUpdate) SetMedia(v *Media) *ArticleUpdate {
+	return _u.SetMediaID(v.ID)
 }
 
 // AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
@@ -302,6 +348,12 @@ func (_u *ArticleUpdate) ClearUser() *ArticleUpdate {
 // ClearCategory clears the "category" edge to the Category entity.
 func (_u *ArticleUpdate) ClearCategory() *ArticleUpdate {
 	_u.mutation.ClearCategory()
+	return _u
+}
+
+// ClearMedia clears the "media" edge to the Media entity.
+func (_u *ArticleUpdate) ClearMedia() *ArticleUpdate {
+	_u.mutation.ClearMedia()
 	return _u
 }
 
@@ -356,9 +408,9 @@ func (_u *ArticleUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *ArticleUpdate) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := article.UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := article.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -382,6 +434,16 @@ func (_u *ArticleUpdate) check() error {
 	if v, ok := _u.mutation.State(); ok {
 		if err := article.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`entity: validator failed for field "Article.state": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.MediaID(); ok {
+		if err := article.MediaIDValidator(v); err != nil {
+			return &ValidationError{Name: "media_id", err: fmt.Errorf(`entity: validator failed for field "Article.media_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Thumbnail(); ok {
+		if err := article.ThumbnailValidator(v); err != nil {
+			return &ValidationError{Name: "thumbnail", err: fmt.Errorf(`entity: validator failed for field "Article.thumbnail": %w`, err)}
 		}
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
@@ -455,17 +517,23 @@ func (_u *ArticleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.TagsCleared() {
 		_spec.ClearField(article.FieldTags, field.TypeJSON)
 	}
+	if value, ok := _u.mutation.Thumbnail(); ok {
+		_spec.SetField(article.FieldThumbnail, field.TypeString, value)
+	}
+	if _u.mutation.ThumbnailCleared() {
+		_spec.ClearField(article.FieldThumbnail, field.TypeString)
+	}
 	if value, ok := _u.mutation.PublishedAt(); ok {
 		_spec.SetField(article.FieldPublishedAt, field.TypeTime, value)
 	}
 	if _u.mutation.PublishedAtCleared() {
 		_spec.ClearField(article.FieldPublishedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(article.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(article.FieldCreateTime, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(article.FieldUpdatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(article.FieldUpdateTime, field.TypeTime, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -518,6 +586,35 @@ func (_u *ArticleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.MediaCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   article.MediaTable,
+			Columns: []string{article.MediaColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MediaIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   article.MediaTable,
+			Columns: []string{article.MediaColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -782,6 +879,46 @@ func (_u *ArticleUpdateOne) ClearCategoryID() *ArticleUpdateOne {
 	return _u
 }
 
+// SetMediaID sets the "media_id" field.
+func (_u *ArticleUpdateOne) SetMediaID(v string) *ArticleUpdateOne {
+	_u.mutation.SetMediaID(v)
+	return _u
+}
+
+// SetNillableMediaID sets the "media_id" field if the given value is not nil.
+func (_u *ArticleUpdateOne) SetNillableMediaID(v *string) *ArticleUpdateOne {
+	if v != nil {
+		_u.SetMediaID(*v)
+	}
+	return _u
+}
+
+// ClearMediaID clears the value of the "media_id" field.
+func (_u *ArticleUpdateOne) ClearMediaID() *ArticleUpdateOne {
+	_u.mutation.ClearMediaID()
+	return _u
+}
+
+// SetThumbnail sets the "thumbnail" field.
+func (_u *ArticleUpdateOne) SetThumbnail(v string) *ArticleUpdateOne {
+	_u.mutation.SetThumbnail(v)
+	return _u
+}
+
+// SetNillableThumbnail sets the "thumbnail" field if the given value is not nil.
+func (_u *ArticleUpdateOne) SetNillableThumbnail(v *string) *ArticleUpdateOne {
+	if v != nil {
+		_u.SetThumbnail(*v)
+	}
+	return _u
+}
+
+// ClearThumbnail clears the value of the "thumbnail" field.
+func (_u *ArticleUpdateOne) ClearThumbnail() *ArticleUpdateOne {
+	_u.mutation.ClearThumbnail()
+	return _u
+}
+
 // SetPublishedAt sets the "published_at" field.
 func (_u *ArticleUpdateOne) SetPublishedAt(v time.Time) *ArticleUpdateOne {
 	_u.mutation.SetPublishedAt(v)
@@ -802,23 +939,23 @@ func (_u *ArticleUpdateOne) ClearPublishedAt() *ArticleUpdateOne {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *ArticleUpdateOne) SetCreatedAt(v time.Time) *ArticleUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *ArticleUpdateOne) SetCreateTime(v time.Time) *ArticleUpdateOne {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *ArticleUpdateOne) SetNillableCreatedAt(v *time.Time) *ArticleUpdateOne {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *ArticleUpdateOne) SetNillableCreateTime(v *time.Time) *ArticleUpdateOne {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *ArticleUpdateOne) SetUpdatedAt(v time.Time) *ArticleUpdateOne {
-	_u.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_u *ArticleUpdateOne) SetUpdateTime(v time.Time) *ArticleUpdateOne {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -830,6 +967,11 @@ func (_u *ArticleUpdateOne) SetUser(v *User) *ArticleUpdateOne {
 // SetCategory sets the "category" edge to the Category entity.
 func (_u *ArticleUpdateOne) SetCategory(v *Category) *ArticleUpdateOne {
 	return _u.SetCategoryID(v.ID)
+}
+
+// SetMedia sets the "media" edge to the Media entity.
+func (_u *ArticleUpdateOne) SetMedia(v *Media) *ArticleUpdateOne {
+	return _u.SetMediaID(v.ID)
 }
 
 // AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
@@ -861,6 +1003,12 @@ func (_u *ArticleUpdateOne) ClearUser() *ArticleUpdateOne {
 // ClearCategory clears the "category" edge to the Category entity.
 func (_u *ArticleUpdateOne) ClearCategory() *ArticleUpdateOne {
 	_u.mutation.ClearCategory()
+	return _u
+}
+
+// ClearMedia clears the "media" edge to the Media entity.
+func (_u *ArticleUpdateOne) ClearMedia() *ArticleUpdateOne {
+	_u.mutation.ClearMedia()
 	return _u
 }
 
@@ -928,9 +1076,9 @@ func (_u *ArticleUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *ArticleUpdateOne) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := article.UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := article.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -954,6 +1102,16 @@ func (_u *ArticleUpdateOne) check() error {
 	if v, ok := _u.mutation.State(); ok {
 		if err := article.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`entity: validator failed for field "Article.state": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.MediaID(); ok {
+		if err := article.MediaIDValidator(v); err != nil {
+			return &ValidationError{Name: "media_id", err: fmt.Errorf(`entity: validator failed for field "Article.media_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Thumbnail(); ok {
+		if err := article.ThumbnailValidator(v); err != nil {
+			return &ValidationError{Name: "thumbnail", err: fmt.Errorf(`entity: validator failed for field "Article.thumbnail": %w`, err)}
 		}
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
@@ -1044,17 +1202,23 @@ func (_u *ArticleUpdateOne) sqlSave(ctx context.Context) (_node *Article, err er
 	if _u.mutation.TagsCleared() {
 		_spec.ClearField(article.FieldTags, field.TypeJSON)
 	}
+	if value, ok := _u.mutation.Thumbnail(); ok {
+		_spec.SetField(article.FieldThumbnail, field.TypeString, value)
+	}
+	if _u.mutation.ThumbnailCleared() {
+		_spec.ClearField(article.FieldThumbnail, field.TypeString)
+	}
 	if value, ok := _u.mutation.PublishedAt(); ok {
 		_spec.SetField(article.FieldPublishedAt, field.TypeTime, value)
 	}
 	if _u.mutation.PublishedAtCleared() {
 		_spec.ClearField(article.FieldPublishedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(article.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(article.FieldCreateTime, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(article.FieldUpdatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(article.FieldUpdateTime, field.TypeTime, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1107,6 +1271,35 @@ func (_u *ArticleUpdateOne) sqlSave(ctx context.Context) (_node *Article, err er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.MediaCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   article.MediaTable,
+			Columns: []string{article.MediaColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MediaIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   article.MediaTable,
+			Columns: []string{article.MediaColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

@@ -11,101 +11,84 @@ option java_outer_classname = "OrigCMSServiceTypeMediaProto";
 option java_package = "com.origcms.api.v1.services.types";
 option objc_class_prefix = "OrigCMS";
 
+// Privacy defines the visibility/access level for Media, Channel, and Playlist.
+enum Privacy {
+  PRIVACY_UNSPECIFIED = 0;
+  PRIVACY_PUBLIC = 1;
+  PRIVACY_PRIVATE = 2;
+  PRIVACY_UNLISTED = 3;
+  PRIVACY_PAID = 4;
+  PRIVACY_SUBSCRIBERS_ONLY = 5;
+}
+
+// TagStatus defines the status of a Tag.
+enum TagStatus {
+  TAG_STATUS_UNSPECIFIED = 0;
+  TAG_STATUS_INACTIVE = 1;
+  TAG_STATUS_ACTIVE = 2;
+}
+
+// PlaylistStatus defines the status of a Playlist.
+enum PlaylistStatus {
+  PLAYLIST_STATUS_UNSPECIFIED = 0;
+  PLAYLIST_STATUS_ACTIVE = 1;
+  PLAYLIST_STATUS_INACTIVE = 2;
+  PLAYLIST_STATUS_DRAFT = 3;
+  PLAYLIST_STATUS_ARCHIVED = 4;
+}
+
 // Media is the model entity for Media.
 message Media {
-  // ID of the ent.
   string id = 1 [json_name = "id"];
-  // create_time.field.comment
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
-  // update_time.field.comment
   google.protobuf.Timestamp update_time = 3 [json_name = "update_time"];
-  // media.field.title
   string title = 4 [json_name = "title"];
-  // media.field.description
   string description = 5 [json_name = "description"];
-  // media.field.type
   string type = 6 [json_name = "type"];
-  // media.field.url
   string url = 7 [json_name = "url"];
-  // media.field.thumbnail
   string thumbnail = 8 [json_name = "thumbnail"];
-  // media.field.duration
   int32 duration = 9 [json_name = "duration"];
-  // media.field.size
   int64 size = 10 [json_name = "size"];
-  // media.field.width
   int32 width = 11 [json_name = "width"];
-  // media.field.height
   int32 height = 12 [json_name = "height"];
-  // media.field.mime_type
   string mime_type = 13 [json_name = "mime_type"];
-  // media.field.privacy
-  int32 privacy = 14 [json_name = "privacy"];
-  // media.field.status
-  int32 status = 15 [json_name = "status"];
-  // media.field.view_count
+  Privacy privacy = 14 [json_name = "privacy"];
+  string state = 15 [json_name = "state"];
   int64 view_count = 16 [json_name = "view_count"];
-  // media.field.like_count
   int64 like_count = 17 [json_name = "like_count"];
-  // media.field.dislike_count
   int64 dislike_count = 18 [json_name = "dislike_count"];
-  // media.field.comment_count
   int64 comment_count = 19 [json_name = "comment_count"];
-  // media.field.favorite_count
   int64 favorite_count = 20 [json_name = "favorite_count"];
-  // media.field.share_count
   int64 share_count = 21 [json_name = "share_count"];
-  // media.field.download_count
   int64 download_count = 22 [json_name = "download_count"];
-  // media.field.user_id
   string user_id = 23 [json_name = "user_id"];
-  // media.field.channel_id
-  string channel_id = 44 [json_name = "channel_id"];
-  // media.field.category_id
   int64 category_id = 24 [json_name = "category_id"];
-  // media.field.tags
   repeated string tags = 25 [json_name = "tags"];
-  // media.field.hls_file
   string hls_file = 26 [json_name = "hls_file"];
-  // media.field.encoding_status
   string encoding_status = 27 [json_name = "encoding_status"];
-  // media.field.uuid — secure unique ID for public paths (HLS, thumbnails, previews)
   string uuid = 28 [json_name = "uuid"];
-  // media.field.preview_file_path — path to GIF preview generated during transcoding
   string preview_file_path = 29 [json_name = "preview_file_path"];
-  // media.field.state — publication state: draft, active, deleted
-  string state = 30 [json_name = "state"];
-  // media.field.short_token — URL-friendly token for public access
   string short_token = 43 [json_name = "short_token"];
-  // media.field.published_at
   google.protobuf.Timestamp published_at = 32 [json_name = "published_at"];
-  // media.field.allow_download
   bool allow_download = 33 [json_name = "allow_download"];
-  // media.field.enable_comments
   bool enable_comments = 34 [json_name = "enable_comments"];
-  // media.field.featured
   bool featured = 35 [json_name = "featured"];
-  // media.field.is_reviewed — DEPRECATED: use review_status instead
-  bool is_reviewed = 36 [json_name = "is_reviewed", deprecated = true];
-  // media.field.reported_times
   int32 reported_times = 37 [json_name = "reported_times"];
-  // media.field.extension
   string extension = 38 [json_name = "extension"];
-  // media.field.md5sum
   string md5sum = 39 [json_name = "md5sum"];
-  // media.field.poster
   string poster = 40 [json_name = "poster"];
-  // media.field.review_status
   string review_status = 41 [json_name = "review_status"];
-  // media.field.listable
   bool listable = 42 [json_name = "listable"];
+  string channel_id = 44 [json_name = "channel_id"];
+  string sprite_status = 45 [json_name = "sprite_status"];
+  string sprite_path = 46 [json_name = "sprite_path"];
+  string vtt_path = 47 [json_name = "vtt_path"];
+  double thumbnail_time = 48 [json_name = "thumbnail_time"];
+  string create_author = 49 [json_name = "create_author"];
+  string update_author = 53 [json_name = "update_author"];
 
-  // Edge fields - abgen auto-matches entity.Media.Edges.Xxx
-  // User holds the value of the user edge.
   User user = 50 [json_name = "user"];
-  // Category holds the value of the category edge.
   Category category = 51 [json_name = "category"];
-  // Channel holds the value of the channel edge.
   Channel channel = 52 [json_name = "channel"];
 }
 
@@ -117,8 +100,13 @@ message EncodeProfile {
   string extension = 4 [json_name = "extension"];
   string resolution = 5 [json_name = "resolution"];
   string video_codec = 6 [json_name = "video_codec"];
-  string audio_codec = 7 [json_name = "audio_codec"];
-  bool is_active = 8 [json_name = "is_active"];
+  string video_bitrate = 7 [json_name = "video_bitrate"];
+  string audio_codec = 8 [json_name = "audio_codec"];
+  string audio_bitrate = 9 [json_name = "audio_bitrate"];
+  string bento_parameters = 10 [json_name = "bento_parameters"];
+  bool is_active = 11 [json_name = "is_active"];
+  google.protobuf.Timestamp create_time = 12 [json_name = "create_time"];
+  google.protobuf.Timestamp update_time = 13 [json_name = "update_time"];
 }
 
 // EncodingTask is the model entity for EncodingTask.
@@ -130,258 +118,174 @@ message EncodingTask {
   int32 progress = 5 [json_name = "progress"];
   string output_path = 6 [json_name = "output_path"];
   string error_message = 7 [json_name = "error_message"];
-  google.protobuf.Timestamp create_time = 8 [json_name = "create_time"];
-  google.protobuf.Timestamp update_time = 9 [json_name = "update_time"];
+  bool chunk = 8 [json_name = "chunk"];
+  google.protobuf.Timestamp create_time = 9 [json_name = "create_time"];
+  google.protobuf.Timestamp update_time = 10 [json_name = "update_time"];
 }
 
 // Category is the model entity for Category.
 message Category {
-  // ID of the ent.
   int64 id = 1 [json_name = "id"];
-  // create_time.field.comment
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
-  // update_time.field.comment
   google.protobuf.Timestamp update_time = 3 [json_name = "update_time"];
-  // category.field.name
   string name = 4 [json_name = "name"];
-  // category.field.slug
   string slug = 5 [json_name = "slug"];
-  // category.field.description
   string description = 6 [json_name = "description"];
-  // category.field.icon
-  string icon = 7 [json_name = "icon"];
-  // category.field.color
-  string color = 8 [json_name = "color"];
-  // category.field.parent_id
-  int64 parent_id = 9 [json_name = "parent_id"];
-  // category.field.sequence
-  int32 sequence = 10 [json_name = "sequence"];
-  // category.field.status
-  int32 status = 11 [json_name = "status"];
-  // category.field.media_count
-  int64 media_count = 12 [json_name = "media_count"];
+  string thumbnail = 7 [json_name = "thumbnail"];
+  string listings_thumbnail = 8 [json_name = "listings_thumbnail"];
+  string icon = 9 [json_name = "icon"];
+  string color = 10 [json_name = "color"];
+  int64 parent_id = 11 [json_name = "parent_id"];
+  int32 sequence = 12 [json_name = "sequence"];
+  int32 status = 13 [json_name = "status"];
+  int64 media_count = 14 [json_name = "media_count"];
+  bool is_global = 15 [json_name = "is_global"];
+  bool is_rbac_category = 16 [json_name = "is_rbac_category"];
+  string identity_provider = 17 [json_name = "identity_provider"];
+  string user_id = 18 [json_name = "user_id"];
 }
 
 // Tag is the model entity for Tag.
 message Tag {
-  // ID of the ent.
   int64 id = 1 [json_name = "id"];
-  // create_time.field.comment
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
-  // update_time.field.comment
   google.protobuf.Timestamp update_time = 3 [json_name = "update_time"];
-  // tag.field.name
   string name = 4 [json_name = "name"];
-  // tag.field.slug
   string slug = 5 [json_name = "slug"];
-  // tag.field.description
   string description = 6 [json_name = "description"];
-  // tag.field.color
   string color = 7 [json_name = "color"];
-  // tag.field.status
-  int32 status = 8 [json_name = "status"];
-  // tag.field.media_count
+  TagStatus status = 8 [json_name = "status"];
   int64 media_count = 9 [json_name = "media_count"];
+  string listings_thumbnail = 10 [json_name = "listings_thumbnail"];
 }
 
 // Comment is the model entity for Comment.
 message Comment {
-  // ID of the ent.
   string id = 1 [json_name = "id"];
-  // create_time.field.comment
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
-  // update_time.field.comment
   google.protobuf.Timestamp update_time = 3 [json_name = "update_time"];
-  // comment.field.content
   string content = 4 [json_name = "content"];
-  // comment.field.user_id
   string user_id = 5 [json_name = "user_id"];
-  // comment.field.media_id
   string media_id = 6 [json_name = "media_id"];
-  // comment.field.parent_id
   string parent_id = 7 [json_name = "parent_id"];
-  // comment.field.like_count
   int64 like_count = 8 [json_name = "like_count"];
-  // comment.field.status
   string status = 9 [json_name = "status"];
+  int32 report_count = 10 [json_name = "report_count"];
+  string moderated_by = 11 [json_name = "moderated_by"];
+  google.protobuf.Timestamp moderated_at = 12 [json_name = "moderated_at"];
+  google.protobuf.Timestamp add_date = 13 [json_name = "add_date"];
 }
 
 // Like is the model entity for Like.
 message Like {
-  // ID of the ent.
   string id = 1 [json_name = "id"];
-  // create_time.field.comment
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
-  // like.field.user_id
   string user_id = 3 [json_name = "user_id"];
-  // like.field.media_id
   string media_id = 4 [json_name = "media_id"];
-  // like.field.type
   string type = 5 [json_name = "type"];
 }
 
 // Favorite is the model entity for Favorite.
 message Favorite {
-  // ID of the ent.
   string id = 1 [json_name = "id"];
-  // create_time.field.comment
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
-  // favorite.field.user_id
   string user_id = 3 [json_name = "user_id"];
-  // favorite.field.media_id
   string media_id = 4 [json_name = "media_id"];
-  // favorite.field.playlist_id
   string playlist_id = 5 [json_name = "playlist_id"];
 }
 
 // Playlist is the model entity for Playlist.
 message Playlist {
-  // ID of the ent.
   string id = 1 [json_name = "id"];
-  // create_time.field.comment
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
-  // update_time.field.comment
   google.protobuf.Timestamp update_time = 3 [json_name = "update_time"];
-  // playlist.field.name
-  string name = 4 [json_name = "name"];
-  // playlist.field.description
+  string title = 4 [json_name = "title"];
   string description = 5 [json_name = "description"];
-  // playlist.field.thumbnail
   string thumbnail = 6 [json_name = "thumbnail"];
-  // playlist.field.user_id
   string user_id = 7 [json_name = "user_id"];
-  // playlist.field.is_public
-  bool is_public = 8 [json_name = "is_public"];
-  // playlist.field.status
-  int32 status = 9 [json_name = "status"];
-  // playlist.field.media_count
+  Privacy privacy = 8 [json_name = "privacy"];
+  PlaylistStatus status = 9 [json_name = "status"];
   int64 media_count = 10 [json_name = "media_count"];
+  string short_token = 11 [json_name = "short_token"];
+  google.protobuf.Timestamp add_date = 12 [json_name = "add_date"];
 }
 
 // Channel is the model entity for Channel.
 message Channel {
-  // ID of the ent.
   string id = 1 [json_name = "id"];
-  // create_time.field.comment
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
-  // update_time.field.comment
   google.protobuf.Timestamp update_time = 3 [json_name = "update_time"];
-  // channel.field.title
   string title = 4 [json_name = "title"];
-  // channel.field.description
   string description = 5 [json_name = "description"];
-  // channel.field.banner_logo
   string banner_logo = 6 [json_name = "banner_logo"];
-  // channel.field.user_id
   string user_id = 7 [json_name = "user_id"];
-  // channel.field.short_token — URL-friendly token for public access
-  string short_token = 11 [json_name = "short_token"];
-  // channel.field.subscriber_count
+  Privacy privacy = 8 [json_name = "privacy"];
   int64 subscriber_count = 9 [json_name = "subscriber_count"];
-  // channel.field.media_count
   int64 media_count = 10 [json_name = "media_count"];
+  string short_token = 11 [json_name = "short_token"];
+  google.protobuf.Timestamp add_date = 12 [json_name = "add_date"];
 }
 
 // Subtitle is the model entity for Subtitle.
 message Subtitle {
-  // ID of the ent.
   string id = 1 [json_name = "id"];
-  // create_time.field.comment
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
-  // subtitle.field.media_id
   string media_id = 3 [json_name = "media_id"];
-  // subtitle.field.language
   string language = 4 [json_name = "language"];
-  // subtitle.field.file_url
   string file_url = 5 [json_name = "file_url"];
-  // subtitle.field.label
   string label = 6 [json_name = "label"];
 }
 
 // MediaVariant is the model entity for MediaVariant (encoding output).
 message MediaVariant {
-  // ID of the ent.
   string id = 1 [json_name = "id"];
-  // media_variant.field.media_id
   string media_id = 2 [json_name = "media_id"];
-  // media_variant.field.profile_id
   string profile_id = 3 [json_name = "profile_id"];
-  // media_variant.field.resolution
   string resolution = 4 [json_name = "resolution"];
-  // media_variant.field.url
   string url = 5 [json_name = "url"];
-  // media_variant.field.size
   int64 size = 6 [json_name = "size"];
-  // media_variant.field.status
   string status = 7 [json_name = "status"];
 }
 
 // MediaMetadata is the model entity for MediaMetadata.
 message MediaMetadata {
-  // ID of the ent.
   string id = 1 [json_name = "id"];
-  // media_metadata.field.media_id
   string media_id = 2 [json_name = "media_id"];
-  // media_metadata.field.duration
   int32 duration = 3 [json_name = "duration"];
-  // media_metadata.field.bitrate
   int64 bitrate = 4 [json_name = "bitrate"];
-  // media_metadata.field.video_codec
   string video_codec = 5 [json_name = "video_codec"];
-  // media_metadata.field.audio_codec
   string audio_codec = 6 [json_name = "audio_codec"];
-  // media_metadata.field.frame_rate
   float frame_rate = 7 [json_name = "frame_rate"];
-  // media_metadata.field.width
   int32 width = 8 [json_name = "width"];
-  // media_metadata.field.height
   int32 height = 9 [json_name = "height"];
 }
 
 // HistoryItem is the model entity for watch history.
 message HistoryItem {
-  // ID of the ent.
   string id = 1 [json_name = "id"];
-  // create_time.field.comment
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
-  // history_item.field.user_id
   string user_id = 3 [json_name = "user_id"];
-  // history_item.field.media_id
   string media_id = 4 [json_name = "media_id"];
-  // history_item.field.progress
   int32 progress = 5 [json_name = "progress"];
-  // history_item.field.duration
   int32 duration = 6 [json_name = "duration"];
-  // history_item.field.is_finished
   bool is_finished = 7 [json_name = "is_finished"];
-  // history_item.field.last_watched_at
   google.protobuf.Timestamp last_watched_at = 8 [json_name = "last_watched_at"];
 }
 
 // Review is the model entity for content review.
 message Review {
-  // ID of the ent.
   string id = 1 [json_name = "id"];
-  // create_time.field.comment
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
-  // update_time.field.comment
   google.protobuf.Timestamp update_time = 3 [json_name = "update_time"];
-  // review.field.media_id
   string media_id = 4 [json_name = "media_id"];
-  // review.field.reviewer_id
   string reviewer_id = 5 [json_name = "reviewer_id"];
-  // review.field.status
   string status = 6 [json_name = "status"];
-  // review.field.reason
   string reason = 7 [json_name = "reason"];
-  // review.field.notes
   string notes = 8 [json_name = "notes"];
 }
 
 // StatPoint is a single data point for statistics.
 message StatPoint {
-  // stat_point.field.date
   string date = 1 [json_name = "date"];
-  // stat_point.field.value
   int64 value = 2 [json_name = "value"];
 }

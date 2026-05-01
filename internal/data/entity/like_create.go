@@ -48,16 +48,16 @@ func (_c *LikeCreate) SetNillableLikeType(v *string) *LikeCreate {
 	return _c
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_c *LikeCreate) SetCreatedAt(v time.Time) *LikeCreate {
-	_c.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_c *LikeCreate) SetCreateTime(v time.Time) *LikeCreate {
+	_c.mutation.SetCreateTime(v)
 	return _c
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *LikeCreate) SetNillableCreatedAt(v *time.Time) *LikeCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *LikeCreate) SetNillableCreateTime(v *time.Time) *LikeCreate {
 	if v != nil {
-		_c.SetCreatedAt(*v)
+		_c.SetCreateTime(*v)
 	}
 	return _c
 }
@@ -125,9 +125,9 @@ func (_c *LikeCreate) defaults() {
 		v := like.DefaultLikeType
 		_c.mutation.SetLikeType(v)
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := like.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := like.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := like.DefaultID()
@@ -151,8 +151,8 @@ func (_c *LikeCreate) check() error {
 			return &ValidationError{Name: "like_type", err: fmt.Errorf(`entity: validator failed for field "Like.like_type": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "Like.created_at"`)}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "Like.create_time"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := like.IDValidator(v); err != nil {
@@ -204,9 +204,9 @@ func (_c *LikeCreate) createSpec() (*Like, *sqlgraph.CreateSpec) {
 		_spec.SetField(like.FieldLikeType, field.TypeString, value)
 		_node.LikeType = value
 	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(like.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(like.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
 	}
 	if nodes := _c.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

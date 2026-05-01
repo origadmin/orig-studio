@@ -102,16 +102,16 @@ func (_c *UserCreate) SetNillableLastName(v *string) *UserCreate {
 	return _c
 }
 
-// SetIsActive sets the "is_active" field.
-func (_c *UserCreate) SetIsActive(v bool) *UserCreate {
-	_c.mutation.SetIsActive(v)
+// SetStatus sets the "status" field.
+func (_c *UserCreate) SetStatus(v user.Status) *UserCreate {
+	_c.mutation.SetStatus(v)
 	return _c
 }
 
-// SetNillableIsActive sets the "is_active" field if the given value is not nil.
-func (_c *UserCreate) SetNillableIsActive(v *bool) *UserCreate {
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *UserCreate) SetNillableStatus(v *user.Status) *UserCreate {
 	if v != nil {
-		_c.SetIsActive(*v)
+		_c.SetStatus(*v)
 	}
 	return _c
 }
@@ -154,20 +154,6 @@ func (_c *UserCreate) SetIsSuperuser(v bool) *UserCreate {
 func (_c *UserCreate) SetNillableIsSuperuser(v *bool) *UserCreate {
 	if v != nil {
 		_c.SetIsSuperuser(*v)
-	}
-	return _c
-}
-
-// SetIsApproved sets the "is_approved" field.
-func (_c *UserCreate) SetIsApproved(v bool) *UserCreate {
-	_c.mutation.SetIsApproved(v)
-	return _c
-}
-
-// SetNillableIsApproved sets the "is_approved" field if the given value is not nil.
-func (_c *UserCreate) SetNillableIsApproved(v *bool) *UserCreate {
-	if v != nil {
-		_c.SetIsApproved(*v)
 	}
 	return _c
 }
@@ -364,6 +350,160 @@ func (_c *UserCreate) SetLastLogin(v time.Time) *UserCreate {
 func (_c *UserCreate) SetNillableLastLogin(v *time.Time) *UserCreate {
 	if v != nil {
 		_c.SetLastLogin(*v)
+	}
+	return _c
+}
+
+// SetNickname sets the "nickname" field.
+func (_c *UserCreate) SetNickname(v string) *UserCreate {
+	_c.mutation.SetNickname(v)
+	return _c
+}
+
+// SetNillableNickname sets the "nickname" field if the given value is not nil.
+func (_c *UserCreate) SetNillableNickname(v *string) *UserCreate {
+	if v != nil {
+		_c.SetNickname(*v)
+	}
+	return _c
+}
+
+// SetPhone sets the "phone" field.
+func (_c *UserCreate) SetPhone(v string) *UserCreate {
+	_c.mutation.SetPhone(v)
+	return _c
+}
+
+// SetNillablePhone sets the "phone" field if the given value is not nil.
+func (_c *UserCreate) SetNillablePhone(v *string) *UserCreate {
+	if v != nil {
+		_c.SetPhone(*v)
+	}
+	return _c
+}
+
+// SetAvatar sets the "avatar" field.
+func (_c *UserCreate) SetAvatar(v string) *UserCreate {
+	_c.mutation.SetAvatar(v)
+	return _c
+}
+
+// SetNillableAvatar sets the "avatar" field if the given value is not nil.
+func (_c *UserCreate) SetNillableAvatar(v *string) *UserCreate {
+	if v != nil {
+		_c.SetAvatar(*v)
+	}
+	return _c
+}
+
+// SetLastLoginIP sets the "last_login_ip" field.
+func (_c *UserCreate) SetLastLoginIP(v string) *UserCreate {
+	_c.mutation.SetLastLoginIP(v)
+	return _c
+}
+
+// SetNillableLastLoginIP sets the "last_login_ip" field if the given value is not nil.
+func (_c *UserCreate) SetNillableLastLoginIP(v *string) *UserCreate {
+	if v != nil {
+		_c.SetLastLoginIP(*v)
+	}
+	return _c
+}
+
+// SetLoginIP sets the "login_ip" field.
+func (_c *UserCreate) SetLoginIP(v string) *UserCreate {
+	_c.mutation.SetLoginIP(v)
+	return _c
+}
+
+// SetNillableLoginIP sets the "login_ip" field if the given value is not nil.
+func (_c *UserCreate) SetNillableLoginIP(v *string) *UserCreate {
+	if v != nil {
+		_c.SetLoginIP(*v)
+	}
+	return _c
+}
+
+// SetLastLoginTime sets the "last_login_time" field.
+func (_c *UserCreate) SetLastLoginTime(v time.Time) *UserCreate {
+	_c.mutation.SetLastLoginTime(v)
+	return _c
+}
+
+// SetNillableLastLoginTime sets the "last_login_time" field if the given value is not nil.
+func (_c *UserCreate) SetNillableLastLoginTime(v *time.Time) *UserCreate {
+	if v != nil {
+		_c.SetLastLoginTime(*v)
+	}
+	return _c
+}
+
+// SetLoginTime sets the "login_time" field.
+func (_c *UserCreate) SetLoginTime(v time.Time) *UserCreate {
+	_c.mutation.SetLoginTime(v)
+	return _c
+}
+
+// SetNillableLoginTime sets the "login_time" field if the given value is not nil.
+func (_c *UserCreate) SetNillableLoginTime(v *time.Time) *UserCreate {
+	if v != nil {
+		_c.SetLoginTime(*v)
+	}
+	return _c
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_c *UserCreate) SetCreateTime(v time.Time) *UserCreate {
+	_c.mutation.SetCreateTime(v)
+	return _c
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *UserCreate) SetNillableCreateTime(v *time.Time) *UserCreate {
+	if v != nil {
+		_c.SetCreateTime(*v)
+	}
+	return _c
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_c *UserCreate) SetUpdateTime(v time.Time) *UserCreate {
+	_c.mutation.SetUpdateTime(v)
+	return _c
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (_c *UserCreate) SetNillableUpdateTime(v *time.Time) *UserCreate {
+	if v != nil {
+		_c.SetUpdateTime(*v)
+	}
+	return _c
+}
+
+// SetCreateAuthor sets the "create_author" field.
+func (_c *UserCreate) SetCreateAuthor(v string) *UserCreate {
+	_c.mutation.SetCreateAuthor(v)
+	return _c
+}
+
+// SetNillableCreateAuthor sets the "create_author" field if the given value is not nil.
+func (_c *UserCreate) SetNillableCreateAuthor(v *string) *UserCreate {
+	if v != nil {
+		_c.SetCreateAuthor(*v)
+	}
+	return _c
+}
+
+// SetUpdateAuthor sets the "update_author" field.
+func (_c *UserCreate) SetUpdateAuthor(v string) *UserCreate {
+	_c.mutation.SetUpdateAuthor(v)
+	return _c
+}
+
+// SetNillableUpdateAuthor sets the "update_author" field if the given value is not nil.
+func (_c *UserCreate) SetNillableUpdateAuthor(v *string) *UserCreate {
+	if v != nil {
+		_c.SetUpdateAuthor(*v)
 	}
 	return _c
 }
@@ -687,9 +827,9 @@ func (_c *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *UserCreate) defaults() {
-	if _, ok := _c.mutation.IsActive(); !ok {
-		v := user.DefaultIsActive
-		_c.mutation.SetIsActive(v)
+	if _, ok := _c.mutation.Status(); !ok {
+		v := user.DefaultStatus
+		_c.mutation.SetStatus(v)
 	}
 	if _, ok := _c.mutation.IsStaff(); !ok {
 		v := user.DefaultIsStaff
@@ -738,6 +878,22 @@ func (_c *UserCreate) defaults() {
 	if _, ok := _c.mutation.DateAdded(); !ok {
 		v := user.DefaultDateAdded()
 		_c.mutation.SetDateAdded(v)
+	}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := user.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
+	}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		v := user.DefaultUpdateTime()
+		_c.mutation.SetUpdateTime(v)
+	}
+	if _, ok := _c.mutation.CreateAuthor(); !ok {
+		v := user.DefaultCreateAuthor
+		_c.mutation.SetCreateAuthor(v)
+	}
+	if _, ok := _c.mutation.UpdateAuthor(); !ok {
+		v := user.DefaultUpdateAuthor
+		_c.mutation.SetUpdateAuthor(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := user.DefaultID()
@@ -794,8 +950,13 @@ func (_c *UserCreate) check() error {
 			return &ValidationError{Name: "last_name", err: fmt.Errorf(`entity: validator failed for field "User.last_name": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.IsActive(); !ok {
-		return &ValidationError{Name: "is_active", err: errors.New(`entity: missing required field "User.is_active"`)}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`entity: missing required field "User.status"`)}
+	}
+	if v, ok := _c.mutation.Status(); ok {
+		if err := user.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "User.status": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.IsStaff(); !ok {
 		return &ValidationError{Name: "is_staff", err: errors.New(`entity: missing required field "User.is_staff"`)}
@@ -852,6 +1013,43 @@ func (_c *UserCreate) check() error {
 	}
 	if _, ok := _c.mutation.DateAdded(); !ok {
 		return &ValidationError{Name: "date_added", err: errors.New(`entity: missing required field "User.date_added"`)}
+	}
+	if v, ok := _c.mutation.Nickname(); ok {
+		if err := user.NicknameValidator(v); err != nil {
+			return &ValidationError{Name: "nickname", err: fmt.Errorf(`entity: validator failed for field "User.nickname": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.Phone(); ok {
+		if err := user.PhoneValidator(v); err != nil {
+			return &ValidationError{Name: "phone", err: fmt.Errorf(`entity: validator failed for field "User.phone": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.Avatar(); ok {
+		if err := user.AvatarValidator(v); err != nil {
+			return &ValidationError{Name: "avatar", err: fmt.Errorf(`entity: validator failed for field "User.avatar": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.LastLoginIP(); ok {
+		if err := user.LastLoginIPValidator(v); err != nil {
+			return &ValidationError{Name: "last_login_ip", err: fmt.Errorf(`entity: validator failed for field "User.last_login_ip": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.LoginIP(); ok {
+		if err := user.LoginIPValidator(v); err != nil {
+			return &ValidationError{Name: "login_ip", err: fmt.Errorf(`entity: validator failed for field "User.login_ip": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "User.create_time"`)}
+	}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`entity: missing required field "User.update_time"`)}
+	}
+	if _, ok := _c.mutation.CreateAuthor(); !ok {
+		return &ValidationError{Name: "create_author", err: errors.New(`entity: missing required field "User.create_author"`)}
+	}
+	if _, ok := _c.mutation.UpdateAuthor(); !ok {
+		return &ValidationError{Name: "update_author", err: errors.New(`entity: missing required field "User.update_author"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := user.IDValidator(v); err != nil {
@@ -921,9 +1119,9 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldLastName, field.TypeString, value)
 		_node.LastName = value
 	}
-	if value, ok := _c.mutation.IsActive(); ok {
-		_spec.SetField(user.FieldIsActive, field.TypeBool, value)
-		_node.IsActive = value
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(user.FieldStatus, field.TypeEnum, value)
+		_node.Status = value
 	}
 	if value, ok := _c.mutation.IsStaff(); ok {
 		_spec.SetField(user.FieldIsStaff, field.TypeBool, value)
@@ -936,10 +1134,6 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.IsSuperuser(); ok {
 		_spec.SetField(user.FieldIsSuperuser, field.TypeBool, value)
 		_node.IsSuperuser = value
-	}
-	if value, ok := _c.mutation.IsApproved(); ok {
-		_spec.SetField(user.FieldIsApproved, field.TypeBool, value)
-		_node.IsApproved = value
 	}
 	if value, ok := _c.mutation.IsFeatured(); ok {
 		_spec.SetField(user.FieldIsFeatured, field.TypeBool, value)
@@ -996,6 +1190,50 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.LastLogin(); ok {
 		_spec.SetField(user.FieldLastLogin, field.TypeTime, value)
 		_node.LastLogin = value
+	}
+	if value, ok := _c.mutation.Nickname(); ok {
+		_spec.SetField(user.FieldNickname, field.TypeString, value)
+		_node.Nickname = value
+	}
+	if value, ok := _c.mutation.Phone(); ok {
+		_spec.SetField(user.FieldPhone, field.TypeString, value)
+		_node.Phone = value
+	}
+	if value, ok := _c.mutation.Avatar(); ok {
+		_spec.SetField(user.FieldAvatar, field.TypeString, value)
+		_node.Avatar = value
+	}
+	if value, ok := _c.mutation.LastLoginIP(); ok {
+		_spec.SetField(user.FieldLastLoginIP, field.TypeString, value)
+		_node.LastLoginIP = value
+	}
+	if value, ok := _c.mutation.LoginIP(); ok {
+		_spec.SetField(user.FieldLoginIP, field.TypeString, value)
+		_node.LoginIP = value
+	}
+	if value, ok := _c.mutation.LastLoginTime(); ok {
+		_spec.SetField(user.FieldLastLoginTime, field.TypeTime, value)
+		_node.LastLoginTime = value
+	}
+	if value, ok := _c.mutation.LoginTime(); ok {
+		_spec.SetField(user.FieldLoginTime, field.TypeTime, value)
+		_node.LoginTime = value
+	}
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(user.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
+	}
+	if value, ok := _c.mutation.UpdateTime(); ok {
+		_spec.SetField(user.FieldUpdateTime, field.TypeTime, value)
+		_node.UpdateTime = value
+	}
+	if value, ok := _c.mutation.CreateAuthor(); ok {
+		_spec.SetField(user.FieldCreateAuthor, field.TypeString, value)
+		_node.CreateAuthor = value
+	}
+	if value, ok := _c.mutation.UpdateAuthor(); ok {
+		_spec.SetField(user.FieldUpdateAuthor, field.TypeString, value)
+		_node.UpdateAuthor = value
 	}
 	if nodes := _c.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

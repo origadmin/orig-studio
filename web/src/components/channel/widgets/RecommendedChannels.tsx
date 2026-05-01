@@ -1,8 +1,9 @@
-﻿import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useNavigate} from '@tanstack/react-router';
 import {useTranslation} from 'react-i18next';
 import {CheckCircle, Users, ChevronRight} from 'lucide-react';
 import {channelApi} from '@/lib/api/channel';
+import {getImageUrl, handleImageError} from '@/lib/imageUtils';
 
 interface RecommendedChannelsProps {
     currentChannelId: string;
@@ -127,13 +128,14 @@ const RecommendedChannels: React.FC<RecommendedChannelsProps> = ({
                         <div className="w-10 h-10 rounded-full overflow-hidden bg-muted dark:bg-gray-700 flex-shrink-0">
                             {channel.avatar ? (
                                 <img
-                                    src={channel.avatar}
+                                    src={getImageUrl(channel.avatar, 'avatar')}
                                     alt={channel.name}
                                     className="w-full h-full object-cover"
+                                    onError={(e) => handleImageError(e, 'avatar')}
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-sm font-bold text-muted-foreground">
-                                    {channel.name?.charAt(0)?.toUpperCase()}
+                                    {channel.name?.charAt(0)?.toUpperCase() || '?'}
                                 </div>
                             )}
                         </div>

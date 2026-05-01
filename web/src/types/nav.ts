@@ -9,6 +9,8 @@ export interface NavItem {
   badgeVariant?: 'default' | 'primary' | 'warning' | 'danger';
   disabled?: boolean;
   external?: boolean;
+  /** When true, the `to` path contains `__dynamic__` placeholder that must be resolved at render time */
+  isDynamic?: boolean;
 }
 
 export interface NavSection {

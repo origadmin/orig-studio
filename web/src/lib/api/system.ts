@@ -60,8 +60,8 @@ export interface SettingItem {
     is_sensitive: boolean;
     fallback_value?: string;
     is_builtin: boolean;
-    created_at: string;
-    updated_at: string;
+    create_time: string;
+    update_time: string;
 }
 
 export type GroupedSettings = Record<SettingCategory, SettingItem[]>;

@@ -2,9 +2,9 @@ import {getFullUrl} from './utils';
 
 // 本地默认图片路径 - 使用更语义化的命名和目录结构
 const PLACEHOLDER_IMAGES = {
-    videoThumbnail: '/assets/images/video-placeholder.svg',
-    userAvatar: '/assets/images/avatar-placeholder.svg',
-    coverImage: '/assets/images/cover-placeholder.svg',
+    videoThumbnail: '/assets/images/video.svg',
+    userAvatar: '/assets/images/avatar.svg',
+    coverImage: '/assets/images/cover.svg',
 };
 
 /**

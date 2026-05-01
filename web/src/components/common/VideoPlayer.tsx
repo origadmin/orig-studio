@@ -1,4 +1,4 @@
-﻿import React, {useState, useRef, useEffect, useCallback, useMemo, forwardRef, useImperativeHandle} from 'react';
+import React, {useState, useRef, useEffect, useCallback, useMemo, forwardRef, useImperativeHandle} from 'react';
 import {
     Play, Pause, Volume2, VolumeX, Maximize, Minimize,
     SkipBack, SkipForward, Settings, Subtitles, PictureInPicture,
@@ -9,6 +9,7 @@ import {Button} from '@/components/ui/button';
 import {formatDuration} from '@/lib/format';
 import {getFullUrl} from '@/lib/utils';
 import {usePlayerSettings} from '@/hooks/usePlayerSettings';
+import SpritePreview from './SpritePreview';
 
 // TypeScript 类型定义
 export interface QualityOption {
@@ -49,6 +50,10 @@ interface VideoPlayerProps {
     /** When true, the video is still being processed (transcoding) and
      *  should not attempt playback. Shows a processing overlay instead. */
     isProcessing?: boolean;
+    /** WebVTT sprite sheet URL for progress bar hover preview */
+    spriteVttUrl?: string;
+    /** Whether to enable sprite preview on progress bar hover (default: true) */
+    enableSpritePreview?: boolean;
 }
 
 const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
@@ -72,6 +77,8 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                                                                              onTimeChange,
                                                                              onAutoPlayNext,
                                                                              isProcessing = false,
+                                                                             spriteVttUrl,
+                                                                             enableSpritePreview = true,
                                                                          }, ref) => {
 
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -94,6 +101,13 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
     const [currentQuality, setCurrentQuality] = useState<string>('auto');
     const [showCenterOverlay, setShowCenterOverlay] = useState(false);
     const [centerOverlayIcon, setCenterOverlayIcon] = useState<'play' | 'pause'>('play');
+
+    // Sprite preview state
+    const [hoverTime, setHoverTime] = useState<number | null>(null);
+    const [hoverRatio, setHoverRatio] = useState<number>(0);
+    const [progressBarRect, setProgressBarRect] = useState<DOMRect | null>(null);
+    const [playerRect, setPlayerRect] = useState<DOMRect | null>(null);
+    const spriteRafRef = useRef<number>(0);
     const [hasError, setHasError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [hlsQualities, setHlsQualities] = useState<QualityOption[]>([]);
@@ -571,6 +585,26 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
         onTimeChange?.(time);
     }, [onTimeChange]);
 
+    // Sprite preview: progress bar mouse move handler (rAF throttled)
+    const handleProgressMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        if (!enableSpritePreview) return;
+        if (spriteRafRef.current) cancelAnimationFrame(spriteRafRef.current);
+
+        spriteRafRef.current = requestAnimationFrame(() => {
+            const bar = e.currentTarget.getBoundingClientRect();
+            const ratio = Math.max(0, Math.min(1, (e.clientX - bar.left) / bar.width));
+            setHoverRatio(ratio);
+            setHoverTime(ratio * duration);
+            setProgressBarRect(bar);
+            setPlayerRect(containerRef.current?.getBoundingClientRect() ?? bar);
+        });
+    }, [enableSpritePreview, duration]);
+
+    const handleProgressMouseLeave = useCallback(() => {
+        if (spriteRafRef.current) cancelAnimationFrame(spriteRafRef.current);
+        setHoverTime(null);
+    }, []);
+
     // Volume
     const handleVolumeChange = useCallback((value: number[]) => {
         if (!videoRef.current) return;
@@ -924,6 +958,8 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                         aria-valuemax={Math.floor(duration)}
                         aria-valuenow={Math.floor(currentTime)}
                         tabIndex={0}
+                        onMouseMove={enableSpritePreview ? handleProgressMouseMove : undefined}
+                        onMouseLeave={enableSpritePreview ? handleProgressMouseLeave : undefined}
                     >
                         {/* Buffered progress */}
                         <div className="absolute inset-0 bg-white/30 rounded-full overflow-hidden">
@@ -955,6 +991,18 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                             </div>
                         </div>
                     </div>
+
+                    {/* Sprite preview on progress bar hover */}
+                    {hoverTime !== null && enableSpritePreview && progressBarRect && playerRect && (
+                        <SpritePreview
+                            hoverTime={hoverTime}
+                            hoverRatio={hoverRatio}
+                            progressBarRect={progressBarRect}
+                            playerRect={playerRect}
+                            vttUrl={spriteVttUrl ?? null}
+                            duration={duration}
+                        />
+                    )}
 
                     {/* Control buttons */}
                     <div className="flex items-center justify-between">

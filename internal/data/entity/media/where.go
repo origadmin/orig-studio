@@ -145,11 +145,6 @@ func Extension(v string) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldExtension, v))
 }
 
-// Privacy applies equality check predicate on the "privacy" field. It's identical to PrivacyEQ.
-func Privacy(v int) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldPrivacy, v))
-}
-
 // EncodingStatus applies equality check predicate on the "encoding_status" field. It's identical to EncodingStatusEQ.
 func EncodingStatus(v string) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldEncodingStatus, v))
@@ -188,6 +183,16 @@ func FavoriteCount(v int64) predicate.Media {
 // DownloadCount applies equality check predicate on the "download_count" field. It's identical to DownloadCountEQ.
 func DownloadCount(v int64) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldDownloadCount, v))
+}
+
+// ShareCount applies equality check predicate on the "share_count" field. It's identical to ShareCountEQ.
+func ShareCount(v int64) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldShareCount, v))
+}
+
+// UUID applies equality check predicate on the "uuid" field. It's identical to UUIDEQ.
+func UUID(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldUUID, v))
 }
 
 // AllowDownload applies equality check predicate on the "allow_download" field. It's identical to AllowDownloadEQ.
@@ -260,14 +265,24 @@ func PublishedAt(v time.Time) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldPublishedAt, v))
 }
 
-// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v time.Time) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldCreatedAt, v))
+// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
+func CreateTime(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldCreateTime, v))
 }
 
-// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
-func UpdatedAt(v time.Time) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldUpdatedAt, v))
+// UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
+func UpdateTime(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldUpdateTime, v))
+}
+
+// CreateAuthor applies equality check predicate on the "create_author" field. It's identical to CreateAuthorEQ.
+func CreateAuthor(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldCreateAuthor, v))
+}
+
+// UpdateAuthor applies equality check predicate on the "update_author" field. It's identical to UpdateAuthorEQ.
+func UpdateAuthor(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldUpdateAuthor, v))
 }
 
 // TitleEQ applies the EQ predicate on the "title" field.
@@ -1326,43 +1341,23 @@ func ExtensionContainsFold(v string) predicate.Media {
 }
 
 // PrivacyEQ applies the EQ predicate on the "privacy" field.
-func PrivacyEQ(v int) predicate.Media {
+func PrivacyEQ(v Privacy) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldPrivacy, v))
 }
 
 // PrivacyNEQ applies the NEQ predicate on the "privacy" field.
-func PrivacyNEQ(v int) predicate.Media {
+func PrivacyNEQ(v Privacy) predicate.Media {
 	return predicate.Media(sql.FieldNEQ(FieldPrivacy, v))
 }
 
 // PrivacyIn applies the In predicate on the "privacy" field.
-func PrivacyIn(vs ...int) predicate.Media {
+func PrivacyIn(vs ...Privacy) predicate.Media {
 	return predicate.Media(sql.FieldIn(FieldPrivacy, vs...))
 }
 
 // PrivacyNotIn applies the NotIn predicate on the "privacy" field.
-func PrivacyNotIn(vs ...int) predicate.Media {
+func PrivacyNotIn(vs ...Privacy) predicate.Media {
 	return predicate.Media(sql.FieldNotIn(FieldPrivacy, vs...))
-}
-
-// PrivacyGT applies the GT predicate on the "privacy" field.
-func PrivacyGT(v int) predicate.Media {
-	return predicate.Media(sql.FieldGT(FieldPrivacy, v))
-}
-
-// PrivacyGTE applies the GTE predicate on the "privacy" field.
-func PrivacyGTE(v int) predicate.Media {
-	return predicate.Media(sql.FieldGTE(FieldPrivacy, v))
-}
-
-// PrivacyLT applies the LT predicate on the "privacy" field.
-func PrivacyLT(v int) predicate.Media {
-	return predicate.Media(sql.FieldLT(FieldPrivacy, v))
-}
-
-// PrivacyLTE applies the LTE predicate on the "privacy" field.
-func PrivacyLTE(v int) predicate.Media {
-	return predicate.Media(sql.FieldLTE(FieldPrivacy, v))
 }
 
 // EncodingStatusEQ applies the EQ predicate on the "encoding_status" field.
@@ -1733,6 +1728,121 @@ func DownloadCountLT(v int64) predicate.Media {
 // DownloadCountLTE applies the LTE predicate on the "download_count" field.
 func DownloadCountLTE(v int64) predicate.Media {
 	return predicate.Media(sql.FieldLTE(FieldDownloadCount, v))
+}
+
+// ShareCountEQ applies the EQ predicate on the "share_count" field.
+func ShareCountEQ(v int64) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldShareCount, v))
+}
+
+// ShareCountNEQ applies the NEQ predicate on the "share_count" field.
+func ShareCountNEQ(v int64) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldShareCount, v))
+}
+
+// ShareCountIn applies the In predicate on the "share_count" field.
+func ShareCountIn(vs ...int64) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldShareCount, vs...))
+}
+
+// ShareCountNotIn applies the NotIn predicate on the "share_count" field.
+func ShareCountNotIn(vs ...int64) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldShareCount, vs...))
+}
+
+// ShareCountGT applies the GT predicate on the "share_count" field.
+func ShareCountGT(v int64) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldShareCount, v))
+}
+
+// ShareCountGTE applies the GTE predicate on the "share_count" field.
+func ShareCountGTE(v int64) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldShareCount, v))
+}
+
+// ShareCountLT applies the LT predicate on the "share_count" field.
+func ShareCountLT(v int64) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldShareCount, v))
+}
+
+// ShareCountLTE applies the LTE predicate on the "share_count" field.
+func ShareCountLTE(v int64) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldShareCount, v))
+}
+
+// UUIDEQ applies the EQ predicate on the "uuid" field.
+func UUIDEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldUUID, v))
+}
+
+// UUIDNEQ applies the NEQ predicate on the "uuid" field.
+func UUIDNEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldUUID, v))
+}
+
+// UUIDIn applies the In predicate on the "uuid" field.
+func UUIDIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldUUID, vs...))
+}
+
+// UUIDNotIn applies the NotIn predicate on the "uuid" field.
+func UUIDNotIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldUUID, vs...))
+}
+
+// UUIDGT applies the GT predicate on the "uuid" field.
+func UUIDGT(v string) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldUUID, v))
+}
+
+// UUIDGTE applies the GTE predicate on the "uuid" field.
+func UUIDGTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldUUID, v))
+}
+
+// UUIDLT applies the LT predicate on the "uuid" field.
+func UUIDLT(v string) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldUUID, v))
+}
+
+// UUIDLTE applies the LTE predicate on the "uuid" field.
+func UUIDLTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldUUID, v))
+}
+
+// UUIDContains applies the Contains predicate on the "uuid" field.
+func UUIDContains(v string) predicate.Media {
+	return predicate.Media(sql.FieldContains(FieldUUID, v))
+}
+
+// UUIDHasPrefix applies the HasPrefix predicate on the "uuid" field.
+func UUIDHasPrefix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasPrefix(FieldUUID, v))
+}
+
+// UUIDHasSuffix applies the HasSuffix predicate on the "uuid" field.
+func UUIDHasSuffix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasSuffix(FieldUUID, v))
+}
+
+// UUIDIsNil applies the IsNil predicate on the "uuid" field.
+func UUIDIsNil() predicate.Media {
+	return predicate.Media(sql.FieldIsNull(FieldUUID))
+}
+
+// UUIDNotNil applies the NotNil predicate on the "uuid" field.
+func UUIDNotNil() predicate.Media {
+	return predicate.Media(sql.FieldNotNull(FieldUUID))
+}
+
+// UUIDEqualFold applies the EqualFold predicate on the "uuid" field.
+func UUIDEqualFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldUUID, v))
+}
+
+// UUIDContainsFold applies the ContainsFold predicate on the "uuid" field.
+func UUIDContainsFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldUUID, v))
 }
 
 // AllowDownloadEQ applies the EQ predicate on the "allow_download" field.
@@ -2375,84 +2485,214 @@ func PublishedAtNotNil() predicate.Media {
 	return predicate.Media(sql.FieldNotNull(FieldPublishedAt))
 }
 
-// CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v time.Time) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldCreatedAt, v))
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldCreateTime, v))
 }
 
-// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v time.Time) predicate.Media {
-	return predicate.Media(sql.FieldNEQ(FieldCreatedAt, v))
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldCreateTime, v))
 }
 
-// CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...time.Time) predicate.Media {
-	return predicate.Media(sql.FieldIn(FieldCreatedAt, vs...))
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldCreateTime, vs...))
 }
 
-// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...time.Time) predicate.Media {
-	return predicate.Media(sql.FieldNotIn(FieldCreatedAt, vs...))
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldCreateTime, vs...))
 }
 
-// CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v time.Time) predicate.Media {
-	return predicate.Media(sql.FieldGT(FieldCreatedAt, v))
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldCreateTime, v))
 }
 
-// CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v time.Time) predicate.Media {
-	return predicate.Media(sql.FieldGTE(FieldCreatedAt, v))
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldCreateTime, v))
 }
 
-// CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v time.Time) predicate.Media {
-	return predicate.Media(sql.FieldLT(FieldCreatedAt, v))
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldCreateTime, v))
 }
 
-// CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v time.Time) predicate.Media {
-	return predicate.Media(sql.FieldLTE(FieldCreatedAt, v))
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldCreateTime, v))
 }
 
-// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
-func UpdatedAtEQ(v time.Time) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldUpdatedAt, v))
+// UpdateTimeEQ applies the EQ predicate on the "update_time" field.
+func UpdateTimeEQ(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldUpdateTime, v))
 }
 
-// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
-func UpdatedAtNEQ(v time.Time) predicate.Media {
-	return predicate.Media(sql.FieldNEQ(FieldUpdatedAt, v))
+// UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
+func UpdateTimeNEQ(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldUpdateTime, v))
 }
 
-// UpdatedAtIn applies the In predicate on the "updated_at" field.
-func UpdatedAtIn(vs ...time.Time) predicate.Media {
-	return predicate.Media(sql.FieldIn(FieldUpdatedAt, vs...))
+// UpdateTimeIn applies the In predicate on the "update_time" field.
+func UpdateTimeIn(vs ...time.Time) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldUpdateTime, vs...))
 }
 
-// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
-func UpdatedAtNotIn(vs ...time.Time) predicate.Media {
-	return predicate.Media(sql.FieldNotIn(FieldUpdatedAt, vs...))
+// UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
+func UpdateTimeNotIn(vs ...time.Time) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldUpdateTime, vs...))
 }
 
-// UpdatedAtGT applies the GT predicate on the "updated_at" field.
-func UpdatedAtGT(v time.Time) predicate.Media {
-	return predicate.Media(sql.FieldGT(FieldUpdatedAt, v))
+// UpdateTimeGT applies the GT predicate on the "update_time" field.
+func UpdateTimeGT(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldUpdateTime, v))
 }
 
-// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
-func UpdatedAtGTE(v time.Time) predicate.Media {
-	return predicate.Media(sql.FieldGTE(FieldUpdatedAt, v))
+// UpdateTimeGTE applies the GTE predicate on the "update_time" field.
+func UpdateTimeGTE(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldUpdateTime, v))
 }
 
-// UpdatedAtLT applies the LT predicate on the "updated_at" field.
-func UpdatedAtLT(v time.Time) predicate.Media {
-	return predicate.Media(sql.FieldLT(FieldUpdatedAt, v))
+// UpdateTimeLT applies the LT predicate on the "update_time" field.
+func UpdateTimeLT(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldUpdateTime, v))
 }
 
-// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
-func UpdatedAtLTE(v time.Time) predicate.Media {
-	return predicate.Media(sql.FieldLTE(FieldUpdatedAt, v))
+// UpdateTimeLTE applies the LTE predicate on the "update_time" field.
+func UpdateTimeLTE(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldUpdateTime, v))
+}
+
+// CreateAuthorEQ applies the EQ predicate on the "create_author" field.
+func CreateAuthorEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldCreateAuthor, v))
+}
+
+// CreateAuthorNEQ applies the NEQ predicate on the "create_author" field.
+func CreateAuthorNEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldCreateAuthor, v))
+}
+
+// CreateAuthorIn applies the In predicate on the "create_author" field.
+func CreateAuthorIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldCreateAuthor, vs...))
+}
+
+// CreateAuthorNotIn applies the NotIn predicate on the "create_author" field.
+func CreateAuthorNotIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldCreateAuthor, vs...))
+}
+
+// CreateAuthorGT applies the GT predicate on the "create_author" field.
+func CreateAuthorGT(v string) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldCreateAuthor, v))
+}
+
+// CreateAuthorGTE applies the GTE predicate on the "create_author" field.
+func CreateAuthorGTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldCreateAuthor, v))
+}
+
+// CreateAuthorLT applies the LT predicate on the "create_author" field.
+func CreateAuthorLT(v string) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldCreateAuthor, v))
+}
+
+// CreateAuthorLTE applies the LTE predicate on the "create_author" field.
+func CreateAuthorLTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldCreateAuthor, v))
+}
+
+// CreateAuthorContains applies the Contains predicate on the "create_author" field.
+func CreateAuthorContains(v string) predicate.Media {
+	return predicate.Media(sql.FieldContains(FieldCreateAuthor, v))
+}
+
+// CreateAuthorHasPrefix applies the HasPrefix predicate on the "create_author" field.
+func CreateAuthorHasPrefix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasPrefix(FieldCreateAuthor, v))
+}
+
+// CreateAuthorHasSuffix applies the HasSuffix predicate on the "create_author" field.
+func CreateAuthorHasSuffix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasSuffix(FieldCreateAuthor, v))
+}
+
+// CreateAuthorEqualFold applies the EqualFold predicate on the "create_author" field.
+func CreateAuthorEqualFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldCreateAuthor, v))
+}
+
+// CreateAuthorContainsFold applies the ContainsFold predicate on the "create_author" field.
+func CreateAuthorContainsFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldCreateAuthor, v))
+}
+
+// UpdateAuthorEQ applies the EQ predicate on the "update_author" field.
+func UpdateAuthorEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldUpdateAuthor, v))
+}
+
+// UpdateAuthorNEQ applies the NEQ predicate on the "update_author" field.
+func UpdateAuthorNEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldUpdateAuthor, v))
+}
+
+// UpdateAuthorIn applies the In predicate on the "update_author" field.
+func UpdateAuthorIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldUpdateAuthor, vs...))
+}
+
+// UpdateAuthorNotIn applies the NotIn predicate on the "update_author" field.
+func UpdateAuthorNotIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldUpdateAuthor, vs...))
+}
+
+// UpdateAuthorGT applies the GT predicate on the "update_author" field.
+func UpdateAuthorGT(v string) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldUpdateAuthor, v))
+}
+
+// UpdateAuthorGTE applies the GTE predicate on the "update_author" field.
+func UpdateAuthorGTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldUpdateAuthor, v))
+}
+
+// UpdateAuthorLT applies the LT predicate on the "update_author" field.
+func UpdateAuthorLT(v string) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldUpdateAuthor, v))
+}
+
+// UpdateAuthorLTE applies the LTE predicate on the "update_author" field.
+func UpdateAuthorLTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldUpdateAuthor, v))
+}
+
+// UpdateAuthorContains applies the Contains predicate on the "update_author" field.
+func UpdateAuthorContains(v string) predicate.Media {
+	return predicate.Media(sql.FieldContains(FieldUpdateAuthor, v))
+}
+
+// UpdateAuthorHasPrefix applies the HasPrefix predicate on the "update_author" field.
+func UpdateAuthorHasPrefix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasPrefix(FieldUpdateAuthor, v))
+}
+
+// UpdateAuthorHasSuffix applies the HasSuffix predicate on the "update_author" field.
+func UpdateAuthorHasSuffix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasSuffix(FieldUpdateAuthor, v))
+}
+
+// UpdateAuthorEqualFold applies the EqualFold predicate on the "update_author" field.
+func UpdateAuthorEqualFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldUpdateAuthor, v))
+}
+
+// UpdateAuthorContainsFold applies the ContainsFold predicate on the "update_author" field.
+func UpdateAuthorContainsFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldUpdateAuthor, v))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.
@@ -2654,6 +2894,29 @@ func HasReviewLogs() predicate.Media {
 func HasReviewLogsWith(preds ...predicate.MediaReviewLog) predicate.Media {
 	return predicate.Media(func(s *sql.Selector) {
 		step := newReviewLogsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasArticles applies the HasEdge predicate on the "articles" edge.
+func HasArticles() predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ArticlesTable, ArticlesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasArticlesWith applies the HasEdge predicate on the "articles" edge with a given conditions (other predicates).
+func HasArticlesWith(preds ...predicate.Article) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		step := newArticlesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

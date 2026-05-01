@@ -22,6 +22,16 @@ type CommentModerationItem struct {
 	AddDate     time.Time  `json:"add_date"`
 	Username    string     `json:"username,omitempty"`
 	MediaTitle  string     `json:"media_title,omitempty"`
+	// Fields added for admin list page alignment (B087)
+	Avatar     string `json:"avatar,omitempty"`
+	LikeCount  int    `json:"like_count,omitempty"`
+	ReplyCount int    `json:"reply_count,omitempty"`
+	// Fields added for tree structure (F018)
+	ParentID           string                    `json:"parent_id,omitempty"`
+	Depth              int                       `json:"depth"`
+	HasReplies         bool                      `json:"has_replies"`
+	Children           []*CommentModerationItem  `json:"children,omitempty"`
+	HasPendingReports  bool                      `json:"has_pending_reports"`
 }
 
 type CommentReportItem struct {
@@ -30,7 +40,8 @@ type CommentReportItem struct {
 	ReporterID  string    `json:"reporter_id"`
 	Reason      string    `json:"reason"`
 	Description string    `json:"description,omitempty"`
-	CreatedAt   time.Time `json:"created_at"`
+	Status      string    `json:"status"`
+	CreateTime   time.Time `json:"create_time"`
 	Username    string    `json:"username,omitempty"`
 }
 
@@ -38,8 +49,15 @@ type CommentStatusCounts struct {
 	Pending         int `json:"pending"`
 	Approved        int `json:"approved"`
 	Rejected        int `json:"rejected"`
+	Blocked         int `json:"blocked"`
 	Total           int `json:"total"`
 	ReportedPending int `json:"reported_pending"`
+}
+
+type DismissReportsResult struct {
+	CommentID     string `json:"comment_id"`
+	DismissedCount int   `json:"dismissed_count"`
+	ReportCount   int    `json:"report_count"`
 }
 
 type CommentConfig struct {
@@ -55,14 +73,18 @@ type CommentModerationRepo interface {
 	IncrementReportCount(ctx context.Context, commentID string) (int, error)
 	ResetReportCount(ctx context.Context, commentID string) error
 	ListByMedia(ctx context.Context, mediaID string, status string, page, pageSize int) ([]*CommentModerationItem, int, error)
+	ListAdminComments(ctx context.Context, mediaID string, status string, reportStatus string, tree bool, page, pageSize int) ([]*CommentModerationItem, int, error)
 	ListPending(ctx context.Context, mediaID string, page, pageSize int) ([]*CommentModerationItem, int, error)
 	CountByStatus(ctx context.Context, mediaID string) (*CommentStatusCounts, error)
+	Delete(ctx context.Context, id string) error
 }
 
 type CommentReportRepo interface {
 	Create(ctx context.Context, commentID string, reporterID string, reason string, description string) (*CommentReportItem, error)
 	Exists(ctx context.Context, reporterID, commentID string) (bool, error)
 	ListByComment(ctx context.Context, commentID string) ([]*CommentReportItem, error)
+	UpdateStatusByComment(ctx context.Context, commentID string, fromStatus string, toStatus string) (int, error)
+	CountPendingByComment(ctx context.Context, commentID string) (int, error)
 }
 
 type CommentModerationUseCase struct {
@@ -93,8 +115,9 @@ var validModerationActions = map[string]bool{
 
 var validStatusTransitions = map[string]map[string]bool{
 	"PENDING":  {"APPROVED": true, "REJECTED": true},
-	"APPROVED": {"REJECTED": true},
+	"APPROVED": {"REJECTED": true, "BLOCKED": true, "PENDING": true},
 	"REJECTED": {"APPROVED": true},
+	"BLOCKED":  {"APPROVED": true},
 }
 
 func (uc *CommentModerationUseCase) ModerateComment(ctx context.Context, commentID string, action string, moderatorID string) error {
@@ -246,6 +269,22 @@ func (uc *CommentModerationUseCase) GetCommentStats(ctx context.Context, mediaID
 	return uc.commentRepo.CountByStatus(ctx, mediaID)
 }
 
+func (uc *CommentModerationUseCase) DeleteComment(ctx context.Context, commentID string, adminID string) error {
+	// Verify the comment exists
+	_, err := uc.commentRepo.Get(ctx, commentID)
+	if err != nil {
+		return fmt.Errorf("failed to get comment: %w", err)
+	}
+
+	err = uc.commentRepo.Delete(ctx, commentID)
+	if err != nil {
+		return fmt.Errorf("failed to delete comment: %w", err)
+	}
+
+	uc.log.Infof("comment %s deleted by admin %s", commentID, adminID)
+	return nil
+}
+
 func (uc *CommentModerationUseCase) GetInitialStatus(ctx context.Context) string {
 	config := uc.GetCommentConfig(ctx)
 	if config.AutoApprove {
@@ -275,4 +314,103 @@ func (uc *CommentModerationUseCase) GetCommentConfig(ctx context.Context) *Comme
 		ReportThreshold: reportThreshold,
 		ReportReasons:   reportReasons,
 	}
+}
+
+// BlockComment transitions a comment from APPROVED to BLOCKED.
+// All PENDING reports for the comment are set to REVIEWED.
+func (uc *CommentModerationUseCase) BlockComment(ctx context.Context, commentID string, adminID string) (*CommentModerationItem, error) {
+	item, err := uc.commentRepo.Get(ctx, commentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get comment: %w", err)
+	}
+
+	allowed, ok := validStatusTransitions[item.Status]
+	if !ok || !allowed["BLOCKED"] {
+		return nil, fmt.Errorf("invalid status transition from %s to BLOCKED", item.Status)
+	}
+
+	err = uc.commentRepo.UpdateStatus(ctx, commentID, "BLOCKED", adminID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to block comment: %w", err)
+	}
+
+	// Mark all PENDING reports as REVIEWED
+	reviewedCount, err := uc.reportRepo.UpdateStatusByComment(ctx, commentID, "PENDING", "REVIEWED")
+	if err != nil {
+		uc.log.Warnf("failed to update report statuses for comment %s: %v", commentID, err)
+	}
+
+	uc.log.Infof("comment %s blocked by %s, %d reports reviewed", commentID, adminID, reviewedCount)
+
+	updated, err := uc.commentRepo.Get(ctx, commentID)
+	if err != nil {
+		return nil, nil // Return nil item but no error since block succeeded
+	}
+	return updated, nil
+}
+
+// UnblockComment transitions a comment from BLOCKED back to APPROVED.
+// Report count is reset to 0.
+func (uc *CommentModerationUseCase) UnblockComment(ctx context.Context, commentID string, adminID string) (*CommentModerationItem, error) {
+	item, err := uc.commentRepo.Get(ctx, commentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get comment: %w", err)
+	}
+
+	allowed, ok := validStatusTransitions[item.Status]
+	if !ok || !allowed["APPROVED"] {
+		return nil, fmt.Errorf("invalid status transition from %s to APPROVED", item.Status)
+	}
+
+	err = uc.commentRepo.UpdateStatus(ctx, commentID, "APPROVED", adminID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unblock comment: %w", err)
+	}
+
+	// Reset report count to 0
+	if err := uc.commentRepo.ResetReportCount(ctx, commentID); err != nil {
+		uc.log.Warnf("failed to reset report count for comment %s: %v", commentID, err)
+	}
+
+	uc.log.Infof("comment %s unblocked by %s, report count reset", commentID, adminID)
+
+	updated, err := uc.commentRepo.Get(ctx, commentID)
+	if err != nil {
+		return nil, nil // Return nil item but no error since unblock succeeded
+	}
+	return updated, nil
+}
+
+// DismissReports sets all PENDING reports for a comment to DISMISSED
+// and resets the report count to 0.
+func (uc *CommentModerationUseCase) DismissReports(ctx context.Context, commentID string, adminID string) (*DismissReportsResult, error) {
+	// Verify the comment exists
+	_, err := uc.commentRepo.Get(ctx, commentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get comment: %w", err)
+	}
+
+	// Update all PENDING reports to DISMISSED
+	dismissedCount, err := uc.reportRepo.UpdateStatusByComment(ctx, commentID, "PENDING", "DISMISSED")
+	if err != nil {
+		return nil, fmt.Errorf("failed to dismiss reports: %w", err)
+	}
+
+	// Reset report count to 0
+	if err := uc.commentRepo.ResetReportCount(ctx, commentID); err != nil {
+		uc.log.Warnf("failed to reset report count for comment %s: %v", commentID, err)
+	}
+
+	uc.log.Infof("comment %s: %d reports dismissed by %s", commentID, dismissedCount, adminID)
+
+	return &DismissReportsResult{
+		CommentID:      commentID,
+		DismissedCount: dismissedCount,
+		ReportCount:    0,
+	}, nil
+}
+
+// ListAdminComments returns comments with optional tree structure and report status filtering.
+func (uc *CommentModerationUseCase) ListAdminComments(ctx context.Context, mediaID string, status string, reportStatus string, tree bool, page, pageSize int) ([]*CommentModerationItem, int, error) {
+	return uc.commentRepo.ListAdminComments(ctx, mediaID, status, reportStatus, tree, page, pageSize)
 }

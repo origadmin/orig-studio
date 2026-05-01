@@ -101,17 +101,59 @@ func (_u *ChannelUpdate) SetNillableBannerLogo(v *string) *ChannelUpdate {
 	return _u
 }
 
-// SetIsPublic sets the "is_public" field.
-func (_u *ChannelUpdate) SetIsPublic(v bool) *ChannelUpdate {
-	_u.mutation.SetIsPublic(v)
+// SetPrivacy sets the "privacy" field.
+func (_u *ChannelUpdate) SetPrivacy(v channel.Privacy) *ChannelUpdate {
+	_u.mutation.SetPrivacy(v)
 	return _u
 }
 
-// SetNillableIsPublic sets the "is_public" field if the given value is not nil.
-func (_u *ChannelUpdate) SetNillableIsPublic(v *bool) *ChannelUpdate {
+// SetNillablePrivacy sets the "privacy" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillablePrivacy(v *channel.Privacy) *ChannelUpdate {
 	if v != nil {
-		_u.SetIsPublic(*v)
+		_u.SetPrivacy(*v)
 	}
+	return _u
+}
+
+// SetSubscriberCount sets the "subscriber_count" field.
+func (_u *ChannelUpdate) SetSubscriberCount(v int64) *ChannelUpdate {
+	_u.mutation.ResetSubscriberCount()
+	_u.mutation.SetSubscriberCount(v)
+	return _u
+}
+
+// SetNillableSubscriberCount sets the "subscriber_count" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableSubscriberCount(v *int64) *ChannelUpdate {
+	if v != nil {
+		_u.SetSubscriberCount(*v)
+	}
+	return _u
+}
+
+// AddSubscriberCount adds value to the "subscriber_count" field.
+func (_u *ChannelUpdate) AddSubscriberCount(v int64) *ChannelUpdate {
+	_u.mutation.AddSubscriberCount(v)
+	return _u
+}
+
+// SetMediaCount sets the "media_count" field.
+func (_u *ChannelUpdate) SetMediaCount(v int) *ChannelUpdate {
+	_u.mutation.ResetMediaCount()
+	_u.mutation.SetMediaCount(v)
+	return _u
+}
+
+// SetNillableMediaCount sets the "media_count" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableMediaCount(v *int) *ChannelUpdate {
+	if v != nil {
+		_u.SetMediaCount(*v)
+	}
+	return _u
+}
+
+// AddMediaCount adds value to the "media_count" field.
+func (_u *ChannelUpdate) AddMediaCount(v int) *ChannelUpdate {
+	_u.mutation.AddMediaCount(v)
 	return _u
 }
 
@@ -126,6 +168,26 @@ func (_u *ChannelUpdate) SetNillableAddDate(v *time.Time) *ChannelUpdate {
 	if v != nil {
 		_u.SetAddDate(*v)
 	}
+	return _u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_u *ChannelUpdate) SetCreateTime(v time.Time) *ChannelUpdate {
+	_u.mutation.SetCreateTime(v)
+	return _u
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableCreateTime(v *time.Time) *ChannelUpdate {
+	if v != nil {
+		_u.SetCreateTime(*v)
+	}
+	return _u
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_u *ChannelUpdate) SetUpdateTime(v time.Time) *ChannelUpdate {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -183,6 +245,7 @@ func (_u *ChannelUpdate) RemoveMedia(v ...*Media) *ChannelUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ChannelUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -208,6 +271,14 @@ func (_u *ChannelUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *ChannelUpdate) defaults() {
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := channel.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_u *ChannelUpdate) check() error {
 	if v, ok := _u.mutation.Title(); ok {
@@ -223,6 +294,11 @@ func (_u *ChannelUpdate) check() error {
 	if v, ok := _u.mutation.BannerLogo(); ok {
 		if err := channel.BannerLogoValidator(v); err != nil {
 			return &ValidationError{Name: "banner_logo", err: fmt.Errorf(`entity: validator failed for field "Channel.banner_logo": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Privacy(); ok {
+		if err := channel.PrivacyValidator(v); err != nil {
+			return &ValidationError{Name: "privacy", err: fmt.Errorf(`entity: validator failed for field "Channel.privacy": %w`, err)}
 		}
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
@@ -261,11 +337,29 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.BannerLogo(); ok {
 		_spec.SetField(channel.FieldBannerLogo, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.IsPublic(); ok {
-		_spec.SetField(channel.FieldIsPublic, field.TypeBool, value)
+	if value, ok := _u.mutation.Privacy(); ok {
+		_spec.SetField(channel.FieldPrivacy, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.SubscriberCount(); ok {
+		_spec.SetField(channel.FieldSubscriberCount, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedSubscriberCount(); ok {
+		_spec.AddField(channel.FieldSubscriberCount, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.MediaCount(); ok {
+		_spec.SetField(channel.FieldMediaCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMediaCount(); ok {
+		_spec.AddField(channel.FieldMediaCount, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddDate(); ok {
 		_spec.SetField(channel.FieldAddDate, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(channel.FieldCreateTime, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(channel.FieldUpdateTime, field.TypeTime, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -433,17 +527,59 @@ func (_u *ChannelUpdateOne) SetNillableBannerLogo(v *string) *ChannelUpdateOne {
 	return _u
 }
 
-// SetIsPublic sets the "is_public" field.
-func (_u *ChannelUpdateOne) SetIsPublic(v bool) *ChannelUpdateOne {
-	_u.mutation.SetIsPublic(v)
+// SetPrivacy sets the "privacy" field.
+func (_u *ChannelUpdateOne) SetPrivacy(v channel.Privacy) *ChannelUpdateOne {
+	_u.mutation.SetPrivacy(v)
 	return _u
 }
 
-// SetNillableIsPublic sets the "is_public" field if the given value is not nil.
-func (_u *ChannelUpdateOne) SetNillableIsPublic(v *bool) *ChannelUpdateOne {
+// SetNillablePrivacy sets the "privacy" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillablePrivacy(v *channel.Privacy) *ChannelUpdateOne {
 	if v != nil {
-		_u.SetIsPublic(*v)
+		_u.SetPrivacy(*v)
 	}
+	return _u
+}
+
+// SetSubscriberCount sets the "subscriber_count" field.
+func (_u *ChannelUpdateOne) SetSubscriberCount(v int64) *ChannelUpdateOne {
+	_u.mutation.ResetSubscriberCount()
+	_u.mutation.SetSubscriberCount(v)
+	return _u
+}
+
+// SetNillableSubscriberCount sets the "subscriber_count" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableSubscriberCount(v *int64) *ChannelUpdateOne {
+	if v != nil {
+		_u.SetSubscriberCount(*v)
+	}
+	return _u
+}
+
+// AddSubscriberCount adds value to the "subscriber_count" field.
+func (_u *ChannelUpdateOne) AddSubscriberCount(v int64) *ChannelUpdateOne {
+	_u.mutation.AddSubscriberCount(v)
+	return _u
+}
+
+// SetMediaCount sets the "media_count" field.
+func (_u *ChannelUpdateOne) SetMediaCount(v int) *ChannelUpdateOne {
+	_u.mutation.ResetMediaCount()
+	_u.mutation.SetMediaCount(v)
+	return _u
+}
+
+// SetNillableMediaCount sets the "media_count" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableMediaCount(v *int) *ChannelUpdateOne {
+	if v != nil {
+		_u.SetMediaCount(*v)
+	}
+	return _u
+}
+
+// AddMediaCount adds value to the "media_count" field.
+func (_u *ChannelUpdateOne) AddMediaCount(v int) *ChannelUpdateOne {
+	_u.mutation.AddMediaCount(v)
 	return _u
 }
 
@@ -458,6 +594,26 @@ func (_u *ChannelUpdateOne) SetNillableAddDate(v *time.Time) *ChannelUpdateOne {
 	if v != nil {
 		_u.SetAddDate(*v)
 	}
+	return _u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_u *ChannelUpdateOne) SetCreateTime(v time.Time) *ChannelUpdateOne {
+	_u.mutation.SetCreateTime(v)
+	return _u
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableCreateTime(v *time.Time) *ChannelUpdateOne {
+	if v != nil {
+		_u.SetCreateTime(*v)
+	}
+	return _u
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_u *ChannelUpdateOne) SetUpdateTime(v time.Time) *ChannelUpdateOne {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -528,6 +684,7 @@ func (_u *ChannelUpdateOne) Select(field string, fields ...string) *ChannelUpdat
 
 // Save executes the query and returns the updated Channel entity.
 func (_u *ChannelUpdateOne) Save(ctx context.Context) (*Channel, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -553,6 +710,14 @@ func (_u *ChannelUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *ChannelUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := channel.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_u *ChannelUpdateOne) check() error {
 	if v, ok := _u.mutation.Title(); ok {
@@ -568,6 +733,11 @@ func (_u *ChannelUpdateOne) check() error {
 	if v, ok := _u.mutation.BannerLogo(); ok {
 		if err := channel.BannerLogoValidator(v); err != nil {
 			return &ValidationError{Name: "banner_logo", err: fmt.Errorf(`entity: validator failed for field "Channel.banner_logo": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Privacy(); ok {
+		if err := channel.PrivacyValidator(v); err != nil {
+			return &ValidationError{Name: "privacy", err: fmt.Errorf(`entity: validator failed for field "Channel.privacy": %w`, err)}
 		}
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
@@ -623,11 +793,29 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 	if value, ok := _u.mutation.BannerLogo(); ok {
 		_spec.SetField(channel.FieldBannerLogo, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.IsPublic(); ok {
-		_spec.SetField(channel.FieldIsPublic, field.TypeBool, value)
+	if value, ok := _u.mutation.Privacy(); ok {
+		_spec.SetField(channel.FieldPrivacy, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.SubscriberCount(); ok {
+		_spec.SetField(channel.FieldSubscriberCount, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedSubscriberCount(); ok {
+		_spec.AddField(channel.FieldSubscriberCount, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.MediaCount(); ok {
+		_spec.SetField(channel.FieldMediaCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMediaCount(); ok {
+		_spec.AddField(channel.FieldMediaCount, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddDate(); ok {
 		_spec.SetField(channel.FieldAddDate, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(channel.FieldCreateTime, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(channel.FieldUpdateTime, field.TypeTime, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

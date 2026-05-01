@@ -3699,7 +3699,7 @@ components:
                 total:
                     type: integer
                     format: int32
-                medias:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Media'
@@ -3810,6 +3810,9 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.media.TranscodingMediaItem'
+                total_pages:
+                    type: integer
+                    format: int32
         api.v1.services.media.GetHomeContentResponse:
             type: object
             properties:
@@ -3831,7 +3834,7 @@ components:
                 total:
                     type: integer
                     format: int32
-                comments:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Comment'
@@ -3839,6 +3842,9 @@ components:
                     type: integer
                     format: int32
                 page_size:
+                    type: integer
+                    format: int32
+                total_pages:
                     type: integer
                     format: int32
         api.v1.services.media.GetMediaDownloadResponse:
@@ -3943,7 +3949,7 @@ components:
             properties:
                 playlist:
                     $ref: '#/components/schemas/api.v1.services.types.Playlist'
-                medias:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Media'
@@ -3953,7 +3959,7 @@ components:
                 total:
                     type: integer
                     format: int32
-                playlists:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Playlist'
@@ -4004,7 +4010,7 @@ components:
                 total:
                     type: integer
                     format: int32
-                medias:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Media'
@@ -4033,7 +4039,7 @@ components:
         api.v1.services.media.GetTrendingContentResponse:
             type: object
             properties:
-                medias:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Media'
@@ -4079,13 +4085,16 @@ components:
                 page_size:
                     type: integer
                     format: int32
+                total_pages:
+                    type: integer
+                    format: int32
         api.v1.services.media.ListCategoriesResponse:
             type: object
             properties:
                 total:
                     type: integer
                     format: int32
-                categories:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Category'
@@ -4097,13 +4106,16 @@ components:
                     format: int32
                 next_page_token:
                     type: string
+                total_pages:
+                    type: integer
+                    format: int32
         api.v1.services.media.ListChannelsResponse:
             type: object
             properties:
                 total:
                     type: integer
                     format: int32
-                channels:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Channel'
@@ -4119,7 +4131,7 @@ components:
                 total:
                     type: integer
                     format: int32
-                comments:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Comment'
@@ -4131,6 +4143,9 @@ components:
                     format: int32
                 next_page_token:
                     type: string
+                total_pages:
+                    type: integer
+                    format: int32
         api.v1.services.media.ListEncodeProfilesResponse:
             type: object
             properties:
@@ -4151,7 +4166,7 @@ components:
                 total:
                     type: integer
                     format: int32
-                medias:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Media'
@@ -4163,13 +4178,16 @@ components:
                     format: int32
                 next_page_token:
                     type: string
+                total_pages:
+                    type: integer
+                    format: int32
         api.v1.services.media.ListTagsResponse:
             type: object
             properties:
                 total:
                     type: integer
                     format: int32
-                tags:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Tag'
@@ -4181,6 +4199,9 @@ components:
                     format: int32
                 next_page_token:
                     type: string
+                total_pages:
+                    type: integer
+                    format: int32
         api.v1.services.media.RemoveChannelMediaResponse:
             type: object
             properties:
@@ -4234,7 +4255,7 @@ components:
                 total:
                     type: integer
                     format: int32
-                medias:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Media'
@@ -4454,113 +4475,111 @@ components:
             properties:
                 id:
                     type: string
-                    description: ID of the ent.
                 create_time:
                     type: string
-                    description: create_time.field.comment
                     format: date-time
                 update_time:
                     type: string
-                    description: update_time.field.comment
                     format: date-time
                 name:
                     type: string
-                    description: category.field.name
                 slug:
                     type: string
-                    description: category.field.slug
                 description:
                     type: string
-                    description: category.field.description
+                thumbnail:
+                    type: string
+                listings_thumbnail:
+                    type: string
                 icon:
                     type: string
-                    description: category.field.icon
                 color:
                     type: string
-                    description: category.field.color
                 parent_id:
                     type: string
-                    description: category.field.parent_id
                 sequence:
                     type: integer
-                    description: category.field.sequence
                     format: int32
                 status:
                     type: integer
-                    description: category.field.status
                     format: int32
                 media_count:
                     type: string
-                    description: category.field.media_count
+                is_global:
+                    type: boolean
+                is_rbac_category:
+                    type: boolean
+                identity_provider:
+                    type: string
+                user_id:
+                    type: string
             description: Category is the model entity for Category.
         api.v1.services.types.Channel:
             type: object
             properties:
                 id:
                     type: string
-                    description: ID of the ent.
                 create_time:
                     type: string
-                    description: create_time.field.comment
                     format: date-time
                 update_time:
                     type: string
-                    description: update_time.field.comment
                     format: date-time
                 title:
                     type: string
-                    description: channel.field.title
                 description:
                     type: string
-                    description: channel.field.description
                 banner_logo:
                     type: string
-                    description: channel.field.banner_logo
                 user_id:
                     type: string
-                    description: channel.field.user_id
-                short_token:
-                    type: string
-                    description: channel.field.short_token — URL-friendly token for public access
+                privacy:
+                    type: integer
+                    format: enum
                 subscriber_count:
                     type: string
-                    description: channel.field.subscriber_count
                 media_count:
                     type: string
-                    description: channel.field.media_count
+                short_token:
+                    type: string
+                add_date:
+                    type: string
+                    format: date-time
             description: Channel is the model entity for Channel.
         api.v1.services.types.Comment:
             type: object
             properties:
                 id:
                     type: string
-                    description: ID of the ent.
                 create_time:
                     type: string
-                    description: create_time.field.comment
                     format: date-time
                 update_time:
                     type: string
-                    description: update_time.field.comment
                     format: date-time
                 content:
                     type: string
-                    description: comment.field.content
                 user_id:
                     type: string
-                    description: comment.field.user_id
                 media_id:
                     type: string
-                    description: comment.field.media_id
                 parent_id:
                     type: string
-                    description: comment.field.parent_id
                 like_count:
                     type: string
-                    description: comment.field.like_count
                 status:
                     type: string
-                    description: comment.field.status
+                report_count:
+                    type: integer
+                    format: int32
+                moderated_by:
+                    type: string
+                moderated_at:
+                    type: string
+                    format: date-time
+                add_date:
+                    type: string
+                    format: date-time
             description: Comment is the model entity for Comment.
         api.v1.services.types.EncodeProfile:
             type: object
@@ -4577,10 +4596,22 @@ components:
                     type: string
                 video_codec:
                     type: string
+                video_bitrate:
+                    type: string
                 audio_codec:
+                    type: string
+                audio_bitrate:
+                    type: string
+                bento_parameters:
                     type: string
                 is_active:
                     type: boolean
+                create_time:
+                    type: string
+                    format: date-time
+                update_time:
+                    type: string
+                    format: date-time
             description: EncodeProfile is the model entity for EncodeProfile.
         api.v1.services.types.EncodingTask:
             type: object
@@ -4600,6 +4631,8 @@ components:
                     type: string
                 error_message:
                     type: string
+                chunk:
+                    type: boolean
                 create_time:
                     type: string
                     format: date-time
@@ -4612,31 +4645,23 @@ components:
             properties:
                 id:
                     type: string
-                    description: ID of the ent.
                 create_time:
                     type: string
-                    description: create_time.field.comment
                     format: date-time
                 user_id:
                     type: string
-                    description: history_item.field.user_id
                 media_id:
                     type: string
-                    description: history_item.field.media_id
                 progress:
                     type: integer
-                    description: history_item.field.progress
                     format: int32
                 duration:
                     type: integer
-                    description: history_item.field.duration
                     format: int32
                 is_finished:
                     type: boolean
-                    description: history_item.field.is_finished
                 last_watched_at:
                     type: string
-                    description: history_item.field.last_watched_at
                     format: date-time
             description: HistoryItem is the model entity for watch history.
         api.v1.services.types.Like:
@@ -4644,212 +4669,155 @@ components:
             properties:
                 id:
                     type: string
-                    description: ID of the ent.
                 create_time:
                     type: string
-                    description: create_time.field.comment
                     format: date-time
                 user_id:
                     type: string
-                    description: like.field.user_id
                 media_id:
                     type: string
-                    description: like.field.media_id
                 type:
                     type: string
-                    description: like.field.type
             description: Like is the model entity for Like.
         api.v1.services.types.Media:
             type: object
             properties:
                 id:
                     type: string
-                    description: ID of the ent.
                 create_time:
                     type: string
-                    description: create_time.field.comment
                     format: date-time
                 update_time:
                     type: string
-                    description: update_time.field.comment
                     format: date-time
                 title:
                     type: string
-                    description: media.field.title
                 description:
                     type: string
-                    description: media.field.description
                 type:
                     type: string
-                    description: media.field.type
                 url:
                     type: string
-                    description: media.field.url
                 thumbnail:
                     type: string
-                    description: media.field.thumbnail
                 duration:
                     type: integer
-                    description: media.field.duration
                     format: int32
                 size:
                     type: string
-                    description: media.field.size
                 width:
                     type: integer
-                    description: media.field.width
                     format: int32
                 height:
                     type: integer
-                    description: media.field.height
                     format: int32
                 mime_type:
                     type: string
-                    description: media.field.mime_type
                 privacy:
                     type: integer
-                    description: media.field.privacy
-                    format: int32
-                status:
-                    type: integer
-                    description: media.field.status
-                    format: int32
+                    format: enum
+                state:
+                    type: string
                 view_count:
                     type: string
-                    description: media.field.view_count
                 like_count:
                     type: string
-                    description: media.field.like_count
                 dislike_count:
                     type: string
-                    description: media.field.dislike_count
                 comment_count:
                     type: string
-                    description: media.field.comment_count
                 favorite_count:
                     type: string
-                    description: media.field.favorite_count
                 share_count:
                     type: string
-                    description: media.field.share_count
                 download_count:
                     type: string
-                    description: media.field.download_count
                 user_id:
                     type: string
-                    description: media.field.user_id
-                channel_id:
-                    type: string
-                    description: media.field.channel_id
                 category_id:
                     type: string
-                    description: media.field.category_id
                 tags:
                     type: array
                     items:
                         type: string
-                    description: media.field.tags
                 hls_file:
                     type: string
-                    description: media.field.hls_file
                 encoding_status:
                     type: string
-                    description: media.field.encoding_status
                 uuid:
                     type: string
-                    description: media.field.uuid — secure unique ID for public paths (HLS, thumbnails, previews)
                 preview_file_path:
                     type: string
-                    description: media.field.preview_file_path — path to GIF preview generated during transcoding
-                state:
-                    type: string
-                    description: 'media.field.state — publication state: draft, active, deleted'
                 short_token:
                     type: string
-                    description: media.field.short_token — URL-friendly token for public access
                 published_at:
                     type: string
-                    description: media.field.published_at
                     format: date-time
                 allow_download:
                     type: boolean
-                    description: media.field.allow_download
                 enable_comments:
                     type: boolean
-                    description: media.field.enable_comments
                 featured:
                     type: boolean
-                    description: media.field.featured
-                is_reviewed:
-                    type: boolean
-                    description: 'media.field.is_reviewed — DEPRECATED: use review_status instead'
                 reported_times:
                     type: integer
-                    description: media.field.reported_times
                     format: int32
                 extension:
                     type: string
-                    description: media.field.extension
                 md5sum:
                     type: string
-                    description: media.field.md5sum
                 poster:
                     type: string
-                    description: media.field.poster
                 review_status:
                     type: string
-                    description: media.field.review_status
                 listable:
                     type: boolean
-                    description: media.field.listable
+                channel_id:
+                    type: string
+                sprite_status:
+                    type: string
+                sprite_path:
+                    type: string
+                vtt_path:
+                    type: string
+                thumbnail_time:
+                    type: number
+                    format: double
+                create_author:
+                    type: string
+                update_author:
+                    type: string
                 user:
-                    allOf:
-                        - $ref: '#/components/schemas/api.v1.services.types.User'
-                    description: |-
-                        Edge fields - abgen auto-matches entity.Media.Edges.Xxx
-                         User holds the value of the user edge.
+                    $ref: '#/components/schemas/api.v1.services.types.User'
                 category:
-                    allOf:
-                        - $ref: '#/components/schemas/api.v1.services.types.Category'
-                    description: Category holds the value of the category edge.
+                    $ref: '#/components/schemas/api.v1.services.types.Category'
                 channel:
-                    allOf:
-                        - $ref: '#/components/schemas/api.v1.services.types.Channel'
-                    description: Channel holds the value of the channel edge.
+                    $ref: '#/components/schemas/api.v1.services.types.Channel'
             description: Media is the model entity for Media.
         api.v1.services.types.MediaMetadata:
             type: object
             properties:
                 id:
                     type: string
-                    description: ID of the ent.
                 media_id:
                     type: string
-                    description: media_metadata.field.media_id
                 duration:
                     type: integer
-                    description: media_metadata.field.duration
                     format: int32
                 bitrate:
                     type: string
-                    description: media_metadata.field.bitrate
                 video_codec:
                     type: string
-                    description: media_metadata.field.video_codec
                 audio_codec:
                     type: string
-                    description: media_metadata.field.audio_codec
                 frame_rate:
                     type: number
-                    description: media_metadata.field.frame_rate
                     format: float
                 width:
                     type: integer
-                    description: media_metadata.field.width
                     format: int32
                 height:
                     type: integer
-                    description: media_metadata.field.height
                     format: int32
             description: MediaMetadata is the model entity for MediaMetadata.
         api.v1.services.types.MediaVariant:
@@ -4857,334 +4825,279 @@ components:
             properties:
                 id:
                     type: string
-                    description: ID of the ent.
                 media_id:
                     type: string
-                    description: media_variant.field.media_id
                 profile_id:
                     type: string
-                    description: media_variant.field.profile_id
                 resolution:
                     type: string
-                    description: media_variant.field.resolution
                 url:
                     type: string
-                    description: media_variant.field.url
                 size:
                     type: string
-                    description: media_variant.field.size
                 status:
                     type: string
-                    description: media_variant.field.status
             description: MediaVariant is the model entity for MediaVariant (encoding output).
         api.v1.services.types.Permission:
             type: object
             properties:
                 id:
                     type: string
-                    description: ID of the ent.
                 create_time:
                     type: string
-                    description: create_time.field.comment
                     format: date-time
                 update_time:
                     type: string
-                    description: update_time.field.comment
                     format: date-time
                 keyword:
                     type: string
-                    description: permission.field.keyword
                 name:
                     type: string
-                    description: permission.field.name
                 description:
                     type: string
-                    description: permission.field.description
                 type:
                     type: string
-                    description: permission.field.type
                 resource_type:
                     type: string
-                    description: permission.field.resource_type
                 action:
                     type: string
-                    description: permission.field.action
                 sequence:
                     type: integer
-                    description: permission.field.sequence
                     format: int32
                 status:
                     type: integer
-                    description: permission.field.status
                     format: int32
                 parent_id:
                     type: string
-                    description: permission.field.parent_id
             description: Permission is the model entity for the Permission schema.
         api.v1.services.types.Playlist:
             type: object
             properties:
                 id:
                     type: string
-                    description: ID of the ent.
                 create_time:
                     type: string
-                    description: create_time.field.comment
                     format: date-time
                 update_time:
                     type: string
-                    description: update_time.field.comment
                     format: date-time
-                name:
+                title:
                     type: string
-                    description: playlist.field.name
                 description:
                     type: string
-                    description: playlist.field.description
                 thumbnail:
                     type: string
-                    description: playlist.field.thumbnail
                 user_id:
                     type: string
-                    description: playlist.field.user_id
-                is_public:
-                    type: boolean
-                    description: playlist.field.is_public
+                privacy:
+                    type: integer
+                    format: enum
                 status:
                     type: integer
-                    description: playlist.field.status
-                    format: int32
+                    format: enum
                 media_count:
                     type: string
-                    description: playlist.field.media_count
+                short_token:
+                    type: string
+                add_date:
+                    type: string
+                    format: date-time
             description: Playlist is the model entity for Playlist.
         api.v1.services.types.Review:
             type: object
             properties:
                 id:
                     type: string
-                    description: ID of the ent.
                 create_time:
                     type: string
-                    description: create_time.field.comment
                     format: date-time
                 update_time:
                     type: string
-                    description: update_time.field.comment
                     format: date-time
                 media_id:
                     type: string
-                    description: review.field.media_id
                 reviewer_id:
                     type: string
-                    description: review.field.reviewer_id
                 status:
                     type: string
-                    description: review.field.status
                 reason:
                     type: string
-                    description: review.field.reason
                 notes:
                     type: string
-                    description: review.field.notes
             description: Review is the model entity for content review.
         api.v1.services.types.Role:
             type: object
             properties:
                 id:
                     type: string
-                    description: ID of the ent.
                 create_time:
                     type: string
-                    description: create_time.field.comment
                     format: date-time
                 update_time:
                     type: string
-                    description: update_time.field.comment
                     format: date-time
                 keyword:
                     type: string
-                    description: role.field.keyword
                 name:
                     type: string
-                    description: role.field.name
                 description:
                     type: string
-                    description: role.field.description
                 type:
                     type: integer
-                    description: role.field.type
                     format: int32
                 sequence:
                     type: integer
-                    description: role.field.sequence
                     format: int32
                 status:
                     type: integer
-                    description: role.field.status
                     format: int32
                 users:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.User'
-                    description: 'For responses: This field is populated with full user details.'
                 permissions:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Permission'
-                    description: 'For responses: This field is populated with full permission details.'
             description: Role is the model entity for the Role schema.
         api.v1.services.types.StatPoint:
             type: object
             properties:
                 date:
                     type: string
-                    description: stat_point.field.date
                 value:
                     type: string
-                    description: stat_point.field.value
             description: StatPoint is a single data point for statistics.
         api.v1.services.types.Subtitle:
             type: object
             properties:
                 id:
                     type: string
-                    description: ID of the ent.
                 create_time:
                     type: string
-                    description: create_time.field.comment
                     format: date-time
                 media_id:
                     type: string
-                    description: subtitle.field.media_id
                 language:
                     type: string
-                    description: subtitle.field.language
                 file_url:
                     type: string
-                    description: subtitle.field.file_url
                 label:
                     type: string
-                    description: subtitle.field.label
             description: Subtitle is the model entity for Subtitle.
         api.v1.services.types.Tag:
             type: object
             properties:
                 id:
                     type: string
-                    description: ID of the ent.
                 create_time:
                     type: string
-                    description: create_time.field.comment
                     format: date-time
                 update_time:
                     type: string
-                    description: update_time.field.comment
                     format: date-time
                 name:
                     type: string
-                    description: tag.field.name
                 slug:
                     type: string
-                    description: tag.field.slug
                 description:
                     type: string
-                    description: tag.field.description
                 color:
                     type: string
-                    description: tag.field.color
                 status:
                     type: integer
-                    description: tag.field.status
-                    format: int32
+                    format: enum
                 media_count:
                     type: string
-                    description: tag.field.media_count
+                listings_thumbnail:
+                    type: string
             description: Tag is the model entity for Tag.
         api.v1.services.types.User:
             type: object
             properties:
                 id:
                     type: string
-                    description: ID of the ent.
                 create_author:
                     type: string
-                    description: create_author.field.comment
                 update_author:
                     type: string
-                    description: update_author.field.comment
                 create_time:
                     type: string
-                    description: create_time.field.comment
                     format: date-time
                 update_time:
                     type: string
-                    description: update_time.field.comment
                     format: date-time
-                uuid:
-                    type: string
-                    description: user.field.uuid
                 username:
                     type: string
-                    description: user.field.username
                 nickname:
                     type: string
-                    description: user.field.nickname
                 password:
                     type: string
-                    description: user.field.password
                 phone:
                     type: string
-                    description: user.field.phone
                 email:
                     type: string
-                    description: user.field.email
                 avatar:
                     type: string
-                    description: user.field.avatar
                 status:
                     type: integer
-                    description: user.field.status
-                    format: int32
+                    format: enum
                 is_superuser:
                     type: boolean
-                    description: user.field.is_superuser
                 is_staff:
                     type: boolean
-                    description: user.field.is_staff
-                is_active:
-                    type: boolean
-                    description: user.field.is_active
                 last_login_ip:
                     type: string
-                    description: user.field.last_login_ip
                 login_ip:
                     type: string
-                    description: user.field.login_ip
                 last_login_time:
                     type: string
-                    description: user.field.last_login_time
                     format: date-time
                 login_time:
                     type: string
-                    description: user.field.login_time
                     format: date-time
                 slug:
                     type: string
-                    description: user.field.slug — public identifier (separate from login username)
+                name:
+                    type: string
+                role:
+                    type: string
+                is_editor:
+                    type: boolean
+                is_manager:
+                    type: boolean
+                title:
+                    type: string
+                description:
+                    type: string
+                logo:
+                    type: string
+                location:
+                    type: string
+                media_count:
+                    type: integer
+                    format: int32
+                notification_on_comments:
+                    type: boolean
+                allow_contact:
+                    type: boolean
+                date_joined:
+                    type: string
+                    format: date-time
+                date_added:
+                    type: string
+                    format: date-time
+                last_login:
+                    type: string
+                    format: date-time
                 profile:
-                    allOf:
-                        - $ref: '#/components/schemas/api.v1.services.types.UserProfile'
-                    description: The user's profile information.
+                    $ref: '#/components/schemas/api.v1.services.types.UserProfile'
                 setting:
-                    allOf:
-                        - $ref: '#/components/schemas/api.v1.services.types.UserSetting'
-                    description: The user's settings.
+                    $ref: '#/components/schemas/api.v1.services.types.UserSetting'
                 roles:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Role'
-                    description: 'For responses: This field is populated with full role details.'
             description: User is the model entity for the User schema.
         api.v1.services.types.UserProfile:
             type: object
@@ -5277,7 +5190,7 @@ components:
                     items:
                         $ref: '#/components/schemas/api.v1.services.upload.PartInfo'
                     description: Uploaded parts
-                created_at:
+                create_time:
                     type: string
                     description: Created at
                 expires_at:
@@ -5519,7 +5432,7 @@ components:
                 total:
                     type: integer
                     format: int32
-                medias:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Media'
@@ -5570,7 +5483,7 @@ components:
                 total:
                     type: integer
                     format: int32
-                playlists:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Playlist'
@@ -5606,7 +5519,7 @@ components:
                 total:
                     type: integer
                     format: int32
-                channels:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Channel'
@@ -5640,7 +5553,7 @@ components:
                 total:
                     type: integer
                     format: int32
-                playlists:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Playlist'
@@ -5682,11 +5595,11 @@ components:
                     type: integer
                     description: The total number of items in the list.
                     format: int32
-                roles:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.Role'
-                    description: The list of roles
+                    description: The list of items
             description: ListUserRolesResponse is the response message for listing user roles.
         api.v1.services.user.ListUsersResponse:
             type: object
@@ -5695,11 +5608,11 @@ components:
                     type: integer
                     description: The total number of items in the list.
                     format: int32
-                users:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.v1.services.types.User'
-                    description: The paging users
+                    description: The paging items
                 page:
                     type: integer
                     description: The page number.

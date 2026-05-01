@@ -186,7 +186,7 @@ func (r *MockReviewLogRepo) Create(ctx context.Context, mediaID string, reviewer
 		Comment:        comment,
 		PreviousStatus: previousStatus,
 		NewStatus:      newStatus,
-		CreatedAt:      "2024-01-01T00:00:00Z",
+		CreateTime:      "2024-01-01T00:00:00Z",
 	}
 	r.logs = append(r.logs, log)
 	return log, nil

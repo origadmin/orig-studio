@@ -89,30 +89,44 @@ func (_c *EncodingTaskCreate) SetNillableChunk(v *bool) *EncodingTaskCreate {
 	return _c
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_c *EncodingTaskCreate) SetCreatedAt(v time.Time) *EncodingTaskCreate {
-	_c.mutation.SetCreatedAt(v)
+// SetProgress sets the "progress" field.
+func (_c *EncodingTaskCreate) SetProgress(v int) *EncodingTaskCreate {
+	_c.mutation.SetProgress(v)
 	return _c
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *EncodingTaskCreate) SetNillableCreatedAt(v *time.Time) *EncodingTaskCreate {
+// SetNillableProgress sets the "progress" field if the given value is not nil.
+func (_c *EncodingTaskCreate) SetNillableProgress(v *int) *EncodingTaskCreate {
 	if v != nil {
-		_c.SetCreatedAt(*v)
+		_c.SetProgress(*v)
 	}
 	return _c
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_c *EncodingTaskCreate) SetUpdatedAt(v time.Time) *EncodingTaskCreate {
-	_c.mutation.SetUpdatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_c *EncodingTaskCreate) SetCreateTime(v time.Time) *EncodingTaskCreate {
+	_c.mutation.SetCreateTime(v)
 	return _c
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *EncodingTaskCreate) SetNillableUpdatedAt(v *time.Time) *EncodingTaskCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *EncodingTaskCreate) SetNillableCreateTime(v *time.Time) *EncodingTaskCreate {
 	if v != nil {
-		_c.SetUpdatedAt(*v)
+		_c.SetCreateTime(*v)
+	}
+	return _c
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_c *EncodingTaskCreate) SetUpdateTime(v time.Time) *EncodingTaskCreate {
+	_c.mutation.SetUpdateTime(v)
+	return _c
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (_c *EncodingTaskCreate) SetNillableUpdateTime(v *time.Time) *EncodingTaskCreate {
+	if v != nil {
+		_c.SetUpdateTime(*v)
 	}
 	return _c
 }
@@ -174,13 +188,17 @@ func (_c *EncodingTaskCreate) defaults() {
 		v := encodingtask.DefaultChunk
 		_c.mutation.SetChunk(v)
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := encodingtask.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+	if _, ok := _c.mutation.Progress(); !ok {
+		v := encodingtask.DefaultProgress
+		_c.mutation.SetProgress(v)
 	}
-	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := encodingtask.DefaultUpdatedAt()
-		_c.mutation.SetUpdatedAt(v)
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := encodingtask.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
+	}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		v := encodingtask.DefaultUpdateTime()
+		_c.mutation.SetUpdateTime(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := encodingtask.DefaultID()
@@ -217,11 +235,14 @@ func (_c *EncodingTaskCreate) check() error {
 	if _, ok := _c.mutation.Chunk(); !ok {
 		return &ValidationError{Name: "chunk", err: errors.New(`entity: missing required field "EncodingTask.chunk"`)}
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "EncodingTask.created_at"`)}
+	if _, ok := _c.mutation.Progress(); !ok {
+		return &ValidationError{Name: "progress", err: errors.New(`entity: missing required field "EncodingTask.progress"`)}
 	}
-	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`entity: missing required field "EncodingTask.updated_at"`)}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "EncodingTask.create_time"`)}
+	}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`entity: missing required field "EncodingTask.update_time"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := encodingtask.IDValidator(v); err != nil {
@@ -287,13 +308,17 @@ func (_c *EncodingTaskCreate) createSpec() (*EncodingTask, *sqlgraph.CreateSpec)
 		_spec.SetField(encodingtask.FieldChunk, field.TypeBool, value)
 		_node.Chunk = value
 	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(encodingtask.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
+	if value, ok := _c.mutation.Progress(); ok {
+		_spec.SetField(encodingtask.FieldProgress, field.TypeInt, value)
+		_node.Progress = value
 	}
-	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(encodingtask.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(encodingtask.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
+	}
+	if value, ok := _c.mutation.UpdateTime(); ok {
+		_spec.SetField(encodingtask.FieldUpdateTime, field.TypeTime, value)
+		_node.UpdateTime = value
 	}
 	return _node, _spec
 }

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"net/http"
 	"strconv"
 	"time"
 
@@ -75,7 +74,7 @@ func (h *CommentHandler) listComments(c *gin.Context) {
 	mediaID := c.Query("media_id")
 	userID := c.Query("user_id")
 	parentID := c.Query("parent_id")
-	sortBy := c.DefaultQuery("sort_by", "created_at")
+	sortBy := c.DefaultQuery("sort_by", "create_time")
 	order := c.DefaultQuery("order", "desc")
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
@@ -118,9 +117,9 @@ func (h *CommentHandler) listComments(c *gin.Context) {
 	switch sortBy {
 	case "like_count":
 		if order == "asc" {
-			query = query.Order(entity.Asc(comment.FieldAddDate))
+			query = query.Order(entity.Asc(comment.FieldLikeCount))
 		} else {
-			query = query.Order(entity.Desc(comment.FieldAddDate))
+			query = query.Order(entity.Desc(comment.FieldLikeCount))
 		}
 	default:
 		if order == "asc" {
@@ -148,16 +147,7 @@ func (h *CommentHandler) listComments(c *gin.Context) {
 		comments[i] = convertCommentToResponse(item, currentUserID, h.commentLikeUC, ctx)
 	}
 
-	server.OK(c, gin.H{
-		"code":    0,
-		"message": "success",
-		"data": gin.H{
-			"items":     comments,
-			"total":     total,
-			"page":      page,
-			"page_size": pageSize,
-		},
-	})
+	server.Page(c, comments, int64(total), page, pageSize)
 }
 
 func (h *CommentHandler) getComment(c *gin.Context) {
@@ -175,11 +165,7 @@ func (h *CommentHandler) getComment(c *gin.Context) {
 		currentUserID = claims.GetUserID()
 	}
 
-	server.OK(c, gin.H{
-		"code":    0,
-		"message": "success",
-		"data":    convertCommentToResponse(commentObj, currentUserID, h.commentLikeUC, ctx),
-	})
+	server.OK(c, convertCommentToResponse(commentObj, currentUserID, h.commentLikeUC, ctx))
 }
 
 func (h *CommentHandler) createComment(c *gin.Context) {
@@ -200,7 +186,7 @@ func (h *CommentHandler) createComment(c *gin.Context) {
 		} `json:"comment"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "Invalid request body: " + err.Error()})
+		server.Fail(c, server.ErrBadRequest, "Invalid request body: "+err.Error())
 		return
 	}
 
@@ -223,15 +209,11 @@ func (h *CommentHandler) createComment(c *gin.Context) {
 
 	commentObj, err := createBuilder.Save(ctx)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "Failed to create comment: " + err.Error()})
+		server.Fail(c, server.ErrInternal, "Failed to create comment: "+err.Error())
 		return
 	}
 
-	server.Created(c, gin.H{
-		"code":    0,
-		"message": "success",
-		"data":    gin.H{"comment": convertCommentToResponse(commentObj, claims.GetUserID(), h.commentLikeUC, ctx)},
-	})
+	server.Created(c, convertCommentToResponse(commentObj, claims.GetUserID(), h.commentLikeUC, ctx))
 }
 
 func (h *CommentHandler) updateComment(c *gin.Context) {
@@ -263,11 +245,7 @@ func (h *CommentHandler) updateComment(c *gin.Context) {
 		return
 	}
 
-	server.OK(c, gin.H{
-		"code":    0,
-		"message": "success",
-		"data":    gin.H{"comment": convertCommentToResponse(commentObj, "", h.commentLikeUC, ctx)},
-	})
+	server.OK(c, convertCommentToResponse(commentObj, "", h.commentLikeUC, ctx))
 }
 
 func (h *CommentHandler) deleteComment(c *gin.Context) {
@@ -280,13 +258,13 @@ func (h *CommentHandler) deleteComment(c *gin.Context) {
 		return
 	}
 
-	server.OK(c, gin.H{"code": 0, "message": "success"})
+	server.OK(c, nil)
 }
 
 func (h *CommentHandler) registerCommentLikesRoutes(rg *gin.RouterGroup) {
 	commentLikes := rg.Group("/comments/:id")
 	{
-		commentLikes.GET("/likes", func(c *gin.Context) {
+		commentLikes.GET("/likes", server.OptionalJWTMiddleware(h.jwtMgr), func(c *gin.Context) {
 			commentID := c.Param("id")
 			if commentID == "" {
 				server.Fail(c, 400, "comment ID required")

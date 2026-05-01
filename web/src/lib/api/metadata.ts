@@ -16,8 +16,8 @@ export interface MediaMetadata {
     resolution: string;
     aspect_ratio: string;
     file_size: number;
-    created_at: string;
-    updated_at: string;
+    create_time: string;
+    update_time: string;
     // 高级元数据
     key_frames?: KeyFrame[];
     audio_waveform?: AudioWaveform;

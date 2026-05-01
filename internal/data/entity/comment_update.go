@@ -124,6 +124,27 @@ func (_u *CommentUpdate) AddReportCount(v int) *CommentUpdate {
 	return _u
 }
 
+// SetLikeCount sets the "like_count" field.
+func (_u *CommentUpdate) SetLikeCount(v int) *CommentUpdate {
+	_u.mutation.ResetLikeCount()
+	_u.mutation.SetLikeCount(v)
+	return _u
+}
+
+// SetNillableLikeCount sets the "like_count" field if the given value is not nil.
+func (_u *CommentUpdate) SetNillableLikeCount(v *int) *CommentUpdate {
+	if v != nil {
+		_u.SetLikeCount(*v)
+	}
+	return _u
+}
+
+// AddLikeCount adds value to the "like_count" field.
+func (_u *CommentUpdate) AddLikeCount(v int) *CommentUpdate {
+	_u.mutation.AddLikeCount(v)
+	return _u
+}
+
 // SetModeratedBy sets the "moderated_by" field.
 func (_u *CommentUpdate) SetModeratedBy(v string) *CommentUpdate {
 	_u.mutation.SetModeratedBy(v)
@@ -161,6 +182,26 @@ func (_u *CommentUpdate) SetNillableModeratedAt(v *time.Time) *CommentUpdate {
 // ClearModeratedAt clears the value of the "moderated_at" field.
 func (_u *CommentUpdate) ClearModeratedAt() *CommentUpdate {
 	_u.mutation.ClearModeratedAt()
+	return _u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_u *CommentUpdate) SetCreateTime(v time.Time) *CommentUpdate {
+	_u.mutation.SetCreateTime(v)
+	return _u
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *CommentUpdate) SetNillableCreateTime(v *time.Time) *CommentUpdate {
+	if v != nil {
+		_u.SetCreateTime(*v)
+	}
+	return _u
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_u *CommentUpdate) SetUpdateTime(v time.Time) *CommentUpdate {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -351,6 +392,7 @@ func (_u *CommentUpdate) ClearModerator() *CommentUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CommentUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -373,6 +415,14 @@ func (_u *CommentUpdate) Exec(ctx context.Context) error {
 func (_u *CommentUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *CommentUpdate) defaults() {
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := comment.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -425,11 +475,23 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedReportCount(); ok {
 		_spec.AddField(comment.FieldReportCount, field.TypeInt, value)
 	}
+	if value, ok := _u.mutation.LikeCount(); ok {
+		_spec.SetField(comment.FieldLikeCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedLikeCount(); ok {
+		_spec.AddField(comment.FieldLikeCount, field.TypeInt, value)
+	}
 	if value, ok := _u.mutation.ModeratedAt(); ok {
 		_spec.SetField(comment.FieldModeratedAt, field.TypeTime, value)
 	}
 	if _u.mutation.ModeratedAtCleared() {
 		_spec.ClearField(comment.FieldModeratedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(comment.FieldCreateTime, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(comment.FieldUpdateTime, field.TypeTime, value)
 	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -795,6 +857,27 @@ func (_u *CommentUpdateOne) AddReportCount(v int) *CommentUpdateOne {
 	return _u
 }
 
+// SetLikeCount sets the "like_count" field.
+func (_u *CommentUpdateOne) SetLikeCount(v int) *CommentUpdateOne {
+	_u.mutation.ResetLikeCount()
+	_u.mutation.SetLikeCount(v)
+	return _u
+}
+
+// SetNillableLikeCount sets the "like_count" field if the given value is not nil.
+func (_u *CommentUpdateOne) SetNillableLikeCount(v *int) *CommentUpdateOne {
+	if v != nil {
+		_u.SetLikeCount(*v)
+	}
+	return _u
+}
+
+// AddLikeCount adds value to the "like_count" field.
+func (_u *CommentUpdateOne) AddLikeCount(v int) *CommentUpdateOne {
+	_u.mutation.AddLikeCount(v)
+	return _u
+}
+
 // SetModeratedBy sets the "moderated_by" field.
 func (_u *CommentUpdateOne) SetModeratedBy(v string) *CommentUpdateOne {
 	_u.mutation.SetModeratedBy(v)
@@ -832,6 +915,26 @@ func (_u *CommentUpdateOne) SetNillableModeratedAt(v *time.Time) *CommentUpdateO
 // ClearModeratedAt clears the value of the "moderated_at" field.
 func (_u *CommentUpdateOne) ClearModeratedAt() *CommentUpdateOne {
 	_u.mutation.ClearModeratedAt()
+	return _u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_u *CommentUpdateOne) SetCreateTime(v time.Time) *CommentUpdateOne {
+	_u.mutation.SetCreateTime(v)
+	return _u
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *CommentUpdateOne) SetNillableCreateTime(v *time.Time) *CommentUpdateOne {
+	if v != nil {
+		_u.SetCreateTime(*v)
+	}
+	return _u
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_u *CommentUpdateOne) SetUpdateTime(v time.Time) *CommentUpdateOne {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -1035,6 +1138,7 @@ func (_u *CommentUpdateOne) Select(field string, fields ...string) *CommentUpdat
 
 // Save executes the query and returns the updated Comment entity.
 func (_u *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -1057,6 +1161,14 @@ func (_u *CommentUpdateOne) Exec(ctx context.Context) error {
 func (_u *CommentUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *CommentUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := comment.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -1126,11 +1238,23 @@ func (_u *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err er
 	if value, ok := _u.mutation.AddedReportCount(); ok {
 		_spec.AddField(comment.FieldReportCount, field.TypeInt, value)
 	}
+	if value, ok := _u.mutation.LikeCount(); ok {
+		_spec.SetField(comment.FieldLikeCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedLikeCount(); ok {
+		_spec.AddField(comment.FieldLikeCount, field.TypeInt, value)
+	}
 	if value, ok := _u.mutation.ModeratedAt(); ok {
 		_spec.SetField(comment.FieldModeratedAt, field.TypeTime, value)
 	}
 	if _u.mutation.ModeratedAtCleared() {
 		_spec.ClearField(comment.FieldModeratedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(comment.FieldCreateTime, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(comment.FieldUpdateTime, field.TypeTime, value)
 	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{

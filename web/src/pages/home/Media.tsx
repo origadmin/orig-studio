@@ -1,4 +1,4 @@
-﻿// 用户端 - 媒体浏览页面
+// 用户端 - 媒体浏览页面
 import {useState, useEffect} from "react";
 import {Link} from "@tanstack/react-router";
 import {mediaApi, categoryApi, type Media, type Category, normalizeMediaList} from "@/lib/api";

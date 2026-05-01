@@ -44,7 +44,7 @@ func (r *mediaRepo) GetByShortToken(ctx context.Context, shortToken string) (*ty
 	if err != nil {
 		return nil, fmt.Errorf("media not found by short_token %s: %w", shortToken, err)
 	}
-	return convpb.ConvertMediaToMediaPB(m), nil
+	return convpb.ConvertMediaToMediaPBFull(m), nil
 }
 
 // GetByID 通过 UUID 获取媒体（仅用于 Admin/Authenticated API）
@@ -60,7 +60,7 @@ func (r *mediaRepo) GetByID(ctx context.Context, id string) (*types.Media, error
 	if err != nil {
 		return nil, fmt.Errorf("media not found by id %s: %w", id, err)
 	}
-	return convpb.ConvertMediaToMediaPB(m), nil
+	return convpb.ConvertMediaToMediaPBFull(m), nil
 }
 
 // ResolveToID 将 short_token 解析为内部 ID
@@ -84,7 +84,7 @@ func (r *mediaRepo) Get(
 		WithCategory().
 		Only(ctx)
 	if err == nil {
-		return convpb.ConvertMediaToMediaPB(m), nil
+		return convpb.ConvertMediaToMediaPBFull(m), nil
 	}
 	// 失败后按 ID 查询
 	m, err = r.db.Media.Query().
@@ -95,7 +95,7 @@ func (r *mediaRepo) Get(
 	if err != nil {
 		return nil, err
 	}
-	return convpb.ConvertMediaToMediaPB(m), nil
+	return convpb.ConvertMediaToMediaPBFull(m), nil
 }
 
 // GetWithEntity returns both entity.Media (with loaded Edges) and types.Media.
@@ -111,7 +111,7 @@ func (r *mediaRepo) GetWithEntity(
 		WithCategory().
 		Only(ctx)
 	if err == nil {
-		return m, convpb.ConvertMediaToMediaPB(m), nil
+		return m, convpb.ConvertMediaToMediaPBFull(m), nil
 	}
 	// 失败后按 ID 查询
 	m, err = r.db.Media.Query().
@@ -122,7 +122,7 @@ func (r *mediaRepo) GetWithEntity(
 	if err != nil {
 		return nil, nil, err
 	}
-	return m, convpb.ConvertMediaToMediaPB(m), nil
+	return m, convpb.ConvertMediaToMediaPBFull(m), nil
 }
 
 func (r *mediaRepo) List(
@@ -142,6 +142,11 @@ func (r *mediaRepo) List(
 	}
 	if opt.CategoryID != nil {
 		query = query.Where(media.HasCategoryWith(category.ID(*opt.CategoryID)))
+	}
+	if len(opt.CategoryIDs) > 0 {
+		ids := make([]int64, len(opt.CategoryIDs))
+		copy(ids, opt.CategoryIDs)
+		query = query.Where(media.HasCategoryWith(category.IDIn(ids...)))
 	}
 	if opt.State != "" {
 		query = query.Where(media.StateEQ(opt.State))
@@ -182,7 +187,10 @@ func (r *mediaRepo) List(
 		query = query.Where(media.ReviewStatusEQ(*opt.ReviewStatus))
 	}
 	if opt.Privacy != nil {
-		query = query.Where(media.PrivacyEQ(int(*opt.Privacy)))
+		query = query.Where(media.PrivacyEQ(convpb.ConvertPrivacyPBToMediaPrivacy(types.Privacy(*opt.Privacy))))
+	} else if !opt.AdminMode {
+		// Non-admin mode: exclude private media by default
+		query = query.Where(media.PrivacyNEQ(media.PrivacyPRIVATE))
 	}
 
 	total, err := query.Count(ctx)
@@ -193,9 +201,14 @@ func (r *mediaRepo) List(
 	// Apply sorting
 	orderBy := opt.OrderBy
 	if orderBy == "" {
-		orderBy = "created_at"
+		orderBy = "create_time"
 	}
+
 	desc := opt.Descending
+	// Default to DESC for create_time (newest first) when not explicitly specified
+	if !opt.Descending && opt.OrderBy == "" {
+		desc = true
+	}
 
 	switch orderBy {
 	case "title":
@@ -210,13 +223,13 @@ func (r *mediaRepo) List(
 		} else {
 			query = query.Order(entity.Asc(media.FieldViewCount))
 		}
-	case "created_at":
+	case "create_time":
 		fallthrough
 	default:
 		if desc {
-			query = query.Order(entity.Desc(media.FieldCreatedAt))
+			query = query.Order(entity.Desc(media.FieldCreateTime))
 		} else {
-			query = query.Order(entity.Asc(media.FieldCreatedAt))
+			query = query.Order(entity.Asc(media.FieldCreateTime))
 		}
 	}
 
@@ -239,7 +252,7 @@ func (r *mediaRepo) List(
 
 	result := make([]*types.Media, len(items))
 	for i, item := range items {
-		result[i] = convpb.ConvertMediaToMediaPB(item)
+		result[i] = convpb.ConvertMediaToMediaPBFull(item)
 	}
 	return result, int32(total), nil
 }
@@ -293,7 +306,10 @@ func (r *mediaRepo) ListWithEntities(
 		query = query.Where(media.ReviewStatusEQ(*opt.ReviewStatus))
 	}
 	if opt.Privacy != nil {
-		query = query.Where(media.PrivacyEQ(int(*opt.Privacy)))
+		query = query.Where(media.PrivacyEQ(convpb.ConvertPrivacyPBToMediaPrivacy(types.Privacy(*opt.Privacy))))
+	} else if !opt.AdminMode {
+		// Non-admin mode: exclude private media by default
+		query = query.Where(media.PrivacyNEQ(media.PrivacyPRIVATE))
 	}
 
 	total, err := query.Count(ctx)
@@ -304,9 +320,13 @@ func (r *mediaRepo) ListWithEntities(
 	// Apply sorting (same as List)
 	orderBy := opt.OrderBy
 	if orderBy == "" {
-		orderBy = "created_at"
+		orderBy = "create_time"
 	}
 	desc := opt.Descending
+	// Default to DESC for create_time (newest first) when not explicitly specified
+	if !opt.Descending && opt.OrderBy == "" {
+		desc = true
+	}
 
 	switch orderBy {
 	case "title":
@@ -321,13 +341,13 @@ func (r *mediaRepo) ListWithEntities(
 		} else {
 			query = query.Order(entity.Asc(media.FieldViewCount))
 		}
-	case "created_at":
+	case "create_time":
 		fallthrough
 	default:
 		if desc {
-			query = query.Order(entity.Desc(media.FieldCreatedAt))
+			query = query.Order(entity.Desc(media.FieldCreateTime))
 		} else {
-			query = query.Order(entity.Asc(media.FieldCreatedAt))
+			query = query.Order(entity.Asc(media.FieldCreateTime))
 		}
 	}
 
@@ -350,7 +370,7 @@ func (r *mediaRepo) ListWithEntities(
 
 	result := make([]*types.Media, len(items))
 	for i, item := range items {
-		result[i] = convpb.ConvertMediaToMediaPB(item)
+		result[i] = convpb.ConvertMediaToMediaPBFull(item)
 	}
 	return items, result, int32(total), nil
 }
@@ -367,7 +387,7 @@ func (r *mediaRepo) Create(
 		SetMimeType(in.MimeType).
 		SetSize(fmt.Sprintf("%d", in.Size)).
 		SetState(in.State).
-		SetPrivacy(int(in.Privacy)).
+		SetPrivacy(convpb.ConvertPrivacyPBToMediaPrivacy(in.Privacy)).
 		SetEncodingStatus(in.EncodingStatus).
 		SetAllowDownload(in.AllowDownload).
 		SetEnableComments(in.EnableComments).
@@ -409,7 +429,7 @@ func (r *mediaRepo) Create(
 	if err != nil {
 		return nil, err
 	}
-	return convpb.ConvertMediaToMediaPB(m), nil
+	return convpb.ConvertMediaToMediaPBFull(m), nil
 }
 
 // CreateWithEntity creates a new media and returns both entity.Media and types.Media.
@@ -444,7 +464,7 @@ func (r *mediaRepo) CreateWithEntity(
 	if err != nil {
 		return nil, nil, err
 	}
-	return m, convpb.ConvertMediaToMediaPB(m), nil
+	return m, convpb.ConvertMediaToMediaPBFull(m), nil
 }
 
 func (r *mediaRepo) Update(
@@ -493,7 +513,7 @@ func (r *mediaRepo) Update(
 	if in.State != "" {
 		update = update.SetState(in.State)
 	}
-	update = update.SetPrivacy(int(in.Privacy))
+	update = update.SetPrivacy(convpb.ConvertPrivacyPBToMediaPrivacy(in.Privacy))
 	update = update.SetFeatured(in.Featured)
 	update = update.SetAllowDownload(in.AllowDownload)
 	update = update.SetEnableComments(in.EnableComments)
@@ -502,7 +522,7 @@ func (r *mediaRepo) Update(
 	if err != nil {
 		return nil, err
 	}
-	return convpb.ConvertMediaToMediaPB(m), nil
+	return convpb.ConvertMediaToMediaPBFull(m), nil
 }
 
 func (r *mediaRepo) Delete(ctx context.Context, id string) error {
@@ -644,7 +664,7 @@ func (r *mediaRepo) ListFilteredByEncodingStatus(
 
 	query := r.db.Media.Query().
 		Where(media.EncodingStatusIn(statuses...)).
-		Order(entity.Desc(media.FieldUpdatedAt))
+		Order(entity.Desc(media.FieldUpdateTime))
 
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -662,7 +682,7 @@ func (r *mediaRepo) ListFilteredByEncodingStatus(
 
 	result := make([]*types.Media, len(items))
 	for i, item := range items {
-		result[i] = convpb.ConvertMediaToMediaPB(item)
+		result[i] = convpb.ConvertMediaToMediaPBFull(item)
 	}
 	return result, total, nil
 }

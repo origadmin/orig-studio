@@ -31,16 +31,14 @@ type User struct {
 	FirstName string `json:"first_name,omitempty"`
 	// LastName holds the value of the "last_name" field.
 	LastName string `json:"last_name,omitempty"`
-	// IsActive holds the value of the "is_active" field.
-	IsActive bool `json:"is_active,omitempty"`
+	// Status holds the value of the "status" field.
+	Status user.Status `json:"status,omitempty"`
 	// IsStaff holds the value of the "is_staff" field.
 	IsStaff bool `json:"is_staff,omitempty"`
 	// Role holds the value of the "role" field.
 	Role user.Role `json:"role,omitempty"`
 	// IsSuperuser holds the value of the "is_superuser" field.
 	IsSuperuser bool `json:"is_superuser,omitempty"`
-	// IsApproved holds the value of the "is_approved" field.
-	IsApproved bool `json:"is_approved,omitempty"`
 	// IsFeatured holds the value of the "is_featured" field.
 	IsFeatured bool `json:"is_featured,omitempty"`
 	// AdvancedUser holds the value of the "advanced_user" field.
@@ -69,6 +67,28 @@ type User struct {
 	DateAdded time.Time `json:"date_added,omitempty"`
 	// LastLogin holds the value of the "last_login" field.
 	LastLogin time.Time `json:"last_login,omitempty"`
+	// Nickname holds the value of the "nickname" field.
+	Nickname string `json:"nickname,omitempty"`
+	// Phone holds the value of the "phone" field.
+	Phone string `json:"phone,omitempty"`
+	// Avatar holds the value of the "avatar" field.
+	Avatar string `json:"avatar,omitempty"`
+	// LastLoginIP holds the value of the "last_login_ip" field.
+	LastLoginIP string `json:"last_login_ip,omitempty"`
+	// LoginIP holds the value of the "login_ip" field.
+	LoginIP string `json:"login_ip,omitempty"`
+	// LastLoginTime holds the value of the "last_login_time" field.
+	LastLoginTime time.Time `json:"last_login_time,omitempty"`
+	// LoginTime holds the value of the "login_time" field.
+	LoginTime time.Time `json:"login_time,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
+	// Create author user ID
+	CreateAuthor string `json:"create_author,omitempty"`
+	// Update author user ID
+	UpdateAuthor string `json:"update_author,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges        UserEdges `json:"edges"`
@@ -285,13 +305,13 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldIsActive, user.FieldIsStaff, user.FieldIsSuperuser, user.FieldIsApproved, user.FieldIsFeatured, user.FieldAdvancedUser, user.FieldIsEditor, user.FieldIsManager, user.FieldNotificationOnComments, user.FieldAllowContact:
+		case user.FieldIsStaff, user.FieldIsSuperuser, user.FieldIsFeatured, user.FieldAdvancedUser, user.FieldIsEditor, user.FieldIsManager, user.FieldNotificationOnComments, user.FieldAllowContact:
 			values[i] = new(sql.NullBool)
 		case user.FieldMediaCount:
 			values[i] = new(sql.NullInt64)
-		case user.FieldID, user.FieldUsername, user.FieldEmail, user.FieldPassword, user.FieldName, user.FieldSlug, user.FieldFirstName, user.FieldLastName, user.FieldRole, user.FieldTitle, user.FieldDescription, user.FieldLogo, user.FieldLocation:
+		case user.FieldID, user.FieldUsername, user.FieldEmail, user.FieldPassword, user.FieldName, user.FieldSlug, user.FieldFirstName, user.FieldLastName, user.FieldStatus, user.FieldRole, user.FieldTitle, user.FieldDescription, user.FieldLogo, user.FieldLocation, user.FieldNickname, user.FieldPhone, user.FieldAvatar, user.FieldLastLoginIP, user.FieldLoginIP, user.FieldCreateAuthor, user.FieldUpdateAuthor:
 			values[i] = new(sql.NullString)
-		case user.FieldDateJoined, user.FieldDateAdded, user.FieldLastLogin:
+		case user.FieldDateJoined, user.FieldDateAdded, user.FieldLastLogin, user.FieldLastLoginTime, user.FieldLoginTime, user.FieldCreateTime, user.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -356,11 +376,11 @@ func (_m *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.LastName = value.String
 			}
-		case user.FieldIsActive:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field is_active", values[i])
+		case user.FieldStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				_m.IsActive = value.Bool
+				_m.Status = user.Status(value.String)
 			}
 		case user.FieldIsStaff:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -379,12 +399,6 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field is_superuser", values[i])
 			} else if value.Valid {
 				_m.IsSuperuser = value.Bool
-			}
-		case user.FieldIsApproved:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field is_approved", values[i])
-			} else if value.Valid {
-				_m.IsApproved = value.Bool
 			}
 		case user.FieldIsFeatured:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -469,6 +483,72 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field last_login", values[i])
 			} else if value.Valid {
 				_m.LastLogin = value.Time
+			}
+		case user.FieldNickname:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field nickname", values[i])
+			} else if value.Valid {
+				_m.Nickname = value.String
+			}
+		case user.FieldPhone:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field phone", values[i])
+			} else if value.Valid {
+				_m.Phone = value.String
+			}
+		case user.FieldAvatar:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field avatar", values[i])
+			} else if value.Valid {
+				_m.Avatar = value.String
+			}
+		case user.FieldLastLoginIP:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field last_login_ip", values[i])
+			} else if value.Valid {
+				_m.LastLoginIP = value.String
+			}
+		case user.FieldLoginIP:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field login_ip", values[i])
+			} else if value.Valid {
+				_m.LoginIP = value.String
+			}
+		case user.FieldLastLoginTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field last_login_time", values[i])
+			} else if value.Valid {
+				_m.LastLoginTime = value.Time
+			}
+		case user.FieldLoginTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field login_time", values[i])
+			} else if value.Valid {
+				_m.LoginTime = value.Time
+			}
+		case user.FieldCreateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+			} else if value.Valid {
+				_m.CreateTime = value.Time
+			}
+		case user.FieldUpdateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
+			} else if value.Valid {
+				_m.UpdateTime = value.Time
+			}
+		case user.FieldCreateAuthor:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field create_author", values[i])
+			} else if value.Valid {
+				_m.CreateAuthor = value.String
+			}
+		case user.FieldUpdateAuthor:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field update_author", values[i])
+			} else if value.Valid {
+				_m.UpdateAuthor = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -617,8 +697,8 @@ func (_m *User) String() string {
 	builder.WriteString("last_name=")
 	builder.WriteString(_m.LastName)
 	builder.WriteString(", ")
-	builder.WriteString("is_active=")
-	builder.WriteString(fmt.Sprintf("%v", _m.IsActive))
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
 	builder.WriteString(", ")
 	builder.WriteString("is_staff=")
 	builder.WriteString(fmt.Sprintf("%v", _m.IsStaff))
@@ -628,9 +708,6 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("is_superuser=")
 	builder.WriteString(fmt.Sprintf("%v", _m.IsSuperuser))
-	builder.WriteString(", ")
-	builder.WriteString("is_approved=")
-	builder.WriteString(fmt.Sprintf("%v", _m.IsApproved))
 	builder.WriteString(", ")
 	builder.WriteString("is_featured=")
 	builder.WriteString(fmt.Sprintf("%v", _m.IsFeatured))
@@ -673,6 +750,39 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("last_login=")
 	builder.WriteString(_m.LastLogin.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("nickname=")
+	builder.WriteString(_m.Nickname)
+	builder.WriteString(", ")
+	builder.WriteString("phone=")
+	builder.WriteString(_m.Phone)
+	builder.WriteString(", ")
+	builder.WriteString("avatar=")
+	builder.WriteString(_m.Avatar)
+	builder.WriteString(", ")
+	builder.WriteString("last_login_ip=")
+	builder.WriteString(_m.LastLoginIP)
+	builder.WriteString(", ")
+	builder.WriteString("login_ip=")
+	builder.WriteString(_m.LoginIP)
+	builder.WriteString(", ")
+	builder.WriteString("last_login_time=")
+	builder.WriteString(_m.LastLoginTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("login_time=")
+	builder.WriteString(_m.LoginTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("create_time=")
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("update_time=")
+	builder.WriteString(_m.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("create_author=")
+	builder.WriteString(_m.CreateAuthor)
+	builder.WriteString(", ")
+	builder.WriteString("update_author=")
+	builder.WriteString(_m.UpdateAuthor)
 	builder.WriteByte(')')
 	return builder.String()
 }

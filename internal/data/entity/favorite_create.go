@@ -34,16 +34,30 @@ func (_c *FavoriteCreate) SetUserID(v string) *FavoriteCreate {
 	return _c
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_c *FavoriteCreate) SetCreatedAt(v time.Time) *FavoriteCreate {
-	_c.mutation.SetCreatedAt(v)
+// SetPlaylistID sets the "playlist_id" field.
+func (_c *FavoriteCreate) SetPlaylistID(v string) *FavoriteCreate {
+	_c.mutation.SetPlaylistID(v)
 	return _c
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *FavoriteCreate) SetNillableCreatedAt(v *time.Time) *FavoriteCreate {
+// SetNillablePlaylistID sets the "playlist_id" field if the given value is not nil.
+func (_c *FavoriteCreate) SetNillablePlaylistID(v *string) *FavoriteCreate {
 	if v != nil {
-		_c.SetCreatedAt(*v)
+		_c.SetPlaylistID(*v)
+	}
+	return _c
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_c *FavoriteCreate) SetCreateTime(v time.Time) *FavoriteCreate {
+	_c.mutation.SetCreateTime(v)
+	return _c
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *FavoriteCreate) SetNillableCreateTime(v *time.Time) *FavoriteCreate {
+	if v != nil {
+		_c.SetCreateTime(*v)
 	}
 	return _c
 }
@@ -107,9 +121,9 @@ func (_c *FavoriteCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *FavoriteCreate) defaults() {
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := favorite.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := favorite.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := favorite.DefaultID()
@@ -125,8 +139,8 @@ func (_c *FavoriteCreate) check() error {
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`entity: missing required field "Favorite.user_id"`)}
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "Favorite.created_at"`)}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "Favorite.create_time"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := favorite.IDValidator(v); err != nil {
@@ -174,9 +188,13 @@ func (_c *FavoriteCreate) createSpec() (*Favorite, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(favorite.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
+	if value, ok := _c.mutation.PlaylistID(); ok {
+		_spec.SetField(favorite.FieldPlaylistID, field.TypeString, value)
+		_node.PlaylistID = value
+	}
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(favorite.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
 	}
 	if nodes := _c.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

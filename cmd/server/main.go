@@ -12,8 +12,8 @@ import (
 	"context"
 	"flag"
 
+	"origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/handler"
-	"origadmin/application/origcms/internal/infra/conf"
 	confhelper "origadmin/application/origcms/internal/helpers/conf"
 	"origadmin/application/origcms/internal/server"
 
@@ -117,6 +117,7 @@ func main() {
 			deps.AdminHandler,
 			deps.AdminTagHandler,
 			deps.StubHandler,
+			deps.SpriteHandler,
 			deps.SystemHandler,
 			deps.StatsHandler,
 		},

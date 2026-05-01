@@ -60,16 +60,44 @@ func (_c *ChannelCreate) SetBannerLogo(v string) *ChannelCreate {
 	return _c
 }
 
-// SetIsPublic sets the "is_public" field.
-func (_c *ChannelCreate) SetIsPublic(v bool) *ChannelCreate {
-	_c.mutation.SetIsPublic(v)
+// SetPrivacy sets the "privacy" field.
+func (_c *ChannelCreate) SetPrivacy(v channel.Privacy) *ChannelCreate {
+	_c.mutation.SetPrivacy(v)
 	return _c
 }
 
-// SetNillableIsPublic sets the "is_public" field if the given value is not nil.
-func (_c *ChannelCreate) SetNillableIsPublic(v *bool) *ChannelCreate {
+// SetNillablePrivacy sets the "privacy" field if the given value is not nil.
+func (_c *ChannelCreate) SetNillablePrivacy(v *channel.Privacy) *ChannelCreate {
 	if v != nil {
-		_c.SetIsPublic(*v)
+		_c.SetPrivacy(*v)
+	}
+	return _c
+}
+
+// SetSubscriberCount sets the "subscriber_count" field.
+func (_c *ChannelCreate) SetSubscriberCount(v int64) *ChannelCreate {
+	_c.mutation.SetSubscriberCount(v)
+	return _c
+}
+
+// SetNillableSubscriberCount sets the "subscriber_count" field if the given value is not nil.
+func (_c *ChannelCreate) SetNillableSubscriberCount(v *int64) *ChannelCreate {
+	if v != nil {
+		_c.SetSubscriberCount(*v)
+	}
+	return _c
+}
+
+// SetMediaCount sets the "media_count" field.
+func (_c *ChannelCreate) SetMediaCount(v int) *ChannelCreate {
+	_c.mutation.SetMediaCount(v)
+	return _c
+}
+
+// SetNillableMediaCount sets the "media_count" field if the given value is not nil.
+func (_c *ChannelCreate) SetNillableMediaCount(v *int) *ChannelCreate {
+	if v != nil {
+		_c.SetMediaCount(*v)
 	}
 	return _c
 }
@@ -84,6 +112,34 @@ func (_c *ChannelCreate) SetAddDate(v time.Time) *ChannelCreate {
 func (_c *ChannelCreate) SetNillableAddDate(v *time.Time) *ChannelCreate {
 	if v != nil {
 		_c.SetAddDate(*v)
+	}
+	return _c
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_c *ChannelCreate) SetCreateTime(v time.Time) *ChannelCreate {
+	_c.mutation.SetCreateTime(v)
+	return _c
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *ChannelCreate) SetNillableCreateTime(v *time.Time) *ChannelCreate {
+	if v != nil {
+		_c.SetCreateTime(*v)
+	}
+	return _c
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_c *ChannelCreate) SetUpdateTime(v time.Time) *ChannelCreate {
+	_c.mutation.SetUpdateTime(v)
+	return _c
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (_c *ChannelCreate) SetNillableUpdateTime(v *time.Time) *ChannelCreate {
+	if v != nil {
+		_c.SetUpdateTime(*v)
 	}
 	return _c
 }
@@ -161,13 +217,29 @@ func (_c *ChannelCreate) defaults() {
 		v := channel.DefaultShortToken()
 		_c.mutation.SetShortToken(v)
 	}
-	if _, ok := _c.mutation.IsPublic(); !ok {
-		v := channel.DefaultIsPublic
-		_c.mutation.SetIsPublic(v)
+	if _, ok := _c.mutation.Privacy(); !ok {
+		v := channel.DefaultPrivacy
+		_c.mutation.SetPrivacy(v)
+	}
+	if _, ok := _c.mutation.SubscriberCount(); !ok {
+		v := channel.DefaultSubscriberCount
+		_c.mutation.SetSubscriberCount(v)
+	}
+	if _, ok := _c.mutation.MediaCount(); !ok {
+		v := channel.DefaultMediaCount
+		_c.mutation.SetMediaCount(v)
 	}
 	if _, ok := _c.mutation.AddDate(); !ok {
 		v := channel.DefaultAddDate()
 		_c.mutation.SetAddDate(v)
+	}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := channel.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
+	}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		v := channel.DefaultUpdateTime()
+		_c.mutation.SetUpdateTime(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := channel.DefaultID()
@@ -207,11 +279,28 @@ func (_c *ChannelCreate) check() error {
 			return &ValidationError{Name: "banner_logo", err: fmt.Errorf(`entity: validator failed for field "Channel.banner_logo": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.IsPublic(); !ok {
-		return &ValidationError{Name: "is_public", err: errors.New(`entity: missing required field "Channel.is_public"`)}
+	if _, ok := _c.mutation.Privacy(); !ok {
+		return &ValidationError{Name: "privacy", err: errors.New(`entity: missing required field "Channel.privacy"`)}
+	}
+	if v, ok := _c.mutation.Privacy(); ok {
+		if err := channel.PrivacyValidator(v); err != nil {
+			return &ValidationError{Name: "privacy", err: fmt.Errorf(`entity: validator failed for field "Channel.privacy": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.SubscriberCount(); !ok {
+		return &ValidationError{Name: "subscriber_count", err: errors.New(`entity: missing required field "Channel.subscriber_count"`)}
+	}
+	if _, ok := _c.mutation.MediaCount(); !ok {
+		return &ValidationError{Name: "media_count", err: errors.New(`entity: missing required field "Channel.media_count"`)}
 	}
 	if _, ok := _c.mutation.AddDate(); !ok {
 		return &ValidationError{Name: "add_date", err: errors.New(`entity: missing required field "Channel.add_date"`)}
+	}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "Channel.create_time"`)}
+	}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`entity: missing required field "Channel.update_time"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := channel.IDValidator(v); err != nil {
@@ -272,13 +361,29 @@ func (_c *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 		_spec.SetField(channel.FieldBannerLogo, field.TypeString, value)
 		_node.BannerLogo = value
 	}
-	if value, ok := _c.mutation.IsPublic(); ok {
-		_spec.SetField(channel.FieldIsPublic, field.TypeBool, value)
-		_node.IsPublic = value
+	if value, ok := _c.mutation.Privacy(); ok {
+		_spec.SetField(channel.FieldPrivacy, field.TypeEnum, value)
+		_node.Privacy = value
+	}
+	if value, ok := _c.mutation.SubscriberCount(); ok {
+		_spec.SetField(channel.FieldSubscriberCount, field.TypeInt64, value)
+		_node.SubscriberCount = value
+	}
+	if value, ok := _c.mutation.MediaCount(); ok {
+		_spec.SetField(channel.FieldMediaCount, field.TypeInt, value)
+		_node.MediaCount = value
 	}
 	if value, ok := _c.mutation.AddDate(); ok {
 		_spec.SetField(channel.FieldAddDate, field.TypeTime, value)
 		_node.AddDate = value
+	}
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(channel.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
+	}
+	if value, ok := _c.mutation.UpdateTime(); ok {
+		_spec.SetField(channel.FieldUpdateTime, field.TypeTime, value)
+		_node.UpdateTime = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

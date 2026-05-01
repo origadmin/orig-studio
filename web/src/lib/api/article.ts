@@ -1,5 +1,14 @@
-// API 客户端 - 文章模块
+// API client - Article module
 import {api} from "../request";
+
+export interface MediaBrief {
+    id: string;
+    title: string;
+    thumbnail?: string;
+    duration: number;
+    type: string;
+    short_token?: string;
+}
 
 export interface Article {
     id: string;
@@ -10,13 +19,16 @@ export interface Article {
     state: string;
     user_id: string;
     category_id?: number;
+    media_id?: string;
+    thumbnail?: string;
     tags?: string[];
     view_count: number;
     comment_count: number;
     featured: boolean;
     published_at?: string;
-    created_at: string;
-    updated_at?: string;
+    create_time: string;
+    update_time?: string;
+    media?: MediaBrief;
 }
 
 export interface ArticleListResponse {
@@ -33,6 +45,8 @@ export interface CreateArticleRequest {
     summary?: string;
     state?: string;
     category_id?: number;
+    media_id?: string;
+    thumbnail?: string;
     tags?: string[];
     featured?: boolean;
     published_at?: string;
@@ -45,6 +59,8 @@ export interface UpdateArticleRequest {
     summary?: string;
     state?: string;
     category_id?: number;
+    media_id?: string;
+    thumbnail?: string;
     tags?: string[];
     featured?: boolean;
     published_at?: string;

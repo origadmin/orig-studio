@@ -1,10 +1,11 @@
-﻿import React, {useState, useEffect, useMemo, useRef} from 'react';
+import React, {useState, useEffect, useMemo, useRef} from 'react';
 import {Link, useLocation} from '@tanstack/react-router';
 import {useTranslation} from 'react-i18next';
 import {useAuth} from '@/hooks/useAuth';
 import {useSubscribedChannels} from '@/hooks/useSubscriptions';
 import {NAV_CONFIG} from '@/config/navigation';
 import type {NavSection, NavItem} from '@/types/nav';
+import type {User as AuthUser} from '@/contexts/auth/types';
 
 interface SidebarProps {
     collapsed?: boolean;
@@ -18,20 +19,28 @@ interface RenderNavItem {
     to: string;
 }
 
-function toRenderItems(items: NavItem[]): RenderNavItem[] {
-    return items.map((item) => ({
-        id: item.id,
-        icon: item.icon ? <item.icon size={22}/> : null,
-        label: item.label,
-        to: item.to,
-    }));
+function toRenderItems(items: NavItem[], currentUser?: AuthUser | null): RenderNavItem[] {
+    return items.map((item) => {
+        let to = item.to;
+        // Resolve dynamic paths: replace __dynamic__ placeholder with current user's username
+        if (item.isDynamic && item.to.includes('__dynamic__')) {
+            const username = currentUser?.username;
+            to = username ? `/@${username}` : '/auth/signin';
+        }
+        return {
+            id: item.id,
+            icon: item.icon ? <item.icon size={22}/> : null,
+            label: item.label,
+            to,
+        };
+    });
 }
 
 const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
     const {t} = useTranslation();
     const location = useLocation();
     const pathname = location.pathname;
-    const {isAuthenticated, isAdmin} = useAuth();
+    const {isAuthenticated, isAdmin, user} = useAuth();
     const {channels: subChannels} = useSubscribedChannels();
     const [hoveredSection, setHoveredSection] = useState<NavSection | null>(null);
     const [hoveredItems, setHoveredItems] = useState<RenderNavItem[]>([]);
@@ -52,13 +61,13 @@ const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
             if (section.requiresAdmin && !isAdmin) return false;
             return true;
         }).map((section) => {
-            const baseItems = toRenderItems(section.items);
+            const baseItems = toRenderItems(section.items, user);
             if (section.id === 'subscriptions' && subChannels.length > 0) {
                 return {section, items: [...baseItems, ...subChannels as RenderNavItem[]]};
             }
             return {section, items: baseItems};
         });
-    }, [isAuthenticated, isAdmin, subChannels]);
+    }, [isAuthenticated, isAdmin, user, subChannels]);
 
     const handleSectionEnter = (e: React.MouseEvent, section: NavSection, items: RenderNavItem[]) => {
         if (closeTimerRef.current) clearTimeout(closeTimerRef.current);

@@ -29,10 +29,13 @@ func (Comment) Fields() []ent.Field {
 		field.Time("add_date").Default(time.Now),
 		field.String("media_id").StorageKey("media_comments"),
 		field.String("user_id").StorageKey("user_comments"),
-		field.Enum("status").Values("PENDING", "APPROVED", "REJECTED").Default("PENDING"),
+		field.Enum("status").Values("PENDING", "APPROVED", "REJECTED", "BLOCKED").Default("PENDING"),
 		field.Int("report_count").Default(0),
+		field.Int("like_count").Default(0),
 		field.String("moderated_by").Optional(),
 		field.Time("moderated_at").Optional(),
+		field.Time("create_time").Default(time.Now),
+		field.Time("update_time").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 

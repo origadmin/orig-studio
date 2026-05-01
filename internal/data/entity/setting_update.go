@@ -153,9 +153,9 @@ func (_u *SettingUpdate) SetNillableIsBuiltin(v *bool) *SettingUpdate {
 	return _u
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *SettingUpdate) SetUpdatedAt(v time.Time) *SettingUpdate {
-	_u.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_u *SettingUpdate) SetUpdateTime(v time.Time) *SettingUpdate {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -194,9 +194,9 @@ func (_u *SettingUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *SettingUpdate) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := setting.UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := setting.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -268,8 +268,8 @@ func (_u *SettingUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.IsBuiltin(); ok {
 		_spec.SetField(setting.FieldIsBuiltin, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(setting.FieldUpdatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(setting.FieldUpdateTime, field.TypeTime, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -417,9 +417,9 @@ func (_u *SettingUpdateOne) SetNillableIsBuiltin(v *bool) *SettingUpdateOne {
 	return _u
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *SettingUpdateOne) SetUpdatedAt(v time.Time) *SettingUpdateOne {
-	_u.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_u *SettingUpdateOne) SetUpdateTime(v time.Time) *SettingUpdateOne {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -471,9 +471,9 @@ func (_u *SettingUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *SettingUpdateOne) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := setting.UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := setting.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -562,8 +562,8 @@ func (_u *SettingUpdateOne) sqlSave(ctx context.Context) (_node *Setting, err er
 	if value, ok := _u.mutation.IsBuiltin(); ok {
 		_spec.SetField(setting.FieldIsBuiltin, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(setting.FieldUpdatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(setting.FieldUpdateTime, field.TypeTime, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Setting{config: _u.config}

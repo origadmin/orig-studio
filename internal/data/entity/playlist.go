@@ -26,9 +26,19 @@ type Playlist struct {
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
 	// Privacy holds the value of the "privacy" field.
-	Privacy int `json:"privacy,omitempty"`
+	Privacy playlist.Privacy `json:"privacy,omitempty"`
 	// AddDate holds the value of the "add_date" field.
 	AddDate time.Time `json:"add_date,omitempty"`
+	// Status holds the value of the "status" field.
+	Status playlist.Status `json:"status,omitempty"`
+	// Thumbnail holds the value of the "thumbnail" field.
+	Thumbnail string `json:"thumbnail,omitempty"`
+	// MediaCount holds the value of the "media_count" field.
+	MediaCount int `json:"media_count,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PlaylistQuery when eager-loading is set.
 	Edges        PlaylistEdges `json:"edges"`
@@ -58,11 +68,11 @@ func (*Playlist) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case playlist.FieldPrivacy:
+		case playlist.FieldMediaCount:
 			values[i] = new(sql.NullInt64)
-		case playlist.FieldID, playlist.FieldTitle, playlist.FieldDescription, playlist.FieldShortToken, playlist.FieldUserID:
+		case playlist.FieldID, playlist.FieldTitle, playlist.FieldDescription, playlist.FieldShortToken, playlist.FieldUserID, playlist.FieldPrivacy, playlist.FieldStatus, playlist.FieldThumbnail:
 			values[i] = new(sql.NullString)
-		case playlist.FieldAddDate:
+		case playlist.FieldAddDate, playlist.FieldCreateTime, playlist.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -110,16 +120,46 @@ func (_m *Playlist) assignValues(columns []string, values []any) error {
 				_m.UserID = value.String
 			}
 		case playlist.FieldPrivacy:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field privacy", values[i])
 			} else if value.Valid {
-				_m.Privacy = int(value.Int64)
+				_m.Privacy = playlist.Privacy(value.String)
 			}
 		case playlist.FieldAddDate:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field add_date", values[i])
 			} else if value.Valid {
 				_m.AddDate = value.Time
+			}
+		case playlist.FieldStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				_m.Status = playlist.Status(value.String)
+			}
+		case playlist.FieldThumbnail:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field thumbnail", values[i])
+			} else if value.Valid {
+				_m.Thumbnail = value.String
+			}
+		case playlist.FieldMediaCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field media_count", values[i])
+			} else if value.Valid {
+				_m.MediaCount = int(value.Int64)
+			}
+		case playlist.FieldCreateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+			} else if value.Valid {
+				_m.CreateTime = value.Time
+			}
+		case playlist.FieldUpdateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
+			} else if value.Valid {
+				_m.UpdateTime = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -179,6 +219,21 @@ func (_m *Playlist) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("add_date=")
 	builder.WriteString(_m.AddDate.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString(", ")
+	builder.WriteString("thumbnail=")
+	builder.WriteString(_m.Thumbnail)
+	builder.WriteString(", ")
+	builder.WriteString("media_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MediaCount))
+	builder.WriteString(", ")
+	builder.WriteString("create_time=")
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("update_time=")
+	builder.WriteString(_m.UpdateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

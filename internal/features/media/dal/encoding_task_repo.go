@@ -151,7 +151,7 @@ func (r *encodingTaskRepo) ListFlat(
 
 	// Paginate
 	items, err := query.
-		Order(entity.Desc(encodingtask.FieldUpdatedAt)).
+		Order(entity.Desc(encodingtask.FieldUpdateTime)).
 		Offset(offset).
 		Limit(limit).
 		All(ctx)
@@ -175,8 +175,8 @@ func convertEncodingTaskToDto(m *entity.EncodingTask) *dto.EncodingTask {
 		OutputPath:   m.OutputPath,
 		ErrorMessage: m.ErrorMessage,
 		Chunk:        m.Chunk,
-		CreateTime:   m.CreatedAt.Format(time.RFC3339),
-		UpdateTime:   m.UpdatedAt.Format(time.RFC3339),
+		CreateTime:   m.CreateTime.Format(time.RFC3339),
+		UpdateTime:   m.UpdateTime.Format(time.RFC3339),
 	}
 }
 

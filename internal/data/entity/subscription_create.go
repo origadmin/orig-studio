@@ -33,16 +33,16 @@ func (_c *SubscriptionCreate) SetChannelID(v string) *SubscriptionCreate {
 	return _c
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_c *SubscriptionCreate) SetCreatedAt(v time.Time) *SubscriptionCreate {
-	_c.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_c *SubscriptionCreate) SetCreateTime(v time.Time) *SubscriptionCreate {
+	_c.mutation.SetCreateTime(v)
 	return _c
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *SubscriptionCreate) SetNillableCreatedAt(v *time.Time) *SubscriptionCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillableCreateTime(v *time.Time) *SubscriptionCreate {
 	if v != nil {
-		_c.SetCreatedAt(*v)
+		_c.SetCreateTime(*v)
 	}
 	return _c
 }
@@ -106,9 +106,9 @@ func (_c *SubscriptionCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *SubscriptionCreate) defaults() {
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := subscription.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := subscription.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := subscription.DefaultID()
@@ -124,8 +124,8 @@ func (_c *SubscriptionCreate) check() error {
 	if _, ok := _c.mutation.ChannelID(); !ok {
 		return &ValidationError{Name: "channel_id", err: errors.New(`entity: missing required field "Subscription.channel_id"`)}
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "Subscription.created_at"`)}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "Subscription.create_time"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := subscription.IDValidator(v); err != nil {
@@ -173,9 +173,9 @@ func (_c *SubscriptionCreate) createSpec() (*Subscription, *sqlgraph.CreateSpec)
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(subscription.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(subscription.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
 	}
 	if nodes := _c.mutation.SubscriberIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

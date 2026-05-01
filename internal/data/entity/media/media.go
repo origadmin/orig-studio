@@ -3,6 +3,7 @@
 package media
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -64,6 +65,10 @@ const (
 	FieldFavoriteCount = "favorite_count"
 	// FieldDownloadCount holds the string denoting the download_count field in the database.
 	FieldDownloadCount = "download_count"
+	// FieldShareCount holds the string denoting the share_count field in the database.
+	FieldShareCount = "share_count"
+	// FieldUUID holds the string denoting the uuid field in the database.
+	FieldUUID = "uuid"
 	// FieldAllowDownload holds the string denoting the allow_download field in the database.
 	FieldAllowDownload = "allow_download"
 	// FieldEnableComments holds the string denoting the enable_comments field in the database.
@@ -94,10 +99,14 @@ const (
 	FieldChannelID = "channel_id"
 	// FieldPublishedAt holds the string denoting the published_at field in the database.
 	FieldPublishedAt = "published_at"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
-	FieldCreatedAt = "created_at"
-	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
-	FieldUpdatedAt = "updated_at"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
+	// FieldUpdateTime holds the string denoting the update_time field in the database.
+	FieldUpdateTime = "update_time"
+	// FieldCreateAuthor holds the string denoting the create_author field in the database.
+	FieldCreateAuthor = "create_author"
+	// FieldUpdateAuthor holds the string denoting the update_author field in the database.
+	FieldUpdateAuthor = "update_author"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeCategory holds the string denoting the category edge name in mutations.
@@ -116,6 +125,8 @@ const (
 	EdgeLikes = "likes"
 	// EdgeReviewLogs holds the string denoting the review_logs edge name in mutations.
 	EdgeReviewLogs = "review_logs"
+	// EdgeArticles holds the string denoting the articles edge name in mutations.
+	EdgeArticles = "articles"
 	// Table holds the table name of the media in the database.
 	Table = "content_media"
 	// UserTable is the table that holds the user relation/edge.
@@ -181,6 +192,13 @@ const (
 	ReviewLogsInverseTable = "content_media_review_logs"
 	// ReviewLogsColumn is the table column denoting the review_logs relation/edge.
 	ReviewLogsColumn = "media_id"
+	// ArticlesTable is the table that holds the articles relation/edge.
+	ArticlesTable = "content_articles"
+	// ArticlesInverseTable is the table name for the Article entity.
+	// It exists in this package in order to avoid circular dependency with the "article" package.
+	ArticlesInverseTable = "content_articles"
+	// ArticlesColumn is the table column denoting the articles relation/edge.
+	ArticlesColumn = "media_id"
 )
 
 // Columns holds all SQL columns for media fields.
@@ -211,6 +229,8 @@ var Columns = []string{
 	FieldCommentCount,
 	FieldFavoriteCount,
 	FieldDownloadCount,
+	FieldShareCount,
+	FieldUUID,
 	FieldAllowDownload,
 	FieldEnableComments,
 	FieldFeatured,
@@ -226,8 +246,10 @@ var Columns = []string{
 	FieldCategoryID,
 	FieldChannelID,
 	FieldPublishedAt,
-	FieldCreatedAt,
-	FieldUpdatedAt,
+	FieldCreateTime,
+	FieldUpdateTime,
+	FieldCreateAuthor,
+	FieldUpdateAuthor,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "content_media"
@@ -287,8 +309,6 @@ var (
 	Md5sumValidator func(string) error
 	// ExtensionValidator is a validator for the "extension" field. It is called by the builders before save.
 	ExtensionValidator func(string) error
-	// DefaultPrivacy holds the default value on creation for the "privacy" field.
-	DefaultPrivacy int
 	// DefaultEncodingStatus holds the default value on creation for the "encoding_status" field.
 	DefaultEncodingStatus string
 	// EncodingStatusValidator is a validator for the "encoding_status" field. It is called by the builders before save.
@@ -309,6 +329,10 @@ var (
 	DefaultFavoriteCount int64
 	// DefaultDownloadCount holds the default value on creation for the "download_count" field.
 	DefaultDownloadCount int64
+	// DefaultShareCount holds the default value on creation for the "share_count" field.
+	DefaultShareCount int64
+	// UUIDValidator is a validator for the "uuid" field. It is called by the builders before save.
+	UUIDValidator func(string) error
 	// DefaultAllowDownload holds the default value on creation for the "allow_download" field.
 	DefaultAllowDownload bool
 	// DefaultEnableComments holds the default value on creation for the "enable_comments" field.
@@ -331,17 +355,49 @@ var (
 	SpritePathValidator func(string) error
 	// VttPathValidator is a validator for the "vtt_path" field. It is called by the builders before save.
 	VttPathValidator func(string) error
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() time.Time
-	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
-	DefaultUpdatedAt func() time.Time
-	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
-	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
+	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
+	DefaultUpdateTime func() time.Time
+	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
+	UpdateDefaultUpdateTime func() time.Time
+	// DefaultCreateAuthor holds the default value on creation for the "create_author" field.
+	DefaultCreateAuthor string
+	// DefaultUpdateAuthor holds the default value on creation for the "update_author" field.
+	DefaultUpdateAuthor string
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
+
+// Privacy defines the type for the "privacy" enum field.
+type Privacy string
+
+// PrivacyPUBLIC is the default value of the Privacy enum.
+const DefaultPrivacy = PrivacyPUBLIC
+
+// Privacy values.
+const (
+	PrivacyPUBLIC   Privacy = "PUBLIC"
+	PrivacyPRIVATE  Privacy = "PRIVATE"
+	PrivacyUNLISTED Privacy = "UNLISTED"
+	PrivacyPAID     Privacy = "PAID"
+)
+
+func (pr Privacy) String() string {
+	return string(pr)
+}
+
+// PrivacyValidator is a validator for the "privacy" field enum values. It is called by the builders before save.
+func PrivacyValidator(pr Privacy) error {
+	switch pr {
+	case PrivacyPUBLIC, PrivacyPRIVATE, PrivacyUNLISTED, PrivacyPAID:
+		return nil
+	default:
+		return fmt.Errorf("media: invalid enum value for privacy field: %q", pr)
+	}
+}
 
 // OrderOption defines the ordering options for the Media queries.
 type OrderOption func(*sql.Selector)
@@ -476,6 +532,16 @@ func ByDownloadCount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDownloadCount, opts...).ToFunc()
 }
 
+// ByShareCount orders the results by the share_count field.
+func ByShareCount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldShareCount, opts...).ToFunc()
+}
+
+// ByUUID orders the results by the uuid field.
+func ByUUID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUUID, opts...).ToFunc()
+}
+
 // ByAllowDownload orders the results by the allow_download field.
 func ByAllowDownload(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAllowDownload, opts...).ToFunc()
@@ -546,14 +612,24 @@ func ByPublishedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPublishedAt, opts...).ToFunc()
 }
 
-// ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
 }
 
-// ByUpdatedAt orders the results by the updated_at field.
-func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+// ByUpdateTime orders the results by the update_time field.
+func ByUpdateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdateTime, opts...).ToFunc()
+}
+
+// ByCreateAuthor orders the results by the create_author field.
+func ByCreateAuthor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateAuthor, opts...).ToFunc()
+}
+
+// ByUpdateAuthor orders the results by the update_author field.
+func ByUpdateAuthor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdateAuthor, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.
@@ -660,6 +736,20 @@ func ByReviewLogs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newReviewLogsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByArticlesCount orders the results by articles count.
+func ByArticlesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newArticlesStep(), opts...)
+	}
+}
+
+// ByArticles orders the results by articles terms.
+func ByArticles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newArticlesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -721,5 +811,12 @@ func newReviewLogsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ReviewLogsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ReviewLogsTable, ReviewLogsColumn),
+	)
+}
+func newArticlesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ArticlesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ArticlesTable, ArticlesColumn),
 	)
 }

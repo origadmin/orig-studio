@@ -121,16 +121,16 @@ func (_u *MediaReviewLogUpdate) SetNillableNewStatus(v *string) *MediaReviewLogU
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *MediaReviewLogUpdate) SetCreatedAt(v time.Time) *MediaReviewLogUpdate {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *MediaReviewLogUpdate) SetCreateTime(v time.Time) *MediaReviewLogUpdate {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *MediaReviewLogUpdate) SetNillableCreatedAt(v *time.Time) *MediaReviewLogUpdate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *MediaReviewLogUpdate) SetNillableCreateTime(v *time.Time) *MediaReviewLogUpdate {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
@@ -248,8 +248,8 @@ func (_u *MediaReviewLogUpdate) sqlSave(ctx context.Context) (_node int, err err
 	if value, ok := _u.mutation.NewStatus(); ok {
 		_spec.SetField(mediareviewlog.FieldNewStatus, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(mediareviewlog.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(mediareviewlog.FieldCreateTime, field.TypeTime, value)
 	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -421,16 +421,16 @@ func (_u *MediaReviewLogUpdateOne) SetNillableNewStatus(v *string) *MediaReviewL
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *MediaReviewLogUpdateOne) SetCreatedAt(v time.Time) *MediaReviewLogUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *MediaReviewLogUpdateOne) SetCreateTime(v time.Time) *MediaReviewLogUpdateOne {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *MediaReviewLogUpdateOne) SetNillableCreatedAt(v *time.Time) *MediaReviewLogUpdateOne {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *MediaReviewLogUpdateOne) SetNillableCreateTime(v *time.Time) *MediaReviewLogUpdateOne {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
@@ -578,8 +578,8 @@ func (_u *MediaReviewLogUpdateOne) sqlSave(ctx context.Context) (_node *MediaRev
 	if value, ok := _u.mutation.NewStatus(); ok {
 		_spec.SetField(mediareviewlog.FieldNewStatus, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(mediareviewlog.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(mediareviewlog.FieldCreateTime, field.TypeTime, value)
 	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{

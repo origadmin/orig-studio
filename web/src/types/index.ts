@@ -14,7 +14,6 @@ export interface Media {
     duration?: number;
     view_count?: number;
     likes?: number;
-    created_at?: string;
     create_time?: string;
     type?: string;
     size?: string;
@@ -60,13 +59,13 @@ export interface MediaItem extends Media {
     url: string;
     author_name: string;
     author_avatar: string;
-    created_at: string;
+    create_time: string;
 }
 
 export interface Comment {
     id: string;
     content: string;
-    created_at: string;
+    create_time: string;
     user: User;
 }
 
@@ -85,7 +84,7 @@ export interface Favorite {
     id: string;
     media_id: string;
     media: Media;
-    created_at: string;
+    create_time: string;
 }
 
 export interface ToggleFavoriteResponse {

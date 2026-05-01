@@ -7,8 +7,8 @@ package infra
 import (
 	"time"
 
+	config "origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/infra/auth"
-	config "origadmin/application/origcms/internal/infra/conf"
 )
 
 // NewJWTManager creates a new JWT manager.

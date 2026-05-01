@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
+	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"strings"
 	"time"
@@ -42,12 +43,16 @@ type Article struct {
 	UserID string `json:"user_id,omitempty"`
 	// CategoryID holds the value of the "category_id" field.
 	CategoryID int64 `json:"category_id,omitempty"`
+	// MediaID holds the value of the "media_id" field.
+	MediaID string `json:"media_id,omitempty"`
+	// Thumbnail holds the value of the "thumbnail" field.
+	Thumbnail string `json:"thumbnail,omitempty"`
 	// PublishedAt holds the value of the "published_at" field.
 	PublishedAt time.Time `json:"published_at,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ArticleQuery when eager-loading is set.
 	Edges        ArticleEdges `json:"edges"`
@@ -60,11 +65,13 @@ type ArticleEdges struct {
 	User *User `json:"user,omitempty"`
 	// Category holds the value of the category edge.
 	Category *Category `json:"category,omitempty"`
+	// Media holds the value of the media edge.
+	Media *Media `json:"media,omitempty"`
 	// Comments holds the value of the comments edge.
 	Comments []*Comment `json:"comments,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -89,10 +96,21 @@ func (e ArticleEdges) CategoryOrErr() (*Category, error) {
 	return nil, &NotLoadedError{edge: "category"}
 }
 
+// MediaOrErr returns the Media value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ArticleEdges) MediaOrErr() (*Media, error) {
+	if e.Media != nil {
+		return e.Media, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: media.Label}
+	}
+	return nil, &NotLoadedError{edge: "media"}
+}
+
 // CommentsOrErr returns the Comments value or an error if the edge
 // was not loaded in eager-loading.
 func (e ArticleEdges) CommentsOrErr() ([]*Comment, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.Comments, nil
 	}
 	return nil, &NotLoadedError{edge: "comments"}
@@ -109,9 +127,9 @@ func (*Article) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case article.FieldViewCount, article.FieldCommentCount, article.FieldCategoryID:
 			values[i] = new(sql.NullInt64)
-		case article.FieldID, article.FieldTitle, article.FieldContent, article.FieldSummary, article.FieldSlug, article.FieldState, article.FieldUserID:
+		case article.FieldID, article.FieldTitle, article.FieldContent, article.FieldSummary, article.FieldSlug, article.FieldState, article.FieldUserID, article.FieldMediaID, article.FieldThumbnail:
 			values[i] = new(sql.NullString)
-		case article.FieldPublishedAt, article.FieldCreatedAt, article.FieldUpdatedAt:
+		case article.FieldPublishedAt, article.FieldCreateTime, article.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -202,23 +220,35 @@ func (_m *Article) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.CategoryID = value.Int64
 			}
+		case article.FieldMediaID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field media_id", values[i])
+			} else if value.Valid {
+				_m.MediaID = value.String
+			}
+		case article.FieldThumbnail:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field thumbnail", values[i])
+			} else if value.Valid {
+				_m.Thumbnail = value.String
+			}
 		case article.FieldPublishedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field published_at", values[i])
 			} else if value.Valid {
 				_m.PublishedAt = value.Time
 			}
-		case article.FieldCreatedAt:
+		case article.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				_m.CreatedAt = value.Time
+				_m.CreateTime = value.Time
 			}
-		case article.FieldUpdatedAt:
+		case article.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				_m.UpdatedAt = value.Time
+				_m.UpdateTime = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -241,6 +271,11 @@ func (_m *Article) QueryUser() *UserQuery {
 // QueryCategory queries the "category" edge of the Article entity.
 func (_m *Article) QueryCategory() *CategoryQuery {
 	return NewArticleClient(_m.config).QueryCategory(_m)
+}
+
+// QueryMedia queries the "media" edge of the Article entity.
+func (_m *Article) QueryMedia() *MediaQuery {
+	return NewArticleClient(_m.config).QueryMedia(_m)
 }
 
 // QueryComments queries the "comments" edge of the Article entity.
@@ -304,14 +339,20 @@ func (_m *Article) String() string {
 	builder.WriteString("category_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CategoryID))
 	builder.WriteString(", ")
+	builder.WriteString("media_id=")
+	builder.WriteString(_m.MediaID)
+	builder.WriteString(", ")
+	builder.WriteString("thumbnail=")
+	builder.WriteString(_m.Thumbnail)
+	builder.WriteString(", ")
 	builder.WriteString("published_at=")
 	builder.WriteString(_m.PublishedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString("create_time=")
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString("update_time=")
+	builder.WriteString(_m.UpdateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

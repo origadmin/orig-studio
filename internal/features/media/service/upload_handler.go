@@ -5,13 +5,16 @@
 package service
 
 import (
+	"io"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origcms/internal/helpers/hashtag"
 	"origadmin/application/origcms/internal/server"
 	"origadmin/application/origcms/internal/features/media/biz"
 )
@@ -37,6 +40,10 @@ func NewUploadHandler(uc *biz.UploadUseCase, jwtMgr *auth.Manager, logger log.Lo
 func (h *UploadHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	uploads := rg.Group("/uploads")
 	{
+		// Simple upload (single file, multipart/form-data)
+		uploads.POST("/simple", server.JWTMiddleware(h.jwtMgr), h.simpleUpload())
+
+		// Multipart upload (chunked, for large files)
 		uploads.POST("/multipart", server.JWTMiddleware(h.jwtMgr), h.initiateMultipartUpload())
 		uploads.POST("/:uploadId/parts/:partNumber", server.JWTMiddleware(h.jwtMgr), h.uploadPart())
 		uploads.POST("/:uploadId/complete", server.JWTMiddleware(h.jwtMgr), h.completeMultipartUpload())
@@ -49,6 +56,114 @@ func (h *UploadHandler) RegisterRoutes(rg *gin.RouterGroup) {
 }
 
 // --- Handlers (Refactored to use biz.UploadUseCase) ---
+
+// simpleUpload handles a single-file upload via multipart/form-data.
+// It initiates a session, uploads the file as one part, and completes
+// the upload in a single request. Suitable for small files (<5MB).
+func (h *UploadHandler) simpleUpload() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		h.log.Infof("simpleUpload called")
+
+		// Parse multipart form
+		file, header, err := c.Request.FormFile("file")
+		if err != nil {
+			h.log.Errorf("failed to read file from form: %v", err)
+			server.Fail(c, server.ErrBadRequest, "failed to read file: "+err.Error())
+			return
+		}
+		defer file.Close()
+
+		claims, _ := server.GetClaims(c)
+		userID := claims.GetUserID()
+
+		title := c.PostForm("title")
+		if title == "" {
+			title = header.Filename
+		}
+		description := c.PostForm("description")
+		thumbnail := c.PostForm("thumbnail")
+
+		var categoryID *int64
+		if cidStr := c.PostForm("category_id"); cidStr != "" {
+			if cid, err := strconv.ParseInt(cidStr, 10, 64); err == nil {
+				categoryID = &cid
+			}
+		}
+
+		var tags []string
+		if tagsStr := c.PostForm("tags"); tagsStr != "" {
+			tags = strings.Split(tagsStr, ",")
+		}
+
+		// Parse #hashtags from title and description, merge with explicit tags
+		parsedHashtags := hashtag.ParseHashtags(title + " " + description)
+		if len(parsedHashtags) > 0 {
+			tags = mergeUploadTags(tags, parsedHashtags)
+		}
+
+		contentType := header.Header.Get("Content-Type")
+		if contentType == "" {
+			contentType = "application/octet-stream"
+		}
+
+		// Read file data
+		data, err := io.ReadAll(file)
+		if err != nil {
+			h.log.Errorf("failed to read file data: %v", err)
+			server.Fail(c, server.ErrInternal, "failed to read file data")
+			return
+		}
+
+		// Initiate multipart upload session
+		session, err := h.uc.InitiateMultipartUpload(
+			c.Request.Context(),
+			header.Filename,
+			header.Size,
+			contentType,
+			title,
+			description,
+			categoryID,
+			tags,
+			thumbnail,
+			&userID,
+		)
+		if err != nil {
+			h.log.Errorf("InitiateMultipartUpload failed: %v", err)
+			server.Fail(c, server.ErrInternal, err.Error())
+			return
+		}
+
+		// Upload as single part
+		etag, err := h.uc.UploadPart(c.Request.Context(), session.UploadID, 1, data)
+		if err != nil {
+			h.log.Errorf("UploadPart failed: %v", err)
+			_ = h.uc.AbortMultipartUpload(c.Request.Context(), session.UploadID)
+			server.Fail(c, server.ErrInternal, err.Error())
+			return
+		}
+		_ = etag
+
+		// Complete the upload
+		media, err := h.uc.CompleteMultipartUpload(
+			c.Request.Context(),
+			session.UploadID,
+			"",
+			title,
+			description,
+			categoryID,
+			tags,
+			thumbnail,
+		)
+		if err != nil {
+			h.log.Errorf("CompleteMultipartUpload failed: %v", err)
+			server.Fail(c, server.ErrInternal, "failed to complete upload: "+err.Error())
+			return
+		}
+
+		h.log.Infof("simpleUpload completed: filename=%s, size=%d", header.Filename, header.Size)
+		server.OK(c, gin.H{"media": media})
+	}
+}
 
 // initiateMultipartUpload starts a new multipart upload session.
 func (h *UploadHandler) initiateMultipartUpload() gin.HandlerFunc {
@@ -189,6 +304,14 @@ func (h *UploadHandler) completeMultipartUpload() gin.HandlerFunc {
 			// Even if JSON binding fails or is empty, we try to complete with defaults
 		}
 
+		// Parse #hashtags from title and description, merge with explicit tags
+		if req.Title != "" || req.Description != "" {
+			parsedHashtags := hashtag.ParseHashtags(req.Title + " " + req.Description)
+			if len(parsedHashtags) > 0 {
+				req.Tags = mergeUploadTags(req.Tags, parsedHashtags)
+			}
+		}
+
 		media, err := h.uc.CompleteMultipartUpload(
 			c.Request.Context(),
 			uploadID,
@@ -258,4 +381,24 @@ func (h *UploadHandler) listUploadSessions() gin.HandlerFunc {
 			"total":    total,
 		})
 	}
+}
+
+// mergeUploadTags merges explicit tags with parsed #hashtag names,
+// deduplicating case-insensitively. Existing tags are preserved;
+// new hashtag names are appended only if not already present.
+func mergeUploadTags(existing []string, parsed []string) []string {
+	seen := make(map[string]bool)
+	for _, t := range existing {
+		seen[strings.ToLower(strings.TrimSpace(t))] = true
+	}
+	result := make([]string, len(existing))
+	copy(result, existing)
+	for _, t := range parsed {
+		lower := strings.ToLower(t)
+		if !seen[lower] {
+			seen[lower] = true
+			result = append(result, t)
+		}
+	}
+	return result
 }

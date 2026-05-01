@@ -73,7 +73,7 @@ func (r *notificationRepo) ListByUser(ctx context.Context, userID int, page, pag
 	ents, err := query.
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
-		Order(entity.Desc(notification.FieldCreatedAt)).
+		Order(entity.Desc(notification.FieldCreateTime)).
 		All(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -112,6 +112,6 @@ func mapNotification(ent *entity.Notification) *biz.Notification {
 		Method:    ent.Method,
 		UserID:    ent.UserID,
 		IsRead:    ent.IsRead,
-		CreatedAt: ent.CreatedAt,
+		CreateTime: ent.CreateTime,
 	}
 }

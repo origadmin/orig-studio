@@ -111,7 +111,13 @@ async function uploadPart(
         throw new Error(`Upload part failed: ${response.statusText}`);
     }
 
-    return response.json();
+    const json = await response.json();
+    // Unwrap unified response format {code, message, data} from C016
+    // Raw fetch doesn't go through the axios interceptor that unwraps this
+    if (json && typeof json === 'object' && 'code' in json && 'data' in json) {
+        return json.data as UploadPartResponse;
+    }
+    return json as UploadPartResponse;
 }
 
 // 查询已上传分片 (断点续传)
@@ -120,15 +126,21 @@ async function listParts(uploadId: string): Promise<ListPartsResponse> {
 }
 
 // 更新元数据
+// NOTE: Backend does not have a metadata update endpoint yet.
+// This function silently handles failure to avoid blocking the upload flow.
 export async function updateUploadMetadataApi(task: UploadTask): Promise<void> {
     if (!task.uploadId) return;
-    return api.patch(`/uploads/${task.uploadId}/metadata`, {
-        title: task.title,
-        description: task.description,
-        category_id: task.categoryId,
-        tags: task.tags,
-        thumbnail: task.thumbnail,
-    });
+    try {
+        await api.patch(`/uploads/${task.uploadId}/metadata`, {
+            title: task.title,
+            description: task.description,
+            category_id: task.categoryId,
+            tags: task.tags,
+            thumbnail: task.thumbnail,
+        });
+    } catch {
+        // Silently ignore - metadata is also sent at completion
+    }
 }
 
 // 完成分片上传
@@ -152,7 +164,7 @@ async function completeMultipartUpload(
 
 // 取消上传
 async function abortMultipartUpload(uploadId: string): Promise<void> {
-    await api.del(`/uploads/${uploadId}`);
+    await api.post(`/uploads/${uploadId}/abort`);
 }
 
 // 计算 SHA-256 (备用)

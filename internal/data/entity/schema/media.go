@@ -43,7 +43,7 @@ func (Media) Fields() []ent.Field {
 		field.String("mime_type").MaxLen(128).Optional(),
 		field.String("md5sum").MaxLen(64).Optional(),
 		field.String("extension").MaxLen(32).Optional(),
-		field.Int("privacy").Default(1), // 1: public, 2: private, 3: unlisted
+		field.Enum("privacy").Values("PUBLIC", "PRIVATE", "UNLISTED", "PAID").Default("PUBLIC"),
 		// encoding_status: pending / processing / success / partial / failed
 		field.String("encoding_status").MaxLen(20).Default("pending"),
 		// state: draft / active / deleted
@@ -54,6 +54,8 @@ func (Media) Fields() []ent.Field {
 		field.Int64("comment_count").Default(0),
 		field.Int64("favorite_count").Default(0),
 		field.Int64("download_count").Default(0),
+		field.Int64("share_count").Default(0),
+		field.String("uuid").MaxLen(36).Optional(),
 		field.Bool("allow_download").Default(true),
 		field.Bool("enable_comments").Default(true),
 		field.Bool("featured").Default(false),
@@ -69,8 +71,11 @@ func (Media) Fields() []ent.Field {
 		field.Int64("category_id").Optional().StructTag(`json:"category_id,omitempty"`),
 		field.String("channel_id").Optional(),
 		field.Time("published_at").Optional(),
-		field.Time("created_at").Default(time.Now),
-		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+		field.Time("create_time").Default(time.Now),
+		field.Time("update_time").Default(time.Now).UpdateDefault(time.Now),
+		// Audit author fields - store user ID who created/updated the record (UUIDv7 string matching users.id)
+		field.String("create_author").Default("").Comment("Create author user ID"),
+		field.String("update_author").Default("").Comment("Update author user ID"),
 	}
 }
 
@@ -82,7 +87,7 @@ func (Media) Indexes() []ent.Index {
 		index.Fields("encoding_status"),
 		index.Fields("featured"),
 		index.Fields("view_count"),
-		index.Fields("created_at"),
+		index.Fields("create_time"),
 		index.Fields("user_id"),
 		index.Fields("short_token").Unique(),
 		index.Fields("review_status", "listable", "state"),
@@ -108,6 +113,7 @@ func (Media) Edges() []ent.Edge {
 		edge.To("favorites", Favorite.Type),
 		edge.To("likes", Like.Type),
 		edge.To("review_logs", MediaReviewLog.Type),
+		edge.To("articles", Article.Type),
 		// edge.To("tasks", EncodingTask.Type),
 	}
 }

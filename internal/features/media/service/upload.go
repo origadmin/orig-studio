@@ -223,7 +223,7 @@ func (s *UploadService) GetUploadSession(ctx context.Context, req *pb.GetUploadS
 		UploadedSize: session.UploadedSize,
 		Status:       string(session.Status),
 		Parts:        parts,
-		CreatedAt:    session.CreatedAt.Format(time.RFC3339),
+		CreateTime:    session.CreateTime.Format(time.RFC3339),
 		ExpiresAt:    session.ExpiresAt.Format(time.RFC3339),
 	}, nil
 }
@@ -253,7 +253,7 @@ func (s *UploadService) ListUploadSessions(ctx context.Context, req *pb.ListUplo
 			ChunkSize:    int32(session.ChunkSize),
 			UploadedSize: session.UploadedSize,
 			Status:       string(session.Status),
-			CreatedAt:    session.CreatedAt.Format(time.RFC3339),
+			CreateTime:    session.CreateTime.Format(time.RFC3339),
 			ExpiresAt:    session.ExpiresAt.Format(time.RFC3339),
 		}
 	}

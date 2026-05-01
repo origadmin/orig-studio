@@ -24,7 +24,7 @@ type Comment struct {
 	UserID    string    `json:"user_id"`
 	ParentID  *string   `json:"parent_id,omitempty"`
 	AddDate   time.Time `json:"add_date"`
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdateTime time.Time `json:"update_time"`
 	Status    string    `json:"status"` // PENDING, APPROVED, REJECTED
 
 	// Edges

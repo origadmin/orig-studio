@@ -90,14 +90,19 @@ func Chunk(v bool) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldEQ(FieldChunk, v))
 }
 
-// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldEQ(FieldCreatedAt, v))
+// Progress applies equality check predicate on the "progress" field. It's identical to ProgressEQ.
+func Progress(v int) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldEQ(FieldProgress, v))
 }
 
-// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
-func UpdatedAt(v time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldEQ(FieldUpdatedAt, v))
+// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
+func CreateTime(v time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldEQ(FieldCreateTime, v))
+}
+
+// UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
+func UpdateTime(v time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // MediaIDEQ applies the EQ predicate on the "media_id" field.
@@ -395,84 +400,124 @@ func ChunkNEQ(v bool) predicate.EncodingTask {
 	return predicate.EncodingTask(sql.FieldNEQ(FieldChunk, v))
 }
 
-// CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldEQ(FieldCreatedAt, v))
+// ProgressEQ applies the EQ predicate on the "progress" field.
+func ProgressEQ(v int) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldEQ(FieldProgress, v))
 }
 
-// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldNEQ(FieldCreatedAt, v))
+// ProgressNEQ applies the NEQ predicate on the "progress" field.
+func ProgressNEQ(v int) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldNEQ(FieldProgress, v))
 }
 
-// CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldIn(FieldCreatedAt, vs...))
+// ProgressIn applies the In predicate on the "progress" field.
+func ProgressIn(vs ...int) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldIn(FieldProgress, vs...))
 }
 
-// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldNotIn(FieldCreatedAt, vs...))
+// ProgressNotIn applies the NotIn predicate on the "progress" field.
+func ProgressNotIn(vs ...int) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldNotIn(FieldProgress, vs...))
 }
 
-// CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldGT(FieldCreatedAt, v))
+// ProgressGT applies the GT predicate on the "progress" field.
+func ProgressGT(v int) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldGT(FieldProgress, v))
 }
 
-// CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldGTE(FieldCreatedAt, v))
+// ProgressGTE applies the GTE predicate on the "progress" field.
+func ProgressGTE(v int) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldGTE(FieldProgress, v))
 }
 
-// CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldLT(FieldCreatedAt, v))
+// ProgressLT applies the LT predicate on the "progress" field.
+func ProgressLT(v int) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldLT(FieldProgress, v))
 }
 
-// CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldLTE(FieldCreatedAt, v))
+// ProgressLTE applies the LTE predicate on the "progress" field.
+func ProgressLTE(v int) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldLTE(FieldProgress, v))
 }
 
-// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
-func UpdatedAtEQ(v time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldEQ(FieldUpdatedAt, v))
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldEQ(FieldCreateTime, v))
 }
 
-// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
-func UpdatedAtNEQ(v time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldNEQ(FieldUpdatedAt, v))
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldNEQ(FieldCreateTime, v))
 }
 
-// UpdatedAtIn applies the In predicate on the "updated_at" field.
-func UpdatedAtIn(vs ...time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldIn(FieldUpdatedAt, vs...))
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldIn(FieldCreateTime, vs...))
 }
 
-// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
-func UpdatedAtNotIn(vs ...time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldNotIn(FieldUpdatedAt, vs...))
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldNotIn(FieldCreateTime, vs...))
 }
 
-// UpdatedAtGT applies the GT predicate on the "updated_at" field.
-func UpdatedAtGT(v time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldGT(FieldUpdatedAt, v))
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldGT(FieldCreateTime, v))
 }
 
-// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
-func UpdatedAtGTE(v time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldGTE(FieldUpdatedAt, v))
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldGTE(FieldCreateTime, v))
 }
 
-// UpdatedAtLT applies the LT predicate on the "updated_at" field.
-func UpdatedAtLT(v time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldLT(FieldUpdatedAt, v))
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldLT(FieldCreateTime, v))
 }
 
-// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
-func UpdatedAtLTE(v time.Time) predicate.EncodingTask {
-	return predicate.EncodingTask(sql.FieldLTE(FieldUpdatedAt, v))
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldLTE(FieldCreateTime, v))
+}
+
+// UpdateTimeEQ applies the EQ predicate on the "update_time" field.
+func UpdateTimeEQ(v time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldEQ(FieldUpdateTime, v))
+}
+
+// UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
+func UpdateTimeNEQ(v time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldNEQ(FieldUpdateTime, v))
+}
+
+// UpdateTimeIn applies the In predicate on the "update_time" field.
+func UpdateTimeIn(vs ...time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldIn(FieldUpdateTime, vs...))
+}
+
+// UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
+func UpdateTimeNotIn(vs ...time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldNotIn(FieldUpdateTime, vs...))
+}
+
+// UpdateTimeGT applies the GT predicate on the "update_time" field.
+func UpdateTimeGT(v time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldGT(FieldUpdateTime, v))
+}
+
+// UpdateTimeGTE applies the GTE predicate on the "update_time" field.
+func UpdateTimeGTE(v time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldGTE(FieldUpdateTime, v))
+}
+
+// UpdateTimeLT applies the LT predicate on the "update_time" field.
+func UpdateTimeLT(v time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldLT(FieldUpdateTime, v))
+}
+
+// UpdateTimeLTE applies the LTE predicate on the "update_time" field.
+func UpdateTimeLTE(v time.Time) predicate.EncodingTask {
+	return predicate.EncodingTask(sql.FieldLTE(FieldUpdateTime, v))
 }
 
 // And groups predicates with the AND operator between them.

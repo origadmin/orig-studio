@@ -13,13 +13,13 @@ import (
 	"strings"
 
 	"origadmin/application/origcms/api/gen/v1/types"
+	"origadmin/application/origcms/internal/data/convpb"
 	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"origadmin/application/origcms/internal/helpers/idutil"
 	"origadmin/application/origcms/internal/features/user/dto"
-
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // userRepo implements the dto.UserRepo interface using the shared entity package.
@@ -67,10 +67,15 @@ func (r *userRepo) List(
 		)
 	}
 
-	// In the unified schema, we use is_active instead of status
+	// In the unified schema, we use status enum instead of is_active
 	if opt.Status != nil {
-		isActive := *opt.Status == 1
-		query = query.Where(user.IsActive(isActive))
+		status := userStatusFromInt32(*opt.Status)
+		query = query.Where(user.StatusEQ(status))
+	}
+
+	// Filter by role if specified
+	if opt.Role != "" {
+		query = query.Where(user.RoleEQ(user.Role(opt.Role)))
 	}
 
 	total, err := query.Count(ctx)
@@ -90,6 +95,9 @@ func (r *userRepo) List(
 
 	offset := (page - 1) * pageSize
 	query = query.Offset(int(offset)).Limit(int(pageSize))
+
+	// Default sort: create_time DESC (newest first) to ensure stable pagination
+	query = query.Order(entity.Desc(user.FieldCreateTime))
 
 	users, err := query.All(ctx)
 	if err != nil {
@@ -127,8 +135,13 @@ func (r *userRepo) ListEntities(
 	}
 
 	if opt.Status != nil {
-		isActive := *opt.Status == 1
-		query = query.Where(user.IsActive(isActive))
+		status := userStatusFromInt32(*opt.Status)
+		query = query.Where(user.StatusEQ(status))
+	}
+
+	// Filter by role if specified
+	if opt.Role != "" {
+		query = query.Where(user.RoleEQ(user.Role(opt.Role)))
 	}
 
 	total, err := query.Count(ctx)
@@ -148,6 +161,9 @@ func (r *userRepo) ListEntities(
 	offset := (page - 1) * pageSize
 	query = query.Offset(int(offset)).Limit(int(pageSize))
 
+	// Default sort: create_time DESC (newest first) to ensure stable pagination
+	query = query.Order(entity.Desc(user.FieldCreateTime))
+
 	users, err := query.All(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -164,9 +180,9 @@ func (r *userRepo) Create(
 	opts ...*dto.UserCreateOption,
 ) (*types.User, error) {
 	// Default value handling
-	isActive := in.Status == 1
-	if in.Status == 0 {
-		isActive = true
+	status := user.StatusACTIVE
+	if in.Status == types.UserStatus_USER_STATUS_INACTIVE {
+		status = user.StatusINACTIVE
 	}
 
 	// Auto-generate slug from name/username
@@ -183,7 +199,7 @@ func (r *userRepo) Create(
 		SetEmail(in.Email).
 		SetPassword(hashedPassword).
 		SetSlug(slug).
-		SetIsActive(isActive).
+		SetStatus(status).
 		SetIsStaff(in.IsStaff).
 		SetIsSuperuser(in.IsSuperuser).
 		SetLogo(in.Avatar).
@@ -199,7 +215,7 @@ func (r *userRepo) Create(
 		SetUserID(u.ID).
 		SetTitle(u.Username + "'s Channel").
 		SetDescription("Default channel for " + u.Username).
-		SetIsPublic(true).
+		SetPrivacy(channel.PrivacyPUBLIC).
 		Save(ctx)
 	if err != nil {
 		// Log error but don't affect user creation
@@ -218,7 +234,7 @@ func (r *userRepo) Update(
 	u, err := r.db.User.UpdateOneID(in.Id).
 		SetName(in.Nickname).
 		SetEmail(in.Email).
-		SetIsActive(in.Status == 1).
+		SetStatus(userStatusFromProto(in.Status)).
 		SetLogo(in.Avatar).
 		Save(ctx)
 	if err != nil {
@@ -236,7 +252,7 @@ func (r *userRepo) Delete(ctx context.Context, id string) error {
 
 // Restore reactivates a soft-deleted user.
 func (r *userRepo) Restore(ctx context.Context, id string) error {
-	return r.db.User.UpdateOneID(id).SetIsActive(true).Exec(ctx)
+	return r.db.User.UpdateOneID(id).SetStatus(user.StatusACTIVE).Exec(ctx)
 }
 
 // GetByUsername retrieves a user by username.
@@ -245,13 +261,13 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (*types.U
 	if err != nil {
 		return nil, err
 	}
-	// DEBUG: 打印从数据库读取的用户完整信息
+	// DEBUG: print user info from database
 	slog.Info("user from db raw",
 		"id", u.ID,
 		"username", u.Username,
 		"is_staff", u.IsStaff,
 		"is_superuser", u.IsSuperuser,
-		"is_active", u.IsActive,
+		"status", u.Status,
 	)
 	return convertUserToProto(u), nil
 }
@@ -347,42 +363,35 @@ func (r *userRepo) GetUserSetting(ctx context.Context, userID string) (*types.Us
 }
 
 // UpdateUserStatus updates a user's status.
+// Maps proto UserStatus enum values to Ent entity Status values:
+// 0=UNSPECIFIED→PENDING, 1=PENDING, 2=ACTIVE, 3=INACTIVE, 4=SUSPENDED, 5=REJECTED
 func (r *userRepo) UpdateUserStatus(ctx context.Context, userID string, status int8) error {
-	return r.db.User.UpdateOneID(userID).SetIsActive(status == 1).Exec(ctx)
+	var entityStatus user.Status
+	switch status {
+	case 0, 1:
+		entityStatus = user.StatusPENDING
+	case 2:
+		entityStatus = user.StatusACTIVE
+	case 3:
+		entityStatus = user.StatusINACTIVE
+	case 4:
+		entityStatus = user.StatusSUSPENDED
+	case 5:
+		entityStatus = user.StatusREJECTED
+	default:
+		// Unknown status, default to PENDING for safety
+		entityStatus = user.StatusPENDING
+	}
+	return r.db.User.UpdateOneID(userID).SetStatus(entityStatus).Exec(ctx)
 }
 
 // Helper functions
 
 func convertUserToProto(u *entity.User) *types.User {
-	status := int32(0)
-	if u.IsActive {
-		status = 1
-	}
-	// DEBUG: 打印转换前的值
-	slog.Info("convertUserToProto input",
-		"is_staff", u.IsStaff,
-		"is_superuser", u.IsSuperuser,
-	)
-	result := &types.User{
-		Id:          u.ID,
-		Uuid:        u.ID,
-		Username:    u.Username,
-		Nickname:    u.Name,
-		Email:       u.Email,
-		Slug:        u.Slug,
-		Status:      status,
-		IsStaff:     u.IsStaff,
-		IsSuperuser: u.IsSuperuser,
-		Avatar:      u.Logo,
-		CreateTime:  timestamppb.New(u.DateJoined),
-		UpdateTime:  timestamppb.New(u.DateAdded),
-	}
-	// DEBUG: 打印转换后的值
-	slog.Info("convertUserToProto output",
-		"is_staff", result.IsStaff,
-		"is_superuser", result.IsSuperuser,
-	)
-	return result
+	// Use the auto-generated convpb converter which includes all field mappings
+	// (create_author, update_author, create_time, update_time, nickname, phone, avatar, etc.)
+	// The previous manual implementation was missing many fields.
+	return convpb.ConvertUserToUserPBFull(u)
 }
 
 func convertUserToProfileProto(u *entity.User) *types.UserProfile {
@@ -491,6 +500,54 @@ func (r *userRepo) GetSubscriptions(ctx context.Context, subscriberID string, pa
 	}
 
 	return result, total, nil
+}
+
+// userStatusFromInt32 converts int32 (dto layer) to user.Status (entity enum string).
+func userStatusFromInt32(status int32) user.Status {
+	switch types.UserStatus(status) {
+	case types.UserStatus_USER_STATUS_ACTIVE:
+		return user.StatusACTIVE
+	case types.UserStatus_USER_STATUS_INACTIVE:
+		return user.StatusINACTIVE
+	case types.UserStatus_USER_STATUS_PENDING:
+		return user.StatusPENDING
+	case types.UserStatus_USER_STATUS_SUSPENDED:
+		return user.StatusSUSPENDED
+	default:
+		return user.StatusACTIVE
+	}
+}
+
+func userStatusFromProto(status types.UserStatus) user.Status {
+	switch status {
+	case types.UserStatus_USER_STATUS_ACTIVE:
+		return user.StatusACTIVE
+	case types.UserStatus_USER_STATUS_INACTIVE:
+		return user.StatusINACTIVE
+	case types.UserStatus_USER_STATUS_PENDING:
+		return user.StatusPENDING
+	case types.UserStatus_USER_STATUS_SUSPENDED:
+		return user.StatusSUSPENDED
+	default:
+		return user.StatusACTIVE
+	}
+}
+
+func userStatusToProto(status user.Status) types.UserStatus {
+	switch status {
+	case user.StatusACTIVE:
+		return types.UserStatus_USER_STATUS_ACTIVE
+	case user.StatusINACTIVE:
+		return types.UserStatus_USER_STATUS_INACTIVE
+	case user.StatusPENDING:
+		return types.UserStatus_USER_STATUS_PENDING
+	case user.StatusSUSPENDED:
+		return types.UserStatus_USER_STATUS_SUSPENDED
+	case user.StatusREJECTED:
+		return types.UserStatus_USER_STATUS_REJECTED
+	default:
+		return types.UserStatus_USER_STATUS_ACTIVE
+	}
 }
 
 // generateSlugFromName generates a base slug from name/username.

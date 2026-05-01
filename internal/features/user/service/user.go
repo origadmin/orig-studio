@@ -112,7 +112,7 @@ func (s *UserService) ListUsers(
 	}
 
 	return &userv1.ListUsersResponse{
-		Users:    users,
+		Items:    users,
 		Total:    total,
 		PageSize: queryOpt.PageSize,
 		Page:     queryOpt.Page,

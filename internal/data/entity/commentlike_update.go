@@ -73,16 +73,16 @@ func (_u *CommentLikeUpdate) SetNillableLikeType(v *string) *CommentLikeUpdate {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *CommentLikeUpdate) SetCreatedAt(v time.Time) *CommentLikeUpdate {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *CommentLikeUpdate) SetCreateTime(v time.Time) *CommentLikeUpdate {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *CommentLikeUpdate) SetNillableCreatedAt(v *time.Time) *CommentLikeUpdate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *CommentLikeUpdate) SetNillableCreateTime(v *time.Time) *CommentLikeUpdate {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
@@ -178,8 +178,8 @@ func (_u *CommentLikeUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if value, ok := _u.mutation.LikeType(); ok {
 		_spec.SetField(commentlike.FieldLikeType, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(commentlike.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(commentlike.FieldCreateTime, field.TypeTime, value)
 	}
 	if _u.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -303,16 +303,16 @@ func (_u *CommentLikeUpdateOne) SetNillableLikeType(v *string) *CommentLikeUpdat
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *CommentLikeUpdateOne) SetCreatedAt(v time.Time) *CommentLikeUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *CommentLikeUpdateOne) SetCreateTime(v time.Time) *CommentLikeUpdateOne {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *CommentLikeUpdateOne) SetNillableCreatedAt(v *time.Time) *CommentLikeUpdateOne {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *CommentLikeUpdateOne) SetNillableCreateTime(v *time.Time) *CommentLikeUpdateOne {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
@@ -438,8 +438,8 @@ func (_u *CommentLikeUpdateOne) sqlSave(ctx context.Context) (_node *CommentLike
 	if value, ok := _u.mutation.LikeType(); ok {
 		_spec.SetField(commentlike.FieldLikeType, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(commentlike.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(commentlike.FieldCreateTime, field.TypeTime, value)
 	}
 	if _u.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{

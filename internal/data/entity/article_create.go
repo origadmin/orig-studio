@@ -9,6 +9,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
 
@@ -145,6 +146,34 @@ func (_c *ArticleCreate) SetNillableCategoryID(v *int64) *ArticleCreate {
 	return _c
 }
 
+// SetMediaID sets the "media_id" field.
+func (_c *ArticleCreate) SetMediaID(v string) *ArticleCreate {
+	_c.mutation.SetMediaID(v)
+	return _c
+}
+
+// SetNillableMediaID sets the "media_id" field if the given value is not nil.
+func (_c *ArticleCreate) SetNillableMediaID(v *string) *ArticleCreate {
+	if v != nil {
+		_c.SetMediaID(*v)
+	}
+	return _c
+}
+
+// SetThumbnail sets the "thumbnail" field.
+func (_c *ArticleCreate) SetThumbnail(v string) *ArticleCreate {
+	_c.mutation.SetThumbnail(v)
+	return _c
+}
+
+// SetNillableThumbnail sets the "thumbnail" field if the given value is not nil.
+func (_c *ArticleCreate) SetNillableThumbnail(v *string) *ArticleCreate {
+	if v != nil {
+		_c.SetThumbnail(*v)
+	}
+	return _c
+}
+
 // SetPublishedAt sets the "published_at" field.
 func (_c *ArticleCreate) SetPublishedAt(v time.Time) *ArticleCreate {
 	_c.mutation.SetPublishedAt(v)
@@ -159,30 +188,30 @@ func (_c *ArticleCreate) SetNillablePublishedAt(v *time.Time) *ArticleCreate {
 	return _c
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_c *ArticleCreate) SetCreatedAt(v time.Time) *ArticleCreate {
-	_c.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_c *ArticleCreate) SetCreateTime(v time.Time) *ArticleCreate {
+	_c.mutation.SetCreateTime(v)
 	return _c
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *ArticleCreate) SetNillableCreatedAt(v *time.Time) *ArticleCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *ArticleCreate) SetNillableCreateTime(v *time.Time) *ArticleCreate {
 	if v != nil {
-		_c.SetCreatedAt(*v)
+		_c.SetCreateTime(*v)
 	}
 	return _c
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_c *ArticleCreate) SetUpdatedAt(v time.Time) *ArticleCreate {
-	_c.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_c *ArticleCreate) SetUpdateTime(v time.Time) *ArticleCreate {
+	_c.mutation.SetUpdateTime(v)
 	return _c
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *ArticleCreate) SetNillableUpdatedAt(v *time.Time) *ArticleCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (_c *ArticleCreate) SetNillableUpdateTime(v *time.Time) *ArticleCreate {
 	if v != nil {
-		_c.SetUpdatedAt(*v)
+		_c.SetUpdateTime(*v)
 	}
 	return _c
 }
@@ -209,6 +238,11 @@ func (_c *ArticleCreate) SetUser(v *User) *ArticleCreate {
 // SetCategory sets the "category" edge to the Category entity.
 func (_c *ArticleCreate) SetCategory(v *Category) *ArticleCreate {
 	return _c.SetCategoryID(v.ID)
+}
+
+// SetMedia sets the "media" edge to the Media entity.
+func (_c *ArticleCreate) SetMedia(v *Media) *ArticleCreate {
+	return _c.SetMediaID(v.ID)
 }
 
 // AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
@@ -277,13 +311,13 @@ func (_c *ArticleCreate) defaults() {
 		v := article.DefaultFeatured
 		_c.mutation.SetFeatured(v)
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := article.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := article.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
 	}
-	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := article.DefaultUpdatedAt()
-		_c.mutation.SetUpdatedAt(v)
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		v := article.DefaultUpdateTime()
+		_c.mutation.SetUpdateTime(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := article.DefaultID()
@@ -334,11 +368,21 @@ func (_c *ArticleCreate) check() error {
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`entity: missing required field "Article.user_id"`)}
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "Article.created_at"`)}
+	if v, ok := _c.mutation.MediaID(); ok {
+		if err := article.MediaIDValidator(v); err != nil {
+			return &ValidationError{Name: "media_id", err: fmt.Errorf(`entity: validator failed for field "Article.media_id": %w`, err)}
+		}
 	}
-	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`entity: missing required field "Article.updated_at"`)}
+	if v, ok := _c.mutation.Thumbnail(); ok {
+		if err := article.ThumbnailValidator(v); err != nil {
+			return &ValidationError{Name: "thumbnail", err: fmt.Errorf(`entity: validator failed for field "Article.thumbnail": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "Article.create_time"`)}
+	}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`entity: missing required field "Article.update_time"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := article.IDValidator(v); err != nil {
@@ -419,17 +463,21 @@ func (_c *ArticleCreate) createSpec() (*Article, *sqlgraph.CreateSpec) {
 		_spec.SetField(article.FieldTags, field.TypeJSON, value)
 		_node.Tags = value
 	}
+	if value, ok := _c.mutation.Thumbnail(); ok {
+		_spec.SetField(article.FieldThumbnail, field.TypeString, value)
+		_node.Thumbnail = value
+	}
 	if value, ok := _c.mutation.PublishedAt(); ok {
 		_spec.SetField(article.FieldPublishedAt, field.TypeTime, value)
 		_node.PublishedAt = value
 	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(article.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(article.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
 	}
-	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(article.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
+	if value, ok := _c.mutation.UpdateTime(); ok {
+		_spec.SetField(article.FieldUpdateTime, field.TypeTime, value)
+		_node.UpdateTime = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -463,6 +511,23 @@ func (_c *ArticleCreate) createSpec() (*Article, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.CategoryID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.MediaIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   article.MediaTable,
+			Columns: []string{article.MediaColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.MediaID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.CommentsIDs(); len(nodes) > 0 {

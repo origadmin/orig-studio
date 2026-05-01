@@ -37,7 +37,7 @@ type Category struct {
 	// Sequence holds the value of the "sequence" field.
 	Sequence int `json:"sequence,omitempty"`
 	// Status holds the value of the "status" field.
-	Status int `json:"status,omitempty"`
+	Status category.Status `json:"status,omitempty"`
 	// MediaCount holds the value of the "media_count" field.
 	MediaCount int `json:"media_count,omitempty"`
 	// IsGlobal holds the value of the "is_global" field.
@@ -48,10 +48,10 @@ type Category struct {
 	IdentityProvider string `json:"identity_provider,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CategoryQuery when eager-loading is set.
 	Edges                   CategoryEdges `json:"edges"`
@@ -132,11 +132,11 @@ func (*Category) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case category.FieldIsGlobal, category.FieldIsRbacCategory:
 			values[i] = new(sql.NullBool)
-		case category.FieldID, category.FieldParentID, category.FieldSequence, category.FieldStatus, category.FieldMediaCount:
+		case category.FieldID, category.FieldParentID, category.FieldSequence, category.FieldMediaCount:
 			values[i] = new(sql.NullInt64)
-		case category.FieldName, category.FieldSlug, category.FieldDescription, category.FieldThumbnail, category.FieldListingsThumbnail, category.FieldIcon, category.FieldColor, category.FieldIdentityProvider, category.FieldUserID:
+		case category.FieldName, category.FieldSlug, category.FieldDescription, category.FieldThumbnail, category.FieldListingsThumbnail, category.FieldIcon, category.FieldColor, category.FieldStatus, category.FieldIdentityProvider, category.FieldUserID:
 			values[i] = new(sql.NullString)
-		case category.FieldCreatedAt, category.FieldUpdatedAt:
+		case category.FieldCreateTime, category.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		case category.ForeignKeys[0]: // media_category_category
 			values[i] = new(sql.NullInt64)
@@ -216,10 +216,10 @@ func (_m *Category) assignValues(columns []string, values []any) error {
 				_m.Sequence = int(value.Int64)
 			}
 		case category.FieldStatus:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				_m.Status = int(value.Int64)
+				_m.Status = category.Status(value.String)
 			}
 		case category.FieldMediaCount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -251,17 +251,17 @@ func (_m *Category) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UserID = value.String
 			}
-		case category.FieldCreatedAt:
+		case category.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				_m.CreatedAt = value.Time
+				_m.CreateTime = value.Time
 			}
-		case category.FieldUpdatedAt:
+		case category.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				_m.UpdatedAt = value.Time
+				_m.UpdateTime = value.Time
 			}
 		case category.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -376,11 +376,11 @@ func (_m *Category) String() string {
 	builder.WriteString("user_id=")
 	builder.WriteString(_m.UserID)
 	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString("create_time=")
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString("update_time=")
+	builder.WriteString(_m.UpdateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

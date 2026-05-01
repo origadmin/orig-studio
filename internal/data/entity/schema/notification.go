@@ -26,14 +26,14 @@ func (Notification) Fields() []ent.Field {
 		field.String("method").MaxLen(20).Default("email"),
 		field.Int("user_id"),
 		field.Bool("is_read").Default(false),
-		field.Time("created_at").Default(time.Now),
+		field.Time("create_time").Default(time.Now),
 	}
 }
 
 func (Notification) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("user_id"),
-		index.Fields("created_at"),
+		index.Fields("create_time"),
 		index.Fields("is_read"),
 	}
 }

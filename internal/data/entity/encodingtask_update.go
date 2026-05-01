@@ -133,23 +133,44 @@ func (_u *EncodingTaskUpdate) SetNillableChunk(v *bool) *EncodingTaskUpdate {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *EncodingTaskUpdate) SetCreatedAt(v time.Time) *EncodingTaskUpdate {
-	_u.mutation.SetCreatedAt(v)
+// SetProgress sets the "progress" field.
+func (_u *EncodingTaskUpdate) SetProgress(v int) *EncodingTaskUpdate {
+	_u.mutation.ResetProgress()
+	_u.mutation.SetProgress(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *EncodingTaskUpdate) SetNillableCreatedAt(v *time.Time) *EncodingTaskUpdate {
+// SetNillableProgress sets the "progress" field if the given value is not nil.
+func (_u *EncodingTaskUpdate) SetNillableProgress(v *int) *EncodingTaskUpdate {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetProgress(*v)
 	}
 	return _u
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *EncodingTaskUpdate) SetUpdatedAt(v time.Time) *EncodingTaskUpdate {
-	_u.mutation.SetUpdatedAt(v)
+// AddProgress adds value to the "progress" field.
+func (_u *EncodingTaskUpdate) AddProgress(v int) *EncodingTaskUpdate {
+	_u.mutation.AddProgress(v)
+	return _u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_u *EncodingTaskUpdate) SetCreateTime(v time.Time) *EncodingTaskUpdate {
+	_u.mutation.SetCreateTime(v)
+	return _u
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *EncodingTaskUpdate) SetNillableCreateTime(v *time.Time) *EncodingTaskUpdate {
+	if v != nil {
+		_u.SetCreateTime(*v)
+	}
+	return _u
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_u *EncodingTaskUpdate) SetUpdateTime(v time.Time) *EncodingTaskUpdate {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -188,9 +209,9 @@ func (_u *EncodingTaskUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *EncodingTaskUpdate) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := encodingtask.UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := encodingtask.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -259,11 +280,17 @@ func (_u *EncodingTaskUpdate) sqlSave(ctx context.Context) (_node int, err error
 	if value, ok := _u.mutation.Chunk(); ok {
 		_spec.SetField(encodingtask.FieldChunk, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(encodingtask.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.Progress(); ok {
+		_spec.SetField(encodingtask.FieldProgress, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(encodingtask.FieldUpdatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.AddedProgress(); ok {
+		_spec.AddField(encodingtask.FieldProgress, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(encodingtask.FieldCreateTime, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(encodingtask.FieldUpdateTime, field.TypeTime, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -390,23 +417,44 @@ func (_u *EncodingTaskUpdateOne) SetNillableChunk(v *bool) *EncodingTaskUpdateOn
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *EncodingTaskUpdateOne) SetCreatedAt(v time.Time) *EncodingTaskUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+// SetProgress sets the "progress" field.
+func (_u *EncodingTaskUpdateOne) SetProgress(v int) *EncodingTaskUpdateOne {
+	_u.mutation.ResetProgress()
+	_u.mutation.SetProgress(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *EncodingTaskUpdateOne) SetNillableCreatedAt(v *time.Time) *EncodingTaskUpdateOne {
+// SetNillableProgress sets the "progress" field if the given value is not nil.
+func (_u *EncodingTaskUpdateOne) SetNillableProgress(v *int) *EncodingTaskUpdateOne {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetProgress(*v)
 	}
 	return _u
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *EncodingTaskUpdateOne) SetUpdatedAt(v time.Time) *EncodingTaskUpdateOne {
-	_u.mutation.SetUpdatedAt(v)
+// AddProgress adds value to the "progress" field.
+func (_u *EncodingTaskUpdateOne) AddProgress(v int) *EncodingTaskUpdateOne {
+	_u.mutation.AddProgress(v)
+	return _u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_u *EncodingTaskUpdateOne) SetCreateTime(v time.Time) *EncodingTaskUpdateOne {
+	_u.mutation.SetCreateTime(v)
+	return _u
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *EncodingTaskUpdateOne) SetNillableCreateTime(v *time.Time) *EncodingTaskUpdateOne {
+	if v != nil {
+		_u.SetCreateTime(*v)
+	}
+	return _u
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_u *EncodingTaskUpdateOne) SetUpdateTime(v time.Time) *EncodingTaskUpdateOne {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -458,9 +506,9 @@ func (_u *EncodingTaskUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *EncodingTaskUpdateOne) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := encodingtask.UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := encodingtask.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -546,11 +594,17 @@ func (_u *EncodingTaskUpdateOne) sqlSave(ctx context.Context) (_node *EncodingTa
 	if value, ok := _u.mutation.Chunk(); ok {
 		_spec.SetField(encodingtask.FieldChunk, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(encodingtask.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.Progress(); ok {
+		_spec.SetField(encodingtask.FieldProgress, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(encodingtask.FieldUpdatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.AddedProgress(); ok {
+		_spec.AddField(encodingtask.FieldProgress, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(encodingtask.FieldCreateTime, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(encodingtask.FieldUpdateTime, field.TypeTime, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &EncodingTask{config: _u.config}

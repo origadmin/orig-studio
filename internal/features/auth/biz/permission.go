@@ -51,8 +51,8 @@ type PermissionGroupItem struct {
 	IsActive      bool      `json:"is_active"`
 	CreatedBy     string    `json:"created_by,omitempty"`
 	MemberCount   int       `json:"member_count"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	CreateTime     time.Time `json:"create_time"`
+	UpdateTime     time.Time `json:"update_time"`
 }
 
 type GroupMemberItem struct {

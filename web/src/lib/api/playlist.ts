@@ -8,10 +8,8 @@ export interface Playlist {
     user_id: string;
     media_count: number;
     media?: Media[];
-    created_at: string;
-    create_time?: string;
-    updated_at: string;
-    update_time?: string;
+    create_time: string;
+    update_time: string;
 }
 
 export interface PlaylistListResponse {

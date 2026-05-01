@@ -80,9 +80,9 @@ func LikeType(v string) predicate.CommentLike {
 	return predicate.CommentLike(sql.FieldEQ(FieldLikeType, v))
 }
 
-// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v time.Time) predicate.CommentLike {
-	return predicate.CommentLike(sql.FieldEQ(FieldCreatedAt, v))
+// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
+func CreateTime(v time.Time) predicate.CommentLike {
+	return predicate.CommentLike(sql.FieldEQ(FieldCreateTime, v))
 }
 
 // CommentIDEQ applies the EQ predicate on the "comment_id" field.
@@ -280,44 +280,44 @@ func LikeTypeContainsFold(v string) predicate.CommentLike {
 	return predicate.CommentLike(sql.FieldContainsFold(FieldLikeType, v))
 }
 
-// CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v time.Time) predicate.CommentLike {
-	return predicate.CommentLike(sql.FieldEQ(FieldCreatedAt, v))
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.CommentLike {
+	return predicate.CommentLike(sql.FieldEQ(FieldCreateTime, v))
 }
 
-// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v time.Time) predicate.CommentLike {
-	return predicate.CommentLike(sql.FieldNEQ(FieldCreatedAt, v))
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.CommentLike {
+	return predicate.CommentLike(sql.FieldNEQ(FieldCreateTime, v))
 }
 
-// CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...time.Time) predicate.CommentLike {
-	return predicate.CommentLike(sql.FieldIn(FieldCreatedAt, vs...))
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.CommentLike {
+	return predicate.CommentLike(sql.FieldIn(FieldCreateTime, vs...))
 }
 
-// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...time.Time) predicate.CommentLike {
-	return predicate.CommentLike(sql.FieldNotIn(FieldCreatedAt, vs...))
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.CommentLike {
+	return predicate.CommentLike(sql.FieldNotIn(FieldCreateTime, vs...))
 }
 
-// CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v time.Time) predicate.CommentLike {
-	return predicate.CommentLike(sql.FieldGT(FieldCreatedAt, v))
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.CommentLike {
+	return predicate.CommentLike(sql.FieldGT(FieldCreateTime, v))
 }
 
-// CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v time.Time) predicate.CommentLike {
-	return predicate.CommentLike(sql.FieldGTE(FieldCreatedAt, v))
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.CommentLike {
+	return predicate.CommentLike(sql.FieldGTE(FieldCreateTime, v))
 }
 
-// CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v time.Time) predicate.CommentLike {
-	return predicate.CommentLike(sql.FieldLT(FieldCreatedAt, v))
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.CommentLike {
+	return predicate.CommentLike(sql.FieldLT(FieldCreateTime, v))
 }
 
-// CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v time.Time) predicate.CommentLike {
-	return predicate.CommentLike(sql.FieldLTE(FieldCreatedAt, v))
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.CommentLike {
+	return predicate.CommentLike(sql.FieldLTE(FieldCreateTime, v))
 }
 
 // HasComment applies the HasEdge predicate on the "comment" edge.

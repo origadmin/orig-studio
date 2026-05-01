@@ -27,10 +27,16 @@ const (
 	FieldStatus = "status"
 	// FieldReportCount holds the string denoting the report_count field in the database.
 	FieldReportCount = "report_count"
+	// FieldLikeCount holds the string denoting the like_count field in the database.
+	FieldLikeCount = "like_count"
 	// FieldModeratedBy holds the string denoting the moderated_by field in the database.
 	FieldModeratedBy = "moderated_by"
 	// FieldModeratedAt holds the string denoting the moderated_at field in the database.
 	FieldModeratedAt = "moderated_at"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
+	// FieldUpdateTime holds the string denoting the update_time field in the database.
+	FieldUpdateTime = "update_time"
 	// EdgeMedia holds the string denoting the media edge name in mutations.
 	EdgeMedia = "media"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -101,8 +107,11 @@ var Columns = []string{
 	FieldUserID,
 	FieldStatus,
 	FieldReportCount,
+	FieldLikeCount,
 	FieldModeratedBy,
 	FieldModeratedAt,
+	FieldCreateTime,
+	FieldUpdateTime,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "content_comments"
@@ -132,6 +141,14 @@ var (
 	DefaultAddDate func() time.Time
 	// DefaultReportCount holds the default value on creation for the "report_count" field.
 	DefaultReportCount int
+	// DefaultLikeCount holds the default value on creation for the "like_count" field.
+	DefaultLikeCount int
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
+	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
+	DefaultUpdateTime func() time.Time
+	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
+	UpdateDefaultUpdateTime func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -149,6 +166,7 @@ const (
 	StatusPENDING  Status = "PENDING"
 	StatusAPPROVED Status = "APPROVED"
 	StatusREJECTED Status = "REJECTED"
+	StatusBLOCKED  Status = "BLOCKED"
 )
 
 func (s Status) String() string {
@@ -158,7 +176,7 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusPENDING, StatusAPPROVED, StatusREJECTED:
+	case StatusPENDING, StatusAPPROVED, StatusREJECTED, StatusBLOCKED:
 		return nil
 	default:
 		return fmt.Errorf("comment: invalid enum value for status field: %q", s)
@@ -203,6 +221,11 @@ func ByReportCount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldReportCount, opts...).ToFunc()
 }
 
+// ByLikeCount orders the results by the like_count field.
+func ByLikeCount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLikeCount, opts...).ToFunc()
+}
+
 // ByModeratedBy orders the results by the moderated_by field.
 func ByModeratedBy(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldModeratedBy, opts...).ToFunc()
@@ -211,6 +234,16 @@ func ByModeratedBy(opts ...sql.OrderTermOption) OrderOption {
 // ByModeratedAt orders the results by the moderated_at field.
 func ByModeratedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldModeratedAt, opts...).ToFunc()
+}
+
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
+}
+
+// ByUpdateTime orders the results by the update_time field.
+func ByUpdateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdateTime, opts...).ToFunc()
 }
 
 // ByMediaField orders the results by media field.

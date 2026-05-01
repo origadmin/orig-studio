@@ -28,10 +28,18 @@ type Channel struct {
 	ShortToken string `json:"short_token,omitempty"`
 	// BannerLogo holds the value of the "banner_logo" field.
 	BannerLogo string `json:"banner_logo,omitempty"`
-	// IsPublic holds the value of the "is_public" field.
-	IsPublic bool `json:"is_public,omitempty"`
+	// Privacy holds the value of the "privacy" field.
+	Privacy channel.Privacy `json:"privacy,omitempty"`
+	// SubscriberCount holds the value of the "subscriber_count" field.
+	SubscriberCount int64 `json:"subscriber_count,omitempty"`
+	// MediaCount holds the value of the "media_count" field.
+	MediaCount int `json:"media_count,omitempty"`
 	// AddDate holds the value of the "add_date" field.
 	AddDate time.Time `json:"add_date,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ChannelQuery when eager-loading is set.
 	Edges        ChannelEdges `json:"edges"`
@@ -74,11 +82,11 @@ func (*Channel) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case channel.FieldIsPublic:
-			values[i] = new(sql.NullBool)
-		case channel.FieldID, channel.FieldUserID, channel.FieldTitle, channel.FieldDescription, channel.FieldShortToken, channel.FieldBannerLogo:
+		case channel.FieldSubscriberCount, channel.FieldMediaCount:
+			values[i] = new(sql.NullInt64)
+		case channel.FieldID, channel.FieldUserID, channel.FieldTitle, channel.FieldDescription, channel.FieldShortToken, channel.FieldBannerLogo, channel.FieldPrivacy:
 			values[i] = new(sql.NullString)
-		case channel.FieldAddDate:
+		case channel.FieldAddDate, channel.FieldCreateTime, channel.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -131,17 +139,41 @@ func (_m *Channel) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.BannerLogo = value.String
 			}
-		case channel.FieldIsPublic:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field is_public", values[i])
+		case channel.FieldPrivacy:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field privacy", values[i])
 			} else if value.Valid {
-				_m.IsPublic = value.Bool
+				_m.Privacy = channel.Privacy(value.String)
+			}
+		case channel.FieldSubscriberCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field subscriber_count", values[i])
+			} else if value.Valid {
+				_m.SubscriberCount = value.Int64
+			}
+		case channel.FieldMediaCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field media_count", values[i])
+			} else if value.Valid {
+				_m.MediaCount = int(value.Int64)
 			}
 		case channel.FieldAddDate:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field add_date", values[i])
 			} else if value.Valid {
 				_m.AddDate = value.Time
+			}
+		case channel.FieldCreateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+			} else if value.Valid {
+				_m.CreateTime = value.Time
+			}
+		case channel.FieldUpdateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
+			} else if value.Valid {
+				_m.UpdateTime = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -204,11 +236,23 @@ func (_m *Channel) String() string {
 	builder.WriteString("banner_logo=")
 	builder.WriteString(_m.BannerLogo)
 	builder.WriteString(", ")
-	builder.WriteString("is_public=")
-	builder.WriteString(fmt.Sprintf("%v", _m.IsPublic))
+	builder.WriteString("privacy=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Privacy))
+	builder.WriteString(", ")
+	builder.WriteString("subscriber_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SubscriberCount))
+	builder.WriteString(", ")
+	builder.WriteString("media_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MediaCount))
 	builder.WriteString(", ")
 	builder.WriteString("add_date=")
 	builder.WriteString(_m.AddDate.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("create_time=")
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("update_time=")
+	builder.WriteString(_m.UpdateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

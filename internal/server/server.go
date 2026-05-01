@@ -89,6 +89,7 @@ func (s *Server) Start(addr string) error {
 	r.Static("/uploads", filepath.Join(absStorageBase, "uploads"))
 	r.Static("/thumbnails", filepath.Join(absStorageBase, "thumbnails"))
 	r.Static("/hls", filepath.Join(absStorageBase, "hls"))
+	r.Static("/sprites", filepath.Join(absStorageBase, "sprites"))
 
 	// Register all module routes
 	s.RegisterRoutes(r)

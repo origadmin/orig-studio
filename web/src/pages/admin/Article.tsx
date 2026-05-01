@@ -1,10 +1,11 @@
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
- * 管理端 - 文章管理页面
+ * Admin - Article Management Page
  */
 
 import {useState, useEffect} from 'react';
-import {Search, Plus, FileText, MoreVertical, Trash2, Edit, Eye, Filter} from 'lucide-react';
+import {useNavigate} from '@tanstack/react-router';
+import {Search, Plus, FileText, MoreVertical, Trash2, Edit, Eye, Filter, Film} from 'lucide-react';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
@@ -27,27 +28,28 @@ import {
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import {adminArticleApi, Article} from '@/lib/api/article';
+import {formatDateTime} from '@/lib/format';
 import {extractList} from '@/lib/extract';
 import {TablePagination} from '@/components/common/TablePagination';
-import {PAGINATION} from '@/config/pagination';
+import {usePagination} from '@/hooks/usePagination';
+import {toast} from 'sonner';
 
 export default function ArticlePage() {
+    const navigate = useNavigate();
     const [articles, setArticles] = useState<Article[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [page, setPage] = useState(1);
-    const [pageSize] = useState(PAGINATION.DEFAULT_PAGE_SIZE);
-    const [total, setTotal] = useState(0);
+    const {page, pageSize, total, setPage, setTotal, getParams} = usePagination();
 
-    // 加载文章数据
+    // Load article data
     useEffect(() => {
         const loadArticles = async () => {
             setLoading(true);
             setError(null);
             try {
-                const response = await adminArticleApi.adminList({page, page_size: pageSize});
+                const response = await adminArticleApi.adminList(getParams());
                 const articleList = extractList<Article>(response);
                 setArticles(articleList);
                 if ((response as any)?.total !== undefined) {
@@ -66,7 +68,7 @@ export default function ArticlePage() {
 
     const filteredArticles = articles.filter(item => {
         const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
+        const matchesStatus = statusFilter === 'all' || item.state === statusFilter;
         return matchesSearch && matchesStatus;
     });
 
@@ -76,13 +78,32 @@ export default function ArticlePage() {
         return count.toString();
     };
 
+    const handleDelete = async (id: string) => {
+        try {
+            await adminArticleApi.delete(id);
+            setArticles(prev => prev.filter(a => a.id !== id));
+            toast.success('Article deleted');
+        } catch (err: any) {
+            toast.error(`Delete failed: ${err?.message || 'Unknown error'}`);
+        }
+    };
+
+    const stateBadgeVariant = (state: string): "default" | "secondary" | "destructive" | "outline" => {
+        switch (state) {
+            case 'published': return 'default';
+            case 'draft': return 'secondary';
+            case 'archived': return 'destructive';
+            default: return 'outline';
+        }
+    };
+
     return (
         <div className="space-y-4 p-4 md:p-6">
-            {/* 操作栏 */}
+            {/* Action bar */}
             <Card className="overflow-hidden">
                 <CardContent className="p-6">
                     <div className="flex flex-col gap-4">
-                        {/* 页面标题 */}
+                        {/* Page title */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
                                 <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">Article Management</h2>
@@ -92,10 +113,10 @@ export default function ArticlePage() {
                             </div>
                         </div>
 
-                        {/* 分隔线 */}
+                        {/* Separator */}
                         <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
 
-                        {/* 搜索和筛选 */}
+                        {/* Search and filter */}
                         <div className="flex flex-col lg:flex-row gap-4">
                             <div className="flex-1 min-w-0">
                                 <div className="relative w-full">
@@ -139,7 +160,7 @@ export default function ArticlePage() {
                             <CardDescription>Manage your articles and pages</CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button size="sm">
+                            <Button size="sm" onClick={() => navigate({to: '/admin/articles/new'})}>
                                 <Plus className="w-4 h-4 mr-2"/>
                                 Create Article
                             </Button>
@@ -151,9 +172,8 @@ export default function ArticlePage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Title</TableHead>
-                                <TableHead>Type</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Author</TableHead>
+                                <TableHead>Video</TableHead>
+                                <TableHead>State</TableHead>
                                 <TableHead>Views</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
@@ -162,17 +182,17 @@ export default function ArticlePage() {
                         <TableBody>
                             {loading ? (
                                 <TableRow key="loading">
-                                    <TableCell colSpan={7} className="text-center py-8">
+                                    <TableCell colSpan={6} className="text-center py-8">
                                         <div className="animate-pulse">Loading articles...</div>
                                     </TableCell>
                                 </TableRow>
                             ) : error ? (
                                 <TableRow key="error">
-                                    <TableCell colSpan={7} className="text-center py-8">
+                                    <TableCell colSpan={6} className="text-center py-8">
                                         <div className="text-destructive">{error}</div>
-                                        <Button 
-                                            variant="outline" 
-                                            size="sm" 
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
                                             className="mt-2"
                                             onClick={() => window.location.reload()}
                                         >
@@ -182,7 +202,7 @@ export default function ArticlePage() {
                                 </TableRow>
                             ) : filteredArticles.length === 0 ? (
                                 <TableRow key="empty">
-                                    <TableCell colSpan={7} className="text-center py-8">
+                                    <TableCell colSpan={6} className="text-center py-8">
                                         No articles found
                                     </TableCell>
                                 </TableRow>
@@ -191,31 +211,43 @@ export default function ArticlePage() {
                                     <TableRow key={item.id}>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
-                                                <div
-                                                    className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
+                                                <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center">
                                                     <FileText className="w-5 h-5 text-slate-500"/>
                                                 </div>
-                                                <span className="font-medium">{item.title}</span>
+                                                <div>
+                                                    <span className="font-medium">{item.title}</span>
+                                                    {item.featured && (
+                                                        <Badge variant="outline" className="ml-2 text-[10px] px-1 py-0 text-warning border-amber-300">
+                                                            Featured
+                                                        </Badge>
+                                                    )}
+                                                </div>
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant="outline">{item.type}</Badge>
+                                            {item.media_id ? (
+                                                <Badge variant="outline" className="gap-1">
+                                                    <Film className="w-3 h-3"/>
+                                                    Video
+                                                </Badge>
+                                            ) : (
+                                                <span className="text-muted-foreground text-sm">--</span>
+                                            )}
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant={item.status === 'published' ? 'default' : 'secondary'}>
-                                                {item.status}
+                                            <Badge variant={stateBadgeVariant(item.state)}>
+                                                {item.state}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="text-sm text-slate-500">Author ID: {item.author_id}</TableCell>
-                                        <TableCell className="text-sm text-slate-500">{formatViews(item.views)}</TableCell>
-                                        <TableCell className="text-sm text-slate-500">{new Date(item.created_at || item.create_time).toLocaleDateString()}</TableCell>
+                                        <TableCell className="text-sm text-slate-500">{formatViews(item.view_count)}</TableCell>
+                                        <TableCell className="text-sm text-slate-500">{formatDateTime(item.create_time)}</TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="icon" 
-                                                        className="h-6 w-6" 
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-6 w-6"
                                                         title="More Actions"
                                                     >
                                                         <MoreVertical className="h-3 w-3"/>
@@ -224,15 +256,20 @@ export default function ArticlePage() {
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                     <DropdownMenuSeparator/>
-                                                    <DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => {
+                                                        if (item.slug) {
+                                                            window.open(`/articles/${item.slug}`, '_blank');
+                                                        }
+                                                    }}>
                                                         <Eye className="w-4 h-4 mr-2"/>
                                                         View
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => navigate({to: '/admin/articles/$id/edit', params: {id: item.id}})}>
                                                         <Edit className="w-4 h-4 mr-2"/>
                                                         Edit
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem className="text-destructive focus:text-destructive">
+                                                    <DropdownMenuItem className="text-destructive focus:text-destructive"
+                                                        onClick={() => handleDelete(item.id)}>
                                                         <Trash2 className="w-4 h-4 mr-2"/>
                                                         Delete
                                                     </DropdownMenuItem>

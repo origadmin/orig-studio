@@ -47,8 +47,8 @@ export interface Banner {
     sequence: number;
     start_time?: string;
     end_time?: string;
-    created_at: string;
-    updated_at: string;
+    create_time: string;
+    update_time: string;
 }
 
 export interface BannerListResponse {

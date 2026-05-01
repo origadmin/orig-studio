@@ -24,8 +24,8 @@ const (
 	FieldUserID = "user_id"
 	// FieldIsRead holds the string denoting the is_read field in the database.
 	FieldIsRead = "is_read"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
-	FieldCreatedAt = "created_at"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the notification in the database.
@@ -45,7 +45,7 @@ var Columns = []string{
 	FieldMethod,
 	FieldUserID,
 	FieldIsRead,
-	FieldCreatedAt,
+	FieldCreateTime,
 }
 
 var (
@@ -75,8 +75,8 @@ var (
 	MethodValidator func(string) error
 	// DefaultIsRead holds the default value on creation for the "is_read" field.
 	DefaultIsRead bool
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() time.Time
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
 )
 
 // OrderOption defines the ordering options for the Notification queries.
@@ -112,9 +112,9 @@ func ByIsRead(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsRead, opts...).ToFunc()
 }
 
-// ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
 }
 
 // ByUserCount orders the results by user count.

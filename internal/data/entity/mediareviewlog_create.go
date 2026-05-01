@@ -66,16 +66,16 @@ func (_c *MediaReviewLogCreate) SetNewStatus(v string) *MediaReviewLogCreate {
 	return _c
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_c *MediaReviewLogCreate) SetCreatedAt(v time.Time) *MediaReviewLogCreate {
-	_c.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_c *MediaReviewLogCreate) SetCreateTime(v time.Time) *MediaReviewLogCreate {
+	_c.mutation.SetCreateTime(v)
 	return _c
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *MediaReviewLogCreate) SetNillableCreatedAt(v *time.Time) *MediaReviewLogCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *MediaReviewLogCreate) SetNillableCreateTime(v *time.Time) *MediaReviewLogCreate {
 	if v != nil {
-		_c.SetCreatedAt(*v)
+		_c.SetCreateTime(*v)
 	}
 	return _c
 }
@@ -139,9 +139,9 @@ func (_c *MediaReviewLogCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *MediaReviewLogCreate) defaults() {
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := mediareviewlog.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := mediareviewlog.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := mediareviewlog.DefaultID()
@@ -181,8 +181,8 @@ func (_c *MediaReviewLogCreate) check() error {
 			return &ValidationError{Name: "new_status", err: fmt.Errorf(`entity: validator failed for field "MediaReviewLog.new_status": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "MediaReviewLog.created_at"`)}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "MediaReviewLog.create_time"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := mediareviewlog.IDValidator(v); err != nil {
@@ -246,9 +246,9 @@ func (_c *MediaReviewLogCreate) createSpec() (*MediaReviewLog, *sqlgraph.CreateS
 		_spec.SetField(mediareviewlog.FieldNewStatus, field.TypeString, value)
 		_node.NewStatus = value
 	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(mediareviewlog.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(mediareviewlog.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
 	}
 	if nodes := _c.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -55,9 +55,9 @@ type UploadSession struct {
 	// Session expiration time
 	ExpiresAt time.Time `json:"expires_at,omitempty"`
 	// Creation time
-	CreatedAt time.Time `json:"created_at,omitempty"`
+	CreateTime time.Time `json:"create_time,omitempty"`
 	// Last update time
-	UpdatedAt    time.Time `json:"updated_at,omitempty"`
+	UpdateTime   time.Time `json:"update_time,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -72,7 +72,7 @@ func (*UploadSession) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case uploadsession.FieldUploadID, uploadsession.FieldFilename, uploadsession.FieldContentType, uploadsession.FieldTitle, uploadsession.FieldDescription, uploadsession.FieldUserID, uploadsession.FieldStatus, uploadsession.FieldSha256, uploadsession.FieldStoragePath, uploadsession.FieldTempDir:
 			values[i] = new(sql.NullString)
-		case uploadsession.FieldExpiresAt, uploadsession.FieldCreatedAt, uploadsession.FieldUpdatedAt:
+		case uploadsession.FieldExpiresAt, uploadsession.FieldCreateTime, uploadsession.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -207,17 +207,17 @@ func (_m *UploadSession) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ExpiresAt = value.Time
 			}
-		case uploadsession.FieldCreatedAt:
+		case uploadsession.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				_m.CreatedAt = value.Time
+				_m.CreateTime = value.Time
 			}
-		case uploadsession.FieldUpdatedAt:
+		case uploadsession.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				_m.UpdatedAt = value.Time
+				_m.UpdateTime = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -309,11 +309,11 @@ func (_m *UploadSession) String() string {
 	builder.WriteString("expires_at=")
 	builder.WriteString(_m.ExpiresAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString("create_time=")
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString("update_time=")
+	builder.WriteString(_m.UpdateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

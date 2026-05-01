@@ -52,6 +52,12 @@ func (r *articleRepo) Create(ctx context.Context, a *biz.Article) (*biz.Article,
 	if a.CategoryID != 0 {
 		builder = builder.SetCategoryID(a.CategoryID)
 	}
+	if a.MediaID != "" {
+		builder = builder.SetMediaID(a.MediaID)
+	}
+	if a.Thumbnail != "" {
+		builder = builder.SetThumbnail(a.Thumbnail)
+	}
 	if !a.PublishedAt.IsZero() {
 		builder = builder.SetPublishedAt(a.PublishedAt)
 	}
@@ -82,6 +88,10 @@ func (r *articleRepo) Update(ctx context.Context, a *biz.Article) (*biz.Article,
 	if a.CategoryID != 0 {
 		builder = builder.SetCategoryID(a.CategoryID)
 	}
+	if a.MediaID != "" {
+		builder = builder.SetMediaID(a.MediaID)
+	}
+	builder = builder.SetThumbnail(a.Thumbnail) // Allow empty string to clear
 	if !a.PublishedAt.IsZero() {
 		builder = builder.SetPublishedAt(a.PublishedAt)
 	}
@@ -98,7 +108,11 @@ func (r *articleRepo) Delete(ctx context.Context, id string) error {
 }
 
 func (r *articleRepo) Get(ctx context.Context, id string) (*biz.Article, error) {
-	ent, err := r.data.db.Article.Get(ctx, id)
+	ent, err := r.data.db.Article.Query().
+		Where(article.IDEQ(id)).
+		WithMedia().
+		WithCategory().
+		Only(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("get article: %w", err)
 	}
@@ -108,6 +122,8 @@ func (r *articleRepo) Get(ctx context.Context, id string) (*biz.Article, error) 
 func (r *articleRepo) GetBySlug(ctx context.Context, slug string) (*biz.Article, error) {
 	ent, err := r.data.db.Article.Query().
 		Where(article.SlugEQ(slug)).
+		WithMedia().
+		WithCategory().
 		Only(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("get article by slug: %w", err)
@@ -156,7 +172,7 @@ func (r *articleRepo) List(ctx context.Context, page, pageSize int, filters map[
 	// Apply pagination and ordering
 	offset := (page - 1) * pageSize
 	ents, err := query.
-		Order(entity.Desc(article.FieldCreatedAt)).
+		Order(entity.Desc(article.FieldCreateTime)).
 		Offset(offset).
 		Limit(pageSize).
 		All(ctx)
@@ -192,12 +208,29 @@ func mapArticleEntity(ent *entity.Article) *biz.Article {
 		Tags:         ent.Tags,
 		UserID:       ent.UserID,
 		CategoryID:   ent.CategoryID,
+		MediaID:      ent.MediaID,
+		Thumbnail:    ent.Thumbnail,
 		PublishedAt:  ent.PublishedAt,
-		CreatedAt:    ent.CreatedAt,
-		UpdatedAt:    ent.UpdatedAt,
+		CreateTime:   ent.CreateTime,
+		UpdateTime:   ent.UpdateTime,
 	}
 	if a.Tags == nil {
 		a.Tags = []string{}
+	}
+	// Map eager-loaded media edge
+	if media := ent.Edges.Media; media != nil {
+		a.Media = &biz.MediaBrief{
+			ID:         media.ID,
+			Title:      media.Title,
+			Thumbnail:  media.Thumbnail,
+			Duration:   media.Duration,
+			Type:       media.Type,
+			ShortToken: media.ShortToken,
+		}
+		// Auto-populate thumbnail from media if not set
+		if a.Thumbnail == "" && media.Thumbnail != "" {
+			a.Thumbnail = media.Thumbnail
+		}
 	}
 	return a
 }

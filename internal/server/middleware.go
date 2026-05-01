@@ -162,14 +162,32 @@ func WithAdminAndPerm(jwtMgr *auth.Manager, permChecker authbiz.PermissionChecke
 }
 
 // JWTMiddleware validates Bearer token and injects claims into context.
+// It supports two token sources:
+//  1. Authorization header: "Bearer <token>" (standard, for regular API calls)
+//  2. Query parameter: "?token=<token>" (fallback, for SSE/EventSource which
+//     cannot set custom headers)
 func JWTMiddleware(jwtMgr *auth.Manager) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		var tokenStr string
+
+		// Try Authorization header first
 		header := c.GetHeader("Authorization")
-		if len(header) < 8 || header[:7] != "Bearer " {
+		if len(header) >= 8 && header[:7] == "Bearer " {
+			tokenStr = header[7:]
+		}
+
+		// Fallback to query parameter (for SSE/EventSource connections)
+		if tokenStr == "" {
+			if t := c.Query("token"); t != "" {
+				tokenStr = t
+			}
+		}
+
+		if tokenStr == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing or invalid Authorization header"})
 			return
 		}
-		claims, err := jwtMgr.Parse(header[7:])
+		claims, err := jwtMgr.Parse(tokenStr)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token: " + err.Error()})
 			return

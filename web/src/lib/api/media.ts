@@ -73,6 +73,10 @@ export interface Media {
  * normalizeMedia converts flat edge fields from the proto-based API response
  * into the nested `edges` structure that frontend components expect.
  *
+ * It also handles the GetMediaResponse wrapper: when the backend returns
+ *   { media: { id: "...", title: "...", ... } }
+ * the function unwraps it to the inner Media object first.
+ *
  * The backend proto types.Media returns edge data as flat fields:
  *   { user: {...}, category: {...}, channel: {...} }
  *
@@ -84,6 +88,16 @@ export interface Media {
  */
 export function normalizeMedia<T extends Media>(media: T): T {
     if (!media) return media;
+
+    // Unwrap GetMediaResponse wrapper: backend returns {media: {...}},
+    // but frontend expects the inner Media object directly.
+    // Detect this by checking if the top-level object has a `media` property
+    // that looks like a Media object (has an `id` field) and lacks `title`
+    // (which a real Media would have).
+    const maybeWrapped = media as unknown as { media?: { id?: string; title?: string } };
+    if (maybeWrapped.media && typeof maybeWrapped.media === 'object' && maybeWrapped.media.id && !media.title) {
+        media = maybeWrapped.media as T;
+    }
 
     // Build edges from flat fields if edges are not already populated
     const flatUser = media.user;
@@ -266,8 +280,15 @@ export interface ShareResponse {
 // NOTE: 后端路径 /api/v1/admin/encoding/* (有 admin 前缀)
 export const encodingApi = {
     // 获取转码事件流（SSE）
+    // 后端端点已移至 admin 路由组: /api/v1/admin/medias/transcoding/events
+    // EventSource 不支持自定义 header，因此通过 query parameter 传递 JWT token
     getSSEUrl: (mediaId?: string) => {
-        return `/api/v1/admin/encoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
+        const token = getAccessToken();
+        const params = new URLSearchParams();
+        if (token) params.set("token", token);
+        if (mediaId) params.set("media_id", mediaId);
+        const qs = params.toString();
+        return `/api/v1/admin/medias/transcoding/events${qs ? `?${qs}` : ""}`;
     },
 
     // 获取所有转码任务（扁平列表）
@@ -325,7 +346,7 @@ export const mediaApi = {
         descending?: boolean;
     }) => api.get<MediaListResponse>("/medias", params as Record<string, unknown>),
 
-    // 获取媒体详情（公开，自增播放量）
+    // 获取媒体详情（公开）
     get: (id: number | string) => {
         const cleanId = String(id).replace(/["']/g, '').trim();
         return api.get<Media>(`/medias/${cleanId}`);
@@ -341,6 +362,7 @@ export const mediaApi = {
     }) => api.get<MediaListResponse>("/admin/medias", params as Record<string, unknown>),
 
     // 上传媒体文件（需要 JWT，支持进度回调）
+    // Uses the backend simple upload endpoint POST /uploads/simple
     upload: (
         file: File,
         metadata: {
@@ -377,7 +399,7 @@ export const mediaApi = {
                 if (xhr.status >= 200 && xhr.status < 300) {
                     try {
                         const response = JSON.parse(xhr.responseText);
-                        // 适配新的统一响应格式 {code, message, data}
+                        // Unwrap unified response format {code, message, data}
                         const data = response.data || response;
                         resolve({data});
                     } catch {
@@ -396,7 +418,7 @@ export const mediaApi = {
             xhr.addEventListener("error", () => reject(new Error("Network error")));
             xhr.addEventListener("abort", () => reject(new Error("Upload aborted")));
 
-            xhr.open("POST", `${API_BASE_URL}/medias/upload`);
+            xhr.open("POST", `${API_BASE_URL}/api/v1/uploads/simple`);
             if (token) {
                 xhr.setRequestHeader("Authorization", `Bearer ${token}`);
             }
@@ -439,9 +461,15 @@ export const mediaApi = {
     }) => api.get<TranscodingStatusResponse>("/encoding/status", params as Record<string, unknown>),
 
     // 获取转码事件流（SSE）
+    // 后端端点已移至 admin 路由组: /api/v1/admin/medias/transcoding/events
+    // EventSource 不支持自定义 header，因此通过 query parameter 传递 JWT token
     getSSEUrl: (mediaId?: string) => {
-        // 使用相对路径，让前端代理处理
-        return `/api/v1/encoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
+        const token = getAccessToken();
+        const params = new URLSearchParams();
+        if (token) params.set("token", token);
+        if (mediaId) params.set("media_id", mediaId);
+        const qs = params.toString();
+        return `/api/v1/admin/medias/transcoding/events${qs ? `?${qs}` : ""}`;
     },
 
     // ==================== 点赞/点踩 API ====================
@@ -539,8 +567,15 @@ export const legacyMediaApi = {
     /** @deprecated 使用 adminMediaApi.getVariants(id) 代替。此方法使用不存在的 public 路径 */
     getVariants: (mediaId: number) =>
         api.get<MediaVariantSummary>(`/admin/medias/${mediaId}/variants`),
+    /** @deprecated 使用 encodingApi.getSSEUrl() 代替 */
     getSSEUrl: (mediaId?: number) => {
-        return `/api/v1/admin/encoding/events${mediaId ? `?media_id=${mediaId}` : ""}`;
+        // 后端端点已移至 admin 路由组: /api/v1/admin/medias/transcoding/events
+        const token = getAccessToken();
+        const params = new URLSearchParams();
+        if (token) params.set("token", token);
+        if (mediaId) params.set("media_id", String(mediaId));
+        const qs = params.toString();
+        return `/api/v1/admin/medias/transcoding/events${qs ? `?${qs}` : ""}`;
     },
 };
 
@@ -565,13 +600,17 @@ export const publicMediaApi = {
 
     // 获取媒体公开详情（使用 short_token）
     // 返回公开字段，不包含敏感信息
-    // 自动增加观看计数
     get: (shortToken: string) => {
         const cleanToken = String(shortToken).replace(/["']/g, '').trim();
         return api.get<Media>(`/medias/${cleanToken}`);
     },
 
+    // 增加观看计数（使用 short_token）
+    incrementViewCount: (shortToken: string) =>
+        api.post<{ view_count: number }>(`/medias/${shortToken}/view`),
+
     // 上传媒体文件（需要 JWT，支持进度回调）
+    // Uses the backend simple upload endpoint POST /uploads/simple
     upload: (
         file: File,
         metadata: {
@@ -608,6 +647,7 @@ export const publicMediaApi = {
                 if (xhr.status >= 200 && xhr.status < 300) {
                     try {
                         const response = JSON.parse(xhr.responseText);
+                        // Unwrap unified response format {code, message, data}
                         const data = response.data || response;
                         resolve({data});
                     } catch {
@@ -626,7 +666,7 @@ export const publicMediaApi = {
             xhr.addEventListener("error", () => reject(new Error("Network error")));
             xhr.addEventListener("abort", () => reject(new Error("Upload aborted")));
 
-            xhr.open("POST", `${API_BASE_URL}/medias/upload`);
+            xhr.open("POST", `${API_BASE_URL}/api/v1/uploads/simple`);
             if (token) {
                 xhr.setRequestHeader("Authorization", `Bearer ${token}`);
             }

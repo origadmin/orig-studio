@@ -81,6 +81,7 @@ type MediaQueryOption struct {
 	Type         *int32
 	UserID       *string
 	CategoryID   *int64
+	CategoryIDs  []int64
 	Status       *int32
 	State        string
 	MediaType    string

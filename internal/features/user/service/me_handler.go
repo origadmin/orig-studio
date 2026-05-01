@@ -461,7 +461,7 @@ func (h *MeHandler) GetHistory(c *gin.Context) {
 			"media_id":   f.MediaID,
 			"user_id":    claims.GetUserID(),
 			"progress":   0,
-			"watched_at": f.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+			"watched_at": f.CreateTime.Format("2006-01-02T15:04:05Z07:00"),
 		})
 	}
 	for _, l := range likes {
@@ -470,7 +470,7 @@ func (h *MeHandler) GetHistory(c *gin.Context) {
 			"media_id":   l.MediaID,
 			"user_id":    claims.GetUserID(),
 			"progress":   0,
-			"watched_at": l.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+			"watched_at": l.CreateTime.Format("2006-01-02T15:04:05Z07:00"),
 		})
 	}
 

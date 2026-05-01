@@ -10,6 +10,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"origadmin/application/origcms/internal/data/entity/user"
 
@@ -29,6 +30,7 @@ type ArticleQuery struct {
 	predicates   []predicate.Article
 	withUser     *UserQuery
 	withCategory *CategoryQuery
+	withMedia    *MediaQuery
 	withComments *CommentQuery
 	modifiers    []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -104,6 +106,28 @@ func (_q *ArticleQuery) QueryCategory() *CategoryQuery {
 			sqlgraph.From(article.Table, article.FieldID, selector),
 			sqlgraph.To(category.Table, category.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, article.CategoryTable, article.CategoryColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMedia chains the current query on the "media" edge.
+func (_q *ArticleQuery) QueryMedia() *MediaQuery {
+	query := (&MediaClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(article.Table, article.FieldID, selector),
+			sqlgraph.To(media.Table, media.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, article.MediaTable, article.MediaColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -327,6 +351,7 @@ func (_q *ArticleQuery) Clone() *ArticleQuery {
 		predicates:   append([]predicate.Article{}, _q.predicates...),
 		withUser:     _q.withUser.Clone(),
 		withCategory: _q.withCategory.Clone(),
+		withMedia:    _q.withMedia.Clone(),
 		withComments: _q.withComments.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
@@ -354,6 +379,17 @@ func (_q *ArticleQuery) WithCategory(opts ...func(*CategoryQuery)) *ArticleQuery
 		opt(query)
 	}
 	_q.withCategory = query
+	return _q
+}
+
+// WithMedia tells the query-builder to eager-load the nodes that are connected to
+// the "media" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ArticleQuery) WithMedia(opts ...func(*MediaQuery)) *ArticleQuery {
+	query := (&MediaClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withMedia = query
 	return _q
 }
 
@@ -446,9 +482,10 @@ func (_q *ArticleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Arti
 	var (
 		nodes       = []*Article{}
 		_spec       = _q.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			_q.withUser != nil,
 			_q.withCategory != nil,
+			_q.withMedia != nil,
 			_q.withComments != nil,
 		}
 	)
@@ -482,6 +519,12 @@ func (_q *ArticleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Arti
 	if query := _q.withCategory; query != nil {
 		if err := _q.loadCategory(ctx, query, nodes, nil,
 			func(n *Article, e *Category) { n.Edges.Category = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withMedia; query != nil {
+		if err := _q.loadMedia(ctx, query, nodes, nil,
+			func(n *Article, e *Media) { n.Edges.Media = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -546,6 +589,35 @@ func (_q *ArticleQuery) loadCategory(ctx context.Context, query *CategoryQuery, 
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "category_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *ArticleQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes []*Article, init func(*Article), assign func(*Article, *Media)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Article)
+	for i := range nodes {
+		fk := nodes[i].MediaID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(media.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "media_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -618,6 +690,9 @@ func (_q *ArticleQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if _q.withCategory != nil {
 			_spec.Node.AddColumnOnce(article.FieldCategoryID)
+		}
+		if _q.withMedia != nil {
+			_spec.Node.AddColumnOnce(article.FieldMediaID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

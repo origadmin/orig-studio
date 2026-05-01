@@ -75,9 +75,14 @@ func UserID(v string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldEQ(FieldUserID, v))
 }
 
-// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v time.Time) predicate.Favorite {
-	return predicate.Favorite(sql.FieldEQ(FieldCreatedAt, v))
+// PlaylistID applies equality check predicate on the "playlist_id" field. It's identical to PlaylistIDEQ.
+func PlaylistID(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldEQ(FieldPlaylistID, v))
+}
+
+// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
+func CreateTime(v time.Time) predicate.Favorite {
+	return predicate.Favorite(sql.FieldEQ(FieldCreateTime, v))
 }
 
 // MediaIDEQ applies the EQ predicate on the "media_id" field.
@@ -210,44 +215,119 @@ func UserIDContainsFold(v string) predicate.Favorite {
 	return predicate.Favorite(sql.FieldContainsFold(FieldUserID, v))
 }
 
-// CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v time.Time) predicate.Favorite {
-	return predicate.Favorite(sql.FieldEQ(FieldCreatedAt, v))
+// PlaylistIDEQ applies the EQ predicate on the "playlist_id" field.
+func PlaylistIDEQ(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldEQ(FieldPlaylistID, v))
 }
 
-// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v time.Time) predicate.Favorite {
-	return predicate.Favorite(sql.FieldNEQ(FieldCreatedAt, v))
+// PlaylistIDNEQ applies the NEQ predicate on the "playlist_id" field.
+func PlaylistIDNEQ(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldNEQ(FieldPlaylistID, v))
 }
 
-// CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...time.Time) predicate.Favorite {
-	return predicate.Favorite(sql.FieldIn(FieldCreatedAt, vs...))
+// PlaylistIDIn applies the In predicate on the "playlist_id" field.
+func PlaylistIDIn(vs ...string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldIn(FieldPlaylistID, vs...))
 }
 
-// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...time.Time) predicate.Favorite {
-	return predicate.Favorite(sql.FieldNotIn(FieldCreatedAt, vs...))
+// PlaylistIDNotIn applies the NotIn predicate on the "playlist_id" field.
+func PlaylistIDNotIn(vs ...string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldNotIn(FieldPlaylistID, vs...))
 }
 
-// CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v time.Time) predicate.Favorite {
-	return predicate.Favorite(sql.FieldGT(FieldCreatedAt, v))
+// PlaylistIDGT applies the GT predicate on the "playlist_id" field.
+func PlaylistIDGT(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldGT(FieldPlaylistID, v))
 }
 
-// CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v time.Time) predicate.Favorite {
-	return predicate.Favorite(sql.FieldGTE(FieldCreatedAt, v))
+// PlaylistIDGTE applies the GTE predicate on the "playlist_id" field.
+func PlaylistIDGTE(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldGTE(FieldPlaylistID, v))
 }
 
-// CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v time.Time) predicate.Favorite {
-	return predicate.Favorite(sql.FieldLT(FieldCreatedAt, v))
+// PlaylistIDLT applies the LT predicate on the "playlist_id" field.
+func PlaylistIDLT(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldLT(FieldPlaylistID, v))
 }
 
-// CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v time.Time) predicate.Favorite {
-	return predicate.Favorite(sql.FieldLTE(FieldCreatedAt, v))
+// PlaylistIDLTE applies the LTE predicate on the "playlist_id" field.
+func PlaylistIDLTE(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldLTE(FieldPlaylistID, v))
+}
+
+// PlaylistIDContains applies the Contains predicate on the "playlist_id" field.
+func PlaylistIDContains(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldContains(FieldPlaylistID, v))
+}
+
+// PlaylistIDHasPrefix applies the HasPrefix predicate on the "playlist_id" field.
+func PlaylistIDHasPrefix(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldHasPrefix(FieldPlaylistID, v))
+}
+
+// PlaylistIDHasSuffix applies the HasSuffix predicate on the "playlist_id" field.
+func PlaylistIDHasSuffix(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldHasSuffix(FieldPlaylistID, v))
+}
+
+// PlaylistIDIsNil applies the IsNil predicate on the "playlist_id" field.
+func PlaylistIDIsNil() predicate.Favorite {
+	return predicate.Favorite(sql.FieldIsNull(FieldPlaylistID))
+}
+
+// PlaylistIDNotNil applies the NotNil predicate on the "playlist_id" field.
+func PlaylistIDNotNil() predicate.Favorite {
+	return predicate.Favorite(sql.FieldNotNull(FieldPlaylistID))
+}
+
+// PlaylistIDEqualFold applies the EqualFold predicate on the "playlist_id" field.
+func PlaylistIDEqualFold(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldEqualFold(FieldPlaylistID, v))
+}
+
+// PlaylistIDContainsFold applies the ContainsFold predicate on the "playlist_id" field.
+func PlaylistIDContainsFold(v string) predicate.Favorite {
+	return predicate.Favorite(sql.FieldContainsFold(FieldPlaylistID, v))
+}
+
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.Favorite {
+	return predicate.Favorite(sql.FieldEQ(FieldCreateTime, v))
+}
+
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.Favorite {
+	return predicate.Favorite(sql.FieldNEQ(FieldCreateTime, v))
+}
+
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.Favorite {
+	return predicate.Favorite(sql.FieldIn(FieldCreateTime, vs...))
+}
+
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.Favorite {
+	return predicate.Favorite(sql.FieldNotIn(FieldCreateTime, vs...))
+}
+
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.Favorite {
+	return predicate.Favorite(sql.FieldGT(FieldCreateTime, v))
+}
+
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.Favorite {
+	return predicate.Favorite(sql.FieldGTE(FieldCreateTime, v))
+}
+
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.Favorite {
+	return predicate.Favorite(sql.FieldLT(FieldCreateTime, v))
+}
+
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.Favorite {
+	return predicate.Favorite(sql.FieldLTE(FieldCreateTime, v))
 }
 
 // HasMedia applies the HasEdge predicate on the "media" edge.

@@ -1,4 +1,4 @@
-import {formatViews, formatRelativeTime, formatDuration} from './format';
+import {formatViews, formatRelativeTime, formatDuration, formatDateTime} from './format';
 
 describe('formatViews', () => {
     it('should return 0 for 0 views', () => {
@@ -95,5 +95,63 @@ describe('formatDuration', () => {
 
     it('should return "1:00:00" for 3600 seconds', () => {
         expect(formatDuration(3600)).toBe('1:00:00');
+    });
+});
+
+describe('formatDateTime', () => {
+    it('should return "N/A" for null input', () => {
+        expect(formatDateTime(null)).toBe('N/A');
+    });
+
+    it('should return "N/A" for undefined input', () => {
+        expect(formatDateTime(undefined)).toBe('N/A');
+    });
+
+    it('should return "N/A" for empty string', () => {
+        expect(formatDateTime('')).toBe('N/A');
+    });
+
+    it('should format ISO string with milliseconds to YYYY-MM-DD HH:mm:ss', () => {
+        expect(formatDateTime('2026-05-01T12:34:56.789Z')).toBe('2026-05-01 12:34:56');
+    });
+
+    it('should format ISO string without milliseconds to YYYY-MM-DD HH:mm:ss', () => {
+        expect(formatDateTime('2026-05-01T12:34:56Z')).toBe('2026-05-01 12:34:56');
+    });
+
+    it('should format ISO string with timezone offset', () => {
+        expect(formatDateTime('2026-05-01T20:34:56+08:00')).toBe('2026-05-01 12:34:56');
+    });
+
+    it('should format protobuf Timestamp object {seconds, nanos}', () => {
+        // 2026-05-01 12:34:56 UTC = 1777638896 seconds since epoch
+        expect(formatDateTime({seconds: 1777638896, nanos: 0})).toBe('2026-05-01 12:34:56');
+    });
+
+    it('should format protobuf Timestamp with nanos (ignoring sub-second precision)', () => {
+        // 2026-05-01 12:34:56.789 UTC
+        expect(formatDateTime({seconds: 1777638896, nanos: 789000000})).toBe('2026-05-01 12:34:56');
+    });
+
+    it('should format numeric timestamp (seconds since epoch)', () => {
+        // 2026-05-01 12:34:56 UTC = 1777638896
+        expect(formatDateTime(1777638896)).toBe('2026-05-01 12:34:56');
+    });
+
+    it('should pad single-digit month/day/hour/minute/second', () => {
+        expect(formatDateTime('2026-01-05T03:07:09.123Z')).toBe('2026-01-05 03:07:09');
+    });
+
+    it('should return "N/A" for invalid date string', () => {
+        expect(formatDateTime('not-a-date')).toBe('N/A');
+    });
+
+    it('should return "N/A" for invalid object without seconds', () => {
+        expect(formatDateTime({} as any)).toBe('N/A');
+    });
+
+    it('should handle Date object input', () => {
+        const date = new Date('2026-05-01T12:34:56.789Z');
+        expect(formatDateTime(date)).toBe('2026-05-01 12:34:56');
     });
 });

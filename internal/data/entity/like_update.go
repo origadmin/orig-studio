@@ -73,16 +73,16 @@ func (_u *LikeUpdate) SetNillableLikeType(v *string) *LikeUpdate {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *LikeUpdate) SetCreatedAt(v time.Time) *LikeUpdate {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *LikeUpdate) SetCreateTime(v time.Time) *LikeUpdate {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *LikeUpdate) SetNillableCreatedAt(v *time.Time) *LikeUpdate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *LikeUpdate) SetNillableCreateTime(v *time.Time) *LikeUpdate {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
@@ -178,8 +178,8 @@ func (_u *LikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.LikeType(); ok {
 		_spec.SetField(like.FieldLikeType, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(like.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(like.FieldCreateTime, field.TypeTime, value)
 	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -303,16 +303,16 @@ func (_u *LikeUpdateOne) SetNillableLikeType(v *string) *LikeUpdateOne {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *LikeUpdateOne) SetCreatedAt(v time.Time) *LikeUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *LikeUpdateOne) SetCreateTime(v time.Time) *LikeUpdateOne {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *LikeUpdateOne) SetNillableCreatedAt(v *time.Time) *LikeUpdateOne {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *LikeUpdateOne) SetNillableCreateTime(v *time.Time) *LikeUpdateOne {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
@@ -438,8 +438,8 @@ func (_u *LikeUpdateOne) sqlSave(ctx context.Context) (_node *Like, err error) {
 	if value, ok := _u.mutation.LikeType(); ok {
 		_spec.SetField(like.FieldLikeType, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(like.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(like.FieldCreateTime, field.TypeTime, value)
 	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{

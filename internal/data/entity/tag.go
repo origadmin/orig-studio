@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/tag"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -24,6 +25,16 @@ type Tag struct {
 	MediaCount int `json:"media_count,omitempty"`
 	// ListingsThumbnail holds the value of the "listings_thumbnail" field.
 	ListingsThumbnail string `json:"listings_thumbnail,omitempty"`
+	// Status holds the value of the "status" field.
+	Status tag.Status `json:"status,omitempty"`
+	// Description holds the value of the "description" field.
+	Description string `json:"description,omitempty"`
+	// Color holds the value of the "color" field.
+	Color string `json:"color,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TagQuery when eager-loading is set.
 	Edges         TagEdges `json:"edges"`
@@ -56,8 +67,10 @@ func (*Tag) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case tag.FieldID, tag.FieldMediaCount:
 			values[i] = new(sql.NullInt64)
-		case tag.FieldTitle, tag.FieldSlug, tag.FieldListingsThumbnail:
+		case tag.FieldTitle, tag.FieldSlug, tag.FieldListingsThumbnail, tag.FieldStatus, tag.FieldDescription, tag.FieldColor:
 			values[i] = new(sql.NullString)
+		case tag.FieldCreateTime, tag.FieldUpdateTime:
+			values[i] = new(sql.NullTime)
 		case tag.ForeignKeys[0]: // media_tag_tag
 			values[i] = new(sql.NullInt64)
 		default:
@@ -104,6 +117,36 @@ func (_m *Tag) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field listings_thumbnail", values[i])
 			} else if value.Valid {
 				_m.ListingsThumbnail = value.String
+			}
+		case tag.FieldStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				_m.Status = tag.Status(value.String)
+			}
+		case tag.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				_m.Description = value.String
+			}
+		case tag.FieldColor:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field color", values[i])
+			} else if value.Valid {
+				_m.Color = value.String
+			}
+		case tag.FieldCreateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+			} else if value.Valid {
+				_m.CreateTime = value.Time
+			}
+		case tag.FieldUpdateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
+			} else if value.Valid {
+				_m.UpdateTime = value.Time
 			}
 		case tag.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -164,6 +207,21 @@ func (_m *Tag) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("listings_thumbnail=")
 	builder.WriteString(_m.ListingsThumbnail)
+	builder.WriteString(", ")
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(_m.Description)
+	builder.WriteString(", ")
+	builder.WriteString("color=")
+	builder.WriteString(_m.Color)
+	builder.WriteString(", ")
+	builder.WriteString("create_time=")
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("update_time=")
+	builder.WriteString(_m.UpdateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

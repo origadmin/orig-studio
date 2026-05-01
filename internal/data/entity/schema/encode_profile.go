@@ -28,8 +28,8 @@ func (EncodeProfile) Fields() []ent.Field {
 		field.String("audio_bitrate").MaxLen(20).Optional(),
 		field.Text("bento_parameters").Optional(), // Bento4 mp4hls extra args
 		field.Bool("is_active").Default(true),
-		field.Time("created_at").Default(time.Now),
-		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+		field.Time("create_time").Default(time.Now),
+		field.Time("update_time").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 

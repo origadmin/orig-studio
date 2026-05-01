@@ -38,7 +38,7 @@ import (
 	userservice "origadmin/application/origcms/internal/features/user/service"
 	"origadmin/application/origcms/internal/infra"
 	auth2 "origadmin/application/origcms/internal/infra/auth"
-	"origadmin/application/origcms/internal/infra/conf"
+	"origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/infra/pubsub"
 	"time"
 )
@@ -96,7 +96,8 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	groupMemberRepo := dal5.NewGroupMemberRepo(dalData, logger)
 	userPermRepo := dal5.NewUserPermRepo(dalData, logger)
 	permissionUseCase := biz5.NewPermissionUseCase(permissionGroupRepo, groupMemberRepo, userPermRepo, logger)
-	mediaHandler := NewMediaHandler(manager, mediaUseCase, uploadUseCase, likeFavoriteUseCase, playlistChannelUseCase, userUseCase, permissionUseCase)
+	mediaService := mediaservice.NewMediaService(mediaUseCase, logger)
+	mediaHandler := NewMediaHandler(manager, mediaUseCase, uploadUseCase, likeFavoriteUseCase, playlistChannelUseCase, userUseCase, permissionUseCase, mediaService)
 	uploadHandler := NewUploadHandler(uploadUseCase, manager, logger)
 	categoryRepo := dal4.NewCategoryRepo(data, logger)
 	tagRepo := dal4.NewTagRepo(data, logger)
@@ -121,7 +122,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	tagService := adminservice.NewTagService(tagUseCase)
 	articleRepo := dal4.NewArticleRepo(data, logger)
 	articleUseCase := biz4.NewArticleUseCase(articleRepo, logger)
-	adminHandler := NewAdminHandler(manager, mediaUseCase, playlistChannelUseCase, tagService, settingUseCase, categoryTagUseCase, articleUseCase, userUseCase, permissionUseCase)
+	adminHandler := NewAdminHandler(manager, mediaUseCase, mediaService, playlistChannelUseCase, tagService, settingUseCase, categoryTagUseCase, articleUseCase, userUseCase, permissionUseCase)
 	commentLikeRepo := dal4.NewCommentLikeRepo(data, logger)
 	commentLikeUseCase := biz4.NewCommentLikeUseCase(commentLikeRepo, logger)
 	commentModerationRepo := dal4.NewCommentModerationRepo(data, logger)
@@ -136,6 +137,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	adminTagHandler := NewAdminTagHandler(tagService)
 	exploreHandler := NewExploreHandler(client)
 	stubHandler := NewStubHandler(manager)
+	spriteHandler := NewSpriteHandler(mediaUseCase, manager, logger)
 	appDependencies := &AppDependencies{
 		DB:                       client,
 		PubSub:                   pubSub,
@@ -163,6 +165,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 		AdminHandler:             adminHandler,
 		AdminTagHandler:          adminTagHandler,
 		StubHandler:              stubHandler,
+		SpriteHandler:            spriteHandler,
 		SystemHandler:            systemHandler,
 		StatsHandler:             statsHandler,
 		UploadUC:                 uploadUseCase,
@@ -206,7 +209,8 @@ var ProviderSet = wire.NewSet(infra.ProviderSet, media.ProviderSet, content.Prov
 	NewInteractionHandler,
 	NewAdminTagHandler,
 	NewExploreHandler,
-	NewStubHandler, wire.Bind(new(biz5.PermissionChecker), new(*biz5.PermissionUseCase)), wire.Bind(new(biz2.Storage), new(*dal.LocalStorage)), wire.Bind(new(biz4.MediaUseCaseInterface), new(*biz2.MediaUseCase)), wire.Bind(new(biz.ConfigProvider), new(*biz.SettingUseCase)),
+	NewStubHandler,
+	NewSpriteHandler, wire.Bind(new(biz5.PermissionChecker), new(*biz5.PermissionUseCase)), wire.Bind(new(biz2.Storage), new(*dal.LocalStorage)), wire.Bind(new(biz4.MediaUseCaseInterface), new(*biz2.MediaUseCase)), wire.Bind(new(biz.ConfigProvider), new(*biz.SettingUseCase)),
 )
 
 // NewStorage creates a new storage with hardcoded base path.
@@ -301,8 +305,9 @@ func NewMediaHandler(
 	playlistChannelUC *biz4.PlaylistChannelUseCase,
 	userUC *biz3.UserUseCase,
 	permChecker biz5.PermissionChecker,
+	mediaService *mediaservice.MediaService,
 ) *mediaservice.MediaHandler {
-	return mediaservice.NewMediaHandler(jwt, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC, permChecker)
+	return mediaservice.NewMediaHandler(jwt, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC, permChecker, mediaService)
 }
 
 // NewUploadHandler creates a new upload handler.
@@ -401,6 +406,7 @@ func NewMeHandler(
 func NewAdminHandler(
 	jwt *auth2.Manager,
 	mediaUC *biz2.MediaUseCase,
+	mediaService *mediaservice.MediaService,
 	channelUC *biz4.PlaylistChannelUseCase,
 	tagService *adminservice.TagService,
 	settingUC *biz.SettingUseCase,
@@ -409,7 +415,7 @@ func NewAdminHandler(
 	userUC *biz3.UserUseCase,
 	permChecker biz5.PermissionChecker,
 ) *adminservice.AdminHandler {
-	return adminservice.NewAdminHandler(jwt, mediaUC, channelUC, tagService, settingUC, categoryUC, articleUC, userUC, permChecker)
+	return adminservice.NewAdminHandler(jwt, mediaUC, mediaService, channelUC, tagService, settingUC, categoryUC, articleUC, userUC, permChecker)
 }
 
 // NewCommentModerationHandler creates a new comment moderation handler.
@@ -474,6 +480,11 @@ func NewStubHandler(jwt *auth2.Manager) *contentservice.StubHandler {
 	return contentservice.NewStubHandler(jwt)
 }
 
+// NewSpriteHandler creates a new sprite handler for sprite sheet and VTT routes.
+func NewSpriteHandler(mediaUC *biz2.MediaUseCase, jwt *auth2.Manager, logger log2.Logger) *contentservice.SpriteHandler {
+	return contentservice.NewSpriteHandler(mediaUC, "./data/uploads", jwt, logger)
+}
+
 // AppDependencies holds all application dependencies.
 type AppDependencies struct {
 	DB                       *entity.Client
@@ -502,6 +513,7 @@ type AppDependencies struct {
 	AdminHandler             *adminservice.AdminHandler
 	AdminTagHandler          *adminservice.AdminTagHandler
 	StubHandler              *contentservice.StubHandler
+	SpriteHandler            *contentservice.SpriteHandler
 	SystemHandler            *systemservice.SystemHandler
 	StatsHandler             *systemservice.StatsHandler
 	UploadUC                 *biz2.UploadUseCase

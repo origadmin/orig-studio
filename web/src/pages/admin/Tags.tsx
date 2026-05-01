@@ -43,12 +43,14 @@ import {
 import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, Hash, Filter, RotateCcw} from 'lucide-react';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {tagApi, Tag, CreateTagRequest, UpdateTagRequest} from '@/lib/api/admin-tags';
+import {formatDateTime} from '@/lib/format';
+import {generateSlug} from '@/lib/utils/slug';
 import {TablePagination} from '@/components/common/TablePagination';
-import {PAGINATION} from '@/config/pagination';
+import {PAGINATION_CONFIG} from '@/config/pagination';
 
 const Tags: React.FC = () => {
     const {t} = useTranslation();
-    const [searchParams, setSearchParams] = useState({keyword: '', page: 1, page_size: PAGINATION.DEFAULT_PAGE_SIZE});
+    const [searchParams, setSearchParams] = useState({search: '', page: 1, page_size: PAGINATION_CONFIG.DEFAULT_PAGE_SIZE});
     const [tags, setTags] = useState<Tag[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -64,6 +66,7 @@ const Tags: React.FC = () => {
         color: '',
         status: 'active',
     });
+    const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
 
     // 加载标签数据
     useEffect(() => {
@@ -75,8 +78,8 @@ const Tags: React.FC = () => {
         setError(null);
         try {
             const apiParams: any = {page: params.page, page_size: params.page_size};
-            if (params.keyword) {
-                apiParams.keyword = params.keyword;
+            if (params.search) {
+                apiParams.search = params.search;
             }
             const response = await tagApi.list(apiParams);
             const tagList = Array.isArray(response?.items) ? response.items : [];
@@ -100,6 +103,7 @@ const Tags: React.FC = () => {
             color: '',
             status: 'active',
         });
+        setSlugManuallyEdited(false);
     };
 
     const handleCreate = async () => {
@@ -154,6 +158,7 @@ const Tags: React.FC = () => {
             color: tag.color || '',
             status: tag.status,
         });
+        setSlugManuallyEdited(true); // Don't auto-overwrite existing slug in edit mode
         setShowEditDialog(true);
     };
 
@@ -198,8 +203,8 @@ const Tags: React.FC = () => {
                                         className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                                     <Input
                                         placeholder={t('admin.search') || t('admin.tags') + '...'}
-                                        value={searchParams.keyword}
-                                        onChange={(e) => setSearchParams({...searchParams, keyword: e.target.value})}
+                                        value={searchParams.search}
+                                        onChange={(e) => setSearchParams({...searchParams, search: e.target.value})}
                                         className="pl-10 h-8 rounded-btn-sm w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
                                     />
                                 </div>
@@ -209,7 +214,7 @@ const Tags: React.FC = () => {
                                     variant="outline"
                                     size="sm"
                                     onClick={() => {
-                                        const newParams = {keyword: '', page: 1, page_size: PAGINATION.DEFAULT_PAGE_SIZE};
+                                        const newParams = {search: '', page: 1, page_size: PAGINATION_CONFIG.DEFAULT_PAGE_SIZE};
                                         setSearchParams(newParams);
                                         loadTags(newParams);
                                     }}
@@ -335,7 +340,7 @@ const Tags: React.FC = () => {
                                         <TableCell className="text-right">{tag.count || 0}</TableCell>
                                         <TableCell>
                                             <span className="text-sm text-muted-foreground">
-                                                {new Date(tag.created_at || tag.create_time).toLocaleDateString()}
+                                                {formatDateTime(tag.create_time)}
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-right">
@@ -403,17 +408,28 @@ const Tags: React.FC = () => {
                             <Input
                                 placeholder="Enter tag name"
                                 value={formData.name || ''}
-                                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                onChange={(e) => {
+                                    const newName = e.target.value;
+                                    const newFormData: typeof formData = {...formData, name: newName};
+                                    // Auto-fill slug only if user hasn't manually edited it
+                                    if (!slugManuallyEdited) {
+                                        newFormData.slug = generateSlug(newName);
+                                    }
+                                    setFormData(newFormData);
+                                }}
                             />
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Slug *
+                                Slug <span className="text-muted-foreground font-normal">(auto-generated if empty)</span>
                             </h4>
                             <Input
-                                placeholder="Enter tag slug"
+                                placeholder="Auto-generated from name"
                                 value={formData.slug || ''}
-                                onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                                onChange={(e) => {
+                                    setSlugManuallyEdited(true);
+                                    setFormData({...formData, slug: e.target.value});
+                                }}
                             />
                         </div>
                         <div>
@@ -487,10 +503,10 @@ const Tags: React.FC = () => {
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Slug *
+                                Slug <span className="text-muted-foreground font-normal">(auto-generated if empty)</span>
                             </h4>
                             <Input
-                                placeholder="Enter tag slug"
+                                placeholder="Auto-generated from name"
                                 value={formData.slug || ''}
                                 onChange={(e) => setFormData({...formData, slug: e.target.value})}
                             />

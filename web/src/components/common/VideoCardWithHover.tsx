@@ -1,4 +1,4 @@
-﻿/*
+﻿﻿/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * VideoCardWithHover - Video card with hover action overlay
  * Used in subscription content page and similar video grid layouts
@@ -119,7 +119,7 @@ const VideoCardWithHover: React.FC<VideoCardWithHoverProps> = ({video}) => {
                     </span>
                     <span className="flex items-center gap-1">
                         <Clock size={12}/>
-                        {formatDate(video.published_at || video.create_time || video.created_at)}
+                        {formatDate(video.published_at || video.create_time)}
                     </span>
                 </div>
             </div>

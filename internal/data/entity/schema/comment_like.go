@@ -22,7 +22,7 @@ func (CommentLike) Fields() []ent.Field {
 		field.String("comment_id"),
 		field.String("user_id"),
 		field.String("like_type").MaxLen(10).Default("like"),
-		field.Time("created_at").Default(time.Now),
+		field.Time("create_time").Default(time.Now),
 	}
 }
 

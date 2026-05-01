@@ -29,6 +29,17 @@ type TagRepository interface {
 	// GetBySlug returns a tag by slug
 	GetBySlug(ctx context.Context, slug string) (*entity.Tag, error)
 
+	// GetByName returns a tag by title (case-insensitive match)
+	GetByName(ctx context.Context, name string) (*entity.Tag, error)
+
 	// Count returns the total number of tags
 	Count(ctx context.Context, status string) (int64, error)
+
+	// GetOrCreateTag returns an existing tag by name (case-insensitive) or creates one if not found.
+	// When creating, it auto-generates a slug from the name.
+	GetOrCreateTag(ctx context.Context, name string) (*entity.Tag, error)
+
+	// BatchGetOrCreateTags returns existing tags or creates missing ones for the given names.
+	// Names are deduplicated (case-insensitive). Max 20 names per call.
+	BatchGetOrCreateTags(ctx context.Context, names []string) ([]*entity.Tag, error)
 }

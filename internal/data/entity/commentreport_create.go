@@ -54,16 +54,30 @@ func (_c *CommentReportCreate) SetNillableDescription(v *string) *CommentReportC
 	return _c
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_c *CommentReportCreate) SetCreatedAt(v time.Time) *CommentReportCreate {
-	_c.mutation.SetCreatedAt(v)
+// SetStatus sets the "status" field.
+func (_c *CommentReportCreate) SetStatus(v commentreport.Status) *CommentReportCreate {
+	_c.mutation.SetStatus(v)
 	return _c
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *CommentReportCreate) SetNillableCreatedAt(v *time.Time) *CommentReportCreate {
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *CommentReportCreate) SetNillableStatus(v *commentreport.Status) *CommentReportCreate {
 	if v != nil {
-		_c.SetCreatedAt(*v)
+		_c.SetStatus(*v)
+	}
+	return _c
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_c *CommentReportCreate) SetCreateTime(v time.Time) *CommentReportCreate {
+	_c.mutation.SetCreateTime(v)
+	return _c
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *CommentReportCreate) SetNillableCreateTime(v *time.Time) *CommentReportCreate {
+	if v != nil {
+		_c.SetCreateTime(*v)
 	}
 	return _c
 }
@@ -127,9 +141,13 @@ func (_c *CommentReportCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *CommentReportCreate) defaults() {
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := commentreport.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+	if _, ok := _c.mutation.Status(); !ok {
+		v := commentreport.DefaultStatus
+		_c.mutation.SetStatus(v)
+	}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := commentreport.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := commentreport.DefaultID()
@@ -153,8 +171,16 @@ func (_c *CommentReportCreate) check() error {
 			return &ValidationError{Name: "reason", err: fmt.Errorf(`entity: validator failed for field "CommentReport.reason": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "CommentReport.created_at"`)}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`entity: missing required field "CommentReport.status"`)}
+	}
+	if v, ok := _c.mutation.Status(); ok {
+		if err := commentreport.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "CommentReport.status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "CommentReport.create_time"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := commentreport.IDValidator(v); err != nil {
@@ -210,9 +236,13 @@ func (_c *CommentReportCreate) createSpec() (*CommentReport, *sqlgraph.CreateSpe
 		_spec.SetField(commentreport.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(commentreport.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(commentreport.FieldStatus, field.TypeEnum, value)
+		_node.Status = value
+	}
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(commentreport.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
 	}
 	if nodes := _c.mutation.CommentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -11,8 +11,8 @@ export interface Category {
     order: number;
     status?: number;
     media_count?: number;
-    created_at: string;
-    updated_at: string;
+    create_time: string;
+    update_time: string;
 }
 
 export const categoryApi = {

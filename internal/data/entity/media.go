@@ -54,7 +54,7 @@ type Media struct {
 	// Extension holds the value of the "extension" field.
 	Extension string `json:"extension,omitempty"`
 	// Privacy holds the value of the "privacy" field.
-	Privacy int `json:"privacy,omitempty"`
+	Privacy media.Privacy `json:"privacy,omitempty"`
 	// EncodingStatus holds the value of the "encoding_status" field.
 	EncodingStatus string `json:"encoding_status,omitempty"`
 	// State holds the value of the "state" field.
@@ -71,6 +71,10 @@ type Media struct {
 	FavoriteCount int64 `json:"favorite_count,omitempty"`
 	// DownloadCount holds the value of the "download_count" field.
 	DownloadCount int64 `json:"download_count,omitempty"`
+	// ShareCount holds the value of the "share_count" field.
+	ShareCount int64 `json:"share_count,omitempty"`
+	// UUID holds the value of the "uuid" field.
+	UUID string `json:"uuid,omitempty"`
 	// AllowDownload holds the value of the "allow_download" field.
 	AllowDownload bool `json:"allow_download,omitempty"`
 	// EnableComments holds the value of the "enable_comments" field.
@@ -101,10 +105,14 @@ type Media struct {
 	ChannelID string `json:"channel_id,omitempty"`
 	// PublishedAt holds the value of the "published_at" field.
 	PublishedAt time.Time `json:"published_at,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
+	// Create author user ID
+	CreateAuthor string `json:"create_author,omitempty"`
+	// Update author user ID
+	UpdateAuthor string `json:"update_author,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MediaQuery when eager-loading is set.
 	Edges                MediaEdges `json:"edges"`
@@ -133,9 +141,11 @@ type MediaEdges struct {
 	Likes []*Like `json:"likes,omitempty"`
 	// ReviewLogs holds the value of the review_logs edge.
 	ReviewLogs []*MediaReviewLog `json:"review_logs,omitempty"`
+	// Articles holds the value of the articles edge.
+	Articles []*Article `json:"articles,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [9]bool
+	loadedTypes [10]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -225,6 +235,15 @@ func (e MediaEdges) ReviewLogsOrErr() ([]*MediaReviewLog, error) {
 	return nil, &NotLoadedError{edge: "review_logs"}
 }
 
+// ArticlesOrErr returns the Articles value or an error if the edge
+// was not loaded in eager-loading.
+func (e MediaEdges) ArticlesOrErr() ([]*Article, error) {
+	if e.loadedTypes[9] {
+		return e.Articles, nil
+	}
+	return nil, &NotLoadedError{edge: "articles"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Media) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -236,11 +255,11 @@ func (*Media) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case media.FieldThumbnailTime:
 			values[i] = new(sql.NullFloat64)
-		case media.FieldDuration, media.FieldWidth, media.FieldHeight, media.FieldPrivacy, media.FieldViewCount, media.FieldLikeCount, media.FieldDislikeCount, media.FieldCommentCount, media.FieldFavoriteCount, media.FieldDownloadCount, media.FieldReportedTimes, media.FieldCategoryID:
+		case media.FieldDuration, media.FieldWidth, media.FieldHeight, media.FieldViewCount, media.FieldLikeCount, media.FieldDislikeCount, media.FieldCommentCount, media.FieldFavoriteCount, media.FieldDownloadCount, media.FieldShareCount, media.FieldReportedTimes, media.FieldCategoryID:
 			values[i] = new(sql.NullInt64)
-		case media.FieldID, media.FieldTitle, media.FieldDescription, media.FieldShortToken, media.FieldType, media.FieldURL, media.FieldHlsFile, media.FieldThumbnail, media.FieldPoster, media.FieldPreviewFilePath, media.FieldSize, media.FieldMimeType, media.FieldMd5sum, media.FieldExtension, media.FieldEncodingStatus, media.FieldState, media.FieldReviewStatus, media.FieldSpriteStatus, media.FieldSpritePath, media.FieldVttPath, media.FieldUserID, media.FieldChannelID:
+		case media.FieldID, media.FieldTitle, media.FieldDescription, media.FieldShortToken, media.FieldType, media.FieldURL, media.FieldHlsFile, media.FieldThumbnail, media.FieldPoster, media.FieldPreviewFilePath, media.FieldSize, media.FieldMimeType, media.FieldMd5sum, media.FieldExtension, media.FieldPrivacy, media.FieldEncodingStatus, media.FieldState, media.FieldUUID, media.FieldReviewStatus, media.FieldSpriteStatus, media.FieldSpritePath, media.FieldVttPath, media.FieldUserID, media.FieldChannelID, media.FieldCreateAuthor, media.FieldUpdateAuthor:
 			values[i] = new(sql.NullString)
-		case media.FieldPublishedAt, media.FieldCreatedAt, media.FieldUpdatedAt:
+		case media.FieldPublishedAt, media.FieldCreateTime, media.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		case media.ForeignKeys[0]: // media_category_media
 			values[i] = new(sql.NullInt64)
@@ -364,10 +383,10 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 				_m.Extension = value.String
 			}
 		case media.FieldPrivacy:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field privacy", values[i])
 			} else if value.Valid {
-				_m.Privacy = int(value.Int64)
+				_m.Privacy = media.Privacy(value.String)
 			}
 		case media.FieldEncodingStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -416,6 +435,18 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field download_count", values[i])
 			} else if value.Valid {
 				_m.DownloadCount = value.Int64
+			}
+		case media.FieldShareCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field share_count", values[i])
+			} else if value.Valid {
+				_m.ShareCount = value.Int64
+			}
+		case media.FieldUUID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field uuid", values[i])
+			} else if value.Valid {
+				_m.UUID = value.String
 			}
 		case media.FieldAllowDownload:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -509,17 +540,29 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.PublishedAt = value.Time
 			}
-		case media.FieldCreatedAt:
+		case media.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				_m.CreatedAt = value.Time
+				_m.CreateTime = value.Time
 			}
-		case media.FieldUpdatedAt:
+		case media.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				_m.UpdatedAt = value.Time
+				_m.UpdateTime = value.Time
+			}
+		case media.FieldCreateAuthor:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field create_author", values[i])
+			} else if value.Valid {
+				_m.CreateAuthor = value.String
+			}
+		case media.FieldUpdateAuthor:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field update_author", values[i])
+			} else if value.Valid {
+				_m.UpdateAuthor = value.String
 			}
 		case media.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -591,6 +634,11 @@ func (_m *Media) QueryLikes() *LikeQuery {
 // QueryReviewLogs queries the "review_logs" edge of the Media entity.
 func (_m *Media) QueryReviewLogs() *MediaReviewLogQuery {
 	return NewMediaClient(_m.config).QueryReviewLogs(_m)
+}
+
+// QueryArticles queries the "articles" edge of the Media entity.
+func (_m *Media) QueryArticles() *ArticleQuery {
+	return NewMediaClient(_m.config).QueryArticles(_m)
 }
 
 // Update returns a builder for updating this Media.
@@ -691,6 +739,12 @@ func (_m *Media) String() string {
 	builder.WriteString("download_count=")
 	builder.WriteString(fmt.Sprintf("%v", _m.DownloadCount))
 	builder.WriteString(", ")
+	builder.WriteString("share_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ShareCount))
+	builder.WriteString(", ")
+	builder.WriteString("uuid=")
+	builder.WriteString(_m.UUID)
+	builder.WriteString(", ")
 	builder.WriteString("allow_download=")
 	builder.WriteString(fmt.Sprintf("%v", _m.AllowDownload))
 	builder.WriteString(", ")
@@ -736,11 +790,17 @@ func (_m *Media) String() string {
 	builder.WriteString("published_at=")
 	builder.WriteString(_m.PublishedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString("create_time=")
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString("update_time=")
+	builder.WriteString(_m.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("create_author=")
+	builder.WriteString(_m.CreateAuthor)
+	builder.WriteString(", ")
+	builder.WriteString("update_author=")
+	builder.WriteString(_m.UpdateAuthor)
 	builder.WriteByte(')')
 	return builder.String()
 }

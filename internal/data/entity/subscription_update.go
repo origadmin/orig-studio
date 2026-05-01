@@ -58,16 +58,16 @@ func (_u *SubscriptionUpdate) SetNillableChannelID(v *string) *SubscriptionUpdat
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *SubscriptionUpdate) SetCreatedAt(v time.Time) *SubscriptionUpdate {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *SubscriptionUpdate) SetCreateTime(v time.Time) *SubscriptionUpdate {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *SubscriptionUpdate) SetNillableCreatedAt(v *time.Time) *SubscriptionUpdate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillableCreateTime(v *time.Time) *SubscriptionUpdate {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
@@ -155,8 +155,8 @@ func (_u *SubscriptionUpdate) sqlSave(ctx context.Context) (_node int, err error
 			}
 		}
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(subscription.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(subscription.FieldCreateTime, field.TypeTime, value)
 	}
 	if _u.mutation.SubscriberCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -266,16 +266,16 @@ func (_u *SubscriptionUpdateOne) SetNillableChannelID(v *string) *SubscriptionUp
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *SubscriptionUpdateOne) SetCreatedAt(v time.Time) *SubscriptionUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *SubscriptionUpdateOne) SetCreateTime(v time.Time) *SubscriptionUpdateOne {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *SubscriptionUpdateOne) SetNillableCreatedAt(v *time.Time) *SubscriptionUpdateOne {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillableCreateTime(v *time.Time) *SubscriptionUpdateOne {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
@@ -393,8 +393,8 @@ func (_u *SubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Subscripti
 			}
 		}
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(subscription.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(subscription.FieldCreateTime, field.TypeTime, value)
 	}
 	if _u.mutation.SubscriberCleared() {
 		edge := &sqlgraph.EdgeSpec{

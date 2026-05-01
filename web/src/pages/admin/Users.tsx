@@ -5,7 +5,7 @@ import {Spinner} from "@/components/ui/spinner"
  */
 
 import {useState, useEffect} from 'react';
-import {Search, Plus, User as UserIcon, MoreVertical, Trash2, Edit, Shield, Mail, Eye, RotateCcw} from 'lucide-react';
+import {Search, Plus, User as UserIcon, MoreVertical, Trash2, Edit, Shield, Mail, Eye, RotateCcw, ToggleLeft} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Badge} from '@/components/ui/badge';
@@ -47,27 +47,32 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {adminUserApi, userApi, User, CreateUserRequest, UpdateUserRequest} from '@/lib/api/user';
+import {adminUserApi, userApi, User, CreateUserRequest, AdminCreateUserRequest, UpdateUserRequest, getUserStatusLabel, getUserStatusCode} from '@/lib/api/user';
+import {formatDateTime} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
 import {getFullUrl} from '@/lib/utils';
 import {TablePagination} from '@/components/common/TablePagination';
-import {PAGINATION} from '@/config/pagination';
+import {PAGINATION_CONFIG} from '@/config/pagination';
 
 export default function UsersPage() {
     const {t} = useTranslation();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchParams, setSearchParams] = useState({keyword: '', role: 'all', page: 1, page_size: PAGINATION.DEFAULT_PAGE_SIZE});
+    const [searchParams, setSearchParams] = useState({keyword: '', role: 'all', page: 1, page_size: PAGINATION_CONFIG.DEFAULT_PAGE_SIZE});
     const [total, setTotal] = useState(0);
     
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [showChangeRoleDialog, setShowChangeRoleDialog] = useState(false);
+    const [showChangeStatusDialog, setShowChangeStatusDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     
     const [currentUser, setCurrentUser] = useState<User | null>(null);
-    const [formData, setFormData] = useState<Partial<CreateUserRequest & UpdateUserRequest>>({
+    const [selectedRole, setSelectedRole] = useState<string>('user');
+    const [selectedStatus, setSelectedStatus] = useState<string>('active');
+    const [formData, setFormData] = useState<Partial<CreateUserRequest & UpdateUserRequest & {nickname?: string; avatar?: string; phone?: string}>>({
         username: '',
+        nickname: '',
         email: '',
         password: '',
         role: 'user',
@@ -104,6 +109,7 @@ export default function UsersPage() {
     const resetForm = () => {
         setFormData({
             username: '',
+            nickname: '',
             email: '',
             password: '',
             role: 'user',
@@ -112,8 +118,27 @@ export default function UsersPage() {
     };
 
     const handleCreate = async () => {
+        // Validate required fields
+        if (!formData.username?.trim()) {
+            return;
+        }
+        if (!formData.email?.trim()) {
+            return;
+        }
+        // Password is optional, but if provided must be at least 6 characters
+        if (formData.password && formData.password.length < 6) {
+            return;
+        }
+
         try {
-            await userApi.create(formData as CreateUserRequest);
+            const createData: AdminCreateUserRequest = {
+                username: formData.username,
+                email: formData.email,
+                password: formData.password || undefined,
+                nickname: formData.nickname || undefined,
+                role: formData.role,
+            };
+            await adminUserApi.create(createData);
             await loadUsers();
             setShowCreateDialog(false);
             resetForm();
@@ -136,16 +161,29 @@ export default function UsersPage() {
         }
     };
 
-    const handleChangeRole = async (newRole: string) => {
+    const handleChangeRole = async () => {
         if (!currentUser) return;
 
         try {
-            await adminUserApi.updateRole(currentUser.id, newRole);
+            await adminUserApi.updateRole(currentUser.id, selectedRole);
             await loadUsers();
             setShowChangeRoleDialog(false);
             setCurrentUser(null);
         } catch (err) {
             console.error('Failed to change role:', err);
+        }
+    };
+
+    const handleChangeStatus = async () => {
+        if (!currentUser) return;
+
+        try {
+            await adminUserApi.updateStatus(currentUser.id, selectedStatus);
+            await loadUsers();
+            setShowChangeStatusDialog(false);
+            setCurrentUser(null);
+        } catch (err) {
+            console.error('Failed to change status:', err);
         }
     };
 
@@ -171,16 +209,26 @@ export default function UsersPage() {
         setCurrentUser(user);
         setFormData({
             username: user.username,
+            nickname: user.nickname || '',
             email: user.email,
+            avatar: user.avatar || '',
+            phone: user.phone || '',
             role: user.role,
-            status: user.status,
+            status: getUserStatusLabel(user.status),
         });
         setShowEditDialog(true);
     };
 
     const openChangeRoleDialog = (user: User) => {
         setCurrentUser(user);
+        setSelectedRole(user.role || 'user');
         setShowChangeRoleDialog(true);
+    };
+
+    const openChangeStatusDialog = (user: User) => {
+        setCurrentUser(user);
+        setSelectedStatus(getUserStatusLabel(user.status));
+        setShowChangeStatusDialog(true);
     };
 
     const openDeleteDialog = (user: User) => {
@@ -193,12 +241,12 @@ export default function UsersPage() {
     };
 
     const getRoleBadge = (role: string) => {
-        const roles: Record<string, { variant: "default" | "secondary" | "outline", label: string }> = {
-            admin: {variant: "default", label: t('admin.admin') || "Admin"},
-            editor: {variant: "secondary", label: t('admin.editor') || "Editor"},
-            user: {variant: "outline", label: t('admin.user') || "User"}
+        const roles: Record<string, { variant: "default" | "secondary" | "outline", label: string, icon: React.ReactNode }> = {
+            admin: {variant: "default", label: t('admin.admin') || "Admin", icon: <Shield className="w-3 h-3"/>},
+            editor: {variant: "secondary", label: t('admin.editor') || "Editor", icon: <Edit className="w-3 h-3"/>},
+            user: {variant: "outline", label: t('admin.user') || "User", icon: <UserIcon className="w-3 h-3"/>}
         };
-        return roles[role] || {variant: "outline", label: role};
+        return roles[role] || {variant: "outline", label: role, icon: <UserIcon className="w-3 h-3"/>};
     };
 
     return (
@@ -258,7 +306,7 @@ export default function UsersPage() {
                                         variant="outline"
                                         size="sm"
                                         onClick={() => {
-                                            const newParams = {keyword: '', role: 'all', page: 1, page_size: PAGINATION.DEFAULT_PAGE_SIZE};
+                                            const newParams = {keyword: '', role: 'all', page: 1, page_size: PAGINATION_CONFIG.DEFAULT_PAGE_SIZE};
                                             setSearchParams(newParams);
                                             loadUsers(newParams);
                                         }}
@@ -302,7 +350,7 @@ export default function UsersPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-slate-500">{t('admin.activeUsers') || "Active Users"}</p>
-                                <p className="text-2xl font-bold text-success dark:text-green-400">{users.filter(u => u.status === 'active').length}</p>
+                                <p className="text-2xl font-bold text-success dark:text-green-400">{users.filter(u => getUserStatusLabel(u.status) === 'active').length}</p>
                             </div>
                             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                                 <Shield className="w-6 h-6 text-success"/>
@@ -382,10 +430,10 @@ export default function UsersPage() {
                                                 <Avatar className="w-10 h-10">
                                                     <AvatarImage
                                                         src={user.avatar ? getFullUrl(user.avatar) : undefined}/>
-                                                    <AvatarFallback>{user.username ? user.username.charAt(0) : '?'}</AvatarFallback>
+                                                    <AvatarFallback>{(user.nickname || user.username || '?').charAt(0)}</AvatarFallback>
                                                 </Avatar>
                                                 <div>
-                                                    <p className="font-medium">{user.username}</p>
+                                                    <p className="font-medium">{user.nickname || user.username}</p>
                                                     <p className="text-sm text-slate-500">@{user.username}</p>
                                                 </div>
                                             </div>
@@ -397,16 +445,19 @@ export default function UsersPage() {
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <Badge {...getRoleBadge(user.role)} />
+                                            <Badge variant={getRoleBadge(user.role).variant} className="gap-1">
+                                                {getRoleBadge(user.role).icon}
+                                                {getRoleBadge(user.role).label}
+                                            </Badge>
                                         </TableCell>
                                         <TableCell>
-                                            {user.status === "active" ? (
+                                            {getUserStatusLabel(user.status) === "active" ? (
                                                 <Badge variant="default" className="bg-success">{t('admin.active') || "Active"}</Badge>
                                             ) : (
-                                                <Badge variant="secondary">{t('admin.inactive') || "Inactive"}</Badge>
+                                                <Badge variant="secondary">{t('admin.inactive') || getUserStatusLabel(user.status)}</Badge>
                                             )}
                                         </TableCell>
-                                        <TableCell className="text-sm text-slate-500">{user.created_at || user.create_time}</TableCell>
+                                        <TableCell className="text-sm text-slate-500">{formatDateTime(user.create_time)}</TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
@@ -433,6 +484,10 @@ export default function UsersPage() {
                                                     <DropdownMenuItem onClick={() => openChangeRoleDialog(user)}>
                                                         <Shield className="w-4 h-4 mr-2"/>
                                                         {t('admin.changeRole') || "Change Role"}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => openChangeStatusDialog(user)}>
+                                                        <ToggleLeft className="w-4 h-4 mr-2"/>
+                                                        {t('admin.changeStatus') || "Change Status"}
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem 
                                                         className="text-destructive focus:text-destructive" 
@@ -489,9 +544,10 @@ export default function UsersPage() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">{t('admin.password') || "Password"}</label>
+                            <label className="block text-sm font-medium mb-1">{t('admin.password') || "Password"} <span className="text-muted-foreground text-xs">({t('admin.optional') || "Optional"})</span></label>
                             <Input
                                 type="password"
+                                placeholder={t('admin.passwordPlaceholder') || "Min 6 characters, leave blank for auto-generated"}
                                 value={formData.password}
                                 onChange={(e) => setFormData({...formData, password: e.target.value})}
                             />
@@ -533,7 +589,15 @@ export default function UsersPage() {
                             <label className="block text-sm font-medium mb-1">{t('admin.username') || "Username"}</label>
                             <Input
                                 value={formData.username}
-                                onChange={(e) => setFormData({...formData, username: e.target.value})}
+                                disabled
+                                className="bg-muted"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.nickname') || "Nickname"}</label>
+                            <Input
+                                value={formData.nickname}
+                                onChange={(e) => setFormData({...formData, nickname: e.target.value})}
                             />
                         </div>
                         <div>
@@ -566,6 +630,7 @@ export default function UsersPage() {
                                 <SelectContent>
                                     <SelectItem value="active">{t('admin.active') || "Active"}</SelectItem>
                                     <SelectItem value="inactive">{t('admin.inactive') || "Inactive"}</SelectItem>
+                                    <SelectItem value="suspended">{t('admin.suspended') || "Suspended"}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -592,8 +657,8 @@ export default function UsersPage() {
                         <div>
                             <label className="block text-sm font-medium mb-1">{t('admin.newRole') || "New Role"}</label>
                             <Select 
-                                value={currentUser?.role || 'user'} 
-                                onValueChange={(v) => handleChangeRole(v)}
+                                value={selectedRole} 
+                                onValueChange={(v) => setSelectedRole(v)}
                             >
                                 <SelectTrigger>
                                     <SelectValue/>
@@ -606,6 +671,50 @@ export default function UsersPage() {
                             </Select>
                         </div>
                     </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowChangeRoleDialog(false)}>
+                            {t('admin.cancel') || "Cancel"}
+                        </Button>
+                        <Button onClick={handleChangeRole}>
+                            {t('admin.save') || "Save"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Change Status Dialog */}
+            <Dialog open={showChangeStatusDialog} onOpenChange={setShowChangeStatusDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('admin.changeStatus') || "Change Status"}</DialogTitle>
+                        <DialogDescription>{t('admin.changeStatusDesc') || "Change user account status"}</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">{t('admin.newStatus') || "New Status"}</label>
+                            <Select 
+                                value={selectedStatus} 
+                                onValueChange={(v) => setSelectedStatus(v)}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="active">{t('admin.active') || "Active"}</SelectItem>
+                                    <SelectItem value="inactive">{t('admin.inactive') || "Inactive"}</SelectItem>
+                                    <SelectItem value="suspended">{t('admin.suspended') || "Suspended"}</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowChangeStatusDialog(false)}>
+                            {t('admin.cancel') || "Cancel"}
+                        </Button>
+                        <Button onClick={handleChangeStatus}>
+                            {t('admin.save') || "Save"}
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
 

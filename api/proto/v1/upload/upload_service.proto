@@ -230,7 +230,7 @@ message GetUploadSessionResponse {
   // Uploaded parts
   repeated PartInfo parts = 9 [json_name = "parts"];
   // Created at
-  string created_at = 10 [json_name = "created_at"];
+  string create_time = 10 [json_name = "create_time"];
   // Expires at
   string expires_at = 11 [json_name = "expires_at"];
 }

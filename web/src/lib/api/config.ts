@@ -9,7 +9,7 @@ export interface SettingItem {
     description: string;
     is_secret: boolean;
     is_builtin: boolean;
-    updated_at: string;
+    update_time: string;
 }
 
 export interface SettingCategoryGroup {

@@ -372,7 +372,7 @@ message GetMyPlaylistsRequest {
 // GetMyPlaylistsResponse is the response message for getting my playlists.
 message GetMyPlaylistsResponse {
   int32 total = 1 [json_name = "total"];
-  repeated api.v1.services.types.Playlist playlists = 2 [json_name = "playlists"];
+  repeated api.v1.services.types.Playlist items = 2 [json_name = "items"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
 }
@@ -386,7 +386,7 @@ message GetMyFavoritesRequest {
 // GetMyFavoritesResponse is the response message for getting my favorites.
 message GetMyFavoritesResponse {
   int32 total = 1 [json_name = "total"];
-  repeated api.v1.services.types.Media medias = 2 [json_name = "medias"];
+  repeated api.v1.services.types.Media items = 2 [json_name = "items"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
 }
@@ -414,7 +414,7 @@ message GetMySubscriptionsRequest {
 // GetMySubscriptionsResponse is the response message for getting my subscriptions.
 message GetMySubscriptionsResponse {
   int32 total = 1 [json_name = "total"];
-  repeated api.v1.services.types.Channel channels = 2 [json_name = "channels"];
+  repeated api.v1.services.types.Channel items = 2 [json_name = "items"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
 }
@@ -467,8 +467,8 @@ message ListUsersRequest {
 message ListUsersResponse {
   // The total number of items in the list.
   int32 total = 1 [json_name = "total"];
-  // The paging users
-  repeated api.v1.services.types.User users = 2 [json_name = "users"];
+  // The paging items
+  repeated api.v1.services.types.User items = 2 [json_name = "items"];
   // The page number.
   int32 page = 3 [json_name = "page"];
   // The maximum number of items to return.
@@ -602,8 +602,8 @@ message ListUserRolesRequest {
 message ListUserRolesResponse {
   // The total number of items in the list.
   int32 total = 1 [json_name = "total"];
-  // The list of roles
-  repeated api.v1.services.types.Role roles = 2 [json_name = "roles"];
+  // The list of items
+  repeated api.v1.services.types.Role items = 2 [json_name = "items"];
 }
 
 // GetUserStatsRequest is the request message for getting user stats.
@@ -629,7 +629,7 @@ message GetUserPlaylistsRequest {
 // GetUserPlaylistsResponse is the response message for getting user playlists.
 message GetUserPlaylistsResponse {
   int32 total = 1 [json_name = "total"];
-  repeated api.v1.services.types.Playlist playlists = 2 [json_name = "playlists"];
+  repeated api.v1.services.types.Playlist items = 2 [json_name = "items"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
 }

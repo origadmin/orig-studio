@@ -24,9 +24,11 @@ interface MediaEditFormProps {
     media: Media;
     categories: any;
     isAdmin: boolean;
+    /** Whether to show admin-only fields (featured, listable). Portal should pass false even for admin users. */
+    showAdminOnlyFields?: boolean;
 }
 
-export function MediaEditForm({form, setForm, media: _media, categories, isAdmin}: MediaEditFormProps) {
+export function MediaEditForm({form, setForm, media: _media, categories, isAdmin, showAdminOnlyFields = true}: MediaEditFormProps) {
     const categoriesList = (categories as any)?.items
         ? (categories as any).items
         : Array.isArray(categories) ? categories : [];
@@ -158,7 +160,7 @@ export function MediaEditForm({form, setForm, media: _media, categories, isAdmin
                 </div>
             </div>
 
-            {isAdmin && (
+            {showAdminOnlyFields && (
                 <>
                     <Separator/>
                     <div className="grid grid-cols-2 gap-6">

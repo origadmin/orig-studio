@@ -82,30 +82,30 @@ func (_c *PermissionGroupCreate) SetNillableCreatedBy(v *string) *PermissionGrou
 	return _c
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_c *PermissionGroupCreate) SetCreatedAt(v time.Time) *PermissionGroupCreate {
-	_c.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_c *PermissionGroupCreate) SetCreateTime(v time.Time) *PermissionGroupCreate {
+	_c.mutation.SetCreateTime(v)
 	return _c
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *PermissionGroupCreate) SetNillableCreatedAt(v *time.Time) *PermissionGroupCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *PermissionGroupCreate) SetNillableCreateTime(v *time.Time) *PermissionGroupCreate {
 	if v != nil {
-		_c.SetCreatedAt(*v)
+		_c.SetCreateTime(*v)
 	}
 	return _c
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_c *PermissionGroupCreate) SetUpdatedAt(v time.Time) *PermissionGroupCreate {
-	_c.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_c *PermissionGroupCreate) SetUpdateTime(v time.Time) *PermissionGroupCreate {
+	_c.mutation.SetUpdateTime(v)
 	return _c
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *PermissionGroupCreate) SetNillableUpdatedAt(v *time.Time) *PermissionGroupCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (_c *PermissionGroupCreate) SetNillableUpdateTime(v *time.Time) *PermissionGroupCreate {
 	if v != nil {
-		_c.SetUpdatedAt(*v)
+		_c.SetUpdateTime(*v)
 	}
 	return _c
 }
@@ -197,13 +197,13 @@ func (_c *PermissionGroupCreate) defaults() {
 		v := permissiongroup.DefaultIsActive
 		_c.mutation.SetIsActive(v)
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := permissiongroup.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := permissiongroup.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
 	}
-	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := permissiongroup.DefaultUpdatedAt()
-		_c.mutation.SetUpdatedAt(v)
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		v := permissiongroup.DefaultUpdateTime()
+		_c.mutation.SetUpdateTime(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := permissiongroup.DefaultID()
@@ -227,11 +227,11 @@ func (_c *PermissionGroupCreate) check() error {
 	if _, ok := _c.mutation.IsActive(); !ok {
 		return &ValidationError{Name: "is_active", err: errors.New(`entity: missing required field "PermissionGroup.is_active"`)}
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "PermissionGroup.created_at"`)}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "PermissionGroup.create_time"`)}
 	}
-	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`entity: missing required field "PermissionGroup.updated_at"`)}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`entity: missing required field "PermissionGroup.update_time"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := permissiongroup.IDValidator(v); err != nil {
@@ -293,13 +293,13 @@ func (_c *PermissionGroupCreate) createSpec() (*PermissionGroup, *sqlgraph.Creat
 		_spec.SetField(permissiongroup.FieldIsActive, field.TypeBool, value)
 		_node.IsActive = value
 	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(permissiongroup.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(permissiongroup.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
 	}
-	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(permissiongroup.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
+	if value, ok := _c.mutation.UpdateTime(); ok {
+		_spec.SetField(permissiongroup.FieldUpdateTime, field.TypeTime, value)
+		_node.UpdateTime = value
 	}
 	if nodes := _c.mutation.MembersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

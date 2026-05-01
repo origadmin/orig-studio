@@ -1,5 +1,42 @@
 import i18n from 'i18next';
 
+/** Supported date input types across the application */
+type DateInput = string | number | Date | { seconds: number; nanos: number } | null | undefined;
+
+/**
+ * Parse various date input formats into a Date object.
+ * Supports: ISO 8601 strings, unix timestamps (seconds), Date objects,
+ * and protobuf Timestamp objects ({seconds, nanos}).
+ * Returns null for invalid or empty input.
+ */
+function parseDateInput(dateInput: DateInput): Date | null {
+    if (dateInput === null || dateInput === undefined || dateInput === '') {
+        return null;
+    }
+
+    let date: Date;
+
+    if (dateInput instanceof Date) {
+        date = dateInput;
+    } else if (typeof dateInput === 'string') {
+        date = new Date(dateInput);
+    } else if (typeof dateInput === 'number') {
+        // Handle unix timestamp in seconds
+        date = new Date(dateInput * 1000);
+    } else if (typeof dateInput === 'object' && dateInput.seconds !== undefined) {
+        // Handle Protocol Buffers Timestamp format: {seconds, nanos}
+        date = new Date(Number(dateInput.seconds) * 1000 + Math.floor(Number(dateInput.nanos) / 1_000_000));
+    } else {
+        return null;
+    }
+
+    if (isNaN(date.getTime())) {
+        return null;
+    }
+
+    return date;
+}
+
 export function formatDuration(seconds: number | null | undefined): string {
     if (seconds === null || seconds === undefined || isNaN(seconds)) {
         return '0:00';
@@ -24,28 +61,11 @@ export function formatViews(count: number | undefined): string {
     return String(count);
 }
 
-export function formatDate(dateInput: string | number | { seconds: number; nanos: number } | null | undefined): string {
+export function formatDate(dateInput: DateInput): string {
     const lng = i18n.language;
+    const date = parseDateInput(dateInput);
 
-    if (dateInput === null || dateInput === undefined) {
-        return lng === 'zh' ? '未知时间' : 'Unknown time';
-    }
-
-    let date: Date;
-
-    if (typeof dateInput === 'string') {
-        date = new Date(dateInput);
-    } else if (typeof dateInput === 'number') {
-        // Handle timestamp format
-        date = new Date(dateInput * 1000);
-    } else if (typeof dateInput === 'object' && dateInput.seconds !== undefined) {
-        // Handle Protocol Buffers time format
-        date = new Date(dateInput.seconds * 1000 + dateInput.nanos / 1000000);
-    } else {
-        return lng === 'zh' ? '未知时间' : 'Unknown time';
-    }
-
-    if (isNaN(date.getTime())) {
+    if (!date) {
         return lng === 'zh' ? '未知时间' : 'Unknown time';
     }
 
@@ -58,6 +78,29 @@ export function formatDate(dateInput: string | number | { seconds: number; nanos
     return lng === 'zh' ? `${Math.floor(diff / 365)} 年前` : `${Math.floor(diff / 365)}y ago`;
 }
 
+/**
+ * Format a date to YYYY-MM-DD HH:mm:ss (second-precision, UTC).
+ * Designed for admin pages that need precise, consistent datetime display.
+ * Handles: ISO 8601 strings, unix timestamps (seconds), Date objects,
+ * and protobuf Timestamp objects ({seconds, nanos}).
+ */
+export function formatDateTime(dateInput: DateInput): string {
+    const date = parseDateInput(dateInput);
+
+    if (!date) {
+        return 'N/A';
+    }
+
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
 export function formatFileSize(bytes: number): string {
     if (bytes >= 1073741824) return `${(bytes / 1073741824).toFixed(2)} GB`;
     if (bytes >= 1048576) return `${(bytes / 1048576).toFixed(2)} MB`;
@@ -65,29 +108,12 @@ export function formatFileSize(bytes: number): string {
     return `${bytes} B`;
 }
 
-export function formatRelativeTime(dateInput: string | number | { seconds: number; nanos: number } | null | undefined): string {
+export function formatRelativeTime(dateInput: DateInput): string {
     const lng = i18n.language;
+    const date = parseDateInput(dateInput);
 
-    if (dateInput === null || dateInput === undefined) {
+    if (!date) {
         return lng === 'zh' ? '刚刚' : 'Just now';
-    }
-
-    let date: Date;
-
-    if (typeof dateInput === 'string') {
-        date = new Date(dateInput);
-    } else if (typeof dateInput === 'number') {
-        // Handle timestamp format
-        date = new Date(dateInput * 1000);
-    } else if (typeof dateInput === 'object' && dateInput.seconds !== undefined) {
-        // Handle Protocol Buffers time format
-        date = new Date(dateInput.seconds * 1000 + dateInput.nanos / 1000000);
-    } else {
-        return lng === 'zh' ? '未知时间' : 'Unknown time';
-    }
-
-    if (isNaN(date.getTime())) {
-        return lng === 'zh' ? '未知时间' : 'Unknown time';
     }
 
     const diff = Date.now() - date.getTime();

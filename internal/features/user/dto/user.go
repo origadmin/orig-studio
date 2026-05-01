@@ -62,6 +62,7 @@ type UserQueryOption struct {
 	repo.QueryOption
 	WithProfile bool
 	WithSetting bool
+	Role        string // Filter by role (e.g. "admin", "editor", "user")
 }
 
 // UserCreateOption specifies options for creating a user.

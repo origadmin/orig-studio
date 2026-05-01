@@ -1,6 +1,6 @@
 import {Button} from '@/components/ui/button';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
-import {PAGINATION} from '@/config/pagination';
+import {PAGINATION_CONFIG} from '@/config/pagination';
 
 interface TablePaginationProps {
     page: number;
@@ -29,7 +29,7 @@ export function TablePagination({page, pageSize, total, onPageChange, onPageSize
                         value={pageSize}
                         onChange={(e) => onPageSizeChange(Number(e.target.value))}
                     >
-                        {PAGINATION.PAGE_SIZE_OPTIONS.map((opt) => (
+                        {PAGINATION_CONFIG.PAGE_SIZE_OPTIONS.map((opt) => (
                             <option key={opt} value={opt}>{opt} / page</option>
                         ))}
                     </select>

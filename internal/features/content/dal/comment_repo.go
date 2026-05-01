@@ -169,7 +169,7 @@ func mapComment(ent *entity.Comment) *biz.Comment {
 		MediaID:   ent.MediaID,
 		UserID:    ent.UserID,
 		AddDate:   ent.AddDate,
-		UpdatedAt: ent.AddDate,
+		UpdateTime: ent.AddDate,
 		Status:    string(ent.Status),
 	}
 

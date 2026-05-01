@@ -93,16 +93,30 @@ func (_u *CommentReportUpdate) ClearDescription() *CommentReportUpdate {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *CommentReportUpdate) SetCreatedAt(v time.Time) *CommentReportUpdate {
-	_u.mutation.SetCreatedAt(v)
+// SetStatus sets the "status" field.
+func (_u *CommentReportUpdate) SetStatus(v commentreport.Status) *CommentReportUpdate {
+	_u.mutation.SetStatus(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *CommentReportUpdate) SetNillableCreatedAt(v *time.Time) *CommentReportUpdate {
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *CommentReportUpdate) SetNillableStatus(v *commentreport.Status) *CommentReportUpdate {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_u *CommentReportUpdate) SetCreateTime(v time.Time) *CommentReportUpdate {
+	_u.mutation.SetCreateTime(v)
+	return _u
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *CommentReportUpdate) SetNillableCreateTime(v *time.Time) *CommentReportUpdate {
+	if v != nil {
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
@@ -168,6 +182,11 @@ func (_u *CommentReportUpdate) check() error {
 			return &ValidationError{Name: "reason", err: fmt.Errorf(`entity: validator failed for field "CommentReport.reason": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := commentreport.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "CommentReport.status": %w`, err)}
+		}
+	}
 	if _u.mutation.CommentCleared() && len(_u.mutation.CommentIDs()) > 0 {
 		return errors.New(`entity: clearing a required unique edge "CommentReport.comment"`)
 	}
@@ -204,8 +223,11 @@ func (_u *CommentReportUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(commentreport.FieldDescription, field.TypeString)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(commentreport.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(commentreport.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(commentreport.FieldCreateTime, field.TypeTime, value)
 	}
 	if _u.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -349,16 +371,30 @@ func (_u *CommentReportUpdateOne) ClearDescription() *CommentReportUpdateOne {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *CommentReportUpdateOne) SetCreatedAt(v time.Time) *CommentReportUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+// SetStatus sets the "status" field.
+func (_u *CommentReportUpdateOne) SetStatus(v commentreport.Status) *CommentReportUpdateOne {
+	_u.mutation.SetStatus(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *CommentReportUpdateOne) SetNillableCreatedAt(v *time.Time) *CommentReportUpdateOne {
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *CommentReportUpdateOne) SetNillableStatus(v *commentreport.Status) *CommentReportUpdateOne {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_u *CommentReportUpdateOne) SetCreateTime(v time.Time) *CommentReportUpdateOne {
+	_u.mutation.SetCreateTime(v)
+	return _u
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *CommentReportUpdateOne) SetNillableCreateTime(v *time.Time) *CommentReportUpdateOne {
+	if v != nil {
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
@@ -437,6 +473,11 @@ func (_u *CommentReportUpdateOne) check() error {
 			return &ValidationError{Name: "reason", err: fmt.Errorf(`entity: validator failed for field "CommentReport.reason": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := commentreport.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "CommentReport.status": %w`, err)}
+		}
+	}
 	if _u.mutation.CommentCleared() && len(_u.mutation.CommentIDs()) > 0 {
 		return errors.New(`entity: clearing a required unique edge "CommentReport.comment"`)
 	}
@@ -490,8 +531,11 @@ func (_u *CommentReportUpdateOne) sqlSave(ctx context.Context) (_node *CommentRe
 	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(commentreport.FieldDescription, field.TypeString)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(commentreport.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(commentreport.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(commentreport.FieldCreateTime, field.TypeTime, value)
 	}
 	if _u.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{

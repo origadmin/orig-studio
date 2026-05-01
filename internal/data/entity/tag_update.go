@@ -9,6 +9,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"origadmin/application/origcms/internal/data/entity/tag"
 	"origadmin/application/origcms/internal/data/entity/user"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -98,6 +99,86 @@ func (_u *TagUpdate) SetNillableListingsThumbnail(v *string) *TagUpdate {
 	return _u
 }
 
+// ClearListingsThumbnail clears the value of the "listings_thumbnail" field.
+func (_u *TagUpdate) ClearListingsThumbnail() *TagUpdate {
+	_u.mutation.ClearListingsThumbnail()
+	return _u
+}
+
+// SetStatus sets the "status" field.
+func (_u *TagUpdate) SetStatus(v tag.Status) *TagUpdate {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *TagUpdate) SetNillableStatus(v *tag.Status) *TagUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *TagUpdate) SetDescription(v string) *TagUpdate {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *TagUpdate) SetNillableDescription(v *string) *TagUpdate {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
+	return _u
+}
+
+// ClearDescription clears the value of the "description" field.
+func (_u *TagUpdate) ClearDescription() *TagUpdate {
+	_u.mutation.ClearDescription()
+	return _u
+}
+
+// SetColor sets the "color" field.
+func (_u *TagUpdate) SetColor(v string) *TagUpdate {
+	_u.mutation.SetColor(v)
+	return _u
+}
+
+// SetNillableColor sets the "color" field if the given value is not nil.
+func (_u *TagUpdate) SetNillableColor(v *string) *TagUpdate {
+	if v != nil {
+		_u.SetColor(*v)
+	}
+	return _u
+}
+
+// ClearColor clears the value of the "color" field.
+func (_u *TagUpdate) ClearColor() *TagUpdate {
+	_u.mutation.ClearColor()
+	return _u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_u *TagUpdate) SetCreateTime(v time.Time) *TagUpdate {
+	_u.mutation.SetCreateTime(v)
+	return _u
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *TagUpdate) SetNillableCreateTime(v *time.Time) *TagUpdate {
+	if v != nil {
+		_u.SetCreateTime(*v)
+	}
+	return _u
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_u *TagUpdate) SetUpdateTime(v time.Time) *TagUpdate {
+	_u.mutation.SetUpdateTime(v)
+	return _u
+}
+
 // AddUserIDs adds the "user" edge to the User entity by IDs.
 func (_u *TagUpdate) AddUserIDs(ids ...string) *TagUpdate {
 	_u.mutation.AddUserIDs(ids...)
@@ -141,6 +222,7 @@ func (_u *TagUpdate) RemoveUser(v ...*User) *TagUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TagUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -166,6 +248,14 @@ func (_u *TagUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *TagUpdate) defaults() {
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := tag.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_u *TagUpdate) check() error {
 	if v, ok := _u.mutation.Title(); ok {
@@ -181,6 +271,21 @@ func (_u *TagUpdate) check() error {
 	if v, ok := _u.mutation.ListingsThumbnail(); ok {
 		if err := tag.ListingsThumbnailValidator(v); err != nil {
 			return &ValidationError{Name: "listings_thumbnail", err: fmt.Errorf(`entity: validator failed for field "Tag.listings_thumbnail": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := tag.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "Tag.status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Description(); ok {
+		if err := tag.DescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "description", err: fmt.Errorf(`entity: validator failed for field "Tag.description": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Color(); ok {
+		if err := tag.ColorValidator(v); err != nil {
+			return &ValidationError{Name: "color", err: fmt.Errorf(`entity: validator failed for field "Tag.color": %w`, err)}
 		}
 	}
 	return nil
@@ -221,6 +326,30 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.ListingsThumbnail(); ok {
 		_spec.SetField(tag.FieldListingsThumbnail, field.TypeString, value)
+	}
+	if _u.mutation.ListingsThumbnailCleared() {
+		_spec.ClearField(tag.FieldListingsThumbnail, field.TypeString)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(tag.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(tag.FieldDescription, field.TypeString, value)
+	}
+	if _u.mutation.DescriptionCleared() {
+		_spec.ClearField(tag.FieldDescription, field.TypeString)
+	}
+	if value, ok := _u.mutation.Color(); ok {
+		_spec.SetField(tag.FieldColor, field.TypeString, value)
+	}
+	if _u.mutation.ColorCleared() {
+		_spec.ClearField(tag.FieldColor, field.TypeString)
+	}
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(tag.FieldCreateTime, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(tag.FieldUpdateTime, field.TypeTime, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -358,6 +487,86 @@ func (_u *TagUpdateOne) SetNillableListingsThumbnail(v *string) *TagUpdateOne {
 	return _u
 }
 
+// ClearListingsThumbnail clears the value of the "listings_thumbnail" field.
+func (_u *TagUpdateOne) ClearListingsThumbnail() *TagUpdateOne {
+	_u.mutation.ClearListingsThumbnail()
+	return _u
+}
+
+// SetStatus sets the "status" field.
+func (_u *TagUpdateOne) SetStatus(v tag.Status) *TagUpdateOne {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *TagUpdateOne) SetNillableStatus(v *tag.Status) *TagUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *TagUpdateOne) SetDescription(v string) *TagUpdateOne {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *TagUpdateOne) SetNillableDescription(v *string) *TagUpdateOne {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
+	return _u
+}
+
+// ClearDescription clears the value of the "description" field.
+func (_u *TagUpdateOne) ClearDescription() *TagUpdateOne {
+	_u.mutation.ClearDescription()
+	return _u
+}
+
+// SetColor sets the "color" field.
+func (_u *TagUpdateOne) SetColor(v string) *TagUpdateOne {
+	_u.mutation.SetColor(v)
+	return _u
+}
+
+// SetNillableColor sets the "color" field if the given value is not nil.
+func (_u *TagUpdateOne) SetNillableColor(v *string) *TagUpdateOne {
+	if v != nil {
+		_u.SetColor(*v)
+	}
+	return _u
+}
+
+// ClearColor clears the value of the "color" field.
+func (_u *TagUpdateOne) ClearColor() *TagUpdateOne {
+	_u.mutation.ClearColor()
+	return _u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_u *TagUpdateOne) SetCreateTime(v time.Time) *TagUpdateOne {
+	_u.mutation.SetCreateTime(v)
+	return _u
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *TagUpdateOne) SetNillableCreateTime(v *time.Time) *TagUpdateOne {
+	if v != nil {
+		_u.SetCreateTime(*v)
+	}
+	return _u
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_u *TagUpdateOne) SetUpdateTime(v time.Time) *TagUpdateOne {
+	_u.mutation.SetUpdateTime(v)
+	return _u
+}
+
 // AddUserIDs adds the "user" edge to the User entity by IDs.
 func (_u *TagUpdateOne) AddUserIDs(ids ...string) *TagUpdateOne {
 	_u.mutation.AddUserIDs(ids...)
@@ -414,6 +623,7 @@ func (_u *TagUpdateOne) Select(field string, fields ...string) *TagUpdateOne {
 
 // Save executes the query and returns the updated Tag entity.
 func (_u *TagUpdateOne) Save(ctx context.Context) (*Tag, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -439,6 +649,14 @@ func (_u *TagUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *TagUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := tag.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_u *TagUpdateOne) check() error {
 	if v, ok := _u.mutation.Title(); ok {
@@ -454,6 +672,21 @@ func (_u *TagUpdateOne) check() error {
 	if v, ok := _u.mutation.ListingsThumbnail(); ok {
 		if err := tag.ListingsThumbnailValidator(v); err != nil {
 			return &ValidationError{Name: "listings_thumbnail", err: fmt.Errorf(`entity: validator failed for field "Tag.listings_thumbnail": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := tag.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "Tag.status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Description(); ok {
+		if err := tag.DescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "description", err: fmt.Errorf(`entity: validator failed for field "Tag.description": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Color(); ok {
+		if err := tag.ColorValidator(v); err != nil {
+			return &ValidationError{Name: "color", err: fmt.Errorf(`entity: validator failed for field "Tag.color": %w`, err)}
 		}
 	}
 	return nil
@@ -511,6 +744,30 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 	}
 	if value, ok := _u.mutation.ListingsThumbnail(); ok {
 		_spec.SetField(tag.FieldListingsThumbnail, field.TypeString, value)
+	}
+	if _u.mutation.ListingsThumbnailCleared() {
+		_spec.ClearField(tag.FieldListingsThumbnail, field.TypeString)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(tag.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(tag.FieldDescription, field.TypeString, value)
+	}
+	if _u.mutation.DescriptionCleared() {
+		_spec.ClearField(tag.FieldDescription, field.TypeString)
+	}
+	if value, ok := _u.mutation.Color(); ok {
+		_spec.SetField(tag.FieldColor, field.TypeString, value)
+	}
+	if _u.mutation.ColorCleared() {
+		_spec.ClearField(tag.FieldColor, field.TypeString)
+	}
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(tag.FieldCreateTime, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(tag.FieldUpdateTime, field.TypeTime, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -21,8 +21,8 @@ type Category struct {
 	ParentID    int64     `json:"parent_id"`
 	Sequence    int       `json:"order"`
 	MediaCount  int       `json:"media_count"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	CreateTime   time.Time `json:"create_time"`
+	UpdateTime   time.Time `json:"update_time"`
 }
 
 // UpdateCategoryInput represents partial update input for a category.

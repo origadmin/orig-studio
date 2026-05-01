@@ -18,7 +18,7 @@ type Notification struct {
 	Notify    bool      `json:"notify"`
 	Method    string    `json:"method"` // email, app
 	UserID    int       `json:"user_id"`
-	CreatedAt time.Time `json:"created_at"`
+	CreateTime time.Time `json:"create_time"`
 	IsRead    bool      `json:"is_read"`
 }
 

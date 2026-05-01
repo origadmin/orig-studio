@@ -1,4 +1,4 @@
-﻿import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useParams, Link} from '@tanstack/react-router';
 import {useTranslation} from 'react-i18next';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';

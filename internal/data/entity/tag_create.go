@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/tag"
 	"origadmin/application/origcms/internal/data/entity/user"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -57,6 +58,84 @@ func (_c *TagCreate) SetNillableMediaCount(v *int) *TagCreate {
 // SetListingsThumbnail sets the "listings_thumbnail" field.
 func (_c *TagCreate) SetListingsThumbnail(v string) *TagCreate {
 	_c.mutation.SetListingsThumbnail(v)
+	return _c
+}
+
+// SetNillableListingsThumbnail sets the "listings_thumbnail" field if the given value is not nil.
+func (_c *TagCreate) SetNillableListingsThumbnail(v *string) *TagCreate {
+	if v != nil {
+		_c.SetListingsThumbnail(*v)
+	}
+	return _c
+}
+
+// SetStatus sets the "status" field.
+func (_c *TagCreate) SetStatus(v tag.Status) *TagCreate {
+	_c.mutation.SetStatus(v)
+	return _c
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *TagCreate) SetNillableStatus(v *tag.Status) *TagCreate {
+	if v != nil {
+		_c.SetStatus(*v)
+	}
+	return _c
+}
+
+// SetDescription sets the "description" field.
+func (_c *TagCreate) SetDescription(v string) *TagCreate {
+	_c.mutation.SetDescription(v)
+	return _c
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_c *TagCreate) SetNillableDescription(v *string) *TagCreate {
+	if v != nil {
+		_c.SetDescription(*v)
+	}
+	return _c
+}
+
+// SetColor sets the "color" field.
+func (_c *TagCreate) SetColor(v string) *TagCreate {
+	_c.mutation.SetColor(v)
+	return _c
+}
+
+// SetNillableColor sets the "color" field if the given value is not nil.
+func (_c *TagCreate) SetNillableColor(v *string) *TagCreate {
+	if v != nil {
+		_c.SetColor(*v)
+	}
+	return _c
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_c *TagCreate) SetCreateTime(v time.Time) *TagCreate {
+	_c.mutation.SetCreateTime(v)
+	return _c
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *TagCreate) SetNillableCreateTime(v *time.Time) *TagCreate {
+	if v != nil {
+		_c.SetCreateTime(*v)
+	}
+	return _c
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_c *TagCreate) SetUpdateTime(v time.Time) *TagCreate {
+	_c.mutation.SetUpdateTime(v)
+	return _c
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (_c *TagCreate) SetNillableUpdateTime(v *time.Time) *TagCreate {
+	if v != nil {
+		_c.SetUpdateTime(*v)
+	}
 	return _c
 }
 
@@ -114,6 +193,22 @@ func (_c *TagCreate) defaults() {
 		v := tag.DefaultMediaCount
 		_c.mutation.SetMediaCount(v)
 	}
+	if _, ok := _c.mutation.ListingsThumbnail(); !ok {
+		v := tag.DefaultListingsThumbnail
+		_c.mutation.SetListingsThumbnail(v)
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		v := tag.DefaultStatus
+		_c.mutation.SetStatus(v)
+	}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := tag.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
+	}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		v := tag.DefaultUpdateTime()
+		_c.mutation.SetUpdateTime(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -134,13 +229,34 @@ func (_c *TagCreate) check() error {
 	if _, ok := _c.mutation.MediaCount(); !ok {
 		return &ValidationError{Name: "media_count", err: errors.New(`entity: missing required field "Tag.media_count"`)}
 	}
-	if _, ok := _c.mutation.ListingsThumbnail(); !ok {
-		return &ValidationError{Name: "listings_thumbnail", err: errors.New(`entity: missing required field "Tag.listings_thumbnail"`)}
-	}
 	if v, ok := _c.mutation.ListingsThumbnail(); ok {
 		if err := tag.ListingsThumbnailValidator(v); err != nil {
 			return &ValidationError{Name: "listings_thumbnail", err: fmt.Errorf(`entity: validator failed for field "Tag.listings_thumbnail": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`entity: missing required field "Tag.status"`)}
+	}
+	if v, ok := _c.mutation.Status(); ok {
+		if err := tag.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "Tag.status": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.Description(); ok {
+		if err := tag.DescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "description", err: fmt.Errorf(`entity: validator failed for field "Tag.description": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.Color(); ok {
+		if err := tag.ColorValidator(v); err != nil {
+			return &ValidationError{Name: "color", err: fmt.Errorf(`entity: validator failed for field "Tag.color": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "Tag.create_time"`)}
+	}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`entity: missing required field "Tag.update_time"`)}
 	}
 	return nil
 }
@@ -183,6 +299,26 @@ func (_c *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ListingsThumbnail(); ok {
 		_spec.SetField(tag.FieldListingsThumbnail, field.TypeString, value)
 		_node.ListingsThumbnail = value
+	}
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(tag.FieldStatus, field.TypeEnum, value)
+		_node.Status = value
+	}
+	if value, ok := _c.mutation.Description(); ok {
+		_spec.SetField(tag.FieldDescription, field.TypeString, value)
+		_node.Description = value
+	}
+	if value, ok := _c.mutation.Color(); ok {
+		_spec.SetField(tag.FieldColor, field.TypeString, value)
+		_node.Color = value
+	}
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(tag.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
+	}
+	if value, ok := _c.mutation.UpdateTime(); ok {
+		_spec.SetField(tag.FieldUpdateTime, field.TypeTime, value)
+		_node.UpdateTime = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -59,16 +59,36 @@ func (_u *FavoriteUpdate) SetNillableUserID(v *string) *FavoriteUpdate {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *FavoriteUpdate) SetCreatedAt(v time.Time) *FavoriteUpdate {
-	_u.mutation.SetCreatedAt(v)
+// SetPlaylistID sets the "playlist_id" field.
+func (_u *FavoriteUpdate) SetPlaylistID(v string) *FavoriteUpdate {
+	_u.mutation.SetPlaylistID(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *FavoriteUpdate) SetNillableCreatedAt(v *time.Time) *FavoriteUpdate {
+// SetNillablePlaylistID sets the "playlist_id" field if the given value is not nil.
+func (_u *FavoriteUpdate) SetNillablePlaylistID(v *string) *FavoriteUpdate {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetPlaylistID(*v)
+	}
+	return _u
+}
+
+// ClearPlaylistID clears the value of the "playlist_id" field.
+func (_u *FavoriteUpdate) ClearPlaylistID() *FavoriteUpdate {
+	_u.mutation.ClearPlaylistID()
+	return _u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_u *FavoriteUpdate) SetCreateTime(v time.Time) *FavoriteUpdate {
+	_u.mutation.SetCreateTime(v)
+	return _u
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *FavoriteUpdate) SetNillableCreateTime(v *time.Time) *FavoriteUpdate {
+	if v != nil {
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
@@ -156,8 +176,14 @@ func (_u *FavoriteUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(favorite.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.PlaylistID(); ok {
+		_spec.SetField(favorite.FieldPlaylistID, field.TypeString, value)
+	}
+	if _u.mutation.PlaylistIDCleared() {
+		_spec.ClearField(favorite.FieldPlaylistID, field.TypeString)
+	}
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(favorite.FieldCreateTime, field.TypeTime, value)
 	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -267,16 +293,36 @@ func (_u *FavoriteUpdateOne) SetNillableUserID(v *string) *FavoriteUpdateOne {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *FavoriteUpdateOne) SetCreatedAt(v time.Time) *FavoriteUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+// SetPlaylistID sets the "playlist_id" field.
+func (_u *FavoriteUpdateOne) SetPlaylistID(v string) *FavoriteUpdateOne {
+	_u.mutation.SetPlaylistID(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *FavoriteUpdateOne) SetNillableCreatedAt(v *time.Time) *FavoriteUpdateOne {
+// SetNillablePlaylistID sets the "playlist_id" field if the given value is not nil.
+func (_u *FavoriteUpdateOne) SetNillablePlaylistID(v *string) *FavoriteUpdateOne {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetPlaylistID(*v)
+	}
+	return _u
+}
+
+// ClearPlaylistID clears the value of the "playlist_id" field.
+func (_u *FavoriteUpdateOne) ClearPlaylistID() *FavoriteUpdateOne {
+	_u.mutation.ClearPlaylistID()
+	return _u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_u *FavoriteUpdateOne) SetCreateTime(v time.Time) *FavoriteUpdateOne {
+	_u.mutation.SetCreateTime(v)
+	return _u
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *FavoriteUpdateOne) SetNillableCreateTime(v *time.Time) *FavoriteUpdateOne {
+	if v != nil {
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
@@ -394,8 +440,14 @@ func (_u *FavoriteUpdateOne) sqlSave(ctx context.Context) (_node *Favorite, err 
 			}
 		}
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(favorite.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.PlaylistID(); ok {
+		_spec.SetField(favorite.FieldPlaylistID, field.TypeString, value)
+	}
+	if _u.mutation.PlaylistIDCleared() {
+		_spec.ClearField(favorite.FieldPlaylistID, field.TypeString)
+	}
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(favorite.FieldCreateTime, field.TypeTime, value)
 	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{

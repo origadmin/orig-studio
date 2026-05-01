@@ -13,12 +13,10 @@ export interface TrendingItem {
 }
 
 export interface TrendingResponse {
-    code: number;
-    message: string;
-    data: {
-        items: TrendingItem[];
-        total: number;
-    };
+    items: TrendingItem[];
+    total: number;
+    page?: number;
+    page_size?: number;
 }
 
 const exploreApi = {

@@ -42,9 +42,9 @@ import {
     Filter, MoreVertical, Trash2, Play,
     Pause, Settings, ArrowUpDown, Download, AlertCircle
 } from "lucide-react";
-import {formatDate, formatRelativeTime} from "../../lib/format";
+import {formatDateTime, formatRelativeTime} from "../../lib/format";
 import {TablePagination} from '@/components/common/TablePagination';
-import {PAGINATION} from '@/config/pagination';
+import {PAGINATION_CONFIG} from '@/config/pagination';
 
 // ─── Types ─────────────────────────────────────────────
 
@@ -89,7 +89,7 @@ function mediaLink(mediaId: string): string {
 
 const formatTime = (ts?: any): string => {
     if (!ts) return "--";
-    return formatDate(ts);
+    return formatDateTime(ts);
 };
 
 // ─── Status helpers ───────────────────────────────────
@@ -475,7 +475,7 @@ export default function TranscodingStatus() {
         try {
             const params: any = {
                 page: pageNum,
-                page_size: PAGINATION.DEFAULT_PAGE_SIZE,
+                page_size: PAGINATION_CONFIG.DEFAULT_PAGE_SIZE,
             };
             
             if (status !== '') {

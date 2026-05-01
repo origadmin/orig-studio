@@ -8,8 +8,8 @@ export interface Subtitle {
     language_name: string;
     file_path: string;
     status: string;
-    created_at: string;
-    updated_at: string;
+    create_time: string;
+    update_time: string;
 }
 
 export const subtitleApi = {

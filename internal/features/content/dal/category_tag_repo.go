@@ -69,7 +69,7 @@ func (r *categoryRepo) Update(ctx context.Context, c *biz.Category) (*biz.Catego
 		SetName(c.Name).
 		SetSlug(c.Slug).
 		SetDescription(c.Description).
-		SetStatus(c.Status).
+		SetStatus(categoryStatusFromInt(c.Status)).
 		SetParentID(c.ParentID).
 		SetSequence(c.Sequence).
 		Save(ctx)
@@ -84,7 +84,7 @@ func (r *categoryRepo) Delete(ctx context.Context, id int) error {
 }
 
 func (r *categoryRepo) ListAll(ctx context.Context) ([]*biz.Category, error) {
-	ents, err := r.data.db.Category.Query().All(ctx)
+	ents, err := r.data.db.Category.Query().Order(entity.Desc(category.FieldCreateTime)).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -261,6 +261,7 @@ func (r *tagRepo) ListAll(ctx context.Context, page, pageSize int) ([]*biz.Tag, 
 		return nil, 0, err
 	}
 	ents, err := query.
+		Order(entity.Desc(tag.FieldCreateTime)).
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
 		All(ctx)
@@ -280,12 +281,12 @@ func mapCategory(ent *entity.Category) *biz.Category {
 		Name:        ent.Name,
 		Slug:        ent.Slug,
 		Description: ent.Description,
-		Status:      ent.Status,
+		Status:      categoryStatusToInt(ent.Status),
 		ParentID:    ent.ParentID,
 		Sequence:    ent.Sequence,
 		MediaCount:  ent.MediaCount,
-		CreatedAt:   ent.CreatedAt,
-		UpdatedAt:   ent.UpdatedAt,
+		CreateTime:   ent.CreateTime,
+		UpdateTime:   ent.UpdateTime,
 	}
 }
 
@@ -295,5 +296,32 @@ func mapTag(ent *entity.Tag) *biz.Tag {
 		Title:      ent.Title,
 		Slug:       ent.Slug,
 		MediaCount: ent.MediaCount,
+	}
+}
+
+// categoryStatusFromInt converts int (biz layer) to category.Status (entity enum).
+// Frontend convention: 1 = active/enabled, 0 = inactive/disabled.
+// Ent enum convention: ACTIVE = 1, INACTIVE = 2.
+// Both 0 and 2 map to INACTIVE; default falls to INACTIVE for safety.
+func categoryStatusFromInt(status int) category.Status {
+	switch status {
+	case 1:
+		return category.StatusACTIVE
+	case 2, 0: // 2 = INACTIVE (Ent enum), 0 = inactive (frontend convention)
+		return category.StatusINACTIVE
+	default:
+		return category.StatusINACTIVE // safe default: unknown status treated as inactive
+	}
+}
+
+// categoryStatusToInt converts category.Status (entity enum) to int (biz layer).
+func categoryStatusToInt(status category.Status) int {
+	switch status {
+	case category.StatusACTIVE:
+		return 1
+	case category.StatusINACTIVE:
+		return 2
+	default:
+		return 1
 	}
 }

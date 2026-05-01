@@ -2646,8 +2646,6 @@ export interface components {
              * @description update_time.field.comment
              */
             update_time?: string;
-            /** @description user.field.uuid */
-            uuid?: string;
             /** @description user.field.username */
             username?: string;
             /** @description user.field.nickname */
@@ -2755,7 +2753,7 @@ export interface components {
             /** @description Uploaded parts */
             parts?: components["schemas"]["api.v1.services.upload.PartInfo"][];
             /** @description Created at */
-            created_at?: string;
+            create_time?: string;
             /** @description Expires at */
             expires_at?: string;
         };

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
@@ -102,9 +102,12 @@ const AdminLayout = () => {
                 <div className={`${sidebarCollapsed ? 'p-2' : 'p-6'} flex items-center justify-center`}>
                     <Link to="/admin" className={`flex items-center justify-center transition-all duration-300 ease-in-out ${sidebarCollapsed ? '' : 'w-full'}`}>
                         {sidebarCollapsed ? (
-                            <div className="w-14 h-14 bg-brand rounded-lg flex items-center justify-center text-brand-foreground font-bold text-xl">OC</div>
+                            <img src="/logo.svg" alt="OrigCMS" className="h-10 w-10" />
                         ) : (
-                            <span className="text-xl font-bold tracking-tight text-brand">OrigCMS Admin</span>
+                            <div className="flex items-center gap-2">
+                                <img src="/logo.svg" alt="OrigCMS" className="h-8 w-8" />
+                                <span className="text-xl font-bold tracking-tight text-brand">OrigCMS Admin</span>
+                            </div>
                         )}
                     </Link>
                 </div>

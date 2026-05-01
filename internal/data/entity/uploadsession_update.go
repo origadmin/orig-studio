@@ -367,23 +367,23 @@ func (_u *UploadSessionUpdate) SetNillableExpiresAt(v *time.Time) *UploadSession
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *UploadSessionUpdate) SetCreatedAt(v time.Time) *UploadSessionUpdate {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *UploadSessionUpdate) SetCreateTime(v time.Time) *UploadSessionUpdate {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *UploadSessionUpdate) SetNillableCreatedAt(v *time.Time) *UploadSessionUpdate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *UploadSessionUpdate) SetNillableCreateTime(v *time.Time) *UploadSessionUpdate {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *UploadSessionUpdate) SetUpdatedAt(v time.Time) *UploadSessionUpdate {
-	_u.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_u *UploadSessionUpdate) SetUpdateTime(v time.Time) *UploadSessionUpdate {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -422,9 +422,9 @@ func (_u *UploadSessionUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *UploadSessionUpdate) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := uploadsession.UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := uploadsession.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -610,11 +610,11 @@ func (_u *UploadSessionUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(uploadsession.FieldExpiresAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(uploadsession.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(uploadsession.FieldCreateTime, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(uploadsession.FieldUpdatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(uploadsession.FieldUpdateTime, field.TypeTime, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -975,23 +975,23 @@ func (_u *UploadSessionUpdateOne) SetNillableExpiresAt(v *time.Time) *UploadSess
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *UploadSessionUpdateOne) SetCreatedAt(v time.Time) *UploadSessionUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *UploadSessionUpdateOne) SetCreateTime(v time.Time) *UploadSessionUpdateOne {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *UploadSessionUpdateOne) SetNillableCreatedAt(v *time.Time) *UploadSessionUpdateOne {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *UploadSessionUpdateOne) SetNillableCreateTime(v *time.Time) *UploadSessionUpdateOne {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *UploadSessionUpdateOne) SetUpdatedAt(v time.Time) *UploadSessionUpdateOne {
-	_u.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_u *UploadSessionUpdateOne) SetUpdateTime(v time.Time) *UploadSessionUpdateOne {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -1043,9 +1043,9 @@ func (_u *UploadSessionUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *UploadSessionUpdateOne) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := uploadsession.UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := uploadsession.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -1248,11 +1248,11 @@ func (_u *UploadSessionUpdateOne) sqlSave(ctx context.Context) (_node *UploadSes
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(uploadsession.FieldExpiresAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(uploadsession.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(uploadsession.FieldCreateTime, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(uploadsession.FieldUpdatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(uploadsession.FieldUpdateTime, field.TypeTime, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &UploadSession{config: _u.config}

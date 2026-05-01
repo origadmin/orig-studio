@@ -27,8 +27,10 @@ type CommentReport struct {
 	Reason commentreport.Reason `json:"reason,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
+	// Status holds the value of the "status" field.
+	Status commentreport.Status `json:"status,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CommentReportQuery when eager-loading is set.
 	Edges        CommentReportEdges `json:"edges"`
@@ -73,9 +75,9 @@ func (*CommentReport) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case commentreport.FieldID, commentreport.FieldCommentID, commentreport.FieldReporterID, commentreport.FieldReason, commentreport.FieldDescription:
+		case commentreport.FieldID, commentreport.FieldCommentID, commentreport.FieldReporterID, commentreport.FieldReason, commentreport.FieldDescription, commentreport.FieldStatus:
 			values[i] = new(sql.NullString)
-		case commentreport.FieldCreatedAt:
+		case commentreport.FieldCreateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -122,11 +124,17 @@ func (_m *CommentReport) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Description = value.String
 			}
-		case commentreport.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+		case commentreport.FieldStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				_m.CreatedAt = value.Time
+				_m.Status = commentreport.Status(value.String)
+			}
+		case commentreport.FieldCreateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+			} else if value.Valid {
+				_m.CreateTime = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -186,8 +194,11 @@ func (_m *CommentReport) String() string {
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
 	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString(", ")
+	builder.WriteString("create_time=")
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

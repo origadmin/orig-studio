@@ -72,7 +72,7 @@ func (r *uploadRepo) UpdateSession(ctx context.Context, session *dto.UploadSessi
 		SetParts(session.Parts).
 		SetSha256(session.Sha256).
 		SetStoragePath(session.StoragePath).
-		SetUpdatedAt(time.Now()).
+		SetUpdateTime(time.Now()).
 		Exec(ctx)
 }
 
@@ -170,7 +170,7 @@ func (r *uploadRepo) entToBiz(s *entity.UploadSession) *dto.UploadSession {
 		StoragePath:  s.StoragePath,
 		TempDir:      s.TempDir,
 		ExpiresAt:    s.ExpiresAt,
-		CreatedAt:    s.CreatedAt,
-		UpdatedAt:    s.UpdatedAt,
+		CreateTime:    s.CreateTime,
+		UpdateTime:    s.UpdateTime,
 	}
 }

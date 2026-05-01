@@ -31,10 +31,16 @@ type Comment struct {
 	Status comment.Status `json:"status,omitempty"`
 	// ReportCount holds the value of the "report_count" field.
 	ReportCount int `json:"report_count,omitempty"`
+	// LikeCount holds the value of the "like_count" field.
+	LikeCount int `json:"like_count,omitempty"`
 	// ModeratedBy holds the value of the "moderated_by" field.
 	ModeratedBy string `json:"moderated_by,omitempty"`
 	// ModeratedAt holds the value of the "moderated_at" field.
 	ModeratedAt time.Time `json:"moderated_at,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CommentQuery when eager-loading is set.
 	Edges            CommentEdges `json:"edges"`
@@ -140,11 +146,11 @@ func (*Comment) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case comment.FieldReportCount:
+		case comment.FieldReportCount, comment.FieldLikeCount:
 			values[i] = new(sql.NullInt64)
 		case comment.FieldID, comment.FieldText, comment.FieldMediaID, comment.FieldUserID, comment.FieldStatus, comment.FieldModeratedBy:
 			values[i] = new(sql.NullString)
-		case comment.FieldAddDate, comment.FieldModeratedAt:
+		case comment.FieldAddDate, comment.FieldModeratedAt, comment.FieldCreateTime, comment.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		case comment.ForeignKeys[0]: // article_comments
 			values[i] = new(sql.NullString)
@@ -207,6 +213,12 @@ func (_m *Comment) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ReportCount = int(value.Int64)
 			}
+		case comment.FieldLikeCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field like_count", values[i])
+			} else if value.Valid {
+				_m.LikeCount = int(value.Int64)
+			}
 		case comment.FieldModeratedBy:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field moderated_by", values[i])
@@ -218,6 +230,18 @@ func (_m *Comment) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field moderated_at", values[i])
 			} else if value.Valid {
 				_m.ModeratedAt = value.Time
+			}
+		case comment.FieldCreateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+			} else if value.Valid {
+				_m.CreateTime = value.Time
+			}
+		case comment.FieldUpdateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
+			} else if value.Valid {
+				_m.UpdateTime = value.Time
 			}
 		case comment.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -322,11 +346,20 @@ func (_m *Comment) String() string {
 	builder.WriteString("report_count=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ReportCount))
 	builder.WriteString(", ")
+	builder.WriteString("like_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.LikeCount))
+	builder.WriteString(", ")
 	builder.WriteString("moderated_by=")
 	builder.WriteString(_m.ModeratedBy)
 	builder.WriteString(", ")
 	builder.WriteString("moderated_at=")
 	builder.WriteString(_m.ModeratedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("create_time=")
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("update_time=")
+	builder.WriteString(_m.UpdateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

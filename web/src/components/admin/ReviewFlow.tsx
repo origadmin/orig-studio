@@ -1,4 +1,4 @@
-﻿import React, {useState, useEffect} from 'react';
+﻿﻿﻿﻿import React, {useState, useEffect} from 'react';
 import {Check, X, Clock, User, File, Search, Filter, Trash2} from 'lucide-react';
 import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dialog';
 import {Textarea} from '@/components/ui/textarea';
 import {Badge} from '@/components/ui/badge';
-import {formatDate, formatViews} from '@/lib/format';
+import {formatDateTime, formatViews} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
 import {reviewApi, type ReviewItem} from '@/lib/api/review';
 import ErrorPage from '@/components/common/ErrorPage';
@@ -257,12 +257,12 @@ const ReviewFlow: React.FC = () => {
                             </div>
                         </div>
                         <div className="w-40">
-                            <Select value={typeFilter} onValueChange={setTypeFilter}>
+                            <Select value={typeFilter || 'all'} onValueChange={(value) => setTypeFilter(value === 'all' ? '' : value)}>
                                 <SelectTrigger>
                                     <SelectValue placeholder={t('common.type')}/>
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">{t('common.all')}</SelectItem>
+                                    <SelectItem value="all">{t('common.all')}</SelectItem>
                                     <SelectItem value="video">Video</SelectItem>
                                     <SelectItem value="image">Image</SelectItem>
                                     <SelectItem value="audio">Audio</SelectItem>
@@ -271,12 +271,12 @@ const ReviewFlow: React.FC = () => {
                         </div>
                         {activeTab === 'history' && (
                             <div className="w-40">
-                                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                <Select value={statusFilter || 'all'} onValueChange={(value) => setStatusFilter(value === 'all' ? '' : value)}>
                                     <SelectTrigger>
                                         <SelectValue placeholder={t('common.status')}/>
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="">{t('common.all')}</SelectItem>
+                                        <SelectItem value="all">{t('common.all')}</SelectItem>
                                         <SelectItem value="approved">{t('review.approved')}</SelectItem>
                                         <SelectItem value="rejected">{t('review.rejected')}</SelectItem>
                                     </SelectContent>
@@ -371,7 +371,7 @@ const ReviewFlow: React.FC = () => {
                                             {getStatusBadge(item.status)}
                                         </TableCell>
                                         <TableCell>
-                                            <p className="text-sm text-gray-600 dark:text-muted-foreground">{formatDate(item.created_at || item.create_time)}</p>
+                                            <p className="text-sm text-gray-600 dark:text-muted-foreground">{formatDateTime(item.create_time)}</p>
                                         </TableCell>
                                         {activeTab === 'history' && (
                                             <TableCell>
@@ -520,7 +520,7 @@ const ReviewFlow: React.FC = () => {
                                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                     {t('common.createdAt')}
                                 </h4>
-                                <p className="text-sm text-gray-600 dark:text-muted-foreground">{formatDate(currentItem.created_at || currentItem.create_time)}</p>
+                                <p className="text-sm text-gray-600 dark:text-muted-foreground">{formatDateTime(currentItem.create_time)}</p>
                             </div>
                             {currentItem.reason && (
                                 <div className="space-y-2">

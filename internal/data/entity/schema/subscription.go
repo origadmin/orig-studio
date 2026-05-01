@@ -26,7 +26,7 @@ func (Subscription) Fields() []ent.Field {
 		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.DefaultUUIDv7()), // UUIDv7 for distributed system
 		field.String("subscriber_id"),
 		field.String("channel_id"),
-		field.Time("created_at").Default(time.Now),
+		field.Time("create_time").Default(time.Now),
 	}
 }
 
@@ -36,7 +36,7 @@ func (Subscription) Indexes() []ent.Index {
 			Unique(),
 		index.Fields("subscriber_id"),
 		index.Fields("channel_id"),
-		index.Fields("created_at"),
+		index.Fields("create_time"),
 	}
 }
 

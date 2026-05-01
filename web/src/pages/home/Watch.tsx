@@ -16,6 +16,7 @@ import {Skeleton} from '@/components/ui/skeleton';
 import {formatViews, formatDate, formatDuration} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
 import {publicMediaApi, adminMediaApi, encodingApi} from '@/lib/api/media';
+import {spriteApi} from '@/lib/api/sprite';
 import {commentApi} from '@/lib/api/comment';
 import {usePublicMediaDetail, useMediaList, useDeleteMedia} from '@/hooks/queries';
 import {useAuth} from '@/hooks/useAuth';
@@ -40,6 +41,12 @@ const WatchPage = () => {
     const [retrying, setRetrying] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const commentSectionRef = useRef<HTMLDivElement>(null);
+    const viewCountedRef = useRef(false);
+
+    // Reset view count tracking when shortToken changes
+    useEffect(() => {
+        viewCountedRef.current = false;
+    }, [shortToken]);
 
     // Video player ref for external control
     const videoPlayerRef = useRef<VideoPlayerHandle>(null);
@@ -137,6 +144,14 @@ const WatchPage = () => {
                         src={media.url || ''}
                         hlsSrc={media.hls_file}
                         poster={media.poster || media.thumbnail}
+                        spriteVttUrl={media.sprite_status === 'success' && media.short_token ? spriteApi.getVttUrl(media.short_token) : undefined}
+                        enableSpritePreview={true}
+                        onPlay={() => {
+                            if (!viewCountedRef.current && media.short_token) {
+                                viewCountedRef.current = true;
+                                publicMediaApi.incrementViewCount(media.short_token).catch(() => {});
+                            }
+                        }}
                         onError={(error) => {
                             console.error('Video player error:', error);
                         }}
@@ -292,7 +307,7 @@ const WatchPage = () => {
                         <CardContent className="p-4 space-y-2">
                             <div className="flex gap-3 text-sm font-bold text-gray-900 dark:text-white">
                                 <span>{formatViews(media.view_count)} {t('watch.views')}</span>
-                                <span>{formatDate(media.create_time || media.created_at)}</span>
+                                <span>{formatDate(media.create_time)}</span>
                                 {media.tags?.map(tag => (
                                     <span key={tag}
                                           className="text-info dark:text-blue-400 cursor-pointer hover:underline">#{tag}</span>
@@ -353,7 +368,7 @@ const WatchPage = () => {
                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                             <span>{formatViews(item.view_count)} views</span>
                                             <span>·</span>
-                                            <span>{formatDate(item.create_time || item.created_at)}</span>
+                                            <span>{formatDate(item.create_time)}</span>
                                         </div>
                                     </div>
                                 </Link>

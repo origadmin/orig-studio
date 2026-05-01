@@ -26,8 +26,8 @@ export interface SubscriptionVideo {
     encoding_status: string;
     state: string;
     published_at?: string;
-    created_at: string;
-    updated_at?: string;
+    create_time: string;
+    update_time?: string;
     tags?: string[];
     channel_id: string;
     channel_name: string;

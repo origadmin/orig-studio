@@ -31,11 +31,10 @@ func (User) Fields() []ent.Field {
 		field.String("slug").MaxLen(64).Unique().Optional(),
 		field.String("first_name").Optional().MaxLen(150),
 		field.String("last_name").Optional().MaxLen(150),
-		field.Bool("is_active").Default(true),
+		field.Enum("status").Values("PENDING", "ACTIVE", "INACTIVE", "SUSPENDED", "REJECTED").Default("ACTIVE"),
 		field.Bool("is_staff").Default(false),
 		field.Enum("role").Values("user", "admin", "editor").Default("user"),
 		field.Bool("is_superuser").Default(false),
-		field.Bool("is_approved").Optional(),
 		field.Bool("is_featured").Default(false),
 		field.Bool("advanced_user").Default(false),
 		field.Bool("is_editor").Default(false),
@@ -50,6 +49,18 @@ func (User) Fields() []ent.Field {
 		field.Time("date_joined").Default(time.Now),
 		field.Time("date_added").Default(time.Now),
 		field.Time("last_login").Optional(),
+		field.String("nickname").MaxLen(150).Optional(),
+		field.String("phone").MaxLen(32).Optional(),
+		field.String("avatar").MaxLen(500).Optional(),
+		field.String("last_login_ip").MaxLen(64).Optional(),
+		field.String("login_ip").MaxLen(64).Optional(),
+		field.Time("last_login_time").Optional(),
+		field.Time("login_time").Optional(),
+		field.Time("create_time").Default(time.Now),
+		field.Time("update_time").Default(time.Now).UpdateDefault(time.Now),
+		// Audit author fields - store user ID who created/updated the record (UUIDv7 string matching users.id)
+		field.String("create_author").Default("").Comment("Create author user ID"),
+		field.String("update_author").Default("").Comment("Update author user ID"),
 	}
 }
 
@@ -58,7 +69,7 @@ func (User) Indexes() []ent.Index {
 		index.Fields("username"),
 		index.Fields("email"),
 		index.Fields("slug"),
-		index.Fields("is_active"),
+		index.Fields("status"),
 		index.Fields("is_staff"),
 		index.Fields("date_added"),
 	}

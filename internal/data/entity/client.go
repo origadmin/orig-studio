@@ -538,6 +538,22 @@ func (c *ArticleClient) QueryCategory(_m *Article) *CategoryQuery {
 	return query
 }
 
+// QueryMedia queries the media edge of a Article.
+func (c *ArticleClient) QueryMedia(_m *Article) *MediaQuery {
+	query := (&MediaClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(article.Table, article.FieldID, id),
+			sqlgraph.To(media.Table, media.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, article.MediaTable, article.MediaColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryComments queries the comments edge of a Article.
 func (c *ArticleClient) QueryComments(_m *Article) *CommentQuery {
 	query := (&CommentClient{config: c.config}).Query()
@@ -2538,6 +2554,22 @@ func (c *MediaClient) QueryReviewLogs(_m *Media) *MediaReviewLogQuery {
 			sqlgraph.From(media.Table, media.FieldID, id),
 			sqlgraph.To(mediareviewlog.Table, mediareviewlog.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, media.ReviewLogsTable, media.ReviewLogsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryArticles queries the articles edge of a Media.
+func (c *MediaClient) QueryArticles(_m *Media) *ArticleQuery {
+	query := (&ArticleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(media.Table, media.FieldID, id),
+			sqlgraph.To(article.Table, article.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, media.ArticlesTable, media.ArticlesColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil

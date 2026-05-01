@@ -26,8 +26,8 @@ func (Setting) Fields() []ent.Field {
 		field.Bool("is_sensitive").Default(false),
 		field.Text("fallback_value").Optional(),
 		field.Bool("is_builtin").Default(true),
-		field.Time("created_at").Default(time.Now).Immutable(),
-		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+		field.Time("create_time").Default(time.Now).Immutable(),
+		field.Time("update_time").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 
