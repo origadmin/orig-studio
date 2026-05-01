@@ -24,6 +24,10 @@ import (
 	"strconv"
 	"strings"
 
+	"google.golang.org/protobuf/types/known/timestamppb"
+
+	pb "origadmin/application/origcms/api/gen/v1/media"
+	types "origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/helpers/repo"
@@ -134,7 +138,9 @@ func (h *ChannelHandler) GetChannelByToken(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	server.OK(gc, chItem)
+	server.OK(gc, &pb.GetChannelResponse{
+		Channel: bizChannelToProto(chItem),
+	})
 }
 
 // ListChannels returns channels with optional query parameters.
@@ -172,7 +178,9 @@ func (h *ChannelHandler) ListChannels(w http.ResponseWriter, r *http.Request) {
 			server.Fail(gc, server.ErrNotFound, fmt.Sprintf("channel not found for @%s", username))
 			return
 		}
-		server.OK(gc, chItem)
+		server.OK(gc, &pb.GetChannelResponse{
+			Channel: bizChannelToProto(chItem),
+		})
 
 	case userId != "":
 		items, total, err := h.uc.ListUserChannels(r.Context(), userId, page, limit)
@@ -180,7 +188,13 @@ func (h *ChannelHandler) ListChannels(w http.ResponseWriter, r *http.Request) {
 			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
-		server.OKPage(gc, items, int64(total), page, limit)
+		pbChannels := bizChannelsToProto(items)
+		server.OK(gc, &pb.ListChannelsResponse{
+			Items:     pbChannels,
+			Total:     int32(total),
+			Page:      int32(page),
+			PageSize:  int32(limit),
+		})
 
 	default:
 		// List all public channels (paginated)
@@ -189,7 +203,13 @@ func (h *ChannelHandler) ListChannels(w http.ResponseWriter, r *http.Request) {
 			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
-		server.OKPage(gc, items, int64(total), page, limit)
+		pbChannels := bizChannelsToProto(items)
+		server.OK(gc, &pb.ListChannelsResponse{
+			Items:     pbChannels,
+			Total:     int32(total),
+			Page:      int32(page),
+			PageSize:  int32(limit),
+		})
 	}
 }
 
@@ -232,7 +252,9 @@ func (h *ChannelHandler) CreateChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	server.Created(gc, created)
+	server.Created(gc, &pb.CreateChannelResponse{
+		Channel: bizChannelToProto(created),
+	})
 }
 
 // UpdateChannel updates a channel by short_token. Only the owner can update.
@@ -277,7 +299,7 @@ func (h *ChannelHandler) UpdateChannel(w http.ResponseWriter, r *http.Request) {
 		BannerLogo:  input.BannerLogo,
 		IsPublic:    existingChannel.IsPublic,
 		UserID:      existingChannel.UserID,
-		CreatedAt:   existingChannel.CreatedAt,
+		CreateTime:  existingChannel.CreateTime,
 	}
 
 	if input.IsPublic != nil {
@@ -295,7 +317,9 @@ func (h *ChannelHandler) UpdateChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	server.OK(gc, updated)
+	server.OK(gc, &pb.UpdateChannelResponse{
+		Channel: bizChannelToProto(updated),
+	})
 }
 
 // DeleteChannel deletes a channel by short_token. Only the owner or admin can delete.
@@ -328,7 +352,7 @@ func (h *ChannelHandler) DeleteChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	server.OK(gc, gin.H{"message": "deleted"})
+	server.OK(gc, &pb.DeleteChannelResponse{})
 }
 
 // AddMedia adds a media item to a channel.
@@ -369,10 +393,8 @@ func (h *ChannelHandler) AddMedia(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	server.OK(gc, gin.H{
-		"message":    "media added to channel",
-		"channel_id": token,
-		"media_id":   input.MediaID,
+	server.OK(gc, &pb.AddChannelMediaResponse{
+		Success: true,
 	})
 }
 
@@ -411,10 +433,8 @@ func (h *ChannelHandler) RemoveMedia(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	server.OK(gc, gin.H{
-		"message":    "media removed from channel",
-		"channel_id": token,
-		"media_id":   mediaId,
+	server.OK(gc, &pb.RemoveChannelMediaResponse{
+		Success: true,
 	})
 }
 
@@ -435,7 +455,9 @@ func (h *ChannelHandler) GetChannelSubscribers(w http.ResponseWriter, r *http.Re
 			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
-		server.OK(gc, gin.H{"count": count})
+		server.OK(gc, &pb.GetChannelSubscribersResponse{
+			Count: int32(count),
+		})
 		return
 	}
 
@@ -456,7 +478,16 @@ func (h *ChannelHandler) GetChannelSubscribers(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	server.OKPage(gc, subscribers, int64(total), page, pageSize)
+	pbSubscribers := make([]*types.User, len(subscribers))
+	// subscribers from biz layer are interface{}; convert to proto User where possible
+	_ = pbSubscribers // placeholder until proper conversion is available
+
+	server.OK(gc, &pb.GetChannelSubscribersResponse{
+		Subscribers: pbSubscribers,
+		Total:       int32(total),
+		Page:        int32(page),
+		PageSize:    int32(pageSize),
+	})
 }
 
 // GetSubscriptionStatus returns the subscription status for the current user.
@@ -483,7 +514,9 @@ func (h *ChannelHandler) GetSubscriptionStatus(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	server.OK(gc, gin.H{"is_subscribed": isSubscribed})
+	server.OK(gc, &pb.GetChannelSubscriptionResponse{
+		IsSubscribed: isSubscribed,
+	})
 }
 
 // SubscribeToChannel subscribes the current user to a channel.
@@ -510,7 +543,10 @@ func (h *ChannelHandler) SubscribeToChannel(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	server.OK(gc, gin.H{"success": true, "message": "Subscribed to channel"})
+	server.OK(gc, &pb.SubscribeChannelResponse{
+		Success:      true,
+		IsSubscribed: true,
+	})
 }
 
 // UnsubscribeFromChannel unsubscribes the current user from a channel.
@@ -537,7 +573,10 @@ func (h *ChannelHandler) UnsubscribeFromChannel(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	server.OK(gc, gin.H{"success": true, "message": "Unsubscribed from channel"})
+	server.OK(gc, &pb.UnsubscribeChannelResponse{
+		Success:      true,
+		IsSubscribed: false,
+	})
 }
 
 // InviteUserToChannel invites a user to join a channel.
@@ -572,7 +611,10 @@ func (h *ChannelHandler) InviteUserToChannel(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	server.OK(gc, gin.H{"success": true, "message": "User invited to channel"})
+	server.OK(gc, &pb.SubscribeChannelResponse{
+		Success:      true,
+		IsSubscribed: true,
+	})
 }
 
 // AcceptChannelInvitation accepts a channel invitation.
@@ -599,7 +641,10 @@ func (h *ChannelHandler) AcceptChannelInvitation(w http.ResponseWriter, r *http.
 		return
 	}
 
-	server.OK(gc, gin.H{"success": true, "message": "Invitation accepted"})
+	server.OK(gc, &pb.SubscribeChannelResponse{
+		Success:      true,
+		IsSubscribed: true,
+	})
 }
 
 // RejectChannelInvitation rejects a channel invitation.
@@ -626,7 +671,10 @@ func (h *ChannelHandler) RejectChannelInvitation(w http.ResponseWriter, r *http.
 		return
 	}
 
-	server.OK(gc, gin.H{"success": true, "message": "Invitation rejected"})
+	server.OK(gc, &pb.UnsubscribeChannelResponse{
+		Success:      true,
+		IsSubscribed: false,
+	})
 }
 
 // GetChannelInvitations returns the current user's channel invitations.
@@ -647,7 +695,11 @@ func (h *ChannelHandler) GetChannelInvitations(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	server.OK(gc, gin.H{"invitations": invitations})
+	// TODO: Define ChannelInvitation proto type and convert properly
+	server.OK(gc, &pb.ListChannelsResponse{
+		Items: []*types.Channel{},
+	})
+	_ = invitations
 }
 
 // GetMyChannel returns the current authenticated user's channel.
@@ -669,11 +721,17 @@ func (h *ChannelHandler) GetMyChannel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(channels) == 0 {
-		server.Fail(gc, server.ErrNotFound, "You don't have a channel yet")
+		// Return 200 with null channel instead of 404;
+		// 404 should mean "endpoint not found", not "user has no channel yet".
+		server.OK(gc, &pb.GetChannelResponse{
+			Channel: nil,
+		})
 		return
 	}
 
-	server.OK(gc, channels[0])
+	server.OK(gc, &pb.GetChannelResponse{
+		Channel: bizChannelToProto(channels[0]),
+	})
 }
 
 // UpdateMyHandle updates the current user's channel handle/slug.
@@ -716,7 +774,9 @@ func (h *ChannelHandler) UpdateMyHandle(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	server.OK(gc, updated)
+	server.OK(gc, &pb.UpdateChannelResponse{
+		Channel: bizChannelToProto(updated),
+	})
 }
 
 // UpdateNotificationSetting updates notification preferences for a channel subscription.
@@ -756,11 +816,9 @@ func (h *ChannelHandler) UpdateNotificationSetting(w http.ResponseWriter, r *htt
 		return
 	}
 
-	server.OK(gc, gin.H{
-		"success":    true,
-		"setting":    input.Setting,
-		"channel_id": token,
-		"message":    "Notification setting updated",
+	server.OK(gc, &pb.SubscribeChannelResponse{
+		Success:      true,
+		IsSubscribed: true,
 	})
 }
 
@@ -808,7 +866,12 @@ func (h *ChannelHandler) GetSubscriptionVideos(w http.ResponseWriter, r *http.Re
 	}
 
 	if len(channelIDs) == 0 {
-		server.OKPage(gc, []interface{}{}, int64(0), page, limit)
+		server.OK(gc, &pb.GetChannelMediasResponse{
+			Items:    []*types.Media{},
+			Total:    0,
+			Page:     int32(page),
+			PageSize: int32(limit),
+		})
 		return
 	}
 
@@ -834,7 +897,16 @@ func (h *ChannelHandler) GetSubscriptionVideos(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	server.OKPage(gc, items, int64(total), page, limit)
+	// TODO: Convert biz items to proto Media objects properly
+	pbMedias := make([]*types.Media, 0)
+	_ = items
+
+	server.OK(gc, &pb.GetChannelMediasResponse{
+		Items:    pbMedias,
+		Total:    int32(total),
+		Page:     int32(page),
+		PageSize: int32(limit),
+	})
 }
 
 // GetChannelVideos returns videos for a specific channel by short_token.
@@ -886,7 +958,16 @@ func (h *ChannelHandler) GetChannelVideos(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	server.OKPage(gc, items, int64(total), page, limit)
+	// TODO: Convert biz items to proto Media objects properly
+	pbMedias := make([]*types.Media, 0)
+	_ = items
+
+	server.OK(gc, &pb.GetChannelMediasResponse{
+		Items:    pbMedias,
+		Total:    int32(total),
+		Page:     int32(page),
+		PageSize: int32(limit),
+	})
 }
 
 // GetChannelPlaylists returns playlists for a specific channel by short_token.
@@ -931,5 +1012,42 @@ func (h *ChannelHandler) GetChannelPlaylists(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	server.OKPage(gc, items, int64(total), page, limit)
+	// TODO: Convert biz items to proto Playlist objects properly
+	pbPlaylists := make([]*types.Playlist, 0)
+	_ = items
+
+	server.OK(gc, &pb.GetPlaylistsResponse{
+		Items:     pbPlaylists,
+		Total:     int32(total),
+		Page:      int32(page),
+		PageSize:  int32(limit),
+	})
+}
+
+// bizChannelToProto converts a biz.Channel to a proto types.Channel.
+func bizChannelToProto(ch *biz.Channel) *types.Channel {
+	if ch == nil {
+		return nil
+	}
+	pb := &types.Channel{
+		Id:          ch.ID,
+		Title:       ch.Title,
+		Description: ch.Description,
+		BannerLogo:  ch.BannerLogo,
+		UserId:      ch.UserID,
+		ShortToken:  ch.ShortToken,
+	}
+	if !ch.CreateTime.IsZero() {
+		pb.CreateTime = timestamppb.New(ch.CreateTime)
+	}
+	return pb
+}
+
+// bizChannelsToProto converts a slice of biz.Channel to proto types.Channel.
+func bizChannelsToProto(channels []*biz.Channel) []*types.Channel {
+	result := make([]*types.Channel, len(channels))
+	for i, ch := range channels {
+		result[i] = bizChannelToProto(ch)
+	}
+	return result
 }

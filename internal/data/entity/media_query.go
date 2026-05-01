@@ -7,6 +7,7 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"math"
+	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
@@ -42,6 +43,7 @@ type MediaQuery struct {
 	withFavorites  *FavoriteQuery
 	withLikes      *LikeQuery
 	withReviewLogs *MediaReviewLogQuery
+	withArticles   *ArticleQuery
 	withFKs        bool
 	modifiers      []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -278,6 +280,28 @@ func (_q *MediaQuery) QueryReviewLogs() *MediaReviewLogQuery {
 	return query
 }
 
+// QueryArticles chains the current query on the "articles" edge.
+func (_q *MediaQuery) QueryArticles() *ArticleQuery {
+	query := (&ArticleClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(media.Table, media.FieldID, selector),
+			sqlgraph.To(article.Table, article.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, media.ArticlesTable, media.ArticlesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first Media entity from the query.
 // Returns a *NotFoundError when no Media was found.
 func (_q *MediaQuery) First(ctx context.Context) (*Media, error) {
@@ -479,6 +503,7 @@ func (_q *MediaQuery) Clone() *MediaQuery {
 		withFavorites:  _q.withFavorites.Clone(),
 		withLikes:      _q.withLikes.Clone(),
 		withReviewLogs: _q.withReviewLogs.Clone(),
+		withArticles:   _q.withArticles.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -585,6 +610,17 @@ func (_q *MediaQuery) WithReviewLogs(opts ...func(*MediaReviewLogQuery)) *MediaQ
 	return _q
 }
 
+// WithArticles tells the query-builder to eager-load the nodes that are connected to
+// the "articles" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *MediaQuery) WithArticles(opts ...func(*ArticleQuery)) *MediaQuery {
+	query := (&ArticleClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withArticles = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -664,7 +700,7 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 		nodes       = []*Media{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [9]bool{
+		loadedTypes = [10]bool{
 			_q.withUser != nil,
 			_q.withCategory != nil,
 			_q.withComments != nil,
@@ -674,6 +710,7 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 			_q.withFavorites != nil,
 			_q.withLikes != nil,
 			_q.withReviewLogs != nil,
+			_q.withArticles != nil,
 		}
 	)
 	if withFKs {
@@ -757,6 +794,13 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 		if err := _q.loadReviewLogs(ctx, query, nodes,
 			func(n *Media) { n.Edges.ReviewLogs = []*MediaReviewLog{} },
 			func(n *Media, e *MediaReviewLog) { n.Edges.ReviewLogs = append(n.Edges.ReviewLogs, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withArticles; query != nil {
+		if err := _q.loadArticles(ctx, query, nodes,
+			func(n *Media) { n.Edges.Articles = []*Article{} },
+			func(n *Media, e *Article) { n.Edges.Articles = append(n.Edges.Articles, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1018,6 +1062,36 @@ func (_q *MediaQuery) loadReviewLogs(ctx context.Context, query *MediaReviewLogQ
 	}
 	query.Where(predicate.MediaReviewLog(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(media.ReviewLogsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.MediaID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "media_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *MediaQuery) loadArticles(ctx context.Context, query *ArticleQuery, nodes []*Media, init func(*Media), assign func(*Media, *Article)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Media)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(article.FieldMediaID)
+	}
+	query.Where(predicate.Article(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(media.ArticlesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

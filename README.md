@@ -1,6 +1,6 @@
 <p align="center">
 
-  <img src="resources/images/banner.png" alt="OrigMedia Banner" width="100%">
+  <img src="web/public/banner.png" alt="OrigMedia Banner" width="100%">
   <h1 align="center">OrigMedia</h1>
   <p align="center">
     <strong>高性能开源媒体内容管理系统</strong>

@@ -27,8 +27,8 @@ type Notification struct {
 	UserID int `json:"user_id,omitempty"`
 	// IsRead holds the value of the "is_read" field.
 	IsRead bool `json:"is_read,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the NotificationQuery when eager-loading is set.
 	Edges        NotificationEdges `json:"edges"`
@@ -64,7 +64,7 @@ func (*Notification) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case notification.FieldAction, notification.FieldMethod:
 			values[i] = new(sql.NullString)
-		case notification.FieldCreatedAt:
+		case notification.FieldCreateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -117,11 +117,11 @@ func (_m *Notification) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.IsRead = value.Bool
 			}
-		case notification.FieldCreatedAt:
+		case notification.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				_m.CreatedAt = value.Time
+				_m.CreateTime = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -179,8 +179,8 @@ func (_m *Notification) String() string {
 	builder.WriteString("is_read=")
 	builder.WriteString(fmt.Sprintf("%v", _m.IsRead))
 	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString("create_time=")
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

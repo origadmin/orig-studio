@@ -16,6 +16,8 @@ import {
     Bell,
     Radio,
     TrendingUp,
+    UserCircle,
+    FileText,
 } from 'lucide-react';
 import type {NavSection} from '@/types/nav';
 
@@ -30,6 +32,7 @@ export const NAV_CONFIG: NavSection[] = [
             {id: 'categories', label: 'nav.categories', to: '/categories', icon: LayoutGrid},
             {id: 'tags', label: 'nav.tags', to: '/tags', icon: Tag},
             {id: 'members', label: 'nav.members', to: '/members', icon: UsersIcon},
+            {id: 'articles', label: 'nav.articles', to: '/articles', icon: FileText},
         ],
     },
     {
@@ -50,6 +53,7 @@ export const NAV_CONFIG: NavSection[] = [
         title: 'nav.you',
         requiresAuth: true,
         items: [
+            {id: 'my-profile', label: 'nav.myProfile', to: '/@__dynamic__', icon: UserCircle, isDynamic: true},
             {id: 'history', label: 'nav.history', to: '/me/history', icon: History},
             {id: 'my-videos', label: 'nav.myVideos', to: '/me/videos', icon: Video},
             {id: 'upload', label: 'nav.upload', to: '/me/upload', icon: Upload},

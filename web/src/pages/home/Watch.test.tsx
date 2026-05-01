@@ -14,7 +14,7 @@ jest.mock('@/hooks/queries', () => ({
             view_count: 1000,
             like_count: 50,
             favorite_count: 20,
-            created_at: '2024-01-01T00:00:00Z',
+            create_time: '2024-01-01T00:00:00Z',
             encoding_status: 'success',
             url: '/api/v1/medias/1',
             hls_file: '/api/v1/medias/1/hls.m3u8',
@@ -48,7 +48,7 @@ jest.mock('@/hooks/queries', () => ({
                     id: 2,
                     title: 'Recommended Video 1',
                     view_count: 500,
-                    created_at: '2024-01-02T00:00:00Z',
+                    create_time: '2024-01-02T00:00:00Z',
                     duration: 180,
                     thumbnail: '/api/v1/medias/2/thumbnail.jpg',
                     edges: {
@@ -63,7 +63,7 @@ jest.mock('@/hooks/queries', () => ({
                     id: 3,
                     title: 'Recommended Video 2',
                     view_count: 300,
-                    created_at: '2024-01-03T00:00:00Z',
+                    create_time: '2024-01-03T00:00:00Z',
                     duration: 240,
                     thumbnail: '/api/v1/medias/3/thumbnail.jpg',
                     edges: {
@@ -205,7 +205,7 @@ jest.mock('@/lib/api/comment', () => ({
                     id: 1,
                     body: 'Test comment',
                     username: 'testuser',
-                    created_at: '2024-01-01T01:00:00Z'
+                    create_time: '2024-01-01T01:00:00Z'
                 }
             ]
         }),

@@ -24,9 +24,10 @@ import {
 import {MoreHorizontal, Search, Edit, Trash2, Eye, PlayCircle, Lock, Globe, User, Filter, RotateCcw} from 'lucide-react';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {adminPlaylistApi, Playlist} from '@/lib/api/playlist';
+import {formatDateTime} from '@/lib/format';
 import {extractList} from '@/lib/extract';
 import {TablePagination} from '@/components/common/TablePagination';
-import {PAGINATION} from '@/config/pagination';
+import {usePagination} from '@/hooks/usePagination';
 
 const Playlists: React.FC = () => {
     const {t} = useTranslation();
@@ -35,9 +36,7 @@ const Playlists: React.FC = () => {
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [page, setPage] = useState(1);
-    const [pageSize] = useState(PAGINATION.DEFAULT_PAGE_SIZE);
-    const [total, setTotal] = useState(0);
+    const {page, pageSize, total, setPage, setTotal, getParams} = usePagination();
 
     // 加载播放列表数据
     useEffect(() => {
@@ -45,7 +44,7 @@ const Playlists: React.FC = () => {
             setLoading(true);
             setError(null);
             try {
-                const response = await adminPlaylistApi.list({page, page_size: pageSize});
+                const response = await adminPlaylistApi.list(getParams());
                 const playlistList = extractList<Playlist>(response);
                 setPlaylists(playlistList);
                 if ((response as any)?.total !== undefined) {
@@ -296,7 +295,7 @@ const Playlists: React.FC = () => {
                                             <Badge variant="outline">-</Badge>
                                         </TableCell>
                                         <TableCell className="text-muted-foreground">
-                                            {new Date(playlist.created_at || playlist.create_time).toLocaleDateString()}
+                                            {formatDateTime(playlist.create_time)}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>

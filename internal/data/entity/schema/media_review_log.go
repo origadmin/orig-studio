@@ -26,7 +26,7 @@ func (MediaReviewLog) Fields() []ent.Field {
 		field.Text("comment").Optional(),
 		field.String("previous_status").MaxLen(20),
 		field.String("new_status").MaxLen(20),
-		field.Time("created_at").Default(time.Now),
+		field.Time("create_time").Default(time.Now),
 	}
 }
 
@@ -40,7 +40,7 @@ func (MediaReviewLog) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("media_id"),
 		index.Fields("reviewer_id"),
-		index.Fields("created_at"),
+		index.Fields("create_time"),
 	}
 }
 

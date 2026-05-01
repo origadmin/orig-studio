@@ -138,7 +138,7 @@ func (r *permissionGroupRepo) List(ctx context.Context, isActive *bool, page, pa
 	ents, err := query.
 		Offset((page - 1) * pageSize).
 		Limit(pageSize).
-		Order(entity.Desc(permissiongroup.FieldCreatedAt)).
+		Order(entity.Desc(permissiongroup.FieldCreateTime)).
 		All(ctx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to list permission groups: %w", err)
@@ -293,8 +293,8 @@ func mapPermissionGroupToItem(ent *entity.PermissionGroup, memberCount int) *biz
 		IsActive:    ent.IsActive,
 		CreatedBy:   ent.CreatedBy,
 		MemberCount: memberCount,
-		CreatedAt:   ent.CreatedAt,
-		UpdatedAt:   ent.UpdatedAt,
+		CreateTime:   ent.CreateTime,
+		UpdateTime:   ent.UpdateTime,
 	}
 
 	if len(ent.CategoryScope) > 0 {

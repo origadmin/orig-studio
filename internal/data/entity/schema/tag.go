@@ -6,6 +6,8 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
@@ -23,7 +25,12 @@ func (Tag) Fields() []ent.Field {
 		field.String("title").NotEmpty().Unique().MaxLen(100),
 		field.String("slug").MaxLen(100).Unique().Optional(),
 		field.Int("media_count").Default(0),
-		field.String("listings_thumbnail").MaxLen(400),
+		field.String("listings_thumbnail").MaxLen(400).Optional().Default(""),
+		field.Enum("status").Values("ACTIVE", "INACTIVE").Default("ACTIVE"),
+		field.String("description").Optional().MaxLen(500),
+		field.String("color").MaxLen(32).Optional(),
+		field.Time("create_time").Default(time.Now),
+		field.Time("update_time").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 

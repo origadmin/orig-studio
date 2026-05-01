@@ -30,8 +30,9 @@ func (EncodingTask) Fields() []ent.Field {
 		field.String("output_path").MaxLen(512).Optional(),
 		field.Text("error_message").Optional(),
 		field.Bool("chunk").Default(false),
-		field.Time("created_at").Default(time.Now),
-		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+		field.Int("progress").Default(0),
+		field.Time("create_time").Default(time.Now),
+		field.Time("update_time").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 
@@ -47,6 +48,6 @@ func (EncodingTask) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("media_id"),
 		index.Fields("status"),
-		index.Fields("created_at"),
+		index.Fields("create_time"),
 	}
 }

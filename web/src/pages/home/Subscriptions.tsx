@@ -1,4 +1,4 @@
-﻿import React, {useState, useEffect} from 'react';
+﻿﻿import React, {useState, useEffect} from 'react';
 import {Link} from '@tanstack/react-router';
 import {Users, UserPlus, Search, Loader2} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
@@ -8,7 +8,7 @@ import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {formatDate} from '@/lib/format';
 import {subscriptionApi} from '@/lib/api/subscription';
 import ErrorPage from '@/components/common/ErrorPage';
-import {PAGINATION} from '@/config/pagination';
+import {PAGINATION_CONFIG} from '@/config/pagination';
 
 const SubscriptionsPage = () => {
     const {t} = useTranslation();
@@ -31,13 +31,13 @@ const SubscriptionsPage = () => {
 
             let response;
             if (activeTab === 'subscriptions') {
-                response = await subscriptionApi.getSubscriptions({page, page_size: PAGINATION.DEFAULT_PAGE_SIZE});
+                response = await subscriptionApi.getSubscriptions({page, page_size: PAGINATION_CONFIG.DEFAULT_PAGE_SIZE});
                 setSubscriptions(prev => page === 1 ? response.items : [...prev, ...response.items]);
-                setHasMore(response.items.length === PAGINATION.DEFAULT_PAGE_SIZE);
+                setHasMore(response.items.length === PAGINATION_CONFIG.DEFAULT_PAGE_SIZE);
             } else {
-                response = await subscriptionApi.getFollowers({page, page_size: PAGINATION.DEFAULT_PAGE_SIZE});
+                response = await subscriptionApi.getFollowers({page, page_size: PAGINATION_CONFIG.DEFAULT_PAGE_SIZE});
                 setFollowers(prev => page === 1 ? response.items : [...prev, ...response.items]);
-                setHasMore(response.items.length === PAGINATION.DEFAULT_PAGE_SIZE);
+                setHasMore(response.items.length === PAGINATION_CONFIG.DEFAULT_PAGE_SIZE);
             }
         } catch (err) {
             setError('Failed to fetch data');

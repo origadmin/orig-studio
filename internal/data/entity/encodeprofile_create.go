@@ -144,30 +144,30 @@ func (_c *EncodeProfileCreate) SetNillableIsActive(v *bool) *EncodeProfileCreate
 	return _c
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_c *EncodeProfileCreate) SetCreatedAt(v time.Time) *EncodeProfileCreate {
-	_c.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_c *EncodeProfileCreate) SetCreateTime(v time.Time) *EncodeProfileCreate {
+	_c.mutation.SetCreateTime(v)
 	return _c
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *EncodeProfileCreate) SetNillableCreatedAt(v *time.Time) *EncodeProfileCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *EncodeProfileCreate) SetNillableCreateTime(v *time.Time) *EncodeProfileCreate {
 	if v != nil {
-		_c.SetCreatedAt(*v)
+		_c.SetCreateTime(*v)
 	}
 	return _c
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_c *EncodeProfileCreate) SetUpdatedAt(v time.Time) *EncodeProfileCreate {
-	_c.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_c *EncodeProfileCreate) SetUpdateTime(v time.Time) *EncodeProfileCreate {
+	_c.mutation.SetUpdateTime(v)
 	return _c
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *EncodeProfileCreate) SetNillableUpdatedAt(v *time.Time) *EncodeProfileCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (_c *EncodeProfileCreate) SetNillableUpdateTime(v *time.Time) *EncodeProfileCreate {
 	if v != nil {
-		_c.SetUpdatedAt(*v)
+		_c.SetUpdateTime(*v)
 	}
 	return _c
 }
@@ -223,13 +223,13 @@ func (_c *EncodeProfileCreate) defaults() {
 		v := encodeprofile.DefaultIsActive
 		_c.mutation.SetIsActive(v)
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := encodeprofile.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := encodeprofile.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
 	}
-	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := encodeprofile.DefaultUpdatedAt()
-		_c.mutation.SetUpdatedAt(v)
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		v := encodeprofile.DefaultUpdateTime()
+		_c.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -288,11 +288,11 @@ func (_c *EncodeProfileCreate) check() error {
 	if _, ok := _c.mutation.IsActive(); !ok {
 		return &ValidationError{Name: "is_active", err: errors.New(`entity: missing required field "EncodeProfile.is_active"`)}
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "EncodeProfile.created_at"`)}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "EncodeProfile.create_time"`)}
 	}
-	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`entity: missing required field "EncodeProfile.updated_at"`)}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`entity: missing required field "EncodeProfile.update_time"`)}
 	}
 	return nil
 }
@@ -360,13 +360,13 @@ func (_c *EncodeProfileCreate) createSpec() (*EncodeProfile, *sqlgraph.CreateSpe
 		_spec.SetField(encodeprofile.FieldIsActive, field.TypeBool, value)
 		_node.IsActive = value
 	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(encodeprofile.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(encodeprofile.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
 	}
-	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(encodeprofile.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
+	if value, ok := _c.mutation.UpdateTime(); ok {
+		_spec.SetField(encodeprofile.FieldUpdateTime, field.TypeTime, value)
+		_node.UpdateTime = value
 	}
 	return _node, _spec
 }

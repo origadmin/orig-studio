@@ -208,23 +208,16 @@ func (_u *CategoryUpdate) AddSequence(v int) *CategoryUpdate {
 }
 
 // SetStatus sets the "status" field.
-func (_u *CategoryUpdate) SetStatus(v int) *CategoryUpdate {
-	_u.mutation.ResetStatus()
+func (_u *CategoryUpdate) SetStatus(v category.Status) *CategoryUpdate {
 	_u.mutation.SetStatus(v)
 	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *CategoryUpdate) SetNillableStatus(v *int) *CategoryUpdate {
+func (_u *CategoryUpdate) SetNillableStatus(v *category.Status) *CategoryUpdate {
 	if v != nil {
 		_u.SetStatus(*v)
 	}
-	return _u
-}
-
-// AddStatus adds value to the "status" field.
-func (_u *CategoryUpdate) AddStatus(v int) *CategoryUpdate {
-	_u.mutation.AddStatus(v)
 	return _u
 }
 
@@ -317,23 +310,23 @@ func (_u *CategoryUpdate) ClearUserID() *CategoryUpdate {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *CategoryUpdate) SetCreatedAt(v time.Time) *CategoryUpdate {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *CategoryUpdate) SetCreateTime(v time.Time) *CategoryUpdate {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *CategoryUpdate) SetNillableCreatedAt(v *time.Time) *CategoryUpdate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *CategoryUpdate) SetNillableCreateTime(v *time.Time) *CategoryUpdate {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *CategoryUpdate) SetUpdatedAt(v time.Time) *CategoryUpdate {
-	_u.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_u *CategoryUpdate) SetUpdateTime(v time.Time) *CategoryUpdate {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -502,9 +495,9 @@ func (_u *CategoryUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *CategoryUpdate) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := category.UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := category.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -538,6 +531,11 @@ func (_u *CategoryUpdate) check() error {
 	if v, ok := _u.mutation.Color(); ok {
 		if err := category.ColorValidator(v); err != nil {
 			return &ValidationError{Name: "color", err: fmt.Errorf(`entity: validator failed for field "Category.color": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := category.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "Category.status": %w`, err)}
 		}
 	}
 	return nil
@@ -607,10 +605,7 @@ func (_u *CategoryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.AddField(category.FieldSequence, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Status(); ok {
-		_spec.SetField(category.FieldStatus, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedStatus(); ok {
-		_spec.AddField(category.FieldStatus, field.TypeInt, value)
+		_spec.SetField(category.FieldStatus, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.MediaCount(); ok {
 		_spec.SetField(category.FieldMediaCount, field.TypeInt, value)
@@ -630,11 +625,11 @@ func (_u *CategoryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.IdentityProviderCleared() {
 		_spec.ClearField(category.FieldIdentityProvider, field.TypeString)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(category.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(category.FieldCreateTime, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(category.FieldUpdatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(category.FieldUpdateTime, field.TypeTime, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1027,23 +1022,16 @@ func (_u *CategoryUpdateOne) AddSequence(v int) *CategoryUpdateOne {
 }
 
 // SetStatus sets the "status" field.
-func (_u *CategoryUpdateOne) SetStatus(v int) *CategoryUpdateOne {
-	_u.mutation.ResetStatus()
+func (_u *CategoryUpdateOne) SetStatus(v category.Status) *CategoryUpdateOne {
 	_u.mutation.SetStatus(v)
 	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *CategoryUpdateOne) SetNillableStatus(v *int) *CategoryUpdateOne {
+func (_u *CategoryUpdateOne) SetNillableStatus(v *category.Status) *CategoryUpdateOne {
 	if v != nil {
 		_u.SetStatus(*v)
 	}
-	return _u
-}
-
-// AddStatus adds value to the "status" field.
-func (_u *CategoryUpdateOne) AddStatus(v int) *CategoryUpdateOne {
-	_u.mutation.AddStatus(v)
 	return _u
 }
 
@@ -1136,23 +1124,23 @@ func (_u *CategoryUpdateOne) ClearUserID() *CategoryUpdateOne {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *CategoryUpdateOne) SetCreatedAt(v time.Time) *CategoryUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *CategoryUpdateOne) SetCreateTime(v time.Time) *CategoryUpdateOne {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *CategoryUpdateOne) SetNillableCreatedAt(v *time.Time) *CategoryUpdateOne {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *CategoryUpdateOne) SetNillableCreateTime(v *time.Time) *CategoryUpdateOne {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *CategoryUpdateOne) SetUpdatedAt(v time.Time) *CategoryUpdateOne {
-	_u.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_u *CategoryUpdateOne) SetUpdateTime(v time.Time) *CategoryUpdateOne {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -1334,9 +1322,9 @@ func (_u *CategoryUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *CategoryUpdateOne) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := category.UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := category.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -1370,6 +1358,11 @@ func (_u *CategoryUpdateOne) check() error {
 	if v, ok := _u.mutation.Color(); ok {
 		if err := category.ColorValidator(v); err != nil {
 			return &ValidationError{Name: "color", err: fmt.Errorf(`entity: validator failed for field "Category.color": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := category.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "Category.status": %w`, err)}
 		}
 	}
 	return nil
@@ -1456,10 +1449,7 @@ func (_u *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err 
 		_spec.AddField(category.FieldSequence, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Status(); ok {
-		_spec.SetField(category.FieldStatus, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedStatus(); ok {
-		_spec.AddField(category.FieldStatus, field.TypeInt, value)
+		_spec.SetField(category.FieldStatus, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.MediaCount(); ok {
 		_spec.SetField(category.FieldMediaCount, field.TypeInt, value)
@@ -1479,11 +1469,11 @@ func (_u *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err 
 	if _u.mutation.IdentityProviderCleared() {
 		_spec.ClearField(category.FieldIdentityProvider, field.TypeString)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(category.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(category.FieldCreateTime, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(category.FieldUpdatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(category.FieldUpdateTime, field.TypeTime, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -1,4 +1,4 @@
-﻿import {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import {Link} from '@tanstack/react-router';
 import {TrendingUp, Play, Eye, Heart, Clock} from 'lucide-react';
 import {exploreApi} from '../../lib/api/explore';
@@ -12,13 +12,9 @@ export default function Trending() {
     useEffect(() => {
         exploreApi.getTrending({limit: 50})
             .then((res) => {
-                if (res.code === 0) {
-                    setItems(res.data.items || []);
-                } else {
-                    setError(res.message || 'Failed to load trending');
-                }
+                setItems(res.items || []);
             })
-            .catch((err: Error) => setError(err.message))
+            .catch((err: Error) => setError(err.message || 'Failed to load trending'))
             .finally(() => setLoading(false));
     }, []);
 

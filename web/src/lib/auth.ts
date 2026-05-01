@@ -52,7 +52,7 @@ export interface CurrentUser {
     avatar?: string;
     role: string;
     status: string;
-    created_at: string;
+    create_time: string;
 }
 
 export async function getCurrentUser(): Promise<CurrentUser> {

@@ -26,8 +26,8 @@ func (PermissionGroup) Fields() []ent.Field {
 		field.JSON("category_scope", []string{}).Optional(),
 		field.Bool("is_active").Default(true),
 		field.String("created_by").Optional(),
-		field.Time("created_at").Default(time.Now),
-		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+		field.Time("create_time").Default(time.Now),
+		field.Time("update_time").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 

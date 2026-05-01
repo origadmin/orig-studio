@@ -6,12 +6,11 @@
 package service
 
 import (
-	"origadmin/application/origcms/internal/handler"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
+	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/setting"
@@ -77,7 +76,7 @@ func (h *SystemHandler) registerSettings(g handler.Router) {
 func (h *SystemHandler) getDashboardStats() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if h.statsRepo == nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "stats service not available"})
+			server.Fail(c, server.ErrInternal, "stats service not available")
 			return
 		}
 
@@ -94,7 +93,7 @@ func (h *SystemHandler) getDashboardStats() gin.HandlerFunc {
 func (h *SystemHandler) getMediaStats() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if h.statsRepo == nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "stats service not available"})
+			server.Fail(c, server.ErrInternal, "stats service not available")
 			return
 		}
 
@@ -111,7 +110,7 @@ func (h *SystemHandler) getMediaStats() gin.HandlerFunc {
 func (h *SystemHandler) getUserStats() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if h.statsRepo == nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "stats service not available"})
+			server.Fail(c, server.ErrInternal, "stats service not available")
 			return
 		}
 
@@ -147,7 +146,7 @@ func (h *SystemHandler) getTrafficStats() gin.HandlerFunc {
 func (h *SystemHandler) getSettings() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if h.settingUC == nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "settings service not available"})
+			server.Fail(c, server.ErrInternal, "settings service not available")
 			return
 		}
 
@@ -164,18 +163,14 @@ func (h *SystemHandler) getSettings() gin.HandlerFunc {
 			grouped[cat] = append(grouped[cat], masked)
 		}
 
-		server.OK(c, gin.H{
-			"code":    0,
-			"message": "ok",
-			"data":    grouped,
-		})
+		server.OK(c, grouped)
 	}
 }
 
 func (h *SystemHandler) updateSettings() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if h.settingUC == nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "settings service not available"})
+			server.Fail(c, server.ErrInternal, "settings service not available")
 			return
 		}
 
@@ -187,7 +182,7 @@ func (h *SystemHandler) updateSettings() gin.HandlerFunc {
 		}
 
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"code": server.ErrBadRequest, "message": err.Error()})
+			server.Fail(c, server.ErrBadRequest, err.Error())
 			return
 		}
 
@@ -195,21 +190,12 @@ func (h *SystemHandler) updateSettings() gin.HandlerFunc {
 		for _, item := range req.Settings {
 			existing, err := h.settingUC.GetByKey(c.Request.Context(), item.Key)
 			if err != nil {
-				c.JSON(
-					http.StatusNotFound,
-					gin.H{"code": server.ErrNotFound, "message": "setting not found: " + item.Key},
-				)
+				server.Fail(c, server.ErrNotFound, "setting not found: "+item.Key)
 				return
 			}
 
 			if err := ValidateSettingValue(item.Value, existing.Type); err != nil {
-				c.JSON(
-					http.StatusBadRequest,
-					gin.H{
-						"code":    server.ErrBadRequest,
-						"message": "invalid value for " + item.Key + ": " + err.Error(),
-					},
-				)
+				server.Fail(c, server.ErrBadRequest, "invalid value for "+item.Key+": "+err.Error())
 				return
 			}
 
@@ -225,82 +211,61 @@ func (h *SystemHandler) updateSettings() gin.HandlerFunc {
 			}
 			result, err := h.settingUC.Upsert(c.Request.Context(), s)
 			if err != nil {
-				c.JSON(
-					http.StatusInternalServerError,
-					gin.H{"code": server.ErrInternal, "message": err.Error()},
-				)
+				server.Fail(c, server.ErrInternal, err.Error())
 				return
 			}
 			updated = append(updated, result)
 		}
 
-		server.OK(c, gin.H{
-			"code":    0,
-			"message": "ok",
-			"data":    updated,
-		})
+		server.OK(c, updated)
 	}
 }
 
 func (h *SystemHandler) getSettingByKey() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if h.settingUC == nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "settings service not available"})
+			server.Fail(c, server.ErrInternal, "settings service not available")
 			return
 		}
 
 		key := c.Param("key")
 		if key == "" {
-			c.JSON(
-				http.StatusBadRequest,
-				gin.H{"code": server.ErrBadRequest, "message": "key is required"},
-			)
+			server.Fail(c, server.ErrBadRequest, "key is required")
 			return
 		}
 
 		s, err := h.settingUC.GetByKey(c.Request.Context(), key)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"code": server.ErrNotFound, "message": "setting not found"})
+			server.Fail(c, server.ErrNotFound, "setting not found")
 			return
 		}
 
 		masked := h.settingUC.MaskSensitive(s)
-		server.OK(c, gin.H{
-			"code":    0,
-			"message": "ok",
-			"data":    masked,
-		})
+		server.OK(c, masked)
 	}
 }
 
 func (h *SystemHandler) resetSetting() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if h.settingUC == nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "settings service not available"})
+			server.Fail(c, server.ErrInternal, "settings service not available")
 			return
 		}
 
 		key := c.Param("key")
 		if key == "" {
-			c.JSON(
-				http.StatusBadRequest,
-				gin.H{"code": server.ErrBadRequest, "message": "key is required"},
-			)
+			server.Fail(c, server.ErrBadRequest, "key is required")
 			return
 		}
 
 		s, err := h.settingUC.ResetToDefault(c.Request.Context(), key)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"code": server.ErrNotFound, "message": "setting not found"})
+			server.Fail(c, server.ErrNotFound, "setting not found")
 			return
 		}
 
 		masked := h.settingUC.MaskSensitive(s)
-		server.OK(c, gin.H{
-			"code":    0,
-			"message": "ok",
-			"data":    masked,
-		})
+		server.OK(c, masked)
 	}
 }
 
@@ -309,16 +274,12 @@ func (h *SystemHandler) resetSetting() gin.HandlerFunc {
 func (h *SystemHandler) getPublicConfig() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if h.settingUC == nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "settings service not available"})
+			server.Fail(c, server.ErrInternal, "settings service not available")
 			return
 		}
 
 		publicSettings := h.settingUC.GetPublicSettings(c.Request.Context())
-		server.OK(c, gin.H{
-			"code":    0,
-			"message": "ok",
-			"data":    publicSettings,
-		})
+		server.OK(c, publicSettings)
 	}
 }
 

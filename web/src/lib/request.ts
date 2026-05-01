@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import type {User} from '@/contexts/auth/types';
+import {PAGINATION_CONFIG} from '@/config/pagination';
 
 // Use relative path by default, let rsbuild proxy handle the actual URL
 const getApiBaseUrl = (): string => {
@@ -307,12 +308,56 @@ interface RequestOptions {
     headers?: Record<string, string>;
 }
 
+/** Check if running in development mode (compatible with both rsbuild and Jest) */
+const isDev = process.env.NODE_ENV === 'development';
+
+/**
+ * Normalize pagination parameters in request params.
+ * Ensures page >= 1 and page_size is within [1, MAX_PAGE_SIZE].
+ * Only processes requests that contain page/page_size keys.
+ * Logs a warning in development mode when corrections are made.
+ */
+function normalizePaginationInParams(params: Record<string, unknown>): void {
+    if ('page' in params) {
+        const raw = Number(params.page);
+        if (isNaN(raw) || raw < 1) {
+            if (isDev) {
+                console.warn(`[request] pagination param corrected: page ${params.page} -> 1`);
+            }
+            params.page = 1;
+        } else {
+            params.page = raw;
+        }
+    }
+    if ('page_size' in params) {
+        const raw = Number(params.page_size);
+        if (isNaN(raw) || raw <= 0) {
+            if (isDev) {
+                console.warn(`[request] pagination param corrected: page_size ${params.page_size} -> ${PAGINATION_CONFIG.DEFAULT_PAGE_SIZE}`);
+            }
+            params.page_size = PAGINATION_CONFIG.DEFAULT_PAGE_SIZE;
+        } else if (raw > PAGINATION_CONFIG.MAX_PAGE_SIZE) {
+            if (isDev) {
+                console.warn(`[request] pagination param corrected: page_size ${params.page_size} -> ${PAGINATION_CONFIG.MAX_PAGE_SIZE}`);
+            }
+            params.page_size = PAGINATION_CONFIG.MAX_PAGE_SIZE;
+        } else {
+            params.page_size = raw;
+        }
+    }
+}
+
 async function fetchApi<T>(
     url: string,
     method: Method = "GET",
     options: RequestOptions = {}
 ): Promise<T> {
     const request = getRequest();
+
+    // Normalize pagination params before sending request
+    if (options.params) {
+        normalizePaginationInParams(options.params);
+    }
 
     // 构建 URL 参数
     const searchParams = new URLSearchParams();

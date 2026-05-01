@@ -25,8 +25,8 @@ type Like struct {
 	UserID string `json:"user_id,omitempty"`
 	// LikeType holds the value of the "like_type" field.
 	LikeType string `json:"like_type,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the LikeQuery when eager-loading is set.
 	Edges        LikeEdges `json:"edges"`
@@ -73,7 +73,7 @@ func (*Like) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case like.FieldID, like.FieldMediaID, like.FieldUserID, like.FieldLikeType:
 			values[i] = new(sql.NullString)
-		case like.FieldCreatedAt:
+		case like.FieldCreateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -114,11 +114,11 @@ func (_m *Like) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.LikeType = value.String
 			}
-		case like.FieldCreatedAt:
+		case like.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				_m.CreatedAt = value.Time
+				_m.CreateTime = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -175,8 +175,8 @@ func (_m *Like) String() string {
 	builder.WriteString("like_type=")
 	builder.WriteString(_m.LikeType)
 	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString("create_time=")
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

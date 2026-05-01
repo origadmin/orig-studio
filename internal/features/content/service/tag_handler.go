@@ -1,12 +1,17 @@
 package service
 
 import (
-	"origadmin/application/origcms/internal/handler"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
+	types "origadmin/application/origcms/api/gen/v1/types"
+	pb "origadmin/application/origcms/api/gen/v1/media"
+	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/server"
@@ -31,12 +36,12 @@ func (h *TagHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		// ================================
 		tags.GET("", h.listTags())
 		tags.POST("", server.WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
-												c := handler.NewGinContextAdapterFromHTTP(w, r)
-var input struct {
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
+			var input struct {
 				Title string `json:"title"`
 			}
 			if err := c.Bind(&input); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"code": server.ErrBadRequest, "message": err.Error()})
+				server.Fail(c.GinContext(), server.ErrBadRequest, err.Error())
 				return
 			}
 
@@ -44,11 +49,13 @@ var input struct {
 				Title: input.Title,
 			})
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"code": server.ErrInternal, "message": err.Error()})
+				server.Fail(c.GinContext(), server.ErrInternal, err.Error())
 				return
 			}
 
-			server.OK(c.GinContext(), gin.H{"code": 0, "message": "ok", "data": t})
+			server.Created(c.GinContext(), &pb.CreateTagResponse{
+				Tag: bizTagToProto(t),
+			})
 		}))
 
 		// ================================
@@ -61,32 +68,34 @@ var input struct {
 		// 3. MAIN RESOURCE PARAMETER ROUTES (WITH :id) - MUST BE LAST
 		// ================================
 		tags.GET("/:id", func(w http.ResponseWriter, r *http.Request) {
-												c := handler.NewGinContextAdapterFromHTTP(w, r)
-id, err := strconv.Atoi(c.Param("id"))
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
+			id, err := strconv.Atoi(c.Param("id"))
 			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"code": server.ErrBadRequest, "message": "invalid tag id"})
+				server.Fail(c.GinContext(), server.ErrBadRequest, "invalid tag id")
 				return
 			}
 			t, err := h.uc.GetTag(r.Context(), id)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"code": server.ErrInternal, "message": err.Error()})
+				server.Fail(c.GinContext(), server.ErrInternal, err.Error())
 				return
 			}
-			server.OK(c.GinContext(), gin.H{"code": 0, "message": "ok", "data": t})
+			server.OK(c.GinContext(), &pb.GetTagResponse{
+				Tag: bizTagToProto(t),
+			})
 		})
 
 		tags.PUT("/:id", server.WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
-												c := handler.NewGinContextAdapterFromHTTP(w, r)
-id, err := strconv.Atoi(c.Param("id"))
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
+			id, err := strconv.Atoi(c.Param("id"))
 			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"code": server.ErrBadRequest, "message": "invalid tag id"})
+				server.Fail(c.GinContext(), server.ErrBadRequest, "invalid tag id")
 				return
 			}
 			var input struct {
 				Title string `json:"title"`
 			}
 			if err := c.Bind(&input); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"code": server.ErrBadRequest, "message": err.Error()})
+				server.Fail(c.GinContext(), server.ErrBadRequest, err.Error())
 				return
 			}
 
@@ -95,22 +104,26 @@ id, err := strconv.Atoi(c.Param("id"))
 				Title: input.Title,
 			})
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"code": server.ErrInternal, "message": err.Error()})
+				server.Fail(c.GinContext(), server.ErrInternal, err.Error())
 				return
 			}
 
-			server.OK(c.GinContext(), gin.H{"code": 0, "message": "ok", "data": t})
+			server.OK(c.GinContext(), &pb.UpdateTagResponse{
+				Tag: bizTagToProto(t),
+			})
 		}))
 
 		tags.DELETE("/:id", server.WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
-												c := handler.NewGinContextAdapterFromHTTP(w, r)
-id, _ := strconv.Atoi(c.Param("id"))
+			c := handler.NewGinContextAdapterFromHTTP(w, r)
+			id, _ := strconv.Atoi(c.Param("id"))
 			err := h.uc.DeleteTag(r.Context(), id)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"code": server.ErrInternal, "message": err.Error()})
+				server.Fail(c.GinContext(), server.ErrInternal, err.Error())
 				return
 			}
-			server.OK(c.GinContext(), gin.H{"code": 0, "message": "ok", "data": gin.H{"message": "deleted"}})
+			server.OK(c.GinContext(), &pb.DeleteTagResponse{
+				Empty: &emptypb.Empty{},
+			})
 		}))
 	}
 }
@@ -130,18 +143,26 @@ func (h *TagHandler) listTags() http.HandlerFunc {
 		page, limit = repo.NormalizeHTTPPagination(page, limit)
 		items, total, err := h.uc.ListTags(r.Context(), page, limit)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"code": server.ErrInternal, "message": err.Error()})
+			server.Fail(c.GinContext(), server.ErrInternal, err.Error())
 			return
 		}
-		server.OK(c.GinContext(), gin.H{
-			"code": 0,
-			"message": "ok",
-			"data": gin.H{
-				"items":     items,
-				"total":     total,
-				"page":      page,
-				"page_size": limit,
-			},
+
+		pbTags := make([]*types.Tag, len(items))
+		for i, item := range items {
+			pbTags[i] = bizTagToProto(item)
+		}
+
+		totalPages := int32(0)
+		if limit > 0 {
+			totalPages = (int32(total) + int32(limit) - 1) / int32(limit)
+		}
+
+		server.OK(c.GinContext(), &pb.ListTagsResponse{
+			Total:      int32(total),
+			Items:      pbTags,
+			Page:       int32(page),
+			PageSize:   int32(limit),
+			TotalPages: totalPages,
 		})
 	}
 }
@@ -151,7 +172,20 @@ func (h *TagHandler) listTags() http.HandlerFunc {
 func (h *TagHandler) getMediaByTag() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c := handler.NewGinContextAdapterFromHTTP(w, r)
-		// This requires MediaUseCase or a more complex query in UseCase
-		c.JSON(http.StatusNotFound, gin.H{"code": server.ErrNotFound, "message": "not implemented in UseCase"})
+		server.Fail(c.GinContext(), server.ErrNotFound, "not implemented in UseCase")
+	}
+}
+
+// bizTagToProto converts a biz.Tag to a proto types.Tag.
+func bizTagToProto(t *biz.Tag) *types.Tag {
+	if t == nil {
+		return nil
+	}
+	return &types.Tag{
+		Id:         int64(t.ID),
+		Name:       t.Title,
+		Slug:       t.Slug,
+		MediaCount: int64(t.MediaCount),
+		CreateTime: timestamppb.New(time.Now()), // biz.Tag lacks timestamp fields
 	}
 }

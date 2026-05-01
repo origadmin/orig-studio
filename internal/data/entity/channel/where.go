@@ -90,14 +90,29 @@ func BannerLogo(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldEQ(FieldBannerLogo, v))
 }
 
-// IsPublic applies equality check predicate on the "is_public" field. It's identical to IsPublicEQ.
-func IsPublic(v bool) predicate.Channel {
-	return predicate.Channel(sql.FieldEQ(FieldIsPublic, v))
+// SubscriberCount applies equality check predicate on the "subscriber_count" field. It's identical to SubscriberCountEQ.
+func SubscriberCount(v int64) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldSubscriberCount, v))
+}
+
+// MediaCount applies equality check predicate on the "media_count" field. It's identical to MediaCountEQ.
+func MediaCount(v int) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldMediaCount, v))
 }
 
 // AddDate applies equality check predicate on the "add_date" field. It's identical to AddDateEQ.
 func AddDate(v time.Time) predicate.Channel {
 	return predicate.Channel(sql.FieldEQ(FieldAddDate, v))
+}
+
+// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
+func CreateTime(v time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldCreateTime, v))
+}
+
+// UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
+func UpdateTime(v time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
@@ -425,14 +440,104 @@ func BannerLogoContainsFold(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldContainsFold(FieldBannerLogo, v))
 }
 
-// IsPublicEQ applies the EQ predicate on the "is_public" field.
-func IsPublicEQ(v bool) predicate.Channel {
-	return predicate.Channel(sql.FieldEQ(FieldIsPublic, v))
+// PrivacyEQ applies the EQ predicate on the "privacy" field.
+func PrivacyEQ(v Privacy) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldPrivacy, v))
 }
 
-// IsPublicNEQ applies the NEQ predicate on the "is_public" field.
-func IsPublicNEQ(v bool) predicate.Channel {
-	return predicate.Channel(sql.FieldNEQ(FieldIsPublic, v))
+// PrivacyNEQ applies the NEQ predicate on the "privacy" field.
+func PrivacyNEQ(v Privacy) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldPrivacy, v))
+}
+
+// PrivacyIn applies the In predicate on the "privacy" field.
+func PrivacyIn(vs ...Privacy) predicate.Channel {
+	return predicate.Channel(sql.FieldIn(FieldPrivacy, vs...))
+}
+
+// PrivacyNotIn applies the NotIn predicate on the "privacy" field.
+func PrivacyNotIn(vs ...Privacy) predicate.Channel {
+	return predicate.Channel(sql.FieldNotIn(FieldPrivacy, vs...))
+}
+
+// SubscriberCountEQ applies the EQ predicate on the "subscriber_count" field.
+func SubscriberCountEQ(v int64) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldSubscriberCount, v))
+}
+
+// SubscriberCountNEQ applies the NEQ predicate on the "subscriber_count" field.
+func SubscriberCountNEQ(v int64) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldSubscriberCount, v))
+}
+
+// SubscriberCountIn applies the In predicate on the "subscriber_count" field.
+func SubscriberCountIn(vs ...int64) predicate.Channel {
+	return predicate.Channel(sql.FieldIn(FieldSubscriberCount, vs...))
+}
+
+// SubscriberCountNotIn applies the NotIn predicate on the "subscriber_count" field.
+func SubscriberCountNotIn(vs ...int64) predicate.Channel {
+	return predicate.Channel(sql.FieldNotIn(FieldSubscriberCount, vs...))
+}
+
+// SubscriberCountGT applies the GT predicate on the "subscriber_count" field.
+func SubscriberCountGT(v int64) predicate.Channel {
+	return predicate.Channel(sql.FieldGT(FieldSubscriberCount, v))
+}
+
+// SubscriberCountGTE applies the GTE predicate on the "subscriber_count" field.
+func SubscriberCountGTE(v int64) predicate.Channel {
+	return predicate.Channel(sql.FieldGTE(FieldSubscriberCount, v))
+}
+
+// SubscriberCountLT applies the LT predicate on the "subscriber_count" field.
+func SubscriberCountLT(v int64) predicate.Channel {
+	return predicate.Channel(sql.FieldLT(FieldSubscriberCount, v))
+}
+
+// SubscriberCountLTE applies the LTE predicate on the "subscriber_count" field.
+func SubscriberCountLTE(v int64) predicate.Channel {
+	return predicate.Channel(sql.FieldLTE(FieldSubscriberCount, v))
+}
+
+// MediaCountEQ applies the EQ predicate on the "media_count" field.
+func MediaCountEQ(v int) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldMediaCount, v))
+}
+
+// MediaCountNEQ applies the NEQ predicate on the "media_count" field.
+func MediaCountNEQ(v int) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldMediaCount, v))
+}
+
+// MediaCountIn applies the In predicate on the "media_count" field.
+func MediaCountIn(vs ...int) predicate.Channel {
+	return predicate.Channel(sql.FieldIn(FieldMediaCount, vs...))
+}
+
+// MediaCountNotIn applies the NotIn predicate on the "media_count" field.
+func MediaCountNotIn(vs ...int) predicate.Channel {
+	return predicate.Channel(sql.FieldNotIn(FieldMediaCount, vs...))
+}
+
+// MediaCountGT applies the GT predicate on the "media_count" field.
+func MediaCountGT(v int) predicate.Channel {
+	return predicate.Channel(sql.FieldGT(FieldMediaCount, v))
+}
+
+// MediaCountGTE applies the GTE predicate on the "media_count" field.
+func MediaCountGTE(v int) predicate.Channel {
+	return predicate.Channel(sql.FieldGTE(FieldMediaCount, v))
+}
+
+// MediaCountLT applies the LT predicate on the "media_count" field.
+func MediaCountLT(v int) predicate.Channel {
+	return predicate.Channel(sql.FieldLT(FieldMediaCount, v))
+}
+
+// MediaCountLTE applies the LTE predicate on the "media_count" field.
+func MediaCountLTE(v int) predicate.Channel {
+	return predicate.Channel(sql.FieldLTE(FieldMediaCount, v))
 }
 
 // AddDateEQ applies the EQ predicate on the "add_date" field.
@@ -473,6 +578,86 @@ func AddDateLT(v time.Time) predicate.Channel {
 // AddDateLTE applies the LTE predicate on the "add_date" field.
 func AddDateLTE(v time.Time) predicate.Channel {
 	return predicate.Channel(sql.FieldLTE(FieldAddDate, v))
+}
+
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldCreateTime, v))
+}
+
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldCreateTime, v))
+}
+
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldIn(FieldCreateTime, vs...))
+}
+
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldNotIn(FieldCreateTime, vs...))
+}
+
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldGT(FieldCreateTime, v))
+}
+
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldGTE(FieldCreateTime, v))
+}
+
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldLT(FieldCreateTime, v))
+}
+
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldLTE(FieldCreateTime, v))
+}
+
+// UpdateTimeEQ applies the EQ predicate on the "update_time" field.
+func UpdateTimeEQ(v time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldUpdateTime, v))
+}
+
+// UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
+func UpdateTimeNEQ(v time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldUpdateTime, v))
+}
+
+// UpdateTimeIn applies the In predicate on the "update_time" field.
+func UpdateTimeIn(vs ...time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldIn(FieldUpdateTime, vs...))
+}
+
+// UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
+func UpdateTimeNotIn(vs ...time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldNotIn(FieldUpdateTime, vs...))
+}
+
+// UpdateTimeGT applies the GT predicate on the "update_time" field.
+func UpdateTimeGT(v time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldGT(FieldUpdateTime, v))
+}
+
+// UpdateTimeGTE applies the GTE predicate on the "update_time" field.
+func UpdateTimeGTE(v time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldGTE(FieldUpdateTime, v))
+}
+
+// UpdateTimeLT applies the LT predicate on the "update_time" field.
+func UpdateTimeLT(v time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldLT(FieldUpdateTime, v))
+}
+
+// UpdateTimeLTE applies the LTE predicate on the "update_time" field.
+func UpdateTimeLTE(v time.Time) predicate.Channel {
+	return predicate.Channel(sql.FieldLTE(FieldUpdateTime, v))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

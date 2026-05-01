@@ -144,10 +144,11 @@ func (x *ListMediasRequest) GetDescending() bool {
 type ListMediasResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	Medias        []*types.Media         `protobuf:"bytes,2,rep,name=medias,proto3" json:"medias,omitempty"`
+	Items         []*types.Media         `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
 	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	NextPageToken string                 `protobuf:"bytes,5,opt,name=next_page_token,proto3" json:"next_page_token,omitempty"`
+	TotalPages    int32                  `protobuf:"varint,6,opt,name=total_pages,proto3" json:"total_pages,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -189,9 +190,9 @@ func (x *ListMediasResponse) GetTotal() int32 {
 	return 0
 }
 
-func (x *ListMediasResponse) GetMedias() []*types.Media {
+func (x *ListMediasResponse) GetItems() []*types.Media {
 	if x != nil {
-		return x.Medias
+		return x.Items
 	}
 	return nil
 }
@@ -215,6 +216,13 @@ func (x *ListMediasResponse) GetNextPageToken() string {
 		return x.NextPageToken
 	}
 	return ""
+}
+
+func (x *ListMediasResponse) GetTotalPages() int32 {
+	if x != nil {
+		return x.TotalPages
+	}
+	return 0
 }
 
 type GetMediaRequest struct {
@@ -1431,6 +1439,7 @@ type GetEncodingStatusResponse struct {
 	Page            int32                   `protobuf:"varint,6,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize        int32                   `protobuf:"varint,7,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	Items           []*TranscodingMediaItem `protobuf:"bytes,8,rep,name=items,proto3" json:"items,omitempty"`
+	TotalPages      int32                   `protobuf:"varint,9,opt,name=total_pages,proto3" json:"total_pages,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -1521,6 +1530,13 @@ func (x *GetEncodingStatusResponse) GetItems() []*TranscodingMediaItem {
 	return nil
 }
 
+func (x *GetEncodingStatusResponse) GetTotalPages() int32 {
+	if x != nil {
+		return x.TotalPages
+	}
+	return 0
+}
+
 type ListAllEncodingTasksRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Status        string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
@@ -1595,6 +1611,7 @@ type ListAllEncodingTasksResponse struct {
 	Tasks         []*types.EncodingTask  `protobuf:"bytes,2,rep,name=tasks,proto3" json:"tasks,omitempty"`
 	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	TotalPages    int32                  `protobuf:"varint,5,opt,name=total_pages,proto3" json:"total_pages,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1653,6 +1670,13 @@ func (x *ListAllEncodingTasksResponse) GetPage() int32 {
 func (x *ListAllEncodingTasksResponse) GetPageSize() int32 {
 	if x != nil {
 		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListAllEncodingTasksResponse) GetTotalPages() int32 {
+	if x != nil {
+		return x.TotalPages
 	}
 	return 0
 }
@@ -2660,9 +2684,10 @@ func (x *GetMediaCommentsRequest) GetPageSize() int32 {
 type GetMediaCommentsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	Comments      []*types.Comment       `protobuf:"bytes,2,rep,name=comments,proto3" json:"comments,omitempty"`
+	Items         []*types.Comment       `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
 	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	TotalPages    int32                  `protobuf:"varint,5,opt,name=total_pages,proto3" json:"total_pages,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2704,9 +2729,9 @@ func (x *GetMediaCommentsResponse) GetTotal() int32 {
 	return 0
 }
 
-func (x *GetMediaCommentsResponse) GetComments() []*types.Comment {
+func (x *GetMediaCommentsResponse) GetItems() []*types.Comment {
 	if x != nil {
-		return x.Comments
+		return x.Items
 	}
 	return nil
 }
@@ -2721,6 +2746,13 @@ func (x *GetMediaCommentsResponse) GetPage() int32 {
 func (x *GetMediaCommentsResponse) GetPageSize() int32 {
 	if x != nil {
 		return x.PageSize
+	}
+	return 0
+}
+
+func (x *GetMediaCommentsResponse) GetTotalPages() int32 {
+	if x != nil {
+		return x.TotalPages
 	}
 	return 0
 }
@@ -3516,10 +3548,11 @@ func (x *ListCategoriesRequest) GetStatus() int32 {
 type ListCategoriesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	Categories    []*types.Category      `protobuf:"bytes,2,rep,name=categories,proto3" json:"categories,omitempty"`
+	Items         []*types.Category      `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
 	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	NextPageToken string                 `protobuf:"bytes,5,opt,name=next_page_token,proto3" json:"next_page_token,omitempty"`
+	TotalPages    int32                  `protobuf:"varint,6,opt,name=total_pages,proto3" json:"total_pages,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3561,9 +3594,9 @@ func (x *ListCategoriesResponse) GetTotal() int32 {
 	return 0
 }
 
-func (x *ListCategoriesResponse) GetCategories() []*types.Category {
+func (x *ListCategoriesResponse) GetItems() []*types.Category {
 	if x != nil {
-		return x.Categories
+		return x.Items
 	}
 	return nil
 }
@@ -3587,6 +3620,13 @@ func (x *ListCategoriesResponse) GetNextPageToken() string {
 		return x.NextPageToken
 	}
 	return ""
+}
+
+func (x *ListCategoriesResponse) GetTotalPages() int32 {
+	if x != nil {
+		return x.TotalPages
+	}
+	return 0
 }
 
 type GetCategoryRequest struct {
@@ -4028,10 +4068,11 @@ func (x *ListTagsRequest) GetStatus() int32 {
 type ListTagsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	Tags          []*types.Tag           `protobuf:"bytes,2,rep,name=tags,proto3" json:"tags,omitempty"`
+	Items         []*types.Tag           `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
 	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	NextPageToken string                 `protobuf:"bytes,5,opt,name=next_page_token,proto3" json:"next_page_token,omitempty"`
+	TotalPages    int32                  `protobuf:"varint,6,opt,name=total_pages,proto3" json:"total_pages,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -4073,9 +4114,9 @@ func (x *ListTagsResponse) GetTotal() int32 {
 	return 0
 }
 
-func (x *ListTagsResponse) GetTags() []*types.Tag {
+func (x *ListTagsResponse) GetItems() []*types.Tag {
 	if x != nil {
-		return x.Tags
+		return x.Items
 	}
 	return nil
 }
@@ -4099,6 +4140,13 @@ func (x *ListTagsResponse) GetNextPageToken() string {
 		return x.NextPageToken
 	}
 	return ""
+}
+
+func (x *ListTagsResponse) GetTotalPages() int32 {
+	if x != nil {
+		return x.TotalPages
+	}
+	return 0
 }
 
 type GetTagRequest struct {
@@ -4556,10 +4604,11 @@ func (x *ListCommentsRequest) GetStatus() int32 {
 type ListCommentsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	Comments      []*types.Comment       `protobuf:"bytes,2,rep,name=comments,proto3" json:"comments,omitempty"`
+	Items         []*types.Comment       `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
 	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	NextPageToken string                 `protobuf:"bytes,5,opt,name=next_page_token,proto3" json:"next_page_token,omitempty"`
+	TotalPages    int32                  `protobuf:"varint,6,opt,name=total_pages,proto3" json:"total_pages,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -4601,9 +4650,9 @@ func (x *ListCommentsResponse) GetTotal() int32 {
 	return 0
 }
 
-func (x *ListCommentsResponse) GetComments() []*types.Comment {
+func (x *ListCommentsResponse) GetItems() []*types.Comment {
 	if x != nil {
-		return x.Comments
+		return x.Items
 	}
 	return nil
 }
@@ -4627,6 +4676,13 @@ func (x *ListCommentsResponse) GetNextPageToken() string {
 		return x.NextPageToken
 	}
 	return ""
+}
+
+func (x *ListCommentsResponse) GetTotalPages() int32 {
+	if x != nil {
+		return x.TotalPages
+	}
+	return 0
 }
 
 type GetCommentRequest struct {
@@ -5284,7 +5340,7 @@ func (x *GetPlaylistsRequest) GetPageSize() int32 {
 type GetPlaylistsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	Playlists     []*types.Playlist      `protobuf:"bytes,2,rep,name=playlists,proto3" json:"playlists,omitempty"`
+	Items         []*types.Playlist      `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
 	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -5328,9 +5384,9 @@ func (x *GetPlaylistsResponse) GetTotal() int32 {
 	return 0
 }
 
-func (x *GetPlaylistsResponse) GetPlaylists() []*types.Playlist {
+func (x *GetPlaylistsResponse) GetItems() []*types.Playlist {
 	if x != nil {
-		return x.Playlists
+		return x.Items
 	}
 	return nil
 }
@@ -5396,7 +5452,7 @@ func (x *GetPlaylistRequest) GetId() string {
 type GetPlaylistResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Playlist      *types.Playlist        `protobuf:"bytes,1,opt,name=playlist,proto3" json:"playlist,omitempty"`
-	Medias        []*types.Media         `protobuf:"bytes,2,rep,name=medias,proto3" json:"medias,omitempty"`
+	Items         []*types.Media         `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -5438,9 +5494,9 @@ func (x *GetPlaylistResponse) GetPlaylist() *types.Playlist {
 	return nil
 }
 
-func (x *GetPlaylistResponse) GetMedias() []*types.Media {
+func (x *GetPlaylistResponse) GetItems() []*types.Media {
 	if x != nil {
-		return x.Medias
+		return x.Items
 	}
 	return nil
 }
@@ -6076,7 +6132,7 @@ func (x *ListChannelsRequest) GetUserId() string {
 type ListChannelsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	Channels      []*types.Channel       `protobuf:"bytes,2,rep,name=channels,proto3" json:"channels,omitempty"`
+	Items         []*types.Channel       `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
 	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -6120,9 +6176,9 @@ func (x *ListChannelsResponse) GetTotal() int32 {
 	return 0
 }
 
-func (x *ListChannelsResponse) GetChannels() []*types.Channel {
+func (x *ListChannelsResponse) GetItems() []*types.Channel {
 	if x != nil {
-		return x.Channels
+		return x.Items
 	}
 	return nil
 }
@@ -6564,7 +6620,7 @@ func (x *GetChannelMediasRequest) GetPageSize() int32 {
 type GetChannelMediasResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	Medias        []*types.Media         `protobuf:"bytes,2,rep,name=medias,proto3" json:"medias,omitempty"`
+	Items         []*types.Media         `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
 	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -6608,9 +6664,9 @@ func (x *GetChannelMediasResponse) GetTotal() int32 {
 	return 0
 }
 
-func (x *GetChannelMediasResponse) GetMedias() []*types.Media {
+func (x *GetChannelMediasResponse) GetItems() []*types.Media {
 	if x != nil {
-		return x.Medias
+		return x.Items
 	}
 	return nil
 }
@@ -7316,7 +7372,7 @@ func (x *SearchRequest) GetPageSize() int32 {
 type SearchResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	Medias        []*types.Media         `protobuf:"bytes,2,rep,name=medias,proto3" json:"medias,omitempty"`
+	Items         []*types.Media         `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
 	Channels      []*types.Channel       `protobuf:"bytes,3,rep,name=channels,proto3" json:"channels,omitempty"`
 	Playlists     []*types.Playlist      `protobuf:"bytes,4,rep,name=playlists,proto3" json:"playlists,omitempty"`
 	Users         []*types.User          `protobuf:"bytes,5,rep,name=users,proto3" json:"users,omitempty"`
@@ -7363,9 +7419,9 @@ func (x *SearchResponse) GetTotal() int32 {
 	return 0
 }
 
-func (x *SearchResponse) GetMedias() []*types.Media {
+func (x *SearchResponse) GetItems() []*types.Media {
 	if x != nil {
-		return x.Medias
+		return x.Items
 	}
 	return nil
 }
@@ -8779,7 +8835,7 @@ func (x *GetTrendingContentRequest) GetLimit() int32 {
 
 type GetTrendingContentResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Medias        []*types.Media         `protobuf:"bytes,1,rep,name=medias,proto3" json:"medias,omitempty"`
+	Items         []*types.Media         `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -8814,9 +8870,9 @@ func (*GetTrendingContentResponse) Descriptor() ([]byte, []int) {
 	return file_v1_media_media_service_proto_rawDescGZIP(), []int{170}
 }
 
-func (x *GetTrendingContentResponse) GetMedias() []*types.Media {
+func (x *GetTrendingContentResponse) GetItems() []*types.Media {
 	if x != nil {
-		return x.Medias
+		return x.Items
 	}
 	return nil
 }
@@ -8876,7 +8932,7 @@ func (x *GetSubscriptionFeedRequest) GetPageSize() int32 {
 type GetSubscriptionFeedResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	Medias        []*types.Media         `protobuf:"bytes,2,rep,name=medias,proto3" json:"medias,omitempty"`
+	Items         []*types.Media         `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
 	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -8920,9 +8976,9 @@ func (x *GetSubscriptionFeedResponse) GetTotal() int32 {
 	return 0
 }
 
-func (x *GetSubscriptionFeedResponse) GetMedias() []*types.Media {
+func (x *GetSubscriptionFeedResponse) GetItems() []*types.Media {
 	if x != nil {
-		return x.Medias
+		return x.Items
 	}
 	return nil
 }
@@ -8966,13 +9022,14 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\a_statusB\x0e\n" +
 	"\f_category_idB\n" +
 	"\n" +
-	"\b_user_id\"\xbc\x01\n" +
+	"\b_user_id\"\xdc\x01\n" +
 	"\x12ListMediasResponse\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x05R\x05total\x124\n" +
-	"\x06medias\x18\x02 \x03(\v2\x1c.api.v1.services.types.MediaR\x06medias\x12\x12\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x122\n" +
+	"\x05items\x18\x02 \x03(\v2\x1c.api.v1.services.types.MediaR\x05items\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\x12(\n" +
-	"\x0fnext_page_token\x18\x05 \x01(\tR\x0fnext_page_token\"!\n" +
+	"\x0fnext_page_token\x18\x05 \x01(\tR\x0fnext_page_token\x12 \n" +
+	"\vtotal_pages\x18\x06 \x01(\x05R\vtotal_pages\"!\n" +
 	"\x0fGetMediaRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"F\n" +
 	"\x10GetMediaResponse\x122\n" +
@@ -9041,7 +9098,7 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_sizeB\n" +
 	"\n" +
-	"\b_user_id\"\xc2\x02\n" +
+	"\b_user_id\"\xe4\x02\n" +
 	"\x19GetEncodingStatusResponse\x12*\n" +
 	"\x10processing_count\x18\x01 \x01(\x05R\x10processing_count\x12$\n" +
 	"\rpending_count\x18\x02 \x01(\x05R\rpending_count\x12\"\n" +
@@ -9050,18 +9107,20 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\x05total\x18\x05 \x01(\x05R\x05total\x12\x12\n" +
 	"\x04page\x18\x06 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\a \x01(\x05R\tpage_size\x12A\n" +
-	"\x05items\x18\b \x03(\v2+.api.v1.services.media.TranscodingMediaItemR\x05items\"\x95\x01\n" +
+	"\x05items\x18\b \x03(\v2+.api.v1.services.media.TranscodingMediaItemR\x05items\x12 \n" +
+	"\vtotal_pages\x18\t \x01(\x05R\vtotal_pages\"\x95\x01\n" +
 	"\x1bListAllEncodingTasksRequest\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\tR\x06status\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x03 \x01(\x05R\tpage_size\x12\x1f\n" +
 	"\bmedia_id\x18\x04 \x01(\tH\x00R\bmedia_id\x88\x01\x01B\v\n" +
-	"\t_media_id\"\xa1\x01\n" +
+	"\t_media_id\"\xc3\x01\n" +
 	"\x1cListAllEncodingTasksResponse\x12\x14\n" +
 	"\x05total\x18\x01 \x01(\x05R\x05total\x129\n" +
 	"\x05tasks\x18\x02 \x03(\v2#.api.v1.services.types.EncodingTaskR\x05tasks\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
-	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"J\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\x12 \n" +
+	"\vtotal_pages\x18\x05 \x01(\x05R\vtotal_pages\"J\n" +
 	"\x1aRetryAllFailedTasksRequest\x12\x1f\n" +
 	"\bmedia_id\x18\x01 \x01(\tH\x00R\bmedia_id\x88\x01\x01B\v\n" +
 	"\t_media_id\"C\n" +
@@ -9121,12 +9180,13 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\x17GetMediaCommentsRequest\x12\x19\n" +
 	"\bmedia_id\x18\x01 \x01(\tR\amediaId\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1c\n" +
-	"\tpage_size\x18\x03 \x01(\x05R\tpage_size\"\x9e\x01\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\tpage_size\"\xba\x01\n" +
 	"\x18GetMediaCommentsResponse\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x05R\x05total\x12:\n" +
-	"\bcomments\x18\x02 \x03(\v2\x1e.api.v1.services.types.CommentR\bcomments\x12\x12\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x124\n" +
+	"\x05items\x18\x02 \x03(\v2\x1e.api.v1.services.types.CommentR\x05items\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
-	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"5\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\x12 \n" +
+	"\vtotal_pages\x18\x05 \x01(\x05R\vtotal_pages\"5\n" +
 	"\x18GetMediaSubtitlesRequest\x12\x19\n" +
 	"\bmedia_id\x18\x01 \x01(\tR\amediaId\"Z\n" +
 	"\x19GetMediaSubtitlesResponse\x12=\n" +
@@ -9170,15 +9230,14 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\x06status\x18\x05 \x01(\x05H\x01R\x06status\x88\x01\x01B\f\n" +
 	"\n" +
 	"_parent_idB\t\n" +
-	"\a_status\"\xcb\x01\n" +
+	"\a_status\"\xe3\x01\n" +
 	"\x16ListCategoriesResponse\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x05R\x05total\x12?\n" +
-	"\n" +
-	"categories\x18\x02 \x03(\v2\x1f.api.v1.services.types.CategoryR\n" +
-	"categories\x12\x12\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x125\n" +
+	"\x05items\x18\x02 \x03(\v2\x1f.api.v1.services.types.CategoryR\x05items\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\x12(\n" +
-	"\x0fnext_page_token\x18\x05 \x01(\tR\x0fnext_page_token\"$\n" +
+	"\x0fnext_page_token\x18\x05 \x01(\tR\x0fnext_page_token\x12 \n" +
+	"\vtotal_pages\x18\x06 \x01(\x05R\vtotal_pages\"$\n" +
 	"\x12GetCategoryRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"R\n" +
 	"\x13GetCategoryResponse\x12;\n" +
@@ -9204,13 +9263,14 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"page_token\x12\x18\n" +
 	"\akeyword\x18\x04 \x01(\tR\akeyword\x12\x1b\n" +
 	"\x06status\x18\x05 \x01(\x05H\x00R\x06status\x88\x01\x01B\t\n" +
-	"\a_status\"\xb4\x01\n" +
+	"\a_status\"\xd8\x01\n" +
 	"\x10ListTagsResponse\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x05R\x05total\x12.\n" +
-	"\x04tags\x18\x02 \x03(\v2\x1a.api.v1.services.types.TagR\x04tags\x12\x12\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x120\n" +
+	"\x05items\x18\x02 \x03(\v2\x1a.api.v1.services.types.TagR\x05items\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\x12(\n" +
-	"\x0fnext_page_token\x18\x05 \x01(\tR\x0fnext_page_token\"\x1f\n" +
+	"\x0fnext_page_token\x18\x05 \x01(\tR\x0fnext_page_token\x12 \n" +
+	"\vtotal_pages\x18\x06 \x01(\x05R\vtotal_pages\"\x1f\n" +
 	"\rGetTagRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\">\n" +
 	"\x0eGetTagResponse\x12,\n" +
@@ -9243,13 +9303,14 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\b_user_idB\f\n" +
 	"\n" +
 	"_parent_idB\t\n" +
-	"\a_status\"\xc4\x01\n" +
+	"\a_status\"\xe0\x01\n" +
 	"\x14ListCommentsResponse\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x05R\x05total\x12:\n" +
-	"\bcomments\x18\x02 \x03(\v2\x1e.api.v1.services.types.CommentR\bcomments\x12\x12\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x124\n" +
+	"\x05items\x18\x02 \x03(\v2\x1e.api.v1.services.types.CommentR\x05items\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\x12(\n" +
-	"\x0fnext_page_token\x18\x05 \x01(\tR\x0fnext_page_token\"#\n" +
+	"\x0fnext_page_token\x18\x05 \x01(\tR\x0fnext_page_token\x12 \n" +
+	"\vtotal_pages\x18\x06 \x01(\x05R\vtotal_pages\"#\n" +
 	"\x11GetCommentRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"N\n" +
 	"\x12GetCommentResponse\x128\n" +
@@ -9287,17 +9348,17 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_sizeB\f\n" +
 	"\n" +
-	"_is_public\"\x9d\x01\n" +
+	"_is_public\"\x95\x01\n" +
 	"\x14GetPlaylistsResponse\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x05R\x05total\x12=\n" +
-	"\tplaylists\x18\x02 \x03(\v2\x1f.api.v1.services.types.PlaylistR\tplaylists\x12\x12\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x125\n" +
+	"\x05items\x18\x02 \x03(\v2\x1f.api.v1.services.types.PlaylistR\x05items\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"$\n" +
 	"\x12GetPlaylistRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\x88\x01\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\x86\x01\n" +
 	"\x13GetPlaylistResponse\x12;\n" +
-	"\bplaylist\x18\x01 \x01(\v2\x1f.api.v1.services.types.PlaylistR\bplaylist\x124\n" +
-	"\x06medias\x18\x02 \x03(\v2\x1c.api.v1.services.types.MediaR\x06medias\"T\n" +
+	"\bplaylist\x18\x01 \x01(\v2\x1f.api.v1.services.types.PlaylistR\bplaylist\x122\n" +
+	"\x05items\x18\x02 \x03(\v2\x1c.api.v1.services.types.MediaR\x05items\"T\n" +
 	"\x15CreatePlaylistRequest\x12;\n" +
 	"\bplaylist\x18\x01 \x01(\v2\x1f.api.v1.services.types.PlaylistR\bplaylist\"U\n" +
 	"\x16CreatePlaylistResponse\x12;\n" +
@@ -9332,10 +9393,10 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\akeyword\x18\x03 \x01(\tR\akeyword\x12\x1d\n" +
 	"\auser_id\x18\x04 \x01(\tH\x00R\auser_id\x88\x01\x01B\n" +
 	"\n" +
-	"\b_user_id\"\x9a\x01\n" +
+	"\b_user_id\"\x94\x01\n" +
 	"\x14ListChannelsResponse\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x05R\x05total\x12:\n" +
-	"\bchannels\x18\x02 \x03(\v2\x1e.api.v1.services.types.ChannelR\bchannels\x12\x12\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x124\n" +
+	"\x05items\x18\x02 \x03(\v2\x1e.api.v1.services.types.ChannelR\x05items\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"#\n" +
 	"\x11GetChannelRequest\x12\x0e\n" +
@@ -9360,10 +9421,10 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"channel_id\x18\x01 \x01(\tR\n" +
 	"channel_id\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1c\n" +
-	"\tpage_size\x18\x03 \x01(\x05R\tpage_size\"\x98\x01\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\tpage_size\"\x96\x01\n" +
 	"\x18GetChannelMediasResponse\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x05R\x05total\x124\n" +
-	"\x06medias\x18\x02 \x03(\v2\x1c.api.v1.services.types.MediaR\x06medias\x12\x12\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x122\n" +
+	"\x05items\x18\x02 \x03(\v2\x1c.api.v1.services.types.MediaR\x05items\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"T\n" +
 	"\x16AddChannelMediaRequest\x12\x1e\n" +
@@ -9419,10 +9480,10 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\x01q\x18\x01 \x01(\tR\x01q\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\tR\x04type\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
-	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"\xbc\x02\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"\xba\x02\n" +
 	"\x0eSearchResponse\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x05R\x05total\x124\n" +
-	"\x06medias\x18\x02 \x03(\v2\x1c.api.v1.services.types.MediaR\x06medias\x12:\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x122\n" +
+	"\x05items\x18\x02 \x03(\v2\x1c.api.v1.services.types.MediaR\x05items\x12:\n" +
 	"\bchannels\x18\x03 \x03(\v2\x1e.api.v1.services.types.ChannelR\bchannels\x12=\n" +
 	"\tplaylists\x18\x04 \x03(\v2\x1f.api.v1.services.types.PlaylistR\tplaylists\x121\n" +
 	"\x05users\x18\x05 \x03(\v2\x1b.api.v1.services.types.UserR\x05users\x12\x12\n" +
@@ -9513,15 +9574,15 @@ const file_v1_media_media_service_proto_rawDesc = "" +
 	"\x10popular_channels\x18\x03 \x03(\v2\x1e.api.v1.services.types.ChannelR\x10popular_channels\"I\n" +
 	"\x19GetTrendingContentRequest\x12\x16\n" +
 	"\x06period\x18\x01 \x01(\tR\x06period\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limit\"R\n" +
-	"\x1aGetTrendingContentResponse\x124\n" +
-	"\x06medias\x18\x01 \x03(\v2\x1c.api.v1.services.types.MediaR\x06medias\"N\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"P\n" +
+	"\x1aGetTrendingContentResponse\x122\n" +
+	"\x05items\x18\x01 \x03(\v2\x1c.api.v1.services.types.MediaR\x05items\"N\n" +
 	"\x1aGetSubscriptionFeedRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1c\n" +
-	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\"\x9b\x01\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\"\x99\x01\n" +
 	"\x1bGetSubscriptionFeedResponse\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x05R\x05total\x124\n" +
-	"\x06medias\x18\x02 \x03(\v2\x1c.api.v1.services.types.MediaR\x06medias\x12\x12\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x122\n" +
+	"\x05items\x18\x02 \x03(\v2\x1c.api.v1.services.types.MediaR\x05items\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size2\xa4\"\n" +
 	"\fMediaService\x12y\n" +
@@ -9834,7 +9895,7 @@ var file_v1_media_media_service_proto_goTypes = []any{
 	(*types.Review)(nil),                   // 191: api.v1.services.types.Review
 }
 var file_v1_media_media_service_proto_depIdxs = []int32{
-	176, // 0: api.v1.services.media.ListMediasResponse.medias:type_name -> api.v1.services.types.Media
+	176, // 0: api.v1.services.media.ListMediasResponse.items:type_name -> api.v1.services.types.Media
 	176, // 1: api.v1.services.media.GetMediaResponse.media:type_name -> api.v1.services.types.Media
 	176, // 2: api.v1.services.media.CreateMediaRequest.media:type_name -> api.v1.services.types.Media
 	176, // 3: api.v1.services.media.CreateMediaResponse.media:type_name -> api.v1.services.types.Media
@@ -9850,7 +9911,7 @@ var file_v1_media_media_service_proto_depIdxs = []int32{
 	179, // 13: api.v1.services.media.ListAllEncodingTasksResponse.tasks:type_name -> api.v1.services.types.EncodingTask
 	176, // 14: api.v1.services.media.TranscodingMediaItem.media:type_name -> api.v1.services.types.Media
 	179, // 15: api.v1.services.media.TranscodingMediaItem.tasks:type_name -> api.v1.services.types.EncodingTask
-	181, // 16: api.v1.services.media.GetMediaCommentsResponse.comments:type_name -> api.v1.services.types.Comment
+	181, // 16: api.v1.services.media.GetMediaCommentsResponse.items:type_name -> api.v1.services.types.Comment
 	182, // 17: api.v1.services.media.GetMediaSubtitlesResponse.subtitles:type_name -> api.v1.services.types.Subtitle
 	182, // 18: api.v1.services.media.CreateMediaSubtitleResponse.subtitle:type_name -> api.v1.services.types.Subtitle
 	183, // 19: api.v1.services.media.GetMediaMetadataResponse.metadata:type_name -> api.v1.services.types.MediaMetadata
@@ -9861,7 +9922,7 @@ var file_v1_media_media_service_proto_depIdxs = []int32{
 	184, // 24: api.v1.services.media.UpdateEncodeProfileRequest.profile:type_name -> api.v1.services.types.EncodeProfile
 	184, // 25: api.v1.services.media.UpdateEncodeProfileResponse.profile:type_name -> api.v1.services.types.EncodeProfile
 	178, // 26: api.v1.services.media.DeleteEncodeProfileResponse.empty:type_name -> google.protobuf.Empty
-	185, // 27: api.v1.services.media.ListCategoriesResponse.categories:type_name -> api.v1.services.types.Category
+	185, // 27: api.v1.services.media.ListCategoriesResponse.items:type_name -> api.v1.services.types.Category
 	185, // 28: api.v1.services.media.GetCategoryResponse.category:type_name -> api.v1.services.types.Category
 	185, // 29: api.v1.services.media.CreateCategoryRequest.category:type_name -> api.v1.services.types.Category
 	185, // 30: api.v1.services.media.CreateCategoryResponse.category:type_name -> api.v1.services.types.Category
@@ -9869,7 +9930,7 @@ var file_v1_media_media_service_proto_depIdxs = []int32{
 	177, // 32: api.v1.services.media.UpdateCategoryRequest.update_mask:type_name -> google.protobuf.FieldMask
 	185, // 33: api.v1.services.media.UpdateCategoryResponse.category:type_name -> api.v1.services.types.Category
 	178, // 34: api.v1.services.media.DeleteCategoryResponse.empty:type_name -> google.protobuf.Empty
-	186, // 35: api.v1.services.media.ListTagsResponse.tags:type_name -> api.v1.services.types.Tag
+	186, // 35: api.v1.services.media.ListTagsResponse.items:type_name -> api.v1.services.types.Tag
 	186, // 36: api.v1.services.media.GetTagResponse.tag:type_name -> api.v1.services.types.Tag
 	186, // 37: api.v1.services.media.CreateTagRequest.tag:type_name -> api.v1.services.types.Tag
 	186, // 38: api.v1.services.media.CreateTagResponse.tag:type_name -> api.v1.services.types.Tag
@@ -9877,7 +9938,7 @@ var file_v1_media_media_service_proto_depIdxs = []int32{
 	177, // 40: api.v1.services.media.UpdateTagRequest.update_mask:type_name -> google.protobuf.FieldMask
 	186, // 41: api.v1.services.media.UpdateTagResponse.tag:type_name -> api.v1.services.types.Tag
 	178, // 42: api.v1.services.media.DeleteTagResponse.empty:type_name -> google.protobuf.Empty
-	181, // 43: api.v1.services.media.ListCommentsResponse.comments:type_name -> api.v1.services.types.Comment
+	181, // 43: api.v1.services.media.ListCommentsResponse.items:type_name -> api.v1.services.types.Comment
 	181, // 44: api.v1.services.media.GetCommentResponse.comment:type_name -> api.v1.services.types.Comment
 	181, // 45: api.v1.services.media.CreateCommentRequest.comment:type_name -> api.v1.services.types.Comment
 	181, // 46: api.v1.services.media.CreateCommentResponse.comment:type_name -> api.v1.services.types.Comment
@@ -9888,16 +9949,16 @@ var file_v1_media_media_service_proto_depIdxs = []int32{
 	181, // 51: api.v1.services.media.GetCommentRepliesResponse.replies:type_name -> api.v1.services.types.Comment
 	181, // 52: api.v1.services.media.CreateCommentReplyRequest.comment:type_name -> api.v1.services.types.Comment
 	181, // 53: api.v1.services.media.CreateCommentReplyResponse.reply:type_name -> api.v1.services.types.Comment
-	187, // 54: api.v1.services.media.GetPlaylistsResponse.playlists:type_name -> api.v1.services.types.Playlist
+	187, // 54: api.v1.services.media.GetPlaylistsResponse.items:type_name -> api.v1.services.types.Playlist
 	187, // 55: api.v1.services.media.GetPlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
-	176, // 56: api.v1.services.media.GetPlaylistResponse.medias:type_name -> api.v1.services.types.Media
+	176, // 56: api.v1.services.media.GetPlaylistResponse.items:type_name -> api.v1.services.types.Media
 	187, // 57: api.v1.services.media.CreatePlaylistRequest.playlist:type_name -> api.v1.services.types.Playlist
 	187, // 58: api.v1.services.media.CreatePlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
 	187, // 59: api.v1.services.media.UpdatePlaylistRequest.playlist:type_name -> api.v1.services.types.Playlist
 	177, // 60: api.v1.services.media.UpdatePlaylistRequest.update_mask:type_name -> google.protobuf.FieldMask
 	187, // 61: api.v1.services.media.UpdatePlaylistResponse.playlist:type_name -> api.v1.services.types.Playlist
 	178, // 62: api.v1.services.media.DeletePlaylistResponse.empty:type_name -> google.protobuf.Empty
-	188, // 63: api.v1.services.media.ListChannelsResponse.channels:type_name -> api.v1.services.types.Channel
+	188, // 63: api.v1.services.media.ListChannelsResponse.items:type_name -> api.v1.services.types.Channel
 	188, // 64: api.v1.services.media.GetChannelResponse.channel:type_name -> api.v1.services.types.Channel
 	188, // 65: api.v1.services.media.CreateChannelRequest.channel:type_name -> api.v1.services.types.Channel
 	188, // 66: api.v1.services.media.CreateChannelResponse.channel:type_name -> api.v1.services.types.Channel
@@ -9905,9 +9966,9 @@ var file_v1_media_media_service_proto_depIdxs = []int32{
 	177, // 68: api.v1.services.media.UpdateChannelRequest.update_mask:type_name -> google.protobuf.FieldMask
 	188, // 69: api.v1.services.media.UpdateChannelResponse.channel:type_name -> api.v1.services.types.Channel
 	178, // 70: api.v1.services.media.DeleteChannelResponse.empty:type_name -> google.protobuf.Empty
-	176, // 71: api.v1.services.media.GetChannelMediasResponse.medias:type_name -> api.v1.services.types.Media
+	176, // 71: api.v1.services.media.GetChannelMediasResponse.items:type_name -> api.v1.services.types.Media
 	189, // 72: api.v1.services.media.GetChannelSubscribersResponse.subscribers:type_name -> api.v1.services.types.User
-	176, // 73: api.v1.services.media.SearchResponse.medias:type_name -> api.v1.services.types.Media
+	176, // 73: api.v1.services.media.SearchResponse.items:type_name -> api.v1.services.types.Media
 	188, // 74: api.v1.services.media.SearchResponse.channels:type_name -> api.v1.services.types.Channel
 	187, // 75: api.v1.services.media.SearchResponse.playlists:type_name -> api.v1.services.types.Playlist
 	189, // 76: api.v1.services.media.SearchResponse.users:type_name -> api.v1.services.types.User
@@ -9925,8 +9986,8 @@ var file_v1_media_media_service_proto_depIdxs = []int32{
 	176, // 88: api.v1.services.media.GetHomeContentResponse.featured:type_name -> api.v1.services.types.Media
 	176, // 89: api.v1.services.media.GetHomeContentResponse.recommended:type_name -> api.v1.services.types.Media
 	188, // 90: api.v1.services.media.GetHomeContentResponse.popular_channels:type_name -> api.v1.services.types.Channel
-	176, // 91: api.v1.services.media.GetTrendingContentResponse.medias:type_name -> api.v1.services.types.Media
-	176, // 92: api.v1.services.media.GetSubscriptionFeedResponse.medias:type_name -> api.v1.services.types.Media
+	176, // 91: api.v1.services.media.GetTrendingContentResponse.items:type_name -> api.v1.services.types.Media
+	176, // 92: api.v1.services.media.GetSubscriptionFeedResponse.items:type_name -> api.v1.services.types.Media
 	0,   // 93: api.v1.services.media.MediaService.ListMedias:input_type -> api.v1.services.media.ListMediasRequest
 	2,   // 94: api.v1.services.media.MediaService.GetMedia:input_type -> api.v1.services.media.GetMediaRequest
 	4,   // 95: api.v1.services.media.MediaService.CreateMedia:input_type -> api.v1.services.media.CreateMediaRequest

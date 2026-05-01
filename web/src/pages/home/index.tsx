@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * Home Page - Feed + Infinite Scroll (Connected to Real API)
  */
@@ -87,27 +87,23 @@ const HomePage = () => {
         <div className="space-y-8">
             {/* Hero Banner */}
             <section
-                className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white">
+                className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-foreground dark:text-white">
                 <div
                     className="absolute inset-0 bg-cover bg-center opacity-20"
-                    style={{backgroundImage: 'url(/assets/images/cover-placeholder.svg)'}}/>
+                    style={{backgroundImage: 'url(/assets/images/cover.svg)'}}/>
                 <div className="relative px-6 py-6 flex items-center">
                     <div className="max-w-xl">
-                        <Badge className="bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 mb-4">
+                        <Badge className="bg-primary/20 text-primary hover:bg-primary/30 mb-4">
                             <TrendingUp className="w-3 h-3 mr-1"/> {t('home.heroBadge')}
                         </Badge>
                         <h1 className="text-4xl font-black mb-4 leading-tight">{t('home.heroTitle')}</h1>
-                        <p className="text-lg text-slate-300 mb-6">{t('home.heroDesc')}</p>
+                        <p className="text-lg text-muted-foreground dark:text-slate-300 mb-6">{t('home.heroDesc')}</p>
                         <div className="flex gap-4">
                             <Link to="/featured">
-                                <Button size="lg"
-                                        className="bg-emerald-600 hover:bg-emerald-700">{t('home.exploreContent')}</Button>
+                                <Button size="lg">{t('home.exploreContent')}</Button>
                             </Link>
                             <Link to="/me/upload">
-                                <Button size="lg" variant="outline"
-                                        className="border-slate-600 text-white hover:bg-slate-800">
-                                    {t('home.startCreating')}
-                                </Button>
+                                <Button size="lg" variant="outline-primary">{t('home.startCreating')}</Button>
                             </Link>
                         </div>
                     </div>
@@ -117,12 +113,12 @@ const HomePage = () => {
             {/* Featured Videos */}
             <section className="mb-12">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
                         <Star className="w-6 h-6 text-warning"/>
                         {t('home.featuredVideos')}
                     </h2>
                     <Link to="/featured"
-                          className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 font-medium">
+                          className="text-primary hover:text-primary/80 font-medium">
                         {t('home.viewAll')}
                     </Link>
                 </div>
@@ -136,7 +132,7 @@ const HomePage = () => {
                             <Link key={media?.id} to="/watch" search={{v: media?.short_token}}
                                   className="group w-64 flex-shrink-0">
                                 <div
-                                    className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
+                                    className="bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
                                     <div className="relative aspect-video overflow-hidden">
                                         <img src={thumbUrl} alt={media?.title}
                                              onError={(e) => handleImageError(e, 'thumbnail')}
@@ -154,7 +150,7 @@ const HomePage = () => {
                                         </div>
                                     </div>
                                     <div className="p-3">
-                                        <h3 className="font-medium text-gray-900 dark:text-white text-sm line-clamp-2 mb-1.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                        <h3 className="font-medium text-foreground text-sm line-clamp-2 mb-1.5 group-hover:text-primary transition-colors">
                                             {media?.title || 'Untitled'}
                                         </h3>
                                         <div className="flex items-center gap-2 mb-1">
@@ -164,10 +160,10 @@ const HomePage = () => {
                                                 onError={(e) => handleImageError(e, 'avatar')}
                                                 className="w-5 h-5 rounded-full object-cover"/>
                                             <span
-                                                className="text-xs text-gray-500 dark:text-muted-foreground">{user?.nickname || user?.username || 'Unknown'}</span>
+                                                className="text-xs text-muted-foreground">{user?.nickname || user?.username || 'Unknown'}</span>
                                         </div>
                                         <div
-                                            className="flex items-center gap-3 text-xs text-muted-foreground dark:text-gray-500">
+                                            className="flex items-center gap-3 text-xs text-muted-foreground">
                                                 <span className="flex items-center gap-1"><Eye
                                                     size={12}/>{formatViews(media?.view_count || 0)}</span>
                                         </div>
@@ -182,11 +178,11 @@ const HomePage = () => {
             {/* Recommended Videos */}
             <section className="mb-12">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                    <h2 className="text-2xl font-bold text-foreground">
                         {t('home.recommendedVideos')}
                     </h2>
                     <Link to="/latest"
-                          className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 font-medium">
+                          className="text-primary hover:text-primary/80 font-medium">
                         {t('home.viewAll')}
                     </Link>
                 </div>
@@ -200,7 +196,7 @@ const HomePage = () => {
                             <Link key={media?.id} to="/watch" search={{v: media?.short_token}}
                                   className="group w-64 flex-shrink-0">
                                 <div
-                                    className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
+                                    className="bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
                                     <div className="relative aspect-video overflow-hidden">
                                         <img src={thumbUrl} alt={media?.title}
                                              onError={(e) => handleImageError(e, 'thumbnail')}
@@ -218,7 +214,7 @@ const HomePage = () => {
                                         </div>
                                     </div>
                                     <div className="p-3">
-                                        <h3 className="font-medium text-gray-900 dark:text-white text-sm line-clamp-2 mb-1.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                        <h3 className="font-medium text-foreground text-sm line-clamp-2 mb-1.5 group-hover:text-primary transition-colors">
                                             {media?.title || 'Untitled'}
                                         </h3>
                                         <div className="flex items-center gap-2 mb-1">
@@ -228,10 +224,10 @@ const HomePage = () => {
                                                 onError={(e) => handleImageError(e, 'avatar')}
                                                 className="w-5 h-5 rounded-full object-cover"/>
                                             <span
-                                                className="text-xs text-gray-500 dark:text-muted-foreground">{user?.nickname || user?.username || 'Unknown'}</span>
+                                                className="text-xs text-muted-foreground">{user?.nickname || user?.username || 'Unknown'}</span>
                                         </div>
                                         <div
-                                            className="flex items-center gap-3 text-xs text-muted-foreground dark:text-gray-500">
+                                            className="flex items-center gap-3 text-xs text-muted-foreground">
                                                 <span className="flex items-center gap-1"><Eye
                                                     size={12}/>{formatViews(media?.view_count || 0)}</span>
                                         </div>
@@ -246,20 +242,20 @@ const HomePage = () => {
             {/* Latest Videos */}
             <section className="mb-12">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                    <h2 className="text-2xl font-bold text-foreground">
                         {activeCategoryId === null
                             ? t('home.latestVideos')
                             : t('home.categoryVideos', {category: categories.find(c => c.id === activeCategoryId)?.name})}
                     </h2>
                     <Link to="/latest"
-                          className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 font-medium">
+                          className="text-primary hover:text-primary/80 font-medium">
                         {t('home.viewAll')}
                     </Link>
                 </div>
 
                 {/* Video Grid */}
                 {items.length === 0 && !isFetchingNextPage ? (
-                    <div className="py-20 text-center text-gray-500">
+                    <div className="py-20 text-center text-muted-foreground">
                         <p>{t('common.noData')}</p>
                     </div>
                 ) : (
@@ -272,7 +268,7 @@ const HomePage = () => {
                             return (
                                 <Link key={media?.id} to="/watch" search={{v: media?.short_token}} className="group">
                                     <div
-                                        className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
+                                        className="bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
                                         <div className="relative aspect-video overflow-hidden">
                                             <img src={thumbUrl} alt={media?.title}
                                                  onError={(e) => handleImageError(e, 'thumbnail')}
@@ -290,7 +286,7 @@ const HomePage = () => {
                                             </div>
                                         </div>
                                         <div className="p-3">
-                                            <h3 className="font-medium text-gray-900 dark:text-white text-sm line-clamp-2 mb-1.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                            <h3 className="font-medium text-foreground text-sm line-clamp-2 mb-1.5 group-hover:text-primary transition-colors">
                                                 {media?.title || 'Untitled'}
                                             </h3>
                                             <div className="flex items-center gap-2 mb-1">
@@ -300,13 +296,13 @@ const HomePage = () => {
                                                     onError={(e) => handleImageError(e, 'avatar')}
                                                     className="w-5 h-5 rounded-full object-cover"/>
                                                 <span
-                                                    className="text-xs text-gray-500 dark:text-muted-foreground">{user?.nickname || user?.username || 'Unknown'}</span>
+                                                    className="text-xs text-muted-foreground">{user?.nickname || user?.username || 'Unknown'}</span>
                                             </div>
                                             <div
-                                                className="flex items-center gap-3 text-xs text-muted-foreground dark:text-gray-500">
+                                                className="flex items-center gap-3 text-xs text-muted-foreground">
                                                 <span className="flex items-center gap-1"><Eye
                                                     size={12}/>{formatViews(media?.view_count || 0)}</span>
-                                                <span>{formatDate(media?.create_time || media?.created_at || new Date().toISOString())}</span>
+                                                <span>{formatDate(media?.create_time || new Date().toISOString())}</span>
                                             </div>
                                             <div className="flex flex-wrap gap-1 mt-2">
                                                 {media?.tags?.slice(0, 2).map((tag: string, tIdx: number) => (

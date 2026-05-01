@@ -3,6 +3,7 @@
 package category
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -44,10 +45,10 @@ const (
 	FieldIdentityProvider = "identity_provider"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
-	FieldCreatedAt = "created_at"
-	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
-	FieldUpdatedAt = "updated_at"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
+	// FieldUpdateTime holds the string denoting the update_time field in the database.
+	FieldUpdateTime = "update_time"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeMedia holds the string denoting the media edge name in mutations.
@@ -109,8 +110,8 @@ var Columns = []string{
 	FieldIsRbacCategory,
 	FieldIdentityProvider,
 	FieldUserID,
-	FieldCreatedAt,
-	FieldUpdatedAt,
+	FieldCreateTime,
+	FieldUpdateTime,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "content_categories"
@@ -149,23 +150,47 @@ var (
 	ColorValidator func(string) error
 	// DefaultSequence holds the default value on creation for the "sequence" field.
 	DefaultSequence int
-	// DefaultStatus holds the default value on creation for the "status" field.
-	DefaultStatus int
 	// DefaultMediaCount holds the default value on creation for the "media_count" field.
 	DefaultMediaCount int
 	// DefaultIsGlobal holds the default value on creation for the "is_global" field.
 	DefaultIsGlobal bool
 	// DefaultIsRbacCategory holds the default value on creation for the "is_rbac_category" field.
 	DefaultIsRbacCategory bool
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() time.Time
-	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
-	DefaultUpdatedAt func() time.Time
-	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
-	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
+	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
+	DefaultUpdateTime func() time.Time
+	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
+	UpdateDefaultUpdateTime func() time.Time
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(int64) error
 )
+
+// Status defines the type for the "status" enum field.
+type Status string
+
+// StatusACTIVE is the default value of the Status enum.
+const DefaultStatus = StatusACTIVE
+
+// Status values.
+const (
+	StatusACTIVE   Status = "ACTIVE"
+	StatusINACTIVE Status = "INACTIVE"
+)
+
+func (s Status) String() string {
+	return string(s)
+}
+
+// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
+func StatusValidator(s Status) error {
+	switch s {
+	case StatusACTIVE, StatusINACTIVE:
+		return nil
+	default:
+		return fmt.Errorf("category: invalid enum value for status field: %q", s)
+	}
+}
 
 // OrderOption defines the ordering options for the Category queries.
 type OrderOption func(*sql.Selector)
@@ -250,14 +275,14 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
-// ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
 }
 
-// ByUpdatedAt orders the results by the updated_at field.
-func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+// ByUpdateTime orders the results by the update_time field.
+func ByUpdateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdateTime, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.

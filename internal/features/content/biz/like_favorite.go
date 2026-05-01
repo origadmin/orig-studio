@@ -17,7 +17,7 @@ type Like struct {
 	MediaID   string    `json:"media_id"`
 	UserID    string    `json:"user_id"`
 	LikeType  string    `json:"like_type"` // like or dislike
-	CreatedAt time.Time `json:"created_at"`
+	CreateTime time.Time `json:"create_time"`
 }
 
 // Favorite represents a user's favorite on a media.
@@ -25,7 +25,7 @@ type Favorite struct {
 	ID        string    `json:"id"`
 	MediaID   string    `json:"media_id"`
 	UserID    string    `json:"user_id"`
-	CreatedAt time.Time `json:"created_at"`
+	CreateTime time.Time `json:"create_time"`
 }
 
 // MediaStats holds counts for likes and favorites.

@@ -48,16 +48,16 @@ func (_c *CommentLikeCreate) SetNillableLikeType(v *string) *CommentLikeCreate {
 	return _c
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_c *CommentLikeCreate) SetCreatedAt(v time.Time) *CommentLikeCreate {
-	_c.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_c *CommentLikeCreate) SetCreateTime(v time.Time) *CommentLikeCreate {
+	_c.mutation.SetCreateTime(v)
 	return _c
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *CommentLikeCreate) SetNillableCreatedAt(v *time.Time) *CommentLikeCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *CommentLikeCreate) SetNillableCreateTime(v *time.Time) *CommentLikeCreate {
 	if v != nil {
-		_c.SetCreatedAt(*v)
+		_c.SetCreateTime(*v)
 	}
 	return _c
 }
@@ -125,9 +125,9 @@ func (_c *CommentLikeCreate) defaults() {
 		v := commentlike.DefaultLikeType
 		_c.mutation.SetLikeType(v)
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := commentlike.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := commentlike.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := commentlike.DefaultID()
@@ -151,8 +151,8 @@ func (_c *CommentLikeCreate) check() error {
 			return &ValidationError{Name: "like_type", err: fmt.Errorf(`entity: validator failed for field "CommentLike.like_type": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "CommentLike.created_at"`)}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "CommentLike.create_time"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := commentlike.IDValidator(v); err != nil {
@@ -204,9 +204,9 @@ func (_c *CommentLikeCreate) createSpec() (*CommentLike, *sqlgraph.CreateSpec) {
 		_spec.SetField(commentlike.FieldLikeType, field.TypeString, value)
 		_node.LikeType = value
 	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(commentlike.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(commentlike.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
 	}
 	if nodes := _c.mutation.CommentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

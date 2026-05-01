@@ -1,4 +1,4 @@
-﻿import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     Plus,
     Edit,
@@ -160,6 +160,12 @@ const CategoryManager: React.FC = () => {
         return parent ? parent.name : t('admin.parentNotFound');
     };
 
+    const isParentDisabled = (cat: Category) => {
+        if (!cat.parent_id) return false;
+        const parent = categories.find(c => c.id === cat.parent_id);
+        return parent !== undefined && parent.status !== 1;
+    };
+
     const renderCategoryTree = (parentId: number | undefined = undefined, level: number = 0) => {
         const children = categories
             .filter(c => c.parent_id === parentId)
@@ -183,6 +189,11 @@ const CategoryManager: React.FC = () => {
                                 </button>
                             )}
                             <span className="font-medium">{category.name}</span>
+                            {isParentDisabled(category) && (
+                                <span className="text-xs text-amber-500 dark:text-amber-400 ml-1 whitespace-nowrap">
+                                    ({t('admin.parentDisabled') || 'Parent Disabled'})
+                                </span>
+                            )}
                         </div>
                     </TableCell>
                     <TableCell>{category.slug}</TableCell>
@@ -365,15 +376,15 @@ const CategoryManager: React.FC = () => {
                                 {t('admin.parent')}
                             </h4>
                             <Select
-                                value={formData.parent_id !== undefined && formData.parent_id !== null ? String(formData.parent_id) : ''}
-                                onValueChange={(value) => setFormData({...formData, parent_id: value ? Number(value) : undefined})}
+                                value={formData.parent_id !== undefined && formData.parent_id !== null ? String(formData.parent_id) : '__none__'}
+                                onValueChange={(value) => setFormData({...formData, parent_id: value === '__none__' ? undefined : Number(value)})}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder={t('admin.selectParentCategory')}/>
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">{t('admin.noParent')}</SelectItem>
-                                    {categories.map(category => (
+                                    <SelectItem value="__none__">{t('admin.noParent')}</SelectItem>
+                                    {categories.filter(cat => cat.status === 1).map(category => (
                                         <SelectItem key={category.id} value={String(category.id)}>
                                             {category.name}
                                         </SelectItem>
@@ -448,19 +459,19 @@ const CategoryManager: React.FC = () => {
                                 {t('admin.parent')}
                             </h4>
                             <Select
-                                value={formData.parent_id !== undefined && formData.parent_id !== null ? String(formData.parent_id) : ''}
-                                onValueChange={(value) => setFormData({...formData, parent_id: value ? Number(value) : undefined})}
+                                value={formData.parent_id !== undefined && formData.parent_id !== null ? String(formData.parent_id) : '__none__'}
+                                onValueChange={(value) => setFormData({...formData, parent_id: value === '__none__' ? undefined : Number(value)})}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder={t('admin.selectParentCategory')}/>
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">{t('admin.noParent')}</SelectItem>
+                                    <SelectItem value="__none__">{t('admin.noParent')}</SelectItem>
                                     {categories
-                                        .filter(category => !currentCategory || category.id !== currentCategory.id)
+                                        .filter(category => (!currentCategory || category.id !== currentCategory.id) && (category.status === 1 || category.id === formData.parent_id))
                                         .map(category => (
                                             <SelectItem key={category.id} value={String(category.id)}>
-                                                {category.name}
+                                                {category.name}{category.status !== 1 ? ` (${t('admin.disabled') || 'Disabled'})` : ''}
                                             </SelectItem>
                                         ))}
                                 </SelectContent>

@@ -1,5 +1,5 @@
 ﻿import React, {useState, useEffect, useRef} from 'react';
-import {MessageCircle, ThumbsUp, ThumbsDown, Loader2, LogIn, List, Reply, SmilePlus, Trash2, ChevronDown} from 'lucide-react';
+import {MessageCircle, ThumbsUp, ThumbsDown, Loader2, LogIn, List, Reply, SmilePlus, Trash2, ChevronDown, ShieldOff} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {Button} from '@/components/ui/button';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
@@ -91,8 +91,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
             setError(null);
             const sortParams: Record<string, string> = {};
             switch (sortBy) {
-                case 'newest': sortParams.sort_by = 'created_at'; sortParams.order = 'desc'; break;
-                case 'oldest': sortParams.sort_by = 'created_at'; sortParams.order = 'asc'; break;
+                case 'newest': sortParams.sort_by = 'create_time'; sortParams.order = 'desc'; break;
+                case 'oldest': sortParams.sort_by = 'create_time'; sortParams.order = 'asc'; break;
                 case 'popular': sortParams.sort_by = 'like_count'; sortParams.order = 'desc'; break;
             }
             const response = await commentApi.getAll({media_id: mediaId, page: pageNum, page_size: PAGE_SIZE, ...sortParams});
@@ -106,7 +106,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                 avatar: comment.avatar || '',
                 parent_id: comment.parent_id || null,
                 status: comment.status || '',
-                create_time: comment.create_time || comment.created_at || '',
+                create_time: comment.create_time || '',
                 update_time: comment.update_time || '',
                 like_count: comment.like_count || 0,
                 is_liked: comment.is_liked || false,
@@ -505,7 +505,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                                         </>
                                     )}
                                     <span className="text-gray-500 dark:text-muted-foreground text-xs">
-                                        {formatDate(comment.create_time || comment.created_at)}
+                                        {formatDate(comment.create_time)}
                                     </span>
                                 </div>
 
@@ -517,10 +517,18 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                                     </div>
                                 )}
 
-                                <p className="text-[15px] text-gray-800 dark:text-gray-200 mt-1.5 leading-relaxed whitespace-pre-wrap break-words">
-                                    {comment.content || <span className="text-muted-foreground italic">No content</span>}
-                                </p>
+                                {comment.status === 'blocked' ? (
+                                    <div className="flex items-center gap-2 text-gray-400 dark:text-muted-foreground italic mt-1.5 py-1">
+                                        <ShieldOff className="h-4 w-4 flex-shrink-0"/>
+                                        <span>{t('watch.commentBlocked') || 'This comment has been blocked'}</span>
+                                    </div>
+                                ) : (
+                                    <p className="text-[15px] text-gray-800 dark:text-gray-200 mt-1.5 leading-relaxed whitespace-pre-wrap break-words">
+                                        {comment.content || <span className="text-muted-foreground italic">No content</span>}
+                                    </p>
+                                )}
 
+                                {comment.status !== 'blocked' && (
                                 <div className="flex items-center gap-1 mt-2">
                                     <button
                                         className={`flex items-center gap-1.5 rounded-full p-1.5 transition-colors ${
@@ -581,8 +589,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                                         </button>
                                     )}
                                 </div>
+                                )}
 
-                                {replyingTo?.id === comment.id && (
+                                {comment.status !== 'blocked' && replyingTo?.id === comment.id && (
                                     <div className="mt-3 space-y-2 border-l-2 border-input dark:border-gray-600 pl-5 ml-1">
                                         {isAuthenticated ? (
                                             <div className="flex gap-3 items-start">

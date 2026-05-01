@@ -2,7 +2,7 @@
 import {useState, useEffect, useMemo, useCallback} from 'react';
 import {useParams, useNavigate} from '@tanstack/react-router';
 import {useAdminMediaDetail, useUpdateMedia, useDeleteMedia, useCategoryList} from '@/hooks/queries';
-import {adminMediaApi} from '@/lib/api/media';
+import {adminMediaApi, encodingApi, type EncodeProfile} from '@/lib/api/media';
 import {api, API_BASE_URL} from '@/lib/request';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
@@ -13,15 +13,48 @@ import {Separator} from '@/components/ui/separator';
 import {EditPageHeader, type HeaderBadgeConfig, type EncodingStatusConfig} from '@/components/common/EditPageHeader';
 import {DeleteConfirmDialog} from '@/components/common/DeleteConfirmDialog';
 import {useDirtyState, useSaveState, useKeyboardShortcut} from '@/hooks/useEditPage';
-import {ArrowLeft, RefreshCw, Play, Eye, ThumbsUp, MessageSquare, Download, AlertTriangle, CheckCircle, Clock, XCircle} from 'lucide-react';
+import {ArrowLeft, RefreshCw, Play, Eye, ThumbsUp, MessageSquare, Download, AlertTriangle, CheckCircle, Clock, XCircle, Image, Film} from 'lucide-react';
+import {formatDateTime} from '@/lib/format';
 import {toast} from 'sonner';
 import type {Media} from '@/lib/api/media';
 
+/**
+ * Normalize privacy value from backend to a numeric enum value.
+ * Backend (protojson) may return either:
+ *   - A string enum name like "PRIVACY_PUBLIC", "PRIVACY_PRIVATE", "PRIVACY_UNLISTED"
+ *   - A numeric value like 1, 2, 3
+ * Frontend Select uses numeric string values ("1", "2", "3") for consistency.
+ */
+const PRIVACY_NAME_TO_VALUE: Record<string, number> = {
+    PRIVACY_UNSPECIFIED: 0,
+    PRIVACY_PUBLIC: 1,
+    PRIVACY_PRIVATE: 2,
+    PRIVACY_UNLISTED: 3,
+    PRIVACY_PAID: 4,
+    PRIVACY_SUBSCRIBERS_ONLY: 5,
+};
+
+function normalizePrivacy(value: unknown): number {
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string') {
+        // Try parsing as numeric string first (e.g., "1", "2")
+        const num = Number(value);
+        if (!isNaN(num) && num >= 0) return num;
+        // Then try enum name (e.g., "PRIVACY_PUBLIC")
+        const mapped = PRIVACY_NAME_TO_VALUE[value];
+        if (mapped !== undefined) return mapped;
+    }
+    return 1; // Default to PUBLIC
+}
+
 interface EncodingTask {
     id: string;
-    profile: string;
+    media_id: string;
+    profile_id: number;
     status: string;
-    progress: number;
+    output_path: string;
+    error_message: string;
+    chunk: boolean;
     create_time: string;
     update_time: string;
 }
@@ -104,28 +137,6 @@ function resolveMediaUrl(url: string | undefined): string | undefined {
     return `${base}/${url.replace(/^\//, '')}`;
 }
 
-/**
- * Format a date string for display.
- * Handles both ISO 8601 strings and protobuf-style {seconds, nanos} objects.
- */
-function formatDate(dateStr: string | { seconds: number; nanos: number } | undefined): string {
-    if (!dateStr) return 'N/A';
-    try {
-        if (typeof dateStr === 'string') {
-            const d = new Date(dateStr);
-            return isNaN(d.getTime()) ? 'N/A' : d.toLocaleString();
-        }
-        // Protobuf Timestamp format: {seconds, nanos}
-        if (typeof dateStr === 'object' && 'seconds' in dateStr) {
-            const d = new Date(Number(dateStr.seconds) * 1000 + Math.floor(Number(dateStr.nanos) / 1_000_000));
-            return isNaN(d.getTime()) ? 'N/A' : d.toLocaleString();
-        }
-        return 'N/A';
-    } catch {
-        return 'N/A';
-    }
-}
-
 export default function MediaEditPage() {
     const {id} = useParams({strict: false}) as {id: string};
     const navigate = useNavigate();
@@ -150,10 +161,14 @@ export default function MediaEditPage() {
 
     const [stats, setStats] = useState<MediaStats | null>(null);
     const [tasks, setTasks] = useState<EncodingTask[]>([]);
+    const [profiles, setProfiles] = useState<Map<number, EncodeProfile>>(new Map());
     const [activeTab, setActiveTab] = useState<'metadata' | 'publish' | 'encoding' | 'stats'>('metadata');
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [thumbnailError, setThumbnailError] = useState(false);
+    const [regenThumbnailConfirmOpen, setRegenThumbnailConfirmOpen] = useState(false);
+    const [regenSpriteConfirmOpen, setRegenSpriteConfirmOpen] = useState(false);
+    const [isRegenerating, setIsRegenerating] = useState(false);
 
     // Save state management
     const {saveState, isSaving, setSaving, setSuccess, setError} = useSaveState();
@@ -167,7 +182,7 @@ export default function MediaEditPage() {
                 state: media.state || 'draft',
                 category_id: media.category_id ?? '',
                 tags: media.tags?.join(', ') || '',
-                privacy: media.privacy ?? 1,
+                privacy: normalizePrivacy(media.privacy),
                 featured: media.featured || false,
                 enable_comments: media.enable_comments ?? true,
                 allow_download: media.allow_download ?? false,
@@ -176,13 +191,23 @@ export default function MediaEditPage() {
         }
     }, [media, syncFromData]);
 
-    // Fetch stats and tasks
+    // Fetch stats, tasks, and profiles
     useEffect(() => {
         if (id) {
             adminMediaApi.getStats(id).then(setStats).catch(() => {});
             adminMediaApi.getTasks(id).then((res: any) => setTasks(res?.tasks || res?.items || [])).catch(() => {});
         }
     }, [id]);
+
+    // Fetch encode profiles for profile name resolution
+    useEffect(() => {
+        encodingApi.profiles.list().then((res: any) => {
+            const profileList: EncodeProfile[] = res?.profiles || res || [];
+            const map = new Map<number, EncodeProfile>();
+            profileList.forEach(p => map.set(p.id, p));
+            setProfiles(map);
+        }).catch(() => {});
+    }, []);
 
     // Save handler
     const handleSave = useCallback(async () => {
@@ -259,29 +284,43 @@ export default function MediaEditPage() {
 
     const handleRegenerateThumbnail = async () => {
         if (!id) return;
+        setIsRegenerating(true);
         try {
             await api.post(`/admin/medias/${id}/regenerate-thumbnail`, {});
-            toast.success('缩略图重新生成已调度');
+            toast.success('缩略图重新生成已调度，请稍后刷新页面查看结果');
+            // Refresh tasks to reflect any status changes
+            const res = await adminMediaApi.getTasks(id);
+            setTasks((res as any)?.tasks || (res as any)?.items || []);
         } catch (err: any) {
-            const errMsg = err?.response?.data?.message || err?.message || '未知错误';
+            const errMsg = err?.response?.data?.error || err?.response?.data?.message || err?.message || '未知错误';
             toast.error(`重新生成缩略图失败: ${errMsg}`);
             console.error('Failed to regenerate thumbnail', err);
+        } finally {
+            setIsRegenerating(false);
+            setRegenThumbnailConfirmOpen(false);
         }
     };
 
     const handleRegenerateSprite = async () => {
         if (!id) return;
+        setIsRegenerating(true);
         try {
             await api.post(`/admin/medias/${id}/regenerate-sprite`, {});
-            toast.success('雪碧图重新生成已调度');
+            toast.success('雪碧图重新生成已调度，后台处理中请稍候');
+            // Refresh tasks to reflect any status changes
+            const res = await adminMediaApi.getTasks(id);
+            setTasks((res as any)?.tasks || (res as any)?.items || []);
         } catch (err: any) {
-            const errMsg = err?.response?.data?.message || err?.message || '未知错误';
-            if (errMsg.includes('already in progress')) {
+            const errMsg = err?.response?.data?.error || err?.response?.data?.message || err?.message || '未知错误';
+            if (errMsg.includes('already processing') || errMsg.includes('already in progress')) {
                 toast.warning('雪碧图正在生成中，请稍后再试');
             } else {
                 toast.error(`重新生成雪碧图失败: ${errMsg}`);
             }
             console.error('Failed to regenerate sprite', err);
+        } finally {
+            setIsRegenerating(false);
+            setRegenSpriteConfirmOpen(false);
         }
     };
 
@@ -305,9 +344,54 @@ export default function MediaEditPage() {
             case 'processing': return '转码中';
             case 'pending': return '排队中';
             case 'failed': return '失败';
+            case 'partial': return '部分完成';
             default: return status || '--';
         }
     };
+
+    // Resolve profile_id to a human-readable profile name
+    const getProfileName = (profileId: number): string => {
+        const profile = profiles.get(profileId);
+        if (profile) {
+            return profile.name || `Profile #${profileId}`;
+        }
+        return `Profile #${profileId}`;
+    };
+
+    // Get profile resolution info for display
+    const getProfileInfo = (profileId: number): string => {
+        const profile = profiles.get(profileId);
+        if (profile) {
+            const parts: string[] = [];
+            if (profile.resolution) parts.push(profile.resolution);
+            if (profile.extension) parts.push(profile.extension.toUpperCase());
+            return parts.length > 0 ? parts.join(' / ') : '';
+        }
+        return '';
+    };
+
+    // Compute task summary counts
+    const taskSummary = useMemo(() => {
+        const counts = {success: 0, processing: 0, pending: 0, failed: 0, partial: 0, total: tasks.length};
+        tasks.forEach(t => {
+            if (t.status in counts) {
+                counts[t.status as keyof typeof counts]++;
+            }
+        });
+        return counts;
+    }, [tasks]);
+
+    // Format task summary text
+    const taskSummaryText = useMemo(() => {
+        if (tasks.length === 0) return '';
+        const parts: string[] = [];
+        if (taskSummary.success > 0) parts.push(`${taskSummary.success} 完成`);
+        if (taskSummary.processing > 0) parts.push(`${taskSummary.processing} 转码中`);
+        if (taskSummary.pending > 0) parts.push(`${taskSummary.pending} 排队中`);
+        if (taskSummary.failed > 0) parts.push(`${taskSummary.failed} 失败`);
+        if (taskSummary.partial > 0) parts.push(`${taskSummary.partial} 部分完成`);
+        return parts.join('，');
+    }, [taskSummary, tasks.length]);
 
     const reviewStatusBadge = (status: string | undefined): "default" | "secondary" | "destructive" | "outline" | "success" | "warning" | "info" => {
         switch (status) {
@@ -534,43 +618,104 @@ export default function MediaEditPage() {
                         {activeTab === 'encoding' && (
                             <div className="space-y-4 bg-card rounded-lg border p-6">
                                 <div className="flex items-center justify-between">
-                                    <h3 className="font-medium">编码任务</h3>
-                                    <div className="flex gap-2">
-                                        <Button variant="outline" size="sm" onClick={handleRegenerateThumbnail}>
-                                            <RefreshCw className="w-3 h-3 mr-1"/>重新生成缩略图
-                                        </Button>
-                                        <Button variant="outline" size="sm" onClick={handleRegenerateSprite}>
-                                            <RefreshCw className="w-3 h-3 mr-1"/>重新生成雪碧图
-                                        </Button>
+                                    <div>
+                                        <h3 className="font-medium">编码任务</h3>
+                                        {taskSummaryText && (
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                共 {tasks.length} 个任务: {taskSummaryText}
+                                            </p>
+                                        )}
                                     </div>
+                                    {media.type === 'video' && (
+                                        <div className="flex gap-2">
+                                            <Button variant="outline" size="sm"
+                                                    onClick={() => setRegenThumbnailConfirmOpen(true)}
+                                                    disabled={isRegenerating}
+                                                    title="从视频中截取一帧作为缩略图，替换当前缩略图">
+                                                <Image className="w-3 h-3 mr-1"/>重新生成缩略图
+                                            </Button>
+                                            <Button variant="outline" size="sm"
+                                                    onClick={() => setRegenSpriteConfirmOpen(true)}
+                                                    disabled={isRegenerating}
+                                                    title="重新生成视频预览用的雪碧图（进度条缩略图），用于播放器进度条预览">
+                                                <Film className="w-3 h-3 mr-1"/>重新生成雪碧图
+                                            </Button>
+                                        </div>
+                                    )}
                                 </div>
                                 {tasks.length === 0 ? (
                                     <p className="text-sm text-muted-foreground py-8 text-center">暂无编码任务</p>
                                 ) : (
                                     <div className="space-y-3">
                                         {tasks.map(task => (
-                                            <div key={task.id} className="flex items-center justify-between p-3 rounded-md border">
-                                                <div className="flex items-center gap-3">
-                                                    <Badge variant={encodingStatusBadge(task.status)} className="text-[10px] px-1.5 py-0 h-4">
-                                                        {encodingStatusLabel(task.status)}
-                                                    </Badge>
-                                                    <div>
-                                                        <p className="text-sm font-medium">{task.profile}</p>
-                                                        <p className="text-xs text-muted-foreground">
-                                                            {task.progress > 0 && `(${task.progress}%)`}
-                                                        </p>
+                                            <div key={task.id} className="p-3 rounded-md border space-y-2">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <Badge variant={encodingStatusBadge(task.status)} className="text-[10px] px-1.5 py-0 h-4 shrink-0">
+                                                            {encodingStatusLabel(task.status)}
+                                                        </Badge>
+                                                        <div>
+                                                            <p className="text-sm font-medium">{getProfileName(task.profile_id)}</p>
+                                                            {getProfileInfo(task.profile_id) && (
+                                                                <p className="text-xs text-muted-foreground">{getProfileInfo(task.profile_id)}</p>
+                                                            )}
+                                                        </div>
+                                                        {task.chunk && (
+                                                            <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">分段</Badge>
+                                                        )}
                                                     </div>
+                                                    {task.status === 'failed' && (
+                                                        <Button variant="outline" size="sm"
+                                                                onClick={() => handleRetryTask(task.id)}>
+                                                            <RefreshCw className="w-3 h-3 mr-1"/>重试
+                                                        </Button>
+                                                    )}
                                                 </div>
-                                                {task.status === 'failed' && (
-                                                    <Button variant="outline" size="sm"
-                                                            onClick={() => handleRetryTask(task.id)}>
-                                                        <RefreshCw className="w-3 h-3 mr-1"/>重试
-                                                    </Button>
+                                                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                                    {task.create_time && (
+                                                        <span>创建: {formatDateTime(task.create_time)}</span>
+                                                    )}
+                                                    {task.update_time && task.update_time !== task.create_time && (
+                                                        <span>更新: {formatDateTime(task.update_time)}</span>
+                                                    )}
+                                                </div>
+                                                {task.status === 'failed' && task.error_message && (
+                                                    <div className="flex items-start gap-2 p-2 rounded bg-destructive/10 text-destructive text-xs">
+                                                        <AlertTriangle className="w-3 h-3 shrink-0 mt-0.5"/>
+                                                        <span className="break-all">{task.error_message}</span>
+                                                    </div>
+                                                )}
+                                                {task.status === 'success' && task.output_path && (
+                                                    <div className="text-xs text-muted-foreground truncate" title={task.output_path}>
+                                                        输出: {task.output_path}
+                                                    </div>
                                                 )}
                                             </div>
                                         ))}
                                     </div>
                                 )}
+
+                                {/* Regenerate Thumbnail Confirmation */}
+                                <DeleteConfirmDialog
+                                    open={regenThumbnailConfirmOpen}
+                                    onOpenChange={setRegenThumbnailConfirmOpen}
+                                    title="重新生成缩略图"
+                                    isDeleting={isRegenerating}
+                                    onConfirm={handleRegenerateThumbnail}
+                                    confirmLabel="确认重新生成"
+                                    description="将从视频中截取一帧作为新的缩略图，替换当前的缩略图。此操作不可撤销，确认继续？"
+                                />
+
+                                {/* Regenerate Sprite Confirmation */}
+                                <DeleteConfirmDialog
+                                    open={regenSpriteConfirmOpen}
+                                    onOpenChange={setRegenSpriteConfirmOpen}
+                                    title="重新生成雪碧图"
+                                    isDeleting={isRegenerating}
+                                    onConfirm={handleRegenerateSprite}
+                                    confirmLabel="确认重新生成"
+                                    description="将重新生成视频预览用的雪碧图（播放器进度条缩略图）。此操作需要一定时间，确认继续？"
+                                />
                             </div>
                         )}
 
@@ -635,9 +780,9 @@ export default function MediaEditPage() {
                                 <span className="text-muted-foreground">Short Token</span>
                                 <span className="font-mono text-xs text-right break-all">{media.short_token || 'N/A'}</span>
                                 <span className="text-muted-foreground">创建时间</span>
-                                <span className="text-xs text-right whitespace-nowrap">{formatDate(media.create_time || media.created_at)}</span>
+                                <span className="text-xs text-right whitespace-nowrap">{formatDateTime(media.create_time)}</span>
                                 <span className="text-muted-foreground">更新时间</span>
-                                <span className="text-xs text-right whitespace-nowrap">{formatDate(media.update_time || media.updated_at)}</span>
+                                <span className="text-xs text-right whitespace-nowrap">{formatDateTime(media.update_time)}</span>
                                 <span className="text-muted-foreground">编码状态</span>
                                 <div className="flex justify-end">
                                     <Badge variant={encodingStatusBadge(media.encoding_status)} className="text-[10px] px-1.5 py-0 h-4">

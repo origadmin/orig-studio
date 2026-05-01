@@ -9,10 +9,8 @@ export interface ReviewItem {
     username: string;
     review_status: string;
     reason?: string;
-    created_at: string;
-    create_time?: string;
-    updated_at: string;
-    update_time?: string;
+    create_time: string;
+    update_time: string;
     reviewer_id?: string;
     reviewer_name?: string;
 }
@@ -32,7 +30,7 @@ export const reviewApi = {
         api.get<ReviewListResponse>('/admin/medias/review/history', params),
 
     review: (mediaId: string, data: { action: 'approve' | 'reject'; comment?: string }) =>
-        api.put<{ id: string; review_status: string; listable: boolean; updated_at: string }>(`/admin/medias/${mediaId}/review`, data),
+        api.put<{ id: string; review_status: string; listable: boolean; update_time: string }>(`/admin/medias/${mediaId}/review`, data),
 
     getDetail: (mediaId: string) =>
         api.get<{ items: ReviewItem[] }>(`/admin/medias/${mediaId}/review-logs`),

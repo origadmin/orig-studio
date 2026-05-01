@@ -85,14 +85,29 @@ func UserID(v string) predicate.Playlist {
 	return predicate.Playlist(sql.FieldEQ(FieldUserID, v))
 }
 
-// Privacy applies equality check predicate on the "privacy" field. It's identical to PrivacyEQ.
-func Privacy(v int) predicate.Playlist {
-	return predicate.Playlist(sql.FieldEQ(FieldPrivacy, v))
-}
-
 // AddDate applies equality check predicate on the "add_date" field. It's identical to AddDateEQ.
 func AddDate(v time.Time) predicate.Playlist {
 	return predicate.Playlist(sql.FieldEQ(FieldAddDate, v))
+}
+
+// Thumbnail applies equality check predicate on the "thumbnail" field. It's identical to ThumbnailEQ.
+func Thumbnail(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldEQ(FieldThumbnail, v))
+}
+
+// MediaCount applies equality check predicate on the "media_count" field. It's identical to MediaCountEQ.
+func MediaCount(v int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldEQ(FieldMediaCount, v))
+}
+
+// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
+func CreateTime(v time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldEQ(FieldCreateTime, v))
+}
+
+// UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
+func UpdateTime(v time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // TitleEQ applies the EQ predicate on the "title" field.
@@ -356,43 +371,23 @@ func UserIDContainsFold(v string) predicate.Playlist {
 }
 
 // PrivacyEQ applies the EQ predicate on the "privacy" field.
-func PrivacyEQ(v int) predicate.Playlist {
+func PrivacyEQ(v Privacy) predicate.Playlist {
 	return predicate.Playlist(sql.FieldEQ(FieldPrivacy, v))
 }
 
 // PrivacyNEQ applies the NEQ predicate on the "privacy" field.
-func PrivacyNEQ(v int) predicate.Playlist {
+func PrivacyNEQ(v Privacy) predicate.Playlist {
 	return predicate.Playlist(sql.FieldNEQ(FieldPrivacy, v))
 }
 
 // PrivacyIn applies the In predicate on the "privacy" field.
-func PrivacyIn(vs ...int) predicate.Playlist {
+func PrivacyIn(vs ...Privacy) predicate.Playlist {
 	return predicate.Playlist(sql.FieldIn(FieldPrivacy, vs...))
 }
 
 // PrivacyNotIn applies the NotIn predicate on the "privacy" field.
-func PrivacyNotIn(vs ...int) predicate.Playlist {
+func PrivacyNotIn(vs ...Privacy) predicate.Playlist {
 	return predicate.Playlist(sql.FieldNotIn(FieldPrivacy, vs...))
-}
-
-// PrivacyGT applies the GT predicate on the "privacy" field.
-func PrivacyGT(v int) predicate.Playlist {
-	return predicate.Playlist(sql.FieldGT(FieldPrivacy, v))
-}
-
-// PrivacyGTE applies the GTE predicate on the "privacy" field.
-func PrivacyGTE(v int) predicate.Playlist {
-	return predicate.Playlist(sql.FieldGTE(FieldPrivacy, v))
-}
-
-// PrivacyLT applies the LT predicate on the "privacy" field.
-func PrivacyLT(v int) predicate.Playlist {
-	return predicate.Playlist(sql.FieldLT(FieldPrivacy, v))
-}
-
-// PrivacyLTE applies the LTE predicate on the "privacy" field.
-func PrivacyLTE(v int) predicate.Playlist {
-	return predicate.Playlist(sql.FieldLTE(FieldPrivacy, v))
 }
 
 // AddDateEQ applies the EQ predicate on the "add_date" field.
@@ -433,6 +428,221 @@ func AddDateLT(v time.Time) predicate.Playlist {
 // AddDateLTE applies the LTE predicate on the "add_date" field.
 func AddDateLTE(v time.Time) predicate.Playlist {
 	return predicate.Playlist(sql.FieldLTE(FieldAddDate, v))
+}
+
+// StatusEQ applies the EQ predicate on the "status" field.
+func StatusEQ(v Status) predicate.Playlist {
+	return predicate.Playlist(sql.FieldEQ(FieldStatus, v))
+}
+
+// StatusNEQ applies the NEQ predicate on the "status" field.
+func StatusNEQ(v Status) predicate.Playlist {
+	return predicate.Playlist(sql.FieldNEQ(FieldStatus, v))
+}
+
+// StatusIn applies the In predicate on the "status" field.
+func StatusIn(vs ...Status) predicate.Playlist {
+	return predicate.Playlist(sql.FieldIn(FieldStatus, vs...))
+}
+
+// StatusNotIn applies the NotIn predicate on the "status" field.
+func StatusNotIn(vs ...Status) predicate.Playlist {
+	return predicate.Playlist(sql.FieldNotIn(FieldStatus, vs...))
+}
+
+// ThumbnailEQ applies the EQ predicate on the "thumbnail" field.
+func ThumbnailEQ(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldEQ(FieldThumbnail, v))
+}
+
+// ThumbnailNEQ applies the NEQ predicate on the "thumbnail" field.
+func ThumbnailNEQ(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldNEQ(FieldThumbnail, v))
+}
+
+// ThumbnailIn applies the In predicate on the "thumbnail" field.
+func ThumbnailIn(vs ...string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldIn(FieldThumbnail, vs...))
+}
+
+// ThumbnailNotIn applies the NotIn predicate on the "thumbnail" field.
+func ThumbnailNotIn(vs ...string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldNotIn(FieldThumbnail, vs...))
+}
+
+// ThumbnailGT applies the GT predicate on the "thumbnail" field.
+func ThumbnailGT(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldGT(FieldThumbnail, v))
+}
+
+// ThumbnailGTE applies the GTE predicate on the "thumbnail" field.
+func ThumbnailGTE(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldGTE(FieldThumbnail, v))
+}
+
+// ThumbnailLT applies the LT predicate on the "thumbnail" field.
+func ThumbnailLT(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldLT(FieldThumbnail, v))
+}
+
+// ThumbnailLTE applies the LTE predicate on the "thumbnail" field.
+func ThumbnailLTE(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldLTE(FieldThumbnail, v))
+}
+
+// ThumbnailContains applies the Contains predicate on the "thumbnail" field.
+func ThumbnailContains(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldContains(FieldThumbnail, v))
+}
+
+// ThumbnailHasPrefix applies the HasPrefix predicate on the "thumbnail" field.
+func ThumbnailHasPrefix(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldHasPrefix(FieldThumbnail, v))
+}
+
+// ThumbnailHasSuffix applies the HasSuffix predicate on the "thumbnail" field.
+func ThumbnailHasSuffix(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldHasSuffix(FieldThumbnail, v))
+}
+
+// ThumbnailIsNil applies the IsNil predicate on the "thumbnail" field.
+func ThumbnailIsNil() predicate.Playlist {
+	return predicate.Playlist(sql.FieldIsNull(FieldThumbnail))
+}
+
+// ThumbnailNotNil applies the NotNil predicate on the "thumbnail" field.
+func ThumbnailNotNil() predicate.Playlist {
+	return predicate.Playlist(sql.FieldNotNull(FieldThumbnail))
+}
+
+// ThumbnailEqualFold applies the EqualFold predicate on the "thumbnail" field.
+func ThumbnailEqualFold(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldEqualFold(FieldThumbnail, v))
+}
+
+// ThumbnailContainsFold applies the ContainsFold predicate on the "thumbnail" field.
+func ThumbnailContainsFold(v string) predicate.Playlist {
+	return predicate.Playlist(sql.FieldContainsFold(FieldThumbnail, v))
+}
+
+// MediaCountEQ applies the EQ predicate on the "media_count" field.
+func MediaCountEQ(v int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldEQ(FieldMediaCount, v))
+}
+
+// MediaCountNEQ applies the NEQ predicate on the "media_count" field.
+func MediaCountNEQ(v int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldNEQ(FieldMediaCount, v))
+}
+
+// MediaCountIn applies the In predicate on the "media_count" field.
+func MediaCountIn(vs ...int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldIn(FieldMediaCount, vs...))
+}
+
+// MediaCountNotIn applies the NotIn predicate on the "media_count" field.
+func MediaCountNotIn(vs ...int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldNotIn(FieldMediaCount, vs...))
+}
+
+// MediaCountGT applies the GT predicate on the "media_count" field.
+func MediaCountGT(v int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldGT(FieldMediaCount, v))
+}
+
+// MediaCountGTE applies the GTE predicate on the "media_count" field.
+func MediaCountGTE(v int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldGTE(FieldMediaCount, v))
+}
+
+// MediaCountLT applies the LT predicate on the "media_count" field.
+func MediaCountLT(v int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldLT(FieldMediaCount, v))
+}
+
+// MediaCountLTE applies the LTE predicate on the "media_count" field.
+func MediaCountLTE(v int) predicate.Playlist {
+	return predicate.Playlist(sql.FieldLTE(FieldMediaCount, v))
+}
+
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldEQ(FieldCreateTime, v))
+}
+
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldNEQ(FieldCreateTime, v))
+}
+
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldIn(FieldCreateTime, vs...))
+}
+
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldNotIn(FieldCreateTime, vs...))
+}
+
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldGT(FieldCreateTime, v))
+}
+
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldGTE(FieldCreateTime, v))
+}
+
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldLT(FieldCreateTime, v))
+}
+
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldLTE(FieldCreateTime, v))
+}
+
+// UpdateTimeEQ applies the EQ predicate on the "update_time" field.
+func UpdateTimeEQ(v time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldEQ(FieldUpdateTime, v))
+}
+
+// UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
+func UpdateTimeNEQ(v time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldNEQ(FieldUpdateTime, v))
+}
+
+// UpdateTimeIn applies the In predicate on the "update_time" field.
+func UpdateTimeIn(vs ...time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldIn(FieldUpdateTime, vs...))
+}
+
+// UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
+func UpdateTimeNotIn(vs ...time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldNotIn(FieldUpdateTime, vs...))
+}
+
+// UpdateTimeGT applies the GT predicate on the "update_time" field.
+func UpdateTimeGT(v time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldGT(FieldUpdateTime, v))
+}
+
+// UpdateTimeGTE applies the GTE predicate on the "update_time" field.
+func UpdateTimeGTE(v time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldGTE(FieldUpdateTime, v))
+}
+
+// UpdateTimeLT applies the LT predicate on the "update_time" field.
+func UpdateTimeLT(v time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldLT(FieldUpdateTime, v))
+}
+
+// UpdateTimeLTE applies the LTE predicate on the "update_time" field.
+func UpdateTimeLTE(v time.Time) predicate.Playlist {
+	return predicate.Playlist(sql.FieldLTE(FieldUpdateTime, v))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

@@ -28,21 +28,13 @@ import { Route as PortalCookiesRouteImport } from "./routes/_portal/cookies";
 import { Route as PortalCategoriesRouteImport } from "./routes/_portal/categories";
 import { Route as PortalAboutRouteImport } from "./routes/_portal/about";
 import { Route as PortalHandleRouteImport } from "./routes/_portal/$handle";
-import { Route as AuthenticatedSubscriptionsRouteImport } from "./routes/_authenticated/subscriptions";
-import { Route as AuthenticatedMeRouteImport } from "./routes/_authenticated/me";
 import { Route as AuthenticatedAdminRouteImport } from "./routes/_authenticated/admin";
+import { Route as AuthenticatedPortalRouteImport } from "./routes/_authenticated/_portal";
 import { Route as AuthenticatedAdminIndexRouteImport } from "./routes/_authenticated/admin/index";
 import { Route as PortalUIdRouteImport } from "./routes/_portal/u.$id";
 import { Route as PortalPlaylistIdRouteImport } from "./routes/_portal/playlist.$id";
 import { Route as PortalChannelIdRouteImport } from "./routes/_portal/channel.$id";
 import { Route as PortalCIdRouteImport } from "./routes/_portal/c.$id";
-import { Route as AuthenticatedMeVideosRouteImport } from "./routes/_authenticated/me/videos";
-import { Route as AuthenticatedMeUploadRouteImport } from "./routes/_authenticated/me/upload";
-import { Route as AuthenticatedMePlaylistsRouteImport } from "./routes/_authenticated/me/playlists";
-import { Route as AuthenticatedMeNotificationsRouteImport } from "./routes/_authenticated/me/notifications";
-import { Route as AuthenticatedMeHistoryRouteImport } from "./routes/_authenticated/me/history";
-import { Route as AuthenticatedMeFavoritesRouteImport } from "./routes/_authenticated/me/favorites";
-import { Route as AuthenticatedMeChannelRouteImport } from "./routes/_authenticated/me/channel";
 import { Route as AuthenticatedAdminUsersRouteImport } from "./routes/_authenticated/admin/users";
 import { Route as AuthenticatedAdminTagsRouteImport } from "./routes/_authenticated/admin/tags";
 import { Route as AuthenticatedAdminSettingsRouteImport } from "./routes/_authenticated/admin/settings";
@@ -52,13 +44,27 @@ import { Route as AuthenticatedAdminPermissionsRouteImport } from "./routes/_aut
 import { Route as AuthenticatedAdminCommentsRouteImport } from "./routes/_authenticated/admin/comments";
 import { Route as AuthenticatedAdminChannelsRouteImport } from "./routes/_authenticated/admin/channels";
 import { Route as AuthenticatedAdminCategoriesRouteImport } from "./routes/_authenticated/admin/categories";
-import { Route as AuthenticatedAdminArticlesRouteImport } from "./routes/_authenticated/admin/articles";
+import { Route as AuthenticatedPortalSubscriptionsRouteImport } from "./routes/_authenticated/_portal/subscriptions";
+import { Route as AuthenticatedPortalMeRouteImport } from "./routes/_authenticated/_portal/me";
+import { Route as AuthenticatedPortalArticlesRouteImport } from "./routes/_authenticated/_portal/articles";
 import { Route as AuthenticatedAdminMediaRouteRouteImport } from "./routes/_authenticated/admin/media/route";
+import { Route as AuthenticatedAdminArticlesRouteRouteImport } from "./routes/_authenticated/admin/articles/route";
 import { Route as AuthenticatedAdminMediaIndexRouteImport } from "./routes/_authenticated/admin/media/index";
-import { Route as AuthenticatedMediaShortTokenEditRouteImport } from "./routes/_authenticated/media.$shortToken.edit";
+import { Route as AuthenticatedAdminArticlesIndexRouteImport } from "./routes/_authenticated/admin/articles/index";
 import { Route as AuthenticatedAdminTranscodingStatusRouteImport } from "./routes/_authenticated/admin/transcoding.status";
 import { Route as AuthenticatedAdminTranscodingProfilesRouteImport } from "./routes/_authenticated/admin/transcoding.profiles";
 import { Route as AuthenticatedAdminMediaIdRouteImport } from "./routes/_authenticated/admin/media/$id";
+import { Route as AuthenticatedAdminArticlesNewRouteImport } from "./routes/_authenticated/admin/articles/new";
+import { Route as AuthenticatedPortalMeVideosRouteImport } from "./routes/_authenticated/_portal/me/videos";
+import { Route as AuthenticatedPortalMeUploadRouteImport } from "./routes/_authenticated/_portal/me/upload";
+import { Route as AuthenticatedPortalMePlaylistsRouteImport } from "./routes/_authenticated/_portal/me/playlists";
+import { Route as AuthenticatedPortalMeNotificationsRouteImport } from "./routes/_authenticated/_portal/me/notifications";
+import { Route as AuthenticatedPortalMeHistoryRouteImport } from "./routes/_authenticated/_portal/me/history";
+import { Route as AuthenticatedPortalMeFavoritesRouteImport } from "./routes/_authenticated/_portal/me/favorites";
+import { Route as AuthenticatedPortalMeChannelRouteImport } from "./routes/_authenticated/_portal/me/channel";
+import { Route as AuthenticatedPortalArticlesSlugRouteImport } from "./routes/_authenticated/_portal/articles.$slug";
+import { Route as AuthenticatedAdminArticlesIdEditRouteImport } from "./routes/_authenticated/admin/articles/$id.edit";
+import { Route as AuthenticatedPortalMediaShortTokenEditRouteImport } from "./routes/_authenticated/_portal/media.$shortToken.edit";
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: "/_authenticated",
@@ -153,20 +159,13 @@ const PortalHandleRoute = PortalHandleRouteImport.update({
   path: "/$handle",
   getParentRoute: () => PortalRouteRoute,
 } as any);
-const AuthenticatedSubscriptionsRoute =
-  AuthenticatedSubscriptionsRouteImport.update({
-    id: "/subscriptions",
-    path: "/subscriptions",
-    getParentRoute: () => AuthenticatedRoute,
-  } as any);
-const AuthenticatedMeRoute = AuthenticatedMeRouteImport.update({
-  id: "/me",
-  path: "/me",
-  getParentRoute: () => AuthenticatedRoute,
-} as any);
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: "/admin",
   path: "/admin",
+  getParentRoute: () => AuthenticatedRoute,
+} as any);
+const AuthenticatedPortalRoute = AuthenticatedPortalRouteImport.update({
+  id: "/_portal",
   getParentRoute: () => AuthenticatedRoute,
 } as any);
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
@@ -193,44 +192,6 @@ const PortalCIdRoute = PortalCIdRouteImport.update({
   id: "/c/$id",
   path: "/c/$id",
   getParentRoute: () => PortalRouteRoute,
-} as any);
-const AuthenticatedMeVideosRoute = AuthenticatedMeVideosRouteImport.update({
-  id: "/videos",
-  path: "/videos",
-  getParentRoute: () => AuthenticatedMeRoute,
-} as any);
-const AuthenticatedMeUploadRoute = AuthenticatedMeUploadRouteImport.update({
-  id: "/upload",
-  path: "/upload",
-  getParentRoute: () => AuthenticatedMeRoute,
-} as any);
-const AuthenticatedMePlaylistsRoute =
-  AuthenticatedMePlaylistsRouteImport.update({
-    id: "/playlists",
-    path: "/playlists",
-    getParentRoute: () => AuthenticatedMeRoute,
-  } as any);
-const AuthenticatedMeNotificationsRoute =
-  AuthenticatedMeNotificationsRouteImport.update({
-    id: "/notifications",
-    path: "/notifications",
-    getParentRoute: () => AuthenticatedMeRoute,
-  } as any);
-const AuthenticatedMeHistoryRoute = AuthenticatedMeHistoryRouteImport.update({
-  id: "/history",
-  path: "/history",
-  getParentRoute: () => AuthenticatedMeRoute,
-} as any);
-const AuthenticatedMeFavoritesRoute =
-  AuthenticatedMeFavoritesRouteImport.update({
-    id: "/favorites",
-    path: "/favorites",
-    getParentRoute: () => AuthenticatedMeRoute,
-  } as any);
-const AuthenticatedMeChannelRoute = AuthenticatedMeChannelRouteImport.update({
-  id: "/channel",
-  path: "/channel",
-  getParentRoute: () => AuthenticatedMeRoute,
 } as any);
 const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   id: "/users",
@@ -284,16 +245,33 @@ const AuthenticatedAdminCategoriesRoute =
     path: "/categories",
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any);
-const AuthenticatedAdminArticlesRoute =
-  AuthenticatedAdminArticlesRouteImport.update({
+const AuthenticatedPortalSubscriptionsRoute =
+  AuthenticatedPortalSubscriptionsRouteImport.update({
+    id: "/subscriptions",
+    path: "/subscriptions",
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any);
+const AuthenticatedPortalMeRoute = AuthenticatedPortalMeRouteImport.update({
+  id: "/me",
+  path: "/me",
+  getParentRoute: () => AuthenticatedPortalRoute,
+} as any);
+const AuthenticatedPortalArticlesRoute =
+  AuthenticatedPortalArticlesRouteImport.update({
     id: "/articles",
     path: "/articles",
-    getParentRoute: () => AuthenticatedAdminRoute,
+    getParentRoute: () => AuthenticatedPortalRoute,
   } as any);
 const AuthenticatedAdminMediaRouteRoute =
   AuthenticatedAdminMediaRouteRouteImport.update({
     id: "/media",
     path: "/media",
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any);
+const AuthenticatedAdminArticlesRouteRoute =
+  AuthenticatedAdminArticlesRouteRouteImport.update({
+    id: "/articles",
+    path: "/articles",
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any);
 const AuthenticatedAdminMediaIndexRoute =
@@ -302,11 +280,11 @@ const AuthenticatedAdminMediaIndexRoute =
     path: "/",
     getParentRoute: () => AuthenticatedAdminMediaRouteRoute,
   } as any);
-const AuthenticatedMediaShortTokenEditRoute =
-  AuthenticatedMediaShortTokenEditRouteImport.update({
-    id: "/media/$shortToken/edit",
-    path: "/media/$shortToken/edit",
-    getParentRoute: () => AuthenticatedRoute,
+const AuthenticatedAdminArticlesIndexRoute =
+  AuthenticatedAdminArticlesIndexRouteImport.update({
+    id: "/",
+    path: "/",
+    getParentRoute: () => AuthenticatedAdminArticlesRouteRoute,
   } as any);
 const AuthenticatedAdminTranscodingStatusRoute =
   AuthenticatedAdminTranscodingStatusRouteImport.update({
@@ -326,12 +304,76 @@ const AuthenticatedAdminMediaIdRoute =
     path: "/$id",
     getParentRoute: () => AuthenticatedAdminMediaRouteRoute,
   } as any);
+const AuthenticatedAdminArticlesNewRoute =
+  AuthenticatedAdminArticlesNewRouteImport.update({
+    id: "/new",
+    path: "/new",
+    getParentRoute: () => AuthenticatedAdminArticlesRouteRoute,
+  } as any);
+const AuthenticatedPortalMeVideosRoute =
+  AuthenticatedPortalMeVideosRouteImport.update({
+    id: "/videos",
+    path: "/videos",
+    getParentRoute: () => AuthenticatedPortalMeRoute,
+  } as any);
+const AuthenticatedPortalMeUploadRoute =
+  AuthenticatedPortalMeUploadRouteImport.update({
+    id: "/upload",
+    path: "/upload",
+    getParentRoute: () => AuthenticatedPortalMeRoute,
+  } as any);
+const AuthenticatedPortalMePlaylistsRoute =
+  AuthenticatedPortalMePlaylistsRouteImport.update({
+    id: "/playlists",
+    path: "/playlists",
+    getParentRoute: () => AuthenticatedPortalMeRoute,
+  } as any);
+const AuthenticatedPortalMeNotificationsRoute =
+  AuthenticatedPortalMeNotificationsRouteImport.update({
+    id: "/notifications",
+    path: "/notifications",
+    getParentRoute: () => AuthenticatedPortalMeRoute,
+  } as any);
+const AuthenticatedPortalMeHistoryRoute =
+  AuthenticatedPortalMeHistoryRouteImport.update({
+    id: "/history",
+    path: "/history",
+    getParentRoute: () => AuthenticatedPortalMeRoute,
+  } as any);
+const AuthenticatedPortalMeFavoritesRoute =
+  AuthenticatedPortalMeFavoritesRouteImport.update({
+    id: "/favorites",
+    path: "/favorites",
+    getParentRoute: () => AuthenticatedPortalMeRoute,
+  } as any);
+const AuthenticatedPortalMeChannelRoute =
+  AuthenticatedPortalMeChannelRouteImport.update({
+    id: "/channel",
+    path: "/channel",
+    getParentRoute: () => AuthenticatedPortalMeRoute,
+  } as any);
+const AuthenticatedPortalArticlesSlugRoute =
+  AuthenticatedPortalArticlesSlugRouteImport.update({
+    id: "/$slug",
+    path: "/$slug",
+    getParentRoute: () => AuthenticatedPortalArticlesRoute,
+  } as any);
+const AuthenticatedAdminArticlesIdEditRoute =
+  AuthenticatedAdminArticlesIdEditRouteImport.update({
+    id: "/$id/edit",
+    path: "/$id/edit",
+    getParentRoute: () => AuthenticatedAdminArticlesRouteRoute,
+  } as any);
+const AuthenticatedPortalMediaShortTokenEditRoute =
+  AuthenticatedPortalMediaShortTokenEditRouteImport.update({
+    id: "/media/$shortToken/edit",
+    path: "/media/$shortToken/edit",
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof PortalIndexRoute;
   "/admin": typeof AuthenticatedAdminRouteWithChildren;
-  "/me": typeof AuthenticatedMeRouteWithChildren;
-  "/subscriptions": typeof AuthenticatedSubscriptionsRoute;
   "/$handle": typeof PortalHandleRoute;
   "/about": typeof PortalAboutRoute;
   "/categories": typeof PortalCategoriesRoute;
@@ -348,8 +390,11 @@ export interface FileRoutesByFullPath {
   "/watch": typeof PortalWatchRoute;
   "/auth/signin": typeof AuthSigninRoute;
   "/auth/signup": typeof AuthSignupRoute;
+  "/admin/articles": typeof AuthenticatedAdminArticlesRouteRouteWithChildren;
   "/admin/media": typeof AuthenticatedAdminMediaRouteRouteWithChildren;
-  "/admin/articles": typeof AuthenticatedAdminArticlesRoute;
+  "/articles": typeof AuthenticatedPortalArticlesRouteWithChildren;
+  "/me": typeof AuthenticatedPortalMeRouteWithChildren;
+  "/subscriptions": typeof AuthenticatedPortalSubscriptionsRoute;
   "/admin/categories": typeof AuthenticatedAdminCategoriesRoute;
   "/admin/channels": typeof AuthenticatedAdminChannelsRoute;
   "/admin/comments": typeof AuthenticatedAdminCommentsRoute;
@@ -359,28 +404,30 @@ export interface FileRoutesByFullPath {
   "/admin/settings": typeof AuthenticatedAdminSettingsRoute;
   "/admin/tags": typeof AuthenticatedAdminTagsRoute;
   "/admin/users": typeof AuthenticatedAdminUsersRoute;
-  "/me/channel": typeof AuthenticatedMeChannelRoute;
-  "/me/favorites": typeof AuthenticatedMeFavoritesRoute;
-  "/me/history": typeof AuthenticatedMeHistoryRoute;
-  "/me/notifications": typeof AuthenticatedMeNotificationsRoute;
-  "/me/playlists": typeof AuthenticatedMePlaylistsRoute;
-  "/me/upload": typeof AuthenticatedMeUploadRoute;
-  "/me/videos": typeof AuthenticatedMeVideosRoute;
   "/c/$id": typeof PortalCIdRoute;
   "/channel/$id": typeof PortalChannelIdRoute;
   "/playlist/$id": typeof PortalPlaylistIdRoute;
   "/u/$id": typeof PortalUIdRoute;
   "/admin/": typeof AuthenticatedAdminIndexRoute;
+  "/articles/$slug": typeof AuthenticatedPortalArticlesSlugRoute;
+  "/me/channel": typeof AuthenticatedPortalMeChannelRoute;
+  "/me/favorites": typeof AuthenticatedPortalMeFavoritesRoute;
+  "/me/history": typeof AuthenticatedPortalMeHistoryRoute;
+  "/me/notifications": typeof AuthenticatedPortalMeNotificationsRoute;
+  "/me/playlists": typeof AuthenticatedPortalMePlaylistsRoute;
+  "/me/upload": typeof AuthenticatedPortalMeUploadRoute;
+  "/me/videos": typeof AuthenticatedPortalMeVideosRoute;
+  "/admin/articles/new": typeof AuthenticatedAdminArticlesNewRoute;
   "/admin/media/$id": typeof AuthenticatedAdminMediaIdRoute;
   "/admin/transcoding/profiles": typeof AuthenticatedAdminTranscodingProfilesRoute;
   "/admin/transcoding/status": typeof AuthenticatedAdminTranscodingStatusRoute;
-  "/media/$shortToken/edit": typeof AuthenticatedMediaShortTokenEditRoute;
+  "/admin/articles/": typeof AuthenticatedAdminArticlesIndexRoute;
   "/admin/media/": typeof AuthenticatedAdminMediaIndexRoute;
+  "/media/$shortToken/edit": typeof AuthenticatedPortalMediaShortTokenEditRoute;
+  "/admin/articles/$id/edit": typeof AuthenticatedAdminArticlesIdEditRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof PortalIndexRoute;
-  "/me": typeof AuthenticatedMeRouteWithChildren;
-  "/subscriptions": typeof AuthenticatedSubscriptionsRoute;
   "/$handle": typeof PortalHandleRoute;
   "/about": typeof PortalAboutRoute;
   "/categories": typeof PortalCategoriesRoute;
@@ -397,7 +444,9 @@ export interface FileRoutesByTo {
   "/watch": typeof PortalWatchRoute;
   "/auth/signin": typeof AuthSigninRoute;
   "/auth/signup": typeof AuthSignupRoute;
-  "/admin/articles": typeof AuthenticatedAdminArticlesRoute;
+  "/articles": typeof AuthenticatedPortalArticlesRouteWithChildren;
+  "/me": typeof AuthenticatedPortalMeRouteWithChildren;
+  "/subscriptions": typeof AuthenticatedPortalSubscriptionsRoute;
   "/admin/categories": typeof AuthenticatedAdminCategoriesRoute;
   "/admin/channels": typeof AuthenticatedAdminChannelsRoute;
   "/admin/comments": typeof AuthenticatedAdminCommentsRoute;
@@ -407,31 +456,34 @@ export interface FileRoutesByTo {
   "/admin/settings": typeof AuthenticatedAdminSettingsRoute;
   "/admin/tags": typeof AuthenticatedAdminTagsRoute;
   "/admin/users": typeof AuthenticatedAdminUsersRoute;
-  "/me/channel": typeof AuthenticatedMeChannelRoute;
-  "/me/favorites": typeof AuthenticatedMeFavoritesRoute;
-  "/me/history": typeof AuthenticatedMeHistoryRoute;
-  "/me/notifications": typeof AuthenticatedMeNotificationsRoute;
-  "/me/playlists": typeof AuthenticatedMePlaylistsRoute;
-  "/me/upload": typeof AuthenticatedMeUploadRoute;
-  "/me/videos": typeof AuthenticatedMeVideosRoute;
   "/c/$id": typeof PortalCIdRoute;
   "/channel/$id": typeof PortalChannelIdRoute;
   "/playlist/$id": typeof PortalPlaylistIdRoute;
   "/u/$id": typeof PortalUIdRoute;
   "/admin": typeof AuthenticatedAdminIndexRoute;
+  "/articles/$slug": typeof AuthenticatedPortalArticlesSlugRoute;
+  "/me/channel": typeof AuthenticatedPortalMeChannelRoute;
+  "/me/favorites": typeof AuthenticatedPortalMeFavoritesRoute;
+  "/me/history": typeof AuthenticatedPortalMeHistoryRoute;
+  "/me/notifications": typeof AuthenticatedPortalMeNotificationsRoute;
+  "/me/playlists": typeof AuthenticatedPortalMePlaylistsRoute;
+  "/me/upload": typeof AuthenticatedPortalMeUploadRoute;
+  "/me/videos": typeof AuthenticatedPortalMeVideosRoute;
+  "/admin/articles/new": typeof AuthenticatedAdminArticlesNewRoute;
   "/admin/media/$id": typeof AuthenticatedAdminMediaIdRoute;
   "/admin/transcoding/profiles": typeof AuthenticatedAdminTranscodingProfilesRoute;
   "/admin/transcoding/status": typeof AuthenticatedAdminTranscodingStatusRoute;
-  "/media/$shortToken/edit": typeof AuthenticatedMediaShortTokenEditRoute;
+  "/admin/articles": typeof AuthenticatedAdminArticlesIndexRoute;
   "/admin/media": typeof AuthenticatedAdminMediaIndexRoute;
+  "/media/$shortToken/edit": typeof AuthenticatedPortalMediaShortTokenEditRoute;
+  "/admin/articles/$id/edit": typeof AuthenticatedAdminArticlesIdEditRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/_portal": typeof PortalRouteRouteWithChildren;
   "/_authenticated": typeof AuthenticatedRouteWithChildren;
+  "/_authenticated/_portal": typeof AuthenticatedPortalRouteWithChildren;
   "/_authenticated/admin": typeof AuthenticatedAdminRouteWithChildren;
-  "/_authenticated/me": typeof AuthenticatedMeRouteWithChildren;
-  "/_authenticated/subscriptions": typeof AuthenticatedSubscriptionsRoute;
   "/_portal/$handle": typeof PortalHandleRoute;
   "/_portal/about": typeof PortalAboutRoute;
   "/_portal/categories": typeof PortalCategoriesRoute;
@@ -449,8 +501,11 @@ export interface FileRoutesById {
   "/auth/signin": typeof AuthSigninRoute;
   "/auth/signup": typeof AuthSignupRoute;
   "/_portal/": typeof PortalIndexRoute;
+  "/_authenticated/admin/articles": typeof AuthenticatedAdminArticlesRouteRouteWithChildren;
   "/_authenticated/admin/media": typeof AuthenticatedAdminMediaRouteRouteWithChildren;
-  "/_authenticated/admin/articles": typeof AuthenticatedAdminArticlesRoute;
+  "/_authenticated/_portal/articles": typeof AuthenticatedPortalArticlesRouteWithChildren;
+  "/_authenticated/_portal/me": typeof AuthenticatedPortalMeRouteWithChildren;
+  "/_authenticated/_portal/subscriptions": typeof AuthenticatedPortalSubscriptionsRoute;
   "/_authenticated/admin/categories": typeof AuthenticatedAdminCategoriesRoute;
   "/_authenticated/admin/channels": typeof AuthenticatedAdminChannelsRoute;
   "/_authenticated/admin/comments": typeof AuthenticatedAdminCommentsRoute;
@@ -460,31 +515,33 @@ export interface FileRoutesById {
   "/_authenticated/admin/settings": typeof AuthenticatedAdminSettingsRoute;
   "/_authenticated/admin/tags": typeof AuthenticatedAdminTagsRoute;
   "/_authenticated/admin/users": typeof AuthenticatedAdminUsersRoute;
-  "/_authenticated/me/channel": typeof AuthenticatedMeChannelRoute;
-  "/_authenticated/me/favorites": typeof AuthenticatedMeFavoritesRoute;
-  "/_authenticated/me/history": typeof AuthenticatedMeHistoryRoute;
-  "/_authenticated/me/notifications": typeof AuthenticatedMeNotificationsRoute;
-  "/_authenticated/me/playlists": typeof AuthenticatedMePlaylistsRoute;
-  "/_authenticated/me/upload": typeof AuthenticatedMeUploadRoute;
-  "/_authenticated/me/videos": typeof AuthenticatedMeVideosRoute;
   "/_portal/c/$id": typeof PortalCIdRoute;
   "/_portal/channel/$id": typeof PortalChannelIdRoute;
   "/_portal/playlist/$id": typeof PortalPlaylistIdRoute;
   "/_portal/u/$id": typeof PortalUIdRoute;
   "/_authenticated/admin/": typeof AuthenticatedAdminIndexRoute;
+  "/_authenticated/_portal/articles/$slug": typeof AuthenticatedPortalArticlesSlugRoute;
+  "/_authenticated/_portal/me/channel": typeof AuthenticatedPortalMeChannelRoute;
+  "/_authenticated/_portal/me/favorites": typeof AuthenticatedPortalMeFavoritesRoute;
+  "/_authenticated/_portal/me/history": typeof AuthenticatedPortalMeHistoryRoute;
+  "/_authenticated/_portal/me/notifications": typeof AuthenticatedPortalMeNotificationsRoute;
+  "/_authenticated/_portal/me/playlists": typeof AuthenticatedPortalMePlaylistsRoute;
+  "/_authenticated/_portal/me/upload": typeof AuthenticatedPortalMeUploadRoute;
+  "/_authenticated/_portal/me/videos": typeof AuthenticatedPortalMeVideosRoute;
+  "/_authenticated/admin/articles/new": typeof AuthenticatedAdminArticlesNewRoute;
   "/_authenticated/admin/media/$id": typeof AuthenticatedAdminMediaIdRoute;
   "/_authenticated/admin/transcoding/profiles": typeof AuthenticatedAdminTranscodingProfilesRoute;
   "/_authenticated/admin/transcoding/status": typeof AuthenticatedAdminTranscodingStatusRoute;
-  "/_authenticated/media/$shortToken/edit": typeof AuthenticatedMediaShortTokenEditRoute;
+  "/_authenticated/admin/articles/": typeof AuthenticatedAdminArticlesIndexRoute;
   "/_authenticated/admin/media/": typeof AuthenticatedAdminMediaIndexRoute;
+  "/_authenticated/_portal/media/$shortToken/edit": typeof AuthenticatedPortalMediaShortTokenEditRoute;
+  "/_authenticated/admin/articles/$id/edit": typeof AuthenticatedAdminArticlesIdEditRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | "/"
     | "/admin"
-    | "/me"
-    | "/subscriptions"
     | "/$handle"
     | "/about"
     | "/categories"
@@ -501,8 +558,11 @@ export interface FileRouteTypes {
     | "/watch"
     | "/auth/signin"
     | "/auth/signup"
-    | "/admin/media"
     | "/admin/articles"
+    | "/admin/media"
+    | "/articles"
+    | "/me"
+    | "/subscriptions"
     | "/admin/categories"
     | "/admin/channels"
     | "/admin/comments"
@@ -512,28 +572,30 @@ export interface FileRouteTypes {
     | "/admin/settings"
     | "/admin/tags"
     | "/admin/users"
-    | "/me/channel"
-    | "/me/favorites"
-    | "/me/history"
-    | "/me/notifications"
-    | "/me/playlists"
-    | "/me/upload"
-    | "/me/videos"
     | "/c/$id"
     | "/channel/$id"
     | "/playlist/$id"
     | "/u/$id"
     | "/admin/"
+    | "/articles/$slug"
+    | "/me/channel"
+    | "/me/favorites"
+    | "/me/history"
+    | "/me/notifications"
+    | "/me/playlists"
+    | "/me/upload"
+    | "/me/videos"
+    | "/admin/articles/new"
     | "/admin/media/$id"
     | "/admin/transcoding/profiles"
     | "/admin/transcoding/status"
+    | "/admin/articles/"
+    | "/admin/media/"
     | "/media/$shortToken/edit"
-    | "/admin/media/";
+    | "/admin/articles/$id/edit";
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
-    | "/me"
-    | "/subscriptions"
     | "/$handle"
     | "/about"
     | "/categories"
@@ -550,7 +612,9 @@ export interface FileRouteTypes {
     | "/watch"
     | "/auth/signin"
     | "/auth/signup"
-    | "/admin/articles"
+    | "/articles"
+    | "/me"
+    | "/subscriptions"
     | "/admin/categories"
     | "/admin/channels"
     | "/admin/comments"
@@ -560,6 +624,12 @@ export interface FileRouteTypes {
     | "/admin/settings"
     | "/admin/tags"
     | "/admin/users"
+    | "/c/$id"
+    | "/channel/$id"
+    | "/playlist/$id"
+    | "/u/$id"
+    | "/admin"
+    | "/articles/$slug"
     | "/me/channel"
     | "/me/favorites"
     | "/me/history"
@@ -567,23 +637,20 @@ export interface FileRouteTypes {
     | "/me/playlists"
     | "/me/upload"
     | "/me/videos"
-    | "/c/$id"
-    | "/channel/$id"
-    | "/playlist/$id"
-    | "/u/$id"
-    | "/admin"
+    | "/admin/articles/new"
     | "/admin/media/$id"
     | "/admin/transcoding/profiles"
     | "/admin/transcoding/status"
+    | "/admin/articles"
+    | "/admin/media"
     | "/media/$shortToken/edit"
-    | "/admin/media";
+    | "/admin/articles/$id/edit";
   id:
     | "__root__"
     | "/_portal"
     | "/_authenticated"
+    | "/_authenticated/_portal"
     | "/_authenticated/admin"
-    | "/_authenticated/me"
-    | "/_authenticated/subscriptions"
     | "/_portal/$handle"
     | "/_portal/about"
     | "/_portal/categories"
@@ -601,8 +668,11 @@ export interface FileRouteTypes {
     | "/auth/signin"
     | "/auth/signup"
     | "/_portal/"
-    | "/_authenticated/admin/media"
     | "/_authenticated/admin/articles"
+    | "/_authenticated/admin/media"
+    | "/_authenticated/_portal/articles"
+    | "/_authenticated/_portal/me"
+    | "/_authenticated/_portal/subscriptions"
     | "/_authenticated/admin/categories"
     | "/_authenticated/admin/channels"
     | "/_authenticated/admin/comments"
@@ -612,23 +682,27 @@ export interface FileRouteTypes {
     | "/_authenticated/admin/settings"
     | "/_authenticated/admin/tags"
     | "/_authenticated/admin/users"
-    | "/_authenticated/me/channel"
-    | "/_authenticated/me/favorites"
-    | "/_authenticated/me/history"
-    | "/_authenticated/me/notifications"
-    | "/_authenticated/me/playlists"
-    | "/_authenticated/me/upload"
-    | "/_authenticated/me/videos"
     | "/_portal/c/$id"
     | "/_portal/channel/$id"
     | "/_portal/playlist/$id"
     | "/_portal/u/$id"
     | "/_authenticated/admin/"
+    | "/_authenticated/_portal/articles/$slug"
+    | "/_authenticated/_portal/me/channel"
+    | "/_authenticated/_portal/me/favorites"
+    | "/_authenticated/_portal/me/history"
+    | "/_authenticated/_portal/me/notifications"
+    | "/_authenticated/_portal/me/playlists"
+    | "/_authenticated/_portal/me/upload"
+    | "/_authenticated/_portal/me/videos"
+    | "/_authenticated/admin/articles/new"
     | "/_authenticated/admin/media/$id"
     | "/_authenticated/admin/transcoding/profiles"
     | "/_authenticated/admin/transcoding/status"
-    | "/_authenticated/media/$shortToken/edit"
-    | "/_authenticated/admin/media/";
+    | "/_authenticated/admin/articles/"
+    | "/_authenticated/admin/media/"
+    | "/_authenticated/_portal/media/$shortToken/edit"
+    | "/_authenticated/admin/articles/$id/edit";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -773,25 +847,18 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PortalHandleRouteImport;
       parentRoute: typeof PortalRouteRoute;
     };
-    "/_authenticated/subscriptions": {
-      id: "/_authenticated/subscriptions";
-      path: "/subscriptions";
-      fullPath: "/subscriptions";
-      preLoaderRoute: typeof AuthenticatedSubscriptionsRouteImport;
-      parentRoute: typeof AuthenticatedRoute;
-    };
-    "/_authenticated/me": {
-      id: "/_authenticated/me";
-      path: "/me";
-      fullPath: "/me";
-      preLoaderRoute: typeof AuthenticatedMeRouteImport;
-      parentRoute: typeof AuthenticatedRoute;
-    };
     "/_authenticated/admin": {
       id: "/_authenticated/admin";
       path: "/admin";
       fullPath: "/admin";
       preLoaderRoute: typeof AuthenticatedAdminRouteImport;
+      parentRoute: typeof AuthenticatedRoute;
+    };
+    "/_authenticated/_portal": {
+      id: "/_authenticated/_portal";
+      path: "";
+      fullPath: "/";
+      preLoaderRoute: typeof AuthenticatedPortalRouteImport;
       parentRoute: typeof AuthenticatedRoute;
     };
     "/_authenticated/admin/": {
@@ -828,55 +895,6 @@ declare module "@tanstack/react-router" {
       fullPath: "/c/$id";
       preLoaderRoute: typeof PortalCIdRouteImport;
       parentRoute: typeof PortalRouteRoute;
-    };
-    "/_authenticated/me/videos": {
-      id: "/_authenticated/me/videos";
-      path: "/videos";
-      fullPath: "/me/videos";
-      preLoaderRoute: typeof AuthenticatedMeVideosRouteImport;
-      parentRoute: typeof AuthenticatedMeRoute;
-    };
-    "/_authenticated/me/upload": {
-      id: "/_authenticated/me/upload";
-      path: "/upload";
-      fullPath: "/me/upload";
-      preLoaderRoute: typeof AuthenticatedMeUploadRouteImport;
-      parentRoute: typeof AuthenticatedMeRoute;
-    };
-    "/_authenticated/me/playlists": {
-      id: "/_authenticated/me/playlists";
-      path: "/playlists";
-      fullPath: "/me/playlists";
-      preLoaderRoute: typeof AuthenticatedMePlaylistsRouteImport;
-      parentRoute: typeof AuthenticatedMeRoute;
-    };
-    "/_authenticated/me/notifications": {
-      id: "/_authenticated/me/notifications";
-      path: "/notifications";
-      fullPath: "/me/notifications";
-      preLoaderRoute: typeof AuthenticatedMeNotificationsRouteImport;
-      parentRoute: typeof AuthenticatedMeRoute;
-    };
-    "/_authenticated/me/history": {
-      id: "/_authenticated/me/history";
-      path: "/history";
-      fullPath: "/me/history";
-      preLoaderRoute: typeof AuthenticatedMeHistoryRouteImport;
-      parentRoute: typeof AuthenticatedMeRoute;
-    };
-    "/_authenticated/me/favorites": {
-      id: "/_authenticated/me/favorites";
-      path: "/favorites";
-      fullPath: "/me/favorites";
-      preLoaderRoute: typeof AuthenticatedMeFavoritesRouteImport;
-      parentRoute: typeof AuthenticatedMeRoute;
-    };
-    "/_authenticated/me/channel": {
-      id: "/_authenticated/me/channel";
-      path: "/channel";
-      fullPath: "/me/channel";
-      preLoaderRoute: typeof AuthenticatedMeChannelRouteImport;
-      parentRoute: typeof AuthenticatedMeRoute;
     };
     "/_authenticated/admin/users": {
       id: "/_authenticated/admin/users";
@@ -941,18 +959,39 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedAdminCategoriesRouteImport;
       parentRoute: typeof AuthenticatedAdminRoute;
     };
-    "/_authenticated/admin/articles": {
-      id: "/_authenticated/admin/articles";
+    "/_authenticated/_portal/subscriptions": {
+      id: "/_authenticated/_portal/subscriptions";
+      path: "/subscriptions";
+      fullPath: "/subscriptions";
+      preLoaderRoute: typeof AuthenticatedPortalSubscriptionsRouteImport;
+      parentRoute: typeof AuthenticatedPortalRoute;
+    };
+    "/_authenticated/_portal/me": {
+      id: "/_authenticated/_portal/me";
+      path: "/me";
+      fullPath: "/me";
+      preLoaderRoute: typeof AuthenticatedPortalMeRouteImport;
+      parentRoute: typeof AuthenticatedPortalRoute;
+    };
+    "/_authenticated/_portal/articles": {
+      id: "/_authenticated/_portal/articles";
       path: "/articles";
-      fullPath: "/admin/articles";
-      preLoaderRoute: typeof AuthenticatedAdminArticlesRouteImport;
-      parentRoute: typeof AuthenticatedAdminRoute;
+      fullPath: "/articles";
+      preLoaderRoute: typeof AuthenticatedPortalArticlesRouteImport;
+      parentRoute: typeof AuthenticatedPortalRoute;
     };
     "/_authenticated/admin/media": {
       id: "/_authenticated/admin/media";
       path: "/media";
       fullPath: "/admin/media";
       preLoaderRoute: typeof AuthenticatedAdminMediaRouteRouteImport;
+      parentRoute: typeof AuthenticatedAdminRoute;
+    };
+    "/_authenticated/admin/articles": {
+      id: "/_authenticated/admin/articles";
+      path: "/articles";
+      fullPath: "/admin/articles";
+      preLoaderRoute: typeof AuthenticatedAdminArticlesRouteRouteImport;
       parentRoute: typeof AuthenticatedAdminRoute;
     };
     "/_authenticated/admin/media/": {
@@ -962,12 +1001,12 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedAdminMediaIndexRouteImport;
       parentRoute: typeof AuthenticatedAdminMediaRouteRoute;
     };
-    "/_authenticated/media/$shortToken/edit": {
-      id: "/_authenticated/media/$shortToken/edit";
-      path: "/media/$shortToken/edit";
-      fullPath: "/media/$shortToken/edit";
-      preLoaderRoute: typeof AuthenticatedMediaShortTokenEditRouteImport;
-      parentRoute: typeof AuthenticatedRoute;
+    "/_authenticated/admin/articles/": {
+      id: "/_authenticated/admin/articles/";
+      path: "/";
+      fullPath: "/admin/articles/";
+      preLoaderRoute: typeof AuthenticatedAdminArticlesIndexRouteImport;
+      parentRoute: typeof AuthenticatedAdminArticlesRouteRoute;
     };
     "/_authenticated/admin/transcoding/status": {
       id: "/_authenticated/admin/transcoding/status";
@@ -989,6 +1028,83 @@ declare module "@tanstack/react-router" {
       fullPath: "/admin/media/$id";
       preLoaderRoute: typeof AuthenticatedAdminMediaIdRouteImport;
       parentRoute: typeof AuthenticatedAdminMediaRouteRoute;
+    };
+    "/_authenticated/admin/articles/new": {
+      id: "/_authenticated/admin/articles/new";
+      path: "/new";
+      fullPath: "/admin/articles/new";
+      preLoaderRoute: typeof AuthenticatedAdminArticlesNewRouteImport;
+      parentRoute: typeof AuthenticatedAdminArticlesRouteRoute;
+    };
+    "/_authenticated/_portal/me/videos": {
+      id: "/_authenticated/_portal/me/videos";
+      path: "/videos";
+      fullPath: "/me/videos";
+      preLoaderRoute: typeof AuthenticatedPortalMeVideosRouteImport;
+      parentRoute: typeof AuthenticatedPortalMeRoute;
+    };
+    "/_authenticated/_portal/me/upload": {
+      id: "/_authenticated/_portal/me/upload";
+      path: "/upload";
+      fullPath: "/me/upload";
+      preLoaderRoute: typeof AuthenticatedPortalMeUploadRouteImport;
+      parentRoute: typeof AuthenticatedPortalMeRoute;
+    };
+    "/_authenticated/_portal/me/playlists": {
+      id: "/_authenticated/_portal/me/playlists";
+      path: "/playlists";
+      fullPath: "/me/playlists";
+      preLoaderRoute: typeof AuthenticatedPortalMePlaylistsRouteImport;
+      parentRoute: typeof AuthenticatedPortalMeRoute;
+    };
+    "/_authenticated/_portal/me/notifications": {
+      id: "/_authenticated/_portal/me/notifications";
+      path: "/notifications";
+      fullPath: "/me/notifications";
+      preLoaderRoute: typeof AuthenticatedPortalMeNotificationsRouteImport;
+      parentRoute: typeof AuthenticatedPortalMeRoute;
+    };
+    "/_authenticated/_portal/me/history": {
+      id: "/_authenticated/_portal/me/history";
+      path: "/history";
+      fullPath: "/me/history";
+      preLoaderRoute: typeof AuthenticatedPortalMeHistoryRouteImport;
+      parentRoute: typeof AuthenticatedPortalMeRoute;
+    };
+    "/_authenticated/_portal/me/favorites": {
+      id: "/_authenticated/_portal/me/favorites";
+      path: "/favorites";
+      fullPath: "/me/favorites";
+      preLoaderRoute: typeof AuthenticatedPortalMeFavoritesRouteImport;
+      parentRoute: typeof AuthenticatedPortalMeRoute;
+    };
+    "/_authenticated/_portal/me/channel": {
+      id: "/_authenticated/_portal/me/channel";
+      path: "/channel";
+      fullPath: "/me/channel";
+      preLoaderRoute: typeof AuthenticatedPortalMeChannelRouteImport;
+      parentRoute: typeof AuthenticatedPortalMeRoute;
+    };
+    "/_authenticated/_portal/articles/$slug": {
+      id: "/_authenticated/_portal/articles/$slug";
+      path: "/$slug";
+      fullPath: "/articles/$slug";
+      preLoaderRoute: typeof AuthenticatedPortalArticlesSlugRouteImport;
+      parentRoute: typeof AuthenticatedPortalArticlesRoute;
+    };
+    "/_authenticated/admin/articles/$id/edit": {
+      id: "/_authenticated/admin/articles/$id/edit";
+      path: "/$id/edit";
+      fullPath: "/admin/articles/$id/edit";
+      preLoaderRoute: typeof AuthenticatedAdminArticlesIdEditRouteImport;
+      parentRoute: typeof AuthenticatedAdminArticlesRouteRoute;
+    };
+    "/_authenticated/_portal/media/$shortToken/edit": {
+      id: "/_authenticated/_portal/media/$shortToken/edit";
+      path: "/media/$shortToken/edit";
+      fullPath: "/media/$shortToken/edit";
+      preLoaderRoute: typeof AuthenticatedPortalMediaShortTokenEditRouteImport;
+      parentRoute: typeof AuthenticatedPortalRoute;
     };
   }
 }
@@ -1041,6 +1157,84 @@ const PortalRouteRouteWithChildren = PortalRouteRoute._addFileChildren(
   PortalRouteRouteChildren,
 );
 
+interface AuthenticatedPortalArticlesRouteChildren {
+  AuthenticatedPortalArticlesSlugRoute: typeof AuthenticatedPortalArticlesSlugRoute;
+}
+
+const AuthenticatedPortalArticlesRouteChildren: AuthenticatedPortalArticlesRouteChildren =
+  {
+    AuthenticatedPortalArticlesSlugRoute: AuthenticatedPortalArticlesSlugRoute,
+  };
+
+const AuthenticatedPortalArticlesRouteWithChildren =
+  AuthenticatedPortalArticlesRoute._addFileChildren(
+    AuthenticatedPortalArticlesRouteChildren,
+  );
+
+interface AuthenticatedPortalMeRouteChildren {
+  AuthenticatedPortalMeChannelRoute: typeof AuthenticatedPortalMeChannelRoute;
+  AuthenticatedPortalMeFavoritesRoute: typeof AuthenticatedPortalMeFavoritesRoute;
+  AuthenticatedPortalMeHistoryRoute: typeof AuthenticatedPortalMeHistoryRoute;
+  AuthenticatedPortalMeNotificationsRoute: typeof AuthenticatedPortalMeNotificationsRoute;
+  AuthenticatedPortalMePlaylistsRoute: typeof AuthenticatedPortalMePlaylistsRoute;
+  AuthenticatedPortalMeUploadRoute: typeof AuthenticatedPortalMeUploadRoute;
+  AuthenticatedPortalMeVideosRoute: typeof AuthenticatedPortalMeVideosRoute;
+}
+
+const AuthenticatedPortalMeRouteChildren: AuthenticatedPortalMeRouteChildren = {
+  AuthenticatedPortalMeChannelRoute: AuthenticatedPortalMeChannelRoute,
+  AuthenticatedPortalMeFavoritesRoute: AuthenticatedPortalMeFavoritesRoute,
+  AuthenticatedPortalMeHistoryRoute: AuthenticatedPortalMeHistoryRoute,
+  AuthenticatedPortalMeNotificationsRoute:
+    AuthenticatedPortalMeNotificationsRoute,
+  AuthenticatedPortalMePlaylistsRoute: AuthenticatedPortalMePlaylistsRoute,
+  AuthenticatedPortalMeUploadRoute: AuthenticatedPortalMeUploadRoute,
+  AuthenticatedPortalMeVideosRoute: AuthenticatedPortalMeVideosRoute,
+};
+
+const AuthenticatedPortalMeRouteWithChildren =
+  AuthenticatedPortalMeRoute._addFileChildren(
+    AuthenticatedPortalMeRouteChildren,
+  );
+
+interface AuthenticatedPortalRouteChildren {
+  AuthenticatedPortalArticlesRoute: typeof AuthenticatedPortalArticlesRouteWithChildren;
+  AuthenticatedPortalMeRoute: typeof AuthenticatedPortalMeRouteWithChildren;
+  AuthenticatedPortalSubscriptionsRoute: typeof AuthenticatedPortalSubscriptionsRoute;
+  AuthenticatedPortalMediaShortTokenEditRoute: typeof AuthenticatedPortalMediaShortTokenEditRoute;
+}
+
+const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
+  AuthenticatedPortalArticlesRoute:
+    AuthenticatedPortalArticlesRouteWithChildren,
+  AuthenticatedPortalMeRoute: AuthenticatedPortalMeRouteWithChildren,
+  AuthenticatedPortalSubscriptionsRoute: AuthenticatedPortalSubscriptionsRoute,
+  AuthenticatedPortalMediaShortTokenEditRoute:
+    AuthenticatedPortalMediaShortTokenEditRoute,
+};
+
+const AuthenticatedPortalRouteWithChildren =
+  AuthenticatedPortalRoute._addFileChildren(AuthenticatedPortalRouteChildren);
+
+interface AuthenticatedAdminArticlesRouteRouteChildren {
+  AuthenticatedAdminArticlesNewRoute: typeof AuthenticatedAdminArticlesNewRoute;
+  AuthenticatedAdminArticlesIndexRoute: typeof AuthenticatedAdminArticlesIndexRoute;
+  AuthenticatedAdminArticlesIdEditRoute: typeof AuthenticatedAdminArticlesIdEditRoute;
+}
+
+const AuthenticatedAdminArticlesRouteRouteChildren: AuthenticatedAdminArticlesRouteRouteChildren =
+  {
+    AuthenticatedAdminArticlesNewRoute: AuthenticatedAdminArticlesNewRoute,
+    AuthenticatedAdminArticlesIndexRoute: AuthenticatedAdminArticlesIndexRoute,
+    AuthenticatedAdminArticlesIdEditRoute:
+      AuthenticatedAdminArticlesIdEditRoute,
+  };
+
+const AuthenticatedAdminArticlesRouteRouteWithChildren =
+  AuthenticatedAdminArticlesRouteRoute._addFileChildren(
+    AuthenticatedAdminArticlesRouteRouteChildren,
+  );
+
 interface AuthenticatedAdminMediaRouteRouteChildren {
   AuthenticatedAdminMediaIdRoute: typeof AuthenticatedAdminMediaIdRoute;
   AuthenticatedAdminMediaIndexRoute: typeof AuthenticatedAdminMediaIndexRoute;
@@ -1058,8 +1252,8 @@ const AuthenticatedAdminMediaRouteRouteWithChildren =
   );
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminArticlesRouteRoute: typeof AuthenticatedAdminArticlesRouteRouteWithChildren;
   AuthenticatedAdminMediaRouteRoute: typeof AuthenticatedAdminMediaRouteRouteWithChildren;
-  AuthenticatedAdminArticlesRoute: typeof AuthenticatedAdminArticlesRoute;
   AuthenticatedAdminCategoriesRoute: typeof AuthenticatedAdminCategoriesRoute;
   AuthenticatedAdminChannelsRoute: typeof AuthenticatedAdminChannelsRoute;
   AuthenticatedAdminCommentsRoute: typeof AuthenticatedAdminCommentsRoute;
@@ -1075,9 +1269,10 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminArticlesRouteRoute:
+    AuthenticatedAdminArticlesRouteRouteWithChildren,
   AuthenticatedAdminMediaRouteRoute:
     AuthenticatedAdminMediaRouteRouteWithChildren,
-  AuthenticatedAdminArticlesRoute: AuthenticatedAdminArticlesRoute,
   AuthenticatedAdminCategoriesRoute: AuthenticatedAdminCategoriesRoute,
   AuthenticatedAdminChannelsRoute: AuthenticatedAdminChannelsRoute,
   AuthenticatedAdminCommentsRoute: AuthenticatedAdminCommentsRoute,
@@ -1097,42 +1292,14 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
 const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren);
 
-interface AuthenticatedMeRouteChildren {
-  AuthenticatedMeChannelRoute: typeof AuthenticatedMeChannelRoute;
-  AuthenticatedMeFavoritesRoute: typeof AuthenticatedMeFavoritesRoute;
-  AuthenticatedMeHistoryRoute: typeof AuthenticatedMeHistoryRoute;
-  AuthenticatedMeNotificationsRoute: typeof AuthenticatedMeNotificationsRoute;
-  AuthenticatedMePlaylistsRoute: typeof AuthenticatedMePlaylistsRoute;
-  AuthenticatedMeUploadRoute: typeof AuthenticatedMeUploadRoute;
-  AuthenticatedMeVideosRoute: typeof AuthenticatedMeVideosRoute;
-}
-
-const AuthenticatedMeRouteChildren: AuthenticatedMeRouteChildren = {
-  AuthenticatedMeChannelRoute: AuthenticatedMeChannelRoute,
-  AuthenticatedMeFavoritesRoute: AuthenticatedMeFavoritesRoute,
-  AuthenticatedMeHistoryRoute: AuthenticatedMeHistoryRoute,
-  AuthenticatedMeNotificationsRoute: AuthenticatedMeNotificationsRoute,
-  AuthenticatedMePlaylistsRoute: AuthenticatedMePlaylistsRoute,
-  AuthenticatedMeUploadRoute: AuthenticatedMeUploadRoute,
-  AuthenticatedMeVideosRoute: AuthenticatedMeVideosRoute,
-};
-
-const AuthenticatedMeRouteWithChildren = AuthenticatedMeRoute._addFileChildren(
-  AuthenticatedMeRouteChildren,
-);
-
 interface AuthenticatedRouteChildren {
+  AuthenticatedPortalRoute: typeof AuthenticatedPortalRouteWithChildren;
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren;
-  AuthenticatedMeRoute: typeof AuthenticatedMeRouteWithChildren;
-  AuthenticatedSubscriptionsRoute: typeof AuthenticatedSubscriptionsRoute;
-  AuthenticatedMediaShortTokenEditRoute: typeof AuthenticatedMediaShortTokenEditRoute;
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedPortalRoute: AuthenticatedPortalRouteWithChildren,
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
-  AuthenticatedMeRoute: AuthenticatedMeRouteWithChildren,
-  AuthenticatedSubscriptionsRoute: AuthenticatedSubscriptionsRoute,
-  AuthenticatedMediaShortTokenEditRoute: AuthenticatedMediaShortTokenEditRoute,
 };
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

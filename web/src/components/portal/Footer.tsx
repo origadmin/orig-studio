@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
@@ -13,10 +13,8 @@ const Footer = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
                     <div className="space-y-6">
                         <Link to="/" className="flex items-center space-x-2">
-                            <div
-                                className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white shadow-lg">O
-                            </div>
-                            <span className="text-xl font-black text-slate-900 tracking-tighter">ORIGCMS</span>
+                            <img src="/logo.svg" alt="OrigCMS" className="h-8 w-8" />
+                            <span className="text-xl font-black text-slate-900 tracking-tighter">OrigCMS</span>
                         </Link>
                         <p className="text-sm text-slate-500 font-medium leading-relaxed">
                             Next-generation video platform powered by Go microservices.

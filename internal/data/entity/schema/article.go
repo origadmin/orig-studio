@@ -37,9 +37,11 @@ func (Article) Fields() []ent.Field {
 		field.JSON("tags", []string{}).Optional(),
 		field.String("user_id"),
 		field.Int64("category_id").Optional().StructTag(`json:"category_id,omitempty"`),
+		field.String("media_id").MaxLen(36).Optional().StructTag(`json:"media_id,omitempty"`),
+		field.String("thumbnail").MaxLen(512).Optional(),
 		field.Time("published_at").Optional(),
-		field.Time("created_at").Default(time.Now),
-		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+		field.Time("create_time").Default(time.Now),
+		field.Time("update_time").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 
@@ -50,9 +52,10 @@ func (Article) Indexes() []ent.Index {
 		index.Fields("state"),
 		index.Fields("featured"),
 		index.Fields("view_count"),
-		index.Fields("created_at"),
+		index.Fields("create_time"),
 		index.Fields("published_at"),
 		index.Fields("user_id"),
+		index.Fields("media_id"),
 	}
 }
 
@@ -66,6 +69,7 @@ func (Article) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).Ref("articles").Field("user_id").Required().Unique(),
 		edge.From("category", Category.Type).Ref("articles").Field("category_id").Unique(),
+		edge.From("media", Media.Type).Ref("articles").Field("media_id").Unique(),
 		edge.To("comments", Comment.Type),
 	}
 }

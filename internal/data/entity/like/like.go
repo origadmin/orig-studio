@@ -20,8 +20,8 @@ const (
 	FieldUserID = "user_id"
 	// FieldLikeType holds the string denoting the like_type field in the database.
 	FieldLikeType = "like_type"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
-	FieldCreatedAt = "created_at"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
 	// EdgeMedia holds the string denoting the media edge name in mutations.
 	EdgeMedia = "media"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -50,7 +50,7 @@ var Columns = []string{
 	FieldMediaID,
 	FieldUserID,
 	FieldLikeType,
-	FieldCreatedAt,
+	FieldCreateTime,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -68,8 +68,8 @@ var (
 	DefaultLikeType string
 	// LikeTypeValidator is a validator for the "like_type" field. It is called by the builders before save.
 	LikeTypeValidator func(string) error
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() time.Time
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -99,9 +99,9 @@ func ByLikeType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLikeType, opts...).ToFunc()
 }
 
-// ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
 }
 
 // ByMediaField orders the results by media field.

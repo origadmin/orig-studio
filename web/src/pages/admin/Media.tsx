@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * 管理端 - 媒体管理页面
  */
@@ -69,9 +69,9 @@ import {mediaApi, encodingApi, adminMediaApi, type Media, type MediaVariantSumma
 import {API_BASE_URL} from '@/lib/request';
 import {useAdminMediaList, useDeleteMedia} from '@/hooks/queries';
 import {UploadComponent} from '@/components/upload/UploadComponent';
-import {formatFileSize, formatDate} from '@/lib/format';
+import {formatFileSize, formatDateTime} from '@/lib/format';
 import {TablePagination} from '@/components/common/TablePagination';
-import {PAGINATION} from '@/config/pagination';
+import {PAGINATION_CONFIG} from '@/config/pagination';
 
 export default function MediaPage() {
     const location = useLocation();
@@ -90,7 +90,7 @@ export default function MediaPage() {
     const [variantData, setVariantData] = useState<MediaVariantSummary | null>(null);
     const [retryingAllId, setRetryingAllId] = useState<string | number | null>(null);
 
-    const [searchParams, setSearchParams] = useState({keyword: urlSearch || '', state: '', page: 1, page_size: PAGINATION.DEFAULT_PAGE_SIZE});
+    const [searchParams, setSearchParams] = useState({keyword: urlSearch || '', state: '', page: 1, page_size: PAGINATION_CONFIG.DEFAULT_PAGE_SIZE});
 
     const [total, setTotal] = useState(0);
 
@@ -267,7 +267,7 @@ export default function MediaPage() {
                                             variant="outline"
                                             size="sm"
                                             onClick={() => {
-                                                const newParams = {keyword: '', state: '', page: 1, page_size: PAGINATION.DEFAULT_PAGE_SIZE};
+                                                const newParams = {keyword: '', state: '', page: 1, page_size: PAGINATION_CONFIG.DEFAULT_PAGE_SIZE};
                                                 setSearchParams(newParams);
                                                 loadMedia();
                                             }}
@@ -462,7 +462,7 @@ export default function MediaPage() {
                                         <TableCell
                                             className="text-sm text-slate-500">{media.edges?.user?.[0]?.nickname || media.edges?.user?.[0]?.username || '-'}</TableCell>
                                         <TableCell
-                                            className="text-sm text-slate-500">{formatDate(media.create_time || media.created_at)}</TableCell>
+                                            className="text-sm text-slate-500">{formatDateTime(media.create_time)}</TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>

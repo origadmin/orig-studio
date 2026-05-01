@@ -6,9 +6,250 @@ package convpb
 import (
 	"strconv"
 
+	"origadmin/application/origcms/api/gen/v1/types"
+	"origadmin/application/origcms/internal/data/entity/category"
+	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/media"
+	"origadmin/application/origcms/internal/data/entity/playlist"
+	"origadmin/application/origcms/internal/data/entity/tag"
+	"origadmin/application/origcms/internal/data/entity/user"
 	"origadmin/application/origcms/internal/data/enums"
 )
+
+// ConvertCategoryStatusToInt32 converts a category.Status to int32.
+func ConvertCategoryStatusToInt32(from category.Status) int32 {
+	switch from {
+	case category.StatusACTIVE:
+		return 1
+	case category.StatusINACTIVE:
+		return 2
+	default:
+		return 1
+	}
+}
+
+// ConvertChannelPrivacyToPrivacyPB is a custom conversion function stub.
+// Please implement this function to complete the conversion.
+func ConvertChannelPrivacyToPrivacyPB(from channel.Privacy) types.Privacy {
+	switch from {
+	case channel.PrivacyPUBLIC:
+		return types.Privacy_PRIVACY_PUBLIC
+	case channel.PrivacyPRIVATE:
+		return types.Privacy_PRIVACY_PRIVATE
+	case channel.PrivacyUNLISTED:
+		return types.Privacy_PRIVACY_UNLISTED
+	case channel.PrivacyPAID:
+		return types.Privacy_PRIVACY_PAID
+	case channel.PrivacySUBSCRIBERS_ONLY:
+		return types.Privacy_PRIVACY_SUBSCRIBERS_ONLY
+	default:
+		return types.Privacy_PRIVACY_PUBLIC
+	}
+}
+
+// ConvertInt32ToCategoryStatus converts an int32 to category.Status.
+func ConvertInt32ToCategoryStatus(from int32) category.Status {
+	return category.Status(from)
+}
+
+// ConvertMediaPrivacyToPrivacyPB is a custom conversion function stub.
+// Please implement this function to complete the conversion.
+func ConvertMediaPrivacyToPrivacyPB(from media.Privacy) types.Privacy {
+	switch from {
+	case media.PrivacyPUBLIC:
+		return types.Privacy_PRIVACY_PUBLIC
+	case media.PrivacyPRIVATE:
+		return types.Privacy_PRIVACY_PRIVATE
+	case media.PrivacyUNLISTED:
+		return types.Privacy_PRIVACY_UNLISTED
+	case media.PrivacyPAID:
+		return types.Privacy_PRIVACY_PAID
+	default:
+		return types.Privacy_PRIVACY_PUBLIC
+	}
+}
+
+// ConvertPlaylistPrivacyToPrivacyPB is a custom conversion function stub.
+// Please implement this function to complete the conversion.
+func ConvertPlaylistPrivacyToPrivacyPB(from playlist.Privacy) types.Privacy {
+	switch from {
+	case playlist.PrivacyPUBLIC:
+		return types.Privacy_PRIVACY_PUBLIC
+	case playlist.PrivacyPRIVATE:
+		return types.Privacy_PRIVACY_PRIVATE
+	case playlist.PrivacyUNLISTED:
+		return types.Privacy_PRIVACY_UNLISTED
+	case playlist.PrivacyPAID:
+		return types.Privacy_PRIVACY_PAID
+	default:
+		return types.Privacy_PRIVACY_PUBLIC
+	}
+}
+
+// ConvertPlaylistStatusPBToPlaylistStatus converts a proto PlaylistStatus to entity playlist.Status.
+func ConvertPlaylistStatusPBToPlaylistStatus(from types.PlaylistStatus) playlist.Status {
+	switch from {
+	case types.PlaylistStatus_PLAYLIST_STATUS_ACTIVE:
+		return playlist.StatusACTIVE
+	case types.PlaylistStatus_PLAYLIST_STATUS_INACTIVE:
+		return playlist.StatusINACTIVE
+	case types.PlaylistStatus_PLAYLIST_STATUS_DRAFT:
+		return playlist.StatusDRAFT
+	case types.PlaylistStatus_PLAYLIST_STATUS_ARCHIVED:
+		return playlist.StatusARCHIVED
+	default:
+		return playlist.StatusACTIVE
+	}
+}
+
+// ConvertPlaylistStatusToPlaylistStatusPB converts an entity playlist.Status to proto PlaylistStatus.
+func ConvertPlaylistStatusToPlaylistStatusPB(from playlist.Status) types.PlaylistStatus {
+	switch from {
+	case playlist.StatusACTIVE:
+		return types.PlaylistStatus_PLAYLIST_STATUS_ACTIVE
+	case playlist.StatusINACTIVE:
+		return types.PlaylistStatus_PLAYLIST_STATUS_INACTIVE
+	case playlist.StatusDRAFT:
+		return types.PlaylistStatus_PLAYLIST_STATUS_DRAFT
+	case playlist.StatusARCHIVED:
+		return types.PlaylistStatus_PLAYLIST_STATUS_ARCHIVED
+	default:
+		return types.PlaylistStatus_PLAYLIST_STATUS_ACTIVE
+	}
+}
+
+// ConvertPrivacyPBToChannelPrivacy is a custom conversion function stub.
+// Please implement this function to complete the conversion.
+func ConvertPrivacyPBToChannelPrivacy(from types.Privacy) channel.Privacy {
+	switch from {
+	case types.Privacy_PRIVACY_PUBLIC:
+		return channel.PrivacyPUBLIC
+	case types.Privacy_PRIVACY_PRIVATE:
+		return channel.PrivacyPRIVATE
+	case types.Privacy_PRIVACY_UNLISTED:
+		return channel.PrivacyUNLISTED
+	case types.Privacy_PRIVACY_PAID:
+		return channel.PrivacyPAID
+	case types.Privacy_PRIVACY_SUBSCRIBERS_ONLY:
+		return channel.PrivacySUBSCRIBERS_ONLY
+	default:
+		return channel.PrivacyPUBLIC
+	}
+}
+
+// ConvertPrivacyPBToMediaPrivacy is a custom conversion function stub.
+// Please implement this function to complete the conversion.
+func ConvertPrivacyPBToMediaPrivacy(from types.Privacy) media.Privacy {
+	switch from {
+	case types.Privacy_PRIVACY_PUBLIC:
+		return media.PrivacyPUBLIC
+	case types.Privacy_PRIVACY_PRIVATE:
+		return media.PrivacyPRIVATE
+	case types.Privacy_PRIVACY_UNLISTED:
+		return media.PrivacyUNLISTED
+	case types.Privacy_PRIVACY_PAID:
+		return media.PrivacyPAID
+	default:
+		return media.PrivacyPUBLIC
+	}
+}
+
+// ConvertPrivacyPBToPlaylistPrivacy is a custom conversion function stub.
+// Please implement this function to complete the conversion.
+func ConvertPrivacyPBToPlaylistPrivacy(from types.Privacy) playlist.Privacy {
+	switch from {
+	case types.Privacy_PRIVACY_PUBLIC:
+		return playlist.PrivacyPUBLIC
+	case types.Privacy_PRIVACY_PRIVATE:
+		return playlist.PrivacyPRIVATE
+	case types.Privacy_PRIVACY_UNLISTED:
+		return playlist.PrivacyUNLISTED
+	case types.Privacy_PRIVACY_PAID:
+		return playlist.PrivacyPAID
+	default:
+		return playlist.PrivacyPUBLIC
+	}
+}
+
+// ConvertStringToUserRole converts a string to user.Role.
+func ConvertStringToUserRole(from string) user.Role {
+	switch from {
+	case "admin":
+		return user.RoleAdmin
+	case "editor":
+		return user.RoleEditor
+	case "user":
+		return user.RoleUser
+	default:
+		return user.RoleUser
+	}
+}
+
+// ConvertTagStatusPBToTagStatus converts a proto TagStatus to entity tag.Status.
+func ConvertTagStatusPBToTagStatus(from types.TagStatus) tag.Status {
+	switch from {
+	case types.TagStatus_TAG_STATUS_ACTIVE:
+		return tag.StatusACTIVE
+	case types.TagStatus_TAG_STATUS_INACTIVE:
+		return tag.StatusINACTIVE
+	default:
+		return tag.StatusACTIVE
+	}
+}
+
+// ConvertTagStatusToTagStatusPB converts an entity tag.Status to proto TagStatus.
+func ConvertTagStatusToTagStatusPB(from tag.Status) types.TagStatus {
+	switch from {
+	case tag.StatusACTIVE:
+		return types.TagStatus_TAG_STATUS_ACTIVE
+	case tag.StatusINACTIVE:
+		return types.TagStatus_TAG_STATUS_INACTIVE
+	default:
+		return types.TagStatus_TAG_STATUS_ACTIVE
+	}
+}
+
+// ConvertUserRoleToString converts a user.Role to string.
+func ConvertUserRoleToString(from user.Role) string {
+	return string(from)
+}
+
+// ConvertUserStatusPBToUserStatus converts a proto UserStatus to entity user.Status.
+func ConvertUserStatusPBToUserStatus(from types.UserStatus) user.Status {
+	switch from {
+	case types.UserStatus_USER_STATUS_ACTIVE:
+		return user.StatusACTIVE
+	case types.UserStatus_USER_STATUS_INACTIVE:
+		return user.StatusINACTIVE
+	case types.UserStatus_USER_STATUS_PENDING:
+		return user.StatusPENDING
+	case types.UserStatus_USER_STATUS_SUSPENDED:
+		return user.StatusSUSPENDED
+	case types.UserStatus_USER_STATUS_REJECTED:
+		return user.StatusREJECTED
+	default:
+		return user.StatusACTIVE
+	}
+}
+
+// ConvertUserStatusToUserStatusPB converts an entity user.Status to proto UserStatus.
+func ConvertUserStatusToUserStatusPB(from user.Status) types.UserStatus {
+	switch from {
+	case user.StatusACTIVE:
+		return types.UserStatus_USER_STATUS_ACTIVE
+	case user.StatusINACTIVE:
+		return types.UserStatus_USER_STATUS_INACTIVE
+	case user.StatusPENDING:
+		return types.UserStatus_USER_STATUS_PENDING
+	case user.StatusSUSPENDED:
+		return types.UserStatus_USER_STATUS_SUSPENDED
+	case user.StatusREJECTED:
+		return types.UserStatus_USER_STATUS_REJECTED
+	default:
+		return types.UserStatus_USER_STATUS_ACTIVE
+	}
+}
 
 func ConvertEnumsEncodingTaskStatusToString(from enums.EncodingTaskStatus) string {
 	return from.String()
@@ -40,4 +281,18 @@ func ConvertStringToCommentStatus(from string) comment.Status {
 	default:
 		return comment.StatusPENDING
 	}
+}
+
+// ConvertUserToUserPBFull converts User entity to UserPB with all fields including audit timestamps.
+// After C020 (Ent schema field rename created_at→create_time), the auto-generated ConvertUserToUserPB
+// now includes CreateTime/UpdateTime mapping natively, so this function is an alias.
+func ConvertUserToUserPBFull(from *User) *types.User {
+	return ConvertUserToUserPB(from)
+}
+
+// ConvertMediaToMediaPBFull converts Media entity to MediaPB with all fields including audit timestamps.
+// After C020 (Ent schema field rename created_at→create_time), the auto-generated ConvertMediaToMediaPB
+// now includes CreateTime/UpdateTime mapping natively, so this function is an alias.
+func ConvertMediaToMediaPBFull(from *Media) *types.Media {
+	return ConvertMediaToMediaPB(from)
 }

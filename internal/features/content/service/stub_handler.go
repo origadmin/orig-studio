@@ -29,21 +29,11 @@ func NewStubHandler(jwt *auth.Manager) *StubHandler {
 // RegisterRoutes registers all stub routes.
 func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	// ================================
-	// 1. Admin Media Management (missing from AdminHandler)
+	// 1. Admin Media Management — MOVED to AdminHandler (B079)
+	// CRUD routes (GET/PUT/DELETE /admin/medias/:id, GET /admin/medias, etc.)
+	// are now handled by AdminHandler.adminListMedias/adminGetMedia/adminUpdateMedia/etc.
+	// Only review stubs remain here.
 	// ================================
-	adminMedias := rg.Group("/admin/medias")
-	adminMedias.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
-	{
-		adminMedias.GET("", h.stubAdminMediaList())
-		adminMedias.GET("/:id", h.stubAdminMediaGet())
-		adminMedias.PUT("/:id", h.stubAdminMediaUpdate())
-		adminMedias.DELETE("/:id", h.stubAdminMediaDelete())
-		adminMedias.GET("/:id/stats", h.stubAdminMediaStats())
-		adminMedias.GET("/:id/variants", h.stubAdminMediaVariants())
-		adminMedias.PUT("/:id/state", h.stubAdminMediaState())
-		adminMedias.GET("/:id/tasks", h.stubAdminMediaTasks())
-		adminMedias.POST("/:id/tasks/:taskId/retry", h.stubAdminMediaTaskRetry())
-	}
 
 	// ================================
 	// 2. Review Module
@@ -109,9 +99,9 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		medias.GET("/:id/metadata/text-content", h.stubMediaMetadataTextContent())
 		medias.GET("/:id/metadata/scene-changes", h.stubMediaMetadataSceneChanges())
 
-		// Sprite
-		medias.GET("/:id/sprite.vtt", h.stubSpriteVTT())
-		medias.GET("/:id/sprite.jpg", h.stubSpriteJPG())
+		// Sprite (replaced by SpriteHandler - routes registered separately)
+		// medias.GET("/:id/sprite.vtt", h.stubSpriteVTT())
+		// medias.GET("/:id/sprite.jpg", h.stubSpriteJPG())
 
 		// Subtitle
 		medias.GET("/:id/subtitles", h.stubSubtitleList())
@@ -157,14 +147,14 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	}
 
 	// ================================
-	// 8. Admin Sprite/Thumbnail regeneration
+	// 8. Admin Sprite/Thumbnail regeneration (replaced by SpriteHandler)
 	// ================================
-	adminMediaRegen := rg.Group("/admin/medias/:id")
-	adminMediaRegen.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
-	{
-		adminMediaRegen.POST("/regenerate-sprite", h.stubRegenerateSprite())
-		adminMediaRegen.POST("/regenerate-thumbnail", h.stubRegenerateThumbnail())
-	}
+	// adminMediaRegen := rg.Group("/admin/medias/:id")
+	// adminMediaRegen.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
+	// {
+	// 	adminMediaRegen.POST("/regenerate-sprite", h.stubRegenerateSprite())
+	// 	adminMediaRegen.POST("/regenerate-thumbnail", h.stubRegenerateThumbnail())
+	// }
 
 	// ================================
 	// 9. Admin Stats Revenue
@@ -196,13 +186,8 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	}
 
 	// ================================
-	// 12. Admin Comments DELETE
+	// 12. Admin Comments DELETE — MOVED to CommentModerationHandler (B087)
 	// ================================
-	adminComments := rg.Group("/admin/comments")
-	adminComments.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
-	{
-		adminComments.DELETE("/:id", h.stubAdminCommentDelete())
-	}
 
 	// ================================
 	// 13. Notification DELETE
@@ -613,14 +598,6 @@ func (h *StubHandler) stubAdminSettingsDeleteKey() gin.HandlerFunc {
 func (h *StubHandler) stubAdminChannelCreate() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		server.OK(c, gin.H{"code": 0, "message": "created", "data": nil})
-	}
-}
-
-// ==================== Admin Comment Delete Stub ====================
-
-func (h *StubHandler) stubAdminCommentDelete() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "deleted"})
 	}
 }
 

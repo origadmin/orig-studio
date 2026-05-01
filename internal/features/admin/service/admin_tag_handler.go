@@ -1,10 +1,11 @@
 package service
 
 import (
-	"net/http"
 	"strconv"
 
 	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/helpers/hashtag"
+	"origadmin/application/origcms/internal/helpers/repo"
 
 	"github.com/gin-gonic/gin"
 	"origadmin/application/origcms/internal/server"
@@ -35,16 +36,28 @@ func (h *AdminTagHandler) RegisterRoutes(r *gin.RouterGroup) {
 	}
 }
 
-// listTags handles GET /tags
+// listTags handles GET /admin/tags
+// B087-R2 Fix: Uses TagResponse DTO for frontend-compatible field names.
+// Also supports both "search" and "keyword" query parameters.
 func (h *AdminTagHandler) listTags() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Parse query parameters
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+
+		// B087-R2 Fix: Support both "search" and "keyword" parameters.
+		// Frontend sends "keyword", backend originally expected "search".
 		search := c.Query("search")
+		if search == "" {
+			search = c.Query("keyword")
+		}
+
 		status := c.Query("status")
-		sortBy := c.DefaultQuery("sort_by", "created_at")
+		sortBy := c.DefaultQuery("sort_by", "create_time")
 		sortOrder := c.DefaultQuery("sort_order", "desc")
+
+		// Normalize pagination parameters
+		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 		// Get tags
 		tags, total, err := h.service.List(c.Request.Context(), page, pageSize, search, status, sortBy, sortOrder)
@@ -53,25 +66,25 @@ func (h *AdminTagHandler) listTags() gin.HandlerFunc {
 			return
 		}
 
+		// B087-R2 Fix: Convert entity.Tag to TagResponse DTO
+		tagResponses := ToTagResponseList(tags)
+
 		// Calculate total pages
 		totalPages := (int(total) + pageSize - 1) / pageSize
 
-		// Return response
+		// Return response with frontend-compatible field names
 		server.OK(c, gin.H{
-			"code":    0,
-			"message": "ok",
-			"data": gin.H{
-				"items":       tags,
-				"total":       total,
-				"page":        page,
-				"page_size":   pageSize,
-				"total_pages": totalPages,
-			},
+			"items":       tagResponses,
+			"total":       total,
+			"page":        page,
+			"page_size":   pageSize,
+			"total_pages": totalPages,
 		})
 	}
 }
 
-// getTag handles GET /tags/:id
+// getTag handles GET /admin/tags/:id
+// B087-R2 Fix: Uses TagResponse DTO for frontend-compatible field names.
 func (h *AdminTagHandler) getTag() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
@@ -82,20 +95,19 @@ func (h *AdminTagHandler) getTag() gin.HandlerFunc {
 			return
 		}
 
-		server.OK(c, gin.H{
-			"code":    0,
-			"message": "ok",
-			"data":    tag,
-		})
+		// B087-R2 Fix: Convert to TagResponse DTO
+		server.OK(c, ToTagResponse(tag))
 	}
 }
 
-// createTag handles POST /tags
+// createTag handles POST /admin/tags
+// B087-R2 Fix: Uses TagResponse DTO for frontend-compatible field names.
+// Also maps frontend "status" (lowercase) to DB enum.
 func (h *AdminTagHandler) createTag() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req struct {
 			Name        string `json:"name" binding:"required"`
-			Slug        string `json:"slug" binding:"required"`
+			Slug        string `json:"slug"` // Optional: auto-generated from name when empty
 			Description string `json:"description"`
 			Color       string `json:"color"`
 			Status      string `json:"status"`
@@ -107,24 +119,33 @@ func (h *AdminTagHandler) createTag() gin.HandlerFunc {
 		}
 
 		tag := &entity.Tag{
-			Title: req.Name,
+			Title:       req.Name,
+			Description: req.Description,
+			Color:       req.Color,
+			// B087-R2 Fix: Parse frontend status string to DB enum
+			Status: ParseTagStatus(req.Status),
+		}
+
+		// Auto-generate slug from name when not provided
+		if req.Slug != "" {
+			tag.Slug = req.Slug
+		} else {
+			tag.Slug = hashtag.GenerateTagSlug(req.Name)
 		}
 
 		createdTag, err := h.service.Create(c.Request.Context(), tag)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"code": 10004, "message": err.Error()})
+			server.Fail(c, server.ErrBadRequest, err.Error())
 			return
 		}
 
-		server.OK(c, gin.H{
-			"code":    0,
-			"message": "Tag created successfully",
-			"data":    createdTag,
-		})
+		// B087-R2 Fix: Convert to TagResponse DTO
+		server.OK(c, ToTagResponse(createdTag))
 	}
 }
 
-// updateTag handles PUT /tags/:id
+// updateTag handles PUT /admin/tags/:id
+// B087-R2 Fix: Uses TagResponse DTO for frontend-compatible field names.
 func (h *AdminTagHandler) updateTag() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
@@ -143,30 +164,35 @@ func (h *AdminTagHandler) updateTag() gin.HandlerFunc {
 		}
 
 		updates := &entity.Tag{
-			Title: req.Name,
+			Title:       req.Name,
+			Description: req.Description,
+			Color:       req.Color,
+			// B087-R2 Fix: Parse frontend status string to DB enum
+			Status: ParseTagStatus(req.Status),
+		}
+
+		if req.Slug != "" {
+			updates.Slug = req.Slug
 		}
 
 		updatedTag, err := h.service.Update(c.Request.Context(), id, updates)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"code": 10004, "message": err.Error()})
+			server.Fail(c, server.ErrBadRequest, err.Error())
 			return
 		}
 
-		server.OK(c, gin.H{
-			"code":    0,
-			"message": "Tag updated successfully",
-			"data":    updatedTag,
-		})
+		// B087-R2 Fix: Convert to TagResponse DTO
+		server.OK(c, ToTagResponse(updatedTag))
 	}
 }
 
-// deleteTag handles DELETE /tags/:id
+// deleteTag handles DELETE /admin/tags/:id
 func (h *AdminTagHandler) deleteTag() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 
 		if err := h.service.Delete(c.Request.Context(), id); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"code": 10004, "message": err.Error()})
+			server.Fail(c, server.ErrBadRequest, err.Error())
 			return
 		}
 
@@ -177,7 +203,7 @@ func (h *AdminTagHandler) deleteTag() gin.HandlerFunc {
 	}
 }
 
-// bulkTagOperation handles POST /tags/bulk
+// bulkTagOperation handles POST /admin/tags/bulk
 func (h *AdminTagHandler) bulkTagOperation() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req struct {
@@ -197,38 +223,32 @@ func (h *AdminTagHandler) bulkTagOperation() gin.HandlerFunc {
 
 		count, err := h.service.BulkDelete(c.Request.Context(), req.IDs)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"code": 10004, "message": err.Error()})
+			server.Fail(c, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		server.OK(c, gin.H{
-			"code":    0,
-			"message": "Bulk operation completed",
-			"data": gin.H{
-				"success": count,
-				"failed":  len(req.IDs) - count,
-			},
+			"success": count,
+			"failed":  len(req.IDs) - count,
 		})
 	}
 }
 
-// exportTags handles GET /tags/export
+// exportTags handles GET /admin/tags/export
 func (h *AdminTagHandler) exportTags() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// TODO: Implement export functionality
 		server.OK(c, gin.H{
-			"code":    0,
 			"message": "Export functionality not implemented yet",
 		})
 	}
 }
 
-// importTags handles POST /tags/import
+// importTags handles POST /admin/tags/import
 func (h *AdminTagHandler) importTags() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// TODO: Implement import functionality
 		server.OK(c, gin.H{
-			"code":    0,
 			"message": "Import functionality not implemented yet",
 		})
 	}

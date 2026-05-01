@@ -72,10 +72,7 @@ export default function SignInPage() {
             <div
                 className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex-col justify-between p-12">
                 <div className="flex items-center gap-2 text-white">
-                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                              d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                    </svg>
+                    <img src="/logo.svg" alt="OrigCMS" className="h-8 w-8" />
                     <span className="text-2xl font-bold">OrigCMS</span>
                 </div>
                 <blockquote className="text-white/90 text-xl italic">

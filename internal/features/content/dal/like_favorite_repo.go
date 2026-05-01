@@ -58,7 +58,7 @@ func (r *likeRepo) Create(
 		UserID:    userID,
 		MediaID:   mediaID,
 		LikeType:  ent.LikeType,
-		CreatedAt: ent.CreatedAt,
+		CreateTime: ent.CreateTime,
 	}, nil
 }
 
@@ -101,7 +101,7 @@ func (r *likeRepo) CountByMedia(ctx context.Context, mediaID string, likeType st
 func (r *likeRepo) ListByUser(ctx context.Context, userID string) ([]*biz.Like, error) {
 	ents, err := r.data.db.Like.Query().
 		Where(like.HasUserWith(user.IDEQ(userID))).
-		Order(entity.Desc(like.FieldCreatedAt)).
+		Order(entity.Desc(like.FieldCreateTime)).
 		WithMedia().
 		All(ctx)
 	if err != nil {
@@ -118,7 +118,7 @@ func (r *likeRepo) ListByUser(ctx context.Context, userID string) ([]*biz.Like, 
 			UserID:    userID,
 			MediaID:   mediaID,
 			LikeType:  ent.LikeType,
-			CreatedAt: ent.CreatedAt,
+			CreateTime: ent.CreateTime,
 		}
 	}
 	return res, nil
@@ -138,7 +138,7 @@ func (r *favoriteRepo) Create(ctx context.Context, userID, mediaID string) (*biz
 		ID:        ent.ID,
 		UserID:    userID,
 		MediaID:   mediaID,
-		CreatedAt: ent.CreatedAt,
+		CreateTime: ent.CreateTime,
 	}, nil
 }
 
@@ -171,7 +171,7 @@ func (r *favoriteRepo) CountByMedia(ctx context.Context, mediaID string) (int64,
 func (r *favoriteRepo) ListByUser(ctx context.Context, userID string) ([]*biz.Favorite, error) {
 	ents, err := r.data.db.Favorite.Query().
 		Where(favorite.HasUserWith(user.IDEQ(userID))).
-		Order(entity.Desc(favorite.FieldCreatedAt)).
+		Order(entity.Desc(favorite.FieldCreateTime)).
 		WithMedia().
 		All(ctx)
 	if err != nil {
@@ -187,7 +187,7 @@ func (r *favoriteRepo) ListByUser(ctx context.Context, userID string) ([]*biz.Fa
 			ID:        ent.ID,
 			UserID:    userID,
 			MediaID:   mediaID,
-			CreatedAt: ent.CreatedAt,
+			CreateTime: ent.CreateTime,
 		}
 	}
 	return res, nil

@@ -107,16 +107,16 @@ func (_u *NotificationUpdate) SetNillableIsRead(v *bool) *NotificationUpdate {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *NotificationUpdate) SetCreatedAt(v time.Time) *NotificationUpdate {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *NotificationUpdate) SetCreateTime(v time.Time) *NotificationUpdate {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *NotificationUpdate) SetNillableCreatedAt(v *time.Time) *NotificationUpdate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *NotificationUpdate) SetNillableCreateTime(v *time.Time) *NotificationUpdate {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
@@ -240,8 +240,8 @@ func (_u *NotificationUpdate) sqlSave(ctx context.Context) (_node int, err error
 	if value, ok := _u.mutation.IsRead(); ok {
 		_spec.SetField(notification.FieldIsRead, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(notification.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(notification.FieldCreateTime, field.TypeTime, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -387,16 +387,16 @@ func (_u *NotificationUpdateOne) SetNillableIsRead(v *bool) *NotificationUpdateO
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *NotificationUpdateOne) SetCreatedAt(v time.Time) *NotificationUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *NotificationUpdateOne) SetCreateTime(v time.Time) *NotificationUpdateOne {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *NotificationUpdateOne) SetNillableCreatedAt(v *time.Time) *NotificationUpdateOne {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *NotificationUpdateOne) SetNillableCreateTime(v *time.Time) *NotificationUpdateOne {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
@@ -550,8 +550,8 @@ func (_u *NotificationUpdateOne) sqlSave(ctx context.Context) (_node *Notificati
 	if value, ok := _u.mutation.IsRead(); ok {
 		_spec.SetField(notification.FieldIsRead, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(notification.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(notification.FieldCreateTime, field.TypeTime, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

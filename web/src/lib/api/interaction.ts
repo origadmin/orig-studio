@@ -26,7 +26,7 @@ export interface Favorite {
     id: number;
     media_id: number;
     media: Media;
-    created_at: string;
+    create_time: string;
 }
 
 export interface ToggleFavoriteResponse {

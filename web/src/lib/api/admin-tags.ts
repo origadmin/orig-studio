@@ -9,8 +9,8 @@ export interface Tag {
   color?: string;
   count: number;
   status: string;
-  created_at: string;
-  updated_at: string;
+  create_time: string;
+  update_time: string;
 }
 
 export interface TagListResponse {
@@ -32,10 +32,10 @@ export interface TagQueryParams {
 
 export interface CreateTagRequest {
   name: string;
-  slug: string;
+  slug?: string; // Optional: auto-generated from name when empty
   description?: string;
   color?: string;
-  status: string;
+  status?: string; // Optional: defaults to active
 }
 
 export interface UpdateTagRequest {

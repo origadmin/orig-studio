@@ -914,7 +914,7 @@ type GetUploadSessionResponse struct {
 	// Uploaded parts
 	Parts []*PartInfo `protobuf:"bytes,9,rep,name=parts,proto3" json:"parts,omitempty"`
 	// Created at
-	CreatedAt string `protobuf:"bytes,10,opt,name=created_at,proto3" json:"created_at,omitempty"`
+	CreateTime string `protobuf:"bytes,10,opt,name=create_time,proto3" json:"create_time,omitempty"`
 	// Expires at
 	ExpiresAt     string `protobuf:"bytes,11,opt,name=expires_at,proto3" json:"expires_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -1014,9 +1014,9 @@ func (x *GetUploadSessionResponse) GetParts() []*PartInfo {
 	return nil
 }
 
-func (x *GetUploadSessionResponse) GetCreatedAt() string {
+func (x *GetUploadSessionResponse) GetCreateTime() string {
 	if x != nil {
-		return x.CreatedAt
+		return x.CreateTime
 	}
 	return ""
 }
@@ -1208,7 +1208,7 @@ const file_v1_upload_upload_service_proto_rawDesc = "" +
 	"\x12UploadFileResponse\x122\n" +
 	"\x05media\x18\x01 \x01(\v2\x1c.api.v1.services.types.MediaR\x05media\"7\n" +
 	"\x17GetUploadSessionRequest\x12\x1c\n" +
-	"\tupload_id\x18\x01 \x01(\tR\tupload_id\"\x8e\x03\n" +
+	"\tupload_id\x18\x01 \x01(\tR\tupload_id\"\x90\x03\n" +
 	"\x18GetUploadSessionResponse\x12\x1c\n" +
 	"\tupload_id\x18\x01 \x01(\tR\tupload_id\x12\x1a\n" +
 	"\bfilename\x18\x02 \x01(\tR\bfilename\x12\x1c\n" +
@@ -1220,11 +1220,9 @@ const file_v1_upload_upload_service_proto_rawDesc = "" +
 	"chunk_size\x12$\n" +
 	"\ruploaded_size\x18\a \x01(\x03R\ruploaded_size\x12\x16\n" +
 	"\x06status\x18\b \x01(\tR\x06status\x126\n" +
-	"\x05parts\x18\t \x03(\v2 .api.v1.services.upload.PartInfoR\x05parts\x12\x1e\n" +
-	"\n" +
-	"created_at\x18\n" +
-	" \x01(\tR\n" +
-	"created_at\x12\x1e\n" +
+	"\x05parts\x18\t \x03(\v2 .api.v1.services.upload.PartInfoR\x05parts\x12 \n" +
+	"\vcreate_time\x18\n" +
+	" \x01(\tR\vcreate_time\x12\x1e\n" +
 	"\n" +
 	"expires_at\x18\v \x01(\tR\n" +
 	"expires_at\"u\n" +

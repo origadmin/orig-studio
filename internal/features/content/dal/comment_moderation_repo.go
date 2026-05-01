@@ -2,6 +2,7 @@ package dal
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -104,9 +105,14 @@ func (r *commentModerationRepo) ResetReportCount(ctx context.Context, commentID 
 }
 
 func (r *commentModerationRepo) ListByMedia(ctx context.Context, mediaID string, status string, page, pageSize int) ([]*biz.CommentModerationItem, int, error) {
-	query := r.data.db.Comment.Query().Where(comment.MediaIDEQ(mediaID))
+	query := r.data.db.Comment.Query()
+	if mediaID != "" {
+		query = query.Where(comment.MediaIDEQ(mediaID))
+	}
 	if status != "" {
-		query.Where(comment.StatusEQ(comment.Status(status)))
+		// Normalize status to uppercase for DB query (frontend may send lowercase)
+		upperStatus := strings.ToUpper(status)
+		query = query.Where(comment.StatusEQ(comment.Status(upperStatus)))
 	}
 
 	total, err := query.Count(ctx)
@@ -120,6 +126,8 @@ func (r *commentModerationRepo) ListByMedia(ctx context.Context, mediaID string,
 		Order(entity.Desc(comment.FieldAddDate)).
 		WithUser().
 		WithMedia().
+		WithParent().
+		WithReplies().
 		All(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -165,12 +173,14 @@ func (r *commentModerationRepo) CountByStatus(ctx context.Context, mediaID strin
 	pendingQuery := r.data.db.Comment.Query().Where(comment.StatusEQ(comment.StatusPENDING))
 	approvedQuery := r.data.db.Comment.Query().Where(comment.StatusEQ(comment.StatusAPPROVED))
 	rejectedQuery := r.data.db.Comment.Query().Where(comment.StatusEQ(comment.StatusREJECTED))
-	reportedPendingQuery := r.data.db.Comment.Query().Where(comment.StatusEQ(comment.StatusPENDING), comment.ReportCountGT(0))
+	blockedQuery := r.data.db.Comment.Query().Where(comment.StatusEQ(comment.StatusBLOCKED))
+	reportedPendingQuery := r.data.db.Comment.Query().Where(comment.ReportCountGT(0))
 
 	if mediaID != "" {
 		pendingQuery.Where(comment.MediaIDEQ(mediaID))
 		approvedQuery.Where(comment.MediaIDEQ(mediaID))
 		rejectedQuery.Where(comment.MediaIDEQ(mediaID))
+		blockedQuery.Where(comment.MediaIDEQ(mediaID))
 		reportedPendingQuery.Where(comment.MediaIDEQ(mediaID))
 	}
 
@@ -189,6 +199,11 @@ func (r *commentModerationRepo) CountByStatus(ctx context.Context, mediaID strin
 		return nil, err
 	}
 
+	blockedCount, err := blockedQuery.Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	reportedPendingCount, err := reportedPendingQuery.Count(ctx)
 	if err != nil {
 		return nil, err
@@ -198,9 +213,101 @@ func (r *commentModerationRepo) CountByStatus(ctx context.Context, mediaID strin
 		Pending:         pendingCount,
 		Approved:        approvedCount,
 		Rejected:        rejectedCount,
-		Total:           pendingCount + approvedCount + rejectedCount,
+		Blocked:         blockedCount,
+		Total:           pendingCount + approvedCount + rejectedCount + blockedCount,
 		ReportedPending: reportedPendingCount,
 	}, nil
+}
+
+func (r *commentModerationRepo) Delete(ctx context.Context, id string) error {
+	return r.data.db.Comment.DeleteOneID(id).Exec(ctx)
+}
+
+// ListAdminComments returns comments with optional tree structure and report status filtering.
+// When tree=true, only root-level comments are paginated, and children are loaded via WithReplies.
+// When reportStatus is set, comments are filtered by their report status.
+func (r *commentModerationRepo) ListAdminComments(ctx context.Context, mediaID string, status string, reportStatus string, tree bool, page, pageSize int) ([]*biz.CommentModerationItem, int, error) {
+	query := r.data.db.Comment.Query()
+
+	// Apply media filter
+	if mediaID != "" {
+		query = query.Where(comment.MediaIDEQ(mediaID))
+	}
+
+	// Apply status filter
+	if status != "" {
+		upperStatus := strings.ToUpper(status)
+		query = query.Where(comment.StatusEQ(comment.Status(upperStatus)))
+	}
+
+	// Apply report status filter using subqueries
+	switch strings.ToLower(reportStatus) {
+	case "reported":
+		// Comments with at least one report
+		query = query.Where(comment.ReportCountGT(0))
+	case "pending_reports":
+		// Comments that have at least one PENDING report
+		query = query.Where(
+			comment.HasReportsWith(commentreport.StatusEQ(commentreport.StatusPENDING)),
+		)
+	case "reviewed_reports":
+		// Comments that have reports but none are PENDING
+		query = query.Where(
+			comment.ReportCountGT(0),
+			comment.Not(
+				comment.HasReportsWith(commentreport.StatusEQ(commentreport.StatusPENDING)),
+			),
+		)
+	case "no_reports":
+		// Comments with no reports
+		query = query.Where(comment.ReportCountEQ(0))
+	}
+
+	if tree {
+		// In tree mode, only fetch root-level comments (no parent)
+		query = query.Where(comment.Not(comment.HasParent()))
+	}
+
+	total, err := query.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Build the query with eager loading
+	if tree {
+		query = query.
+			WithUser().
+			WithMedia().
+			WithReplies(func(q *entity.CommentQuery) {
+				q.WithUser().WithMedia().Order(entity.Asc(comment.FieldAddDate))
+			}).
+			Order(entity.Desc(comment.FieldAddDate))
+	} else {
+		query = query.
+			WithUser().
+			WithMedia().
+			WithParent().
+			WithReplies().
+			Order(entity.Desc(comment.FieldAddDate))
+	}
+
+	ents, err := query.
+		Limit(pageSize).
+		Offset((page - 1) * pageSize).
+		All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	res := make([]*biz.CommentModerationItem, len(ents))
+	for i, ent := range ents {
+		if tree {
+			res[i] = mapCommentToTreeItem(ent, 0)
+		} else {
+			res[i] = mapCommentToModerationItem(ent)
+		}
+	}
+	return res, total, nil
 }
 
 func (r *commentReportRepo) Create(ctx context.Context, commentID string, reporterID string, reason string, description string) (*biz.CommentReportItem, error) {
@@ -238,6 +345,32 @@ func (r *commentReportRepo) ListByComment(ctx context.Context, commentID string)
 	return res, nil
 }
 
+// UpdateStatusByComment updates all reports for a comment that match fromStatus to toStatus.
+// Returns the number of reports updated.
+func (r *commentReportRepo) UpdateStatusByComment(ctx context.Context, commentID string, fromStatus string, toStatus string) (int, error) {
+	n, err := r.data.db.CommentReport.Update().
+		Where(
+			commentreport.CommentID(commentID),
+			commentreport.StatusEQ(commentreport.Status(fromStatus)),
+		).
+		SetStatus(commentreport.Status(toStatus)).
+		Save(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return n, nil
+}
+
+// CountPendingByComment counts the number of PENDING reports for a comment.
+func (r *commentReportRepo) CountPendingByComment(ctx context.Context, commentID string) (int, error) {
+	return r.data.db.CommentReport.Query().
+		Where(
+			commentreport.CommentID(commentID),
+			commentreport.StatusEQ(commentreport.StatusPENDING),
+		).
+		Count(ctx)
+}
+
 func mapCommentToModerationItem(ent *entity.Comment) *biz.CommentModerationItem {
 	item := &biz.CommentModerationItem{
 		ID:          ent.ID,
@@ -247,6 +380,7 @@ func mapCommentToModerationItem(ent *entity.Comment) *biz.CommentModerationItem 
 		UserID:      ent.UserID,
 		ReportCount: ent.ReportCount,
 		AddDate:     ent.AddDate,
+		LikeCount:   ent.LikeCount,
 	}
 
 	if ent.ModeratedBy != "" {
@@ -259,10 +393,90 @@ func mapCommentToModerationItem(ent *entity.Comment) *biz.CommentModerationItem 
 
 	if ent.Edges.User != nil {
 		item.Username = ent.Edges.User.Username
+		item.Avatar = ent.Edges.User.Logo
 	}
 
 	if ent.Edges.Media != nil {
 		item.MediaTitle = ent.Edges.Media.Title
+	}
+
+	if len(ent.Edges.Replies) > 0 {
+		item.ReplyCount = len(ent.Edges.Replies)
+		item.HasReplies = true
+	}
+
+	// Set parent_id from the parent edge
+	if ent.Edges.Parent != nil {
+		item.ParentID = ent.Edges.Parent.ID
+	}
+
+	// Check for pending reports
+	if len(ent.Edges.Reports) > 0 {
+		for _, r := range ent.Edges.Reports {
+			if r.Status == commentreport.StatusPENDING {
+				item.HasPendingReports = true
+				break
+			}
+		}
+	}
+
+	return item
+}
+
+// mapCommentToTreeItem maps a Comment entity to a CommentModerationItem with tree structure.
+// It recursively maps children and calculates depth.
+func mapCommentToTreeItem(ent *entity.Comment, depth int) *biz.CommentModerationItem {
+	item := &biz.CommentModerationItem{
+		ID:          ent.ID,
+		Text:        ent.Text,
+		Status:      string(ent.Status),
+		MediaID:     ent.MediaID,
+		UserID:      ent.UserID,
+		ReportCount: ent.ReportCount,
+		AddDate:     ent.AddDate,
+		LikeCount:   ent.LikeCount,
+		Depth:       depth,
+		HasReplies:  len(ent.Edges.Replies) > 0,
+	}
+
+	if ent.ModeratedBy != "" {
+		item.ModeratedBy = &ent.ModeratedBy
+	}
+
+	if !ent.ModeratedAt.IsZero() {
+		item.ModeratedAt = &ent.ModeratedAt
+	}
+
+	if ent.Edges.User != nil {
+		item.Username = ent.Edges.User.Username
+		item.Avatar = ent.Edges.User.Logo
+	}
+
+	if ent.Edges.Media != nil {
+		item.MediaTitle = ent.Edges.Media.Title
+	}
+
+	if len(ent.Edges.Replies) > 0 {
+		item.ReplyCount = len(ent.Edges.Replies)
+		item.Children = make([]*biz.CommentModerationItem, len(ent.Edges.Replies))
+		for i, reply := range ent.Edges.Replies {
+			item.Children[i] = mapCommentToTreeItem(reply, depth+1)
+		}
+	}
+
+	// Set parent_id from the parent edge
+	if ent.Edges.Parent != nil {
+		item.ParentID = ent.Edges.Parent.ID
+	}
+
+	// Check for pending reports
+	if len(ent.Edges.Reports) > 0 {
+		for _, r := range ent.Edges.Reports {
+			if r.Status == commentreport.StatusPENDING {
+				item.HasPendingReports = true
+				break
+			}
+		}
 	}
 
 	return item
@@ -275,7 +489,8 @@ func mapCommentReportToItem(ent *entity.CommentReport) *biz.CommentReportItem {
 		ReporterID:  ent.ReporterID,
 		Reason:      string(ent.Reason),
 		Description: ent.Description,
-		CreatedAt:   ent.CreatedAt,
+		Status:      string(ent.Status),
+		CreateTime:   ent.CreateTime,
 	}
 
 	if ent.Edges.Reporter != nil {

@@ -145,9 +145,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                 </button>
 
                 <Link to="/" className="flex items-center gap-2 shrink-0">
-                    <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">O</span>
-                    </div>
+                    <img src="/logo.svg" alt="OrigCMS" className="h-8 w-8" />
                     <span className="text-lg font-bold text-gray-900 dark:text-white hidden sm:inline">
                         OrigCMS
                     </span>
@@ -161,7 +159,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                             to={link.to}
                             className={`px-3 py-1.5 text-sm rounded-full transition-colors whitespace-nowrap ${
                                 isActive(link.to)
-                                    ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 font-medium'
+                                    ? 'bg-brand/10 dark:bg-brand/20 text-brand dark:text-brand font-medium'
                                     : 'text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
                             }`}
                         >
@@ -190,7 +188,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                                             onClick={() => setMoreMenuOpen(false)}
                                             className={`block px-4 py-2 text-sm transition-colors ${
                                                 isActive(link.to)
-                                                    ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-medium'
+                                                    ? 'bg-brand/10 dark:bg-brand/20 text-brand dark:text-brand font-medium'
                                                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                                             }`}
                                         >
@@ -215,7 +213,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder={t('header.searchPlaceholder')}
-                            className="w-full bg-gray-100 dark:bg-gray-800 border-0 rounded-full pl-9 pr-4 py-1.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:bg-white dark:focus:bg-gray-700 transition-all outline-none"
+                            className="w-full bg-gray-100 dark:bg-gray-800 border-0 rounded-full pl-9 pr-4 py-1.5 text-sm focus:ring-2 focus:ring-brand focus:bg-white dark:focus:bg-gray-700 transition-all outline-none"
                         />
                     </div>
                 </form>
@@ -225,7 +223,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                     {onToggleDarkMode && (
                         <button
                             onClick={onToggleDarkMode}
-                            className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                            className="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                             title={darkMode ? t('nav.toggleLight') : t('nav.toggleDark')}
                         >
                             {darkMode ? <Sun size={18} className="text-amber-500"/> : <Moon size={18}/>}
@@ -233,10 +231,10 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                     )}
                     <button
                         onClick={() => i18n.changeLanguage(i18n.language === 'zh' ? 'en' : 'zh')}
-                        className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                        className="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                         title={i18n.language === 'zh' ? t('nav.switchToEnglish') : t('nav.switchToChinese')}
                     >
-                        <Globe size={18} className="text-emerald-500"/>
+                        <Globe size={18} className="text-brand"/>
                     </button>
 
                     {isAuthenticated && user ? (
@@ -247,7 +245,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                             {/* 上传按钮 */}
                             <Link
                                 to="/me/upload"
-                                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                                className="hidden sm:flex items-center gap-1.5 h-10 px-3.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
                             >
                                 <Plus size={16}/>
                                 <span className="hidden lg:inline">{t('nav.upload')}</span>
@@ -257,25 +255,21 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                             <div className="relative" ref={userMenuRef}>
                                 <button
                                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                                    className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                    className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                 >
                                     {user.avatarUrl ? (
                                         <img
                                             src={user.avatarUrl}
                                             alt={user.displayName}
                                             loading="lazy"
-                                            className="w-7 h-7 rounded-full object-cover"
+                                            className="w-8 h-8 rounded-full object-cover"
                                         />
                                     ) : (
                                         <div
-                                            className="w-7 h-7 bg-emerald-100 dark:bg-emerald-900 rounded-full flex items-center justify-center">
-                                            <User size={14} className="text-emerald-600 dark:text-emerald-400"/>
+                                            className="w-8 h-8 bg-brand/10 dark:bg-brand/20 rounded-full flex items-center justify-center">
+                                            <User size={16} className="text-brand dark:text-brand"/>
                                         </div>
                                     )}
-                                    <span
-                                        className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:inline max-w-[100px] truncate">
-                                        {user.displayName || user.username}
-                                    </span>
                                 </button>
 
                                 {userMenuOpen && (
@@ -318,7 +312,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                                             <Link
                                                 to="/admin"
                                                 onClick={() => setUserMenuOpen(false)}
-                                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-brand dark:text-brand hover:bg-brand/10 dark:hover:bg-brand/20"
                                             >
                                                 <Shield size={16}/> {t('nav.admin')}
                                             </Link>
@@ -343,7 +337,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                     ) : (
                         <Link
                             to="/auth/signin"
-                            className="flex items-center gap-2 px-4 py-1.5 bg-emerald-600 text-white text-sm font-medium rounded-full hover:bg-emerald-700 transition-colors"
+                            className="flex items-center gap-2 h-10 px-4 bg-brand text-white text-sm font-medium rounded-full hover:bg-brand/90 transition-colors"
                         >
                             <LogIn size={16}/>
                             {t('nav.login')}

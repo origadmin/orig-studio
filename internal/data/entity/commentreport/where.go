@@ -80,9 +80,9 @@ func Description(v string) predicate.CommentReport {
 	return predicate.CommentReport(sql.FieldEQ(FieldDescription, v))
 }
 
-// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v time.Time) predicate.CommentReport {
-	return predicate.CommentReport(sql.FieldEQ(FieldCreatedAt, v))
+// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
+func CreateTime(v time.Time) predicate.CommentReport {
+	return predicate.CommentReport(sql.FieldEQ(FieldCreateTime, v))
 }
 
 // CommentIDEQ applies the EQ predicate on the "comment_id" field.
@@ -310,44 +310,64 @@ func DescriptionContainsFold(v string) predicate.CommentReport {
 	return predicate.CommentReport(sql.FieldContainsFold(FieldDescription, v))
 }
 
-// CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v time.Time) predicate.CommentReport {
-	return predicate.CommentReport(sql.FieldEQ(FieldCreatedAt, v))
+// StatusEQ applies the EQ predicate on the "status" field.
+func StatusEQ(v Status) predicate.CommentReport {
+	return predicate.CommentReport(sql.FieldEQ(FieldStatus, v))
 }
 
-// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v time.Time) predicate.CommentReport {
-	return predicate.CommentReport(sql.FieldNEQ(FieldCreatedAt, v))
+// StatusNEQ applies the NEQ predicate on the "status" field.
+func StatusNEQ(v Status) predicate.CommentReport {
+	return predicate.CommentReport(sql.FieldNEQ(FieldStatus, v))
 }
 
-// CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...time.Time) predicate.CommentReport {
-	return predicate.CommentReport(sql.FieldIn(FieldCreatedAt, vs...))
+// StatusIn applies the In predicate on the "status" field.
+func StatusIn(vs ...Status) predicate.CommentReport {
+	return predicate.CommentReport(sql.FieldIn(FieldStatus, vs...))
 }
 
-// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...time.Time) predicate.CommentReport {
-	return predicate.CommentReport(sql.FieldNotIn(FieldCreatedAt, vs...))
+// StatusNotIn applies the NotIn predicate on the "status" field.
+func StatusNotIn(vs ...Status) predicate.CommentReport {
+	return predicate.CommentReport(sql.FieldNotIn(FieldStatus, vs...))
 }
 
-// CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v time.Time) predicate.CommentReport {
-	return predicate.CommentReport(sql.FieldGT(FieldCreatedAt, v))
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.CommentReport {
+	return predicate.CommentReport(sql.FieldEQ(FieldCreateTime, v))
 }
 
-// CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v time.Time) predicate.CommentReport {
-	return predicate.CommentReport(sql.FieldGTE(FieldCreatedAt, v))
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.CommentReport {
+	return predicate.CommentReport(sql.FieldNEQ(FieldCreateTime, v))
 }
 
-// CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v time.Time) predicate.CommentReport {
-	return predicate.CommentReport(sql.FieldLT(FieldCreatedAt, v))
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.CommentReport {
+	return predicate.CommentReport(sql.FieldIn(FieldCreateTime, vs...))
 }
 
-// CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v time.Time) predicate.CommentReport {
-	return predicate.CommentReport(sql.FieldLTE(FieldCreatedAt, v))
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.CommentReport {
+	return predicate.CommentReport(sql.FieldNotIn(FieldCreateTime, vs...))
+}
+
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.CommentReport {
+	return predicate.CommentReport(sql.FieldGT(FieldCreateTime, v))
+}
+
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.CommentReport {
+	return predicate.CommentReport(sql.FieldGTE(FieldCreateTime, v))
+}
+
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.CommentReport {
+	return predicate.CommentReport(sql.FieldLT(FieldCreateTime, v))
+}
+
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.CommentReport {
+	return predicate.CommentReport(sql.FieldLTE(FieldCreateTime, v))
 }
 
 // HasComment applies the HasEdge predicate on the "comment" edge.

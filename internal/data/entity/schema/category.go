@@ -33,14 +33,14 @@ func (Category) Fields() []ent.Field {
 		field.String("color").MaxLen(32).Optional(),
 		field.Int64("parent_id").Optional().StructTag(`json:"parent_id,omitempty"`),
 		field.Int("sequence").Default(0),
-		field.Int("status").Default(1), // 1: active, 2: inactive
+		field.Enum("status").Values("ACTIVE", "INACTIVE").Default("ACTIVE"),
 		field.Int("media_count").Default(0),
 		field.Bool("is_global").Default(false),
 		field.Bool("is_rbac_category").Default(false),
 		field.String("identity_provider").Optional(),
 		field.String("user_id").Optional(),
-		field.Time("created_at").Default(time.Now),
-		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+		field.Time("create_time").Default(time.Now),
+		field.Time("update_time").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 

@@ -193,23 +193,23 @@ func (_u *EncodeProfileUpdate) SetNillableIsActive(v *bool) *EncodeProfileUpdate
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *EncodeProfileUpdate) SetCreatedAt(v time.Time) *EncodeProfileUpdate {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *EncodeProfileUpdate) SetCreateTime(v time.Time) *EncodeProfileUpdate {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *EncodeProfileUpdate) SetNillableCreatedAt(v *time.Time) *EncodeProfileUpdate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *EncodeProfileUpdate) SetNillableCreateTime(v *time.Time) *EncodeProfileUpdate {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *EncodeProfileUpdate) SetUpdatedAt(v time.Time) *EncodeProfileUpdate {
-	_u.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_u *EncodeProfileUpdate) SetUpdateTime(v time.Time) *EncodeProfileUpdate {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -248,9 +248,9 @@ func (_u *EncodeProfileUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *EncodeProfileUpdate) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := encodeprofile.UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := encodeprofile.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -354,11 +354,11 @@ func (_u *EncodeProfileUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if value, ok := _u.mutation.IsActive(); ok {
 		_spec.SetField(encodeprofile.FieldIsActive, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(encodeprofile.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(encodeprofile.FieldCreateTime, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(encodeprofile.FieldUpdatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(encodeprofile.FieldUpdateTime, field.TypeTime, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -546,23 +546,23 @@ func (_u *EncodeProfileUpdateOne) SetNillableIsActive(v *bool) *EncodeProfileUpd
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *EncodeProfileUpdateOne) SetCreatedAt(v time.Time) *EncodeProfileUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *EncodeProfileUpdateOne) SetCreateTime(v time.Time) *EncodeProfileUpdateOne {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *EncodeProfileUpdateOne) SetNillableCreatedAt(v *time.Time) *EncodeProfileUpdateOne {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *EncodeProfileUpdateOne) SetNillableCreateTime(v *time.Time) *EncodeProfileUpdateOne {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *EncodeProfileUpdateOne) SetUpdatedAt(v time.Time) *EncodeProfileUpdateOne {
-	_u.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_u *EncodeProfileUpdateOne) SetUpdateTime(v time.Time) *EncodeProfileUpdateOne {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -614,9 +614,9 @@ func (_u *EncodeProfileUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *EncodeProfileUpdateOne) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := encodeprofile.UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := encodeprofile.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -737,11 +737,11 @@ func (_u *EncodeProfileUpdateOne) sqlSave(ctx context.Context) (_node *EncodePro
 	if value, ok := _u.mutation.IsActive(); ok {
 		_spec.SetField(encodeprofile.FieldIsActive, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(encodeprofile.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(encodeprofile.FieldCreateTime, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(encodeprofile.FieldUpdatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(encodeprofile.FieldUpdateTime, field.TypeTime, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &EncodeProfile{config: _u.config}

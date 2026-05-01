@@ -16,14 +16,15 @@ import (
 	atlasmigrate "ariga.io/atlas/sql/migrate"
 	"entgo.io/ent/dialect"
 	dbschema "entgo.io/ent/dialect/sql/schema"
+
 	"github.com/origadmin/runtime/log"
 
+	config "origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/migrate"
-	config "origadmin/application/origcms/internal/infra/conf"
 	mediadal "origadmin/application/origcms/internal/features/media/dal"
-	systemdal "origadmin/application/origcms/internal/features/system/dal"
 	systembiz "origadmin/application/origcms/internal/features/system/biz"
+	systemdal "origadmin/application/origcms/internal/features/system/dal"
 )
 
 // NewDatabase creates a new database client.
@@ -35,6 +36,15 @@ func NewDatabase(cfg *config.Config, logger log.Logger) (*entity.Client, error) 
 	}
 
 	ctx := context.Background()
+
+	// For SQLite: run pre-migration patches to add missing columns with defaults
+	// before Ent auto-migration, which would otherwise fail when copying data
+	// from old tables to new tables (NOT NULL constraint violation on new columns).
+	if dbDialect == "sqlite3" {
+		if err := patchSQLiteSchema(dbSource, logger); err != nil {
+			log.Warnf("SQLite pre-migration patch failed (non-fatal): %v", err)
+		}
+	}
 
 	// Build migration options based on database dialect
 	migrateOpts := []dbschema.MigrateOption{
@@ -78,6 +88,102 @@ func NewDatabase(cfg *config.Config, logger log.Logger) (*entity.Client, error) 
 	}
 
 	return db, nil
+}
+
+// patchSQLiteSchema adds missing columns to existing SQLite tables before Ent auto-migration.
+// This prevents NOT NULL constraint violations when Ent copies data from old tables to new tables.
+func patchSQLiteSchema(dsn string, logger log.Logger) error {
+	// Extract file path from DSN (remove query parameters if present)
+	dbPath := dsn
+	if idx := strings.Index(dsn, "?"); idx >= 0 {
+		dbPath = dsn[:idx]
+	}
+
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return fmt.Errorf("open sqlite for patching: %w", err)
+	}
+	defer db.Close()
+
+	// Define columns that need to be added to existing tables.
+	// These correspond to fields added in recent schema changes that old databases lack.
+	// For DATETIME columns that need non-constant defaults (e.g. CURRENT_TIMESTAMP),
+	// we add them as nullable first, then UPDATE existing rows, because SQLite
+	// ALTER TABLE does not support non-constant defaults.
+	patches := []struct {
+		table      string
+		column     string
+		colType    string
+		defaultVal string // constant default for ALTER TABLE; empty = nullable
+		updateVal  string // value to UPDATE existing rows; empty = skip UPDATE
+	}{
+		// users table: new fields added in schema evolution
+		{"users", "slug", "TEXT", "", ""},
+		{"users", "status", "TEXT", "'ACTIVE'", ""},
+		{"users", "nickname", "TEXT", "", ""},
+		{"users", "phone", "TEXT", "", ""},
+		{"users", "avatar", "TEXT", "", ""},
+		{"users", "last_login_ip", "TEXT", "", ""},
+		{"users", "login_ip", "TEXT", "", ""},
+		{"users", "last_login_time", "DATETIME", "", ""},
+		{"users", "login_time", "DATETIME", "", ""},
+		// created_at/updated_at: add as nullable, then set to date_joined/date_added for existing rows
+		{"users", "create_time", "DATETIME", "", "date_joined"},
+		{"users", "update_time", "DATETIME", "", "date_added"},
+		{"users", "create_author", "TEXT", "", ""},
+		{"users", "update_author", "TEXT", "", ""},
+		// content_media table: new fields
+		{"content_media", "share_count", "INTEGER", "0", ""},
+		{"content_media", "uuid", "TEXT", "", ""},
+		{"content_media", "sprite_status", "TEXT", "'pending'", ""},
+		{"content_media", "sprite_path", "TEXT", "", ""},
+		{"content_media", "vtt_path", "TEXT", "", ""},
+		{"content_media", "thumbnail_time", "REAL", "", ""},
+		{"content_media", "tags", "JSON", "", ""},
+		{"content_media", "create_author", "TEXT", "", ""},
+		{"content_media", "update_author", "TEXT", "", ""},
+	}
+
+	for _, p := range patches {
+		// Check if column already exists
+		var count int
+		err := db.QueryRow(
+			"SELECT COUNT(*) FROM pragma_table_info(?) WHERE name = ?",
+			p.table, p.column,
+		).Scan(&count)
+		if err != nil {
+			// Table might not exist yet (fresh database), skip
+			continue
+		}
+		if count > 0 {
+			continue // Column already exists
+		}
+
+		// Add the missing column (nullable, with constant default if provided)
+		var alterSQL string
+		if p.defaultVal != "" {
+			alterSQL = fmt.Sprintf("ALTER TABLE `%s` ADD COLUMN `%s` %s DEFAULT %s", p.table, p.column, p.colType, p.defaultVal)
+		} else {
+			alterSQL = fmt.Sprintf("ALTER TABLE `%s` ADD COLUMN `%s` %s", p.table, p.column, p.colType)
+		}
+		if _, err := db.Exec(alterSQL); err != nil {
+			log.Warnf("SQLite patch: failed to add %s.%s: %v", p.table, p.column, err)
+			continue
+		}
+		log.Infof("SQLite patch: added column %s.%s", p.table, p.column)
+
+		// For columns that need non-constant defaults, UPDATE existing rows
+		if p.updateVal != "" {
+			updateSQL := fmt.Sprintf("UPDATE `%s` SET `%s` = `%s` WHERE `%s` IS NULL", p.table, p.column, p.updateVal, p.column)
+			if result, err := db.Exec(updateSQL); err != nil {
+				log.Warnf("SQLite patch: failed to update %s.%s: %v", p.table, p.column, err)
+			} else if rows, _ := result.RowsAffected(); rows > 0 {
+				log.Infof("SQLite patch: updated %d rows in %s.%s", rows, p.table, p.column)
+			}
+		}
+	}
+
+	return nil
 }
 
 // seedSettings seeds default settings into the database.

@@ -26,8 +26,8 @@ const (
 	FieldPreviousStatus = "previous_status"
 	// FieldNewStatus holds the string denoting the new_status field in the database.
 	FieldNewStatus = "new_status"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
-	FieldCreatedAt = "created_at"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
 	// EdgeMedia holds the string denoting the media edge name in mutations.
 	EdgeMedia = "media"
 	// EdgeReviewer holds the string denoting the reviewer edge name in mutations.
@@ -59,7 +59,7 @@ var Columns = []string{
 	FieldComment,
 	FieldPreviousStatus,
 	FieldNewStatus,
-	FieldCreatedAt,
+	FieldCreateTime,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -79,8 +79,8 @@ var (
 	PreviousStatusValidator func(string) error
 	// NewStatusValidator is a validator for the "new_status" field. It is called by the builders before save.
 	NewStatusValidator func(string) error
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() time.Time
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -125,9 +125,9 @@ func ByNewStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNewStatus, opts...).ToFunc()
 }
 
-// ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
 }
 
 // ByMediaField orders the results by media field.

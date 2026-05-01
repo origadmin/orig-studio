@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
@@ -339,23 +340,16 @@ func (_u *MediaUpdate) ClearExtension() *MediaUpdate {
 }
 
 // SetPrivacy sets the "privacy" field.
-func (_u *MediaUpdate) SetPrivacy(v int) *MediaUpdate {
-	_u.mutation.ResetPrivacy()
+func (_u *MediaUpdate) SetPrivacy(v media.Privacy) *MediaUpdate {
 	_u.mutation.SetPrivacy(v)
 	return _u
 }
 
 // SetNillablePrivacy sets the "privacy" field if the given value is not nil.
-func (_u *MediaUpdate) SetNillablePrivacy(v *int) *MediaUpdate {
+func (_u *MediaUpdate) SetNillablePrivacy(v *media.Privacy) *MediaUpdate {
 	if v != nil {
 		_u.SetPrivacy(*v)
 	}
-	return _u
-}
-
-// AddPrivacy adds value to the "privacy" field.
-func (_u *MediaUpdate) AddPrivacy(v int) *MediaUpdate {
-	_u.mutation.AddPrivacy(v)
 	return _u
 }
 
@@ -510,6 +504,47 @@ func (_u *MediaUpdate) SetNillableDownloadCount(v *int64) *MediaUpdate {
 // AddDownloadCount adds value to the "download_count" field.
 func (_u *MediaUpdate) AddDownloadCount(v int64) *MediaUpdate {
 	_u.mutation.AddDownloadCount(v)
+	return _u
+}
+
+// SetShareCount sets the "share_count" field.
+func (_u *MediaUpdate) SetShareCount(v int64) *MediaUpdate {
+	_u.mutation.ResetShareCount()
+	_u.mutation.SetShareCount(v)
+	return _u
+}
+
+// SetNillableShareCount sets the "share_count" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableShareCount(v *int64) *MediaUpdate {
+	if v != nil {
+		_u.SetShareCount(*v)
+	}
+	return _u
+}
+
+// AddShareCount adds value to the "share_count" field.
+func (_u *MediaUpdate) AddShareCount(v int64) *MediaUpdate {
+	_u.mutation.AddShareCount(v)
+	return _u
+}
+
+// SetUUID sets the "uuid" field.
+func (_u *MediaUpdate) SetUUID(v string) *MediaUpdate {
+	_u.mutation.SetUUID(v)
+	return _u
+}
+
+// SetNillableUUID sets the "uuid" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableUUID(v *string) *MediaUpdate {
+	if v != nil {
+		_u.SetUUID(*v)
+	}
+	return _u
+}
+
+// ClearUUID clears the value of the "uuid" field.
+func (_u *MediaUpdate) ClearUUID() *MediaUpdate {
+	_u.mutation.ClearUUID()
 	return _u
 }
 
@@ -777,23 +812,51 @@ func (_u *MediaUpdate) ClearPublishedAt() *MediaUpdate {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *MediaUpdate) SetCreatedAt(v time.Time) *MediaUpdate {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *MediaUpdate) SetCreateTime(v time.Time) *MediaUpdate {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *MediaUpdate) SetNillableCreatedAt(v *time.Time) *MediaUpdate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableCreateTime(v *time.Time) *MediaUpdate {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *MediaUpdate) SetUpdatedAt(v time.Time) *MediaUpdate {
-	_u.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_u *MediaUpdate) SetUpdateTime(v time.Time) *MediaUpdate {
+	_u.mutation.SetUpdateTime(v)
+	return _u
+}
+
+// SetCreateAuthor sets the "create_author" field.
+func (_u *MediaUpdate) SetCreateAuthor(v string) *MediaUpdate {
+	_u.mutation.SetCreateAuthor(v)
+	return _u
+}
+
+// SetNillableCreateAuthor sets the "create_author" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableCreateAuthor(v *string) *MediaUpdate {
+	if v != nil {
+		_u.SetCreateAuthor(*v)
+	}
+	return _u
+}
+
+// SetUpdateAuthor sets the "update_author" field.
+func (_u *MediaUpdate) SetUpdateAuthor(v string) *MediaUpdate {
+	_u.mutation.SetUpdateAuthor(v)
+	return _u
+}
+
+// SetNillableUpdateAuthor sets the "update_author" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableUpdateAuthor(v *string) *MediaUpdate {
+	if v != nil {
+		_u.SetUpdateAuthor(*v)
+	}
 	return _u
 }
 
@@ -900,6 +963,21 @@ func (_u *MediaUpdate) AddReviewLogs(v ...*MediaReviewLog) *MediaUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.AddReviewLogIDs(ids...)
+}
+
+// AddArticleIDs adds the "articles" edge to the Article entity by IDs.
+func (_u *MediaUpdate) AddArticleIDs(ids ...string) *MediaUpdate {
+	_u.mutation.AddArticleIDs(ids...)
+	return _u
+}
+
+// AddArticles adds the "articles" edges to the Article entity.
+func (_u *MediaUpdate) AddArticles(v ...*Article) *MediaUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddArticleIDs(ids...)
 }
 
 // Mutation returns the MediaMutation object of the builder.
@@ -1051,6 +1129,27 @@ func (_u *MediaUpdate) RemoveReviewLogs(v ...*MediaReviewLog) *MediaUpdate {
 	return _u.RemoveReviewLogIDs(ids...)
 }
 
+// ClearArticles clears all "articles" edges to the Article entity.
+func (_u *MediaUpdate) ClearArticles() *MediaUpdate {
+	_u.mutation.ClearArticles()
+	return _u
+}
+
+// RemoveArticleIDs removes the "articles" edge to Article entities by IDs.
+func (_u *MediaUpdate) RemoveArticleIDs(ids ...string) *MediaUpdate {
+	_u.mutation.RemoveArticleIDs(ids...)
+	return _u
+}
+
+// RemoveArticles removes "articles" edges to Article entities.
+func (_u *MediaUpdate) RemoveArticles(v ...*Article) *MediaUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveArticleIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *MediaUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
@@ -1081,9 +1180,9 @@ func (_u *MediaUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *MediaUpdate) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := media.UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := media.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -1149,6 +1248,11 @@ func (_u *MediaUpdate) check() error {
 			return &ValidationError{Name: "extension", err: fmt.Errorf(`entity: validator failed for field "Media.extension": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Privacy(); ok {
+		if err := media.PrivacyValidator(v); err != nil {
+			return &ValidationError{Name: "privacy", err: fmt.Errorf(`entity: validator failed for field "Media.privacy": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.EncodingStatus(); ok {
 		if err := media.EncodingStatusValidator(v); err != nil {
 			return &ValidationError{Name: "encoding_status", err: fmt.Errorf(`entity: validator failed for field "Media.encoding_status": %w`, err)}
@@ -1157,6 +1261,11 @@ func (_u *MediaUpdate) check() error {
 	if v, ok := _u.mutation.State(); ok {
 		if err := media.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`entity: validator failed for field "Media.state": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.UUID(); ok {
+		if err := media.UUIDValidator(v); err != nil {
+			return &ValidationError{Name: "uuid", err: fmt.Errorf(`entity: validator failed for field "Media.uuid": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.ReviewStatus(); ok {
@@ -1288,10 +1397,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.ClearField(media.FieldExtension, field.TypeString)
 	}
 	if value, ok := _u.mutation.Privacy(); ok {
-		_spec.SetField(media.FieldPrivacy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedPrivacy(); ok {
-		_spec.AddField(media.FieldPrivacy, field.TypeInt, value)
+		_spec.SetField(media.FieldPrivacy, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.EncodingStatus(); ok {
 		_spec.SetField(media.FieldEncodingStatus, field.TypeString, value)
@@ -1334,6 +1440,18 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedDownloadCount(); ok {
 		_spec.AddField(media.FieldDownloadCount, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.ShareCount(); ok {
+		_spec.SetField(media.FieldShareCount, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedShareCount(); ok {
+		_spec.AddField(media.FieldShareCount, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UUID(); ok {
+		_spec.SetField(media.FieldUUID, field.TypeString, value)
+	}
+	if _u.mutation.UUIDCleared() {
+		_spec.ClearField(media.FieldUUID, field.TypeString)
 	}
 	if value, ok := _u.mutation.AllowDownload(); ok {
 		_spec.SetField(media.FieldAllowDownload, field.TypeBool, value)
@@ -1397,11 +1515,17 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.PublishedAtCleared() {
 		_spec.ClearField(media.FieldPublishedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(media.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(media.FieldCreateTime, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(media.FieldUpdatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(media.FieldUpdateTime, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.CreateAuthor(); ok {
+		_spec.SetField(media.FieldCreateAuthor, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.UpdateAuthor(); ok {
+		_spec.SetField(media.FieldUpdateAuthor, field.TypeString, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1753,6 +1877,51 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(mediareviewlog.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ArticlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ArticlesTable,
+			Columns: []string{media.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedArticlesIDs(); len(nodes) > 0 && !_u.mutation.ArticlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ArticlesTable,
+			Columns: []string{media.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ArticlesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ArticlesTable,
+			Columns: []string{media.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -2082,23 +2251,16 @@ func (_u *MediaUpdateOne) ClearExtension() *MediaUpdateOne {
 }
 
 // SetPrivacy sets the "privacy" field.
-func (_u *MediaUpdateOne) SetPrivacy(v int) *MediaUpdateOne {
-	_u.mutation.ResetPrivacy()
+func (_u *MediaUpdateOne) SetPrivacy(v media.Privacy) *MediaUpdateOne {
 	_u.mutation.SetPrivacy(v)
 	return _u
 }
 
 // SetNillablePrivacy sets the "privacy" field if the given value is not nil.
-func (_u *MediaUpdateOne) SetNillablePrivacy(v *int) *MediaUpdateOne {
+func (_u *MediaUpdateOne) SetNillablePrivacy(v *media.Privacy) *MediaUpdateOne {
 	if v != nil {
 		_u.SetPrivacy(*v)
 	}
-	return _u
-}
-
-// AddPrivacy adds value to the "privacy" field.
-func (_u *MediaUpdateOne) AddPrivacy(v int) *MediaUpdateOne {
-	_u.mutation.AddPrivacy(v)
 	return _u
 }
 
@@ -2253,6 +2415,47 @@ func (_u *MediaUpdateOne) SetNillableDownloadCount(v *int64) *MediaUpdateOne {
 // AddDownloadCount adds value to the "download_count" field.
 func (_u *MediaUpdateOne) AddDownloadCount(v int64) *MediaUpdateOne {
 	_u.mutation.AddDownloadCount(v)
+	return _u
+}
+
+// SetShareCount sets the "share_count" field.
+func (_u *MediaUpdateOne) SetShareCount(v int64) *MediaUpdateOne {
+	_u.mutation.ResetShareCount()
+	_u.mutation.SetShareCount(v)
+	return _u
+}
+
+// SetNillableShareCount sets the "share_count" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableShareCount(v *int64) *MediaUpdateOne {
+	if v != nil {
+		_u.SetShareCount(*v)
+	}
+	return _u
+}
+
+// AddShareCount adds value to the "share_count" field.
+func (_u *MediaUpdateOne) AddShareCount(v int64) *MediaUpdateOne {
+	_u.mutation.AddShareCount(v)
+	return _u
+}
+
+// SetUUID sets the "uuid" field.
+func (_u *MediaUpdateOne) SetUUID(v string) *MediaUpdateOne {
+	_u.mutation.SetUUID(v)
+	return _u
+}
+
+// SetNillableUUID sets the "uuid" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableUUID(v *string) *MediaUpdateOne {
+	if v != nil {
+		_u.SetUUID(*v)
+	}
+	return _u
+}
+
+// ClearUUID clears the value of the "uuid" field.
+func (_u *MediaUpdateOne) ClearUUID() *MediaUpdateOne {
+	_u.mutation.ClearUUID()
 	return _u
 }
 
@@ -2520,23 +2723,51 @@ func (_u *MediaUpdateOne) ClearPublishedAt() *MediaUpdateOne {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *MediaUpdateOne) SetCreatedAt(v time.Time) *MediaUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *MediaUpdateOne) SetCreateTime(v time.Time) *MediaUpdateOne {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *MediaUpdateOne) SetNillableCreatedAt(v *time.Time) *MediaUpdateOne {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableCreateTime(v *time.Time) *MediaUpdateOne {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *MediaUpdateOne) SetUpdatedAt(v time.Time) *MediaUpdateOne {
-	_u.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_u *MediaUpdateOne) SetUpdateTime(v time.Time) *MediaUpdateOne {
+	_u.mutation.SetUpdateTime(v)
+	return _u
+}
+
+// SetCreateAuthor sets the "create_author" field.
+func (_u *MediaUpdateOne) SetCreateAuthor(v string) *MediaUpdateOne {
+	_u.mutation.SetCreateAuthor(v)
+	return _u
+}
+
+// SetNillableCreateAuthor sets the "create_author" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableCreateAuthor(v *string) *MediaUpdateOne {
+	if v != nil {
+		_u.SetCreateAuthor(*v)
+	}
+	return _u
+}
+
+// SetUpdateAuthor sets the "update_author" field.
+func (_u *MediaUpdateOne) SetUpdateAuthor(v string) *MediaUpdateOne {
+	_u.mutation.SetUpdateAuthor(v)
+	return _u
+}
+
+// SetNillableUpdateAuthor sets the "update_author" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableUpdateAuthor(v *string) *MediaUpdateOne {
+	if v != nil {
+		_u.SetUpdateAuthor(*v)
+	}
 	return _u
 }
 
@@ -2643,6 +2874,21 @@ func (_u *MediaUpdateOne) AddReviewLogs(v ...*MediaReviewLog) *MediaUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.AddReviewLogIDs(ids...)
+}
+
+// AddArticleIDs adds the "articles" edge to the Article entity by IDs.
+func (_u *MediaUpdateOne) AddArticleIDs(ids ...string) *MediaUpdateOne {
+	_u.mutation.AddArticleIDs(ids...)
+	return _u
+}
+
+// AddArticles adds the "articles" edges to the Article entity.
+func (_u *MediaUpdateOne) AddArticles(v ...*Article) *MediaUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddArticleIDs(ids...)
 }
 
 // Mutation returns the MediaMutation object of the builder.
@@ -2794,6 +3040,27 @@ func (_u *MediaUpdateOne) RemoveReviewLogs(v ...*MediaReviewLog) *MediaUpdateOne
 	return _u.RemoveReviewLogIDs(ids...)
 }
 
+// ClearArticles clears all "articles" edges to the Article entity.
+func (_u *MediaUpdateOne) ClearArticles() *MediaUpdateOne {
+	_u.mutation.ClearArticles()
+	return _u
+}
+
+// RemoveArticleIDs removes the "articles" edge to Article entities by IDs.
+func (_u *MediaUpdateOne) RemoveArticleIDs(ids ...string) *MediaUpdateOne {
+	_u.mutation.RemoveArticleIDs(ids...)
+	return _u
+}
+
+// RemoveArticles removes "articles" edges to Article entities.
+func (_u *MediaUpdateOne) RemoveArticles(v ...*Article) *MediaUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveArticleIDs(ids...)
+}
+
 // Where appends a list predicates to the MediaUpdate builder.
 func (_u *MediaUpdateOne) Where(ps ...predicate.Media) *MediaUpdateOne {
 	_u.mutation.Where(ps...)
@@ -2837,9 +3104,9 @@ func (_u *MediaUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *MediaUpdateOne) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := media.UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := media.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -2905,6 +3172,11 @@ func (_u *MediaUpdateOne) check() error {
 			return &ValidationError{Name: "extension", err: fmt.Errorf(`entity: validator failed for field "Media.extension": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Privacy(); ok {
+		if err := media.PrivacyValidator(v); err != nil {
+			return &ValidationError{Name: "privacy", err: fmt.Errorf(`entity: validator failed for field "Media.privacy": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.EncodingStatus(); ok {
 		if err := media.EncodingStatusValidator(v); err != nil {
 			return &ValidationError{Name: "encoding_status", err: fmt.Errorf(`entity: validator failed for field "Media.encoding_status": %w`, err)}
@@ -2913,6 +3185,11 @@ func (_u *MediaUpdateOne) check() error {
 	if v, ok := _u.mutation.State(); ok {
 		if err := media.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`entity: validator failed for field "Media.state": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.UUID(); ok {
+		if err := media.UUIDValidator(v); err != nil {
+			return &ValidationError{Name: "uuid", err: fmt.Errorf(`entity: validator failed for field "Media.uuid": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.ReviewStatus(); ok {
@@ -3061,10 +3338,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 		_spec.ClearField(media.FieldExtension, field.TypeString)
 	}
 	if value, ok := _u.mutation.Privacy(); ok {
-		_spec.SetField(media.FieldPrivacy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedPrivacy(); ok {
-		_spec.AddField(media.FieldPrivacy, field.TypeInt, value)
+		_spec.SetField(media.FieldPrivacy, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.EncodingStatus(); ok {
 		_spec.SetField(media.FieldEncodingStatus, field.TypeString, value)
@@ -3107,6 +3381,18 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	}
 	if value, ok := _u.mutation.AddedDownloadCount(); ok {
 		_spec.AddField(media.FieldDownloadCount, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.ShareCount(); ok {
+		_spec.SetField(media.FieldShareCount, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedShareCount(); ok {
+		_spec.AddField(media.FieldShareCount, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UUID(); ok {
+		_spec.SetField(media.FieldUUID, field.TypeString, value)
+	}
+	if _u.mutation.UUIDCleared() {
+		_spec.ClearField(media.FieldUUID, field.TypeString)
 	}
 	if value, ok := _u.mutation.AllowDownload(); ok {
 		_spec.SetField(media.FieldAllowDownload, field.TypeBool, value)
@@ -3170,11 +3456,17 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	if _u.mutation.PublishedAtCleared() {
 		_spec.ClearField(media.FieldPublishedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(media.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(media.FieldCreateTime, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(media.FieldUpdatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(media.FieldUpdateTime, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.CreateAuthor(); ok {
+		_spec.SetField(media.FieldCreateAuthor, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.UpdateAuthor(); ok {
+		_spec.SetField(media.FieldUpdateAuthor, field.TypeString, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -3526,6 +3818,51 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(mediareviewlog.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ArticlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ArticlesTable,
+			Columns: []string{media.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedArticlesIDs(); len(nodes) > 0 && !_u.mutation.ArticlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ArticlesTable,
+			Columns: []string{media.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ArticlesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ArticlesTable,
+			Columns: []string{media.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

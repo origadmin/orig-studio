@@ -27,7 +27,7 @@ import {
 import {adminPermissionApi, type CreatePermissionGroupRequest, type UpdatePermissionGroupRequest} from '@/lib/api/permission';
 import {useQueryClient} from '@tanstack/react-query';
 import {TablePagination} from '@/components/common/TablePagination';
-import {PAGINATION} from '@/config/pagination';
+import {PAGINATION_CONFIG} from '@/config/pagination';
 
 export default function PermissionsPage() {
     const queryClient = useQueryClient();
@@ -47,9 +47,9 @@ export default function PermissionsPage() {
     const [addMemberIds, setAddMemberIds] = useState('');
     const [userPermId, setUserPermId] = useState<string | null>(null);
 
-    const {data: groupsData, isLoading} = usePermissionGroups({page, page_size: PAGINATION.DEFAULT_PAGE_SIZE});
+    const {data: groupsData, isLoading} = usePermissionGroups({page, page_size: PAGINATION_CONFIG.DEFAULT_PAGE_SIZE});
     const {data: groupDetail} = usePermissionGroup(selectedGroupId);
-    const {data: membersData} = useGroupMembers(selectedGroupId, {page: 1, page_size: PAGINATION.MAX_PAGE_SIZE});
+    const {data: membersData} = useGroupMembers(selectedGroupId, {page: 1, page_size: PAGINATION_CONFIG.MAX_PAGE_SIZE});
     const {data: userPermsData} = useUserPermissions(userPermId);
 
     const groups = groupsData?.items || [];

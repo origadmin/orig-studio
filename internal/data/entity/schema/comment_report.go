@@ -24,7 +24,8 @@ func (CommentReport) Fields() []ent.Field {
 		field.String("reporter_id"),
 		field.Enum("reason").Values("SPAM", "HARASSMENT", "INAPPROPRIATE", "OTHER"),
 		field.Text("description").Optional(),
-		field.Time("created_at").Default(time.Now),
+		field.Enum("status").Values("PENDING", "REVIEWED", "DISMISSED").Default("PENDING"),
+		field.Time("create_time").Default(time.Now),
 	}
 }
 
@@ -33,7 +34,8 @@ func (CommentReport) Indexes() []ent.Index {
 		index.Fields("reporter_id", "comment_id").Unique(),
 		index.Fields("comment_id"),
 		index.Fields("reason"),
-		index.Fields("created_at"),
+		index.Fields("create_time"),
+		index.Fields("status"),
 	}
 }
 

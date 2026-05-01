@@ -124,30 +124,30 @@ func (_c *SettingCreate) SetNillableIsBuiltin(v *bool) *SettingCreate {
 	return _c
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_c *SettingCreate) SetCreatedAt(v time.Time) *SettingCreate {
-	_c.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_c *SettingCreate) SetCreateTime(v time.Time) *SettingCreate {
+	_c.mutation.SetCreateTime(v)
 	return _c
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *SettingCreate) SetNillableCreatedAt(v *time.Time) *SettingCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *SettingCreate) SetNillableCreateTime(v *time.Time) *SettingCreate {
 	if v != nil {
-		_c.SetCreatedAt(*v)
+		_c.SetCreateTime(*v)
 	}
 	return _c
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_c *SettingCreate) SetUpdatedAt(v time.Time) *SettingCreate {
-	_c.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_c *SettingCreate) SetUpdateTime(v time.Time) *SettingCreate {
+	_c.mutation.SetUpdateTime(v)
 	return _c
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *SettingCreate) SetNillableUpdatedAt(v *time.Time) *SettingCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (_c *SettingCreate) SetNillableUpdateTime(v *time.Time) *SettingCreate {
 	if v != nil {
-		_c.SetUpdatedAt(*v)
+		_c.SetUpdateTime(*v)
 	}
 	return _c
 }
@@ -221,13 +221,13 @@ func (_c *SettingCreate) defaults() {
 		v := setting.DefaultIsBuiltin
 		_c.mutation.SetIsBuiltin(v)
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := setting.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := setting.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
 	}
-	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := setting.DefaultUpdatedAt()
-		_c.mutation.SetUpdatedAt(v)
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		v := setting.DefaultUpdateTime()
+		_c.mutation.SetUpdateTime(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := setting.DefaultID()
@@ -270,11 +270,11 @@ func (_c *SettingCreate) check() error {
 	if _, ok := _c.mutation.IsBuiltin(); !ok {
 		return &ValidationError{Name: "is_builtin", err: errors.New(`entity: missing required field "Setting.is_builtin"`)}
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "Setting.created_at"`)}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "Setting.create_time"`)}
 	}
-	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`entity: missing required field "Setting.updated_at"`)}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`entity: missing required field "Setting.update_time"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := setting.IDValidator(v); err != nil {
@@ -348,13 +348,13 @@ func (_c *SettingCreate) createSpec() (*Setting, *sqlgraph.CreateSpec) {
 		_spec.SetField(setting.FieldIsBuiltin, field.TypeBool, value)
 		_node.IsBuiltin = value
 	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(setting.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(setting.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
 	}
-	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(setting.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
+	if value, ok := _c.mutation.UpdateTime(); ok {
+		_spec.SetField(setting.FieldUpdateTime, field.TypeTime, value)
+		_node.UpdateTime = value
 	}
 	return _node, _spec
 }

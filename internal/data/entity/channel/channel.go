@@ -3,6 +3,7 @@
 package channel
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -24,10 +25,18 @@ const (
 	FieldShortToken = "short_token"
 	// FieldBannerLogo holds the string denoting the banner_logo field in the database.
 	FieldBannerLogo = "banner_logo"
-	// FieldIsPublic holds the string denoting the is_public field in the database.
-	FieldIsPublic = "is_public"
+	// FieldPrivacy holds the string denoting the privacy field in the database.
+	FieldPrivacy = "privacy"
+	// FieldSubscriberCount holds the string denoting the subscriber_count field in the database.
+	FieldSubscriberCount = "subscriber_count"
+	// FieldMediaCount holds the string denoting the media_count field in the database.
+	FieldMediaCount = "media_count"
 	// FieldAddDate holds the string denoting the add_date field in the database.
 	FieldAddDate = "add_date"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
+	// FieldUpdateTime holds the string denoting the update_time field in the database.
+	FieldUpdateTime = "update_time"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeMedia holds the string denoting the media edge name in mutations.
@@ -58,8 +67,12 @@ var Columns = []string{
 	FieldDescription,
 	FieldShortToken,
 	FieldBannerLogo,
-	FieldIsPublic,
+	FieldPrivacy,
+	FieldSubscriberCount,
+	FieldMediaCount,
 	FieldAddDate,
+	FieldCreateTime,
+	FieldUpdateTime,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -81,15 +94,52 @@ var (
 	ShortTokenValidator func(string) error
 	// BannerLogoValidator is a validator for the "banner_logo" field. It is called by the builders before save.
 	BannerLogoValidator func(string) error
-	// DefaultIsPublic holds the default value on creation for the "is_public" field.
-	DefaultIsPublic bool
+	// DefaultSubscriberCount holds the default value on creation for the "subscriber_count" field.
+	DefaultSubscriberCount int64
+	// DefaultMediaCount holds the default value on creation for the "media_count" field.
+	DefaultMediaCount int
 	// DefaultAddDate holds the default value on creation for the "add_date" field.
 	DefaultAddDate func() time.Time
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
+	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
+	DefaultUpdateTime func() time.Time
+	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
+	UpdateDefaultUpdateTime func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
+
+// Privacy defines the type for the "privacy" enum field.
+type Privacy string
+
+// PrivacyPUBLIC is the default value of the Privacy enum.
+const DefaultPrivacy = PrivacyPUBLIC
+
+// Privacy values.
+const (
+	PrivacyPUBLIC           Privacy = "PUBLIC"
+	PrivacyPRIVATE          Privacy = "PRIVATE"
+	PrivacyUNLISTED         Privacy = "UNLISTED"
+	PrivacyPAID             Privacy = "PAID"
+	PrivacySUBSCRIBERS_ONLY Privacy = "SUBSCRIBERS_ONLY"
+)
+
+func (pr Privacy) String() string {
+	return string(pr)
+}
+
+// PrivacyValidator is a validator for the "privacy" field enum values. It is called by the builders before save.
+func PrivacyValidator(pr Privacy) error {
+	switch pr {
+	case PrivacyPUBLIC, PrivacyPRIVATE, PrivacyUNLISTED, PrivacyPAID, PrivacySUBSCRIBERS_ONLY:
+		return nil
+	default:
+		return fmt.Errorf("channel: invalid enum value for privacy field: %q", pr)
+	}
+}
 
 // OrderOption defines the ordering options for the Channel queries.
 type OrderOption func(*sql.Selector)
@@ -124,14 +174,34 @@ func ByBannerLogo(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBannerLogo, opts...).ToFunc()
 }
 
-// ByIsPublic orders the results by the is_public field.
-func ByIsPublic(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIsPublic, opts...).ToFunc()
+// ByPrivacy orders the results by the privacy field.
+func ByPrivacy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPrivacy, opts...).ToFunc()
+}
+
+// BySubscriberCount orders the results by the subscriber_count field.
+func BySubscriberCount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSubscriberCount, opts...).ToFunc()
+}
+
+// ByMediaCountField orders the results by the media_count field.
+func ByMediaCountField(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMediaCount, opts...).ToFunc()
 }
 
 // ByAddDate orders the results by the add_date field.
 func ByAddDate(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAddDate, opts...).ToFunc()
+}
+
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
+}
+
+// ByUpdateTime orders the results by the update_time field.
+func ByUpdateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdateTime, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.

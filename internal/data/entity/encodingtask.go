@@ -30,10 +30,12 @@ type EncodingTask struct {
 	ErrorMessage string `json:"error_message,omitempty"`
 	// Chunk holds the value of the "chunk" field.
 	Chunk bool `json:"chunk,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt    time.Time `json:"updated_at,omitempty"`
+	// Progress holds the value of the "progress" field.
+	Progress int `json:"progress,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime   time.Time `json:"update_time,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -44,11 +46,11 @@ func (*EncodingTask) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case encodingtask.FieldChunk:
 			values[i] = new(sql.NullBool)
-		case encodingtask.FieldProfileID:
+		case encodingtask.FieldProfileID, encodingtask.FieldProgress:
 			values[i] = new(sql.NullInt64)
 		case encodingtask.FieldID, encodingtask.FieldMediaID, encodingtask.FieldStatus, encodingtask.FieldOutputPath, encodingtask.FieldErrorMessage:
 			values[i] = new(sql.NullString)
-		case encodingtask.FieldCreatedAt, encodingtask.FieldUpdatedAt:
+		case encodingtask.FieldCreateTime, encodingtask.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -107,17 +109,23 @@ func (_m *EncodingTask) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Chunk = value.Bool
 			}
-		case encodingtask.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+		case encodingtask.FieldProgress:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field progress", values[i])
 			} else if value.Valid {
-				_m.CreatedAt = value.Time
+				_m.Progress = int(value.Int64)
 			}
-		case encodingtask.FieldUpdatedAt:
+		case encodingtask.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				_m.UpdatedAt = value.Time
+				_m.CreateTime = value.Time
+			}
+		case encodingtask.FieldUpdateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
+			} else if value.Valid {
+				_m.UpdateTime = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -173,11 +181,14 @@ func (_m *EncodingTask) String() string {
 	builder.WriteString("chunk=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Chunk))
 	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString("progress=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Progress))
 	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString("create_time=")
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("update_time=")
+	builder.WriteString(_m.UpdateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/data/entity/channel"
+	"origadmin/application/origcms/internal/data/entity/playlist"
 	"origadmin/application/origcms/internal/features/content/biz"
 )
 
@@ -19,7 +21,7 @@ func TestMapChannel_MapsShortToken(t *testing.T) {
 		Description: "A test channel",
 		BannerLogo:  "https://example.com/banner.png",
 		ShortToken:  "abc123def456",
-		IsPublic:    true,
+		Privacy:     channel.PrivacyPUBLIC,
 		UserID:      "user-001",
 		AddDate:     time.Now(),
 	}
@@ -46,7 +48,7 @@ func TestMapChannel_NoFriendlyTokenOrSlug(t *testing.T) {
 		ID:          "ch-002",
 		Title:       "No Slug Channel",
 		ShortToken:  "xyz789",
-		IsPublic:    true,
+		Privacy:     channel.PrivacyPUBLIC,
 		UserID:      "user-002",
 		AddDate:     time.Now(),
 	}
@@ -67,7 +69,7 @@ func TestMapChannel_AllFieldsMapped(t *testing.T) {
 		Description: "Full description",
 		BannerLogo:  "https://example.com/banner.png",
 		ShortToken:  "st-full",
-		IsPublic:    false,
+		Privacy:     channel.PrivacyPRIVATE,
 		UserID:      "user-003",
 		AddDate:     now,
 	}
@@ -89,8 +91,8 @@ func TestMapChannel_AllFieldsMapped(t *testing.T) {
 	if result.ShortToken != ent.ShortToken {
 		t.Errorf("ShortToken: got %q, want %q", result.ShortToken, ent.ShortToken)
 	}
-	if result.IsPublic != ent.IsPublic {
-		t.Errorf("IsPublic: got %v, want %v", result.IsPublic, ent.IsPublic)
+	if result.IsPublic != (ent.Privacy == channel.PrivacyPUBLIC) {
+		t.Errorf("IsPublic: got %v, want %v", result.IsPublic, ent.Privacy == channel.PrivacyPUBLIC)
 	}
 	if result.UserID != ent.UserID {
 		t.Errorf("UserID: got %q, want %q", result.UserID, ent.UserID)
@@ -100,12 +102,13 @@ func TestMapChannel_AllFieldsMapped(t *testing.T) {
 func TestChannelStruct_HasShortTokenField(t *testing.T) {
 	// Verify that the biz.Channel struct has ShortToken field and no FriendlyToken/Slug
 	ch := biz.Channel{
-		ID:         "ch-004",
-		Title:      "Struct Test",
-		ShortToken: "st-abc123",
-		UserID:     "user-004",
-		IsPublic:   true,
-		CreatedAt:  time.Now(),
+		ID:          "ch-004",
+		Title:       "Struct Test",
+		Description: "Struct test description",
+		ShortToken:  "st-abc123",
+		UserID:      "user-004",
+		IsPublic:    true,
+		CreatedAt:   time.Now(),
 	}
 
 	if ch.ShortToken != "st-abc123" {
@@ -120,7 +123,7 @@ func TestMapPlaylist_MapsShortToken(t *testing.T) {
 		Description: "A test playlist",
 		ShortToken:  "pl-abc123",
 		UserID:      "user-001",
-		Privacy:     1,
+		Privacy:     playlist.PrivacyPUBLIC,
 		AddDate:     time.Now(),
 	}
 

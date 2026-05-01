@@ -1,24 +1,26 @@
 package service
 
 import (
-	"origadmin/application/origcms/internal/handler"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"origadmin/application/origcms/internal/server"
-	"origadmin/application/origcms/internal/helpers/repo"
-	mediabiz "origadmin/application/origcms/internal/features/media/biz"
+
+	pb "origadmin/application/origcms/api/gen/v1/media"
+	"origadmin/application/origcms/internal/handler"
+	"origadmin/application/origcms/internal/features/media/biz"
 	"origadmin/application/origcms/internal/features/media/dto"
+	"origadmin/application/origcms/internal/helpers/repo"
+	"origadmin/application/origcms/internal/server"
 )
 
 // SearchHandler handles search-related routes.
 type SearchHandler struct {
-	mediaUC *mediabiz.MediaUseCase
+	mediaUC *biz.MediaUseCase
 }
 
 // NewSearchHandler creates a new SearchHandler.
-func NewSearchHandler(mediaUC *mediabiz.MediaUseCase) *SearchHandler {
+func NewSearchHandler(mediaUC *biz.MediaUseCase) *SearchHandler {
 	return &SearchHandler{mediaUC: mediaUC}
 }
 
@@ -74,20 +76,17 @@ func (h *SearchHandler) search(c *gin.Context) {
 		return
 	}
 
-	// Build pagination response
-	response := server.PageResponse[interface{}]{
-		Code:    0,
-		Message: "ok",
+	totalPages := int32(0)
+	if pageSize > 0 {
+		totalPages = (total + int32(pageSize) - 1) / int32(pageSize)
 	}
-	response.Data.Items = make([]interface{}, len(medias))
-	for i, media := range medias {
-		response.Data.Items[i] = media
-	}
-	response.Data.Total = int64(total)
-	response.Data.Page = page
-	response.Data.PageSize = pageSize
-
-	c.JSON(200, response)
+	server.OK(c, &pb.ListMediasResponse{
+		Total:      total,
+		Items:      medias,
+		Page:       int32(page),
+		PageSize:   int32(pageSize),
+		TotalPages: totalPages,
+	})
 }
 
 func boolPtr(b bool) *bool {
@@ -106,7 +105,9 @@ func (h *SearchHandler) suggestions(c *gin.Context) {
 	}
 
 	if keyword == "" {
-		server.OK(c, gin.H{"suggestions": []string{}})
+		server.OK(c, &pb.GetSearchSuggestionsResponse{
+			Suggestions: []string{},
+		})
 		return
 	}
 
@@ -121,7 +122,9 @@ func (h *SearchHandler) suggestions(c *gin.Context) {
 
 	medias, _, err := h.mediaUC.ListMedias(c.Request.Context(), opts)
 	if err != nil {
-		server.OK(c, gin.H{"suggestions": []string{}})
+		server.OK(c, &pb.GetSearchSuggestionsResponse{
+			Suggestions: []string{},
+		})
 		return
 	}
 
@@ -132,5 +135,7 @@ func (h *SearchHandler) suggestions(c *gin.Context) {
 		}
 	}
 
-	server.OK(c, gin.H{"suggestions": suggestions})
+	server.OK(c, &pb.GetSearchSuggestionsResponse{
+		Suggestions: suggestions,
+	})
 }

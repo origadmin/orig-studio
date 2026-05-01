@@ -1,4 +1,4 @@
-﻿import {Spinner} from "@/components/ui/spinner"
+﻿﻿import {Spinner} from "@/components/ui/spinner"
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * 我的播放列表页
@@ -117,7 +117,7 @@ const PlaylistsPage = () => {
                                     {pl.name}
                                 </h3>
                                 <p className="text-sm text-gray-500 dark:text-muted-foreground line-clamp-1">{pl.description}</p>
-                                <p className="text-xs text-muted-foreground mt-2">{t('playlists.updated', {date: formatDate(pl.updated_at || pl.update_time)})}</p>
+                                <p className="text-xs text-muted-foreground mt-2">{t('playlists.updated', {date: formatDate(pl.update_time)})}</p>
                             </div>
                         </div>
                     ))}

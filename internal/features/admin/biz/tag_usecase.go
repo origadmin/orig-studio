@@ -7,6 +7,7 @@ import (
 
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/features/admin/dal"
+	"origadmin/application/origcms/internal/helpers/repo"
 )
 
 // TagUseCase handles tag business logic
@@ -21,12 +22,8 @@ func NewTagUseCase(repo dal.TagRepository) *TagUseCase {
 
 // List returns a paginated list of tags
 func (uc *TagUseCase) List(ctx context.Context, page, pageSize int, search, status, sortBy, sortOrder string) ([]*entity.Tag, int64, error) {
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 || pageSize > 100 {
-		pageSize = 20
-	}
+	// Normalize pagination parameters using centralized validation
+	page, pageSize = repo.NormalizePagination(page, pageSize)
 
 	tags, total, err := uc.repo.List(ctx, page, pageSize, search, status, sortBy, sortOrder)
 	if err != nil {
@@ -56,8 +53,9 @@ func (uc *TagUseCase) Create(ctx context.Context, tag *entity.Tag) (*entity.Tag,
 		return nil, errors.New("tag title is required")
 	}
 
-	// Check if title is unique
-	existingTag, err := uc.repo.GetBySlug(ctx, tag.Title)
+	// B087-R2 Fix: Check if title is unique using GetByName (not GetBySlug).
+	// GetBySlug checks the slug field, not the title field.
+	existingTag, err := uc.repo.GetByName(ctx, tag.Title)
 	if err == nil && existingTag != nil {
 		return nil, errors.New("tag title already exists")
 	}

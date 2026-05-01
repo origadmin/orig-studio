@@ -160,7 +160,7 @@ func SetupTestServer(t *testing.T) *TestServer {
 
 	authHandler := authservice.NewAuthHandler(userUC, jwtMgr)
 	userHandler := userservice.NewUserHandler(userUC, jwtMgr)
-	mediaHandler := mediaservice.NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC, nil)
+	mediaHandler := mediaservice.NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC, nil, nil)
 	uploadHandler := mediaservice.NewUploadHandler(uploadUC, jwtMgr, logger)
 	categoryHandler := contentservice.NewCategoryHandler(categoryTagUC, jwtMgr)
 	tagHandler := contentservice.NewTagHandler(categoryTagUC, jwtMgr)
@@ -188,7 +188,7 @@ func SetupTestServer(t *testing.T) *TestServer {
 	articleRepo := contentdal.NewArticleRepo(contentDB, logger)
 	articleUC := contentbiz.NewArticleUseCase(articleRepo, logger)
 
-	adminHandler := adminservice.NewAdminHandler(jwtMgr, mediaUC, playlistChannelUC, tagService, settingUC, categoryTagUC, articleUC, userUC, nil)
+	adminHandler := adminservice.NewAdminHandler(jwtMgr, mediaUC, nil, playlistChannelUC, tagService, settingUC, categoryTagUC, articleUC, userUC, nil)
 
 	// Explore handler
 	exploreHandler := contentservice.NewExploreHandler(db)

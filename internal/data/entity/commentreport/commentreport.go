@@ -23,8 +23,10 @@ const (
 	FieldReason = "reason"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
-	FieldCreatedAt = "created_at"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
 	// EdgeComment holds the string denoting the comment edge name in mutations.
 	EdgeComment = "comment"
 	// EdgeReporter holds the string denoting the reporter edge name in mutations.
@@ -54,7 +56,8 @@ var Columns = []string{
 	FieldReporterID,
 	FieldReason,
 	FieldDescription,
-	FieldCreatedAt,
+	FieldStatus,
+	FieldCreateTime,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -68,8 +71,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() time.Time
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -101,6 +104,33 @@ func ReasonValidator(r Reason) error {
 	}
 }
 
+// Status defines the type for the "status" enum field.
+type Status string
+
+// StatusPENDING is the default value of the Status enum.
+const DefaultStatus = StatusPENDING
+
+// Status values.
+const (
+	StatusPENDING   Status = "PENDING"
+	StatusREVIEWED  Status = "REVIEWED"
+	StatusDISMISSED Status = "DISMISSED"
+)
+
+func (s Status) String() string {
+	return string(s)
+}
+
+// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
+func StatusValidator(s Status) error {
+	switch s {
+	case StatusPENDING, StatusREVIEWED, StatusDISMISSED:
+		return nil
+	default:
+		return fmt.Errorf("commentreport: invalid enum value for status field: %q", s)
+	}
+}
+
 // OrderOption defines the ordering options for the CommentReport queries.
 type OrderOption func(*sql.Selector)
 
@@ -129,9 +159,14 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
 }
 
 // ByCommentField orders the results by comment field.

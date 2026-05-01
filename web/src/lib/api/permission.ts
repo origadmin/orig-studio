@@ -8,8 +8,8 @@ export interface PermissionGroup {
     category_scope?: string[];
     is_active: boolean;
     member_count?: number;
-    created_at: string;
-    updated_at: string;
+    create_time: string;
+    update_time: string;
 }
 
 export interface PermissionGroupListResponse {

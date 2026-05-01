@@ -6,6 +6,7 @@ const config: Config = {
     moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1',
         '^@/router$': '<rootDir>/src/router/index.tsx',
+        '^@tests/(.*)$': '<rootDir>/tests/$1',
         '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     },
     transform: {
@@ -14,13 +15,17 @@ const config: Config = {
             useESM: false
         }],
     },
-    testMatch: ['**/*.test.ts', '**/*.test.tsx'],
+    testMatch: [
+        '<rootDir>/src/**/*.test.ts',
+        '<rootDir>/src/**/*.test.tsx',
+        '<rootDir>/tests/**/*.test.ts',
+        '<rootDir>/tests/**/*.test.tsx',
+    ],
     testTimeout: 10000,
     forceExit: true,
     detectOpenHandles: false,
     clearMocks: true,
     restoreMocks: true,
-    // 转换包含 import.meta 的模块
     transformIgnorePatterns: [
         '/node_modules/(?!(axios|@tanstack)/)',
     ],

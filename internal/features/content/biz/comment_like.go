@@ -12,7 +12,7 @@ type CommentLike struct {
 	CommentID string    `json:"comment_id"`
 	UserID    string    `json:"user_id"`
 	LikeType  string    `json:"like_type"`
-	CreatedAt time.Time `json:"created_at"`
+	CreateTime time.Time `json:"create_time"`
 }
 
 type CommentLikeStats struct {

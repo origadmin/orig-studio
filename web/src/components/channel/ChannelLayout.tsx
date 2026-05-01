@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {useNavigate} from '@tanstack/react-router';
+import {useNavigate, Link} from '@tanstack/react-router';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {
@@ -10,7 +10,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import {Search, ExternalLink, Globe, Link2} from 'lucide-react';
+import {Search, ExternalLink, Globe, Link2, Users, UserPlus, Loader2} from 'lucide-react';
 import type {ChannelDetail, ChannelPlaylist} from '@/lib/api/channel';
 import type {Media} from '@/lib/api/media';
 import {
@@ -21,6 +21,11 @@ import {
     useUpdateNotificationSetting,
 } from '@/hooks/queries';
 import {mediaApi} from '@/lib/api/media';
+import {subscriptionApi, type SubscriptionListResponse} from '@/lib/api/subscription';
+import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
+import {Spinner} from '@/components/ui/spinner';
+import {formatDate} from '@/lib/format';
+import {PAGINATION_CONFIG} from '@/config/pagination';
 import ChannelHeader from './ChannelHeader';
 import ChannelNav from './ChannelNav';
 import VideoCard from './widgets/VideoCard';
@@ -48,12 +53,22 @@ const ChannelLayout: React.FC<ChannelLayoutProps> = ({
     const [activeTab, setActiveTab] = useState('home');
     const [subscriberCount, setSubscriberCount] = useState(channel.subscriber_count || 0);
     const [subscribed, setSubscribed] = useState(isSubscribed);
+    const [contentEmpty, setContentEmpty] = useState(false);
 
     const subscribeMutation = useSubscribe();
     const unsubscribeMutation = useUnsubscribe();
     const notificationMutation = useUpdateNotificationSetting();
 
     const channelToken = channel.friendly_token || channel.slug;
+
+    const handleTabChange = (tab: string) => {
+        setActiveTab(tab);
+        setContentEmpty(false);
+    };
+
+    const handleContentEmptyChange = (empty: boolean) => {
+        setContentEmpty(empty);
+    };
 
     const handleSubscribe = () => {
         if (!channelToken) return;
@@ -101,19 +116,20 @@ const ChannelLayout: React.FC<ChannelLayoutProps> = ({
 
                 <ChannelNav
                     activeTab={activeTab}
-                    onTabChange={setActiveTab}
+                    onTabChange={handleTabChange}
                     isOwner={isOwner}
                 />
 
-                <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <main className="flex-1 min-w-0">
+                <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 ${contentEmpty ? '' : 'flex flex-col lg:flex-row gap-6'}`}>
+                    <main className={contentEmpty ? 'w-full' : 'flex-1 min-w-0'}>
                         {activeTab === 'home' && (
                             <HomeTabContent
                                 channelToken={channelToken}
                                 channelId={channel.id}
                                 isOwner={isOwner}
                                 channelName={channel.name}
-                                onTabChange={setActiveTab}
+                                onTabChange={handleTabChange}
+                                onEmptyChange={handleContentEmptyChange}
                             />
                         )}
                         {activeTab === 'videos' && (
@@ -121,6 +137,7 @@ const ChannelLayout: React.FC<ChannelLayoutProps> = ({
                                 channelToken={channelToken}
                                 channelId={channel.id}
                                 isOwner={isOwner}
+                                onEmptyChange={handleContentEmptyChange}
                             />
                         )}
                         {activeTab === 'playlists' && (
@@ -128,6 +145,7 @@ const ChannelLayout: React.FC<ChannelLayoutProps> = ({
                                 channelToken={channelToken}
                                 channelId={channel.id}
                                 isOwner={isOwner}
+                                onEmptyChange={handleContentEmptyChange}
                             />
                         )}
                         {activeTab === 'community' && (
@@ -135,6 +153,12 @@ const ChannelLayout: React.FC<ChannelLayoutProps> = ({
                                 channelId={channel.id}
                                 isOwner={isOwner}
                                 channelName={channel.name}
+                                onEmptyChange={handleContentEmptyChange}
+                            />
+                        )}
+                        {activeTab === 'subscriptions' && isOwner && (
+                            <SubscriptionsTabContent
+                                onEmptyChange={handleContentEmptyChange}
                             />
                         )}
                         {activeTab === 'about' && (
@@ -142,13 +166,16 @@ const ChannelLayout: React.FC<ChannelLayoutProps> = ({
                                 channel={channel}
                                 isOwner={isOwner}
                                 subscriberCount={subscriberCount}
+                                onEmptyChange={handleContentEmptyChange}
                             />
                         )}
                     </main>
 
-                    <aside className="hidden lg:block w-80 flex-shrink-0">
-                        <RecommendedChannels currentChannelId={channel.id}/>
-                    </aside>
+                    {!contentEmpty && (
+                        <aside className="hidden lg:block w-80 flex-shrink-0">
+                            <RecommendedChannels currentChannelId={channel.id}/>
+                        </aside>
+                    )}
                 </div>
 
                 <div className="lg:hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
@@ -168,7 +195,8 @@ const HomeTabContent: React.FC<{
     isOwner: boolean;
     channelName?: string;
     onTabChange: (tab: string) => void;
-}> = ({channelToken, channelId, isOwner, channelName, onTabChange}) => {
+    onEmptyChange?: (empty: boolean) => void;
+}> = ({channelToken, channelId, isOwner, channelName, onTabChange, onEmptyChange}) => {
     const {t} = useTranslation();
 
     const {data: videosData, isLoading} = useChannelVideos(channelToken || null, {
@@ -177,6 +205,12 @@ const HomeTabContent: React.FC<{
     });
 
     const videos = videosData?.items || [];
+
+    React.useEffect(() => {
+        if (!isLoading) {
+            onEmptyChange?.(videos.length === 0);
+        }
+    }, [isLoading, videos.length, onEmptyChange]);
 
     if (isLoading) {
         return (
@@ -237,7 +271,8 @@ const VideosTabContent: React.FC<{
     channelToken?: string;
     channelId?: string;
     isOwner: boolean;
-}> = ({channelToken, channelId, isOwner}) => {
+    onEmptyChange?: (empty: boolean) => void;
+}> = ({channelToken, channelId, isOwner, onEmptyChange}) => {
     const {t} = useTranslation();
     const [sortBy, setSortBy] = useState('newest');
     const [searchKeyword, setSearchKeyword] = useState('');
@@ -253,6 +288,12 @@ const VideosTabContent: React.FC<{
 
     const videos = videosData?.items || [];
     const total = videosData?.total || 0;
+
+    React.useEffect(() => {
+        if (!isLoading) {
+            onEmptyChange?.(videos.length === 0 && !searchKeyword);
+        }
+    }, [isLoading, videos.length, searchKeyword, onEmptyChange]);
 
     const sortOptions = [
         {value: 'newest', label: t('channel.sortNewest') || 'Newest'},
@@ -355,13 +396,20 @@ const PlaylistsTabContent: React.FC<{
     channelToken?: string;
     channelId?: string;
     isOwner: boolean;
-}> = ({channelToken, channelId, isOwner}) => {
+    onEmptyChange?: (empty: boolean) => void;
+}> = ({channelToken, channelId, isOwner, onEmptyChange}) => {
     const {t} = useTranslation();
 
     const {data: playlistsData, isLoading} = useChannelPlaylists(channelToken || null);
 
     const playlists: ChannelPlaylist[] = (playlistsData as any)?.items || [];
     const total = (playlistsData as any)?.total || 0;
+
+    React.useEffect(() => {
+        if (!isLoading) {
+            onEmptyChange?.(playlists.length === 0);
+        }
+    }, [isLoading, playlists.length, onEmptyChange]);
 
     if (isLoading) {
         return (
@@ -414,11 +462,16 @@ const CommunityTabContent: React.FC<{
     channelId?: string;
     isOwner: boolean;
     channelName?: string;
-}> = ({channelId, isOwner, channelName}) => {
+    onEmptyChange?: (empty: boolean) => void;
+}> = ({channelId, isOwner, channelName, onEmptyChange}) => {
     const {t} = useTranslation();
 
+    React.useEffect(() => {
+        onEmptyChange?.(true);
+    }, [onEmptyChange]);
+
     return (
-        <div className="space-y-4 max-w-3xl">
+        <div className="space-y-4">
             {isOwner && (
                 <div className="mb-6 p-4 border border-dashed rounded-lg hover:border-primary/50 transition-colors cursor-pointer group">
                     <button className="w-full text-left text-muted-foreground group-hover:text-foreground transition-colors flex items-center gap-2">
@@ -440,9 +493,16 @@ const AboutTabContent: React.FC<{
     channel: ChannelDetail;
     isOwner: boolean;
     subscriberCount?: number;
-}> = ({channel, isOwner, subscriberCount = 0}) => {
+    onEmptyChange?: (empty: boolean) => void;
+}> = ({channel, isOwner, subscriberCount = 0, onEmptyChange}) => {
     const {t} = useTranslation();
     const navigate = useNavigate();
+
+    const hasContent = !!(channel.description || channel.links?.length || channel.tags?.length);
+
+    React.useEffect(() => {
+        onEmptyChange?.(!hasContent);
+    }, [hasContent, onEmptyChange]);
 
     const formatCount = (num: number): string => {
         if (!num) return '0';
@@ -455,7 +515,7 @@ const AboutTabContent: React.FC<{
         {label: t('channel.subscribers'), value: formatCount(subscriberCount), icon: '👥'},
         {label: t('channel.videoCount'), value: String(channel.video_count || channel.media_count || 0), icon: '🎬'},
         {label: t('channel.views'), value: formatCount(channel.total_views || 0), icon: '👁️'},
-        {label: t('channel.joinDate'), value: (channel.created_at || channel.create_time) ? new Date(channel.created_at || channel.create_time).toLocaleDateString() : '-', icon: '📅'},
+        {label: t('channel.joinDate'), value: channel.create_time ? new Date(channel.create_time).toLocaleDateString() : t('channel.notAvailable') || 'N/A', icon: '📅'},
     ];
 
     const links = channel.links || [];
@@ -471,15 +531,19 @@ const AboutTabContent: React.FC<{
     };
 
     return (
-        <div className="space-y-8 max-w-3xl">
+        <div className="space-y-8">
             <section>
                 <h2 className="text-lg font-semibold mb-4">{t('channel.description')}</h2>
                 <div className="p-4 sm:p-6 bg-card rounded-lg border">
-                    <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                        {channel.description ||
-                            t('channel.noDescription') ||
-                            'This channel has no description yet...'}
-                    </p>
+                    {channel.description ? (
+                        <p className="text-foreground whitespace-pre-wrap leading-relaxed">
+                            {channel.description}
+                        </p>
+                    ) : (
+                        <p className="text-muted-foreground/60 italic">
+                            {t('channel.noDescription') || 'This channel has no description yet.'}
+                        </p>
+                    )}
                     {isOwner && (
                         <button
                             onClick={() =>
@@ -491,7 +555,7 @@ const AboutTabContent: React.FC<{
                             }
                             className="mt-3 text-sm text-primary hover:underline inline-flex items-center gap-1"
                         >
-                            ✏️ {t('channel.editDescription')}
+                            ✏️ {channel.description ? t('channel.editDescription') : (t('channel.addDescription') || 'Add description')}
                         </button>
                     )}
                 </div>
@@ -573,6 +637,169 @@ const AboutTabContent: React.FC<{
 };
 
 // ================================
+// Subscriptions Tab - Shows subscribed channels (owner only)
+// ================================
+const SubscriptionsTabContent: React.FC<{
+    onEmptyChange?: (empty: boolean) => void;
+}> = ({onEmptyChange}) => {
+    const {t} = useTranslation();
+    const [activeSubTab, setActiveSubTab] = useState<'subscriptions' | 'followers'>('subscriptions');
+    const [subscriptions, setSubscriptions] = useState<SubscriptionListResponse['items']>([]);
+    const [followers, setFollowers] = useState<SubscriptionListResponse['items']>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+
+    const fetchData = async (tab: 'subscriptions' | 'followers', pageNum: number) => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            let response: SubscriptionListResponse;
+            if (tab === 'subscriptions') {
+                response = await subscriptionApi.getSubscriptions({page: pageNum, page_size: PAGINATION_CONFIG.DEFAULT_PAGE_SIZE});
+                setSubscriptions(prev => pageNum === 1 ? response.items : [...prev, ...response.items]);
+                setHasMore(response.items.length === PAGINATION_CONFIG.DEFAULT_PAGE_SIZE);
+            } else {
+                response = await subscriptionApi.getFollowers({page: pageNum, page_size: PAGINATION_CONFIG.DEFAULT_PAGE_SIZE});
+                setFollowers(prev => pageNum === 1 ? response.items : [...prev, ...response.items]);
+                setHasMore(response.items.length === PAGINATION_CONFIG.DEFAULT_PAGE_SIZE);
+            }
+        } catch (err) {
+            setError('Failed to fetch data');
+            console.error('Failed to fetch subscription data:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    React.useEffect(() => {
+        setPage(1);
+        setSubscriptions([]);
+        setFollowers([]);
+        fetchData(activeSubTab, 1);
+    }, [activeSubTab]);
+
+    React.useEffect(() => {
+        if (!loading) {
+            const list = activeSubTab === 'subscriptions' ? subscriptions : followers;
+            onEmptyChange?.(list.length === 0);
+        }
+    }, [loading, activeSubTab, subscriptions, followers, onEmptyChange]);
+
+    const handleLoadMore = () => {
+        if (!loading && hasMore) {
+            const nextPage = page + 1;
+            setPage(nextPage);
+            fetchData(activeSubTab, nextPage);
+        }
+    };
+
+    const list = activeSubTab === 'subscriptions' ? subscriptions : followers;
+
+    if (loading && page === 1) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <Spinner />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="text-center py-12 text-muted-foreground">
+                <p>{error}</p>
+                <Button variant="outline" className="mt-4" onClick={() => fetchData(activeSubTab, 1)}>
+                    {t('common.retry')}
+                </Button>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center gap-3">
+                <Users size={24} className="text-emerald-600"/>
+                <h2 className="text-lg font-semibold">{t('subscriptions.title')}</h2>
+            </div>
+
+            <div className="flex border-b dark:border-gray-700">
+                <button
+                    className={`px-4 py-3 font-medium text-sm ${
+                        activeSubTab === 'subscriptions'
+                            ? 'border-b-2 border-emerald-600 text-emerald-600'
+                            : 'text-gray-500 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-gray-100'
+                    }`}
+                    onClick={() => setActiveSubTab('subscriptions')}
+                >
+                    {t('subscriptions.subscriptions')}
+                </button>
+                <button
+                    className={`px-4 py-3 font-medium text-sm ${
+                        activeSubTab === 'followers'
+                            ? 'border-b-2 border-emerald-600 text-emerald-600'
+                            : 'text-gray-500 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-gray-100'
+                    }`}
+                    onClick={() => setActiveSubTab('followers')}
+                >
+                    {t('subscriptions.followers')}
+                </button>
+            </div>
+
+            {list.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground">
+                    <Users size={48} className="mx-auto mb-3 opacity-30"/>
+                    <p>{activeSubTab === 'subscriptions' ? t('subscriptions.noSubscriptions') : t('subscriptions.noFollowers')}</p>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {list.map((user) => (
+                        <div key={user.id}
+                             className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                            <Link to={`/u/${user.user_id}`} className="flex items-center gap-3">
+                                <Avatar className="h-12 w-12">
+                                    <AvatarImage src={user.avatar}/>
+                                    <AvatarFallback>{user.username?.[0] || 'U'}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className="font-medium text-gray-900 dark:text-white">{user.username}</p>
+                                    <p className="text-xs text-gray-500 dark:text-muted-foreground">
+                                        {t('subscriptions.subscribedAt', {date: formatDate(user.subscribed_at)})}
+                                    </p>
+                                </div>
+                            </Link>
+                            <Button variant="outline" className="rounded-full">
+                                <UserPlus className="w-4 h-4 mr-2"/>
+                                {t('common.subscribed')}
+                            </Button>
+                        </div>
+                    ))}
+                    {hasMore && (
+                        <div className="flex justify-center mt-8">
+                            <Button
+                                variant="outline"
+                                onClick={handleLoadMore}
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin"/>
+                                        {t('common.loading')}
+                                    </>
+                                ) : (
+                                    t('common.loading')
+                                )}
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
+// ================================
 // Utility: Map Media API type to VideoCard-compatible type
 // ================================
 function mapMediaToVideo(media: any): {
@@ -592,7 +819,7 @@ function mapMediaToVideo(media: any): {
         thumbnail: media.thumbnail || media.poster,
         duration: media.duration,
         view_count: media.view_count,
-        published_at: media.published_at || media.create_time || media.created_at,
+        published_at: media.published_at || media.create_time,
         progress: 0,
     };
 }

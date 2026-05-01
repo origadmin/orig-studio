@@ -1,4 +1,4 @@
-﻿import {Spinner} from "@/components/ui/spinner"
+import {Spinner} from "@/components/ui/spinner"
 import React, {useState, useEffect} from 'react';
 import {useParams} from '@tanstack/react-router';
 import {Link} from '@tanstack/react-router';
@@ -119,7 +119,7 @@ const ProfilePage = () => {
                                 className="font-semibold text-slate-900 dark:text-white">{formatViews(user.total_views || 0)}</span><span
                                 className="text-slate-500 dark:text-muted-foreground">{t('common.views')}</span></div>
                             <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-muted-foreground"/><span
-                                className="text-slate-500 dark:text-muted-foreground">{t('common.joinedAt', {date: formatDate(user.created_at || user.create_time || new Date().toISOString())})}</span>
+                                className="text-slate-500 dark:text-muted-foreground">{t('common.joinedAt', {date: formatDate(user.create_time || new Date().toISOString())})}</span>
                             </div>
                         </div>
                     </div>
@@ -168,7 +168,7 @@ const ProfilePage = () => {
                                                 <div className="p-3">
                                                     <h3 className="font-semibold text-slate-900 dark:text-white line-clamp-2 text-sm group-hover:text-emerald-600 transition-colors">{video.title}</h3>
                                                     <p className="text-xs text-slate-500 dark:text-muted-foreground mt-2">{formatViews(video.view_count || 0)} {t('common.views')}
-                                                        · {formatDate(video.create_time || video.created_at || new Date().toISOString())}</p>
+                                                        · {formatDate(video.create_time || new Date().toISOString())}</p>
                                                 </div>
                                             </div>
                                         </Link>

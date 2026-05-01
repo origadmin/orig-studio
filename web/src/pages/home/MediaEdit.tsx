@@ -12,6 +12,33 @@ import {AlertTriangle, ArrowLeft, Play} from 'lucide-react';
 import {toast} from 'sonner';
 import {API_BASE_URL} from '@/lib/request';
 
+/**
+ * Normalize privacy value from backend to a numeric enum value.
+ * Backend (protojson) may return either:
+ *   - A string enum name like "PRIVACY_PUBLIC", "PRIVACY_PRIVATE", "PRIVACY_UNLISTED"
+ *   - A numeric value like 1, 2, 3
+ * Frontend Select uses numeric string values ("1", "2", "3") for consistency.
+ */
+const PRIVACY_NAME_TO_VALUE: Record<string, number> = {
+    PRIVACY_UNSPECIFIED: 0,
+    PRIVACY_PUBLIC: 1,
+    PRIVACY_PRIVATE: 2,
+    PRIVACY_UNLISTED: 3,
+    PRIVACY_PAID: 4,
+    PRIVACY_SUBSCRIBERS_ONLY: 5,
+};
+
+function normalizePrivacy(value: unknown): number {
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string') {
+        const num = Number(value);
+        if (!isNaN(num) && num >= 0) return num;
+        const mapped = PRIVACY_NAME_TO_VALUE[value];
+        if (mapped !== undefined) return mapped;
+    }
+    return 1;
+}
+
 const STATE_BADGE_MAP: Record<string, { variant: HeaderBadgeConfig['variant']; label: string }> = {
     active: {variant: 'default', label: 'Published'},
     draft: {variant: 'secondary', label: 'Draft'},
@@ -95,7 +122,7 @@ export default function MediaEditPage() {
                 description: media.description || '',
                 category_id: media.category_id ?? '',
                 tags: media.tags?.join(', ') || '',
-                privacy: media.privacy ?? 1,
+                privacy: normalizePrivacy(media.privacy),
                 state: media.state || 'draft',
                 enable_comments: media.enable_comments ?? true,
                 allow_download: media.allow_download ?? false,
@@ -220,6 +247,7 @@ export default function MediaEditPage() {
                                 media={media}
                                 categories={categoriesData}
                                 isAdmin={isAdmin}
+                                showAdminOnlyFields={false}
                             />
                         </div>
                     </div>

@@ -130,23 +130,23 @@ func (_u *PermissionGroupUpdate) ClearCreatedBy() *PermissionGroupUpdate {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *PermissionGroupUpdate) SetCreatedAt(v time.Time) *PermissionGroupUpdate {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *PermissionGroupUpdate) SetCreateTime(v time.Time) *PermissionGroupUpdate {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *PermissionGroupUpdate) SetNillableCreatedAt(v *time.Time) *PermissionGroupUpdate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *PermissionGroupUpdate) SetNillableCreateTime(v *time.Time) *PermissionGroupUpdate {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *PermissionGroupUpdate) SetUpdatedAt(v time.Time) *PermissionGroupUpdate {
-	_u.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_u *PermissionGroupUpdate) SetUpdateTime(v time.Time) *PermissionGroupUpdate {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -246,9 +246,9 @@ func (_u *PermissionGroupUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *PermissionGroupUpdate) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := permissiongroup.UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := permissiongroup.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -311,11 +311,11 @@ func (_u *PermissionGroupUpdate) sqlSave(ctx context.Context) (_node int, err er
 	if value, ok := _u.mutation.IsActive(); ok {
 		_spec.SetField(permissiongroup.FieldIsActive, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(permissiongroup.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(permissiongroup.FieldCreateTime, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(permissiongroup.FieldUpdatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(permissiongroup.FieldUpdateTime, field.TypeTime, value)
 	}
 	if _u.mutation.MembersCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -511,23 +511,23 @@ func (_u *PermissionGroupUpdateOne) ClearCreatedBy() *PermissionGroupUpdateOne {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *PermissionGroupUpdateOne) SetCreatedAt(v time.Time) *PermissionGroupUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_u *PermissionGroupUpdateOne) SetCreateTime(v time.Time) *PermissionGroupUpdateOne {
+	_u.mutation.SetCreateTime(v)
 	return _u
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *PermissionGroupUpdateOne) SetNillableCreatedAt(v *time.Time) *PermissionGroupUpdateOne {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *PermissionGroupUpdateOne) SetNillableCreateTime(v *time.Time) *PermissionGroupUpdateOne {
 	if v != nil {
-		_u.SetCreatedAt(*v)
+		_u.SetCreateTime(*v)
 	}
 	return _u
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *PermissionGroupUpdateOne) SetUpdatedAt(v time.Time) *PermissionGroupUpdateOne {
-	_u.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_u *PermissionGroupUpdateOne) SetUpdateTime(v time.Time) *PermissionGroupUpdateOne {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -640,9 +640,9 @@ func (_u *PermissionGroupUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *PermissionGroupUpdateOne) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := permissiongroup.UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := permissiongroup.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -722,11 +722,11 @@ func (_u *PermissionGroupUpdateOne) sqlSave(ctx context.Context) (_node *Permiss
 	if value, ok := _u.mutation.IsActive(); ok {
 		_spec.SetField(permissiongroup.FieldIsActive, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(permissiongroup.FieldCreatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(permissiongroup.FieldCreateTime, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(permissiongroup.FieldUpdatedAt, field.TypeTime, value)
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(permissiongroup.FieldUpdateTime, field.TypeTime, value)
 	}
 	if _u.mutation.MembersCleared() {
 		edge := &sqlgraph.EdgeSpec{

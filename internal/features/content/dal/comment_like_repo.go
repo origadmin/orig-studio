@@ -33,7 +33,7 @@ func (r *commentLikeRepo) Create(ctx context.Context, userID, commentID string, 
 		UserID:    userID,
 		CommentID: commentID,
 		LikeType:  ent.LikeType,
-		CreatedAt: ent.CreatedAt,
+		CreateTime: ent.CreateTime,
 	}, nil
 }
 

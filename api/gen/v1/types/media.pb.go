@@ -22,106 +22,226 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Privacy defines the visibility/access level for Media, Channel, and Playlist.
+type Privacy int32
+
+const (
+	Privacy_PRIVACY_UNSPECIFIED      Privacy = 0
+	Privacy_PRIVACY_PUBLIC           Privacy = 1
+	Privacy_PRIVACY_PRIVATE          Privacy = 2
+	Privacy_PRIVACY_UNLISTED         Privacy = 3
+	Privacy_PRIVACY_PAID             Privacy = 4
+	Privacy_PRIVACY_SUBSCRIBERS_ONLY Privacy = 5
+)
+
+// Enum value maps for Privacy.
+var (
+	Privacy_name = map[int32]string{
+		0: "PRIVACY_UNSPECIFIED",
+		1: "PRIVACY_PUBLIC",
+		2: "PRIVACY_PRIVATE",
+		3: "PRIVACY_UNLISTED",
+		4: "PRIVACY_PAID",
+		5: "PRIVACY_SUBSCRIBERS_ONLY",
+	}
+	Privacy_value = map[string]int32{
+		"PRIVACY_UNSPECIFIED":      0,
+		"PRIVACY_PUBLIC":           1,
+		"PRIVACY_PRIVATE":          2,
+		"PRIVACY_UNLISTED":         3,
+		"PRIVACY_PAID":             4,
+		"PRIVACY_SUBSCRIBERS_ONLY": 5,
+	}
+)
+
+func (x Privacy) Enum() *Privacy {
+	p := new(Privacy)
+	*p = x
+	return p
+}
+
+func (x Privacy) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (Privacy) Descriptor() protoreflect.EnumDescriptor {
+	return file_v1_types_media_proto_enumTypes[0].Descriptor()
+}
+
+func (Privacy) Type() protoreflect.EnumType {
+	return &file_v1_types_media_proto_enumTypes[0]
+}
+
+func (x Privacy) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use Privacy.Descriptor instead.
+func (Privacy) EnumDescriptor() ([]byte, []int) {
+	return file_v1_types_media_proto_rawDescGZIP(), []int{0}
+}
+
+// TagStatus defines the status of a Tag.
+type TagStatus int32
+
+const (
+	TagStatus_TAG_STATUS_UNSPECIFIED TagStatus = 0
+	TagStatus_TAG_STATUS_INACTIVE    TagStatus = 1
+	TagStatus_TAG_STATUS_ACTIVE      TagStatus = 2
+)
+
+// Enum value maps for TagStatus.
+var (
+	TagStatus_name = map[int32]string{
+		0: "TAG_STATUS_UNSPECIFIED",
+		1: "TAG_STATUS_INACTIVE",
+		2: "TAG_STATUS_ACTIVE",
+	}
+	TagStatus_value = map[string]int32{
+		"TAG_STATUS_UNSPECIFIED": 0,
+		"TAG_STATUS_INACTIVE":    1,
+		"TAG_STATUS_ACTIVE":      2,
+	}
+)
+
+func (x TagStatus) Enum() *TagStatus {
+	p := new(TagStatus)
+	*p = x
+	return p
+}
+
+func (x TagStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (TagStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_v1_types_media_proto_enumTypes[1].Descriptor()
+}
+
+func (TagStatus) Type() protoreflect.EnumType {
+	return &file_v1_types_media_proto_enumTypes[1]
+}
+
+func (x TagStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use TagStatus.Descriptor instead.
+func (TagStatus) EnumDescriptor() ([]byte, []int) {
+	return file_v1_types_media_proto_rawDescGZIP(), []int{1}
+}
+
+// PlaylistStatus defines the status of a Playlist.
+type PlaylistStatus int32
+
+const (
+	PlaylistStatus_PLAYLIST_STATUS_UNSPECIFIED PlaylistStatus = 0
+	PlaylistStatus_PLAYLIST_STATUS_ACTIVE      PlaylistStatus = 1
+	PlaylistStatus_PLAYLIST_STATUS_INACTIVE    PlaylistStatus = 2
+	PlaylistStatus_PLAYLIST_STATUS_DRAFT       PlaylistStatus = 3
+	PlaylistStatus_PLAYLIST_STATUS_ARCHIVED    PlaylistStatus = 4
+)
+
+// Enum value maps for PlaylistStatus.
+var (
+	PlaylistStatus_name = map[int32]string{
+		0: "PLAYLIST_STATUS_UNSPECIFIED",
+		1: "PLAYLIST_STATUS_ACTIVE",
+		2: "PLAYLIST_STATUS_INACTIVE",
+		3: "PLAYLIST_STATUS_DRAFT",
+		4: "PLAYLIST_STATUS_ARCHIVED",
+	}
+	PlaylistStatus_value = map[string]int32{
+		"PLAYLIST_STATUS_UNSPECIFIED": 0,
+		"PLAYLIST_STATUS_ACTIVE":      1,
+		"PLAYLIST_STATUS_INACTIVE":    2,
+		"PLAYLIST_STATUS_DRAFT":       3,
+		"PLAYLIST_STATUS_ARCHIVED":    4,
+	}
+)
+
+func (x PlaylistStatus) Enum() *PlaylistStatus {
+	p := new(PlaylistStatus)
+	*p = x
+	return p
+}
+
+func (x PlaylistStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (PlaylistStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_v1_types_media_proto_enumTypes[2].Descriptor()
+}
+
+func (PlaylistStatus) Type() protoreflect.EnumType {
+	return &file_v1_types_media_proto_enumTypes[2]
+}
+
+func (x PlaylistStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use PlaylistStatus.Descriptor instead.
+func (PlaylistStatus) EnumDescriptor() ([]byte, []int) {
+	return file_v1_types_media_proto_rawDescGZIP(), []int{2}
+}
+
 // Media is the model entity for Media.
 type Media struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the ent.
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// create_time.field.comment
-	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
-	// update_time.field.comment
-	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
-	// media.field.title
-	Title string `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
-	// media.field.description
-	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	// media.field.type
-	Type string `protobuf:"bytes,6,opt,name=type,proto3" json:"type,omitempty"`
-	// media.field.url
-	Url string `protobuf:"bytes,7,opt,name=url,proto3" json:"url,omitempty"`
-	// media.field.thumbnail
-	Thumbnail string `protobuf:"bytes,8,opt,name=thumbnail,proto3" json:"thumbnail,omitempty"`
-	// media.field.duration
-	Duration int32 `protobuf:"varint,9,opt,name=duration,proto3" json:"duration,omitempty"`
-	// media.field.size
-	Size int64 `protobuf:"varint,10,opt,name=size,proto3" json:"size,omitempty"`
-	// media.field.width
-	Width int32 `protobuf:"varint,11,opt,name=width,proto3" json:"width,omitempty"`
-	// media.field.height
-	Height int32 `protobuf:"varint,12,opt,name=height,proto3" json:"height,omitempty"`
-	// media.field.mime_type
-	MimeType string `protobuf:"bytes,13,opt,name=mime_type,proto3" json:"mime_type,omitempty"`
-	// media.field.privacy
-	Privacy int32 `protobuf:"varint,14,opt,name=privacy,proto3" json:"privacy,omitempty"`
-	// media.field.status
-	Status int32 `protobuf:"varint,15,opt,name=status,proto3" json:"status,omitempty"`
-	// media.field.view_count
-	ViewCount int64 `protobuf:"varint,16,opt,name=view_count,proto3" json:"view_count,omitempty"`
-	// media.field.like_count
-	LikeCount int64 `protobuf:"varint,17,opt,name=like_count,proto3" json:"like_count,omitempty"`
-	// media.field.dislike_count
-	DislikeCount int64 `protobuf:"varint,18,opt,name=dislike_count,proto3" json:"dislike_count,omitempty"`
-	// media.field.comment_count
-	CommentCount int64 `protobuf:"varint,19,opt,name=comment_count,proto3" json:"comment_count,omitempty"`
-	// media.field.favorite_count
-	FavoriteCount int64 `protobuf:"varint,20,opt,name=favorite_count,proto3" json:"favorite_count,omitempty"`
-	// media.field.share_count
-	ShareCount int64 `protobuf:"varint,21,opt,name=share_count,proto3" json:"share_count,omitempty"`
-	// media.field.download_count
-	DownloadCount int64 `protobuf:"varint,22,opt,name=download_count,proto3" json:"download_count,omitempty"`
-	// media.field.user_id
-	UserId string `protobuf:"bytes,23,opt,name=user_id,proto3" json:"user_id,omitempty"`
-	// media.field.channel_id
-	ChannelId string `protobuf:"bytes,44,opt,name=channel_id,proto3" json:"channel_id,omitempty"`
-	// media.field.category_id
-	CategoryId int64 `protobuf:"varint,24,opt,name=category_id,proto3" json:"category_id,omitempty"`
-	// media.field.tags
-	Tags []string `protobuf:"bytes,25,rep,name=tags,proto3" json:"tags,omitempty"`
-	// media.field.hls_file
-	HlsFile string `protobuf:"bytes,26,opt,name=hls_file,proto3" json:"hls_file,omitempty"`
-	// media.field.encoding_status
-	EncodingStatus string `protobuf:"bytes,27,opt,name=encoding_status,proto3" json:"encoding_status,omitempty"`
-	// media.field.uuid — secure unique ID for public paths (HLS, thumbnails, previews)
-	Uuid string `protobuf:"bytes,28,opt,name=uuid,proto3" json:"uuid,omitempty"`
-	// media.field.preview_file_path — path to GIF preview generated during transcoding
-	PreviewFilePath string `protobuf:"bytes,29,opt,name=preview_file_path,proto3" json:"preview_file_path,omitempty"`
-	// media.field.state — publication state: draft, active, deleted
-	State string `protobuf:"bytes,30,opt,name=state,proto3" json:"state,omitempty"`
-	// media.field.short_token — URL-friendly token for public access
-	ShortToken string `protobuf:"bytes,43,opt,name=short_token,proto3" json:"short_token,omitempty"`
-	// media.field.published_at
-	PublishedAt *timestamppb.Timestamp `protobuf:"bytes,32,opt,name=published_at,proto3" json:"published_at,omitempty"`
-	// media.field.allow_download
-	AllowDownload bool `protobuf:"varint,33,opt,name=allow_download,proto3" json:"allow_download,omitempty"`
-	// media.field.enable_comments
-	EnableComments bool `protobuf:"varint,34,opt,name=enable_comments,proto3" json:"enable_comments,omitempty"`
-	// media.field.featured
-	Featured bool `protobuf:"varint,35,opt,name=featured,proto3" json:"featured,omitempty"`
-	// media.field.is_reviewed — DEPRECATED: use review_status instead
-	//
-	// Deprecated: Marked as deprecated in v1/types/media.proto.
-	IsReviewed bool `protobuf:"varint,36,opt,name=is_reviewed,proto3" json:"is_reviewed,omitempty"`
-	// media.field.reported_times
-	ReportedTimes int32 `protobuf:"varint,37,opt,name=reported_times,proto3" json:"reported_times,omitempty"`
-	// media.field.extension
-	Extension string `protobuf:"bytes,38,opt,name=extension,proto3" json:"extension,omitempty"`
-	// media.field.md5sum
-	Md5Sum string `protobuf:"bytes,39,opt,name=md5sum,proto3" json:"md5sum,omitempty"`
-	// media.field.poster
-	Poster string `protobuf:"bytes,40,opt,name=poster,proto3" json:"poster,omitempty"`
-	// media.field.review_status
-	ReviewStatus string `protobuf:"bytes,41,opt,name=review_status,proto3" json:"review_status,omitempty"`
-	// media.field.listable
-	Listable bool `protobuf:"varint,42,opt,name=listable,proto3" json:"listable,omitempty"`
-	// Edge fields - abgen auto-matches entity.Media.Edges.Xxx
-	// User holds the value of the user edge.
-	User *User `protobuf:"bytes,50,opt,name=user,proto3" json:"user,omitempty"`
-	// Category holds the value of the category edge.
-	Category *Category `protobuf:"bytes,51,opt,name=category,proto3" json:"category,omitempty"`
-	// Channel holds the value of the channel edge.
-	Channel       *Channel `protobuf:"bytes,52,opt,name=channel,proto3" json:"channel,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreateTime      *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	UpdateTime      *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
+	Title           string                 `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
+	Description     string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	Type            string                 `protobuf:"bytes,6,opt,name=type,proto3" json:"type,omitempty"`
+	Url             string                 `protobuf:"bytes,7,opt,name=url,proto3" json:"url,omitempty"`
+	Thumbnail       string                 `protobuf:"bytes,8,opt,name=thumbnail,proto3" json:"thumbnail,omitempty"`
+	Duration        int32                  `protobuf:"varint,9,opt,name=duration,proto3" json:"duration,omitempty"`
+	Size            int64                  `protobuf:"varint,10,opt,name=size,proto3" json:"size,omitempty"`
+	Width           int32                  `protobuf:"varint,11,opt,name=width,proto3" json:"width,omitempty"`
+	Height          int32                  `protobuf:"varint,12,opt,name=height,proto3" json:"height,omitempty"`
+	MimeType        string                 `protobuf:"bytes,13,opt,name=mime_type,proto3" json:"mime_type,omitempty"`
+	Privacy         Privacy                `protobuf:"varint,14,opt,name=privacy,proto3,enum=api.v1.services.types.Privacy" json:"privacy,omitempty"`
+	State           string                 `protobuf:"bytes,15,opt,name=state,proto3" json:"state,omitempty"`
+	ViewCount       int64                  `protobuf:"varint,16,opt,name=view_count,proto3" json:"view_count,omitempty"`
+	LikeCount       int64                  `protobuf:"varint,17,opt,name=like_count,proto3" json:"like_count,omitempty"`
+	DislikeCount    int64                  `protobuf:"varint,18,opt,name=dislike_count,proto3" json:"dislike_count,omitempty"`
+	CommentCount    int64                  `protobuf:"varint,19,opt,name=comment_count,proto3" json:"comment_count,omitempty"`
+	FavoriteCount   int64                  `protobuf:"varint,20,opt,name=favorite_count,proto3" json:"favorite_count,omitempty"`
+	ShareCount      int64                  `protobuf:"varint,21,opt,name=share_count,proto3" json:"share_count,omitempty"`
+	DownloadCount   int64                  `protobuf:"varint,22,opt,name=download_count,proto3" json:"download_count,omitempty"`
+	UserId          string                 `protobuf:"bytes,23,opt,name=user_id,proto3" json:"user_id,omitempty"`
+	CategoryId      int64                  `protobuf:"varint,24,opt,name=category_id,proto3" json:"category_id,omitempty"`
+	Tags            []string               `protobuf:"bytes,25,rep,name=tags,proto3" json:"tags,omitempty"`
+	HlsFile         string                 `protobuf:"bytes,26,opt,name=hls_file,proto3" json:"hls_file,omitempty"`
+	EncodingStatus  string                 `protobuf:"bytes,27,opt,name=encoding_status,proto3" json:"encoding_status,omitempty"`
+	Uuid            string                 `protobuf:"bytes,28,opt,name=uuid,proto3" json:"uuid,omitempty"`
+	PreviewFilePath string                 `protobuf:"bytes,29,opt,name=preview_file_path,proto3" json:"preview_file_path,omitempty"`
+	ShortToken      string                 `protobuf:"bytes,43,opt,name=short_token,proto3" json:"short_token,omitempty"`
+	PublishedAt     *timestamppb.Timestamp `protobuf:"bytes,32,opt,name=published_at,proto3" json:"published_at,omitempty"`
+	AllowDownload   bool                   `protobuf:"varint,33,opt,name=allow_download,proto3" json:"allow_download,omitempty"`
+	EnableComments  bool                   `protobuf:"varint,34,opt,name=enable_comments,proto3" json:"enable_comments,omitempty"`
+	Featured        bool                   `protobuf:"varint,35,opt,name=featured,proto3" json:"featured,omitempty"`
+	ReportedTimes   int32                  `protobuf:"varint,37,opt,name=reported_times,proto3" json:"reported_times,omitempty"`
+	Extension       string                 `protobuf:"bytes,38,opt,name=extension,proto3" json:"extension,omitempty"`
+	Md5Sum          string                 `protobuf:"bytes,39,opt,name=md5sum,proto3" json:"md5sum,omitempty"`
+	Poster          string                 `protobuf:"bytes,40,opt,name=poster,proto3" json:"poster,omitempty"`
+	ReviewStatus    string                 `protobuf:"bytes,41,opt,name=review_status,proto3" json:"review_status,omitempty"`
+	Listable        bool                   `protobuf:"varint,42,opt,name=listable,proto3" json:"listable,omitempty"`
+	ChannelId       string                 `protobuf:"bytes,44,opt,name=channel_id,proto3" json:"channel_id,omitempty"`
+	SpriteStatus    string                 `protobuf:"bytes,45,opt,name=sprite_status,proto3" json:"sprite_status,omitempty"`
+	SpritePath      string                 `protobuf:"bytes,46,opt,name=sprite_path,proto3" json:"sprite_path,omitempty"`
+	VttPath         string                 `protobuf:"bytes,47,opt,name=vtt_path,proto3" json:"vtt_path,omitempty"`
+	ThumbnailTime   float64                `protobuf:"fixed64,48,opt,name=thumbnail_time,proto3" json:"thumbnail_time,omitempty"`
+	CreateAuthor    string                 `protobuf:"bytes,49,opt,name=create_author,proto3" json:"create_author,omitempty"`
+	UpdateAuthor    string                 `protobuf:"bytes,53,opt,name=update_author,proto3" json:"update_author,omitempty"`
+	User            *User                  `protobuf:"bytes,50,opt,name=user,proto3" json:"user,omitempty"`
+	Category        *Category              `protobuf:"bytes,51,opt,name=category,proto3" json:"category,omitempty"`
+	Channel         *Channel               `protobuf:"bytes,52,opt,name=channel,proto3" json:"channel,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *Media) Reset() {
@@ -245,18 +365,18 @@ func (x *Media) GetMimeType() string {
 	return ""
 }
 
-func (x *Media) GetPrivacy() int32 {
+func (x *Media) GetPrivacy() Privacy {
 	if x != nil {
 		return x.Privacy
 	}
-	return 0
+	return Privacy_PRIVACY_UNSPECIFIED
 }
 
-func (x *Media) GetStatus() int32 {
+func (x *Media) GetState() string {
 	if x != nil {
-		return x.Status
+		return x.State
 	}
-	return 0
+	return ""
 }
 
 func (x *Media) GetViewCount() int64 {
@@ -315,13 +435,6 @@ func (x *Media) GetUserId() string {
 	return ""
 }
 
-func (x *Media) GetChannelId() string {
-	if x != nil {
-		return x.ChannelId
-	}
-	return ""
-}
-
 func (x *Media) GetCategoryId() int64 {
 	if x != nil {
 		return x.CategoryId
@@ -364,13 +477,6 @@ func (x *Media) GetPreviewFilePath() string {
 	return ""
 }
 
-func (x *Media) GetState() string {
-	if x != nil {
-		return x.State
-	}
-	return ""
-}
-
 func (x *Media) GetShortToken() string {
 	if x != nil {
 		return x.ShortToken
@@ -402,14 +508,6 @@ func (x *Media) GetEnableComments() bool {
 func (x *Media) GetFeatured() bool {
 	if x != nil {
 		return x.Featured
-	}
-	return false
-}
-
-// Deprecated: Marked as deprecated in v1/types/media.proto.
-func (x *Media) GetIsReviewed() bool {
-	if x != nil {
-		return x.IsReviewed
 	}
 	return false
 }
@@ -456,6 +554,55 @@ func (x *Media) GetListable() bool {
 	return false
 }
 
+func (x *Media) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+func (x *Media) GetSpriteStatus() string {
+	if x != nil {
+		return x.SpriteStatus
+	}
+	return ""
+}
+
+func (x *Media) GetSpritePath() string {
+	if x != nil {
+		return x.SpritePath
+	}
+	return ""
+}
+
+func (x *Media) GetVttPath() string {
+	if x != nil {
+		return x.VttPath
+	}
+	return ""
+}
+
+func (x *Media) GetThumbnailTime() float64 {
+	if x != nil {
+		return x.ThumbnailTime
+	}
+	return 0
+}
+
+func (x *Media) GetCreateAuthor() string {
+	if x != nil {
+		return x.CreateAuthor
+	}
+	return ""
+}
+
+func (x *Media) GetUpdateAuthor() string {
+	if x != nil {
+		return x.UpdateAuthor
+	}
+	return ""
+}
+
 func (x *Media) GetUser() *User {
 	if x != nil {
 		return x.User
@@ -479,17 +626,22 @@ func (x *Media) GetChannel() *Channel {
 
 // EncodeProfile is the model entity for EncodeProfile.
 type EncodeProfile struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Extension     string                 `protobuf:"bytes,4,opt,name=extension,proto3" json:"extension,omitempty"`
-	Resolution    string                 `protobuf:"bytes,5,opt,name=resolution,proto3" json:"resolution,omitempty"`
-	VideoCodec    string                 `protobuf:"bytes,6,opt,name=video_codec,proto3" json:"video_codec,omitempty"`
-	AudioCodec    string                 `protobuf:"bytes,7,opt,name=audio_codec,proto3" json:"audio_codec,omitempty"`
-	IsActive      bool                   `protobuf:"varint,8,opt,name=is_active,proto3" json:"is_active,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name            string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description     string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Extension       string                 `protobuf:"bytes,4,opt,name=extension,proto3" json:"extension,omitempty"`
+	Resolution      string                 `protobuf:"bytes,5,opt,name=resolution,proto3" json:"resolution,omitempty"`
+	VideoCodec      string                 `protobuf:"bytes,6,opt,name=video_codec,proto3" json:"video_codec,omitempty"`
+	VideoBitrate    string                 `protobuf:"bytes,7,opt,name=video_bitrate,proto3" json:"video_bitrate,omitempty"`
+	AudioCodec      string                 `protobuf:"bytes,8,opt,name=audio_codec,proto3" json:"audio_codec,omitempty"`
+	AudioBitrate    string                 `protobuf:"bytes,9,opt,name=audio_bitrate,proto3" json:"audio_bitrate,omitempty"`
+	BentoParameters string                 `protobuf:"bytes,10,opt,name=bento_parameters,proto3" json:"bento_parameters,omitempty"`
+	IsActive        bool                   `protobuf:"varint,11,opt,name=is_active,proto3" json:"is_active,omitempty"`
+	CreateTime      *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	UpdateTime      *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=update_time,proto3" json:"update_time,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *EncodeProfile) Reset() {
@@ -564,9 +716,30 @@ func (x *EncodeProfile) GetVideoCodec() string {
 	return ""
 }
 
+func (x *EncodeProfile) GetVideoBitrate() string {
+	if x != nil {
+		return x.VideoBitrate
+	}
+	return ""
+}
+
 func (x *EncodeProfile) GetAudioCodec() string {
 	if x != nil {
 		return x.AudioCodec
+	}
+	return ""
+}
+
+func (x *EncodeProfile) GetAudioBitrate() string {
+	if x != nil {
+		return x.AudioBitrate
+	}
+	return ""
+}
+
+func (x *EncodeProfile) GetBentoParameters() string {
+	if x != nil {
+		return x.BentoParameters
 	}
 	return ""
 }
@@ -576,6 +749,20 @@ func (x *EncodeProfile) GetIsActive() bool {
 		return x.IsActive
 	}
 	return false
+}
+
+func (x *EncodeProfile) GetCreateTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreateTime
+	}
+	return nil
+}
+
+func (x *EncodeProfile) GetUpdateTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdateTime
+	}
+	return nil
 }
 
 // EncodingTask is the model entity for EncodingTask.
@@ -588,8 +775,9 @@ type EncodingTask struct {
 	Progress      int32                  `protobuf:"varint,5,opt,name=progress,proto3" json:"progress,omitempty"`
 	OutputPath    string                 `protobuf:"bytes,6,opt,name=output_path,proto3" json:"output_path,omitempty"`
 	ErrorMessage  string                 `protobuf:"bytes,7,opt,name=error_message,proto3" json:"error_message,omitempty"`
-	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=create_time,proto3" json:"create_time,omitempty"`
-	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=update_time,proto3" json:"update_time,omitempty"`
+	Chunk         bool                   `protobuf:"varint,8,opt,name=chunk,proto3" json:"chunk,omitempty"`
+	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=update_time,proto3" json:"update_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -673,6 +861,13 @@ func (x *EncodingTask) GetErrorMessage() string {
 	return ""
 }
 
+func (x *EncodingTask) GetChunk() bool {
+	if x != nil {
+		return x.Chunk
+	}
+	return false
+}
+
 func (x *EncodingTask) GetCreateTime() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreateTime
@@ -689,33 +884,27 @@ func (x *EncodingTask) GetUpdateTime() *timestamppb.Timestamp {
 
 // Category is the model entity for Category.
 type Category struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the ent.
-	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// create_time.field.comment
-	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
-	// update_time.field.comment
-	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
-	// category.field.name
-	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	// category.field.slug
-	Slug string `protobuf:"bytes,5,opt,name=slug,proto3" json:"slug,omitempty"`
-	// category.field.description
-	Description string `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
-	// category.field.icon
-	Icon string `protobuf:"bytes,7,opt,name=icon,proto3" json:"icon,omitempty"`
-	// category.field.color
-	Color string `protobuf:"bytes,8,opt,name=color,proto3" json:"color,omitempty"`
-	// category.field.parent_id
-	ParentId int64 `protobuf:"varint,9,opt,name=parent_id,proto3" json:"parent_id,omitempty"`
-	// category.field.sequence
-	Sequence int32 `protobuf:"varint,10,opt,name=sequence,proto3" json:"sequence,omitempty"`
-	// category.field.status
-	Status int32 `protobuf:"varint,11,opt,name=status,proto3" json:"status,omitempty"`
-	// category.field.media_count
-	MediaCount    int64 `protobuf:"varint,12,opt,name=media_count,proto3" json:"media_count,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreateTime        *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	UpdateTime        *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
+	Name              string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	Slug              string                 `protobuf:"bytes,5,opt,name=slug,proto3" json:"slug,omitempty"`
+	Description       string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
+	Thumbnail         string                 `protobuf:"bytes,7,opt,name=thumbnail,proto3" json:"thumbnail,omitempty"`
+	ListingsThumbnail string                 `protobuf:"bytes,8,opt,name=listings_thumbnail,proto3" json:"listings_thumbnail,omitempty"`
+	Icon              string                 `protobuf:"bytes,9,opt,name=icon,proto3" json:"icon,omitempty"`
+	Color             string                 `protobuf:"bytes,10,opt,name=color,proto3" json:"color,omitempty"`
+	ParentId          int64                  `protobuf:"varint,11,opt,name=parent_id,proto3" json:"parent_id,omitempty"`
+	Sequence          int32                  `protobuf:"varint,12,opt,name=sequence,proto3" json:"sequence,omitempty"`
+	Status            int32                  `protobuf:"varint,13,opt,name=status,proto3" json:"status,omitempty"`
+	MediaCount        int64                  `protobuf:"varint,14,opt,name=media_count,proto3" json:"media_count,omitempty"`
+	IsGlobal          bool                   `protobuf:"varint,15,opt,name=is_global,proto3" json:"is_global,omitempty"`
+	IsRbacCategory    bool                   `protobuf:"varint,16,opt,name=is_rbac_category,proto3" json:"is_rbac_category,omitempty"`
+	IdentityProvider  string                 `protobuf:"bytes,17,opt,name=identity_provider,proto3" json:"identity_provider,omitempty"`
+	UserId            string                 `protobuf:"bytes,18,opt,name=user_id,proto3" json:"user_id,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *Category) Reset() {
@@ -790,6 +979,20 @@ func (x *Category) GetDescription() string {
 	return ""
 }
 
+func (x *Category) GetThumbnail() string {
+	if x != nil {
+		return x.Thumbnail
+	}
+	return ""
+}
+
+func (x *Category) GetListingsThumbnail() string {
+	if x != nil {
+		return x.ListingsThumbnail
+	}
+	return ""
+}
+
 func (x *Category) GetIcon() string {
 	if x != nil {
 		return x.Icon
@@ -832,29 +1035,49 @@ func (x *Category) GetMediaCount() int64 {
 	return 0
 }
 
+func (x *Category) GetIsGlobal() bool {
+	if x != nil {
+		return x.IsGlobal
+	}
+	return false
+}
+
+func (x *Category) GetIsRbacCategory() bool {
+	if x != nil {
+		return x.IsRbacCategory
+	}
+	return false
+}
+
+func (x *Category) GetIdentityProvider() string {
+	if x != nil {
+		return x.IdentityProvider
+	}
+	return ""
+}
+
+func (x *Category) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
 // Tag is the model entity for Tag.
 type Tag struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the ent.
-	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// create_time.field.comment
-	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
-	// update_time.field.comment
-	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
-	// tag.field.name
-	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	// tag.field.slug
-	Slug string `protobuf:"bytes,5,opt,name=slug,proto3" json:"slug,omitempty"`
-	// tag.field.description
-	Description string `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
-	// tag.field.color
-	Color string `protobuf:"bytes,7,opt,name=color,proto3" json:"color,omitempty"`
-	// tag.field.status
-	Status int32 `protobuf:"varint,8,opt,name=status,proto3" json:"status,omitempty"`
-	// tag.field.media_count
-	MediaCount    int64 `protobuf:"varint,9,opt,name=media_count,proto3" json:"media_count,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreateTime        *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	UpdateTime        *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
+	Name              string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	Slug              string                 `protobuf:"bytes,5,opt,name=slug,proto3" json:"slug,omitempty"`
+	Description       string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
+	Color             string                 `protobuf:"bytes,7,opt,name=color,proto3" json:"color,omitempty"`
+	Status            TagStatus              `protobuf:"varint,8,opt,name=status,proto3,enum=api.v1.services.types.TagStatus" json:"status,omitempty"`
+	MediaCount        int64                  `protobuf:"varint,9,opt,name=media_count,proto3" json:"media_count,omitempty"`
+	ListingsThumbnail string                 `protobuf:"bytes,10,opt,name=listings_thumbnail,proto3" json:"listings_thumbnail,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *Tag) Reset() {
@@ -936,11 +1159,11 @@ func (x *Tag) GetColor() string {
 	return ""
 }
 
-func (x *Tag) GetStatus() int32 {
+func (x *Tag) GetStatus() TagStatus {
 	if x != nil {
 		return x.Status
 	}
-	return 0
+	return TagStatus_TAG_STATUS_UNSPECIFIED
 }
 
 func (x *Tag) GetMediaCount() int64 {
@@ -950,27 +1173,29 @@ func (x *Tag) GetMediaCount() int64 {
 	return 0
 }
 
+func (x *Tag) GetListingsThumbnail() string {
+	if x != nil {
+		return x.ListingsThumbnail
+	}
+	return ""
+}
+
 // Comment is the model entity for Comment.
 type Comment struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the ent.
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// create_time.field.comment
-	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
-	// update_time.field.comment
-	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
-	// comment.field.content
-	Content string `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
-	// comment.field.user_id
-	UserId string `protobuf:"bytes,5,opt,name=user_id,proto3" json:"user_id,omitempty"`
-	// comment.field.media_id
-	MediaId string `protobuf:"bytes,6,opt,name=media_id,proto3" json:"media_id,omitempty"`
-	// comment.field.parent_id
-	ParentId string `protobuf:"bytes,7,opt,name=parent_id,proto3" json:"parent_id,omitempty"`
-	// comment.field.like_count
-	LikeCount int64 `protobuf:"varint,8,opt,name=like_count,proto3" json:"like_count,omitempty"`
-	// comment.field.status
-	Status        string `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
+	Content       string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
+	UserId        string                 `protobuf:"bytes,5,opt,name=user_id,proto3" json:"user_id,omitempty"`
+	MediaId       string                 `protobuf:"bytes,6,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	ParentId      string                 `protobuf:"bytes,7,opt,name=parent_id,proto3" json:"parent_id,omitempty"`
+	LikeCount     int64                  `protobuf:"varint,8,opt,name=like_count,proto3" json:"like_count,omitempty"`
+	Status        string                 `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"`
+	ReportCount   int32                  `protobuf:"varint,10,opt,name=report_count,proto3" json:"report_count,omitempty"`
+	ModeratedBy   string                 `protobuf:"bytes,11,opt,name=moderated_by,proto3" json:"moderated_by,omitempty"`
+	ModeratedAt   *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=moderated_at,proto3" json:"moderated_at,omitempty"`
+	AddDate       *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=add_date,proto3" json:"add_date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1068,19 +1293,42 @@ func (x *Comment) GetStatus() string {
 	return ""
 }
 
+func (x *Comment) GetReportCount() int32 {
+	if x != nil {
+		return x.ReportCount
+	}
+	return 0
+}
+
+func (x *Comment) GetModeratedBy() string {
+	if x != nil {
+		return x.ModeratedBy
+	}
+	return ""
+}
+
+func (x *Comment) GetModeratedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ModeratedAt
+	}
+	return nil
+}
+
+func (x *Comment) GetAddDate() *timestamppb.Timestamp {
+	if x != nil {
+		return x.AddDate
+	}
+	return nil
+}
+
 // Like is the model entity for Like.
 type Like struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the ent.
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// create_time.field.comment
-	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
-	// like.field.user_id
-	UserId string `protobuf:"bytes,3,opt,name=user_id,proto3" json:"user_id,omitempty"`
-	// like.field.media_id
-	MediaId string `protobuf:"bytes,4,opt,name=media_id,proto3" json:"media_id,omitempty"`
-	// like.field.type
-	Type          string `protobuf:"bytes,5,opt,name=type,proto3" json:"type,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,proto3" json:"user_id,omitempty"`
+	MediaId       string                 `protobuf:"bytes,4,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	Type          string                 `protobuf:"bytes,5,opt,name=type,proto3" json:"type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1152,17 +1400,12 @@ func (x *Like) GetType() string {
 
 // Favorite is the model entity for Favorite.
 type Favorite struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the ent.
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// create_time.field.comment
-	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
-	// favorite.field.user_id
-	UserId string `protobuf:"bytes,3,opt,name=user_id,proto3" json:"user_id,omitempty"`
-	// favorite.field.media_id
-	MediaId string `protobuf:"bytes,4,opt,name=media_id,proto3" json:"media_id,omitempty"`
-	// favorite.field.playlist_id
-	PlaylistId    string `protobuf:"bytes,5,opt,name=playlist_id,proto3" json:"playlist_id,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,proto3" json:"user_id,omitempty"`
+	MediaId       string                 `protobuf:"bytes,4,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	PlaylistId    string                 `protobuf:"bytes,5,opt,name=playlist_id,proto3" json:"playlist_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1234,27 +1477,19 @@ func (x *Favorite) GetPlaylistId() string {
 
 // Playlist is the model entity for Playlist.
 type Playlist struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the ent.
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// create_time.field.comment
-	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
-	// update_time.field.comment
-	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
-	// playlist.field.name
-	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	// playlist.field.description
-	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	// playlist.field.thumbnail
-	Thumbnail string `protobuf:"bytes,6,opt,name=thumbnail,proto3" json:"thumbnail,omitempty"`
-	// playlist.field.user_id
-	UserId string `protobuf:"bytes,7,opt,name=user_id,proto3" json:"user_id,omitempty"`
-	// playlist.field.is_public
-	IsPublic bool `protobuf:"varint,8,opt,name=is_public,proto3" json:"is_public,omitempty"`
-	// playlist.field.status
-	Status int32 `protobuf:"varint,9,opt,name=status,proto3" json:"status,omitempty"`
-	// playlist.field.media_count
-	MediaCount    int64 `protobuf:"varint,10,opt,name=media_count,proto3" json:"media_count,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
+	Title         string                 `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
+	Description   string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	Thumbnail     string                 `protobuf:"bytes,6,opt,name=thumbnail,proto3" json:"thumbnail,omitempty"`
+	UserId        string                 `protobuf:"bytes,7,opt,name=user_id,proto3" json:"user_id,omitempty"`
+	Privacy       Privacy                `protobuf:"varint,8,opt,name=privacy,proto3,enum=api.v1.services.types.Privacy" json:"privacy,omitempty"`
+	Status        PlaylistStatus         `protobuf:"varint,9,opt,name=status,proto3,enum=api.v1.services.types.PlaylistStatus" json:"status,omitempty"`
+	MediaCount    int64                  `protobuf:"varint,10,opt,name=media_count,proto3" json:"media_count,omitempty"`
+	ShortToken    string                 `protobuf:"bytes,11,opt,name=short_token,proto3" json:"short_token,omitempty"`
+	AddDate       *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=add_date,proto3" json:"add_date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1310,9 +1545,9 @@ func (x *Playlist) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *Playlist) GetName() string {
+func (x *Playlist) GetTitle() string {
 	if x != nil {
-		return x.Name
+		return x.Title
 	}
 	return ""
 }
@@ -1338,18 +1573,18 @@ func (x *Playlist) GetUserId() string {
 	return ""
 }
 
-func (x *Playlist) GetIsPublic() bool {
+func (x *Playlist) GetPrivacy() Privacy {
 	if x != nil {
-		return x.IsPublic
+		return x.Privacy
 	}
-	return false
+	return Privacy_PRIVACY_UNSPECIFIED
 }
 
-func (x *Playlist) GetStatus() int32 {
+func (x *Playlist) GetStatus() PlaylistStatus {
 	if x != nil {
 		return x.Status
 	}
-	return 0
+	return PlaylistStatus_PLAYLIST_STATUS_UNSPECIFIED
 }
 
 func (x *Playlist) GetMediaCount() int64 {
@@ -1359,31 +1594,37 @@ func (x *Playlist) GetMediaCount() int64 {
 	return 0
 }
 
+func (x *Playlist) GetShortToken() string {
+	if x != nil {
+		return x.ShortToken
+	}
+	return ""
+}
+
+func (x *Playlist) GetAddDate() *timestamppb.Timestamp {
+	if x != nil {
+		return x.AddDate
+	}
+	return nil
+}
+
 // Channel is the model entity for Channel.
 type Channel struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the ent.
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// create_time.field.comment
-	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
-	// update_time.field.comment
-	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
-	// channel.field.title
-	Title string `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
-	// channel.field.description
-	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	// channel.field.banner_logo
-	BannerLogo string `protobuf:"bytes,6,opt,name=banner_logo,proto3" json:"banner_logo,omitempty"`
-	// channel.field.user_id
-	UserId string `protobuf:"bytes,7,opt,name=user_id,proto3" json:"user_id,omitempty"`
-	// channel.field.short_token — URL-friendly token for public access
-	ShortToken string `protobuf:"bytes,11,opt,name=short_token,proto3" json:"short_token,omitempty"`
-	// channel.field.subscriber_count
-	SubscriberCount int64 `protobuf:"varint,9,opt,name=subscriber_count,proto3" json:"subscriber_count,omitempty"`
-	// channel.field.media_count
-	MediaCount    int64 `protobuf:"varint,10,opt,name=media_count,proto3" json:"media_count,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreateTime      *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	UpdateTime      *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
+	Title           string                 `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
+	Description     string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	BannerLogo      string                 `protobuf:"bytes,6,opt,name=banner_logo,proto3" json:"banner_logo,omitempty"`
+	UserId          string                 `protobuf:"bytes,7,opt,name=user_id,proto3" json:"user_id,omitempty"`
+	Privacy         Privacy                `protobuf:"varint,8,opt,name=privacy,proto3,enum=api.v1.services.types.Privacy" json:"privacy,omitempty"`
+	SubscriberCount int64                  `protobuf:"varint,9,opt,name=subscriber_count,proto3" json:"subscriber_count,omitempty"`
+	MediaCount      int64                  `protobuf:"varint,10,opt,name=media_count,proto3" json:"media_count,omitempty"`
+	ShortToken      string                 `protobuf:"bytes,11,opt,name=short_token,proto3" json:"short_token,omitempty"`
+	AddDate         *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=add_date,proto3" json:"add_date,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *Channel) Reset() {
@@ -1465,11 +1706,11 @@ func (x *Channel) GetUserId() string {
 	return ""
 }
 
-func (x *Channel) GetShortToken() string {
+func (x *Channel) GetPrivacy() Privacy {
 	if x != nil {
-		return x.ShortToken
+		return x.Privacy
 	}
-	return ""
+	return Privacy_PRIVACY_UNSPECIFIED
 }
 
 func (x *Channel) GetSubscriberCount() int64 {
@@ -1486,21 +1727,29 @@ func (x *Channel) GetMediaCount() int64 {
 	return 0
 }
 
+func (x *Channel) GetShortToken() string {
+	if x != nil {
+		return x.ShortToken
+	}
+	return ""
+}
+
+func (x *Channel) GetAddDate() *timestamppb.Timestamp {
+	if x != nil {
+		return x.AddDate
+	}
+	return nil
+}
+
 // Subtitle is the model entity for Subtitle.
 type Subtitle struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the ent.
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// create_time.field.comment
-	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
-	// subtitle.field.media_id
-	MediaId string `protobuf:"bytes,3,opt,name=media_id,proto3" json:"media_id,omitempty"`
-	// subtitle.field.language
-	Language string `protobuf:"bytes,4,opt,name=language,proto3" json:"language,omitempty"`
-	// subtitle.field.file_url
-	FileUrl string `protobuf:"bytes,5,opt,name=file_url,proto3" json:"file_url,omitempty"`
-	// subtitle.field.label
-	Label         string `protobuf:"bytes,6,opt,name=label,proto3" json:"label,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	MediaId       string                 `protobuf:"bytes,3,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	Language      string                 `protobuf:"bytes,4,opt,name=language,proto3" json:"language,omitempty"`
+	FileUrl       string                 `protobuf:"bytes,5,opt,name=file_url,proto3" json:"file_url,omitempty"`
+	Label         string                 `protobuf:"bytes,6,opt,name=label,proto3" json:"label,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1579,21 +1828,14 @@ func (x *Subtitle) GetLabel() string {
 
 // MediaVariant is the model entity for MediaVariant (encoding output).
 type MediaVariant struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the ent.
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// media_variant.field.media_id
-	MediaId string `protobuf:"bytes,2,opt,name=media_id,proto3" json:"media_id,omitempty"`
-	// media_variant.field.profile_id
-	ProfileId string `protobuf:"bytes,3,opt,name=profile_id,proto3" json:"profile_id,omitempty"`
-	// media_variant.field.resolution
-	Resolution string `protobuf:"bytes,4,opt,name=resolution,proto3" json:"resolution,omitempty"`
-	// media_variant.field.url
-	Url string `protobuf:"bytes,5,opt,name=url,proto3" json:"url,omitempty"`
-	// media_variant.field.size
-	Size int64 `protobuf:"varint,6,opt,name=size,proto3" json:"size,omitempty"`
-	// media_variant.field.status
-	Status        string `protobuf:"bytes,7,opt,name=status,proto3" json:"status,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	MediaId       string                 `protobuf:"bytes,2,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	ProfileId     string                 `protobuf:"bytes,3,opt,name=profile_id,proto3" json:"profile_id,omitempty"`
+	Resolution    string                 `protobuf:"bytes,4,opt,name=resolution,proto3" json:"resolution,omitempty"`
+	Url           string                 `protobuf:"bytes,5,opt,name=url,proto3" json:"url,omitempty"`
+	Size          int64                  `protobuf:"varint,6,opt,name=size,proto3" json:"size,omitempty"`
+	Status        string                 `protobuf:"bytes,7,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1679,25 +1921,16 @@ func (x *MediaVariant) GetStatus() string {
 
 // MediaMetadata is the model entity for MediaMetadata.
 type MediaMetadata struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the ent.
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// media_metadata.field.media_id
-	MediaId string `protobuf:"bytes,2,opt,name=media_id,proto3" json:"media_id,omitempty"`
-	// media_metadata.field.duration
-	Duration int32 `protobuf:"varint,3,opt,name=duration,proto3" json:"duration,omitempty"`
-	// media_metadata.field.bitrate
-	Bitrate int64 `protobuf:"varint,4,opt,name=bitrate,proto3" json:"bitrate,omitempty"`
-	// media_metadata.field.video_codec
-	VideoCodec string `protobuf:"bytes,5,opt,name=video_codec,proto3" json:"video_codec,omitempty"`
-	// media_metadata.field.audio_codec
-	AudioCodec string `protobuf:"bytes,6,opt,name=audio_codec,proto3" json:"audio_codec,omitempty"`
-	// media_metadata.field.frame_rate
-	FrameRate float32 `protobuf:"fixed32,7,opt,name=frame_rate,proto3" json:"frame_rate,omitempty"`
-	// media_metadata.field.width
-	Width int32 `protobuf:"varint,8,opt,name=width,proto3" json:"width,omitempty"`
-	// media_metadata.field.height
-	Height        int32 `protobuf:"varint,9,opt,name=height,proto3" json:"height,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	MediaId       string                 `protobuf:"bytes,2,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	Duration      int32                  `protobuf:"varint,3,opt,name=duration,proto3" json:"duration,omitempty"`
+	Bitrate       int64                  `protobuf:"varint,4,opt,name=bitrate,proto3" json:"bitrate,omitempty"`
+	VideoCodec    string                 `protobuf:"bytes,5,opt,name=video_codec,proto3" json:"video_codec,omitempty"`
+	AudioCodec    string                 `protobuf:"bytes,6,opt,name=audio_codec,proto3" json:"audio_codec,omitempty"`
+	FrameRate     float32                `protobuf:"fixed32,7,opt,name=frame_rate,proto3" json:"frame_rate,omitempty"`
+	Width         int32                  `protobuf:"varint,8,opt,name=width,proto3" json:"width,omitempty"`
+	Height        int32                  `protobuf:"varint,9,opt,name=height,proto3" json:"height,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1797,22 +2030,14 @@ func (x *MediaMetadata) GetHeight() int32 {
 
 // HistoryItem is the model entity for watch history.
 type HistoryItem struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the ent.
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// create_time.field.comment
-	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
-	// history_item.field.user_id
-	UserId string `protobuf:"bytes,3,opt,name=user_id,proto3" json:"user_id,omitempty"`
-	// history_item.field.media_id
-	MediaId string `protobuf:"bytes,4,opt,name=media_id,proto3" json:"media_id,omitempty"`
-	// history_item.field.progress
-	Progress int32 `protobuf:"varint,5,opt,name=progress,proto3" json:"progress,omitempty"`
-	// history_item.field.duration
-	Duration int32 `protobuf:"varint,6,opt,name=duration,proto3" json:"duration,omitempty"`
-	// history_item.field.is_finished
-	IsFinished bool `protobuf:"varint,7,opt,name=is_finished,proto3" json:"is_finished,omitempty"`
-	// history_item.field.last_watched_at
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,proto3" json:"user_id,omitempty"`
+	MediaId       string                 `protobuf:"bytes,4,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	Progress      int32                  `protobuf:"varint,5,opt,name=progress,proto3" json:"progress,omitempty"`
+	Duration      int32                  `protobuf:"varint,6,opt,name=duration,proto3" json:"duration,omitempty"`
+	IsFinished    bool                   `protobuf:"varint,7,opt,name=is_finished,proto3" json:"is_finished,omitempty"`
 	LastWatchedAt *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=last_watched_at,proto3" json:"last_watched_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1906,23 +2131,15 @@ func (x *HistoryItem) GetLastWatchedAt() *timestamppb.Timestamp {
 
 // Review is the model entity for content review.
 type Review struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the ent.
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// create_time.field.comment
-	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
-	// update_time.field.comment
-	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
-	// review.field.media_id
-	MediaId string `protobuf:"bytes,4,opt,name=media_id,proto3" json:"media_id,omitempty"`
-	// review.field.reviewer_id
-	ReviewerId string `protobuf:"bytes,5,opt,name=reviewer_id,proto3" json:"reviewer_id,omitempty"`
-	// review.field.status
-	Status string `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
-	// review.field.reason
-	Reason string `protobuf:"bytes,7,opt,name=reason,proto3" json:"reason,omitempty"`
-	// review.field.notes
-	Notes         string `protobuf:"bytes,8,opt,name=notes,proto3" json:"notes,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
+	MediaId       string                 `protobuf:"bytes,4,opt,name=media_id,proto3" json:"media_id,omitempty"`
+	ReviewerId    string                 `protobuf:"bytes,5,opt,name=reviewer_id,proto3" json:"reviewer_id,omitempty"`
+	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	Reason        string                 `protobuf:"bytes,7,opt,name=reason,proto3" json:"reason,omitempty"`
+	Notes         string                 `protobuf:"bytes,8,opt,name=notes,proto3" json:"notes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2015,11 +2232,9 @@ func (x *Review) GetNotes() string {
 
 // StatPoint is a single data point for statistics.
 type StatPoint struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// stat_point.field.date
-	Date string `protobuf:"bytes,1,opt,name=date,proto3" json:"date,omitempty"`
-	// stat_point.field.value
-	Value         int64 `protobuf:"varint,2,opt,name=value,proto3" json:"value,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Date          string                 `protobuf:"bytes,1,opt,name=date,proto3" json:"date,omitempty"`
+	Value         int64                  `protobuf:"varint,2,opt,name=value,proto3" json:"value,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2072,7 +2287,7 @@ var File_v1_types_media_proto protoreflect.FileDescriptor
 
 const file_v1_types_media_proto_rawDesc = "" +
 	"\n" +
-	"\x14v1/types/media.proto\x12\x15api.v1.services.types\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x13v1/types/user.proto\"\x9f\f\n" +
+	"\x14v1/types/media.proto\x12\x15api.v1.services.types\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x13v1/types/user.proto\"\xd9\r\n" +
 	"\x05Media\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
@@ -2087,9 +2302,9 @@ const file_v1_types_media_proto_rawDesc = "" +
 	" \x01(\x03R\x04size\x12\x14\n" +
 	"\x05width\x18\v \x01(\x05R\x05width\x12\x16\n" +
 	"\x06height\x18\f \x01(\x05R\x06height\x12\x1c\n" +
-	"\tmime_type\x18\r \x01(\tR\tmime_type\x12\x18\n" +
-	"\aprivacy\x18\x0e \x01(\x05R\aprivacy\x12\x16\n" +
-	"\x06status\x18\x0f \x01(\x05R\x06status\x12\x1e\n" +
+	"\tmime_type\x18\r \x01(\tR\tmime_type\x128\n" +
+	"\aprivacy\x18\x0e \x01(\x0e2\x1e.api.v1.services.types.PrivacyR\aprivacy\x12\x14\n" +
+	"\x05state\x18\x0f \x01(\tR\x05state\x12\x1e\n" +
 	"\n" +
 	"view_count\x18\x10 \x01(\x03R\n" +
 	"view_count\x12\x1e\n" +
@@ -2101,32 +2316,36 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\x0efavorite_count\x18\x14 \x01(\x03R\x0efavorite_count\x12 \n" +
 	"\vshare_count\x18\x15 \x01(\x03R\vshare_count\x12&\n" +
 	"\x0edownload_count\x18\x16 \x01(\x03R\x0edownload_count\x12\x18\n" +
-	"\auser_id\x18\x17 \x01(\tR\auser_id\x12\x1e\n" +
-	"\n" +
-	"channel_id\x18, \x01(\tR\n" +
-	"channel_id\x12 \n" +
+	"\auser_id\x18\x17 \x01(\tR\auser_id\x12 \n" +
 	"\vcategory_id\x18\x18 \x01(\x03R\vcategory_id\x12\x12\n" +
 	"\x04tags\x18\x19 \x03(\tR\x04tags\x12\x1a\n" +
 	"\bhls_file\x18\x1a \x01(\tR\bhls_file\x12(\n" +
 	"\x0fencoding_status\x18\x1b \x01(\tR\x0fencoding_status\x12\x12\n" +
 	"\x04uuid\x18\x1c \x01(\tR\x04uuid\x12,\n" +
-	"\x11preview_file_path\x18\x1d \x01(\tR\x11preview_file_path\x12\x14\n" +
-	"\x05state\x18\x1e \x01(\tR\x05state\x12 \n" +
+	"\x11preview_file_path\x18\x1d \x01(\tR\x11preview_file_path\x12 \n" +
 	"\vshort_token\x18+ \x01(\tR\vshort_token\x12>\n" +
 	"\fpublished_at\x18  \x01(\v2\x1a.google.protobuf.TimestampR\fpublished_at\x12&\n" +
 	"\x0eallow_download\x18! \x01(\bR\x0eallow_download\x12(\n" +
 	"\x0fenable_comments\x18\" \x01(\bR\x0fenable_comments\x12\x1a\n" +
-	"\bfeatured\x18# \x01(\bR\bfeatured\x12$\n" +
-	"\vis_reviewed\x18$ \x01(\bB\x02\x18\x01R\vis_reviewed\x12&\n" +
+	"\bfeatured\x18# \x01(\bR\bfeatured\x12&\n" +
 	"\x0ereported_times\x18% \x01(\x05R\x0ereported_times\x12\x1c\n" +
 	"\textension\x18& \x01(\tR\textension\x12\x16\n" +
 	"\x06md5sum\x18' \x01(\tR\x06md5sum\x12\x16\n" +
 	"\x06poster\x18( \x01(\tR\x06poster\x12$\n" +
 	"\rreview_status\x18) \x01(\tR\rreview_status\x12\x1a\n" +
-	"\blistable\x18* \x01(\bR\blistable\x12/\n" +
+	"\blistable\x18* \x01(\bR\blistable\x12\x1e\n" +
+	"\n" +
+	"channel_id\x18, \x01(\tR\n" +
+	"channel_id\x12$\n" +
+	"\rsprite_status\x18- \x01(\tR\rsprite_status\x12 \n" +
+	"\vsprite_path\x18. \x01(\tR\vsprite_path\x12\x1a\n" +
+	"\bvtt_path\x18/ \x01(\tR\bvtt_path\x12&\n" +
+	"\x0ethumbnail_time\x180 \x01(\x01R\x0ethumbnail_time\x12$\n" +
+	"\rcreate_author\x181 \x01(\tR\rcreate_author\x12$\n" +
+	"\rupdate_author\x185 \x01(\tR\rupdate_author\x12/\n" +
 	"\x04user\x182 \x01(\v2\x1b.api.v1.services.types.UserR\x04user\x12;\n" +
 	"\bcategory\x183 \x01(\v2\x1f.api.v1.services.types.CategoryR\bcategory\x128\n" +
-	"\achannel\x184 \x01(\v2\x1e.api.v1.services.types.ChannelR\achannel\"\xf5\x01\n" +
+	"\achannel\x184 \x01(\v2\x1e.api.v1.services.types.ChannelR\achannel\"\xe9\x03\n" +
 	"\rEncodeProfile\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -2135,9 +2354,15 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\n" +
 	"resolution\x18\x05 \x01(\tR\n" +
 	"resolution\x12 \n" +
-	"\vvideo_codec\x18\x06 \x01(\tR\vvideo_codec\x12 \n" +
-	"\vaudio_codec\x18\a \x01(\tR\vaudio_codec\x12\x1c\n" +
-	"\tis_active\x18\b \x01(\bR\tis_active\"\xd2\x02\n" +
+	"\vvideo_codec\x18\x06 \x01(\tR\vvideo_codec\x12$\n" +
+	"\rvideo_bitrate\x18\a \x01(\tR\rvideo_bitrate\x12 \n" +
+	"\vaudio_codec\x18\b \x01(\tR\vaudio_codec\x12$\n" +
+	"\raudio_bitrate\x18\t \x01(\tR\raudio_bitrate\x12*\n" +
+	"\x10bento_parameters\x18\n" +
+	" \x01(\tR\x10bento_parameters\x12\x1c\n" +
+	"\tis_active\x18\v \x01(\bR\tis_active\x12<\n" +
+	"\vcreate_time\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
+	"\vupdate_time\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\"\xe8\x02\n" +
 	"\fEncodingTask\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
 	"\bmedia_id\x18\x02 \x01(\tR\bmedia_id\x12\x1e\n" +
@@ -2147,23 +2372,31 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\x06status\x18\x04 \x01(\tR\x06status\x12\x1a\n" +
 	"\bprogress\x18\x05 \x01(\x05R\bprogress\x12 \n" +
 	"\voutput_path\x18\x06 \x01(\tR\voutput_path\x12$\n" +
-	"\rerror_message\x18\a \x01(\tR\rerror_message\x12<\n" +
-	"\vcreate_time\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
-	"\vupdate_time\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\"\xfe\x02\n" +
+	"\rerror_message\x18\a \x01(\tR\rerror_message\x12\x14\n" +
+	"\x05chunk\x18\b \x01(\bR\x05chunk\x12<\n" +
+	"\vcreate_time\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
+	"\vupdate_time\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\"\xde\x04\n" +
 	"\bCategory\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
 	"\vupdate_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\x12\x12\n" +
 	"\x04name\x18\x04 \x01(\tR\x04name\x12\x12\n" +
 	"\x04slug\x18\x05 \x01(\tR\x04slug\x12 \n" +
-	"\vdescription\x18\x06 \x01(\tR\vdescription\x12\x12\n" +
-	"\x04icon\x18\a \x01(\tR\x04icon\x12\x14\n" +
-	"\x05color\x18\b \x01(\tR\x05color\x12\x1c\n" +
-	"\tparent_id\x18\t \x01(\x03R\tparent_id\x12\x1a\n" +
-	"\bsequence\x18\n" +
-	" \x01(\x05R\bsequence\x12\x16\n" +
-	"\x06status\x18\v \x01(\x05R\x06status\x12 \n" +
-	"\vmedia_count\x18\f \x01(\x03R\vmedia_count\"\xab\x02\n" +
+	"\vdescription\x18\x06 \x01(\tR\vdescription\x12\x1c\n" +
+	"\tthumbnail\x18\a \x01(\tR\tthumbnail\x12.\n" +
+	"\x12listings_thumbnail\x18\b \x01(\tR\x12listings_thumbnail\x12\x12\n" +
+	"\x04icon\x18\t \x01(\tR\x04icon\x12\x14\n" +
+	"\x05color\x18\n" +
+	" \x01(\tR\x05color\x12\x1c\n" +
+	"\tparent_id\x18\v \x01(\x03R\tparent_id\x12\x1a\n" +
+	"\bsequence\x18\f \x01(\x05R\bsequence\x12\x16\n" +
+	"\x06status\x18\r \x01(\x05R\x06status\x12 \n" +
+	"\vmedia_count\x18\x0e \x01(\x03R\vmedia_count\x12\x1c\n" +
+	"\tis_global\x18\x0f \x01(\bR\tis_global\x12*\n" +
+	"\x10is_rbac_category\x18\x10 \x01(\bR\x10is_rbac_category\x12,\n" +
+	"\x11identity_provider\x18\x11 \x01(\tR\x11identity_provider\x12\x18\n" +
+	"\auser_id\x18\x12 \x01(\tR\auser_id\"\xfd\x02\n" +
 	"\x03Tag\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
@@ -2171,9 +2404,11 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\x04name\x18\x04 \x01(\tR\x04name\x12\x12\n" +
 	"\x04slug\x18\x05 \x01(\tR\x04slug\x12 \n" +
 	"\vdescription\x18\x06 \x01(\tR\vdescription\x12\x14\n" +
-	"\x05color\x18\a \x01(\tR\x05color\x12\x16\n" +
-	"\x06status\x18\b \x01(\x05R\x06status\x12 \n" +
-	"\vmedia_count\x18\t \x01(\x03R\vmedia_count\"\xbb\x02\n" +
+	"\x05color\x18\a \x01(\tR\x05color\x128\n" +
+	"\x06status\x18\b \x01(\x0e2 .api.v1.services.types.TagStatusR\x06status\x12 \n" +
+	"\vmedia_count\x18\t \x01(\x03R\vmedia_count\x12.\n" +
+	"\x12listings_thumbnail\x18\n" +
+	" \x01(\tR\x12listings_thumbnail\"\xfb\x03\n" +
 	"\aComment\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
@@ -2185,7 +2420,12 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\n" +
 	"like_count\x18\b \x01(\x03R\n" +
 	"like_count\x12\x16\n" +
-	"\x06status\x18\t \x01(\tR\x06status\"\x9e\x01\n" +
+	"\x06status\x18\t \x01(\tR\x06status\x12\"\n" +
+	"\freport_count\x18\n" +
+	" \x01(\x05R\freport_count\x12\"\n" +
+	"\fmoderated_by\x18\v \x01(\tR\fmoderated_by\x12>\n" +
+	"\fmoderated_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\fmoderated_at\x126\n" +
+	"\badd_date\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\badd_date\"\x9e\x01\n" +
 	"\x04Like\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12\x18\n" +
@@ -2197,19 +2437,21 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12\x18\n" +
 	"\auser_id\x18\x03 \x01(\tR\auser_id\x12\x1a\n" +
 	"\bmedia_id\x18\x04 \x01(\tR\bmedia_id\x12 \n" +
-	"\vplaylist_id\x18\x05 \x01(\tR\vplaylist_id\"\xdc\x02\n" +
+	"\vplaylist_id\x18\x05 \x01(\tR\vplaylist_id\"\xfb\x03\n" +
 	"\bPlaylist\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
-	"\vupdate_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\x12 \n" +
+	"\vupdate_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\x12\x14\n" +
+	"\x05title\x18\x04 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x1c\n" +
 	"\tthumbnail\x18\x06 \x01(\tR\tthumbnail\x12\x18\n" +
-	"\auser_id\x18\a \x01(\tR\auser_id\x12\x1c\n" +
-	"\tis_public\x18\b \x01(\bR\tis_public\x12\x16\n" +
-	"\x06status\x18\t \x01(\x05R\x06status\x12 \n" +
+	"\auser_id\x18\a \x01(\tR\auser_id\x128\n" +
+	"\aprivacy\x18\b \x01(\x0e2\x1e.api.v1.services.types.PrivacyR\aprivacy\x12=\n" +
+	"\x06status\x18\t \x01(\x0e2%.api.v1.services.types.PlaylistStatusR\x06status\x12 \n" +
 	"\vmedia_count\x18\n" +
-	" \x01(\x03R\vmedia_count\"\xf9\x02\n" +
+	" \x01(\x03R\vmedia_count\x12 \n" +
+	"\vshort_token\x18\v \x01(\tR\vshort_token\x126\n" +
+	"\badd_date\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\badd_date\"\xeb\x03\n" +
 	"\aChannel\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
@@ -2217,11 +2459,13 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\x05title\x18\x04 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x05 \x01(\tR\vdescription\x12 \n" +
 	"\vbanner_logo\x18\x06 \x01(\tR\vbanner_logo\x12\x18\n" +
-	"\auser_id\x18\a \x01(\tR\auser_id\x12 \n" +
-	"\vshort_token\x18\v \x01(\tR\vshort_token\x12*\n" +
+	"\auser_id\x18\a \x01(\tR\auser_id\x128\n" +
+	"\aprivacy\x18\b \x01(\x0e2\x1e.api.v1.services.types.PrivacyR\aprivacy\x12*\n" +
 	"\x10subscriber_count\x18\t \x01(\x03R\x10subscriber_count\x12 \n" +
 	"\vmedia_count\x18\n" +
-	" \x01(\x03R\vmedia_count\"\xc2\x01\n" +
+	" \x01(\x03R\vmedia_count\x12 \n" +
+	"\vshort_token\x18\v \x01(\tR\vshort_token\x126\n" +
+	"\badd_date\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\badd_date\"\xc2\x01\n" +
 	"\bSubtitle\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12\x1a\n" +
@@ -2273,7 +2517,24 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\x05notes\x18\b \x01(\tR\x05notes\"5\n" +
 	"\tStatPoint\x12\x12\n" +
 	"\x04date\x18\x01 \x01(\tR\x04date\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\x03R\x05valueB\xd5\x01\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value*\x91\x01\n" +
+	"\aPrivacy\x12\x17\n" +
+	"\x13PRIVACY_UNSPECIFIED\x10\x00\x12\x12\n" +
+	"\x0ePRIVACY_PUBLIC\x10\x01\x12\x13\n" +
+	"\x0fPRIVACY_PRIVATE\x10\x02\x12\x14\n" +
+	"\x10PRIVACY_UNLISTED\x10\x03\x12\x10\n" +
+	"\fPRIVACY_PAID\x10\x04\x12\x1c\n" +
+	"\x18PRIVACY_SUBSCRIBERS_ONLY\x10\x05*W\n" +
+	"\tTagStatus\x12\x1a\n" +
+	"\x16TAG_STATUS_UNSPECIFIED\x10\x00\x12\x17\n" +
+	"\x13TAG_STATUS_INACTIVE\x10\x01\x12\x15\n" +
+	"\x11TAG_STATUS_ACTIVE\x10\x02*\xa4\x01\n" +
+	"\x0ePlaylistStatus\x12\x1f\n" +
+	"\x1bPLAYLIST_STATUS_UNSPECIFIED\x10\x00\x12\x1a\n" +
+	"\x16PLAYLIST_STATUS_ACTIVE\x10\x01\x12\x1c\n" +
+	"\x18PLAYLIST_STATUS_INACTIVE\x10\x02\x12\x19\n" +
+	"\x15PLAYLIST_STATUS_DRAFT\x10\x03\x12\x1c\n" +
+	"\x18PLAYLIST_STATUS_ARCHIVED\x10\x04B\xd5\x01\n" +
 	"\x19com.api.v1.services.typesB\n" +
 	"MediaProtoP\x01Z4origadmin/application/origcms/api/gen/v1/types;types\xa2\x02\x04AVST\xaa\x02\x15Api.V1.Services.Types\xca\x02\x15Api\\V1\\Services\\Types\xe2\x02!Api\\V1\\Services\\Types\\GPBMetadata\xea\x02\x18Api::V1::Services::Typesb\x06proto3"
 
@@ -2289,58 +2550,73 @@ func file_v1_types_media_proto_rawDescGZIP() []byte {
 	return file_v1_types_media_proto_rawDescData
 }
 
+var file_v1_types_media_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
 var file_v1_types_media_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_v1_types_media_proto_goTypes = []any{
-	(*Media)(nil),                 // 0: api.v1.services.types.Media
-	(*EncodeProfile)(nil),         // 1: api.v1.services.types.EncodeProfile
-	(*EncodingTask)(nil),          // 2: api.v1.services.types.EncodingTask
-	(*Category)(nil),              // 3: api.v1.services.types.Category
-	(*Tag)(nil),                   // 4: api.v1.services.types.Tag
-	(*Comment)(nil),               // 5: api.v1.services.types.Comment
-	(*Like)(nil),                  // 6: api.v1.services.types.Like
-	(*Favorite)(nil),              // 7: api.v1.services.types.Favorite
-	(*Playlist)(nil),              // 8: api.v1.services.types.Playlist
-	(*Channel)(nil),               // 9: api.v1.services.types.Channel
-	(*Subtitle)(nil),              // 10: api.v1.services.types.Subtitle
-	(*MediaVariant)(nil),          // 11: api.v1.services.types.MediaVariant
-	(*MediaMetadata)(nil),         // 12: api.v1.services.types.MediaMetadata
-	(*HistoryItem)(nil),           // 13: api.v1.services.types.HistoryItem
-	(*Review)(nil),                // 14: api.v1.services.types.Review
-	(*StatPoint)(nil),             // 15: api.v1.services.types.StatPoint
-	(*timestamppb.Timestamp)(nil), // 16: google.protobuf.Timestamp
-	(*User)(nil),                  // 17: api.v1.services.types.User
+	(Privacy)(0),                  // 0: api.v1.services.types.Privacy
+	(TagStatus)(0),                // 1: api.v1.services.types.TagStatus
+	(PlaylistStatus)(0),           // 2: api.v1.services.types.PlaylistStatus
+	(*Media)(nil),                 // 3: api.v1.services.types.Media
+	(*EncodeProfile)(nil),         // 4: api.v1.services.types.EncodeProfile
+	(*EncodingTask)(nil),          // 5: api.v1.services.types.EncodingTask
+	(*Category)(nil),              // 6: api.v1.services.types.Category
+	(*Tag)(nil),                   // 7: api.v1.services.types.Tag
+	(*Comment)(nil),               // 8: api.v1.services.types.Comment
+	(*Like)(nil),                  // 9: api.v1.services.types.Like
+	(*Favorite)(nil),              // 10: api.v1.services.types.Favorite
+	(*Playlist)(nil),              // 11: api.v1.services.types.Playlist
+	(*Channel)(nil),               // 12: api.v1.services.types.Channel
+	(*Subtitle)(nil),              // 13: api.v1.services.types.Subtitle
+	(*MediaVariant)(nil),          // 14: api.v1.services.types.MediaVariant
+	(*MediaMetadata)(nil),         // 15: api.v1.services.types.MediaMetadata
+	(*HistoryItem)(nil),           // 16: api.v1.services.types.HistoryItem
+	(*Review)(nil),                // 17: api.v1.services.types.Review
+	(*StatPoint)(nil),             // 18: api.v1.services.types.StatPoint
+	(*timestamppb.Timestamp)(nil), // 19: google.protobuf.Timestamp
+	(*User)(nil),                  // 20: api.v1.services.types.User
 }
 var file_v1_types_media_proto_depIdxs = []int32{
-	16, // 0: api.v1.services.types.Media.create_time:type_name -> google.protobuf.Timestamp
-	16, // 1: api.v1.services.types.Media.update_time:type_name -> google.protobuf.Timestamp
-	16, // 2: api.v1.services.types.Media.published_at:type_name -> google.protobuf.Timestamp
-	17, // 3: api.v1.services.types.Media.user:type_name -> api.v1.services.types.User
-	3,  // 4: api.v1.services.types.Media.category:type_name -> api.v1.services.types.Category
-	9,  // 5: api.v1.services.types.Media.channel:type_name -> api.v1.services.types.Channel
-	16, // 6: api.v1.services.types.EncodingTask.create_time:type_name -> google.protobuf.Timestamp
-	16, // 7: api.v1.services.types.EncodingTask.update_time:type_name -> google.protobuf.Timestamp
-	16, // 8: api.v1.services.types.Category.create_time:type_name -> google.protobuf.Timestamp
-	16, // 9: api.v1.services.types.Category.update_time:type_name -> google.protobuf.Timestamp
-	16, // 10: api.v1.services.types.Tag.create_time:type_name -> google.protobuf.Timestamp
-	16, // 11: api.v1.services.types.Tag.update_time:type_name -> google.protobuf.Timestamp
-	16, // 12: api.v1.services.types.Comment.create_time:type_name -> google.protobuf.Timestamp
-	16, // 13: api.v1.services.types.Comment.update_time:type_name -> google.protobuf.Timestamp
-	16, // 14: api.v1.services.types.Like.create_time:type_name -> google.protobuf.Timestamp
-	16, // 15: api.v1.services.types.Favorite.create_time:type_name -> google.protobuf.Timestamp
-	16, // 16: api.v1.services.types.Playlist.create_time:type_name -> google.protobuf.Timestamp
-	16, // 17: api.v1.services.types.Playlist.update_time:type_name -> google.protobuf.Timestamp
-	16, // 18: api.v1.services.types.Channel.create_time:type_name -> google.protobuf.Timestamp
-	16, // 19: api.v1.services.types.Channel.update_time:type_name -> google.protobuf.Timestamp
-	16, // 20: api.v1.services.types.Subtitle.create_time:type_name -> google.protobuf.Timestamp
-	16, // 21: api.v1.services.types.HistoryItem.create_time:type_name -> google.protobuf.Timestamp
-	16, // 22: api.v1.services.types.HistoryItem.last_watched_at:type_name -> google.protobuf.Timestamp
-	16, // 23: api.v1.services.types.Review.create_time:type_name -> google.protobuf.Timestamp
-	16, // 24: api.v1.services.types.Review.update_time:type_name -> google.protobuf.Timestamp
-	25, // [25:25] is the sub-list for method output_type
-	25, // [25:25] is the sub-list for method input_type
-	25, // [25:25] is the sub-list for extension type_name
-	25, // [25:25] is the sub-list for extension extendee
-	0,  // [0:25] is the sub-list for field type_name
+	19, // 0: api.v1.services.types.Media.create_time:type_name -> google.protobuf.Timestamp
+	19, // 1: api.v1.services.types.Media.update_time:type_name -> google.protobuf.Timestamp
+	0,  // 2: api.v1.services.types.Media.privacy:type_name -> api.v1.services.types.Privacy
+	19, // 3: api.v1.services.types.Media.published_at:type_name -> google.protobuf.Timestamp
+	20, // 4: api.v1.services.types.Media.user:type_name -> api.v1.services.types.User
+	6,  // 5: api.v1.services.types.Media.category:type_name -> api.v1.services.types.Category
+	12, // 6: api.v1.services.types.Media.channel:type_name -> api.v1.services.types.Channel
+	19, // 7: api.v1.services.types.EncodeProfile.create_time:type_name -> google.protobuf.Timestamp
+	19, // 8: api.v1.services.types.EncodeProfile.update_time:type_name -> google.protobuf.Timestamp
+	19, // 9: api.v1.services.types.EncodingTask.create_time:type_name -> google.protobuf.Timestamp
+	19, // 10: api.v1.services.types.EncodingTask.update_time:type_name -> google.protobuf.Timestamp
+	19, // 11: api.v1.services.types.Category.create_time:type_name -> google.protobuf.Timestamp
+	19, // 12: api.v1.services.types.Category.update_time:type_name -> google.protobuf.Timestamp
+	19, // 13: api.v1.services.types.Tag.create_time:type_name -> google.protobuf.Timestamp
+	19, // 14: api.v1.services.types.Tag.update_time:type_name -> google.protobuf.Timestamp
+	1,  // 15: api.v1.services.types.Tag.status:type_name -> api.v1.services.types.TagStatus
+	19, // 16: api.v1.services.types.Comment.create_time:type_name -> google.protobuf.Timestamp
+	19, // 17: api.v1.services.types.Comment.update_time:type_name -> google.protobuf.Timestamp
+	19, // 18: api.v1.services.types.Comment.moderated_at:type_name -> google.protobuf.Timestamp
+	19, // 19: api.v1.services.types.Comment.add_date:type_name -> google.protobuf.Timestamp
+	19, // 20: api.v1.services.types.Like.create_time:type_name -> google.protobuf.Timestamp
+	19, // 21: api.v1.services.types.Favorite.create_time:type_name -> google.protobuf.Timestamp
+	19, // 22: api.v1.services.types.Playlist.create_time:type_name -> google.protobuf.Timestamp
+	19, // 23: api.v1.services.types.Playlist.update_time:type_name -> google.protobuf.Timestamp
+	0,  // 24: api.v1.services.types.Playlist.privacy:type_name -> api.v1.services.types.Privacy
+	2,  // 25: api.v1.services.types.Playlist.status:type_name -> api.v1.services.types.PlaylistStatus
+	19, // 26: api.v1.services.types.Playlist.add_date:type_name -> google.protobuf.Timestamp
+	19, // 27: api.v1.services.types.Channel.create_time:type_name -> google.protobuf.Timestamp
+	19, // 28: api.v1.services.types.Channel.update_time:type_name -> google.protobuf.Timestamp
+	0,  // 29: api.v1.services.types.Channel.privacy:type_name -> api.v1.services.types.Privacy
+	19, // 30: api.v1.services.types.Channel.add_date:type_name -> google.protobuf.Timestamp
+	19, // 31: api.v1.services.types.Subtitle.create_time:type_name -> google.protobuf.Timestamp
+	19, // 32: api.v1.services.types.HistoryItem.create_time:type_name -> google.protobuf.Timestamp
+	19, // 33: api.v1.services.types.HistoryItem.last_watched_at:type_name -> google.protobuf.Timestamp
+	19, // 34: api.v1.services.types.Review.create_time:type_name -> google.protobuf.Timestamp
+	19, // 35: api.v1.services.types.Review.update_time:type_name -> google.protobuf.Timestamp
+	36, // [36:36] is the sub-list for method output_type
+	36, // [36:36] is the sub-list for method input_type
+	36, // [36:36] is the sub-list for extension type_name
+	36, // [36:36] is the sub-list for extension extendee
+	0,  // [0:36] is the sub-list for field type_name
 }
 
 func init() { file_v1_types_media_proto_init() }
@@ -2354,13 +2630,14 @@ func file_v1_types_media_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_types_media_proto_rawDesc), len(file_v1_types_media_proto_rawDesc)),
-			NumEnums:      0,
+			NumEnums:      3,
 			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_v1_types_media_proto_goTypes,
 		DependencyIndexes: file_v1_types_media_proto_depIdxs,
+		EnumInfos:         file_v1_types_media_proto_enumTypes,
 		MessageInfos:      file_v1_types_media_proto_msgTypes,
 	}.Build()
 	File_v1_types_media_proto = out.File

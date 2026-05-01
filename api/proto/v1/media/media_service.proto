@@ -521,7 +521,7 @@ message ListMediasRequest {
 
 message ListMediasResponse {
   int32 total = 1 [json_name = "total"];
-  repeated api.v1.services.types.Media medias = 2 [json_name = "medias"];
+  repeated api.v1.services.types.Media items = 2 [json_name = "items"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
   string next_page_token = 5 [json_name = "next_page_token"];
@@ -775,7 +775,7 @@ message GetMediaCommentsRequest {
 
 message GetMediaCommentsResponse {
   int32 total = 1 [json_name = "total"];
-  repeated api.v1.services.types.Comment comments = 2 [json_name = "comments"];
+  repeated api.v1.services.types.Comment items = 2 [json_name = "items"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
   int32 total_pages = 5 [json_name = "total_pages"];
@@ -863,7 +863,7 @@ message ListCategoriesRequest {
 
 message ListCategoriesResponse {
   int32 total = 1 [json_name = "total"];
-  repeated api.v1.services.types.Category categories = 2 [json_name = "categories"];
+  repeated api.v1.services.types.Category items = 2 [json_name = "items"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
   string next_page_token = 5 [json_name = "next_page_token"];
@@ -915,7 +915,7 @@ message ListTagsRequest {
 
 message ListTagsResponse {
   int32 total = 1 [json_name = "total"];
-  repeated api.v1.services.types.Tag tags = 2 [json_name = "tags"];
+  repeated api.v1.services.types.Tag items = 2 [json_name = "items"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
   string next_page_token = 5 [json_name = "next_page_token"];
@@ -969,7 +969,7 @@ message ListCommentsRequest {
 
 message ListCommentsResponse {
   int32 total = 1 [json_name = "total"];
-  repeated api.v1.services.types.Comment comments = 2 [json_name = "comments"];
+  repeated api.v1.services.types.Comment items = 2 [json_name = "items"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
   string next_page_token = 5 [json_name = "next_page_token"];
@@ -1042,7 +1042,7 @@ message GetPlaylistsRequest {
 
 message GetPlaylistsResponse {
   int32 total = 1 [json_name = "total"];
-  repeated api.v1.services.types.Playlist playlists = 2 [json_name = "playlists"];
+  repeated api.v1.services.types.Playlist items = 2 [json_name = "items"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
 }
@@ -1053,7 +1053,7 @@ message GetPlaylistRequest {
 
 message GetPlaylistResponse {
   api.v1.services.types.Playlist playlist = 1 [json_name = "playlist"];
-  repeated api.v1.services.types.Media medias = 2 [json_name = "medias"];
+  repeated api.v1.services.types.Media items = 2 [json_name = "items"];
 }
 
 message CreatePlaylistRequest {
@@ -1119,7 +1119,7 @@ message ListChannelsRequest {
 
 message ListChannelsResponse {
   int32 total = 1 [json_name = "total"];
-  repeated api.v1.services.types.Channel channels = 2 [json_name = "channels"];
+  repeated api.v1.services.types.Channel items = 2 [json_name = "items"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
 }
@@ -1165,7 +1165,7 @@ message GetChannelMediasRequest {
 
 message GetChannelMediasResponse {
   int32 total = 1 [json_name = "total"];
-  repeated api.v1.services.types.Media medias = 2 [json_name = "medias"];
+  repeated api.v1.services.types.Media items = 2 [json_name = "items"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
 }
@@ -1240,7 +1240,7 @@ message SearchRequest {
 
 message SearchResponse {
   int32 total = 1 [json_name = "total"];
-  repeated api.v1.services.types.Media medias = 2 [json_name = "medias"];
+  repeated api.v1.services.types.Media items = 2 [json_name = "items"];
   repeated api.v1.services.types.Channel channels = 3 [json_name = "channels"];
   repeated api.v1.services.types.Playlist playlists = 4 [json_name = "playlists"];
   repeated api.v1.services.types.User users = 5 [json_name = "users"];
@@ -1382,7 +1382,7 @@ message GetTrendingContentRequest {
 }
 
 message GetTrendingContentResponse {
-  repeated api.v1.services.types.Media medias = 1 [json_name = "medias"];
+  repeated api.v1.services.types.Media items = 1 [json_name = "items"];
 }
 
 message GetSubscriptionFeedRequest {
@@ -1392,7 +1392,7 @@ message GetSubscriptionFeedRequest {
 
 message GetSubscriptionFeedResponse {
   int32 total = 1 [json_name = "total"];
-  repeated api.v1.services.types.Media medias = 2 [json_name = "medias"];
+  repeated api.v1.services.types.Media items = 2 [json_name = "items"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
 }

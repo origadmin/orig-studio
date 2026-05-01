@@ -39,7 +39,7 @@ func RegisterRoutes(r *gin.Engine) {
 		})
 	}
 
-	rootFiles := []string{"/favicon.ico", "/robots.txt", "/manifest.json", "/logo192.png", "/logo512.png"}
+	rootFiles := []string{"/favicon.ico", "/robots.txt", "/manifest.json", "/logo-192.png", "/logo-512.png"}
 	for _, name := range rootFiles {
 		n := name
 		r.GET(n, func(c *gin.Context) {

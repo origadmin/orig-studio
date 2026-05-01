@@ -5,12 +5,12 @@
 package service
 
 import (
-	"origadmin/application/origcms/internal/handler"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
+	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/server"
@@ -101,20 +101,11 @@ func (h *ArticleHandler) listArticles() http.HandlerFunc {
 
 		items, total, err := h.uc.List(r.Context(), page, pageSize, filters)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"code": server.ErrInternal, "message": err.Error()})
+			server.Fail(c.GinContext(), server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c.GinContext(), gin.H{
-			"code":    0,
-			"message": "ok",
-			"data": gin.H{
-				"items":     items,
-				"total":     total,
-				"page":      page,
-				"page_size": pageSize,
-			},
-		})
+		server.Page(c.GinContext(), items, int64(total), page, pageSize)
 	}
 }
 
@@ -123,21 +114,17 @@ func (h *ArticleHandler) getArticle() http.HandlerFunc {
 		c := handler.NewGinContextAdapterFromHTTP(w, r)
 		id := c.Param("id")
 		if id == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"code": server.ErrBadRequest, "message": "article id is required"})
+			server.Fail(c.GinContext(), server.ErrBadRequest, "article id is required")
 			return
 		}
 
 		article, err := h.uc.Get(r.Context(), id)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"code": server.ErrNotFound, "message": "article not found"})
+			server.Fail(c.GinContext(), server.ErrNotFound, "article not found")
 			return
 		}
 
-		server.OK(c.GinContext(), gin.H{
-			"code":    0,
-			"message": "ok",
-			"data":    article,
-		})
+		server.OK(c.GinContext(), article)
 	}
 }
 
@@ -146,21 +133,17 @@ func (h *ArticleHandler) getArticleBySlug() http.HandlerFunc {
 		c := handler.NewGinContextAdapterFromHTTP(w, r)
 		slug := c.Param("slug")
 		if slug == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"code": server.ErrBadRequest, "message": "slug is required"})
+			server.Fail(c.GinContext(), server.ErrBadRequest, "slug is required")
 			return
 		}
 
 		article, err := h.uc.GetBySlug(r.Context(), slug)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"code": server.ErrNotFound, "message": "article not found"})
+			server.Fail(c.GinContext(), server.ErrNotFound, "article not found")
 			return
 		}
 
-		server.OK(c.GinContext(), gin.H{
-			"code":    0,
-			"message": "ok",
-			"data":    article,
-		})
+		server.OK(c.GinContext(), article)
 	}
 }
 
@@ -183,15 +166,11 @@ func (h *ArticleHandler) listFeaturedArticles() http.HandlerFunc {
 
 		items, _, err := h.uc.List(r.Context(), 1, limit, filters)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"code": server.ErrInternal, "message": err.Error()})
+			server.Fail(c.GinContext(), server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c.GinContext(), gin.H{
-			"code":    0,
-			"message": "ok",
-			"data":    items,
-		})
+		server.OK(c.GinContext(), items)
 	}
 }
 
@@ -213,15 +192,11 @@ func (h *ArticleHandler) listLatestArticles() http.HandlerFunc {
 
 		items, _, err := h.uc.List(r.Context(), 1, limit, filters)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"code": server.ErrInternal, "message": err.Error()})
+			server.Fail(c.GinContext(), server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c.GinContext(), gin.H{
-			"code":    0,
-			"message": "ok",
-			"data":    items,
-		})
+		server.OK(c.GinContext(), items)
 	}
 }
 
@@ -233,13 +208,15 @@ func (h *ArticleHandler) createArticle() gin.HandlerFunc {
 			Content     string   `json:"content" binding:"required"`
 			Summary     string   `json:"summary"`
 			CategoryID  int64    `json:"category_id"`
+			MediaID     string   `json:"media_id"`
+			Thumbnail   string   `json:"thumbnail"`
 			Tags        []string `json:"tags"`
 			Featured    bool     `json:"featured"`
 			PublishedAt string   `json:"published_at"`
 		}
 
 		if err := c.ShouldBindJSON(&input); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"code": server.ErrBadRequest, "message": err.Error()})
+			server.Fail(c, server.ErrBadRequest, err.Error())
 			return
 		}
 
@@ -260,19 +237,17 @@ func (h *ArticleHandler) createArticle() gin.HandlerFunc {
 			Tags:       input.Tags,
 			UserID:     userID,
 			CategoryID: input.CategoryID,
+			MediaID:    input.MediaID,
+			Thumbnail:  input.Thumbnail,
 		}
 
 		created, err := h.uc.Create(c.Request.Context(), article)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"code": server.ErrInternal, "message": err.Error()})
+			server.Fail(c, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, gin.H{
-			"code":    0,
-			"message": "ok",
-			"data":    created,
-		})
+		server.Created(c, created)
 	}
 }
 
@@ -280,7 +255,7 @@ func (h *ArticleHandler) updateArticle() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		if id == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"code": server.ErrBadRequest, "message": "article id is required"})
+			server.Fail(c, server.ErrBadRequest, "article id is required")
 			return
 		}
 
@@ -290,6 +265,8 @@ func (h *ArticleHandler) updateArticle() gin.HandlerFunc {
 			Content     string   `json:"content"`
 			Summary     string   `json:"summary"`
 			CategoryID  int64    `json:"category_id"`
+			MediaID     string   `json:"media_id"`
+			Thumbnail   string   `json:"thumbnail"`
 			Tags        []string `json:"tags"`
 			Featured    bool     `json:"featured"`
 			State       string   `json:"state"`
@@ -297,13 +274,13 @@ func (h *ArticleHandler) updateArticle() gin.HandlerFunc {
 		}
 
 		if err := c.ShouldBindJSON(&input); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"code": server.ErrBadRequest, "message": err.Error()})
+			server.Fail(c, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		existing, err := h.uc.Get(c.Request.Context(), id)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"code": server.ErrNotFound, "message": "article not found"})
+			server.Fail(c, server.ErrNotFound, "article not found")
 			return
 		}
 
@@ -322,6 +299,10 @@ func (h *ArticleHandler) updateArticle() gin.HandlerFunc {
 		if input.CategoryID != 0 {
 			existing.CategoryID = input.CategoryID
 		}
+		if input.MediaID != "" {
+			existing.MediaID = input.MediaID
+		}
+		existing.Thumbnail = input.Thumbnail // Allow empty string to clear
 		if input.Tags != nil {
 			existing.Tags = input.Tags
 		}
@@ -332,15 +313,11 @@ func (h *ArticleHandler) updateArticle() gin.HandlerFunc {
 
 		updated, err := h.uc.Update(c.Request.Context(), existing)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"code": server.ErrInternal, "message": err.Error()})
+			server.Fail(c, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, gin.H{
-			"code":    0,
-			"message": "ok",
-			"data":    updated,
-		})
+		server.OK(c, updated)
 	}
 }
 
@@ -348,20 +325,16 @@ func (h *ArticleHandler) deleteArticle() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		if id == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"code": server.ErrBadRequest, "message": "article id is required"})
+			server.Fail(c, server.ErrBadRequest, "article id is required")
 			return
 		}
 
 		if err := h.uc.Delete(c.Request.Context(), id); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"code": server.ErrInternal, "message": err.Error()})
+			server.Fail(c, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, gin.H{
-			"code":    0,
-			"message": "ok",
-			"data":    gin.H{"message": "deleted"},
-		})
+		server.OK(c, nil)
 	}
 }
 
@@ -369,7 +342,7 @@ func (h *ArticleHandler) updateArticleState() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		if id == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"code": server.ErrBadRequest, "message": "article id is required"})
+			server.Fail(c, server.ErrBadRequest, "article id is required")
 			return
 		}
 
@@ -378,34 +351,27 @@ func (h *ArticleHandler) updateArticleState() gin.HandlerFunc {
 		}
 
 		if err := c.ShouldBindJSON(&input); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"code": server.ErrBadRequest, "message": err.Error()})
+			server.Fail(c, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		validStates := map[string]bool{"draft": true, "published": true, "archived": true}
 		if !validStates[input.State] {
-			c.JSON(http.StatusBadRequest, gin.H{"code": server.ErrBadRequest, "message": "invalid state, must be one of: draft, published, archived"})
+			server.Fail(c, server.ErrBadRequest, "invalid state, must be one of: draft, published, archived")
 			return
 		}
 
 		if err := h.uc.UpdateState(c.Request.Context(), id, input.State); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"code": server.ErrInternal, "message": err.Error()})
+			server.Fail(c, server.ErrInternal, err.Error())
 			return
 		}
 
 		article, err := h.uc.Get(c.Request.Context(), id)
 		if err != nil {
-			server.OK(c, gin.H{
-				"code":    0,
-				"message": "state updated",
-			})
+			server.OK(c, nil)
 			return
 		}
 
-		server.OK(c, gin.H{
-			"code":    0,
-			"message": "ok",
-			"data":    article,
-		})
+		server.OK(c, article)
 	}
 }

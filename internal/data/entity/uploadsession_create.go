@@ -224,30 +224,30 @@ func (_c *UploadSessionCreate) SetNillableExpiresAt(v *time.Time) *UploadSession
 	return _c
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_c *UploadSessionCreate) SetCreatedAt(v time.Time) *UploadSessionCreate {
-	_c.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_c *UploadSessionCreate) SetCreateTime(v time.Time) *UploadSessionCreate {
+	_c.mutation.SetCreateTime(v)
 	return _c
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *UploadSessionCreate) SetNillableCreatedAt(v *time.Time) *UploadSessionCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *UploadSessionCreate) SetNillableCreateTime(v *time.Time) *UploadSessionCreate {
 	if v != nil {
-		_c.SetCreatedAt(*v)
+		_c.SetCreateTime(*v)
 	}
 	return _c
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_c *UploadSessionCreate) SetUpdatedAt(v time.Time) *UploadSessionCreate {
-	_c.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_c *UploadSessionCreate) SetUpdateTime(v time.Time) *UploadSessionCreate {
+	_c.mutation.SetUpdateTime(v)
 	return _c
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *UploadSessionCreate) SetNillableUpdatedAt(v *time.Time) *UploadSessionCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (_c *UploadSessionCreate) SetNillableUpdateTime(v *time.Time) *UploadSessionCreate {
 	if v != nil {
-		_c.SetUpdatedAt(*v)
+		_c.SetUpdateTime(*v)
 	}
 	return _c
 }
@@ -303,13 +303,13 @@ func (_c *UploadSessionCreate) defaults() {
 		v := uploadsession.DefaultExpiresAt()
 		_c.mutation.SetExpiresAt(v)
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := uploadsession.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := uploadsession.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
 	}
-	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := uploadsession.DefaultUpdatedAt()
-		_c.mutation.SetUpdatedAt(v)
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		v := uploadsession.DefaultUpdateTime()
+		_c.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -394,11 +394,11 @@ func (_c *UploadSessionCreate) check() error {
 	if _, ok := _c.mutation.ExpiresAt(); !ok {
 		return &ValidationError{Name: "expires_at", err: errors.New(`entity: missing required field "UploadSession.expires_at"`)}
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "UploadSession.created_at"`)}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "UploadSession.create_time"`)}
 	}
-	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`entity: missing required field "UploadSession.updated_at"`)}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`entity: missing required field "UploadSession.update_time"`)}
 	}
 	return nil
 }
@@ -498,13 +498,13 @@ func (_c *UploadSessionCreate) createSpec() (*UploadSession, *sqlgraph.CreateSpe
 		_spec.SetField(uploadsession.FieldExpiresAt, field.TypeTime, value)
 		_node.ExpiresAt = value
 	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(uploadsession.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(uploadsession.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
 	}
-	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(uploadsession.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
+	if value, ok := _c.mutation.UpdateTime(); ok {
+		_spec.SetField(uploadsession.FieldUpdateTime, field.TypeTime, value)
+		_node.UpdateTime = value
 	}
 	return _node, _spec
 }

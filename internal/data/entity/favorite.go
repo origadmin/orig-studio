@@ -23,8 +23,10 @@ type Favorite struct {
 	MediaID string `json:"media_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
+	// PlaylistID holds the value of the "playlist_id" field.
+	PlaylistID string `json:"playlist_id,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FavoriteQuery when eager-loading is set.
 	Edges        FavoriteEdges `json:"edges"`
@@ -69,9 +71,9 @@ func (*Favorite) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case favorite.FieldID, favorite.FieldMediaID, favorite.FieldUserID:
+		case favorite.FieldID, favorite.FieldMediaID, favorite.FieldUserID, favorite.FieldPlaylistID:
 			values[i] = new(sql.NullString)
-		case favorite.FieldCreatedAt:
+		case favorite.FieldCreateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -106,11 +108,17 @@ func (_m *Favorite) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UserID = value.String
 			}
-		case favorite.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+		case favorite.FieldPlaylistID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field playlist_id", values[i])
 			} else if value.Valid {
-				_m.CreatedAt = value.Time
+				_m.PlaylistID = value.String
+			}
+		case favorite.FieldCreateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+			} else if value.Valid {
+				_m.CreateTime = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -164,8 +172,11 @@ func (_m *Favorite) String() string {
 	builder.WriteString("user_id=")
 	builder.WriteString(_m.UserID)
 	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString("playlist_id=")
+	builder.WriteString(_m.PlaylistID)
+	builder.WriteString(", ")
+	builder.WriteString("create_time=")
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

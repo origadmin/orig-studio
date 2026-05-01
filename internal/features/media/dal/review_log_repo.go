@@ -40,7 +40,7 @@ func (r *reviewLogRepo) Create(ctx context.Context, mediaID string, reviewerID s
 func (r *reviewLogRepo) ListByMedia(ctx context.Context, mediaID string) ([]*biz.ReviewLog, error) {
 	items, err := r.db.MediaReviewLog.Query().
 		Where(mediareviewlog.MediaIDEQ(mediaID)).
-		Order(entity.Desc(mediareviewlog.FieldCreatedAt)).
+		Order(entity.Desc(mediareviewlog.FieldCreateTime)).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list review logs: %w", err)
@@ -62,6 +62,6 @@ func convertReviewLog(m *entity.MediaReviewLog) *biz.ReviewLog {
 		Comment:        m.Comment,
 		PreviousStatus: m.PreviousStatus,
 		NewStatus:      m.NewStatus,
-		CreatedAt:      m.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		CreateTime:      m.CreateTime.Format("2006-01-02T15:04:05Z07:00"),
 	}
 }

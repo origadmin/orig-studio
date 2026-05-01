@@ -1,7 +1,8 @@
-﻿import React, {useState} from 'react';
+import React, {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from '@tanstack/react-router';
 import {Button} from '@/components/ui/button';
+import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {
     Settings,
     Upload,
@@ -20,6 +21,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {getImageUrl, handleImageError} from '@/lib/imageUtils';
 import SubscribeButton from './SubscribeButton';
 import NotificationBell from './NotificationBell';
 import type {ChannelDetail} from '@/lib/api/channel';
@@ -105,19 +107,16 @@ const ChannelHeader: React.FC<ChannelHeaderProps> = ({
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 sm:gap-6 -mt-10 sm:-mt-14 relative z-10 pb-4">
                     {/* Avatar - 120px on desktop, smaller on mobile */}
-                    <div className="w-20 h-20 sm:w-28 sm:h-28 md:w-[120px] md:h-[120px] rounded-full bg-background border-4 border-background overflow-hidden shadow-lg flex-shrink-0">
-                        {channel.avatar ? (
-                            <img
-                                src={channel.avatar}
-                                alt={channel.name}
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <div className="w-full h-full bg-muted flex items-center justify-center text-3xl sm:text-4xl md:text-5xl font-bold text-muted-foreground">
-                                {channel.name?.charAt(0)?.toUpperCase()}
-                            </div>
-                        )}
-                    </div>
+                    <Avatar className="w-20 h-20 sm:w-28 sm:h-28 md:w-[120px] md:h-[120px] border-4 border-background shadow-lg flex-shrink-0">
+                        <AvatarImage
+                            src={getImageUrl(channel.avatar, 'avatar')}
+                            alt={channel.name}
+                            onError={(e) => handleImageError(e, 'avatar')}
+                        />
+                        <AvatarFallback className="text-3xl sm:text-4xl md:text-5xl font-bold bg-muted text-muted-foreground">
+                            {channel.name?.charAt(0)?.toUpperCase() || '?'}
+                        </AvatarFallback>
+                    </Avatar>
 
                     {/* Channel Info */}
                     <div className="flex-1 pt-2 sm:pt-4 min-w-0">
@@ -151,7 +150,7 @@ const ChannelHeader: React.FC<ChannelHeaderProps> = ({
                         </div>
 
                         {/* Description - expandable */}
-                        {description && (
+                        {description ? (
                             <div className="text-sm text-muted-foreground">
                                 <p className={descriptionExpanded ? '' : 'line-clamp-2 max-w-2xl'}>
                                     {description}
@@ -182,7 +181,20 @@ const ChannelHeader: React.FC<ChannelHeaderProps> = ({
                                     </button>
                                 )}
                             </div>
-                        )}
+                        ) : isOwner ? (
+                            <button
+                                onClick={() =>
+                                    navigate({
+                                        to: '/u/$id',
+                                        params: {id: channel?.short_token || ''},
+                                        search: {tab: 'branding'},
+                                    })
+                                }
+                                className="text-sm text-muted-foreground/60 hover:text-primary transition-colors italic"
+                            >
+                                {t('channel.addDescription') || 'Add a description...'}
+                            </button>
+                        ) : null}
                     </div>
 
                     {/* Action Buttons */}

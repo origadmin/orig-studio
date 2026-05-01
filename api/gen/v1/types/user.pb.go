@@ -22,6 +22,65 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// UserStatus defines the lifecycle status of a User.
+type UserStatus int32
+
+const (
+	UserStatus_USER_STATUS_UNSPECIFIED UserStatus = 0
+	UserStatus_USER_STATUS_PENDING     UserStatus = 1
+	UserStatus_USER_STATUS_ACTIVE      UserStatus = 2
+	UserStatus_USER_STATUS_INACTIVE    UserStatus = 3
+	UserStatus_USER_STATUS_SUSPENDED   UserStatus = 4
+	UserStatus_USER_STATUS_REJECTED    UserStatus = 5
+)
+
+// Enum value maps for UserStatus.
+var (
+	UserStatus_name = map[int32]string{
+		0: "USER_STATUS_UNSPECIFIED",
+		1: "USER_STATUS_PENDING",
+		2: "USER_STATUS_ACTIVE",
+		3: "USER_STATUS_INACTIVE",
+		4: "USER_STATUS_SUSPENDED",
+		5: "USER_STATUS_REJECTED",
+	}
+	UserStatus_value = map[string]int32{
+		"USER_STATUS_UNSPECIFIED": 0,
+		"USER_STATUS_PENDING":     1,
+		"USER_STATUS_ACTIVE":      2,
+		"USER_STATUS_INACTIVE":    3,
+		"USER_STATUS_SUSPENDED":   4,
+		"USER_STATUS_REJECTED":    5,
+	}
+)
+
+func (x UserStatus) Enum() *UserStatus {
+	p := new(UserStatus)
+	*p = x
+	return p
+}
+
+func (x UserStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (UserStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_v1_types_user_proto_enumTypes[0].Descriptor()
+}
+
+func (UserStatus) Type() protoreflect.EnumType {
+	return &file_v1_types_user_proto_enumTypes[0]
+}
+
+func (x UserStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use UserStatus.Descriptor instead.
+func (UserStatus) EnumDescriptor() ([]byte, []int) {
+	return file_v1_types_user_proto_rawDescGZIP(), []int{0}
+}
+
 // UserProfile holds the profile information of a user.
 type UserProfile struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -178,57 +237,45 @@ func (x *UserSetting) GetPreferences() map[string]string {
 
 // User is the model entity for the User schema.
 type User struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the ent.
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// create_author.field.comment
-	CreateAuthor string `protobuf:"bytes,2,opt,name=create_author,proto3" json:"create_author,omitempty"`
-	// update_author.field.comment
-	UpdateAuthor string `protobuf:"bytes,3,opt,name=update_author,proto3" json:"update_author,omitempty"`
-	// create_time.field.comment
-	CreateTime *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=create_time,proto3" json:"create_time,omitempty"`
-	// update_time.field.comment
-	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=update_time,proto3" json:"update_time,omitempty"`
-	// user.field.uuid
-	Uuid string `protobuf:"bytes,6,opt,name=uuid,proto3" json:"uuid,omitempty"`
-	// user.field.username
-	Username string `protobuf:"bytes,7,opt,name=username,proto3" json:"username,omitempty"`
-	// user.field.nickname
-	Nickname string `protobuf:"bytes,8,opt,name=nickname,proto3" json:"nickname,omitempty"`
-	// user.field.password
-	Password string `protobuf:"bytes,9,opt,name=password,proto3" json:"password,omitempty"`
-	// user.field.phone
-	Phone string `protobuf:"bytes,10,opt,name=phone,proto3" json:"phone,omitempty"`
-	// user.field.email
-	Email string `protobuf:"bytes,11,opt,name=email,proto3" json:"email,omitempty"`
-	// user.field.avatar
-	Avatar string `protobuf:"bytes,12,opt,name=avatar,proto3" json:"avatar,omitempty"`
-	// user.field.status
-	Status int32 `protobuf:"varint,13,opt,name=status,proto3" json:"status,omitempty"`
-	// user.field.is_superuser
-	IsSuperuser bool `protobuf:"varint,14,opt,name=is_superuser,proto3" json:"is_superuser,omitempty"`
-	// user.field.is_staff
-	IsStaff bool `protobuf:"varint,15,opt,name=is_staff,proto3" json:"is_staff,omitempty"`
-	// user.field.is_active
-	IsActive bool `protobuf:"varint,16,opt,name=is_active,proto3" json:"is_active,omitempty"`
-	// user.field.last_login_ip
-	LastLoginIp string `protobuf:"bytes,17,opt,name=last_login_ip,proto3" json:"last_login_ip,omitempty"`
-	// user.field.login_ip
-	LoginIp string `protobuf:"bytes,18,opt,name=login_ip,proto3" json:"login_ip,omitempty"`
-	// user.field.last_login_time
-	LastLoginTime *timestamppb.Timestamp `protobuf:"bytes,19,opt,name=last_login_time,proto3" json:"last_login_time,omitempty"`
-	// user.field.login_time
-	LoginTime *timestamppb.Timestamp `protobuf:"bytes,20,opt,name=login_time,proto3" json:"login_time,omitempty"`
-	// user.field.slug — public identifier (separate from login username)
-	Slug string `protobuf:"bytes,21,opt,name=slug,proto3" json:"slug,omitempty"`
-	// The user's profile information.
-	Profile *UserProfile `protobuf:"bytes,50,opt,name=profile,proto3" json:"profile,omitempty"`
-	// The user's settings.
-	Setting *UserSetting `protobuf:"bytes,51,opt,name=setting,proto3" json:"setting,omitempty"`
-	// For responses: This field is populated with full role details.
-	Roles         []*Role `protobuf:"bytes,100,rep,name=roles,proto3" json:"roles,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"open.v1"`
+	Id                     string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreateAuthor           string                 `protobuf:"bytes,2,opt,name=create_author,proto3" json:"create_author,omitempty"`
+	UpdateAuthor           string                 `protobuf:"bytes,3,opt,name=update_author,proto3" json:"update_author,omitempty"`
+	CreateTime             *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	UpdateTime             *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=update_time,proto3" json:"update_time,omitempty"`
+	Username               string                 `protobuf:"bytes,7,opt,name=username,proto3" json:"username,omitempty"`
+	Nickname               string                 `protobuf:"bytes,8,opt,name=nickname,proto3" json:"nickname,omitempty"`
+	Password               string                 `protobuf:"bytes,9,opt,name=password,proto3" json:"password,omitempty"`
+	Phone                  string                 `protobuf:"bytes,10,opt,name=phone,proto3" json:"phone,omitempty"`
+	Email                  string                 `protobuf:"bytes,11,opt,name=email,proto3" json:"email,omitempty"`
+	Avatar                 string                 `protobuf:"bytes,12,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	Status                 UserStatus             `protobuf:"varint,13,opt,name=status,proto3,enum=api.v1.services.types.UserStatus" json:"status,omitempty"`
+	IsSuperuser            bool                   `protobuf:"varint,14,opt,name=is_superuser,proto3" json:"is_superuser,omitempty"`
+	IsStaff                bool                   `protobuf:"varint,15,opt,name=is_staff,proto3" json:"is_staff,omitempty"`
+	LastLoginIp            string                 `protobuf:"bytes,16,opt,name=last_login_ip,proto3" json:"last_login_ip,omitempty"`
+	LoginIp                string                 `protobuf:"bytes,17,opt,name=login_ip,proto3" json:"login_ip,omitempty"`
+	LastLoginTime          *timestamppb.Timestamp `protobuf:"bytes,18,opt,name=last_login_time,proto3" json:"last_login_time,omitempty"`
+	LoginTime              *timestamppb.Timestamp `protobuf:"bytes,19,opt,name=login_time,proto3" json:"login_time,omitempty"`
+	Slug                   string                 `protobuf:"bytes,20,opt,name=slug,proto3" json:"slug,omitempty"`
+	Name                   string                 `protobuf:"bytes,21,opt,name=name,proto3" json:"name,omitempty"`
+	Role                   string                 `protobuf:"bytes,22,opt,name=role,proto3" json:"role,omitempty"`
+	IsEditor               bool                   `protobuf:"varint,23,opt,name=is_editor,proto3" json:"is_editor,omitempty"`
+	IsManager              bool                   `protobuf:"varint,24,opt,name=is_manager,proto3" json:"is_manager,omitempty"`
+	Title                  string                 `protobuf:"bytes,25,opt,name=title,proto3" json:"title,omitempty"`
+	Description            string                 `protobuf:"bytes,26,opt,name=description,proto3" json:"description,omitempty"`
+	Logo                   string                 `protobuf:"bytes,27,opt,name=logo,proto3" json:"logo,omitempty"`
+	Location               string                 `protobuf:"bytes,28,opt,name=location,proto3" json:"location,omitempty"`
+	MediaCount             int32                  `protobuf:"varint,29,opt,name=media_count,proto3" json:"media_count,omitempty"`
+	NotificationOnComments bool                   `protobuf:"varint,30,opt,name=notification_on_comments,proto3" json:"notification_on_comments,omitempty"`
+	AllowContact           bool                   `protobuf:"varint,31,opt,name=allow_contact,proto3" json:"allow_contact,omitempty"`
+	DateJoined             *timestamppb.Timestamp `protobuf:"bytes,32,opt,name=date_joined,proto3" json:"date_joined,omitempty"`
+	DateAdded              *timestamppb.Timestamp `protobuf:"bytes,33,opt,name=date_added,proto3" json:"date_added,omitempty"`
+	LastLogin              *timestamppb.Timestamp `protobuf:"bytes,34,opt,name=last_login,proto3" json:"last_login,omitempty"`
+	Profile                *UserProfile           `protobuf:"bytes,50,opt,name=profile,proto3" json:"profile,omitempty"`
+	Setting                *UserSetting           `protobuf:"bytes,51,opt,name=setting,proto3" json:"setting,omitempty"`
+	Roles                  []*Role                `protobuf:"bytes,100,rep,name=roles,proto3" json:"roles,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *User) Reset() {
@@ -296,13 +343,6 @@ func (x *User) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *User) GetUuid() string {
-	if x != nil {
-		return x.Uuid
-	}
-	return ""
-}
-
 func (x *User) GetUsername() string {
 	if x != nil {
 		return x.Username
@@ -345,11 +385,11 @@ func (x *User) GetAvatar() string {
 	return ""
 }
 
-func (x *User) GetStatus() int32 {
+func (x *User) GetStatus() UserStatus {
 	if x != nil {
 		return x.Status
 	}
-	return 0
+	return UserStatus_USER_STATUS_UNSPECIFIED
 }
 
 func (x *User) GetIsSuperuser() bool {
@@ -362,13 +402,6 @@ func (x *User) GetIsSuperuser() bool {
 func (x *User) GetIsStaff() bool {
 	if x != nil {
 		return x.IsStaff
-	}
-	return false
-}
-
-func (x *User) GetIsActive() bool {
-	if x != nil {
-		return x.IsActive
 	}
 	return false
 }
@@ -408,6 +441,104 @@ func (x *User) GetSlug() string {
 	return ""
 }
 
+func (x *User) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *User) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *User) GetIsEditor() bool {
+	if x != nil {
+		return x.IsEditor
+	}
+	return false
+}
+
+func (x *User) GetIsManager() bool {
+	if x != nil {
+		return x.IsManager
+	}
+	return false
+}
+
+func (x *User) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *User) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *User) GetLogo() string {
+	if x != nil {
+		return x.Logo
+	}
+	return ""
+}
+
+func (x *User) GetLocation() string {
+	if x != nil {
+		return x.Location
+	}
+	return ""
+}
+
+func (x *User) GetMediaCount() int32 {
+	if x != nil {
+		return x.MediaCount
+	}
+	return 0
+}
+
+func (x *User) GetNotificationOnComments() bool {
+	if x != nil {
+		return x.NotificationOnComments
+	}
+	return false
+}
+
+func (x *User) GetAllowContact() bool {
+	if x != nil {
+		return x.AllowContact
+	}
+	return false
+}
+
+func (x *User) GetDateJoined() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DateJoined
+	}
+	return nil
+}
+
+func (x *User) GetDateAdded() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DateAdded
+	}
+	return nil
+}
+
+func (x *User) GetLastLogin() *timestamppb.Timestamp {
+	if x != nil {
+		return x.LastLogin
+	}
+	return nil
+}
+
 func (x *User) GetProfile() *UserProfile {
 	if x != nil {
 		return x.Profile
@@ -431,29 +562,18 @@ func (x *User) GetRoles() []*Role {
 
 // Role is the model entity for the Role schema.
 type Role struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the ent.
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// create_time.field.comment
-	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
-	// update_time.field.comment
-	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
-	// role.field.keyword
-	Keyword string `protobuf:"bytes,4,opt,name=keyword,proto3" json:"keyword,omitempty"`
-	// role.field.name
-	Name string `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
-	// role.field.description
-	Description string `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
-	// role.field.type
-	Type int32 `protobuf:"varint,7,opt,name=type,proto3" json:"type,omitempty"`
-	// role.field.sequence
-	Sequence int32 `protobuf:"varint,8,opt,name=sequence,proto3" json:"sequence,omitempty"`
-	// role.field.status
-	Status int32 `protobuf:"varint,9,opt,name=status,proto3" json:"status,omitempty"`
-	// For responses: This field is populated with full user details.
-	Users []*User `protobuf:"bytes,101,rep,name=users,proto3" json:"users,omitempty"`
-	// For responses: This field is populated with full permission details.
-	Permissions   []*Permission `protobuf:"bytes,102,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
+	Keyword       string                 `protobuf:"bytes,4,opt,name=keyword,proto3" json:"keyword,omitempty"`
+	Name          string                 `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
+	Type          int32                  `protobuf:"varint,7,opt,name=type,proto3" json:"type,omitempty"`
+	Sequence      int32                  `protobuf:"varint,8,opt,name=sequence,proto3" json:"sequence,omitempty"`
+	Status        int32                  `protobuf:"varint,9,opt,name=status,proto3" json:"status,omitempty"`
+	Users         []*User                `protobuf:"bytes,101,rep,name=users,proto3" json:"users,omitempty"`
+	Permissions   []*Permission          `protobuf:"bytes,102,rep,name=permissions,proto3" json:"permissions,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -567,31 +687,19 @@ func (x *Role) GetPermissions() []*Permission {
 
 // Permission is the model entity for the Permission schema.
 type Permission struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the ent.
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// create_time.field.comment
-	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
-	// update_time.field.comment
-	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
-	// permission.field.keyword
-	Keyword string `protobuf:"bytes,4,opt,name=keyword,proto3" json:"keyword,omitempty"`
-	// permission.field.name
-	Name string `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
-	// permission.field.description
-	Description string `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
-	// permission.field.type
-	Type string `protobuf:"bytes,7,opt,name=type,proto3" json:"type,omitempty"`
-	// permission.field.resource_type
-	ResourceType string `protobuf:"bytes,8,opt,name=resource_type,proto3" json:"resource_type,omitempty"`
-	// permission.field.action
-	Action string `protobuf:"bytes,9,opt,name=action,proto3" json:"action,omitempty"`
-	// permission.field.sequence
-	Sequence int32 `protobuf:"varint,10,opt,name=sequence,proto3" json:"sequence,omitempty"`
-	// permission.field.status
-	Status int32 `protobuf:"varint,11,opt,name=status,proto3" json:"status,omitempty"`
-	// permission.field.parent_id
-	ParentId      string `protobuf:"bytes,12,opt,name=parent_id,proto3" json:"parent_id,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
+	Keyword       string                 `protobuf:"bytes,4,opt,name=keyword,proto3" json:"keyword,omitempty"`
+	Name          string                 `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
+	Type          string                 `protobuf:"bytes,7,opt,name=type,proto3" json:"type,omitempty"`
+	ResourceType  string                 `protobuf:"bytes,8,opt,name=resource_type,proto3" json:"resource_type,omitempty"`
+	Action        string                 `protobuf:"bytes,9,opt,name=action,proto3" json:"action,omitempty"`
+	Sequence      int32                  `protobuf:"varint,10,opt,name=sequence,proto3" json:"sequence,omitempty"`
+	Status        int32                  `protobuf:"varint,11,opt,name=status,proto3" json:"status,omitempty"`
+	ParentId      string                 `protobuf:"bytes,12,opt,name=parent_id,proto3" json:"parent_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -712,13 +820,10 @@ func (x *Permission) GetParentId() string {
 
 // UserRole is the many-to-many relation between User and Role.
 type UserRole struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the ent.
-	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// user_role.field.user_id
-	UserId string `protobuf:"bytes,2,opt,name=user_id,proto3" json:"user_id,omitempty"`
-	// user_role.field.role_id
-	RoleId        string `protobuf:"bytes,3,opt,name=role_id,proto3" json:"role_id,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,proto3" json:"user_id,omitempty"`
+	RoleId        string                 `protobuf:"bytes,3,opt,name=role_id,proto3" json:"role_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -793,35 +898,53 @@ const file_v1_types_user_proto_rawDesc = "" +
 	"\vpreferences\x18\x04 \x03(\v23.api.v1.services.types.UserSetting.PreferencesEntryR\vpreferences\x1a>\n" +
 	"\x10PreferencesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x87\a\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x86\v\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12$\n" +
 	"\rcreate_author\x18\x02 \x01(\tR\rcreate_author\x12$\n" +
 	"\rupdate_author\x18\x03 \x01(\tR\rupdate_author\x12<\n" +
 	"\vcreate_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
-	"\vupdate_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\x12\x12\n" +
-	"\x04uuid\x18\x06 \x01(\tR\x04uuid\x12\x1a\n" +
+	"\vupdate_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\x12\x1a\n" +
 	"\busername\x18\a \x01(\tR\busername\x12\x1a\n" +
 	"\bnickname\x18\b \x01(\tR\bnickname\x12\x1a\n" +
 	"\bpassword\x18\t \x01(\tR\bpassword\x12\x14\n" +
 	"\x05phone\x18\n" +
 	" \x01(\tR\x05phone\x12\x14\n" +
 	"\x05email\x18\v \x01(\tR\x05email\x12\x16\n" +
-	"\x06avatar\x18\f \x01(\tR\x06avatar\x12\x16\n" +
-	"\x06status\x18\r \x01(\x05R\x06status\x12\"\n" +
+	"\x06avatar\x18\f \x01(\tR\x06avatar\x129\n" +
+	"\x06status\x18\r \x01(\x0e2!.api.v1.services.types.UserStatusR\x06status\x12\"\n" +
 	"\fis_superuser\x18\x0e \x01(\bR\fis_superuser\x12\x1a\n" +
-	"\bis_staff\x18\x0f \x01(\bR\bis_staff\x12\x1c\n" +
-	"\tis_active\x18\x10 \x01(\bR\tis_active\x12$\n" +
-	"\rlast_login_ip\x18\x11 \x01(\tR\rlast_login_ip\x12\x1a\n" +
-	"\blogin_ip\x18\x12 \x01(\tR\blogin_ip\x12D\n" +
-	"\x0flast_login_time\x18\x13 \x01(\v2\x1a.google.protobuf.TimestampR\x0flast_login_time\x12:\n" +
+	"\bis_staff\x18\x0f \x01(\bR\bis_staff\x12$\n" +
+	"\rlast_login_ip\x18\x10 \x01(\tR\rlast_login_ip\x12\x1a\n" +
+	"\blogin_ip\x18\x11 \x01(\tR\blogin_ip\x12D\n" +
+	"\x0flast_login_time\x18\x12 \x01(\v2\x1a.google.protobuf.TimestampR\x0flast_login_time\x12:\n" +
 	"\n" +
-	"login_time\x18\x14 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"login_time\x18\x13 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"login_time\x12\x12\n" +
-	"\x04slug\x18\x15 \x01(\tR\x04slug\x12<\n" +
+	"\x04slug\x18\x14 \x01(\tR\x04slug\x12\x12\n" +
+	"\x04name\x18\x15 \x01(\tR\x04name\x12\x12\n" +
+	"\x04role\x18\x16 \x01(\tR\x04role\x12\x1c\n" +
+	"\tis_editor\x18\x17 \x01(\bR\tis_editor\x12\x1e\n" +
+	"\n" +
+	"is_manager\x18\x18 \x01(\bR\n" +
+	"is_manager\x12\x14\n" +
+	"\x05title\x18\x19 \x01(\tR\x05title\x12 \n" +
+	"\vdescription\x18\x1a \x01(\tR\vdescription\x12\x12\n" +
+	"\x04logo\x18\x1b \x01(\tR\x04logo\x12\x1a\n" +
+	"\blocation\x18\x1c \x01(\tR\blocation\x12 \n" +
+	"\vmedia_count\x18\x1d \x01(\x05R\vmedia_count\x12:\n" +
+	"\x18notification_on_comments\x18\x1e \x01(\bR\x18notification_on_comments\x12$\n" +
+	"\rallow_contact\x18\x1f \x01(\bR\rallow_contact\x12<\n" +
+	"\vdate_joined\x18  \x01(\v2\x1a.google.protobuf.TimestampR\vdate_joined\x12:\n" +
+	"\n" +
+	"date_added\x18! \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"date_added\x12:\n" +
+	"\n" +
+	"last_login\x18\" \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"last_login\x12<\n" +
 	"\aprofile\x182 \x01(\v2\".api.v1.services.types.UserProfileR\aprofile\x12<\n" +
 	"\asetting\x183 \x01(\v2\".api.v1.services.types.UserSettingR\asetting\x121\n" +
-	"\x05roles\x18d \x03(\v2\x1b.api.v1.services.types.RoleR\x05roles\"\xa2\x03\n" +
+	"\x05roles\x18d \x03(\v2\x1b.api.v1.services.types.RoleR\x05rolesJ\x04\b\x06\x10\a\"\xa2\x03\n" +
 	"\x04Role\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
@@ -852,7 +975,15 @@ const file_v1_types_user_proto_rawDesc = "" +
 	"\bUserRole\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\auser_id\x18\x02 \x01(\tR\auser_id\x12\x18\n" +
-	"\arole_id\x18\x03 \x01(\tR\arole_idB\xd4\x01\n" +
+	"\arole_id\x18\x03 \x01(\tR\arole_id*\xa9\x01\n" +
+	"\n" +
+	"UserStatus\x12\x1b\n" +
+	"\x17USER_STATUS_UNSPECIFIED\x10\x00\x12\x17\n" +
+	"\x13USER_STATUS_PENDING\x10\x01\x12\x16\n" +
+	"\x12USER_STATUS_ACTIVE\x10\x02\x12\x18\n" +
+	"\x14USER_STATUS_INACTIVE\x10\x03\x12\x19\n" +
+	"\x15USER_STATUS_SUSPENDED\x10\x04\x12\x18\n" +
+	"\x14USER_STATUS_REJECTED\x10\x05B\xd4\x01\n" +
 	"\x19com.api.v1.services.typesB\tUserProtoP\x01Z4origadmin/application/origcms/api/gen/v1/types;types\xa2\x02\x04AVST\xaa\x02\x15Api.V1.Services.Types\xca\x02\x15Api\\V1\\Services\\Types\xe2\x02!Api\\V1\\Services\\Types\\GPBMetadata\xea\x02\x18Api::V1::Services::Typesb\x06proto3"
 
 var (
@@ -867,37 +998,43 @@ func file_v1_types_user_proto_rawDescGZIP() []byte {
 	return file_v1_types_user_proto_rawDescData
 }
 
+var file_v1_types_user_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_v1_types_user_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_v1_types_user_proto_goTypes = []any{
-	(*UserProfile)(nil),           // 0: api.v1.services.types.UserProfile
-	(*UserSetting)(nil),           // 1: api.v1.services.types.UserSetting
-	(*User)(nil),                  // 2: api.v1.services.types.User
-	(*Role)(nil),                  // 3: api.v1.services.types.Role
-	(*Permission)(nil),            // 4: api.v1.services.types.Permission
-	(*UserRole)(nil),              // 5: api.v1.services.types.UserRole
-	nil,                           // 6: api.v1.services.types.UserSetting.PreferencesEntry
-	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
+	(UserStatus)(0),               // 0: api.v1.services.types.UserStatus
+	(*UserProfile)(nil),           // 1: api.v1.services.types.UserProfile
+	(*UserSetting)(nil),           // 2: api.v1.services.types.UserSetting
+	(*User)(nil),                  // 3: api.v1.services.types.User
+	(*Role)(nil),                  // 4: api.v1.services.types.Role
+	(*Permission)(nil),            // 5: api.v1.services.types.Permission
+	(*UserRole)(nil),              // 6: api.v1.services.types.UserRole
+	nil,                           // 7: api.v1.services.types.UserSetting.PreferencesEntry
+	(*timestamppb.Timestamp)(nil), // 8: google.protobuf.Timestamp
 }
 var file_v1_types_user_proto_depIdxs = []int32{
-	6,  // 0: api.v1.services.types.UserSetting.preferences:type_name -> api.v1.services.types.UserSetting.PreferencesEntry
-	7,  // 1: api.v1.services.types.User.create_time:type_name -> google.protobuf.Timestamp
-	7,  // 2: api.v1.services.types.User.update_time:type_name -> google.protobuf.Timestamp
-	7,  // 3: api.v1.services.types.User.last_login_time:type_name -> google.protobuf.Timestamp
-	7,  // 4: api.v1.services.types.User.login_time:type_name -> google.protobuf.Timestamp
-	0,  // 5: api.v1.services.types.User.profile:type_name -> api.v1.services.types.UserProfile
-	1,  // 6: api.v1.services.types.User.setting:type_name -> api.v1.services.types.UserSetting
-	3,  // 7: api.v1.services.types.User.roles:type_name -> api.v1.services.types.Role
-	7,  // 8: api.v1.services.types.Role.create_time:type_name -> google.protobuf.Timestamp
-	7,  // 9: api.v1.services.types.Role.update_time:type_name -> google.protobuf.Timestamp
-	2,  // 10: api.v1.services.types.Role.users:type_name -> api.v1.services.types.User
-	4,  // 11: api.v1.services.types.Role.permissions:type_name -> api.v1.services.types.Permission
-	7,  // 12: api.v1.services.types.Permission.create_time:type_name -> google.protobuf.Timestamp
-	7,  // 13: api.v1.services.types.Permission.update_time:type_name -> google.protobuf.Timestamp
-	14, // [14:14] is the sub-list for method output_type
-	14, // [14:14] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	7,  // 0: api.v1.services.types.UserSetting.preferences:type_name -> api.v1.services.types.UserSetting.PreferencesEntry
+	8,  // 1: api.v1.services.types.User.create_time:type_name -> google.protobuf.Timestamp
+	8,  // 2: api.v1.services.types.User.update_time:type_name -> google.protobuf.Timestamp
+	0,  // 3: api.v1.services.types.User.status:type_name -> api.v1.services.types.UserStatus
+	8,  // 4: api.v1.services.types.User.last_login_time:type_name -> google.protobuf.Timestamp
+	8,  // 5: api.v1.services.types.User.login_time:type_name -> google.protobuf.Timestamp
+	8,  // 6: api.v1.services.types.User.date_joined:type_name -> google.protobuf.Timestamp
+	8,  // 7: api.v1.services.types.User.date_added:type_name -> google.protobuf.Timestamp
+	8,  // 8: api.v1.services.types.User.last_login:type_name -> google.protobuf.Timestamp
+	1,  // 9: api.v1.services.types.User.profile:type_name -> api.v1.services.types.UserProfile
+	2,  // 10: api.v1.services.types.User.setting:type_name -> api.v1.services.types.UserSetting
+	4,  // 11: api.v1.services.types.User.roles:type_name -> api.v1.services.types.Role
+	8,  // 12: api.v1.services.types.Role.create_time:type_name -> google.protobuf.Timestamp
+	8,  // 13: api.v1.services.types.Role.update_time:type_name -> google.protobuf.Timestamp
+	3,  // 14: api.v1.services.types.Role.users:type_name -> api.v1.services.types.User
+	5,  // 15: api.v1.services.types.Role.permissions:type_name -> api.v1.services.types.Permission
+	8,  // 16: api.v1.services.types.Permission.create_time:type_name -> google.protobuf.Timestamp
+	8,  // 17: api.v1.services.types.Permission.update_time:type_name -> google.protobuf.Timestamp
+	18, // [18:18] is the sub-list for method output_type
+	18, // [18:18] is the sub-list for method input_type
+	18, // [18:18] is the sub-list for extension type_name
+	18, // [18:18] is the sub-list for extension extendee
+	0,  // [0:18] is the sub-list for field type_name
 }
 
 func init() { file_v1_types_user_proto_init() }
@@ -910,13 +1047,14 @@ func file_v1_types_user_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_types_user_proto_rawDesc), len(file_v1_types_user_proto_rawDesc)),
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_v1_types_user_proto_goTypes,
 		DependencyIndexes: file_v1_types_user_proto_depIdxs,
+		EnumInfos:         file_v1_types_user_proto_enumTypes,
 		MessageInfos:      file_v1_types_user_proto_msgTypes,
 	}.Build()
 	File_v1_types_user_proto = out.File

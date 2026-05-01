@@ -126,12 +126,26 @@ const Settings: React.FC = () => {
 
     const fetchSettings = async () => {
         try {
-            const grouped = await settingsApi.get();
+            const raw = await settingsApi.get();
+            // Defensive: handle possible double-wrapped response from backend
+            // Backend may return {code, message, data: {general: [...], ...}} (double-wrapped)
+            // or {general: [...], ...} (correct format)
+            let grouped: GroupedSettings | null = null;
+            if (raw && typeof raw === 'object') {
+                // Check if double-wrapped: has 'code' and 'data' keys at top level
+                if ('code' in raw && 'data' in raw && typeof (raw as any).data === 'object') {
+                    grouped = (raw as any).data as GroupedSettings;
+                } else {
+                    grouped = raw as GroupedSettings;
+                }
+            }
+
             if (grouped) {
                 const getSettingValue = (key: string): string => {
-                    for (const category of Object.values(grouped)) {
-                        const items = category as SettingItem[];
-                        const found = items?.find(s => s.key === key);
+                    for (const category of Object.values(grouped!)) {
+                        // Defensive: ensure category is an array before calling .find()
+                        if (!Array.isArray(category)) continue;
+                        const found = category.find(s => s.key === key);
                         if (found) return found.value;
                     }
                     return '';

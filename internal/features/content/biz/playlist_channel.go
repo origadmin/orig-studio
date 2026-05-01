@@ -20,8 +20,8 @@ type Playlist struct {
 	ShortToken  string    `json:"short_token"`
 	UserID      string    `json:"user_id"`
 	IsPublic    bool      `json:"is_public"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	CreateTime   time.Time `json:"create_time"`
+	UpdateTime   time.Time `json:"update_time"`
 	MediaItems  []string  `json:"media_items,omitempty"`
 }
 
@@ -35,7 +35,7 @@ type Channel struct {
 	IsPublic    bool      `json:"is_public"`
 	IsDefault   bool      `json:"is_default"`
 	UserID      string    `json:"user_id"`
-	CreatedAt   time.Time `json:"created_at"`
+	CreateTime  time.Time `json:"create_time"`
 }
 
 // PlaylistRepo defines storage operations for playlists.
@@ -348,7 +348,7 @@ type SubscriptionVideoItem struct {
 	ChannelID      string    `json:"channel_id"`
 	UserID         string    `json:"user_id"`
 	EncodingStatus string    `json:"encoding_status"`
-	CreatedAt      time.Time `json:"created_at"`
+	CreateTime     time.Time `json:"create_time"`
 	PublishedAt    time.Time `json:"published_at"`
 }
 
@@ -359,8 +359,8 @@ type ChannelPlaylistItem struct {
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	UserID      string    `json:"user_id"`
-	Privacy     int       `json:"privacy"`
-	CreatedAt   time.Time `json:"created_at"`
+	Privacy     string    `json:"privacy"`
+	CreateTime  time.Time `json:"create_time"`
 }
 
 // GetSubscriptionVideos returns paginated videos from channels the user is subscribed to.

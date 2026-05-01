@@ -142,13 +142,13 @@ func (_c *CategoryCreate) SetNillableSequence(v *int) *CategoryCreate {
 }
 
 // SetStatus sets the "status" field.
-func (_c *CategoryCreate) SetStatus(v int) *CategoryCreate {
+func (_c *CategoryCreate) SetStatus(v category.Status) *CategoryCreate {
 	_c.mutation.SetStatus(v)
 	return _c
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_c *CategoryCreate) SetNillableStatus(v *int) *CategoryCreate {
+func (_c *CategoryCreate) SetNillableStatus(v *category.Status) *CategoryCreate {
 	if v != nil {
 		_c.SetStatus(*v)
 	}
@@ -225,30 +225,30 @@ func (_c *CategoryCreate) SetNillableUserID(v *string) *CategoryCreate {
 	return _c
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_c *CategoryCreate) SetCreatedAt(v time.Time) *CategoryCreate {
-	_c.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_c *CategoryCreate) SetCreateTime(v time.Time) *CategoryCreate {
+	_c.mutation.SetCreateTime(v)
 	return _c
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *CategoryCreate) SetNillableCreatedAt(v *time.Time) *CategoryCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *CategoryCreate) SetNillableCreateTime(v *time.Time) *CategoryCreate {
 	if v != nil {
-		_c.SetCreatedAt(*v)
+		_c.SetCreateTime(*v)
 	}
 	return _c
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (_c *CategoryCreate) SetUpdatedAt(v time.Time) *CategoryCreate {
-	_c.mutation.SetUpdatedAt(v)
+// SetUpdateTime sets the "update_time" field.
+func (_c *CategoryCreate) SetUpdateTime(v time.Time) *CategoryCreate {
+	_c.mutation.SetUpdateTime(v)
 	return _c
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *CategoryCreate) SetNillableUpdatedAt(v *time.Time) *CategoryCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (_c *CategoryCreate) SetNillableUpdateTime(v *time.Time) *CategoryCreate {
 	if v != nil {
-		_c.SetUpdatedAt(*v)
+		_c.SetUpdateTime(*v)
 	}
 	return _c
 }
@@ -369,13 +369,13 @@ func (_c *CategoryCreate) defaults() {
 		v := category.DefaultIsRbacCategory
 		_c.mutation.SetIsRbacCategory(v)
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := category.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := category.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
 	}
-	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := category.DefaultUpdatedAt()
-		_c.mutation.SetUpdatedAt(v)
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		v := category.DefaultUpdateTime()
+		_c.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -420,6 +420,11 @@ func (_c *CategoryCreate) check() error {
 	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`entity: missing required field "Category.status"`)}
 	}
+	if v, ok := _c.mutation.Status(); ok {
+		if err := category.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "Category.status": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.MediaCount(); !ok {
 		return &ValidationError{Name: "media_count", err: errors.New(`entity: missing required field "Category.media_count"`)}
 	}
@@ -429,11 +434,11 @@ func (_c *CategoryCreate) check() error {
 	if _, ok := _c.mutation.IsRbacCategory(); !ok {
 		return &ValidationError{Name: "is_rbac_category", err: errors.New(`entity: missing required field "Category.is_rbac_category"`)}
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "Category.created_at"`)}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "Category.create_time"`)}
 	}
-	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`entity: missing required field "Category.updated_at"`)}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`entity: missing required field "Category.update_time"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := category.IDValidator(v); err != nil {
@@ -505,7 +510,7 @@ func (_c *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 		_node.Sequence = value
 	}
 	if value, ok := _c.mutation.Status(); ok {
-		_spec.SetField(category.FieldStatus, field.TypeInt, value)
+		_spec.SetField(category.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
 	if value, ok := _c.mutation.MediaCount(); ok {
@@ -524,13 +529,13 @@ func (_c *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 		_spec.SetField(category.FieldIdentityProvider, field.TypeString, value)
 		_node.IdentityProvider = value
 	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(category.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(category.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
 	}
-	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(category.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
+	if value, ok := _c.mutation.UpdateTime(); ok {
+		_spec.SetField(category.FieldUpdateTime, field.TypeTime, value)
+		_node.UpdateTime = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

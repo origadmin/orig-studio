@@ -13,6 +13,12 @@ import {getImageUrl, handleImageError} from '@/lib/imageUtils';
 const VideoCard = ({video}: { video: MediaItem }) => {
     const isProcessing = video.encoding_status !== 'success';
 
+    // Resolve user info from edges.user (populated by normalizeMedia) or flat user field.
+    // Fallback to deprecated author_name/author_avatar for backward compatibility.
+    const edgeUser = video.edges?.user?.[0] || video.user;
+    const authorName = edgeUser?.nickname || edgeUser?.username || video.author_name || 'OrigAdmin Contributor';
+    const authorAvatar = edgeUser?.avatar || video.author_avatar;
+
     return (
         <div
             className="group cursor-pointer rounded-[2rem] bg-white border border-gray-100 hover:border-blue-100 transition-all overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 duration-500 ease-out">
@@ -65,8 +71,8 @@ const VideoCard = ({video}: { video: MediaItem }) => {
                     <div
                         className="w-10 h-10 rounded-2xl bg-blue-50 overflow-hidden ring-2 ring-white shadow-sm shrink-0 border border-blue-100 group-hover:rotate-6 transition-transform">
                         <img
-                            src={getImageUrl(video.author_avatar, 'avatar')}
-                            alt={video.author_name}
+                            src={getImageUrl(authorAvatar, 'avatar')}
+                            alt={authorName}
                             loading="lazy"
                             onError={(e) => handleImageError(e, 'avatar')}
                             className="object-cover w-full h-full"
@@ -74,7 +80,7 @@ const VideoCard = ({video}: { video: MediaItem }) => {
                     </div>
                     <div className="min-w-0 flex-1">
                         <p className="font-black text-slate-800 truncate hover:text-info transition-colors cursor-pointer text-sm">
-                            {video.author_name || 'OrigAdmin Contributor'}
+                            {authorName}
                         </p>
                         <div
                             className="flex items-center space-x-2 text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-0.5">
@@ -82,7 +88,7 @@ const VideoCard = ({video}: { video: MediaItem }) => {
                                                                            className="text-info"/> {formatViews(video.view_count)}</span>
                             <span>•</span>
                             <span className="flex items-center gap-1"><Calendar size={12}
-                                                                                className="text-info"/> {formatDate(video.create_time || video.created_at)}</span>
+                                                                                className="text-info"/> {formatDate(video.create_time)}</span>
                         </div>
                     </div>
                 </div>

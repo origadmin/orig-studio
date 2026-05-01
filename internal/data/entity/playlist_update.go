@@ -87,23 +87,16 @@ func (_u *PlaylistUpdate) SetNillableUserID(v *string) *PlaylistUpdate {
 }
 
 // SetPrivacy sets the "privacy" field.
-func (_u *PlaylistUpdate) SetPrivacy(v int) *PlaylistUpdate {
-	_u.mutation.ResetPrivacy()
+func (_u *PlaylistUpdate) SetPrivacy(v playlist.Privacy) *PlaylistUpdate {
 	_u.mutation.SetPrivacy(v)
 	return _u
 }
 
 // SetNillablePrivacy sets the "privacy" field if the given value is not nil.
-func (_u *PlaylistUpdate) SetNillablePrivacy(v *int) *PlaylistUpdate {
+func (_u *PlaylistUpdate) SetNillablePrivacy(v *playlist.Privacy) *PlaylistUpdate {
 	if v != nil {
 		_u.SetPrivacy(*v)
 	}
-	return _u
-}
-
-// AddPrivacy adds value to the "privacy" field.
-func (_u *PlaylistUpdate) AddPrivacy(v int) *PlaylistUpdate {
-	_u.mutation.AddPrivacy(v)
 	return _u
 }
 
@@ -118,6 +111,81 @@ func (_u *PlaylistUpdate) SetNillableAddDate(v *time.Time) *PlaylistUpdate {
 	if v != nil {
 		_u.SetAddDate(*v)
 	}
+	return _u
+}
+
+// SetStatus sets the "status" field.
+func (_u *PlaylistUpdate) SetStatus(v playlist.Status) *PlaylistUpdate {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *PlaylistUpdate) SetNillableStatus(v *playlist.Status) *PlaylistUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// SetThumbnail sets the "thumbnail" field.
+func (_u *PlaylistUpdate) SetThumbnail(v string) *PlaylistUpdate {
+	_u.mutation.SetThumbnail(v)
+	return _u
+}
+
+// SetNillableThumbnail sets the "thumbnail" field if the given value is not nil.
+func (_u *PlaylistUpdate) SetNillableThumbnail(v *string) *PlaylistUpdate {
+	if v != nil {
+		_u.SetThumbnail(*v)
+	}
+	return _u
+}
+
+// ClearThumbnail clears the value of the "thumbnail" field.
+func (_u *PlaylistUpdate) ClearThumbnail() *PlaylistUpdate {
+	_u.mutation.ClearThumbnail()
+	return _u
+}
+
+// SetMediaCount sets the "media_count" field.
+func (_u *PlaylistUpdate) SetMediaCount(v int) *PlaylistUpdate {
+	_u.mutation.ResetMediaCount()
+	_u.mutation.SetMediaCount(v)
+	return _u
+}
+
+// SetNillableMediaCount sets the "media_count" field if the given value is not nil.
+func (_u *PlaylistUpdate) SetNillableMediaCount(v *int) *PlaylistUpdate {
+	if v != nil {
+		_u.SetMediaCount(*v)
+	}
+	return _u
+}
+
+// AddMediaCount adds value to the "media_count" field.
+func (_u *PlaylistUpdate) AddMediaCount(v int) *PlaylistUpdate {
+	_u.mutation.AddMediaCount(v)
+	return _u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_u *PlaylistUpdate) SetCreateTime(v time.Time) *PlaylistUpdate {
+	_u.mutation.SetCreateTime(v)
+	return _u
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *PlaylistUpdate) SetNillableCreateTime(v *time.Time) *PlaylistUpdate {
+	if v != nil {
+		_u.SetCreateTime(*v)
+	}
+	return _u
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_u *PlaylistUpdate) SetUpdateTime(v time.Time) *PlaylistUpdate {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -164,6 +232,7 @@ func (_u *PlaylistUpdate) RemoveUser(v ...*User) *PlaylistUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *PlaylistUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -189,6 +258,14 @@ func (_u *PlaylistUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *PlaylistUpdate) defaults() {
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := playlist.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_u *PlaylistUpdate) check() error {
 	if v, ok := _u.mutation.Title(); ok {
@@ -199,6 +276,21 @@ func (_u *PlaylistUpdate) check() error {
 	if v, ok := _u.mutation.ShortToken(); ok {
 		if err := playlist.ShortTokenValidator(v); err != nil {
 			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Playlist.short_token": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Privacy(); ok {
+		if err := playlist.PrivacyValidator(v); err != nil {
+			return &ValidationError{Name: "privacy", err: fmt.Errorf(`entity: validator failed for field "Playlist.privacy": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := playlist.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "Playlist.status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Thumbnail(); ok {
+		if err := playlist.ThumbnailValidator(v); err != nil {
+			return &ValidationError{Name: "thumbnail", err: fmt.Errorf(`entity: validator failed for field "Playlist.thumbnail": %w`, err)}
 		}
 	}
 	return nil
@@ -235,13 +327,31 @@ func (_u *PlaylistUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.SetField(playlist.FieldUserID, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Privacy(); ok {
-		_spec.SetField(playlist.FieldPrivacy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedPrivacy(); ok {
-		_spec.AddField(playlist.FieldPrivacy, field.TypeInt, value)
+		_spec.SetField(playlist.FieldPrivacy, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.AddDate(); ok {
 		_spec.SetField(playlist.FieldAddDate, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(playlist.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.Thumbnail(); ok {
+		_spec.SetField(playlist.FieldThumbnail, field.TypeString, value)
+	}
+	if _u.mutation.ThumbnailCleared() {
+		_spec.ClearField(playlist.FieldThumbnail, field.TypeString)
+	}
+	if value, ok := _u.mutation.MediaCount(); ok {
+		_spec.SetField(playlist.FieldMediaCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMediaCount(); ok {
+		_spec.AddField(playlist.FieldMediaCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(playlist.FieldCreateTime, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(playlist.FieldUpdateTime, field.TypeTime, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -367,23 +477,16 @@ func (_u *PlaylistUpdateOne) SetNillableUserID(v *string) *PlaylistUpdateOne {
 }
 
 // SetPrivacy sets the "privacy" field.
-func (_u *PlaylistUpdateOne) SetPrivacy(v int) *PlaylistUpdateOne {
-	_u.mutation.ResetPrivacy()
+func (_u *PlaylistUpdateOne) SetPrivacy(v playlist.Privacy) *PlaylistUpdateOne {
 	_u.mutation.SetPrivacy(v)
 	return _u
 }
 
 // SetNillablePrivacy sets the "privacy" field if the given value is not nil.
-func (_u *PlaylistUpdateOne) SetNillablePrivacy(v *int) *PlaylistUpdateOne {
+func (_u *PlaylistUpdateOne) SetNillablePrivacy(v *playlist.Privacy) *PlaylistUpdateOne {
 	if v != nil {
 		_u.SetPrivacy(*v)
 	}
-	return _u
-}
-
-// AddPrivacy adds value to the "privacy" field.
-func (_u *PlaylistUpdateOne) AddPrivacy(v int) *PlaylistUpdateOne {
-	_u.mutation.AddPrivacy(v)
 	return _u
 }
 
@@ -398,6 +501,81 @@ func (_u *PlaylistUpdateOne) SetNillableAddDate(v *time.Time) *PlaylistUpdateOne
 	if v != nil {
 		_u.SetAddDate(*v)
 	}
+	return _u
+}
+
+// SetStatus sets the "status" field.
+func (_u *PlaylistUpdateOne) SetStatus(v playlist.Status) *PlaylistUpdateOne {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *PlaylistUpdateOne) SetNillableStatus(v *playlist.Status) *PlaylistUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// SetThumbnail sets the "thumbnail" field.
+func (_u *PlaylistUpdateOne) SetThumbnail(v string) *PlaylistUpdateOne {
+	_u.mutation.SetThumbnail(v)
+	return _u
+}
+
+// SetNillableThumbnail sets the "thumbnail" field if the given value is not nil.
+func (_u *PlaylistUpdateOne) SetNillableThumbnail(v *string) *PlaylistUpdateOne {
+	if v != nil {
+		_u.SetThumbnail(*v)
+	}
+	return _u
+}
+
+// ClearThumbnail clears the value of the "thumbnail" field.
+func (_u *PlaylistUpdateOne) ClearThumbnail() *PlaylistUpdateOne {
+	_u.mutation.ClearThumbnail()
+	return _u
+}
+
+// SetMediaCount sets the "media_count" field.
+func (_u *PlaylistUpdateOne) SetMediaCount(v int) *PlaylistUpdateOne {
+	_u.mutation.ResetMediaCount()
+	_u.mutation.SetMediaCount(v)
+	return _u
+}
+
+// SetNillableMediaCount sets the "media_count" field if the given value is not nil.
+func (_u *PlaylistUpdateOne) SetNillableMediaCount(v *int) *PlaylistUpdateOne {
+	if v != nil {
+		_u.SetMediaCount(*v)
+	}
+	return _u
+}
+
+// AddMediaCount adds value to the "media_count" field.
+func (_u *PlaylistUpdateOne) AddMediaCount(v int) *PlaylistUpdateOne {
+	_u.mutation.AddMediaCount(v)
+	return _u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_u *PlaylistUpdateOne) SetCreateTime(v time.Time) *PlaylistUpdateOne {
+	_u.mutation.SetCreateTime(v)
+	return _u
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *PlaylistUpdateOne) SetNillableCreateTime(v *time.Time) *PlaylistUpdateOne {
+	if v != nil {
+		_u.SetCreateTime(*v)
+	}
+	return _u
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_u *PlaylistUpdateOne) SetUpdateTime(v time.Time) *PlaylistUpdateOne {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -457,6 +635,7 @@ func (_u *PlaylistUpdateOne) Select(field string, fields ...string) *PlaylistUpd
 
 // Save executes the query and returns the updated Playlist entity.
 func (_u *PlaylistUpdateOne) Save(ctx context.Context) (*Playlist, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -482,6 +661,14 @@ func (_u *PlaylistUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *PlaylistUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := playlist.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_u *PlaylistUpdateOne) check() error {
 	if v, ok := _u.mutation.Title(); ok {
@@ -492,6 +679,21 @@ func (_u *PlaylistUpdateOne) check() error {
 	if v, ok := _u.mutation.ShortToken(); ok {
 		if err := playlist.ShortTokenValidator(v); err != nil {
 			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Playlist.short_token": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Privacy(); ok {
+		if err := playlist.PrivacyValidator(v); err != nil {
+			return &ValidationError{Name: "privacy", err: fmt.Errorf(`entity: validator failed for field "Playlist.privacy": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := playlist.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "Playlist.status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Thumbnail(); ok {
+		if err := playlist.ThumbnailValidator(v); err != nil {
+			return &ValidationError{Name: "thumbnail", err: fmt.Errorf(`entity: validator failed for field "Playlist.thumbnail": %w`, err)}
 		}
 	}
 	return nil
@@ -545,13 +747,31 @@ func (_u *PlaylistUpdateOne) sqlSave(ctx context.Context) (_node *Playlist, err 
 		_spec.SetField(playlist.FieldUserID, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Privacy(); ok {
-		_spec.SetField(playlist.FieldPrivacy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedPrivacy(); ok {
-		_spec.AddField(playlist.FieldPrivacy, field.TypeInt, value)
+		_spec.SetField(playlist.FieldPrivacy, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.AddDate(); ok {
 		_spec.SetField(playlist.FieldAddDate, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(playlist.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.Thumbnail(); ok {
+		_spec.SetField(playlist.FieldThumbnail, field.TypeString, value)
+	}
+	if _u.mutation.ThumbnailCleared() {
+		_spec.ClearField(playlist.FieldThumbnail, field.TypeString)
+	}
+	if value, ok := _u.mutation.MediaCount(); ok {
+		_spec.SetField(playlist.FieldMediaCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMediaCount(); ok {
+		_spec.AddField(playlist.FieldMediaCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(playlist.FieldCreateTime, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(playlist.FieldUpdateTime, field.TypeTime, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

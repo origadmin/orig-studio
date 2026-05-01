@@ -41,10 +41,11 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {MoreHorizontal, Plus, Search, Edit, Trash2, Eye, UserPlus, Users, Filter, Loader2, RotateCcw} from 'lucide-react';
+import {formatDateTime} from '@/lib/format';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {adminApi, Channel} from '@/lib/api/admin';
 import {TablePagination} from '@/components/common/TablePagination';
-import {PAGINATION} from '@/config/pagination';
+import {usePagination} from '@/hooks/usePagination';
 
 const Channels: React.FC = () => {
     const {t} = useTranslation();
@@ -53,9 +54,7 @@ const Channels: React.FC = () => {
     const [channels, setChannels] = useState<Channel[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [page, setPage] = useState(1);
-    const [pageSize] = useState(PAGINATION.DEFAULT_PAGE_SIZE);
-    const [total, setTotal] = useState(0);
+    const {page, pageSize, total, setPage, setTotal, getParams} = usePagination();
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -76,7 +75,7 @@ const Channels: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await adminApi.getChannels({page, page_size: pageSize});
+            const response = await adminApi.getChannels(getParams());
             const channelList = Array.isArray(response?.items) ? response.items : [];
             setChannels(channelList);
             if (response?.total !== undefined) {
@@ -419,7 +418,7 @@ const Channels: React.FC = () => {
                                         </TableCell>
                                         <TableCell>{getStatusBadge(channel.status)}</TableCell>
                                         <TableCell className="text-muted-foreground">
-                                            {new Date(channel.created_at || channel.create_time).toLocaleDateString()}
+                                            {formatDateTime(channel.create_time)}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>

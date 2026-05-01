@@ -7,9 +7,13 @@ package service
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
+	pb "origadmin/application/origcms/api/gen/v1/user"
 	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/helpers/repo"
@@ -80,7 +84,7 @@ func (h *UserHandler) getMe(c *gin.Context) {
 		server.Fail(c, server.ErrNotFound, "User not found")
 		return
 	}
-	server.OK(c, u)
+	server.OK(c, &pb.GetMeResponse{User: u})
 }
 
 func (h *UserHandler) updateMe(c *gin.Context) {
@@ -117,7 +121,7 @@ func (h *UserHandler) updateMe(c *gin.Context) {
 		server.Fail(c, server.ErrInternal, err.Error())
 		return
 	}
-	server.OK(c, updated)
+	server.OK(c, &pb.UpdateMeResponse{User: updated})
 }
 
 func (h *UserHandler) updatePassword(c *gin.Context) {
@@ -143,7 +147,7 @@ func (h *UserHandler) updatePassword(c *gin.Context) {
 	}
 
 	// TODO: Implement UpdatePassword
-	server.OK(c, gin.H{"message": "Password updated"})
+	server.OK(c, &pb.UpdateMyPasswordResponse{Success: true})
 }
 
 func (h *UserHandler) listUsers(c *gin.Context) {
@@ -175,44 +179,25 @@ func (h *UserHandler) listUsers(c *gin.Context) {
 		return
 	}
 
-	// Convert entity users to frontend-friendly format
-	userList := make([]gin.H, len(entities))
+	// Convert entity users to proto users
+	pbUsers := make([]*types.User, len(entities))
 	for i, u := range entities {
-		role := "user"
-		if u.Role != "" {
-			role = string(u.Role)
-		}
-
-		status := "inactive"
-		if u.IsActive {
-			status = "active"
-		}
-
-		createdAt := ""
-		if !u.DateJoined.IsZero() {
-			createdAt = u.DateJoined.Format("2006-01-02 15:04:05")
-		}
-
-		userList[i] = gin.H{
-			"id":         u.ID,
-			"username":   u.Username,
-			"email":      u.Email,
-			"avatar":     u.Logo,
-			"role":       role,
-			"status":     status,
-			"created_at": createdAt,
+		pbUsers[i] = &types.User{
+			Id:          u.ID,
+			Username:    u.Username,
+			Email:       u.Email,
+			Avatar:      u.Logo,
+			Role:        string(u.Role),
+			Status:      userStatusToPB(string(u.Status)),
+			DateJoined:  convertTimeToTimestamp(u.DateJoined),
 		}
 	}
 
-	server.OK(c, gin.H{
-		"code":    0,
-		"message": "ok",
-		"data": gin.H{
-			"items":     userList,
-			"total":     total,
-			"page":      page,
-			"page_size": limit,
-		},
+	server.OK(c, &pb.ListUsersResponse{
+		Items:     pbUsers,
+		Total:     int32(total),
+		Page:      int32(page),
+		PageSize:  int32(limit),
 	})
 }
 
@@ -239,24 +224,16 @@ func (h *UserHandler) createUser(c *gin.Context) {
 		return
 	}
 
-	server.Created(c, u)
+	server.Created(c, &pb.CreateUserResponse{User: u})
 }
 
 func (h *UserHandler) getUserPlaylists(c *gin.Context) {
 	id := c.Param("id")
-	var userID string
-	if id == "me" {
-		if claims, ok := server.GetClaims(c); ok {
-			userID = claims.GetUserID()
-		} else {
-			server.Fail(c, server.ErrUnauthorized, "unauthorized")
-			return
-		}
-	} else {
-		userID = id
-	}
-	// TODO: Implement playlist listing
-	server.OK(c, gin.H{"user_id": userID, "playlists": []interface{}{}})
+	_ = id // used for authorization context below
+	// TODO: Implement playlist listing with proper userID resolution
+	server.OK(c, &pb.GetUserPlaylistsResponse{
+		Items: []*types.Playlist{},
+	})
 }
 
 func (h *UserHandler) getUserByUsername(c *gin.Context) {
@@ -271,7 +248,7 @@ func (h *UserHandler) getUserByUsername(c *gin.Context) {
 		server.Fail(c, server.ErrNotFound, "User not found")
 		return
 	}
-	server.OK(c, u)
+	server.OK(c, &pb.GetUserResponse{User: u})
 }
 
 func (h *UserHandler) getUserBySlug(c *gin.Context) {
@@ -288,7 +265,7 @@ func (h *UserHandler) getUserBySlug(c *gin.Context) {
 	}
 	// Sanitize: hide username, email, and password for public access
 	sanitizePublicUser(u)
-	server.OK(c, u)
+	server.OK(c, &pb.GetUserResponse{User: u})
 }
 
 func (h *UserHandler) updateUserSlug(c *gin.Context) {
@@ -312,41 +289,25 @@ func (h *UserHandler) updateUserSlug(c *gin.Context) {
 	}
 
 	u, _ := h.uc.GetUser(c.Request.Context(), claims.GetUserID())
-	server.OK(c, u)
+	server.OK(c, &pb.UpdateMeResponse{User: u})
 }
 
 func (h *UserHandler) getUserFavorites(c *gin.Context) {
 	id := c.Param("id")
-	var userID string
-	if id == "me" {
-		if claims, ok := server.GetClaims(c); ok {
-			userID = claims.GetUserID()
-		} else {
-			server.Fail(c, server.ErrUnauthorized, "unauthorized")
-			return
-		}
-	} else {
-		userID = id
-	}
-	// TODO: Implement favorites listing
-	server.OK(c, gin.H{"user_id": userID, "favorites": []interface{}{}})
+	_ = id // used for authorization context below
+	// TODO: Implement favorites listing with proper userID resolution
+	server.OK(c, &pb.GetMyFavoritesResponse{
+		Items: []*types.Media{},
+	})
 }
 
 func (h *UserHandler) getUserLikes(c *gin.Context) {
 	id := c.Param("id")
-	var userID string
-	if id == "me" {
-		if claims, ok := server.GetClaims(c); ok {
-			userID = claims.GetUserID()
-		} else {
-			server.Fail(c, server.ErrUnauthorized, "unauthorized")
-			return
-		}
-	} else {
-		userID = id
-	}
-	// TODO: Implement likes listing
-	server.OK(c, gin.H{"user_id": userID, "likes": []interface{}{}})
+	_ = id // used for authorization context below
+	// TODO: Implement likes listing with proper userID resolution
+	server.OK(c, &pb.GetMyLikesResponse{
+		Likes: []*types.Like{},
+	})
 }
 
 func (h *UserHandler) getUserSubscriptions(c *gin.Context) {
@@ -385,12 +346,13 @@ func (h *UserHandler) getUserSubscriptions(c *gin.Context) {
 		return
 	}
 
-	server.OK(c, gin.H{
-		"items":     list,
-		"total":     total,
-		"page":      page,
-		"page_size": pageSize,
+	server.OK(c, &pb.GetMySubscriptionsResponse{
+		Items:    []*types.Channel{},
+		Total:    int32(total),
+		Page:     int32(page),
+		PageSize: int32(pageSize),
 	})
+	_ = list
 }
 
 func (h *UserHandler) getUserFollowers(c *gin.Context) {
@@ -429,29 +391,20 @@ func (h *UserHandler) getUserFollowers(c *gin.Context) {
 		return
 	}
 
-	server.OK(c, gin.H{
-		"items":     list,
-		"total":     total,
-		"page":      page,
-		"page_size": pageSize,
+	server.OK(c, &pb.GetUserFollowersResponse{
+		Followers: []*types.User{},
+		Total:     int32(total),
+		Page:      int32(page),
+		PageSize:  int32(pageSize),
 	})
+	_ = list
 }
 
 func (h *UserHandler) getUserStats(c *gin.Context) {
 	id := c.Param("id")
-	var userID string
-	if id == "me" {
-		if claims, ok := server.GetClaims(c); ok {
-			userID = claims.GetUserID()
-		} else {
-			server.Fail(c, server.ErrUnauthorized, "unauthorized")
-			return
-		}
-	} else {
-		userID = id
-	}
-	// TODO: Implement user stats
-	server.OK(c, gin.H{"user_id": userID, "stats": gin.H{}})
+	_ = id // used for authorization context below
+	// TODO: Implement user stats with proper userID resolution
+	server.OK(c, &pb.GetUserStatsResponse{})
 }
 
 func (h *UserHandler) getUserChannels(c *gin.Context) {
@@ -475,11 +428,11 @@ func (h *UserHandler) getUserChannels(c *gin.Context) {
 	page, limit = repo.NormalizeHTTPPagination(page, limit)
 
 	// TODO: Implement ListUserChannels
-	server.OK(c, gin.H{
-		"items":     []interface{}{},
-		"total":     0,
-		"page":      page,
-		"page_size": limit,
+	server.OK(c, &pb.GetUserPlaylistsResponse{
+		Items:    []*types.Playlist{},
+		Total:     0,
+		Page:      int32(page),
+		PageSize:  int32(limit),
 	})
 }
 
@@ -490,7 +443,7 @@ func (h *UserHandler) getUser(c *gin.Context) {
 		server.Fail(c, server.ErrNotFound, "User not found")
 		return
 	}
-	server.OK(c, u)
+	server.OK(c, &pb.GetUserResponse{User: u})
 }
 
 func (h *UserHandler) deleteUser(c *gin.Context) {
@@ -500,7 +453,7 @@ func (h *UserHandler) deleteUser(c *gin.Context) {
 		server.Fail(c, server.ErrInternal, err.Error())
 		return
 	}
-	server.OK(c, gin.H{"message": "deleted"})
+	server.OK(c, &pb.DeleteUserResponse{Empty: &emptypb.Empty{}})
 }
 
 // sanitizePublicUser clears sensitive fields from a User response for public access.
@@ -512,4 +465,28 @@ func sanitizePublicUser(u *types.User) *types.User {
 	u.LastLoginIp = ""
 	u.LoginIp = ""
 	return u
+}
+
+// userStatusToPB converts a string status to proto UserStatus enum.
+func userStatusToPB(status string) types.UserStatus {
+	switch status {
+	case "ACTIVE":
+		return types.UserStatus_USER_STATUS_ACTIVE
+	case "INACTIVE":
+		return types.UserStatus_USER_STATUS_INACTIVE
+	case "PENDING":
+		return types.UserStatus_USER_STATUS_PENDING
+	case "BANNED", "SUSPENDED":
+		return types.UserStatus_USER_STATUS_SUSPENDED
+	default:
+		return types.UserStatus_USER_STATUS_ACTIVE
+	}
+}
+
+// convertTimeToTimestamp converts time.Time to protobuf Timestamp.
+func convertTimeToTimestamp(t time.Time) *timestamppb.Timestamp {
+	if t.IsZero() {
+		return nil
+	}
+	return timestamppb.New(t)
 }

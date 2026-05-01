@@ -3,6 +3,9 @@
 package tag
 
 import (
+	"fmt"
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -20,6 +23,16 @@ const (
 	FieldMediaCount = "media_count"
 	// FieldListingsThumbnail holds the string denoting the listings_thumbnail field in the database.
 	FieldListingsThumbnail = "listings_thumbnail"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
+	// FieldColor holds the string denoting the color field in the database.
+	FieldColor = "color"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
+	// FieldUpdateTime holds the string denoting the update_time field in the database.
+	FieldUpdateTime = "update_time"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the tag in the database.
@@ -38,6 +51,11 @@ var Columns = []string{
 	FieldSlug,
 	FieldMediaCount,
 	FieldListingsThumbnail,
+	FieldStatus,
+	FieldDescription,
+	FieldColor,
+	FieldCreateTime,
+	FieldUpdateTime,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "content_tags"
@@ -74,9 +92,47 @@ var (
 	SlugValidator func(string) error
 	// DefaultMediaCount holds the default value on creation for the "media_count" field.
 	DefaultMediaCount int
+	// DefaultListingsThumbnail holds the default value on creation for the "listings_thumbnail" field.
+	DefaultListingsThumbnail string
 	// ListingsThumbnailValidator is a validator for the "listings_thumbnail" field. It is called by the builders before save.
 	ListingsThumbnailValidator func(string) error
+	// DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	DescriptionValidator func(string) error
+	// ColorValidator is a validator for the "color" field. It is called by the builders before save.
+	ColorValidator func(string) error
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
+	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
+	DefaultUpdateTime func() time.Time
+	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
+	UpdateDefaultUpdateTime func() time.Time
 )
+
+// Status defines the type for the "status" enum field.
+type Status string
+
+// StatusACTIVE is the default value of the Status enum.
+const DefaultStatus = StatusACTIVE
+
+// Status values.
+const (
+	StatusACTIVE   Status = "ACTIVE"
+	StatusINACTIVE Status = "INACTIVE"
+)
+
+func (s Status) String() string {
+	return string(s)
+}
+
+// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
+func StatusValidator(s Status) error {
+	switch s {
+	case StatusACTIVE, StatusINACTIVE:
+		return nil
+	default:
+		return fmt.Errorf("tag: invalid enum value for status field: %q", s)
+	}
+}
 
 // OrderOption defines the ordering options for the Tag queries.
 type OrderOption func(*sql.Selector)
@@ -104,6 +160,31 @@ func ByMediaCount(opts ...sql.OrderTermOption) OrderOption {
 // ByListingsThumbnail orders the results by the listings_thumbnail field.
 func ByListingsThumbnail(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldListingsThumbnail, opts...).ToFunc()
+}
+
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByColor orders the results by the color field.
+func ByColor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldColor, opts...).ToFunc()
+}
+
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
+}
+
+// ByUpdateTime orders the results by the update_time field.
+func ByUpdateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdateTime, opts...).ToFunc()
 }
 
 // ByUserCount orders the results by user count.

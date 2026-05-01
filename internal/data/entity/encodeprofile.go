@@ -37,10 +37,10 @@ type EncodeProfile struct {
 	BentoParameters string `json:"bento_parameters,omitempty"`
 	// IsActive holds the value of the "is_active" field.
 	IsActive bool `json:"is_active,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt    time.Time `json:"updated_at,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime   time.Time `json:"update_time,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -55,7 +55,7 @@ func (*EncodeProfile) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case encodeprofile.FieldName, encodeprofile.FieldDescription, encodeprofile.FieldExtension, encodeprofile.FieldResolution, encodeprofile.FieldVideoCodec, encodeprofile.FieldVideoBitrate, encodeprofile.FieldAudioCodec, encodeprofile.FieldAudioBitrate, encodeprofile.FieldBentoParameters:
 			values[i] = new(sql.NullString)
-		case encodeprofile.FieldCreatedAt, encodeprofile.FieldUpdatedAt:
+		case encodeprofile.FieldCreateTime, encodeprofile.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -138,17 +138,17 @@ func (_m *EncodeProfile) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.IsActive = value.Bool
 			}
-		case encodeprofile.FieldCreatedAt:
+		case encodeprofile.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				_m.CreatedAt = value.Time
+				_m.CreateTime = value.Time
 			}
-		case encodeprofile.FieldUpdatedAt:
+		case encodeprofile.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				_m.UpdatedAt = value.Time
+				_m.UpdateTime = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -216,11 +216,11 @@ func (_m *EncodeProfile) String() string {
 	builder.WriteString("is_active=")
 	builder.WriteString(fmt.Sprintf("%v", _m.IsActive))
 	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString("create_time=")
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString("update_time=")
+	builder.WriteString(_m.UpdateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

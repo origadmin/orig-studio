@@ -37,7 +37,7 @@ type NotificationListResponse struct {
 	PageSize    int           `json:"page_size"`
 }
 
-// PageData is the standard pagination data wrapper used by OKPage.
+// PageData is the standard pagination data wrapper used by Page.
 type PageData struct {
 	Items    interface{} `json:"items"`
 	Total    int64       `json:"total"`
@@ -45,28 +45,66 @@ type PageData struct {
 	PageSize int         `json:"page_size"`
 }
 
-// OK returns a success response with HTTP 200.
-func OK(c *gin.Context, data interface{}) {
-	c.JSON(http.StatusOK, Response[interface{}]{Code: 0, Message: "ok", Data: data})
+// protojsonMarshaler is the shared protojson marshaler for consistent serialization.
+var protojsonMarshaler = protojson.MarshalOptions{
+	EmitUnpopulated: true,
+	UseProtoNames:   true,
 }
 
-// OKPage returns a paginated success response with HTTP 200.
-func OKPage(c *gin.Context, items interface{}, total int64, page, pageSize int) {
-	c.JSON(http.StatusOK, Response[interface{}]{
-		Code:    0,
-		Message: "ok",
-		Data: PageData{
+// writeProtoResponse writes a proto.Message as a unified JSON response with the given HTTP status.
+func writeProtoResponse(c *gin.Context, statusCode int, data proto.Message) {
+	b, err := protojsonMarshaler.Marshal(data)
+	if err != nil {
+		Fail(c, ErrInternal, "internal error")
+		return
+	}
+	resp := fmt.Sprintf(`{"code":0,"message":"ok","data":%s}`, string(b))
+	c.Data(statusCode, "application/json; charset=utf-8", []byte(resp))
+}
+
+// writeJSONResponse writes a non-proto data as a unified JSON response with the given HTTP status.
+func writeJSONResponse(c *gin.Context, statusCode int, data interface{}) {
+	c.JSON(statusCode, Response[interface{}]{Code: 0, Message: "ok", Data: data})
+}
+
+// OK returns a success response with HTTP 200.
+// It automatically detects the data type: if data implements proto.Message,
+// protojson serialization is used (ensuring correct field names and timestamp formats);
+// otherwise, standard encoding/json is used via Gin's JSON renderer.
+func OK(c *gin.Context, data interface{}) {
+	if msg, ok := data.(proto.Message); ok {
+		writeProtoResponse(c, http.StatusOK, msg)
+	} else {
+		writeJSONResponse(c, http.StatusOK, data)
+	}
+}
+
+// Page returns a paginated success response with HTTP 200.
+// Like OK, it automatically detects proto.Message for correct serialization.
+// For proto messages (typically ListXxxResponse), pagination metadata is part of
+// the Proto Response message itself, so the data is serialized directly.
+// For non-proto data, the items are wrapped in a standard PageData structure.
+func Page(c *gin.Context, items interface{}, total int64, page, pageSize int) {
+	if msg, ok := items.(proto.Message); ok {
+		writeProtoResponse(c, http.StatusOK, msg)
+	} else {
+		writeJSONResponse(c, http.StatusOK, PageData{
 			Items:    items,
 			Total:    total,
 			Page:     page,
 			PageSize: pageSize,
-		},
-	})
+		})
+	}
 }
 
 // Created returns a success response with HTTP 201 for resource creation.
+// It automatically detects proto.Message for correct serialization.
 func Created(c *gin.Context, data interface{}) {
-	c.JSON(http.StatusCreated, Response[interface{}]{Code: 0, Message: "ok", Data: data})
+	if msg, ok := data.(proto.Message); ok {
+		writeProtoResponse(c, http.StatusCreated, msg)
+	} else {
+		c.JSON(http.StatusCreated, Response[interface{}]{Code: 0, Message: "ok", Data: data})
+	}
 }
 
 // Fail returns a failure response with the appropriate HTTP status code.
@@ -80,22 +118,39 @@ func FailAbort(c *gin.Context, code int, message string) {
 	c.AbortWithStatusJSON(getHTTPStatus(code), Response[interface{}]{Code: code, Message: message})
 }
 
-// protojsonMarshaler is the shared protojson marshaler for consistent serialization.
-var protojsonMarshaler = protojson.MarshalOptions{
-	EmitUnpopulated: true,
-	UseProtoNames:   true,
+// ---------------------------------------------------------------------------
+// Deprecated aliases — kept for backward compatibility, will be removed later.
+// ---------------------------------------------------------------------------
+
+// ProtoOK is a deprecated alias for OK.
+// OK now auto-detects proto.Message, so ProtoOK is no longer needed.
+//
+// Deprecated: Use OK instead.
+func ProtoOK(c *gin.Context, data proto.Message) {
+	writeProtoResponse(c, http.StatusOK, data)
 }
 
-// ProtoOK returns a success response with protojson serialization for proto.Message types.
-// This ensures timestamppb and other proto types are serialized correctly.
-func ProtoOK(c *gin.Context, data proto.Message) {
-	b, err := protojsonMarshaler.Marshal(data)
-	if err != nil {
-		Fail(c, ErrInternal, "internal error")
-		return
-	}
-	resp := fmt.Sprintf(`{"code":0,"message":"ok","data":%s}`, string(b))
-	c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(resp))
+// ProtoOKPage is a deprecated alias for Page.
+// Page now auto-detects proto.Message, so ProtoOKPage is no longer needed.
+//
+// Deprecated: Use Page instead.
+func ProtoOKPage(c *gin.Context, data proto.Message) {
+	writeProtoResponse(c, http.StatusOK, data)
+}
+
+// ProtoCreated is a deprecated alias for Created.
+// Created now auto-detects proto.Message, so ProtoCreated is no longer needed.
+//
+// Deprecated: Use Created instead.
+func ProtoCreated(c *gin.Context, data proto.Message) {
+	writeProtoResponse(c, http.StatusCreated, data)
+}
+
+// OKPage is a deprecated alias for Page.
+//
+// Deprecated: Use Page instead.
+func OKPage(c *gin.Context, items interface{}, total int64, page, pageSize int) {
+	Page(c, items, total, page, pageSize)
 }
 
 // getHTTPStatus maps application error codes to HTTP status codes.

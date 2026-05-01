@@ -72,7 +72,7 @@ func (s *MediaService) ListMedias(
 		return nil, err
 	}
 	return &media.ListMediasResponse{
-		Medias:   items,
+		Items:    items,
 		Total:    total,
 		Page:     int32(page),
 		PageSize: int32(pageSize),

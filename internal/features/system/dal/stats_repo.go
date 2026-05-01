@@ -79,7 +79,7 @@ func (r *StatsRepo) GetDashboardStats(ctx context.Context) (*DashboardStats, err
 
 	// New media today
 	newMediaToday, err := r.db.Media.Query().
-		Where(media.CreatedAtGTE(today)).
+		Where(media.CreateTimeGTE(today)).
 		Count(ctx)
 	if err != nil {
 		return nil, err
@@ -159,7 +159,7 @@ func (r *StatsRepo) GetMediaStats(ctx context.Context) (*MediaStats, error) {
 
 	// Public count (privacy = 1)
 	publicCount, err := r.db.Media.Query().
-		Where(media.PrivacyEQ(1)).
+		Where(media.PrivacyEQ(media.PrivacyPUBLIC)).
 		Count(ctx)
 	if err != nil {
 		return nil, err
@@ -168,7 +168,7 @@ func (r *StatsRepo) GetMediaStats(ctx context.Context) (*MediaStats, error) {
 
 	// Private count (privacy = 2)
 	privateCount, err := r.db.Media.Query().
-		Where(media.PrivacyEQ(2)).
+		Where(media.PrivacyEQ(media.PrivacyPRIVATE)).
 		Count(ctx)
 	if err != nil {
 		return nil, err

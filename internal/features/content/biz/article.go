@@ -13,21 +13,35 @@ import (
 
 // Article represents a content article.
 type Article struct {
-	ID           string    `json:"id"`
-	Title        string    `json:"title"`
-	Content      string    `json:"content"`
-	Summary      string    `json:"summary,omitempty"`
-	Slug         string    `json:"slug,omitempty"`
-	State        string    `json:"state"` // draft / published / archived
-	ViewCount    int64     `json:"view_count"`
-	CommentCount int64     `json:"comment_count"`
-	Featured     bool      `json:"featured"`
-	Tags         []string  `json:"tags,omitempty"`
-	UserID       string    `json:"user_id"`
-	CategoryID   int64     `json:"category_id,omitempty"`
-	PublishedAt  time.Time `json:"published_at,omitempty"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at,omitempty"`
+	ID           string      `json:"id"`
+	Title        string      `json:"title"`
+	Content      string      `json:"content"`
+	Summary      string      `json:"summary,omitempty"`
+	Slug         string      `json:"slug,omitempty"`
+	State        string      `json:"state"` // draft / published / archived
+	ViewCount    int64       `json:"view_count"`
+	CommentCount int64       `json:"comment_count"`
+	Featured     bool        `json:"featured"`
+	Tags         []string    `json:"tags,omitempty"`
+	UserID       string      `json:"user_id"`
+	CategoryID   int64       `json:"category_id,omitempty"`
+	MediaID      string      `json:"media_id,omitempty"`
+	Thumbnail    string      `json:"thumbnail,omitempty"`
+	PublishedAt  time.Time   `json:"published_at,omitempty"`
+	CreateTime   time.Time   `json:"create_time"`
+	UpdateTime   time.Time   `json:"update_time,omitempty"`
+	// Eager-loaded edge data
+	Media *MediaBrief `json:"media,omitempty"`
+}
+
+// MediaBrief contains brief media info embedded in Article response.
+type MediaBrief struct {
+	ID         string `json:"id"`
+	Title      string `json:"title"`
+	Thumbnail  string `json:"thumbnail,omitempty"`
+	Duration   int    `json:"duration"`
+	Type       string `json:"type"`
+	ShortToken string `json:"short_token,omitempty"`
 }
 
 // ArticleRepo defines storage operations for articles.

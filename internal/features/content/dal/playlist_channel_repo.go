@@ -41,9 +41,9 @@ func NewChannelRepo(data *Data, logger log.Logger) biz.ChannelRepo {
 }
 
 func (r *playlistRepo) Create(ctx context.Context, p *biz.Playlist) (*biz.Playlist, error) {
-	privacy := 1 // Default to public
+	privacy := playlist.PrivacyPUBLIC
 	if !p.IsPublic {
-		privacy = 0
+		privacy = playlist.PrivacyPRIVATE
 	}
 	ent, err := r.data.db.Playlist.Create().
 		SetTitle(p.Title).
@@ -87,9 +87,9 @@ func (r *playlistRepo) GetByShortToken(ctx context.Context, token string) (*biz.
 }
 
 func (r *playlistRepo) Update(ctx context.Context, p *biz.Playlist) (*biz.Playlist, error) {
-	privacy := 1 // Default to public
+	privacy := playlist.PrivacyPUBLIC
 	if !p.IsPublic {
-		privacy = 0
+		privacy = playlist.PrivacyPRIVATE
 	}
 	ent, err := r.data.db.Playlist.UpdateOneID(p.ID).
 		SetTitle(p.Title).
@@ -121,6 +121,7 @@ func (r *playlistRepo) ListByUser(ctx context.Context, userID string, page, page
 		return nil, 0, err
 	}
 	ents, err := query.
+		Order(entity.Desc(playlist.FieldCreateTime)).
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
 		All(ctx)
@@ -147,6 +148,7 @@ func (r *playlistRepo) ListAll(ctx context.Context, page, pageSize int) ([]*biz.
 		return nil, 0, err
 	}
 	ents, err := query.
+		Order(entity.Desc(playlist.FieldCreateTime)).
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
 		All(ctx)
@@ -235,12 +237,16 @@ func (r *playlistRepo) GetPlaylistMedia(ctx context.Context, playlistID string) 
 }
 
 func (r *channelRepo) Create(ctx context.Context, ch *biz.Channel) (*biz.Channel, error) {
+	privacy := channel.PrivacyPUBLIC
+	if !ch.IsPublic {
+		privacy = channel.PrivacyPRIVATE
+	}
 	builder := r.data.db.Channel.Create().
 		SetTitle(ch.Title).
 		SetDescription(ch.Description).
 		SetBannerLogo(ch.BannerLogo).
 		SetUserID(ch.UserID).
-		SetIsPublic(ch.IsPublic)
+		SetPrivacy(privacy)
 
 	ent, err := builder.Save(ctx)
 	if err != nil {
@@ -297,11 +303,15 @@ func (r *channelRepo) GetDefaultChannel(ctx context.Context, userID string) (*bi
 }
 
 func (r *channelRepo) Update(ctx context.Context, ch *biz.Channel) (*biz.Channel, error) {
+	privacy := channel.PrivacyPUBLIC
+	if !ch.IsPublic {
+		privacy = channel.PrivacyPRIVATE
+	}
 	builder := r.data.db.Channel.UpdateOneID(ch.ID).
 		SetTitle(ch.Title).
 		SetDescription(ch.Description).
 		SetBannerLogo(ch.BannerLogo).
-		SetIsPublic(ch.IsPublic)
+		SetPrivacy(privacy)
 
 	ent, err := builder.Save(ctx)
 	if err != nil {
@@ -321,6 +331,7 @@ func (r *channelRepo) ListByUser(ctx context.Context, userID string, page, pageS
 		return nil, 0, err
 	}
 	ents, err := query.
+		Order(entity.Desc(channel.FieldCreateTime)).
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
 		All(ctx)
@@ -335,12 +346,13 @@ func (r *channelRepo) ListByUser(ctx context.Context, userID string, page, pageS
 }
 
 func (r *channelRepo) ListPublic(ctx context.Context, page, pageSize int) ([]*biz.Channel, int, error) {
-	query := r.data.db.Channel.Query().Where(channel.IsPublicEQ(true))
+	query := r.data.db.Channel.Query().Where(channel.PrivacyEQ(channel.PrivacyPUBLIC))
 	total, err := query.Count(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 	ents, err := query.
+		Order(entity.Desc(channel.FieldCreateTime)).
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
 		All(ctx)
@@ -505,22 +517,22 @@ func (r *channelRepo) GetSubscriptionVideos(ctx context.Context, userID string, 
 		Where(
 			media.ChannelIDIn(channelIDs...),
 			media.StateEQ("active"),
-			media.PrivacyEQ(1), // public only
+			media.PrivacyEQ(media.PrivacyPUBLIC), // public only
 		)
 
 	// Apply sorting
 	switch sortBy {
 	case "newest":
-		query.Order(entity.Desc(media.FieldCreatedAt))
+		query.Order(entity.Desc(media.FieldCreateTime))
 	case "most_viewed":
-		query.Order(entity.Desc(media.FieldViewCount), entity.Desc(media.FieldCreatedAt))
+		query.Order(entity.Desc(media.FieldViewCount), entity.Desc(media.FieldCreateTime))
 	case "trending":
 		// Trending: prioritize recent videos with high engagement
 		sevenDaysAgo := time.Now().AddDate(0, 0, -7)
-		query.Where(media.CreatedAtGTE(sevenDaysAgo))
-		query.Order(entity.Desc(media.FieldViewCount), entity.Desc(media.FieldCreatedAt))
+		query.Where(media.CreateTimeGTE(sevenDaysAgo))
+		query.Order(entity.Desc(media.FieldViewCount), entity.Desc(media.FieldCreateTime))
 	default:
-		query.Order(entity.Desc(media.FieldCreatedAt))
+		query.Order(entity.Desc(media.FieldCreateTime))
 	}
 
 	// Count total
@@ -556,8 +568,8 @@ func (r *channelRepo) GetSubscriptionVideos(ctx context.Context, userID string, 
 			UserID:         m.UserID,
 			EncodingStatus: m.EncodingStatus,
 		}
-		if !m.CreatedAt.IsZero() {
-			item.CreatedAt = m.CreatedAt
+		if !m.CreateTime.IsZero() {
+			item.CreateTime = m.CreateTime
 		}
 		if !m.PublishedAt.IsZero() {
 			item.PublishedAt = m.PublishedAt
@@ -588,13 +600,13 @@ func (r *channelRepo) GetChannelVideos(ctx context.Context, token string, sortBy
 	// Apply sorting
 	switch sortBy {
 	case "newest":
-		query.Order(entity.Desc(media.FieldCreatedAt))
+		query.Order(entity.Desc(media.FieldCreateTime))
 	case "oldest":
-		query.Order(entity.Asc(media.FieldCreatedAt))
+		query.Order(entity.Asc(media.FieldCreateTime))
 	case "popular":
-		query.Order(entity.Desc(media.FieldViewCount), entity.Desc(media.FieldCreatedAt))
+		query.Order(entity.Desc(media.FieldViewCount), entity.Desc(media.FieldCreateTime))
 	default:
-		query.Order(entity.Desc(media.FieldCreatedAt))
+		query.Order(entity.Desc(media.FieldCreateTime))
 	}
 
 	// Count total
@@ -630,8 +642,8 @@ func (r *channelRepo) GetChannelVideos(ctx context.Context, token string, sortBy
 			UserID:         m.UserID,
 			EncodingStatus: m.EncodingStatus,
 		}
-		if !m.CreatedAt.IsZero() {
-			item.CreatedAt = m.CreatedAt
+		if !m.CreateTime.IsZero() {
+			item.CreateTime = m.CreateTime
 		}
 		if !m.PublishedAt.IsZero() {
 			item.PublishedAt = m.PublishedAt
@@ -656,7 +668,7 @@ func (r *channelRepo) GetChannelPlaylists(ctx context.Context, token string, pag
 	query := r.data.db.Playlist.Query().
 		Where(
 			playlist.UserID(ch.UserID),
-			playlist.PrivacyEQ(1), // public playlists only
+			playlist.PrivacyEQ(playlist.PrivacyPUBLIC),
 		).
 		Order(entity.Desc(playlist.FieldAddDate))
 
@@ -684,10 +696,10 @@ func (r *channelRepo) GetChannelPlaylists(ctx context.Context, token string, pag
 			Title:       p.Title,
 			Description: p.Description,
 			UserID:      p.UserID,
-			Privacy:     p.Privacy,
+			Privacy:     string(p.Privacy),
 		}
 		if !p.AddDate.IsZero() {
-			item.CreatedAt = p.AddDate
+			item.CreateTime = p.AddDate
 		}
 		items = append(items, item)
 	}
@@ -702,9 +714,9 @@ func mapPlaylist(ent *entity.Playlist) *biz.Playlist {
 		Description: ent.Description,
 		ShortToken:  ent.ShortToken,
 		UserID:      ent.UserID,
-		IsPublic:    ent.Privacy == 1,
-		CreatedAt:   ent.AddDate,
-		UpdatedAt:   ent.AddDate,
+		IsPublic:    ent.Privacy == playlist.PrivacyPUBLIC,
+		CreateTime:  ent.AddDate,
+		UpdateTime:  ent.AddDate,
 		MediaItems:  []string{},
 	}
 }
@@ -716,8 +728,8 @@ func mapChannel(ent *entity.Channel) *biz.Channel {
 		Description: ent.Description,
 		BannerLogo:  ent.BannerLogo,
 		ShortToken:  ent.ShortToken,
-		IsPublic:    ent.IsPublic,
+		IsPublic:    ent.Privacy == channel.PrivacyPUBLIC,
 		UserID:      ent.UserID,
-		CreatedAt:   ent.AddDate,
+		CreateTime:  ent.AddDate,
 	}
 }

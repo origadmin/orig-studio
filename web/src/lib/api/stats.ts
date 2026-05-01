@@ -48,7 +48,7 @@ export interface DashboardStats {
         id: string;
         title: string;
         views: number;
-        created_at: string;
+        create_time: string;
     }>;
 }
 

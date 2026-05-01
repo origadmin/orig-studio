@@ -23,7 +23,6 @@ export interface Channel {
     total_views?: number;
     video_count?: number;
     is_verified?: boolean;
-    created_at?: string;
     create_time?: string;
     links?: Array<{
         type: 'website' | 'social' | 'custom';
@@ -45,7 +44,7 @@ export interface ChannelPlaylist {
     video_count?: number;
     thumbnail?: string;
     cover_images?: string[];
-    updated_at?: string;
+    update_time?: string;
 }
 
 export interface ChannelList {

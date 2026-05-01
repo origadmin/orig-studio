@@ -4,14 +4,72 @@ import {api} from "../request";
 export interface User {
     id: string;
     username: string;
+    nickname?: string;
     email: string;
     avatar?: string;
+    phone?: string;
     role: string;
-    status: string;
-    created_at: string;
-    create_time?: string;
-    updated_at?: string;
+    status: number | string; // Protojson serializes enum as string name (e.g. "USER_STATUS_ACTIVE") by default
+    create_time: string;
     update_time?: string;
+}
+
+// Map proto UserStatus numeric enum values to frontend string labels
+export const USER_STATUS_MAP: Record<number, string> = {
+    0: 'unspecified',
+    1: 'pending',
+    2: 'active',
+    3: 'inactive',
+    4: 'suspended',
+    5: 'rejected',
+};
+
+// Map protojson enum string names to frontend string labels
+// protojson (without UseEnumNumbers) serializes enums as their proto name, e.g. "USER_STATUS_ACTIVE"
+export const PROTO_STATUS_MAP: Record<string, string> = {
+    'USER_STATUS_UNSPECIFIED': 'unspecified',
+    'USER_STATUS_PENDING': 'pending',
+    'USER_STATUS_ACTIVE': 'active',
+    'USER_STATUS_INACTIVE': 'inactive',
+    'USER_STATUS_SUSPENDED': 'suspended',
+    'USER_STATUS_REJECTED': 'rejected',
+};
+
+// Map frontend string labels to proto UserStatus enum values
+export const USER_STATUS_REVERSE_MAP: Record<string, number> = {
+    'unspecified': 0,
+    'pending': 1,
+    'active': 2,
+    'inactive': 3,
+    'suspended': 4,
+    'rejected': 5,
+};
+
+// Helper to normalize status to string label for display
+// Handles three input formats:
+// 1. Protojson enum name string: "USER_STATUS_ACTIVE" -> "active"
+// 2. Numeric enum value: 2 -> "active"
+// 3. Already a display label: "active" -> "active"
+export function getUserStatusLabel(status: number | string): string {
+    if (typeof status === 'string') {
+        // Check if it's a proto enum name like "USER_STATUS_ACTIVE"
+        if (PROTO_STATUS_MAP[status]) {
+            return PROTO_STATUS_MAP[status];
+        }
+        // Already a display label like "active"
+        return status;
+    }
+    return USER_STATUS_MAP[status] || 'unknown';
+}
+
+// Helper to normalize status to numeric value for API calls
+export function getUserStatusCode(status: number | string): number {
+    if (typeof status === 'number') return status;
+    // Check if it's a proto enum name like "USER_STATUS_ACTIVE"
+    if (PROTO_STATUS_MAP[status]) {
+        return USER_STATUS_REVERSE_MAP[PROTO_STATUS_MAP[status]] ?? 2;
+    }
+    return USER_STATUS_REVERSE_MAP[status] ?? 2; // default to active
 }
 
 export interface UserListResponse {
@@ -30,10 +88,20 @@ export interface CreateUserRequest {
 
 export interface UpdateUserRequest {
     username?: string;
+    nickname?: string;
     email?: string;
     avatar?: string;
+    phone?: string;
     role?: string;
     status?: string;
+}
+
+export interface AdminCreateUserRequest {
+    username: string;
+    email: string;
+    password?: string;
+    nickname?: string;
+    role?: string;
 }
 
 export interface UpdateProfileRequest {
@@ -121,6 +189,10 @@ export const userApi = {
 
 // ==================== Admin User API (UUID based, requires JWT + Admin) ====================
 export const adminUserApi = {
+    // Create user (Admin)
+    create: (data: AdminCreateUserRequest) =>
+        api.post<User>("/admin/users", data),
+
     // List all users (Admin)
     list: (params?: { page?: number; page_size?: number; keyword?: string; status?: string; role?: string }) =>
         api.get<UserListResponse>("/admin/users", params),
@@ -137,9 +209,9 @@ export const adminUserApi = {
     delete: (id: string) =>
         api.del<void>(`/admin/users/${id}`),
 
-    // Update user status (Admin)
-    updateStatus: (id: string, status: number) =>
-        api.patch<void>(`/admin/users/${id}/status`, {status}),
+    // Update user status (Admin) - sends numeric status code
+    updateStatus: (id: string, status: number | string) =>
+        api.patch<void>(`/admin/users/${id}/status`, {status: typeof status === 'number' ? status : getUserStatusCode(status)}),
 
     // Update user role (Admin)
     updateRole: (id: string, role: string) =>

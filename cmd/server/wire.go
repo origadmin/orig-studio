@@ -11,17 +11,13 @@ import (
 	"time"
 
 	"github.com/ThreeDotsLabs/watermill/message"
-	_ "github.com/lib/pq"             // PostgreSQL driver
-	_ "github.com/sqlite3ent/sqlite3" // SQLite3 driver
-	"github.com/origadmin/runtime/log"
+	_ "github.com/lib/pq" // PostgreSQL driver
 
-	infraauth "origadmin/application/origcms/internal/infra/auth"
-	config "origadmin/application/origcms/internal/infra/conf"
-	"origadmin/application/origcms/internal/infra"
-	"origadmin/application/origcms/internal/infra/pubsub"
+	"github.com/origadmin/runtime/log"
+	_ "github.com/sqlite3ent/sqlite3" // SQLite3 driver
+
+	config "origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/handler"
-	"origadmin/application/origcms/internal/server"
 	"origadmin/application/origcms/internal/features/admin"
 	adminservice "origadmin/application/origcms/internal/features/admin/service"
 	featureauth "origadmin/application/origcms/internal/features/auth"
@@ -30,16 +26,18 @@ import (
 	"origadmin/application/origcms/internal/features/content"
 	contentbiz "origadmin/application/origcms/internal/features/content/biz"
 	contentservice "origadmin/application/origcms/internal/features/content/service"
-	"origadmin/application/origcms/internal/features/system"
-	systemdal "origadmin/application/origcms/internal/features/system/dal"
-	systembiz "origadmin/application/origcms/internal/features/system/biz"
-	systemservice "origadmin/application/origcms/internal/features/system/service"
+	"origadmin/application/origcms/internal/features/media"
 	mediabiz "origadmin/application/origcms/internal/features/media/biz"
 	mediadal "origadmin/application/origcms/internal/features/media/dal"
 	mediaservice "origadmin/application/origcms/internal/features/media/service"
-	"origadmin/application/origcms/internal/features/media"
+	"origadmin/application/origcms/internal/features/system"
+	systembiz "origadmin/application/origcms/internal/features/system/biz"
+	systemservice "origadmin/application/origcms/internal/features/system/service"
 	"origadmin/application/origcms/internal/features/user"
 	userservice "origadmin/application/origcms/internal/features/user/service"
+	"origadmin/application/origcms/internal/infra"
+	infraauth "origadmin/application/origcms/internal/infra/auth"
+	"origadmin/application/origcms/internal/infra/pubsub"
 
 	"github.com/google/wire"
 )
@@ -89,6 +87,7 @@ var ProviderSet = wire.NewSet(
 	NewAdminTagHandler,
 	NewExploreHandler,
 	NewStubHandler,
+	NewSpriteHandler,
 
 	// Wire bindings
 	wire.Bind(new(authbiz.PermissionChecker), new(*authbiz.PermissionUseCase)),
@@ -210,6 +209,11 @@ func NewStubHandler(jwt *infraauth.Manager) *contentservice.StubHandler {
 	return contentservice.NewStubHandler(jwt)
 }
 
+// NewSpriteHandler creates a new sprite handler for sprite sheet and VTT routes.
+func NewSpriteHandler(mediaUC *mediabiz.MediaUseCase, jwt *infraauth.Manager, logger log.Logger) *contentservice.SpriteHandler {
+	return contentservice.NewSpriteHandler(mediaUC, "./data/uploads", jwt, logger)
+}
+
 // AppDependencies holds all application dependencies.
 type AppDependencies struct {
 	DB                       *entity.Client
@@ -238,6 +242,7 @@ type AppDependencies struct {
 	AdminHandler             *adminservice.AdminHandler
 	AdminTagHandler          *adminservice.AdminTagHandler
 	StubHandler              *contentservice.StubHandler
+	SpriteHandler            *contentservice.SpriteHandler
 	SystemHandler            *systemservice.SystemHandler
 	StatsHandler             *systemservice.StatsHandler
 	UploadUC                 *mediabiz.UploadUseCase

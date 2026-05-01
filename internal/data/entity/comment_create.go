@@ -84,6 +84,20 @@ func (_c *CommentCreate) SetNillableReportCount(v *int) *CommentCreate {
 	return _c
 }
 
+// SetLikeCount sets the "like_count" field.
+func (_c *CommentCreate) SetLikeCount(v int) *CommentCreate {
+	_c.mutation.SetLikeCount(v)
+	return _c
+}
+
+// SetNillableLikeCount sets the "like_count" field if the given value is not nil.
+func (_c *CommentCreate) SetNillableLikeCount(v *int) *CommentCreate {
+	if v != nil {
+		_c.SetLikeCount(*v)
+	}
+	return _c
+}
+
 // SetModeratedBy sets the "moderated_by" field.
 func (_c *CommentCreate) SetModeratedBy(v string) *CommentCreate {
 	_c.mutation.SetModeratedBy(v)
@@ -108,6 +122,34 @@ func (_c *CommentCreate) SetModeratedAt(v time.Time) *CommentCreate {
 func (_c *CommentCreate) SetNillableModeratedAt(v *time.Time) *CommentCreate {
 	if v != nil {
 		_c.SetModeratedAt(*v)
+	}
+	return _c
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_c *CommentCreate) SetCreateTime(v time.Time) *CommentCreate {
+	_c.mutation.SetCreateTime(v)
+	return _c
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *CommentCreate) SetNillableCreateTime(v *time.Time) *CommentCreate {
+	if v != nil {
+		_c.SetCreateTime(*v)
+	}
+	return _c
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_c *CommentCreate) SetUpdateTime(v time.Time) *CommentCreate {
+	_c.mutation.SetUpdateTime(v)
+	return _c
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (_c *CommentCreate) SetNillableUpdateTime(v *time.Time) *CommentCreate {
+	if v != nil {
+		_c.SetUpdateTime(*v)
 	}
 	return _c
 }
@@ -266,6 +308,18 @@ func (_c *CommentCreate) defaults() {
 		v := comment.DefaultReportCount
 		_c.mutation.SetReportCount(v)
 	}
+	if _, ok := _c.mutation.LikeCount(); !ok {
+		v := comment.DefaultLikeCount
+		_c.mutation.SetLikeCount(v)
+	}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := comment.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
+	}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		v := comment.DefaultUpdateTime()
+		_c.mutation.SetUpdateTime(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := comment.DefaultID()
 		_c.mutation.SetID(v)
@@ -296,6 +350,15 @@ func (_c *CommentCreate) check() error {
 	}
 	if _, ok := _c.mutation.ReportCount(); !ok {
 		return &ValidationError{Name: "report_count", err: errors.New(`entity: missing required field "Comment.report_count"`)}
+	}
+	if _, ok := _c.mutation.LikeCount(); !ok {
+		return &ValidationError{Name: "like_count", err: errors.New(`entity: missing required field "Comment.like_count"`)}
+	}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "Comment.create_time"`)}
+	}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`entity: missing required field "Comment.update_time"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := comment.IDValidator(v); err != nil {
@@ -359,9 +422,21 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		_spec.SetField(comment.FieldReportCount, field.TypeInt, value)
 		_node.ReportCount = value
 	}
+	if value, ok := _c.mutation.LikeCount(); ok {
+		_spec.SetField(comment.FieldLikeCount, field.TypeInt, value)
+		_node.LikeCount = value
+	}
 	if value, ok := _c.mutation.ModeratedAt(); ok {
 		_spec.SetField(comment.FieldModeratedAt, field.TypeTime, value)
 		_node.ModeratedAt = value
+	}
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(comment.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
+	}
+	if value, ok := _c.mutation.UpdateTime(); ok {
+		_spec.SetField(comment.FieldUpdateTime, field.TypeTime, value)
+		_node.UpdateTime = value
 	}
 	if nodes := _c.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -75,16 +75,16 @@ func (_c *NotificationCreate) SetNillableIsRead(v *bool) *NotificationCreate {
 	return _c
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_c *NotificationCreate) SetCreatedAt(v time.Time) *NotificationCreate {
-	_c.mutation.SetCreatedAt(v)
+// SetCreateTime sets the "create_time" field.
+func (_c *NotificationCreate) SetCreateTime(v time.Time) *NotificationCreate {
+	_c.mutation.SetCreateTime(v)
 	return _c
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *NotificationCreate) SetNillableCreatedAt(v *time.Time) *NotificationCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_c *NotificationCreate) SetNillableCreateTime(v *time.Time) *NotificationCreate {
 	if v != nil {
-		_c.SetCreatedAt(*v)
+		_c.SetCreateTime(*v)
 	}
 	return _c
 }
@@ -151,9 +151,9 @@ func (_c *NotificationCreate) defaults() {
 		v := notification.DefaultIsRead
 		_c.mutation.SetIsRead(v)
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := notification.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		v := notification.DefaultCreateTime()
+		_c.mutation.SetCreateTime(v)
 	}
 }
 
@@ -184,8 +184,8 @@ func (_c *NotificationCreate) check() error {
 	if _, ok := _c.mutation.IsRead(); !ok {
 		return &ValidationError{Name: "is_read", err: errors.New(`entity: missing required field "Notification.is_read"`)}
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`entity: missing required field "Notification.created_at"`)}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "Notification.create_time"`)}
 	}
 	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`entity: missing required edge "Notification.user"`)}
@@ -236,9 +236,9 @@ func (_c *NotificationCreate) createSpec() (*Notification, *sqlgraph.CreateSpec)
 		_spec.SetField(notification.FieldIsRead, field.TypeBool, value)
 		_node.IsRead = value
 	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(notification.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(notification.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

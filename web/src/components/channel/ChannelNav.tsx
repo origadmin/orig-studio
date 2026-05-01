@@ -1,6 +1,6 @@
 import React from 'react';
 import {useTranslation} from 'react-i18next';
-import {Film, ListVideo, Info, Home, MessageSquare} from 'lucide-react';
+import {Film, ListVideo, Info, Home, MessageSquare, Users} from 'lucide-react';
 
 interface ChannelNavProps {
     activeTab: string;
@@ -20,6 +20,8 @@ const ChannelNav: React.FC<ChannelNavProps> = ({
         {id: 'videos', label: t('channel.tabVideos') || 'Videos', icon: Film},
         {id: 'playlists', label: t('channel.tabPlaylists') || 'Playlists', icon: ListVideo},
         {id: 'community', label: t('channel.tabCommunity') || 'Community', icon: MessageSquare},
+        // Subscriptions tab is only visible to the channel owner
+        ...(_isOwner ? [{id: 'subscriptions', label: t('channel.tabSubscriptions') || 'Subscriptions', icon: Users}] : []),
         {id: 'about', label: t('channel.tabAbout') || 'About', icon: Info},
     ];
 

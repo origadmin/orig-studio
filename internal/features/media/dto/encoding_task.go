@@ -17,7 +17,7 @@ type EncodingTask struct {
 	OutputPath   string                   `json:"output_path"`
 	ErrorMessage string                   `json:"error_message"`
 	Chunk        bool                     `json:"chunk"` // is chunk? (视频分段转码标识)
-	CreateTime   string                   `json:"created_at,omitempty"`
+	CreateTime   string                   `json:"create_time,omitempty"`
 	UpdateTime   string                   `json:"update_time,omitempty"`
 }
 

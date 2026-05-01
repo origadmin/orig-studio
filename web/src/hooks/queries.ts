@@ -9,7 +9,7 @@ import {adminCommentApi} from '@/lib/api/comment';
 import {configApi, type SettingCategory} from '@/lib/api/config';
 import {adminPermissionApi} from '@/lib/api/permission';
 import {spriteApi} from '@/lib/api/sprite';
-import {PAGINATION} from '@/config/pagination';
+import {PAGINATION_CONFIG} from '@/config/pagination';
 
 /**
  * keys factory
@@ -26,6 +26,13 @@ export const mediaKeys = {
 
 /**
  * useMediaList: Fetch paginated media list for user
+ *
+ * Parameter mapping (hook params → API params):
+ *   status    → state       (backend uses "state", not "status")
+ *   search    → keyword     (consolidated into "keyword")
+ *   featured  → featured    (boolean → string conversion)
+ *   sort      → order_by    (backend uses "order_by", not "sort")
+ *   order     → descending  ("desc" → true, "asc" → false)
  */
 export function useMediaList(params: {
     page?: number;
@@ -33,22 +40,48 @@ export function useMediaList(params: {
     status?: string;
     type?: string;
     category_id?: number | null;
+    category_ids?: number[];
     user_id?: string | number;
     keyword?: string;
     search?: string;
     featured?: boolean | string;
+    order_by?: string;
+    descending?: boolean;
+    /** @deprecated Use order_by instead */
+    sort?: string;
+    /** @deprecated Use descending instead */
+    order?: string;
 }) {
     return useQuery({
         queryKey: mediaKeys.list(params),
         queryFn: async () => {
-            const res = await mediaApi.list({
-                ...params,
-                keyword: params.search || params.keyword,
-                category_id: params.category_id || undefined,
+            // Explicitly construct API params to avoid leaking unrecognized fields
+            // (e.g. "status" → backend expects "state"; "search" → mapped to "keyword")
+            const apiParams: Record<string, unknown> = {
+                page: params.page,
+                page_size: params.page_size,
+                type: params.type,
+                category_id: params.category_id != null && params.category_id > 0 ? params.category_id : undefined,
+                category_ids: params.category_ids && params.category_ids.length > 0 ? params.category_ids.join(',') : undefined,
                 user_id: params.user_id ? Number(params.user_id) : undefined,
+                keyword: params.search || params.keyword,
+                // Map status → state (backend field name)
+                state: params.status,
                 featured: params.featured != null ? String(params.featured) : undefined,
+                // Map sort/order → order_by/descending (backend field names)
+                order_by: params.order_by || params.sort,
+                descending: params.descending != null
+                    ? params.descending
+                    : params.order === 'desc' ? true : params.order === 'asc' ? false : undefined,
+            };
+            // Remove undefined values to keep URL clean
+            Object.keys(apiParams).forEach(key => {
+                if (apiParams[key] === undefined || apiParams[key] === null) {
+                    delete apiParams[key];
+                }
             });
-            // Normalize flat edge fields (user, category, channel) to edges structure
+            const res = await mediaApi.list(apiParams as Parameters<typeof mediaApi.list>[0]);
+            // Normalize edge fields for each media item
             if (res?.items) {
                 res.items = normalizeMediaList(res.items);
             }
@@ -59,6 +92,9 @@ export function useMediaList(params: {
 
 /**
  * useInfiniteMediaList: Fetch paginated media list with infinite scroll
+ *
+ * Parameter mapping (hook params → API params):
+ *   status → state (backend uses "state", not "status")
  */
 export function useInfiniteMediaList(params: {
     page_size?: number;
@@ -70,13 +106,24 @@ export function useInfiniteMediaList(params: {
     return useInfiniteQuery({
         queryKey: mediaKeys.list(params),
         queryFn: async ({pageParam = 1}) => {
-            const res = await mediaApi.list({
-                ...params,
+            // Explicitly construct API params to avoid leaking unrecognized fields
+            const apiParams: Record<string, unknown> = {
                 page: pageParam,
-                category_id: params.category_id || undefined,
-                user_id: params.user_id ? Number(params.user_id) : undefined
+                page_size: params.page_size,
+                type: params.type,
+                category_id: params.category_id != null && params.category_id > 0 ? params.category_id : undefined,
+                user_id: params.user_id ? Number(params.user_id) : undefined,
+                // Map status → state (backend field name)
+                state: params.status,
+            };
+            // Remove undefined values to keep URL clean
+            Object.keys(apiParams).forEach(key => {
+                if (apiParams[key] === undefined || apiParams[key] === null) {
+                    delete apiParams[key];
+                }
             });
-            // Normalize flat edge fields (user, category, channel) to edges structure
+            const res = await mediaApi.list(apiParams as Parameters<typeof mediaApi.list>[0]);
+            // Normalize edge fields for each media item
             if (res?.items) {
                 res.items = normalizeMediaList(res.items);
             }
@@ -84,7 +131,7 @@ export function useInfiniteMediaList(params: {
         },
         initialPageParam: 1,
         getNextPageParam: (lastPage, allPages) => {
-            const size = params.page_size || PAGINATION.DEFAULT_PAGE_SIZE;
+            const size = params.page_size || PAGINATION_CONFIG.DEFAULT_PAGE_SIZE;
             const items = lastPage.items || [];
             return items.length === size ? allPages.length + 1 : undefined;
         },
@@ -105,7 +152,7 @@ export function useAdminMediaList(params: {
         queryKey: mediaKeys.adminList(params),
         queryFn: async () => {
             const res = await mediaApi.adminList(params);
-            // Normalize flat edge fields (user, category, channel) to edges structure
+            // Normalize edge fields for each media item
             if (res?.items) {
                 res.items = normalizeMediaList(res.items);
             }
@@ -133,7 +180,7 @@ export function useMediaDetail(id: string | null) {
 /**
  * usePublicMediaDetail: Fetch public media details using short_token (Recommended)
  * MediaCMS style: /api/v1/medias/{short_token}
- * Returns public fields only, auto-increments view count
+ * Returns public fields only
  */
 export function usePublicMediaDetail(shortToken: string | null) {
     // 清理 short_token
@@ -248,7 +295,9 @@ export function useMyChannel(enabled: boolean) {
         queryKey: ['channel', 'me'],
         queryFn: async () => {
             const res = await channelApi.getMyChannel();
-            return res as ChannelDetail;
+            // Backend returns { channel: null } when user has no channel yet
+            const data = (res as any)?.channel ?? res;
+            return (data || null) as ChannelDetail | null;
         },
         enabled,
     });

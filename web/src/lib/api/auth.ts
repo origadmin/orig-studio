@@ -10,7 +10,7 @@ export interface CurrentUser {
     role: string;
     status: string;
     is_staff?: boolean;
-    created_at: string;
+    create_time: string;
 }
 
 interface SignInResponse extends Omit<Token, 'user'> {

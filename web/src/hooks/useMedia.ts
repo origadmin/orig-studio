@@ -55,7 +55,7 @@ export function useMediaList(params?: { page?: number; pageSize?: number }): Use
                     thumbnailUrl: m.thumbnail_url ?? m.thumbnail ?? '',
                     viewCount: m.view_count ?? 0,
                     authorId: m.author_id ?? m.user_id ?? 0,
-                    createdAt: m.create_time ?? m.created_at ?? '',
+                    createdAt: m.create_time ?? '',
                 }));
             setItems(allItems);
         } catch (e: any) {

@@ -21,10 +21,12 @@ var (
 		{Name: "comment_count", Type: field.TypeInt64, Default: 0},
 		{Name: "featured", Type: field.TypeBool, Default: false},
 		{Name: "tags", Type: field.TypeJSON, Nullable: true},
+		{Name: "thumbnail", Type: field.TypeString, Nullable: true, Size: 512},
 		{Name: "published_at", Type: field.TypeTime, Nullable: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 		{Name: "category_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "media_id", Type: field.TypeString, Nullable: true, Size: 36},
 		{Name: "user_id", Type: field.TypeString, Size: 36},
 	}
 	// ContentArticlesTable holds the schema information for the "content_articles" table.
@@ -35,13 +37,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "content_articles_content_categories_articles",
-				Columns:    []*schema.Column{ContentArticlesColumns[13]},
+				Columns:    []*schema.Column{ContentArticlesColumns[14]},
 				RefColumns: []*schema.Column{ContentCategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
+				Symbol:     "content_articles_content_media_articles",
+				Columns:    []*schema.Column{ContentArticlesColumns[15]},
+				RefColumns: []*schema.Column{ContentMediaColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
 				Symbol:     "content_articles_users_articles",
-				Columns:    []*schema.Column{ContentArticlesColumns[14]},
+				Columns:    []*schema.Column{ContentArticlesColumns[16]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -73,19 +81,24 @@ var (
 				Columns: []*schema.Column{ContentArticlesColumns[6]},
 			},
 			{
-				Name:    "article_created_at",
+				Name:    "article_create_time",
 				Unique:  false,
-				Columns: []*schema.Column{ContentArticlesColumns[11]},
+				Columns: []*schema.Column{ContentArticlesColumns[12]},
 			},
 			{
 				Name:    "article_published_at",
 				Unique:  false,
-				Columns: []*schema.Column{ContentArticlesColumns[10]},
+				Columns: []*schema.Column{ContentArticlesColumns[11]},
 			},
 			{
 				Name:    "article_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{ContentArticlesColumns[14]},
+				Columns: []*schema.Column{ContentArticlesColumns[16]},
+			},
+			{
+				Name:    "article_media_id",
+				Unique:  false,
+				Columns: []*schema.Column{ContentArticlesColumns[15]},
 			},
 		},
 	}
@@ -100,13 +113,13 @@ var (
 		{Name: "icon", Type: field.TypeString, Nullable: true, Size: 255},
 		{Name: "color", Type: field.TypeString, Nullable: true, Size: 32},
 		{Name: "sequence", Type: field.TypeInt, Default: 0},
-		{Name: "status", Type: field.TypeInt, Default: 1},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"ACTIVE", "INACTIVE"}, Default: "ACTIVE"},
 		{Name: "media_count", Type: field.TypeInt, Default: 0},
 		{Name: "is_global", Type: field.TypeBool, Default: false},
 		{Name: "is_rbac_category", Type: field.TypeBool, Default: false},
 		{Name: "identity_provider", Type: field.TypeString, Nullable: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 		{Name: "parent_id", Type: field.TypeInt64, Nullable: true},
 		{Name: "media_category_category", Type: field.TypeInt, Nullable: true},
 		{Name: "user_id", Type: field.TypeString, Nullable: true, Size: 36},
@@ -171,8 +184,12 @@ var (
 		{Name: "description", Type: field.TypeString, Size: 2147483647},
 		{Name: "short_token", Type: field.TypeString, Unique: true, Size: 12},
 		{Name: "banner_logo", Type: field.TypeString, Size: 500},
-		{Name: "is_public", Type: field.TypeBool, Default: true},
+		{Name: "privacy", Type: field.TypeEnum, Enums: []string{"PUBLIC", "PRIVATE", "UNLISTED", "PAID", "SUBSCRIBERS_ONLY"}, Default: "PUBLIC"},
+		{Name: "subscriber_count", Type: field.TypeInt64, Default: 0},
+		{Name: "media_count", Type: field.TypeInt, Default: 0},
 		{Name: "add_date", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeString, Size: 36},
 	}
 	// UserChannelsTable holds the schema information for the "user_channels" table.
@@ -183,7 +200,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "user_channels_users_channels",
-				Columns:    []*schema.Column{UserChannelsColumns[7]},
+				Columns:    []*schema.Column{UserChannelsColumns[11]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -192,7 +209,7 @@ var (
 			{
 				Name:    "channel_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{UserChannelsColumns[7]},
+				Columns: []*schema.Column{UserChannelsColumns[11]},
 			},
 			{
 				Name:    "channel_title",
@@ -207,7 +224,7 @@ var (
 			{
 				Name:    "channel_add_date",
 				Unique:  false,
-				Columns: []*schema.Column{UserChannelsColumns[6]},
+				Columns: []*schema.Column{UserChannelsColumns[8]},
 			},
 		},
 	}
@@ -216,9 +233,12 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "text", Type: field.TypeString, Size: 2147483647},
 		{Name: "add_date", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "APPROVED", "REJECTED"}, Default: "PENDING"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "APPROVED", "REJECTED", "BLOCKED"}, Default: "PENDING"},
 		{Name: "report_count", Type: field.TypeInt, Default: 0},
+		{Name: "like_count", Type: field.TypeInt, Default: 0},
 		{Name: "moderated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 		{Name: "article_comments", Type: field.TypeString, Nullable: true, Size: 36},
 		{Name: "comment_replies", Type: field.TypeString, Nullable: true, Size: 36},
 		{Name: "media_comments", Type: field.TypeString, Size: 36},
@@ -233,31 +253,31 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "content_comments_content_articles_comments",
-				Columns:    []*schema.Column{ContentCommentsColumns[6]},
+				Columns:    []*schema.Column{ContentCommentsColumns[9]},
 				RefColumns: []*schema.Column{ContentArticlesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "content_comments_content_comments_replies",
-				Columns:    []*schema.Column{ContentCommentsColumns[7]},
+				Columns:    []*schema.Column{ContentCommentsColumns[10]},
 				RefColumns: []*schema.Column{ContentCommentsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "content_comments_content_media_comments",
-				Columns:    []*schema.Column{ContentCommentsColumns[8]},
+				Columns:    []*schema.Column{ContentCommentsColumns[11]},
 				RefColumns: []*schema.Column{ContentMediaColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "content_comments_users_comments",
-				Columns:    []*schema.Column{ContentCommentsColumns[9]},
+				Columns:    []*schema.Column{ContentCommentsColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "content_comments_users_moderated_comments",
-				Columns:    []*schema.Column{ContentCommentsColumns[10]},
+				Columns:    []*schema.Column{ContentCommentsColumns[13]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -271,12 +291,12 @@ var (
 			{
 				Name:    "comment_media_comments",
 				Unique:  false,
-				Columns: []*schema.Column{ContentCommentsColumns[8]},
+				Columns: []*schema.Column{ContentCommentsColumns[11]},
 			},
 			{
 				Name:    "comment_user_comments",
 				Unique:  false,
-				Columns: []*schema.Column{ContentCommentsColumns[9]},
+				Columns: []*schema.Column{ContentCommentsColumns[12]},
 			},
 			{
 				Name:    "comment_status",
@@ -286,7 +306,7 @@ var (
 			{
 				Name:    "comment_media_comments_status",
 				Unique:  false,
-				Columns: []*schema.Column{ContentCommentsColumns[8], ContentCommentsColumns[3]},
+				Columns: []*schema.Column{ContentCommentsColumns[11], ContentCommentsColumns[3]},
 			},
 		},
 	}
@@ -294,7 +314,7 @@ var (
 	ContentCommentLikesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "like_type", Type: field.TypeString, Size: 10, Default: "like"},
-		{Name: "created_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
 		{Name: "comment_id", Type: field.TypeString, Size: 36},
 		{Name: "user_id", Type: field.TypeString, Size: 36},
 	}
@@ -335,7 +355,8 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "reason", Type: field.TypeEnum, Enums: []string{"SPAM", "HARASSMENT", "INAPPROPRIATE", "OTHER"}},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
-		{Name: "created_at", Type: field.TypeTime},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "REVIEWED", "DISMISSED"}, Default: "PENDING"},
+		{Name: "create_time", Type: field.TypeTime},
 		{Name: "comment_id", Type: field.TypeString, Size: 36},
 		{Name: "reporter_id", Type: field.TypeString, Size: 36},
 	}
@@ -347,13 +368,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "content_comment_reports_content_comments_reports",
-				Columns:    []*schema.Column{ContentCommentReportsColumns[4]},
+				Columns:    []*schema.Column{ContentCommentReportsColumns[5]},
 				RefColumns: []*schema.Column{ContentCommentsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "content_comment_reports_users_comment_reports",
-				Columns:    []*schema.Column{ContentCommentReportsColumns[5]},
+				Columns:    []*schema.Column{ContentCommentReportsColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -362,12 +383,12 @@ var (
 			{
 				Name:    "commentreport_reporter_id_comment_id",
 				Unique:  true,
-				Columns: []*schema.Column{ContentCommentReportsColumns[5], ContentCommentReportsColumns[4]},
+				Columns: []*schema.Column{ContentCommentReportsColumns[6], ContentCommentReportsColumns[5]},
 			},
 			{
 				Name:    "commentreport_comment_id",
 				Unique:  false,
-				Columns: []*schema.Column{ContentCommentReportsColumns[4]},
+				Columns: []*schema.Column{ContentCommentReportsColumns[5]},
 			},
 			{
 				Name:    "commentreport_reason",
@@ -375,7 +396,12 @@ var (
 				Columns: []*schema.Column{ContentCommentReportsColumns[1]},
 			},
 			{
-				Name:    "commentreport_created_at",
+				Name:    "commentreport_create_time",
+				Unique:  false,
+				Columns: []*schema.Column{ContentCommentReportsColumns[4]},
+			},
+			{
+				Name:    "commentreport_status",
 				Unique:  false,
 				Columns: []*schema.Column{ContentCommentReportsColumns[3]},
 			},
@@ -394,8 +420,8 @@ var (
 		{Name: "audio_bitrate", Type: field.TypeString, Nullable: true, Size: 20},
 		{Name: "bento_parameters", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "is_active", Type: field.TypeBool, Default: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 	}
 	// SystemEncodeProfilesTable holds the schema information for the "system_encode_profiles" table.
 	SystemEncodeProfilesTable = &schema.Table{
@@ -424,8 +450,9 @@ var (
 		{Name: "output_path", Type: field.TypeString, Nullable: true, Size: 512},
 		{Name: "error_message", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "chunk", Type: field.TypeBool, Default: false},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "progress", Type: field.TypeInt, Default: 0},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 	}
 	// SystemEncodingTasksTable holds the schema information for the "system_encoding_tasks" table.
 	SystemEncodingTasksTable = &schema.Table{
@@ -444,16 +471,17 @@ var (
 				Columns: []*schema.Column{SystemEncodingTasksColumns[3]},
 			},
 			{
-				Name:    "encodingtask_created_at",
+				Name:    "encodingtask_create_time",
 				Unique:  false,
-				Columns: []*schema.Column{SystemEncodingTasksColumns[7]},
+				Columns: []*schema.Column{SystemEncodingTasksColumns[8]},
 			},
 		},
 	}
 	// ContentFavoritesColumns holds the columns for the "content_favorites" table.
 	ContentFavoritesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
-		{Name: "created_at", Type: field.TypeTime},
+		{Name: "playlist_id", Type: field.TypeString, Nullable: true},
+		{Name: "create_time", Type: field.TypeTime},
 		{Name: "media_id", Type: field.TypeString, Size: 36},
 		{Name: "user_id", Type: field.TypeString, Size: 36},
 	}
@@ -465,13 +493,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "content_favorites_content_media_favorites",
-				Columns:    []*schema.Column{ContentFavoritesColumns[2]},
+				Columns:    []*schema.Column{ContentFavoritesColumns[3]},
 				RefColumns: []*schema.Column{ContentMediaColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "content_favorites_users_favorites",
-				Columns:    []*schema.Column{ContentFavoritesColumns[3]},
+				Columns:    []*schema.Column{ContentFavoritesColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -480,7 +508,7 @@ var (
 			{
 				Name:    "favorite_user_id_media_id",
 				Unique:  true,
-				Columns: []*schema.Column{ContentFavoritesColumns[3], ContentFavoritesColumns[2]},
+				Columns: []*schema.Column{ContentFavoritesColumns[4], ContentFavoritesColumns[3]},
 			},
 		},
 	}
@@ -532,7 +560,7 @@ var (
 	ContentLikesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "like_type", Type: field.TypeString, Size: 10, Default: "like"},
-		{Name: "created_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
 		{Name: "media_id", Type: field.TypeString, Size: 36},
 		{Name: "user_id", Type: field.TypeString, Size: 36},
 	}
@@ -582,7 +610,7 @@ var (
 		{Name: "mime_type", Type: field.TypeString, Nullable: true, Size: 128},
 		{Name: "md5sum", Type: field.TypeString, Nullable: true, Size: 64},
 		{Name: "extension", Type: field.TypeString, Nullable: true, Size: 32},
-		{Name: "privacy", Type: field.TypeInt, Default: 1},
+		{Name: "privacy", Type: field.TypeEnum, Enums: []string{"PUBLIC", "PRIVATE", "UNLISTED", "PAID"}, Default: "PUBLIC"},
 		{Name: "encoding_status", Type: field.TypeString, Size: 20, Default: "pending"},
 		{Name: "state", Type: field.TypeString, Size: 20, Default: "active"},
 		{Name: "view_count", Type: field.TypeInt64, Default: 0},
@@ -591,6 +619,8 @@ var (
 		{Name: "comment_count", Type: field.TypeInt64, Default: 0},
 		{Name: "favorite_count", Type: field.TypeInt64, Default: 0},
 		{Name: "download_count", Type: field.TypeInt64, Default: 0},
+		{Name: "share_count", Type: field.TypeInt64, Default: 0},
+		{Name: "uuid", Type: field.TypeString, Nullable: true, Size: 36},
 		{Name: "allow_download", Type: field.TypeBool, Default: true},
 		{Name: "enable_comments", Type: field.TypeBool, Default: true},
 		{Name: "featured", Type: field.TypeBool, Default: false},
@@ -603,8 +633,10 @@ var (
 		{Name: "thumbnail_time", Type: field.TypeFloat64, Nullable: true},
 		{Name: "tags", Type: field.TypeJSON, Nullable: true},
 		{Name: "published_at", Type: field.TypeTime, Nullable: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "create_author", Type: field.TypeString, Default: ""},
+		{Name: "update_author", Type: field.TypeString, Default: ""},
 		{Name: "category_id", Type: field.TypeInt64, Nullable: true},
 		{Name: "channel_id", Type: field.TypeString, Nullable: true, Size: 36},
 		{Name: "media_category_media", Type: field.TypeInt, Nullable: true},
@@ -619,31 +651,31 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "content_media_content_categories_media",
-				Columns:    []*schema.Column{ContentMediaColumns[40]},
+				Columns:    []*schema.Column{ContentMediaColumns[44]},
 				RefColumns: []*schema.Column{ContentCategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "content_media_user_channels_media",
-				Columns:    []*schema.Column{ContentMediaColumns[41]},
+				Columns:    []*schema.Column{ContentMediaColumns[45]},
 				RefColumns: []*schema.Column{UserChannelsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "content_media_content_media_categories_media",
-				Columns:    []*schema.Column{ContentMediaColumns[42]},
+				Columns:    []*schema.Column{ContentMediaColumns[46]},
 				RefColumns: []*schema.Column{ContentMediaCategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "content_media_content_media_tags_media",
-				Columns:    []*schema.Column{ContentMediaColumns[43]},
+				Columns:    []*schema.Column{ContentMediaColumns[47]},
 				RefColumns: []*schema.Column{ContentMediaTagsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "content_media_users_media",
-				Columns:    []*schema.Column{ContentMediaColumns[44]},
+				Columns:    []*schema.Column{ContentMediaColumns[48]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -672,7 +704,7 @@ var (
 			{
 				Name:    "media_featured",
 				Unique:  false,
-				Columns: []*schema.Column{ContentMediaColumns[28]},
+				Columns: []*schema.Column{ContentMediaColumns[30]},
 			},
 			{
 				Name:    "media_view_count",
@@ -680,14 +712,14 @@ var (
 				Columns: []*schema.Column{ContentMediaColumns[20]},
 			},
 			{
-				Name:    "media_created_at",
+				Name:    "media_create_time",
 				Unique:  false,
-				Columns: []*schema.Column{ContentMediaColumns[38]},
+				Columns: []*schema.Column{ContentMediaColumns[40]},
 			},
 			{
 				Name:    "media_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{ContentMediaColumns[44]},
+				Columns: []*schema.Column{ContentMediaColumns[48]},
 			},
 			{
 				Name:    "media_short_token",
@@ -697,17 +729,17 @@ var (
 			{
 				Name:    "media_review_status_listable_state",
 				Unique:  false,
-				Columns: []*schema.Column{ContentMediaColumns[29], ContentMediaColumns[30], ContentMediaColumns[19]},
+				Columns: []*schema.Column{ContentMediaColumns[31], ContentMediaColumns[32], ContentMediaColumns[19]},
 			},
 			{
 				Name:    "media_listable",
 				Unique:  false,
-				Columns: []*schema.Column{ContentMediaColumns[30]},
+				Columns: []*schema.Column{ContentMediaColumns[32]},
 			},
 			{
 				Name:    "media_sprite_status",
 				Unique:  false,
-				Columns: []*schema.Column{ContentMediaColumns[32]},
+				Columns: []*schema.Column{ContentMediaColumns[34]},
 			},
 		},
 	}
@@ -763,7 +795,7 @@ var (
 		{Name: "comment", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "previous_status", Type: field.TypeString, Size: 20},
 		{Name: "new_status", Type: field.TypeString, Size: 20},
-		{Name: "created_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
 		{Name: "media_id", Type: field.TypeString, Size: 36},
 		{Name: "reviewer_id", Type: field.TypeString, Size: 36},
 	}
@@ -798,7 +830,7 @@ var (
 				Columns: []*schema.Column{ContentMediaReviewLogsColumns[7]},
 			},
 			{
-				Name:    "mediareviewlog_created_at",
+				Name:    "mediareviewlog_create_time",
 				Unique:  false,
 				Columns: []*schema.Column{ContentMediaReviewLogsColumns[5]},
 			},
@@ -831,7 +863,7 @@ var (
 		{Name: "method", Type: field.TypeString, Size: 20, Default: "email"},
 		{Name: "user_id", Type: field.TypeInt},
 		{Name: "is_read", Type: field.TypeBool, Default: false},
-		{Name: "created_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
 	}
 	// UserNotificationsTable holds the schema information for the "user_notifications" table.
 	UserNotificationsTable = &schema.Table{
@@ -845,7 +877,7 @@ var (
 				Columns: []*schema.Column{UserNotificationsColumns[4]},
 			},
 			{
-				Name:    "notification_created_at",
+				Name:    "notification_create_time",
 				Unique:  false,
 				Columns: []*schema.Column{UserNotificationsColumns[6]},
 			},
@@ -864,8 +896,8 @@ var (
 		{Name: "permissions", Type: field.TypeJSON},
 		{Name: "category_scope", Type: field.TypeJSON, Nullable: true},
 		{Name: "is_active", Type: field.TypeBool, Default: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 		{Name: "created_by", Type: field.TypeString, Nullable: true, Size: 36},
 	}
 	// AuthPermissionGroupsTable holds the schema information for the "auth_permission_groups" table.
@@ -901,8 +933,13 @@ var (
 		{Name: "description", Type: field.TypeString, Size: 2147483647},
 		{Name: "short_token", Type: field.TypeString, Unique: true, Size: 12},
 		{Name: "user_id", Type: field.TypeString},
-		{Name: "privacy", Type: field.TypeInt, Default: 1},
+		{Name: "privacy", Type: field.TypeEnum, Enums: []string{"PUBLIC", "PRIVATE", "UNLISTED", "PAID"}, Default: "PUBLIC"},
 		{Name: "add_date", Type: field.TypeTime},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"ACTIVE", "INACTIVE", "DRAFT", "ARCHIVED"}, Default: "ACTIVE"},
+		{Name: "thumbnail", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "media_count", Type: field.TypeInt, Default: 0},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 	}
 	// ContentPlaylistsTable holds the schema information for the "content_playlists" table.
 	ContentPlaylistsTable = &schema.Table{
@@ -943,8 +980,8 @@ var (
 		{Name: "is_sensitive", Type: field.TypeBool, Default: false},
 		{Name: "fallback_value", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "is_builtin", Type: field.TypeBool, Default: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 	}
 	// SystemSettingsTable holds the schema information for the "system_settings" table.
 	SystemSettingsTable = &schema.Table{
@@ -967,7 +1004,7 @@ var (
 	// UserSubscriptionsColumns holds the columns for the "user_subscriptions" table.
 	UserSubscriptionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
-		{Name: "created_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
 		{Name: "subscriber_id", Type: field.TypeString, Size: 36},
 		{Name: "channel_id", Type: field.TypeString, Size: 36},
 	}
@@ -1007,7 +1044,7 @@ var (
 				Columns: []*schema.Column{UserSubscriptionsColumns[3]},
 			},
 			{
-				Name:    "subscription_created_at",
+				Name:    "subscription_create_time",
 				Unique:  false,
 				Columns: []*schema.Column{UserSubscriptionsColumns[1]},
 			},
@@ -1019,7 +1056,12 @@ var (
 		{Name: "title", Type: field.TypeString, Unique: true, Size: 100},
 		{Name: "slug", Type: field.TypeString, Unique: true, Nullable: true, Size: 100},
 		{Name: "media_count", Type: field.TypeInt, Default: 0},
-		{Name: "listings_thumbnail", Type: field.TypeString, Size: 400},
+		{Name: "listings_thumbnail", Type: field.TypeString, Nullable: true, Size: 400, Default: ""},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"ACTIVE", "INACTIVE"}, Default: "ACTIVE"},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "color", Type: field.TypeString, Nullable: true, Size: 32},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 		{Name: "media_tag_tag", Type: field.TypeInt, Nullable: true},
 	}
 	// ContentTagsTable holds the schema information for the "content_tags" table.
@@ -1030,7 +1072,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "content_tags_content_media_tags_tag",
-				Columns:    []*schema.Column{ContentTagsColumns[5]},
+				Columns:    []*schema.Column{ContentTagsColumns[10]},
 				RefColumns: []*schema.Column{ContentMediaTagsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -1074,8 +1116,8 @@ var (
 		{Name: "storage_path", Type: field.TypeString, Nullable: true, Size: 512},
 		{Name: "temp_dir", Type: field.TypeString, Nullable: true, Size: 512},
 		{Name: "expires_at", Type: field.TypeTime},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 	}
 	// SystemUploadSessionsTable holds the schema information for the "system_upload_sessions" table.
 	SystemUploadSessionsTable = &schema.Table{
@@ -1115,11 +1157,10 @@ var (
 		{Name: "slug", Type: field.TypeString, Unique: true, Nullable: true, Size: 64},
 		{Name: "first_name", Type: field.TypeString, Nullable: true, Size: 150},
 		{Name: "last_name", Type: field.TypeString, Nullable: true, Size: 150},
-		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "ACTIVE", "INACTIVE", "SUSPENDED", "REJECTED"}, Default: "ACTIVE"},
 		{Name: "is_staff", Type: field.TypeBool, Default: false},
 		{Name: "role", Type: field.TypeEnum, Enums: []string{"user", "admin", "editor"}, Default: "user"},
 		{Name: "is_superuser", Type: field.TypeBool, Default: false},
-		{Name: "is_approved", Type: field.TypeBool, Nullable: true},
 		{Name: "is_featured", Type: field.TypeBool, Default: false},
 		{Name: "advanced_user", Type: field.TypeBool, Default: false},
 		{Name: "is_editor", Type: field.TypeBool, Default: false},
@@ -1134,6 +1175,17 @@ var (
 		{Name: "date_joined", Type: field.TypeTime},
 		{Name: "date_added", Type: field.TypeTime},
 		{Name: "last_login", Type: field.TypeTime, Nullable: true},
+		{Name: "nickname", Type: field.TypeString, Nullable: true, Size: 150},
+		{Name: "phone", Type: field.TypeString, Nullable: true, Size: 32},
+		{Name: "avatar", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "last_login_ip", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "login_ip", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "last_login_time", Type: field.TypeTime, Nullable: true},
+		{Name: "login_time", Type: field.TypeTime, Nullable: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "create_author", Type: field.TypeString, Comment: "Create author user ID", Default: ""},
+		{Name: "update_author", Type: field.TypeString, Comment: "Update author user ID", Default: ""},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -1157,7 +1209,7 @@ var (
 				Columns: []*schema.Column{UsersColumns[5]},
 			},
 			{
-				Name:    "user_is_active",
+				Name:    "user_status",
 				Unique:  false,
 				Columns: []*schema.Column{UsersColumns[8]},
 			},
@@ -1169,7 +1221,7 @@ var (
 			{
 				Name:    "user_date_added",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[25]},
+				Columns: []*schema.Column{UsersColumns[24]},
 			},
 		},
 	}
@@ -1282,7 +1334,8 @@ var (
 
 func init() {
 	ContentArticlesTable.ForeignKeys[0].RefTable = ContentCategoriesTable
-	ContentArticlesTable.ForeignKeys[1].RefTable = UsersTable
+	ContentArticlesTable.ForeignKeys[1].RefTable = ContentMediaTable
+	ContentArticlesTable.ForeignKeys[2].RefTable = UsersTable
 	ContentArticlesTable.Annotation = &entsql.Annotation{
 		Table: "content_articles",
 	}

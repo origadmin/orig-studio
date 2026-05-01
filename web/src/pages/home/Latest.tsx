@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * Latest Page — infinite scroll
  */
@@ -32,8 +32,8 @@ const LatestPage = () => {
         page,
         page_size: PAGE_SIZE,
         status: 'active',
-        sort: 'created_at',
-        order: 'desc',
+        order_by: 'create_time',
+        descending: true,
         category_id: activeCategoryId || undefined
     });
 
@@ -142,7 +142,7 @@ const LatestPage = () => {
                                 <div className="flex items-center gap-3 text-xs text-muted-foreground dark:text-gray-500">
                                     <span className="flex items-center gap-1"><Eye
                                         size={12}/>{formatViews(media.view_count)}</span>
-                                    <span>{formatDate(media.create_time || media.created_at)}</span>
+                                    <span>{formatDate(media.create_time)}</span>
                                 </div>
                             </div>
                         </div>

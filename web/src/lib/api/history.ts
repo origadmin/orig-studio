@@ -13,7 +13,7 @@ export interface HistoryItem {
         thumbnail: string;
         duration: number;
         view_count: number;
-        created_at: string;
+        create_time: string;
         edges?: {
             user?: Array<{
                 username: string;

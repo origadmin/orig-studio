@@ -7,9 +7,12 @@ package service
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
+	pb "origadmin/application/origcms/api/gen/v1/media"
+	types "origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/infra/auth"
 	authbiz "origadmin/application/origcms/internal/features/auth/biz"
@@ -42,6 +45,7 @@ func NewMediaHandler(
 	playlistChannelUC *contentbiz.PlaylistChannelUseCase,
 	userUC *userbiz.UserUseCase,
 	permChecker authbiz.PermissionChecker,
+	mediaService *MediaService,
 ) *MediaHandler {
 	return &MediaHandler{
 		jwtMgr:            jwtMgr,
@@ -51,6 +55,7 @@ func NewMediaHandler(
 		playlistChannelUC: playlistChannelUC,
 		userUC:            userUC,
 		permChecker:       permChecker,
+		mediaService:      mediaService,
 	}
 }
 
@@ -70,13 +75,13 @@ func (h *MediaHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		medias.POST("/encoding/retry", server.WithJWT(h.jwtMgr, h.retryTask))
 		medias.POST("/encoding/retry-all-failed", server.WithJWT(h.jwtMgr, h.retryAllFailed))
 
-		// SSE for transcoding progress
-		medias.GET("/transcoding/events", h.sseHandler)
+		// NOTE: SSE endpoint moved to admin route group (/admin/medias/transcoding/events)
+		// See admin_handler.go encoding group
 
 		// Parameter routes
 		medias.GET("/:id", h.getMedia)
 		medias.GET("/:id/variants", h.mediaVariants)
-		medias.POST("/:id/increment-view", h.incrementViewCount)
+		medias.POST("/:id/view", h.incrementViewCount)
 
 		// Like/favorite routes
 		medias.POST("/:id/like", server.WithJWT(h.jwtMgr, h.likeMedia))
@@ -111,13 +116,39 @@ func (h *MediaHandler) listMedias(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
+	if categoryIDStr := c.Query("category_id"); categoryIDStr != "" {
+		if cid, err := strconv.ParseInt(categoryIDStr, 10, 64); err == nil && cid > 0 {
+			opts.CategoryID = &cid
+		}
+	}
+	if categoryIDsStr := c.Query("category_ids"); categoryIDsStr != "" {
+		for _, idStr := range strings.Split(categoryIDsStr, ",") {
+			if cid, err := strconv.ParseInt(strings.TrimSpace(idStr), 10, 64); err == nil && cid > 0 {
+				opts.CategoryIDs = append(opts.CategoryIDs, cid)
+			}
+		}
+	}
+	if state := c.Query("state"); state != "" {
+		opts.State = state
+	}
+
 	items, total, err := h.mediaUC.ListMedias(r.Context(), opts)
 	if err != nil {
 		server.Fail(gc, server.ErrInternal, err.Error())
 		return
 	}
 
-	server.OKPage(gc, items, int64(total), page, pageSize)
+	totalPages := int32(0)
+	if pageSize > 0 {
+		totalPages = (total + int32(pageSize) - 1) / int32(pageSize)
+	}
+	server.OK(gc, &pb.ListMediasResponse{
+		Total:      total,
+		Items:      items,
+		Page:       int32(page),
+		PageSize:   int32(pageSize),
+		TotalPages: totalPages,
+	})
 }
 
 // listFeaturedMedias handles GET /medias/featured
@@ -147,7 +178,11 @@ func (h *MediaHandler) listFeaturedMedias(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	server.OK(gc, items)
+	server.OK(gc, &pb.ListMediasResponse{
+		Items:    items,
+		Page:     1,
+		PageSize: int32(limit),
+	})
 }
 
 // listLatestMedias handles GET /medias/latest
@@ -176,7 +211,11 @@ func (h *MediaHandler) listLatestMedias(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	server.OK(gc, items)
+	server.OK(gc, &pb.ListMediasResponse{
+		Items:    items,
+		Page:     1,
+		PageSize: int32(limit),
+	})
 }
 
 // getMedia handles GET /medias/:id
@@ -196,10 +235,18 @@ func (h *MediaHandler) getMedia(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	server.OK(gc, item)
+	// Public API: hide private media (return 404 as if it doesn't exist)
+	if item.Privacy == types.Privacy_PRIVACY_PRIVATE {
+		server.Fail(gc, server.ErrNotFound, "media not found")
+		return
+	}
+
+	server.OK(gc, &pb.GetMediaResponse{
+		Media: item,
+	})
 }
 
-// incrementViewCount handles POST /medias/:id/increment-view
+// incrementViewCount handles POST /medias/:id/view
 func (h *MediaHandler) incrementViewCount(w http.ResponseWriter, r *http.Request) {
 	c := handler.NewGinContextAdapterFromHTTP(w, r)
 	gc := c.GinContext()
@@ -216,7 +263,9 @@ func (h *MediaHandler) incrementViewCount(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	server.OK(gc, gin.H{"view_count": count})
+	server.OK(gc, &pb.IncrementViewCountResponse{
+		ViewCount: count,
+	})
 }
 
 // transcodingStatus handles GET /medias/transcoding/status
@@ -230,11 +279,11 @@ func (h *MediaHandler) transcodingStatus(w http.ResponseWriter, r *http.Request)
 		server.Fail(handler.NewGinContextAdapterFromHTTP(w, r).GinContext(), server.ErrInternal, err.Error())
 		return
 	}
-	server.OK(handler.NewGinContextAdapterFromHTTP(w, r).GinContext(), gin.H{
-		"processing_count": status.ProcessingCount,
-		"pending_count":    status.PendingCount,
-		"failed_count":     status.FailedCount,
-		"success_count":    status.SuccessCount,
+	server.OK(handler.NewGinContextAdapterFromHTTP(w, r).GinContext(), &pb.GetEncodingStatusResponse{
+		ProcessingCount: int32(status.ProcessingCount),
+		PendingCount:    int32(status.PendingCount),
+		FailedCount:     int32(status.FailedCount),
+		SuccessCount:    int32(status.SuccessCount),
 	})
 }
 
@@ -244,7 +293,9 @@ func (h *MediaHandler) encodingTasks(w http.ResponseWriter, r *http.Request) {
 		h.mediaService.EncodingTasksHTTPHandler(w, r)
 		return
 	}
-	server.OK(handler.NewGinContextAdapterFromHTTP(w, r).GinContext(), gin.H{"tasks": []interface{}{}})
+	server.OK(handler.NewGinContextAdapterFromHTTP(w, r).GinContext(), &pb.ListEncodingTasksResponse{
+		Tasks: []*types.EncodingTask{},
+	})
 }
 
 // retryTask handles POST /medias/encoding/retry
@@ -253,7 +304,7 @@ func (h *MediaHandler) retryTask(w http.ResponseWriter, r *http.Request) {
 		h.mediaService.RetryTaskHTTPHandler(w, r)
 		return
 	}
-	server.OK(handler.NewGinContextAdapterFromHTTP(w, r).GinContext(), gin.H{"success": true})
+	server.OK(handler.NewGinContextAdapterFromHTTP(w, r).GinContext(), &pb.RetryEncodingTaskResponse{})
 }
 
 // retryAllFailed handles POST /medias/encoding/retry-all-failed
@@ -262,7 +313,7 @@ func (h *MediaHandler) retryAllFailed(w http.ResponseWriter, r *http.Request) {
 		h.mediaService.RetryAllFailedHTTPHandler(w, r)
 		return
 	}
-	server.OK(handler.NewGinContextAdapterFromHTTP(w, r).GinContext(), gin.H{"success": true})
+	server.OK(handler.NewGinContextAdapterFromHTTP(w, r).GinContext(), &pb.RetryAllFailedTasksResponse{})
 }
 
 // sseHandler handles GET /medias/transcoding/events
@@ -287,7 +338,9 @@ func (h *MediaHandler) mediaVariants(w http.ResponseWriter, r *http.Request) {
 		server.Fail(gc, server.ErrBadRequest, "media id is required")
 		return
 	}
-	server.OK(gc, gin.H{"variants": []interface{}{}})
+	server.OK(gc, &pb.GetMediaVariantsResponse{
+		Variants: []*types.MediaVariant{},
+	})
 }
 
 // likeMedia handles POST /medias/:id/like
@@ -314,11 +367,16 @@ func (h *MediaHandler) likeMedia(w http.ResponseWriter, r *http.Request) {
 			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
-		server.OK(gc, stats)
+		server.OK(gc, &pb.ToggleMediaLikeResponse{
+			IsLiked:     stats.UserLikeType == "like",
+			IsDisliked:  stats.UserLikeType == "dislike",
+			LikeCount:   stats.LikeCount,
+			DislikeCount: stats.DislikeCount,
+		})
 		return
 	}
 
-	server.OK(gc, gin.H{"success": true})
+	server.OK(gc, &pb.ToggleMediaLikeResponse{})
 }
 
 // unlikeMedia handles DELETE /medias/:id/like
@@ -345,11 +403,16 @@ func (h *MediaHandler) unlikeMedia(w http.ResponseWriter, r *http.Request) {
 			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
-		server.OK(gc, stats)
+		server.OK(gc, &pb.ToggleMediaLikeResponse{
+			IsLiked:     stats.UserLikeType == "like",
+			IsDisliked:  stats.UserLikeType == "dislike",
+			LikeCount:   stats.LikeCount,
+			DislikeCount: stats.DislikeCount,
+		})
 		return
 	}
 
-	server.OK(gc, gin.H{"success": true})
+	server.OK(gc, &pb.DeleteMediaLikeResponse{})
 }
 
 // favoriteMedia handles POST /medias/:id/favorite
@@ -376,11 +439,14 @@ func (h *MediaHandler) favoriteMedia(w http.ResponseWriter, r *http.Request) {
 			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
-		server.OK(gc, stats)
+		server.OK(gc, &pb.ToggleMediaFavoriteResponse{
+			IsFavorited:   stats.IsFavorited,
+			FavoriteCount: stats.FavoriteCount,
+		})
 		return
 	}
 
-	server.OK(gc, gin.H{"success": true})
+	server.OK(gc, &pb.ToggleMediaFavoriteResponse{})
 }
 
 // unfavoriteMedia handles DELETE /medias/:id/favorite
@@ -407,9 +473,12 @@ func (h *MediaHandler) unfavoriteMedia(w http.ResponseWriter, r *http.Request) {
 			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
-		server.OK(gc, stats)
+		server.OK(gc, &pb.ToggleMediaFavoriteResponse{
+			IsFavorited:   stats.IsFavorited,
+			FavoriteCount: stats.FavoriteCount,
+		})
 		return
 	}
 
-	server.OK(gc, gin.H{"success": true})
+	server.OK(gc, &pb.DeleteMediaFavoriteResponse{})
 }

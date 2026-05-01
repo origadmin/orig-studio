@@ -32,8 +32,8 @@ type UploadSession struct {
 	StoragePath  string             `json:"storage_path"`
 	TempDir      string             `json:"temp_dir"`
 	ExpiresAt    time.Time          `json:"expires_at"`
-	CreatedAt    time.Time          `json:"created_at"`
-	UpdatedAt    time.Time          `json:"updated_at"`
+	CreateTime    time.Time          `json:"create_time"`
+	UpdateTime    time.Time          `json:"update_time"`
 }
 
 // UploadRepo defines the storage operations for upload sessions.

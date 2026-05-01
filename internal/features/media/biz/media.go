@@ -21,6 +21,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/helpers/ffmpeg"
+	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/infra/pubsub"
 	"origadmin/application/origcms/internal/features/media/dto"
 )
@@ -59,7 +60,7 @@ type ReviewLog struct {
 	Comment        string `json:"comment"`
 	PreviousStatus string `json:"previous_status"`
 	NewStatus      string `json:"new_status"`
-	CreatedAt      string `json:"created_at"`
+	CreateTime      string `json:"create_time"`
 }
 
 // ReviewLogRepo defines the storage operations for review logs.
@@ -514,12 +515,8 @@ func (uc *MediaUseCase) ListEncodingTasksFlat(
 	if filter == nil {
 		filter = &TranscodingStatusFilter{Status: "active", Page: 1, PageSize: 25}
 	}
-	if filter.Page < 1 {
-		filter.Page = 1
-	}
-	if filter.PageSize < 1 || filter.PageSize > 100 {
-		filter.PageSize = 25
-	}
+	// Normalize pagination parameters using centralized validation
+	filter.Page, filter.PageSize = repo.NormalizePagination(filter.Page, filter.PageSize)
 
 	var status string
 	switch filter.FilterType {
@@ -1022,7 +1019,7 @@ type SpriteInfo struct {
 	SpriteStatus string
 	VttPath      string
 	SpritePath   string
-	UpdatedAt    time.Time
+	UpdateTime   time.Time
 }
 
 // ThumbnailInfo holds thumbnail-related data for a media item.
@@ -1044,7 +1041,7 @@ func (uc *MediaUseCase) GetSpriteInfoByID(ctx context.Context, id string) (*Spri
 		SpriteStatus: ent.SpriteStatus,
 		VttPath:      ent.VttPath,
 		SpritePath:   ent.SpritePath,
-		UpdatedAt:    ent.UpdatedAt,
+		UpdateTime:   ent.UpdateTime,
 	}, nil
 }
 
@@ -1060,7 +1057,7 @@ func (uc *MediaUseCase) GetSpriteInfoByShortToken(ctx context.Context, shortToke
 		SpriteStatus: ent.SpriteStatus,
 		VttPath:      ent.VttPath,
 		SpritePath:   ent.SpritePath,
-		UpdatedAt:    ent.UpdatedAt,
+		UpdateTime:   ent.UpdateTime,
 	}, nil
 }
 

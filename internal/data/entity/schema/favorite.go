@@ -26,7 +26,8 @@ func (Favorite) Fields() []ent.Field {
 		field.String("id").Unique().MaxLen(36).DefaultFunc(idutil.DefaultUUIDv7()), // UUIDv7 for distributed system
 		field.String("media_id"),
 		field.String("user_id"),
-		field.Time("created_at").Default(time.Now),
+		field.String("playlist_id").Optional(),
+		field.Time("create_time").Default(time.Now),
 	}
 }
 

@@ -37,7 +37,7 @@ func (r *feedRepo) ListLatest(ctx context.Context, page, pageSize int) ([]*biz.M
 	ents, err := query.
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
-		Order(entity.Desc(media.FieldCreatedAt)).
+		Order(entity.Desc(media.FieldCreateTime)).
 		WithUser().
 		All(ctx)
 	if err != nil {
@@ -85,7 +85,7 @@ func (r *feedRepo) ListFeatured(ctx context.Context, page, pageSize int) ([]*biz
 	ents, err := query.
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
-		Order(entity.Desc(media.FieldCreatedAt)).
+		Order(entity.Desc(media.FieldCreateTime)).
 		WithUser().
 		All(ctx)
 	if err != nil {

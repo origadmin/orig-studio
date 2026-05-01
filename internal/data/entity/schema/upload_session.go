@@ -82,10 +82,10 @@ func (UploadSession) Fields() []ent.Field {
 		}).
 			Comment("Session expiration time"),
 		// Creation time
-		field.Time("created_at").Default(time.Now).
+		field.Time("create_time").Default(time.Now).
 			Comment("Creation time"),
 		// Last update time
-		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now).
+		field.Time("update_time").Default(time.Now).UpdateDefault(time.Now).
 			Comment("Last update time"),
 	}
 }

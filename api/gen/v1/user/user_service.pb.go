@@ -1151,7 +1151,7 @@ func (x *GetMyPlaylistsRequest) GetPageSize() int32 {
 type GetMyPlaylistsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	Playlists     []*types.Playlist      `protobuf:"bytes,2,rep,name=playlists,proto3" json:"playlists,omitempty"`
+	Items         []*types.Playlist      `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
 	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -1195,9 +1195,9 @@ func (x *GetMyPlaylistsResponse) GetTotal() int32 {
 	return 0
 }
 
-func (x *GetMyPlaylistsResponse) GetPlaylists() []*types.Playlist {
+func (x *GetMyPlaylistsResponse) GetItems() []*types.Playlist {
 	if x != nil {
-		return x.Playlists
+		return x.Items
 	}
 	return nil
 }
@@ -1273,7 +1273,7 @@ func (x *GetMyFavoritesRequest) GetPageSize() int32 {
 type GetMyFavoritesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	Medias        []*types.Media         `protobuf:"bytes,2,rep,name=medias,proto3" json:"medias,omitempty"`
+	Items         []*types.Media         `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
 	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -1317,9 +1317,9 @@ func (x *GetMyFavoritesResponse) GetTotal() int32 {
 	return 0
 }
 
-func (x *GetMyFavoritesResponse) GetMedias() []*types.Media {
+func (x *GetMyFavoritesResponse) GetItems() []*types.Media {
 	if x != nil {
-		return x.Medias
+		return x.Items
 	}
 	return nil
 }
@@ -1517,7 +1517,7 @@ func (x *GetMySubscriptionsRequest) GetPageSize() int32 {
 type GetMySubscriptionsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	Channels      []*types.Channel       `protobuf:"bytes,2,rep,name=channels,proto3" json:"channels,omitempty"`
+	Items         []*types.Channel       `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
 	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -1561,9 +1561,9 @@ func (x *GetMySubscriptionsResponse) GetTotal() int32 {
 	return 0
 }
 
-func (x *GetMySubscriptionsResponse) GetChannels() []*types.Channel {
+func (x *GetMySubscriptionsResponse) GetItems() []*types.Channel {
 	if x != nil {
-		return x.Channels
+		return x.Items
 	}
 	return nil
 }
@@ -1914,8 +1914,8 @@ type ListUsersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The total number of items in the list.
 	Total int32 `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	// The paging users
-	Users []*types.User `protobuf:"bytes,2,rep,name=users,proto3" json:"users,omitempty"`
+	// The paging items
+	Items []*types.User `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
 	// The page number.
 	Page int32 `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	// The maximum number of items to return.
@@ -1964,9 +1964,9 @@ func (x *ListUsersResponse) GetTotal() int32 {
 	return 0
 }
 
-func (x *ListUsersResponse) GetUsers() []*types.User {
+func (x *ListUsersResponse) GetItems() []*types.User {
 	if x != nil {
-		return x.Users
+		return x.Items
 	}
 	return nil
 }
@@ -2869,8 +2869,8 @@ type ListUserRolesResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The total number of items in the list.
 	Total int32 `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	// The list of roles
-	Roles         []*types.Role `protobuf:"bytes,2,rep,name=roles,proto3" json:"roles,omitempty"`
+	// The list of items
+	Items         []*types.Role `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2912,9 +2912,9 @@ func (x *ListUserRolesResponse) GetTotal() int32 {
 	return 0
 }
 
-func (x *ListUserRolesResponse) GetRoles() []*types.Role {
+func (x *ListUserRolesResponse) GetItems() []*types.Role {
 	if x != nil {
-		return x.Roles
+		return x.Items
 	}
 	return nil
 }
@@ -3098,7 +3098,7 @@ func (x *GetUserPlaylistsRequest) GetPageSize() int32 {
 type GetUserPlaylistsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
-	Playlists     []*types.Playlist      `protobuf:"bytes,2,rep,name=playlists,proto3" json:"playlists,omitempty"`
+	Items         []*types.Playlist      `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
 	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -3142,9 +3142,9 @@ func (x *GetUserPlaylistsResponse) GetTotal() int32 {
 	return 0
 }
 
-func (x *GetUserPlaylistsResponse) GetPlaylists() []*types.Playlist {
+func (x *GetUserPlaylistsResponse) GetItems() []*types.Playlist {
 	if x != nil {
-		return x.Playlists
+		return x.Items
 	}
 	return nil
 }
@@ -3363,18 +3363,18 @@ const file_v1_user_user_service_proto_rawDesc = "" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"I\n" +
 	"\x15GetMyPlaylistsRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1c\n" +
-	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\"\x9f\x01\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\"\x97\x01\n" +
 	"\x16GetMyPlaylistsResponse\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x05R\x05total\x12=\n" +
-	"\tplaylists\x18\x02 \x03(\v2\x1f.api.v1.services.types.PlaylistR\tplaylists\x12\x12\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x125\n" +
+	"\x05items\x18\x02 \x03(\v2\x1f.api.v1.services.types.PlaylistR\x05items\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"I\n" +
 	"\x15GetMyFavoritesRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1c\n" +
-	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\"\x96\x01\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\"\x94\x01\n" +
 	"\x16GetMyFavoritesResponse\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x05R\x05total\x124\n" +
-	"\x06medias\x18\x02 \x03(\v2\x1c.api.v1.services.types.MediaR\x06medias\x12\x12\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x122\n" +
+	"\x05items\x18\x02 \x03(\v2\x1c.api.v1.services.types.MediaR\x05items\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"E\n" +
 	"\x11GetMyLikesRequest\x12\x12\n" +
@@ -3387,10 +3387,10 @@ const file_v1_user_user_service_proto_rawDesc = "" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"M\n" +
 	"\x19GetMySubscriptionsRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1c\n" +
-	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\"\xa0\x01\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\"\x9a\x01\n" +
 	"\x1aGetMySubscriptionsResponse\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x05R\x05total\x12:\n" +
-	"\bchannels\x18\x02 \x03(\v2\x1e.api.v1.services.types.ChannelR\bchannels\x12\x12\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x124\n" +
+	"\x05items\x18\x02 \x03(\v2\x1e.api.v1.services.types.ChannelR\x05items\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"G\n" +
 	"\x13GetMyHistoryRequest\x12\x12\n" +
@@ -3422,7 +3422,7 @@ const file_v1_user_user_service_proto_rawDesc = "" +
 	"\a_status\"\xb8\x01\n" +
 	"\x11ListUsersResponse\x12\x14\n" +
 	"\x05total\x18\x01 \x01(\x05R\x05total\x121\n" +
-	"\x05users\x18\x02 \x03(\v2\x1b.api.v1.services.types.UserR\x05users\x12\x12\n" +
+	"\x05items\x18\x02 \x03(\v2\x1b.api.v1.services.types.UserR\x05items\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\x12(\n" +
 	"\x0fnext_page_token\x18\x05 \x01(\tR\x0fnext_page_token\"\x88\x01\n" +
@@ -3474,7 +3474,7 @@ const file_v1_user_user_service_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"`\n" +
 	"\x15ListUserRolesResponse\x12\x14\n" +
 	"\x05total\x18\x01 \x01(\x05R\x05total\x121\n" +
-	"\x05roles\x18\x02 \x03(\v2\x1b.api.v1.services.types.RoleR\x05roles\"%\n" +
+	"\x05items\x18\x02 \x03(\v2\x1b.api.v1.services.types.RoleR\x05items\"%\n" +
 	"\x13GetUserStatsRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"\xa8\x01\n" +
 	"\x14GetUserStatsResponse\x12 \n" +
@@ -3485,10 +3485,10 @@ const file_v1_user_user_service_proto_rawDesc = "" +
 	"\x17GetUserPlaylistsRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1c\n" +
-	"\tpage_size\x18\x03 \x01(\x05R\tpage_size\"\xa1\x01\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\tpage_size\"\x99\x01\n" +
 	"\x18GetUserPlaylistsResponse\x12\x14\n" +
-	"\x05total\x18\x01 \x01(\x05R\x05total\x12=\n" +
-	"\tplaylists\x18\x02 \x03(\v2\x1f.api.v1.services.types.PlaylistR\tplaylists\x12\x12\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x125\n" +
+	"\x05items\x18\x02 \x03(\v2\x1f.api.v1.services.types.PlaylistR\x05items\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"[\n" +
 	"\x17GetUserFollowersRequest\x12\x0e\n" +
@@ -3627,12 +3627,12 @@ var file_v1_user_user_service_proto_depIdxs = []int32{
 	58, // 2: api.v1.services.user.GetCurrentUserResponse.user:type_name -> api.v1.services.types.User
 	58, // 3: api.v1.services.user.GetMeResponse.user:type_name -> api.v1.services.types.User
 	58, // 4: api.v1.services.user.UpdateMeResponse.user:type_name -> api.v1.services.types.User
-	59, // 5: api.v1.services.user.GetMyPlaylistsResponse.playlists:type_name -> api.v1.services.types.Playlist
-	60, // 6: api.v1.services.user.GetMyFavoritesResponse.medias:type_name -> api.v1.services.types.Media
+	59, // 5: api.v1.services.user.GetMyPlaylistsResponse.items:type_name -> api.v1.services.types.Playlist
+	60, // 6: api.v1.services.user.GetMyFavoritesResponse.items:type_name -> api.v1.services.types.Media
 	61, // 7: api.v1.services.user.GetMyLikesResponse.likes:type_name -> api.v1.services.types.Like
-	62, // 8: api.v1.services.user.GetMySubscriptionsResponse.channels:type_name -> api.v1.services.types.Channel
+	62, // 8: api.v1.services.user.GetMySubscriptionsResponse.items:type_name -> api.v1.services.types.Channel
 	63, // 9: api.v1.services.user.GetMyHistoryResponse.items:type_name -> api.v1.services.types.HistoryItem
-	58, // 10: api.v1.services.user.ListUsersResponse.users:type_name -> api.v1.services.types.User
+	58, // 10: api.v1.services.user.ListUsersResponse.items:type_name -> api.v1.services.types.User
 	58, // 11: api.v1.services.user.GetUserResponse.user:type_name -> api.v1.services.types.User
 	58, // 12: api.v1.services.user.CreateUserRequest.user:type_name -> api.v1.services.types.User
 	58, // 13: api.v1.services.user.CreateUserResponse.user:type_name -> api.v1.services.types.User
@@ -3641,8 +3641,8 @@ var file_v1_user_user_service_proto_depIdxs = []int32{
 	58, // 16: api.v1.services.user.UpdateUserResponse.user:type_name -> api.v1.services.types.User
 	65, // 17: api.v1.services.user.DeleteUserResponse.empty:type_name -> google.protobuf.Empty
 	58, // 18: api.v1.services.user.UpdateUserRolesResponse.user:type_name -> api.v1.services.types.User
-	66, // 19: api.v1.services.user.ListUserRolesResponse.roles:type_name -> api.v1.services.types.Role
-	59, // 20: api.v1.services.user.GetUserPlaylistsResponse.playlists:type_name -> api.v1.services.types.Playlist
+	66, // 19: api.v1.services.user.ListUserRolesResponse.items:type_name -> api.v1.services.types.Role
+	59, // 20: api.v1.services.user.GetUserPlaylistsResponse.items:type_name -> api.v1.services.types.Playlist
 	58, // 21: api.v1.services.user.GetUserFollowersResponse.followers:type_name -> api.v1.services.types.User
 	0,  // 22: api.v1.services.user.UserService.Login:input_type -> api.v1.services.user.LoginRequest
 	2,  // 23: api.v1.services.user.UserService.Logout:input_type -> api.v1.services.user.LogoutRequest
