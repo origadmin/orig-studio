@@ -80,6 +80,9 @@ web/tsc-output.txt
 # Database
 *.db
 
+# Runtime data (uploads, HLS, sprites, thumbnails)
+data/
+
 
 # Added by code-review-graph
 .code-review-graph/
@@ -87,3 +90,43 @@ web/tsc-output.txt
 # Frontend embedded dist (built by make build-frontend, not committed)
 internal/frontend/dist/
 !internal/frontend/dist/.gitkeep
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+.beads/
+.beads-credential-key
+
+# AI / IDE tool configs
+.claude/
+.cursor/
+.cursorrules
+.kiro/
+.windsurfrules
+.opencode.json
+.mcp.json
+.team/
+GEMINI.md
+AGENTS.md
+CLAUDE.md
+
+# Temporary files
+bin.7z
+docs/check_temp/
+docs/img*.png
+fix_*.py
+kill.ps1
+report.md
+task-summary-*.md
+test_all.txt
+test_ffmpeg.txt
+test_worker.txt
+test_api.ps1
+test_api.sh
+FEATURE_COMPARISON.md
+
+# Frontend temp/test output
+web/eslint-*.txt
+web/playwright-report/
+web/test-results/
+web/testoutput.outlog
+web/TESTING.md
