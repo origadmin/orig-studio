@@ -67,13 +67,15 @@ type CategoryEdges struct {
 	Media []*Media `json:"media,omitempty"`
 	// Articles holds the value of the articles edge.
 	Articles []*Article `json:"articles,omitempty"`
+	// Channels holds the value of the channels edge.
+	Channels []*Channel `json:"channels,omitempty"`
 	// Parent holds the value of the parent edge.
 	Parent *Category `json:"parent,omitempty"`
 	// Children holds the value of the children edge.
 	Children []*Category `json:"children,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [6]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -105,12 +107,21 @@ func (e CategoryEdges) ArticlesOrErr() ([]*Article, error) {
 	return nil, &NotLoadedError{edge: "articles"}
 }
 
+// ChannelsOrErr returns the Channels value or an error if the edge
+// was not loaded in eager-loading.
+func (e CategoryEdges) ChannelsOrErr() ([]*Channel, error) {
+	if e.loadedTypes[3] {
+		return e.Channels, nil
+	}
+	return nil, &NotLoadedError{edge: "channels"}
+}
+
 // ParentOrErr returns the Parent value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e CategoryEdges) ParentOrErr() (*Category, error) {
 	if e.Parent != nil {
 		return e.Parent, nil
-	} else if e.loadedTypes[3] {
+	} else if e.loadedTypes[4] {
 		return nil, &NotFoundError{label: category.Label}
 	}
 	return nil, &NotLoadedError{edge: "parent"}
@@ -119,7 +130,7 @@ func (e CategoryEdges) ParentOrErr() (*Category, error) {
 // ChildrenOrErr returns the Children value or an error if the edge
 // was not loaded in eager-loading.
 func (e CategoryEdges) ChildrenOrErr() ([]*Category, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.Children, nil
 	}
 	return nil, &NotLoadedError{edge: "children"}
@@ -296,6 +307,11 @@ func (_m *Category) QueryMedia() *MediaQuery {
 // QueryArticles queries the "articles" edge of the Category entity.
 func (_m *Category) QueryArticles() *ArticleQuery {
 	return NewCategoryClient(_m.config).QueryArticles(_m)
+}
+
+// QueryChannels queries the "channels" edge of the Category entity.
+func (_m *Category) QueryChannels() *ChannelQuery {
+	return NewCategoryClient(_m.config).QueryChannels(_m)
 }
 
 // QueryParent queries the "parent" edge of the Category entity.

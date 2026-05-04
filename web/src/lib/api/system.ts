@@ -48,7 +48,7 @@ export interface TrafficStatsResponse {
 
 // ==================== Settings Types ====================
 export type SettingType = 'string' | 'int' | 'bool' | 'json';
-export type SettingCategory = 'general' | 'upload' | 'review' | 'email';
+export type SettingCategory = 'general' | 'upload' | 'review' | 'email' | 'module';
 
 export interface SettingItem {
     id: string;

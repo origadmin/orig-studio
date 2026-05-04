@@ -1584,9 +1584,11 @@ func (x *GetMySubscriptionsResponse) GetPageSize() int32 {
 
 // GetMyHistoryRequest is the request message for getting my history.
 type GetMyHistoryRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	state    protoimpl.MessageState `protogen:"open.v1"`
+	Page     int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize int32                  `protobuf:"varint,2,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	// Filter by content type (optional).
+	ContentType   types.ContentType `protobuf:"varint,3,opt,name=content_type,proto3,enum=api.v1.services.types.ContentType" json:"content_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1633,6 +1635,13 @@ func (x *GetMyHistoryRequest) GetPageSize() int32 {
 		return x.PageSize
 	}
 	return 0
+}
+
+func (x *GetMyHistoryRequest) GetContentType() types.ContentType {
+	if x != nil {
+		return x.ContentType
+	}
+	return types.ContentType(0)
 }
 
 // GetMyHistoryResponse is the response message for getting my history.
@@ -3293,6 +3302,392 @@ func (x *GetUserFollowersResponse) GetPageSize() int32 {
 	return 0
 }
 
+// UpsertHistoryRequest is the request for creating/updating a history record.
+type UpsertHistoryRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The content ID (media_id or article_id).
+	ContentId string `protobuf:"bytes,1,opt,name=content_id,proto3" json:"content_id,omitempty"`
+	// The content type.
+	ContentType types.ContentType `protobuf:"varint,2,opt,name=content_type,proto3,enum=api.v1.services.types.ContentType" json:"content_type,omitempty"`
+	// The progress in seconds.
+	ProgressSeconds int32 `protobuf:"varint,3,opt,name=progress_seconds,proto3" json:"progress_seconds,omitempty"`
+	// The total duration in seconds.
+	DurationSeconds int32 `protobuf:"varint,4,opt,name=duration_seconds,proto3" json:"duration_seconds,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *UpsertHistoryRequest) Reset() {
+	*x = UpsertHistoryRequest{}
+	mi := &file_v1_user_user_service_proto_msgTypes[58]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpsertHistoryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpsertHistoryRequest) ProtoMessage() {}
+
+func (x *UpsertHistoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[58]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpsertHistoryRequest.ProtoReflect.Descriptor instead.
+func (*UpsertHistoryRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{58}
+}
+
+func (x *UpsertHistoryRequest) GetContentId() string {
+	if x != nil {
+		return x.ContentId
+	}
+	return ""
+}
+
+func (x *UpsertHistoryRequest) GetContentType() types.ContentType {
+	if x != nil {
+		return x.ContentType
+	}
+	return types.ContentType(0)
+}
+
+func (x *UpsertHistoryRequest) GetProgressSeconds() int32 {
+	if x != nil {
+		return x.ProgressSeconds
+	}
+	return 0
+}
+
+func (x *UpsertHistoryRequest) GetDurationSeconds() int32 {
+	if x != nil {
+		return x.DurationSeconds
+	}
+	return 0
+}
+
+// UpsertHistoryResponse is the response for upserting a history record.
+type UpsertHistoryResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The upserted history item.
+	Item          *types.HistoryItem `protobuf:"bytes,1,opt,name=item,proto3" json:"item,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpsertHistoryResponse) Reset() {
+	*x = UpsertHistoryResponse{}
+	mi := &file_v1_user_user_service_proto_msgTypes[59]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpsertHistoryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpsertHistoryResponse) ProtoMessage() {}
+
+func (x *UpsertHistoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[59]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpsertHistoryResponse.ProtoReflect.Descriptor instead.
+func (*UpsertHistoryResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{59}
+}
+
+func (x *UpsertHistoryResponse) GetItem() *types.HistoryItem {
+	if x != nil {
+		return x.Item
+	}
+	return nil
+}
+
+// SyncHistoryRequest is the request for batch-syncing history records.
+type SyncHistoryRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The local history items to merge with server.
+	Items         []*types.HistoryItem `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SyncHistoryRequest) Reset() {
+	*x = SyncHistoryRequest{}
+	mi := &file_v1_user_user_service_proto_msgTypes[60]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SyncHistoryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SyncHistoryRequest) ProtoMessage() {}
+
+func (x *SyncHistoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[60]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SyncHistoryRequest.ProtoReflect.Descriptor instead.
+func (*SyncHistoryRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{60}
+}
+
+func (x *SyncHistoryRequest) GetItems() []*types.HistoryItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+// SyncHistoryResponse is the response for batch-syncing history records.
+type SyncHistoryResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The complete merged history list from server.
+	Items []*types.HistoryItem `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	// Number of items that were merged (updated or created).
+	MergedCount   int32 `protobuf:"varint,2,opt,name=merged_count,proto3" json:"merged_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SyncHistoryResponse) Reset() {
+	*x = SyncHistoryResponse{}
+	mi := &file_v1_user_user_service_proto_msgTypes[61]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SyncHistoryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SyncHistoryResponse) ProtoMessage() {}
+
+func (x *SyncHistoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[61]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SyncHistoryResponse.ProtoReflect.Descriptor instead.
+func (*SyncHistoryResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{61}
+}
+
+func (x *SyncHistoryResponse) GetItems() []*types.HistoryItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *SyncHistoryResponse) GetMergedCount() int32 {
+	if x != nil {
+		return x.MergedCount
+	}
+	return 0
+}
+
+// ClearHistoryRequest is the request for clearing all history.
+type ClearHistoryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClearHistoryRequest) Reset() {
+	*x = ClearHistoryRequest{}
+	mi := &file_v1_user_user_service_proto_msgTypes[62]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClearHistoryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClearHistoryRequest) ProtoMessage() {}
+
+func (x *ClearHistoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[62]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClearHistoryRequest.ProtoReflect.Descriptor instead.
+func (*ClearHistoryRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{62}
+}
+
+// ClearHistoryResponse is the response for clearing all history.
+type ClearHistoryResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Number of records deleted.
+	DeletedCount  int32 `protobuf:"varint,1,opt,name=deleted_count,proto3" json:"deleted_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClearHistoryResponse) Reset() {
+	*x = ClearHistoryResponse{}
+	mi := &file_v1_user_user_service_proto_msgTypes[63]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClearHistoryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClearHistoryResponse) ProtoMessage() {}
+
+func (x *ClearHistoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[63]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClearHistoryResponse.ProtoReflect.Descriptor instead.
+func (*ClearHistoryResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{63}
+}
+
+func (x *ClearHistoryResponse) GetDeletedCount() int32 {
+	if x != nil {
+		return x.DeletedCount
+	}
+	return 0
+}
+
+// RemoveHistoryItemRequest is the request for removing a single history item.
+type RemoveHistoryItemRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The history record ID to remove.
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveHistoryItemRequest) Reset() {
+	*x = RemoveHistoryItemRequest{}
+	mi := &file_v1_user_user_service_proto_msgTypes[64]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveHistoryItemRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveHistoryItemRequest) ProtoMessage() {}
+
+func (x *RemoveHistoryItemRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[64]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveHistoryItemRequest.ProtoReflect.Descriptor instead.
+func (*RemoveHistoryItemRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{64}
+}
+
+func (x *RemoveHistoryItemRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+// RemoveHistoryItemResponse is the response for removing a single history item.
+type RemoveHistoryItemResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveHistoryItemResponse) Reset() {
+	*x = RemoveHistoryItemResponse{}
+	mi := &file_v1_user_user_service_proto_msgTypes[65]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveHistoryItemResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveHistoryItemResponse) ProtoMessage() {}
+
+func (x *RemoveHistoryItemResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[65]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveHistoryItemResponse.ProtoReflect.Descriptor instead.
+func (*RemoveHistoryItemResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{65}
+}
+
 var File_v1_user_user_service_proto protoreflect.FileDescriptor
 
 const file_v1_user_user_service_proto_rawDesc = "" +
@@ -3392,10 +3787,11 @@ const file_v1_user_user_service_proto_rawDesc = "" +
 	"\x05total\x18\x01 \x01(\x05R\x05total\x124\n" +
 	"\x05items\x18\x02 \x03(\v2\x1e.api.v1.services.types.ChannelR\x05items\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
-	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"G\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"\x8f\x01\n" +
 	"\x13GetMyHistoryRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1c\n" +
-	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\"\x98\x01\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\x12F\n" +
+	"\fcontent_type\x18\x03 \x01(\x0e2\".api.v1.services.types.ContentTypeR\fcontent_type\"\x98\x01\n" +
 	"\x14GetMyHistoryResponse\x12\x14\n" +
 	"\x05total\x18\x01 \x01(\x05R\x05total\x128\n" +
 	"\x05items\x18\x02 \x03(\v2\".api.v1.services.types.HistoryItemR\x05items\x12\x12\n" +
@@ -3499,7 +3895,27 @@ const file_v1_user_user_service_proto_rawDesc = "" +
 	"\x05total\x18\x01 \x01(\x05R\x05total\x129\n" +
 	"\tfollowers\x18\x02 \x03(\v2\x1b.api.v1.services.types.UserR\tfollowers\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
-	"\tpage_size\x18\x04 \x01(\x05R\tpage_size2\xe0\x1e\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"\xd6\x01\n" +
+	"\x14UpsertHistoryRequest\x12\x1e\n" +
+	"\n" +
+	"content_id\x18\x01 \x01(\tR\n" +
+	"content_id\x12F\n" +
+	"\fcontent_type\x18\x02 \x01(\x0e2\".api.v1.services.types.ContentTypeR\fcontent_type\x12*\n" +
+	"\x10progress_seconds\x18\x03 \x01(\x05R\x10progress_seconds\x12*\n" +
+	"\x10duration_seconds\x18\x04 \x01(\x05R\x10duration_seconds\"O\n" +
+	"\x15UpsertHistoryResponse\x126\n" +
+	"\x04item\x18\x01 \x01(\v2\".api.v1.services.types.HistoryItemR\x04item\"N\n" +
+	"\x12SyncHistoryRequest\x128\n" +
+	"\x05items\x18\x01 \x03(\v2\".api.v1.services.types.HistoryItemR\x05items\"s\n" +
+	"\x13SyncHistoryResponse\x128\n" +
+	"\x05items\x18\x01 \x03(\v2\".api.v1.services.types.HistoryItemR\x05items\x12\"\n" +
+	"\fmerged_count\x18\x02 \x01(\x05R\fmerged_count\"\x15\n" +
+	"\x13ClearHistoryRequest\"<\n" +
+	"\x14ClearHistoryResponse\x12$\n" +
+	"\rdeleted_count\x18\x01 \x01(\x05R\rdeleted_count\"*\n" +
+	"\x18RemoveHistoryItemRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\x1b\n" +
+	"\x19RemoveHistoryItemResponse2\x8f#\n" +
 	"\vUserService\x12o\n" +
 	"\x05Login\x12\".api.v1.services.user.LoginRequest\x1a#.api.v1.services.user.LoginResponse\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/auth/login\x12s\n" +
 	"\x06Logout\x12#.api.v1.services.user.LogoutRequest\x1a$.api.v1.services.user.LogoutResponse\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/auth/logout\x12\x86\x01\n" +
@@ -3518,7 +3934,11 @@ const file_v1_user_user_service_proto_rawDesc = "" +
 	"\n" +
 	"GetMyLikes\x12'.api.v1.services.user.GetMyLikesRequest\x1a(.api.v1.services.user.GetMyLikesResponse\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/api/v1/me/likes\x12\x99\x01\n" +
 	"\x12GetMySubscriptions\x12/.api.v1.services.user.GetMySubscriptionsRequest\x1a0.api.v1.services.user.GetMySubscriptionsResponse\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/me/subscriptions\x12\x81\x01\n" +
-	"\fGetMyHistory\x12).api.v1.services.user.GetMyHistoryRequest\x1a*.api.v1.services.user.GetMyHistoryResponse\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/me/history\x12y\n" +
+	"\fGetMyHistory\x12).api.v1.services.user.GetMyHistoryRequest\x1a*.api.v1.services.user.GetMyHistoryResponse\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/me/history\x12\x87\x01\n" +
+	"\rUpsertHistory\x12*.api.v1.services.user.UpsertHistoryRequest\x1a+.api.v1.services.user.UpsertHistoryResponse\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/me/history\x12\x86\x01\n" +
+	"\vSyncHistory\x12(.api.v1.services.user.SyncHistoryRequest\x1a).api.v1.services.user.SyncHistoryResponse\"\"\x82\xd3\xe4\x93\x02\x1c:\x01*\"\x17/api/v1/me/history/sync\x12\x81\x01\n" +
+	"\fClearHistory\x12).api.v1.services.user.ClearHistoryRequest\x1a*.api.v1.services.user.ClearHistoryResponse\"\x1a\x82\xd3\xe4\x93\x02\x14*\x12/api/v1/me/history\x12\x95\x01\n" +
+	"\x11RemoveHistoryItem\x12..api.v1.services.user.RemoveHistoryItemRequest\x1a/.api.v1.services.user.RemoveHistoryItemResponse\"\x1f\x82\xd3\xe4\x93\x02\x19*\x17/api/v1/me/history/{id}\x12y\n" +
 	"\n" +
 	"GetMyStats\x12'.api.v1.services.user.GetMyStatsRequest\x1a(.api.v1.services.user.GetMyStatsResponse\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/api/v1/me/stats\x12s\n" +
 	"\tListUsers\x12&.api.v1.services.user.ListUsersRequest\x1a'.api.v1.services.user.ListUsersResponse\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/api/v1/users\x12r\n" +
@@ -3551,7 +3971,7 @@ func file_v1_user_user_service_proto_rawDescGZIP() []byte {
 	return file_v1_user_user_service_proto_rawDescData
 }
 
-var file_v1_user_user_service_proto_msgTypes = make([]protoimpl.MessageInfo, 58)
+var file_v1_user_user_service_proto_msgTypes = make([]protoimpl.MessageInfo, 66)
 var file_v1_user_user_service_proto_goTypes = []any{
 	(*LoginRequest)(nil),               // 0: api.v1.services.user.LoginRequest
 	(*LoginResponse)(nil),              // 1: api.v1.services.user.LoginResponse
@@ -3611,102 +4031,124 @@ var file_v1_user_user_service_proto_goTypes = []any{
 	(*GetUserPlaylistsResponse)(nil),   // 55: api.v1.services.user.GetUserPlaylistsResponse
 	(*GetUserFollowersRequest)(nil),    // 56: api.v1.services.user.GetUserFollowersRequest
 	(*GetUserFollowersResponse)(nil),   // 57: api.v1.services.user.GetUserFollowersResponse
-	(*types.User)(nil),                 // 58: api.v1.services.types.User
-	(*types.Playlist)(nil),             // 59: api.v1.services.types.Playlist
-	(*types.Media)(nil),                // 60: api.v1.services.types.Media
-	(*types.Like)(nil),                 // 61: api.v1.services.types.Like
-	(*types.Channel)(nil),              // 62: api.v1.services.types.Channel
-	(*types.HistoryItem)(nil),          // 63: api.v1.services.types.HistoryItem
-	(*fieldmaskpb.FieldMask)(nil),      // 64: google.protobuf.FieldMask
-	(*emptypb.Empty)(nil),              // 65: google.protobuf.Empty
-	(*types.Role)(nil),                 // 66: api.v1.services.types.Role
+	(*UpsertHistoryRequest)(nil),       // 58: api.v1.services.user.UpsertHistoryRequest
+	(*UpsertHistoryResponse)(nil),      // 59: api.v1.services.user.UpsertHistoryResponse
+	(*SyncHistoryRequest)(nil),         // 60: api.v1.services.user.SyncHistoryRequest
+	(*SyncHistoryResponse)(nil),        // 61: api.v1.services.user.SyncHistoryResponse
+	(*ClearHistoryRequest)(nil),        // 62: api.v1.services.user.ClearHistoryRequest
+	(*ClearHistoryResponse)(nil),       // 63: api.v1.services.user.ClearHistoryResponse
+	(*RemoveHistoryItemRequest)(nil),   // 64: api.v1.services.user.RemoveHistoryItemRequest
+	(*RemoveHistoryItemResponse)(nil),  // 65: api.v1.services.user.RemoveHistoryItemResponse
+	(*types.User)(nil),                 // 66: api.v1.services.types.User
+	(*types.Playlist)(nil),             // 67: api.v1.services.types.Playlist
+	(*types.Media)(nil),                // 68: api.v1.services.types.Media
+	(*types.Like)(nil),                 // 69: api.v1.services.types.Like
+	(*types.Channel)(nil),              // 70: api.v1.services.types.Channel
+	(types.ContentType)(0),             // 71: api.v1.services.types.ContentType
+	(*types.HistoryItem)(nil),          // 72: api.v1.services.types.HistoryItem
+	(*fieldmaskpb.FieldMask)(nil),      // 73: google.protobuf.FieldMask
+	(*emptypb.Empty)(nil),              // 74: google.protobuf.Empty
+	(*types.Role)(nil),                 // 75: api.v1.services.types.Role
 }
 var file_v1_user_user_service_proto_depIdxs = []int32{
-	58, // 0: api.v1.services.user.LoginResponse.user:type_name -> api.v1.services.types.User
-	58, // 1: api.v1.services.user.RegisterResponse.user:type_name -> api.v1.services.types.User
-	58, // 2: api.v1.services.user.GetCurrentUserResponse.user:type_name -> api.v1.services.types.User
-	58, // 3: api.v1.services.user.GetMeResponse.user:type_name -> api.v1.services.types.User
-	58, // 4: api.v1.services.user.UpdateMeResponse.user:type_name -> api.v1.services.types.User
-	59, // 5: api.v1.services.user.GetMyPlaylistsResponse.items:type_name -> api.v1.services.types.Playlist
-	60, // 6: api.v1.services.user.GetMyFavoritesResponse.items:type_name -> api.v1.services.types.Media
-	61, // 7: api.v1.services.user.GetMyLikesResponse.likes:type_name -> api.v1.services.types.Like
-	62, // 8: api.v1.services.user.GetMySubscriptionsResponse.items:type_name -> api.v1.services.types.Channel
-	63, // 9: api.v1.services.user.GetMyHistoryResponse.items:type_name -> api.v1.services.types.HistoryItem
-	58, // 10: api.v1.services.user.ListUsersResponse.items:type_name -> api.v1.services.types.User
-	58, // 11: api.v1.services.user.GetUserResponse.user:type_name -> api.v1.services.types.User
-	58, // 12: api.v1.services.user.CreateUserRequest.user:type_name -> api.v1.services.types.User
-	58, // 13: api.v1.services.user.CreateUserResponse.user:type_name -> api.v1.services.types.User
-	58, // 14: api.v1.services.user.UpdateUserRequest.user:type_name -> api.v1.services.types.User
-	64, // 15: api.v1.services.user.UpdateUserRequest.update_mask:type_name -> google.protobuf.FieldMask
-	58, // 16: api.v1.services.user.UpdateUserResponse.user:type_name -> api.v1.services.types.User
-	65, // 17: api.v1.services.user.DeleteUserResponse.empty:type_name -> google.protobuf.Empty
-	58, // 18: api.v1.services.user.UpdateUserRolesResponse.user:type_name -> api.v1.services.types.User
-	66, // 19: api.v1.services.user.ListUserRolesResponse.items:type_name -> api.v1.services.types.Role
-	59, // 20: api.v1.services.user.GetUserPlaylistsResponse.items:type_name -> api.v1.services.types.Playlist
-	58, // 21: api.v1.services.user.GetUserFollowersResponse.followers:type_name -> api.v1.services.types.User
-	0,  // 22: api.v1.services.user.UserService.Login:input_type -> api.v1.services.user.LoginRequest
-	2,  // 23: api.v1.services.user.UserService.Logout:input_type -> api.v1.services.user.LogoutRequest
-	4,  // 24: api.v1.services.user.UserService.RefreshToken:input_type -> api.v1.services.user.RefreshTokenRequest
-	6,  // 25: api.v1.services.user.UserService.Register:input_type -> api.v1.services.user.RegisterRequest
-	8,  // 26: api.v1.services.user.UserService.ForgotPassword:input_type -> api.v1.services.user.ForgotPasswordRequest
-	10, // 27: api.v1.services.user.UserService.ResetPassword:input_type -> api.v1.services.user.ResetPasswordRequest
-	12, // 28: api.v1.services.user.UserService.GetCurrentUser:input_type -> api.v1.services.user.GetCurrentUserRequest
-	14, // 29: api.v1.services.user.UserService.GetMe:input_type -> api.v1.services.user.GetMeRequest
-	16, // 30: api.v1.services.user.UserService.UpdateMe:input_type -> api.v1.services.user.UpdateMeRequest
-	18, // 31: api.v1.services.user.UserService.UpdateMyPassword:input_type -> api.v1.services.user.UpdateMyPasswordRequest
-	20, // 32: api.v1.services.user.UserService.GetMyPlaylists:input_type -> api.v1.services.user.GetMyPlaylistsRequest
-	22, // 33: api.v1.services.user.UserService.GetMyFavorites:input_type -> api.v1.services.user.GetMyFavoritesRequest
-	24, // 34: api.v1.services.user.UserService.GetMyLikes:input_type -> api.v1.services.user.GetMyLikesRequest
-	26, // 35: api.v1.services.user.UserService.GetMySubscriptions:input_type -> api.v1.services.user.GetMySubscriptionsRequest
-	28, // 36: api.v1.services.user.UserService.GetMyHistory:input_type -> api.v1.services.user.GetMyHistoryRequest
-	30, // 37: api.v1.services.user.UserService.GetMyStats:input_type -> api.v1.services.user.GetMyStatsRequest
-	32, // 38: api.v1.services.user.UserService.ListUsers:input_type -> api.v1.services.user.ListUsersRequest
-	34, // 39: api.v1.services.user.UserService.GetUser:input_type -> api.v1.services.user.GetUserRequest
-	36, // 40: api.v1.services.user.UserService.CreateUser:input_type -> api.v1.services.user.CreateUserRequest
-	38, // 41: api.v1.services.user.UserService.UpdateUser:input_type -> api.v1.services.user.UpdateUserRequest
-	40, // 42: api.v1.services.user.UserService.DeleteUser:input_type -> api.v1.services.user.DeleteUserRequest
-	42, // 43: api.v1.services.user.UserService.UpdateUserStatus:input_type -> api.v1.services.user.UpdateUserStatusRequest
-	44, // 44: api.v1.services.user.UserService.UpdateUserRoles:input_type -> api.v1.services.user.UpdateUserRolesRequest
-	46, // 45: api.v1.services.user.UserService.ChangeUserPassword:input_type -> api.v1.services.user.ChangeUserPasswordRequest
-	48, // 46: api.v1.services.user.UserService.VerifyPassword:input_type -> api.v1.services.user.VerifyPasswordRequest
-	50, // 47: api.v1.services.user.UserService.ListUserRoles:input_type -> api.v1.services.user.ListUserRolesRequest
-	52, // 48: api.v1.services.user.UserService.GetUserStats:input_type -> api.v1.services.user.GetUserStatsRequest
-	54, // 49: api.v1.services.user.UserService.GetUserPlaylists:input_type -> api.v1.services.user.GetUserPlaylistsRequest
-	56, // 50: api.v1.services.user.UserService.GetUserFollowers:input_type -> api.v1.services.user.GetUserFollowersRequest
-	1,  // 51: api.v1.services.user.UserService.Login:output_type -> api.v1.services.user.LoginResponse
-	3,  // 52: api.v1.services.user.UserService.Logout:output_type -> api.v1.services.user.LogoutResponse
-	5,  // 53: api.v1.services.user.UserService.RefreshToken:output_type -> api.v1.services.user.RefreshTokenResponse
-	7,  // 54: api.v1.services.user.UserService.Register:output_type -> api.v1.services.user.RegisterResponse
-	9,  // 55: api.v1.services.user.UserService.ForgotPassword:output_type -> api.v1.services.user.ForgotPasswordResponse
-	11, // 56: api.v1.services.user.UserService.ResetPassword:output_type -> api.v1.services.user.ResetPasswordResponse
-	13, // 57: api.v1.services.user.UserService.GetCurrentUser:output_type -> api.v1.services.user.GetCurrentUserResponse
-	15, // 58: api.v1.services.user.UserService.GetMe:output_type -> api.v1.services.user.GetMeResponse
-	17, // 59: api.v1.services.user.UserService.UpdateMe:output_type -> api.v1.services.user.UpdateMeResponse
-	19, // 60: api.v1.services.user.UserService.UpdateMyPassword:output_type -> api.v1.services.user.UpdateMyPasswordResponse
-	21, // 61: api.v1.services.user.UserService.GetMyPlaylists:output_type -> api.v1.services.user.GetMyPlaylistsResponse
-	23, // 62: api.v1.services.user.UserService.GetMyFavorites:output_type -> api.v1.services.user.GetMyFavoritesResponse
-	25, // 63: api.v1.services.user.UserService.GetMyLikes:output_type -> api.v1.services.user.GetMyLikesResponse
-	27, // 64: api.v1.services.user.UserService.GetMySubscriptions:output_type -> api.v1.services.user.GetMySubscriptionsResponse
-	29, // 65: api.v1.services.user.UserService.GetMyHistory:output_type -> api.v1.services.user.GetMyHistoryResponse
-	31, // 66: api.v1.services.user.UserService.GetMyStats:output_type -> api.v1.services.user.GetMyStatsResponse
-	33, // 67: api.v1.services.user.UserService.ListUsers:output_type -> api.v1.services.user.ListUsersResponse
-	35, // 68: api.v1.services.user.UserService.GetUser:output_type -> api.v1.services.user.GetUserResponse
-	37, // 69: api.v1.services.user.UserService.CreateUser:output_type -> api.v1.services.user.CreateUserResponse
-	39, // 70: api.v1.services.user.UserService.UpdateUser:output_type -> api.v1.services.user.UpdateUserResponse
-	41, // 71: api.v1.services.user.UserService.DeleteUser:output_type -> api.v1.services.user.DeleteUserResponse
-	43, // 72: api.v1.services.user.UserService.UpdateUserStatus:output_type -> api.v1.services.user.UpdateUserStatusResponse
-	45, // 73: api.v1.services.user.UserService.UpdateUserRoles:output_type -> api.v1.services.user.UpdateUserRolesResponse
-	47, // 74: api.v1.services.user.UserService.ChangeUserPassword:output_type -> api.v1.services.user.ChangeUserPasswordResponse
-	49, // 75: api.v1.services.user.UserService.VerifyPassword:output_type -> api.v1.services.user.VerifyPasswordResponse
-	51, // 76: api.v1.services.user.UserService.ListUserRoles:output_type -> api.v1.services.user.ListUserRolesResponse
-	53, // 77: api.v1.services.user.UserService.GetUserStats:output_type -> api.v1.services.user.GetUserStatsResponse
-	55, // 78: api.v1.services.user.UserService.GetUserPlaylists:output_type -> api.v1.services.user.GetUserPlaylistsResponse
-	57, // 79: api.v1.services.user.UserService.GetUserFollowers:output_type -> api.v1.services.user.GetUserFollowersResponse
-	51, // [51:80] is the sub-list for method output_type
-	22, // [22:51] is the sub-list for method input_type
-	22, // [22:22] is the sub-list for extension type_name
-	22, // [22:22] is the sub-list for extension extendee
-	0,  // [0:22] is the sub-list for field type_name
+	66, // 0: api.v1.services.user.LoginResponse.user:type_name -> api.v1.services.types.User
+	66, // 1: api.v1.services.user.RegisterResponse.user:type_name -> api.v1.services.types.User
+	66, // 2: api.v1.services.user.GetCurrentUserResponse.user:type_name -> api.v1.services.types.User
+	66, // 3: api.v1.services.user.GetMeResponse.user:type_name -> api.v1.services.types.User
+	66, // 4: api.v1.services.user.UpdateMeResponse.user:type_name -> api.v1.services.types.User
+	67, // 5: api.v1.services.user.GetMyPlaylistsResponse.items:type_name -> api.v1.services.types.Playlist
+	68, // 6: api.v1.services.user.GetMyFavoritesResponse.items:type_name -> api.v1.services.types.Media
+	69, // 7: api.v1.services.user.GetMyLikesResponse.likes:type_name -> api.v1.services.types.Like
+	70, // 8: api.v1.services.user.GetMySubscriptionsResponse.items:type_name -> api.v1.services.types.Channel
+	71, // 9: api.v1.services.user.GetMyHistoryRequest.content_type:type_name -> api.v1.services.types.ContentType
+	72, // 10: api.v1.services.user.GetMyHistoryResponse.items:type_name -> api.v1.services.types.HistoryItem
+	66, // 11: api.v1.services.user.ListUsersResponse.items:type_name -> api.v1.services.types.User
+	66, // 12: api.v1.services.user.GetUserResponse.user:type_name -> api.v1.services.types.User
+	66, // 13: api.v1.services.user.CreateUserRequest.user:type_name -> api.v1.services.types.User
+	66, // 14: api.v1.services.user.CreateUserResponse.user:type_name -> api.v1.services.types.User
+	66, // 15: api.v1.services.user.UpdateUserRequest.user:type_name -> api.v1.services.types.User
+	73, // 16: api.v1.services.user.UpdateUserRequest.update_mask:type_name -> google.protobuf.FieldMask
+	66, // 17: api.v1.services.user.UpdateUserResponse.user:type_name -> api.v1.services.types.User
+	74, // 18: api.v1.services.user.DeleteUserResponse.empty:type_name -> google.protobuf.Empty
+	66, // 19: api.v1.services.user.UpdateUserRolesResponse.user:type_name -> api.v1.services.types.User
+	75, // 20: api.v1.services.user.ListUserRolesResponse.items:type_name -> api.v1.services.types.Role
+	67, // 21: api.v1.services.user.GetUserPlaylistsResponse.items:type_name -> api.v1.services.types.Playlist
+	66, // 22: api.v1.services.user.GetUserFollowersResponse.followers:type_name -> api.v1.services.types.User
+	71, // 23: api.v1.services.user.UpsertHistoryRequest.content_type:type_name -> api.v1.services.types.ContentType
+	72, // 24: api.v1.services.user.UpsertHistoryResponse.item:type_name -> api.v1.services.types.HistoryItem
+	72, // 25: api.v1.services.user.SyncHistoryRequest.items:type_name -> api.v1.services.types.HistoryItem
+	72, // 26: api.v1.services.user.SyncHistoryResponse.items:type_name -> api.v1.services.types.HistoryItem
+	0,  // 27: api.v1.services.user.UserService.Login:input_type -> api.v1.services.user.LoginRequest
+	2,  // 28: api.v1.services.user.UserService.Logout:input_type -> api.v1.services.user.LogoutRequest
+	4,  // 29: api.v1.services.user.UserService.RefreshToken:input_type -> api.v1.services.user.RefreshTokenRequest
+	6,  // 30: api.v1.services.user.UserService.Register:input_type -> api.v1.services.user.RegisterRequest
+	8,  // 31: api.v1.services.user.UserService.ForgotPassword:input_type -> api.v1.services.user.ForgotPasswordRequest
+	10, // 32: api.v1.services.user.UserService.ResetPassword:input_type -> api.v1.services.user.ResetPasswordRequest
+	12, // 33: api.v1.services.user.UserService.GetCurrentUser:input_type -> api.v1.services.user.GetCurrentUserRequest
+	14, // 34: api.v1.services.user.UserService.GetMe:input_type -> api.v1.services.user.GetMeRequest
+	16, // 35: api.v1.services.user.UserService.UpdateMe:input_type -> api.v1.services.user.UpdateMeRequest
+	18, // 36: api.v1.services.user.UserService.UpdateMyPassword:input_type -> api.v1.services.user.UpdateMyPasswordRequest
+	20, // 37: api.v1.services.user.UserService.GetMyPlaylists:input_type -> api.v1.services.user.GetMyPlaylistsRequest
+	22, // 38: api.v1.services.user.UserService.GetMyFavorites:input_type -> api.v1.services.user.GetMyFavoritesRequest
+	24, // 39: api.v1.services.user.UserService.GetMyLikes:input_type -> api.v1.services.user.GetMyLikesRequest
+	26, // 40: api.v1.services.user.UserService.GetMySubscriptions:input_type -> api.v1.services.user.GetMySubscriptionsRequest
+	28, // 41: api.v1.services.user.UserService.GetMyHistory:input_type -> api.v1.services.user.GetMyHistoryRequest
+	58, // 42: api.v1.services.user.UserService.UpsertHistory:input_type -> api.v1.services.user.UpsertHistoryRequest
+	60, // 43: api.v1.services.user.UserService.SyncHistory:input_type -> api.v1.services.user.SyncHistoryRequest
+	62, // 44: api.v1.services.user.UserService.ClearHistory:input_type -> api.v1.services.user.ClearHistoryRequest
+	64, // 45: api.v1.services.user.UserService.RemoveHistoryItem:input_type -> api.v1.services.user.RemoveHistoryItemRequest
+	30, // 46: api.v1.services.user.UserService.GetMyStats:input_type -> api.v1.services.user.GetMyStatsRequest
+	32, // 47: api.v1.services.user.UserService.ListUsers:input_type -> api.v1.services.user.ListUsersRequest
+	34, // 48: api.v1.services.user.UserService.GetUser:input_type -> api.v1.services.user.GetUserRequest
+	36, // 49: api.v1.services.user.UserService.CreateUser:input_type -> api.v1.services.user.CreateUserRequest
+	38, // 50: api.v1.services.user.UserService.UpdateUser:input_type -> api.v1.services.user.UpdateUserRequest
+	40, // 51: api.v1.services.user.UserService.DeleteUser:input_type -> api.v1.services.user.DeleteUserRequest
+	42, // 52: api.v1.services.user.UserService.UpdateUserStatus:input_type -> api.v1.services.user.UpdateUserStatusRequest
+	44, // 53: api.v1.services.user.UserService.UpdateUserRoles:input_type -> api.v1.services.user.UpdateUserRolesRequest
+	46, // 54: api.v1.services.user.UserService.ChangeUserPassword:input_type -> api.v1.services.user.ChangeUserPasswordRequest
+	48, // 55: api.v1.services.user.UserService.VerifyPassword:input_type -> api.v1.services.user.VerifyPasswordRequest
+	50, // 56: api.v1.services.user.UserService.ListUserRoles:input_type -> api.v1.services.user.ListUserRolesRequest
+	52, // 57: api.v1.services.user.UserService.GetUserStats:input_type -> api.v1.services.user.GetUserStatsRequest
+	54, // 58: api.v1.services.user.UserService.GetUserPlaylists:input_type -> api.v1.services.user.GetUserPlaylistsRequest
+	56, // 59: api.v1.services.user.UserService.GetUserFollowers:input_type -> api.v1.services.user.GetUserFollowersRequest
+	1,  // 60: api.v1.services.user.UserService.Login:output_type -> api.v1.services.user.LoginResponse
+	3,  // 61: api.v1.services.user.UserService.Logout:output_type -> api.v1.services.user.LogoutResponse
+	5,  // 62: api.v1.services.user.UserService.RefreshToken:output_type -> api.v1.services.user.RefreshTokenResponse
+	7,  // 63: api.v1.services.user.UserService.Register:output_type -> api.v1.services.user.RegisterResponse
+	9,  // 64: api.v1.services.user.UserService.ForgotPassword:output_type -> api.v1.services.user.ForgotPasswordResponse
+	11, // 65: api.v1.services.user.UserService.ResetPassword:output_type -> api.v1.services.user.ResetPasswordResponse
+	13, // 66: api.v1.services.user.UserService.GetCurrentUser:output_type -> api.v1.services.user.GetCurrentUserResponse
+	15, // 67: api.v1.services.user.UserService.GetMe:output_type -> api.v1.services.user.GetMeResponse
+	17, // 68: api.v1.services.user.UserService.UpdateMe:output_type -> api.v1.services.user.UpdateMeResponse
+	19, // 69: api.v1.services.user.UserService.UpdateMyPassword:output_type -> api.v1.services.user.UpdateMyPasswordResponse
+	21, // 70: api.v1.services.user.UserService.GetMyPlaylists:output_type -> api.v1.services.user.GetMyPlaylistsResponse
+	23, // 71: api.v1.services.user.UserService.GetMyFavorites:output_type -> api.v1.services.user.GetMyFavoritesResponse
+	25, // 72: api.v1.services.user.UserService.GetMyLikes:output_type -> api.v1.services.user.GetMyLikesResponse
+	27, // 73: api.v1.services.user.UserService.GetMySubscriptions:output_type -> api.v1.services.user.GetMySubscriptionsResponse
+	29, // 74: api.v1.services.user.UserService.GetMyHistory:output_type -> api.v1.services.user.GetMyHistoryResponse
+	59, // 75: api.v1.services.user.UserService.UpsertHistory:output_type -> api.v1.services.user.UpsertHistoryResponse
+	61, // 76: api.v1.services.user.UserService.SyncHistory:output_type -> api.v1.services.user.SyncHistoryResponse
+	63, // 77: api.v1.services.user.UserService.ClearHistory:output_type -> api.v1.services.user.ClearHistoryResponse
+	65, // 78: api.v1.services.user.UserService.RemoveHistoryItem:output_type -> api.v1.services.user.RemoveHistoryItemResponse
+	31, // 79: api.v1.services.user.UserService.GetMyStats:output_type -> api.v1.services.user.GetMyStatsResponse
+	33, // 80: api.v1.services.user.UserService.ListUsers:output_type -> api.v1.services.user.ListUsersResponse
+	35, // 81: api.v1.services.user.UserService.GetUser:output_type -> api.v1.services.user.GetUserResponse
+	37, // 82: api.v1.services.user.UserService.CreateUser:output_type -> api.v1.services.user.CreateUserResponse
+	39, // 83: api.v1.services.user.UserService.UpdateUser:output_type -> api.v1.services.user.UpdateUserResponse
+	41, // 84: api.v1.services.user.UserService.DeleteUser:output_type -> api.v1.services.user.DeleteUserResponse
+	43, // 85: api.v1.services.user.UserService.UpdateUserStatus:output_type -> api.v1.services.user.UpdateUserStatusResponse
+	45, // 86: api.v1.services.user.UserService.UpdateUserRoles:output_type -> api.v1.services.user.UpdateUserRolesResponse
+	47, // 87: api.v1.services.user.UserService.ChangeUserPassword:output_type -> api.v1.services.user.ChangeUserPasswordResponse
+	49, // 88: api.v1.services.user.UserService.VerifyPassword:output_type -> api.v1.services.user.VerifyPasswordResponse
+	51, // 89: api.v1.services.user.UserService.ListUserRoles:output_type -> api.v1.services.user.ListUserRolesResponse
+	53, // 90: api.v1.services.user.UserService.GetUserStats:output_type -> api.v1.services.user.GetUserStatsResponse
+	55, // 91: api.v1.services.user.UserService.GetUserPlaylists:output_type -> api.v1.services.user.GetUserPlaylistsResponse
+	57, // 92: api.v1.services.user.UserService.GetUserFollowers:output_type -> api.v1.services.user.GetUserFollowersResponse
+	60, // [60:93] is the sub-list for method output_type
+	27, // [27:60] is the sub-list for method input_type
+	27, // [27:27] is the sub-list for extension type_name
+	27, // [27:27] is the sub-list for extension extendee
+	0,  // [0:27] is the sub-list for field type_name
 }
 
 func init() { file_v1_user_user_service_proto_init() }
@@ -3721,7 +4163,7 @@ func file_v1_user_user_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_user_user_service_proto_rawDesc), len(file_v1_user_user_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   58,
+			NumMessages:   66,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -1,42 +1,48 @@
-// Channel API v3.2 (路径参数版)
+// Channel API v4.0 (F019: Channel creation + handle resolution)
 import {api} from "../request";
 import {PaginatedResponse} from "./types";
+
+export interface ChannelLink {
+    type: 'website' | 'social' | 'custom';
+    platform?: string;
+    url: string;
+    title: string;
+}
 
 export interface Channel {
     id: string;
     name: string;
     title?: string;
-    slug: string;
+    slug?: string;
     handle?: string;
-    friendly_token?: string;
+    short_token?: string;
     description: string;
     user_id: string;
-    owner_id?: string;
-    media_count: number;
-    subscriber_count: number;
-    status: string;
-    is_public?: boolean;
-    is_default?: boolean;
-    banner_logo?: string;
     avatar?: string;
     banner?: string;
-    total_views?: number;
-    video_count?: number;
+    banner_logo?: string;
+    status?: string;
+    privacy?: string;
     is_verified?: boolean;
-    create_time?: string;
-    links?: Array<{
-        type: 'website' | 'social' | 'custom';
-        platform?: string;
-        url: string;
-        title: string;
-    }>;
     tags?: string[];
+    category_id?: number;
+    subscriber_count: number;
+    media_count: number;
+    article_count?: number;
+    total_views?: number;
+    links?: ChannelLink[];
+    create_time?: string;
+    update_time?: string;
+    // View context
+    is_owner?: boolean;
+    is_subscribed?: boolean;
 }
 
 export interface ChannelDetail extends Channel {}
 
 export interface ChannelPlaylist {
     id: string;
+    short_token?: string;
     title: string;
     name?: string;
     description?: string;
@@ -66,6 +72,39 @@ export interface NotificationSettingResponse {
     message: string;
 }
 
+export interface HandleResolution {
+    type: 'channel' | 'user' | 'not_found';
+    channel?: Channel;
+    user?: {
+        id: string;
+        username: string;
+        name: string;
+        logo?: string;
+    };
+}
+
+export interface ChannelLimits {
+    max_channels: number;
+    current_count: number;
+    can_create: boolean;
+}
+
+export interface HandleValidation {
+    available: boolean;
+    reason?: string;
+}
+
+export interface CreateChannelInput {
+    name: string;
+    handle: string;
+    description?: string;
+    avatar?: string;
+    banner?: string;
+    privacy?: string;
+    tags?: string[];
+    category_id?: number;
+}
+
 /**
  * Channel Query Parameters for GET /channels (查询参数方式)
  */
@@ -81,46 +120,34 @@ export interface ChannelQueryParams {
 
 export const channelApi = {
     /**
-     * Get single channel by short_token (路径参数方式) ⭐
+     * Get single channel by short_token (路径参数方式)
      * RESTful, MediaCMS风格, 推荐!
-     *
-     * @param token - short_token [a-zA-Z0-9]{6,12}
-     * @example getByToken('adm001') → GET /channels/adm001
      */
     getByToken: (token: string) =>
         api.get<ChannelDetail>(`/channels/${token}`),
 
     /**
      * Get channels with query parameters (查询参数方式)
-     * 支持3种模式:
-     *   1. ?username=xxx  → @username 两步方案
-     *   2. ?user_id=xxx   → 用户频道列表
-     *   3. (无参数)        → 公开频道列表
-     *
-     * @example get({ username: 'admin' }) → GET /channels?username=admin
-     * @example get({ user_id: 'uuid-xxx', page: 1 }) → GET /channels?user_id=uuid-xxx&page=1
-     * @example get({ page: 1, limit: 20 }) → GET /channels?page=1&limit=20
      */
     get: (params?: ChannelQueryParams) =>
         api.get<Channel | ChannelList>('/channels', {params}),
 
     /**
      * List all public channels (公开频道列表)
-     * Alias for get() without params
      */
     listAll: (params?: {page?: number; limit?: number}) =>
         api.get<ChannelList>('/channels', {params}),
 
     /**
-     * Get current user's channel(s)
+     * Get current user's channels (F019: now returns list, not single)
      */
-    getMyChannel: () =>
-        api.get<ChannelDetail>('/channels/me'),
+    getMyChannels: (params?: {page?: number; page_size?: number}) =>
+        api.get<ChannelList>('/channels/me', {params}),
 
     /**
-     * Create a new channel
+     * Create a new channel (F019: with handle, limits check)
      */
-    create: (data: Partial<Channel>) => api.post<Channel>('/channels', data),
+    create: (data: CreateChannelInput) => api.post<Channel>('/channels', data),
 
     /**
      * Update a channel (by short_token)
@@ -137,6 +164,27 @@ export const channelApi = {
      */
     updateHandle: (handle: string) =>
         api.put<ChannelDetail>('/channels/me/handle', {handle}),
+
+    /**
+     * Resolve a @handle to a channel or user (F019)
+     * GET /api/v1/resolve/@{handle}
+     */
+    resolveHandle: (handle: string) =>
+        api.get<HandleResolution>(`/resolve/@${handle}`),
+
+    /**
+     * Validate if a handle is available (F019)
+     * GET /api/v1/channels/validate-handle?handle=xxx
+     */
+    validateHandle: (handle: string) =>
+        api.get<HandleValidation>('/channels/validate-handle', {params: {handle}}),
+
+    /**
+     * Get channel creation limits for current user (F019)
+     * GET /api/v1/system/config/channel-limits
+     */
+    getChannelLimits: () =>
+        api.get<ChannelLimits>('/system/config/channel-limits'),
 
     // ================================
     // Subscription APIs (基于 short_token)

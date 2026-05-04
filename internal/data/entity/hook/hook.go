@@ -128,6 +128,18 @@ func (f GroupMemberFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.GroupMemberMutation", m)
 }
 
+// The HistoryFunc type is an adapter to allow the use of ordinary
+// function as History mutator.
+type HistoryFunc func(context.Context, *entity.HistoryMutation) (entity.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f HistoryFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Value, error) {
+	if mv, ok := m.(*entity.HistoryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.HistoryMutation", m)
+}
+
 // The LikeFunc type is an adapter to allow the use of ordinary
 // function as Like mutator.
 type LikeFunc func(context.Context, *entity.LikeMutation) (entity.Value, error)

@@ -13,6 +13,7 @@ interface RecommendedChannel {
     id: string;
     name: string;
     handle?: string;
+    short_token?: string;
     avatar?: string;
     subscriber_count?: number;
     is_verified?: boolean;
@@ -105,7 +106,7 @@ const RecommendedChannels: React.FC<RecommendedChannelsProps> = ({
                     onClick={() => navigate({to: '/members'})}
                     className="text-xs text-primary hover:underline flex items-center gap-1"
                 >
-                    查看全部
+                    {t('channel.viewAll')}
                     <ChevronRight className="w-3 h-3"/>
                 </button>
             </div>
@@ -116,13 +117,7 @@ const RecommendedChannels: React.FC<RecommendedChannelsProps> = ({
                         key={channel.id}
                         className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer group"
                         onClick={() =>
-                            navigate({
-                                to:
-                                    channel.handle &&
-                                    `/@${channel.handle}` ||
-                                      `/c/${channel.id}`,
-                                params: channel.handle ? {handle: `@${channel.handle}`} : undefined,
-                            })
+                            navigate({to: '/c/$id', params: {id: channel.short_token || channel.id}})
                         }
                     >
                         <div className="w-10 h-10 rounded-full overflow-hidden bg-muted dark:bg-gray-700 flex-shrink-0">

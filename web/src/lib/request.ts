@@ -80,11 +80,17 @@ export const attemptRefresh = async (): Promise<boolean> => {
     if (!refreshToken) return false;
 
     try {
-        const {data: newToken} = await axios.post<Token>(
+        // Use raw axios (not the request instance) to avoid circular interceptor calls.
+        // Since this bypasses the response interceptor that auto-unwraps {code, data},
+        // we must manually unwrap the unified response format (B096 fix).
+        const {data: responseBody} = await axios.post<ApiResponse<Token>>(
             (API_BASE_URL || "") + API_PREFIX + "/auth/refresh",
             {refresh_token: refreshToken}
         );
-        setAuth(newToken);
+        if (responseBody.code !== 0 || !responseBody.data) {
+            return false;
+        }
+        setAuth(responseBody.data);
         return true;
     } catch {
         return false;
@@ -108,7 +114,7 @@ export const setAuth = (token: Token) => {
     let user: User | null = null;
     if (token.user) {
         user = {
-            id: typeof token.user.id === 'string' ? parseInt(token.user.id, 10) : token.user.id,
+            id: String(token.user.id),
             username: token.user.username,
             displayName: token.user.nickname || token.user.username,
             avatarUrl: undefined,
@@ -214,21 +220,22 @@ function createRequest() {
                 // 返回 data 部分
                 return {...response, data: data.data};
             }
-            // 原始格式，直接返回（用于认证接口）
+            // Non-unified format (no code/data envelope), return as-is
             return response;
         },
         async (error) => {
             const originalRequest = error.config as any;
 
-            // 构造完整的 URL
-            const refreshTokenUrl = API_PREFIX + "/auth/refresh";
-            const signinUrl = "/auth/signin";
-            const signupUrl = "/auth/signup";
-            
-            const publicUrls = [refreshTokenUrl, signinUrl, signupUrl];
+            // Public auth URLs that should not trigger token refresh on 401.
+            // originalRequest.url is the relative path (e.g., "/auth/refresh")
+            // because baseURL already includes API_PREFIX. So we match against
+            // the relative paths, not the full API_PREFIX + path (B098 fix).
+            const publicAuthUrls = ["/auth/refresh", "/auth/signin", "/auth/signup"];
+            const requestUrl = originalRequest.url || "";
+            const isPublicAuthUrl = publicAuthUrls.some(url => requestUrl.includes(url));
             
             // 如果不是 401 或者是公共接口的 401，直接拒绝
-            if (error.response?.status !== 401 || publicUrls.includes(originalRequest.url || "")) {
+            if (error.response?.status !== 401 || isPublicAuthUrl) {
                 return Promise.reject(error);
             }
 
@@ -258,12 +265,18 @@ function createRequest() {
             }
 
             try {
-                // 使用普通 axios 而不是 request 实例调用 refresh token 接口
-                // 这一点很重要！webui 项目也是这样做的！
-                const { data: newToken } = await axios.post<Token>(
-                    (API_BASE_URL || "") + refreshTokenUrl, 
+                // Use raw axios (not the request instance) to avoid circular interceptor calls.
+                // Since this bypasses the response interceptor that auto-unwraps {code, data},
+                // we must manually unwrap the unified response format (B096 fix).
+                const { data: responseBody } = await axios.post<ApiResponse<Token>>(
+                    (API_BASE_URL || "") + API_PREFIX + "/auth/refresh", 
                     { refresh_token: refreshToken }
                 );
+
+                if (responseBody.code !== 0 || !responseBody.data) {
+                    throw new Error("Token refresh failed: invalid response");
+                }
+                const newToken = responseBody.data;
 
                 setAuth(newToken);
                 if (originalRequest.headers) {

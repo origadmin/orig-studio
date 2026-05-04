@@ -34,33 +34,42 @@ import (
 	"origadmin/application/origcms/internal/features/content/biz"
 	"origadmin/application/origcms/internal/server"
 	"origadmin/application/origcms/internal/validation"
+	systembiz "origadmin/application/origcms/internal/features/system/biz"
+	systemservice "origadmin/application/origcms/internal/features/system/service"
 
 	"github.com/gin-gonic/gin"
 )
 
 // ChannelHandler handles /api/v1/channels routes.
 type ChannelHandler struct {
-	uc  *biz.PlaylistChannelUseCase
-	jwt *auth.Manager
+	uc        *biz.PlaylistChannelUseCase
+	jwt       *auth.Manager
+	settingUC *systembiz.SettingUseCase
 }
 
 // NewChannelHandler creates a new ChannelHandler.
-func NewChannelHandler(uc *biz.PlaylistChannelUseCase, jwt *auth.Manager) *ChannelHandler {
-	return &ChannelHandler{uc: uc, jwt: jwt}
+func NewChannelHandler(uc *biz.PlaylistChannelUseCase, jwt *auth.Manager, settingUC *systembiz.SettingUseCase) *ChannelHandler {
+	return &ChannelHandler{uc: uc, jwt: jwt, settingUC: settingUC}
 }
 
 func (h *ChannelHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	r := handler.NewGinRouterAdapter(rg)
-	channels := r.Group("/channels")
+	channelsGroup := rg.Group("/channels")
+	channelsGroup.Use(systemservice.ModuleGuard(h.settingUC, "module_videos"))
+
+	r := handler.NewGinRouterAdapter(channelsGroup)
+	channels := r.Group("")
 	{
 		// ================================
 		// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST!
 		// ================================
 		channels.GET("", h.ListChannels)
 
-		// Current user's channel (requires auth)
-		channels.GET("/me", server.WithJWT(h.jwt, h.GetMyChannel))
+		// Current user's channels (requires auth)
+		channels.GET("/me", server.WithJWT(h.jwt, h.GetMyChannels))
 		channels.PUT("/me/handle", server.WithJWT(h.jwt, h.UpdateMyHandle))
+
+		// Handle validation (public)
+		channels.GET("/validate-handle", h.ValidateHandle)
 
 		// ================================
 		// 2. PATH PARAMETER ROUTES (WITH :token) - MUST BE AFTER STATIC
@@ -107,11 +116,27 @@ func (h *ChannelHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	}
 
 	// ================================
-	// Subscription feed routes (top-level resource)
+	// Handle resolution route (top-level, NOT under /channels)
 	// ================================
-	subs := r.Group("/subscriptions")
+	resolveAdapter := handler.NewGinRouterAdapter(rg.Group("/resolve"))
 	{
-		subs.GET("/videos", server.WithJWT(h.jwt, h.GetSubscriptionVideos))
+		resolveAdapter.GET("/@:handle", h.ResolveHandle)
+	}
+
+	// ================================
+	// System config routes (top-level, NOT under /channels)
+	// ================================
+	configAdapter := handler.NewGinRouterAdapter(rg.Group("/system/config"))
+	{
+		configAdapter.GET("/channel-limits", h.GetChannelLimits)
+	}
+
+	// ================================
+	// Subscription feed routes (top-level, NOT under /channels)
+	// ================================
+	subsAdapter := handler.NewGinRouterAdapter(rg.Group("/subscriptions"))
+	{
+		subsAdapter.GET("/videos", server.WithJWT(h.jwt, h.GetSubscriptionVideos))
 	}
 }
 
@@ -226,29 +251,68 @@ func (h *ChannelHandler) CreateChannel(w http.ResponseWriter, r *http.Request) {
 	claims := val.(*auth.Claims)
 
 	var input struct {
-		Title         string `json:"title" binding:"required,max=90"`
-		Description   string `json:"description"`
-		BannerLogo    string `json:"banner_logo"`
-		FriendlyToken string `json:"friendly_token"`
-		IsPublic      bool   `json:"is_public"`
+		Name          string   `json:"name" binding:"required,min=3,max=150"`
+		Handle        string   `json:"handle" binding:"required,min=3,max=39"`
+		Description   string   `json:"description"`
+		Avatar        string   `json:"avatar"`
+		Banner        string   `json:"banner"`
+		BannerLogo    string   `json:"banner_logo"`
+		Privacy       string   `json:"privacy"`
+		Tags          []string `json:"tags"`
+		CategoryID    *int64   `json:"category_id"`
+		FriendlyToken string   `json:"friendly_token"`
 	}
 	if err := c.Bind(&input); err != nil {
 		server.Fail(gc, server.ErrBadRequest, err.Error())
 		return
 	}
 
+	// Validate handle format
+	if !validation.IsValidHandle(input.Handle) {
+		server.Fail(gc, server.ErrBadRequest, "invalid_handle_format: must be 3-39 chars, alphanumeric and hyphens only")
+		return
+	}
+
+	// Auto-generate slug from name
+	slug := generateSlug(input.Name)
+
 	chItem := &biz.Channel{
-		Title:       input.Title,
+		Name:        input.Name,
+		Title:       input.Name, // Title defaults to name
+		Slug:        slug,
+		Handle:      input.Handle,
 		Description: input.Description,
+		Avatar:      input.Avatar,
+		Banner:      input.Banner,
 		BannerLogo:  input.BannerLogo,
 		ShortToken:  input.FriendlyToken,
-		IsPublic:    input.IsPublic,
+		Privacy:     input.Privacy,
+		Tags:        input.Tags,
+		CategoryID:  input.CategoryID,
+		Status:      "ACTIVE",
 		UserID:      claims.GetUserID(),
+	}
+
+	if chItem.Privacy == "" {
+		chItem.Privacy = "PUBLIC"
 	}
 
 	created, err := h.uc.CreateChannel(r.Context(), chItem)
 	if err != nil {
-		server.Fail(gc, server.ErrInternal, err.Error())
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "channel_limit_reached") {
+			server.Fail(gc, server.ErrBadRequest, errMsg)
+			return
+		}
+		if strings.Contains(errMsg, "handle_already_taken") {
+			server.Fail(gc, server.ErrConflict, errMsg)
+			return
+		}
+		if strings.Contains(errMsg, "too_many_tags") {
+			server.Fail(gc, server.ErrBadRequest, errMsg)
+			return
+		}
+		server.Fail(gc, server.ErrInternal, errMsg)
 		return
 	}
 
@@ -276,10 +340,22 @@ func (h *ChannelHandler) UpdateChannel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var input struct {
-		Title       string `json:"title"`
-		Description string `json:"description"`
-		BannerLogo  string `json:"banner_logo"`
-		IsPublic    *bool  `json:"is_public"`
+		Name        *string  `json:"name"`
+		Title       *string  `json:"title"`
+		Description *string  `json:"description"`
+		Avatar      *string  `json:"avatar"`
+		Banner      *string  `json:"banner"`
+		BannerLogo  *string  `json:"banner_logo"`
+		Privacy     *string  `json:"privacy"`
+		Status      *string  `json:"status"`
+		Tags        []string `json:"tags"`
+		CategoryID  *int64   `json:"category_id"`
+		Links       []struct {
+			Type     string `json:"type"`
+			Platform string `json:"platform"`
+			URL      string `json:"url"`
+			Title    string `json:"title"`
+		} `json:"links"`
 	}
 	if err := c.Bind(&input); err != nil {
 		server.Fail(gc, server.ErrBadRequest, err.Error())
@@ -292,18 +368,74 @@ func (h *ChannelHandler) UpdateChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Apply partial updates
 	chItem := &biz.Channel{
-		ID:          existingChannel.ID,
-		Title:       input.Title,
-		Description: input.Description,
-		BannerLogo:  input.BannerLogo,
-		IsPublic:    existingChannel.IsPublic,
-		UserID:      existingChannel.UserID,
-		CreateTime:  existingChannel.CreateTime,
+		ID:              existingChannel.ID,
+		Name:            existingChannel.Name,
+		Title:           existingChannel.Title,
+		Slug:            existingChannel.Slug,
+		Handle:          existingChannel.Handle,
+		Description:     existingChannel.Description,
+		Avatar:          existingChannel.Avatar,
+		Banner:          existingChannel.Banner,
+		BannerLogo:      existingChannel.BannerLogo,
+		ShortToken:      existingChannel.ShortToken,
+		Status:          existingChannel.Status,
+		Privacy:         existingChannel.Privacy,
+		IsVerified:      existingChannel.IsVerified,
+		Tags:            existingChannel.Tags,
+		CategoryID:      existingChannel.CategoryID,
+		SubscriberCount: existingChannel.SubscriberCount,
+		MediaCount:      existingChannel.MediaCount,
+		ArticleCount:    existingChannel.ArticleCount,
+		TotalViews:      existingChannel.TotalViews,
+		Links:           existingChannel.Links,
+		UserID:          existingChannel.UserID,
+		CreateTime:      existingChannel.CreateTime,
+		UpdateTime:      existingChannel.UpdateTime,
 	}
 
-	if input.IsPublic != nil {
-		chItem.IsPublic = *input.IsPublic
+	if input.Name != nil {
+		chItem.Name = *input.Name
+		chItem.Slug = generateSlug(*input.Name) // Regenerate slug on name change
+	}
+	if input.Title != nil {
+		chItem.Title = *input.Title
+	}
+	if input.Description != nil {
+		chItem.Description = *input.Description
+	}
+	if input.Avatar != nil {
+		chItem.Avatar = *input.Avatar
+	}
+	if input.Banner != nil {
+		chItem.Banner = *input.Banner
+	}
+	if input.BannerLogo != nil {
+		chItem.BannerLogo = *input.BannerLogo
+	}
+	if input.Privacy != nil {
+		chItem.Privacy = *input.Privacy
+	}
+	if input.Status != nil {
+		chItem.Status = *input.Status
+	}
+	if input.Tags != nil {
+		chItem.Tags = input.Tags
+	}
+	if input.CategoryID != nil {
+		chItem.CategoryID = input.CategoryID
+	}
+	if input.Links != nil {
+		chItem.Links = make([]biz.ChannelLink, len(input.Links))
+		for i, l := range input.Links {
+			chItem.Links[i] = biz.ChannelLink{
+				Type:     l.Type,
+				Platform: l.Platform,
+				URL:      l.URL,
+				Title:    l.Title,
+			}
+		}
 	}
 
 	updated, err := h.uc.UpdateChannel(
@@ -1029,16 +1161,74 @@ func bizChannelToProto(ch *biz.Channel) *types.Channel {
 	if ch == nil {
 		return nil
 	}
-	pb := &types.Channel{
-		Id:          ch.ID,
-		Title:       ch.Title,
-		Description: ch.Description,
-		BannerLogo:  ch.BannerLogo,
-		UserId:      ch.UserID,
-		ShortToken:  ch.ShortToken,
+
+	privacy := types.Privacy_PRIVACY_PUBLIC
+	switch ch.Privacy {
+	case "PRIVATE":
+		privacy = types.Privacy_PRIVACY_PRIVATE
+	case "UNLISTED":
+		privacy = types.Privacy_PRIVACY_UNLISTED
+	case "PAID":
+		privacy = types.Privacy_PRIVACY_PAID
+	case "SUBSCRIBERS_ONLY":
+		privacy = types.Privacy_PRIVACY_SUBSCRIBERS_ONLY
 	}
+
+	status := types.ChannelStatus_CHANNEL_STATUS_ACTIVE
+	switch ch.Status {
+	case "INACTIVE":
+		status = types.ChannelStatus_CHANNEL_STATUS_INACTIVE
+	case "SUSPENDED":
+		status = types.ChannelStatus_CHANNEL_STATUS_SUSPENDED
+	case "PENDING_REVIEW":
+		status = types.ChannelStatus_CHANNEL_STATUS_PENDING_REVIEW
+	}
+
+	pb := &types.Channel{
+		Id:              ch.ID,
+		Name:            ch.Name,
+		Title:           ch.Title,
+		Slug:            ch.Slug,
+		Handle:          ch.Handle,
+		Description:     ch.Description,
+		Avatar:          ch.Avatar,
+		Banner:          ch.Banner,
+		BannerLogo:      ch.BannerLogo,
+		ShortToken:      ch.ShortToken,
+		Status:          status,
+		Privacy:         privacy,
+		IsVerified:      ch.IsVerified,
+		Tags:            ch.Tags,
+		SubscriberCount: ch.SubscriberCount,
+		MediaCount:      int64(ch.MediaCount),
+		ArticleCount:    int32(ch.ArticleCount),
+		TotalViews:      ch.TotalViews,
+		UserId:          ch.UserID,
+		IsOwner:         ch.IsOwner,
+		IsSubscribed:    ch.IsSubscribed,
+	}
+
+	if ch.CategoryID != nil {
+		pb.CategoryId = *ch.CategoryID
+	}
+
+	if ch.Links != nil {
+		pb.Links = make([]*types.ChannelLink, len(ch.Links))
+		for i, l := range ch.Links {
+			pb.Links[i] = &types.ChannelLink{
+				Type:     l.Type,
+				Platform: l.Platform,
+				Url:      l.URL,
+				Title:    l.Title,
+			}
+		}
+	}
+
 	if !ch.CreateTime.IsZero() {
 		pb.CreateTime = timestamppb.New(ch.CreateTime)
+	}
+	if !ch.UpdateTime.IsZero() {
+		pb.UpdateTime = timestamppb.New(ch.UpdateTime)
 	}
 	return pb
 }
@@ -1050,4 +1240,176 @@ func bizChannelsToProto(channels []*biz.Channel) []*types.Channel {
 		result[i] = bizChannelToProto(ch)
 	}
 	return result
+}
+
+// generateSlug creates a URL-safe slug from a name.
+func generateSlug(name string) string {
+	slug := strings.ToLower(name)
+	slug = strings.ReplaceAll(slug, " ", "-")
+	// Remove non-alphanumeric characters except hyphens
+	var result strings.Builder
+	for _, r := range slug {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '-' {
+			result.WriteRune(r)
+		}
+	}
+	slug = result.String()
+	// Collapse multiple hyphens
+	for strings.Contains(slug, "--") {
+		slug = strings.ReplaceAll(slug, "--", "-")
+	}
+	slug = strings.Trim(slug, "-")
+	if len(slug) > 150 {
+		slug = slug[:150]
+	}
+	return slug
+}
+
+// ResolveHandle resolves a @handle to a channel or user.
+// GET /api/v1/resolve/@{handle}
+func (h *ChannelHandler) ResolveHandle(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	gc := c.GinContext()
+
+	handle := c.Param("handle")
+	if handle == "" {
+		server.Fail(gc, server.ErrBadRequest, "handle is required")
+		return
+	}
+
+	// Strip leading @ if present
+	handle = strings.TrimPrefix(handle, "@")
+
+	result, err := h.uc.ResolveHandle(r.Context(), handle)
+	if err != nil {
+		server.Fail(gc, server.ErrInternal, err.Error())
+		return
+	}
+
+	resolutionType := types.HandleResolution_RESOLUTION_TYPE_NOT_FOUND
+	switch result.Type {
+	case "channel":
+		resolutionType = types.HandleResolution_RESOLUTION_TYPE_CHANNEL
+	case "user":
+		resolutionType = types.HandleResolution_RESOLUTION_TYPE_USER
+	}
+
+	pbResult := &types.HandleResolution{
+		Type: resolutionType,
+	}
+
+	if result.Channel != nil {
+		pbResult.Channel = bizChannelToProto(result.Channel)
+	}
+	if result.User != nil {
+		pbResult.User = &types.User{
+			Id:       result.User.ID,
+			Username: result.User.Username,
+			Name:     result.User.Name,
+			Logo:     result.User.Logo,
+		}
+	}
+
+	server.OK(gc, pbResult)
+}
+
+// GetMyChannels returns all channels for the authenticated user.
+// GET /api/v1/channels/me
+func (h *ChannelHandler) GetMyChannels(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	gc := c.GinContext()
+
+	val := c.Get("claims")
+	if val == nil {
+		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
+		return
+	}
+	claims := val.(*auth.Claims)
+
+	page, _ := strconv.Atoi(c.Query("page"))
+	if page < 1 {
+		page = 1
+	}
+	pageSize, _ := strconv.Atoi(c.Query("page_size"))
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+
+	channels, total, err := h.uc.ListUserChannels(r.Context(), claims.GetUserID(), page, pageSize)
+	if err != nil {
+		server.Fail(gc, server.ErrInternal, err.Error())
+		return
+	}
+
+	// Mark is_owner for all channels
+	for _, ch := range channels {
+		ch.IsOwner = true
+	}
+
+	server.OK(gc, &pb.ListChannelsResponse{
+		Items:    bizChannelsToProto(channels),
+		Total:    int32(total),
+		Page:     int32(page),
+		PageSize: int32(pageSize),
+	})
+}
+
+// GetChannelLimits returns channel creation limits for the current user.
+// GET /api/v1/system/config/channel-limits
+func (h *ChannelHandler) GetChannelLimits(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	gc := c.GinContext()
+
+	val := c.Get("claims")
+	isAdmin := false
+	var userID string
+	if val != nil {
+		claims := val.(*auth.Claims)
+		userID = claims.GetUserID()
+		isAdmin = claims.IsStaff
+	}
+
+	maxChannels, currentCount, canCreate, err := h.uc.GetChannelLimits(r.Context(), userID, isAdmin)
+	if err != nil {
+		server.Fail(gc, server.ErrInternal, err.Error())
+		return
+	}
+
+	server.OK(gc, &types.ChannelLimits{
+		MaxChannels:  int32(maxChannels),
+		CurrentCount: int32(currentCount),
+		CanCreate:    canCreate,
+	})
+}
+
+// ValidateHandle checks if a handle is available.
+// GET /api/v1/channels/validate-handle?handle=xxx
+func (h *ChannelHandler) ValidateHandle(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	gc := c.GinContext()
+
+	handle := c.Query("handle")
+	if handle == "" {
+		server.Fail(gc, server.ErrBadRequest, "handle query parameter is required")
+		return
+	}
+
+	if !validation.IsValidHandle(handle) {
+		server.OK(gc, gin.H{
+			"available": false,
+			"reason":    "invalid_format",
+		})
+		return
+	}
+
+	available, err := h.uc.ValidateHandle(r.Context(), handle)
+	if err != nil {
+		server.Fail(gc, server.ErrInternal, err.Error())
+		return
+	}
+
+	server.OK(gc, gin.H{
+		"available": available,
+	})
 }

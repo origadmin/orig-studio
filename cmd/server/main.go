@@ -129,7 +129,7 @@ func main() {
 	// Start server
 	addr := cfg.Server.HTTP.Addr
 	if addr == "" {
-		addr = ":9090"
+		addr = ":8080"
 	}
 	log.Infof("origcms server starting, addr: %s", addr)
 	if err := srv.Start(addr); err != nil {

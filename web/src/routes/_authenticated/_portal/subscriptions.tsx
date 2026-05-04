@@ -10,11 +10,6 @@ const PageLoader = () => (
     </div>
 );
 
-/**
- * Subscriptions page.
- * Auth is handled by _authenticated layout route, no beforeLoad needed.
- * Portal layout (Header + Sidebar) provided by _authenticated/_portal layout.
- */
 export const Route = createFileRoute('/_authenticated/_portal/subscriptions')({
     component: () => <Suspense fallback={<PageLoader/>}><Page/></Suspense>,
 });

@@ -50,7 +50,7 @@ describe('API Tests', () => {
     describe('Share API', () => {
         test('getShareUrl should return share URL', async () => {
             const mockResponse = {
-                url: 'https://localhost:9090/watch?v=1'
+                url: 'https://localhost:8080/watch?v=1'
             };
 
             (api.get as jest.Mock).mockResolvedValueOnce(mockResponse);

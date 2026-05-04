@@ -3,8 +3,11 @@
 package entity
 
 import (
+	"encoding/json"
 	"fmt"
+	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
+	"origadmin/application/origcms/internal/data/entity/schema"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"strings"
 	"time"
@@ -20,20 +23,44 @@ type Channel struct {
 	ID string `json:"id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
-	// Description holds the value of the "description" field.
-	Description string `json:"description,omitempty"`
+	// Slug holds the value of the "slug" field.
+	Slug string `json:"slug,omitempty"`
+	// Handle holds the value of the "handle" field.
+	Handle string `json:"handle,omitempty"`
 	// ShortToken holds the value of the "short_token" field.
 	ShortToken string `json:"short_token,omitempty"`
+	// Description holds the value of the "description" field.
+	Description string `json:"description,omitempty"`
+	// Avatar holds the value of the "avatar" field.
+	Avatar string `json:"avatar,omitempty"`
+	// Banner holds the value of the "banner" field.
+	Banner string `json:"banner,omitempty"`
 	// BannerLogo holds the value of the "banner_logo" field.
 	BannerLogo string `json:"banner_logo,omitempty"`
+	// Status holds the value of the "status" field.
+	Status channel.Status `json:"status,omitempty"`
 	// Privacy holds the value of the "privacy" field.
 	Privacy channel.Privacy `json:"privacy,omitempty"`
+	// Tags holds the value of the "tags" field.
+	Tags []string `json:"tags,omitempty"`
+	// CategoryID holds the value of the "category_id" field.
+	CategoryID int64 `json:"category_id,omitempty"`
+	// IsVerified holds the value of the "is_verified" field.
+	IsVerified bool `json:"is_verified,omitempty"`
 	// SubscriberCount holds the value of the "subscriber_count" field.
 	SubscriberCount int64 `json:"subscriber_count,omitempty"`
 	// MediaCount holds the value of the "media_count" field.
 	MediaCount int `json:"media_count,omitempty"`
+	// ArticleCount holds the value of the "article_count" field.
+	ArticleCount int `json:"article_count,omitempty"`
+	// TotalViews holds the value of the "total_views" field.
+	TotalViews int64 `json:"total_views,omitempty"`
+	// Links holds the value of the "links" field.
+	Links []schema.ChannelLink `json:"links,omitempty"`
 	// AddDate holds the value of the "add_date" field.
 	AddDate time.Time `json:"add_date,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
@@ -52,9 +79,13 @@ type ChannelEdges struct {
 	User *User `json:"user,omitempty"`
 	// Media holds the value of the media edge.
 	Media []*Media `json:"media,omitempty"`
+	// Articles holds the value of the articles edge.
+	Articles []*Article `json:"articles,omitempty"`
+	// Category holds the value of the category edge.
+	Category *Category `json:"category,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [4]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -77,14 +108,38 @@ func (e ChannelEdges) MediaOrErr() ([]*Media, error) {
 	return nil, &NotLoadedError{edge: "media"}
 }
 
+// ArticlesOrErr returns the Articles value or an error if the edge
+// was not loaded in eager-loading.
+func (e ChannelEdges) ArticlesOrErr() ([]*Article, error) {
+	if e.loadedTypes[2] {
+		return e.Articles, nil
+	}
+	return nil, &NotLoadedError{edge: "articles"}
+}
+
+// CategoryOrErr returns the Category value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ChannelEdges) CategoryOrErr() (*Category, error) {
+	if e.Category != nil {
+		return e.Category, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: category.Label}
+	}
+	return nil, &NotLoadedError{edge: "category"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Channel) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case channel.FieldSubscriberCount, channel.FieldMediaCount:
+		case channel.FieldTags, channel.FieldLinks:
+			values[i] = new([]byte)
+		case channel.FieldIsVerified:
+			values[i] = new(sql.NullBool)
+		case channel.FieldCategoryID, channel.FieldSubscriberCount, channel.FieldMediaCount, channel.FieldArticleCount, channel.FieldTotalViews:
 			values[i] = new(sql.NullInt64)
-		case channel.FieldID, channel.FieldUserID, channel.FieldTitle, channel.FieldDescription, channel.FieldShortToken, channel.FieldBannerLogo, channel.FieldPrivacy:
+		case channel.FieldID, channel.FieldUserID, channel.FieldName, channel.FieldTitle, channel.FieldSlug, channel.FieldHandle, channel.FieldShortToken, channel.FieldDescription, channel.FieldAvatar, channel.FieldBanner, channel.FieldBannerLogo, channel.FieldStatus, channel.FieldPrivacy:
 			values[i] = new(sql.NullString)
 		case channel.FieldAddDate, channel.FieldCreateTime, channel.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
@@ -115,17 +170,29 @@ func (_m *Channel) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UserID = value.String
 			}
+		case channel.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				_m.Name = value.String
+			}
 		case channel.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
 			} else if value.Valid {
 				_m.Title = value.String
 			}
-		case channel.FieldDescription:
+		case channel.FieldSlug:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field description", values[i])
+				return fmt.Errorf("unexpected type %T for field slug", values[i])
 			} else if value.Valid {
-				_m.Description = value.String
+				_m.Slug = value.String
+			}
+		case channel.FieldHandle:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field handle", values[i])
+			} else if value.Valid {
+				_m.Handle = value.String
 			}
 		case channel.FieldShortToken:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -133,17 +200,61 @@ func (_m *Channel) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ShortToken = value.String
 			}
+		case channel.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				_m.Description = value.String
+			}
+		case channel.FieldAvatar:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field avatar", values[i])
+			} else if value.Valid {
+				_m.Avatar = value.String
+			}
+		case channel.FieldBanner:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field banner", values[i])
+			} else if value.Valid {
+				_m.Banner = value.String
+			}
 		case channel.FieldBannerLogo:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field banner_logo", values[i])
 			} else if value.Valid {
 				_m.BannerLogo = value.String
 			}
+		case channel.FieldStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				_m.Status = channel.Status(value.String)
+			}
 		case channel.FieldPrivacy:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field privacy", values[i])
 			} else if value.Valid {
 				_m.Privacy = channel.Privacy(value.String)
+			}
+		case channel.FieldTags:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field tags", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Tags); err != nil {
+					return fmt.Errorf("unmarshal field tags: %w", err)
+				}
+			}
+		case channel.FieldCategoryID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field category_id", values[i])
+			} else if value.Valid {
+				_m.CategoryID = value.Int64
+			}
+		case channel.FieldIsVerified:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_verified", values[i])
+			} else if value.Valid {
+				_m.IsVerified = value.Bool
 			}
 		case channel.FieldSubscriberCount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -156,6 +267,26 @@ func (_m *Channel) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field media_count", values[i])
 			} else if value.Valid {
 				_m.MediaCount = int(value.Int64)
+			}
+		case channel.FieldArticleCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field article_count", values[i])
+			} else if value.Valid {
+				_m.ArticleCount = int(value.Int64)
+			}
+		case channel.FieldTotalViews:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field total_views", values[i])
+			} else if value.Valid {
+				_m.TotalViews = value.Int64
+			}
+		case channel.FieldLinks:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field links", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Links); err != nil {
+					return fmt.Errorf("unmarshal field links: %w", err)
+				}
 			}
 		case channel.FieldAddDate:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -198,6 +329,16 @@ func (_m *Channel) QueryMedia() *MediaQuery {
 	return NewChannelClient(_m.config).QueryMedia(_m)
 }
 
+// QueryArticles queries the "articles" edge of the Channel entity.
+func (_m *Channel) QueryArticles() *ArticleQuery {
+	return NewChannelClient(_m.config).QueryArticles(_m)
+}
+
+// QueryCategory queries the "category" edge of the Channel entity.
+func (_m *Channel) QueryCategory() *CategoryQuery {
+	return NewChannelClient(_m.config).QueryCategory(_m)
+}
+
 // Update returns a builder for updating this Channel.
 // Note that you need to call Channel.Unwrap() before calling this method if this Channel
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -224,26 +365,62 @@ func (_m *Channel) String() string {
 	builder.WriteString("user_id=")
 	builder.WriteString(_m.UserID)
 	builder.WriteString(", ")
+	builder.WriteString("name=")
+	builder.WriteString(_m.Name)
+	builder.WriteString(", ")
 	builder.WriteString("title=")
 	builder.WriteString(_m.Title)
 	builder.WriteString(", ")
-	builder.WriteString("description=")
-	builder.WriteString(_m.Description)
+	builder.WriteString("slug=")
+	builder.WriteString(_m.Slug)
+	builder.WriteString(", ")
+	builder.WriteString("handle=")
+	builder.WriteString(_m.Handle)
 	builder.WriteString(", ")
 	builder.WriteString("short_token=")
 	builder.WriteString(_m.ShortToken)
 	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(_m.Description)
+	builder.WriteString(", ")
+	builder.WriteString("avatar=")
+	builder.WriteString(_m.Avatar)
+	builder.WriteString(", ")
+	builder.WriteString("banner=")
+	builder.WriteString(_m.Banner)
+	builder.WriteString(", ")
 	builder.WriteString("banner_logo=")
 	builder.WriteString(_m.BannerLogo)
 	builder.WriteString(", ")
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString(", ")
 	builder.WriteString("privacy=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Privacy))
+	builder.WriteString(", ")
+	builder.WriteString("tags=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Tags))
+	builder.WriteString(", ")
+	builder.WriteString("category_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CategoryID))
+	builder.WriteString(", ")
+	builder.WriteString("is_verified=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsVerified))
 	builder.WriteString(", ")
 	builder.WriteString("subscriber_count=")
 	builder.WriteString(fmt.Sprintf("%v", _m.SubscriberCount))
 	builder.WriteString(", ")
 	builder.WriteString("media_count=")
 	builder.WriteString(fmt.Sprintf("%v", _m.MediaCount))
+	builder.WriteString(", ")
+	builder.WriteString("article_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ArticleCount))
+	builder.WriteString(", ")
+	builder.WriteString("total_views=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TotalViews))
+	builder.WriteString(", ")
+	builder.WriteString("links=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Links))
 	builder.WriteString(", ")
 	builder.WriteString("add_date=")
 	builder.WriteString(_m.AddDate.Format(time.ANSIC))

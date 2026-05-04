@@ -7,9 +7,17 @@ export interface User {
     nickname?: string;
     email: string;
     avatar?: string;
+    cover?: string;
+    bio?: string;
     phone?: string;
     role: string;
-    status: number | string; // Protojson serializes enum as string name (e.g. "USER_STATUS_ACTIVE") by default
+    status: number | string;
+    is_me?: boolean;
+    subscriber_count?: number;
+    total_views?: number;
+    is_verified?: boolean;
+    channel_id?: string;
+    links?: Array<{title?: string; url: string}>;
     create_time: string;
     update_time?: string;
 }
@@ -128,6 +136,25 @@ export interface SubscriptionListResponse {
     page_size: number;
 }
 
+export interface PublicProfile {
+    id: string;
+    username: string;
+    nickname?: string;
+    avatar?: string;
+    slug?: string;
+    bio?: string;
+    location?: string;
+    website?: string;
+    title?: string;
+    is_featured?: boolean;
+    media_count?: number;
+    subscriber_count?: number;
+    created_at?: string;
+    default_channel_token?: string;
+    is_owner?: boolean;
+    is_subscribed?: boolean;
+}
+
 export const userApi = {
     // 获取用户列表
     list: (params?: { page?: number; page_size?: number; keyword?: string; status?: string; role?: string }) =>
@@ -138,6 +165,9 @@ export const userApi = {
 
     // 通过 username 获取用户
     getByUsername: (username: string) => api.get<User>(`/users/username/${username}`),
+
+    // 获取公开个人资料 (F016: 含 is_owner/is_subscribed)
+    getPublicProfile: (username: string) => api.get<PublicProfile>(`/users/username/${username}`),
 
     // 创建用户
     create: (data: CreateUserRequest) => api.post<User>("/users", data),

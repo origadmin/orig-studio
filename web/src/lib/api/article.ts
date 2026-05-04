@@ -66,6 +66,30 @@ export interface UpdateArticleRequest {
     published_at?: string;
 }
 
+/** User-side create request (featured excluded, state restricted) */
+export interface UserCreateArticleRequest {
+    title: string;
+    content: string;
+    summary?: string;
+    state?: 'draft' | 'published';
+    category_id?: number;
+    media_id?: string;
+    thumbnail?: string;
+    tags?: string[];
+}
+
+/** User-side update request (featured excluded, state restricted) */
+export interface UserUpdateArticleRequest {
+    title?: string;
+    content?: string;
+    summary?: string;
+    state?: 'draft' | 'published';
+    category_id?: number;
+    media_id?: string;
+    thumbnail?: string;
+    tags?: string[];
+}
+
 export const articleApi = {
     // Get article list (public, only published)
     list: (params?: {
@@ -74,6 +98,7 @@ export const articleApi = {
         category_id?: number;
         keyword?: string;
         state?: string;
+        user_id?: string;
     }) => api.get<ArticleListResponse>("/articles", {...params, state: params?.state || "published"}),
 
     // Get article detail (public)
@@ -115,4 +140,49 @@ export const adminArticleApi = {
     // Update article state (Admin)
     updateState: (id: string, state: string) =>
         api.patch<void>(`/admin/articles/${id}/state`, {state}),
+};
+
+// ==================== User Article API (requires JWT, ownership enforced) ====================
+export const userArticleApi = {
+    /**
+     * List current user's articles (all states)
+     * GET /articles/me
+     */
+    myArticles: (params?: {
+        page?: number;
+        page_size?: number;
+        state?: string;
+    }) => api.get<ArticleListResponse>("/articles/me", params),
+
+    /**
+     * Create article (user-side)
+     * POST /articles
+     * - featured is ignored (always false)
+     * - state restricted to draft/published
+     */
+    create: (data: UserCreateArticleRequest) =>
+        api.post<Article>("/articles", data),
+
+    /**
+     * Update article (user-side, ownership enforced)
+     * PUT /articles/:id
+     * - featured is preserved (user input ignored)
+     * - state restricted to draft/published
+     */
+    update: (id: string, data: UserUpdateArticleRequest) =>
+        api.put<Article>(`/articles/${id}`, data),
+
+    /**
+     * Delete article (user-side, draft only, ownership enforced)
+     * DELETE /articles/:id
+     */
+    delete: (id: string) =>
+        api.del<void>(`/articles/${id}`),
+
+    /**
+     * Update article state (user-side, draft/published only)
+     * PATCH /articles/:id/state
+     */
+    updateState: (id: string, state: 'draft' | 'published') =>
+        api.patch<void>(`/articles/${id}/state`, {state}),
 };

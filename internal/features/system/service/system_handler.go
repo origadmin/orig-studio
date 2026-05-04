@@ -6,6 +6,7 @@
 package service
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -48,6 +49,11 @@ func (h *SystemHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	config := r.Group("/config")
 	{
 		config.GET("", server.GinHandlerToHTTP(h.getPublicConfig()))
+	}
+
+	portal := r.Group("/portal")
+	{
+		portal.GET("/config", server.GinHandlerToHTTP(h.getPortalConfig()))
 	}
 }
 
@@ -199,6 +205,14 @@ func (h *SystemHandler) updateSettings() gin.HandlerFunc {
 				return
 			}
 
+			if item.Key == "homepage_layout" {
+				validLayouts := map[string]bool{"auto": true, "video": true, "article": true, "mixed": true, "welcome": true, "doc": true}
+				if !validLayouts[item.Value] {
+					server.Fail(c, server.ErrBadRequest, "invalid value for homepage_layout: must be one of: auto, video, article, mixed, doc, welcome")
+					return
+				}
+			}
+
 			s := &entity.Setting{
 				Key:           existing.Key,
 				Value:         item.Value,
@@ -280,6 +294,115 @@ func (h *SystemHandler) getPublicConfig() gin.HandlerFunc {
 
 		publicSettings := h.settingUC.GetPublicSettings(c.Request.Context())
 		server.OK(c, publicSettings)
+	}
+}
+
+// ==================== Portal Config Endpoint ====================
+
+type portalModuleConfig struct {
+	Articles bool `json:"articles"`
+	Videos   bool `json:"videos"`
+	Music    bool `json:"music"`
+}
+
+type portalSiteConfig struct {
+	SiteName          string `json:"site_name"`
+	SiteDescription   string `json:"site_description"`
+	AllowRegistration bool   `json:"allow_registration"`
+	AllowUpload       bool   `json:"allow_upload"`
+}
+
+type portalConfigResponse struct {
+	Modules portalModuleConfig `json:"modules"`
+	Layout  string             `json:"layout"`
+	Site    portalSiteConfig   `json:"site"`
+}
+
+func (h *SystemHandler) getPortalConfig() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if h.settingUC == nil {
+			server.Fail(c, server.ErrInternal, "settings service not available")
+			return
+		}
+
+		ctx := c.Request.Context()
+
+		modules := portalModuleConfig{
+			Articles: getBoolWithDefault(h.settingUC, ctx, "module_articles", true),
+			Videos:   getBoolWithDefault(h.settingUC, ctx, "module_videos", true),
+			Music:    getBoolWithDefault(h.settingUC, ctx, "module_music", false),
+		}
+
+		configuredLayout := h.settingUC.Get(ctx, "homepage_layout")
+		if configuredLayout == "" {
+			configuredLayout = "auto"
+		}
+		layout := resolveLayout(modules, configuredLayout)
+
+		site := portalSiteConfig{
+			SiteName:          h.settingUC.Get(ctx, "site_name"),
+			SiteDescription:   h.settingUC.Get(ctx, "site_description"),
+			AllowRegistration: getBoolWithDefault(h.settingUC, ctx, "allow_registration", true),
+			AllowUpload:       getBoolWithDefault(h.settingUC, ctx, "allow_upload", true),
+		}
+
+		server.OK(c, portalConfigResponse{
+			Modules: modules,
+			Layout:  layout,
+			Site:    site,
+		})
+	}
+}
+
+func getBoolWithDefault(uc *systembiz.SettingUseCase, ctx context.Context, key string, defaultValue bool) bool {
+	val := uc.Get(ctx, key)
+	if val == "" {
+		return defaultValue
+	}
+	b, err := strconv.ParseBool(val)
+	if err != nil {
+		return defaultValue
+	}
+	return b
+}
+
+func resolveLayout(modules portalModuleConfig, configuredLayout string) string {
+	if configuredLayout != "auto" {
+		if configuredLayout == "video" && !modules.Videos {
+			return "welcome"
+		}
+		if configuredLayout == "article" && !modules.Articles {
+			return "welcome"
+		}
+		if configuredLayout == "mixed" && (!modules.Videos || !modules.Articles) {
+			return "welcome"
+		}
+		if configuredLayout == "doc" && !modules.Articles {
+			return "welcome"
+		}
+		return configuredLayout
+	}
+
+	activeCount := 0
+	if modules.Articles {
+		activeCount++
+	}
+	if modules.Videos {
+		activeCount++
+	}
+	if modules.Music {
+		activeCount++
+	}
+
+	switch {
+	case activeCount == 0:
+		return "welcome"
+	case modules.Videos && !modules.Articles:
+		return "video"
+	case modules.Articles && !modules.Videos:
+		return "doc"
+	default:
+		return "mixed"
 	}
 }
 

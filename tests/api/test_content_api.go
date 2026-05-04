@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-const baseURL = "http://localhost:9090/api/v1"
+const baseURL = "http://localhost:8080/api/v1"
 
 func main() {
 	// 测试文章列表接口

@@ -1,4 +1,4 @@
-﻿import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     ThumbsUp,
     ThumbsDown,
@@ -279,7 +279,7 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
             setIsSaving(true);
             const response = await playlistApi.getMyPlaylists();
             const items = response.items || [];
-            setPlaylists(items.map((p: any) => ({id: String(p.id), name: p.title || p.name})));
+            setPlaylists(items.map((p: any) => ({id: String(p.id), name: p.title})));
             setShowSaveModal(true);
         } catch (err) {
             console.error('Failed to fetch playlists:', err);

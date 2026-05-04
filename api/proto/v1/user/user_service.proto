@@ -120,6 +120,32 @@ service UserService {
     option (google.api.http) = {get: "/api/v1/me/history"};
   }
 
+  // UpsertHistory creates or updates a history record (progress reporting).
+  rpc UpsertHistory(UpsertHistoryRequest) returns (UpsertHistoryResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/me/history"
+      body: "*"
+    };
+  }
+
+  // SyncHistory batch-syncs history records (login merge).
+  rpc SyncHistory(SyncHistoryRequest) returns (SyncHistoryResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/me/history/sync"
+      body: "*"
+    };
+  }
+
+  // ClearHistory clears all watch history for the current user.
+  rpc ClearHistory(ClearHistoryRequest) returns (ClearHistoryResponse) {
+    option (google.api.http) = {delete: "/api/v1/me/history"};
+  }
+
+  // RemoveHistoryItem removes a single history record.
+  rpc RemoveHistoryItem(RemoveHistoryItemRequest) returns (RemoveHistoryItemResponse) {
+    option (google.api.http) = {delete: "/api/v1/me/history/{id}"};
+  }
+
   // GetMyStats returns the current user's statistics.
   rpc GetMyStats(GetMyStatsRequest) returns (GetMyStatsResponse) {
     option (google.api.http) = {get: "/api/v1/me/stats"};
@@ -423,6 +449,8 @@ message GetMySubscriptionsResponse {
 message GetMyHistoryRequest {
   int32 page = 1 [json_name = "page"];
   int32 page_size = 2 [json_name = "page_size"];
+  // Filter by content type (optional).
+  api.v1.services.types.ContentType content_type = 3 [json_name = "content_type"];
 }
 
 // GetMyHistoryResponse is the response message for getting my history.
@@ -648,3 +676,55 @@ message GetUserFollowersResponse {
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
 }
+
+// ========== History Messages ==========
+
+// UpsertHistoryRequest is the request for creating/updating a history record.
+message UpsertHistoryRequest {
+  // The content ID (media_id or article_id).
+  string content_id = 1 [json_name = "content_id"];
+  // The content type.
+  api.v1.services.types.ContentType content_type = 2 [json_name = "content_type"];
+  // The progress in seconds.
+  int32 progress_seconds = 3 [json_name = "progress_seconds"];
+  // The total duration in seconds.
+  int32 duration_seconds = 4 [json_name = "duration_seconds"];
+}
+
+// UpsertHistoryResponse is the response for upserting a history record.
+message UpsertHistoryResponse {
+  // The upserted history item.
+  api.v1.services.types.HistoryItem item = 1 [json_name = "item"];
+}
+
+// SyncHistoryRequest is the request for batch-syncing history records.
+message SyncHistoryRequest {
+  // The local history items to merge with server.
+  repeated api.v1.services.types.HistoryItem items = 1 [json_name = "items"];
+}
+
+// SyncHistoryResponse is the response for batch-syncing history records.
+message SyncHistoryResponse {
+  // The complete merged history list from server.
+  repeated api.v1.services.types.HistoryItem items = 1 [json_name = "items"];
+  // Number of items that were merged (updated or created).
+  int32 merged_count = 2 [json_name = "merged_count"];
+}
+
+// ClearHistoryRequest is the request for clearing all history.
+message ClearHistoryRequest {}
+
+// ClearHistoryResponse is the response for clearing all history.
+message ClearHistoryResponse {
+  // Number of records deleted.
+  int32 deleted_count = 1 [json_name = "deleted_count"];
+}
+
+// RemoveHistoryItemRequest is the request for removing a single history item.
+message RemoveHistoryItemRequest {
+  // The history record ID to remove.
+  string id = 1;
+}
+
+// RemoveHistoryItemResponse is the response for removing a single history item.
+message RemoveHistoryItemResponse {}

@@ -187,6 +187,220 @@ func (PlaylistStatus) EnumDescriptor() ([]byte, []int) {
 	return file_v1_types_media_proto_rawDescGZIP(), []int{2}
 }
 
+// ChannelStatus defines the lifecycle status of a Channel.
+type ChannelStatus int32
+
+const (
+	ChannelStatus_CHANNEL_STATUS_UNSPECIFIED    ChannelStatus = 0
+	ChannelStatus_CHANNEL_STATUS_ACTIVE         ChannelStatus = 1
+	ChannelStatus_CHANNEL_STATUS_INACTIVE       ChannelStatus = 2
+	ChannelStatus_CHANNEL_STATUS_SUSPENDED      ChannelStatus = 3
+	ChannelStatus_CHANNEL_STATUS_PENDING_REVIEW ChannelStatus = 4
+)
+
+// Enum value maps for ChannelStatus.
+var (
+	ChannelStatus_name = map[int32]string{
+		0: "CHANNEL_STATUS_UNSPECIFIED",
+		1: "CHANNEL_STATUS_ACTIVE",
+		2: "CHANNEL_STATUS_INACTIVE",
+		3: "CHANNEL_STATUS_SUSPENDED",
+		4: "CHANNEL_STATUS_PENDING_REVIEW",
+	}
+	ChannelStatus_value = map[string]int32{
+		"CHANNEL_STATUS_UNSPECIFIED":    0,
+		"CHANNEL_STATUS_ACTIVE":         1,
+		"CHANNEL_STATUS_INACTIVE":       2,
+		"CHANNEL_STATUS_SUSPENDED":      3,
+		"CHANNEL_STATUS_PENDING_REVIEW": 4,
+	}
+)
+
+func (x ChannelStatus) Enum() *ChannelStatus {
+	p := new(ChannelStatus)
+	*p = x
+	return p
+}
+
+func (x ChannelStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ChannelStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_v1_types_media_proto_enumTypes[3].Descriptor()
+}
+
+func (ChannelStatus) Type() protoreflect.EnumType {
+	return &file_v1_types_media_proto_enumTypes[3]
+}
+
+func (x ChannelStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ChannelStatus.Descriptor instead.
+func (ChannelStatus) EnumDescriptor() ([]byte, []int) {
+	return file_v1_types_media_proto_rawDescGZIP(), []int{3}
+}
+
+// ContentVisibility defines who can see a content item.
+type ContentVisibility int32
+
+const (
+	ContentVisibility_CONTENT_VISIBILITY_UNSPECIFIED ContentVisibility = 0
+	ContentVisibility_CONTENT_VISIBILITY_PUBLIC      ContentVisibility = 1
+	ContentVisibility_CONTENT_VISIBILITY_PRIVATE     ContentVisibility = 2
+	ContentVisibility_CONTENT_VISIBILITY_PAID        ContentVisibility = 3
+)
+
+// Enum value maps for ContentVisibility.
+var (
+	ContentVisibility_name = map[int32]string{
+		0: "CONTENT_VISIBILITY_UNSPECIFIED",
+		1: "CONTENT_VISIBILITY_PUBLIC",
+		2: "CONTENT_VISIBILITY_PRIVATE",
+		3: "CONTENT_VISIBILITY_PAID",
+	}
+	ContentVisibility_value = map[string]int32{
+		"CONTENT_VISIBILITY_UNSPECIFIED": 0,
+		"CONTENT_VISIBILITY_PUBLIC":      1,
+		"CONTENT_VISIBILITY_PRIVATE":     2,
+		"CONTENT_VISIBILITY_PAID":        3,
+	}
+)
+
+func (x ContentVisibility) Enum() *ContentVisibility {
+	p := new(ContentVisibility)
+	*p = x
+	return p
+}
+
+func (x ContentVisibility) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ContentVisibility) Descriptor() protoreflect.EnumDescriptor {
+	return file_v1_types_media_proto_enumTypes[4].Descriptor()
+}
+
+func (ContentVisibility) Type() protoreflect.EnumType {
+	return &file_v1_types_media_proto_enumTypes[4]
+}
+
+func (x ContentVisibility) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ContentVisibility.Descriptor instead.
+func (ContentVisibility) EnumDescriptor() ([]byte, []int) {
+	return file_v1_types_media_proto_rawDescGZIP(), []int{4}
+}
+
+// ContentType defines the type of content for history tracking.
+type ContentType int32
+
+const (
+	ContentType_CONTENT_TYPE_UNSPECIFIED ContentType = 0
+	ContentType_CONTENT_TYPE_VIDEO       ContentType = 1
+	ContentType_CONTENT_TYPE_ARTICLE     ContentType = 2
+	ContentType_CONTENT_TYPE_AUDIO       ContentType = 3
+)
+
+// Enum value maps for ContentType.
+var (
+	ContentType_name = map[int32]string{
+		0: "CONTENT_TYPE_UNSPECIFIED",
+		1: "CONTENT_TYPE_VIDEO",
+		2: "CONTENT_TYPE_ARTICLE",
+		3: "CONTENT_TYPE_AUDIO",
+	}
+	ContentType_value = map[string]int32{
+		"CONTENT_TYPE_UNSPECIFIED": 0,
+		"CONTENT_TYPE_VIDEO":       1,
+		"CONTENT_TYPE_ARTICLE":     2,
+		"CONTENT_TYPE_AUDIO":       3,
+	}
+)
+
+func (x ContentType) Enum() *ContentType {
+	p := new(ContentType)
+	*p = x
+	return p
+}
+
+func (x ContentType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ContentType) Descriptor() protoreflect.EnumDescriptor {
+	return file_v1_types_media_proto_enumTypes[5].Descriptor()
+}
+
+func (ContentType) Type() protoreflect.EnumType {
+	return &file_v1_types_media_proto_enumTypes[5]
+}
+
+func (x ContentType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ContentType.Descriptor instead.
+func (ContentType) EnumDescriptor() ([]byte, []int) {
+	return file_v1_types_media_proto_rawDescGZIP(), []int{5}
+}
+
+type HandleResolution_ResolutionType int32
+
+const (
+	HandleResolution_RESOLUTION_TYPE_UNSPECIFIED HandleResolution_ResolutionType = 0
+	HandleResolution_RESOLUTION_TYPE_CHANNEL     HandleResolution_ResolutionType = 1
+	HandleResolution_RESOLUTION_TYPE_USER        HandleResolution_ResolutionType = 2
+	HandleResolution_RESOLUTION_TYPE_NOT_FOUND   HandleResolution_ResolutionType = 3
+)
+
+// Enum value maps for HandleResolution_ResolutionType.
+var (
+	HandleResolution_ResolutionType_name = map[int32]string{
+		0: "RESOLUTION_TYPE_UNSPECIFIED",
+		1: "RESOLUTION_TYPE_CHANNEL",
+		2: "RESOLUTION_TYPE_USER",
+		3: "RESOLUTION_TYPE_NOT_FOUND",
+	}
+	HandleResolution_ResolutionType_value = map[string]int32{
+		"RESOLUTION_TYPE_UNSPECIFIED": 0,
+		"RESOLUTION_TYPE_CHANNEL":     1,
+		"RESOLUTION_TYPE_USER":        2,
+		"RESOLUTION_TYPE_NOT_FOUND":   3,
+	}
+)
+
+func (x HandleResolution_ResolutionType) Enum() *HandleResolution_ResolutionType {
+	p := new(HandleResolution_ResolutionType)
+	*p = x
+	return p
+}
+
+func (x HandleResolution_ResolutionType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (HandleResolution_ResolutionType) Descriptor() protoreflect.EnumDescriptor {
+	return file_v1_types_media_proto_enumTypes[6].Descriptor()
+}
+
+func (HandleResolution_ResolutionType) Type() protoreflect.EnumType {
+	return &file_v1_types_media_proto_enumTypes[6]
+}
+
+func (x HandleResolution_ResolutionType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use HandleResolution_ResolutionType.Descriptor instead.
+func (HandleResolution_ResolutionType) EnumDescriptor() ([]byte, []int) {
+	return file_v1_types_media_proto_rawDescGZIP(), []int{11, 0}
+}
+
 // Media is the model entity for Media.
 type Media struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
@@ -1608,6 +1822,75 @@ func (x *Playlist) GetAddDate() *timestamppb.Timestamp {
 	return nil
 }
 
+// ChannelLink represents an external link.
+type ChannelLink struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	Platform      string                 `protobuf:"bytes,2,opt,name=platform,proto3" json:"platform,omitempty"`
+	Url           string                 `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
+	Title         string                 `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChannelLink) Reset() {
+	*x = ChannelLink{}
+	mi := &file_v1_types_media_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChannelLink) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChannelLink) ProtoMessage() {}
+
+func (x *ChannelLink) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_types_media_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChannelLink.ProtoReflect.Descriptor instead.
+func (*ChannelLink) Descriptor() ([]byte, []int) {
+	return file_v1_types_media_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ChannelLink) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *ChannelLink) GetPlatform() string {
+	if x != nil {
+		return x.Platform
+	}
+	return ""
+}
+
+func (x *ChannelLink) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+func (x *ChannelLink) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
 // Channel is the model entity for Channel.
 type Channel struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
@@ -1616,20 +1899,40 @@ type Channel struct {
 	UpdateTime      *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
 	Title           string                 `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
 	Description     string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	BannerLogo      string                 `protobuf:"bytes,6,opt,name=banner_logo,proto3" json:"banner_logo,omitempty"`
+	BannerLogo      string                 `protobuf:"bytes,6,opt,name=banner_logo,proto3" json:"banner_logo,omitempty"` // DEPRECATED, use banner
 	UserId          string                 `protobuf:"bytes,7,opt,name=user_id,proto3" json:"user_id,omitempty"`
 	Privacy         Privacy                `protobuf:"varint,8,opt,name=privacy,proto3,enum=api.v1.services.types.Privacy" json:"privacy,omitempty"`
 	SubscriberCount int64                  `protobuf:"varint,9,opt,name=subscriber_count,proto3" json:"subscriber_count,omitempty"`
 	MediaCount      int64                  `protobuf:"varint,10,opt,name=media_count,proto3" json:"media_count,omitempty"`
 	ShortToken      string                 `protobuf:"bytes,11,opt,name=short_token,proto3" json:"short_token,omitempty"`
-	AddDate         *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=add_date,proto3" json:"add_date,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	AddDate         *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=add_date,proto3" json:"add_date,omitempty"` // DEPRECATED
+	// NEW FIELDS (start from field number 20 to reserve space)
+	Name   string        `protobuf:"bytes,20,opt,name=name,proto3" json:"name,omitempty"`
+	Slug   string        `protobuf:"bytes,21,opt,name=slug,proto3" json:"slug,omitempty"`
+	Handle string        `protobuf:"bytes,22,opt,name=handle,proto3" json:"handle,omitempty"`
+	Avatar string        `protobuf:"bytes,23,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	Banner string        `protobuf:"bytes,24,opt,name=banner,proto3" json:"banner,omitempty"`
+	Status ChannelStatus `protobuf:"varint,25,opt,name=status,proto3,enum=api.v1.services.types.ChannelStatus" json:"status,omitempty"`
+	// NOTE: is_default (field 26) REMOVED in v2 -- per A009 no default channel
+	IsVerified   bool           `protobuf:"varint,27,opt,name=is_verified,proto3" json:"is_verified,omitempty"`
+	Tags         []string       `protobuf:"bytes,28,rep,name=tags,proto3" json:"tags,omitempty"`
+	CategoryId   int64          `protobuf:"varint,29,opt,name=category_id,proto3" json:"category_id,omitempty"`
+	ArticleCount int32          `protobuf:"varint,30,opt,name=article_count,proto3" json:"article_count,omitempty"`
+	TotalViews   int64          `protobuf:"varint,31,opt,name=total_views,proto3" json:"total_views,omitempty"`
+	Links        []*ChannelLink `protobuf:"bytes,32,rep,name=links,proto3" json:"links,omitempty"`
+	// Edge data
+	User     *User     `protobuf:"bytes,50,opt,name=user,proto3" json:"user,omitempty"`
+	Category *Category `protobuf:"bytes,51,opt,name=category,proto3" json:"category,omitempty"`
+	// View context (returned by single-channel GET, not stored in DB)
+	IsOwner       bool `protobuf:"varint,60,opt,name=is_owner,proto3" json:"is_owner,omitempty"`
+	IsSubscribed  bool `protobuf:"varint,61,opt,name=is_subscribed,proto3" json:"is_subscribed,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Channel) Reset() {
 	*x = Channel{}
-	mi := &file_v1_types_media_proto_msgTypes[9]
+	mi := &file_v1_types_media_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1641,7 +1944,7 @@ func (x *Channel) String() string {
 func (*Channel) ProtoMessage() {}
 
 func (x *Channel) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_types_media_proto_msgTypes[9]
+	mi := &file_v1_types_media_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1654,7 +1957,7 @@ func (x *Channel) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Channel.ProtoReflect.Descriptor instead.
 func (*Channel) Descriptor() ([]byte, []int) {
-	return file_v1_types_media_proto_rawDescGZIP(), []int{9}
+	return file_v1_types_media_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *Channel) GetId() string {
@@ -1741,6 +2044,309 @@ func (x *Channel) GetAddDate() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Channel) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Channel) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
+func (x *Channel) GetHandle() string {
+	if x != nil {
+		return x.Handle
+	}
+	return ""
+}
+
+func (x *Channel) GetAvatar() string {
+	if x != nil {
+		return x.Avatar
+	}
+	return ""
+}
+
+func (x *Channel) GetBanner() string {
+	if x != nil {
+		return x.Banner
+	}
+	return ""
+}
+
+func (x *Channel) GetStatus() ChannelStatus {
+	if x != nil {
+		return x.Status
+	}
+	return ChannelStatus_CHANNEL_STATUS_UNSPECIFIED
+}
+
+func (x *Channel) GetIsVerified() bool {
+	if x != nil {
+		return x.IsVerified
+	}
+	return false
+}
+
+func (x *Channel) GetTags() []string {
+	if x != nil {
+		return x.Tags
+	}
+	return nil
+}
+
+func (x *Channel) GetCategoryId() int64 {
+	if x != nil {
+		return x.CategoryId
+	}
+	return 0
+}
+
+func (x *Channel) GetArticleCount() int32 {
+	if x != nil {
+		return x.ArticleCount
+	}
+	return 0
+}
+
+func (x *Channel) GetTotalViews() int64 {
+	if x != nil {
+		return x.TotalViews
+	}
+	return 0
+}
+
+func (x *Channel) GetLinks() []*ChannelLink {
+	if x != nil {
+		return x.Links
+	}
+	return nil
+}
+
+func (x *Channel) GetUser() *User {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+func (x *Channel) GetCategory() *Category {
+	if x != nil {
+		return x.Category
+	}
+	return nil
+}
+
+func (x *Channel) GetIsOwner() bool {
+	if x != nil {
+		return x.IsOwner
+	}
+	return false
+}
+
+func (x *Channel) GetIsSubscribed() bool {
+	if x != nil {
+		return x.IsSubscribed
+	}
+	return false
+}
+
+// HandleResolution is the response for /@username resolution.
+type HandleResolution struct {
+	state         protoimpl.MessageState          `protogen:"open.v1"`
+	Type          HandleResolution_ResolutionType `protobuf:"varint,1,opt,name=type,proto3,enum=api.v1.services.types.HandleResolution_ResolutionType" json:"type,omitempty"`
+	Channel       *Channel                        `protobuf:"bytes,2,opt,name=channel,proto3" json:"channel,omitempty"` // Set if type=CHANNEL
+	User          *User                           `protobuf:"bytes,3,opt,name=user,proto3" json:"user,omitempty"`       // Set if type=USER
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HandleResolution) Reset() {
+	*x = HandleResolution{}
+	mi := &file_v1_types_media_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HandleResolution) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HandleResolution) ProtoMessage() {}
+
+func (x *HandleResolution) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_types_media_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HandleResolution.ProtoReflect.Descriptor instead.
+func (*HandleResolution) Descriptor() ([]byte, []int) {
+	return file_v1_types_media_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *HandleResolution) GetType() HandleResolution_ResolutionType {
+	if x != nil {
+		return x.Type
+	}
+	return HandleResolution_RESOLUTION_TYPE_UNSPECIFIED
+}
+
+func (x *HandleResolution) GetChannel() *Channel {
+	if x != nil {
+		return x.Channel
+	}
+	return nil
+}
+
+func (x *HandleResolution) GetUser() *User {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+// ChannelLimits represents channel creation limits for a user.
+type ChannelLimits struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MaxChannels   int32                  `protobuf:"varint,1,opt,name=max_channels,proto3" json:"max_channels,omitempty"` // -1 = unlimited
+	CurrentCount  int32                  `protobuf:"varint,2,opt,name=current_count,proto3" json:"current_count,omitempty"`
+	CanCreate     bool                   `protobuf:"varint,3,opt,name=can_create,proto3" json:"can_create,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChannelLimits) Reset() {
+	*x = ChannelLimits{}
+	mi := &file_v1_types_media_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChannelLimits) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChannelLimits) ProtoMessage() {}
+
+func (x *ChannelLimits) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_types_media_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChannelLimits.ProtoReflect.Descriptor instead.
+func (*ChannelLimits) Descriptor() ([]byte, []int) {
+	return file_v1_types_media_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ChannelLimits) GetMaxChannels() int32 {
+	if x != nil {
+		return x.MaxChannels
+	}
+	return 0
+}
+
+func (x *ChannelLimits) GetCurrentCount() int32 {
+	if x != nil {
+		return x.CurrentCount
+	}
+	return 0
+}
+
+func (x *ChannelLimits) GetCanCreate() bool {
+	if x != nil {
+		return x.CanCreate
+	}
+	return false
+}
+
+// ContentVisibilityCounts represents counts by visibility level.
+type ContentVisibilityCounts struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PublicCount   int32                  `protobuf:"varint,1,opt,name=public_count,proto3" json:"public_count,omitempty"`
+	PrivateCount  int32                  `protobuf:"varint,2,opt,name=private_count,proto3" json:"private_count,omitempty"`
+	PaidCount     int32                  `protobuf:"varint,3,opt,name=paid_count,proto3" json:"paid_count,omitempty"`
+	TotalCount    int32                  `protobuf:"varint,4,opt,name=total_count,proto3" json:"total_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ContentVisibilityCounts) Reset() {
+	*x = ContentVisibilityCounts{}
+	mi := &file_v1_types_media_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ContentVisibilityCounts) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContentVisibilityCounts) ProtoMessage() {}
+
+func (x *ContentVisibilityCounts) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_types_media_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContentVisibilityCounts.ProtoReflect.Descriptor instead.
+func (*ContentVisibilityCounts) Descriptor() ([]byte, []int) {
+	return file_v1_types_media_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ContentVisibilityCounts) GetPublicCount() int32 {
+	if x != nil {
+		return x.PublicCount
+	}
+	return 0
+}
+
+func (x *ContentVisibilityCounts) GetPrivateCount() int32 {
+	if x != nil {
+		return x.PrivateCount
+	}
+	return 0
+}
+
+func (x *ContentVisibilityCounts) GetPaidCount() int32 {
+	if x != nil {
+		return x.PaidCount
+	}
+	return 0
+}
+
+func (x *ContentVisibilityCounts) GetTotalCount() int32 {
+	if x != nil {
+		return x.TotalCount
+	}
+	return 0
+}
+
 // Subtitle is the model entity for Subtitle.
 type Subtitle struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -1756,7 +2362,7 @@ type Subtitle struct {
 
 func (x *Subtitle) Reset() {
 	*x = Subtitle{}
-	mi := &file_v1_types_media_proto_msgTypes[10]
+	mi := &file_v1_types_media_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1768,7 +2374,7 @@ func (x *Subtitle) String() string {
 func (*Subtitle) ProtoMessage() {}
 
 func (x *Subtitle) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_types_media_proto_msgTypes[10]
+	mi := &file_v1_types_media_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1781,7 +2387,7 @@ func (x *Subtitle) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Subtitle.ProtoReflect.Descriptor instead.
 func (*Subtitle) Descriptor() ([]byte, []int) {
-	return file_v1_types_media_proto_rawDescGZIP(), []int{10}
+	return file_v1_types_media_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *Subtitle) GetId() string {
@@ -1842,7 +2448,7 @@ type MediaVariant struct {
 
 func (x *MediaVariant) Reset() {
 	*x = MediaVariant{}
-	mi := &file_v1_types_media_proto_msgTypes[11]
+	mi := &file_v1_types_media_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1854,7 +2460,7 @@ func (x *MediaVariant) String() string {
 func (*MediaVariant) ProtoMessage() {}
 
 func (x *MediaVariant) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_types_media_proto_msgTypes[11]
+	mi := &file_v1_types_media_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1867,7 +2473,7 @@ func (x *MediaVariant) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MediaVariant.ProtoReflect.Descriptor instead.
 func (*MediaVariant) Descriptor() ([]byte, []int) {
-	return file_v1_types_media_proto_rawDescGZIP(), []int{11}
+	return file_v1_types_media_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *MediaVariant) GetId() string {
@@ -1937,7 +2543,7 @@ type MediaMetadata struct {
 
 func (x *MediaMetadata) Reset() {
 	*x = MediaMetadata{}
-	mi := &file_v1_types_media_proto_msgTypes[12]
+	mi := &file_v1_types_media_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1949,7 +2555,7 @@ func (x *MediaMetadata) String() string {
 func (*MediaMetadata) ProtoMessage() {}
 
 func (x *MediaMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_types_media_proto_msgTypes[12]
+	mi := &file_v1_types_media_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1962,7 +2568,7 @@ func (x *MediaMetadata) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MediaMetadata.ProtoReflect.Descriptor instead.
 func (*MediaMetadata) Descriptor() ([]byte, []int) {
-	return file_v1_types_media_proto_rawDescGZIP(), []int{12}
+	return file_v1_types_media_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *MediaMetadata) GetId() string {
@@ -2029,23 +2635,29 @@ func (x *MediaMetadata) GetHeight() int32 {
 }
 
 // HistoryItem is the model entity for watch history.
+// BREAKING CHANGE from previous version:
+//   - media_id -> content_id (supports multi-content-type)
+//   - progress -> progress_seconds (clarified unit)
+//   - duration -> duration_seconds (clarified unit)
+//   - added content_type field
 type HistoryItem struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
-	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,proto3" json:"user_id,omitempty"`
-	MediaId       string                 `protobuf:"bytes,4,opt,name=media_id,proto3" json:"media_id,omitempty"`
-	Progress      int32                  `protobuf:"varint,5,opt,name=progress,proto3" json:"progress,omitempty"`
-	Duration      int32                  `protobuf:"varint,6,opt,name=duration,proto3" json:"duration,omitempty"`
-	IsFinished    bool                   `protobuf:"varint,7,opt,name=is_finished,proto3" json:"is_finished,omitempty"`
-	LastWatchedAt *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=last_watched_at,proto3" json:"last_watched_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreateTime      *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
+	UserId          string                 `protobuf:"bytes,3,opt,name=user_id,proto3" json:"user_id,omitempty"`
+	ContentId       string                 `protobuf:"bytes,4,opt,name=content_id,proto3" json:"content_id,omitempty"`              // RENAMED from media_id
+	ProgressSeconds int32                  `protobuf:"varint,5,opt,name=progress_seconds,proto3" json:"progress_seconds,omitempty"` // RENAMED from progress
+	DurationSeconds int32                  `protobuf:"varint,6,opt,name=duration_seconds,proto3" json:"duration_seconds,omitempty"` // RENAMED from duration
+	IsFinished      bool                   `protobuf:"varint,7,opt,name=is_finished,proto3" json:"is_finished,omitempty"`
+	LastWatchedAt   *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=last_watched_at,proto3" json:"last_watched_at,omitempty"`
+	ContentType     ContentType            `protobuf:"varint,9,opt,name=content_type,proto3,enum=api.v1.services.types.ContentType" json:"content_type,omitempty"` // NEW
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *HistoryItem) Reset() {
 	*x = HistoryItem{}
-	mi := &file_v1_types_media_proto_msgTypes[13]
+	mi := &file_v1_types_media_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2057,7 +2669,7 @@ func (x *HistoryItem) String() string {
 func (*HistoryItem) ProtoMessage() {}
 
 func (x *HistoryItem) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_types_media_proto_msgTypes[13]
+	mi := &file_v1_types_media_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2070,7 +2682,7 @@ func (x *HistoryItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HistoryItem.ProtoReflect.Descriptor instead.
 func (*HistoryItem) Descriptor() ([]byte, []int) {
-	return file_v1_types_media_proto_rawDescGZIP(), []int{13}
+	return file_v1_types_media_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *HistoryItem) GetId() string {
@@ -2094,23 +2706,23 @@ func (x *HistoryItem) GetUserId() string {
 	return ""
 }
 
-func (x *HistoryItem) GetMediaId() string {
+func (x *HistoryItem) GetContentId() string {
 	if x != nil {
-		return x.MediaId
+		return x.ContentId
 	}
 	return ""
 }
 
-func (x *HistoryItem) GetProgress() int32 {
+func (x *HistoryItem) GetProgressSeconds() int32 {
 	if x != nil {
-		return x.Progress
+		return x.ProgressSeconds
 	}
 	return 0
 }
 
-func (x *HistoryItem) GetDuration() int32 {
+func (x *HistoryItem) GetDurationSeconds() int32 {
 	if x != nil {
-		return x.Duration
+		return x.DurationSeconds
 	}
 	return 0
 }
@@ -2127,6 +2739,13 @@ func (x *HistoryItem) GetLastWatchedAt() *timestamppb.Timestamp {
 		return x.LastWatchedAt
 	}
 	return nil
+}
+
+func (x *HistoryItem) GetContentType() ContentType {
+	if x != nil {
+		return x.ContentType
+	}
+	return ContentType_CONTENT_TYPE_UNSPECIFIED
 }
 
 // Review is the model entity for content review.
@@ -2146,7 +2765,7 @@ type Review struct {
 
 func (x *Review) Reset() {
 	*x = Review{}
-	mi := &file_v1_types_media_proto_msgTypes[14]
+	mi := &file_v1_types_media_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2158,7 +2777,7 @@ func (x *Review) String() string {
 func (*Review) ProtoMessage() {}
 
 func (x *Review) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_types_media_proto_msgTypes[14]
+	mi := &file_v1_types_media_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2171,7 +2790,7 @@ func (x *Review) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Review.ProtoReflect.Descriptor instead.
 func (*Review) Descriptor() ([]byte, []int) {
-	return file_v1_types_media_proto_rawDescGZIP(), []int{14}
+	return file_v1_types_media_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *Review) GetId() string {
@@ -2241,7 +2860,7 @@ type StatPoint struct {
 
 func (x *StatPoint) Reset() {
 	*x = StatPoint{}
-	mi := &file_v1_types_media_proto_msgTypes[15]
+	mi := &file_v1_types_media_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2253,7 +2872,7 @@ func (x *StatPoint) String() string {
 func (*StatPoint) ProtoMessage() {}
 
 func (x *StatPoint) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_types_media_proto_msgTypes[15]
+	mi := &file_v1_types_media_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2266,7 +2885,7 @@ func (x *StatPoint) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StatPoint.ProtoReflect.Descriptor instead.
 func (*StatPoint) Descriptor() ([]byte, []int) {
-	return file_v1_types_media_proto_rawDescGZIP(), []int{15}
+	return file_v1_types_media_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *StatPoint) GetDate() string {
@@ -2451,7 +3070,12 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\vmedia_count\x18\n" +
 	" \x01(\x03R\vmedia_count\x12 \n" +
 	"\vshort_token\x18\v \x01(\tR\vshort_token\x126\n" +
-	"\badd_date\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\badd_date\"\xeb\x03\n" +
+	"\badd_date\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\badd_date\"e\n" +
+	"\vChannelLink\x12\x12\n" +
+	"\x04type\x18\x01 \x01(\tR\x04type\x12\x1a\n" +
+	"\bplatform\x18\x02 \x01(\tR\bplatform\x12\x10\n" +
+	"\x03url\x18\x03 \x01(\tR\x03url\x12\x14\n" +
+	"\x05title\x18\x04 \x01(\tR\x05title\"\xa3\b\n" +
 	"\aChannel\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
@@ -2465,7 +3089,45 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\vmedia_count\x18\n" +
 	" \x01(\x03R\vmedia_count\x12 \n" +
 	"\vshort_token\x18\v \x01(\tR\vshort_token\x126\n" +
-	"\badd_date\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\badd_date\"\xc2\x01\n" +
+	"\badd_date\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\badd_date\x12\x12\n" +
+	"\x04name\x18\x14 \x01(\tR\x04name\x12\x12\n" +
+	"\x04slug\x18\x15 \x01(\tR\x04slug\x12\x16\n" +
+	"\x06handle\x18\x16 \x01(\tR\x06handle\x12\x16\n" +
+	"\x06avatar\x18\x17 \x01(\tR\x06avatar\x12\x16\n" +
+	"\x06banner\x18\x18 \x01(\tR\x06banner\x12<\n" +
+	"\x06status\x18\x19 \x01(\x0e2$.api.v1.services.types.ChannelStatusR\x06status\x12 \n" +
+	"\vis_verified\x18\x1b \x01(\bR\vis_verified\x12\x12\n" +
+	"\x04tags\x18\x1c \x03(\tR\x04tags\x12 \n" +
+	"\vcategory_id\x18\x1d \x01(\x03R\vcategory_id\x12$\n" +
+	"\rarticle_count\x18\x1e \x01(\x05R\rarticle_count\x12 \n" +
+	"\vtotal_views\x18\x1f \x01(\x03R\vtotal_views\x128\n" +
+	"\x05links\x18  \x03(\v2\".api.v1.services.types.ChannelLinkR\x05links\x12/\n" +
+	"\x04user\x182 \x01(\v2\x1b.api.v1.services.types.UserR\x04user\x12;\n" +
+	"\bcategory\x183 \x01(\v2\x1f.api.v1.services.types.CategoryR\bcategory\x12\x1a\n" +
+	"\bis_owner\x18< \x01(\bR\bis_owner\x12$\n" +
+	"\ris_subscribed\x18= \x01(\bR\ris_subscribed\"\xd3\x02\n" +
+	"\x10HandleResolution\x12J\n" +
+	"\x04type\x18\x01 \x01(\x0e26.api.v1.services.types.HandleResolution.ResolutionTypeR\x04type\x128\n" +
+	"\achannel\x18\x02 \x01(\v2\x1e.api.v1.services.types.ChannelR\achannel\x12/\n" +
+	"\x04user\x18\x03 \x01(\v2\x1b.api.v1.services.types.UserR\x04user\"\x87\x01\n" +
+	"\x0eResolutionType\x12\x1f\n" +
+	"\x1bRESOLUTION_TYPE_UNSPECIFIED\x10\x00\x12\x1b\n" +
+	"\x17RESOLUTION_TYPE_CHANNEL\x10\x01\x12\x18\n" +
+	"\x14RESOLUTION_TYPE_USER\x10\x02\x12\x1d\n" +
+	"\x19RESOLUTION_TYPE_NOT_FOUND\x10\x03\"y\n" +
+	"\rChannelLimits\x12\"\n" +
+	"\fmax_channels\x18\x01 \x01(\x05R\fmax_channels\x12$\n" +
+	"\rcurrent_count\x18\x02 \x01(\x05R\rcurrent_count\x12\x1e\n" +
+	"\n" +
+	"can_create\x18\x03 \x01(\bR\n" +
+	"can_create\"\xa5\x01\n" +
+	"\x17ContentVisibilityCounts\x12\"\n" +
+	"\fpublic_count\x18\x01 \x01(\x05R\fpublic_count\x12$\n" +
+	"\rprivate_count\x18\x02 \x01(\x05R\rprivate_count\x12\x1e\n" +
+	"\n" +
+	"paid_count\x18\x03 \x01(\x05R\n" +
+	"paid_count\x12 \n" +
+	"\vtotal_count\x18\x04 \x01(\x05R\vtotal_count\"\xc2\x01\n" +
 	"\bSubtitle\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12\x1a\n" +
@@ -2496,16 +3158,19 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"frame_rate\x18\a \x01(\x02R\n" +
 	"frame_rate\x12\x14\n" +
 	"\x05width\x18\b \x01(\x05R\x05width\x12\x16\n" +
-	"\x06height\x18\t \x01(\x05R\x06height\"\xb1\x02\n" +
+	"\x06height\x18\t \x01(\x05R\x06height\"\x9d\x03\n" +
 	"\vHistoryItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12\x18\n" +
-	"\auser_id\x18\x03 \x01(\tR\auser_id\x12\x1a\n" +
-	"\bmedia_id\x18\x04 \x01(\tR\bmedia_id\x12\x1a\n" +
-	"\bprogress\x18\x05 \x01(\x05R\bprogress\x12\x1a\n" +
-	"\bduration\x18\x06 \x01(\x05R\bduration\x12 \n" +
+	"\auser_id\x18\x03 \x01(\tR\auser_id\x12\x1e\n" +
+	"\n" +
+	"content_id\x18\x04 \x01(\tR\n" +
+	"content_id\x12*\n" +
+	"\x10progress_seconds\x18\x05 \x01(\x05R\x10progress_seconds\x12*\n" +
+	"\x10duration_seconds\x18\x06 \x01(\x05R\x10duration_seconds\x12 \n" +
 	"\vis_finished\x18\a \x01(\bR\vis_finished\x12D\n" +
-	"\x0flast_watched_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\x0flast_watched_at\"\x98\x02\n" +
+	"\x0flast_watched_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\x0flast_watched_at\x12F\n" +
+	"\fcontent_type\x18\t \x01(\x0e2\".api.v1.services.types.ContentTypeR\fcontent_type\"\x98\x02\n" +
 	"\x06Review\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
@@ -2534,7 +3199,23 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\x16PLAYLIST_STATUS_ACTIVE\x10\x01\x12\x1c\n" +
 	"\x18PLAYLIST_STATUS_INACTIVE\x10\x02\x12\x19\n" +
 	"\x15PLAYLIST_STATUS_DRAFT\x10\x03\x12\x1c\n" +
-	"\x18PLAYLIST_STATUS_ARCHIVED\x10\x04B\xd5\x01\n" +
+	"\x18PLAYLIST_STATUS_ARCHIVED\x10\x04*\xa8\x01\n" +
+	"\rChannelStatus\x12\x1e\n" +
+	"\x1aCHANNEL_STATUS_UNSPECIFIED\x10\x00\x12\x19\n" +
+	"\x15CHANNEL_STATUS_ACTIVE\x10\x01\x12\x1b\n" +
+	"\x17CHANNEL_STATUS_INACTIVE\x10\x02\x12\x1c\n" +
+	"\x18CHANNEL_STATUS_SUSPENDED\x10\x03\x12!\n" +
+	"\x1dCHANNEL_STATUS_PENDING_REVIEW\x10\x04*\x93\x01\n" +
+	"\x11ContentVisibility\x12\"\n" +
+	"\x1eCONTENT_VISIBILITY_UNSPECIFIED\x10\x00\x12\x1d\n" +
+	"\x19CONTENT_VISIBILITY_PUBLIC\x10\x01\x12\x1e\n" +
+	"\x1aCONTENT_VISIBILITY_PRIVATE\x10\x02\x12\x1b\n" +
+	"\x17CONTENT_VISIBILITY_PAID\x10\x03*u\n" +
+	"\vContentType\x12\x1c\n" +
+	"\x18CONTENT_TYPE_UNSPECIFIED\x10\x00\x12\x16\n" +
+	"\x12CONTENT_TYPE_VIDEO\x10\x01\x12\x18\n" +
+	"\x14CONTENT_TYPE_ARTICLE\x10\x02\x12\x16\n" +
+	"\x12CONTENT_TYPE_AUDIO\x10\x03B\xd5\x01\n" +
 	"\x19com.api.v1.services.typesB\n" +
 	"MediaProtoP\x01Z4origadmin/application/origcms/api/gen/v1/types;types\xa2\x02\x04AVST\xaa\x02\x15Api.V1.Services.Types\xca\x02\x15Api\\V1\\Services\\Types\xe2\x02!Api\\V1\\Services\\Types\\GPBMetadata\xea\x02\x18Api::V1::Services::Typesb\x06proto3"
 
@@ -2550,73 +3231,89 @@ func file_v1_types_media_proto_rawDescGZIP() []byte {
 	return file_v1_types_media_proto_rawDescData
 }
 
-var file_v1_types_media_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_v1_types_media_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_v1_types_media_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
+var file_v1_types_media_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_v1_types_media_proto_goTypes = []any{
-	(Privacy)(0),                  // 0: api.v1.services.types.Privacy
-	(TagStatus)(0),                // 1: api.v1.services.types.TagStatus
-	(PlaylistStatus)(0),           // 2: api.v1.services.types.PlaylistStatus
-	(*Media)(nil),                 // 3: api.v1.services.types.Media
-	(*EncodeProfile)(nil),         // 4: api.v1.services.types.EncodeProfile
-	(*EncodingTask)(nil),          // 5: api.v1.services.types.EncodingTask
-	(*Category)(nil),              // 6: api.v1.services.types.Category
-	(*Tag)(nil),                   // 7: api.v1.services.types.Tag
-	(*Comment)(nil),               // 8: api.v1.services.types.Comment
-	(*Like)(nil),                  // 9: api.v1.services.types.Like
-	(*Favorite)(nil),              // 10: api.v1.services.types.Favorite
-	(*Playlist)(nil),              // 11: api.v1.services.types.Playlist
-	(*Channel)(nil),               // 12: api.v1.services.types.Channel
-	(*Subtitle)(nil),              // 13: api.v1.services.types.Subtitle
-	(*MediaVariant)(nil),          // 14: api.v1.services.types.MediaVariant
-	(*MediaMetadata)(nil),         // 15: api.v1.services.types.MediaMetadata
-	(*HistoryItem)(nil),           // 16: api.v1.services.types.HistoryItem
-	(*Review)(nil),                // 17: api.v1.services.types.Review
-	(*StatPoint)(nil),             // 18: api.v1.services.types.StatPoint
-	(*timestamppb.Timestamp)(nil), // 19: google.protobuf.Timestamp
-	(*User)(nil),                  // 20: api.v1.services.types.User
+	(Privacy)(0),                         // 0: api.v1.services.types.Privacy
+	(TagStatus)(0),                       // 1: api.v1.services.types.TagStatus
+	(PlaylistStatus)(0),                  // 2: api.v1.services.types.PlaylistStatus
+	(ChannelStatus)(0),                   // 3: api.v1.services.types.ChannelStatus
+	(ContentVisibility)(0),               // 4: api.v1.services.types.ContentVisibility
+	(ContentType)(0),                     // 5: api.v1.services.types.ContentType
+	(HandleResolution_ResolutionType)(0), // 6: api.v1.services.types.HandleResolution.ResolutionType
+	(*Media)(nil),                        // 7: api.v1.services.types.Media
+	(*EncodeProfile)(nil),                // 8: api.v1.services.types.EncodeProfile
+	(*EncodingTask)(nil),                 // 9: api.v1.services.types.EncodingTask
+	(*Category)(nil),                     // 10: api.v1.services.types.Category
+	(*Tag)(nil),                          // 11: api.v1.services.types.Tag
+	(*Comment)(nil),                      // 12: api.v1.services.types.Comment
+	(*Like)(nil),                         // 13: api.v1.services.types.Like
+	(*Favorite)(nil),                     // 14: api.v1.services.types.Favorite
+	(*Playlist)(nil),                     // 15: api.v1.services.types.Playlist
+	(*ChannelLink)(nil),                  // 16: api.v1.services.types.ChannelLink
+	(*Channel)(nil),                      // 17: api.v1.services.types.Channel
+	(*HandleResolution)(nil),             // 18: api.v1.services.types.HandleResolution
+	(*ChannelLimits)(nil),                // 19: api.v1.services.types.ChannelLimits
+	(*ContentVisibilityCounts)(nil),      // 20: api.v1.services.types.ContentVisibilityCounts
+	(*Subtitle)(nil),                     // 21: api.v1.services.types.Subtitle
+	(*MediaVariant)(nil),                 // 22: api.v1.services.types.MediaVariant
+	(*MediaMetadata)(nil),                // 23: api.v1.services.types.MediaMetadata
+	(*HistoryItem)(nil),                  // 24: api.v1.services.types.HistoryItem
+	(*Review)(nil),                       // 25: api.v1.services.types.Review
+	(*StatPoint)(nil),                    // 26: api.v1.services.types.StatPoint
+	(*timestamppb.Timestamp)(nil),        // 27: google.protobuf.Timestamp
+	(*User)(nil),                         // 28: api.v1.services.types.User
 }
 var file_v1_types_media_proto_depIdxs = []int32{
-	19, // 0: api.v1.services.types.Media.create_time:type_name -> google.protobuf.Timestamp
-	19, // 1: api.v1.services.types.Media.update_time:type_name -> google.protobuf.Timestamp
+	27, // 0: api.v1.services.types.Media.create_time:type_name -> google.protobuf.Timestamp
+	27, // 1: api.v1.services.types.Media.update_time:type_name -> google.protobuf.Timestamp
 	0,  // 2: api.v1.services.types.Media.privacy:type_name -> api.v1.services.types.Privacy
-	19, // 3: api.v1.services.types.Media.published_at:type_name -> google.protobuf.Timestamp
-	20, // 4: api.v1.services.types.Media.user:type_name -> api.v1.services.types.User
-	6,  // 5: api.v1.services.types.Media.category:type_name -> api.v1.services.types.Category
-	12, // 6: api.v1.services.types.Media.channel:type_name -> api.v1.services.types.Channel
-	19, // 7: api.v1.services.types.EncodeProfile.create_time:type_name -> google.protobuf.Timestamp
-	19, // 8: api.v1.services.types.EncodeProfile.update_time:type_name -> google.protobuf.Timestamp
-	19, // 9: api.v1.services.types.EncodingTask.create_time:type_name -> google.protobuf.Timestamp
-	19, // 10: api.v1.services.types.EncodingTask.update_time:type_name -> google.protobuf.Timestamp
-	19, // 11: api.v1.services.types.Category.create_time:type_name -> google.protobuf.Timestamp
-	19, // 12: api.v1.services.types.Category.update_time:type_name -> google.protobuf.Timestamp
-	19, // 13: api.v1.services.types.Tag.create_time:type_name -> google.protobuf.Timestamp
-	19, // 14: api.v1.services.types.Tag.update_time:type_name -> google.protobuf.Timestamp
+	27, // 3: api.v1.services.types.Media.published_at:type_name -> google.protobuf.Timestamp
+	28, // 4: api.v1.services.types.Media.user:type_name -> api.v1.services.types.User
+	10, // 5: api.v1.services.types.Media.category:type_name -> api.v1.services.types.Category
+	17, // 6: api.v1.services.types.Media.channel:type_name -> api.v1.services.types.Channel
+	27, // 7: api.v1.services.types.EncodeProfile.create_time:type_name -> google.protobuf.Timestamp
+	27, // 8: api.v1.services.types.EncodeProfile.update_time:type_name -> google.protobuf.Timestamp
+	27, // 9: api.v1.services.types.EncodingTask.create_time:type_name -> google.protobuf.Timestamp
+	27, // 10: api.v1.services.types.EncodingTask.update_time:type_name -> google.protobuf.Timestamp
+	27, // 11: api.v1.services.types.Category.create_time:type_name -> google.protobuf.Timestamp
+	27, // 12: api.v1.services.types.Category.update_time:type_name -> google.protobuf.Timestamp
+	27, // 13: api.v1.services.types.Tag.create_time:type_name -> google.protobuf.Timestamp
+	27, // 14: api.v1.services.types.Tag.update_time:type_name -> google.protobuf.Timestamp
 	1,  // 15: api.v1.services.types.Tag.status:type_name -> api.v1.services.types.TagStatus
-	19, // 16: api.v1.services.types.Comment.create_time:type_name -> google.protobuf.Timestamp
-	19, // 17: api.v1.services.types.Comment.update_time:type_name -> google.protobuf.Timestamp
-	19, // 18: api.v1.services.types.Comment.moderated_at:type_name -> google.protobuf.Timestamp
-	19, // 19: api.v1.services.types.Comment.add_date:type_name -> google.protobuf.Timestamp
-	19, // 20: api.v1.services.types.Like.create_time:type_name -> google.protobuf.Timestamp
-	19, // 21: api.v1.services.types.Favorite.create_time:type_name -> google.protobuf.Timestamp
-	19, // 22: api.v1.services.types.Playlist.create_time:type_name -> google.protobuf.Timestamp
-	19, // 23: api.v1.services.types.Playlist.update_time:type_name -> google.protobuf.Timestamp
+	27, // 16: api.v1.services.types.Comment.create_time:type_name -> google.protobuf.Timestamp
+	27, // 17: api.v1.services.types.Comment.update_time:type_name -> google.protobuf.Timestamp
+	27, // 18: api.v1.services.types.Comment.moderated_at:type_name -> google.protobuf.Timestamp
+	27, // 19: api.v1.services.types.Comment.add_date:type_name -> google.protobuf.Timestamp
+	27, // 20: api.v1.services.types.Like.create_time:type_name -> google.protobuf.Timestamp
+	27, // 21: api.v1.services.types.Favorite.create_time:type_name -> google.protobuf.Timestamp
+	27, // 22: api.v1.services.types.Playlist.create_time:type_name -> google.protobuf.Timestamp
+	27, // 23: api.v1.services.types.Playlist.update_time:type_name -> google.protobuf.Timestamp
 	0,  // 24: api.v1.services.types.Playlist.privacy:type_name -> api.v1.services.types.Privacy
 	2,  // 25: api.v1.services.types.Playlist.status:type_name -> api.v1.services.types.PlaylistStatus
-	19, // 26: api.v1.services.types.Playlist.add_date:type_name -> google.protobuf.Timestamp
-	19, // 27: api.v1.services.types.Channel.create_time:type_name -> google.protobuf.Timestamp
-	19, // 28: api.v1.services.types.Channel.update_time:type_name -> google.protobuf.Timestamp
+	27, // 26: api.v1.services.types.Playlist.add_date:type_name -> google.protobuf.Timestamp
+	27, // 27: api.v1.services.types.Channel.create_time:type_name -> google.protobuf.Timestamp
+	27, // 28: api.v1.services.types.Channel.update_time:type_name -> google.protobuf.Timestamp
 	0,  // 29: api.v1.services.types.Channel.privacy:type_name -> api.v1.services.types.Privacy
-	19, // 30: api.v1.services.types.Channel.add_date:type_name -> google.protobuf.Timestamp
-	19, // 31: api.v1.services.types.Subtitle.create_time:type_name -> google.protobuf.Timestamp
-	19, // 32: api.v1.services.types.HistoryItem.create_time:type_name -> google.protobuf.Timestamp
-	19, // 33: api.v1.services.types.HistoryItem.last_watched_at:type_name -> google.protobuf.Timestamp
-	19, // 34: api.v1.services.types.Review.create_time:type_name -> google.protobuf.Timestamp
-	19, // 35: api.v1.services.types.Review.update_time:type_name -> google.protobuf.Timestamp
-	36, // [36:36] is the sub-list for method output_type
-	36, // [36:36] is the sub-list for method input_type
-	36, // [36:36] is the sub-list for extension type_name
-	36, // [36:36] is the sub-list for extension extendee
-	0,  // [0:36] is the sub-list for field type_name
+	27, // 30: api.v1.services.types.Channel.add_date:type_name -> google.protobuf.Timestamp
+	3,  // 31: api.v1.services.types.Channel.status:type_name -> api.v1.services.types.ChannelStatus
+	16, // 32: api.v1.services.types.Channel.links:type_name -> api.v1.services.types.ChannelLink
+	28, // 33: api.v1.services.types.Channel.user:type_name -> api.v1.services.types.User
+	10, // 34: api.v1.services.types.Channel.category:type_name -> api.v1.services.types.Category
+	6,  // 35: api.v1.services.types.HandleResolution.type:type_name -> api.v1.services.types.HandleResolution.ResolutionType
+	17, // 36: api.v1.services.types.HandleResolution.channel:type_name -> api.v1.services.types.Channel
+	28, // 37: api.v1.services.types.HandleResolution.user:type_name -> api.v1.services.types.User
+	27, // 38: api.v1.services.types.Subtitle.create_time:type_name -> google.protobuf.Timestamp
+	27, // 39: api.v1.services.types.HistoryItem.create_time:type_name -> google.protobuf.Timestamp
+	27, // 40: api.v1.services.types.HistoryItem.last_watched_at:type_name -> google.protobuf.Timestamp
+	5,  // 41: api.v1.services.types.HistoryItem.content_type:type_name -> api.v1.services.types.ContentType
+	27, // 42: api.v1.services.types.Review.create_time:type_name -> google.protobuf.Timestamp
+	27, // 43: api.v1.services.types.Review.update_time:type_name -> google.protobuf.Timestamp
+	44, // [44:44] is the sub-list for method output_type
+	44, // [44:44] is the sub-list for method input_type
+	44, // [44:44] is the sub-list for extension type_name
+	44, // [44:44] is the sub-list for extension extendee
+	0,  // [0:44] is the sub-list for field type_name
 }
 
 func init() { file_v1_types_media_proto_init() }
@@ -2630,8 +3327,8 @@ func file_v1_types_media_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_types_media_proto_rawDesc), len(file_v1_types_media_proto_rawDesc)),
-			NumEnums:      3,
-			NumMessages:   16,
+			NumEnums:      7,
+			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

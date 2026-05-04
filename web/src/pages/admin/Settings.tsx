@@ -7,6 +7,8 @@ import {Input} from '@/components/ui/input';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Separator} from '@/components/ui/separator';
 import {Skeleton} from '@/components/ui/skeleton';
+import {Switch} from '@/components/ui/switch';
+import {Label} from '@/components/ui/label';
 import {ThemeSwitcher} from '@/themes';
 import {
     Settings as SettingsIcon,
@@ -21,7 +23,9 @@ import {
     RefreshCw,
     Loader2,
     CheckCircle,
-    AlertCircle
+    AlertCircle,
+    Blocks,
+    LayoutGrid
 } from 'lucide-react';
 import {settingsApi, type GroupedSettings, type SettingItem} from '@/lib/api/system';
 
@@ -29,6 +33,7 @@ interface FormData {
     site_name: string;
     site_description: string;
     site_url: string;
+    base_url: string;
     timezone: string;
     default_theme: string;
     theme_color: string;
@@ -59,6 +64,11 @@ interface FormData {
     jwt_expiry: string;
     enable_rest_api: string;
     rate_limit: string;
+    allow_upload: string;
+    module_articles: boolean;
+    module_videos: boolean;
+    module_music: boolean;
+    homepage_layout: string;
 }
 
 interface SystemInfo {
@@ -77,6 +87,7 @@ const defaultFormData: FormData = {
     site_name: '',
     site_description: '',
     site_url: '',
+    base_url: '',
     timezone: 'Asia/Shanghai',
     default_theme: 'system',
     theme_color: '#3b82f6',
@@ -107,6 +118,11 @@ const defaultFormData: FormData = {
     jwt_expiry: '7',
     enable_rest_api: 'true',
     rate_limit: '60',
+    allow_upload: 'true',
+    module_articles: true,
+    module_videos: true,
+    module_music: false,
+    homepage_layout: 'auto',
 };
 
 const Settings: React.FC = () => {
@@ -157,17 +173,21 @@ const Settings: React.FC = () => {
                     base_url: getSettingValue('base_url') || prev.base_url,
                     enable_register: getSettingValue('allow_registration') || prev.enable_register,
                     allow_upload: getSettingValue('allow_upload') || prev.allow_upload,
-                    max_file_size: getSettingValue('max_upload_size_video') || prev.max_file_size,
+                    max_file_size: getSettingValue('max_upload_size_video') ? String(Math.round(parseInt(getSettingValue('max_upload_size_video')) / 1024 / 1024)) || prev.max_file_size : prev.max_file_size,
                     auto_transcode: getSettingValue('auto_approve') || prev.auto_transcode,
                     smtp_server: getSettingValue('smtp_host') || prev.smtp_server,
                     smtp_port: getSettingValue('smtp_port') || prev.smtp_port,
                     smtp_username: getSettingValue('smtp_user') || prev.smtp_username,
                     smtp_password: getSettingValue('smtp_password') || prev.smtp_password,
+                    module_articles: getSettingValue('module_articles') === 'true',
+                    module_videos: getSettingValue('module_videos') === 'true',
+                    module_music: getSettingValue('module_music') === 'true',
+                    homepage_layout: getSettingValue('homepage_layout') || prev.homepage_layout,
                 }));
             }
         } catch (error) {
             console.error('Failed to fetch settings:', error);
-            setMessage({type: 'error', text: t('settings.loadFailed') || 'Failed to load settings'});
+            setMessage({type: 'error', text: t('settings.loadFailed')});
             setTimeout(() => setMessage(null), 3000);
         } finally {
             setLoading(false);
@@ -203,20 +223,24 @@ const Settings: React.FC = () => {
                 {key: 'base_url', value: formData.base_url},
                 {key: 'allow_registration', value: formData.enable_register},
                 {key: 'allow_upload', value: formData.allow_upload || 'true'},
-                {key: 'max_upload_size_video', value: String(parseInt(formData.max_file_size) * 1024 * 1024 || 5368709120)},
+                {key: 'max_upload_size_video', value: String((parseInt(formData.max_file_size) || 5120) * 1024 * 1024)},
                 {key: 'auto_approve', value: formData.auto_transcode},
                 {key: 'require_review', value: formData.auto_transcode === 'true' ? 'false' : 'true'},
                 {key: 'smtp_host', value: formData.smtp_server},
                 {key: 'smtp_port', value: formData.smtp_port},
                 {key: 'smtp_user', value: formData.smtp_username},
                 {key: 'smtp_password', value: formData.smtp_password},
+                {key: 'module_articles', value: String(formData.module_articles)},
+                {key: 'module_videos', value: String(formData.module_videos)},
+                {key: 'module_music', value: String(formData.module_music)},
+                {key: 'homepage_layout', value: formData.homepage_layout},
             ];
             await settingsApi.update({settings});
-            setMessage({type: 'success', text: t('settings.saveSuccess') || 'Settings saved successfully'});
+            setMessage({type: 'success', text: t('settings.saveSuccess')});
             setTimeout(() => setMessage(null), 3000);
         } catch (error) {
             console.error('Failed to save settings:', error);
-            setMessage({type: 'error', text: t('settings.saveFailed') || 'Failed to save settings'});
+            setMessage({type: 'error', text: t('settings.saveFailed')});
             setTimeout(() => setMessage(null), 3000);
         } finally {
             setSaving(false);
@@ -287,7 +311,7 @@ const Settings: React.FC = () => {
                 <div className="flex gap-2">
                     <Button variant="outline" onClick={fetchSystemInfo}>
                         <RefreshCw className="mr-2 h-4 w-4"/>
-                        {t('settings.refresh') || '刷新'}
+                        {t('settings.refresh')}
                     </Button>
                     <Button onClick={handleSave} disabled={saving}>
                         {saving ? (
@@ -295,18 +319,19 @@ const Settings: React.FC = () => {
                         ) : (
                             <Save className="mr-2 h-4 w-4"/>
                         )}
-                        {saving ? (t('settings.saving') || '保存中...') : t('settings.save')}
+                        {saving ? t('settings.saving') : t('settings.save')}
                     </Button>
                 </div>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-6 lg:w-[800px]">
+                <TabsList className="grid w-full grid-cols-4 sm:grid-cols-7">
                     <TabsTrigger value="general">{t('settings.tabGeneral')}</TabsTrigger>
                     <TabsTrigger value="storage">{t('settings.tabStorage')}</TabsTrigger>
                     <TabsTrigger value="media">{t('settings.tabMedia')}</TabsTrigger>
                     <TabsTrigger value="email">{t('settings.tabEmail')}</TabsTrigger>
                     <TabsTrigger value="security">{t('settings.tabSecurity')}</TabsTrigger>
+                    <TabsTrigger value="modules">{t('settings.tabModules')}</TabsTrigger>
                     <TabsTrigger value="system">{t('settings.tabSystem')}</TabsTrigger>
                 </TabsList>
 
@@ -327,7 +352,7 @@ const Settings: React.FC = () => {
                                     <Input
                                         value={formData.site_name}
                                         onChange={(e) => handleInputChange('site_name', e.target.value)}
-                                        placeholder={t('settings.enterSiteName') || '请输入站点名称'}
+                                        placeholder={t('settings.enterSiteName')}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -335,7 +360,7 @@ const Settings: React.FC = () => {
                                     <Input
                                         value={formData.site_description}
                                         onChange={(e) => handleInputChange('site_description', e.target.value)}
-                                        placeholder={t('settings.enterSiteDesc') || '请输入站点描述'}
+                                        placeholder={t('settings.enterSiteDesc')}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -433,10 +458,10 @@ const Settings: React.FC = () => {
                                         value={formData.storage_type}
                                         onChange={(e) => handleInputChange('storage_type', e.target.value)}
                                     >
-                                        <option value="local">本地存储</option>
-                                        <option value="s3">Amazon S3</option>
-                                        <option value="minio">MinIO</option>
-                                        <option value="oss">Aliyun OSS</option>
+                                        <option value="local">{t('settings.storageLocal')}</option>
+                                        <option value="s3">{t('settings.storageS3')}</option>
+                                        <option value="minio">{t('settings.storageMinio')}</option>
+                                        <option value="oss">{t('settings.storageOss')}</option>
                                     </select>
                                 </div>
                                 <div className="space-y-2">
@@ -719,6 +744,107 @@ const Settings: React.FC = () => {
                                     />
                                 </div>
                             </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* Modules & Layout */}
+                <TabsContent value="modules" className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Blocks className="h-5 w-5"/>
+                                {t('settings.contentModules')}
+                            </CardTitle>
+                            <CardDescription>
+                                {t('settings.contentModulesDesc')}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="flex items-center justify-between p-4 rounded-lg border">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base font-medium">{t('settings.moduleArticles')}</Label>
+                                    <p className="text-sm text-muted-foreground">
+                                        {t('settings.moduleArticlesDesc')}
+                                    </p>
+                                </div>
+                                <Switch
+                                    checked={formData.module_articles}
+                                    onCheckedChange={(checked: boolean) => setFormData(prev => ({...prev, module_articles: checked}))}
+                                />
+                            </div>
+                            <div className="flex items-center justify-between p-4 rounded-lg border">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base font-medium">{t('settings.moduleVideos')}</Label>
+                                    <p className="text-sm text-muted-foreground">
+                                        {t('settings.moduleVideosDesc')}
+                                    </p>
+                                </div>
+                                <Switch
+                                    checked={formData.module_videos}
+                                    onCheckedChange={(checked: boolean) => setFormData(prev => ({...prev, module_videos: checked}))}
+                                />
+                            </div>
+                            <div className="flex items-center justify-between p-4 rounded-lg border">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base font-medium">{t('settings.moduleMusic')}</Label>
+                                    <p className="text-sm text-muted-foreground">
+                                        {t('settings.moduleMusicDesc')}
+                                    </p>
+                                </div>
+                                <Switch
+                                    checked={formData.module_music}
+                                    onCheckedChange={(checked: boolean) => setFormData(prev => ({...prev, module_music: checked}))}
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <LayoutGrid className="h-5 w-5"/>
+                                {t('settings.homepageLayout')}
+                            </CardTitle>
+                            <CardDescription>
+                                {t('settings.homepageLayoutDesc')}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {[
+                                    {value: 'auto', label: t('settings.layoutAuto'), desc: t('settings.layoutAutoDesc')},
+                                    {value: 'video', label: t('settings.layoutVideo'), desc: t('settings.layoutVideoDesc')},
+                                    {value: 'article', label: t('settings.layoutArticle'), desc: t('settings.layoutArticleDesc')},
+                                    {value: 'mixed', label: t('settings.layoutMixed'), desc: t('settings.layoutMixedDesc')},
+                                    {value: 'doc', label: t('settings.layoutDoc'), desc: t('settings.layoutDocDesc')},
+                                    {value: 'welcome', label: t('settings.layoutWelcome'), desc: t('settings.layoutWelcomeDesc')},
+                                ].map((option) => (
+                                    <button
+                                        key={option.value}
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({...prev, homepage_layout: option.value}))}
+                                        className={`text-left p-4 rounded-lg border-2 transition-colors ${
+                                            formData.homepage_layout === option.value
+                                                ? 'border-primary bg-primary/5'
+                                                : 'border-muted hover:border-muted-foreground/30'
+                                        }`}
+                                    >
+                                        <div className="font-medium text-sm">{option.label}</div>
+                                        <div className="text-xs text-muted-foreground mt-1">{option.desc}</div>
+                                    </button>
+                                ))}
+                            </div>
+
+                            {formData.homepage_layout === 'auto' && (
+                                <div className="p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
+                                    {t('settings.autoLayoutPreview')} <strong>{
+                                        !formData.module_articles && !formData.module_videos ? 'Welcome' :
+                                        formData.module_videos && !formData.module_articles ? 'Video' :
+                                        formData.module_articles && !formData.module_videos ? 'Doc' : 'Mixed'
+                                    }</strong>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </TabsContent>

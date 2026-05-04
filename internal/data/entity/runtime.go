@@ -13,6 +13,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/groupmember"
+	"origadmin/application/origcms/internal/data/entity/history"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
@@ -161,8 +162,26 @@ func init() {
 	category.IDValidator = categoryDescID.Validators[0].(func(int64) error)
 	channelFields := schema.Channel{}.Fields()
 	_ = channelFields
+	// channelDescName is the schema descriptor for name field.
+	channelDescName := channelFields[2].Descriptor()
+	// channel.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	channel.NameValidator = func() func(string) error {
+		validators := channelDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// channelDescTitle is the schema descriptor for title field.
-	channelDescTitle := channelFields[2].Descriptor()
+	channelDescTitle := channelFields[3].Descriptor()
 	// channel.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	channel.TitleValidator = func() func(string) error {
 		validators := channelDescTitle.Validators
@@ -179,34 +198,76 @@ func init() {
 			return nil
 		}
 	}()
+	// channelDescSlug is the schema descriptor for slug field.
+	channelDescSlug := channelFields[4].Descriptor()
+	// channel.SlugValidator is a validator for the "slug" field. It is called by the builders before save.
+	channel.SlugValidator = channelDescSlug.Validators[0].(func(string) error)
+	// channelDescHandle is the schema descriptor for handle field.
+	channelDescHandle := channelFields[5].Descriptor()
+	// channel.HandleValidator is a validator for the "handle" field. It is called by the builders before save.
+	channel.HandleValidator = func() func(string) error {
+		validators := channelDescHandle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(handle string) error {
+			for _, fn := range fns {
+				if err := fn(handle); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// channelDescShortToken is the schema descriptor for short_token field.
-	channelDescShortToken := channelFields[4].Descriptor()
+	channelDescShortToken := channelFields[6].Descriptor()
 	// channel.DefaultShortToken holds the default value on creation for the short_token field.
 	channel.DefaultShortToken = channelDescShortToken.Default.(func() string)
 	// channel.ShortTokenValidator is a validator for the "short_token" field. It is called by the builders before save.
 	channel.ShortTokenValidator = channelDescShortToken.Validators[0].(func(string) error)
+	// channelDescAvatar is the schema descriptor for avatar field.
+	channelDescAvatar := channelFields[8].Descriptor()
+	// channel.AvatarValidator is a validator for the "avatar" field. It is called by the builders before save.
+	channel.AvatarValidator = channelDescAvatar.Validators[0].(func(string) error)
+	// channelDescBanner is the schema descriptor for banner field.
+	channelDescBanner := channelFields[9].Descriptor()
+	// channel.BannerValidator is a validator for the "banner" field. It is called by the builders before save.
+	channel.BannerValidator = channelDescBanner.Validators[0].(func(string) error)
 	// channelDescBannerLogo is the schema descriptor for banner_logo field.
-	channelDescBannerLogo := channelFields[5].Descriptor()
+	channelDescBannerLogo := channelFields[10].Descriptor()
 	// channel.BannerLogoValidator is a validator for the "banner_logo" field. It is called by the builders before save.
 	channel.BannerLogoValidator = channelDescBannerLogo.Validators[0].(func(string) error)
+	// channelDescIsVerified is the schema descriptor for is_verified field.
+	channelDescIsVerified := channelFields[15].Descriptor()
+	// channel.DefaultIsVerified holds the default value on creation for the is_verified field.
+	channel.DefaultIsVerified = channelDescIsVerified.Default.(bool)
 	// channelDescSubscriberCount is the schema descriptor for subscriber_count field.
-	channelDescSubscriberCount := channelFields[7].Descriptor()
+	channelDescSubscriberCount := channelFields[16].Descriptor()
 	// channel.DefaultSubscriberCount holds the default value on creation for the subscriber_count field.
 	channel.DefaultSubscriberCount = channelDescSubscriberCount.Default.(int64)
 	// channelDescMediaCount is the schema descriptor for media_count field.
-	channelDescMediaCount := channelFields[8].Descriptor()
+	channelDescMediaCount := channelFields[17].Descriptor()
 	// channel.DefaultMediaCount holds the default value on creation for the media_count field.
 	channel.DefaultMediaCount = channelDescMediaCount.Default.(int)
+	// channelDescArticleCount is the schema descriptor for article_count field.
+	channelDescArticleCount := channelFields[18].Descriptor()
+	// channel.DefaultArticleCount holds the default value on creation for the article_count field.
+	channel.DefaultArticleCount = channelDescArticleCount.Default.(int)
+	// channelDescTotalViews is the schema descriptor for total_views field.
+	channelDescTotalViews := channelFields[19].Descriptor()
+	// channel.DefaultTotalViews holds the default value on creation for the total_views field.
+	channel.DefaultTotalViews = channelDescTotalViews.Default.(int64)
 	// channelDescAddDate is the schema descriptor for add_date field.
-	channelDescAddDate := channelFields[9].Descriptor()
+	channelDescAddDate := channelFields[21].Descriptor()
 	// channel.DefaultAddDate holds the default value on creation for the add_date field.
 	channel.DefaultAddDate = channelDescAddDate.Default.(func() time.Time)
 	// channelDescCreateTime is the schema descriptor for create_time field.
-	channelDescCreateTime := channelFields[10].Descriptor()
+	channelDescCreateTime := channelFields[22].Descriptor()
 	// channel.DefaultCreateTime holds the default value on creation for the create_time field.
 	channel.DefaultCreateTime = channelDescCreateTime.Default.(func() time.Time)
 	// channelDescUpdateTime is the schema descriptor for update_time field.
-	channelDescUpdateTime := channelFields[11].Descriptor()
+	channelDescUpdateTime := channelFields[23].Descriptor()
 	// channel.DefaultUpdateTime holds the default value on creation for the update_time field.
 	channel.DefaultUpdateTime = channelDescUpdateTime.Default.(func() time.Time)
 	// channel.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
@@ -385,6 +446,52 @@ func init() {
 	groupmember.DefaultID = groupmemberDescID.Default.(func() string)
 	// groupmember.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	groupmember.IDValidator = groupmemberDescID.Validators[0].(func(string) error)
+	historyFields := schema.History{}.Fields()
+	_ = historyFields
+	// historyDescProgressSeconds is the schema descriptor for progress_seconds field.
+	historyDescProgressSeconds := historyFields[4].Descriptor()
+	// history.DefaultProgressSeconds holds the default value on creation for the progress_seconds field.
+	history.DefaultProgressSeconds = historyDescProgressSeconds.Default.(int)
+	// historyDescDurationSeconds is the schema descriptor for duration_seconds field.
+	historyDescDurationSeconds := historyFields[5].Descriptor()
+	// history.DefaultDurationSeconds holds the default value on creation for the duration_seconds field.
+	history.DefaultDurationSeconds = historyDescDurationSeconds.Default.(int)
+	// historyDescIsFinished is the schema descriptor for is_finished field.
+	historyDescIsFinished := historyFields[6].Descriptor()
+	// history.DefaultIsFinished holds the default value on creation for the is_finished field.
+	history.DefaultIsFinished = historyDescIsFinished.Default.(bool)
+	// historyDescTitle is the schema descriptor for title field.
+	historyDescTitle := historyFields[7].Descriptor()
+	// history.DefaultTitle holds the default value on creation for the title field.
+	history.DefaultTitle = historyDescTitle.Default.(string)
+	// historyDescThumbnail is the schema descriptor for thumbnail field.
+	historyDescThumbnail := historyFields[8].Descriptor()
+	// history.DefaultThumbnail holds the default value on creation for the thumbnail field.
+	history.DefaultThumbnail = historyDescThumbnail.Default.(string)
+	// historyDescShortToken is the schema descriptor for short_token field.
+	historyDescShortToken := historyFields[9].Descriptor()
+	// history.DefaultShortToken holds the default value on creation for the short_token field.
+	history.DefaultShortToken = historyDescShortToken.Default.(string)
+	// historyDescLastWatchedAt is the schema descriptor for last_watched_at field.
+	historyDescLastWatchedAt := historyFields[10].Descriptor()
+	// history.DefaultLastWatchedAt holds the default value on creation for the last_watched_at field.
+	history.DefaultLastWatchedAt = historyDescLastWatchedAt.Default.(func() time.Time)
+	// historyDescCreateTime is the schema descriptor for create_time field.
+	historyDescCreateTime := historyFields[11].Descriptor()
+	// history.DefaultCreateTime holds the default value on creation for the create_time field.
+	history.DefaultCreateTime = historyDescCreateTime.Default.(func() time.Time)
+	// historyDescUpdateTime is the schema descriptor for update_time field.
+	historyDescUpdateTime := historyFields[12].Descriptor()
+	// history.DefaultUpdateTime holds the default value on creation for the update_time field.
+	history.DefaultUpdateTime = historyDescUpdateTime.Default.(func() time.Time)
+	// history.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	history.UpdateDefaultUpdateTime = historyDescUpdateTime.UpdateDefault.(func() time.Time)
+	// historyDescID is the schema descriptor for id field.
+	historyDescID := historyFields[0].Descriptor()
+	// history.DefaultID holds the default value on creation for the id field.
+	history.DefaultID = historyDescID.Default.(func() string)
+	// history.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	history.IDValidator = historyDescID.Validators[0].(func(string) error)
 	likeFields := schema.Like{}.Fields()
 	_ = likeFields
 	// likeDescLikeType is the schema descriptor for like_type field.

@@ -13,7 +13,7 @@ interface AuthResponse {
     token_type: string;
     expires_in: number;
     user: {
-        id: number;
+        id: string;
         username: string;
         nickname?: string;
         is_staff?: boolean;

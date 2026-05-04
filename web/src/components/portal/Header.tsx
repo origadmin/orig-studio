@@ -12,17 +12,20 @@ import {
     User,
     LogOut,
     Upload,
-    Settings,
+    Heart,
     Shield,
     ChevronDown,
     Plus,
     Sun,
     Moon,
-    Globe,
+    FileText,
+    Tv,
+    UserCircle,
 } from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {useAuth} from '@/hooks/useAuth';
-// import NotificationBadge from '@/components/common/NotificationBadge';
+import {useModuleConfig} from '@/hooks/useModuleConfig';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 
 /* ── QuickLink 定义 ──────────────────────────────────────────────────────── */
 
@@ -75,6 +78,8 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
     const navigate = useNavigate();
     const location = useLocation();
     const {isAuthenticated, user, logout, isAdmin} = useAuth();
+    const {data: moduleConfig} = useModuleConfig();
+    const articlesEnabled = moduleConfig?.modules?.articles !== false;
 
     // 从 localStorage 读取自定义 QuickLinks
     const [customLinks] = useState<QuickLink[]>(() => {
@@ -229,18 +234,25 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                             {darkMode ? <Sun size={18} className="text-amber-500"/> : <Moon size={18}/>}
                         </button>
                     )}
-                    <button
-                        onClick={() => i18n.changeLanguage(i18n.language === 'zh' ? 'en' : 'zh')}
-                        className="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                        title={i18n.language === 'zh' ? t('nav.switchToEnglish') : t('nav.switchToChinese')}
-                    >
-                        <Globe size={18} className="text-brand"/>
-                    </button>
+                    <LanguageSwitcher
+                        buttonClassName="text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    />
 
                     {isAuthenticated && user ? (
                         <>
                             {/* 通知徽章 - 暂时禁用 */}
                             {/* <NotificationBadge/> */}
+
+                            {/* Write Article button */}
+                            {articlesEnabled && (
+                            <Link
+                                to="/me/articles/new"
+                                className="hidden sm:flex items-center gap-1.5 h-10 px-3.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                            >
+                                <FileText size={16}/>
+                                <span className="hidden lg:inline">{t('nav.write')}</span>
+                            </Link>
+                            )}
 
                             {/* 上传按钮 */}
                             <Link
@@ -286,12 +298,19 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                                         </div>
 
                                         <Link
-                                            to="/u/$id"
-                                            params={{id: String(user.id)}}
+                                            to="/$handle"
+                                            params={{handle: `@${user.username}`}}
                                             onClick={() => setUserMenuOpen(false)}
                                             className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                                         >
-                                            <User size={16}/> {t('nav.myChannel')}
+                                            <UserCircle size={16}/> {t('nav.myProfile')}
+                                        </Link>
+                                        <Link
+                                            to="/me/channels"
+                                            onClick={() => setUserMenuOpen(false)}
+                                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                        >
+                                            <Tv size={16}/> {t('nav.channelManagement')}
                                         </Link>
                                         <Link
                                             to="/me/upload"
@@ -305,7 +324,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                                             onClick={() => setUserMenuOpen(false)}
                                             className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                                         >
-                                            <Settings size={16}/> {t('nav.myFavorites')}
+                                            <Heart size={16}/> {t('nav.myFavorites')}
                                         </Link>
 
                                         {isAdmin && (

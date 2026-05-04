@@ -4,7 +4,9 @@ export interface NavItem {
   id: string;
   label: string;
   to: string;
+  params?: Record<string, string>;
   icon?: LucideIcon;
+  module?: 'articles' | 'videos' | 'music';
   badge?: string | number;
   badgeVariant?: 'default' | 'primary' | 'warning' | 'danger';
   disabled?: boolean;

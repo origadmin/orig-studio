@@ -65,6 +65,7 @@ func (Category) Edges() []ent.Edge {
 		edge.From("user", User.Type).Ref("categories").Field("user_id").Unique(),
 		edge.To("media", Media.Type),
 		edge.To("articles", Article.Type),
+		edge.To("channels", Channel.Type), // NEW: Category has Channels
 		edge.To("children", Category.Type).From("parent").Unique().Field("parent_id"),
 	}
 }

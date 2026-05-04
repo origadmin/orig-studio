@@ -6,8 +6,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"origadmin/application/origcms/internal/data/entity/article"
+	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/media"
+	"origadmin/application/origcms/internal/data/entity/schema"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
 
@@ -28,15 +31,35 @@ func (_c *ChannelCreate) SetUserID(v string) *ChannelCreate {
 	return _c
 }
 
+// SetName sets the "name" field.
+func (_c *ChannelCreate) SetName(v string) *ChannelCreate {
+	_c.mutation.SetName(v)
+	return _c
+}
+
 // SetTitle sets the "title" field.
 func (_c *ChannelCreate) SetTitle(v string) *ChannelCreate {
 	_c.mutation.SetTitle(v)
 	return _c
 }
 
-// SetDescription sets the "description" field.
-func (_c *ChannelCreate) SetDescription(v string) *ChannelCreate {
-	_c.mutation.SetDescription(v)
+// SetSlug sets the "slug" field.
+func (_c *ChannelCreate) SetSlug(v string) *ChannelCreate {
+	_c.mutation.SetSlug(v)
+	return _c
+}
+
+// SetNillableSlug sets the "slug" field if the given value is not nil.
+func (_c *ChannelCreate) SetNillableSlug(v *string) *ChannelCreate {
+	if v != nil {
+		_c.SetSlug(*v)
+	}
+	return _c
+}
+
+// SetHandle sets the "handle" field.
+func (_c *ChannelCreate) SetHandle(v string) *ChannelCreate {
+	_c.mutation.SetHandle(v)
 	return _c
 }
 
@@ -54,9 +77,65 @@ func (_c *ChannelCreate) SetNillableShortToken(v *string) *ChannelCreate {
 	return _c
 }
 
+// SetDescription sets the "description" field.
+func (_c *ChannelCreate) SetDescription(v string) *ChannelCreate {
+	_c.mutation.SetDescription(v)
+	return _c
+}
+
+// SetAvatar sets the "avatar" field.
+func (_c *ChannelCreate) SetAvatar(v string) *ChannelCreate {
+	_c.mutation.SetAvatar(v)
+	return _c
+}
+
+// SetNillableAvatar sets the "avatar" field if the given value is not nil.
+func (_c *ChannelCreate) SetNillableAvatar(v *string) *ChannelCreate {
+	if v != nil {
+		_c.SetAvatar(*v)
+	}
+	return _c
+}
+
+// SetBanner sets the "banner" field.
+func (_c *ChannelCreate) SetBanner(v string) *ChannelCreate {
+	_c.mutation.SetBanner(v)
+	return _c
+}
+
+// SetNillableBanner sets the "banner" field if the given value is not nil.
+func (_c *ChannelCreate) SetNillableBanner(v *string) *ChannelCreate {
+	if v != nil {
+		_c.SetBanner(*v)
+	}
+	return _c
+}
+
 // SetBannerLogo sets the "banner_logo" field.
 func (_c *ChannelCreate) SetBannerLogo(v string) *ChannelCreate {
 	_c.mutation.SetBannerLogo(v)
+	return _c
+}
+
+// SetNillableBannerLogo sets the "banner_logo" field if the given value is not nil.
+func (_c *ChannelCreate) SetNillableBannerLogo(v *string) *ChannelCreate {
+	if v != nil {
+		_c.SetBannerLogo(*v)
+	}
+	return _c
+}
+
+// SetStatus sets the "status" field.
+func (_c *ChannelCreate) SetStatus(v channel.Status) *ChannelCreate {
+	_c.mutation.SetStatus(v)
+	return _c
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *ChannelCreate) SetNillableStatus(v *channel.Status) *ChannelCreate {
+	if v != nil {
+		_c.SetStatus(*v)
+	}
 	return _c
 }
 
@@ -70,6 +149,40 @@ func (_c *ChannelCreate) SetPrivacy(v channel.Privacy) *ChannelCreate {
 func (_c *ChannelCreate) SetNillablePrivacy(v *channel.Privacy) *ChannelCreate {
 	if v != nil {
 		_c.SetPrivacy(*v)
+	}
+	return _c
+}
+
+// SetTags sets the "tags" field.
+func (_c *ChannelCreate) SetTags(v []string) *ChannelCreate {
+	_c.mutation.SetTags(v)
+	return _c
+}
+
+// SetCategoryID sets the "category_id" field.
+func (_c *ChannelCreate) SetCategoryID(v int64) *ChannelCreate {
+	_c.mutation.SetCategoryID(v)
+	return _c
+}
+
+// SetNillableCategoryID sets the "category_id" field if the given value is not nil.
+func (_c *ChannelCreate) SetNillableCategoryID(v *int64) *ChannelCreate {
+	if v != nil {
+		_c.SetCategoryID(*v)
+	}
+	return _c
+}
+
+// SetIsVerified sets the "is_verified" field.
+func (_c *ChannelCreate) SetIsVerified(v bool) *ChannelCreate {
+	_c.mutation.SetIsVerified(v)
+	return _c
+}
+
+// SetNillableIsVerified sets the "is_verified" field if the given value is not nil.
+func (_c *ChannelCreate) SetNillableIsVerified(v *bool) *ChannelCreate {
+	if v != nil {
+		_c.SetIsVerified(*v)
 	}
 	return _c
 }
@@ -99,6 +212,40 @@ func (_c *ChannelCreate) SetNillableMediaCount(v *int) *ChannelCreate {
 	if v != nil {
 		_c.SetMediaCount(*v)
 	}
+	return _c
+}
+
+// SetArticleCount sets the "article_count" field.
+func (_c *ChannelCreate) SetArticleCount(v int) *ChannelCreate {
+	_c.mutation.SetArticleCount(v)
+	return _c
+}
+
+// SetNillableArticleCount sets the "article_count" field if the given value is not nil.
+func (_c *ChannelCreate) SetNillableArticleCount(v *int) *ChannelCreate {
+	if v != nil {
+		_c.SetArticleCount(*v)
+	}
+	return _c
+}
+
+// SetTotalViews sets the "total_views" field.
+func (_c *ChannelCreate) SetTotalViews(v int64) *ChannelCreate {
+	_c.mutation.SetTotalViews(v)
+	return _c
+}
+
+// SetNillableTotalViews sets the "total_views" field if the given value is not nil.
+func (_c *ChannelCreate) SetNillableTotalViews(v *int64) *ChannelCreate {
+	if v != nil {
+		_c.SetTotalViews(*v)
+	}
+	return _c
+}
+
+// SetLinks sets the "links" field.
+func (_c *ChannelCreate) SetLinks(v []schema.ChannelLink) *ChannelCreate {
+	_c.mutation.SetLinks(v)
 	return _c
 }
 
@@ -178,6 +325,26 @@ func (_c *ChannelCreate) AddMedia(v ...*Media) *ChannelCreate {
 	return _c.AddMediumIDs(ids...)
 }
 
+// AddArticleIDs adds the "articles" edge to the Article entity by IDs.
+func (_c *ChannelCreate) AddArticleIDs(ids ...string) *ChannelCreate {
+	_c.mutation.AddArticleIDs(ids...)
+	return _c
+}
+
+// AddArticles adds the "articles" edges to the Article entity.
+func (_c *ChannelCreate) AddArticles(v ...*Article) *ChannelCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddArticleIDs(ids...)
+}
+
+// SetCategory sets the "category" edge to the Category entity.
+func (_c *ChannelCreate) SetCategory(v *Category) *ChannelCreate {
+	return _c.SetCategoryID(v.ID)
+}
+
 // Mutation returns the ChannelMutation object of the builder.
 func (_c *ChannelCreate) Mutation() *ChannelMutation {
 	return _c.mutation
@@ -217,9 +384,17 @@ func (_c *ChannelCreate) defaults() {
 		v := channel.DefaultShortToken()
 		_c.mutation.SetShortToken(v)
 	}
+	if _, ok := _c.mutation.Status(); !ok {
+		v := channel.DefaultStatus
+		_c.mutation.SetStatus(v)
+	}
 	if _, ok := _c.mutation.Privacy(); !ok {
 		v := channel.DefaultPrivacy
 		_c.mutation.SetPrivacy(v)
+	}
+	if _, ok := _c.mutation.IsVerified(); !ok {
+		v := channel.DefaultIsVerified
+		_c.mutation.SetIsVerified(v)
 	}
 	if _, ok := _c.mutation.SubscriberCount(); !ok {
 		v := channel.DefaultSubscriberCount
@@ -228,6 +403,14 @@ func (_c *ChannelCreate) defaults() {
 	if _, ok := _c.mutation.MediaCount(); !ok {
 		v := channel.DefaultMediaCount
 		_c.mutation.SetMediaCount(v)
+	}
+	if _, ok := _c.mutation.ArticleCount(); !ok {
+		v := channel.DefaultArticleCount
+		_c.mutation.SetArticleCount(v)
+	}
+	if _, ok := _c.mutation.TotalViews(); !ok {
+		v := channel.DefaultTotalViews
+		_c.mutation.SetTotalViews(v)
 	}
 	if _, ok := _c.mutation.AddDate(); !ok {
 		v := channel.DefaultAddDate()
@@ -252,6 +435,14 @@ func (_c *ChannelCreate) check() error {
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`entity: missing required field "Channel.user_id"`)}
 	}
+	if _, ok := _c.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`entity: missing required field "Channel.name"`)}
+	}
+	if v, ok := _c.mutation.Name(); ok {
+		if err := channel.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`entity: validator failed for field "Channel.name": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`entity: missing required field "Channel.title"`)}
 	}
@@ -260,8 +451,18 @@ func (_c *ChannelCreate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Channel.title": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Description(); !ok {
-		return &ValidationError{Name: "description", err: errors.New(`entity: missing required field "Channel.description"`)}
+	if v, ok := _c.mutation.Slug(); ok {
+		if err := channel.SlugValidator(v); err != nil {
+			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "Channel.slug": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Handle(); !ok {
+		return &ValidationError{Name: "handle", err: errors.New(`entity: missing required field "Channel.handle"`)}
+	}
+	if v, ok := _c.mutation.Handle(); ok {
+		if err := channel.HandleValidator(v); err != nil {
+			return &ValidationError{Name: "handle", err: fmt.Errorf(`entity: validator failed for field "Channel.handle": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.ShortToken(); !ok {
 		return &ValidationError{Name: "short_token", err: errors.New(`entity: missing required field "Channel.short_token"`)}
@@ -271,12 +472,30 @@ func (_c *ChannelCreate) check() error {
 			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Channel.short_token": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.BannerLogo(); !ok {
-		return &ValidationError{Name: "banner_logo", err: errors.New(`entity: missing required field "Channel.banner_logo"`)}
+	if _, ok := _c.mutation.Description(); !ok {
+		return &ValidationError{Name: "description", err: errors.New(`entity: missing required field "Channel.description"`)}
+	}
+	if v, ok := _c.mutation.Avatar(); ok {
+		if err := channel.AvatarValidator(v); err != nil {
+			return &ValidationError{Name: "avatar", err: fmt.Errorf(`entity: validator failed for field "Channel.avatar": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.Banner(); ok {
+		if err := channel.BannerValidator(v); err != nil {
+			return &ValidationError{Name: "banner", err: fmt.Errorf(`entity: validator failed for field "Channel.banner": %w`, err)}
+		}
 	}
 	if v, ok := _c.mutation.BannerLogo(); ok {
 		if err := channel.BannerLogoValidator(v); err != nil {
 			return &ValidationError{Name: "banner_logo", err: fmt.Errorf(`entity: validator failed for field "Channel.banner_logo": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`entity: missing required field "Channel.status"`)}
+	}
+	if v, ok := _c.mutation.Status(); ok {
+		if err := channel.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "Channel.status": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Privacy(); !ok {
@@ -287,11 +506,20 @@ func (_c *ChannelCreate) check() error {
 			return &ValidationError{Name: "privacy", err: fmt.Errorf(`entity: validator failed for field "Channel.privacy": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.IsVerified(); !ok {
+		return &ValidationError{Name: "is_verified", err: errors.New(`entity: missing required field "Channel.is_verified"`)}
+	}
 	if _, ok := _c.mutation.SubscriberCount(); !ok {
 		return &ValidationError{Name: "subscriber_count", err: errors.New(`entity: missing required field "Channel.subscriber_count"`)}
 	}
 	if _, ok := _c.mutation.MediaCount(); !ok {
 		return &ValidationError{Name: "media_count", err: errors.New(`entity: missing required field "Channel.media_count"`)}
+	}
+	if _, ok := _c.mutation.ArticleCount(); !ok {
+		return &ValidationError{Name: "article_count", err: errors.New(`entity: missing required field "Channel.article_count"`)}
+	}
+	if _, ok := _c.mutation.TotalViews(); !ok {
+		return &ValidationError{Name: "total_views", err: errors.New(`entity: missing required field "Channel.total_views"`)}
 	}
 	if _, ok := _c.mutation.AddDate(); !ok {
 		return &ValidationError{Name: "add_date", err: errors.New(`entity: missing required field "Channel.add_date"`)}
@@ -345,25 +573,57 @@ func (_c *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
+	if value, ok := _c.mutation.Name(); ok {
+		_spec.SetField(channel.FieldName, field.TypeString, value)
+		_node.Name = value
+	}
 	if value, ok := _c.mutation.Title(); ok {
 		_spec.SetField(channel.FieldTitle, field.TypeString, value)
 		_node.Title = value
 	}
-	if value, ok := _c.mutation.Description(); ok {
-		_spec.SetField(channel.FieldDescription, field.TypeString, value)
-		_node.Description = value
+	if value, ok := _c.mutation.Slug(); ok {
+		_spec.SetField(channel.FieldSlug, field.TypeString, value)
+		_node.Slug = value
+	}
+	if value, ok := _c.mutation.Handle(); ok {
+		_spec.SetField(channel.FieldHandle, field.TypeString, value)
+		_node.Handle = value
 	}
 	if value, ok := _c.mutation.ShortToken(); ok {
 		_spec.SetField(channel.FieldShortToken, field.TypeString, value)
 		_node.ShortToken = value
 	}
+	if value, ok := _c.mutation.Description(); ok {
+		_spec.SetField(channel.FieldDescription, field.TypeString, value)
+		_node.Description = value
+	}
+	if value, ok := _c.mutation.Avatar(); ok {
+		_spec.SetField(channel.FieldAvatar, field.TypeString, value)
+		_node.Avatar = value
+	}
+	if value, ok := _c.mutation.Banner(); ok {
+		_spec.SetField(channel.FieldBanner, field.TypeString, value)
+		_node.Banner = value
+	}
 	if value, ok := _c.mutation.BannerLogo(); ok {
 		_spec.SetField(channel.FieldBannerLogo, field.TypeString, value)
 		_node.BannerLogo = value
 	}
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(channel.FieldStatus, field.TypeEnum, value)
+		_node.Status = value
+	}
 	if value, ok := _c.mutation.Privacy(); ok {
 		_spec.SetField(channel.FieldPrivacy, field.TypeEnum, value)
 		_node.Privacy = value
+	}
+	if value, ok := _c.mutation.Tags(); ok {
+		_spec.SetField(channel.FieldTags, field.TypeJSON, value)
+		_node.Tags = value
+	}
+	if value, ok := _c.mutation.IsVerified(); ok {
+		_spec.SetField(channel.FieldIsVerified, field.TypeBool, value)
+		_node.IsVerified = value
 	}
 	if value, ok := _c.mutation.SubscriberCount(); ok {
 		_spec.SetField(channel.FieldSubscriberCount, field.TypeInt64, value)
@@ -372,6 +632,18 @@ func (_c *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.MediaCount(); ok {
 		_spec.SetField(channel.FieldMediaCount, field.TypeInt, value)
 		_node.MediaCount = value
+	}
+	if value, ok := _c.mutation.ArticleCount(); ok {
+		_spec.SetField(channel.FieldArticleCount, field.TypeInt, value)
+		_node.ArticleCount = value
+	}
+	if value, ok := _c.mutation.TotalViews(); ok {
+		_spec.SetField(channel.FieldTotalViews, field.TypeInt64, value)
+		_node.TotalViews = value
+	}
+	if value, ok := _c.mutation.Links(); ok {
+		_spec.SetField(channel.FieldLinks, field.TypeJSON, value)
+		_node.Links = value
 	}
 	if value, ok := _c.mutation.AddDate(); ok {
 		_spec.SetField(channel.FieldAddDate, field.TypeTime, value)
@@ -416,6 +688,39 @@ func (_c *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ArticlesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.ArticlesTable,
+			Columns: []string{channel.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CategoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   channel.CategoryTable,
+			Columns: []string{channel.CategoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.CategoryID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -7,16 +7,18 @@ package dal
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/channel"
-	ent "origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
 	"origadmin/application/origcms/internal/data/entity/playlist"
+	schema "origadmin/application/origcms/internal/data/entity/schema"
+	"origadmin/application/origcms/internal/data/entity/setting"
 	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"origadmin/application/origcms/internal/features/content/biz"
@@ -38,6 +40,28 @@ func NewPlaylistRepo(data *Data, logger log.Logger) biz.PlaylistRepo {
 
 func NewChannelRepo(data *Data, logger log.Logger) biz.ChannelRepo {
 	return &channelRepo{data: data, log: log.NewHelper(log.With(logger, "module", "channel.data"))}
+}
+
+// systemConfigRepo implements biz.SystemConfigRepo using the existing Setting entity.
+type systemConfigRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
+// NewSystemConfigRepo creates a new SystemConfigRepo.
+func NewSystemConfigRepo(data *Data, logger log.Logger) biz.SystemConfigRepo {
+	return &systemConfigRepo{data: data, log: log.NewHelper(log.With(logger, "module", "system_config.data"))}
+}
+
+// channelUserRepo implements biz.UserRepo for handle resolution.
+type channelUserRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
+// NewChannelUserRepo creates a new UserRepo for handle resolution.
+func NewChannelUserRepo(data *Data, logger log.Logger) biz.UserRepo {
+	return &channelUserRepo{data: data, log: log.NewHelper(log.With(logger, "module", "channel_user.data"))}
 }
 
 func (r *playlistRepo) Create(ctx context.Context, p *biz.Playlist) (*biz.Playlist, error) {
@@ -69,6 +93,11 @@ func (r *playlistRepo) Get(ctx context.Context, id string) (*biz.Playlist, error
 	if err == nil {
 		playlist.MediaItems = mediaItems
 	}
+	// Get media details for the playlist
+	mediaDetails, err := r.GetPlaylistMediaDetails(ctx, id)
+	if err == nil {
+		playlist.MediaDetails = mediaDetails
+	}
 	return playlist, nil
 }
 
@@ -82,6 +111,11 @@ func (r *playlistRepo) GetByShortToken(ctx context.Context, token string) (*biz.
 	mediaItems, err := r.GetPlaylistMedia(ctx, ent.ID)
 	if err == nil {
 		playlist.MediaItems = mediaItems
+	}
+	// Get media details for the playlist
+	mediaDetails, err := r.GetPlaylistMediaDetails(ctx, ent.ID)
+	if err == nil {
+		playlist.MediaDetails = mediaDetails
 	}
 	return playlist, nil
 }
@@ -236,17 +270,117 @@ func (r *playlistRepo) GetPlaylistMedia(ctx context.Context, playlistID string) 
 	return mediaIDs, nil
 }
 
+func (r *playlistRepo) GetPlaylistMediaDetails(ctx context.Context, playlistID string) ([]biz.PlaylistMediaItem, error) {
+	// First get ordered media IDs from the join table
+	mediaPlaylistItems, err := r.data.db.MediaPlaylist.Query().
+		Where(mediaplaylist.PlaylistIDEQ(playlistID)).
+		Order(entity.Asc(mediaplaylist.FieldOrdering)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(mediaPlaylistItems) == 0 {
+		return []biz.PlaylistMediaItem{}, nil
+	}
+
+	// Collect media IDs in order
+	mediaIDs := make([]string, len(mediaPlaylistItems))
+	for i, mp := range mediaPlaylistItems {
+		mediaIDs[i] = mp.MediaID
+	}
+
+	// Fetch all media entities by IDs
+	mediaEnts, err := r.data.db.Media.Query().
+		Where(media.IDIn(mediaIDs...)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build a map for quick lookup
+	mediaMap := make(map[string]*entity.Media, len(mediaEnts))
+	for _, m := range mediaEnts {
+		mediaMap[m.ID] = m
+	}
+
+	// Build result in the original order from the join table
+	result := make([]biz.PlaylistMediaItem, 0, len(mediaIDs))
+	for _, id := range mediaIDs {
+		m, ok := mediaMap[id]
+		if !ok {
+			continue // Skip deleted media
+		}
+		item := biz.PlaylistMediaItem{
+			ID:             m.ID,
+			ShortToken:     m.ShortToken,
+			Title:          m.Title,
+			Thumbnail:      m.Thumbnail,
+			Duration:       m.Duration,
+			Type:           m.Type,
+			ViewCount:      m.ViewCount,
+			EncodingStatus: m.EncodingStatus,
+		}
+		if !m.CreateTime.IsZero() {
+			item.CreateTime = m.CreateTime
+		}
+		result = append(result, item)
+	}
+
+	return result, nil
+}
+
 func (r *channelRepo) Create(ctx context.Context, ch *biz.Channel) (*biz.Channel, error) {
 	privacy := channel.PrivacyPUBLIC
-	if !ch.IsPublic {
+	if ch.Privacy == "PRIVATE" {
 		privacy = channel.PrivacyPRIVATE
+	} else if ch.Privacy == "UNLISTED" {
+		privacy = channel.PrivacyUNLISTED
+	} else if ch.Privacy == "PAID" {
+		privacy = channel.PrivacyPAID
+	} else if ch.Privacy == "SUBSCRIBERS_ONLY" {
+		privacy = channel.PrivacySUBSCRIBERS_ONLY
 	}
+
+	status := channel.StatusACTIVE
+	if ch.Status == "INACTIVE" {
+		status = channel.StatusINACTIVE
+	} else if ch.Status == "SUSPENDED" {
+		status = channel.StatusSUSPENDED
+	} else if ch.Status == "PENDING_REVIEW" {
+		status = channel.StatusPENDING_REVIEW
+	}
+
 	builder := r.data.db.Channel.Create().
+		SetName(ch.Name).
 		SetTitle(ch.Title).
+		SetHandle(ch.Handle).
 		SetDescription(ch.Description).
-		SetBannerLogo(ch.BannerLogo).
 		SetUserID(ch.UserID).
-		SetPrivacy(privacy)
+		SetPrivacy(privacy).
+		SetStatus(status)
+
+	if ch.Slug != "" {
+		builder.SetSlug(ch.Slug)
+	}
+	if ch.Avatar != "" {
+		builder.SetAvatar(ch.Avatar)
+	}
+	if ch.Banner != "" {
+		builder.SetBanner(ch.Banner)
+	}
+	if ch.BannerLogo != "" {
+		builder.SetBannerLogo(ch.BannerLogo)
+	}
+	if ch.Tags != nil {
+		builder.SetTags(ch.Tags)
+	}
+	if ch.CategoryID != nil {
+		builder.SetCategoryID(*ch.CategoryID)
+	}
+	if ch.Links != nil {
+		builder.SetLinks(convertBizLinksToSchema(ch.Links))
+	}
 
 	ent, err := builder.Save(ctx)
 	if err != nil {
@@ -292,9 +426,10 @@ func (r *channelRepo) GetByShortToken(ctx context.Context, token string) (*biz.C
 }
 
 func (r *channelRepo) GetDefaultChannel(ctx context.Context, userID string) (*biz.Channel, error) {
+	// Per A009: no default channel concept. Return first channel for backward compat.
 	ent, err := r.data.db.Channel.Query().
 		Where(channel.UserIDEQ(userID)).
-		Order(ent.Asc(channel.FieldID)).
+		Order(entity.Asc(channel.FieldID)).
 		First(ctx)
 	if err != nil {
 		return nil, err
@@ -302,16 +437,75 @@ func (r *channelRepo) GetDefaultChannel(ctx context.Context, userID string) (*bi
 	return mapChannel(ent), nil
 }
 
+func (r *channelRepo) GetByHandle(ctx context.Context, handle string) (*biz.Channel, error) {
+	ent, err := r.data.db.Channel.Query().Where(channel.HandleEQ(handle)).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return mapChannel(ent), nil
+}
+
+func (r *channelRepo) GetBySlug(ctx context.Context, slug string) (*biz.Channel, error) {
+	ent, err := r.data.db.Channel.Query().Where(channel.SlugEQ(slug)).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return mapChannel(ent), nil
+}
+
+func (r *channelRepo) CountByUser(ctx context.Context, userID string) (int, error) {
+	return r.data.db.Channel.Query().Where(channel.UserIDEQ(userID)).Count(ctx)
+}
+
 func (r *channelRepo) Update(ctx context.Context, ch *biz.Channel) (*biz.Channel, error) {
 	privacy := channel.PrivacyPUBLIC
-	if !ch.IsPublic {
+	if ch.Privacy == "PRIVATE" {
 		privacy = channel.PrivacyPRIVATE
+	} else if ch.Privacy == "UNLISTED" {
+		privacy = channel.PrivacyUNLISTED
+	} else if ch.Privacy == "PAID" {
+		privacy = channel.PrivacyPAID
+	} else if ch.Privacy == "SUBSCRIBERS_ONLY" {
+		privacy = channel.PrivacySUBSCRIBERS_ONLY
 	}
+
+	status := channel.StatusACTIVE
+	if ch.Status == "INACTIVE" {
+		status = channel.StatusINACTIVE
+	} else if ch.Status == "SUSPENDED" {
+		status = channel.StatusSUSPENDED
+	} else if ch.Status == "PENDING_REVIEW" {
+		status = channel.StatusPENDING_REVIEW
+	}
+
 	builder := r.data.db.Channel.UpdateOneID(ch.ID).
+		SetName(ch.Name).
 		SetTitle(ch.Title).
 		SetDescription(ch.Description).
-		SetBannerLogo(ch.BannerLogo).
-		SetPrivacy(privacy)
+		SetPrivacy(privacy).
+		SetStatus(status)
+
+	if ch.Slug != "" {
+		builder.SetSlug(ch.Slug)
+	}
+	if ch.Avatar != "" {
+		builder.SetAvatar(ch.Avatar)
+	}
+	if ch.Banner != "" {
+		builder.SetBanner(ch.Banner)
+	}
+	if ch.BannerLogo != "" {
+		builder.SetBannerLogo(ch.BannerLogo)
+	}
+	if ch.Tags != nil {
+		builder.SetTags(ch.Tags)
+	}
+	if ch.CategoryID != nil {
+		builder.SetCategoryID(*ch.CategoryID)
+	}
+	if ch.Links != nil {
+		builder.SetLinks(convertBizLinksToSchema(ch.Links))
+	}
 
 	ent, err := builder.Save(ctx)
 	if err != nil {
@@ -722,14 +916,180 @@ func mapPlaylist(ent *entity.Playlist) *biz.Playlist {
 }
 
 func mapChannel(ent *entity.Channel) *biz.Channel {
-	return &biz.Channel{
-		ID:          ent.ID,
-		Title:       ent.Title,
-		Description: ent.Description,
-		BannerLogo:  ent.BannerLogo,
-		ShortToken:  ent.ShortToken,
-		IsPublic:    ent.Privacy == channel.PrivacyPUBLIC,
-		UserID:      ent.UserID,
-		CreateTime:  ent.AddDate,
+	if ent == nil {
+		return nil
 	}
+
+	var tags []string
+	if ent.Tags != nil {
+		tags = ent.Tags
+	}
+
+	var links []biz.ChannelLink
+	if ent.Links != nil {
+		links = convertSchemaLinksToBiz(ent.Links)
+	}
+
+	var categoryID *int64
+	if ent.CategoryID != 0 {
+		v := ent.CategoryID
+		categoryID = &v
+	}
+
+	return &biz.Channel{
+		ID:              ent.ID,
+		Name:            ent.Name,
+		Title:           ent.Title,
+		Slug:            ent.Slug,
+		Handle:          ent.Handle,
+		Description:     ent.Description,
+		Avatar:          ent.Avatar,
+		Banner:          ent.Banner,
+		BannerLogo:      ent.BannerLogo,
+		ShortToken:      ent.ShortToken,
+		Status:          string(ent.Status),
+		Privacy:         string(ent.Privacy),
+		IsVerified:      ent.IsVerified,
+		Tags:            tags,
+		CategoryID:      categoryID,
+		SubscriberCount: ent.SubscriberCount,
+		MediaCount:      ent.MediaCount,
+		ArticleCount:    ent.ArticleCount,
+		TotalViews:      ent.TotalViews,
+		Links:           links,
+		UserID:          ent.UserID,
+		CreateTime:      ent.CreateTime,
+		UpdateTime:      ent.UpdateTime,
+	}
+}
+
+func convertBizLinksToSchema(links []biz.ChannelLink) []schema.ChannelLink {
+	result := make([]schema.ChannelLink, len(links))
+	for i, l := range links {
+		result[i] = schema.ChannelLink{
+			Type:     l.Type,
+			Platform: l.Platform,
+			URL:      l.URL,
+			Title:    l.Title,
+		}
+	}
+	return result
+}
+
+func convertSchemaLinksToBiz(links []schema.ChannelLink) []biz.ChannelLink {
+	result := make([]biz.ChannelLink, len(links))
+	for i, l := range links {
+		result[i] = biz.ChannelLink{
+			Type:     l.Type,
+			Platform: l.Platform,
+			URL:      l.URL,
+			Title:    l.Title,
+		}
+	}
+	return result
+}
+
+// systemConfigRepo implementation
+
+// configCache provides an in-memory TTL cache for system settings.
+var configCache = struct {
+	sync.RWMutex
+	items map[string]cacheItem
+}{items: make(map[string]cacheItem)}
+
+type cacheItem struct {
+	value     string
+	expiresAt time.Time
+}
+
+const configCacheTTL = 5 * time.Minute
+
+func (r *systemConfigRepo) Get(ctx context.Context, key string) (string, error) {
+	// Check cache first
+	configCache.RLock()
+	if item, ok := configCache.items[key]; ok && time.Now().Before(item.expiresAt) {
+		configCache.RUnlock()
+		return item.value, nil
+	}
+	configCache.RUnlock()
+
+	// Query DB
+	ent, err := r.data.db.Setting.Query().Where(setting.KeyEQ(key)).Only(ctx)
+	if err != nil {
+		return "", fmt.Errorf("setting not found: %s: %w", key, err)
+	}
+
+	// Update cache
+	configCache.Lock()
+	configCache.items[key] = cacheItem{value: ent.Value, expiresAt: time.Now().Add(configCacheTTL)}
+	configCache.Unlock()
+
+	return ent.Value, nil
+}
+
+func (r *systemConfigRepo) Set(ctx context.Context, key, value string) error {
+	// Upsert: try update first, then create
+	_, err := r.data.db.Setting.Update().Where(setting.KeyEQ(key)).SetValue(value).Save(ctx)
+	if err != nil {
+		// Try create if update found nothing
+		_, err = r.data.db.Setting.Create().
+			SetKey(key).
+			SetValue(value).
+			SetCategory(setting.CategoryGeneral).
+			Save(ctx)
+		if err != nil {
+			return fmt.Errorf("failed to set setting %s: %w", key, err)
+		}
+	}
+
+	// Invalidate cache
+	configCache.Lock()
+	delete(configCache.items, key)
+	configCache.Unlock()
+
+	return nil
+}
+
+func (r *systemConfigRepo) ListByCategory(ctx context.Context, category string) (map[string]string, error) {
+	items, err := r.data.db.Setting.Query().Where(setting.CategoryEQ(setting.Category(category))).All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list settings for category %s: %w", category, err)
+	}
+
+	result := make(map[string]string, len(items))
+	for _, item := range items {
+		result[item.Key] = item.Value
+	}
+	return result, nil
+}
+
+func (r *systemConfigRepo) Delete(ctx context.Context, key string) error {
+	err := r.data.db.Setting.DeleteOneID(key).Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to delete setting %s: %w", key, err)
+	}
+
+	// Invalidate cache
+	configCache.Lock()
+	delete(configCache.items, key)
+	configCache.Unlock()
+
+	return nil
+}
+
+// channelUserRepo implementation
+
+func (r *channelUserRepo) GetByUsername(ctx context.Context, username string) (*biz.User, error) {
+	ent, err := r.data.db.User.Query().Where(user.UsernameEQ(username)).Only(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("user not found: %s: %w", username, err)
+	}
+	return &biz.User{
+		ID:          ent.ID,
+		Username:    ent.Username,
+		Name:        ent.Name,
+		Logo:        ent.Logo,
+		Description: ent.Description,
+		CreateTime:  ent.CreateTime,
+	}, nil
 }

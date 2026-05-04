@@ -21,13 +21,21 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import {MoreHorizontal, Search, Edit, Trash2, Eye, PlayCircle, Lock, Globe, User, Filter, RotateCcw} from 'lucide-react';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from '@/components/ui/dialog';
+import {MoreHorizontal, Search, Edit, Trash2, Eye, PlayCircle, Lock, Globe, User, Filter, RotateCcw, Plus, Loader2} from 'lucide-react';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
-import {adminPlaylistApi, Playlist} from '@/lib/api/playlist';
+import {adminPlaylistApi, playlistApi, Playlist} from '@/lib/api/playlist';
 import {formatDateTime} from '@/lib/format';
 import {extractList} from '@/lib/extract';
 import {TablePagination} from '@/components/common/TablePagination';
 import {usePagination} from '@/hooks/usePagination';
+import {Link} from '@tanstack/react-router';
 
 const Playlists: React.FC = () => {
     const {t} = useTranslation();
@@ -38,26 +46,45 @@ const Playlists: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const {page, pageSize, total, setPage, setTotal, getParams} = usePagination();
 
-    // 加载播放列表数据
-    useEffect(() => {
-        const loadPlaylists = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const response = await adminPlaylistApi.list(getParams());
-                const playlistList = extractList<Playlist>(response);
-                setPlaylists(playlistList);
-                if ((response as any)?.total !== undefined) {
-                    setTotal((response as any).total);
-                }
-            } catch (err) {
-                setError('Failed to load playlists');
-                console.error('Error loading playlists:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
+    // Create dialog state
+    const [showCreateDialog, setShowCreateDialog] = useState(false);
+    const [createTitle, setCreateTitle] = useState('');
+    const [createDescription, setCreateDescription] = useState('');
+    const [createUserId, setCreateUserId] = useState('');
+    const [createIsPublic, setCreateIsPublic] = useState(true);
+    const [isCreating, setIsCreating] = useState(false);
 
+    // Edit dialog state
+    const [editTarget, setEditTarget] = useState<Playlist | null>(null);
+    const [editTitle, setEditTitle] = useState('');
+    const [editDescription, setEditDescription] = useState('');
+    const [editIsPublic, setEditIsPublic] = useState(true);
+    const [isUpdating, setIsUpdating] = useState(false);
+
+    // Delete dialog state
+    const [deleteTarget, setDeleteTarget] = useState<Playlist | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    // Load playlists
+    const loadPlaylists = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await adminPlaylistApi.list(getParams());
+            const playlistList = extractList<Playlist>(response);
+            setPlaylists(playlistList);
+            if ((response as any)?.total !== undefined) {
+                setTotal((response as any).total);
+            }
+        } catch (err) {
+            setError('Failed to load playlists');
+            console.error('Error loading playlists:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         loadPlaylists();
     }, [page]);
 
@@ -68,9 +95,9 @@ const Playlists: React.FC = () => {
     });
 
     const totalPlaylists = playlists.length;
-    const publicCount = playlists.length; // API返回数据中没有visibility字段
-    const privateCount = 0; // API返回数据中没有visibility字段
-    const totalViews = 0; // API返回数据中没有viewCount字段
+    const publicCount = playlists.filter(p => p.is_public).length;
+    const privateCount = playlists.filter(p => !p.is_public).length;
+    const totalViews = 0;
 
     const getVisibilityBadge = (visibility: 'public' | 'private' | 'unlisted' | string) => {
         const configs = {
@@ -94,13 +121,74 @@ const Playlists: React.FC = () => {
         return num.toString();
     };
 
+    const handleCreate = async () => {
+        if (!createTitle.trim() || !createUserId.trim()) return;
+        try {
+            setIsCreating(true);
+            await adminPlaylistApi.create({
+                title: createTitle.trim(),
+                description: createDescription.trim(),
+                user_id: createUserId.trim(),
+                is_public: createIsPublic,
+            });
+            setShowCreateDialog(false);
+            setCreateTitle('');
+            setCreateDescription('');
+            setCreateUserId('');
+            setCreateIsPublic(true);
+            loadPlaylists();
+        } catch (err) {
+            console.error('Failed to create playlist:', err);
+        } finally {
+            setIsCreating(false);
+        }
+    };
+
+    const handleEdit = (playlist: Playlist) => {
+        setEditTarget(playlist);
+        setEditTitle(playlist.title);
+        setEditDescription(playlist.description || '');
+        setEditIsPublic(playlist.is_public);
+    };
+
+    const handleSaveEdit = async () => {
+        if (!editTarget) return;
+        try {
+            setIsUpdating(true);
+            await adminPlaylistApi.update(editTarget.id, {
+                title: editTitle,
+                description: editDescription,
+                is_public: editIsPublic,
+            });
+            setEditTarget(null);
+            loadPlaylists();
+        } catch (err) {
+            console.error('Failed to update playlist:', err);
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!deleteTarget) return;
+        try {
+            setIsDeleting(true);
+            await adminPlaylistApi.delete(deleteTarget.id);
+            setDeleteTarget(null);
+            loadPlaylists();
+        } catch (err) {
+            console.error('Failed to delete playlist:', err);
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     return (
         <div className="space-y-4 p-4 md:p-6">
-            {/* 操作栏 */}
+            {/* Action bar */}
             <Card className="overflow-hidden">
                 <CardContent className="p-6">
                     <div className="flex flex-col gap-4">
-                        {/* 页面标题 */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
                                 <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{t('admin.playlists')}</h2>
@@ -110,10 +198,8 @@ const Playlists: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* 分隔线 */}
                         <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
 
-                        {/* 搜索和筛选 */}
                         <div className="flex flex-col lg:flex-row gap-4">
                             <div className="flex-1 min-w-[120px] max-w-[400px]">
                                 <div className="relative w-full">
@@ -158,15 +244,6 @@ const Playlists: React.FC = () => {
                                         <RotateCcw className="h-4 w-4 mr-2"/>
                                         Reset
                                     </Button>
-                                    <Button
-                                        variant="default"
-                                        size="sm"
-                                        onClick={() => {
-                                        }}
-                                    >
-                                        <Search className="h-4 w-4 mr-2"/>
-                                        Search
-                                    </Button>
                                 </div>
                             </div>
                         </div>
@@ -174,7 +251,7 @@ const Playlists: React.FC = () => {
                 </CardContent>
             </Card>
 
-            {/* 统计卡片 */}
+            {/* Stats cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
                     <CardContent className="pt-6">
@@ -211,7 +288,7 @@ const Playlists: React.FC = () => {
                 </Card>
             </div>
 
-            {/* 播放列表表格 */}
+            {/* Playlist table */}
             <Card>
                 <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
@@ -219,8 +296,8 @@ const Playlists: React.FC = () => {
                             <CardTitle>{t('admin.playlistList')}</CardTitle>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button size="sm">
-                                <PlayCircle className="mr-2 h-4 w-4"/>
+                            <Button size="sm" onClick={() => setShowCreateDialog(true)}>
+                                <Plus className="mr-2 h-4 w-4"/>
                                 {t('admin.newPlaylist')}
                             </Button>
                         </div>
@@ -234,7 +311,6 @@ const Playlists: React.FC = () => {
                                 <TableHead>{t('admin.name')}</TableHead>
                                 <TableHead>{t('admin.creator')}</TableHead>
                                 <TableHead className="text-right">{t('admin.videoCount')}</TableHead>
-                                <TableHead className="text-right">{t('admin.viewCount')}</TableHead>
                                 <TableHead>{t('admin.visibility')}</TableHead>
                                 <TableHead>{t('admin.createdAt')}</TableHead>
                                 <TableHead className="text-right">{t('admin.actions')}</TableHead>
@@ -243,19 +319,19 @@ const Playlists: React.FC = () => {
                         <TableBody>
                             {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={8} className="text-center py-8">
+                                    <TableCell colSpan={7} className="text-center py-8">
                                         <div className="animate-pulse">Loading playlists...</div>
                                     </TableCell>
                                 </TableRow>
                             ) : error ? (
                                 <TableRow>
-                                    <TableCell colSpan={8} className="text-center py-8">
+                                    <TableCell colSpan={7} className="text-center py-8">
                                         <div className="text-destructive">{error}</div>
-                                        <Button 
-                                            variant="outline" 
-                                            size="sm" 
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
                                             className="mt-2"
-                                            onClick={() => window.location.reload()}
+                                            onClick={loadPlaylists}
                                         >
                                             Retry
                                         </Button>
@@ -263,14 +339,14 @@ const Playlists: React.FC = () => {
                                 </TableRow>
                             ) : filteredPlaylists.length === 0 ? (
                                 <TableRow key="empty">
-                                    <TableCell colSpan={8} className="text-center py-8">
+                                    <TableCell colSpan={7} className="text-center py-8">
                                         No playlists found
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 filteredPlaylists.map((playlist) => (
                                     <TableRow key={playlist.id}>
-                                        <TableCell className="font-medium">{playlist.id}</TableCell>
+                                        <TableCell className="font-medium text-xs">{playlist.id?.substring(0, 8)}...</TableCell>
                                         <TableCell>
                                             <div>
                                                 <div className="font-medium">{playlist.title}</div>
@@ -286,13 +362,12 @@ const Playlists: React.FC = () => {
                                                         <User className="h-3 w-3"/>
                                                     </AvatarFallback>
                                                 </Avatar>
-                                                <span className="text-muted-foreground">User ID: {playlist.user_id}</span>
+                                                <span className="text-muted-foreground text-xs">User ID: {playlist.user_id?.substring(0, 8)}...</span>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-right">{playlist.media_count || 0}</TableCell>
-                                        <TableCell className="text-right">0</TableCell>
+                                        <TableCell className="text-right">{playlist.media_items?.length || 0}</TableCell>
                                         <TableCell>
-                                            <Badge variant="outline">-</Badge>
+                                            {getVisibilityBadge(playlist.is_public ? 'public' : 'private')}
                                         </TableCell>
                                         <TableCell className="text-muted-foreground">
                                             {formatDateTime(playlist.create_time)}
@@ -300,10 +375,10 @@ const Playlists: React.FC = () => {
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="icon" 
-                                                        className="h-6 w-6" 
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-6 w-6"
                                                         title="More Actions"
                                                     >
                                                         <MoreHorizontal className="h-3 w-3"/>
@@ -312,15 +387,17 @@ const Playlists: React.FC = () => {
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                     <DropdownMenuSeparator/>
-                                                    <DropdownMenuItem>
-                                                        <Eye className="mr-2 h-4 w-4"/>
-                                                        {t('admin.view')}
+                                                    <DropdownMenuItem asChild>
+                                                        <Link to="/playlist/$token" params={{token: playlist.short_token || playlist.id}}>
+                                                            <Eye className="mr-2 h-4 w-4"/>
+                                                            {t('admin.view')}
+                                                        </Link>
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleEdit(playlist)}>
                                                         <Edit className="mr-2 h-4 w-4"/>
                                                         {t('admin.edit')}
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem className="text-destructive focus:text-destructive">
+                                                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteTarget(playlist)}>
                                                         <Trash2 className="mr-2 h-4 w-4"/>
                                                         {t('admin.delete')}
                                                     </DropdownMenuItem>
@@ -341,6 +418,96 @@ const Playlists: React.FC = () => {
                 total={total}
                 onPageChange={setPage}
             />
+
+            {/* Create Playlist Dialog */}
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>{t('admin.newPlaylist') || 'Create Playlist'}</DialogTitle>
+                        <DialogDescription>Create a new playlist for a user</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 mt-4">
+                        <div>
+                            <label className="text-sm font-medium mb-1 block">Title *</label>
+                            <Input value={createTitle} onChange={(e) => setCreateTitle(e.target.value)}
+                                   placeholder="Enter playlist title"/>
+                        </div>
+                        <div>
+                            <label className="text-sm font-medium mb-1 block">Description</label>
+                            <Input value={createDescription} onChange={(e) => setCreateDescription(e.target.value)}
+                                   placeholder="Enter playlist description"/>
+                        </div>
+                        <div>
+                            <label className="text-sm font-medium mb-1 block">User ID *</label>
+                            <Input value={createUserId} onChange={(e) => setCreateUserId(e.target.value)}
+                                   placeholder="Enter user ID (UUID)"/>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <input type="checkbox" id="create-is-public" checked={createIsPublic}
+                                   onChange={(e) => setCreateIsPublic(e.target.checked)} className="rounded"/>
+                            <label htmlFor="create-is-public" className="text-sm">Public</label>
+                        </div>
+                        <div className="flex justify-end gap-2">
+                            <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={isCreating}>Cancel</Button>
+                            <Button onClick={handleCreate} disabled={!createTitle.trim() || !createUserId.trim() || isCreating}>
+                                {isCreating ? <Loader2 className="w-4 h-4 mr-1 animate-spin"/> : <Plus className="w-4 h-4 mr-1"/>}
+                                Create
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Edit Playlist Dialog */}
+            <Dialog open={!!editTarget} onOpenChange={() => setEditTarget(null)}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Edit Playlist</DialogTitle>
+                        <DialogDescription>Update playlist details</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 mt-4">
+                        <div>
+                            <label className="text-sm font-medium mb-1 block">Title</label>
+                            <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)}/>
+                        </div>
+                        <div>
+                            <label className="text-sm font-medium mb-1 block">Description</label>
+                            <Input value={editDescription} onChange={(e) => setEditDescription(e.target.value)}/>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <input type="checkbox" id="edit-is-public" checked={editIsPublic}
+                                   onChange={(e) => setEditIsPublic(e.target.checked)} className="rounded"/>
+                            <label htmlFor="edit-is-public" className="text-sm">Public</label>
+                        </div>
+                        <div className="flex justify-end gap-2">
+                            <Button variant="outline" onClick={() => setEditTarget(null)} disabled={isUpdating}>Cancel</Button>
+                            <Button onClick={handleSaveEdit} disabled={isUpdating}>
+                                {isUpdating ? <Loader2 className="w-4 h-4 mr-1 animate-spin"/> : null}
+                                Save
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Playlist Dialog */}
+            <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Delete Playlist</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete "{deleteTarget?.title}"? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-end gap-2 mt-4">
+                        <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={isDeleting}>Cancel</Button>
+                        <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+                            {isDeleting ? <Loader2 className="w-4 h-4 mr-1 animate-spin"/> : null}
+                            Delete
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

@@ -25,6 +25,7 @@ import {
     Search, ExternalLink
 } from 'lucide-react';
 import {formatDateTime} from '@/lib/format';
+import {generateSlug} from '@/lib/utils/slug';
 import {toast} from 'sonner';
 
 /**
@@ -35,18 +36,6 @@ function resolveMediaUrl(url: string | undefined): string | undefined {
     if (/^(https?:|data:|blob:)/i.test(url)) return url;
     const base = API_BASE_URL || '';
     return `${base}/${url.replace(/^\//, '')}`;
-}
-
-/**
- * Generate a slug from a title (lowercase, hyphens, ASCII-only).
- */
-function generateSlug(title: string): string {
-    return title
-        .trim()
-        .replace(/[\s_]+/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '')
-        .substring(0, 150);
 }
 
 /**

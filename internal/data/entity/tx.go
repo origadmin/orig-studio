@@ -32,6 +32,8 @@ type Tx struct {
 	Favorite *FavoriteClient
 	// GroupMember is the client for interacting with the GroupMember builders.
 	GroupMember *GroupMemberClient
+	// History is the client for interacting with the History builders.
+	History *HistoryClient
 	// Like is the client for interacting with the Like builders.
 	Like *LikeClient
 	// Media is the client for interacting with the Media builders.
@@ -201,6 +203,7 @@ func (tx *Tx) init() {
 	tx.EncodingTask = NewEncodingTaskClient(tx.config)
 	tx.Favorite = NewFavoriteClient(tx.config)
 	tx.GroupMember = NewGroupMemberClient(tx.config)
+	tx.History = NewHistoryClient(tx.config)
 	tx.Like = NewLikeClient(tx.config)
 	tx.Media = NewMediaClient(tx.config)
 	tx.MediaCategory = NewMediaCategoryClient(tx.config)

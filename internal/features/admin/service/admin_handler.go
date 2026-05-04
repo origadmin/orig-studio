@@ -527,8 +527,19 @@ func (h *AdminHandler) updateSystemSettings() gin.HandlerFunc {
 		for _, item := range req.Settings {
 			existing, err := h.settingUC.GetByKey(c.Request.Context(), item.Key)
 			if err != nil {
-				server.Fail(c, server.ErrNotFound, "setting not found: "+item.Key)
-				return
+				defaults := systembiz.DefaultSettings()
+				var defaultSetting *entity.Setting
+				for _, d := range defaults {
+					if d.Key == item.Key {
+						defaultSetting = d
+						break
+					}
+				}
+				if defaultSetting == nil {
+					server.Fail(c, server.ErrBadRequest, "unknown setting key: "+item.Key)
+					return
+				}
+				existing = defaultSetting
 			}
 
 			if err := systemservice.ValidateSettingValue(item.Value, existing.Type); err != nil {
@@ -824,11 +835,16 @@ func (h *AdminHandler) adminUpdateChannel() gin.HandlerFunc {
 		}
 
 		var input struct {
-			Title       string `json:"title"`
-			Description string `json:"description"`
-			BannerLogo  string `json:"banner_logo"`
-			IsPublic    *bool  `json:"is_public"`
-			IsDefault   *bool  `json:"is_default"`
+			Name        *string  `json:"name"`
+			Title       *string  `json:"title"`
+			Description *string  `json:"description"`
+			Avatar      *string  `json:"avatar"`
+			Banner      *string  `json:"banner"`
+			BannerLogo  *string  `json:"banner_logo"`
+			Privacy     *string  `json:"privacy"`
+			Status      *string  `json:"status"`
+			Tags        []string `json:"tags"`
+			CategoryID  *int64   `json:"category_id"`
 		}
 		if err := c.ShouldBindJSON(&input); err != nil {
 			server.Fail(c, server.ErrBadRequest, err.Error())
@@ -842,20 +858,60 @@ func (h *AdminHandler) adminUpdateChannel() gin.HandlerFunc {
 		}
 
 		chItem := &contentbiz.Channel{
-			ID:          id,
-			Title:       input.Title,
-			Description: input.Description,
-			BannerLogo:  input.BannerLogo,
-			IsPublic:    existingCh.IsPublic,
-			UserID:      existingCh.UserID,
-			CreateTime:  existingCh.CreateTime,
+			ID:              id,
+			Name:            existingCh.Name,
+			Title:           existingCh.Title,
+			Slug:            existingCh.Slug,
+			Handle:          existingCh.Handle,
+			Description:     existingCh.Description,
+			Avatar:          existingCh.Avatar,
+			Banner:          existingCh.Banner,
+			BannerLogo:      existingCh.BannerLogo,
+			ShortToken:      existingCh.ShortToken,
+			Status:          existingCh.Status,
+			Privacy:         existingCh.Privacy,
+			IsVerified:      existingCh.IsVerified,
+			Tags:            existingCh.Tags,
+			CategoryID:      existingCh.CategoryID,
+			SubscriberCount: existingCh.SubscriberCount,
+			MediaCount:      existingCh.MediaCount,
+			ArticleCount:    existingCh.ArticleCount,
+			TotalViews:      existingCh.TotalViews,
+			Links:           existingCh.Links,
+			UserID:          existingCh.UserID,
+			CreateTime:      existingCh.CreateTime,
+			UpdateTime:      existingCh.UpdateTime,
 		}
 
-		if input.IsPublic != nil {
-			chItem.IsPublic = *input.IsPublic
+		if input.Name != nil {
+			chItem.Name = *input.Name
 		}
-		if input.IsDefault != nil {
-			chItem.IsDefault = *input.IsDefault
+		if input.Title != nil {
+			chItem.Title = *input.Title
+		}
+		if input.Description != nil {
+			chItem.Description = *input.Description
+		}
+		if input.Avatar != nil {
+			chItem.Avatar = *input.Avatar
+		}
+		if input.Banner != nil {
+			chItem.Banner = *input.Banner
+		}
+		if input.BannerLogo != nil {
+			chItem.BannerLogo = *input.BannerLogo
+		}
+		if input.Privacy != nil {
+			chItem.Privacy = *input.Privacy
+		}
+		if input.Status != nil {
+			chItem.Status = *input.Status
+		}
+		if input.Tags != nil {
+			chItem.Tags = input.Tags
+		}
+		if input.CategoryID != nil {
+			chItem.CategoryID = input.CategoryID
 		}
 
 		updated, err := h.channelUC.UpdateChannel(c.Request.Context(), chItem, "", true)
@@ -931,7 +987,7 @@ func (h *AdminHandler) adminGetPlaylistDetail() gin.HandlerFunc {
 			return
 		}
 
-		server.OK(c, playlist)
+		server.OK(c, gin.H{"playlist": playlist})
 	}
 }
 
@@ -966,7 +1022,7 @@ func (h *AdminHandler) adminCreatePlaylist() gin.HandlerFunc {
 			return
 		}
 
-		server.OK(c, created)
+		server.OK(c, gin.H{"playlist": created})
 	}
 }
 
@@ -1018,7 +1074,7 @@ func (h *AdminHandler) adminUpdatePlaylist() gin.HandlerFunc {
 			return
 		}
 
-		server.OK(c, updated)
+		server.OK(c, gin.H{"playlist": updated})
 	}
 }
 
@@ -1743,9 +1799,14 @@ func (h *AdminHandler) adminCreateArticle() gin.HandlerFunc {
 			state = "draft"
 		}
 
+		slug := input.Slug
+		if slug == "" {
+			slug = hashtag.GenerateTagSlug(input.Title)
+		}
+
 		article := &contentbiz.Article{
 			Title:      input.Title,
-			Slug:       input.Slug,
+			Slug:       slug,
 			Content:    input.Content,
 			Summary:    input.Summary,
 			UserID:     userID,

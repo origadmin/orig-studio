@@ -9,7 +9,7 @@ i18n
     .use(initReactI18next)
     .init({
         fallbackLng: 'zh',
-        supportedLngs: ['zh', 'en'],
+        supportedLngs: ['zh', 'en', 'ja'],
         debug: false,
         interpolation: {
             escapeValue: false,

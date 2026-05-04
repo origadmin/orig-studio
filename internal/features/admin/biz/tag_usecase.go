@@ -8,6 +8,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/features/admin/dal"
 	"origadmin/application/origcms/internal/helpers/repo"
+	"origadmin/application/origcms/internal/helpers/tagcolor"
 )
 
 // TagUseCase handles tag business logic
@@ -60,6 +61,10 @@ func (uc *TagUseCase) Create(ctx context.Context, tag *entity.Tag) (*entity.Tag,
 		return nil, errors.New("tag title already exists")
 	}
 
+	if tag.Color == "" {
+		tag.Color = tagcolor.ColorFromName(tag.Title)
+	}
+
 	createdTag, err := uc.repo.Create(ctx, tag)
 	if err != nil {
 		return nil, fmt.Errorf("create tag: %w", err)
@@ -91,6 +96,22 @@ func (uc *TagUseCase) Update(ctx context.Context, id string, updates *entity.Tag
 			}
 		}
 		tag.Title = updates.Title
+	}
+	if updates.Slug != "" {
+		tag.Slug = updates.Slug
+	}
+	if updates.Color != "" {
+		tag.Color = updates.Color
+	} else {
+		tag.Color = ""
+	}
+	if updates.Description != "" {
+		tag.Description = updates.Description
+	} else {
+		tag.Description = ""
+	}
+	if updates.Status != "" {
+		tag.Status = updates.Status
 	}
 
 	updatedTag, err := uc.repo.Update(ctx, tag)

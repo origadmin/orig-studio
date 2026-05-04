@@ -26,6 +26,7 @@ var (
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "category_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "channel_articles", Type: field.TypeString, Nullable: true, Size: 36},
 		{Name: "media_id", Type: field.TypeString, Nullable: true, Size: 36},
 		{Name: "user_id", Type: field.TypeString, Size: 36},
 	}
@@ -42,14 +43,20 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "content_articles_content_media_articles",
+				Symbol:     "content_articles_user_channels_articles",
 				Columns:    []*schema.Column{ContentArticlesColumns[15]},
+				RefColumns: []*schema.Column{UserChannelsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "content_articles_content_media_articles",
+				Columns:    []*schema.Column{ContentArticlesColumns[16]},
 				RefColumns: []*schema.Column{ContentMediaColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "content_articles_users_articles",
-				Columns:    []*schema.Column{ContentArticlesColumns[16]},
+				Columns:    []*schema.Column{ContentArticlesColumns[17]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -93,12 +100,12 @@ var (
 			{
 				Name:    "article_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{ContentArticlesColumns[16]},
+				Columns: []*schema.Column{ContentArticlesColumns[17]},
 			},
 			{
 				Name:    "article_media_id",
 				Unique:  false,
-				Columns: []*schema.Column{ContentArticlesColumns[15]},
+				Columns: []*schema.Column{ContentArticlesColumns[16]},
 			},
 		},
 	}
@@ -180,16 +187,28 @@ var (
 	// UserChannelsColumns holds the columns for the "user_channels" table.
 	UserChannelsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "name", Type: field.TypeString, Size: 150},
 		{Name: "title", Type: field.TypeString, Size: 90},
-		{Name: "description", Type: field.TypeString, Size: 2147483647},
+		{Name: "slug", Type: field.TypeString, Unique: true, Nullable: true, Size: 150},
+		{Name: "handle", Type: field.TypeString, Unique: true, Size: 150},
 		{Name: "short_token", Type: field.TypeString, Unique: true, Size: 12},
-		{Name: "banner_logo", Type: field.TypeString, Size: 500},
+		{Name: "description", Type: field.TypeString, Size: 2147483647},
+		{Name: "avatar", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "banner", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "banner_logo", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"ACTIVE", "INACTIVE", "SUSPENDED", "PENDING_REVIEW"}, Default: "ACTIVE"},
 		{Name: "privacy", Type: field.TypeEnum, Enums: []string{"PUBLIC", "PRIVATE", "UNLISTED", "PAID", "SUBSCRIBERS_ONLY"}, Default: "PUBLIC"},
+		{Name: "tags", Type: field.TypeJSON, Nullable: true},
+		{Name: "is_verified", Type: field.TypeBool, Default: false},
 		{Name: "subscriber_count", Type: field.TypeInt64, Default: 0},
 		{Name: "media_count", Type: field.TypeInt, Default: 0},
+		{Name: "article_count", Type: field.TypeInt, Default: 0},
+		{Name: "total_views", Type: field.TypeInt64, Default: 0},
+		{Name: "links", Type: field.TypeJSON, Nullable: true},
 		{Name: "add_date", Type: field.TypeTime},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
+		{Name: "category_id", Type: field.TypeInt64, Nullable: true},
 		{Name: "user_id", Type: field.TypeString, Size: 36},
 	}
 	// UserChannelsTable holds the schema information for the "user_channels" table.
@@ -199,8 +218,14 @@ var (
 		PrimaryKey: []*schema.Column{UserChannelsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
+				Symbol:     "user_channels_content_categories_channels",
+				Columns:    []*schema.Column{UserChannelsColumns[22]},
+				RefColumns: []*schema.Column{ContentCategoriesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
 				Symbol:     "user_channels_users_channels",
-				Columns:    []*schema.Column{UserChannelsColumns[11]},
+				Columns:    []*schema.Column{UserChannelsColumns[23]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -209,22 +234,52 @@ var (
 			{
 				Name:    "channel_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{UserChannelsColumns[11]},
+				Columns: []*schema.Column{UserChannelsColumns[23]},
 			},
 			{
-				Name:    "channel_title",
+				Name:    "channel_name",
 				Unique:  false,
 				Columns: []*schema.Column{UserChannelsColumns[1]},
 			},
 			{
-				Name:    "channel_short_token",
+				Name:    "channel_slug",
 				Unique:  false,
 				Columns: []*schema.Column{UserChannelsColumns[3]},
 			},
 			{
+				Name:    "channel_handle",
+				Unique:  false,
+				Columns: []*schema.Column{UserChannelsColumns[4]},
+			},
+			{
+				Name:    "channel_short_token",
+				Unique:  false,
+				Columns: []*schema.Column{UserChannelsColumns[5]},
+			},
+			{
+				Name:    "channel_status",
+				Unique:  false,
+				Columns: []*schema.Column{UserChannelsColumns[10]},
+			},
+			{
+				Name:    "channel_category_id",
+				Unique:  false,
+				Columns: []*schema.Column{UserChannelsColumns[22]},
+			},
+			{
+				Name:    "channel_create_time",
+				Unique:  false,
+				Columns: []*schema.Column{UserChannelsColumns[20]},
+			},
+			{
 				Name:    "channel_add_date",
 				Unique:  false,
-				Columns: []*schema.Column{UserChannelsColumns[8]},
+				Columns: []*schema.Column{UserChannelsColumns[19]},
+			},
+			{
+				Name:    "channel_user_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{UserChannelsColumns[23], UserChannelsColumns[10]},
 			},
 		},
 	}
@@ -553,6 +608,53 @@ var (
 				Name:    "groupmember_group_id",
 				Unique:  false,
 				Columns: []*schema.Column{AuthGroupMembersColumns[2]},
+			},
+		},
+	}
+	// UserHistoryColumns holds the columns for the "user_history" table.
+	UserHistoryColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "content_id", Type: field.TypeString, Comment: "Content ID (UUID of media/article)"},
+		{Name: "content_type", Type: field.TypeEnum, Comment: "Content type for polymorphic content_id", Enums: []string{"video", "article", "audio"}, Default: "video"},
+		{Name: "progress_seconds", Type: field.TypeInt, Comment: "Watched/read seconds", Default: 0},
+		{Name: "duration_seconds", Type: field.TypeInt, Comment: "Total duration in seconds", Default: 0},
+		{Name: "is_finished", Type: field.TypeBool, Comment: "Whether content is fully consumed (progress >= duration * threshold)", Default: false},
+		{Name: "title", Type: field.TypeString, Comment: "Denormalized content title at watch time", Default: ""},
+		{Name: "thumbnail", Type: field.TypeString, Comment: "Denormalized content thumbnail URL at watch time", Default: ""},
+		{Name: "short_token", Type: field.TypeString, Comment: "Denormalized content short_token for frontend links", Default: ""},
+		{Name: "last_watched_at", Type: field.TypeTime, Comment: "Last watch timestamp"},
+		{Name: "create_time", Type: field.TypeTime, Comment: "Record creation time (first watch)"},
+		{Name: "update_time", Type: field.TypeTime, Comment: "Record update time"},
+		{Name: "user_id", Type: field.TypeString, Size: 36, Comment: "Owner user ID"},
+	}
+	// UserHistoryTable holds the schema information for the "user_history" table.
+	UserHistoryTable = &schema.Table{
+		Name:       "user_history",
+		Columns:    UserHistoryColumns,
+		PrimaryKey: []*schema.Column{UserHistoryColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_history_users_history",
+				Columns:    []*schema.Column{UserHistoryColumns[12]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "history_user_id_content_id_content_type",
+				Unique:  true,
+				Columns: []*schema.Column{UserHistoryColumns[12], UserHistoryColumns[1], UserHistoryColumns[2]},
+			},
+			{
+				Name:    "history_user_id_last_watched_at",
+				Unique:  false,
+				Columns: []*schema.Column{UserHistoryColumns[12], UserHistoryColumns[9]},
+			},
+			{
+				Name:    "history_user_id_content_type_last_watched_at",
+				Unique:  false,
+				Columns: []*schema.Column{UserHistoryColumns[12], UserHistoryColumns[2], UserHistoryColumns[9]},
 			},
 		},
 	}
@@ -975,7 +1077,7 @@ var (
 		{Name: "key", Type: field.TypeString, Unique: true, Size: 200},
 		{Name: "value", Type: field.TypeString, Size: 2147483647, Default: ""},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"string", "int", "bool", "json"}, Default: "string"},
-		{Name: "category", Type: field.TypeEnum, Enums: []string{"general", "upload", "review", "email"}, Default: "general"},
+		{Name: "category", Type: field.TypeEnum, Enums: []string{"general", "upload", "review", "email", "module"}, Default: "general"},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "is_sensitive", Type: field.TypeBool, Default: false},
 		{Name: "fallback_value", Type: field.TypeString, Nullable: true, Size: 2147483647},
@@ -1312,6 +1414,7 @@ var (
 		SystemEncodingTasksTable,
 		ContentFavoritesTable,
 		AuthGroupMembersTable,
+		UserHistoryTable,
 		ContentLikesTable,
 		ContentMediaTable,
 		ContentMediaCategoriesTable,
@@ -1334,8 +1437,9 @@ var (
 
 func init() {
 	ContentArticlesTable.ForeignKeys[0].RefTable = ContentCategoriesTable
-	ContentArticlesTable.ForeignKeys[1].RefTable = ContentMediaTable
-	ContentArticlesTable.ForeignKeys[2].RefTable = UsersTable
+	ContentArticlesTable.ForeignKeys[1].RefTable = UserChannelsTable
+	ContentArticlesTable.ForeignKeys[2].RefTable = ContentMediaTable
+	ContentArticlesTable.ForeignKeys[3].RefTable = UsersTable
 	ContentArticlesTable.Annotation = &entsql.Annotation{
 		Table: "content_articles",
 	}
@@ -1345,7 +1449,8 @@ func init() {
 	ContentCategoriesTable.Annotation = &entsql.Annotation{
 		Table: "content_categories",
 	}
-	UserChannelsTable.ForeignKeys[0].RefTable = UsersTable
+	UserChannelsTable.ForeignKeys[0].RefTable = ContentCategoriesTable
+	UserChannelsTable.ForeignKeys[1].RefTable = UsersTable
 	UserChannelsTable.Annotation = &entsql.Annotation{
 		Table: "user_channels",
 	}
@@ -1382,6 +1487,10 @@ func init() {
 	AuthGroupMembersTable.ForeignKeys[1].RefTable = UsersTable
 	AuthGroupMembersTable.Annotation = &entsql.Annotation{
 		Table: "auth_group_members",
+	}
+	UserHistoryTable.ForeignKeys[0].RefTable = UsersTable
+	UserHistoryTable.Annotation = &entsql.Annotation{
+		Table: "user_history",
 	}
 	ContentLikesTable.ForeignKeys[0].RefTable = ContentMediaTable
 	ContentLikesTable.ForeignKeys[1].RefTable = UsersTable

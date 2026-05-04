@@ -6,6 +6,7 @@ package biz
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -22,10 +23,38 @@ type Like struct {
 
 // Favorite represents a user's favorite on a media.
 type Favorite struct {
-	ID        string    `json:"id"`
-	MediaID   string    `json:"media_id"`
-	UserID    string    `json:"user_id"`
-	CreateTime time.Time `json:"create_time"`
+	ID         string      `json:"id"`
+	MediaID    string      `json:"media_id"`
+	UserID     string      `json:"user_id"`
+	CreateTime time.Time   `json:"create_time"`
+	Media      *FavoriteMedia `json:"media,omitempty"`
+}
+
+// FavoriteMedia holds the media details embedded in a favorite response.
+type FavoriteMedia struct {
+	ID          string              `json:"id"`
+	ShortToken  string              `json:"short_token"`
+	Title       string              `json:"title"`
+	Description string              `json:"description"`
+	Thumbnail   string              `json:"thumbnail"`
+	Duration    int64               `json:"duration"`
+	ViewCount   int64               `json:"view_count"`
+	Type        string              `json:"type"`
+	UserID      string              `json:"user_id"`
+	CreateTime  string              `json:"create_time"`
+	Edges       *FavoriteMediaEdges `json:"edges,omitempty"`
+}
+
+// FavoriteMediaEdges holds the edge data for FavoriteMedia.
+type FavoriteMediaEdges struct {
+	User []FavoriteMediaUser `json:"user,omitempty"`
+}
+
+// FavoriteMediaUser holds user info for the media edge.
+type FavoriteMediaUser struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	Nickname string `json:"nickname,omitempty"`
 }
 
 // MediaStats holds counts for likes and favorites.
@@ -50,9 +79,11 @@ type LikeRepo interface {
 type FavoriteRepo interface {
 	Create(ctx context.Context, userID, mediaID string) (*Favorite, error)
 	Delete(ctx context.Context, userID, mediaID string) error
+	DeleteByID(ctx context.Context, id string) error
 	IsFavorited(ctx context.Context, userID, mediaID string) (bool, error)
 	CountByMedia(ctx context.Context, mediaID string) (int64, error)
 	ListByUser(ctx context.Context, userID string) ([]*Favorite, error)
+	ListByUserPaginated(ctx context.Context, userID string, page, pageSize int) ([]*Favorite, int, error)
 }
 
 // LikeFavoriteUseCase handles likes and favorites business logic.
@@ -77,7 +108,18 @@ func NewLikeFavoriteUseCase(
 	}
 }
 
+// resolveMediaID resolves a short_token to internal media ID.
+// If resolution fails, returns the original idOrToken as-is.
+func (uc *LikeFavoriteUseCase) resolveMediaID(ctx context.Context, idOrToken string) string {
+	resolved, err := uc.mediaUC.ResolveToID(ctx, idOrToken)
+	if err != nil {
+		return idOrToken
+	}
+	return resolved
+}
+
 func (uc *LikeFavoriteUseCase) ToggleLike(ctx context.Context, userID, mediaID string, likeType string) (*MediaStats, error) {
+	mediaID = uc.resolveMediaID(ctx, mediaID)
 	currentStatus, err := uc.likeRepo.GetStatus(ctx, userID, mediaID)
 	if err != nil {
 		return nil, err
@@ -124,6 +166,7 @@ func (uc *LikeFavoriteUseCase) ToggleLike(ctx context.Context, userID, mediaID s
 }
 
 func (uc *LikeFavoriteUseCase) ToggleFavorite(ctx context.Context, userID, mediaID string) (*MediaStats, error) {
+	mediaID = uc.resolveMediaID(ctx, mediaID)
 	favorited, err := uc.favoriteRepo.IsFavorited(ctx, userID, mediaID)
 	if err != nil {
 		return nil, err
@@ -149,6 +192,7 @@ func (uc *LikeFavoriteUseCase) ToggleFavorite(ctx context.Context, userID, media
 }
 
 func (uc *LikeFavoriteUseCase) GetMediaStats(ctx context.Context, userID, mediaID string) (*MediaStats, error) {
+	mediaID = uc.resolveMediaID(ctx, mediaID)
 	likeCount, _ := uc.likeRepo.CountByMedia(ctx, mediaID, "like")
 	dislikeCount, _ := uc.likeRepo.CountByMedia(ctx, mediaID, "dislike")
 	favoriteCount, _ := uc.favoriteRepo.CountByMedia(ctx, mediaID)
@@ -171,6 +215,45 @@ func (uc *LikeFavoriteUseCase) GetMediaStats(ctx context.Context, userID, mediaI
 
 func (uc *LikeFavoriteUseCase) ListUserFavorites(ctx context.Context, userID string) ([]*Favorite, error) {
 	return uc.favoriteRepo.ListByUser(ctx, userID)
+}
+
+// ListUserFavoritesPaginated returns a paginated list of user favorites.
+func (uc *LikeFavoriteUseCase) ListUserFavoritesPaginated(ctx context.Context, userID string, page, pageSize int) ([]*Favorite, int, error) {
+	return uc.favoriteRepo.ListByUserPaginated(ctx, userID, page, pageSize)
+}
+
+// RemoveFavoriteByID removes a favorite by its ID directly.
+// It also updates the media favorite count.
+func (uc *LikeFavoriteUseCase) RemoveFavoriteByID(ctx context.Context, userID, favoriteID string) error {
+	// First get the favorite to find the mediaID for count update
+	favorites, err := uc.favoriteRepo.ListByUser(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	var mediaID string
+	found := false
+	for _, fav := range favorites {
+		if fav.ID == favoriteID {
+			mediaID = fav.MediaID
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("favorite not found")
+	}
+
+	// Delete by ID directly
+	if err := uc.favoriteRepo.DeleteByID(ctx, favoriteID); err != nil {
+		return err
+	}
+
+	// Update media favorite count
+	_ = uc.mediaUC.UpdateFavoriteCount(ctx, mediaID, -1)
+
+	return nil
 }
 
 func (uc *LikeFavoriteUseCase) ListUserLikes(ctx context.Context, userID string) ([]*Like, error) {

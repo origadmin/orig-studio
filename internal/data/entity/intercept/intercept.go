@@ -17,6 +17,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/groupmember"
+	"origadmin/application/origcms/internal/data/entity/history"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediacategory"
@@ -360,6 +361,33 @@ func (f TraverseGroupMember) Traverse(ctx context.Context, q entity.Query) error
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *entity.GroupMemberQuery", q)
+}
+
+// The HistoryFunc type is an adapter to allow the use of ordinary function as a Querier.
+type HistoryFunc func(context.Context, *entity.HistoryQuery) (entity.Value, error)
+
+// Query calls f(ctx, q).
+func (f HistoryFunc) Query(ctx context.Context, q entity.Query) (entity.Value, error) {
+	if q, ok := q.(*entity.HistoryQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *entity.HistoryQuery", q)
+}
+
+// The TraverseHistory type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseHistory func(context.Context, *entity.HistoryQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseHistory) Intercept(next entity.Querier) entity.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseHistory) Traverse(ctx context.Context, q entity.Query) error {
+	if q, ok := q.(*entity.HistoryQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *entity.HistoryQuery", q)
 }
 
 // The LikeFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -763,6 +791,8 @@ func NewQuery(q entity.Query) (Query, error) {
 		return &query[*entity.FavoriteQuery, predicate.Favorite, favorite.OrderOption]{typ: entity.TypeFavorite, tq: q}, nil
 	case *entity.GroupMemberQuery:
 		return &query[*entity.GroupMemberQuery, predicate.GroupMember, groupmember.OrderOption]{typ: entity.TypeGroupMember, tq: q}, nil
+	case *entity.HistoryQuery:
+		return &query[*entity.HistoryQuery, predicate.History, history.OrderOption]{typ: entity.TypeHistory, tq: q}, nil
 	case *entity.LikeQuery:
 		return &query[*entity.LikeQuery, predicate.Like, like.OrderOption]{typ: entity.TypeLike, tq: q}, nil
 	case *entity.MediaQuery:

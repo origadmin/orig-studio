@@ -3,10 +3,12 @@ import {useParams, Link} from '@tanstack/react-router';
 import {useTranslation} from 'react-i18next';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
-import {formatDuration, formatViews} from '@/lib/format';
+import {formatDuration, formatViews, formatDate} from '@/lib/format';
 import {channelApi} from '@/lib/api/channel';
 import {mediaApi, normalizeMediaList} from '@/lib/api/media';
+import {articleApi, type Article} from '@/lib/api/article';
 import type {Channel} from '@/lib/api/channel';
+import {Play, FileText, Info} from 'lucide-react';
 
 const ChannelPage = () => {
     const params = useParams({strict: false}) as {id: string};
@@ -14,15 +16,17 @@ const ChannelPage = () => {
     const {t} = useTranslation();
     const [channel, setChannel] = useState<Channel | null>(null);
     const [videos, setVideos] = useState<any[]>([]);
+    const [articles, setArticles] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
+    const [articlesLoading, setArticlesLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('videos');
 
     useEffect(() => {
         if (!id) return;
         setLoading(true);
         Promise.all([
-            channelApi.get({id}),
-            mediaApi.list({channel_id: id, page_size: 12}),
+            channelApi.getByToken(id),
+            mediaApi.list({page_size: 12}),
         ])
             .then(([channelRes, videosRes]: any[]) => {
                 const ch = channelRes?.data || channelRes;
@@ -32,6 +36,23 @@ const ChannelPage = () => {
             })
             .finally(() => setLoading(false));
     }, [id]);
+
+    // Fetch articles when articles tab is active
+    useEffect(() => {
+        if (!id || activeTab !== 'articles') return;
+        if (articles.length > 0) return;
+        setArticlesLoading(true);
+        articleApi.list({page_size: 20})
+            .then((res: any) => {
+                const data = res?.data || res;
+                const items: Article[] = data?.items || [];
+                // Filter articles belonging to this channel's user
+                // The API may not support channel_id filter, so we filter client-side if needed
+                setArticles(items);
+            })
+            .catch(err => console.error('Failed to fetch articles:', err))
+            .finally(() => setArticlesLoading(false));
+    }, [id, activeTab, articles.length]);
 
     if (loading) {
         return (
@@ -87,9 +108,8 @@ const ChannelPage = () => {
                 <TabsList className="w-full justify-start border-b dark:border-gray-700 bg-transparent h-auto p-0">
                     {[
                         {v: 'videos', icon: <Play className="w-4 h-4 mr-2"/>, l: t('channel.tabVideos')},
-                        {v: 'playlists', l: t('channel.tabPlaylists')},
-                        {v: 'community', l: t('channel.tabCommunity')},
-                        {v: 'about', l: t('channel.tabAbout')},
+                        {v: 'articles', icon: <FileText className="w-4 h-4 mr-2"/>, l: t('channel.tabArticles')},
+                        {v: 'about', icon: <Info className="w-4 h-4 mr-2"/>, l: t('channel.tabAbout')},
                     ].map(t => (
                         <TabsTrigger key={t.v} value={t.v}
                                      className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 rounded-none px-4 py-3">
@@ -130,11 +150,48 @@ const ChannelPage = () => {
                         </div>
                     )}
                 </TabsContent>
-                <TabsContent value="playlists" className="mt-6">
-                    <div className="text-center py-12 text-slate-500 dark:text-muted-foreground">{t('channel.noPlaylists')}</div>
-                </TabsContent>
-                <TabsContent value="community" className="mt-6">
-                    <div className="text-center py-12 text-slate-500 dark:text-muted-foreground">{t('channel.noCommunity')}</div>
+                <TabsContent value="articles" className="mt-6">
+                    {articlesLoading ? (
+                        <div className="text-center py-12 text-slate-500 dark:text-muted-foreground">{t('common.loading')}</div>
+                    ) : articles.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {articles.map(article => (
+                                <Link
+                                    key={article.id}
+                                    to="/articles/$slug"
+                                    params={{slug: article.slug || article.id}}
+                                    className="group"
+                                >
+                                    <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 border border-gray-100 dark:border-gray-700">
+                                        {article.thumbnail && (
+                                            <div className="aspect-video bg-muted dark:bg-gray-700">
+                                                <img src={article.thumbnail} alt={article.title}
+                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"/>
+                                            </div>
+                                        )}
+                                        <div className="p-4">
+                                            <h3 className="font-semibold text-slate-900 dark:text-white line-clamp-2 group-hover:text-emerald-600 transition-colors">
+                                                {article.title}
+                                            </h3>
+                                            {article.summary && (
+                                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-2 line-clamp-2">
+                                                    {article.summary}
+                                                </p>
+                                            )}
+                                            <div className="flex items-center gap-3 mt-3 text-xs text-slate-500 dark:text-muted-foreground">
+                                                <span>{formatViews(article.view_count)} {t('common.views')}</span>
+                                                {article.published_at && (
+                                                    <span>{formatDate(article.published_at)}</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12 text-slate-500 dark:text-muted-foreground">{t('channel.noArticles')}</div>
+                    )}
                 </TabsContent>
                 <TabsContent value="about" className="mt-6">
                     <div className="max-w-2xl"><h3

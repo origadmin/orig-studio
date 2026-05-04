@@ -39,7 +39,8 @@ export function useSpriteVtt(vttUrl: string | null | undefined): UseSpriteVttRes
             }
 
             const text = await response.text();
-            const baseUrl = vttUrl.substring(0, vttUrl.lastIndexOf('/') + 1);
+            const basePath = vttUrl.substring(0, vttUrl.lastIndexOf('/') + 1);
+            const baseUrl = new URL(basePath, window.location.origin).href;
             const result = parseWebVTT(text, baseUrl);
 
             if (!result) {

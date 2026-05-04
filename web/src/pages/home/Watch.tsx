@@ -27,6 +27,7 @@ import CommentSection from '@/components/common/CommentSection';
 import InteractionBar from '@/components/common/InteractionBar';
 import VideoPlayer, {VideoPlayerHandle} from '@/components/common/VideoPlayer';
 import {DeleteConfirmDialog} from '@/components/common/DeleteConfirmDialog';
+import {useWatchProgress} from '@/hooks/useWatchProgress';
 import {toast} from 'sonner';
 
 const WatchPage = () => {
@@ -50,6 +51,17 @@ const WatchPage = () => {
 
     // Video player ref for external control
     const videoPlayerRef = useRef<VideoPlayerHandle>(null);
+
+    // Watch progress reporting - reports to history service
+    const {handleTimeUpdate: handleProgressTimeUpdate, handlePause: handleProgressPause, handleEnded: handleProgressEnded} = useWatchProgress({
+        contentId: media?.id || '',
+        contentType: 'video',
+        duration: media?.duration || 0,
+        enabled: !!media?.id,
+        title: media?.title || '',
+        thumbnail: media?.thumbnail || '',
+        shortToken: media?.short_token || '',
+    });
 
     const {data: recData} = useMediaList({
         page_size: 10,
@@ -146,6 +158,9 @@ const WatchPage = () => {
                         poster={media.poster || media.thumbnail}
                         spriteVttUrl={media.sprite_status === 'success' && media.short_token ? spriteApi.getVttUrl(media.short_token) : undefined}
                         enableSpritePreview={true}
+                        onTimeUpdate={handleProgressTimeUpdate}
+                        onPause={handleProgressPause}
+                        onEnded={handleProgressEnded}
                         onPlay={() => {
                             if (!viewCountedRef.current && media.short_token) {
                                 viewCountedRef.current = true;

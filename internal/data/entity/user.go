@@ -133,9 +133,11 @@ type UserEdges struct {
 	GroupMemberships []*GroupMember `json:"group_memberships,omitempty"`
 	// CreatedGroups holds the value of the created_groups edge.
 	CreatedGroups []*PermissionGroup `json:"created_groups,omitempty"`
+	// History holds the value of the history edge.
+	History []*History `json:"history,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [18]bool
+	loadedTypes [19]bool
 }
 
 // MediaOrErr returns the Media value or an error if the edge
@@ -298,6 +300,15 @@ func (e UserEdges) CreatedGroupsOrErr() ([]*PermissionGroup, error) {
 		return e.CreatedGroups, nil
 	}
 	return nil, &NotLoadedError{edge: "created_groups"}
+}
+
+// HistoryOrErr returns the History value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) HistoryOrErr() ([]*History, error) {
+	if e.loadedTypes[18] {
+		return e.History, nil
+	}
+	return nil, &NotLoadedError{edge: "history"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -651,6 +662,11 @@ func (_m *User) QueryGroupMemberships() *GroupMemberQuery {
 // QueryCreatedGroups queries the "created_groups" edge of the User entity.
 func (_m *User) QueryCreatedGroups() *PermissionGroupQuery {
 	return NewUserClient(_m.config).QueryCreatedGroups(_m)
+}
+
+// QueryHistory queries the "history" edge of the User entity.
+func (_m *User) QueryHistory() *HistoryQuery {
+	return NewUserClient(_m.config).QueryHistory(_m)
 }
 
 // Update returns a builder for updating this User.

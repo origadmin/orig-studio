@@ -22,6 +22,8 @@ import (
 	userbiz "origadmin/application/origcms/internal/features/user/biz"
 	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/server"
+	systembiz "origadmin/application/origcms/internal/features/system/biz"
+	systemservice "origadmin/application/origcms/internal/features/system/service"
 )
 
 // MediaHandler handles media-related HTTP routes.
@@ -34,6 +36,7 @@ type MediaHandler struct {
 	userUC            *userbiz.UserUseCase
 	permChecker       authbiz.PermissionChecker
 	mediaService      *MediaService
+	settingUC         *systembiz.SettingUseCase
 }
 
 // NewMediaHandler creates a new MediaHandler.
@@ -46,6 +49,7 @@ func NewMediaHandler(
 	userUC *userbiz.UserUseCase,
 	permChecker authbiz.PermissionChecker,
 	mediaService *MediaService,
+	settingUC *systembiz.SettingUseCase,
 ) *MediaHandler {
 	return &MediaHandler{
 		jwtMgr:            jwtMgr,
@@ -56,13 +60,17 @@ func NewMediaHandler(
 		userUC:            userUC,
 		permChecker:       permChecker,
 		mediaService:      mediaService,
+		settingUC:         settingUC,
 	}
 }
 
 // RegisterRoutes registers the handler's routes.
 func (h *MediaHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	r := handler.NewGinRouterAdapter(rg)
-	medias := r.Group("/medias")
+	mediasGroup := rg.Group("/medias")
+	mediasGroup.Use(systemservice.ModuleGuard(h.settingUC, "module_videos"))
+
+	r := handler.NewGinRouterAdapter(mediasGroup)
+	medias := r.Group("")
 	{
 		// Public routes
 		medias.GET("", h.listMedias)
@@ -83,11 +91,19 @@ func (h *MediaHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		medias.GET("/:id/variants", h.mediaVariants)
 		medias.POST("/:id/view", h.incrementViewCount)
 
-		// Like/favorite routes
+		// Like/favorite routes (singular - proto canonical)
 		medias.POST("/:id/like", server.WithJWT(h.jwtMgr, h.likeMedia))
 		medias.DELETE("/:id/like", server.WithJWT(h.jwtMgr, h.unlikeMedia))
 		medias.POST("/:id/favorite", server.WithJWT(h.jwtMgr, h.favoriteMedia))
 		medias.DELETE("/:id/favorite", server.WithJWT(h.jwtMgr, h.unfavoriteMedia))
+
+		// Like/favorite routes (plural - frontend compatibility)
+		medias.GET("/:id/likes", server.WithOptionalJWT(h.jwtMgr, h.getMediaLikes))
+		medias.POST("/:id/likes", server.WithJWT(h.jwtMgr, h.likeMedia))
+		medias.DELETE("/:id/likes", server.WithJWT(h.jwtMgr, h.unlikeMedia))
+		medias.GET("/:id/favorites", server.WithOptionalJWT(h.jwtMgr, h.getMediaFavorites))
+		medias.POST("/:id/favorites", server.WithJWT(h.jwtMgr, h.favoriteMedia))
+		medias.DELETE("/:id/favorites", server.WithJWT(h.jwtMgr, h.unfavoriteMedia))
 	}
 }
 
@@ -481,4 +497,94 @@ func (h *MediaHandler) unfavoriteMedia(w http.ResponseWriter, r *http.Request) {
 	}
 
 	server.OK(gc, &pb.DeleteMediaFavoriteResponse{})
+}
+
+// getMediaLikes handles GET /medias/:id/likes (plural path for frontend compatibility)
+func (h *MediaHandler) getMediaLikes(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	gc := c.GinContext()
+
+	mediaID := c.Param("id")
+	if mediaID == "" {
+		server.Fail(gc, server.ErrBadRequest, "media id is required")
+		return
+	}
+
+	// Resolve short_token to internal ID if needed
+	resolvedID, err := h.mediaUC.ResolveToID(r.Context(), mediaID)
+	if err != nil {
+		resolvedID = mediaID
+	}
+
+	val := c.Get("claims")
+	userID := ""
+	if val != nil {
+		claims := val.(*auth.Claims)
+		userID = claims.GetUserID()
+	}
+
+	if h.likeFavoriteUC != nil {
+		stats, err := h.likeFavoriteUC.GetMediaStats(r.Context(), userID, resolvedID)
+		if err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
+			return
+		}
+		server.OK(gc, gin.H{
+			"is_liked":     stats.UserLikeType == "like",
+			"is_disliked":  stats.UserLikeType == "dislike",
+			"like_count":   stats.LikeCount,
+			"dislike_count": stats.DislikeCount,
+		})
+		return
+	}
+
+	server.OK(gc, gin.H{
+		"is_liked":      false,
+		"is_disliked":   false,
+		"like_count":    0,
+		"dislike_count": 0,
+	})
+}
+
+// getMediaFavorites handles GET /medias/:id/favorites (plural path for frontend compatibility)
+func (h *MediaHandler) getMediaFavorites(w http.ResponseWriter, r *http.Request) {
+	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	gc := c.GinContext()
+
+	mediaID := c.Param("id")
+	if mediaID == "" {
+		server.Fail(gc, server.ErrBadRequest, "media id is required")
+		return
+	}
+
+	// Resolve short_token to internal ID if needed
+	resolvedID, err := h.mediaUC.ResolveToID(r.Context(), mediaID)
+	if err != nil {
+		resolvedID = mediaID
+	}
+
+	val := c.Get("claims")
+	userID := ""
+	if val != nil {
+		claims := val.(*auth.Claims)
+		userID = claims.GetUserID()
+	}
+
+	if h.likeFavoriteUC != nil {
+		stats, err := h.likeFavoriteUC.GetMediaStats(r.Context(), userID, resolvedID)
+		if err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
+			return
+		}
+		server.OK(gc, gin.H{
+			"is_favorited":   stats.IsFavorited,
+			"favorite_count": stats.FavoriteCount,
+		})
+		return
+	}
+
+	server.OK(gc, gin.H{
+		"is_favorited":   false,
+		"favorite_count": 0,
+	})
 }

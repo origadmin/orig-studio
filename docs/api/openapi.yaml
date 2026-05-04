@@ -1243,6 +1243,12 @@ paths:
                   schema:
                     type: integer
                     format: int32
+                - name: content_type
+                  in: query
+                  description: Filter by content type (optional).
+                  schema:
+                    type: integer
+                    format: enum
             responses:
                 "200":
                     description: OK
@@ -1250,6 +1256,99 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.v1.services.user.GetMyHistoryResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/google.rpc.Status'
+        post:
+            tags:
+                - UserService
+            description: UpsertHistory creates or updates a history record (progress reporting).
+            operationId: UserService_UpsertHistory
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.v1.services.user.UpsertHistoryRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.v1.services.user.UpsertHistoryResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/google.rpc.Status'
+        delete:
+            tags:
+                - UserService
+            description: ClearHistory clears all watch history for the current user.
+            operationId: UserService_ClearHistory
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.v1.services.user.ClearHistoryResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/google.rpc.Status'
+    /api/v1/me/history/sync:
+        post:
+            tags:
+                - UserService
+            description: SyncHistory batch-syncs history records (login merge).
+            operationId: UserService_SyncHistory
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.v1.services.user.SyncHistoryRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.v1.services.user.SyncHistoryResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/google.rpc.Status'
+    /api/v1/me/history/{id}:
+        delete:
+            tags:
+                - UserService
+            description: RemoveHistoryItem removes a single history record.
+            operationId: UserService_RemoveHistoryItem
+            parameters:
+                - name: id
+                  in: path
+                  description: The history record ID to remove.
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.v1.services.user.RemoveHistoryItemResponse'
                 default:
                     description: Default error response
                     content:
@@ -4545,7 +4644,62 @@ components:
                 add_date:
                     type: string
                     format: date-time
+                name:
+                    type: string
+                    description: NEW FIELDS (start from field number 20 to reserve space)
+                slug:
+                    type: string
+                handle:
+                    type: string
+                avatar:
+                    type: string
+                banner:
+                    type: string
+                status:
+                    type: integer
+                    format: enum
+                is_verified:
+                    type: boolean
+                    description: 'NOTE: is_default (field 26) REMOVED in v2 -- per A009 no default channel'
+                tags:
+                    type: array
+                    items:
+                        type: string
+                category_id:
+                    type: string
+                article_count:
+                    type: integer
+                    format: int32
+                total_views:
+                    type: string
+                links:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.v1.services.types.ChannelLink'
+                user:
+                    allOf:
+                        - $ref: '#/components/schemas/api.v1.services.types.User'
+                    description: Edge data
+                category:
+                    $ref: '#/components/schemas/api.v1.services.types.Category'
+                is_owner:
+                    type: boolean
+                    description: View context (returned by single-channel GET, not stored in DB)
+                is_subscribed:
+                    type: boolean
             description: Channel is the model entity for Channel.
+        api.v1.services.types.ChannelLink:
+            type: object
+            properties:
+                type:
+                    type: string
+                platform:
+                    type: string
+                url:
+                    type: string
+                title:
+                    type: string
+            description: ChannelLink represents an external link.
         api.v1.services.types.Comment:
             type: object
             properties:
@@ -4650,12 +4804,12 @@ components:
                     format: date-time
                 user_id:
                     type: string
-                media_id:
+                content_id:
                     type: string
-                progress:
+                progress_seconds:
                     type: integer
                     format: int32
-                duration:
+                duration_seconds:
                     type: integer
                     format: int32
                 is_finished:
@@ -4663,7 +4817,16 @@ components:
                 last_watched_at:
                     type: string
                     format: date-time
-            description: HistoryItem is the model entity for watch history.
+                content_type:
+                    type: integer
+                    format: enum
+            description: |-
+                HistoryItem is the model entity for watch history.
+                 BREAKING CHANGE from previous version:
+                   - media_id -> content_id (supports multi-content-type)
+                   - progress -> progress_seconds (clarified unit)
+                   - duration -> duration_seconds (clarified unit)
+                   - added content_type field
         api.v1.services.types.Like:
             type: object
             properties:
@@ -5363,6 +5526,14 @@ components:
             type: object
             properties: {}
             description: ChangeUserPasswordResponse is the response message for changing user password.
+        api.v1.services.user.ClearHistoryResponse:
+            type: object
+            properties:
+                deleted_count:
+                    type: integer
+                    description: Number of records deleted.
+                    format: int32
+            description: ClearHistoryResponse is the response for clearing all history.
         api.v1.services.user.CreateUserRequest:
             type: object
             properties:
@@ -5721,6 +5892,10 @@ components:
                     type: string
                     description: Token expiration timestamp.
             description: RegisterResponse is the response message for user registration.
+        api.v1.services.user.RemoveHistoryItemResponse:
+            type: object
+            properties: {}
+            description: RemoveHistoryItemResponse is the response for removing a single history item.
         api.v1.services.user.ResetPasswordRequest:
             type: object
             properties:
@@ -5738,6 +5913,28 @@ components:
                     type: boolean
                     description: Whether the reset was successful.
             description: ResetPasswordResponse is the response message for resetting password.
+        api.v1.services.user.SyncHistoryRequest:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.v1.services.types.HistoryItem'
+                    description: The local history items to merge with server.
+            description: SyncHistoryRequest is the request for batch-syncing history records.
+        api.v1.services.user.SyncHistoryResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.v1.services.types.HistoryItem'
+                    description: The complete merged history list from server.
+                merged_count:
+                    type: integer
+                    description: Number of items that were merged (updated or created).
+                    format: int32
+            description: SyncHistoryResponse is the response for batch-syncing history records.
         api.v1.services.user.UpdateMeRequest:
             type: object
             properties:
@@ -5836,6 +6033,33 @@ components:
             type: object
             properties: {}
             description: UpdateUserStatusResponse is the response message for updating user status.
+        api.v1.services.user.UpsertHistoryRequest:
+            type: object
+            properties:
+                content_id:
+                    type: string
+                    description: The content ID (media_id or article_id).
+                content_type:
+                    type: integer
+                    description: The content type.
+                    format: enum
+                progress_seconds:
+                    type: integer
+                    description: The progress in seconds.
+                    format: int32
+                duration_seconds:
+                    type: integer
+                    description: The total duration in seconds.
+                    format: int32
+            description: UpsertHistoryRequest is the request for creating/updating a history record.
+        api.v1.services.user.UpsertHistoryResponse:
+            type: object
+            properties:
+                item:
+                    allOf:
+                        - $ref: '#/components/schemas/api.v1.services.types.HistoryItem'
+                    description: The upserted history item.
+            description: UpsertHistoryResponse is the response for upserting a history record.
         api.v1.services.user.VerifyPasswordRequest:
             type: object
             properties:

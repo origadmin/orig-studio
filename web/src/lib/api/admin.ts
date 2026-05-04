@@ -1,6 +1,10 @@
-// Admin API v3.2 (管理端 - UUID only)
+// Admin API v4.0 (管理端 - UUID only)
 import {api} from "../request";
 import {Channel, ChannelList} from "./channel";
+
+// Re-export Channel type for admin pages
+export type {Channel} from "./channel";
+export type {ChannelList} from "./channel";
 
 export interface AdminChannelDetail extends Omit<Channel, 'media_count'> {
     media_count?: number;

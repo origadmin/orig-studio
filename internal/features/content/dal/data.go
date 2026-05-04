@@ -17,9 +17,12 @@ var ProviderSet = wire.NewSet(
 	NewTagRepo,
 	NewPlaylistRepo,
 	NewChannelRepo,
+	NewSystemConfigRepo,
+	NewChannelUserRepo,
 	NewFeedRepo,
 	NewArticleRepo,
 	NewCommentModerationRepo,
 	NewCommentReportRepo,
 	NewCommentLikeRepo,
+	NewHistoryRepo,
 )

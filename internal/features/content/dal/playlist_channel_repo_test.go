@@ -91,8 +91,8 @@ func TestMapChannel_AllFieldsMapped(t *testing.T) {
 	if result.ShortToken != ent.ShortToken {
 		t.Errorf("ShortToken: got %q, want %q", result.ShortToken, ent.ShortToken)
 	}
-	if result.IsPublic != (ent.Privacy == channel.PrivacyPUBLIC) {
-		t.Errorf("IsPublic: got %v, want %v", result.IsPublic, ent.Privacy == channel.PrivacyPUBLIC)
+	if result.Privacy != string(ent.Privacy) {
+		t.Errorf("Privacy: got %q, want %q", result.Privacy, string(ent.Privacy))
 	}
 	if result.UserID != ent.UserID {
 		t.Errorf("UserID: got %q, want %q", result.UserID, ent.UserID)
@@ -100,19 +100,23 @@ func TestMapChannel_AllFieldsMapped(t *testing.T) {
 }
 
 func TestChannelStruct_HasShortTokenField(t *testing.T) {
-	// Verify that the biz.Channel struct has ShortToken field and no FriendlyToken/Slug
+	// Verify that the biz.Channel struct has ShortToken field and new fields
 	ch := biz.Channel{
-		ID:          "ch-004",
-		Title:       "Struct Test",
-		Description: "Struct test description",
-		ShortToken:  "st-abc123",
-		UserID:      "user-004",
-		IsPublic:    true,
-		CreatedAt:   time.Now(),
+		ID:         "ch-004",
+		Name:       "Struct Test",
+		Title:      "Struct Test",
+		Handle:     "struct-test",
+		ShortToken: "st-abc123",
+		UserID:     "user-004",
+		Privacy:    "PUBLIC",
+		Status:     "ACTIVE",
 	}
 
 	if ch.ShortToken != "st-abc123" {
 		t.Errorf("biz.Channel ShortToken: got %q, want %q", ch.ShortToken, "st-abc123")
+	}
+	if ch.Handle != "struct-test" {
+		t.Errorf("biz.Channel Handle: got %q, want %q", ch.Handle, "struct-test")
 	}
 }
 

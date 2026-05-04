@@ -1,6 +1,7 @@
 package service
 
 import (
+	"regexp"
 	"strconv"
 
 	"origadmin/application/origcms/internal/data/entity"
@@ -10,6 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"origadmin/application/origcms/internal/server"
 )
+
+var hexColorRegex = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
 
 // AdminTagHandler handles tag HTTP requests in admin panel
 type AdminTagHandler struct {
@@ -118,6 +121,11 @@ func (h *AdminTagHandler) createTag() gin.HandlerFunc {
 			return
 		}
 
+		if req.Color != "" && !hexColorRegex.MatchString(req.Color) {
+			server.Fail(c, 10004, "Invalid color format, expected #RRGGBB")
+			return
+		}
+
 		tag := &entity.Tag{
 			Title:       req.Name,
 			Description: req.Description,
@@ -160,6 +168,11 @@ func (h *AdminTagHandler) updateTag() gin.HandlerFunc {
 
 		if err := c.ShouldBindJSON(&req); err != nil {
 			server.Fail(c, 10004, "Invalid request")
+			return
+		}
+
+		if req.Color != "" && !hexColorRegex.MatchString(req.Color) {
+			server.Fail(c, 10004, "Invalid color format, expected #RRGGBB")
 			return
 		}
 

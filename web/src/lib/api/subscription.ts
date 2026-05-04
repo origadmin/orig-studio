@@ -10,8 +10,11 @@ export interface SubscriptionListResponse {
     items: {
         id: string;
         user_id: string;
+        name?: string;
         username: string;
         avatar?: string;
+        short_token?: string;
+        channel_id?: string;
         subscribed_at: string;
     }[];
     total: number;

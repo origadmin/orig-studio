@@ -32,6 +32,12 @@ export interface Media {
     extension?: string;
     privacy: number;
     encoding_status: string;
+    /** Sprite generation status: pending | processing | success | failed */
+    sprite_status?: string;
+    /** Sprite sheet image path */
+    sprite_path?: string;
+    /** WebVTT file path */
+    vtt_path?: string;
     state: string;
     view_count: number;
     like_count: number;
@@ -339,7 +345,7 @@ export const mediaApi = {
         type?: string;
         category_id?: number;
         keyword?: string;
-        user_id?: number;
+        user_id?: string;
         state?: string;
         featured?: string;
         order_by?: string;
@@ -591,7 +597,7 @@ export const publicMediaApi = {
         type?: string;
         category_id?: number;
         keyword?: string;
-        user_id?: number;
+        user_id?: string;
         state?: string;
         featured?: string;
         order_by?: string;

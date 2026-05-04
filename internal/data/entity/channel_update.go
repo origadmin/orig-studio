@@ -6,14 +6,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"origadmin/application/origcms/internal/data/entity/article"
+	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/predicate"
+	"origadmin/application/origcms/internal/data/entity/schema"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 )
 
@@ -45,6 +49,20 @@ func (_u *ChannelUpdate) SetNillableUserID(v *string) *ChannelUpdate {
 	return _u
 }
 
+// SetName sets the "name" field.
+func (_u *ChannelUpdate) SetName(v string) *ChannelUpdate {
+	_u.mutation.SetName(v)
+	return _u
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableName(v *string) *ChannelUpdate {
+	if v != nil {
+		_u.SetName(*v)
+	}
+	return _u
+}
+
 // SetTitle sets the "title" field.
 func (_u *ChannelUpdate) SetTitle(v string) *ChannelUpdate {
 	_u.mutation.SetTitle(v)
@@ -59,16 +77,36 @@ func (_u *ChannelUpdate) SetNillableTitle(v *string) *ChannelUpdate {
 	return _u
 }
 
-// SetDescription sets the "description" field.
-func (_u *ChannelUpdate) SetDescription(v string) *ChannelUpdate {
-	_u.mutation.SetDescription(v)
+// SetSlug sets the "slug" field.
+func (_u *ChannelUpdate) SetSlug(v string) *ChannelUpdate {
+	_u.mutation.SetSlug(v)
 	return _u
 }
 
-// SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *ChannelUpdate) SetNillableDescription(v *string) *ChannelUpdate {
+// SetNillableSlug sets the "slug" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableSlug(v *string) *ChannelUpdate {
 	if v != nil {
-		_u.SetDescription(*v)
+		_u.SetSlug(*v)
+	}
+	return _u
+}
+
+// ClearSlug clears the value of the "slug" field.
+func (_u *ChannelUpdate) ClearSlug() *ChannelUpdate {
+	_u.mutation.ClearSlug()
+	return _u
+}
+
+// SetHandle sets the "handle" field.
+func (_u *ChannelUpdate) SetHandle(v string) *ChannelUpdate {
+	_u.mutation.SetHandle(v)
+	return _u
+}
+
+// SetNillableHandle sets the "handle" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableHandle(v *string) *ChannelUpdate {
+	if v != nil {
+		_u.SetHandle(*v)
 	}
 	return _u
 }
@@ -87,6 +125,60 @@ func (_u *ChannelUpdate) SetNillableShortToken(v *string) *ChannelUpdate {
 	return _u
 }
 
+// SetDescription sets the "description" field.
+func (_u *ChannelUpdate) SetDescription(v string) *ChannelUpdate {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableDescription(v *string) *ChannelUpdate {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
+	return _u
+}
+
+// SetAvatar sets the "avatar" field.
+func (_u *ChannelUpdate) SetAvatar(v string) *ChannelUpdate {
+	_u.mutation.SetAvatar(v)
+	return _u
+}
+
+// SetNillableAvatar sets the "avatar" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableAvatar(v *string) *ChannelUpdate {
+	if v != nil {
+		_u.SetAvatar(*v)
+	}
+	return _u
+}
+
+// ClearAvatar clears the value of the "avatar" field.
+func (_u *ChannelUpdate) ClearAvatar() *ChannelUpdate {
+	_u.mutation.ClearAvatar()
+	return _u
+}
+
+// SetBanner sets the "banner" field.
+func (_u *ChannelUpdate) SetBanner(v string) *ChannelUpdate {
+	_u.mutation.SetBanner(v)
+	return _u
+}
+
+// SetNillableBanner sets the "banner" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableBanner(v *string) *ChannelUpdate {
+	if v != nil {
+		_u.SetBanner(*v)
+	}
+	return _u
+}
+
+// ClearBanner clears the value of the "banner" field.
+func (_u *ChannelUpdate) ClearBanner() *ChannelUpdate {
+	_u.mutation.ClearBanner()
+	return _u
+}
+
 // SetBannerLogo sets the "banner_logo" field.
 func (_u *ChannelUpdate) SetBannerLogo(v string) *ChannelUpdate {
 	_u.mutation.SetBannerLogo(v)
@@ -101,6 +193,26 @@ func (_u *ChannelUpdate) SetNillableBannerLogo(v *string) *ChannelUpdate {
 	return _u
 }
 
+// ClearBannerLogo clears the value of the "banner_logo" field.
+func (_u *ChannelUpdate) ClearBannerLogo() *ChannelUpdate {
+	_u.mutation.ClearBannerLogo()
+	return _u
+}
+
+// SetStatus sets the "status" field.
+func (_u *ChannelUpdate) SetStatus(v channel.Status) *ChannelUpdate {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableStatus(v *channel.Status) *ChannelUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
 // SetPrivacy sets the "privacy" field.
 func (_u *ChannelUpdate) SetPrivacy(v channel.Privacy) *ChannelUpdate {
 	_u.mutation.SetPrivacy(v)
@@ -111,6 +223,58 @@ func (_u *ChannelUpdate) SetPrivacy(v channel.Privacy) *ChannelUpdate {
 func (_u *ChannelUpdate) SetNillablePrivacy(v *channel.Privacy) *ChannelUpdate {
 	if v != nil {
 		_u.SetPrivacy(*v)
+	}
+	return _u
+}
+
+// SetTags sets the "tags" field.
+func (_u *ChannelUpdate) SetTags(v []string) *ChannelUpdate {
+	_u.mutation.SetTags(v)
+	return _u
+}
+
+// AppendTags appends value to the "tags" field.
+func (_u *ChannelUpdate) AppendTags(v []string) *ChannelUpdate {
+	_u.mutation.AppendTags(v)
+	return _u
+}
+
+// ClearTags clears the value of the "tags" field.
+func (_u *ChannelUpdate) ClearTags() *ChannelUpdate {
+	_u.mutation.ClearTags()
+	return _u
+}
+
+// SetCategoryID sets the "category_id" field.
+func (_u *ChannelUpdate) SetCategoryID(v int64) *ChannelUpdate {
+	_u.mutation.SetCategoryID(v)
+	return _u
+}
+
+// SetNillableCategoryID sets the "category_id" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableCategoryID(v *int64) *ChannelUpdate {
+	if v != nil {
+		_u.SetCategoryID(*v)
+	}
+	return _u
+}
+
+// ClearCategoryID clears the value of the "category_id" field.
+func (_u *ChannelUpdate) ClearCategoryID() *ChannelUpdate {
+	_u.mutation.ClearCategoryID()
+	return _u
+}
+
+// SetIsVerified sets the "is_verified" field.
+func (_u *ChannelUpdate) SetIsVerified(v bool) *ChannelUpdate {
+	_u.mutation.SetIsVerified(v)
+	return _u
+}
+
+// SetNillableIsVerified sets the "is_verified" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableIsVerified(v *bool) *ChannelUpdate {
+	if v != nil {
+		_u.SetIsVerified(*v)
 	}
 	return _u
 }
@@ -154,6 +318,66 @@ func (_u *ChannelUpdate) SetNillableMediaCount(v *int) *ChannelUpdate {
 // AddMediaCount adds value to the "media_count" field.
 func (_u *ChannelUpdate) AddMediaCount(v int) *ChannelUpdate {
 	_u.mutation.AddMediaCount(v)
+	return _u
+}
+
+// SetArticleCount sets the "article_count" field.
+func (_u *ChannelUpdate) SetArticleCount(v int) *ChannelUpdate {
+	_u.mutation.ResetArticleCount()
+	_u.mutation.SetArticleCount(v)
+	return _u
+}
+
+// SetNillableArticleCount sets the "article_count" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableArticleCount(v *int) *ChannelUpdate {
+	if v != nil {
+		_u.SetArticleCount(*v)
+	}
+	return _u
+}
+
+// AddArticleCount adds value to the "article_count" field.
+func (_u *ChannelUpdate) AddArticleCount(v int) *ChannelUpdate {
+	_u.mutation.AddArticleCount(v)
+	return _u
+}
+
+// SetTotalViews sets the "total_views" field.
+func (_u *ChannelUpdate) SetTotalViews(v int64) *ChannelUpdate {
+	_u.mutation.ResetTotalViews()
+	_u.mutation.SetTotalViews(v)
+	return _u
+}
+
+// SetNillableTotalViews sets the "total_views" field if the given value is not nil.
+func (_u *ChannelUpdate) SetNillableTotalViews(v *int64) *ChannelUpdate {
+	if v != nil {
+		_u.SetTotalViews(*v)
+	}
+	return _u
+}
+
+// AddTotalViews adds value to the "total_views" field.
+func (_u *ChannelUpdate) AddTotalViews(v int64) *ChannelUpdate {
+	_u.mutation.AddTotalViews(v)
+	return _u
+}
+
+// SetLinks sets the "links" field.
+func (_u *ChannelUpdate) SetLinks(v []schema.ChannelLink) *ChannelUpdate {
+	_u.mutation.SetLinks(v)
+	return _u
+}
+
+// AppendLinks appends value to the "links" field.
+func (_u *ChannelUpdate) AppendLinks(v []schema.ChannelLink) *ChannelUpdate {
+	_u.mutation.AppendLinks(v)
+	return _u
+}
+
+// ClearLinks clears the value of the "links" field.
+func (_u *ChannelUpdate) ClearLinks() *ChannelUpdate {
+	_u.mutation.ClearLinks()
 	return _u
 }
 
@@ -211,6 +435,26 @@ func (_u *ChannelUpdate) AddMedia(v ...*Media) *ChannelUpdate {
 	return _u.AddMediumIDs(ids...)
 }
 
+// AddArticleIDs adds the "articles" edge to the Article entity by IDs.
+func (_u *ChannelUpdate) AddArticleIDs(ids ...string) *ChannelUpdate {
+	_u.mutation.AddArticleIDs(ids...)
+	return _u
+}
+
+// AddArticles adds the "articles" edges to the Article entity.
+func (_u *ChannelUpdate) AddArticles(v ...*Article) *ChannelUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddArticleIDs(ids...)
+}
+
+// SetCategory sets the "category" edge to the Category entity.
+func (_u *ChannelUpdate) SetCategory(v *Category) *ChannelUpdate {
+	return _u.SetCategoryID(v.ID)
+}
+
 // Mutation returns the ChannelMutation object of the builder.
 func (_u *ChannelUpdate) Mutation() *ChannelMutation {
 	return _u.mutation
@@ -241,6 +485,33 @@ func (_u *ChannelUpdate) RemoveMedia(v ...*Media) *ChannelUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveMediumIDs(ids...)
+}
+
+// ClearArticles clears all "articles" edges to the Article entity.
+func (_u *ChannelUpdate) ClearArticles() *ChannelUpdate {
+	_u.mutation.ClearArticles()
+	return _u
+}
+
+// RemoveArticleIDs removes the "articles" edge to Article entities by IDs.
+func (_u *ChannelUpdate) RemoveArticleIDs(ids ...string) *ChannelUpdate {
+	_u.mutation.RemoveArticleIDs(ids...)
+	return _u
+}
+
+// RemoveArticles removes "articles" edges to Article entities.
+func (_u *ChannelUpdate) RemoveArticles(v ...*Article) *ChannelUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveArticleIDs(ids...)
+}
+
+// ClearCategory clears the "category" edge to the Category entity.
+func (_u *ChannelUpdate) ClearCategory() *ChannelUpdate {
+	_u.mutation.ClearCategory()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -281,9 +552,24 @@ func (_u *ChannelUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ChannelUpdate) check() error {
+	if v, ok := _u.mutation.Name(); ok {
+		if err := channel.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`entity: validator failed for field "Channel.name": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Title(); ok {
 		if err := channel.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Channel.title": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Slug(); ok {
+		if err := channel.SlugValidator(v); err != nil {
+			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "Channel.slug": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Handle(); ok {
+		if err := channel.HandleValidator(v); err != nil {
+			return &ValidationError{Name: "handle", err: fmt.Errorf(`entity: validator failed for field "Channel.handle": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.ShortToken(); ok {
@@ -291,9 +577,24 @@ func (_u *ChannelUpdate) check() error {
 			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Channel.short_token": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Avatar(); ok {
+		if err := channel.AvatarValidator(v); err != nil {
+			return &ValidationError{Name: "avatar", err: fmt.Errorf(`entity: validator failed for field "Channel.avatar": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Banner(); ok {
+		if err := channel.BannerValidator(v); err != nil {
+			return &ValidationError{Name: "banner", err: fmt.Errorf(`entity: validator failed for field "Channel.banner": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.BannerLogo(); ok {
 		if err := channel.BannerLogoValidator(v); err != nil {
 			return &ValidationError{Name: "banner_logo", err: fmt.Errorf(`entity: validator failed for field "Channel.banner_logo": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := channel.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "Channel.status": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Privacy(); ok {
@@ -325,20 +626,64 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
+	if value, ok := _u.mutation.Name(); ok {
+		_spec.SetField(channel.FieldName, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(channel.FieldTitle, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Description(); ok {
-		_spec.SetField(channel.FieldDescription, field.TypeString, value)
+	if value, ok := _u.mutation.Slug(); ok {
+		_spec.SetField(channel.FieldSlug, field.TypeString, value)
+	}
+	if _u.mutation.SlugCleared() {
+		_spec.ClearField(channel.FieldSlug, field.TypeString)
+	}
+	if value, ok := _u.mutation.Handle(); ok {
+		_spec.SetField(channel.FieldHandle, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ShortToken(); ok {
 		_spec.SetField(channel.FieldShortToken, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(channel.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Avatar(); ok {
+		_spec.SetField(channel.FieldAvatar, field.TypeString, value)
+	}
+	if _u.mutation.AvatarCleared() {
+		_spec.ClearField(channel.FieldAvatar, field.TypeString)
+	}
+	if value, ok := _u.mutation.Banner(); ok {
+		_spec.SetField(channel.FieldBanner, field.TypeString, value)
+	}
+	if _u.mutation.BannerCleared() {
+		_spec.ClearField(channel.FieldBanner, field.TypeString)
+	}
 	if value, ok := _u.mutation.BannerLogo(); ok {
 		_spec.SetField(channel.FieldBannerLogo, field.TypeString, value)
 	}
+	if _u.mutation.BannerLogoCleared() {
+		_spec.ClearField(channel.FieldBannerLogo, field.TypeString)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(channel.FieldStatus, field.TypeEnum, value)
+	}
 	if value, ok := _u.mutation.Privacy(); ok {
 		_spec.SetField(channel.FieldPrivacy, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.Tags(); ok {
+		_spec.SetField(channel.FieldTags, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedTags(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, channel.FieldTags, value)
+		})
+	}
+	if _u.mutation.TagsCleared() {
+		_spec.ClearField(channel.FieldTags, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.IsVerified(); ok {
+		_spec.SetField(channel.FieldIsVerified, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.SubscriberCount(); ok {
 		_spec.SetField(channel.FieldSubscriberCount, field.TypeInt64, value)
@@ -351,6 +696,29 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedMediaCount(); ok {
 		_spec.AddField(channel.FieldMediaCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.ArticleCount(); ok {
+		_spec.SetField(channel.FieldArticleCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedArticleCount(); ok {
+		_spec.AddField(channel.FieldArticleCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.TotalViews(); ok {
+		_spec.SetField(channel.FieldTotalViews, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedTotalViews(); ok {
+		_spec.AddField(channel.FieldTotalViews, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.Links(); ok {
+		_spec.SetField(channel.FieldLinks, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedLinks(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, channel.FieldLinks, value)
+		})
+	}
+	if _u.mutation.LinksCleared() {
+		_spec.ClearField(channel.FieldLinks, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.AddDate(); ok {
 		_spec.SetField(channel.FieldAddDate, field.TypeTime, value)
@@ -435,6 +803,80 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.ArticlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.ArticlesTable,
+			Columns: []string{channel.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedArticlesIDs(); len(nodes) > 0 && !_u.mutation.ArticlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.ArticlesTable,
+			Columns: []string{channel.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ArticlesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.ArticlesTable,
+			Columns: []string{channel.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CategoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   channel.CategoryTable,
+			Columns: []string{channel.CategoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CategoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   channel.CategoryTable,
+			Columns: []string{channel.CategoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -471,6 +913,20 @@ func (_u *ChannelUpdateOne) SetNillableUserID(v *string) *ChannelUpdateOne {
 	return _u
 }
 
+// SetName sets the "name" field.
+func (_u *ChannelUpdateOne) SetName(v string) *ChannelUpdateOne {
+	_u.mutation.SetName(v)
+	return _u
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableName(v *string) *ChannelUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
+	}
+	return _u
+}
+
 // SetTitle sets the "title" field.
 func (_u *ChannelUpdateOne) SetTitle(v string) *ChannelUpdateOne {
 	_u.mutation.SetTitle(v)
@@ -485,16 +941,36 @@ func (_u *ChannelUpdateOne) SetNillableTitle(v *string) *ChannelUpdateOne {
 	return _u
 }
 
-// SetDescription sets the "description" field.
-func (_u *ChannelUpdateOne) SetDescription(v string) *ChannelUpdateOne {
-	_u.mutation.SetDescription(v)
+// SetSlug sets the "slug" field.
+func (_u *ChannelUpdateOne) SetSlug(v string) *ChannelUpdateOne {
+	_u.mutation.SetSlug(v)
 	return _u
 }
 
-// SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *ChannelUpdateOne) SetNillableDescription(v *string) *ChannelUpdateOne {
+// SetNillableSlug sets the "slug" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableSlug(v *string) *ChannelUpdateOne {
 	if v != nil {
-		_u.SetDescription(*v)
+		_u.SetSlug(*v)
+	}
+	return _u
+}
+
+// ClearSlug clears the value of the "slug" field.
+func (_u *ChannelUpdateOne) ClearSlug() *ChannelUpdateOne {
+	_u.mutation.ClearSlug()
+	return _u
+}
+
+// SetHandle sets the "handle" field.
+func (_u *ChannelUpdateOne) SetHandle(v string) *ChannelUpdateOne {
+	_u.mutation.SetHandle(v)
+	return _u
+}
+
+// SetNillableHandle sets the "handle" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableHandle(v *string) *ChannelUpdateOne {
+	if v != nil {
+		_u.SetHandle(*v)
 	}
 	return _u
 }
@@ -513,6 +989,60 @@ func (_u *ChannelUpdateOne) SetNillableShortToken(v *string) *ChannelUpdateOne {
 	return _u
 }
 
+// SetDescription sets the "description" field.
+func (_u *ChannelUpdateOne) SetDescription(v string) *ChannelUpdateOne {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableDescription(v *string) *ChannelUpdateOne {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
+	return _u
+}
+
+// SetAvatar sets the "avatar" field.
+func (_u *ChannelUpdateOne) SetAvatar(v string) *ChannelUpdateOne {
+	_u.mutation.SetAvatar(v)
+	return _u
+}
+
+// SetNillableAvatar sets the "avatar" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableAvatar(v *string) *ChannelUpdateOne {
+	if v != nil {
+		_u.SetAvatar(*v)
+	}
+	return _u
+}
+
+// ClearAvatar clears the value of the "avatar" field.
+func (_u *ChannelUpdateOne) ClearAvatar() *ChannelUpdateOne {
+	_u.mutation.ClearAvatar()
+	return _u
+}
+
+// SetBanner sets the "banner" field.
+func (_u *ChannelUpdateOne) SetBanner(v string) *ChannelUpdateOne {
+	_u.mutation.SetBanner(v)
+	return _u
+}
+
+// SetNillableBanner sets the "banner" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableBanner(v *string) *ChannelUpdateOne {
+	if v != nil {
+		_u.SetBanner(*v)
+	}
+	return _u
+}
+
+// ClearBanner clears the value of the "banner" field.
+func (_u *ChannelUpdateOne) ClearBanner() *ChannelUpdateOne {
+	_u.mutation.ClearBanner()
+	return _u
+}
+
 // SetBannerLogo sets the "banner_logo" field.
 func (_u *ChannelUpdateOne) SetBannerLogo(v string) *ChannelUpdateOne {
 	_u.mutation.SetBannerLogo(v)
@@ -527,6 +1057,26 @@ func (_u *ChannelUpdateOne) SetNillableBannerLogo(v *string) *ChannelUpdateOne {
 	return _u
 }
 
+// ClearBannerLogo clears the value of the "banner_logo" field.
+func (_u *ChannelUpdateOne) ClearBannerLogo() *ChannelUpdateOne {
+	_u.mutation.ClearBannerLogo()
+	return _u
+}
+
+// SetStatus sets the "status" field.
+func (_u *ChannelUpdateOne) SetStatus(v channel.Status) *ChannelUpdateOne {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableStatus(v *channel.Status) *ChannelUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
 // SetPrivacy sets the "privacy" field.
 func (_u *ChannelUpdateOne) SetPrivacy(v channel.Privacy) *ChannelUpdateOne {
 	_u.mutation.SetPrivacy(v)
@@ -537,6 +1087,58 @@ func (_u *ChannelUpdateOne) SetPrivacy(v channel.Privacy) *ChannelUpdateOne {
 func (_u *ChannelUpdateOne) SetNillablePrivacy(v *channel.Privacy) *ChannelUpdateOne {
 	if v != nil {
 		_u.SetPrivacy(*v)
+	}
+	return _u
+}
+
+// SetTags sets the "tags" field.
+func (_u *ChannelUpdateOne) SetTags(v []string) *ChannelUpdateOne {
+	_u.mutation.SetTags(v)
+	return _u
+}
+
+// AppendTags appends value to the "tags" field.
+func (_u *ChannelUpdateOne) AppendTags(v []string) *ChannelUpdateOne {
+	_u.mutation.AppendTags(v)
+	return _u
+}
+
+// ClearTags clears the value of the "tags" field.
+func (_u *ChannelUpdateOne) ClearTags() *ChannelUpdateOne {
+	_u.mutation.ClearTags()
+	return _u
+}
+
+// SetCategoryID sets the "category_id" field.
+func (_u *ChannelUpdateOne) SetCategoryID(v int64) *ChannelUpdateOne {
+	_u.mutation.SetCategoryID(v)
+	return _u
+}
+
+// SetNillableCategoryID sets the "category_id" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableCategoryID(v *int64) *ChannelUpdateOne {
+	if v != nil {
+		_u.SetCategoryID(*v)
+	}
+	return _u
+}
+
+// ClearCategoryID clears the value of the "category_id" field.
+func (_u *ChannelUpdateOne) ClearCategoryID() *ChannelUpdateOne {
+	_u.mutation.ClearCategoryID()
+	return _u
+}
+
+// SetIsVerified sets the "is_verified" field.
+func (_u *ChannelUpdateOne) SetIsVerified(v bool) *ChannelUpdateOne {
+	_u.mutation.SetIsVerified(v)
+	return _u
+}
+
+// SetNillableIsVerified sets the "is_verified" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableIsVerified(v *bool) *ChannelUpdateOne {
+	if v != nil {
+		_u.SetIsVerified(*v)
 	}
 	return _u
 }
@@ -580,6 +1182,66 @@ func (_u *ChannelUpdateOne) SetNillableMediaCount(v *int) *ChannelUpdateOne {
 // AddMediaCount adds value to the "media_count" field.
 func (_u *ChannelUpdateOne) AddMediaCount(v int) *ChannelUpdateOne {
 	_u.mutation.AddMediaCount(v)
+	return _u
+}
+
+// SetArticleCount sets the "article_count" field.
+func (_u *ChannelUpdateOne) SetArticleCount(v int) *ChannelUpdateOne {
+	_u.mutation.ResetArticleCount()
+	_u.mutation.SetArticleCount(v)
+	return _u
+}
+
+// SetNillableArticleCount sets the "article_count" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableArticleCount(v *int) *ChannelUpdateOne {
+	if v != nil {
+		_u.SetArticleCount(*v)
+	}
+	return _u
+}
+
+// AddArticleCount adds value to the "article_count" field.
+func (_u *ChannelUpdateOne) AddArticleCount(v int) *ChannelUpdateOne {
+	_u.mutation.AddArticleCount(v)
+	return _u
+}
+
+// SetTotalViews sets the "total_views" field.
+func (_u *ChannelUpdateOne) SetTotalViews(v int64) *ChannelUpdateOne {
+	_u.mutation.ResetTotalViews()
+	_u.mutation.SetTotalViews(v)
+	return _u
+}
+
+// SetNillableTotalViews sets the "total_views" field if the given value is not nil.
+func (_u *ChannelUpdateOne) SetNillableTotalViews(v *int64) *ChannelUpdateOne {
+	if v != nil {
+		_u.SetTotalViews(*v)
+	}
+	return _u
+}
+
+// AddTotalViews adds value to the "total_views" field.
+func (_u *ChannelUpdateOne) AddTotalViews(v int64) *ChannelUpdateOne {
+	_u.mutation.AddTotalViews(v)
+	return _u
+}
+
+// SetLinks sets the "links" field.
+func (_u *ChannelUpdateOne) SetLinks(v []schema.ChannelLink) *ChannelUpdateOne {
+	_u.mutation.SetLinks(v)
+	return _u
+}
+
+// AppendLinks appends value to the "links" field.
+func (_u *ChannelUpdateOne) AppendLinks(v []schema.ChannelLink) *ChannelUpdateOne {
+	_u.mutation.AppendLinks(v)
+	return _u
+}
+
+// ClearLinks clears the value of the "links" field.
+func (_u *ChannelUpdateOne) ClearLinks() *ChannelUpdateOne {
+	_u.mutation.ClearLinks()
 	return _u
 }
 
@@ -637,6 +1299,26 @@ func (_u *ChannelUpdateOne) AddMedia(v ...*Media) *ChannelUpdateOne {
 	return _u.AddMediumIDs(ids...)
 }
 
+// AddArticleIDs adds the "articles" edge to the Article entity by IDs.
+func (_u *ChannelUpdateOne) AddArticleIDs(ids ...string) *ChannelUpdateOne {
+	_u.mutation.AddArticleIDs(ids...)
+	return _u
+}
+
+// AddArticles adds the "articles" edges to the Article entity.
+func (_u *ChannelUpdateOne) AddArticles(v ...*Article) *ChannelUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddArticleIDs(ids...)
+}
+
+// SetCategory sets the "category" edge to the Category entity.
+func (_u *ChannelUpdateOne) SetCategory(v *Category) *ChannelUpdateOne {
+	return _u.SetCategoryID(v.ID)
+}
+
 // Mutation returns the ChannelMutation object of the builder.
 func (_u *ChannelUpdateOne) Mutation() *ChannelMutation {
 	return _u.mutation
@@ -667,6 +1349,33 @@ func (_u *ChannelUpdateOne) RemoveMedia(v ...*Media) *ChannelUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveMediumIDs(ids...)
+}
+
+// ClearArticles clears all "articles" edges to the Article entity.
+func (_u *ChannelUpdateOne) ClearArticles() *ChannelUpdateOne {
+	_u.mutation.ClearArticles()
+	return _u
+}
+
+// RemoveArticleIDs removes the "articles" edge to Article entities by IDs.
+func (_u *ChannelUpdateOne) RemoveArticleIDs(ids ...string) *ChannelUpdateOne {
+	_u.mutation.RemoveArticleIDs(ids...)
+	return _u
+}
+
+// RemoveArticles removes "articles" edges to Article entities.
+func (_u *ChannelUpdateOne) RemoveArticles(v ...*Article) *ChannelUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveArticleIDs(ids...)
+}
+
+// ClearCategory clears the "category" edge to the Category entity.
+func (_u *ChannelUpdateOne) ClearCategory() *ChannelUpdateOne {
+	_u.mutation.ClearCategory()
+	return _u
 }
 
 // Where appends a list predicates to the ChannelUpdate builder.
@@ -720,9 +1429,24 @@ func (_u *ChannelUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ChannelUpdateOne) check() error {
+	if v, ok := _u.mutation.Name(); ok {
+		if err := channel.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`entity: validator failed for field "Channel.name": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Title(); ok {
 		if err := channel.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Channel.title": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Slug(); ok {
+		if err := channel.SlugValidator(v); err != nil {
+			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "Channel.slug": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Handle(); ok {
+		if err := channel.HandleValidator(v); err != nil {
+			return &ValidationError{Name: "handle", err: fmt.Errorf(`entity: validator failed for field "Channel.handle": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.ShortToken(); ok {
@@ -730,9 +1454,24 @@ func (_u *ChannelUpdateOne) check() error {
 			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Channel.short_token": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Avatar(); ok {
+		if err := channel.AvatarValidator(v); err != nil {
+			return &ValidationError{Name: "avatar", err: fmt.Errorf(`entity: validator failed for field "Channel.avatar": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Banner(); ok {
+		if err := channel.BannerValidator(v); err != nil {
+			return &ValidationError{Name: "banner", err: fmt.Errorf(`entity: validator failed for field "Channel.banner": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.BannerLogo(); ok {
 		if err := channel.BannerLogoValidator(v); err != nil {
 			return &ValidationError{Name: "banner_logo", err: fmt.Errorf(`entity: validator failed for field "Channel.banner_logo": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := channel.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "Channel.status": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Privacy(); ok {
@@ -781,20 +1520,64 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 			}
 		}
 	}
+	if value, ok := _u.mutation.Name(); ok {
+		_spec.SetField(channel.FieldName, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(channel.FieldTitle, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Description(); ok {
-		_spec.SetField(channel.FieldDescription, field.TypeString, value)
+	if value, ok := _u.mutation.Slug(); ok {
+		_spec.SetField(channel.FieldSlug, field.TypeString, value)
+	}
+	if _u.mutation.SlugCleared() {
+		_spec.ClearField(channel.FieldSlug, field.TypeString)
+	}
+	if value, ok := _u.mutation.Handle(); ok {
+		_spec.SetField(channel.FieldHandle, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ShortToken(); ok {
 		_spec.SetField(channel.FieldShortToken, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(channel.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Avatar(); ok {
+		_spec.SetField(channel.FieldAvatar, field.TypeString, value)
+	}
+	if _u.mutation.AvatarCleared() {
+		_spec.ClearField(channel.FieldAvatar, field.TypeString)
+	}
+	if value, ok := _u.mutation.Banner(); ok {
+		_spec.SetField(channel.FieldBanner, field.TypeString, value)
+	}
+	if _u.mutation.BannerCleared() {
+		_spec.ClearField(channel.FieldBanner, field.TypeString)
+	}
 	if value, ok := _u.mutation.BannerLogo(); ok {
 		_spec.SetField(channel.FieldBannerLogo, field.TypeString, value)
 	}
+	if _u.mutation.BannerLogoCleared() {
+		_spec.ClearField(channel.FieldBannerLogo, field.TypeString)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(channel.FieldStatus, field.TypeEnum, value)
+	}
 	if value, ok := _u.mutation.Privacy(); ok {
 		_spec.SetField(channel.FieldPrivacy, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.Tags(); ok {
+		_spec.SetField(channel.FieldTags, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedTags(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, channel.FieldTags, value)
+		})
+	}
+	if _u.mutation.TagsCleared() {
+		_spec.ClearField(channel.FieldTags, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.IsVerified(); ok {
+		_spec.SetField(channel.FieldIsVerified, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.SubscriberCount(); ok {
 		_spec.SetField(channel.FieldSubscriberCount, field.TypeInt64, value)
@@ -807,6 +1590,29 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 	}
 	if value, ok := _u.mutation.AddedMediaCount(); ok {
 		_spec.AddField(channel.FieldMediaCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.ArticleCount(); ok {
+		_spec.SetField(channel.FieldArticleCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedArticleCount(); ok {
+		_spec.AddField(channel.FieldArticleCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.TotalViews(); ok {
+		_spec.SetField(channel.FieldTotalViews, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedTotalViews(); ok {
+		_spec.AddField(channel.FieldTotalViews, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.Links(); ok {
+		_spec.SetField(channel.FieldLinks, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedLinks(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, channel.FieldLinks, value)
+		})
+	}
+	if _u.mutation.LinksCleared() {
+		_spec.ClearField(channel.FieldLinks, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.AddDate(); ok {
 		_spec.SetField(channel.FieldAddDate, field.TypeTime, value)
@@ -884,6 +1690,80 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ArticlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.ArticlesTable,
+			Columns: []string{channel.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedArticlesIDs(); len(nodes) > 0 && !_u.mutation.ArticlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.ArticlesTable,
+			Columns: []string{channel.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ArticlesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.ArticlesTable,
+			Columns: []string{channel.ArticlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CategoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   channel.CategoryTable,
+			Columns: []string{channel.CategoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CategoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   channel.CategoryTable,
+			Columns: []string{channel.CategoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

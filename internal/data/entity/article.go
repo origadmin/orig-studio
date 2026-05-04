@@ -55,8 +55,9 @@ type Article struct {
 	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ArticleQuery when eager-loading is set.
-	Edges        ArticleEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges            ArticleEdges `json:"edges"`
+	channel_articles *string
+	selectValues     sql.SelectValues
 }
 
 // ArticleEdges holds the relations/edges for other nodes in the graph.
@@ -131,6 +132,8 @@ func (*Article) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case article.FieldPublishedAt, article.FieldCreateTime, article.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
+		case article.ForeignKeys[0]: // channel_articles
+			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -249,6 +252,13 @@ func (_m *Article) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
 				_m.UpdateTime = value.Time
+			}
+		case article.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field channel_articles", values[i])
+			} else if value.Valid {
+				_m.channel_articles = new(string)
+				*_m.channel_articles = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])

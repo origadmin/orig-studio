@@ -90,14 +90,18 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	likeFavoriteUseCase := biz4.NewLikeFavoriteUseCase(likeRepo, favoriteRepo, mediaUseCase, logger)
 	playlistRepo := dal4.NewPlaylistRepo(data, logger)
 	channelRepo := dal4.NewChannelRepo(data, logger)
-	playlistChannelUseCase := biz4.NewPlaylistChannelUseCase(playlistRepo, channelRepo, logger)
+	systemConfigRepo := dal4.NewSystemConfigRepo(data, logger)
+	channelUserRepo := dal4.NewChannelUserRepo(data, logger)
+	playlistChannelUseCase := biz4.NewPlaylistChannelUseCase(playlistRepo, channelRepo, systemConfigRepo, channelUserRepo, logger)
+	historyRepo := dal4.NewHistoryRepo(data, logger)
+	historyUseCase := biz4.NewHistoryUseCase(historyRepo, logger)
 	dalData := dal5.NewData(client)
 	permissionGroupRepo := dal5.NewPermissionGroupRepo(dalData, logger)
 	groupMemberRepo := dal5.NewGroupMemberRepo(dalData, logger)
 	userPermRepo := dal5.NewUserPermRepo(dalData, logger)
 	permissionUseCase := biz5.NewPermissionUseCase(permissionGroupRepo, groupMemberRepo, userPermRepo, logger)
 	mediaService := mediaservice.NewMediaService(mediaUseCase, logger)
-	mediaHandler := NewMediaHandler(manager, mediaUseCase, uploadUseCase, likeFavoriteUseCase, playlistChannelUseCase, userUseCase, permissionUseCase, mediaService)
+	mediaHandler := NewMediaHandler(manager, mediaUseCase, uploadUseCase, likeFavoriteUseCase, playlistChannelUseCase, userUseCase, permissionUseCase, mediaService, settingUseCase)
 	uploadHandler := NewUploadHandler(uploadUseCase, manager, logger)
 	categoryRepo := dal4.NewCategoryRepo(data, logger)
 	tagRepo := dal4.NewTagRepo(data, logger)
@@ -110,13 +114,13 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	notificationRepo := dal4.NewNotificationRepo(data, logger)
 	notificationUseCase := biz4.NewNotificationUseCase(notificationRepo, logger)
 	notificationHandler := NewNotificationHandler(notificationUseCase, manager)
-	channelHandler := NewChannelHandler(playlistChannelUseCase, manager)
+	channelHandler := NewChannelHandler(playlistChannelUseCase, manager, settingUseCase)
 	shareHandler := NewShareHandler(likeFavoriteUseCase, manager)
 	statsRepo := dal2.NewStatsRepo(client)
 	systemHandler := NewSystemHandler(manager, statsRepo, settingUseCase)
 	statsHandler := NewStatsHandler(mediaUseCase, likeFavoriteUseCase, statsRepo, manager)
 	searchHandler := NewSearchHandler(mediaUseCase)
-	meHandler := NewMeHandler(userUseCase, likeFavoriteUseCase, playlistChannelUseCase, manager)
+	meHandler := NewMeHandler(userUseCase, likeFavoriteUseCase, playlistChannelUseCase, historyUseCase, manager)
 	tagRepository := dal6.NewTagRepository(client)
 	tagUseCase := biz6.NewTagUseCase(tagRepository)
 	tagService := adminservice.NewTagService(tagUseCase)
@@ -130,9 +134,9 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	commentModerationUseCase := biz4.NewCommentModerationUseCase(commentModerationRepo, commentReportRepo, settingUseCase, logger)
 	commentModerationHandler := NewCommentModerationHandler(commentModerationUseCase, manager)
 	permissionHandler := NewPermissionHandler(permissionUseCase, manager)
-	articleHandler := NewArticleHandler(articleUseCase, manager)
+	articleHandler := NewArticleHandler(articleUseCase, manager, settingUseCase)
 	commentHandler := NewCommentHandler(client, manager, commentLikeUseCase, commentModerationUseCase)
-	playlistHandler := NewPlaylistHandler(client)
+	playlistHandler := NewPlaylistHandler(playlistChannelUseCase, settingUseCase, manager)
 	interactionHandler := NewInteractionHandler(manager, likeFavoriteUseCase)
 	adminTagHandler := NewAdminTagHandler(tagService)
 	exploreHandler := NewExploreHandler(client)
@@ -306,8 +310,9 @@ func NewMediaHandler(
 	userUC *biz3.UserUseCase,
 	permChecker biz5.PermissionChecker,
 	mediaService *mediaservice.MediaService,
+	settingUC *biz.SettingUseCase,
 ) *mediaservice.MediaHandler {
-	return mediaservice.NewMediaHandler(jwt, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC, permChecker, mediaService)
+	return mediaservice.NewMediaHandler(jwt, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC, permChecker, mediaService, settingUC)
 }
 
 // NewUploadHandler creates a new upload handler.
@@ -354,8 +359,9 @@ func NewNotificationHandler(
 func NewChannelHandler(
 	playlistChannelUC *biz4.PlaylistChannelUseCase,
 	jwt *auth2.Manager,
+	settingUC *biz.SettingUseCase,
 ) *contentservice.ChannelHandler {
-	return contentservice.NewChannelHandler(playlistChannelUC, jwt)
+	return contentservice.NewChannelHandler(playlistChannelUC, jwt, settingUC)
 }
 
 // NewShareHandler creates a new share handler.
@@ -397,9 +403,10 @@ func NewMeHandler(
 	userUC *biz3.UserUseCase,
 	likeFavoriteUC *biz4.LikeFavoriteUseCase,
 	playlistChannelUC *biz4.PlaylistChannelUseCase,
+	historyUC *biz4.HistoryUseCase,
 	jwt *auth2.Manager,
 ) *userservice.MeHandler {
-	return userservice.NewMeHandler(userUC, likeFavoriteUC, playlistChannelUC, jwt)
+	return userservice.NewMeHandler(userUC, likeFavoriteUC, playlistChannelUC, historyUC, jwt)
 }
 
 // NewAdminHandler creates a new admin handler.
@@ -438,8 +445,9 @@ func NewPermissionHandler(
 func NewArticleHandler(
 	uc *biz4.ArticleUseCase,
 	jwt *auth2.Manager,
+	settingUC *biz.SettingUseCase,
 ) *contentservice.ArticleHandler {
-	return contentservice.NewArticleHandler(uc, jwt)
+	return contentservice.NewArticleHandler(uc, jwt, settingUC)
 }
 
 // NewCommentHandler creates a new comment handler.
@@ -453,8 +461,8 @@ func NewCommentHandler(
 }
 
 // NewPlaylistHandler creates a new playlist handler.
-func NewPlaylistHandler(client *entity.Client) *contentservice.PlaylistHandler {
-	return contentservice.NewPlaylistHandler(client)
+func NewPlaylistHandler(playlistUC *biz4.PlaylistChannelUseCase, settingUC *biz.SettingUseCase, jwt *auth2.Manager) *contentservice.PlaylistHandler {
+	return contentservice.NewPlaylistHandler(playlistUC, settingUC, jwt)
 }
 
 // NewInteractionHandler creates a new interaction handler.
