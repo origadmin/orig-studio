@@ -1,4 +1,4 @@
-import {api, API_BASE_URL} from "@/lib/request";
+import {api, API_BASE_URL, API_PREFIX} from "@/lib/request";
 
 export interface RegenerateSpriteResponse {
     media_id: string;
@@ -20,11 +20,11 @@ export interface RegenerateThumbnailResponse {
 export const spriteApi = {
     /** Get the WebVTT sprite sheet URL for a media item (by short_token) */
     getVttUrl: (mediaId: string) =>
-        `${API_BASE_URL}/medias/${mediaId}/sprite.vtt`,
+        `${API_BASE_URL}${API_PREFIX}/medias/${mediaId}/sprite.vtt`,
 
     /** Get the sprite sheet JPEG URL for a media item (by short_token) */
     getSpriteUrl: (mediaId: string) =>
-        `${API_BASE_URL}/medias/${mediaId}/sprite.jpg`,
+        `${API_BASE_URL}${API_PREFIX}/medias/${mediaId}/sprite.jpg`,
 
     /** Trigger asynchronous sprite sheet regeneration (admin only) */
     regenerateSprite: (mediaId: string) =>

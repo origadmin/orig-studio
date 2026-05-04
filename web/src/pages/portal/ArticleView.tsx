@@ -1,22 +1,22 @@
 /*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
- * Portal - Article View Page (Video Website Style)
+ * Portal - Article View Page (X/Twitter Style)
  */
 
 import {useState, useEffect, useMemo} from 'react';
 import {useParams} from '@tanstack/react-router';
 import {articleApi, type Article} from '@/lib/api/article';
+import {publicMediaApi, type Media} from '@/lib/api/media';
+import {userApi, type User as AuthorUser} from '@/lib/api/user';
 import {API_BASE_URL} from '@/lib/request';
 import {Spinner} from '@/components/ui/spinner';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
-import {AlertTriangle, Play, Eye, MessageSquare, Clock, User, ArrowLeft} from 'lucide-react';
-import {formatDateTime} from '@/lib/format';
+import {Avatar, AvatarImage, AvatarFallback} from '@/components/ui/avatar';
+import {AlertTriangle, Eye, Clock, ArrowLeft} from 'lucide-react';
+import {formatDate, formatViews} from '@/lib/format';
 import VideoPlayer from '@/components/common/VideoPlayer';
 
-/**
- * Resolve a potentially relative URL to a full URL.
- */
 function resolveMediaUrl(url: string | undefined): string | undefined {
     if (!url) return undefined;
     if (/^(https?:|data:|blob:)/i.test(url)) return url;
@@ -24,35 +24,20 @@ function resolveMediaUrl(url: string | undefined): string | undefined {
     return `${base}/${url.replace(/^\//, '')}`;
 }
 
-/**
- * Render markdown content to HTML (basic implementation).
- * For production, use a proper markdown library like marked or remark.
- */
 function renderMarkdown(content: string): string {
-    // Basic markdown rendering - headers, bold, italic, links, code, lists
     let html = content
-        // Code blocks
         .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>')
-        // Inline code
         .replace(/`([^`]+)`/g, '<code>$1</code>')
-        // Headers
         .replace(/^### (.+)$/gm, '<h3>$1</h3>')
         .replace(/^## (.+)$/gm, '<h2>$1</h2>')
         .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-        // Bold
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        // Italic
         .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        // Links
         .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-        // Unordered lists
         .replace(/^- (.+)$/gm, '<li>$1</li>')
-        // Paragraphs (lines not already wrapped)
         .replace(/^(?!<[huplo]|<li|<pre|<code)(.+)$/gm, '<p>$1</p>')
-        // Line breaks
         .replace(/\n\n/g, '');
 
-    // Wrap consecutive <li> in <ul>
     html = html.replace(/(<li>[\s\S]*?<\/li>)+/g, '<ul>$&</ul>');
 
     return html;
@@ -61,6 +46,8 @@ function renderMarkdown(content: string): string {
 export default function ArticleViewPage() {
     const {slug} = useParams({strict: false}) as {slug?: string};
     const [article, setArticle] = useState<Article | null>(null);
+    const [media, setMedia] = useState<Media | null>(null);
+    const [author, setAuthor] = useState<AuthorUser | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -70,7 +57,28 @@ export default function ArticleViewPage() {
         setError(null);
         articleApi.getBySlug(slug)
             .then(data => {
-                setArticle(data);
+                const articleData = (data as any)?.article ?? (data as any)?.data?.article ?? (data as any)?.data ?? data;
+                setArticle(articleData);
+                if (articleData.media_id && articleData.media?.short_token) {
+                    publicMediaApi.get(articleData.media.short_token)
+                        .then(mediaRes => {
+                            const mediaData = (mediaRes as any)?.media ?? (mediaRes as any)?.data?.media ?? (mediaRes as any)?.data ?? mediaRes;
+                            setMedia(mediaData);
+                        })
+                        .catch(err => {
+                            console.error('Error loading media:', err);
+                        });
+                }
+                if (articleData.user_id) {
+                    userApi.get(String(articleData.user_id))
+                        .then(authorData => {
+                            const authorRes = (authorData as any)?.user ?? (authorData as any)?.data?.user ?? (authorData as any)?.data ?? authorData;
+                            setAuthor(authorRes);
+                        })
+                        .catch(err => {
+                            console.error('Error loading author:', err);
+                        });
+                }
             })
             .catch(err => {
                 setError('Article not found');
@@ -79,20 +87,18 @@ export default function ArticleViewPage() {
             .finally(() => setLoading(false));
     }, [slug]);
 
-    // Resolve video source URL
-    const videoSrc = useMemo(() => {
-        if (!article?.media?.short_token) return undefined;
-        return `${API_BASE_URL}/stream/${article.media.short_token}/index.m3u8`;
-    }, [article?.media?.short_token]);
+    const isProcessing = media ? media.encoding_status !== 'success' : false;
 
-    // Rendered markdown content
     const renderedContent = useMemo(() => {
         if (!article?.content) return '';
         return renderMarkdown(article.content);
     }, [article?.content]);
 
-    // Display thumbnail
     const displayThumbnail = resolveMediaUrl(article?.thumbnail || article?.media?.thumbnail);
+
+    const authorName = author?.nickname || author?.username || (article?.user_id ? `User ${String(article.user_id).substring(0, 8)}` : 'Unknown');
+    const authorAvatar = author?.avatar ? resolveMediaUrl(author.avatar) : undefined;
+    const authorBio = author?.bio || '';
 
     if (loading) {
         return (
@@ -119,145 +125,118 @@ export default function ArticleViewPage() {
 
     return (
         <div className="min-h-screen bg-background">
-            {/* Video Player (full width, if media associated) */}
-            {article.media_id && article.media && videoSrc && (
-                <div className="w-full bg-black">
-                    <div className="max-w-5xl mx-auto">
-                        <VideoPlayer
-                            src={videoSrc}
-                            poster={displayThumbnail}
-                        />
-                    </div>
-                </div>
-            )}
+            <div className="max-w-3xl mx-auto px-6 py-12">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => window.history.back()}
+                    className="mb-8 -ml-2 text-muted-foreground hover:text-foreground"
+                >
+                    <ArrowLeft className="w-4 h-4 mr-1"/>
+                    Back
+                </Button>
 
-            {/* Cover image (if no video but has thumbnail) */}
-            {!article.media_id && displayThumbnail && (
-                <div className="w-full max-h-[400px] overflow-hidden">
-                    <img src={displayThumbnail} alt={article.title}
-                         className="w-full h-full object-cover"/>
-                </div>
-            )}
-
-            <div className="max-w-5xl mx-auto px-4 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Main content area */}
-                    <div className="lg:col-span-2 space-y-6">
-                        {/* Article header */}
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-2">
-                                <Badge variant={article.state === 'published' ? 'default' : 'secondary'}>
-                                    {article.state}
+                <article>
+                    <div className="space-y-4 mb-8">
+                        <div className="flex items-center gap-2">
+                            {article.state === 'published' && (
+                                <Badge variant="default" className="text-xs">Published</Badge>
+                            )}
+                            {article.featured && (
+                                <Badge variant="outline" className="text-warning border-amber-300 text-xs">
+                                    Featured
                                 </Badge>
-                                {article.featured && (
-                                    <Badge variant="outline" className="text-warning border-amber-300">
-                                        Featured
-                                    </Badge>
-                                )}
-                            </div>
-                            <h1 className="text-3xl font-bold tracking-tight">{article.title}</h1>
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-1">
-                                    <User className="w-4 h-4"/>
-                                    <span>{article.user_id}</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                    <Clock className="w-4 h-4"/>
-                                    <span>{formatDateTime(article.create_time)}</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                    <Eye className="w-4 h-4"/>
-                                    <span>{article.view_count} views</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                    <MessageSquare className="w-4 h-4"/>
-                                    <span>{article.comment_count} comments</span>
-                                </div>
-                            </div>
-                            {article.summary && (
-                                <p className="text-muted-foreground text-lg leading-relaxed">
-                                    {article.summary}
+                            )}
+                        </div>
+
+                        <h1 className="text-4xl font-bold tracking-tight leading-tight">
+                            {article.title}
+                        </h1>
+
+                        <div className="flex items-center gap-3">
+                            <Avatar className="w-10 h-10">
+                                {authorAvatar ? (
+                                    <AvatarImage src={authorAvatar} alt={authorName}/>
+                                ) : null}
+                                <AvatarFallback>{authorName[0]}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="font-medium text-foreground">{authorName}</p>
+                                <p className="text-sm text-muted-foreground flex items-center gap-2">
+                                    <span className="flex items-center gap-1">
+                                        <Clock className="w-3.5 h-3.5"/>
+                                        {formatDate(article.published_at || article.create_time)}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                        <Eye className="w-3.5 h-3.5"/>
+                                        {formatViews(article.view_count)} views
+                                    </span>
                                 </p>
-                            )}
-                            {article.tags && article.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1.5">
-                                    {article.tags.map((tag, i) => (
-                                        <Badge key={i} variant="secondary" className="text-xs">{tag}</Badge>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="border-t"/>
-
-                        {/* Article content */}
-                        <div
-                            className="prose prose-slate dark:prose-invert max-w-none"
-                            dangerouslySetInnerHTML={{__html: renderedContent}}
-                        />
-                    </div>
-
-                    {/* Right sidebar */}
-                    <div className="space-y-6">
-                        {/* Author card */}
-                        <div className="bg-card rounded-lg border p-4 space-y-3">
-                            <h3 className="font-medium">Author</h3>
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
-                                    <User className="w-5 h-5 text-muted-foreground"/>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium">User {article.user_id.substring(0, 8)}</p>
-                                    <p className="text-xs text-muted-foreground">Content Creator</p>
-                                </div>
                             </div>
                         </div>
 
-                        {/* Article info */}
-                        <div className="bg-card rounded-lg border p-4 space-y-3">
-                            <h3 className="font-medium">Article Info</h3>
-                            <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-                                <span className="text-muted-foreground">Published</span>
-                                <span className="text-xs text-right whitespace-nowrap">
-                                    {article.published_at ? formatDateTime(article.published_at) : 'Not published'}
-                                </span>
-                                <span className="text-muted-foreground">Updated</span>
-                                <span className="text-xs text-right whitespace-nowrap">{formatDateTime(article.update_time)}</span>
-                                <span className="text-muted-foreground">Views</span>
-                                <span className="text-xs text-right">{article.view_count}</span>
-                            </div>
-                        </div>
+                        {article.summary && (
+                            <p className="text-lg text-muted-foreground leading-relaxed">
+                                {article.summary}
+                            </p>
+                        )}
 
-                        {/* Related video */}
-                        {article.media && (
-                            <div className="bg-card rounded-lg border p-4 space-y-3">
-                                <h3 className="font-medium">Related Video</h3>
-                                <div className="relative aspect-video bg-muted rounded-md overflow-hidden">
-                                    {resolveMediaUrl(article.media.thumbnail) ? (
-                                        <img src={resolveMediaUrl(article.media.thumbnail)} alt={article.media.title}
-                                             className="w-full h-full object-cover" loading="lazy"/>
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center">
-                                            <Play className="w-8 h-8 text-muted-foreground"/>
-                                        </div>
-                                    )}
-                                    {article.media.duration > 0 && (
-                                        <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1.5 py-0.5 rounded">
-                                            {Math.floor(article.media.duration / 60)}:{String(Math.floor(article.media.duration % 60)).padStart(2, '0')}
-                                        </span>
-                                    )}
-                                </div>
-                                <p className="text-sm font-medium">{article.media.title}</p>
-                                {article.media.short_token && (
-                                    <Button variant="outline" size="sm" className="w-full"
-                                            onClick={() => window.open(`/watch?v=${article.media!.short_token}`, '_blank')}>
-                                        <Play className="w-3 h-3 mr-1"/>Watch Video
-                                    </Button>
-                                )}
+                        {article.tags && article.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                                {article.tags.map((tag, i) => (
+                                    <Badge key={i} variant="secondary" className="text-xs">{tag}</Badge>
+                                ))}
                             </div>
                         )}
                     </div>
-                </div>
+
+                    <div className="border-t mb-8"/>
+
+                    {article.media_id && media && (
+                        <div className="my-8 rounded-xl overflow-hidden shadow-sm">
+                            <VideoPlayer
+                                src={media.url || ''}
+                                hlsSrc={media.hls_file}
+                                poster={resolveMediaUrl(media.poster || media.thumbnail)}
+                                isProcessing={isProcessing}
+                            />
+                        </div>
+                    )}
+
+                    {!article.media_id && displayThumbnail && (
+                        <div className="my-8 rounded-xl overflow-hidden shadow-sm">
+                            <img
+                                src={displayThumbnail}
+                                alt={article.title}
+                                className="w-full h-auto object-cover"
+                            />
+                        </div>
+                    )}
+
+                    <div
+                        className="prose prose-slate dark:prose-invert max-w-none leading-relaxed"
+                        dangerouslySetInnerHTML={{__html: renderedContent}}
+                    />
+
+                    <div className="border-t mt-12 mb-8"/>
+
+                    <div className="p-6 bg-muted/50 rounded-xl border">
+                        <div className="flex items-center gap-4">
+                            <Avatar className="w-16 h-16">
+                                {authorAvatar ? (
+                                    <AvatarImage src={authorAvatar} alt={authorName}/>
+                                ) : null}
+                                <AvatarFallback className="text-xl">{authorName[0]}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="font-semibold text-lg">{authorName}</p>
+                                {authorBio && (
+                                    <p className="text-muted-foreground text-sm mt-1">{authorBio}</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </article>
             </div>
         </div>
     );

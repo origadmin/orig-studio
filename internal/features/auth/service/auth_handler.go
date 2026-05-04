@@ -7,7 +7,6 @@ package service
 
 import (
 	"log/slog"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 
@@ -124,10 +123,9 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		Email:    u.Email,
 		IsStaff:  u.IsStaff,
 	}
-	c.JSON(
-		http.StatusOK,
-		TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser},
-	)
+	// Use server.OK() to return unified response format {code:0, message:"ok", data:{...}}
+	// per C016 unified API response convention.
+	server.OK(c, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
 }
 
 func (h *AuthHandler) RegisterUser(c *gin.Context) {
@@ -188,10 +186,9 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 		Email:    created.Email,
 		IsStaff:  created.IsStaff,
 	}
-	c.JSON(
-		http.StatusCreated,
-		TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser},
-	)
+	// Use server.Created() to return unified response format {code:0, message:"ok", data:{...}}
+	// per C016 unified API response convention.
+	server.Created(c, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
 }
 
 // RefreshToken godoc: POST /api/v1/auth/refresh
@@ -241,13 +238,9 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		IsStaff:  u.IsStaff,
 	}
 
-	server.OK(c, TokenResponse{
-		AccessToken:  token,
-		RefreshToken: refreshToken,
-		TokenType:    "Bearer",
-		ExpiresIn:    int64(h.jwt.TTL().Seconds()),
-		User:         loginUser,
-	})
+	// Use server.OK() to return unified response format {code:0, message:"ok", data:{...}}
+	// per C016 unified API response convention.
+	server.OK(c, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
 }
 
 // Logout godoc: POST /api/v1/auth/logout (stateless: client discards token)

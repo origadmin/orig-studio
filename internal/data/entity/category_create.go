@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
+	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
@@ -292,6 +293,21 @@ func (_c *CategoryCreate) AddArticles(v ...*Article) *CategoryCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddArticleIDs(ids...)
+}
+
+// AddChannelIDs adds the "channels" edge to the Channel entity by IDs.
+func (_c *CategoryCreate) AddChannelIDs(ids ...string) *CategoryCreate {
+	_c.mutation.AddChannelIDs(ids...)
+	return _c
+}
+
+// AddChannels adds the "channels" edges to the Channel entity.
+func (_c *CategoryCreate) AddChannels(v ...*Channel) *CategoryCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddChannelIDs(ids...)
 }
 
 // SetParent sets the "parent" edge to the Category entity.
@@ -579,6 +595,22 @@ func (_c *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   category.ChannelsTable,
+			Columns: []string{category.ChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

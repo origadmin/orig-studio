@@ -100,6 +100,49 @@ func WithJWT(jwtMgr *auth.Manager, h interface{}) http.HandlerFunc {
 	}
 }
 
+// WithOptionalJWT wraps a handler with optional JWT middleware.
+// If a valid token is present, claims are set in the context.
+// If no token is present or the token is invalid, the handler still proceeds.
+func WithOptionalJWT(jwtMgr *auth.Manager, h interface{}) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		c, _ := gin.CreateTestContext(w)
+		c.Request = r
+		if params := handler.GetGinParams(r); params != nil {
+			c.Params = params
+		}
+
+		// Try to parse token, but don't abort if missing/invalid
+		header := c.GetHeader("Authorization")
+		if len(header) >= 8 && header[:7] == "Bearer " {
+			if claims, err := jwtMgr.Parse(header[7:]); err == nil {
+				c.Set("claims", claims)
+			}
+		}
+		// Also try query parameter fallback
+		if _, exists := c.Get("claims"); !exists {
+			if t := c.Query("token"); t != "" {
+				if claims, err := jwtMgr.Parse(t); err == nil {
+					c.Set("claims", claims)
+				}
+			}
+		}
+
+		if claimsVal, exists := c.Get("claims"); exists {
+			r = r.WithContext(context.WithValue(r.Context(), claimsKey, claimsVal))
+			r = handler.SetClaimsInContext(r, claimsVal)
+		}
+
+		switch h := h.(type) {
+		case gin.HandlerFunc:
+			h(c)
+		case http.HandlerFunc:
+			h(w, r)
+		case func(http.ResponseWriter, *http.Request):
+			h(w, r)
+		}
+	}
+}
+
 // WithAdmin wraps a gin.HandlerFunc with JWT + Admin middleware
 func WithAdmin(jwtMgr *auth.Manager, h gin.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

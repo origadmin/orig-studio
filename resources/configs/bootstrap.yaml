@@ -16,7 +16,7 @@ app:
 server:
   http:
     network: tcp
-    addr: "${SERVER_HTTP_ADDR:0.0.0.0:9090}"
+    addr: "${SERVER_HTTP_ADDR:0.0.0.0:8080}"
     timeout: "${SERVER_HTTP_TIMEOUT:60s}"
 
 data:

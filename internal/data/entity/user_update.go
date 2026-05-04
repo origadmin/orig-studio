@@ -14,6 +14,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/commentreport"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/groupmember"
+	"origadmin/application/origcms/internal/data/entity/history"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
@@ -908,6 +909,21 @@ func (_u *UserUpdate) AddCreatedGroups(v ...*PermissionGroup) *UserUpdate {
 	return _u.AddCreatedGroupIDs(ids...)
 }
 
+// AddHistoryIDs adds the "history" edge to the History entity by IDs.
+func (_u *UserUpdate) AddHistoryIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddHistoryIDs(ids...)
+	return _u
+}
+
+// AddHistory adds the "history" edges to the History entity.
+func (_u *UserUpdate) AddHistory(v ...*History) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddHistoryIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
@@ -1289,6 +1305,27 @@ func (_u *UserUpdate) RemoveCreatedGroups(v ...*PermissionGroup) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveCreatedGroupIDs(ids...)
+}
+
+// ClearHistory clears all "history" edges to the History entity.
+func (_u *UserUpdate) ClearHistory() *UserUpdate {
+	_u.mutation.ClearHistory()
+	return _u
+}
+
+// RemoveHistoryIDs removes the "history" edge to History entities by IDs.
+func (_u *UserUpdate) RemoveHistoryIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemoveHistoryIDs(ids...)
+	return _u
+}
+
+// RemoveHistory removes "history" edges to History entities.
+func (_u *UserUpdate) RemoveHistory(v ...*History) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveHistoryIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -2401,6 +2438,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.HistoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.HistoryTable,
+			Columns: []string{user.HistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(history.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedHistoryIDs(); len(nodes) > 0 && !_u.mutation.HistoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.HistoryTable,
+			Columns: []string{user.HistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(history.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.HistoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.HistoryTable,
+			Columns: []string{user.HistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(history.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -3286,6 +3368,21 @@ func (_u *UserUpdateOne) AddCreatedGroups(v ...*PermissionGroup) *UserUpdateOne 
 	return _u.AddCreatedGroupIDs(ids...)
 }
 
+// AddHistoryIDs adds the "history" edge to the History entity by IDs.
+func (_u *UserUpdateOne) AddHistoryIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddHistoryIDs(ids...)
+	return _u
+}
+
+// AddHistory adds the "history" edges to the History entity.
+func (_u *UserUpdateOne) AddHistory(v ...*History) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddHistoryIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
@@ -3667,6 +3764,27 @@ func (_u *UserUpdateOne) RemoveCreatedGroups(v ...*PermissionGroup) *UserUpdateO
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveCreatedGroupIDs(ids...)
+}
+
+// ClearHistory clears all "history" edges to the History entity.
+func (_u *UserUpdateOne) ClearHistory() *UserUpdateOne {
+	_u.mutation.ClearHistory()
+	return _u
+}
+
+// RemoveHistoryIDs removes the "history" edge to History entities by IDs.
+func (_u *UserUpdateOne) RemoveHistoryIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemoveHistoryIDs(ids...)
+	return _u
+}
+
+// RemoveHistory removes "history" edges to History entities.
+func (_u *UserUpdateOne) RemoveHistory(v ...*History) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveHistoryIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -4802,6 +4920,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(permissiongroup.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.HistoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.HistoryTable,
+			Columns: []string{user.HistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(history.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedHistoryIDs(); len(nodes) > 0 && !_u.mutation.HistoryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.HistoryTable,
+			Columns: []string{user.HistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(history.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.HistoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.HistoryTable,
+			Columns: []string{user.HistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(history.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

@@ -1,8 +1,8 @@
-﻿import {Spinner} from "@/components/ui/spinner"
+import {Spinner} from "@/components/ui/spinner"
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { lazy, Suspense } from 'react';
 
-const UnifiedChannelPage = lazy(() => import('@/pages/home/UnifiedChannelPage'));
+const ProfileHomePage = lazy(() => import('@/components/profile/ProfileHomePage'));
 
 const PageLoader = () => (
     <div className="flex items-center justify-center min-h-[60vh] bg-background text-foreground">
@@ -16,9 +16,14 @@ export const Route = createFileRoute('/_portal/$handle')({
             throw notFound();
         }
     },
-    component: () => (
-        <Suspense fallback={<PageLoader />}>
-            <UnifiedChannelPage />
-        </Suspense>
-    ),
+    component: () => {
+        const { handle } = Route.useParams();
+        const username = handle.slice(1);
+
+        return (
+            <Suspense fallback={<PageLoader />}>
+                <ProfileHomePage username={username} />
+            </Suspense>
+        );
+    },
 });

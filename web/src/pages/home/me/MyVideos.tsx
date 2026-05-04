@@ -146,9 +146,11 @@ const MyVideos = () => {
 
                                 <div className="mt-4 pt-4 border-t flex justify-end gap-2">
                                     <Button variant="ghost" size="sm"
-                                            className="h-8 text-gray-500 hover:text-emerald-600">
-                                        <Edit className="w-3.5 h-3.5 mr-1"/>
-                                        编辑
+                                            className="h-8 text-gray-500 hover:text-emerald-600" asChild>
+                                        <Link to="/media/$shortToken/edit" params={{shortToken: item.short_token || ''}}>
+                                            <Edit className="w-3.5 h-3.5 mr-1"/>
+                                            编辑
+                                        </Link>
                                     </Button>
                                     <Button
                                         variant="ghost"

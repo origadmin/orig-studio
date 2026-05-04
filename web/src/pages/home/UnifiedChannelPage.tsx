@@ -1,5 +1,6 @@
-import React, {useMemo} from 'react';
-import {useLocation, useNavigate} from '@tanstack/react-router';
+import React, {useMemo, useState} from 'react';
+import {useLocation, useNavigate, useParams} from '@tanstack/react-router';
+import {useTranslation} from 'react-i18next';
 import {useAuth} from '@/hooks/useAuth';
 import {
     useChannelByToken,
@@ -7,25 +8,23 @@ import {
     useMyChannel,
     useSubscriptionStatus,
 } from '@/hooks/queries';
-import type {ChannelDetail} from '@/lib/api/channel';
+import {type ChannelDetail} from '@/lib/api/channel';
 import ChannelLayout from '@/components/channel/ChannelLayout';
 import ChannelSkeleton from '@/components/channel/ChannelSkeleton';
 import ChannelNotFound from '@/components/channel/ChannelNotFound';
+import {CreateChannelDialog} from '@/components/channel/CreateChannelDialog';
+import {Button} from '@/components/ui/button';
+import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 
-/**
- * UnifiedChannelPage: Handles three routing modes
- *   /@{handle}      - @username query mode (two-step)
- *   /c/{token}      - short_token path mode (RESTful, recommended)
- *   /channel/{token} - short_token path mode (alternative)
- *   /me/channel      - my channel (requires auth)
- */
-const UnifiedChannelPage: React.FC = () => {
+const ChannelPage: React.FC = () => {
+    const {t} = useTranslation();
     const location = useLocation();
     const pathname = location.pathname;
+    const params = useParams({strict: false});
     const navigate = useNavigate();
     const {user, isAuthenticated} = useAuth();
+    const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
-    // Parse routing mode from pathname
     let handle: string | undefined;
     let token: string | undefined;
 
@@ -37,34 +36,29 @@ const UnifiedChannelPage: React.FC = () => {
         token = pathname.slice(9);
     }
 
-    const isFromMeChannel = useMemo(() => {
-        return !handle && !token;
-    }, [handle, token]);
+    const isFromMeChannel = !token && !handle;
 
-    // Fetch channel data using TanStack Query based on routing mode
-    const tokenQuery = useChannelByToken(token || null);
     const handleQuery = useChannelByHandle(handle || null);
+    const tokenQuery = useChannelByToken(token || null);
     const myChannelQuery = useMyChannel(isFromMeChannel && isAuthenticated);
 
-    // Determine which query result to use
-    const activeQuery = token
-        ? tokenQuery
-        : handle
-            ? handleQuery
+    const activeQuery = handle
+        ? handleQuery
+        : token
+            ? tokenQuery
             : myChannelQuery;
 
     const channel = activeQuery.data as ChannelDetail | undefined;
     const loading = activeQuery.isLoading;
     const error = activeQuery.error;
 
-    // Fetch subscription status when channel is loaded and user is not the owner
-    const channelToken = channel?.short_token || null;
     const isOwner = useMemo(() => {
         if (!user || !channel) return false;
         if (isFromMeChannel) return true;
-        return String(user.id) === String(channel.owner_id) || String(user.id) === String(channel.user_id);
+        return String(user.id) === String(channel.user_id);
     }, [user, channel, isFromMeChannel]);
 
+    const channelToken = channel?.short_token || null;
     const subscriptionQuery = useSubscriptionStatus(
         channelToken && !isOwner && isAuthenticated ? channelToken : null
     );
@@ -74,14 +68,60 @@ const UnifiedChannelPage: React.FC = () => {
     }
 
     if (error || !channel) {
-        const errorMessage = error
-            ? (error as any)?.response?.data?.message || (error as Error).message || 'Failed to load channel'
-            : isFromMeChannel && !isAuthenticated
-                ? 'Please log in first'
-                : 'Channel not found';
+        if (isFromMeChannel && !isAuthenticated) {
+            return <ChannelNotFound message={t('channel.login_required')} onBack={() => navigate({to: '/'})}/>;
+        }
+        if (isFromMeChannel) {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 p-8">
+                    <Avatar className="h-24 w-24">
+                        <AvatarImage src={user?.avatarUrl} alt={user?.username}/>
+                        <AvatarFallback>{user?.username?.charAt(0)?.toUpperCase() || '?'}</AvatarFallback>
+                    </Avatar>
+                    <div className="text-center">
+                        <h1 className="text-2xl font-bold">{user?.username}</h1>
+                    </div>
+                    <p className="text-muted-foreground text-center max-w-md">
+                        {t('channel.profile.no_channel_self')}
+                    </p>
+                    <Button onClick={() => setCreateDialogOpen(true)} size="lg">
+                        {t('channel.create.title')}
+                    </Button>
+                    <CreateChannelDialog
+                        open={createDialogOpen}
+                        onOpenChange={setCreateDialogOpen}
+                        onSuccess={({handle: newHandle, short_token: newToken}) => {
+                            if (newToken) {
+                                navigate({to: '/c/$id', params: {id: newToken}});
+                            } else if (newHandle) {
+                                navigate({to: '/$handle', params: {handle: `@${newHandle}`}});
+                            } else {
+                                window.location.reload();
+                            }
+                        }}
+                    />
+                </div>
+            );
+        }
+        if (handle) {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 p-8">
+                    <Avatar className="h-24 w-24">
+                        <AvatarFallback>{handle.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="text-center">
+                        <h1 className="text-2xl font-bold">{handle}</h1>
+                        <p className="text-sm text-muted-foreground mt-1">@{handle}</p>
+                    </div>
+                    <p className="text-muted-foreground text-center max-w-md">
+                        {t('channel.profile.no_channel_other', {name: handle})}
+                    </p>
+                </div>
+            );
+        }
         return (
             <ChannelNotFound
-                message={errorMessage}
+                message={error ? (error as any)?.response?.data?.message || (error as Error).message || 'Failed to load channel' : t('channel.not_found')}
                 onBack={() => navigate({to: '/'})}
             />
         );
@@ -98,4 +138,4 @@ const UnifiedChannelPage: React.FC = () => {
     );
 };
 
-export default UnifiedChannelPage;
+export default ChannelPage;

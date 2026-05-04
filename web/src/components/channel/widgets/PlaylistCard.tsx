@@ -1,5 +1,6 @@
 import React from 'react';
 import {useNavigate} from '@tanstack/react-router';
+import {useTranslation} from 'react-i18next';
 import {ListVideo, Clock, MoreVertical, Play, Pencil, Trash2} from 'lucide-react';
 import {
     DropdownMenu,
@@ -24,6 +25,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
     onDelete,
 }) => {
     const navigate = useNavigate();
+    const {t} = useTranslation();
 
     const displayName = playlist.title || playlist.name || 'Untitled Playlist';
     const videoCount = playlist.video_count || playlist.media_count || 0;
@@ -50,7 +52,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
     return (
         <div
             className="group cursor-pointer border rounded-lg hover:border-primary/30 hover:shadow-md transition-all bg-card overflow-hidden"
-            onClick={() => navigate({to: '/me/playlists'})}
+            onClick={() => navigate({to: '/playlist/$token', params: {token: playlist.short_token || playlist.id}})}
         >
             {/* Cover image grid */}
             <div className="relative aspect-video overflow-hidden">
@@ -97,7 +99,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
                     <div className="px-3 py-1.5 bg-black/70 rounded-full text-white text-xs font-medium flex items-center gap-1.5 backdrop-blur-sm">
                         <Play className="w-3.5 h-3.5 fill-white"/>
-                        Play all
+                        {t('channel.playAll')}
                     </div>
                 </div>
             </div>
@@ -125,7 +127,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
                                     onEdit?.(playlist.id);
                                 }}>
                                     <Pencil className="h-4 w-4 mr-2"/>
-                                    Edit
+                                    {t('common.edit')}
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator/>
                                 <DropdownMenuItem
@@ -136,7 +138,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
                                     }}
                                 >
                                     <Trash2 className="h-4 w-4 mr-2"/>
-                                    Delete
+                                    {t('common.delete')}
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -146,7 +148,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
                 <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                         <ListVideo className="w-3 h-3"/>
-                        {videoCount} {videoCount === 1 ? 'video' : 'videos'}
+                        {videoCount} {t('common.videos')}
                     </span>
                     {playlist.update_time && (
                         <span className="flex items-center gap-1">

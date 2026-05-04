@@ -12,23 +12,40 @@ import (
 
 	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/infra/auth"
+	"origadmin/application/origcms/internal/helpers/hashtag"
 	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/server"
 	"origadmin/application/origcms/internal/features/content/biz"
+	systembiz "origadmin/application/origcms/internal/features/system/biz"
+	systemservice "origadmin/application/origcms/internal/features/system/service"
 )
 
 type ArticleHandler struct {
-	uc  *biz.ArticleUseCase
-	jwt *auth.Manager
+	uc        *biz.ArticleUseCase
+	jwt       *auth.Manager
+	settingUC *systembiz.SettingUseCase
 }
 
-func NewArticleHandler(uc *biz.ArticleUseCase, jwt *auth.Manager) *ArticleHandler {
-	return &ArticleHandler{uc: uc, jwt: jwt}
+func NewArticleHandler(uc *biz.ArticleUseCase, jwt *auth.Manager, settingUC *systembiz.SettingUseCase) *ArticleHandler {
+	return &ArticleHandler{uc: uc, jwt: jwt, settingUC: settingUC}
+}
+
+// extractUserID extracts the user ID from JWT claims in the Gin context.
+func extractUserID(c *gin.Context) string {
+	if claims, exists := c.Get("claims"); exists {
+		if cl, ok := claims.(*auth.Claims); ok {
+			return cl.GetUserID()
+		}
+	}
+	return ""
 }
 
 func (h *ArticleHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	r := handler.NewGinRouterAdapter(rg)
-	articles := r.Group("/articles")
+	articlesGroup := rg.Group("/articles")
+	articlesGroup.Use(systemservice.ModuleGuard(h.settingUC, "module_articles"))
+
+	r := handler.NewGinRouterAdapter(articlesGroup)
+	articles := r.Group("")
 	{
 		// ================================
 		// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST
@@ -45,6 +62,9 @@ func (h *ArticleHandler) RegisterRoutes(rg *gin.RouterGroup) {
 
 		// GET /articles/latest - Get latest articles
 		articles.GET("/latest", h.listLatestArticles())
+
+		// GET /articles/me - List current user's articles (requires auth)
+		articles.GET("/me", server.WithJWT(h.jwt, h.listMyArticles()))
 
 		// GET /articles/slug/:slug - Get article by slug
 		articles.GET("/slug/:slug", h.getArticleBySlug())
@@ -203,16 +223,16 @@ func (h *ArticleHandler) listLatestArticles() http.HandlerFunc {
 func (h *ArticleHandler) createArticle() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var input struct {
-			Title       string   `json:"title" binding:"required"`
-			Slug        string   `json:"slug"`
-			Content     string   `json:"content" binding:"required"`
-			Summary     string   `json:"summary"`
-			CategoryID  int64    `json:"category_id"`
-			MediaID     string   `json:"media_id"`
-			Thumbnail   string   `json:"thumbnail"`
-			Tags        []string `json:"tags"`
-			Featured    bool     `json:"featured"`
-			PublishedAt string   `json:"published_at"`
+			Title      string   `json:"title" binding:"required"`
+			Slug       string   `json:"slug"`
+			Content    string   `json:"content" binding:"required"`
+			Summary    string   `json:"summary"`
+			CategoryID int64    `json:"category_id"`
+			MediaID    string   `json:"media_id"`
+			Thumbnail  string   `json:"thumbnail"`
+			Tags       []string `json:"tags"`
+			Featured   bool     `json:"featured"`
+			State      string   `json:"state"`
 		}
 
 		if err := c.ShouldBindJSON(&input); err != nil {
@@ -220,20 +240,32 @@ func (h *ArticleHandler) createArticle() gin.HandlerFunc {
 			return
 		}
 
-		userID := ""
-		if claims, exists := c.Get("claims"); exists {
-			if cl, ok := claims.(*auth.Claims); ok {
-				userID = cl.GetUserID()
-			}
+		// Reject archived state from user-side requests
+		if input.State == "archived" {
+			server.Fail(c, server.ErrBadRequest, "invalid state, must be draft or published")
+			return
+		}
+
+		userID := extractUserID(c)
+
+		slug := input.Slug
+		if slug == "" {
+			slug = hashtag.GenerateTagSlug(input.Title)
+		}
+
+		// Determine state: default to draft, only allow draft or published
+		state := "draft"
+		if input.State == "published" {
+			state = "published"
 		}
 
 		article := &biz.Article{
 			Title:      input.Title,
-			Slug:       input.Slug,
+			Slug:       slug,
 			Content:    input.Content,
 			Summary:    input.Summary,
-			State:      "draft",
-			Featured:   input.Featured,
+			State:      state,
+			Featured:   false, // Always false for user-side; ignore user input
 			Tags:       input.Tags,
 			UserID:     userID,
 			CategoryID: input.CategoryID,
@@ -260,17 +292,16 @@ func (h *ArticleHandler) updateArticle() gin.HandlerFunc {
 		}
 
 		var input struct {
-			Title       string   `json:"title"`
-			Slug        string   `json:"slug"`
-			Content     string   `json:"content"`
-			Summary     string   `json:"summary"`
-			CategoryID  int64    `json:"category_id"`
-			MediaID     string   `json:"media_id"`
-			Thumbnail   string   `json:"thumbnail"`
-			Tags        []string `json:"tags"`
-			Featured    bool     `json:"featured"`
-			State       string   `json:"state"`
-			PublishedAt string   `json:"published_at"`
+			Title      string   `json:"title"`
+			Slug       string   `json:"slug"`
+			Content    string   `json:"content"`
+			Summary    string   `json:"summary"`
+			CategoryID int64    `json:"category_id"`
+			MediaID    string   `json:"media_id"`
+			Thumbnail  string   `json:"thumbnail"`
+			Tags       []string `json:"tags"`
+			Featured   bool     `json:"featured"`
+			State      string   `json:"state"`
 		}
 
 		if err := c.ShouldBindJSON(&input); err != nil {
@@ -278,9 +309,22 @@ func (h *ArticleHandler) updateArticle() gin.HandlerFunc {
 			return
 		}
 
+		// Reject archived state from user-side requests
+		if input.State == "archived" {
+			server.Fail(c, server.ErrBadRequest, "invalid state, must be draft or published")
+			return
+		}
+
 		existing, err := h.uc.Get(c.Request.Context(), id)
 		if err != nil {
 			server.Fail(c, server.ErrNotFound, "article not found")
+			return
+		}
+
+		// Ownership check: only the article owner can update
+		userID := extractUserID(c)
+		if existing.UserID != userID {
+			server.Fail(c, server.ErrForbidden, "you can only edit your own articles")
 			return
 		}
 
@@ -306,7 +350,8 @@ func (h *ArticleHandler) updateArticle() gin.HandlerFunc {
 		if input.Tags != nil {
 			existing.Tags = input.Tags
 		}
-		existing.Featured = input.Featured
+		// Preserve existing featured value; ignore user input
+		// existing.Featured is NOT modified from input.Featured
 		if input.State != "" {
 			existing.State = input.State
 		}
@@ -326,6 +371,25 @@ func (h *ArticleHandler) deleteArticle() gin.HandlerFunc {
 		id := c.Param("id")
 		if id == "" {
 			server.Fail(c, server.ErrBadRequest, "article id is required")
+			return
+		}
+
+		article, err := h.uc.Get(c.Request.Context(), id)
+		if err != nil {
+			server.Fail(c, server.ErrNotFound, "article not found")
+			return
+		}
+
+		// Ownership check: only the article owner can delete
+		userID := extractUserID(c)
+		if article.UserID != userID {
+			server.Fail(c, server.ErrForbidden, "you can only delete your own articles")
+			return
+		}
+
+		// Only allow deleting draft articles
+		if article.State == "published" {
+			server.Fail(c, server.ErrBadRequest, "published articles cannot be deleted, please contact admin")
 			return
 		}
 
@@ -355,9 +419,22 @@ func (h *ArticleHandler) updateArticleState() gin.HandlerFunc {
 			return
 		}
 
-		validStates := map[string]bool{"draft": true, "published": true, "archived": true}
-		if !validStates[input.State] {
-			server.Fail(c, server.ErrBadRequest, "invalid state, must be one of: draft, published, archived")
+		// Only allow draft and published states for user-side
+		validUserStates := map[string]bool{"draft": true, "published": true}
+		if !validUserStates[input.State] {
+			server.Fail(c, server.ErrBadRequest, "invalid state, must be draft or published")
+			return
+		}
+
+		// Ownership check: only the article owner can change state
+		article, err := h.uc.Get(c.Request.Context(), id)
+		if err != nil {
+			server.Fail(c, server.ErrNotFound, "article not found")
+			return
+		}
+		userID := extractUserID(c)
+		if article.UserID != userID {
+			server.Fail(c, server.ErrForbidden, "you can only modify your own articles")
 			return
 		}
 
@@ -366,12 +443,49 @@ func (h *ArticleHandler) updateArticleState() gin.HandlerFunc {
 			return
 		}
 
-		article, err := h.uc.Get(c.Request.Context(), id)
+		updated, err := h.uc.Get(c.Request.Context(), id)
 		if err != nil {
 			server.OK(c, nil)
 			return
 		}
 
-		server.OK(c, article)
+		server.OK(c, updated)
+	}
+}
+
+// listMyArticles returns the current authenticated user's articles (all states).
+func (h *ArticleHandler) listMyArticles() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := extractUserID(c)
+		if userID == "" {
+			server.Fail(c, server.ErrBadRequest, "authentication required")
+			return
+		}
+
+		page, _ := strconv.Atoi(c.Query("page"))
+		if page == 0 {
+			page = 1
+		}
+		pageSize, _ := strconv.Atoi(c.Query("page_size"))
+		if pageSize == 0 {
+			pageSize = 20
+		}
+		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+
+		filters := map[string]interface{}{
+			"user_id": userID,
+		}
+
+		if state := c.Query("state"); state != "" {
+			filters["state"] = state
+		}
+
+		items, total, err := h.uc.List(c.Request.Context(), page, pageSize, filters)
+		if err != nil {
+			server.Fail(c, server.ErrInternal, err.Error())
+			return
+		}
+
+		server.Page(c, items, int64(total), page, pageSize)
 	}
 }

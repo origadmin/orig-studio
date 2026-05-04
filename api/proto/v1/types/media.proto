@@ -210,6 +210,31 @@ message Playlist {
   google.protobuf.Timestamp add_date = 12 [json_name = "add_date"];
 }
 
+// ChannelStatus defines the lifecycle status of a Channel.
+enum ChannelStatus {
+  CHANNEL_STATUS_UNSPECIFIED = 0;
+  CHANNEL_STATUS_ACTIVE = 1;
+  CHANNEL_STATUS_INACTIVE = 2;
+  CHANNEL_STATUS_SUSPENDED = 3;
+  CHANNEL_STATUS_PENDING_REVIEW = 4;
+}
+
+// ContentVisibility defines who can see a content item.
+enum ContentVisibility {
+  CONTENT_VISIBILITY_UNSPECIFIED = 0;
+  CONTENT_VISIBILITY_PUBLIC = 1;
+  CONTENT_VISIBILITY_PRIVATE = 2;
+  CONTENT_VISIBILITY_PAID = 3;
+}
+
+// ChannelLink represents an external link.
+message ChannelLink {
+  string type = 1 [json_name = "type"];
+  string platform = 2 [json_name = "platform"];
+  string url = 3 [json_name = "url"];
+  string title = 4 [json_name = "title"];
+}
+
 // Channel is the model entity for Channel.
 message Channel {
   string id = 1 [json_name = "id"];
@@ -217,13 +242,64 @@ message Channel {
   google.protobuf.Timestamp update_time = 3 [json_name = "update_time"];
   string title = 4 [json_name = "title"];
   string description = 5 [json_name = "description"];
-  string banner_logo = 6 [json_name = "banner_logo"];
+  string banner_logo = 6 [json_name = "banner_logo"];     // DEPRECATED, use banner
   string user_id = 7 [json_name = "user_id"];
   Privacy privacy = 8 [json_name = "privacy"];
   int64 subscriber_count = 9 [json_name = "subscriber_count"];
   int64 media_count = 10 [json_name = "media_count"];
   string short_token = 11 [json_name = "short_token"];
-  google.protobuf.Timestamp add_date = 12 [json_name = "add_date"];
+  google.protobuf.Timestamp add_date = 12 [json_name = "add_date"]; // DEPRECATED
+
+  // NEW FIELDS (start from field number 20 to reserve space)
+  string name = 20 [json_name = "name"];
+  string slug = 21 [json_name = "slug"];
+  string handle = 22 [json_name = "handle"];
+  string avatar = 23 [json_name = "avatar"];
+  string banner = 24 [json_name = "banner"];
+  ChannelStatus status = 25 [json_name = "status"];
+  // NOTE: is_default (field 26) REMOVED in v2 -- per A009 no default channel
+  bool is_verified = 27 [json_name = "is_verified"];
+  repeated string tags = 28 [json_name = "tags"];
+  int64 category_id = 29 [json_name = "category_id"];
+  int32 article_count = 30 [json_name = "article_count"];
+  int64 total_views = 31 [json_name = "total_views"];
+  repeated ChannelLink links = 32 [json_name = "links"];
+
+  // Edge data
+  User user = 50 [json_name = "user"];
+  Category category = 51 [json_name = "category"];
+
+  // View context (returned by single-channel GET, not stored in DB)
+  bool is_owner = 60 [json_name = "is_owner"];
+  bool is_subscribed = 61 [json_name = "is_subscribed"];
+}
+
+// HandleResolution is the response for /@username resolution.
+message HandleResolution {
+  enum ResolutionType {
+    RESOLUTION_TYPE_UNSPECIFIED = 0;
+    RESOLUTION_TYPE_CHANNEL = 1;
+    RESOLUTION_TYPE_USER = 2;
+    RESOLUTION_TYPE_NOT_FOUND = 3;
+  }
+  ResolutionType type = 1 [json_name = "type"];
+  Channel channel = 2 [json_name = "channel"];  // Set if type=CHANNEL
+  User user = 3 [json_name = "user"];            // Set if type=USER
+}
+
+// ChannelLimits represents channel creation limits for a user.
+message ChannelLimits {
+  int32 max_channels = 1 [json_name = "max_channels"];     // -1 = unlimited
+  int32 current_count = 2 [json_name = "current_count"];
+  bool can_create = 3 [json_name = "can_create"];
+}
+
+// ContentVisibilityCounts represents counts by visibility level.
+message ContentVisibilityCounts {
+  int32 public_count = 1 [json_name = "public_count"];
+  int32 private_count = 2 [json_name = "private_count"];
+  int32 paid_count = 3 [json_name = "paid_count"];
+  int32 total_count = 4 [json_name = "total_count"];
 }
 
 // Subtitle is the model entity for Subtitle.
@@ -261,15 +337,29 @@ message MediaMetadata {
 }
 
 // HistoryItem is the model entity for watch history.
+// BREAKING CHANGE from previous version:
+//   - media_id -> content_id (supports multi-content-type)
+//   - progress -> progress_seconds (clarified unit)
+//   - duration -> duration_seconds (clarified unit)
+//   - added content_type field
 message HistoryItem {
   string id = 1 [json_name = "id"];
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
   string user_id = 3 [json_name = "user_id"];
-  string media_id = 4 [json_name = "media_id"];
-  int32 progress = 5 [json_name = "progress"];
-  int32 duration = 6 [json_name = "duration"];
+  string content_id = 4 [json_name = "content_id"];            // RENAMED from media_id
+  int32 progress_seconds = 5 [json_name = "progress_seconds"]; // RENAMED from progress
+  int32 duration_seconds = 6 [json_name = "duration_seconds"]; // RENAMED from duration
   bool is_finished = 7 [json_name = "is_finished"];
   google.protobuf.Timestamp last_watched_at = 8 [json_name = "last_watched_at"];
+  ContentType content_type = 9 [json_name = "content_type"];   // NEW
+}
+
+// ContentType defines the type of content for history tracking.
+enum ContentType {
+  CONTENT_TYPE_UNSPECIFIED = 0;
+  CONTENT_TYPE_VIDEO = 1;
+  CONTENT_TYPE_ARTICLE = 2;
+  CONTENT_TYPE_AUDIO = 3;
 }
 
 // Review is the model entity for content review.

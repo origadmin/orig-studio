@@ -9,8 +9,8 @@ import (
 
 func TestDefaultSettings(t *testing.T) {
 	defaults := DefaultSettings()
-	if len(defaults) != 21 {
-		t.Fatalf("expected 21 default settings, got %d", len(defaults))
+	if len(defaults) != 25 {
+		t.Fatalf("expected 25 default settings, got %d", len(defaults))
 	}
 
 	keys := make(map[string]bool)
@@ -33,6 +33,7 @@ func TestDefaultSettingsCategories(t *testing.T) {
 		"upload":  0,
 		"review":  0,
 		"email":   0,
+		"module":  0,
 	}
 	for _, s := range defaults {
 		cat := string(s.Category)
@@ -53,6 +54,9 @@ func TestDefaultSettingsCategories(t *testing.T) {
 	}
 	if categories["email"] < 1 {
 		t.Errorf("expected at least 1 email setting, got %d", categories["email"])
+	}
+	if categories["module"] < 1 {
+		t.Errorf("expected at least 1 module setting, got %d", categories["module"])
 	}
 }
 
@@ -80,6 +84,9 @@ func TestDefaultSettingsTypes(t *testing.T) {
 		"allow_upload":       true,
 		"auto_approve":       true,
 		"require_review":     true,
+		"module_articles":    true,
+		"module_videos":      true,
+		"module_music":       true,
 	}
 	intKeys := map[string]bool{
 		"max_upload_size_video": true,

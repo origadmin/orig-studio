@@ -16,6 +16,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/groupmember"
+	"origadmin/application/origcms/internal/data/entity/history"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediacategory"
@@ -106,6 +107,7 @@ func checkColumn(t, c string) error {
 			encodingtask.Table:    encodingtask.ValidColumn,
 			favorite.Table:        favorite.ValidColumn,
 			groupmember.Table:     groupmember.ValidColumn,
+			history.Table:         history.ValidColumn,
 			like.Table:            like.ValidColumn,
 			media.Table:           media.ValidColumn,
 			mediacategory.Table:   mediacategory.ValidColumn,

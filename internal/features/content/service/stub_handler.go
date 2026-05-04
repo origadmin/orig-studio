@@ -53,12 +53,10 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	}
 
 	// ================================
-	// 3. Portal / Config
+	// 3. Portal / Config — MOVED to SystemHandler
+	// SystemHandler.getPortalConfig() provides real implementation
+	// reading from settings. Stub removed to avoid route conflict.
 	// ================================
-	portal := rg.Group("/portal")
-	{
-		portal.GET("/config", h.stubPortalConfig())
-	}
 
 	// ================================
 	// 4. Admin Nav Items
@@ -112,14 +110,9 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		medias.GET("/:id/stream", h.stubMediaStream())
 		medias.GET("/:id/thumbnail", h.stubMediaThumbnail())
 
-		// Likes (plural path aliases)
-		medias.GET("/:id/likes", h.stubMediaLikes())
-		medias.POST("/:id/likes", server.JWTMiddleware(h.jwt), h.stubMediaLikeToggle())
-		medias.DELETE("/:id/likes", server.JWTMiddleware(h.jwt), h.stubMediaLikeRemove())
-
-		// Favorites (plural path aliases)
-		medias.GET("/:id/favorites", h.stubMediaFavorites())
-		medias.POST("/:id/favorites", server.JWTMiddleware(h.jwt), h.stubMediaFavoriteToggle())
+		// NOTE: Likes/Favorites plural paths are now handled by MediaHandler
+		// (POST /:id/likes, GET /:id/likes, DELETE /:id/likes,
+		//  POST /:id/favorites, GET /:id/favorites, DELETE /:id/favorites)
 
 		// Shares
 		medias.GET("/:id/shares", h.stubMediaShares())
@@ -166,15 +159,10 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	}
 
 	// ================================
-	// 10. Admin Settings per-key/category
+	// 10. Admin Settings — MOVED to AdminHandler
+	// AdminHandler provides real GET/PUT /admin/settings implementation.
+	// Per-key routes removed to avoid route conflict with AdminHandler.
 	// ================================
-	adminSettings := rg.Group("/admin/settings")
-	adminSettings.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
-	{
-		adminSettings.GET("/:category", h.stubAdminSettingsCategory())
-		adminSettings.PUT("/:key", h.stubAdminSettingsUpdateKey())
-		adminSettings.DELETE("/:key", h.stubAdminSettingsDeleteKey())
-	}
 
 	// ================================
 	// 11. Admin Channels POST
@@ -211,15 +199,11 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	}
 
 	// ================================
-	// 15. Playlist detail/update/delete/reorder
+	// 15. Playlist — MOVED to PlaylistHandler + MeHandler + AdminHandler
+	// PlaylistHandler: GET /playlists, GET /playlists/:token (portal, short_token)
+	// MeHandler: GET/POST/PATCH/DELETE /me/playlists (user CRUD)
+	// AdminHandler: GET/POST/PUT/DELETE /admin/playlists (admin CRUD)
 	// ================================
-	playlists := rg.Group("/playlists")
-	{
-		playlists.GET("/:id", h.stubPlaylistGet())
-		playlists.PUT("/:id", server.JWTMiddleware(h.jwt), h.stubPlaylistUpdate())
-		playlists.DELETE("/:id", server.JWTMiddleware(h.jwt), h.stubPlaylistDelete())
-		playlists.PUT("/:id/reorder", server.JWTMiddleware(h.jwt), h.stubPlaylistReorder())
-	}
 
 	// ================================
 	// 16. Encoding status/events (public aliases)
@@ -348,25 +332,6 @@ func (h *StubHandler) stubReviewLogs() gin.HandlerFunc {
 			"items": []interface{}{},
 			"total": 0,
 		}})
-	}
-}
-
-// ==================== Portal Stubs ====================
-
-func (h *StubHandler) stubPortalConfig() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{
-			"code":    0,
-			"message": "ok",
-			"data": gin.H{
-				"site_name":        "OrigCMS",
-				"site_description": "",
-				"logo":             "",
-				"favicon":          "",
-				"primary_color":    "#1890ff",
-				"footer_text":      "",
-			},
-		})
 	}
 }
 
@@ -719,32 +684,6 @@ func (h *StubHandler) stubMediaShares() gin.HandlerFunc {
 func (h *StubHandler) stubMediaShareCreate() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		server.OK(c, gin.H{"code": 0, "message": "shared"})
-	}
-}
-
-// ==================== Playlist Detail/Update/Delete/Reorder Stubs ====================
-
-func (h *StubHandler) stubPlaylistGet() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": nil})
-	}
-}
-
-func (h *StubHandler) stubPlaylistUpdate() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "updated", "data": nil})
-	}
-}
-
-func (h *StubHandler) stubPlaylistDelete() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "deleted"})
-	}
-}
-
-func (h *StubHandler) stubPlaylistReorder() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "reordered"})
 	}
 }
 

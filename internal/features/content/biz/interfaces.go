@@ -13,6 +13,7 @@ type MediaUseCaseInterface interface {
 	UpdateLikeCount(ctx context.Context, id string, delta int) error
 	UpdateDislikeCount(ctx context.Context, id string, delta int) error
 	UpdateFavoriteCount(ctx context.Context, id string, delta int) error
+	ResolveToID(ctx context.Context, shortToken string) (string, error)
 }
 
 // MediaInfo is a minimal media record for dependency injection and feeds.

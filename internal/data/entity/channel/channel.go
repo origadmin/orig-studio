@@ -17,20 +17,44 @@ const (
 	FieldID = "id"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
 	// FieldTitle holds the string denoting the title field in the database.
 	FieldTitle = "title"
-	// FieldDescription holds the string denoting the description field in the database.
-	FieldDescription = "description"
+	// FieldSlug holds the string denoting the slug field in the database.
+	FieldSlug = "slug"
+	// FieldHandle holds the string denoting the handle field in the database.
+	FieldHandle = "handle"
 	// FieldShortToken holds the string denoting the short_token field in the database.
 	FieldShortToken = "short_token"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
+	// FieldAvatar holds the string denoting the avatar field in the database.
+	FieldAvatar = "avatar"
+	// FieldBanner holds the string denoting the banner field in the database.
+	FieldBanner = "banner"
 	// FieldBannerLogo holds the string denoting the banner_logo field in the database.
 	FieldBannerLogo = "banner_logo"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 	// FieldPrivacy holds the string denoting the privacy field in the database.
 	FieldPrivacy = "privacy"
+	// FieldTags holds the string denoting the tags field in the database.
+	FieldTags = "tags"
+	// FieldCategoryID holds the string denoting the category_id field in the database.
+	FieldCategoryID = "category_id"
+	// FieldIsVerified holds the string denoting the is_verified field in the database.
+	FieldIsVerified = "is_verified"
 	// FieldSubscriberCount holds the string denoting the subscriber_count field in the database.
 	FieldSubscriberCount = "subscriber_count"
 	// FieldMediaCount holds the string denoting the media_count field in the database.
 	FieldMediaCount = "media_count"
+	// FieldArticleCount holds the string denoting the article_count field in the database.
+	FieldArticleCount = "article_count"
+	// FieldTotalViews holds the string denoting the total_views field in the database.
+	FieldTotalViews = "total_views"
+	// FieldLinks holds the string denoting the links field in the database.
+	FieldLinks = "links"
 	// FieldAddDate holds the string denoting the add_date field in the database.
 	FieldAddDate = "add_date"
 	// FieldCreateTime holds the string denoting the create_time field in the database.
@@ -41,6 +65,10 @@ const (
 	EdgeUser = "user"
 	// EdgeMedia holds the string denoting the media edge name in mutations.
 	EdgeMedia = "media"
+	// EdgeArticles holds the string denoting the articles edge name in mutations.
+	EdgeArticles = "articles"
+	// EdgeCategory holds the string denoting the category edge name in mutations.
+	EdgeCategory = "category"
 	// Table holds the table name of the channel in the database.
 	Table = "user_channels"
 	// UserTable is the table that holds the user relation/edge.
@@ -57,19 +85,45 @@ const (
 	MediaInverseTable = "content_media"
 	// MediaColumn is the table column denoting the media relation/edge.
 	MediaColumn = "channel_id"
+	// ArticlesTable is the table that holds the articles relation/edge.
+	ArticlesTable = "content_articles"
+	// ArticlesInverseTable is the table name for the Article entity.
+	// It exists in this package in order to avoid circular dependency with the "article" package.
+	ArticlesInverseTable = "content_articles"
+	// ArticlesColumn is the table column denoting the articles relation/edge.
+	ArticlesColumn = "channel_articles"
+	// CategoryTable is the table that holds the category relation/edge.
+	CategoryTable = "user_channels"
+	// CategoryInverseTable is the table name for the Category entity.
+	// It exists in this package in order to avoid circular dependency with the "category" package.
+	CategoryInverseTable = "content_categories"
+	// CategoryColumn is the table column denoting the category relation/edge.
+	CategoryColumn = "category_id"
 )
 
 // Columns holds all SQL columns for channel fields.
 var Columns = []string{
 	FieldID,
 	FieldUserID,
+	FieldName,
 	FieldTitle,
-	FieldDescription,
+	FieldSlug,
+	FieldHandle,
 	FieldShortToken,
+	FieldDescription,
+	FieldAvatar,
+	FieldBanner,
 	FieldBannerLogo,
+	FieldStatus,
 	FieldPrivacy,
+	FieldTags,
+	FieldCategoryID,
+	FieldIsVerified,
 	FieldSubscriberCount,
 	FieldMediaCount,
+	FieldArticleCount,
+	FieldTotalViews,
+	FieldLinks,
 	FieldAddDate,
 	FieldCreateTime,
 	FieldUpdateTime,
@@ -86,18 +140,34 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// NameValidator is a validator for the "name" field. It is called by the builders before save.
+	NameValidator func(string) error
 	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	TitleValidator func(string) error
+	// SlugValidator is a validator for the "slug" field. It is called by the builders before save.
+	SlugValidator func(string) error
+	// HandleValidator is a validator for the "handle" field. It is called by the builders before save.
+	HandleValidator func(string) error
 	// DefaultShortToken holds the default value on creation for the "short_token" field.
 	DefaultShortToken func() string
 	// ShortTokenValidator is a validator for the "short_token" field. It is called by the builders before save.
 	ShortTokenValidator func(string) error
+	// AvatarValidator is a validator for the "avatar" field. It is called by the builders before save.
+	AvatarValidator func(string) error
+	// BannerValidator is a validator for the "banner" field. It is called by the builders before save.
+	BannerValidator func(string) error
 	// BannerLogoValidator is a validator for the "banner_logo" field. It is called by the builders before save.
 	BannerLogoValidator func(string) error
+	// DefaultIsVerified holds the default value on creation for the "is_verified" field.
+	DefaultIsVerified bool
 	// DefaultSubscriberCount holds the default value on creation for the "subscriber_count" field.
 	DefaultSubscriberCount int64
 	// DefaultMediaCount holds the default value on creation for the "media_count" field.
 	DefaultMediaCount int
+	// DefaultArticleCount holds the default value on creation for the "article_count" field.
+	DefaultArticleCount int
+	// DefaultTotalViews holds the default value on creation for the "total_views" field.
+	DefaultTotalViews int64
 	// DefaultAddDate holds the default value on creation for the "add_date" field.
 	DefaultAddDate func() time.Time
 	// DefaultCreateTime holds the default value on creation for the "create_time" field.
@@ -111,6 +181,34 @@ var (
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
+
+// Status defines the type for the "status" enum field.
+type Status string
+
+// StatusACTIVE is the default value of the Status enum.
+const DefaultStatus = StatusACTIVE
+
+// Status values.
+const (
+	StatusACTIVE         Status = "ACTIVE"
+	StatusINACTIVE       Status = "INACTIVE"
+	StatusSUSPENDED      Status = "SUSPENDED"
+	StatusPENDING_REVIEW Status = "PENDING_REVIEW"
+)
+
+func (s Status) String() string {
+	return string(s)
+}
+
+// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
+func StatusValidator(s Status) error {
+	switch s {
+	case StatusACTIVE, StatusINACTIVE, StatusSUSPENDED, StatusPENDING_REVIEW:
+		return nil
+	default:
+		return fmt.Errorf("channel: invalid enum value for status field: %q", s)
+	}
+}
 
 // Privacy defines the type for the "privacy" enum field.
 type Privacy string
@@ -154,14 +252,24 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
 // ByTitle orders the results by the title field.
 func ByTitle(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTitle, opts...).ToFunc()
 }
 
-// ByDescription orders the results by the description field.
-func ByDescription(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+// BySlug orders the results by the slug field.
+func BySlug(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSlug, opts...).ToFunc()
+}
+
+// ByHandle orders the results by the handle field.
+func ByHandle(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHandle, opts...).ToFunc()
 }
 
 // ByShortToken orders the results by the short_token field.
@@ -169,14 +277,44 @@ func ByShortToken(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldShortToken, opts...).ToFunc()
 }
 
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByAvatar orders the results by the avatar field.
+func ByAvatar(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAvatar, opts...).ToFunc()
+}
+
+// ByBanner orders the results by the banner field.
+func ByBanner(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBanner, opts...).ToFunc()
+}
+
 // ByBannerLogo orders the results by the banner_logo field.
 func ByBannerLogo(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBannerLogo, opts...).ToFunc()
 }
 
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
 // ByPrivacy orders the results by the privacy field.
 func ByPrivacy(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPrivacy, opts...).ToFunc()
+}
+
+// ByCategoryID orders the results by the category_id field.
+func ByCategoryID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCategoryID, opts...).ToFunc()
+}
+
+// ByIsVerified orders the results by the is_verified field.
+func ByIsVerified(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsVerified, opts...).ToFunc()
 }
 
 // BySubscriberCount orders the results by the subscriber_count field.
@@ -187,6 +325,16 @@ func BySubscriberCount(opts ...sql.OrderTermOption) OrderOption {
 // ByMediaCountField orders the results by the media_count field.
 func ByMediaCountField(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMediaCount, opts...).ToFunc()
+}
+
+// ByArticleCount orders the results by the article_count field.
+func ByArticleCount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldArticleCount, opts...).ToFunc()
+}
+
+// ByTotalViews orders the results by the total_views field.
+func ByTotalViews(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTotalViews, opts...).ToFunc()
 }
 
 // ByAddDate orders the results by the add_date field.
@@ -224,6 +372,27 @@ func ByMedia(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newMediaStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByArticlesCount orders the results by articles count.
+func ByArticlesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newArticlesStep(), opts...)
+	}
+}
+
+// ByArticles orders the results by articles terms.
+func ByArticles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newArticlesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCategoryField orders the results by category field.
+func ByCategoryField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCategoryStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -236,5 +405,19 @@ func newMediaStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MediaInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, MediaTable, MediaColumn),
+	)
+}
+func newArticlesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ArticlesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ArticlesTable, ArticlesColumn),
+	)
+}
+func newCategoryStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CategoryInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, CategoryTable, CategoryColumn),
 	)
 }

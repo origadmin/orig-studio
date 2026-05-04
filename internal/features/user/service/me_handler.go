@@ -22,6 +22,7 @@ type MeHandler struct {
 	userUC         *userbiz.UserUseCase
 	likeFavoriteUC *contentbiz.LikeFavoriteUseCase
 	playlistUC     *contentbiz.PlaylistChannelUseCase
+	historyUC      *contentbiz.HistoryUseCase
 	jwt            *auth.Manager
 }
 
@@ -30,12 +31,14 @@ func NewMeHandler(
 	userUC *userbiz.UserUseCase,
 	likeFavoriteUC *contentbiz.LikeFavoriteUseCase,
 	playlistUC *contentbiz.PlaylistChannelUseCase,
+	historyUC *contentbiz.HistoryUseCase,
 	jwt *auth.Manager,
 ) *MeHandler {
 	return &MeHandler{
 		userUC:         userUC,
 		likeFavoriteUC: likeFavoriteUC,
 		playlistUC:     playlistUC,
+		historyUC:      historyUC,
 		jwt:            jwt,
 	}
 }
@@ -66,9 +69,16 @@ func (h *MeHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		me.GET("/likes", h.GetLikes)
 		me.GET("/subscriptions", h.GetSubscriptions)
 		me.GET("/followers", h.GetFollowers)
+
+		// ================================
+		// 3. WATCH HISTORY (independent from favorites/likes)
+		// ================================
 		me.GET("/history", h.GetHistory)
+		me.POST("/history", h.UpsertHistory)
+		me.POST("/history/sync", h.SyncHistory)
 		me.DELETE("/history", h.ClearHistory)
 		me.DELETE("/history/:id", h.RemoveHistoryItem)
+
 		me.GET("/stats", h.GetStats)
 	}
 }
@@ -196,6 +206,7 @@ func (h *MeHandler) CreatePlaylist(c *gin.Context) {
 	var input struct {
 		Title       string `json:"title"`
 		Description string `json:"description"`
+		IsPublic    *bool  `json:"is_public"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		server.Fail(c, server.ErrBadRequest, err.Error())
@@ -211,10 +222,19 @@ func (h *MeHandler) CreatePlaylist(c *gin.Context) {
 		input.Description = " "
 	}
 
+	// Default to public if not specified (fixes B099: playlists were created as
+	// PRIVATE by default because Go bool zero-value is false, then the public
+	// detail endpoint /playlists/:token couldn't verify ownership without JWT).
+	isPublic := true
+	if input.IsPublic != nil {
+		isPublic = *input.IsPublic
+	}
+
 	p, err := h.playlistUC.CreatePlaylist(c.Request.Context(), &contentbiz.Playlist{
 		Title:       input.Title,
 		Description: input.Description,
 		UserID:      claims.GetUserID(),
+		IsPublic:    isPublic,
 	})
 	if err != nil {
 		_ = c.Error(fmt.Errorf("CreatePlaylist failed: userID=%q title=%q err=%w", claims.GetUserID(), input.Title, err))
@@ -306,7 +326,7 @@ func (h *MeHandler) UpdatePlaylist(c *gin.Context) {
 		return
 	}
 
-	server.OK(c, updated)
+	server.OK(c, gin.H{"playlist": updated})
 }
 
 // DeletePlaylist deletes a playlist owned by the current user.
@@ -361,7 +381,12 @@ func (h *MeHandler) GetFavorites(c *gin.Context) {
 		return
 	}
 
-	favorites, err := h.likeFavoriteUC.ListUserFavorites(c.Request.Context(), claims.GetUserID())
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	// Normalize pagination parameters
+	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+
+	favorites, total, err := h.likeFavoriteUC.ListUserFavoritesPaginated(c.Request.Context(), claims.GetUserID(), page, pageSize)
 	if err != nil {
 		server.Fail(c, server.ErrInternal, err.Error())
 		return
@@ -369,9 +394,9 @@ func (h *MeHandler) GetFavorites(c *gin.Context) {
 
 	server.OK(c, gin.H{
 		"items":     favorites,
-		"total":     len(favorites),
-		"page":      1,
-		"page_size": len(favorites),
+		"total":     total,
+		"page":      page,
+		"page_size": pageSize,
 	})
 }
 
@@ -429,7 +454,8 @@ func (h *MeHandler) GetSubscriptions(c *gin.Context) {
 	})
 }
 
-// GetHistory returns the current user's watch history.
+// GetHistory returns the current user's watch history from the user_history table.
+// This replaces the old implementation that incorrectly used favorites+likes.
 func (h *MeHandler) GetHistory(c *gin.Context) {
 	claims, ok := server.GetClaims(c)
 	if !ok {
@@ -439,58 +465,166 @@ func (h *MeHandler) GetHistory(c *gin.Context) {
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
-	// Normalize pagination parameters
 	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
-	favorites, favErr := h.likeFavoriteUC.ListUserFavorites(c.Request.Context(), claims.GetUserID())
-	if favErr != nil {
-		server.Fail(c, server.ErrInternal, favErr.Error())
+	contentType := c.DefaultQuery("content_type", "")
+
+	items, total, err := h.historyUC.List(c.Request.Context(), claims.GetUserID(), contentType, page, pageSize)
+	if err != nil {
+		server.Fail(c, server.ErrInternal, err.Error())
 		return
-	}
-
-	likes, likeErr := h.likeFavoriteUC.ListUserLikes(c.Request.Context(), claims.GetUserID())
-	if likeErr != nil {
-		server.Fail(c, server.ErrInternal, likeErr.Error())
-		return
-	}
-
-	items := make([]interface{}, 0, len(favorites)+len(likes))
-	for _, f := range favorites {
-		items = append(items, gin.H{
-			"id":         f.ID,
-			"media_id":   f.MediaID,
-			"user_id":    claims.GetUserID(),
-			"progress":   0,
-			"watched_at": f.CreateTime.Format("2006-01-02T15:04:05Z07:00"),
-		})
-	}
-	for _, l := range likes {
-		items = append(items, gin.H{
-			"id":         l.ID,
-			"media_id":   l.MediaID,
-			"user_id":    claims.GetUserID(),
-			"progress":   0,
-			"watched_at": l.CreateTime.Format("2006-01-02T15:04:05Z07:00"),
-		})
-	}
-
-	total := len(items)
-
-	start := (page - 1) * pageSize
-	if start > total {
-		start = total
-	}
-	end := start + pageSize
-	if end > total {
-		end = total
 	}
 
 	server.OK(c, gin.H{
-		"items":     items[start:end],
+		"items":     items,
 		"total":     total,
 		"page":      page,
 		"page_size": pageSize,
 	})
+}
+
+// UpsertHistory creates or updates a history record (progress reporting).
+func (h *MeHandler) UpsertHistory(c *gin.Context) {
+	claims, ok := server.GetClaims(c)
+	if !ok {
+		server.Fail(c, server.ErrUnauthorized, "unauthorized")
+		return
+	}
+
+	var input struct {
+		ContentID       string `json:"content_id" binding:"required"`
+		ContentType     string `json:"content_type" binding:"required"`
+		ProgressSeconds int    `json:"progress_seconds"`
+		DurationSeconds int    `json:"duration_seconds"`
+		Title           string `json:"title"`
+		Thumbnail       string `json:"thumbnail"`
+		ShortToken      string `json:"short_token"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		server.Fail(c, server.ErrBadRequest, err.Error())
+		return
+	}
+
+	if input.ContentID == "" {
+		server.Fail(c, server.ErrBadRequest, "content_id is required")
+		return
+	}
+
+	result, err := h.historyUC.Upsert(c.Request.Context(), &contentbiz.History{
+		UserID:          claims.GetUserID(),
+		ContentID:       input.ContentID,
+		ContentType:     input.ContentType,
+		ProgressSeconds: input.ProgressSeconds,
+		DurationSeconds: input.DurationSeconds,
+		Title:           input.Title,
+		Thumbnail:       input.Thumbnail,
+		ShortToken:      input.ShortToken,
+	})
+	if err != nil {
+		if err.Error() == "invalid content_type: "+input.ContentType {
+			server.Fail(c, server.ErrBadRequest, err.Error())
+			return
+		}
+		server.Fail(c, server.ErrInternal, err.Error())
+		return
+	}
+
+	server.OK(c, gin.H{"item": result})
+}
+
+// SyncHistory batch-syncs history records (login merge).
+func (h *MeHandler) SyncHistory(c *gin.Context) {
+	claims, ok := server.GetClaims(c)
+	if !ok {
+		server.Fail(c, server.ErrUnauthorized, "unauthorized")
+		return
+	}
+
+	var input struct {
+		Items []struct {
+			ContentID       string `json:"content_id"`
+			ContentType     string `json:"content_type"`
+			ProgressSeconds int    `json:"progress_seconds"`
+			DurationSeconds int    `json:"duration_seconds"`
+			IsFinished      bool   `json:"is_finished"`
+			Title           string `json:"title"`
+			Thumbnail       string `json:"thumbnail"`
+			ShortToken      string `json:"short_token"`
+		} `json:"items"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		server.Fail(c, server.ErrBadRequest, err.Error())
+		return
+	}
+
+	items := make([]*contentbiz.History, len(input.Items))
+	for i, item := range input.Items {
+		items[i] = &contentbiz.History{
+			ContentID:       item.ContentID,
+			ContentType:     item.ContentType,
+			ProgressSeconds: item.ProgressSeconds,
+			DurationSeconds: item.DurationSeconds,
+			IsFinished:      item.IsFinished,
+			Title:           item.Title,
+			Thumbnail:       item.Thumbnail,
+			ShortToken:      item.ShortToken,
+		}
+	}
+
+	result, mergedCount, err := h.historyUC.Sync(c.Request.Context(), claims.GetUserID(), items)
+	if err != nil {
+		server.Fail(c, server.ErrInternal, err.Error())
+		return
+	}
+
+	server.OK(c, gin.H{
+		"items":        result,
+		"merged_count": mergedCount,
+	})
+}
+
+// ClearHistory clears all watch history for the current user.
+// This only deletes from the user_history table and does NOT touch favorites or likes.
+func (h *MeHandler) ClearHistory(c *gin.Context) {
+	claims, ok := server.GetClaims(c)
+	if !ok {
+		server.Fail(c, server.ErrUnauthorized, "unauthorized")
+		return
+	}
+
+	deletedCount, err := h.historyUC.ClearAll(c.Request.Context(), claims.GetUserID())
+	if err != nil {
+		server.Fail(c, server.ErrInternal, err.Error())
+		return
+	}
+
+	server.OK(c, gin.H{"deleted_count": deletedCount})
+}
+
+// RemoveHistoryItem removes a single history item by its ID.
+// This only deletes from the user_history table and does NOT touch favorites or likes.
+func (h *MeHandler) RemoveHistoryItem(c *gin.Context) {
+	_, ok := server.GetClaims(c)
+	if !ok {
+		server.Fail(c, server.ErrUnauthorized, "unauthorized")
+		return
+	}
+
+	itemID := c.Param("id")
+	if itemID == "" {
+		server.Fail(c, server.ErrBadRequest, "item id is required")
+		return
+	}
+
+	err := h.historyUC.Remove(c.Request.Context(), itemID)
+	if err != nil {
+		server.Fail(c, server.ErrNotFound, "History item not found")
+		return
+	}
+
+	server.OK(c, gin.H{"message": "History item removed"})
 }
 
 // GetStats returns the current user's statistics.
@@ -522,25 +656,16 @@ func (h *MeHandler) RemoveFavorite(c *gin.Context) {
 		return
 	}
 
-	favorites, err := h.likeFavoriteUC.ListUserFavorites(c.Request.Context(), claims.GetUserID())
-	if err != nil {
+	if err := h.likeFavoriteUC.RemoveFavoriteByID(c.Request.Context(), claims.GetUserID(), favoriteID); err != nil {
+		if err.Error() == "favorite not found" {
+			server.Fail(c, server.ErrNotFound, "Favorite not found")
+			return
+		}
 		server.Fail(c, server.ErrInternal, err.Error())
 		return
 	}
 
-	for _, fav := range favorites {
-		if fav.ID == favoriteID {
-			_, toggleErr := h.likeFavoriteUC.ToggleFavorite(c.Request.Context(), claims.GetUserID(), fav.MediaID)
-			if toggleErr != nil {
-				server.Fail(c, server.ErrInternal, toggleErr.Error())
-				return
-			}
-			server.OK(c, gin.H{"message": "Favorite removed"})
-			return
-		}
-	}
-
-	server.Fail(c, server.ErrNotFound, "Favorite not found")
+	server.OK(c, gin.H{"message": "Favorite removed"})
 }
 
 // GetFollowers returns users who follow the current user.
@@ -589,68 +714,4 @@ func (h *MeHandler) GetFollowers(c *gin.Context) {
 		"page":      page,
 		"page_size": pageSize,
 	})
-}
-
-// ClearHistory clears all watch history for the current user.
-func (h *MeHandler) ClearHistory(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
-	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
-	}
-
-	favorites, favErr := h.likeFavoriteUC.ListUserFavorites(c.Request.Context(), claims.GetUserID())
-	if favErr == nil && len(favorites) > 0 {
-		for _, fav := range favorites {
-			h.likeFavoriteUC.ToggleFavorite(c.Request.Context(), claims.GetUserID(), fav.MediaID)
-		}
-	}
-
-	likes, likeErr := h.likeFavoriteUC.ListUserLikes(c.Request.Context(), claims.GetUserID())
-	if likeErr == nil && len(likes) > 0 {
-		for _, l := range likes {
-			h.likeFavoriteUC.ToggleLike(c.Request.Context(), claims.GetUserID(), l.MediaID, "like")
-		}
-	}
-
-	server.OK(c, gin.H{"message": "History cleared"})
-}
-
-// RemoveHistoryItem removes a single history item by its ID.
-func (h *MeHandler) RemoveHistoryItem(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
-	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
-	}
-
-	itemID := c.Param("id")
-	if itemID == "" {
-		server.Fail(c, server.ErrBadRequest, "item id is required")
-		return
-	}
-
-	favorites, favErr := h.likeFavoriteUC.ListUserFavorites(c.Request.Context(), claims.GetUserID())
-	if favErr == nil {
-		for _, fav := range favorites {
-			if fav.ID == itemID {
-				_, _ = h.likeFavoriteUC.ToggleFavorite(c.Request.Context(), claims.GetUserID(), fav.MediaID)
-				server.OK(c, gin.H{"message": "History item removed"})
-				return
-			}
-		}
-	}
-
-	likes, likeErr := h.likeFavoriteUC.ListUserLikes(c.Request.Context(), claims.GetUserID())
-	if likeErr == nil {
-		for _, l := range likes {
-			if l.ID == itemID {
-				_, _ = h.likeFavoriteUC.ToggleLike(c.Request.Context(), claims.GetUserID(), l.MediaID, "like")
-				server.OK(c, gin.H{"message": "History item removed"})
-				return
-			}
-		}
-	}
-
-	server.Fail(c, server.ErrNotFound, "History item not found")
 }

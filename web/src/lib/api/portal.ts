@@ -104,9 +104,27 @@ export interface PortalConfig {
     };
 }
 
+export interface ModulePortalConfig {
+    modules: {
+        articles: boolean;
+        videos: boolean;
+        music: boolean;
+    };
+    layout: 'video' | 'article' | 'mixed' | 'welcome' | 'doc';
+    site: {
+        site_name: string;
+        site_description: string;
+        allow_registration: boolean;
+        allow_upload: boolean;
+    };
+}
+
 export const portalApi = {
     getConfig: () =>
         api.get<PortalConfig>('/portal/config'),
+
+    getModuleConfig: () =>
+        api.get<ModulePortalConfig>('/portal/config'),
 };
 
 export const adminPortalApi = {

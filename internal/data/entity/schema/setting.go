@@ -21,7 +21,7 @@ func (Setting) Fields() []ent.Field {
 		field.String("key").NotEmpty().Unique().MaxLen(200),
 		field.Text("value").Default(""),
 		field.Enum("type").Values("string", "int", "bool", "json").Default("string"),
-		field.Enum("category").Values("general", "upload", "review", "email").Default("general"),
+		field.Enum("category").Values("general", "upload", "review", "email", "module").Default("general"),
 		field.Text("description").Optional(),
 		field.Bool("is_sensitive").Default(false),
 		field.Text("fallback_value").Optional(),

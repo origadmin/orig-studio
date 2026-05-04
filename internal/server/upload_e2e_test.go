@@ -80,7 +80,7 @@ func TestUploadE2E(t *testing.T) {
 	apiV1 := router.Group("/api/v1")
 
 	uploadHandler := mediaservice.NewUploadHandler(uploadUC, jwtMgr, logger)
-	mediaHandler := mediaservice.NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC, nil, nil, nil, nil)
+	mediaHandler := mediaservice.NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC, nil, nil, nil, nil, nil)
 
 	uploadHandler.RegisterRoutes(apiV1)
 	mediaHandler.RegisterRoutes(apiV1)

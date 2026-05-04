@@ -15,7 +15,6 @@ import (
 	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/data/convpb"
 	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"origadmin/application/origcms/internal/helpers/idutil"
@@ -172,7 +171,9 @@ func (r *userRepo) ListEntities(
 	return users, int32(total), nil
 }
 
-// Create creates a new user and automatically creates a default channel.
+// Create creates a new user.
+// Per A009: registration does NOT auto-create a default channel.
+// Channels are created on-demand when the user wants to publish content.
 func (r *userRepo) Create(
 	ctx context.Context,
 	in *types.User,
@@ -207,19 +208,6 @@ func (r *userRepo) Create(
 		Save(ctx)
 	if err != nil {
 		return nil, err
-	}
-
-	// Create default channel for new user
-	_, err = r.db.Channel.Create().
-		SetID(idutil.GenUUID()).
-		SetUserID(u.ID).
-		SetTitle(u.Username + "'s Channel").
-		SetDescription("Default channel for " + u.Username).
-		SetPrivacy(channel.PrivacyPUBLIC).
-		Save(ctx)
-	if err != nil {
-		// Log error but don't affect user creation
-		slog.Error("Failed to create default channel for user", "user_id", u.ID, "error", err)
 	}
 
 	return convertUserToProto(u), nil

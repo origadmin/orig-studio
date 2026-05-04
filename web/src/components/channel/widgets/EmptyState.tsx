@@ -2,10 +2,10 @@ import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from '@tanstack/react-router';
 import {Button} from '@/components/ui/button';
-import {Upload, FileVideo, ListVideo, MessageSquare, Info} from 'lucide-react';
+import {Upload, FileVideo, ListVideo, MessageSquare, Info, Tv, FileText, UserCheck, Heart, History} from 'lucide-react';
 
 interface EmptyStateProps {
-    type: 'videos' | 'playlists' | 'community' | 'home';
+    type: 'videos' | 'playlists' | 'community' | 'home' | 'channels' | 'articles' | 'followers' | 'favorites' | 'history';
     isOwner?: boolean;
     channelId?: string;
 }
@@ -64,6 +64,41 @@ const EmptyState: React.FC<EmptyStateProps> = ({type, isOwner = false, channelId
                     {t('channel.startCreating')}
                 </Button>
             ) : null,
+        },
+        channels: {
+            icon: <Tv className="w-20 h-20"/>,
+            title: t('profile.noChannels') || 'No channels yet',
+            desc: isOwner ? (t('profile.noChannelsDescOwner') || 'Create your first channel to start publishing') : (t('profile.noChannelsDescVisitor') || 'This user has no channels'),
+            action: isOwner ? (
+                <Button onClick={() => navigate({to: '/me/channels'})}>
+                    <Tv className="w-4 h-4 mr-1"/>
+                    {t('profile.createChannel') || 'Create Channel'}
+                </Button>
+            ) : null,
+        },
+        articles: {
+            icon: <FileText className="w-20 h-20"/>,
+            title: t('profile.noArticles') || 'No articles yet',
+            desc: isOwner ? (t('profile.noArticlesDescOwner') || 'Write your first article') : (t('profile.noArticlesDescVisitor') || 'This user has no articles'),
+            action: null,
+        },
+        followers: {
+            icon: <UserCheck className="w-20 h-20"/>,
+            title: t('profile.noFollowers') || 'No followers yet',
+            desc: isOwner ? (t('profile.noFollowersDescOwner') || 'Share your profile to get followers') : (t('profile.noFollowersDescVisitor') || 'This user has no followers'),
+            action: null,
+        },
+        favorites: {
+            icon: <Heart className="w-20 h-20"/>,
+            title: t('profile.noFavorites') || 'No favorites yet',
+            desc: isOwner ? (t('profile.noFavoritesDescOwner') || 'Videos you favorite will appear here') : (t('profile.noFavoritesDescVisitor') || 'This user has no favorites'),
+            action: null,
+        },
+        history: {
+            icon: <History className="w-20 h-20"/>,
+            title: t('profile.noHistory') || 'No watch history',
+            desc: isOwner ? (t('profile.noHistoryDescOwner') || 'Videos you watch will appear here') : (t('profile.noHistoryDescVisitor') || 'No watch history'),
+            action: null,
         },
     };
 

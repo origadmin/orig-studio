@@ -34,6 +34,10 @@ const (
 	UserService_GetMyLikes_FullMethodName         = "/api.v1.services.user.UserService/GetMyLikes"
 	UserService_GetMySubscriptions_FullMethodName = "/api.v1.services.user.UserService/GetMySubscriptions"
 	UserService_GetMyHistory_FullMethodName       = "/api.v1.services.user.UserService/GetMyHistory"
+	UserService_UpsertHistory_FullMethodName      = "/api.v1.services.user.UserService/UpsertHistory"
+	UserService_SyncHistory_FullMethodName        = "/api.v1.services.user.UserService/SyncHistory"
+	UserService_ClearHistory_FullMethodName       = "/api.v1.services.user.UserService/ClearHistory"
+	UserService_RemoveHistoryItem_FullMethodName  = "/api.v1.services.user.UserService/RemoveHistoryItem"
 	UserService_GetMyStats_FullMethodName         = "/api.v1.services.user.UserService/GetMyStats"
 	UserService_ListUsers_FullMethodName          = "/api.v1.services.user.UserService/ListUsers"
 	UserService_GetUser_FullMethodName            = "/api.v1.services.user.UserService/GetUser"
@@ -87,6 +91,14 @@ type UserServiceClient interface {
 	GetMySubscriptions(ctx context.Context, in *GetMySubscriptionsRequest, opts ...grpc.CallOption) (*GetMySubscriptionsResponse, error)
 	// GetMyHistory returns the current user's watch history.
 	GetMyHistory(ctx context.Context, in *GetMyHistoryRequest, opts ...grpc.CallOption) (*GetMyHistoryResponse, error)
+	// UpsertHistory creates or updates a history record (progress reporting).
+	UpsertHistory(ctx context.Context, in *UpsertHistoryRequest, opts ...grpc.CallOption) (*UpsertHistoryResponse, error)
+	// SyncHistory batch-syncs history records (login merge).
+	SyncHistory(ctx context.Context, in *SyncHistoryRequest, opts ...grpc.CallOption) (*SyncHistoryResponse, error)
+	// ClearHistory clears all watch history for the current user.
+	ClearHistory(ctx context.Context, in *ClearHistoryRequest, opts ...grpc.CallOption) (*ClearHistoryResponse, error)
+	// RemoveHistoryItem removes a single history record.
+	RemoveHistoryItem(ctx context.Context, in *RemoveHistoryItemRequest, opts ...grpc.CallOption) (*RemoveHistoryItemResponse, error)
 	// GetMyStats returns the current user's statistics.
 	GetMyStats(ctx context.Context, in *GetMyStatsRequest, opts ...grpc.CallOption) (*GetMyStatsResponse, error)
 	// ListUsers returns a list of users.
@@ -275,6 +287,46 @@ func (c *userServiceClient) GetMyHistory(ctx context.Context, in *GetMyHistoryRe
 	return out, nil
 }
 
+func (c *userServiceClient) UpsertHistory(ctx context.Context, in *UpsertHistoryRequest, opts ...grpc.CallOption) (*UpsertHistoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpsertHistoryResponse)
+	err := c.cc.Invoke(ctx, UserService_UpsertHistory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) SyncHistory(ctx context.Context, in *SyncHistoryRequest, opts ...grpc.CallOption) (*SyncHistoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SyncHistoryResponse)
+	err := c.cc.Invoke(ctx, UserService_SyncHistory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) ClearHistory(ctx context.Context, in *ClearHistoryRequest, opts ...grpc.CallOption) (*ClearHistoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ClearHistoryResponse)
+	err := c.cc.Invoke(ctx, UserService_ClearHistory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) RemoveHistoryItem(ctx context.Context, in *RemoveHistoryItemRequest, opts ...grpc.CallOption) (*RemoveHistoryItemResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemoveHistoryItemResponse)
+	err := c.cc.Invoke(ctx, UserService_RemoveHistoryItem_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userServiceClient) GetMyStats(ctx context.Context, in *GetMyStatsRequest, opts ...grpc.CallOption) (*GetMyStatsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetMyStatsResponse)
@@ -452,6 +504,14 @@ type UserServiceServer interface {
 	GetMySubscriptions(context.Context, *GetMySubscriptionsRequest) (*GetMySubscriptionsResponse, error)
 	// GetMyHistory returns the current user's watch history.
 	GetMyHistory(context.Context, *GetMyHistoryRequest) (*GetMyHistoryResponse, error)
+	// UpsertHistory creates or updates a history record (progress reporting).
+	UpsertHistory(context.Context, *UpsertHistoryRequest) (*UpsertHistoryResponse, error)
+	// SyncHistory batch-syncs history records (login merge).
+	SyncHistory(context.Context, *SyncHistoryRequest) (*SyncHistoryResponse, error)
+	// ClearHistory clears all watch history for the current user.
+	ClearHistory(context.Context, *ClearHistoryRequest) (*ClearHistoryResponse, error)
+	// RemoveHistoryItem removes a single history record.
+	RemoveHistoryItem(context.Context, *RemoveHistoryItemRequest) (*RemoveHistoryItemResponse, error)
 	// GetMyStats returns the current user's statistics.
 	GetMyStats(context.Context, *GetMyStatsRequest) (*GetMyStatsResponse, error)
 	// ListUsers returns a list of users.
@@ -534,6 +594,18 @@ func (UnimplementedUserServiceServer) GetMySubscriptions(context.Context, *GetMy
 }
 func (UnimplementedUserServiceServer) GetMyHistory(context.Context, *GetMyHistoryRequest) (*GetMyHistoryResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetMyHistory not implemented")
+}
+func (UnimplementedUserServiceServer) UpsertHistory(context.Context, *UpsertHistoryRequest) (*UpsertHistoryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpsertHistory not implemented")
+}
+func (UnimplementedUserServiceServer) SyncHistory(context.Context, *SyncHistoryRequest) (*SyncHistoryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SyncHistory not implemented")
+}
+func (UnimplementedUserServiceServer) ClearHistory(context.Context, *ClearHistoryRequest) (*ClearHistoryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ClearHistory not implemented")
+}
+func (UnimplementedUserServiceServer) RemoveHistoryItem(context.Context, *RemoveHistoryItemRequest) (*RemoveHistoryItemResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RemoveHistoryItem not implemented")
 }
 func (UnimplementedUserServiceServer) GetMyStats(context.Context, *GetMyStatsRequest) (*GetMyStatsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetMyStats not implemented")
@@ -868,6 +940,78 @@ func _UserService_GetMyHistory_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_UpsertHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpsertHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UpsertHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_UpsertHistory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UpsertHistory(ctx, req.(*UpsertHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_SyncHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SyncHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).SyncHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_SyncHistory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).SyncHistory(ctx, req.(*SyncHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_ClearHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClearHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).ClearHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_ClearHistory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).ClearHistory(ctx, req.(*ClearHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_RemoveHistoryItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveHistoryItemRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).RemoveHistoryItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_RemoveHistoryItem_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).RemoveHistoryItem(ctx, req.(*RemoveHistoryItemRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_GetMyStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetMyStatsRequest)
 	if err := dec(in); err != nil {
@@ -1186,6 +1330,22 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMyHistory",
 			Handler:    _UserService_GetMyHistory_Handler,
+		},
+		{
+			MethodName: "UpsertHistory",
+			Handler:    _UserService_UpsertHistory_Handler,
+		},
+		{
+			MethodName: "SyncHistory",
+			Handler:    _UserService_SyncHistory_Handler,
+		},
+		{
+			MethodName: "ClearHistory",
+			Handler:    _UserService_ClearHistory_Handler,
+		},
+		{
+			MethodName: "RemoveHistoryItem",
+			Handler:    _UserService_RemoveHistoryItem_Handler,
 		},
 		{
 			MethodName: "GetMyStats",

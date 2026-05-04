@@ -9,15 +9,13 @@ import {
     History,
     Heart,
     ListVideo,
-    Upload,
-    Shield,
-    Settings,
     Info,
     Bell,
     Radio,
     TrendingUp,
     UserCircle,
     FileText,
+    Tv,
 } from 'lucide-react';
 import type {NavSection} from '@/types/nav';
 
@@ -27,12 +25,12 @@ export const NAV_CONFIG: NavSection[] = [
         title: 'nav.browse',
         items: [
             {id: 'home', label: 'nav.home', to: '/', icon: Home},
-            {id: 'featured', label: 'nav.featured', to: '/featured', icon: Star},
-            {id: 'latest', label: 'nav.latest', to: '/latest', icon: Clock},
+            {id: 'featured', label: 'nav.featured', to: '/featured', icon: Star, module: 'videos'},
+            {id: 'latest', label: 'nav.latest', to: '/latest', icon: Clock, module: 'videos'},
             {id: 'categories', label: 'nav.categories', to: '/categories', icon: LayoutGrid},
             {id: 'tags', label: 'nav.tags', to: '/tags', icon: Tag},
             {id: 'members', label: 'nav.members', to: '/members', icon: UsersIcon},
-            {id: 'articles', label: 'nav.articles', to: '/articles', icon: FileText},
+            {id: 'articles', label: 'nav.articles', to: '/articles', icon: FileText, module: 'articles'},
         ],
     },
     {
@@ -45,6 +43,7 @@ export const NAV_CONFIG: NavSection[] = [
                 label: 'nav.subsFeed',
                 to: '/subscriptions',
                 icon: Radio,
+                module: 'videos',
             },
         ],
     },
@@ -54,11 +53,26 @@ export const NAV_CONFIG: NavSection[] = [
         requiresAuth: true,
         items: [
             {id: 'my-profile', label: 'nav.myProfile', to: '/@__dynamic__', icon: UserCircle, isDynamic: true},
+            {id: 'my-channels', label: 'nav.myChannels', to: '/me/channels', icon: Tv, module: 'videos'},
+            {id: 'my-videos', label: 'nav.myVideos', to: '/me/videos', icon: Video, module: 'videos'},
+            {id: 'my-articles', label: 'nav.myArticles', to: '/me/articles', icon: FileText, module: 'articles'},
+        ],
+    },
+    {
+        id: 'library',
+        title: 'nav.library',
+        requiresAuth: true,
+        items: [
             {id: 'history', label: 'nav.history', to: '/me/history', icon: History},
-            {id: 'my-videos', label: 'nav.myVideos', to: '/me/videos', icon: Video},
-            {id: 'upload', label: 'nav.upload', to: '/me/upload', icon: Upload},
             {id: 'favorites', label: 'nav.favorites', to: '/me/favorites', icon: Heart},
-            {id: 'playlists', label: 'nav.playlists', to: '/me/playlists', icon: ListVideo},
+            {id: 'playlists', label: 'nav.playlists', to: '/me/playlists', icon: ListVideo, module: 'videos'},
+        ],
+    },
+    {
+        id: 'notifications',
+        title: 'nav.notifications',
+        requiresAuth: true,
+        items: [
             {id: 'notifications', label: 'nav.notifications', to: '/me/notifications', icon: Bell},
         ],
     },
@@ -72,16 +86,6 @@ export const NAV_CONFIG: NavSection[] = [
                 to: '/explore',
                 icon: TrendingUp,
             },
-        ],
-    },
-    {
-        id: 'admin',
-        title: 'nav.admin',
-        requiresAdmin: true,
-        items: [
-            {id: 'media-admin', label: 'nav.mediaAdmin', to: '/admin/media', icon: Shield},
-            {id: 'users-admin', label: 'nav.usersAdmin', to: '/admin/users', icon: UsersIcon},
-            {id: 'settings-admin', label: 'nav.settingsAdmin', to: '/admin/settings', icon: Settings},
         ],
     },
     {

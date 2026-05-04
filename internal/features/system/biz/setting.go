@@ -188,6 +188,10 @@ func (uc *SettingUseCase) GetPublicSettings(ctx context.Context) map[string]stri
 		"site_description":   true,
 		"allow_registration": true,
 		"allow_upload":       true,
+		"module_articles":    true,
+		"module_videos":      true,
+		"module_music":       true,
+		"homepage_layout":    true,
 	}
 	m, err := uc.loadCache(ctx)
 	if err != nil {
@@ -401,6 +405,42 @@ func DefaultSettings() []*entity.Setting {
 			Category:      setting.CategoryUpload,
 			Description:   "Thumbnail position (0.0-1.0, percentage of video duration)",
 			FallbackValue: "0.2",
+			IsBuiltin:     true,
+		},
+		{
+			Key:           "module_articles",
+			Value:         "true",
+			Type:          setting.TypeBool,
+			Category:      setting.CategoryModule,
+			Description:   "Enable Articles content module",
+			FallbackValue: "true",
+			IsBuiltin:     true,
+		},
+		{
+			Key:           "module_videos",
+			Value:         "true",
+			Type:          setting.TypeBool,
+			Category:      setting.CategoryModule,
+			Description:   "Enable Videos content module",
+			FallbackValue: "true",
+			IsBuiltin:     true,
+		},
+		{
+			Key:           "module_music",
+			Value:         "false",
+			Type:          setting.TypeBool,
+			Category:      setting.CategoryModule,
+			Description:   "Enable Music content module",
+			FallbackValue: "false",
+			IsBuiltin:     true,
+		},
+		{
+			Key:           "homepage_layout",
+			Value:         "auto",
+			Type:          setting.TypeString,
+			Category:      setting.CategoryModule,
+			Description:   "Homepage layout mode: auto|video|article|mixed|welcome",
+			FallbackValue: "auto",
 			IsBuiltin:     true,
 		},
 	}

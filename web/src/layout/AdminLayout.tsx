@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {useTheme} from '@/themes';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 
 const AdminLayout = () => {
     const {t} = useTranslation();
@@ -99,15 +100,11 @@ const AdminLayout = () => {
             {/* Sidebar */}
             <aside
                 className={`${sidebarCollapsed ? 'w-20' : 'w-64'} bg-sidebar text-sidebar-foreground flex-shrink-0 flex flex-col transition-all duration-300 ease-in-out`}>
-                <div className={`${sidebarCollapsed ? 'p-2' : 'p-6'} flex items-center justify-center`}>
-                    <Link to="/admin" className={`flex items-center justify-center transition-all duration-300 ease-in-out ${sidebarCollapsed ? '' : 'w-full'}`}>
-                        {sidebarCollapsed ? (
-                            <img src="/logo.svg" alt="OrigCMS" className="h-10 w-10" />
-                        ) : (
-                            <div className="flex items-center gap-2">
-                                <img src="/logo.svg" alt="OrigCMS" className="h-8 w-8" />
-                                <span className="text-xl font-bold tracking-tight text-brand">OrigCMS Admin</span>
-                            </div>
+                <div className={`flex items-center border-b border-sidebar-border ${sidebarCollapsed ? 'justify-center py-3' : 'px-4 py-3'}`}>
+                    <Link to="/admin" className="flex items-center gap-2 transition-all duration-300 ease-in-out">
+                        <img src="/logo.svg" alt="OrigCMS" className="h-14 w-14 flex-shrink-0" />
+                        {!sidebarCollapsed && (
+                            <span className="text-lg font-semibold tracking-tight text-brand whitespace-nowrap">OrigCMS Admin</span>
                         )}
                     </Link>
                 </div>
@@ -172,6 +169,7 @@ const AdminLayout = () => {
                         ))}
                     </div>
                     <div className="flex items-center space-x-4">
+                        <LanguageSwitcher variant="compact" buttonClassName="text-muted-foreground hover:text-foreground" />
                         <div
                             className="w-8 h-8 rounded-full bg-brand-muted flex items-center justify-center text-brand font-bold">A
                         </div>

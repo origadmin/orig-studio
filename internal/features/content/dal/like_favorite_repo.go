@@ -152,6 +152,10 @@ func (r *favoriteRepo) Delete(ctx context.Context, userID, mediaID string) error
 	return err
 }
 
+func (r *favoriteRepo) DeleteByID(ctx context.Context, id string) error {
+	return r.data.db.Favorite.DeleteOneID(id).Exec(ctx)
+}
+
 func (r *favoriteRepo) IsFavorited(ctx context.Context, userID, mediaID string) (bool, error) {
 	return r.data.db.Favorite.Query().
 		Where(
@@ -172,23 +176,111 @@ func (r *favoriteRepo) ListByUser(ctx context.Context, userID string) ([]*biz.Fa
 	ents, err := r.data.db.Favorite.Query().
 		Where(favorite.HasUserWith(user.IDEQ(userID))).
 		Order(entity.Desc(favorite.FieldCreateTime)).
-		WithMedia().
+		WithMedia(func(q *entity.MediaQuery) { q.WithUser() }).
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	res := make([]*biz.Favorite, len(ents))
 	for i, ent := range ents {
-		mediaID := ""
-		if ent.Edges.Media != nil {
-			mediaID = ent.Edges.Media.ID
-		}
-		res[i] = &biz.Favorite{
-			ID:        ent.ID,
-			UserID:    userID,
-			MediaID:   mediaID,
+		fav := &biz.Favorite{
+			ID:         ent.ID,
+			UserID:     userID,
 			CreateTime: ent.CreateTime,
 		}
+		if ent.Edges.Media != nil {
+			m := ent.Edges.Media
+			fav.MediaID = m.ID
+			mediaDetail := &biz.FavoriteMedia{
+				ID:          m.ID,
+				ShortToken:  m.ShortToken,
+				Title:       m.Title,
+				Description: m.Description,
+				Thumbnail:   m.Thumbnail,
+				Duration:    int64(m.Duration),
+				ViewCount:   m.ViewCount,
+				Type:        m.Type,
+				UserID:      m.UserID,
+				CreateTime:  m.CreateTime.Format("2006-01-02T15:04:05Z07:00"),
+			}
+			if m.Edges.User != nil {
+				mediaDetail.Edges = &biz.FavoriteMediaEdges{
+					User: []biz.FavoriteMediaUser{
+						{
+							ID:       m.Edges.User.ID,
+							Username: m.Edges.User.Username,
+							Nickname: m.Edges.User.Nickname,
+						},
+					},
+				}
+			}
+			fav.Media = mediaDetail
+		}
+		res[i] = fav
 	}
 	return res, nil
+}
+
+func (r *favoriteRepo) ListByUserPaginated(ctx context.Context, userID string, page, pageSize int) ([]*biz.Favorite, int, error) {
+	query := r.data.db.Favorite.Query().
+		Where(favorite.HasUserWith(user.IDEQ(userID)))
+
+	// Get total count
+	total, err := query.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Calculate offset
+	offset := (page - 1) * pageSize
+
+	// Get paginated results
+	ents, err := query.
+		Order(entity.Desc(favorite.FieldCreateTime)).
+		WithMedia(func(q *entity.MediaQuery) { q.WithUser() }).
+		Offset(offset).
+		Limit(pageSize).
+		All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	res := make([]*biz.Favorite, len(ents))
+	for i, ent := range ents {
+		fav := &biz.Favorite{
+			ID:         ent.ID,
+			UserID:     userID,
+			CreateTime: ent.CreateTime,
+		}
+		if ent.Edges.Media != nil {
+			m := ent.Edges.Media
+			fav.MediaID = m.ID
+			mediaDetail := &biz.FavoriteMedia{
+				ID:          m.ID,
+				ShortToken:  m.ShortToken,
+				Title:       m.Title,
+				Description: m.Description,
+				Thumbnail:   m.Thumbnail,
+				Duration:    int64(m.Duration),
+				ViewCount:   m.ViewCount,
+				Type:        m.Type,
+				UserID:      m.UserID,
+				CreateTime:  m.CreateTime.Format("2006-01-02T15:04:05Z07:00"),
+			}
+			if m.Edges.User != nil {
+				mediaDetail.Edges = &biz.FavoriteMediaEdges{
+					User: []biz.FavoriteMediaUser{
+						{
+							ID:       m.Edges.User.ID,
+							Username: m.Edges.User.Username,
+							Nickname: m.Edges.User.Nickname,
+						},
+					},
+				}
+			}
+			fav.Media = mediaDetail
+		}
+		res[i] = fav
+	}
+	return res, total, nil
 }

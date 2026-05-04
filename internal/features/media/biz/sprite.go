@@ -9,8 +9,8 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origcms/internal/helpers/ffmpeg"
 	systembiz "origadmin/application/origcms/internal/features/system/biz"
+	"origadmin/application/origcms/internal/helpers/ffmpeg"
 )
 
 type SpriteConfig struct {
@@ -94,11 +94,19 @@ func NewSpriteUseCase(
 	baseDir string,
 	logger log.Logger,
 ) *SpriteUseCase {
+	// Resolve baseDir to absolute path to avoid working directory dependency.
+	// When the server is started from a different directory (e.g., framework root
+	// instead of project root), relative paths like "./data/uploads" would
+	// resolve incorrectly, causing file not found errors for sprite/VTT files.
+	absBaseDir, err := filepath.Abs(baseDir)
+	if err != nil {
+		absBaseDir = baseDir // fallback to original if resolution fails
+	}
 	return &SpriteUseCase{
 		mediaRepo:      mediaRepo,
 		configProvider: configProvider,
 		logger:         log.NewHelper(log.With(logger, "module", "media.sprite")),
-		baseDir:        baseDir,
+		baseDir:        absBaseDir,
 	}
 }
 
@@ -118,8 +126,8 @@ func (uc *SpriteUseCase) GenerateSpriteAndVTT(ctx context.Context, mediaID strin
 
 	cfg := LoadSpriteConfig(ctx, uc.configProvider)
 
-	spritePath := fmt.Sprintf("sprites/%s.jpg", mediaID)
-	vttPath := fmt.Sprintf("sprites/%s.vtt", mediaID)
+	spritePath := fmt.Sprintf("sprites/%s/sprite.jpg", mediaID)
+	vttPath := fmt.Sprintf("sprites/%s/sprite.vtt", mediaID)
 
 	fullInputPath := filepath.Join(uc.baseDir, m.Url)
 	fullSpritePath := filepath.Join(uc.baseDir, spritePath)
@@ -132,9 +140,9 @@ func (uc *SpriteUseCase) GenerateSpriteAndVTT(ctx context.Context, mediaID strin
 	}
 
 	duration, _ := ffmpeg.GetVideoDurationSeconds(ctx, fullInputPath)
-	spriteFileName := filepath.Base(spritePath)
+	spriteImageRef := "sprite.jpg"
 
-	if err := ffmpeg.GenerateWebVTT(fullVttPath, spriteFileName, frameCount, float64(cfg.FrameInterval), cfg.Columns, cfg.FrameWidth, cfg.FrameHeight, duration); err != nil {
+	if err := ffmpeg.GenerateWebVTT(fullVttPath, spriteImageRef, frameCount, float64(cfg.FrameInterval), cfg.Columns, cfg.FrameWidth, cfg.FrameHeight, duration); err != nil {
 		uc.mediaRepo.UpdateSpriteFields(ctx, mediaID, "failed", "", "")
 		return fmt.Errorf("generate webvtt for media %s: %w", mediaID, err)
 	}

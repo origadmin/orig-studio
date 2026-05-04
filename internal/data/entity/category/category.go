@@ -55,6 +55,8 @@ const (
 	EdgeMedia = "media"
 	// EdgeArticles holds the string denoting the articles edge name in mutations.
 	EdgeArticles = "articles"
+	// EdgeChannels holds the string denoting the channels edge name in mutations.
+	EdgeChannels = "channels"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
 	// EdgeChildren holds the string denoting the children edge name in mutations.
@@ -82,6 +84,13 @@ const (
 	ArticlesInverseTable = "content_articles"
 	// ArticlesColumn is the table column denoting the articles relation/edge.
 	ArticlesColumn = "category_id"
+	// ChannelsTable is the table that holds the channels relation/edge.
+	ChannelsTable = "user_channels"
+	// ChannelsInverseTable is the table name for the Channel entity.
+	// It exists in this package in order to avoid circular dependency with the "channel" package.
+	ChannelsInverseTable = "user_channels"
+	// ChannelsColumn is the table column denoting the channels relation/edge.
+	ChannelsColumn = "category_id"
 	// ParentTable is the table that holds the parent relation/edge.
 	ParentTable = "content_categories"
 	// ParentColumn is the table column denoting the parent relation/edge.
@@ -320,6 +329,20 @@ func ByArticles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByChannelsCount orders the results by channels count.
+func ByChannelsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newChannelsStep(), opts...)
+	}
+}
+
+// ByChannels orders the results by channels terms.
+func ByChannels(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newChannelsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByParentField orders the results by parent field.
 func ByParentField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -359,6 +382,13 @@ func newArticlesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ArticlesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ArticlesTable, ArticlesColumn),
+	)
+}
+func newChannelsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ChannelsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ChannelsTable, ChannelsColumn),
 	)
 }
 func newParentStep() *sqlgraph.Step {

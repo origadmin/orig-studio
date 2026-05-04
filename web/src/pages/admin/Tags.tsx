@@ -45,7 +45,9 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/c
 import {tagApi, Tag, CreateTagRequest, UpdateTagRequest} from '@/lib/api/admin-tags';
 import {formatDateTime} from '@/lib/format';
 import {generateSlug} from '@/lib/utils/slug';
+import {getTagColor} from '@/lib/utils/tag-color';
 import {TablePagination} from '@/components/common/TablePagination';
+import TagColorPicker from '@/components/common/TagColorPicker';
 import {PAGINATION_CONFIG} from '@/config/pagination';
 
 const Tags: React.FC = () => {
@@ -332,7 +334,13 @@ const Tags: React.FC = () => {
                                     <TableRow key={tag.id}>
                                         <TableCell className="font-medium">{tag.id}</TableCell>
                                         <TableCell>
-                                            <span className="font-medium">{tag.name}</span>
+                                            <div className="flex items-center gap-2">
+                                                <span
+                                                    className="inline-block h-2 w-2 rounded-full shrink-0"
+                                                    style={{backgroundColor: getTagColor(tag)}}
+                                                />
+                                                <span className="font-medium">{tag.name}</span>
+                                            </div>
                                         </TableCell>
                                         <TableCell>
                                             <code className="text-xs bg-muted px-2 py-1 rounded">{tag.slug}</code>
@@ -446,10 +454,9 @@ const Tags: React.FC = () => {
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Color
                             </h4>
-                            <Input
-                                placeholder="#000000"
+                            <TagColorPicker
                                 value={formData.color || ''}
-                                onChange={(e) => setFormData({...formData, color: e.target.value})}
+                                onChange={(color: string) => setFormData({...formData, color})}
                             />
                         </div>
                         <div>
@@ -525,10 +532,9 @@ const Tags: React.FC = () => {
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Color
                             </h4>
-                            <Input
-                                placeholder="#000000"
+                            <TagColorPicker
                                 value={formData.color || ''}
-                                onChange={(e) => setFormData({...formData, color: e.target.value})}
+                                onChange={(color: string) => setFormData({...formData, color})}
                             />
                         </div>
                         <div>

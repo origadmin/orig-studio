@@ -70,14 +70,24 @@ func UserID(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldEQ(FieldUserID, v))
 }
 
+// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
+func Name(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldName, v))
+}
+
 // Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
 func Title(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldEQ(FieldTitle, v))
 }
 
-// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
-func Description(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldEQ(FieldDescription, v))
+// Slug applies equality check predicate on the "slug" field. It's identical to SlugEQ.
+func Slug(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldSlug, v))
+}
+
+// Handle applies equality check predicate on the "handle" field. It's identical to HandleEQ.
+func Handle(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldHandle, v))
 }
 
 // ShortToken applies equality check predicate on the "short_token" field. It's identical to ShortTokenEQ.
@@ -85,9 +95,34 @@ func ShortToken(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldEQ(FieldShortToken, v))
 }
 
+// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
+func Description(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldDescription, v))
+}
+
+// Avatar applies equality check predicate on the "avatar" field. It's identical to AvatarEQ.
+func Avatar(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldAvatar, v))
+}
+
+// Banner applies equality check predicate on the "banner" field. It's identical to BannerEQ.
+func Banner(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldBanner, v))
+}
+
 // BannerLogo applies equality check predicate on the "banner_logo" field. It's identical to BannerLogoEQ.
 func BannerLogo(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldEQ(FieldBannerLogo, v))
+}
+
+// CategoryID applies equality check predicate on the "category_id" field. It's identical to CategoryIDEQ.
+func CategoryID(v int64) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldCategoryID, v))
+}
+
+// IsVerified applies equality check predicate on the "is_verified" field. It's identical to IsVerifiedEQ.
+func IsVerified(v bool) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldIsVerified, v))
 }
 
 // SubscriberCount applies equality check predicate on the "subscriber_count" field. It's identical to SubscriberCountEQ.
@@ -98,6 +133,16 @@ func SubscriberCount(v int64) predicate.Channel {
 // MediaCount applies equality check predicate on the "media_count" field. It's identical to MediaCountEQ.
 func MediaCount(v int) predicate.Channel {
 	return predicate.Channel(sql.FieldEQ(FieldMediaCount, v))
+}
+
+// ArticleCount applies equality check predicate on the "article_count" field. It's identical to ArticleCountEQ.
+func ArticleCount(v int) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldArticleCount, v))
+}
+
+// TotalViews applies equality check predicate on the "total_views" field. It's identical to TotalViewsEQ.
+func TotalViews(v int64) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldTotalViews, v))
 }
 
 // AddDate applies equality check predicate on the "add_date" field. It's identical to AddDateEQ.
@@ -180,6 +225,71 @@ func UserIDContainsFold(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldContainsFold(FieldUserID, v))
 }
 
+// NameEQ applies the EQ predicate on the "name" field.
+func NameEQ(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldName, v))
+}
+
+// NameNEQ applies the NEQ predicate on the "name" field.
+func NameNEQ(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldName, v))
+}
+
+// NameIn applies the In predicate on the "name" field.
+func NameIn(vs ...string) predicate.Channel {
+	return predicate.Channel(sql.FieldIn(FieldName, vs...))
+}
+
+// NameNotIn applies the NotIn predicate on the "name" field.
+func NameNotIn(vs ...string) predicate.Channel {
+	return predicate.Channel(sql.FieldNotIn(FieldName, vs...))
+}
+
+// NameGT applies the GT predicate on the "name" field.
+func NameGT(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldGT(FieldName, v))
+}
+
+// NameGTE applies the GTE predicate on the "name" field.
+func NameGTE(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldGTE(FieldName, v))
+}
+
+// NameLT applies the LT predicate on the "name" field.
+func NameLT(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldLT(FieldName, v))
+}
+
+// NameLTE applies the LTE predicate on the "name" field.
+func NameLTE(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldLTE(FieldName, v))
+}
+
+// NameContains applies the Contains predicate on the "name" field.
+func NameContains(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldContains(FieldName, v))
+}
+
+// NameHasPrefix applies the HasPrefix predicate on the "name" field.
+func NameHasPrefix(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldHasPrefix(FieldName, v))
+}
+
+// NameHasSuffix applies the HasSuffix predicate on the "name" field.
+func NameHasSuffix(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldHasSuffix(FieldName, v))
+}
+
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEqualFold(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldContainsFold(FieldName, v))
+}
+
 // TitleEQ applies the EQ predicate on the "title" field.
 func TitleEQ(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldEQ(FieldTitle, v))
@@ -245,69 +355,144 @@ func TitleContainsFold(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldContainsFold(FieldTitle, v))
 }
 
-// DescriptionEQ applies the EQ predicate on the "description" field.
-func DescriptionEQ(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldEQ(FieldDescription, v))
+// SlugEQ applies the EQ predicate on the "slug" field.
+func SlugEQ(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldSlug, v))
 }
 
-// DescriptionNEQ applies the NEQ predicate on the "description" field.
-func DescriptionNEQ(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldNEQ(FieldDescription, v))
+// SlugNEQ applies the NEQ predicate on the "slug" field.
+func SlugNEQ(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldSlug, v))
 }
 
-// DescriptionIn applies the In predicate on the "description" field.
-func DescriptionIn(vs ...string) predicate.Channel {
-	return predicate.Channel(sql.FieldIn(FieldDescription, vs...))
+// SlugIn applies the In predicate on the "slug" field.
+func SlugIn(vs ...string) predicate.Channel {
+	return predicate.Channel(sql.FieldIn(FieldSlug, vs...))
 }
 
-// DescriptionNotIn applies the NotIn predicate on the "description" field.
-func DescriptionNotIn(vs ...string) predicate.Channel {
-	return predicate.Channel(sql.FieldNotIn(FieldDescription, vs...))
+// SlugNotIn applies the NotIn predicate on the "slug" field.
+func SlugNotIn(vs ...string) predicate.Channel {
+	return predicate.Channel(sql.FieldNotIn(FieldSlug, vs...))
 }
 
-// DescriptionGT applies the GT predicate on the "description" field.
-func DescriptionGT(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldGT(FieldDescription, v))
+// SlugGT applies the GT predicate on the "slug" field.
+func SlugGT(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldGT(FieldSlug, v))
 }
 
-// DescriptionGTE applies the GTE predicate on the "description" field.
-func DescriptionGTE(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldGTE(FieldDescription, v))
+// SlugGTE applies the GTE predicate on the "slug" field.
+func SlugGTE(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldGTE(FieldSlug, v))
 }
 
-// DescriptionLT applies the LT predicate on the "description" field.
-func DescriptionLT(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldLT(FieldDescription, v))
+// SlugLT applies the LT predicate on the "slug" field.
+func SlugLT(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldLT(FieldSlug, v))
 }
 
-// DescriptionLTE applies the LTE predicate on the "description" field.
-func DescriptionLTE(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldLTE(FieldDescription, v))
+// SlugLTE applies the LTE predicate on the "slug" field.
+func SlugLTE(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldLTE(FieldSlug, v))
 }
 
-// DescriptionContains applies the Contains predicate on the "description" field.
-func DescriptionContains(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldContains(FieldDescription, v))
+// SlugContains applies the Contains predicate on the "slug" field.
+func SlugContains(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldContains(FieldSlug, v))
 }
 
-// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
-func DescriptionHasPrefix(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldHasPrefix(FieldDescription, v))
+// SlugHasPrefix applies the HasPrefix predicate on the "slug" field.
+func SlugHasPrefix(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldHasPrefix(FieldSlug, v))
 }
 
-// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
-func DescriptionHasSuffix(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldHasSuffix(FieldDescription, v))
+// SlugHasSuffix applies the HasSuffix predicate on the "slug" field.
+func SlugHasSuffix(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldHasSuffix(FieldSlug, v))
 }
 
-// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
-func DescriptionEqualFold(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldEqualFold(FieldDescription, v))
+// SlugIsNil applies the IsNil predicate on the "slug" field.
+func SlugIsNil() predicate.Channel {
+	return predicate.Channel(sql.FieldIsNull(FieldSlug))
 }
 
-// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
-func DescriptionContainsFold(v string) predicate.Channel {
-	return predicate.Channel(sql.FieldContainsFold(FieldDescription, v))
+// SlugNotNil applies the NotNil predicate on the "slug" field.
+func SlugNotNil() predicate.Channel {
+	return predicate.Channel(sql.FieldNotNull(FieldSlug))
+}
+
+// SlugEqualFold applies the EqualFold predicate on the "slug" field.
+func SlugEqualFold(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEqualFold(FieldSlug, v))
+}
+
+// SlugContainsFold applies the ContainsFold predicate on the "slug" field.
+func SlugContainsFold(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldContainsFold(FieldSlug, v))
+}
+
+// HandleEQ applies the EQ predicate on the "handle" field.
+func HandleEQ(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldHandle, v))
+}
+
+// HandleNEQ applies the NEQ predicate on the "handle" field.
+func HandleNEQ(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldHandle, v))
+}
+
+// HandleIn applies the In predicate on the "handle" field.
+func HandleIn(vs ...string) predicate.Channel {
+	return predicate.Channel(sql.FieldIn(FieldHandle, vs...))
+}
+
+// HandleNotIn applies the NotIn predicate on the "handle" field.
+func HandleNotIn(vs ...string) predicate.Channel {
+	return predicate.Channel(sql.FieldNotIn(FieldHandle, vs...))
+}
+
+// HandleGT applies the GT predicate on the "handle" field.
+func HandleGT(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldGT(FieldHandle, v))
+}
+
+// HandleGTE applies the GTE predicate on the "handle" field.
+func HandleGTE(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldGTE(FieldHandle, v))
+}
+
+// HandleLT applies the LT predicate on the "handle" field.
+func HandleLT(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldLT(FieldHandle, v))
+}
+
+// HandleLTE applies the LTE predicate on the "handle" field.
+func HandleLTE(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldLTE(FieldHandle, v))
+}
+
+// HandleContains applies the Contains predicate on the "handle" field.
+func HandleContains(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldContains(FieldHandle, v))
+}
+
+// HandleHasPrefix applies the HasPrefix predicate on the "handle" field.
+func HandleHasPrefix(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldHasPrefix(FieldHandle, v))
+}
+
+// HandleHasSuffix applies the HasSuffix predicate on the "handle" field.
+func HandleHasSuffix(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldHasSuffix(FieldHandle, v))
+}
+
+// HandleEqualFold applies the EqualFold predicate on the "handle" field.
+func HandleEqualFold(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEqualFold(FieldHandle, v))
+}
+
+// HandleContainsFold applies the ContainsFold predicate on the "handle" field.
+func HandleContainsFold(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldContainsFold(FieldHandle, v))
 }
 
 // ShortTokenEQ applies the EQ predicate on the "short_token" field.
@@ -375,6 +560,221 @@ func ShortTokenContainsFold(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldContainsFold(FieldShortToken, v))
 }
 
+// DescriptionEQ applies the EQ predicate on the "description" field.
+func DescriptionEQ(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldDescription, v))
+}
+
+// DescriptionNEQ applies the NEQ predicate on the "description" field.
+func DescriptionNEQ(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldDescription, v))
+}
+
+// DescriptionIn applies the In predicate on the "description" field.
+func DescriptionIn(vs ...string) predicate.Channel {
+	return predicate.Channel(sql.FieldIn(FieldDescription, vs...))
+}
+
+// DescriptionNotIn applies the NotIn predicate on the "description" field.
+func DescriptionNotIn(vs ...string) predicate.Channel {
+	return predicate.Channel(sql.FieldNotIn(FieldDescription, vs...))
+}
+
+// DescriptionGT applies the GT predicate on the "description" field.
+func DescriptionGT(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldGT(FieldDescription, v))
+}
+
+// DescriptionGTE applies the GTE predicate on the "description" field.
+func DescriptionGTE(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldGTE(FieldDescription, v))
+}
+
+// DescriptionLT applies the LT predicate on the "description" field.
+func DescriptionLT(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldLT(FieldDescription, v))
+}
+
+// DescriptionLTE applies the LTE predicate on the "description" field.
+func DescriptionLTE(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldLTE(FieldDescription, v))
+}
+
+// DescriptionContains applies the Contains predicate on the "description" field.
+func DescriptionContains(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldContains(FieldDescription, v))
+}
+
+// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
+func DescriptionHasPrefix(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldHasPrefix(FieldDescription, v))
+}
+
+// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
+func DescriptionHasSuffix(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldHasSuffix(FieldDescription, v))
+}
+
+// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
+func DescriptionEqualFold(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEqualFold(FieldDescription, v))
+}
+
+// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
+func DescriptionContainsFold(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// AvatarEQ applies the EQ predicate on the "avatar" field.
+func AvatarEQ(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldAvatar, v))
+}
+
+// AvatarNEQ applies the NEQ predicate on the "avatar" field.
+func AvatarNEQ(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldAvatar, v))
+}
+
+// AvatarIn applies the In predicate on the "avatar" field.
+func AvatarIn(vs ...string) predicate.Channel {
+	return predicate.Channel(sql.FieldIn(FieldAvatar, vs...))
+}
+
+// AvatarNotIn applies the NotIn predicate on the "avatar" field.
+func AvatarNotIn(vs ...string) predicate.Channel {
+	return predicate.Channel(sql.FieldNotIn(FieldAvatar, vs...))
+}
+
+// AvatarGT applies the GT predicate on the "avatar" field.
+func AvatarGT(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldGT(FieldAvatar, v))
+}
+
+// AvatarGTE applies the GTE predicate on the "avatar" field.
+func AvatarGTE(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldGTE(FieldAvatar, v))
+}
+
+// AvatarLT applies the LT predicate on the "avatar" field.
+func AvatarLT(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldLT(FieldAvatar, v))
+}
+
+// AvatarLTE applies the LTE predicate on the "avatar" field.
+func AvatarLTE(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldLTE(FieldAvatar, v))
+}
+
+// AvatarContains applies the Contains predicate on the "avatar" field.
+func AvatarContains(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldContains(FieldAvatar, v))
+}
+
+// AvatarHasPrefix applies the HasPrefix predicate on the "avatar" field.
+func AvatarHasPrefix(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldHasPrefix(FieldAvatar, v))
+}
+
+// AvatarHasSuffix applies the HasSuffix predicate on the "avatar" field.
+func AvatarHasSuffix(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldHasSuffix(FieldAvatar, v))
+}
+
+// AvatarIsNil applies the IsNil predicate on the "avatar" field.
+func AvatarIsNil() predicate.Channel {
+	return predicate.Channel(sql.FieldIsNull(FieldAvatar))
+}
+
+// AvatarNotNil applies the NotNil predicate on the "avatar" field.
+func AvatarNotNil() predicate.Channel {
+	return predicate.Channel(sql.FieldNotNull(FieldAvatar))
+}
+
+// AvatarEqualFold applies the EqualFold predicate on the "avatar" field.
+func AvatarEqualFold(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEqualFold(FieldAvatar, v))
+}
+
+// AvatarContainsFold applies the ContainsFold predicate on the "avatar" field.
+func AvatarContainsFold(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldContainsFold(FieldAvatar, v))
+}
+
+// BannerEQ applies the EQ predicate on the "banner" field.
+func BannerEQ(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldBanner, v))
+}
+
+// BannerNEQ applies the NEQ predicate on the "banner" field.
+func BannerNEQ(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldBanner, v))
+}
+
+// BannerIn applies the In predicate on the "banner" field.
+func BannerIn(vs ...string) predicate.Channel {
+	return predicate.Channel(sql.FieldIn(FieldBanner, vs...))
+}
+
+// BannerNotIn applies the NotIn predicate on the "banner" field.
+func BannerNotIn(vs ...string) predicate.Channel {
+	return predicate.Channel(sql.FieldNotIn(FieldBanner, vs...))
+}
+
+// BannerGT applies the GT predicate on the "banner" field.
+func BannerGT(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldGT(FieldBanner, v))
+}
+
+// BannerGTE applies the GTE predicate on the "banner" field.
+func BannerGTE(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldGTE(FieldBanner, v))
+}
+
+// BannerLT applies the LT predicate on the "banner" field.
+func BannerLT(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldLT(FieldBanner, v))
+}
+
+// BannerLTE applies the LTE predicate on the "banner" field.
+func BannerLTE(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldLTE(FieldBanner, v))
+}
+
+// BannerContains applies the Contains predicate on the "banner" field.
+func BannerContains(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldContains(FieldBanner, v))
+}
+
+// BannerHasPrefix applies the HasPrefix predicate on the "banner" field.
+func BannerHasPrefix(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldHasPrefix(FieldBanner, v))
+}
+
+// BannerHasSuffix applies the HasSuffix predicate on the "banner" field.
+func BannerHasSuffix(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldHasSuffix(FieldBanner, v))
+}
+
+// BannerIsNil applies the IsNil predicate on the "banner" field.
+func BannerIsNil() predicate.Channel {
+	return predicate.Channel(sql.FieldIsNull(FieldBanner))
+}
+
+// BannerNotNil applies the NotNil predicate on the "banner" field.
+func BannerNotNil() predicate.Channel {
+	return predicate.Channel(sql.FieldNotNull(FieldBanner))
+}
+
+// BannerEqualFold applies the EqualFold predicate on the "banner" field.
+func BannerEqualFold(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldEqualFold(FieldBanner, v))
+}
+
+// BannerContainsFold applies the ContainsFold predicate on the "banner" field.
+func BannerContainsFold(v string) predicate.Channel {
+	return predicate.Channel(sql.FieldContainsFold(FieldBanner, v))
+}
+
 // BannerLogoEQ applies the EQ predicate on the "banner_logo" field.
 func BannerLogoEQ(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldEQ(FieldBannerLogo, v))
@@ -430,6 +830,16 @@ func BannerLogoHasSuffix(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldHasSuffix(FieldBannerLogo, v))
 }
 
+// BannerLogoIsNil applies the IsNil predicate on the "banner_logo" field.
+func BannerLogoIsNil() predicate.Channel {
+	return predicate.Channel(sql.FieldIsNull(FieldBannerLogo))
+}
+
+// BannerLogoNotNil applies the NotNil predicate on the "banner_logo" field.
+func BannerLogoNotNil() predicate.Channel {
+	return predicate.Channel(sql.FieldNotNull(FieldBannerLogo))
+}
+
 // BannerLogoEqualFold applies the EqualFold predicate on the "banner_logo" field.
 func BannerLogoEqualFold(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldEqualFold(FieldBannerLogo, v))
@@ -438,6 +848,26 @@ func BannerLogoEqualFold(v string) predicate.Channel {
 // BannerLogoContainsFold applies the ContainsFold predicate on the "banner_logo" field.
 func BannerLogoContainsFold(v string) predicate.Channel {
 	return predicate.Channel(sql.FieldContainsFold(FieldBannerLogo, v))
+}
+
+// StatusEQ applies the EQ predicate on the "status" field.
+func StatusEQ(v Status) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldStatus, v))
+}
+
+// StatusNEQ applies the NEQ predicate on the "status" field.
+func StatusNEQ(v Status) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldStatus, v))
+}
+
+// StatusIn applies the In predicate on the "status" field.
+func StatusIn(vs ...Status) predicate.Channel {
+	return predicate.Channel(sql.FieldIn(FieldStatus, vs...))
+}
+
+// StatusNotIn applies the NotIn predicate on the "status" field.
+func StatusNotIn(vs ...Status) predicate.Channel {
+	return predicate.Channel(sql.FieldNotIn(FieldStatus, vs...))
 }
 
 // PrivacyEQ applies the EQ predicate on the "privacy" field.
@@ -458,6 +888,56 @@ func PrivacyIn(vs ...Privacy) predicate.Channel {
 // PrivacyNotIn applies the NotIn predicate on the "privacy" field.
 func PrivacyNotIn(vs ...Privacy) predicate.Channel {
 	return predicate.Channel(sql.FieldNotIn(FieldPrivacy, vs...))
+}
+
+// TagsIsNil applies the IsNil predicate on the "tags" field.
+func TagsIsNil() predicate.Channel {
+	return predicate.Channel(sql.FieldIsNull(FieldTags))
+}
+
+// TagsNotNil applies the NotNil predicate on the "tags" field.
+func TagsNotNil() predicate.Channel {
+	return predicate.Channel(sql.FieldNotNull(FieldTags))
+}
+
+// CategoryIDEQ applies the EQ predicate on the "category_id" field.
+func CategoryIDEQ(v int64) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldCategoryID, v))
+}
+
+// CategoryIDNEQ applies the NEQ predicate on the "category_id" field.
+func CategoryIDNEQ(v int64) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldCategoryID, v))
+}
+
+// CategoryIDIn applies the In predicate on the "category_id" field.
+func CategoryIDIn(vs ...int64) predicate.Channel {
+	return predicate.Channel(sql.FieldIn(FieldCategoryID, vs...))
+}
+
+// CategoryIDNotIn applies the NotIn predicate on the "category_id" field.
+func CategoryIDNotIn(vs ...int64) predicate.Channel {
+	return predicate.Channel(sql.FieldNotIn(FieldCategoryID, vs...))
+}
+
+// CategoryIDIsNil applies the IsNil predicate on the "category_id" field.
+func CategoryIDIsNil() predicate.Channel {
+	return predicate.Channel(sql.FieldIsNull(FieldCategoryID))
+}
+
+// CategoryIDNotNil applies the NotNil predicate on the "category_id" field.
+func CategoryIDNotNil() predicate.Channel {
+	return predicate.Channel(sql.FieldNotNull(FieldCategoryID))
+}
+
+// IsVerifiedEQ applies the EQ predicate on the "is_verified" field.
+func IsVerifiedEQ(v bool) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldIsVerified, v))
+}
+
+// IsVerifiedNEQ applies the NEQ predicate on the "is_verified" field.
+func IsVerifiedNEQ(v bool) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldIsVerified, v))
 }
 
 // SubscriberCountEQ applies the EQ predicate on the "subscriber_count" field.
@@ -538,6 +1018,96 @@ func MediaCountLT(v int) predicate.Channel {
 // MediaCountLTE applies the LTE predicate on the "media_count" field.
 func MediaCountLTE(v int) predicate.Channel {
 	return predicate.Channel(sql.FieldLTE(FieldMediaCount, v))
+}
+
+// ArticleCountEQ applies the EQ predicate on the "article_count" field.
+func ArticleCountEQ(v int) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldArticleCount, v))
+}
+
+// ArticleCountNEQ applies the NEQ predicate on the "article_count" field.
+func ArticleCountNEQ(v int) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldArticleCount, v))
+}
+
+// ArticleCountIn applies the In predicate on the "article_count" field.
+func ArticleCountIn(vs ...int) predicate.Channel {
+	return predicate.Channel(sql.FieldIn(FieldArticleCount, vs...))
+}
+
+// ArticleCountNotIn applies the NotIn predicate on the "article_count" field.
+func ArticleCountNotIn(vs ...int) predicate.Channel {
+	return predicate.Channel(sql.FieldNotIn(FieldArticleCount, vs...))
+}
+
+// ArticleCountGT applies the GT predicate on the "article_count" field.
+func ArticleCountGT(v int) predicate.Channel {
+	return predicate.Channel(sql.FieldGT(FieldArticleCount, v))
+}
+
+// ArticleCountGTE applies the GTE predicate on the "article_count" field.
+func ArticleCountGTE(v int) predicate.Channel {
+	return predicate.Channel(sql.FieldGTE(FieldArticleCount, v))
+}
+
+// ArticleCountLT applies the LT predicate on the "article_count" field.
+func ArticleCountLT(v int) predicate.Channel {
+	return predicate.Channel(sql.FieldLT(FieldArticleCount, v))
+}
+
+// ArticleCountLTE applies the LTE predicate on the "article_count" field.
+func ArticleCountLTE(v int) predicate.Channel {
+	return predicate.Channel(sql.FieldLTE(FieldArticleCount, v))
+}
+
+// TotalViewsEQ applies the EQ predicate on the "total_views" field.
+func TotalViewsEQ(v int64) predicate.Channel {
+	return predicate.Channel(sql.FieldEQ(FieldTotalViews, v))
+}
+
+// TotalViewsNEQ applies the NEQ predicate on the "total_views" field.
+func TotalViewsNEQ(v int64) predicate.Channel {
+	return predicate.Channel(sql.FieldNEQ(FieldTotalViews, v))
+}
+
+// TotalViewsIn applies the In predicate on the "total_views" field.
+func TotalViewsIn(vs ...int64) predicate.Channel {
+	return predicate.Channel(sql.FieldIn(FieldTotalViews, vs...))
+}
+
+// TotalViewsNotIn applies the NotIn predicate on the "total_views" field.
+func TotalViewsNotIn(vs ...int64) predicate.Channel {
+	return predicate.Channel(sql.FieldNotIn(FieldTotalViews, vs...))
+}
+
+// TotalViewsGT applies the GT predicate on the "total_views" field.
+func TotalViewsGT(v int64) predicate.Channel {
+	return predicate.Channel(sql.FieldGT(FieldTotalViews, v))
+}
+
+// TotalViewsGTE applies the GTE predicate on the "total_views" field.
+func TotalViewsGTE(v int64) predicate.Channel {
+	return predicate.Channel(sql.FieldGTE(FieldTotalViews, v))
+}
+
+// TotalViewsLT applies the LT predicate on the "total_views" field.
+func TotalViewsLT(v int64) predicate.Channel {
+	return predicate.Channel(sql.FieldLT(FieldTotalViews, v))
+}
+
+// TotalViewsLTE applies the LTE predicate on the "total_views" field.
+func TotalViewsLTE(v int64) predicate.Channel {
+	return predicate.Channel(sql.FieldLTE(FieldTotalViews, v))
+}
+
+// LinksIsNil applies the IsNil predicate on the "links" field.
+func LinksIsNil() predicate.Channel {
+	return predicate.Channel(sql.FieldIsNull(FieldLinks))
+}
+
+// LinksNotNil applies the NotNil predicate on the "links" field.
+func LinksNotNil() predicate.Channel {
+	return predicate.Channel(sql.FieldNotNull(FieldLinks))
 }
 
 // AddDateEQ applies the EQ predicate on the "add_date" field.
@@ -698,6 +1268,52 @@ func HasMedia() predicate.Channel {
 func HasMediaWith(preds ...predicate.Media) predicate.Channel {
 	return predicate.Channel(func(s *sql.Selector) {
 		step := newMediaStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasArticles applies the HasEdge predicate on the "articles" edge.
+func HasArticles() predicate.Channel {
+	return predicate.Channel(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ArticlesTable, ArticlesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasArticlesWith applies the HasEdge predicate on the "articles" edge with a given conditions (other predicates).
+func HasArticlesWith(preds ...predicate.Article) predicate.Channel {
+	return predicate.Channel(func(s *sql.Selector) {
+		step := newArticlesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCategory applies the HasEdge predicate on the "category" edge.
+func HasCategory() predicate.Channel {
+	return predicate.Channel(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, CategoryTable, CategoryColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCategoryWith applies the HasEdge predicate on the "category" edge with a given conditions (other predicates).
+func HasCategoryWith(preds ...predicate.Category) predicate.Channel {
+	return predicate.Channel(func(s *sql.Selector) {
+		step := newCategoryStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -7,7 +7,7 @@
 
 /** User information stored in auth state */
 export interface User {
-  id: number;
+  id: string;
   username: string;
   displayName: string;
   avatarUrl?: string;

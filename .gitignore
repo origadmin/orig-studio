@@ -81,7 +81,7 @@ web/tsc-output.txt
 *.db
 
 # Runtime data (uploads, HLS, sprites, thumbnails)
-data/
+/data/
 
 
 # Added by code-review-graph
@@ -123,6 +123,13 @@ test_worker.txt
 test_api.ps1
 test_api.sh
 FEATURE_COMPARISON.md
+CHANGELOG.md
+bootstrap.yaml
+/configs/
+Dockerfile.server
+init_db.go
+/resources/sampels/
+/tools/
 
 # Frontend temp/test output
 web/eslint-*.txt

@@ -123,6 +123,8 @@ const (
 	EdgeGroupMemberships = "group_memberships"
 	// EdgeCreatedGroups holds the string denoting the created_groups edge name in mutations.
 	EdgeCreatedGroups = "created_groups"
+	// EdgeHistory holds the string denoting the history edge name in mutations.
+	EdgeHistory = "history"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// MediaTable is the table that holds the media relation/edge.
@@ -245,6 +247,13 @@ const (
 	CreatedGroupsInverseTable = "auth_permission_groups"
 	// CreatedGroupsColumn is the table column denoting the created_groups relation/edge.
 	CreatedGroupsColumn = "created_by"
+	// HistoryTable is the table that holds the history relation/edge.
+	HistoryTable = "user_history"
+	// HistoryInverseTable is the table name for the History entity.
+	// It exists in this package in order to avoid circular dependency with the "history" package.
+	HistoryInverseTable = "user_history"
+	// HistoryColumn is the table column denoting the history relation/edge.
+	HistoryColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -874,6 +883,20 @@ func ByCreatedGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newCreatedGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByHistoryCount orders the results by history count.
+func ByHistoryCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newHistoryStep(), opts...)
+	}
+}
+
+// ByHistory orders the results by history terms.
+func ByHistory(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newHistoryStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newMediaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -998,5 +1021,12 @@ func newCreatedGroupsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CreatedGroupsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, CreatedGroupsTable, CreatedGroupsColumn),
+	)
+}
+func newHistoryStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(HistoryInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, HistoryTable, HistoryColumn),
 	)
 }

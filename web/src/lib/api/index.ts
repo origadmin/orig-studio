@@ -95,7 +95,7 @@ export type {
 
 // ==================== History ====================
 export {historyApi} from "./history";
-export type {HistoryItem, HistoryListResponse} from "./history";
+export type {HistoryItem, HistoryListResponse, UpsertHistoryRequest, UpsertHistoryResponse, SyncHistoryRequest, SyncHistoryResponse, ClearHistoryResponse, ContentType} from "./history";
 
 // ==================== Explore ====================
 export {exploreApi} from "./explore";

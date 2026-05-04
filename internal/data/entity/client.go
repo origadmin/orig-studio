@@ -21,6 +21,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/encodingtask"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/groupmember"
+	"origadmin/application/origcms/internal/data/entity/history"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediacategory"
@@ -67,6 +68,8 @@ type Client struct {
 	Favorite *FavoriteClient
 	// GroupMember is the client for interacting with the GroupMember builders.
 	GroupMember *GroupMemberClient
+	// History is the client for interacting with the History builders.
+	History *HistoryClient
 	// Like is the client for interacting with the Like builders.
 	Like *LikeClient
 	// Media is the client for interacting with the Media builders.
@@ -116,6 +119,7 @@ func (c *Client) init() {
 	c.EncodingTask = NewEncodingTaskClient(c.config)
 	c.Favorite = NewFavoriteClient(c.config)
 	c.GroupMember = NewGroupMemberClient(c.config)
+	c.History = NewHistoryClient(c.config)
 	c.Like = NewLikeClient(c.config)
 	c.Media = NewMediaClient(c.config)
 	c.MediaCategory = NewMediaCategoryClient(c.config)
@@ -232,6 +236,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		EncodingTask:    NewEncodingTaskClient(cfg),
 		Favorite:        NewFavoriteClient(cfg),
 		GroupMember:     NewGroupMemberClient(cfg),
+		History:         NewHistoryClient(cfg),
 		Like:            NewLikeClient(cfg),
 		Media:           NewMediaClient(cfg),
 		MediaCategory:   NewMediaCategoryClient(cfg),
@@ -275,6 +280,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		EncodingTask:    NewEncodingTaskClient(cfg),
 		Favorite:        NewFavoriteClient(cfg),
 		GroupMember:     NewGroupMemberClient(cfg),
+		History:         NewHistoryClient(cfg),
 		Like:            NewLikeClient(cfg),
 		Media:           NewMediaClient(cfg),
 		MediaCategory:   NewMediaCategoryClient(cfg),
@@ -319,10 +325,10 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Article, c.Category, c.Channel, c.Comment, c.CommentLike, c.CommentReport,
-		c.EncodeProfile, c.EncodingTask, c.Favorite, c.GroupMember, c.Like, c.Media,
-		c.MediaCategory, c.MediaPlaylist, c.MediaReviewLog, c.MediaTag, c.Notification,
-		c.PermissionGroup, c.Playlist, c.Setting, c.Subscription, c.Tag,
-		c.UploadSession, c.User,
+		c.EncodeProfile, c.EncodingTask, c.Favorite, c.GroupMember, c.History, c.Like,
+		c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaReviewLog, c.MediaTag,
+		c.Notification, c.PermissionGroup, c.Playlist, c.Setting, c.Subscription,
+		c.Tag, c.UploadSession, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -333,10 +339,10 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Article, c.Category, c.Channel, c.Comment, c.CommentLike, c.CommentReport,
-		c.EncodeProfile, c.EncodingTask, c.Favorite, c.GroupMember, c.Like, c.Media,
-		c.MediaCategory, c.MediaPlaylist, c.MediaReviewLog, c.MediaTag, c.Notification,
-		c.PermissionGroup, c.Playlist, c.Setting, c.Subscription, c.Tag,
-		c.UploadSession, c.User,
+		c.EncodeProfile, c.EncodingTask, c.Favorite, c.GroupMember, c.History, c.Like,
+		c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaReviewLog, c.MediaTag,
+		c.Notification, c.PermissionGroup, c.Playlist, c.Setting, c.Subscription,
+		c.Tag, c.UploadSession, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -365,6 +371,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Favorite.mutate(ctx, m)
 	case *GroupMemberMutation:
 		return c.GroupMember.mutate(ctx, m)
+	case *HistoryMutation:
+		return c.History.mutate(ctx, m)
 	case *LikeMutation:
 		return c.Like.mutate(ctx, m)
 	case *MediaMutation:
@@ -751,6 +759,22 @@ func (c *CategoryClient) QueryArticles(_m *Category) *ArticleQuery {
 	return query
 }
 
+// QueryChannels queries the channels edge of a Category.
+func (c *CategoryClient) QueryChannels(_m *Category) *ChannelQuery {
+	query := (&ChannelClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(category.Table, category.FieldID, id),
+			sqlgraph.To(channel.Table, channel.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, category.ChannelsTable, category.ChannelsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryParent queries the parent edge of a Category.
 func (c *CategoryClient) QueryParent(_m *Category) *CategoryQuery {
 	query := (&CategoryClient{config: c.config}).Query()
@@ -941,6 +965,38 @@ func (c *ChannelClient) QueryMedia(_m *Channel) *MediaQuery {
 			sqlgraph.From(channel.Table, channel.FieldID, id),
 			sqlgraph.To(media.Table, media.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, channel.MediaTable, channel.MediaColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryArticles queries the articles edge of a Channel.
+func (c *ChannelClient) QueryArticles(_m *Channel) *ArticleQuery {
+	query := (&ArticleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(channel.Table, channel.FieldID, id),
+			sqlgraph.To(article.Table, article.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, channel.ArticlesTable, channel.ArticlesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCategory queries the category edge of a Channel.
+func (c *ChannelClient) QueryCategory(_m *Channel) *CategoryQuery {
+	query := (&CategoryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(channel.Table, channel.FieldID, id),
+			sqlgraph.To(category.Table, category.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, channel.CategoryTable, channel.CategoryColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -2141,6 +2197,155 @@ func (c *GroupMemberClient) mutate(ctx context.Context, m *GroupMemberMutation) 
 		return (&GroupMemberDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("entity: unknown GroupMember mutation op: %q", m.Op())
+	}
+}
+
+// HistoryClient is a client for the History schema.
+type HistoryClient struct {
+	config
+}
+
+// NewHistoryClient returns a client for the History from the given config.
+func NewHistoryClient(c config) *HistoryClient {
+	return &HistoryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `history.Hooks(f(g(h())))`.
+func (c *HistoryClient) Use(hooks ...Hook) {
+	c.hooks.History = append(c.hooks.History, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `history.Intercept(f(g(h())))`.
+func (c *HistoryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.History = append(c.inters.History, interceptors...)
+}
+
+// Create returns a builder for creating a History entity.
+func (c *HistoryClient) Create() *HistoryCreate {
+	mutation := newHistoryMutation(c.config, OpCreate)
+	return &HistoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of History entities.
+func (c *HistoryClient) CreateBulk(builders ...*HistoryCreate) *HistoryCreateBulk {
+	return &HistoryCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *HistoryClient) MapCreateBulk(slice any, setFunc func(*HistoryCreate, int)) *HistoryCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &HistoryCreateBulk{err: fmt.Errorf("calling to HistoryClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*HistoryCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &HistoryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for History.
+func (c *HistoryClient) Update() *HistoryUpdate {
+	mutation := newHistoryMutation(c.config, OpUpdate)
+	return &HistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *HistoryClient) UpdateOne(_m *History) *HistoryUpdateOne {
+	mutation := newHistoryMutation(c.config, OpUpdateOne, withHistory(_m))
+	return &HistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *HistoryClient) UpdateOneID(id string) *HistoryUpdateOne {
+	mutation := newHistoryMutation(c.config, OpUpdateOne, withHistoryID(id))
+	return &HistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for History.
+func (c *HistoryClient) Delete() *HistoryDelete {
+	mutation := newHistoryMutation(c.config, OpDelete)
+	return &HistoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *HistoryClient) DeleteOne(_m *History) *HistoryDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *HistoryClient) DeleteOneID(id string) *HistoryDeleteOne {
+	builder := c.Delete().Where(history.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &HistoryDeleteOne{builder}
+}
+
+// Query returns a query builder for History.
+func (c *HistoryClient) Query() *HistoryQuery {
+	return &HistoryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeHistory},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a History entity by its id.
+func (c *HistoryClient) Get(ctx context.Context, id string) (*History, error) {
+	return c.Query().Where(history.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *HistoryClient) GetX(ctx context.Context, id string) *History {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a History.
+func (c *HistoryClient) QueryUser(_m *History) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(history.Table, history.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, history.UserTable, history.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *HistoryClient) Hooks() []Hook {
+	return c.hooks.History
+}
+
+// Interceptors returns the client interceptors.
+func (c *HistoryClient) Interceptors() []Interceptor {
+	return c.inters.History
+}
+
+func (c *HistoryClient) mutate(ctx context.Context, m *HistoryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&HistoryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&HistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&HistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&HistoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entity: unknown History mutation op: %q", m.Op())
 	}
 }
 
@@ -4701,6 +4906,22 @@ func (c *UserClient) QueryCreatedGroups(_m *User) *PermissionGroupQuery {
 	return query
 }
 
+// QueryHistory queries the history edge of a User.
+func (c *UserClient) QueryHistory(_m *User) *HistoryQuery {
+	query := (&HistoryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(history.Table, history.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.HistoryTable, user.HistoryColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -4730,14 +4951,14 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 type (
 	hooks struct {
 		Article, Category, Channel, Comment, CommentLike, CommentReport, EncodeProfile,
-		EncodingTask, Favorite, GroupMember, Like, Media, MediaCategory, MediaPlaylist,
-		MediaReviewLog, MediaTag, Notification, PermissionGroup, Playlist, Setting,
-		Subscription, Tag, UploadSession, User []ent.Hook
+		EncodingTask, Favorite, GroupMember, History, Like, Media, MediaCategory,
+		MediaPlaylist, MediaReviewLog, MediaTag, Notification, PermissionGroup,
+		Playlist, Setting, Subscription, Tag, UploadSession, User []ent.Hook
 	}
 	inters struct {
 		Article, Category, Channel, Comment, CommentLike, CommentReport, EncodeProfile,
-		EncodingTask, Favorite, GroupMember, Like, Media, MediaCategory, MediaPlaylist,
-		MediaReviewLog, MediaTag, Notification, PermissionGroup, Playlist, Setting,
-		Subscription, Tag, UploadSession, User []ent.Interceptor
+		EncodingTask, Favorite, GroupMember, History, Like, Media, MediaCategory,
+		MediaPlaylist, MediaReviewLog, MediaTag, Notification, PermissionGroup,
+		Playlist, Setting, Subscription, Tag, UploadSession, User []ent.Interceptor
 	}
 )

@@ -34,6 +34,7 @@ import (
 	systembiz "origadmin/application/origcms/internal/features/system/biz"
 	systemservice "origadmin/application/origcms/internal/features/system/service"
 	"origadmin/application/origcms/internal/features/user"
+	userbiz "origadmin/application/origcms/internal/features/user/biz"
 	userservice "origadmin/application/origcms/internal/features/user/service"
 	"origadmin/application/origcms/internal/infra"
 	infraauth "origadmin/application/origcms/internal/infra/auth"
@@ -167,8 +168,9 @@ func NewTranscodeHandler(
 func NewArticleHandler(
 	uc *contentbiz.ArticleUseCase,
 	jwt *infraauth.Manager,
+	settingUC *systembiz.SettingUseCase,
 ) *contentservice.ArticleHandler {
-	return contentservice.NewArticleHandler(uc, jwt)
+	return contentservice.NewArticleHandler(uc, jwt, settingUC)
 }
 
 // NewCommentHandler creates a new comment handler.
@@ -182,8 +184,8 @@ func NewCommentHandler(
 }
 
 // NewPlaylistHandler creates a new playlist handler.
-func NewPlaylistHandler(client *entity.Client) *contentservice.PlaylistHandler {
-	return contentservice.NewPlaylistHandler(client)
+func NewPlaylistHandler(playlistUC *contentbiz.PlaylistChannelUseCase, settingUC *systembiz.SettingUseCase) *contentservice.PlaylistHandler {
+	return contentservice.NewPlaylistHandler(playlistUC, settingUC)
 }
 
 // NewInteractionHandler creates a new interaction handler.
@@ -212,6 +214,17 @@ func NewStubHandler(jwt *infraauth.Manager) *contentservice.StubHandler {
 // NewSpriteHandler creates a new sprite handler for sprite sheet and VTT routes.
 func NewSpriteHandler(mediaUC *mediabiz.MediaUseCase, jwt *infraauth.Manager, logger log.Logger) *contentservice.SpriteHandler {
 	return contentservice.NewSpriteHandler(mediaUC, "./data/uploads", jwt, logger)
+}
+
+// NewMeHandler creates a new me handler.
+func NewMeHandler(
+	userUC *userbiz.UserUseCase,
+	likeFavoriteUC *contentbiz.LikeFavoriteUseCase,
+	playlistChannelUC *contentbiz.PlaylistChannelUseCase,
+	historyUC *contentbiz.HistoryUseCase,
+	jwt *infraauth.Manager,
+) *userservice.MeHandler {
+	return userservice.NewMeHandler(userUC, likeFavoriteUC, playlistChannelUC, historyUC, jwt)
 }
 
 // AppDependencies holds all application dependencies.

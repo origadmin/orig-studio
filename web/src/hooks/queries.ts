@@ -1,7 +1,9 @@
 import {useQuery, useMutation, useQueryClient, useInfiniteQuery} from '@tanstack/react-query';
+import {useMemo} from 'react';
 import {mediaApi, publicMediaApi, adminMediaApi, type Media, type UpdateMediaRequest, normalizeMedia, normalizeMediaList} from '@/lib/api/media';
 import {categoryApi, type Category} from '@/lib/api/category';
-import {channelApi, type ChannelDetail} from '@/lib/api/channel';
+import {channelApi, type Channel, type ChannelDetail, type ChannelLimits} from '@/lib/api/channel';
+import {userApi, type PublicProfile} from '@/lib/api/user';
 import {playlistApi, type Playlist, type PlaylistListResponse} from '@/lib/api/playlist';
 import {portalApi, adminPortalApi} from '@/lib/api/portal';
 import {reviewApi} from '@/lib/api/review';
@@ -9,7 +11,9 @@ import {adminCommentApi} from '@/lib/api/comment';
 import {configApi, type SettingCategory} from '@/lib/api/config';
 import {adminPermissionApi} from '@/lib/api/permission';
 import {spriteApi} from '@/lib/api/sprite';
+import {favoriteApi} from '@/lib/api/favorite';
 import {PAGINATION_CONFIG} from '@/config/pagination';
+import {useAuth} from '@/hooks/useAuth';
 
 /**
  * keys factory
@@ -63,7 +67,7 @@ export function useMediaList(params: {
                 type: params.type,
                 category_id: params.category_id != null && params.category_id > 0 ? params.category_id : undefined,
                 category_ids: params.category_ids && params.category_ids.length > 0 ? params.category_ids.join(',') : undefined,
-                user_id: params.user_id ? Number(params.user_id) : undefined,
+                user_id: params.user_id || undefined,
                 keyword: params.search || params.keyword,
                 // Map status → state (backend field name)
                 state: params.status,
@@ -283,21 +287,92 @@ export function useChannelByHandle(handle: string | null) {
     return useQuery({
         queryKey: ['channel', 'handle', handle],
         queryFn: async () => {
-            const res = await channelApi.get({username: handle!});
-            return (res as any).data || res as ChannelDetail;
+            const res = await channelApi.resolveHandle(handle!);
+            if (res.type === 'channel' && res.channel) {
+                return res.channel as ChannelDetail;
+            }
+            return null;
         },
         enabled: !!handle,
     });
+}
+
+export function usePublicProfile(username: string | null) {
+    const {user: currentUser, isAuthenticated} = useAuth();
+    const query = useQuery({
+        queryKey: ['profile', username],
+        queryFn: async () => {
+            const res = await userApi.getPublicProfile(username!);
+            const raw = (res as any)?.user ?? res;
+            return {
+                id: raw.id,
+                username: raw.username,
+                nickname: raw.nickname || undefined,
+                avatar: raw.avatar || undefined,
+                slug: raw.slug || undefined,
+                bio: raw.description || raw.bio || undefined,
+                location: raw.location || undefined,
+                website: raw.website || undefined,
+                title: raw.title || undefined,
+                is_featured: raw.is_verified || false,
+                media_count: raw.media_count || 0,
+                subscriber_count: raw.subscriber_count || 0,
+                created_at: raw.create_time || raw.created_at,
+                default_channel_token: raw.default_channel_token || undefined,
+                // is_owner computed outside queryFn via useMemo below,
+                // so it stays in sync with auth state changes.
+                is_subscribed: raw.is_subscribed || false,
+            } as Omit<PublicProfile, 'is_owner'>;
+        },
+        enabled: !!username,
+        staleTime: 60_000,
+    });
+
+    // Derive is_owner from current auth state and profile data.
+    // Using useMemo ensures is_owner is recomputed whenever auth state changes,
+    // without requiring a re-fetch of the profile data.
+    const data = useMemo(() => {
+        if (!query.data) return undefined;
+        return {
+            ...query.data,
+            is_owner: isAuthenticated && !!currentUser && currentUser.username === query.data.username,
+        } as PublicProfile;
+    }, [query.data, isAuthenticated, currentUser]);
+
+    return {...query, data};
 }
 
 export function useMyChannel(enabled: boolean) {
     return useQuery({
         queryKey: ['channel', 'me'],
         queryFn: async () => {
-            const res = await channelApi.getMyChannel();
-            // Backend returns { channel: null } when user has no channel yet
-            const data = (res as any)?.channel ?? res;
-            return (data || null) as ChannelDetail | null;
+            const res = await channelApi.getMyChannels();
+            // Backend returns { items: [], total: 0 } when user has no channels
+            const data = (res as any)?.items ?? [];
+            return (data.length > 0 ? data[0] : null) as ChannelDetail | null;
+        },
+        enabled,
+    });
+}
+
+export function useMyChannels(enabled: boolean) {
+    return useQuery({
+        queryKey: ['channels', 'me'],
+        queryFn: async () => {
+            const res = await channelApi.getMyChannels();
+            const data = (res as any)?.items ?? [];
+            return data as Channel[];
+        },
+        enabled,
+    });
+}
+
+export function useChannelLimits(enabled: boolean) {
+    return useQuery({
+        queryKey: ['channel', 'limits'],
+        queryFn: async () => {
+            const res = await channelApi.getChannelLimits();
+            return res as ChannelLimits;
         },
         enabled,
     });
@@ -701,6 +776,158 @@ export function useGenerateSprite() {
         mutationFn: (mediaId: string) => spriteApi.regenerateSprite(mediaId),
         onSuccess: (_data, mediaId) => {
             queryClient.invalidateQueries({queryKey: ['sprite', mediaId]});
+        },
+    });
+}
+
+// ==================== Favorite Hooks ====================
+
+/**
+ * useFavoriteStatus: Get favorite status for a media item with TanStack Query caching
+ */
+export function useFavoriteStatus(mediaId: string | null | undefined, shortToken?: string) {
+    const identifier = shortToken || mediaId;
+    const usePublicApi = !!shortToken && shortToken.trim().length > 0;
+    return useQuery({
+        queryKey: ['favoriteStatus', identifier],
+        queryFn: async () => {
+            if (!identifier) return null;
+            if (usePublicApi) {
+                return await publicMediaApi.favorites.getStatus(identifier);
+            }
+            return await mediaApi.favorites.getStatus(identifier!);
+        },
+        enabled: !!identifier,
+    });
+}
+
+/**
+ * useToggleFavorite: Toggle favorite status with optimistic update
+ */
+export function useToggleFavorite() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({mediaId, shortToken}: { mediaId: string; shortToken?: string }) => {
+            const identifier = shortToken || mediaId;
+            const usePublicApi = !!shortToken && shortToken.trim().length > 0;
+            if (usePublicApi) {
+                return await publicMediaApi.favorites.toggle(identifier);
+            }
+            return await mediaApi.favorites.toggle(identifier);
+        },
+        onSuccess: (_data, variables) => {
+            const identifier = variables.shortToken || variables.mediaId;
+            // Invalidate favorite status cache
+            queryClient.invalidateQueries({queryKey: ['favoriteStatus', identifier]});
+            // Invalidate favorites list cache
+            queryClient.invalidateQueries({queryKey: ['favorites']});
+            // Invalidate media detail cache (favorite_count may have changed)
+            queryClient.invalidateQueries({queryKey: ['publicMedia', 'detail', identifier]});
+            queryClient.invalidateQueries({queryKey: mediaKeys.detail(identifier)});
+        },
+    });
+}
+
+/**
+ * useFavoriteList: Get user's favorite list with pagination
+ */
+export function useFavoriteList(params?: { page?: number; page_size?: number }, userId?: string) {
+    return useQuery({
+        queryKey: ['favorites', userId, params],
+        queryFn: async () => {
+            return await favoriteApi.list(params);
+        },
+        enabled: !!userId,
+    });
+}
+
+/**
+ * useRemoveFavorite: Remove a favorite by its ID
+ */
+export function useRemoveFavorite() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (favoriteId: string) => favoriteApi.remove(favoriteId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['favorites']});
+        },
+    });
+}
+
+// ==================== History Hooks ====================
+
+import {historyApi, type ContentType} from '@/lib/api/history';
+import {createHistoryService} from '@/lib/services/history';
+
+/**
+ * useHistoryList: Get watch history list with pagination
+ * Supports both authenticated (remote) and anonymous (local) users
+ */
+export function useHistoryList(params: {
+    page?: number;
+    page_size?: number;
+    content_type?: ContentType;
+    isAuthenticated?: boolean;
+    userId?: number | string;
+}) {
+    const service = createHistoryService(!!params.isAuthenticated);
+    return useQuery({
+        queryKey: ['history', params.userId, params.page, params.content_type],
+        queryFn: async () => {
+            return await service.list({
+                page: params.page,
+                page_size: params.page_size,
+                content_type: params.content_type,
+            });
+        },
+        staleTime: 0,
+        refetchOnMount: 'always',
+    });
+}
+
+/**
+ * useUpsertHistory: Report watch progress (upsert a history record)
+ */
+export function useUpsertHistory() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: {
+            content_id: string;
+            content_type: ContentType;
+            progress_seconds: number;
+            duration_seconds: number;
+        }) => historyApi.upsert(data),
+        onSuccess: () => {
+            // Don't invalidate on every upsert (too frequent during playback)
+            // Progress is reported via useWatchProgress which handles its own cadence
+        },
+    });
+}
+
+/**
+ * useClearHistory: Clear all watch history
+ */
+export function useClearHistory(isAuthenticated?: boolean) {
+    const queryClient = useQueryClient();
+    const service = createHistoryService(!!isAuthenticated);
+    return useMutation({
+        mutationFn: () => service.clear(),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['history']});
+        },
+    });
+}
+
+/**
+ * useRemoveHistoryItem: Remove a single history record by ID
+ */
+export function useRemoveHistoryItem(isAuthenticated?: boolean) {
+    const queryClient = useQueryClient();
+    const service = createHistoryService(!!isAuthenticated);
+    return useMutation({
+        mutationFn: (id: string) => service.remove(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['history']});
         },
     });
 }

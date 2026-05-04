@@ -36,6 +36,9 @@ type Favorite func(*sql.Selector)
 // GroupMember is the predicate function for groupmember builders.
 type GroupMember func(*sql.Selector)
 
+// History is the predicate function for history builders.
+type History func(*sql.Selector)
+
 // Like is the predicate function for like builders.
 type Like func(*sql.Selector)
 

@@ -126,10 +126,23 @@ func (r *tagRepositoryImpl) Create(ctx context.Context, tag *entity.Tag) (*entit
 // Update updates an existing tag
 func (r *tagRepositoryImpl) Update(ctx context.Context, tag *entity.Tag) (*entity.Tag, error) {
 	builder := r.client.Tag.UpdateOne(tag).
-		SetTitle(tag.Title)
+		SetTitle(tag.Title).
+		SetStatus(tag.Status)
+
 	if tag.Slug != "" {
 		builder = builder.SetSlug(tag.Slug)
 	}
+	if tag.Color != "" {
+		builder = builder.SetColor(tag.Color)
+	} else {
+		builder = builder.ClearColor()
+	}
+	if tag.Description != "" {
+		builder = builder.SetDescription(tag.Description)
+	} else {
+		builder = builder.ClearDescription()
+	}
+
 	updatedTag, err := builder.Save(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("update tag: %w", err)

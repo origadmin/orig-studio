@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {useNavigate} from '@tanstack/react-router';
+import {useTranslation} from 'react-i18next';
 import {Clock, Eye, MoreVertical, Pencil, BarChart3, Play, ListPlus, Share2, Flag} from 'lucide-react';
 import {
     DropdownMenu,
@@ -17,7 +18,14 @@ interface Video {
     duration?: number;
     view_count?: number;
     published_at?: string;
+    create_time?: string;
     progress?: number;
+    user?: {
+        id?: string;
+        username?: string;
+        nickname?: string;
+        avatar?: string;
+    };
 }
 
 interface VideoCardProps {
@@ -44,6 +52,7 @@ const VideoCard: React.FC<VideoCardProps> = ({
     onShare,
 }) => {
     const navigate = useNavigate();
+    const {t} = useTranslation();
     const [isHovered, setIsHovered] = useState(false);
 
     const formatDuration = (seconds: number): string => {
@@ -72,12 +81,12 @@ const VideoCard: React.FC<VideoCardProps> = ({
         const diffHours = Math.floor(diffMins / 60);
         const diffDays = Math.floor(diffHours / 24);
 
-        if (diffMins < 1) return 'just now';
-        if (diffMins < 60) return `${diffMins}m ago`;
-        if (diffHours < 24) return `${diffHours}h ago`;
-        if (diffDays < 7) return `${diffDays}d ago`;
-        if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-        if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
+        if (diffMins < 1) return t('common.justNow');
+        if (diffMins < 60) return t('common.minutesAgo', {count: diffMins});
+        if (diffHours < 24) return t('common.hoursAgo', {count: diffHours});
+        if (diffDays < 7) return t('common.daysAgo', {count: diffDays});
+        if (diffDays < 30) return t('common.weeksAgo', {count: Math.floor(diffDays / 7)});
+        if (diffDays < 365) return t('common.monthsAgo', {count: Math.floor(diffDays / 30)});
         return date.toLocaleDateString();
     };
 
@@ -120,8 +129,8 @@ const VideoCard: React.FC<VideoCardProps> = ({
                 {/* Play overlay on hover */}
                 {isHovered && (
                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-opacity duration-200">
-                        <div className="w-12 h-12 rounded-full bg-black/60 flex items-center justify-center backdrop-blur-sm">
-                            <Play className="w-6 h-6 text-white fill-white ml-0.5"/>
+                        <div className="w-[clamp(2rem,6vw,3rem)] h-[clamp(2rem,6vw,3rem)] rounded-full bg-black/60 flex items-center justify-center backdrop-blur-sm">
+                            <Play className="text-white fill-white ml-0.5" style={{width: 'clamp(0.75rem,3vw,1.5rem)', height: 'clamp(0.75rem,3vw,1.5rem)'}}/>
                         </div>
                     </div>
                 )}
@@ -166,10 +175,14 @@ const VideoCard: React.FC<VideoCardProps> = ({
             {/* Video info */}
             <div className="mt-2.5 flex gap-2.5">
                 {!showChannelInfo && (
-                    <div className="hidden sm:block w-9 h-9 rounded-full bg-primary/10 flex-shrink-0 mt-0.5">
-                        <div className="w-full h-full rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-xs font-bold text-primary">
-                            C
-                        </div>
+                    <div className="hidden sm:block w-9 h-9 rounded-full bg-primary/10 flex-shrink-0 mt-0.5 overflow-hidden">
+                        {video.user?.avatar ? (
+                            <img src={video.user.avatar} alt="" className="w-full h-full object-cover"/>
+                        ) : (
+                            <div className="w-full h-full rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-xs font-bold text-primary">
+                                {(video.user?.nickname || video.user?.username || 'U').charAt(0).toUpperCase()}
+                            </div>
+                        )}
                     </div>
                 )}
                 <div className="flex-1 min-w-0">
@@ -177,14 +190,23 @@ const VideoCard: React.FC<VideoCardProps> = ({
                         {video.title}
                     </h3>
                     <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                        {video.user?.username && (
+                            <span>@{video.user.nickname || video.user.username}</span>
+                        )}
+                        {video.user?.username && video.view_count !== undefined && (
+                            <span>·</span>
+                        )}
                         {video.view_count !== undefined && (
                             <span className="flex items-center gap-1">
                                 <Eye className="w-3 h-3"/>
                                 {formatCount(video.view_count)}
                             </span>
                         )}
-                        {video.published_at && (
-                            <span>{timeAgo(video.published_at)}</span>
+                        {(video.published_at || video.create_time) && (
+                            <>
+                                <span>·</span>
+                                <span>{timeAgo(video.published_at || video.create_time!)}</span>
+                            </>
                         )}
                     </div>
                 </div>
@@ -205,14 +227,14 @@ const VideoCard: React.FC<VideoCardProps> = ({
                             onAddToPlaylist?.(video.id);
                         }}>
                             <ListPlus className="h-4 w-4 mr-2"/>
-                            Add to playlist
+                            {t('watch.saveToPlaylist')}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={(e) => {
                             e.stopPropagation();
                             onShare?.(video.id);
                         }}>
                             <Share2 className="h-4 w-4 mr-2"/>
-                            Share
+                            {t('watch.share')}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator/>
                         <DropdownMenuItem onClick={(e) => {
@@ -220,7 +242,7 @@ const VideoCard: React.FC<VideoCardProps> = ({
                             console.log('Report video:', video.id);
                         }}>
                             <Flag className="h-4 w-4 mr-2"/>
-                            Report
+                            {t('channel.reportChannel')}
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

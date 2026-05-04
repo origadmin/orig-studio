@@ -6,6 +6,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -30,9 +31,17 @@ type SpriteHandler struct {
 
 // NewSpriteHandler creates a new SpriteHandler.
 func NewSpriteHandler(mediaUC *biz.MediaUseCase, baseDir string, jwt *auth.Manager, logger log.Logger) *SpriteHandler {
+	// Resolve baseDir to absolute path to avoid working directory dependency.
+	// When the server is started from a different directory (e.g., framework root
+	// instead of project root), relative paths like "./data/uploads" would
+	// resolve incorrectly, causing file not found errors for sprite/VTT files.
+	absBaseDir, err := filepath.Abs(baseDir)
+	if err != nil {
+		absBaseDir = baseDir // fallback to original if resolution fails
+	}
 	return &SpriteHandler{
 		mediaUC: mediaUC,
-		baseDir: baseDir,
+		baseDir: absBaseDir,
 		jwt:     jwt,
 		logger:  log.NewHelper(log.With(logger, "module", "service.sprite")),
 	}
@@ -156,9 +165,13 @@ func (h *SpriteHandler) RegenerateSprite(c *gin.Context) {
 		return
 	}
 
-	// Trigger asynchronous regeneration
+	// Trigger asynchronous regeneration.
+	// IMPORTANT: Do NOT use c.Request.Context() here — it is cancelled as soon as
+	// the HTTP response is sent, which would abort the ffmpeg subprocess via
+	// exec.CommandContext. Use context.Background() so the regeneration runs to
+	// completion independently of the request lifecycle.
 	go func() {
-		if err := h.mediaUC.RegenerateSprite(c.Request.Context(), mediaID); err != nil {
+		if err := h.mediaUC.RegenerateSprite(context.Background(), mediaID); err != nil {
 			h.logger.Warnf("sprite regeneration failed for media %s: %v", mediaID, err)
 		}
 	}()

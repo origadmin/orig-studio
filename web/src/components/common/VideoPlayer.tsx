@@ -108,6 +108,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
     const [progressBarRect, setProgressBarRect] = useState<DOMRect | null>(null);
     const [playerRect, setPlayerRect] = useState<DOMRect | null>(null);
     const spriteRafRef = useRef<number>(0);
+    const isDraggingProgress = useRef(false);
     const [hasError, setHasError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [hlsQualities, setHlsQualities] = useState<QualityOption[]>([]);
@@ -544,7 +545,18 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
 
     const handleLoadedMetadata = useCallback(() => {
         if (!videoRef.current) return;
-        setDuration(videoRef.current.duration);
+        const d = videoRef.current.duration;
+        if (d && isFinite(d)) {
+            setDuration(d);
+        }
+    }, []);
+
+    const handleDurationChange = useCallback(() => {
+        if (!videoRef.current) return;
+        const d = videoRef.current.duration;
+        if (d && isFinite(d)) {
+            setDuration(d);
+        }
     }, []);
 
     const handleEnded = useCallback(() => {
@@ -577,32 +589,55 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
     }, [onError, errorMessage]);
 
     // Seek
-    const handleSeek = useCallback((value: number[]) => {
-        if (!videoRef.current) return;
-        const time = value[0];
-        videoRef.current.currentTime = time;
-        setCurrentTime(time);
-        onTimeChange?.(time);
-    }, [onTimeChange]);
+    const getProgressRatio = useCallback((clientX: number, bar: DOMRect) => {
+        return Math.max(0, Math.min(1, (clientX - bar.left) / bar.width));
+    }, []);
 
-    // Sprite preview: progress bar mouse move handler (rAF throttled)
     const handleProgressMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (!enableSpritePreview) return;
+        const bar = e.currentTarget.getBoundingClientRect();
+        const clientX = e.clientX;
+
         if (spriteRafRef.current) cancelAnimationFrame(spriteRafRef.current);
 
         spriteRafRef.current = requestAnimationFrame(() => {
-            const bar = e.currentTarget.getBoundingClientRect();
-            const ratio = Math.max(0, Math.min(1, (e.clientX - bar.left) / bar.width));
+            const ratio = getProgressRatio(clientX, bar);
             setHoverRatio(ratio);
             setHoverTime(ratio * duration);
             setProgressBarRect(bar);
             setPlayerRect(containerRef.current?.getBoundingClientRect() ?? bar);
         });
-    }, [enableSpritePreview, duration]);
+    }, [enableSpritePreview, duration, getProgressRatio]);
 
     const handleProgressMouseLeave = useCallback(() => {
         if (spriteRafRef.current) cancelAnimationFrame(spriteRafRef.current);
         setHoverTime(null);
+    }, []);
+
+    const handleProgressPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+        if (!videoRef.current || !duration) return;
+        isDraggingProgress.current = true;
+        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+        const bar = e.currentTarget.getBoundingClientRect();
+        const ratio = getProgressRatio(e.clientX, bar);
+        const seekTime = ratio * duration;
+        videoRef.current.currentTime = seekTime;
+        setCurrentTime(seekTime);
+        onTimeChange?.(seekTime);
+    }, [duration, onTimeChange, getProgressRatio]);
+
+    const handleProgressPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+        if (!isDraggingProgress.current || !videoRef.current || !duration) return;
+        const bar = e.currentTarget.getBoundingClientRect();
+        const ratio = getProgressRatio(e.clientX, bar);
+        const seekTime = ratio * duration;
+        videoRef.current.currentTime = seekTime;
+        setCurrentTime(seekTime);
+        onTimeChange?.(seekTime);
+    }, [duration, onTimeChange, getProgressRatio]);
+
+    const handleProgressPointerUp = useCallback(() => {
+        isDraggingProgress.current = false;
     }, []);
 
     // Volume
@@ -820,6 +855,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                 onClick={handleVideoClick}
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
+                onDurationChange={handleDurationChange}
                 onEnded={handleEnded}
                 onWaiting={handleWaiting}
                 onPlaying={handlePlaying}
@@ -848,11 +884,11 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                     className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"
                     aria-hidden="true"
                 >
-                    <div className="w-24 h-24 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center animate-fade-in">
+                    <div className="w-[clamp(3rem,15vw,6rem)] h-[clamp(3rem,15vw,6rem)] bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center animate-fade-in">
                         {centerOverlayIcon === 'play' ? (
-                            <Play size={56} className="text-white fill-white ml-2"/>
+                            <Play className="text-white fill-white ml-2" style={{width: 'clamp(1.5rem,8vw,3.5rem)', height: 'clamp(1.5rem,8vw,3.5rem)'}}/>
                         ) : (
-                            <Pause size={56} className="text-white fill-white"/>
+                            <Pause className="text-white fill-white" style={{width: 'clamp(1.5rem,8vw,3.5rem)', height: 'clamp(1.5rem,8vw,3.5rem)'}}/>
                         )}
                     </div>
                 </div>
@@ -872,10 +908,9 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
             {!isPlaying && !hasError && showControls && !showCenterOverlay && (
                 <div
                     className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
-                    aria-hidden="true"
                 >
                     <div
-                        className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center cursor-pointer pointer-events-auto transition-transform hover:scale-110"
+                        className="w-[clamp(2.5rem,12vw,5rem)] h-[clamp(2.5rem,12vw,5rem)] bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center cursor-pointer pointer-events-auto transition-transform hover:scale-110"
                         onClick={(e) => {
                             e.stopPropagation();
                             togglePlay();
@@ -892,7 +927,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                             }
                         }}
                     >
-                        <Play size={48} className="text-white fill-white ml-2"/>
+                        <Play className="text-white fill-white ml-2" style={{width: 'clamp(1.25rem,7vw,3rem)', height: 'clamp(1.25rem,7vw,3rem)'}}/>
                     </div>
                 </div>
             )}
@@ -958,6 +993,9 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                         aria-valuemax={Math.floor(duration)}
                         aria-valuenow={Math.floor(currentTime)}
                         tabIndex={0}
+                        onPointerDown={handleProgressPointerDown}
+                        onPointerMove={handleProgressPointerMove}
+                        onPointerUp={handleProgressPointerUp}
                         onMouseMove={enableSpritePreview ? handleProgressMouseMove : undefined}
                         onMouseLeave={enableSpritePreview ? handleProgressMouseLeave : undefined}
                     >
@@ -971,16 +1009,6 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                         </div>
                         {/* Played progress */}
                         <div className="absolute inset-0 flex items-center">
-                            <input
-                                type="range"
-                                value={currentTime}
-                                min={0}
-                                max={duration || 100}
-                                step={0.1}
-                                onChange={(e) => handleSeek([parseFloat(e.target.value)])}
-                                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                                aria-label="Seek video"
-                            />
                             <div
                                 className="h-full bg-red-600 rounded-full transition-all"
                                 style={{width: `${(currentTime / (duration || 1)) * 100}%`}}
@@ -991,18 +1019,6 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                             </div>
                         </div>
                     </div>
-
-                    {/* Sprite preview on progress bar hover */}
-                    {hoverTime !== null && enableSpritePreview && progressBarRect && playerRect && (
-                        <SpritePreview
-                            hoverTime={hoverTime}
-                            hoverRatio={hoverRatio}
-                            progressBarRect={progressBarRect}
-                            playerRect={playerRect}
-                            vttUrl={spriteVttUrl ?? null}
-                            duration={duration}
-                        />
-                    )}
 
                     {/* Control buttons */}
                     <div className="flex items-center justify-between">
@@ -1309,6 +1325,20 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                     </div>
                 </div>
             </div>
+
+            {/* Sprite preview on progress bar hover — rendered at player container level
+                so that absolute positioning is relative to the player container, not the
+                bottom controls area. This avoids padding/offset miscalculations. */}
+            {hoverTime !== null && enableSpritePreview && progressBarRect && playerRect && (
+                <SpritePreview
+                    hoverTime={hoverTime}
+                    hoverRatio={hoverRatio}
+                    progressBarRect={progressBarRect}
+                    playerRect={playerRect}
+                    vttUrl={spriteVttUrl ?? null}
+                    duration={duration}
+                />
+            )}
         </div>
     );
 });

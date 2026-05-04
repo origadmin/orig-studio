@@ -14,6 +14,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/commentreport"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/groupmember"
+	"origadmin/application/origcms/internal/data/entity/history"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
@@ -792,6 +793,21 @@ func (_c *UserCreate) AddCreatedGroups(v ...*PermissionGroup) *UserCreate {
 	return _c.AddCreatedGroupIDs(ids...)
 }
 
+// AddHistoryIDs adds the "history" edge to the History entity by IDs.
+func (_c *UserCreate) AddHistoryIDs(ids ...string) *UserCreate {
+	_c.mutation.AddHistoryIDs(ids...)
+	return _c
+}
+
+// AddHistory adds the "history" edges to the History entity.
+func (_c *UserCreate) AddHistory(v ...*History) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddHistoryIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_c *UserCreate) Mutation() *UserMutation {
 	return _c.mutation
@@ -1516,6 +1532,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(permissiongroup.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.HistoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.HistoryTable,
+			Columns: []string{user.HistoryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(history.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

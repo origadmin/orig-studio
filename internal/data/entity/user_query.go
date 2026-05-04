@@ -15,6 +15,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/commentreport"
 	"origadmin/application/origcms/internal/data/entity/favorite"
 	"origadmin/application/origcms/internal/data/entity/groupmember"
+	"origadmin/application/origcms/internal/data/entity/history"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
@@ -58,6 +59,7 @@ type UserQuery struct {
 	withModeratedComments *CommentQuery
 	withGroupMemberships  *GroupMemberQuery
 	withCreatedGroups     *PermissionGroupQuery
+	withHistory           *HistoryQuery
 	modifiers             []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -491,6 +493,28 @@ func (_q *UserQuery) QueryCreatedGroups() *PermissionGroupQuery {
 	return query
 }
 
+// QueryHistory chains the current query on the "history" edge.
+func (_q *UserQuery) QueryHistory() *HistoryQuery {
+	query := (&HistoryClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(history.Table, history.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.HistoryTable, user.HistoryColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first User entity from the query.
 // Returns a *NotFoundError when no User was found.
 func (_q *UserQuery) First(ctx context.Context) (*User, error) {
@@ -701,6 +725,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		withModeratedComments: _q.withModeratedComments.Clone(),
 		withGroupMemberships:  _q.withGroupMemberships.Clone(),
 		withCreatedGroups:     _q.withCreatedGroups.Clone(),
+		withHistory:           _q.withHistory.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -906,6 +931,17 @@ func (_q *UserQuery) WithCreatedGroups(opts ...func(*PermissionGroupQuery)) *Use
 	return _q
 }
 
+// WithHistory tells the query-builder to eager-load the nodes that are connected to
+// the "history" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithHistory(opts ...func(*HistoryQuery)) *UserQuery {
+	query := (&HistoryClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withHistory = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -984,7 +1020,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [18]bool{
+		loadedTypes = [19]bool{
 			_q.withMedia != nil,
 			_q.withArticles != nil,
 			_q.withChannels != nil,
@@ -1003,6 +1039,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			_q.withModeratedComments != nil,
 			_q.withGroupMemberships != nil,
 			_q.withCreatedGroups != nil,
+			_q.withHistory != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -1152,6 +1189,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
+	if query := _q.withHistory; query != nil {
+		if err := _q.loadHistory(ctx, query, nodes,
+			func(n *User) { n.Edges.History = []*History{} },
+			func(n *User, e *History) { n.Edges.History = append(n.Edges.History, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -1196,6 +1240,7 @@ func (_q *UserQuery) loadArticles(ctx context.Context, query *ArticleQuery, node
 			init(nodes[i])
 		}
 	}
+	query.withFKs = true
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(article.FieldUserID)
 	}
@@ -1787,6 +1832,36 @@ func (_q *UserQuery) loadCreatedGroups(ctx context.Context, query *PermissionGro
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "created_by" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadHistory(ctx context.Context, query *HistoryQuery, nodes []*User, init func(*User), assign func(*User, *History)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(history.FieldUserID)
+	}
+	query.Where(predicate.History(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.HistoryColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

@@ -61,7 +61,7 @@ const Channels: React.FC = () => {
     const [currentChannel, setCurrentChannel] = useState<Channel | null>(null);
     const [formData, setFormData] = useState<Partial<Channel>>({
         name: '',
-        slug: '',
+        handle: '',
         description: '',
         status: 'active',
     });
@@ -92,7 +92,7 @@ const Channels: React.FC = () => {
     const resetForm = () => {
         setFormData({
             name: '',
-            slug: '',
+            handle: '',
             description: '',
             status: 'active',
         });
@@ -145,7 +145,7 @@ const Channels: React.FC = () => {
         setCurrentChannel(channel);
         setFormData({
             name: channel.name,
-            slug: channel.slug,
+            handle: channel.handle,
             description: channel.description,
             status: channel.status,
         });
@@ -396,7 +396,7 @@ const Channels: React.FC = () => {
                                                 </Avatar>
                                                 <div>
                                                     <div className="font-medium">{channel.name}</div>
-                                                    <div className="text-xs text-muted-foreground">{channel.slug}</div>
+                                                    <div className="text-xs text-muted-foreground">@{channel.handle}</div>
                                                 </div>
                                             </div>
                                         </TableCell>
@@ -496,12 +496,12 @@ const Channels: React.FC = () => {
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Slug *
+                                Handle *
                             </h4>
                             <Input
-                                placeholder="Enter channel slug"
-                                value={formData.slug || ''}
-                                onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                                placeholder="Enter channel handle"
+                                value={formData.handle || ''}
+                                onChange={(e) => setFormData({...formData, handle: e.target.value})}
                             />
                         </div>
                         <div>
@@ -567,12 +567,12 @@ const Channels: React.FC = () => {
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Slug *
+                                Handle *
                             </h4>
                             <Input
-                                placeholder="Enter channel slug"
-                                value={formData.slug || ''}
-                                onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                                placeholder="Enter channel handle"
+                                value={formData.handle || ''}
+                                onChange={(e) => setFormData({...formData, handle: e.target.value})}
                             />
                         </div>
                         <div>
