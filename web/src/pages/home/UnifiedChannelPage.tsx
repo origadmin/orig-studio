@@ -90,12 +90,11 @@ const ChannelPage: React.FC = () => {
                     <CreateChannelDialog
                         open={createDialogOpen}
                         onOpenChange={setCreateDialogOpen}
-                        onSuccess={({handle: newHandle, short_token: newToken}) => {
+                        onSuccess={({handle: _newHandle, short_token: newToken}) => {
                             if (newToken) {
                                 navigate({to: '/c/$id', params: {id: newToken}});
-                            } else if (newHandle) {
-                                navigate({to: '/$handle', params: {handle: `@${newHandle}`}});
                             } else {
+                                // short_token should always be returned from backend; reload as last resort
                                 window.location.reload();
                             }
                         }}

@@ -574,20 +574,17 @@ const ProfilePage: React.FC<ProfilePageProps> = ({userId: propUserId}) => {
                                                                 <Badge variant="default" className="bg-emerald-500 text-xs px-1.5 py-0">{t('common.verified')}</Badge>
                                                             )}
                                                         </div>
-                                                        {ch.handle && (
-                                                            <p className="text-xs text-slate-500 dark:text-muted-foreground mt-0.5">@{ch.handle}</p>
-                                                        )}
                                                     </div>
                                                 </div>
                                                 {ch.description && (
                                                     <p className="text-sm text-slate-500 dark:text-muted-foreground mt-3 line-clamp-2">{ch.description}</p>
                                                 )}
-                                                <div className="flex items-center gap-3 mt-3 text-xs text-slate-500 dark:text-muted-foreground">
-                                                    <span>{ch.media_count || 0} {t('profile.videosCount')}</span>
+                                                <div className="flex items-center gap-3 mt-3 text-xs text-slate-500 dark:text-muted-foreground flex-nowrap">
+                                                    <span className="whitespace-nowrap">{ch.media_count || 0} {t('profile.videosCount')}</span>
                                                     {ch.article_count !== undefined && (
-                                                        <span>{ch.article_count} {t('profile.articlesCount')}</span>
+                                                        <span className="whitespace-nowrap">{ch.article_count} {t('profile.articlesCount')}</span>
                                                     )}
-                                                    <span>{formatViews(ch.subscriber_count || 0)} {t('profile.subscribersCount')}</span>
+                                                    <span className="whitespace-nowrap">{formatViews(ch.subscriber_count || 0)} {t('profile.subscribersCount')}</span>
                                                 </div>
                                                 <div className="flex items-center justify-between mt-3">
                                                     <Badge variant={getPrivacyBadgeVariant(ch.privacy)} className="text-xs">

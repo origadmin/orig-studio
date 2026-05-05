@@ -363,6 +363,11 @@ func (r *channelRepo) Create(ctx context.Context, ch *biz.Channel) (*biz.Channel
 	if ch.Slug != "" {
 		builder.SetSlug(ch.Slug)
 	}
+	// Only set ShortToken when explicitly provided (non-empty);
+	// otherwise let ent schema's DefaultFunc (idutil.GenShortID) auto-generate one.
+	if ch.ShortToken != "" {
+		builder.SetShortToken(ch.ShortToken)
+	}
 	if ch.Avatar != "" {
 		builder.SetAvatar(ch.Avatar)
 	}

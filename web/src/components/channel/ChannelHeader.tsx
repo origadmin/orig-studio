@@ -161,21 +161,17 @@ const ChannelHeader: React.FC<ChannelHeaderProps> = ({
                             )}
                         </h1>
 
-                        {channel.handle && (
-                            <p className="text-xs sm:text-sm text-muted-foreground mb-1">@{channel.handle}</p>
-                        )}
-
-                        <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-3 gap-y-0.5 sm:gap-y-1 text-xs sm:text-sm text-muted-foreground mb-1 sm:mb-2">
-                            <span className="flex items-center gap-1">
+                        <div className="flex items-center gap-x-2 sm:gap-x-3 text-xs sm:text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1 whitespace-nowrap">
                                 <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5"/>
                                 {formatCount(subCount)} {t('channel.subscribers')}
                             </span>
-                            <span className="flex items-center gap-1">
+                            <span className="flex items-center gap-1 whitespace-nowrap">
                                 <Film className="w-3 h-3 sm:w-3.5 sm:h-3.5"/>
                                 {videoCount} {t('channel.videoCount')}
                             </span>
                             {viewCount > 0 && (
-                                <span className="flex items-center gap-1">
+                                <span className="flex items-center gap-1 whitespace-nowrap">
                                     <Eye className="w-3 h-3 sm:w-3.5 sm:h-3.5"/>
                                     {formatCount(viewCount)} {t('channel.views')}
                                 </span>
@@ -253,16 +249,14 @@ const ChannelHeader: React.FC<ChannelHeaderProps> = ({
                             </>
                         ) : (
                             <>
-                                <Button asChild>
+                                <Button asChild size="sm">
                                     <Link to="/me/upload">
-                                        <Upload className="w-4 h-4 mr-1"/>
-                                        {t('channel.uploadVideo')}
+                                        <Upload className="w-4 h-4"/>
                                     </Link>
                                 </Button>
-                                <Button asChild variant="outline">
+                                <Button asChild variant="outline" size="sm">
                                     <Link to="/me/channels">
-                                        <Settings className="w-4 h-4 mr-1"/>
-                                        {t('channel.channelSettings')}
+                                        <Settings className="w-4 h-4"/>
                                     </Link>
                                 </Button>
                                 <Button variant="ghost" size="icon" className="rounded-full" onClick={handleShareClick}>
