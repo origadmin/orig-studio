@@ -446,44 +446,68 @@ func (uc *PlaylistChannelUseCase) RemoveMediaFromChannel(ctx context.Context, ch
 
 // Subscription methods
 
-func (uc *PlaylistChannelUseCase) SubscribeToChannel(ctx context.Context, channelID, userID string) error {
-	// Check if channel exists
-	_, err := uc.channelRepo.Get(ctx, channelID)
+func (uc *PlaylistChannelUseCase) SubscribeToChannel(ctx context.Context, channelToken, userID string) error {
+	// Resolve short_token to channel first
+	ch, err := uc.channelRepo.GetByShortToken(ctx, channelToken)
 	if err != nil {
-		return err
+		return fmt.Errorf("channel_not_found")
 	}
-	return uc.channelRepo.Subscribe(ctx, channelID, userID)
+	// Prevent self-subscription
+	if ch.UserID == userID {
+		return fmt.Errorf("cannot_subscribe_own_channel")
+	}
+	return uc.channelRepo.Subscribe(ctx, ch.ID, userID)
 }
 
-func (uc *PlaylistChannelUseCase) UnsubscribeFromChannel(ctx context.Context, channelID, userID string) error {
-	return uc.channelRepo.Unsubscribe(ctx, channelID, userID)
+func (uc *PlaylistChannelUseCase) UnsubscribeFromChannel(ctx context.Context, channelToken, userID string) error {
+	// Resolve short_token to channel first
+	ch, err := uc.channelRepo.GetByShortToken(ctx, channelToken)
+	if err != nil {
+		return fmt.Errorf("channel_not_found")
+	}
+	return uc.channelRepo.Unsubscribe(ctx, ch.ID, userID)
 }
 
-func (uc *PlaylistChannelUseCase) IsSubscribedToChannel(ctx context.Context, channelID, userID string) (bool, error) {
-	return uc.channelRepo.IsSubscribed(ctx, channelID, userID)
+func (uc *PlaylistChannelUseCase) IsSubscribedToChannel(ctx context.Context, channelToken, userID string) (bool, error) {
+	// Resolve short_token to channel first
+	ch, err := uc.channelRepo.GetByShortToken(ctx, channelToken)
+	if err != nil {
+		return false, fmt.Errorf("channel_not_found")
+	}
+	return uc.channelRepo.IsSubscribed(ctx, ch.ID, userID)
 }
 
-func (uc *PlaylistChannelUseCase) GetChannelSubscribers(ctx context.Context, channelID string, page, pageSize int) ([]string, int, error) {
-	return uc.channelRepo.GetSubscribers(ctx, channelID, page, pageSize)
+func (uc *PlaylistChannelUseCase) GetChannelSubscribers(ctx context.Context, channelToken string, page, pageSize int) ([]string, int, error) {
+	// Resolve short_token to channel first
+	ch, err := uc.channelRepo.GetByShortToken(ctx, channelToken)
+	if err != nil {
+		return nil, 0, fmt.Errorf("channel_not_found")
+	}
+	return uc.channelRepo.GetSubscribers(ctx, ch.ID, page, pageSize)
 }
 
-func (uc *PlaylistChannelUseCase) GetChannelSubscriberCount(ctx context.Context, channelID string) (int, error) {
-	return uc.channelRepo.GetSubscriberCount(ctx, channelID)
+func (uc *PlaylistChannelUseCase) GetChannelSubscriberCount(ctx context.Context, channelToken string) (int, error) {
+	// Resolve short_token to channel first
+	ch, err := uc.channelRepo.GetByShortToken(ctx, channelToken)
+	if err != nil {
+		return 0, fmt.Errorf("channel_not_found")
+	}
+	return uc.channelRepo.GetSubscriberCount(ctx, ch.ID)
 }
 
 // Invitation methods
 
-func (uc *PlaylistChannelUseCase) InviteUserToChannel(ctx context.Context, channelID, userID, inviterID string, isAdmin bool) error {
-	// Check if channel exists
-	existing, err := uc.channelRepo.Get(ctx, channelID)
+func (uc *PlaylistChannelUseCase) InviteUserToChannel(ctx context.Context, channelToken, userID, inviterID string, isAdmin bool) error {
+	// Resolve short_token to channel first
+	existing, err := uc.channelRepo.GetByShortToken(ctx, channelToken)
 	if err != nil {
-		return err
+		return fmt.Errorf("channel_not_found")
 	}
 	// Check if inviter is channel owner or admin
 	if existing.UserID != inviterID && !isAdmin {
 		return fmt.Errorf("permission denied")
 	}
-	return uc.channelRepo.InviteUserToChannel(ctx, channelID, userID)
+	return uc.channelRepo.InviteUserToChannel(ctx, existing.ID, userID)
 }
 
 func (uc *PlaylistChannelUseCase) AcceptChannelInvitation(ctx context.Context, channelID, userID string) error {

@@ -1,15 +1,24 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {Link} from '@tanstack/react-router';
+import {Link, useNavigate} from '@tanstack/react-router';
+import {useTranslation} from 'react-i18next';
 import {articleApi} from '@/lib/api/article';
 import {Avatar, AvatarFallback} from '@/components/ui/avatar';
 import {Badge} from '@/components/ui/badge';
+import {Button} from '@/components/ui/button';
 import {Spinner} from '@/components/ui/spinner';
-import {FileText, Clock, User} from 'lucide-react';
+import {FileText, Clock, User, Plus} from 'lucide-react';
 import {getImageUrl, handleImageError} from '@/lib/imageUtils';
 import {formatDate} from '@/lib/format';
+import {CreateChannelDialog} from '@/components/channel/CreateChannelDialog';
+import {useAuth} from '@/hooks/useAuth';
 
 const ArticleHomeLayout: React.FC = () => {
+    const {t} = useTranslation();
+    const navigate = useNavigate();
+    const {isAuthenticated} = useAuth();
+    const [createDialogOpen, setCreateDialogOpen] = useState(false);
+
     const {data, isLoading, error} = useQuery({
         queryKey: ['articles', 'latest'],
         queryFn: () => articleApi.list({page: 1, page_size: 20, state: 'published'}),
@@ -38,8 +47,25 @@ const ArticleHomeLayout: React.FC = () => {
         return (
             <div className="text-center py-12">
                 <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground"/>
-                <h2 className="text-xl font-semibold mb-2">No Articles Yet</h2>
-                <p className="text-muted-foreground">Check back later for new content.</p>
+                <h2 className="text-xl font-semibold mb-2">{t('channel.noArticles') || 'No Articles Yet'}</h2>
+                <p className="text-muted-foreground mb-6">{t('channel.noArticlesSelf') || 'Check back later for new content.'}</p>
+                {isAuthenticated && (
+                    <>
+                        <Button onClick={() => setCreateDialogOpen(true)} size="lg" className="mb-2">
+                            <Plus size={16} className="mr-2"/>
+                            {t('channel.create.title') || 'Create Channel'}
+                        </Button>
+                        <CreateChannelDialog
+                            open={createDialogOpen}
+                            onOpenChange={setCreateDialogOpen}
+                            onSuccess={({short_token: newToken}) => {
+                                if (newToken) {
+                                    navigate({to: '/c/$id', params: {id: newToken}});
+                                }
+                            }}
+                        />
+                    </>
+                )}
             </div>
         );
     }
@@ -47,8 +73,8 @@ const ArticleHomeLayout: React.FC = () => {
     return (
         <div className="max-w-2xl mx-auto">
             <div className="mb-6">
-                <h1 className="text-2xl font-bold">Latest Articles</h1>
-                <p className="text-muted-foreground text-sm">Stay updated with the latest posts</p>
+                <h1 className="text-2xl font-bold">{t('home.latestArticles')}</h1>
+                <p className="text-muted-foreground text-sm">{t('home.latestArticlesDesc')}</p>
             </div>
 
             <div className="divide-y divide-border">

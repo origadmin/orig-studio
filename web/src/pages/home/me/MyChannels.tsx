@@ -51,12 +51,24 @@ const MyChannels = () => {
     const currentCount = limits ? limits.current_count : 0;
     const maxChannels = limits ? limits.max_channels : -1;
 
+    // Map proto enum status to i18n key
+    const getChannelStatusLabel = (status: string | undefined): string => {
+        if (!status) return '';
+        // Handle both proto enum format (CHANNEL_STATUS_ACTIVE) and simple format (ACTIVE)
+        const normalized = status.replace('CHANNEL_STATUS_', '').toLowerCase();
+        const key = `channel.status.${normalized}`;
+        const translated = t(key);
+        // If no translation found, return the key as fallback
+        return translated === key ? status : translated;
+    };
+
     const handleCreateSuccess = ({handle, short_token}: {id: string; handle: string; short_token?: string}) => {
         setCreateDialogOpen(false);
         if (short_token) {
             navigate({to: '/c/$id', params: {id: short_token}});
         } else {
-            navigate({to: '/$handle', params: {handle: `@${handle}`}});
+            // short_token should always be returned from backend; reload as last resort
+            window.location.reload();
         }
     };
 
@@ -131,20 +143,20 @@ const MyChannels = () => {
             ) : (
                 <div className="grid gap-4">
                     {channelList.map(channel => (
-                        <Card key={channel.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                        <Card key={channel.id} className="hover:shadow-md transition-shadow">
                             <CardContent className="p-0">
                                 <div className="flex flex-col sm:flex-row">
+                                    <div className="sm:w-48 h-24 sm:h-auto flex-shrink-0 overflow-hidden">
                                     {channel.banner ? (
-                                        <div className="sm:w-48 h-24 sm:h-auto flex-shrink-0">
-                                            <img
-                                                src={getImageUrl(channel.banner, 'cover')}
-                                                alt={channel.name}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
+                                        <img
+                                            src={getImageUrl(channel.banner, 'cover')}
+                                            alt={channel.name}
+                                            className="w-full h-full object-cover"
+                                        />
                                     ) : (
-                                        <div className="sm:w-48 h-24 sm:h-auto flex-shrink-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500"/>
+                                        <div className="w-full h-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500"/>
                                     )}
+                                    </div>
                                     <div className="flex-1 p-4 sm:p-5">
                                         <div className="flex items-start gap-4">
                                             <Avatar className="w-16 h-16 border-2 border-background shadow">
@@ -166,30 +178,27 @@ const MyChannels = () => {
                                                     )}
                                                     {channel.status && channel.status !== 'ACTIVE' && (
                                                         <Badge variant="outline" className="text-xs">
-                                                            {channel.status}
+                                                            {getChannelStatusLabel(channel.status)}
                                                         </Badge>
                                                     )}
                                                 </div>
-                                                {channel.handle && (
-                                                    <p className="text-sm text-muted-foreground">@{channel.handle}</p>
-                                                )}
                                                 {channel.description && (
                                                     <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{channel.description}</p>
                                                 )}
-                                                <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-                                                    <span className="flex items-center gap-1">
+                                                <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground flex-nowrap">
+                                                    <span className="flex items-center gap-1 whitespace-nowrap">
                                                         <Users size={14}/> {channel.subscriber_count || 0} {t('channel.subscribers')}
                                                     </span>
-                                                    <span className="flex items-center gap-1">
+                                                    <span className="flex items-center gap-1 whitespace-nowrap">
                                                         <Video size={14}/> {channel.media_count || 0} {t('common.videos')}
                                                     </span>
                                                     {channel.article_count !== undefined && (
-                                                        <span className="flex items-center gap-1">
+                                                        <span className="flex items-center gap-1 whitespace-nowrap">
                                                             <FileText size={14}/> {channel.article_count} {t('common.articles')}
                                                         </span>
                                                     )}
                                                     {channel.total_views !== undefined && (
-                                                        <span className="flex items-center gap-1">
+                                                        <span className="flex items-center gap-1 whitespace-nowrap">
                                                             <Eye size={14}/> {channel.total_views} {t('common.views')}
                                                         </span>
                                                     )}

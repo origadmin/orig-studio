@@ -30,6 +30,7 @@ func (Article) Fields() []ent.Field {
 		field.Text("content").NotEmpty(),
 		field.Text("summary").Optional(),
 		field.String("slug").MaxLen(150).Unique().Optional(),
+		field.String("short_token").MaxLen(150).DefaultFunc(idutil.GenShortID).Unique().NotEmpty(),
 		field.String("state").MaxLen(20).Default("draft"), // draft / published / archived
 		field.Int64("view_count").Default(0),
 		field.Int64("comment_count").Default(0),
@@ -49,6 +50,7 @@ func (Article) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("title"),
 		index.Fields("slug"),
+		index.Fields("short_token").Unique(),
 		index.Fields("state"),
 		index.Fields("featured"),
 		index.Fields("view_count"),

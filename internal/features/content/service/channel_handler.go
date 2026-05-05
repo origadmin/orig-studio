@@ -153,13 +153,13 @@ func (h *ChannelHandler) GetChannelByToken(w http.ResponseWriter, r *http.Reques
 	}
 
 	if !validation.IsValidShortToken(token) {
-		server.Fail(gc, server.ErrBadRequest, "invalid_token_format")
+		server.Fail(gc, server.ErrBadRequest, "invalid_token_format: token must be 6-12 alphanumeric characters")
 		return
 	}
 
 	chItem, err := h.uc.GetByShortToken(r.Context(), token)
 	if err != nil {
-		server.Fail(gc, server.ErrNotFound, "channel_not_found")
+		server.Fail(gc, server.ErrNotFound, "channel_not_found: no channel exists with the given token")
 		return
 	}
 
@@ -285,12 +285,16 @@ func (h *ChannelHandler) CreateChannel(w http.ResponseWriter, r *http.Request) {
 		Avatar:      input.Avatar,
 		Banner:      input.Banner,
 		BannerLogo:  input.BannerLogo,
-		ShortToken:  input.FriendlyToken,
-		Privacy:     input.Privacy,
-		Tags:        input.Tags,
-		CategoryID:  input.CategoryID,
-		Status:      "ACTIVE",
-		UserID:      claims.GetUserID(),
+		// Only set ShortToken when FriendlyToken is provided and non-empty;
+		// otherwise let ent schema's DefaultFunc (idutil.GenShortID) auto-generate one.
+		Privacy:    input.Privacy,
+		Tags:       input.Tags,
+		CategoryID: input.CategoryID,
+		Status:     "ACTIVE",
+		UserID:     claims.GetUserID(),
+	}
+	if input.FriendlyToken != "" {
+		chItem.ShortToken = input.FriendlyToken
 	}
 
 	if chItem.Privacy == "" {
@@ -671,7 +675,12 @@ func (h *ChannelHandler) SubscribeToChannel(w http.ResponseWriter, r *http.Reque
 
 	err := h.uc.SubscribeToChannel(r.Context(), token, claims.GetUserID())
 	if err != nil {
-		server.Fail(gc, server.ErrInternal, err.Error())
+		errMsg := err.Error()
+		if errMsg == "cannot_subscribe_own_channel" {
+			server.Fail(gc, server.ErrBadRequest, errMsg)
+			return
+		}
+		server.Fail(gc, server.ErrInternal, errMsg)
 		return
 	}
 

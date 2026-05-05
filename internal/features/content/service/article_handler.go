@@ -5,6 +5,8 @@
 package service
 
 import (
+	"fmt"
+	"math/rand"
 	"net/http"
 	"strconv"
 
@@ -251,6 +253,9 @@ func (h *ArticleHandler) createArticle() gin.HandlerFunc {
 		slug := input.Slug
 		if slug == "" {
 			slug = hashtag.GenerateTagSlug(input.Title)
+			// Append random suffix to auto-generated slugs to avoid collisions
+			// (article slug is Unique in schema; same-titled articles would conflict)
+			slug = fmt.Sprintf("%s-%s", slug, randomSuffix(4))
 		}
 
 		// Determine state: default to draft, only allow draft or published
@@ -488,4 +493,15 @@ func (h *ArticleHandler) listMyArticles() gin.HandlerFunc {
 
 		server.Page(c, items, int64(total), page, pageSize)
 	}
+}
+
+// randomSuffix generates a random alphanumeric suffix of the given length
+// to avoid slug collisions for auto-generated slugs.
+func randomSuffix(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(b)
 }

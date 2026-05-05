@@ -135,7 +135,10 @@ const ProfileHomePage: React.FC<ProfileHomePageProps> = ({username}) => {
         unsubscribeMutation.mutate(channelToken);
     };
 
-    const channelShareUrl = `${window.location.origin}/@${username}`;
+    // Use /c/{short_token} for channel share URL, fallback to /@username only when no token
+    const channelShareUrl = channelToken
+        ? `${window.location.origin}/c/${channelToken}`
+        : `${window.location.origin}/@${username}`;
 
     const handleShareClick = useCallback(() => {
         setShowShareDialog(true);

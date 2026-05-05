@@ -72,6 +72,7 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
     const [isSaving, setIsSaving] = useState(false);
     const [showSaveModal, setShowSaveModal] = useState(false);
     const [playlists, setPlaylists] = useState<{ id: string; name: string }[]>([]);
+    const [addedPlaylistIds, setAddedPlaylistIds] = useState<Set<string>>(new Set());
     const [newPlaylistName, setNewPlaylistName] = useState('');
     const [isCreatingPlaylist, setIsCreatingPlaylist] = useState(false);
     const [showCreateForm, setShowCreateForm] = useState(false);
@@ -280,6 +281,7 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
             const response = await playlistApi.getMyPlaylists();
             const items = response.items || [];
             setPlaylists(items.map((p: any) => ({id: String(p.id), name: p.title})));
+            setAddedPlaylistIds(new Set()); // Reset added state when opening a new dialog
             setShowSaveModal(true);
         } catch (err) {
             console.error('Failed to fetch playlists:', err);
@@ -289,10 +291,12 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
     };
 
     const handleAddToPlaylist = async (playlistId: string) => {
+        // Skip if already added to this playlist
+        if (addedPlaylistIds.has(playlistId)) return;
         try {
             setIsSaving(true);
             await playlistApi.addMedia(playlistId, mediaId);
-            setShowSaveModal(false);
+            setAddedPlaylistIds(prev => new Set(prev).add(playlistId));
         } catch (err) {
             console.error('Failed to add to playlist:', err);
         } finally {
@@ -309,11 +313,12 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
             const newPlaylist = result.playlist;
             if (newPlaylist && newPlaylist.id) {
                 await playlistApi.addMedia(newPlaylist.id, mediaId);
-                setPlaylists(prev => [...prev, {id: newPlaylist.id, name: newPlaylist.title || newPlaylistName.trim()}]);
+                const playlistId = String(newPlaylist.id);
+                setPlaylists(prev => [...prev, {id: playlistId, name: newPlaylist.title || newPlaylistName.trim()}]);
+                setAddedPlaylistIds(prev => new Set(prev).add(playlistId));
             }
             setNewPlaylistName('');
             setShowCreateForm(false);
-            setShowSaveModal(false);
         } catch (err) {
             console.error('Failed to create playlist:', err);
         } finally {
@@ -569,21 +574,39 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
                         {/* Existing playlists */}
                         {playlists.length > 0 && (
                             <div className="space-y-2 max-h-48 overflow-y-auto">
-                                {playlists.map(playlist => (
-                                    <Button
-                                        key={playlist.id}
-                                        variant="outline"
-                                        className="w-full justify-start h-auto py-2.5 px-3"
-                                        onClick={() => handleAddToPlaylist(playlist.id)}
-                                        disabled={isSaving}
-                                    >
-                                        <Bookmark className="w-4 h-4 mr-2 flex-shrink-0"/>
-                                        <span className="truncate text-left">{playlist.name}</span>
-                                        {isSaving && (
-                                            <Loader2 className="w-4 h-4 ml-auto animate-spin flex-shrink-0"/>
-                                        )}
-                                    </Button>
-                                ))}
+                                {playlists.map(playlist => {
+                                    const isAdded = addedPlaylistIds.has(playlist.id);
+                                    return (
+                                        <Button
+                                            key={playlist.id}
+                                            variant="outline"
+                                            className={`w-full justify-start h-auto py-2.5 px-3 ${
+                                                isAdded
+                                                    ? 'border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20'
+                                                    : ''
+                                            }`}
+                                            onClick={() => handleAddToPlaylist(playlist.id)}
+                                            disabled={isSaving || isAdded}
+                                        >
+                                            {isAdded ? (
+                                                <Check className="w-4 h-4 mr-2 flex-shrink-0 text-emerald-600"/>
+                                            ) : (
+                                                <Bookmark className="w-4 h-4 mr-2 flex-shrink-0"/>
+                                            )}
+                                            <span className={`truncate text-left ${isAdded ? 'text-emerald-700 dark:text-emerald-400' : ''}`}>
+                                                {playlist.name}
+                                            </span>
+                                            {isAdded && (
+                                                <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400 flex-shrink-0">
+                                                    {t('watch.added') || 'Added'}
+                                                </span>
+                                            )}
+                                            {isSaving && !isAdded && (
+                                                <Loader2 className="w-4 h-4 ml-auto animate-spin flex-shrink-0"/>
+                                            )}
+                                        </Button>
+                                    );
+                                })}
                             </div>
                         )}
 
