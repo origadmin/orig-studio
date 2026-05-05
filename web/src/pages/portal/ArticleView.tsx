@@ -15,6 +15,7 @@ import {Button} from '@/components/ui/button';
 import {Avatar, AvatarImage, AvatarFallback} from '@/components/ui/avatar';
 import {AlertTriangle, Eye, Clock, ArrowLeft} from 'lucide-react';
 import {formatDate, formatViews} from '@/lib/format';
+import {useTranslation} from 'react-i18next';
 import VideoPlayer from '@/components/common/VideoPlayer';
 
 function resolveMediaUrl(url: string | undefined): string | undefined {
@@ -44,6 +45,7 @@ function renderMarkdown(content: string): string {
 }
 
 export default function ArticleViewPage() {
+    const {t} = useTranslation();
     const {slug} = useParams({strict: false}) as {slug?: string};
     const [article, setArticle] = useState<Article | null>(null);
     const [media, setMedia] = useState<Media | null>(null);
@@ -112,12 +114,12 @@ export default function ArticleViewPage() {
         return (
             <div className="flex flex-col items-center justify-center min-h-[80vh] gap-4">
                 <AlertTriangle className="w-12 h-12 text-muted-foreground"/>
-                <h2 className="text-xl font-semibold">Article Not Found</h2>
+                <h2 className="text-xl font-semibold">{t('article.notFound')}</h2>
                 <p className="text-muted-foreground">
-                    The article you are looking for does not exist or is not publicly available.
+                    {t('article.notFoundDesc')}
                 </p>
                 <Button variant="outline" onClick={() => window.history.back()}>
-                    <ArrowLeft className="w-4 h-4 mr-2"/>Go Back
+                    <ArrowLeft className="w-4 h-4 mr-2"/>{t('article.goBack')}
                 </Button>
             </div>
         );
@@ -133,18 +135,18 @@ export default function ArticleViewPage() {
                     className="mb-8 -ml-2 text-muted-foreground hover:text-foreground"
                 >
                     <ArrowLeft className="w-4 h-4 mr-1"/>
-                    Back
+                    {t('article.back')}
                 </Button>
 
                 <article>
                     <div className="space-y-4 mb-8">
                         <div className="flex items-center gap-2">
                             {article.state === 'published' && (
-                                <Badge variant="default" className="text-xs">Published</Badge>
+                                <Badge variant="default" className="text-xs">{t('article.published')}</Badge>
                             )}
                             {article.featured && (
                                 <Badge variant="outline" className="text-warning border-amber-300 text-xs">
-                                    Featured
+                                    {t('article.featured')}
                                 </Badge>
                             )}
                         </div>
@@ -169,7 +171,7 @@ export default function ArticleViewPage() {
                                     </span>
                                     <span className="flex items-center gap-1">
                                         <Eye className="w-3.5 h-3.5"/>
-                                        {formatViews(article.view_count)} views
+                                        {formatViews(article.view_count)} {t('article.views')}
                                     </span>
                                 </p>
                             </div>

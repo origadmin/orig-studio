@@ -20,7 +20,7 @@ export const CategoryStatsCards: React.FC<CategoryStatsCardsProps> = React.memo(
     return (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Total Categories */}
-        <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+        <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-border">
           <CardContent className="pt-6">
             <div className="text-2xl font-bold text-info dark:text-blue-400">
               {stats.total}

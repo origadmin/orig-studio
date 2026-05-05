@@ -90,7 +90,7 @@ const Tags: React.FC = () => {
                 setTotal(response.total);
             }
         } catch (err) {
-            setError('Failed to load tags');
+            setError(t('admin.failedToLoadTags'));
             console.error('Error loading tags:', err);
         } finally {
             setLoading(false);
@@ -187,15 +187,15 @@ const Tags: React.FC = () => {
                         {/* 页面标题 */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
-                                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{t('admin.tags')}</h2>
-                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5">
-                                    Manage your content tags
+                                <h2 className="text-3xl font-extrabold tracking-tight text-foreground">{t('admin.tags')}</h2>
+                                <p className="text-sm text-muted-foreground mt-1.5">
+                                    {t('admin.manageTags')}
                                 </p>
                             </div>
                         </div>
 
                         {/* 分隔线 */}
-                        <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+                        <div className="border-t border-border my-2"/>
 
                         {/* 搜索和筛选 */}
                         <div className="flex flex-col lg:flex-row gap-4">
@@ -222,7 +222,7 @@ const Tags: React.FC = () => {
                                     }}
                                 >
                                     <RotateCcw className="h-4 w-4 mr-2"/>
-                                    Reset
+                                    {t('admin.reset')}
                                 </Button>
                                 <Button
                                     variant="default"
@@ -230,7 +230,7 @@ const Tags: React.FC = () => {
                                     onClick={() => loadTags()}
                                 >
                                     <Search className="h-4 w-4 mr-2"/>
-                                    Search
+                                    {t('common.search')}
                                 </Button>
                             </div>
                         </div>
@@ -240,7 +240,7 @@ const Tags: React.FC = () => {
 
             {/* 统计卡片 */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-border">
                     <CardContent className="pt-6">
                         <div className="flex items-center gap-2">
                             <Hash className="h-5 w-5 text-purple-600"/>
@@ -294,11 +294,11 @@ const Tags: React.FC = () => {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>ID</TableHead>
+                                <TableHead>{t('admin.id')}</TableHead>
                                 <TableHead>{t('admin.tagName')}</TableHead>
-                                <TableHead>Slug</TableHead>
+                                <TableHead>{t('admin.slug')}</TableHead>
                                 <TableHead className="text-right">{t('admin.mediaCount')}</TableHead>
-                                <TableHead>Created</TableHead>
+                                <TableHead>{t('admin.created')}</TableHead>
                                 <TableHead className="text-right">{t('admin.actions')}</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -306,7 +306,7 @@ const Tags: React.FC = () => {
                             {loading ? (
                                 <TableRow>
                                     <TableCell colSpan={6} className="text-center py-8">
-                                        <div className="animate-pulse">Loading tags...</div>
+                                        <div className="animate-pulse">{t('admin.loadingTags')}</div>
                                     </TableCell>
                                 </TableRow>
                             ) : error ? (
@@ -319,14 +319,14 @@ const Tags: React.FC = () => {
                                             className="mt-2"
                                             onClick={() => window.location.reload()}
                                         >
-                                            Retry
+                                            {t('common.retry')}
                                         </Button>
                                     </TableCell>
                                 </TableRow>
                             ) : tags.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={6} className="text-center py-8">
-                                        No tags found
+                                        {t('admin.noTagsFound')}
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -358,13 +358,13 @@ const Tags: React.FC = () => {
                                                         variant="ghost" 
                                                         size="icon" 
                                                         className="h-6 w-6" 
-                                                        title="More Actions"
+                                                        title={t('admin.moreActions')}
                                                     >
                                                         <MoreHorizontal className="h-3 w-3"/>
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuLabel>{t('admin.actions')}</DropdownMenuLabel>
                                                     <DropdownMenuSeparator/>
                                                     <DropdownMenuItem onClick={() => handleView(tag)}>
                                                         <Eye className="mr-2 h-4 w-4"/>
@@ -403,18 +403,18 @@ const Tags: React.FC = () => {
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{t('admin.newTag') || 'New Tag'}</DialogTitle>
+                        <DialogTitle>{t('admin.newTag')}</DialogTitle>
                         <DialogDescription>
-                            Create a new tag for organizing your content
+                            {t('admin.createTagDesc')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div>
-                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Name *
+                            <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                                {t('admin.name')} *
                             </h4>
                             <Input
-                                placeholder="Enter tag name"
+                                placeholder={t('admin.enterTagName')}
                                 value={formData.name || ''}
                                 onChange={(e) => {
                                     const newName = e.target.value;
@@ -429,10 +429,10 @@ const Tags: React.FC = () => {
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Slug <span className="text-muted-foreground font-normal">(auto-generated if empty)</span>
+                                {t('admin.slugLabel')} <span className="text-muted-foreground font-normal">({t('admin.slugAutoHint')})</span>
                             </h4>
                             <Input
-                                placeholder="Auto-generated from name"
+                                placeholder={t('admin.autoGeneratedFromName')}
                                 value={formData.slug || ''}
                                 onChange={(e) => {
                                     setSlugManuallyEdited(true);
@@ -442,17 +442,17 @@ const Tags: React.FC = () => {
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Description
+                                {t('admin.description')}
                             </h4>
                             <Textarea
-                                placeholder="Enter tag description"
+                                placeholder={t('admin.enterTagDescription')}
                                 value={formData.description || ''}
                                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                             />
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Color
+                                {t('admin.color')}
                             </h4>
                             <TagColorPicker
                                 value={formData.color || ''}
@@ -461,28 +461,28 @@ const Tags: React.FC = () => {
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Status
+                                {t('admin.status')}
                             </h4>
                             <Select
                                 value={formData.status || 'active'}
                                 onValueChange={(value) => setFormData({...formData, status: value})}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select status"/>
+                                    <SelectValue placeholder={t('admin.selectStatus')}/>
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                    <SelectItem value="active">{t('admin.active')}</SelectItem>
+                                    <SelectItem value="inactive">{t('admin.inactive')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-                            {t('common.cancel') || 'Cancel'}
+                            {t('admin.cancel')}
                         </Button>
                         <Button onClick={handleCreate}>
-                            {t('common.save') || 'Save'}
+                            {t('admin.create')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -492,45 +492,45 @@ const Tags: React.FC = () => {
             <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{t('admin.editTag') || 'Edit Tag'}</DialogTitle>
+                        <DialogTitle>{t('admin.editTag')}</DialogTitle>
                         <DialogDescription>
-                            Update the tag information
+                            {t('admin.updateTagInfo')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Name *
+                                {t('admin.name')} *
                             </h4>
                             <Input
-                                placeholder="Enter tag name"
+                                placeholder={t('admin.enterTagName')}
                                 value={formData.name || ''}
                                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                             />
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Slug <span className="text-muted-foreground font-normal">(auto-generated if empty)</span>
+                                {t('admin.slugLabel')} <span className="text-muted-foreground font-normal">({t('admin.slugAutoHint')})</span>
                             </h4>
                             <Input
-                                placeholder="Auto-generated from name"
+                                placeholder={t('admin.autoGeneratedFromName')}
                                 value={formData.slug || ''}
                                 onChange={(e) => setFormData({...formData, slug: e.target.value})}
                             />
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Description
+                                {t('admin.description')}
                             </h4>
                             <Textarea
-                                placeholder="Enter tag description"
+                                placeholder={t('admin.enterTagDescription')}
                                 value={formData.description || ''}
                                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                             />
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Color
+                                {t('admin.color')}
                             </h4>
                             <TagColorPicker
                                 value={formData.color || ''}
@@ -539,28 +539,28 @@ const Tags: React.FC = () => {
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Status
+                                {t('admin.status')}
                             </h4>
                             <Select
                                 value={formData.status || 'active'}
                                 onValueChange={(value) => setFormData({...formData, status: value})}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select status"/>
+                                    <SelectValue placeholder={t('admin.selectStatus')}/>
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                    <SelectItem value="active">{t('admin.active')}</SelectItem>
+                                    <SelectItem value="inactive">{t('admin.inactive')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowEditDialog(false)}>
-                            {t('common.cancel') || 'Cancel'}
+                            {t('admin.cancel')}
                         </Button>
                         <Button onClick={handleUpdate}>
-                            {t('common.save') || 'Save'}
+                            {t('admin.save')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -570,20 +570,20 @@ const Tags: React.FC = () => {
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>{t('admin.deleteTag') || 'Delete Tag'}</AlertDialogTitle>
+                        <AlertDialogTitle>{t('admin.deleteTag')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure you want to delete this tag? This action cannot be undone.
+                            {t('admin.deleteTagConfirm')}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>
-                            {t('common.cancel') || 'Cancel'}
+                            {t('admin.cancel')}
                         </AlertDialogCancel>
                         <AlertDialogAction 
                             onClick={handleDelete}
                             className="bg-red-600 hover:bg-red-700"
                         >
-                            {t('common.delete') || 'Delete'}
+                            {t('admin.delete')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

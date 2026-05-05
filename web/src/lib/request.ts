@@ -332,30 +332,41 @@ const isDev = process.env.NODE_ENV === 'development';
  */
 function normalizePaginationInParams(params: Record<string, unknown>): void {
     if ('page' in params) {
-        const raw = Number(params.page);
-        if (isNaN(raw) || raw < 1) {
-            if (isDev) {
-                console.warn(`[request] pagination param corrected: page ${params.page} -> 1`);
-            }
-            params.page = 1;
+        // If page key exists but value is undefined/null, delete the key
+        // so the backend uses its default. This prevents the warning
+        // "pagination param corrected: page undefined -> 1".
+        if (params.page === undefined || params.page === null) {
+            delete params.page;
         } else {
-            params.page = raw;
+            const raw = Number(params.page);
+            if (isNaN(raw) || raw < 1) {
+                if (isDev) {
+                    console.warn(`[request] pagination param corrected: page ${params.page} -> 1`);
+                }
+                params.page = 1;
+            } else {
+                params.page = raw;
+            }
         }
     }
     if ('page_size' in params) {
-        const raw = Number(params.page_size);
-        if (isNaN(raw) || raw <= 0) {
-            if (isDev) {
-                console.warn(`[request] pagination param corrected: page_size ${params.page_size} -> ${PAGINATION_CONFIG.DEFAULT_PAGE_SIZE}`);
-            }
-            params.page_size = PAGINATION_CONFIG.DEFAULT_PAGE_SIZE;
-        } else if (raw > PAGINATION_CONFIG.MAX_PAGE_SIZE) {
-            if (isDev) {
-                console.warn(`[request] pagination param corrected: page_size ${params.page_size} -> ${PAGINATION_CONFIG.MAX_PAGE_SIZE}`);
-            }
-            params.page_size = PAGINATION_CONFIG.MAX_PAGE_SIZE;
+        if (params.page_size === undefined || params.page_size === null) {
+            delete params.page_size;
         } else {
-            params.page_size = raw;
+            const raw = Number(params.page_size);
+            if (isNaN(raw) || raw <= 0) {
+                if (isDev) {
+                    console.warn(`[request] pagination param corrected: page_size ${params.page_size} -> ${PAGINATION_CONFIG.DEFAULT_PAGE_SIZE}`);
+                }
+                params.page_size = PAGINATION_CONFIG.DEFAULT_PAGE_SIZE;
+            } else if (raw > PAGINATION_CONFIG.MAX_PAGE_SIZE) {
+                if (isDev) {
+                    console.warn(`[request] pagination param corrected: page_size ${params.page_size} -> ${PAGINATION_CONFIG.MAX_PAGE_SIZE}`);
+                }
+                params.page_size = PAGINATION_CONFIG.MAX_PAGE_SIZE;
+            } else {
+                params.page_size = raw;
+            }
         }
     }
 }

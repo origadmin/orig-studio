@@ -77,7 +77,7 @@ const Playlists: React.FC = () => {
                 setTotal((response as any).total);
             }
         } catch (err) {
-            setError('Failed to load playlists');
+            setError(t('admin.failedToLoadPlaylists'));
             console.error('Error loading playlists:', err);
         } finally {
             setLoading(false);
@@ -191,14 +191,14 @@ const Playlists: React.FC = () => {
                     <div className="flex flex-col gap-4">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
-                                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{t('admin.playlists')}</h2>
-                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5">
-                                    Manage your playlists
+                                <h2 className="text-3xl font-extrabold tracking-tight text-foreground">{t('admin.playlists')}</h2>
+                                <p className="text-sm text-muted-foreground mt-1.5">
+                                    {t('admin.managePlaylists')}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+                        <div className="border-t border-border my-2"/>
 
                         <div className="flex flex-col lg:flex-row gap-4">
                             <div className="flex-1 min-w-[120px] max-w-[400px]">
@@ -219,14 +219,14 @@ const Playlists: React.FC = () => {
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
                                             {visibilityFilter === 'all' ? (
-                                                <span className="text-muted-foreground">Visibility</span>
+                                                <span className="text-muted-foreground">{t('admin.visibility')}</span>
                                             ) : (
-                                                <SelectValue placeholder="Visibility"/>
+                                                <SelectValue placeholder={t('admin.visibility')}/>
                                             )}
                                         </div>
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all" className="justify-center text-center font-medium opacity-70">--- All ---</SelectItem>
+                                        <SelectItem value="all" className="justify-center text-center font-medium opacity-70">--- {t('admin.allVisibility')} ---</SelectItem>
                                         <SelectItem value="public">{t('admin.pub')}</SelectItem>
                                         <SelectItem value="private">{t('admin.priv')}</SelectItem>
                                         <SelectItem value="unlisted">{t('admin.unlisted')}</SelectItem>
@@ -242,7 +242,7 @@ const Playlists: React.FC = () => {
                                         }}
                                     >
                                         <RotateCcw className="h-4 w-4 mr-2"/>
-                                        Reset
+                                        {t('admin.reset')}
                                     </Button>
                                 </div>
                             </div>
@@ -253,7 +253,7 @@ const Playlists: React.FC = () => {
 
             {/* Stats cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-border">
                     <CardContent className="pt-6">
                         <div className="flex items-center gap-2">
                             <PlayCircle className="h-5 w-5 text-indigo-600"/>
@@ -307,7 +307,7 @@ const Playlists: React.FC = () => {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>ID</TableHead>
+                                <TableHead>{t('admin.id')}</TableHead>
                                 <TableHead>{t('admin.name')}</TableHead>
                                 <TableHead>{t('admin.creator')}</TableHead>
                                 <TableHead className="text-right">{t('admin.videoCount')}</TableHead>
@@ -320,7 +320,7 @@ const Playlists: React.FC = () => {
                             {loading ? (
                                 <TableRow>
                                     <TableCell colSpan={7} className="text-center py-8">
-                                        <div className="animate-pulse">Loading playlists...</div>
+                                        <div className="animate-pulse">{t('admin.loadingPlaylists')}</div>
                                     </TableCell>
                                 </TableRow>
                             ) : error ? (
@@ -333,14 +333,14 @@ const Playlists: React.FC = () => {
                                             className="mt-2"
                                             onClick={loadPlaylists}
                                         >
-                                            Retry
+                                            {t('common.retry')}
                                         </Button>
                                     </TableCell>
                                 </TableRow>
                             ) : filteredPlaylists.length === 0 ? (
                                 <TableRow key="empty">
                                     <TableCell colSpan={7} className="text-center py-8">
-                                        No playlists found
+                                        {t('admin.noPlaylistsFound')}
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -362,7 +362,7 @@ const Playlists: React.FC = () => {
                                                         <User className="h-3 w-3"/>
                                                     </AvatarFallback>
                                                 </Avatar>
-                                                <span className="text-muted-foreground text-xs">User ID: {playlist.user_id?.substring(0, 8)}...</span>
+                                                <span className="text-muted-foreground text-xs">{t('admin.user')} ID: {playlist.user_id?.substring(0, 8)}...</span>
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-right">{playlist.media_items?.length || 0}</TableCell>
@@ -379,13 +379,13 @@ const Playlists: React.FC = () => {
                                                         variant="ghost"
                                                         size="icon"
                                                         className="h-6 w-6"
-                                                        title="More Actions"
+                                                        title={t('admin.moreActions')}
                                                     >
                                                         <MoreHorizontal className="h-3 w-3"/>
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuLabel>{t('admin.actions')}</DropdownMenuLabel>
                                                     <DropdownMenuSeparator/>
                                                     <DropdownMenuItem asChild>
                                                         <Link to="/playlist/$token" params={{token: playlist.short_token || playlist.id}}>
@@ -423,35 +423,35 @@ const Playlists: React.FC = () => {
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{t('admin.newPlaylist') || 'Create Playlist'}</DialogTitle>
-                        <DialogDescription>Create a new playlist for a user</DialogDescription>
+                        <DialogTitle>{t('admin.newPlaylist')}</DialogTitle>
+                        <DialogDescription>{t('admin.createPlaylistDesc')}</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 mt-4">
                         <div>
-                            <label className="text-sm font-medium mb-1 block">Title *</label>
+                            <label className="text-sm font-medium mb-1 block">{t('admin.title')} *</label>
                             <Input value={createTitle} onChange={(e) => setCreateTitle(e.target.value)}
-                                   placeholder="Enter playlist title"/>
+                                   placeholder={t('admin.enterPlaylistTitle')}/>
                         </div>
                         <div>
-                            <label className="text-sm font-medium mb-1 block">Description</label>
+                            <label className="text-sm font-medium mb-1 block">{t('admin.description')}</label>
                             <Input value={createDescription} onChange={(e) => setCreateDescription(e.target.value)}
-                                   placeholder="Enter playlist description"/>
+                                   placeholder={t('admin.enterPlaylistDescription')}/>
                         </div>
                         <div>
-                            <label className="text-sm font-medium mb-1 block">User ID *</label>
+                            <label className="text-sm font-medium mb-1 block">{t('admin.user')} ID *</label>
                             <Input value={createUserId} onChange={(e) => setCreateUserId(e.target.value)}
-                                   placeholder="Enter user ID (UUID)"/>
+                                   placeholder={t('admin.enterUserId')}/>
                         </div>
                         <div className="flex items-center gap-2">
                             <input type="checkbox" id="create-is-public" checked={createIsPublic}
                                    onChange={(e) => setCreateIsPublic(e.target.checked)} className="rounded"/>
-                            <label htmlFor="create-is-public" className="text-sm">Public</label>
+                            <label htmlFor="create-is-public" className="text-sm">{t('admin.pub')}</label>
                         </div>
                         <div className="flex justify-end gap-2">
-                            <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={isCreating}>Cancel</Button>
+                            <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={isCreating}>{t('admin.cancel')}</Button>
                             <Button onClick={handleCreate} disabled={!createTitle.trim() || !createUserId.trim() || isCreating}>
                                 {isCreating ? <Loader2 className="w-4 h-4 mr-1 animate-spin"/> : <Plus className="w-4 h-4 mr-1"/>}
-                                Create
+                                {t('admin.create')}
                             </Button>
                         </div>
                     </div>
@@ -462,28 +462,28 @@ const Playlists: React.FC = () => {
             <Dialog open={!!editTarget} onOpenChange={() => setEditTarget(null)}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Edit Playlist</DialogTitle>
-                        <DialogDescription>Update playlist details</DialogDescription>
+                        <DialogTitle>{t('admin.editPlaylist')}</DialogTitle>
+                        <DialogDescription>{t('admin.updatePlaylistDetails')}</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 mt-4">
                         <div>
-                            <label className="text-sm font-medium mb-1 block">Title</label>
+                            <label className="text-sm font-medium mb-1 block">{t('admin.title')}</label>
                             <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)}/>
                         </div>
                         <div>
-                            <label className="text-sm font-medium mb-1 block">Description</label>
+                            <label className="text-sm font-medium mb-1 block">{t('admin.description')}</label>
                             <Input value={editDescription} onChange={(e) => setEditDescription(e.target.value)}/>
                         </div>
                         <div className="flex items-center gap-2">
                             <input type="checkbox" id="edit-is-public" checked={editIsPublic}
                                    onChange={(e) => setEditIsPublic(e.target.checked)} className="rounded"/>
-                            <label htmlFor="edit-is-public" className="text-sm">Public</label>
+                            <label htmlFor="edit-is-public" className="text-sm">{t('admin.pub')}</label>
                         </div>
                         <div className="flex justify-end gap-2">
-                            <Button variant="outline" onClick={() => setEditTarget(null)} disabled={isUpdating}>Cancel</Button>
+                            <Button variant="outline" onClick={() => setEditTarget(null)} disabled={isUpdating}>{t('admin.cancel')}</Button>
                             <Button onClick={handleSaveEdit} disabled={isUpdating}>
                                 {isUpdating ? <Loader2 className="w-4 h-4 mr-1 animate-spin"/> : null}
-                                Save
+                                {t('admin.save')}
                             </Button>
                         </div>
                     </div>
@@ -494,16 +494,16 @@ const Playlists: React.FC = () => {
             <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Delete Playlist</DialogTitle>
+                        <DialogTitle>{t('admin.deletePlaylist')}</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete "{deleteTarget?.title}"? This action cannot be undone.
+                            {t('admin.deletePlaylistConfirm')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex justify-end gap-2 mt-4">
-                        <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={isDeleting}>Cancel</Button>
+                        <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={isDeleting}>{t('admin.cancel')}</Button>
                         <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
                             {isDeleting ? <Loader2 className="w-4 h-4 mr-1 animate-spin"/> : null}
-                            Delete
+                            {t('admin.delete')}
                         </Button>
                     </div>
                 </DialogContent>

@@ -61,33 +61,33 @@ const AdminLayout = () => {
     const getBreadcrumbs = () => {
         const path = routerState.location.pathname;
         const breadcrumbs: {label: string; path: string; icon?: any}[] = [
-            {label: "首页", path: "/admin", icon: Home}
+            {label: t('nav.home'), path: "/admin", icon: Home}
         ];
 
         if (path.startsWith("/admin/media")) {
-            breadcrumbs.push({label: "Media", path: "/admin/media"});
+            breadcrumbs.push({label: t('admin.media'), path: "/admin/media"});
         } else if (path.startsWith("/admin/transcoding/profiles")) {
-            breadcrumbs.push({label: "Media", path: "/admin/media"});
-            breadcrumbs.push({label: "Encode profiles", path: "/admin/transcoding/profiles"});
+            breadcrumbs.push({label: t('admin.media'), path: "/admin/media"});
+            breadcrumbs.push({label: t('admin.transcodingProfiles'), path: "/admin/transcoding/profiles"});
         } else if (path.startsWith("/admin/transcoding/status")) {
-            breadcrumbs.push({label: "Media", path: "/admin/media"});
-            breadcrumbs.push({label: "Transcoding status", path: "/admin/transcoding/status"});
+            breadcrumbs.push({label: t('admin.media'), path: "/admin/media"});
+            breadcrumbs.push({label: t('admin.transcodingStatus'), path: "/admin/transcoding/status"});
         } else if (path.startsWith("/admin/users")) {
-            breadcrumbs.push({label: "Users", path: "/admin/users"});
+            breadcrumbs.push({label: t('admin.users'), path: "/admin/users"});
         } else if (path.startsWith("/admin/categories")) {
-            breadcrumbs.push({label: "Categories", path: "/admin/categories"});
+            breadcrumbs.push({label: t('admin.categories'), path: "/admin/categories"});
         } else if (path.startsWith("/admin/channels")) {
-            breadcrumbs.push({label: "Channels", path: "/admin/channels"});
+            breadcrumbs.push({label: t('admin.channels'), path: "/admin/channels"});
         } else if (path.startsWith("/admin/tags")) {
-            breadcrumbs.push({label: "Tags", path: "/admin/tags"});
+            breadcrumbs.push({label: t('admin.tags'), path: "/admin/tags"});
         } else if (path.startsWith("/admin/comments")) {
-            breadcrumbs.push({label: "Comments", path: "/admin/comments"});
+            breadcrumbs.push({label: t('admin.comments'), path: "/admin/comments"});
         } else if (path.startsWith("/admin/playlists")) {
-            breadcrumbs.push({label: "Playlists", path: "/admin/playlists"});
+            breadcrumbs.push({label: t('admin.playlists'), path: "/admin/playlists"});
         } else if (path.startsWith("/admin/articles")) {
-            breadcrumbs.push({label: "Articles", path: "/admin/articles"});
+            breadcrumbs.push({label: t('admin.articles'), path: "/admin/articles"});
         } else if (path.startsWith("/admin/settings")) {
-            breadcrumbs.push({label: "Settings", path: "/admin/settings"});
+            breadcrumbs.push({label: t('admin.settings'), path: "/admin/settings"});
         }
 
         return breadcrumbs;
@@ -104,7 +104,7 @@ const AdminLayout = () => {
                     <Link to="/admin" className="flex items-center gap-2 transition-all duration-300 ease-in-out">
                         <img src="/logo.svg" alt="OrigCMS" className="h-14 w-14 flex-shrink-0" />
                         {!sidebarCollapsed && (
-                            <span className="text-lg font-semibold tracking-tight text-brand whitespace-nowrap">OrigCMS Admin</span>
+                            <span className="text-lg font-semibold tracking-tight text-brand whitespace-nowrap">{t('admin.welcomeAdmin')}</span>
                         )}
                     </Link>
                 </div>
@@ -126,7 +126,7 @@ const AdminLayout = () => {
                         className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-3'} text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors`}
                     >
                         <LogOut size={20}/>
-                        {!sidebarCollapsed && <span>Exit Admin</span>}
+                        {!sidebarCollapsed && <span>{t('admin.exitAdmin')}</span>}
                     </Link>
                 </div>
             </aside>
@@ -138,7 +138,7 @@ const AdminLayout = () => {
                     onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
                     className="absolute top-12 z-50 w-8 h-8 bg-card border border-border rounded-full shadow-md flex items-center justify-center hover:bg-accent transition-all duration-200 hover:scale-110"
                     style={{ left: -16 }}
-                    title={sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
+                    title={sidebarCollapsed ? t('nav.expandMenu') : t('nav.collapseMenu')}
                 >
                     {sidebarCollapsed ? (
                         <PanelLeftOpen size={18} className="text-muted-foreground" />
@@ -173,7 +173,7 @@ const AdminLayout = () => {
                         <div
                             className="w-8 h-8 rounded-full bg-brand-muted flex items-center justify-center text-brand font-bold">A
                         </div>
-                        <span className="text-sm font-medium text-foreground">Administrator</span>
+                        <span className="text-sm font-medium text-foreground">{t('admin.administrator')}</span>
                     </div>
                 </header>
                 <main className="flex-grow p-8 overflow-auto">
@@ -208,7 +208,7 @@ const NavItem = ({to, icon, label, exact = false, collapsed = false}: {
             title={collapsed ? label : undefined}
         >
             {collapsed ? React.cloneElement(icon as React.ReactElement<any>, { size: 28 }) : icon}
-            {!collapsed && <span className="font-medium text-sm">{label}</span>}
+            {!collapsed && <span className="font-medium text-sm truncate">{label}</span>}
         </Link>
     );
 };

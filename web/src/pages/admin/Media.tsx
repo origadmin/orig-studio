@@ -4,6 +4,7 @@
  */
 
 import React, {useState, useEffect} from 'react';
+import {useTranslation} from 'react-i18next';
 import {useLocation, useNavigate, useRouterState, Link} from '@tanstack/react-router';
 import {
     Play,
@@ -74,6 +75,7 @@ import {TablePagination} from '@/components/common/TablePagination';
 import {PAGINATION_CONFIG} from '@/config/pagination';
 
 export default function MediaPage() {
+    const {t} = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
     const urlSearch = new URLSearchParams(location.search).get("q");
@@ -191,15 +193,15 @@ export default function MediaPage() {
     const encStatusLabel = (status?: string) => {
         switch (status) {
             case "success":
-                return "完成";
+                return t('admin.complete');
             case "processing":
-                return "转码中";
+                return t('admin.processing');
             case "pending":
-                return "排队中";
+                return t('admin.queued');
             case "partial":
-                return "部分完成";
+                return t('admin.partialComplete');
             case "failed":
-                return "失败";
+                return t('admin.failed');
             default:
                 return status || "--";
         }
@@ -222,13 +224,13 @@ export default function MediaPage() {
                             {/* 页面标题 */}
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <div>
-                                    <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">媒体管理</h2>
-                                    <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5">在这里集中管理所有的视频与图片资源</p>
+                                    <h2 className="text-3xl font-extrabold tracking-tight text-foreground">{t('admin.mediaManagement')}</h2>
+                                    <p className="text-sm text-muted-foreground mt-1.5">{t('admin.mediaManagementDesc')}</p>
                                 </div>
                             </div>
 
                             {/* 分隔线 */}
-                            <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+                            <div className="border-t border-border my-2"/>
 
                             {/* 搜索和筛选 */}
                             <div className="flex flex-col lg:flex-row gap-4">
@@ -236,7 +238,7 @@ export default function MediaPage() {
                                     <div className="relative w-full">
                                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                                         <Input
-                                            placeholder="搜索媒体..."
+                                            placeholder={t('admin.search')}
                                             value={searchParams.keyword}
                                             onChange={(e) => setSearchParams({...searchParams, keyword: e.target.value})}
                                             className="pl-10 h-8 rounded-btn-sm w-full focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
@@ -249,17 +251,17 @@ export default function MediaPage() {
                                             <div className="flex items-center gap-2">
                                                 <Filter className="h-4 w-4"/>
                                                 {!searchParams.state ? (
-                                                    <span className="text-muted-foreground">Status</span>
+                                                    <span className="text-muted-foreground">{t('admin.status')}</span>
                                                 ) : (
-                                                    <SelectValue placeholder="Status"/>
+                                                    <SelectValue placeholder={t('admin.status')}/>
                                                 )}
                                             </div>
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="all" className="justify-center text-center font-medium opacity-70">--- All ---</SelectItem>
-                                            <SelectItem value="active">已发布 (Active)</SelectItem>
-                                            <SelectItem value="draft">草稿 (Draft)</SelectItem>
-                                            <SelectItem value="deleted">已删除 (Deleted)</SelectItem>
+                                            <SelectItem value="all" className="justify-center text-center font-medium opacity-70">--- {t('admin.allStatus')} ---</SelectItem>
+                                            <SelectItem value="active">{t('admin.publishedStatus')}</SelectItem>
+                                            <SelectItem value="draft">{t('admin.draftStatus')}</SelectItem>
+                                            <SelectItem value="deleted">{t('admin.deletedStatus')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <div className="flex items-center gap-2 ml-auto lg:ml-0">
@@ -273,7 +275,7 @@ export default function MediaPage() {
                                             }}
                                         >
                                             <RotateCcw className="h-4 w-4 mr-2"/>
-                                            Reset
+                                            {t('admin.reset')}
                                         </Button>
                                         <Button
                                             variant="default"
@@ -281,7 +283,7 @@ export default function MediaPage() {
                                             onClick={() => loadMedia()}
                                         >
                                             <Search className="h-4 w-4 mr-2"/>
-                                            Search
+                                            {t('common.search')}
                                         </Button>
                                     </div>
                                 </div>
@@ -292,11 +294,11 @@ export default function MediaPage() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-border">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-500">媒体总数</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.totalMedia')}</p>
                                 <p className="text-2xl font-bold text-info dark:text-blue-400">{mediaList.length}</p>
                             </div>
                             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -306,11 +308,11 @@ export default function MediaPage() {
                         <div className="absolute bottom-0 left-0 h-1 bg-info w-full opacity-10"/>
                     </CardContent>
                 </Card>
-                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-border">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-500">视频</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.videos')}</p>
                                 <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{mediaList.filter(m => m.type === 'video').length}</p>
                             </div>
                             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
@@ -320,11 +322,11 @@ export default function MediaPage() {
                         <div className="absolute bottom-0 left-0 h-1 bg-purple-500 w-full opacity-10"/>
                     </CardContent>
                 </Card>
-                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-border">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-500">图片</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.images')}</p>
                                 <p className="text-2xl font-bold text-success dark:text-green-400">{mediaList.filter(m => m.type === 'image' || !m.type).length}</p>
                             </div>
                             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
@@ -334,11 +336,11 @@ export default function MediaPage() {
                         <div className="absolute bottom-0 left-0 h-1 bg-success w-full opacity-10"/>
                     </CardContent>
                 </Card>
-                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-border">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-500">总播放量</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.totalViews')}</p>
                                 <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{formatViews(mediaList.reduce((acc, m) => acc + (m.view_count || 0), 0))}</p>
                             </div>
                             <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
@@ -354,35 +356,35 @@ export default function MediaPage() {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between gap-4">
                     <div>
-                        <CardTitle>所有媒体</CardTitle>
+                        <CardTitle>{t('admin.allMedia')}</CardTitle>
                         <CardDescription>
-                            {mediaList.length} 条媒体记录
+                            {t('admin.mediaRecords', {count: mediaList.length})}
                         </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
                         <Button size="sm" onClick={() => setUploadDialogOpen(true)}>
                             <Upload className="w-4 h-4 mr-2"/>
-                            上传媒体
+                            {t('admin.uploadMedia')}
                         </Button>
                     </div>
                 </CardHeader>
                 <CardContent>
                     {loading ? (
-                        <div className="py-12 text-center text-muted-foreground">正在加载数据...</div>
+                        <div className="py-12 text-center text-muted-foreground">{t('admin.loadingData')}</div>
                     ) : (
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>名称</TableHead>
-                                    <TableHead>类型</TableHead>
-                                    <TableHead>大小</TableHead>
-                                    <TableHead>时长</TableHead>
-                                    <TableHead>播放量</TableHead>
-                                    <TableHead>状态</TableHead>
-                                    <TableHead>转码</TableHead>
-                                    <TableHead>作者</TableHead>
-                                    <TableHead>日期</TableHead>
-                                    <TableHead className="text-right">操作</TableHead>
+                                    <TableHead>{t('admin.name')}</TableHead>
+                                    <TableHead>{t('admin.type')}</TableHead>
+                                    <TableHead>{t('admin.size')}</TableHead>
+                                    <TableHead>{t('admin.duration')}</TableHead>
+                                    <TableHead>{t('admin.viewCount')}</TableHead>
+                                    <TableHead>{t('admin.status')}</TableHead>
+                                    <TableHead>{t('admin.transcoding')}</TableHead>
+                                    <TableHead>{t('admin.author')}</TableHead>
+                                    <TableHead>{t('admin.date')}</TableHead>
+                                    <TableHead className="text-right">{t('admin.actions')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -412,7 +414,7 @@ export default function MediaPage() {
                                                 </div>
                                                 <span className="font-medium line-clamp-2"
                                                       title={media.title}>
-                                                    {media.title || '未命名媒体'}
+                                                    {media.title || t('admin.unnamedMedia')}
                                                 </span>
                                             </div>
                                         </TableCell>
@@ -423,13 +425,13 @@ export default function MediaPage() {
                                                 {media.type || 'unknown'}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="text-sm text-slate-500">
+                                        <TableCell className="text-sm text-muted-foreground">
                                             {media.size ? formatFileSize(parseInt(media.size)) : '-'}
                                         </TableCell>
                                         <TableCell
-                                            className="text-sm text-slate-500">{formatDuration(media.duration)}</TableCell>
+                                            className="text-sm text-muted-foreground">{formatDuration(media.duration)}</TableCell>
                                         <TableCell
-                                            className="text-sm text-slate-500">{formatViews(media.view_count)}</TableCell>
+                                            className="text-sm text-muted-foreground">{formatViews(media.view_count)}</TableCell>
                                         <TableCell>
                                             <Badge variant={media.state === 'active' ? 'default' : 'secondary'}>
                                                 {media.state || 'draft'}
@@ -450,7 +452,7 @@ export default function MediaPage() {
                                                             e.stopPropagation();
                                                             handleShowVariants(media);
                                                         }}
-                                                        title="查看转码详情"
+                                                        title={t('admin.viewTranscodingDetails')}
                                                     >
                                                         <ExternalLink className="w-3 h-3"/>
                                                     </Button>
@@ -460,9 +462,9 @@ export default function MediaPage() {
                                             )}
                                         </TableCell>
                                         <TableCell
-                                            className="text-sm text-slate-500">{media.edges?.user?.[0]?.nickname || media.edges?.user?.[0]?.username || '-'}</TableCell>
+                                            className="text-sm text-muted-foreground">{media.edges?.user?.[0]?.nickname || media.edges?.user?.[0]?.username || '-'}</TableCell>
                                         <TableCell
-                                            className="text-sm text-slate-500">{formatDateTime(media.create_time)}</TableCell>
+                                            className="text-sm text-muted-foreground">{formatDateTime(media.create_time)}</TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
@@ -470,30 +472,30 @@ export default function MediaPage() {
                                                         variant="ghost" 
                                                         size="icon" 
                                                         className="h-6 w-6" 
-                                                        title="More Actions"
+                                                        title={t('admin.moreActions')}
                                                     >
                                                         <MoreVertical className="h-3 w-3"/>
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuLabel>{t('admin.actions')}</DropdownMenuLabel>
                                                     <DropdownMenuSeparator/>
                                                     <DropdownMenuItem
                                                         onClick={() => window.open(`/watch?v=${media.short_token || media.id}`, '_blank')}>
                                                         <Eye className="w-4 h-4 mr-2"/>
-                                                        查看
+                                                        {t('admin.view')}
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem asChild>
                                                         <Link to="/admin/media/$id" params={{id: String(media.id)}}>
                                                             <Edit className="w-4 h-4 mr-2"/>
-                                                            编辑
+                                                            {t('admin.edit')}
                                                         </Link>
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem 
                                                         className="text-destructive focus:text-destructive"
                                                                       onClick={() => handleDeleteClick(media)}>
                                                         <Trash2 className="w-4 h-4 mr-2"/>
-                                                        删除
+                                                        {t('admin.delete')}
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
@@ -502,7 +504,7 @@ export default function MediaPage() {
                                 )) : (
                                     <TableRow key="empty">
                                         <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
-                                            没有找到匹配的媒体数据
+                                            {t('admin.noMediaFound')}
                                         </TableCell>
                                     </TableRow>
                                 )}
@@ -523,9 +525,9 @@ export default function MediaPage() {
             <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
                 <DialogContent className="max-w-4xl">
                     <DialogHeader>
-                        <DialogTitle>上传媒体文件</DialogTitle>
+                        <DialogTitle>{t('admin.uploadMediaFiles')}</DialogTitle>
                         <DialogDescription>
-                            上传视频或音频文件到媒体库
+                            {t('admin.uploadMediaDesc')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-4">
@@ -544,15 +546,15 @@ export default function MediaPage() {
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>确认删除？</AlertDialogTitle>
+                        <AlertDialogTitle>{t('admin.confirmDelete')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            您将永久删除资源 "{deletingMedia?.title}"。此操作无法撤销，数据将从服务器移除。
+                            {t('admin.deleteMediaConfirm')}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>手滑了，取消</AlertDialogCancel>
+                        <AlertDialogCancel>{t('admin.cancelDelete')}</AlertDialogCancel>
                         <AlertDialogAction onClick={handleConfirmDelete} className="bg-red-600 hover:bg-red-700">
-                            是的，我要删除
+                            {t('admin.confirmDeleteBtn')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
@@ -563,7 +565,7 @@ export default function MediaPage() {
                 <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
-                            转码概况
+                            {t('admin.transcodingOverview')}
                             {variantData?.encoding_status && (
                                 <Badge variant={encStatusBadge(variantData.encoding_status)} className="text-xs">
                                     {encStatusLabel(variantData.encoding_status)}
@@ -571,7 +573,7 @@ export default function MediaPage() {
                             )}
                         </DialogTitle>
                         <DialogDescription>
-                            查看媒体文件的转码状态和详细信息
+                            {t('admin.transcodingOverviewDesc')}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -581,23 +583,23 @@ export default function MediaPage() {
                             <div className="grid grid-cols-5 gap-2 text-center">
                                 <div className="rounded-lg bg-yellow-50 dark:bg-yellow-950/20 p-3">
                                     <p className="text-lg font-bold text-yellow-600">{variantData.video_pending_count ?? 0}</p>
-                                    <p className="text-[11px] text-muted-foreground">排队</p>
+                                    <p className="text-[11px] text-muted-foreground">{t('admin.queued')}</p>
                                 </div>
                                 <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 p-3">
                                     <p className="text-lg font-bold text-info">{variantData.video_processing_count ?? 0}</p>
-                                    <p className="text-[11px] text-muted-foreground">转码中</p>
+                                    <p className="text-[11px] text-muted-foreground">{t('admin.transcoding')}</p>
                                 </div>
                                 <div className="rounded-lg bg-green-50 dark:bg-green-950/20 p-3">
                                     <p className="text-lg font-bold text-success">{variantData.video_success_count}</p>
-                                    <p className="text-[11px] text-muted-foreground">成功</p>
+                                    <p className="text-[11px] text-muted-foreground">{t('admin.success')}</p>
                                 </div>
                                 <div className="rounded-lg bg-red-50 dark:bg-red-950/20 p-3">
                                     <p className="text-lg font-bold text-destructive">{variantData.video_failed_count}</p>
-                                    <p className="text-[11px] text-muted-foreground">失败</p>
+                                    <p className="text-[11px] text-muted-foreground">{t('admin.failed')}</p>
                                 </div>
                                 <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-3">
                                     <p className="text-lg font-bold text-slate-700">{variantData.video_total_count}</p>
-                                    <p className="text-[11px] text-muted-foreground">总计</p>
+                                    <p className="text-[11px] text-muted-foreground">{t('admin.total')}</p>
                                 </div>
                             </div>
 
@@ -628,7 +630,7 @@ export default function MediaPage() {
                             {variantData.variants && variantData.variants.length > 0 && (
                                 <div className="space-y-1.5">
                                     <p className="text-sm font-medium flex items-center gap-2">
-                                        各清晰度任务
+                                        {t('admin.variantTasks')}
                                         {variantData.video_failed_count > 0 && (
                                             <Button
                                                 variant="outline"
@@ -642,7 +644,7 @@ export default function MediaPage() {
                                                 ) : (
                                                     <RotateCcw className="w-3 h-3 mr-1"/>
                                                 )}
-                                                重试全部失败
+                                                {t('admin.retryAllFailed')}
                                             </Button>
                                         )}
                                     </p>
@@ -688,7 +690,7 @@ export default function MediaPage() {
                                     rel="noreferrer"
                                     className="inline-flex items-center gap-1.5 text-xs text-info hover:text-blue-800 hover:underline"
                                 >
-                                    在转码任务页面查看完整任务列表
+                                    {t('admin.viewFullTaskList')}
                                     <ExternalLink className="w-3 h-3"/>
                                 </a>
                             </div>

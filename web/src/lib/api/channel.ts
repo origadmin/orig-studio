@@ -130,19 +130,19 @@ export const channelApi = {
      * Get channels with query parameters (查询参数方式)
      */
     get: (params?: ChannelQueryParams) =>
-        api.get<Channel | ChannelList>('/channels', {params}),
+        api.get<Channel | ChannelList>('/channels', params as Record<string, unknown>),
 
     /**
      * List all public channels (公开频道列表)
      */
     listAll: (params?: {page?: number; limit?: number}) =>
-        api.get<ChannelList>('/channels', {params}),
+        api.get<ChannelList>('/channels', params),
 
     /**
      * Get current user's channels (F019: now returns list, not single)
      */
     getMyChannels: (params?: {page?: number; page_size?: number}) =>
-        api.get<ChannelList>('/channels/me', {params}),
+        api.get<ChannelList>('/channels/me', params),
 
     /**
      * Create a new channel (F019: with handle, limits check)
@@ -177,7 +177,7 @@ export const channelApi = {
      * GET /api/v1/channels/validate-handle?handle=xxx
      */
     validateHandle: (handle: string) =>
-        api.get<HandleValidation>('/channels/validate-handle', {params: {handle}}),
+        api.get<HandleValidation>('/channels/validate-handle', {handle}),
 
     /**
      * Get channel creation limits for current user (F019)
@@ -205,11 +205,11 @@ export const channelApi = {
     getSubscribers: (channelToken: string, params?: {page?: number; page_size?: number}) =>
         api.get<{items: string[]; total: number; page: number; page_size: number}>(
             `/channels/${channelToken}/subscribers`,
-            {params}
+            params
         ),
 
     getSubscriberCount: (channelToken: string) =>
-        api.get<{count: number}>(`/channels/${channelToken}/subscribers`, {params: {count: 'true'}}),
+        api.get<{count: number}>(`/channels/${channelToken}/subscribers`, {count: 'true'}),
 
-    getAll: (params?: {page?: number; page_size?: number}) => api.get<PaginatedResponse<Channel>>('/channels', {params}),
+    getAll: (params?: {page?: number; page_size?: number}) => api.get<PaginatedResponse<Channel>>('/channels', params),
 };

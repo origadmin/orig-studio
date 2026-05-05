@@ -62,38 +62,58 @@ func init() {
 	articleDescSlug := articleFields[4].Descriptor()
 	// article.SlugValidator is a validator for the "slug" field. It is called by the builders before save.
 	article.SlugValidator = articleDescSlug.Validators[0].(func(string) error)
+	// articleDescShortToken is the schema descriptor for short_token field.
+	articleDescShortToken := articleFields[5].Descriptor()
+	// article.DefaultShortToken holds the default value on creation for the short_token field.
+	article.DefaultShortToken = articleDescShortToken.Default.(func() string)
+	// article.ShortTokenValidator is a validator for the "short_token" field. It is called by the builders before save.
+	article.ShortTokenValidator = func() func(string) error {
+		validators := articleDescShortToken.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(short_token string) error {
+			for _, fn := range fns {
+				if err := fn(short_token); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// articleDescState is the schema descriptor for state field.
-	articleDescState := articleFields[5].Descriptor()
+	articleDescState := articleFields[6].Descriptor()
 	// article.DefaultState holds the default value on creation for the state field.
 	article.DefaultState = articleDescState.Default.(string)
 	// article.StateValidator is a validator for the "state" field. It is called by the builders before save.
 	article.StateValidator = articleDescState.Validators[0].(func(string) error)
 	// articleDescViewCount is the schema descriptor for view_count field.
-	articleDescViewCount := articleFields[6].Descriptor()
+	articleDescViewCount := articleFields[7].Descriptor()
 	// article.DefaultViewCount holds the default value on creation for the view_count field.
 	article.DefaultViewCount = articleDescViewCount.Default.(int64)
 	// articleDescCommentCount is the schema descriptor for comment_count field.
-	articleDescCommentCount := articleFields[7].Descriptor()
+	articleDescCommentCount := articleFields[8].Descriptor()
 	// article.DefaultCommentCount holds the default value on creation for the comment_count field.
 	article.DefaultCommentCount = articleDescCommentCount.Default.(int64)
 	// articleDescFeatured is the schema descriptor for featured field.
-	articleDescFeatured := articleFields[8].Descriptor()
+	articleDescFeatured := articleFields[9].Descriptor()
 	// article.DefaultFeatured holds the default value on creation for the featured field.
 	article.DefaultFeatured = articleDescFeatured.Default.(bool)
 	// articleDescMediaID is the schema descriptor for media_id field.
-	articleDescMediaID := articleFields[12].Descriptor()
+	articleDescMediaID := articleFields[13].Descriptor()
 	// article.MediaIDValidator is a validator for the "media_id" field. It is called by the builders before save.
 	article.MediaIDValidator = articleDescMediaID.Validators[0].(func(string) error)
 	// articleDescThumbnail is the schema descriptor for thumbnail field.
-	articleDescThumbnail := articleFields[13].Descriptor()
+	articleDescThumbnail := articleFields[14].Descriptor()
 	// article.ThumbnailValidator is a validator for the "thumbnail" field. It is called by the builders before save.
 	article.ThumbnailValidator = articleDescThumbnail.Validators[0].(func(string) error)
 	// articleDescCreateTime is the schema descriptor for create_time field.
-	articleDescCreateTime := articleFields[15].Descriptor()
+	articleDescCreateTime := articleFields[16].Descriptor()
 	// article.DefaultCreateTime holds the default value on creation for the create_time field.
 	article.DefaultCreateTime = articleDescCreateTime.Default.(func() time.Time)
 	// articleDescUpdateTime is the schema descriptor for update_time field.
-	articleDescUpdateTime := articleFields[16].Descriptor()
+	articleDescUpdateTime := articleFields[17].Descriptor()
 	// article.DefaultUpdateTime holds the default value on creation for the update_time field.
 	article.DefaultUpdateTime = articleDescUpdateTime.Default.(func() time.Time)
 	// article.UpdateDefaultUpdateTime holds the default value on update for the update_time field.

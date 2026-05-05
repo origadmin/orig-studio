@@ -64,6 +64,20 @@ func (_c *ArticleCreate) SetNillableSlug(v *string) *ArticleCreate {
 	return _c
 }
 
+// SetShortToken sets the "short_token" field.
+func (_c *ArticleCreate) SetShortToken(v string) *ArticleCreate {
+	_c.mutation.SetShortToken(v)
+	return _c
+}
+
+// SetNillableShortToken sets the "short_token" field if the given value is not nil.
+func (_c *ArticleCreate) SetNillableShortToken(v *string) *ArticleCreate {
+	if v != nil {
+		_c.SetShortToken(*v)
+	}
+	return _c
+}
+
 // SetState sets the "state" field.
 func (_c *ArticleCreate) SetState(v string) *ArticleCreate {
 	_c.mutation.SetState(v)
@@ -295,6 +309,10 @@ func (_c *ArticleCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *ArticleCreate) defaults() {
+	if _, ok := _c.mutation.ShortToken(); !ok {
+		v := article.DefaultShortToken()
+		_c.mutation.SetShortToken(v)
+	}
 	if _, ok := _c.mutation.State(); !ok {
 		v := article.DefaultState
 		_c.mutation.SetState(v)
@@ -346,6 +364,14 @@ func (_c *ArticleCreate) check() error {
 	if v, ok := _c.mutation.Slug(); ok {
 		if err := article.SlugValidator(v); err != nil {
 			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "Article.slug": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ShortToken(); !ok {
+		return &ValidationError{Name: "short_token", err: errors.New(`entity: missing required field "Article.short_token"`)}
+	}
+	if v, ok := _c.mutation.ShortToken(); ok {
+		if err := article.ShortTokenValidator(v); err != nil {
+			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Article.short_token": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.State(); !ok {
@@ -442,6 +468,10 @@ func (_c *ArticleCreate) createSpec() (*Article, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Slug(); ok {
 		_spec.SetField(article.FieldSlug, field.TypeString, value)
 		_node.Slug = value
+	}
+	if value, ok := _c.mutation.ShortToken(); ok {
+		_spec.SetField(article.FieldShortToken, field.TypeString, value)
+		_node.ShortToken = value
 	}
 	if value, ok := _c.mutation.State(); ok {
 		_spec.SetField(article.FieldState, field.TypeString, value)

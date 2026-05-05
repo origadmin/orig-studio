@@ -5,25 +5,27 @@
  * Integrates with useTheme hook for state management.
  */
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from './useTheme';
 import type { ThemeMeta, ThemeCategory } from './types';
 import { Check, Loader2, Sun, Moon, Monitor } from 'lucide-react';
 
-const CATEGORY_LABELS: Record<ThemeCategory, string> = {
-  professional: '专业商务',
-  social: '活力社交',
-  creative: '创意设计',
-  minimal: '极简暗色',
-  custom: '项目专属',
+const CATEGORY_LABEL_KEYS: Record<ThemeCategory, string> = {
+  professional: 'theme.categoryProfessional',
+  social: 'theme.categorySocial',
+  creative: 'theme.categoryCreative',
+  minimal: 'theme.categoryMinimal',
+  custom: 'theme.categoryCustom',
 };
 
 const COLOR_MODE_OPTIONS = [
-  { value: 'light' as const, label: '浅色', icon: Sun },
-  { value: 'dark' as const, label: '深色', icon: Moon },
-  { value: 'system' as const, label: '跟随系统', icon: Monitor },
+  { value: 'light' as const, labelKey: 'theme.modeLight', icon: Sun },
+  { value: 'dark' as const, labelKey: 'theme.modeDark', icon: Moon },
+  { value: 'system' as const, labelKey: 'theme.modeSystem', icon: Monitor },
 ];
 
 export function ThemeSwitcher() {
+  const { t } = useTranslation();
   const { themeId, setTheme, colorMode, setColorMode, themes, isLoading } = useTheme();
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [switchingTo, setSwitchingTo] = useState<string | null>(null);
@@ -55,7 +57,7 @@ export function ThemeSwitcher() {
     <div className="space-y-6">
       {/* Color mode toggle */}
       <div className="flex items-center gap-3">
-        <span className="text-sm font-medium">外观模式</span>
+        <span className="text-sm font-medium">{t('theme.appearanceMode')}</span>
         <div className="flex rounded-lg border p-1">
           {COLOR_MODE_OPTIONS.map((option) => {
             const Icon = option.icon;
@@ -70,7 +72,7 @@ export function ThemeSwitcher() {
                 }`}
               >
                 <Icon className="h-3.5 w-3.5" />
-                {option.label}
+                {t(option.labelKey)}
               </button>
             );
           })}
@@ -87,7 +89,7 @@ export function ThemeSwitcher() {
               : 'bg-muted hover:bg-muted/80'
           }`}
         >
-          全部
+          {t('theme.allCategories')}
         </button>
         {categories.map((cat) => (
           <button
@@ -99,7 +101,7 @@ export function ThemeSwitcher() {
                 : 'bg-muted hover:bg-muted/80'
             }`}
           >
-            {CATEGORY_LABELS[cat] || cat}
+            {t(CATEGORY_LABEL_KEYS[cat] || cat)}
           </button>
         ))}
       </div>
@@ -121,7 +123,7 @@ export function ThemeSwitcher() {
       {isLoading && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
-          正在加载主题...
+          {t('theme.loadingThemes')}
         </div>
       )}
     </div>

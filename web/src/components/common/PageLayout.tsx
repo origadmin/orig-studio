@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
@@ -23,11 +23,11 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
     <div className={`space-y-6 ${className}`}>
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl font-bold text-foreground">
             {title}
           </h1>
           {description && (
-            <p className="mt-2 text-sm text-gray-600 dark:text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground">
               {description}
             </p>
           )}
@@ -38,7 +38,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
           </div>
         )}
       </div>
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+      <div className="bg-card rounded-lg shadow-sm border border-border p-6">
         {children}
       </div>
     </div>

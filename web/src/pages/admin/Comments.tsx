@@ -79,11 +79,11 @@ const Comments: React.FC = () => {
         try {
             setActionLoading(id);
             await adminCommentApi.approve(id);
-            toast.success('Comment approved');
+            toast.success(t('admin.approved'));
             await refreshComments();
             await fetchStats();
         } catch (err: any) {
-            toast.error('Failed to approve', { description: err.message });
+            toast.error(t('admin.approve') + ' ' + t('admin.loadFailed'), { description: err.message });
         } finally {
             setActionLoading(null);
         }
@@ -93,11 +93,11 @@ const Comments: React.FC = () => {
         try {
             setActionLoading(id);
             await adminCommentApi.reject(id);
-            toast.success('Comment rejected');
+            toast.success(t('admin.rejected'));
             await refreshComments();
             await fetchStats();
         } catch (err: any) {
-            toast.error('Failed to reject', { description: err.message });
+            toast.error(t('admin.reject') + ' ' + t('admin.loadFailed'), { description: err.message });
         } finally {
             setActionLoading(null);
         }
@@ -107,11 +107,11 @@ const Comments: React.FC = () => {
         try {
             setActionLoading(id);
             await adminCommentApi.block(id);
-            toast.success('Comment blocked');
+            toast.success(t('admin.blocked'));
             await refreshComments();
             await fetchStats();
         } catch (err: any) {
-            toast.error('Failed to block', { description: err.message });
+            toast.error(t('admin.blocked') + ' ' + t('admin.loadFailed'), { description: err.message });
         } finally {
             setActionLoading(null);
         }
@@ -121,11 +121,11 @@ const Comments: React.FC = () => {
         try {
             setActionLoading(id);
             await adminCommentApi.unblock(id);
-            toast.success('Comment unblocked');
+            toast.success(t('admin.unblocked'));
             await refreshComments();
             await fetchStats();
         } catch (err: any) {
-            toast.error('Failed to unblock', { description: err.message });
+            toast.error(t('admin.unblocked') + ' ' + t('admin.loadFailed'), { description: err.message });
         } finally {
             setActionLoading(null);
         }
@@ -136,11 +136,11 @@ const Comments: React.FC = () => {
         try {
             setActionLoading(id);
             await adminCommentApi.delete(id);
-            toast.success('Comment deleted');
+            toast.success(t('admin.commentDeleted'));
             await refreshComments();
             await fetchStats();
         } catch (err: any) {
-            toast.error('Failed to delete', { description: err.message });
+            toast.error(t('admin.deleteFailed'), { description: err.message });
         } finally {
             setActionLoading(null);
         }
@@ -154,11 +154,11 @@ const Comments: React.FC = () => {
         try {
             setActionLoading(id);
             await adminCommentApi.dismissReports(id);
-            toast.success('Reports dismissed');
+            toast.success(t('admin.reportsDismissed'));
             await refreshComments();
             await fetchStats();
         } catch (err: any) {
-            toast.error('Failed to dismiss reports', { description: err.message });
+            toast.error(t('admin.loadFailed'), { description: err.message });
         } finally {
             setActionLoading(null);
         }
@@ -194,17 +194,17 @@ const Comments: React.FC = () => {
                         {/* Page title */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
-                                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">
-                                    {t('admin.comments') || 'Comments'}
+                                <h2 className="text-3xl font-extrabold tracking-tight text-foreground">
+                                    {t('admin.comments')}
                                 </h2>
-                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5">
-                                    Manage your user comments
+                                <p className="text-sm text-muted-foreground mt-1.5">
+                                    {t('admin.manageComments')}
                                 </p>
                             </div>
                         </div>
 
                         {/* Divider */}
-                        <div className="border-t border-slate-200 dark:border-slate-800 my-2" />
+                        <div className="border-t border-border my-2" />
 
                         {/* Search and filters */}
                         <div className="flex flex-col lg:flex-row gap-4">
@@ -225,18 +225,18 @@ const Comments: React.FC = () => {
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4" />
                                             {statusFilter === 'all' ? (
-                                                <span className="text-muted-foreground">Status</span>
+                                                <span className="text-muted-foreground">{t('admin.status')}</span>
                                             ) : (
-                                                <SelectValue placeholder="Status" />
+                                                <SelectValue placeholder={t('admin.status')} />
                                             )}
                                         </div>
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">--- All ---</SelectItem>
-                                        <SelectItem value="approved">{t('admin.approved') || 'Approved'}</SelectItem>
-                                        <SelectItem value="pending">{t('admin.pending') || 'Pending'}</SelectItem>
-                                        <SelectItem value="rejected">{t('admin.rejected') || 'Rejected'}</SelectItem>
-                                        <SelectItem value="blocked">Blocked</SelectItem>
+                                        <SelectItem value="all">--- {t('admin.allStatus')} ---</SelectItem>
+                                        <SelectItem value="approved">{t('admin.approved')}</SelectItem>
+                                        <SelectItem value="pending">{t('admin.pending')}</SelectItem>
+                                        <SelectItem value="rejected">{t('admin.rejected')}</SelectItem>
+                                        <SelectItem value="blocked">{t('admin.blocked')}</SelectItem>
                                     </SelectContent>
                                 </Select>
 
@@ -249,7 +249,7 @@ const Comments: React.FC = () => {
                                         onClick={handleReset}
                                     >
                                         <RotateCcw className="h-4 w-4 mr-2" />
-                                        Reset
+                                        {t('admin.reset')}
                                     </Button>
                                 </div>
                             </div>

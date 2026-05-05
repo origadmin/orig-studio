@@ -70,7 +70,7 @@ import { Route as AuthenticatedPortalMeArticlesIndexRouteImport } from "./routes
 import { Route as AuthenticatedAdminArticlesIdEditRouteImport } from "./routes/_authenticated/admin/articles/$id.edit";
 import { Route as AuthenticatedPortalMediaShortTokenEditRouteImport } from "./routes/_authenticated/_portal/media.$shortToken.edit";
 import { Route as AuthenticatedPortalMeArticlesNewRouteImport } from "./routes/_authenticated/_portal/me/articles.new";
-import { Route as AuthenticatedPortalMeArticlesIdEditRouteImport } from "./routes/_authenticated/_portal/me/articles.$id.edit";
+import { Route as AuthenticatedPortalMeArticlesTokenEditRouteImport } from "./routes/_authenticated/_portal/me/articles.$token.edit";
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: "/_authenticated",
@@ -406,10 +406,10 @@ const AuthenticatedPortalMeArticlesNewRoute =
     path: "/new",
     getParentRoute: () => AuthenticatedPortalMeArticlesRouteRoute,
   } as any);
-const AuthenticatedPortalMeArticlesIdEditRoute =
-  AuthenticatedPortalMeArticlesIdEditRouteImport.update({
-    id: "/$id/edit",
-    path: "/$id/edit",
+const AuthenticatedPortalMeArticlesTokenEditRoute =
+  AuthenticatedPortalMeArticlesTokenEditRouteImport.update({
+    id: "/$token/edit",
+    path: "/$token/edit",
     getParentRoute: () => AuthenticatedPortalMeArticlesRouteRoute,
   } as any);
 
@@ -472,7 +472,7 @@ export interface FileRoutesByFullPath {
   "/media/$shortToken/edit": typeof AuthenticatedPortalMediaShortTokenEditRoute;
   "/admin/articles/$id/edit": typeof AuthenticatedAdminArticlesIdEditRoute;
   "/me/articles/": typeof AuthenticatedPortalMeArticlesIndexRoute;
-  "/me/articles/$id/edit": typeof AuthenticatedPortalMeArticlesIdEditRoute;
+  "/me/articles/$token/edit": typeof AuthenticatedPortalMeArticlesTokenEditRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof PortalIndexRoute;
@@ -528,7 +528,7 @@ export interface FileRoutesByTo {
   "/media/$shortToken/edit": typeof AuthenticatedPortalMediaShortTokenEditRoute;
   "/admin/articles/$id/edit": typeof AuthenticatedAdminArticlesIdEditRoute;
   "/me/articles": typeof AuthenticatedPortalMeArticlesIndexRoute;
-  "/me/articles/$id/edit": typeof AuthenticatedPortalMeArticlesIdEditRoute;
+  "/me/articles/$token/edit": typeof AuthenticatedPortalMeArticlesTokenEditRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
@@ -593,7 +593,7 @@ export interface FileRoutesById {
   "/_authenticated/_portal/media/$shortToken/edit": typeof AuthenticatedPortalMediaShortTokenEditRoute;
   "/_authenticated/admin/articles/$id/edit": typeof AuthenticatedAdminArticlesIdEditRoute;
   "/_authenticated/_portal/me/articles/": typeof AuthenticatedPortalMeArticlesIndexRoute;
-  "/_authenticated/_portal/me/articles/$id/edit": typeof AuthenticatedPortalMeArticlesIdEditRoute;
+  "/_authenticated/_portal/me/articles/$token/edit": typeof AuthenticatedPortalMeArticlesTokenEditRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
@@ -656,7 +656,7 @@ export interface FileRouteTypes {
     | "/media/$shortToken/edit"
     | "/admin/articles/$id/edit"
     | "/me/articles/"
-    | "/me/articles/$id/edit";
+    | "/me/articles/$token/edit";
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
@@ -712,7 +712,7 @@ export interface FileRouteTypes {
     | "/media/$shortToken/edit"
     | "/admin/articles/$id/edit"
     | "/me/articles"
-    | "/me/articles/$id/edit";
+    | "/me/articles/$token/edit";
   id:
     | "__root__"
     | "/_portal"
@@ -776,7 +776,7 @@ export interface FileRouteTypes {
     | "/_authenticated/_portal/media/$shortToken/edit"
     | "/_authenticated/admin/articles/$id/edit"
     | "/_authenticated/_portal/me/articles/"
-    | "/_authenticated/_portal/me/articles/$id/edit";
+    | "/_authenticated/_portal/me/articles/$token/edit";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -1215,11 +1215,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedPortalMeArticlesNewRouteImport;
       parentRoute: typeof AuthenticatedPortalMeArticlesRouteRoute;
     };
-    "/_authenticated/_portal/me/articles/$id/edit": {
-      id: "/_authenticated/_portal/me/articles/$id/edit";
-      path: "/$id/edit";
-      fullPath: "/me/articles/$id/edit";
-      preLoaderRoute: typeof AuthenticatedPortalMeArticlesIdEditRouteImport;
+    "/_authenticated/_portal/me/articles/$token/edit": {
+      id: "/_authenticated/_portal/me/articles/$token/edit";
+      path: "/$token/edit";
+      fullPath: "/me/articles/$token/edit";
+      preLoaderRoute: typeof AuthenticatedPortalMeArticlesTokenEditRouteImport;
       parentRoute: typeof AuthenticatedPortalMeArticlesRouteRoute;
     };
   }
@@ -1293,7 +1293,7 @@ const AuthenticatedPortalArticlesRouteRouteWithChildren =
 interface AuthenticatedPortalMeArticlesRouteRouteChildren {
   AuthenticatedPortalMeArticlesNewRoute: typeof AuthenticatedPortalMeArticlesNewRoute;
   AuthenticatedPortalMeArticlesIndexRoute: typeof AuthenticatedPortalMeArticlesIndexRoute;
-  AuthenticatedPortalMeArticlesIdEditRoute: typeof AuthenticatedPortalMeArticlesIdEditRoute;
+  AuthenticatedPortalMeArticlesTokenEditRoute: typeof AuthenticatedPortalMeArticlesTokenEditRoute;
 }
 
 const AuthenticatedPortalMeArticlesRouteRouteChildren: AuthenticatedPortalMeArticlesRouteRouteChildren =
@@ -1302,8 +1302,8 @@ const AuthenticatedPortalMeArticlesRouteRouteChildren: AuthenticatedPortalMeArti
       AuthenticatedPortalMeArticlesNewRoute,
     AuthenticatedPortalMeArticlesIndexRoute:
       AuthenticatedPortalMeArticlesIndexRoute,
-    AuthenticatedPortalMeArticlesIdEditRoute:
-      AuthenticatedPortalMeArticlesIdEditRoute,
+    AuthenticatedPortalMeArticlesTokenEditRoute:
+      AuthenticatedPortalMeArticlesTokenEditRoute,
   };
 
 const AuthenticatedPortalMeArticlesRouteRouteWithChildren =

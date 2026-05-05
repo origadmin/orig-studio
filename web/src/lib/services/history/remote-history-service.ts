@@ -1,16 +1,17 @@
 // Remote history service - calls backend API for authenticated users
 
-import type {HistoryItem} from '@/lib/api/history';
+import type {ContentType, HistoryItem} from '@/lib/api/history';
 import type {HistoryListParams, HistoryListResult, IHistoryService} from './types';
 import {historyApi} from '@/lib/api/history';
 
 export class RemoteHistoryService implements IHistoryService {
     async list(params?: HistoryListParams): Promise<HistoryListResult> {
-        const response = await historyApi.list({
-            page: params?.page,
-            page_size: params?.page_size,
-            content_type: params?.content_type,
-        });
+        // Build API params conditionally to avoid passing page: undefined
+        const apiParams: { page?: number; page_size?: number; content_type?: ContentType } = {};
+        if (params?.page !== undefined) apiParams.page = params.page;
+        if (params?.page_size !== undefined) apiParams.page_size = params.page_size;
+        if (params?.content_type !== undefined) apiParams.content_type = params.content_type;
+        const response = await historyApi.list(apiParams);
         return {
             items: response.items,
             total: response.total,

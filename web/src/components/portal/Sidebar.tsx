@@ -119,11 +119,11 @@ const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
                 params={item.params}
                 className={`flex items-center gap-3 py-2.5 px-3 rounded-lg transition-colors ${
                     active
-                        ? 'bg-gray-100 dark:bg-gray-800 font-medium'
-                        : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                        ? 'bg-accent font-medium'
+                        : 'hover:bg-accent'
                 }`}
             >
-                <span className={`flex-shrink-0 ${active ? 'text-black dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                <span className={`flex-shrink-0 ${active ? 'text-foreground' : 'text-muted-foreground'}`}>
                     {item.icon}
                 </span>
                 <span className="text-[14px]">{t(item.label)}</span>
@@ -143,8 +143,8 @@ const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
                 params={linkParams}
                 className={`flex items-center gap-3 py-1.5 px-3 rounded-lg transition-colors ${
                     active
-                        ? 'bg-gray-100 dark:bg-gray-800 font-medium'
-                        : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                        ? 'bg-accent font-medium'
+                        : 'hover:bg-accent'
                 }`}
             >
                 <Avatar className="w-6 h-6 flex-shrink-0">
@@ -157,7 +157,7 @@ const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
                         {displayName ? displayName.charAt(0).toUpperCase() : 'U'}
                     </AvatarFallback>
                 </Avatar>
-                <span className={`text-[14px] truncate ${active ? 'text-black dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                <span className={`text-[14px] truncate ${active ? 'text-foreground' : 'text-muted-foreground'}`}>
                     {displayName}
                 </span>
             </Link>
@@ -168,12 +168,12 @@ const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
         <button
             onMouseEnter={(e) => handleSectionEnter(e, section, items)}
             onMouseLeave={handleSectionLeave}
-            className="w-full flex flex-col items-center gap-1 py-2.5 px-1 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="w-full flex flex-col items-center gap-1 py-2.5 px-1 rounded-lg transition-colors hover:bg-accent"
         >
             {items[0]?.icon && (
-                <span className="text-gray-700 dark:text-gray-300 scale-110">{items[0].icon}</span>
+                <span className="text-muted-foreground scale-110">{items[0].icon}</span>
             )}
-            <span className="text-[12px] font-medium text-gray-900 dark:text-gray-100 leading-tight">
+            <span className="text-[12px] font-medium text-foreground leading-tight">
                 {t(section.title)}
             </span>
         </button>
@@ -187,12 +187,12 @@ const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
                 params={item.params}
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
                     active
-                        ? 'bg-gray-100 dark:bg-gray-800 font-medium'
-                        : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                        ? 'bg-accent font-medium'
+                        : 'hover:bg-accent'
                 }`}
                 onMouseEnter={handlePopupEnter}
             >
-                <span className={`flex-shrink-0 ${active ? 'text-black dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                <span className={`flex-shrink-0 ${active ? 'text-foreground' : 'text-muted-foreground'}`}>
                     {item.icon}
                 </span>
                 <span className="text-sm">{t(item.label)}</span>
@@ -212,8 +212,8 @@ const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
                 params={linkParams}
                 className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
                     active
-                        ? 'bg-gray-100 dark:bg-gray-800 font-medium'
-                        : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                        ? 'bg-accent font-medium'
+                        : 'hover:bg-accent'
                 }`}
                 onMouseEnter={handlePopupEnter}
             >
@@ -227,7 +227,7 @@ const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
                         {displayName ? displayName.charAt(0).toUpperCase() : 'U'}
                     </AvatarFallback>
                 </Avatar>
-                <span className={`text-sm truncate ${active ? 'text-black dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                <span className={`text-sm truncate ${active ? 'text-foreground' : 'text-muted-foreground'}`}>
                     {displayName}
                 </span>
             </Link>
@@ -245,7 +245,7 @@ const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
         return (
             <div className="py-0.5">
                 {title && (
-                    <h3 className="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-muted-foreground uppercase tracking-wider">
+                    <h3 className="px-3 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         {title}
                     </h3>
                 )}
@@ -260,14 +260,14 @@ const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
                     {canExpand && (
                         <button
                             onClick={() => setSubsExpanded(!subsExpanded)}
-                            className="flex items-center gap-3 py-2 px-3 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 w-full text-left"
+                            className="flex items-center gap-3 py-2 px-3 rounded-lg transition-colors hover:bg-accent w-full text-left"
                         >
                             {subsExpanded ? (
-                                <ChevronUp className="w-5 h-5 text-gray-700 dark:text-gray-300 flex-shrink-0"/>
+                                <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0"/>
                             ) : (
-                                <ChevronDown className="w-5 h-5 text-gray-700 dark:text-gray-300 flex-shrink-0"/>
+                                <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0"/>
                             )}
-                            <span className="text-[14px] text-gray-700 dark:text-gray-300">
+                            <span className="text-[14px] text-muted-foreground">
                                 {subsExpanded ? t('nav.showLess') : t('nav.showMore')}
                             </span>
                         </button>
@@ -278,11 +278,11 @@ const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
     };
 
     const FullDivider = () => (
-        <div className="border-t border-gray-200/60 dark:border-gray-700/60 my-1.5 mx-3"/>
+        <div className="border-t border-border/60 my-1.5 mx-3"/>
     );
 
     const CollapsedDivider = () => (
-        <div className="border-t border-gray-200/60 dark:border-gray-700/60 my-1 mx-2"/>
+        <div className="border-t border-border/60 my-1 mx-2"/>
     );
 
     const width = collapsed ? 72 : 240;
@@ -316,7 +316,7 @@ const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
         <>
             <aside
                 style={{width}}
-                className="fixed left-0 top-14 bottom-0 bg-white dark:bg-gray-900 z-40 hidden md:flex flex-col transition-all duration-200"
+                className="fixed left-0 top-14 bottom-0 bg-background z-40 hidden md:flex flex-col transition-all duration-200"
             >
                 {collapsed ? (
                     <nav className="flex-1 overflow-hidden py-2 relative">
@@ -324,7 +324,7 @@ const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
 
                         {hoveredSection && hoveredItems.length > 0 && (
                             <div
-                                className="fixed bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200/60 dark:border-gray-700/60 py-1.5 z-50 animate-in fade-in slide-in-from-left-1 duration-150"
+                                className="fixed bg-popover rounded-xl shadow-xl border border-border/60 py-1.5 z-50 animate-in fade-in slide-in-from-left-1 duration-150"
                                 style={{
                                     left: width + 6,
                                     top: hoverPos.top,
@@ -335,8 +335,8 @@ const Sidebar: React.FC<SidebarProps> = ({collapsed = false}) => {
                                 onMouseEnter={handlePopupEnter}
                                 onMouseLeave={handlePopupLeave}
                             >
-                                <div className="px-3 py-1.5 border-b border-gray-100 dark:border-gray-800">
-                                    <span className="text-xs font-semibold text-gray-500 dark:text-muted-foreground uppercase tracking-wider">
+                                <div className="px-3 py-1.5 border-b border-border">
+                                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                                         {t(hoveredSection.title)}
                                     </span>
                                 </div>

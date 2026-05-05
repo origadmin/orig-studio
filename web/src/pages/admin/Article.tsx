@@ -106,15 +106,15 @@ export default function ArticlePage() {
                         {/* Page title */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
-                                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">Article Management</h2>
-                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5">
+                                <h2 className="text-3xl font-extrabold tracking-tight text-foreground">Article Management</h2>
+                                <p className="text-sm text-muted-foreground mt-1.5">
                                     Manage articles, pages, and static content
                                 </p>
                             </div>
                         </div>
 
                         {/* Separator */}
-                        <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+                        <div className="border-t border-border my-2"/>
 
                         {/* Search and filter */}
                         <div className="flex flex-col lg:flex-row gap-4">
@@ -239,8 +239,8 @@ export default function ArticlePage() {
                                                 {item.state}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="text-sm text-slate-500">{formatViews(item.view_count)}</TableCell>
-                                        <TableCell className="text-sm text-slate-500">{formatDateTime(item.create_time)}</TableCell>
+                                        <TableCell className="text-sm text-muted-foreground">{formatViews(item.view_count)}</TableCell>
+                                        <TableCell className="text-sm text-muted-foreground">{formatDateTime(item.create_time)}</TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>

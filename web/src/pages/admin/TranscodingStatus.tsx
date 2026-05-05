@@ -901,9 +901,9 @@ const filteredTasks = useMemo(() => {
                         {/* 页面标题和状态 */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
-                                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">Transcoding
+                                <h2 className="text-3xl font-extrabold tracking-tight text-foreground">Transcoding
                                     Status</h2>
-                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5 flex items-center gap-2">
+                                <p className="text-sm text-muted-foreground mt-1.5 flex items-center gap-2">
                                     <span className="inline-block w-2 h-2 rounded-full bg-sky-500 animate-pulse"/>
                                     Live monitoring of video processing workflows
                                 </p>
@@ -931,7 +931,7 @@ const filteredTasks = useMemo(() => {
                         </div>
 
                         {/* 分隔线 */}
-                        <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+                        <div className="border-t border-border my-2"/>
 
                         {/* 搜索和筛选 */}
                         <div className="flex flex-col lg:flex-row gap-4 items-center">
@@ -1050,13 +1050,13 @@ const filteredTasks = useMemo(() => {
                         },
                     ].map((card, index) => (
                         <Card key={card.label}
-                              className="relative overflow-hidden border-none shadow-sm bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
+                              className="relative overflow-hidden border-none shadow-sm bg-card ring-1 ring-border">
                             <CardContent className="p-5">
                                 <div className="flex items-start justify-between">
                                     <div className="space-y-1">
-                                        <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground dark:text-slate-500">{card.label}</p>
+                                        <p className="text-xs font-semibold text-muted-foreground">{card.label}</p>
                                         <h3 className={`text-3xl font-bold tabular-nums text-${card.color}-600 dark:text-${card.color}-400`}>{card.value}</h3>
-                                        <p className="text-[10px] text-muted-foreground dark:text-slate-500 font-medium">{card.desc}</p>
+                                        <p className="text-[10px] text-muted-foreground font-medium">{card.desc}</p>
                                     </div>
                                     <div
                                         className={`p-2.5 rounded-xl bg-${card.color}-50 dark:bg-${card.color}-950/30 text-${card.color}-500 dark:text-${card.color}-400`}>

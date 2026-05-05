@@ -5,6 +5,7 @@
 
 import {useState, useEffect, useMemo, useCallback} from 'react';
 import {useParams, useNavigate} from '@tanstack/react-router';
+import {useTranslation} from 'react-i18next';
 import {adminArticleApi, type Article, type CreateArticleRequest, type UpdateArticleRequest, type MediaBrief} from '@/lib/api/article';
 import {adminMediaApi, type Media} from '@/lib/api/media';
 import {useCategoryList} from '@/hooks/queries';
@@ -41,17 +42,20 @@ function resolveMediaUrl(url: string | undefined): string | undefined {
 /**
  * Map Article state to Badge variant and label
  */
-const STATE_BADGE_MAP: Record<string, { variant: HeaderBadgeConfig['variant']; label: string }> = {
-    draft: {variant: 'secondary', label: 'Draft'},
-    published: {variant: 'default', label: 'Published'},
-    archived: {variant: 'destructive', label: 'Archived'},
-};
+function getStateBadgeConfig(state: string, t: (key: string) => string): { variant: HeaderBadgeConfig['variant']; label: string } {
+    const map: Record<string, { variant: HeaderBadgeConfig['variant']; label: string }> = {
+        draft: {variant: 'secondary', label: t('admin.draft')},
+        published: {variant: 'default', label: t('admin.published')},
+        archived: {variant: 'destructive', label: t('admin.archived')},
+    };
+    return map[state] || {variant: 'outline' as const, label: state};
+}
 
-function mapArticleToHeaderBadges(article: Article): HeaderBadgeConfig[] {
+function mapArticleToHeaderBadges(article: Article, t: (key: string) => string): HeaderBadgeConfig[] {
     const badges: HeaderBadgeConfig[] = [];
 
     // State Badge
-    const stateConfig = STATE_BADGE_MAP[article.state] || {variant: 'outline' as const, label: article.state};
+    const stateConfig = getStateBadgeConfig(article.state, t);
     badges.push({
         type: 'state',
         variant: stateConfig.variant,
@@ -64,8 +68,8 @@ function mapArticleToHeaderBadges(article: Article): HeaderBadgeConfig[] {
         badges.push({
             type: 'featured',
             variant: 'outline',
-            label: 'Featured',
-            ariaLabel: 'Featured article',
+            label: t('admin.featured'),
+            ariaLabel: t('admin.featuredArticle'),
             className: 'text-warning border-amber-300',
         });
     }
@@ -75,8 +79,8 @@ function mapArticleToHeaderBadges(article: Article): HeaderBadgeConfig[] {
         badges.push({
             type: 'media-type',
             variant: 'outline',
-            label: 'Video',
-            ariaLabel: 'Has associated video',
+            label: t('admin.video'),
+            ariaLabel: t('admin.hasAssociatedVideo'),
         });
     }
 
@@ -94,6 +98,7 @@ interface MediaSelectorDialogProps {
 }
 
 function MediaSelectorDialog({open, onClose, onSelect}: MediaSelectorDialogProps) {
+    const {t} = useTranslation();
     const [medias, setMedias] = useState<Media[]>([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
@@ -131,7 +136,7 @@ function MediaSelectorDialog({open, onClose, onSelect}: MediaSelectorDialogProps
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="bg-background rounded-lg shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col">
                 <div className="flex items-center justify-between p-4 border-b">
-                    <h3 className="font-semibold text-lg">Select Video</h3>
+                    <h3 className="font-semibold text-lg">{t('admin.selectVideo')}</h3>
                     <Button variant="ghost" size="icon" onClick={onClose}>
                         <X className="w-4 h-4"/>
                     </Button>
@@ -141,7 +146,7 @@ function MediaSelectorDialog({open, onClose, onSelect}: MediaSelectorDialogProps
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                         <Input
-                            placeholder="Search videos..."
+                            placeholder={t('admin.searchVideos')}
                             value={search}
                             onChange={e => {
                                 setSearch(e.target.value);
@@ -159,7 +164,7 @@ function MediaSelectorDialog({open, onClose, onSelect}: MediaSelectorDialogProps
                         </div>
                     ) : medias.length === 0 ? (
                         <div className="text-center py-12 text-muted-foreground">
-                            No videos found
+                            {t('admin.noVideosFound')}
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -203,12 +208,12 @@ function MediaSelectorDialog({open, onClose, onSelect}: MediaSelectorDialogProps
 
                 <div className="flex items-center justify-between p-4 border-t">
                     <span className="text-sm text-muted-foreground">
-                        {total} video(s) found
+                        {t('admin.videosFound', {count: total})}
                     </span>
                     <div className="flex gap-2">
-                        <Button variant="outline" onClick={onClose}>Cancel</Button>
+                        <Button variant="outline" onClick={onClose}>{t('admin.cancel')}</Button>
                         <Button onClick={handleSelect} disabled={!selectedId}>
-                            Confirm
+                            {t('admin.confirm')}
                         </Button>
                     </div>
                 </div>
@@ -226,6 +231,7 @@ interface ArticleEditPageProps {
 }
 
 export default function ArticleEditPage({mode}: ArticleEditPageProps) {
+    const {t} = useTranslation();
     const {id} = useParams({strict: false}) as {id?: string};
     const navigate = useNavigate();
     const {data: categoriesData} = useCategoryList();
@@ -286,7 +292,7 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
                 });
             })
             .catch(err => {
-                setLoadError('Failed to load article');
+                setLoadError(t('admin.failedToLoadArticle'));
                 console.error('Error loading article:', err);
             })
             .finally(() => setLoading(false));
@@ -324,7 +330,7 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
                 const created = await adminArticleApi.create(data);
                 resetDirty();
                 setSuccess();
-                toast.success('Article created');
+                toast.success(t('admin.articleCreated'));
                 // Navigate to edit page with new ID
                 if (created?.id) {
                     navigate({to: '/admin/articles/$id/edit', params: {id: created.id}});
@@ -345,11 +351,11 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
                 await adminArticleApi.update(id, data);
                 resetDirty();
                 setSuccess();
-                toast.success('Article saved');
+                toast.success(t('admin.articleSaved'));
             }
         } catch (err: any) {
             setError();
-            toast.error(`Save failed: ${err?.message || 'Unknown error'}`);
+            toast.error(`${t('admin.saveFailed')}: ${err?.message || t('admin.unknownError')}`);
             console.error('Failed to save', err);
         }
     }, [mode, id, isSaving, form, resetDirty, setSaving, setSuccess, setError, navigate]);
@@ -361,11 +367,11 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
         try {
             await adminArticleApi.delete(id);
             setDeleteDialogOpen(false);
-            toast.success('Article deleted');
+            toast.success(t('admin.articleDeleted'));
             navigate({to: '/admin/articles'});
         } catch (err: any) {
             setIsDeleting(false);
-            toast.error(`Delete failed: ${err?.message || 'Unknown error'}`);
+            toast.error(`${t('admin.deleteFailed')}: ${err?.message || t('admin.unknownError')}`);
             console.error('Failed to delete', err);
         }
     }, [id, navigate]);
@@ -414,11 +420,11 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
     // Compute header badges
     const headerBadges = useMemo(() => {
         if (mode === 'create') {
-            return [{type: 'state' as const, variant: 'secondary' as const, label: 'Draft', ariaLabel: 'State: Draft'}];
+            return [{type: 'state' as const, variant: 'secondary' as const, label: t('admin.draft'), ariaLabel: `State: ${t('admin.draft')}`}];
         }
-        if (article) return mapArticleToHeaderBadges(article);
+        if (article) return mapArticleToHeaderBadges(article, t);
         return [];
-    }, [mode, article]);
+    }, [mode, article, t]);
 
     // Resolve thumbnail for display
     const displayThumbnail = resolveMediaUrl(form.thumbnail || selectedMedia?.thumbnail);
@@ -437,7 +443,7 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
                 <AlertTriangle className="w-12 h-12 text-destructive"/>
                 <p className="text-lg text-muted-foreground">{loadError}</p>
                 <Button variant="outline" onClick={handleBack}>
-                    <ArrowLeft className="w-4 h-4 mr-2"/>Back to List
+                    <ArrowLeft className="w-4 h-4 mr-2"/>{t('admin.backToList')}
                 </Button>
             </div>
         );
@@ -446,7 +452,7 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
     return (
         <div className="min-h-screen bg-background">
             <EditPageHeader
-                title={mode === 'create' ? 'Create Article' : (article?.title || 'Untitled Article')}
+                title={mode === 'create' ? t('admin.createArticle') : (article?.title || t('admin.untitledArticle'))}
                 isDirty={isDirty}
                 isSaving={isSaving}
                 saveState={saveState}
@@ -470,7 +476,7 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
                                                 : 'border-transparent text-muted-foreground hover:text-foreground'
                                         }`}
                                         onClick={() => setActiveTab(tab)}>
-                                    {{content: 'Content', publish: 'Publish Settings'}[tab]}
+                                    {{content: t('admin.content'), publish: t('admin.publishSettings')}[tab]}
                                 </button>
                             ))}
                         </div>
@@ -478,7 +484,7 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
                         {activeTab === 'content' && (
                             <div className="space-y-6 bg-card rounded-lg border p-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="title">Title</Label>
+                                    <Label htmlFor="title">{t('admin.title')}</Label>
                                     <Input id="title" value={form.title}
                                            onChange={e => {
                                                setForm({...form, title: e.target.value});
@@ -486,10 +492,10 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
                                                    setForm(prev => ({...prev, slug: generateSlug(e.target.value)}));
                                                }
                                            }}
-                                           placeholder="Article title"/>
+                                           placeholder={t('admin.articleTitle')}/>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="slug">Slug</Label>
+                                    <Label htmlFor="slug">{t('admin.slug')}</Label>
                                     <Input id="slug" value={form.slug}
                                            onChange={e => {
                                                setForm({...form, slug: e.target.value});
@@ -497,30 +503,30 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
                                            }}
                                            placeholder="article-url-slug"/>
                                     <p className="text-xs text-muted-foreground">
-                                        Auto-generated from title. Edit manually if needed.
+                                        {t('admin.autoGeneratedFromTitle')}
                                     </p>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="content">Content (Markdown)</Label>
+                                    <Label htmlFor="content">{t('admin.contentMarkdown')}</Label>
                                     <textarea id="content"
                                               className="flex min-h-[400px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-mono"
                                               value={form.content}
                                               onChange={e => setForm({...form, content: e.target.value})}
-                                              placeholder="Write your article content in Markdown..."/>
+                                              placeholder={t('admin.writeContent')}/>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="summary">Summary</Label>
+                                    <Label htmlFor="summary">{t('admin.summary')}</Label>
                                     <textarea id="summary"
                                               className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                               value={form.summary}
                                               onChange={e => setForm({...form, summary: e.target.value})}
-                                              placeholder="Brief summary of the article..."/>
+                                              placeholder={t('admin.briefSummary')}/>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="tags">Tags (comma-separated)</Label>
+                                    <Label htmlFor="tags">{t('admin.tagsCommaSeparated')}</Label>
                                     <Input id="tags" value={form.tags}
                                            onChange={e => setForm({...form, tags: e.target.value})}
-                                           placeholder="e.g., tutorial, golang, programming"/>
+                                           placeholder={t('admin.tagsPlaceholder')}/>
                                     {form.tags && (
                                         <div className="flex flex-wrap gap-1 mt-2">
                                             {form.tags.split(',').map((tag, i) => tag.trim() && (
@@ -535,23 +541,23 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
                         {activeTab === 'publish' && (
                             <div className="space-y-6 bg-card rounded-lg border p-6">
                                 <div className="space-y-2">
-                                    <Label>State</Label>
+                                    <Label>{t('admin.state')}</Label>
                                     <Select value={form.state} onValueChange={val => setForm({...form, state: val})}>
                                         <SelectTrigger><SelectValue/></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="draft">Draft</SelectItem>
-                                            <SelectItem value="published">Published</SelectItem>
-                                            <SelectItem value="archived">Archived</SelectItem>
+                                            <SelectItem value="draft">{t('admin.draft')}</SelectItem>
+                                            <SelectItem value="published">{t('admin.published')}</SelectItem>
+                                            <SelectItem value="archived">{t('admin.archived')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Category</Label>
+                                    <Label>{t('admin.category')}</Label>
                                     <Select value={form.category_id !== '' && form.category_id !== undefined ? String(form.category_id) : '_none_'}
                                             onValueChange={val => setForm({...form, category_id: val === '_none_' ? '' : val})}>
-                                        <SelectTrigger><SelectValue placeholder="Select category"/></SelectTrigger>
+                                        <SelectTrigger><SelectValue placeholder={t('admin.selectCategory')}/></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="_none_">No Category</SelectItem>
+                                            <SelectItem value="_none_">{t('admin.noCategory')}</SelectItem>
                                             {(Array.isArray(categoriesData?.items) ? categoriesData.items : Array.isArray(categoriesData) ? categoriesData : []).map((cat: any) => (
                                                 <SelectItem key={cat.id} value={String(cat.id)}>
                                                     {cat.name}
@@ -566,17 +572,17 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
                                            onChange={e => setForm({...form, featured: e.target.checked})}
                                            className="h-4 w-4 rounded border-input text-primary focus:ring-primary"/>
                                     <div>
-                                        <Label htmlFor="featured" className="cursor-pointer">Featured Article</Label>
-                                        <p className="text-xs text-muted-foreground">Display in featured section</p>
+                                        <Label htmlFor="featured" className="cursor-pointer">{t('admin.featuredArticle')}</Label>
+                                        <p className="text-xs text-muted-foreground">{t('admin.displayInFeatured')}</p>
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="thumbnail">Thumbnail URL (override)</Label>
+                                    <Label htmlFor="thumbnail">{t('admin.thumbnailUrl')}</Label>
                                     <Input id="thumbnail" value={form.thumbnail}
                                            onChange={e => setForm({...form, thumbnail: e.target.value})}
-                                           placeholder="Custom thumbnail URL (leave empty to use video thumbnail)"/>
+                                           placeholder={t('admin.customThumbnailUrl')}/>
                                     <p className="text-xs text-muted-foreground">
-                                        If a video is associated, its thumbnail is used by default. Enter a URL here to override.
+                                        {t('admin.videoThumbnailDefault')}
                                     </p>
                                 </div>
                             </div>
@@ -587,7 +593,7 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
                     <div className="space-y-6">
                         {/* Video Preview Panel */}
                         <div className="bg-card rounded-lg border p-4">
-                            <h3 className="font-medium mb-3">Associated Video</h3>
+                            <h3 className="font-medium mb-3">{t('admin.associatedVideo')}</h3>
                             {form.media_id && selectedMedia ? (
                                 <div className="space-y-3">
                                     <div className="relative aspect-video bg-muted rounded-md overflow-hidden">
@@ -614,16 +620,16 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
                                         {selectedMedia.short_token && (
                                             <Button variant="outline" size="sm" className="flex-1"
                                                     onClick={() => window.open(`/watch?v=${selectedMedia.short_token}`, '_blank')}>
-                                                <ExternalLink className="w-3 h-3 mr-1"/>Preview
+                                                <ExternalLink className="w-3 h-3 mr-1"/>{t('admin.preview')}
                                             </Button>
                                         )}
                                         <Button variant="outline" size="sm" className="flex-1"
                                                 onClick={() => setMediaSelectorOpen(true)}>
-                                            Change
+                                            {t('admin.change')}
                                         </Button>
                                         <Button variant="ghost" size="sm"
                                                 onClick={handleClearMedia}
-                                                title="Remove video association">
+                                                title={t('admin.removeVideoAssociation')}>
                                             <X className="w-3 h-3"/>
                                         </Button>
                                     </div>
@@ -632,11 +638,11 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
                                 <div className="space-y-3">
                                     <div className="w-full aspect-video bg-muted rounded-md flex flex-col items-center justify-center gap-2">
                                         <Film className="w-10 h-10 text-muted-foreground"/>
-                                        <p className="text-sm text-muted-foreground">No video associated</p>
+                                        <p className="text-sm text-muted-foreground">{t('admin.noVideoAssociated')}</p>
                                     </div>
                                     <Button variant="outline" className="w-full"
                                             onClick={() => setMediaSelectorOpen(true)}>
-                                        <Film className="w-4 h-4 mr-2"/>Select Video
+                                        <Film className="w-4 h-4 mr-2"/>{t('admin.selectVideoBtn')}
                                     </Button>
                                 </div>
                             )}
@@ -645,19 +651,19 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
                         {/* Metadata Card */}
                         {mode === 'edit' && article && (
                             <div className="bg-card rounded-lg border p-4 space-y-3">
-                                <h3 className="font-medium">Metadata</h3>
+                                <h3 className="font-medium">{t('admin.metadata')}</h3>
                                 <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-                                    <span className="text-muted-foreground">ID</span>
+                                    <span className="text-muted-foreground">{t('admin.id')}</span>
                                     <span className="font-mono text-xs text-right break-all">{article.id}</span>
-                                    <span className="text-muted-foreground">Slug</span>
-                                    <span className="text-xs text-right break-all">{article.slug || 'N/A'}</span>
-                                    <span className="text-muted-foreground">Views</span>
+                                    <span className="text-muted-foreground">{t('admin.slug')}</span>
+                                    <span className="text-xs text-right break-all">{article.slug || t('admin.na')}</span>
+                                    <span className="text-muted-foreground">{t('admin.views')}</span>
                                     <span className="text-xs text-right">{article.view_count}</span>
-                                    <span className="text-muted-foreground">Comments</span>
+                                    <span className="text-muted-foreground">{t('admin.comments')}</span>
                                     <span className="text-xs text-right">{article.comment_count}</span>
-                                    <span className="text-muted-foreground">Created</span>
+                                    <span className="text-muted-foreground">{t('admin.created')}</span>
                                     <span className="text-xs text-right whitespace-nowrap">{formatDateTime(article.create_time)}</span>
-                                    <span className="text-muted-foreground">Updated</span>
+                                    <span className="text-muted-foreground">{t('admin.updated')}</span>
                                     <span className="text-xs text-right whitespace-nowrap">{formatDateTime(article.update_time)}</span>
                                 </div>
                             </div>
@@ -665,29 +671,29 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
 
                         {/* Quick Actions */}
                         <div className="bg-card rounded-lg border p-4 space-y-3">
-                            <h3 className="font-medium">Quick Actions</h3>
+                            <h3 className="font-medium">{t('admin.quickActions')}</h3>
                             <div className="space-y-2">
                                 {form.state !== 'published' && (
                                     <Button variant="outline" size="sm" className="w-full justify-start"
                                             onClick={() => setForm({...form, state: 'published'})}>
-                                        <CheckCircle className="w-4 h-4 mr-2"/>Publish
+                                        <CheckCircle className="w-4 h-4 mr-2"/>{t('admin.publish')}
                                     </Button>
                                 )}
                                 {form.state === 'published' && (
                                     <Button variant="outline" size="sm" className="w-full justify-start"
                                             onClick={() => setForm({...form, state: 'draft'})}>
-                                        <Clock className="w-4 h-4 mr-2"/>Revert to Draft
+                                        <Clock className="w-4 h-4 mr-2"/>{t('admin.revertToDraft')}
                                     </Button>
                                 )}
                                 <Button variant="outline" size="sm" className="w-full justify-start"
                                         onClick={() => setForm({...form, featured: !form.featured})}>
                                     {form.featured ? <X className="w-4 h-4 mr-2"/> : <CheckCircle className="w-4 h-4 mr-2"/>}
-                                    {form.featured ? 'Remove Featured' : 'Set Featured'}
+                                    {form.featured ? t('admin.removeFeatured') : t('admin.setFeatured')}
                                 </Button>
                                 {!form.media_id && (
                                     <Button variant="outline" size="sm" className="w-full justify-start"
                                             onClick={() => setMediaSelectorOpen(true)}>
-                                        <Film className="w-4 h-4 mr-2"/>Associate Video
+                                        <Film className="w-4 h-4 mr-2"/>{t('admin.associateVideo')}
                                     </Button>
                                 )}
                             </div>
@@ -708,7 +714,7 @@ export default function ArticleEditPage({mode}: ArticleEditPageProps) {
                 <DeleteConfirmDialog
                     open={deleteDialogOpen}
                     onOpenChange={setDeleteDialogOpen}
-                    title={article?.title || 'Untitled Article'}
+                    title={article?.title || t('admin.untitledArticle')}
                     isDeleting={isDeleting}
                     onConfirm={handleDelete}
                 />

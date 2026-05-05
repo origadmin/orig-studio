@@ -341,8 +341,8 @@ export default function TranscodingProfiles() {
                         {/* 页面标题和操作区域 */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
-                                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">Encoding Profiles</h2>
-                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5">
+                                <h2 className="text-3xl font-extrabold tracking-tight text-foreground">Encoding Profiles</h2>
+                                <p className="text-sm text-muted-foreground mt-1.5">
                                     Manage and configure your video encoding presets
                                 </p>
                             </div>
@@ -391,7 +391,7 @@ export default function TranscodingProfiles() {
                         </div>
 
                         {/* 分隔线 */}
-                        <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+                        <div className="border-t border-border my-2"/>
 
                         {/* 搜索和筛选 */}
                         <div className="flex flex-col lg:flex-row gap-4">

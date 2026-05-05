@@ -87,8 +87,8 @@ const Dashboard = () => {
                         {/* 页面标题 */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
-                                <h1 className="text-3xl font-extrabold text-slate-900 dark:text-slate-50">{t('admin.dashboard')}</h1>
-                                <p className="text-slate-500 text-sm mt-1">{t('admin.dashboardDesc') || 'Overview of your platform performance'}</p>
+                                <h1 className="text-3xl font-extrabold text-foreground">{t('admin.dashboard')}</h1>
+                                <p className="text-muted-foreground text-sm mt-1">{t('admin.dashboardDesc') || 'Overview of your platform performance'}</p>
                             </div>
                             <div className="flex gap-2">
                                 <Button
@@ -183,7 +183,7 @@ const Dashboard = () => {
                 {/* Media by Type */}
                 <Card className="shadow-sm relative overflow-hidden">
                     <CardContent className="p-6">
-                        <h3 className="font-bold text-slate-900 dark:text-slate-50 mb-6 flex items-center gap-2">
+                        <h3 className="font-bold text-foreground mb-6 flex items-center gap-2">
                             <BarChart3 size={20} className="text-info"/>
                             {t('admin.mediaByType') || 'Media by Type'}
                         </h3>
@@ -204,7 +204,7 @@ const Dashboard = () => {
                 {/* Users by Role */}
                 <Card className="shadow-sm relative overflow-hidden">
                     <CardContent className="p-6">
-                        <h3 className="font-bold text-slate-900 dark:text-slate-50 mb-6 flex items-center gap-2">
+                        <h3 className="font-bold text-foreground mb-6 flex items-center gap-2">
                             <Users size={20} className="text-destructive"/>
                             {t('admin.usersByRole') || 'Users by Role'}
                         </h3>
@@ -223,7 +223,7 @@ const Dashboard = () => {
                 {/* Trending Content */}
                 <Card className="shadow-sm relative overflow-hidden">
                     <CardContent className="p-6">
-                        <h3 className="font-bold text-slate-900 dark:text-slate-50 mb-6 flex items-center gap-2">
+                        <h3 className="font-bold text-foreground mb-6 flex items-center gap-2">
                             <TrendingUp size={20} className="text-success"/>
                             {t('admin.trendingContent') || 'Trending Content'}
                         </h3>
@@ -237,7 +237,7 @@ const Dashboard = () => {
                                 />
                             ))}
                             {(!stats.top_media || stats.top_media.length === 0) && (
-                                <p className="text-sm text-gray-500 text-center py-4">No trending content yet</p>
+                                <p className="text-sm text-muted-foreground text-center py-4">No trending content yet</p>
                             )}
                         </div>
                         <div className="absolute bottom-0 left-0 h-1 bg-success w-full opacity-10"/>
@@ -250,7 +250,7 @@ const Dashboard = () => {
                 {/* Top Categories */}
                 <Card className="shadow-sm relative overflow-hidden">
                     <CardContent className="p-6">
-                        <h3 className="font-bold text-slate-900 dark:text-slate-50 mb-6 flex items-center gap-2">
+                        <h3 className="font-bold text-foreground mb-6 flex items-center gap-2">
                             <BarChart3 size={20} className="text-emerald-500"/>
                             {t('admin.topCategories') || 'Top Categories'}
                         </h3>
@@ -258,20 +258,20 @@ const Dashboard = () => {
                         <div className="space-y-3">
                             {stats.top_categories?.map((category: any, index: number) => (
                                 <div key={category.id}
-                                     className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                     className="flex items-center justify-between p-3 bg-muted rounded-lg">
                                     <div className="flex items-center gap-3">
                                         <span
                                             className="w-6 h-6 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded">
                                             {index + 1}
                                         </span>
                                         <span
-                                            className="font-medium text-slate-800 dark:text-gray-200">{category.name}</span>
+                                            className="font-medium text-foreground">{category.name}</span>
                                     </div>
-                                    <span className="text-sm text-gray-500">{category.count} items</span>
+                                    <span className="text-sm text-muted-foreground">{category.count} items</span>
                                 </div>
                             ))}
                             {(!stats.top_categories || stats.top_categories.length === 0) && (
-                                <p className="text-sm text-gray-500 text-center py-4">No categories yet</p>
+                                <p className="text-sm text-muted-foreground text-center py-4">No categories yet</p>
                             )}
                         </div>
                     </CardContent>
@@ -280,7 +280,7 @@ const Dashboard = () => {
                 {/* Top Creators */}
                 <Card className="shadow-sm relative overflow-hidden">
                     <CardContent className="p-6">
-                        <h3 className="font-bold text-slate-900 dark:text-slate-50 mb-6 flex items-center gap-2">
+                        <h3 className="font-bold text-foreground mb-6 flex items-center gap-2">
                             <Users size={20} className="text-info"/>
                             {t('admin.topCreators') || 'Top Creators'}
                         </h3>
@@ -288,7 +288,7 @@ const Dashboard = () => {
                         <div className="space-y-3">
                             {stats.top_creators?.map((creator: any, index: number) => (
                                 <div key={creator.id}
-                                     className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                     className="flex items-center justify-between p-3 bg-muted rounded-lg">
                                     <div className="flex items-center gap-3">
                                         <span
                                             className="w-6 h-6 flex items-center justify-center bg-blue-100 dark:bg-blue-900 text-info dark:text-blue-400 text-xs font-bold rounded">
@@ -296,15 +296,15 @@ const Dashboard = () => {
                                         </span>
                                         <div>
                                             <span
-                                                className="font-medium text-slate-800 dark:text-gray-200 block">{creator.name}</span>
-                                            <span className="text-xs text-gray-500">{creator.media_count} videos</span>
+                                                className="font-medium text-foreground block">{creator.name}</span>
+                                            <span className="text-xs text-muted-foreground">{creator.media_count} videos</span>
                                         </div>
                                     </div>
-                                    <span className="text-sm text-gray-500">{formatNumber(creator.views)} views</span>
+                                    <span className="text-sm text-muted-foreground">{formatNumber(creator.views)} views</span>
                                 </div>
                             ))}
                             {(!stats.top_creators || stats.top_creators.length === 0) && (
-                                <p className="text-sm text-gray-500 text-center py-4">No creators yet</p>
+                                <p className="text-sm text-muted-foreground text-center py-4">No creators yet</p>
                             )}
                         </div>
                     </CardContent>
@@ -368,11 +368,11 @@ const StatCard = ({icon, label, value, trend, trendUp, small = false, color = "p
     const validColor = colorMap[color] || colorMap.primary;
     
     return (
-        <Card className="relative overflow-hidden border-none shadow-sm bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
+        <Card className="relative overflow-hidden border-none shadow-sm bg-card ring-1 ring-border">
             <CardContent className={`p-5 ${small ? 'p-4' : ''}`}>
                 <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                        <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground dark:text-slate-500">{label}</p>
+                        <p className="text-xs font-semibold text-muted-foreground">{label}</p>
                         <h3 className={`text-3xl font-bold tabular-nums ${validColor.text} ${small ? 'text-xl' : ''}`}>{value}</h3>
                     </div>
                     <div
@@ -383,7 +383,7 @@ const StatCard = ({icon, label, value, trend, trendUp, small = false, color = "p
                     </div>
                 </div>
                 <div
-                    className={`mt-4 pt-4 border-t border-gray-50 dark:border-gray-700 flex items-center text-[11px] font-semibold ${trendUp === true ? 'text-success' : trendUp === false ? 'text-destructive' : 'text-gray-500'}`}>
+                    className={`mt-4 pt-4 border-t border-muted flex items-center text-[11px] font-semibold ${trendUp === true ? 'text-success' : trendUp === false ? 'text-destructive' : 'text-muted-foreground'}`}>
                     {trendUp === true ? <TrendingUp size={14} className="mr-1"/> : trendUp === false ? <TrendingDown size={14} className="mr-1"/> : <Minus size={14} className="mr-1"/>}
                     {trend}
                 </div>
@@ -399,10 +399,10 @@ const TypeBar = ({label, count, total, color}: { label: string, count: number, t
     return (
         <div className="space-y-1">
             <div className="flex justify-between text-sm">
-                <span className="text-slate-700 dark:text-gray-300">{label}</span>
-                <span className="font-medium text-slate-900 dark:text-white">{count}</span>
+                <span className="text-muted-foreground">{label}</span>
+                <span className="font-medium text-foreground">{count}</span>
             </div>
-            <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div className={`h-full ${color} rounded-full transition-all duration-500`}
                      style={{width: `${percentage}%`}}/>
             </div>
@@ -411,14 +411,14 @@ const TypeBar = ({label, count, total, color}: { label: string, count: number, t
 };
 
 const TrendingItem = ({title, views, index}: { title: string, views: string, index: number }) => (
-    <div className="flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
+    <div className="flex items-center gap-3 p-2 hover:bg-accent rounded-lg transition-colors">
         <span
-            className="w-6 h-6 flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-muted-foreground text-xs font-bold rounded shrink-0">
+            className="w-6 h-6 flex items-center justify-center bg-muted text-muted-foreground text-xs font-bold rounded shrink-0">
             {index}
         </span>
         <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-slate-800 dark:text-gray-200 truncate">{title}</p>
-            <p className="text-xs text-slate-500">{views} views</p>
+            <p className="text-sm font-medium text-foreground truncate">{title}</p>
+            <p className="text-xs text-muted-foreground">{views} views</p>
         </div>
         <TrendingUp size={16} className="text-success shrink-0"/>
     </div>

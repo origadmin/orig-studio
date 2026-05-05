@@ -18,7 +18,7 @@ export const CascadingStatusHint: React.FC<CascadingStatusHintProps> = React.mem
     if (!isAncestorDisabled) return null;
 
     return (
-      <span className="text-xs text-amber-500 dark:text-amber-400 whitespace-nowrap">
+      <span className="text-xs text-warning whitespace-nowrap">
         ({t('admin.parentDisabled') || 'Parent Disabled'})
       </span>
     );

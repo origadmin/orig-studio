@@ -10,7 +10,7 @@ const PageLoader = () => (
     </div>
 );
 
-export const Route = createFileRoute('/_authenticated/_portal/me/articles/$id/edit')({
+export const Route = createFileRoute('/_authenticated/_portal/me/articles/$token/edit')({
     component: () => (
         <Suspense fallback={<PageLoader/>}>
             <Page mode="edit"/>

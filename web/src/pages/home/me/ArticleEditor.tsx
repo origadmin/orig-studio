@@ -179,9 +179,9 @@ export default function UserArticleEditor({mode}: { mode: 'create' | 'edit' }) {
     const navigate = useNavigate();
     const {data: categoriesData} = useCategoryList();
 
-    // Get article ID from URL params (same pattern as admin ArticleEdit.tsx)
-    const {id: routeId} = useParams({strict: false}) as {id?: string};
-    const articleId = mode === 'edit' ? routeId : undefined;
+    // Get article token from URL params (user-side uses short_token, not ID)
+    const {token: routeToken} = useParams({strict: false}) as {token?: string};
+    const articleToken = mode === 'edit' ? routeToken : undefined;
 
     // Article data for edit mode
     const [article, setArticle] = useState<Article | null>(null);
@@ -209,10 +209,10 @@ export default function UserArticleEditor({mode}: { mode: 'create' | 'edit' }) {
 
     // Load article data in edit mode
     useEffect(() => {
-        if (mode !== 'edit' || !articleId) return;
+        if (mode !== 'edit' || !articleToken) return;
         setLoading(true);
         setLoadError(null);
-        articleApi.get(articleId)
+        articleApi.get(articleToken)
             .then(data => {
                 setArticle(data);
                 setSelectedMedia(data.media || null);
@@ -232,7 +232,7 @@ export default function UserArticleEditor({mode}: { mode: 'create' | 'edit' }) {
                 console.error('Error loading article:', err);
             })
             .finally(() => setLoading(false));
-    }, [mode, articleId, syncFromData, t]);
+    }, [mode, articleToken, syncFromData, t]);
 
     // Auto-generate slug from title (display only, not editable)
     const displaySlug = form.title ? generateSlug(form.title) : '';
@@ -265,11 +265,11 @@ export default function UserArticleEditor({mode}: { mode: 'create' | 'edit' }) {
                 resetDirty();
                 setSuccess();
                 toast.success(t('articleEditor.saveSuccess'));
-                // Navigate to edit page with new ID
-                if (created?.id) {
-                    navigate({to: '/me/articles/$id/edit', params: {id: created.id}});
+                // Navigate to edit page with short_token
+                if (created?.short_token) {
+                    navigate({to: '/me/articles/$token/edit', params: {token: created.short_token}});
                 }
-            } else if (articleId) {
+            } else if (articleToken) {
                 const data: UserUpdateArticleRequest = {
                     title: form.title,
                     content: form.content,
@@ -280,7 +280,7 @@ export default function UserArticleEditor({mode}: { mode: 'create' | 'edit' }) {
                     thumbnail: form.thumbnail,
                     tags: tagsArray,
                 };
-                await userArticleApi.update(articleId, data);
+                await userArticleApi.update(articleToken, data);
                 resetDirty();
                 setSuccess();
                 toast.success(t('articleEditor.saveSuccess'));
@@ -300,7 +300,7 @@ export default function UserArticleEditor({mode}: { mode: 'create' | 'edit' }) {
             }
             console.error('Failed to save', err);
         }
-    }, [mode, articleId, isSaving, form, resetDirty, setSaving, setSuccess, setError, navigate, toast, t]);
+    }, [mode, articleToken, isSaving, form, resetDirty, setSaving, setSuccess, setError, navigate, toast, t]);
 
     // Back handler
     const handleBack = useCallback(() => {

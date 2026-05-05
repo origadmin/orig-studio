@@ -14,6 +14,7 @@ export interface Article {
     id: string;
     title: string;
     slug: string;
+    short_token: string;
     content: string;
     summary?: string;
     state: string;
