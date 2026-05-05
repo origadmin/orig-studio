@@ -64,6 +64,7 @@
     "mySection": "我的",
     "adminSection": "管理",
     "otherSection": "其他",
+    "other": "其他",
     "expandMenu": "展开菜单",
     "collapseMenu": "收起菜单",
     "more": "更多",
@@ -383,10 +384,16 @@
     "tabChannels": "频道",
     "tabVideos": "视频",
     "tabPlaylists": "播放列表",
+    "tabArticles": "文章",
     "manageVideos": "管理视频",
     "managePlaylists": "管理播放列表",
+    "manageArticles": "管理文章",
     "noVideos": "暂无视频",
     "noPlaylists": "暂无播放列表",
+    "noArticles": "暂无文章",
+    "noArticlesSelf": "你还没有发布文章",
+    "writeArticle": "写文章",
+    "customizeProfile": "自定义主页",
     "manage": "管理",
     "manageChannel": "管理",
     "followersCount": "共 {{count}} 位关注者",
@@ -421,7 +428,7 @@
     "noFavorites": "暂无收藏",
     "noDescription": "暂无描述",
     "noInfo": "暂无更多信息",
-    "subscribersCount": "{{count}} 位订阅者"
+    "subscribersCount": "位订阅者"
   },
   "tags": {
     "title": "标签",
@@ -602,7 +609,7 @@
     "settings": "系统设置",
     "exitAdmin": "返回用户端",
     "myAccount": "我的账户",
-    "welcomeAdmin": "欢迎使用 OrigCMS 管理后台",
+    "welcomeAdmin": "管理后台",
     "search": "搜索...",
     "view": "查看",
     "edit": "编辑",
@@ -992,6 +999,19 @@
     "layoutDoc": "文档模式",
     "layoutDocDesc": "VitePress 风格文档布局，含侧边栏导航、目录和阅读优化内容区。需要文章模块。",
     "autoLayoutPreview": "自动布局将解析为："
+  },
+  "theme": {
+    "appearanceMode": "外观模式",
+    "modeLight": "浅色",
+    "modeDark": "深色",
+    "modeSystem": "跟随系统",
+    "allCategories": "全部",
+    "loadingThemes": "正在加载主题...",
+    "categoryProfessional": "专业商务",
+    "categorySocial": "活力社交",
+    "categoryCreative": "创意设计",
+    "categoryMinimal": "极简暗色",
+    "categoryCustom": "项目专属"
   },
   "doc": {
     "tocTitle": "本页目录",
