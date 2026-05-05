@@ -170,15 +170,24 @@ const Settings: React.FC = () => {
                     ...prev,
                     site_name: getSettingValue('site_name') || prev.site_name,
                     site_description: getSettingValue('site_description') || prev.site_description,
+                    site_url: getSettingValue('base_url') || prev.site_url,
                     base_url: getSettingValue('base_url') || prev.base_url,
+                    timezone: getSettingValue('timezone') || prev.timezone,
+                    default_theme: getSettingValue('default_theme') || prev.default_theme,
                     enable_register: getSettingValue('allow_registration') || prev.enable_register,
                     allow_upload: getSettingValue('allow_upload') || prev.allow_upload,
                     max_file_size: getSettingValue('max_upload_size_video') ? String(Math.round(parseInt(getSettingValue('max_upload_size_video')) / 1024 / 1024)) || prev.max_file_size : prev.max_file_size,
+                    storage_type: getSettingValue('storage_type') || prev.storage_type,
                     auto_transcode: getSettingValue('auto_approve') || prev.auto_transcode,
                     smtp_server: getSettingValue('smtp_host') || prev.smtp_server,
                     smtp_port: getSettingValue('smtp_port') || prev.smtp_port,
                     smtp_username: getSettingValue('smtp_user') || prev.smtp_username,
                     smtp_password: getSettingValue('smtp_password') || prev.smtp_password,
+                    require_email_verify: getSettingValue('require_email_verify') || prev.require_email_verify,
+                    min_password_len: getSettingValue('min_password_len') || prev.min_password_len,
+                    jwt_expiry: getSettingValue('jwt_expiry') || prev.jwt_expiry,
+                    enable_rest_api: getSettingValue('enable_rest_api') || prev.enable_rest_api,
+                    rate_limit: getSettingValue('rate_limit') || prev.rate_limit,
                     module_articles: getSettingValue('module_articles') === 'true',
                     module_videos: getSettingValue('module_videos') === 'true',
                     module_music: getSettingValue('module_music') === 'true',
@@ -249,7 +258,7 @@ const Settings: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="space-y-6 p-4 md:p-6">
+            <div className="space-y-6">
                 <div className="flex items-center justify-between">
                     <div className="space-y-2">
                         <Skeleton className="h-8 w-48"/>
@@ -839,9 +848,11 @@ const Settings: React.FC = () => {
                             {formData.homepage_layout === 'auto' && (
                                 <div className="p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
                                     {t('settings.autoLayoutPreview')} <strong>{
-                                        !formData.module_articles && !formData.module_videos ? 'Welcome' :
-                                        formData.module_videos && !formData.module_articles ? 'Video' :
-                                        formData.module_articles && !formData.module_videos ? 'Doc' : 'Mixed'
+                                        !formData.module_articles && !formData.module_videos && !formData.module_music ? t('settings.layoutWelcome') :
+                                        formData.module_videos && !formData.module_articles ? t('settings.layoutVideo') :
+                                        formData.module_articles && !formData.module_videos ? t('settings.layoutDoc') :
+                                        formData.module_articles && formData.module_videos ? t('settings.layoutMixed') :
+                                        t('settings.layoutWelcome')
                                     }</strong>
                                 </div>
                             )}

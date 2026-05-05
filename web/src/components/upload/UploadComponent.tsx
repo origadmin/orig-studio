@@ -1,4 +1,4 @@
-﻿import React, {useState, useRef, useCallback, useEffect} from 'react';
+import React, {useState, useRef, useCallback, useEffect} from 'react';
 import {
     Upload, X, File, Image, Video, CheckCircle,
     AlertCircle, Edit2
@@ -366,7 +366,7 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
                                     disabled={selectedFile.status === 'success'}
                                 >
                                     <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="选择分类"/>
+                                        <SelectValue placeholder={t('upload.selectCategory')}/>
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value=" ">无分类</SelectItem>

@@ -87,6 +87,7 @@ type ArticleMutation struct {
 	content          *string
 	summary          *string
 	slug             *string
+	short_token      *string
 	state            *string
 	view_count       *int64
 	addview_count    *int64
@@ -386,6 +387,42 @@ func (m *ArticleMutation) SlugCleared() bool {
 func (m *ArticleMutation) ResetSlug() {
 	m.slug = nil
 	delete(m.clearedFields, article.FieldSlug)
+}
+
+// SetShortToken sets the "short_token" field.
+func (m *ArticleMutation) SetShortToken(s string) {
+	m.short_token = &s
+}
+
+// ShortToken returns the value of the "short_token" field in the mutation.
+func (m *ArticleMutation) ShortToken() (r string, exists bool) {
+	v := m.short_token
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldShortToken returns the old "short_token" field's value of the Article entity.
+// If the Article object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ArticleMutation) OldShortToken(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldShortToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldShortToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldShortToken: %w", err)
+	}
+	return oldValue.ShortToken, nil
+}
+
+// ResetShortToken resets all changes to the "short_token" field.
+func (m *ArticleMutation) ResetShortToken() {
+	m.short_token = nil
 }
 
 // SetState sets the "state" field.
@@ -1110,7 +1147,7 @@ func (m *ArticleMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ArticleMutation) Fields() []string {
-	fields := make([]string, 0, 16)
+	fields := make([]string, 0, 17)
 	if m.title != nil {
 		fields = append(fields, article.FieldTitle)
 	}
@@ -1122,6 +1159,9 @@ func (m *ArticleMutation) Fields() []string {
 	}
 	if m.slug != nil {
 		fields = append(fields, article.FieldSlug)
+	}
+	if m.short_token != nil {
+		fields = append(fields, article.FieldShortToken)
 	}
 	if m.state != nil {
 		fields = append(fields, article.FieldState)
@@ -1175,6 +1215,8 @@ func (m *ArticleMutation) Field(name string) (ent.Value, bool) {
 		return m.Summary()
 	case article.FieldSlug:
 		return m.Slug()
+	case article.FieldShortToken:
+		return m.ShortToken()
 	case article.FieldState:
 		return m.State()
 	case article.FieldViewCount:
@@ -1216,6 +1258,8 @@ func (m *ArticleMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldSummary(ctx)
 	case article.FieldSlug:
 		return m.OldSlug(ctx)
+	case article.FieldShortToken:
+		return m.OldShortToken(ctx)
 	case article.FieldState:
 		return m.OldState(ctx)
 	case article.FieldViewCount:
@@ -1276,6 +1320,13 @@ func (m *ArticleMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSlug(v)
+		return nil
+	case article.FieldShortToken:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetShortToken(v)
 		return nil
 	case article.FieldState:
 		v, ok := value.(string)
@@ -1493,6 +1544,9 @@ func (m *ArticleMutation) ResetField(name string) error {
 		return nil
 	case article.FieldSlug:
 		m.ResetSlug()
+		return nil
+	case article.FieldShortToken:
+		m.ResetShortToken()
 		return nil
 	case article.FieldState:
 		m.ResetState()

@@ -28,7 +28,7 @@ export const adminApi = {
      * Returns paginated list of all channels including non-public
      */
     getChannels: (filters?: AdminChannelFilters) =>
-        api.get<ChannelList>('/admin/channels', {params: filters}),
+        api.get<ChannelList>('/admin/channels', filters as Record<string, unknown>),
 
     /**
      * Get channel detail by UUID (Admin)

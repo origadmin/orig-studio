@@ -7,9 +7,12 @@ package service
 
 import (
 	"crypto/rand"
+	"fmt"
 	"math/big"
+	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -48,6 +51,9 @@ type AdminHandler struct {
 	articleUC      *contentbiz.ArticleUseCase
 	userUC         *userbiz.UserUseCase
 	permChecker    authbiz.PermissionChecker
+	appVersion     string
+	dbDialect      string
+	startTime      time.Time
 }
 
 func NewAdminHandler(
@@ -61,6 +67,8 @@ func NewAdminHandler(
 	articleUC *contentbiz.ArticleUseCase,
 	userUC *userbiz.UserUseCase,
 	permChecker authbiz.PermissionChecker,
+	appVersion string,
+	dbDialect string,
 ) *AdminHandler {
 	return &AdminHandler{
 		jwt:            jwt,
@@ -73,6 +81,9 @@ func NewAdminHandler(
 		articleUC:      articleUC,
 		userUC:         userUC,
 		permChecker:    permChecker,
+		appVersion:     appVersion,
+		dbDialect:      dbDialect,
+		startTime:      time.Now(),
 	}
 }
 
@@ -152,6 +163,7 @@ func (h *AdminHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		settings := admin.Group("/settings")
 		{
 			settings.GET("", server.WithAdmin(h.jwt, h.getSystemSettings()))
+			settings.GET("/info", server.WithAdmin(h.jwt, h.getSystemInfo()))
 			settings.PUT("", server.WithAdminAndPerm(h.jwt, h.permChecker, "system:config", h.updateSystemSettings()))
 		}
 
@@ -501,6 +513,58 @@ func (h *AdminHandler) getSystemSettings() gin.HandlerFunc {
 		}
 
 		server.OK(c, grouped)
+	}
+}
+
+// getSystemInfo returns runtime system information for the admin settings page.
+// Response format matches the frontend SystemInfo interface.
+//
+// Future extensibility (multi-instance): The response can be extended to include
+// an "instances" array for distributed deployments, while keeping backward
+// compatibility by retaining the top-level fields as the "local" instance's data.
+func (h *AdminHandler) getSystemInfo() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var m runtime.MemStats
+		runtime.ReadMemStats(&m)
+
+		// Uptime calculation
+		uptime := time.Since(h.startTime)
+		uptimeStr := formatDuration(uptime)
+
+		// Database display name
+		dbName := h.dbDialect
+		switch dbName {
+		case "sqlite3":
+			dbName = "SQLite"
+		case "postgres":
+			dbName = "PostgreSQL"
+		}
+
+		// Memory info
+		totalMem := m.Sys
+		usedMem := m.Alloc
+
+		// Memory usage percentage
+		memUsagePercent := float64(0)
+		if totalMem > 0 {
+			memUsagePercent = float64(usedMem) / float64(totalMem) * 100
+		}
+
+		info := gin.H{
+			"version":      h.appVersion,
+			"goVersion":    runtime.Version(),
+			"database":     dbName,
+			"os":           runtime.GOOS + "/" + runtime.GOARCH,
+			"uptime":       uptimeStr,
+			"totalMemory":  formatBytes(totalMem),
+			"usedMemory":   formatBytes(usedMem),
+			"cpuUsage":     "-", // CPU usage requires cgroup/OS-specific APIs; placeholder for now
+			"memoryUsage":  memUsagePercent,
+			"numCPU":       runtime.NumCPU(),
+			"numGoroutine": runtime.NumGoroutine(),
+		}
+
+		server.OK(c, info)
 	}
 }
 
@@ -1359,6 +1423,43 @@ func (h *AdminHandler) adminUpdateUserStatus() gin.HandlerFunc {
 
 		server.OK(c, &emptypb.Empty{})
 	}
+}
+
+// formatDuration formats a time.Duration into a human-readable string.
+func formatDuration(d time.Duration) string {
+	days := int(d.Hours()) / 24
+	hours := int(d.Hours()) % 24
+	minutes := int(d.Minutes()) % 60
+	seconds := int(d.Seconds()) % 60
+
+	parts := []string{}
+	if days > 0 {
+		parts = append(parts, fmt.Sprintf("%dd", days))
+	}
+	if hours > 0 {
+		parts = append(parts, fmt.Sprintf("%dh", hours))
+	}
+	if minutes > 0 {
+		parts = append(parts, fmt.Sprintf("%dm", minutes))
+	}
+	if seconds > 0 || len(parts) == 0 {
+		parts = append(parts, fmt.Sprintf("%ds", seconds))
+	}
+	return strings.Join(parts, " ")
+}
+
+// formatBytes formats a byte count into a human-readable string.
+func formatBytes(b uint64) string {
+	const unit = 1024
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+	div, exp := uint64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %ciB", float64(b)/float64(div), "KMGTPE"[exp])
 }
 
 // mergeTags merges existing tags with new parsed tags, deduplicating

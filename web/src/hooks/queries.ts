@@ -426,7 +426,11 @@ export function useChannelVideos(channelToken: string | null, params?: {sort?: s
     return useQuery({
         queryKey: ['channelVideos', channelToken, params],
         queryFn: async () => {
-            const res = await channelApi.listAll({page: params?.page, limit: params?.page_size});
+            // Build params conditionally to avoid passing page: undefined
+            const listParams: { page?: number; limit?: number } = {};
+            if (params?.page !== undefined) listParams.page = params.page;
+            if (params?.page_size !== undefined) listParams.limit = params.page_size;
+            const res = await channelApi.listAll(listParams);
             return res;
         },
         enabled: !!channelToken,
@@ -874,11 +878,12 @@ export function useHistoryList(params: {
     return useQuery({
         queryKey: ['history', params.userId, params.page, params.content_type],
         queryFn: async () => {
-            return await service.list({
-                page: params.page,
-                page_size: params.page_size,
-                content_type: params.content_type,
-            });
+            // Build params conditionally to avoid passing page: undefined
+            const listParams: { page?: number; page_size?: number; content_type?: ContentType } = {};
+            if (params.page !== undefined) listParams.page = params.page;
+            if (params.page_size !== undefined) listParams.page_size = params.page_size;
+            if (params.content_type !== undefined) listParams.content_type = params.content_type;
+            return await service.list(listParams);
         },
         staleTime: 0,
         refetchOnMount: 'always',

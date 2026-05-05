@@ -1,6 +1,7 @@
-﻿import {Spinner} from "@/components/ui/spinner"
+import {Spinner} from "@/components/ui/spinner"
 import {useState, useEffect, useMemo, useCallback} from 'react';
 import {useParams, useNavigate} from '@tanstack/react-router';
+import {useTranslation} from 'react-i18next';
 import {useAdminMediaDetail, useUpdateMedia, useDeleteMedia, useCategoryList} from '@/hooks/queries';
 import {adminMediaApi, encodingApi, type EncodeProfile} from '@/lib/api/media';
 import {api, API_BASE_URL} from '@/lib/request';
@@ -69,18 +70,18 @@ interface MediaStats {
 }
 
 /**
- * Map Media state to Badge variant and label
+ * Map Media state to Badge variant
  */
-const STATE_BADGE_MAP: Record<string, { variant: HeaderBadgeConfig['variant']; label: string }> = {
-    active: {variant: 'default', label: '已发布'},
-    draft: {variant: 'secondary', label: '草稿'},
-    deleted: {variant: 'destructive', label: '已删除'},
+const STATE_BADGE_VARIANT_MAP: Record<string, HeaderBadgeConfig['variant']> = {
+    active: 'default',
+    draft: 'secondary',
+    deleted: 'destructive',
 };
 
 /**
  * Map Media to HeaderBadgeConfig[]
  */
-function mapMediaToHeaderBadges(media: Media): HeaderBadgeConfig[] {
+function mapMediaToHeaderBadges(media: Media, t: (key: string) => string): HeaderBadgeConfig[] {
     const badges: HeaderBadgeConfig[] = [];
 
     // Type Badge
@@ -92,12 +93,13 @@ function mapMediaToHeaderBadges(media: Media): HeaderBadgeConfig[] {
     });
 
     // State Badge
-    const stateConfig = STATE_BADGE_MAP[media.state] || {variant: 'outline' as const, label: media.state};
+    const stateVariant = STATE_BADGE_VARIANT_MAP[media.state] || 'outline' as const;
+    const stateLabel = media.state;
     badges.push({
         type: 'state',
-        variant: stateConfig.variant,
-        label: stateConfig.label,
-        ariaLabel: `状态: ${stateConfig.label}`,
+        variant: stateVariant,
+        label: stateLabel,
+        ariaLabel: `状态: ${stateLabel}`,
     });
 
     // Featured Badge (conditional)
@@ -105,8 +107,8 @@ function mapMediaToHeaderBadges(media: Media): HeaderBadgeConfig[] {
         badges.push({
             type: 'featured',
             variant: 'outline',
-            label: '推荐',
-            ariaLabel: '推荐内容',
+            label: t('mediaEdit.featured'),
+            ariaLabel: t('mediaEdit.featuredContent'),
             className: 'text-warning border-amber-300',
         });
     }
@@ -140,6 +142,7 @@ function resolveMediaUrl(url: string | undefined): string | undefined {
 export default function MediaEditPage() {
     const {id} = useParams({strict: false}) as {id: string};
     const navigate = useNavigate();
+    const {t} = useTranslation();
     const {data: media, isLoading, error} = useAdminMediaDetail(id);
     const updateMutation = useUpdateMedia();
     const deleteMutation = useDeleteMedia();
@@ -287,13 +290,13 @@ export default function MediaEditPage() {
         setIsRegenerating(true);
         try {
             await api.post(`/admin/medias/${id}/regenerate-thumbnail`, {});
-            toast.success('缩略图重新生成已调度，请稍后刷新页面查看结果');
+            toast.success(t('mediaEdit.thumbnailRegenerateScheduled'));
             // Refresh tasks to reflect any status changes
             const res = await adminMediaApi.getTasks(id);
             setTasks((res as any)?.tasks || (res as any)?.items || []);
         } catch (err: any) {
             const errMsg = err?.response?.data?.error || err?.response?.data?.message || err?.message || '未知错误';
-            toast.error(`重新生成缩略图失败: ${errMsg}`);
+            toast.error(`${t('mediaEdit.thumbnailRegenerateFailed')}: ${errMsg}`);
             console.error('Failed to regenerate thumbnail', err);
         } finally {
             setIsRegenerating(false);
@@ -306,16 +309,16 @@ export default function MediaEditPage() {
         setIsRegenerating(true);
         try {
             await api.post(`/admin/medias/${id}/regenerate-sprite`, {});
-            toast.success('雪碧图重新生成已调度，后台处理中请稍候');
+            toast.success(t('mediaEdit.spriteRegenerateScheduled'));
             // Refresh tasks to reflect any status changes
             const res = await adminMediaApi.getTasks(id);
             setTasks((res as any)?.tasks || (res as any)?.items || []);
         } catch (err: any) {
             const errMsg = err?.response?.data?.error || err?.response?.data?.message || err?.message || '未知错误';
             if (errMsg.includes('already processing') || errMsg.includes('already in progress')) {
-                toast.warning('雪碧图正在生成中，请稍后再试');
+                toast.warning(t('mediaEdit.spriteRegenerateScheduled'));
             } else {
-                toast.error(`重新生成雪碧图失败: ${errMsg}`);
+                toast.error(`${t('mediaEdit.spriteRegenerateFailed')}: ${errMsg}`);
             }
             console.error('Failed to regenerate sprite', err);
         } finally {
@@ -325,7 +328,7 @@ export default function MediaEditPage() {
     };
 
     // Compute header badges and encoding status from media
-    const headerBadges = useMemo(() => media ? mapMediaToHeaderBadges(media) : [], [media]);
+    const headerBadges = useMemo(() => media ? mapMediaToHeaderBadges(media, t) : [], [media, t]);
     const encodingConfig = useMemo(() => media ? mapEncodingStatus(media.encoding_status) : undefined, [media]);
 
     const encodingStatusBadge = (status: string | undefined): "default" | "secondary" | "destructive" | "outline" | "success" | "warning" | "info" => {
@@ -476,13 +479,13 @@ export default function MediaEditPage() {
                                               className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                               value={form.description}
                                               onChange={e => setForm({...form, description: e.target.value})}
-                                              placeholder="输入媒体描述..."/>
+                                              placeholder={t('mediaEdit.descriptionPlaceholder')}/>
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="tags">标签 (逗号分隔)</Label>
                                     <Input id="tags" value={form.tags}
                                            onChange={e => setForm({...form, tags: e.target.value})}
-                                           placeholder="如：编程, 教程, 运维"/>
+                                           placeholder={t('mediaEdit.tagsPlaceholder')}/>
                                     {form.tags && (
                                         <div className="flex flex-wrap gap-1 mt-2">
                                             {form.tags.split(',').map((tag, i) => tag.trim() && (
@@ -551,7 +554,7 @@ export default function MediaEditPage() {
                                 <div className="space-y-2">
                                     <Label>分类</Label>
                                     <Select value={form.category_id !== '' && form.category_id !== undefined ? String(form.category_id) : '_none_'} onValueChange={val => setForm({...form, category_id: val === '_none_' ? '' : val})}>
-                                        <SelectTrigger><SelectValue placeholder="选择分类"/></SelectTrigger>
+                                        <SelectTrigger><SelectValue placeholder={t('mediaEdit.selectCategory')}/></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="_none_">无分类</SelectItem>
                                             {(Array.isArray(categoriesData?.items) ? categoriesData.items : Array.isArray(categoriesData) ? categoriesData : []).map((cat: any) => (
@@ -569,8 +572,8 @@ export default function MediaEditPage() {
                                                onChange={e => setForm({...form, featured: e.target.checked})}
                                                className="h-4 w-4 rounded border-input text-primary focus:ring-primary"/>
                                         <div>
-                                            <Label htmlFor="featured" className="cursor-pointer">推荐内容</Label>
-                                            <p className="text-xs text-muted-foreground">在首页推荐区域展示</p>
+                                            <Label htmlFor="featured" className="cursor-pointer">{t('mediaEdit.featuredContent')}</Label>
+                                            <p className="text-xs text-muted-foreground">{t('mediaEdit.featuredDesc')}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
@@ -631,14 +634,14 @@ export default function MediaEditPage() {
                                             <Button variant="outline" size="sm"
                                                     onClick={() => setRegenThumbnailConfirmOpen(true)}
                                                     disabled={isRegenerating}
-                                                    title="从视频中截取一帧作为缩略图，替换当前缩略图">
-                                                <Image className="w-3 h-3 mr-1"/>重新生成缩略图
+                                                    title={t('mediaEdit.regenerateThumbnailTitle')}>
+                                                <Image className="w-3 h-3 mr-1"/>{t('mediaEdit.regenerateThumbnail')}
                                             </Button>
                                             <Button variant="outline" size="sm"
                                                     onClick={() => setRegenSpriteConfirmOpen(true)}
                                                     disabled={isRegenerating}
-                                                    title="重新生成视频预览用的雪碧图（进度条缩略图），用于播放器进度条预览">
-                                                <Film className="w-3 h-3 mr-1"/>重新生成雪碧图
+                                                    title={t('mediaEdit.regenerateSpriteTitle')}>
+                                                <Film className="w-3 h-3 mr-1"/>{t('mediaEdit.regenerateSprite')}
                                             </Button>
                                         </div>
                                     )}
@@ -699,22 +702,22 @@ export default function MediaEditPage() {
                                 <DeleteConfirmDialog
                                     open={regenThumbnailConfirmOpen}
                                     onOpenChange={setRegenThumbnailConfirmOpen}
-                                    title="重新生成缩略图"
+                                    title={t('mediaEdit.regenerateThumbnail')}
                                     isDeleting={isRegenerating}
                                     onConfirm={handleRegenerateThumbnail}
-                                    confirmLabel="确认重新生成"
-                                    description="将从视频中截取一帧作为新的缩略图，替换当前的缩略图。此操作不可撤销，确认继续？"
+                                    confirmLabel={t('mediaEdit.confirmRegenerate')}
+                                    description={t('mediaEdit.confirmRegenerateThumbnailDesc')}
                                 />
 
                                 {/* Regenerate Sprite Confirmation */}
                                 <DeleteConfirmDialog
                                     open={regenSpriteConfirmOpen}
                                     onOpenChange={setRegenSpriteConfirmOpen}
-                                    title="重新生成雪碧图"
+                                    title={t('mediaEdit.regenerateSprite')}
                                     isDeleting={isRegenerating}
                                     onConfirm={handleRegenerateSprite}
-                                    confirmLabel="确认重新生成"
-                                    description="将重新生成视频预览用的雪碧图（播放器进度条缩略图）。此操作需要一定时间，确认继续？"
+                                    confirmLabel={t('mediaEdit.confirmRegenerate')}
+                                    description={t('mediaEdit.confirmRegenerateSpriteDesc')}
                                 />
                             </div>
                         )}
@@ -831,13 +834,13 @@ export default function MediaEditPage() {
                                         onClick={async () => {
                                             try {
                                                 await updateMutation.mutateAsync({id, data: {featured: !media.featured}});
-                                                toast.success(media.featured ? '已取消推荐' : '已设为推荐');
+                                                toast.success(media.featured ? t('mediaEdit.unfeatured') : t('mediaEdit.setFeatured'));
                                             } catch (err: any) {
                                                 toast.error(`操作失败: ${err?.message || '未知错误'}`);
                                             }
                                         }}>
                                     {media.featured ? <XCircle className="w-4 h-4 mr-2"/> : <CheckCircle className="w-4 h-4 mr-2"/>}
-                                    {media.featured ? '取消推荐' : '设为推荐'}
+                                    {media.featured ? t('mediaEdit.unfeature') : t('mediaEdit.setFeature')}
                                 </Button>
                                 <Button variant="outline" size="sm" className="w-full justify-start"
                                         onClick={async () => {

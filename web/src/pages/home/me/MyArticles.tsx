@@ -199,7 +199,7 @@ const MyArticles = () => {
 
                                 <div className="mt-4 pt-4 border-t flex justify-end gap-2">
                                     <Button variant="ghost" size="sm" className="h-8" asChild>
-                                        <Link to="/me/articles/$id/edit" params={{id: article.id}}>
+                                        <Link to="/me/articles/$token/edit" params={{token: article.short_token}}>
                                             <Edit className="w-3.5 h-3.5 mr-1"/>
                                             {t('myArticles.edit')}
                                         </Link>

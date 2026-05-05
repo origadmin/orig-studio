@@ -29,6 +29,8 @@ type Article struct {
 	Summary string `json:"summary,omitempty"`
 	// Slug holds the value of the "slug" field.
 	Slug string `json:"slug,omitempty"`
+	// ShortToken holds the value of the "short_token" field.
+	ShortToken string `json:"short_token,omitempty"`
 	// State holds the value of the "state" field.
 	State string `json:"state,omitempty"`
 	// ViewCount holds the value of the "view_count" field.
@@ -128,7 +130,7 @@ func (*Article) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case article.FieldViewCount, article.FieldCommentCount, article.FieldCategoryID:
 			values[i] = new(sql.NullInt64)
-		case article.FieldID, article.FieldTitle, article.FieldContent, article.FieldSummary, article.FieldSlug, article.FieldState, article.FieldUserID, article.FieldMediaID, article.FieldThumbnail:
+		case article.FieldID, article.FieldTitle, article.FieldContent, article.FieldSummary, article.FieldSlug, article.FieldShortToken, article.FieldState, article.FieldUserID, article.FieldMediaID, article.FieldThumbnail:
 			values[i] = new(sql.NullString)
 		case article.FieldPublishedAt, article.FieldCreateTime, article.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
@@ -178,6 +180,12 @@ func (_m *Article) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field slug", values[i])
 			} else if value.Valid {
 				_m.Slug = value.String
+			}
+		case article.FieldShortToken:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field short_token", values[i])
+			} else if value.Valid {
+				_m.ShortToken = value.String
 			}
 		case article.FieldState:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -327,6 +335,9 @@ func (_m *Article) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("slug=")
 	builder.WriteString(_m.Slug)
+	builder.WriteString(", ")
+	builder.WriteString("short_token=")
+	builder.WriteString(_m.ShortToken)
 	builder.WriteString(", ")
 	builder.WriteString("state=")
 	builder.WriteString(_m.State)

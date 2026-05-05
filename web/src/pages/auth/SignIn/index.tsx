@@ -1,6 +1,7 @@
 // SignIn page - uses shadcn/ui components
 import {useState} from "react";
 import {useNavigate, useSearch, Link} from "@tanstack/react-router";
+import {useTranslation} from 'react-i18next';
 import {api, setAuth} from "@/lib/request";
 import {useAuth} from "@/hooks/useAuth";
 import {Button} from "@/components/ui/button";
@@ -27,6 +28,7 @@ export default function SignInPage() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const {login} = useAuth();
+    const {t} = useTranslation();
 
     // Read redirect param from search params (set by _authenticated layout route)
     const search = useSearch({strict: false}) as { redirect?: string };
@@ -85,8 +87,8 @@ export default function SignInPage() {
             <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
                 <Card className="w-full max-w-md">
                     <CardHeader>
-                        <CardTitle>Welcome back</CardTitle>
-                        <CardDescription>Enter your credentials to access your account</CardDescription>
+                        <CardTitle>{t('auth.signIn.title')}</CardTitle>
+                        <CardDescription>{t('auth.signIn.desc')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {error && (
@@ -96,36 +98,36 @@ export default function SignInPage() {
                         )}
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
-                                <label htmlFor="username" className="text-sm font-medium">Username</label>
+                                <label htmlFor="username" className="text-sm font-medium">{t('auth.signIn.usernameLabel')}</label>
                                 <Input
                                     id="username"
                                     type="text"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
-                                    placeholder="Enter your username"
+                                    placeholder={t('auth.signIn.usernamePlaceholder')}
                                     required
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label htmlFor="password" className="text-sm font-medium">Password</label>
+                                <label htmlFor="password" className="text-sm font-medium">{t('auth.signIn.passwordLabel')}</label>
                                 <Input
                                     id="password"
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Enter your password"
+                                    placeholder={t('auth.signIn.passwordPlaceholder')}
                                     required
                                 />
                             </div>
                             <Button type="submit" className="w-full" disabled={loading}>
-                                {loading ? "Signing in..." : "Sign In"}
+                                {loading ? t('auth.signIn.submitting') : t('auth.signIn.submit')}
                             </Button>
                         </form>
                     </CardContent>
                     <CardFooter className="justify-center">
                         <p className="text-sm text-muted-foreground">
-                            Don't have an account?{" "}
-                            <Link to="/auth/signup" className="text-primary hover:underline">Sign up</Link>
+                            {t('auth.signIn.noAccount')}{" "}
+                            <Link to="/auth/signup" className="text-primary hover:underline">{t('auth.signIn.signUp')}</Link>
                         </p>
                     </CardFooter>
                 </Card>

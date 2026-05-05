@@ -10,8 +10,10 @@ import {FileText, Video, Clock, User, Eye} from 'lucide-react';
 import {getImageUrl, handleImageError} from '@/lib/imageUtils';
 import {formatDuration, formatViews, formatDate} from '@/lib/format';
 import {useQuery} from '@tanstack/react-query';
+import {useTranslation} from 'react-i18next';
 
 const MixedHomeLayout: React.FC = () => {
+    const {t} = useTranslation();
     const articlesQuery = useQuery({
         queryKey: ['articles', 'latest'],
         queryFn: () => articleApi.list({page: 1, page_size: 10, state: 'published'}),
@@ -41,11 +43,11 @@ const MixedHomeLayout: React.FC = () => {
         <div className="max-w-5xl mx-auto">
             <Tabs defaultValue="all" className="w-full">
                 <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-2xl font-bold">Home</h1>
+                    <h1 className="text-2xl font-bold">{t('nav.home')}</h1>
                     <TabsList>
-                        <TabsTrigger value="all">All</TabsTrigger>
-                        <TabsTrigger value="articles">Articles</TabsTrigger>
-                        <TabsTrigger value="videos">Videos</TabsTrigger>
+                        <TabsTrigger value="all">{t('home.all')}</TabsTrigger>
+                        <TabsTrigger value="articles">{t('nav.articles')}</TabsTrigger>
+                        <TabsTrigger value="videos">{t('common.videos')}</TabsTrigger>
                     </TabsList>
                 </div>
 
@@ -55,10 +57,10 @@ const MixedHomeLayout: React.FC = () => {
                             <div className="flex items-center justify-between mb-4">
                                 <h2 className="text-lg font-semibold flex items-center gap-2">
                                     <Video className="h-5 w-5"/>
-                                    Latest Videos
+                                    {t('home.latestVideos')}
                                 </h2>
                                 <Link to="/latest" className="text-sm text-primary hover:underline">
-                                    View all
+                                    {t('home.viewAll')}
                                 </Link>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -107,10 +109,10 @@ const MixedHomeLayout: React.FC = () => {
                             <div className="flex items-center justify-between mb-4">
                                 <h2 className="text-lg font-semibold flex items-center gap-2">
                                     <FileText className="h-5 w-5"/>
-                                    Latest Articles
+                                    {t('home.latestArticles')}
                                 </h2>
                                 <Link to="/articles" className="text-sm text-primary hover:underline">
-                                    View all
+                                    {t('home.viewAll')}
                                 </Link>
                             </div>
                             <div className="divide-y divide-border">

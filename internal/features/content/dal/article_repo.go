@@ -108,7 +108,17 @@ func (r *articleRepo) Delete(ctx context.Context, id string) error {
 }
 
 func (r *articleRepo) Get(ctx context.Context, id string) (*biz.Article, error) {
+	// Try short_token first (same pattern as Media repo)
 	ent, err := r.data.db.Article.Query().
+		Where(article.ShortTokenEQ(id)).
+		WithMedia().
+		WithCategory().
+		Only(ctx)
+	if err == nil {
+		return mapArticleEntity(ent), nil
+	}
+	// Fall back to ID lookup
+	ent, err = r.data.db.Article.Query().
 		Where(article.IDEQ(id)).
 		WithMedia().
 		WithCategory().
@@ -127,6 +137,18 @@ func (r *articleRepo) GetBySlug(ctx context.Context, slug string) (*biz.Article,
 		Only(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("get article by slug: %w", err)
+	}
+	return mapArticleEntity(ent), nil
+}
+
+func (r *articleRepo) GetByShortToken(ctx context.Context, shortToken string) (*biz.Article, error) {
+	ent, err := r.data.db.Article.Query().
+		Where(article.ShortTokenEQ(shortToken)).
+		WithMedia().
+		WithCategory().
+		Only(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("get article by short_token: %w", err)
 	}
 	return mapArticleEntity(ent), nil
 }
@@ -201,6 +223,7 @@ func mapArticleEntity(ent *entity.Article) *biz.Article {
 		Content:      ent.Content,
 		Summary:      ent.Summary,
 		Slug:         ent.Slug,
+		ShortToken:   ent.ShortToken,
 		State:        ent.State,
 		ViewCount:    ent.ViewCount,
 		CommentCount: ent.CommentCount,

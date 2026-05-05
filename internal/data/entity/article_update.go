@@ -102,6 +102,20 @@ func (_u *ArticleUpdate) ClearSlug() *ArticleUpdate {
 	return _u
 }
 
+// SetShortToken sets the "short_token" field.
+func (_u *ArticleUpdate) SetShortToken(v string) *ArticleUpdate {
+	_u.mutation.SetShortToken(v)
+	return _u
+}
+
+// SetNillableShortToken sets the "short_token" field if the given value is not nil.
+func (_u *ArticleUpdate) SetNillableShortToken(v *string) *ArticleUpdate {
+	if v != nil {
+		_u.SetShortToken(*v)
+	}
+	return _u
+}
+
 // SetState sets the "state" field.
 func (_u *ArticleUpdate) SetState(v string) *ArticleUpdate {
 	_u.mutation.SetState(v)
@@ -431,6 +445,11 @@ func (_u *ArticleUpdate) check() error {
 			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "Article.slug": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ShortToken(); ok {
+		if err := article.ShortTokenValidator(v); err != nil {
+			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Article.short_token": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.State(); ok {
 		if err := article.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`entity: validator failed for field "Article.state": %w`, err)}
@@ -487,6 +506,9 @@ func (_u *ArticleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.SlugCleared() {
 		_spec.ClearField(article.FieldSlug, field.TypeString)
+	}
+	if value, ok := _u.mutation.ShortToken(); ok {
+		_spec.SetField(article.FieldShortToken, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.State(); ok {
 		_spec.SetField(article.FieldState, field.TypeString, value)
@@ -754,6 +776,20 @@ func (_u *ArticleUpdateOne) SetNillableSlug(v *string) *ArticleUpdateOne {
 // ClearSlug clears the value of the "slug" field.
 func (_u *ArticleUpdateOne) ClearSlug() *ArticleUpdateOne {
 	_u.mutation.ClearSlug()
+	return _u
+}
+
+// SetShortToken sets the "short_token" field.
+func (_u *ArticleUpdateOne) SetShortToken(v string) *ArticleUpdateOne {
+	_u.mutation.SetShortToken(v)
+	return _u
+}
+
+// SetNillableShortToken sets the "short_token" field if the given value is not nil.
+func (_u *ArticleUpdateOne) SetNillableShortToken(v *string) *ArticleUpdateOne {
+	if v != nil {
+		_u.SetShortToken(*v)
+	}
 	return _u
 }
 
@@ -1099,6 +1135,11 @@ func (_u *ArticleUpdateOne) check() error {
 			return &ValidationError{Name: "slug", err: fmt.Errorf(`entity: validator failed for field "Article.slug": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ShortToken(); ok {
+		if err := article.ShortTokenValidator(v); err != nil {
+			return &ValidationError{Name: "short_token", err: fmt.Errorf(`entity: validator failed for field "Article.short_token": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.State(); ok {
 		if err := article.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`entity: validator failed for field "Article.state": %w`, err)}
@@ -1172,6 +1213,9 @@ func (_u *ArticleUpdateOne) sqlSave(ctx context.Context) (_node *Article, err er
 	}
 	if _u.mutation.SlugCleared() {
 		_spec.ClearField(article.FieldSlug, field.TypeString)
+	}
+	if value, ok := _u.mutation.ShortToken(); ok {
+		_spec.SetField(article.FieldShortToken, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.State(); ok {
 		_spec.SetField(article.FieldState, field.TypeString, value)

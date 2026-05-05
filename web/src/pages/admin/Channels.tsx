@@ -82,7 +82,7 @@ const Channels: React.FC = () => {
                 setTotal(response.total);
             }
         } catch (err) {
-            setError('Failed to load channels');
+            setError(t('admin.failedToLoadChannels'));
             console.error('Error loading channels:', err);
         } finally {
             setLoading(false);
@@ -199,15 +199,15 @@ const Channels: React.FC = () => {
                         {/* 页面标题 */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
-                                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{t('admin.channels')}</h2>
-                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5">
-                                    Manage your content channels
+                                <h2 className="text-3xl font-extrabold tracking-tight text-foreground">{t('admin.channels')}</h2>
+                                <p className="text-sm text-muted-foreground mt-1.5">
+                                    {t('admin.manageChannels')}
                                 </p>
                             </div>
                         </div>
 
                         {/* 分隔线 */}
-                        <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+                        <div className="border-t border-border my-2"/>
 
                         {/* 搜索和筛选 */}
                         <div className="flex flex-col lg:flex-row gap-4">
@@ -229,14 +229,14 @@ const Channels: React.FC = () => {
                                         <div className="flex items-center gap-2">
                                             <Filter className="h-4 w-4"/>
                                             {statusFilter === 'all' ? (
-                                                <span className="text-muted-foreground">Status</span>
+                                                <span className="text-muted-foreground">{t('admin.status')}</span>
                                             ) : (
-                                                <SelectValue placeholder="Status"/>
+                                                <SelectValue placeholder={t('admin.status')}/>
                                             )}
                                         </div>
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all" className="justify-center text-center font-medium opacity-70">--- All ---</SelectItem>
+                                        <SelectItem value="all" className="justify-center text-center font-medium opacity-70">--- {t('admin.allStatus')} ---</SelectItem>
                                         <SelectItem value="verified">{t('common.verified')}</SelectItem>
                                         <SelectItem value="active">{t('admin.normal')}</SelectItem>
                                         <SelectItem value="pending">{t('admin.pending')}</SelectItem>
@@ -252,7 +252,7 @@ const Channels: React.FC = () => {
                                         }}
                                     >
                                         <RotateCcw className="h-4 w-4 mr-2"/>
-                                        Reset
+                                        {t('admin.reset')}
                                     </Button>
                                     <Button
                                         variant="default"
@@ -261,7 +261,7 @@ const Channels: React.FC = () => {
                                         }}
                                     >
                                         <Search className="h-4 w-4 mr-2"/>
-                                        Search
+                                        {t('common.search')}
                                     </Button>
                                 </div>
                             </div>
@@ -272,11 +272,11 @@ const Channels: React.FC = () => {
 
             {/* 统计卡片 */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-border">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-500">{t('admin.channelTotal')}</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.channelTotal')}</p>
                                 <p className="text-2xl font-bold text-info">{channels.length}</p>
                             </div>
                             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -286,11 +286,11 @@ const Channels: React.FC = () => {
                         <div className="absolute bottom-0 left-0 h-1 bg-info w-full opacity-10"/>
                     </CardContent>
                 </Card>
-                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-border">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-500">{t('admin.totalSubscribers')}</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.totalSubscribers')}</p>
                                 <p className="text-2xl font-bold text-purple-600">{formatNumber(totalSubscribers)}</p>
                             </div>
                             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
@@ -300,11 +300,11 @@ const Channels: React.FC = () => {
                         <div className="absolute bottom-0 left-0 h-1 bg-purple-500 w-full opacity-10"/>
                     </CardContent>
                 </Card>
-                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-border">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-500">{t('admin.verifiedChannels')}</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.verifiedChannels')}</p>
                                 <p className="text-2xl font-bold text-success">{verifiedCount}</p>
                             </div>
                             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
@@ -314,11 +314,11 @@ const Channels: React.FC = () => {
                         <div className="absolute bottom-0 left-0 h-1 bg-success w-full opacity-10"/>
                     </CardContent>
                 </Card>
-                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card className="relative overflow-hidden shadow-sm border-none ring-1 ring-border">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-500">{t('admin.pending')}</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.pending')}</p>
                                 <p className="text-2xl font-bold text-yellow-600">{pendingCount}</p>
                             </div>
                             <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
@@ -363,7 +363,7 @@ const Channels: React.FC = () => {
                             {loading ? (
                                 <TableRow key="loading">
                                     <TableCell colSpan={8} className="text-center py-8">
-                                        <div className="animate-pulse">Loading channels...</div>
+                                        <div className="animate-pulse">{t('admin.loadingChannels')}</div>
                                     </TableCell>
                                 </TableRow>
                             ) : error ? (
@@ -376,14 +376,14 @@ const Channels: React.FC = () => {
                                             className="mt-2"
                                             onClick={() => window.location.reload()}
                                         >
-                                            Retry
+                                            {t('common.retry')}
                                         </Button>
                                     </TableCell>
                                 </TableRow>
                             ) : filteredChannels.length === 0 ? (
                                 <TableRow key="empty">
                                     <TableCell colSpan={8} className="text-center py-8">
-                                        No channels found
+                                        {t('admin.noChannelsFound')}
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -406,7 +406,7 @@ const Channels: React.FC = () => {
                                                     <AvatarFallback
                                                         className="text-xs">{channel.user_id.substring(0, 1).toUpperCase()}</AvatarFallback>
                                                 </Avatar>
-                                                <span className="text-muted-foreground">User ID: {channel.user_id}</span>
+                                                <span className="text-muted-foreground">{t('admin.user')} ID: {channel.user_id}</span>
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-right font-medium">
@@ -427,13 +427,13 @@ const Channels: React.FC = () => {
                                                         variant="ghost" 
                                                         size="icon" 
                                                         className="h-6 w-6" 
-                                                        title="More Actions"
+                                                        title={t('admin.moreActions')}
                                                     >
                                                         <MoreHorizontal className="h-3 w-3"/>
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuLabel>{t('admin.actions')}</DropdownMenuLabel>
                                                     <DropdownMenuSeparator/>
                                                     <DropdownMenuItem>
                                                         <Eye className="mr-2 h-4 w-4"/>
@@ -478,68 +478,68 @@ const Channels: React.FC = () => {
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{t('admin.newChannel') || 'New Channel'}</DialogTitle>
+                        <DialogTitle>{t('admin.newChannel')}</DialogTitle>
                         <DialogDescription>
-                            Create a new channel for your content
+                            {t('admin.createChannelDesc')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div>
-                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Name *
+                            <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                                {t('admin.name')} *
                             </h4>
                             <Input
-                                placeholder="Enter channel name"
+                                placeholder={t('admin.enterChannelName')}
                                 value={formData.name || ''}
                                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                             />
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Handle *
+                                {t('admin.handle')} *
                             </h4>
                             <Input
-                                placeholder="Enter channel handle"
+                                placeholder={t('admin.enterChannelHandle')}
                                 value={formData.handle || ''}
                                 onChange={(e) => setFormData({...formData, handle: e.target.value})}
                             />
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Description
+                                {t('admin.description')}
                             </h4>
                             <Textarea
-                                placeholder="Enter channel description"
+                                placeholder={t('admin.enterChannelDescription')}
                                 value={formData.description || ''}
                                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                             />
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Status
+                                {t('admin.status')}
                             </h4>
                             <Select
                                 value={formData.status || 'active'}
                                 onValueChange={(value) => setFormData({...formData, status: value})}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select status"/>
+                                    <SelectValue placeholder={t('admin.selectStatus')}/>
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="verified">Verified</SelectItem>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="banned">Banned</SelectItem>
+                                    <SelectItem value="active">{t('admin.active')}</SelectItem>
+                                    <SelectItem value="verified">{t('admin.verified')}</SelectItem>
+                                    <SelectItem value="pending">{t('admin.pending')}</SelectItem>
+                                    <SelectItem value="banned">{t('admin.banned')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-                            {t('common.cancel') || 'Cancel'}
+                            {t('admin.cancel')}
                         </Button>
                         <Button onClick={handleCreate}>
-                            {t('common.save') || 'Save'}
+                            {t('admin.create')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -549,68 +549,68 @@ const Channels: React.FC = () => {
             <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{t('admin.editChannel') || 'Edit Channel'}</DialogTitle>
+                        <DialogTitle>{t('admin.editChannel')}</DialogTitle>
                         <DialogDescription>
-                            Update the channel information
+                            {t('admin.updateChannelInfo')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Name *
+                                {t('admin.name')} *
                             </h4>
                             <Input
-                                placeholder="Enter channel name"
+                                placeholder={t('admin.enterChannelName')}
                                 value={formData.name || ''}
                                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                             />
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Handle *
+                                {t('admin.handle')} *
                             </h4>
                             <Input
-                                placeholder="Enter channel handle"
+                                placeholder={t('admin.enterChannelHandle')}
                                 value={formData.handle || ''}
                                 onChange={(e) => setFormData({...formData, handle: e.target.value})}
                             />
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Description
+                                {t('admin.description')}
                             </h4>
                             <Textarea
-                                placeholder="Enter channel description"
+                                placeholder={t('admin.enterChannelDescription')}
                                 value={formData.description || ''}
                                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                             />
                         </div>
                         <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Status
+                                {t('admin.status')}
                             </h4>
                             <Select
                                 value={formData.status || 'active'}
                                 onValueChange={(value) => setFormData({...formData, status: value})}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select status"/>
+                                    <SelectValue placeholder={t('admin.selectStatus')}/>
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="verified">Verified</SelectItem>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="banned">Banned</SelectItem>
+                                    <SelectItem value="active">{t('admin.active')}</SelectItem>
+                                    <SelectItem value="verified">{t('admin.verified')}</SelectItem>
+                                    <SelectItem value="pending">{t('admin.pending')}</SelectItem>
+                                    <SelectItem value="banned">{t('admin.banned')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowEditDialog(false)}>
-                            {t('common.cancel') || 'Cancel'}
+                            {t('admin.cancel')}
                         </Button>
                         <Button onClick={handleUpdate}>
-                            {t('common.save') || 'Save'}
+                            {t('admin.save')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -620,20 +620,20 @@ const Channels: React.FC = () => {
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>{t('admin.deleteChannel') || 'Delete Channel'}</AlertDialogTitle>
+                        <AlertDialogTitle>{t('admin.deleteChannel')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure you want to delete this channel? This action cannot be undone.
+                            {t('admin.deleteChannelConfirm')}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>
-                            {t('common.cancel') || 'Cancel'}
+                            {t('admin.cancel')}
                         </AlertDialogCancel>
                         <AlertDialogAction 
                             onClick={handleDelete}
                             className="bg-red-600 hover:bg-red-700"
                         >
-                            {t('common.delete') || 'Delete'}
+                            {t('admin.delete')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

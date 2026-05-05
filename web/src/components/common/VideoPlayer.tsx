@@ -9,6 +9,7 @@ import {Button} from '@/components/ui/button';
 import {formatDuration} from '@/lib/format';
 import {getFullUrl} from '@/lib/utils';
 import {usePlayerSettings} from '@/hooks/usePlayerSettings';
+import {useTranslation} from 'react-i18next';
 import SpritePreview from './SpritePreview';
 
 // TypeScript 类型定义
@@ -81,6 +82,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                                                                              enableSpritePreview = true,
                                                                          }, ref) => {
 
+    const {t} = useTranslation();
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const hlsRef = useRef<Hls | null>(null);
@@ -847,7 +849,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
             className={`relative bg-black overflow-hidden aspect-video group video-player-container ${className}`}
             tabIndex={0}
             role="application"
-            aria-label="Video Player"
+            aria-label={t('videoPlayer.player')}
         >
             {/* Video Element */}
             <video
@@ -917,7 +919,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                             showCenterIcon('play');
                         }}
                         role="button"
-                        aria-label="Play video"
+                        aria-label={t('videoPlayer.playVideo')}
                         tabIndex={0}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' || e.key === ' ') {
@@ -946,7 +948,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                         onClick={() => window.location.reload()}
                         className="mt-2"
                     >
-                        Retry
+                        {t('videoPlayer.retry')}
                     </Button>
                 </div>
             )}
@@ -957,12 +959,12 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                     className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 z-20 gap-4 p-8"
                     role="status"
                     aria-live="polite"
-                    aria-label="Video is being processed"
+                    aria-label={t('videoPlayer.processing')}
                 >
                     <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin"/>
-                    <p className="text-white text-lg font-medium text-center">Video is being processed</p>
+                    <p className="text-white text-lg font-medium text-center">{t('videoPlayer.processing')}</p>
                     <p className="text-white/60 text-sm text-center max-w-sm">
-                        This video is currently being transcoded and will be available for playback once processing is complete.
+                        {t('videoPlayer.processingDesc')}
                     </p>
                 </div>
             )}
@@ -973,7 +975,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                     showControls || !isPlaying ? 'opacity-100' : 'opacity-0'
                 }`}
                 role="toolbar"
-                aria-label="Video Controls"
+                aria-label={t('videoPlayer.controls')}
             >
                 {/* Gradient background */}
                 <div
@@ -1142,8 +1144,8 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                                     variant="ghost"
                                     size="icon"
                                     className="h-10 w-10 text-white hover:bg-white/10 rounded-full focus-visible:ring-2 focus-visible:ring-white"
-                                    title="Subtitles"
-                                    aria-label="Subtitles"
+                                    title={t('videoPlayer.subtitles')}
+                                    aria-label={t('videoPlayer.subtitles')}
                                 >
                                     <Subtitles size={20} aria-hidden="true"/>
                                 </Button>
@@ -1155,8 +1157,8 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                                     variant="ghost"
                                     size="icon"
                                     className="h-10 w-10 text-white hover:bg-white/10 rounded-full focus-visible:ring-2 focus-visible:ring-white"
-                                    title="Audio tracks"
-                                    aria-label="Audio tracks"
+                                    title={t('videoPlayer.audioTracks')}
+                                    aria-label={t('videoPlayer.audioTracks')}
                                 >
                                     <MonitorPlay size={20} aria-hidden="true"/>
                                 </Button>
@@ -1220,8 +1222,8 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                                         setShowPlaybackMenu(false);
                                     }}
                                     disabled={!hasQualityOptions}
-                                    title={hasQualityOptions ? 'Quality settings' : 'Quality options not available'}
-                                    aria-label="Quality settings"
+                                    title={hasQualityOptions ? t('videoPlayer.qualitySettings') : t('videoPlayer.qualitySettings')}
+                                    aria-label={t('videoPlayer.qualitySettings')}
                                     aria-expanded={showSettingsMenu}
                                     aria-haspopup="menu"
                                 >
@@ -1275,7 +1277,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
                                                 {currentQuality === q.name ? (
                                                     <span className="text-blue-400 text-xs">✓</span>
                                                 ) : q.isRecommended ? (
-                                                    <span className="text-[10px] bg-info/20 text-blue-400 px-1.5 py-0.5 rounded">推荐</span>
+                                                    <span className="text-[10px] bg-info/20 text-blue-400 px-1.5 py-0.5 rounded">{t('videoPlayer.featured')}</span>
                                                 ) : null}
                                             </button>
                                         ))}

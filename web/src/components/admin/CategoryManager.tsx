@@ -190,7 +190,7 @@ const CategoryManager: React.FC = () => {
                             )}
                             <span className="font-medium">{category.name}</span>
                             {isParentDisabled(category) && (
-                                <span className="text-xs text-amber-500 dark:text-amber-400 ml-1 whitespace-nowrap">
+                                <span className="text-xs text-warning ml-1 whitespace-nowrap">
                                     ({t('admin.parentDisabled') || 'Parent Disabled'})
                                 </span>
                             )}
@@ -342,7 +342,7 @@ const CategoryManager: React.FC = () => {
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div>
-                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <h4 className="text-sm font-medium text-muted-foreground mb-2">
                                 {t('admin.name')} *
                             </h4>
                             <Input

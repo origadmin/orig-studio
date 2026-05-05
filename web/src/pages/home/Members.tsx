@@ -14,7 +14,7 @@ import {Avatar, AvatarImage, AvatarFallback} from '@/components/ui/avatar';
 import ErrorPage from '@/components/common/ErrorPage';
 import {PAGINATION_CONFIG} from '@/config/pagination';
 
-const formatNumber = (n: number) => n >= 10000 ? `${(n / 10000).toFixed(1)}万` : n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
+const formatNumber = (n: number, t: (key: string) => string) => n >= 10000 ? `${(n / 10000).toFixed(1)}${t('common.wan')}` : n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
 
 // Role label mapping for display
 const getRoleLabel = (role: string, t: (key: string) => string): {label: string, icon: React.ReactNode} => {

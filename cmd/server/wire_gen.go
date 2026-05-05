@@ -126,7 +126,8 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	tagService := adminservice.NewTagService(tagUseCase)
 	articleRepo := dal4.NewArticleRepo(data, logger)
 	articleUseCase := biz4.NewArticleUseCase(articleRepo, logger)
-	adminHandler := NewAdminHandler(manager, mediaUseCase, mediaService, playlistChannelUseCase, tagService, settingUseCase, categoryTagUseCase, articleUseCase, userUseCase, permissionUseCase)
+	dbDialect, _ := cfg.GetDefaultDB()
+	adminHandler := NewAdminHandler(manager, mediaUseCase, mediaService, playlistChannelUseCase, tagService, settingUseCase, categoryTagUseCase, articleUseCase, userUseCase, permissionUseCase, Version, dbDialect)
 	commentLikeRepo := dal4.NewCommentLikeRepo(data, logger)
 	commentLikeUseCase := biz4.NewCommentLikeUseCase(commentLikeRepo, logger)
 	commentModerationRepo := dal4.NewCommentModerationRepo(data, logger)
@@ -421,8 +422,10 @@ func NewAdminHandler(
 	articleUC *biz4.ArticleUseCase,
 	userUC *biz3.UserUseCase,
 	permChecker biz5.PermissionChecker,
+	appVersion string,
+	dbDialect string,
 ) *adminservice.AdminHandler {
-	return adminservice.NewAdminHandler(jwt, mediaUC, mediaService, channelUC, tagService, settingUC, categoryUC, articleUC, userUC, permChecker)
+	return adminservice.NewAdminHandler(jwt, mediaUC, mediaService, channelUC, tagService, settingUC, categoryUC, articleUC, userUC, permChecker, appVersion, dbDialect)
 }
 
 // NewCommentModerationHandler creates a new comment moderation handler.

@@ -8,15 +8,15 @@ import {Globe, Heart, Mail, Video, MessageCircle} from 'lucide-react';
 
 const Footer = () => {
     return (
-        <footer className="bg-slate-50 border-t border-slate-100 py-8">
+        <footer className="bg-muted border-t border-border py-8">
             <div className="container mx-auto px-4">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
                     <div className="space-y-6">
                         <Link to="/" className="flex items-center space-x-2">
                             <img src="/logo.svg" alt="OrigCMS" className="h-8 w-8" />
-                            <span className="text-xl font-black text-slate-900 tracking-tighter">OrigCMS</span>
+                            <span className="text-xl font-black text-foreground tracking-tighter">OrigCMS</span>
                         </Link>
-                        <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                        <p className="text-sm text-muted-foreground font-medium leading-relaxed">
                             Next-generation video platform powered by Go microservices.
                         </p>
                         <div className="flex items-center space-x-4">
@@ -48,15 +48,15 @@ const Footer = () => {
                 </div>
 
                 <div
-                    className="pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                    className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
                     <div className="flex items-center gap-4">
                         <Link to="/privacy" className="hover:text-info transition-colors">Privacy Policy</Link>
                         <Link to="/terms" className="hover:text-info transition-colors">Terms of Service</Link>
                         <Link to="/cookies" className="hover:text-info transition-colors">Cookie Policy</Link>
                     </div>
                     <p className="flex items-center gap-1.5">
-                        Made with <Heart size={12} className="text-rose-500 fill-rose-500"/> by
-                        <span className="text-slate-900">OrigAdmin Team</span> © 2024
+                        Made with <Heart size={12} className="text-destructive fill-destructive"/> by
+                        <span className="text-foreground">OrigAdmin Team</span> © 2024
                     </p>
                 </div>
             </div>
@@ -69,12 +69,12 @@ const FooterSection = ({title, links}: {
     links: { label: string; to: string; search?: Record<string, any> }[]
 }) => (
     <div className="space-y-6">
-        <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest">{title}</h4>
+        <h4 className="text-sm font-black text-foreground uppercase tracking-widest">{title}</h4>
         <ul className="space-y-4">
             {links.map((link) => (
                 <li key={link.label}>
                     <Link to={link.to} search={link.search}
-                          className="text-sm text-slate-500 font-bold hover:text-info transition-all hover:translate-x-1 inline-block">
+                          className="text-sm text-muted-foreground font-bold hover:text-info transition-all hover:translate-x-1 inline-block">
                         {link.label}
                     </Link>
                 </li>
@@ -85,7 +85,7 @@ const FooterSection = ({title, links}: {
 
 const SocialIcon = ({icon}: any) => (
     <button
-        className="w-9 h-9 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-muted-foreground hover:text-info hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm hover:shadow-md active:scale-95">
+        className="w-9 h-9 bg-card border border-border rounded-xl flex items-center justify-center text-muted-foreground hover:text-info hover:border-brand-muted hover:bg-brand-muted transition-all shadow-sm hover:shadow-md active:scale-95">
         {icon}
     </button>
 );

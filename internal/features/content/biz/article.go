@@ -18,6 +18,7 @@ type Article struct {
 	Content      string      `json:"content"`
 	Summary      string      `json:"summary,omitempty"`
 	Slug         string      `json:"slug,omitempty"`
+	ShortToken   string      `json:"short_token,omitempty"`
 	State        string      `json:"state"` // draft / published / archived
 	ViewCount    int64       `json:"view_count"`
 	CommentCount int64       `json:"comment_count"`
@@ -51,6 +52,7 @@ type ArticleRepo interface {
 	Delete(ctx context.Context, id string) error
 	Get(ctx context.Context, id string) (*Article, error)
 	GetBySlug(ctx context.Context, slug string) (*Article, error)
+	GetByShortToken(ctx context.Context, shortToken string) (*Article, error)
 	List(ctx context.Context, page, pageSize int, filters map[string]interface{}) ([]*Article, int64, error)
 	UpdateState(ctx context.Context, id string, state string) error
 }

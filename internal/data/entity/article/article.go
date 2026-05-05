@@ -22,6 +22,8 @@ const (
 	FieldSummary = "summary"
 	// FieldSlug holds the string denoting the slug field in the database.
 	FieldSlug = "slug"
+	// FieldShortToken holds the string denoting the short_token field in the database.
+	FieldShortToken = "short_token"
 	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
 	// FieldViewCount holds the string denoting the view_count field in the database.
@@ -93,6 +95,7 @@ var Columns = []string{
 	FieldContent,
 	FieldSummary,
 	FieldSlug,
+	FieldShortToken,
 	FieldState,
 	FieldViewCount,
 	FieldCommentCount,
@@ -135,6 +138,10 @@ var (
 	ContentValidator func(string) error
 	// SlugValidator is a validator for the "slug" field. It is called by the builders before save.
 	SlugValidator func(string) error
+	// DefaultShortToken holds the default value on creation for the "short_token" field.
+	DefaultShortToken func() string
+	// ShortTokenValidator is a validator for the "short_token" field. It is called by the builders before save.
+	ShortTokenValidator func(string) error
 	// DefaultState holds the default value on creation for the "state" field.
 	DefaultState string
 	// StateValidator is a validator for the "state" field. It is called by the builders before save.
@@ -187,6 +194,11 @@ func BySummary(opts ...sql.OrderTermOption) OrderOption {
 // BySlug orders the results by the slug field.
 func BySlug(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSlug, opts...).ToFunc()
+}
+
+// ByShortToken orders the results by the short_token field.
+func ByShortToken(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldShortToken, opts...).ToFunc()
 }
 
 // ByState orders the results by the state field.

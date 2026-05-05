@@ -85,6 +85,11 @@ func Slug(v string) predicate.Article {
 	return predicate.Article(sql.FieldEQ(FieldSlug, v))
 }
 
+// ShortToken applies equality check predicate on the "short_token" field. It's identical to ShortTokenEQ.
+func ShortToken(v string) predicate.Article {
+	return predicate.Article(sql.FieldEQ(FieldShortToken, v))
+}
+
 // State applies equality check predicate on the "state" field. It's identical to StateEQ.
 func State(v string) predicate.Article {
 	return predicate.Article(sql.FieldEQ(FieldState, v))
@@ -418,6 +423,71 @@ func SlugEqualFold(v string) predicate.Article {
 // SlugContainsFold applies the ContainsFold predicate on the "slug" field.
 func SlugContainsFold(v string) predicate.Article {
 	return predicate.Article(sql.FieldContainsFold(FieldSlug, v))
+}
+
+// ShortTokenEQ applies the EQ predicate on the "short_token" field.
+func ShortTokenEQ(v string) predicate.Article {
+	return predicate.Article(sql.FieldEQ(FieldShortToken, v))
+}
+
+// ShortTokenNEQ applies the NEQ predicate on the "short_token" field.
+func ShortTokenNEQ(v string) predicate.Article {
+	return predicate.Article(sql.FieldNEQ(FieldShortToken, v))
+}
+
+// ShortTokenIn applies the In predicate on the "short_token" field.
+func ShortTokenIn(vs ...string) predicate.Article {
+	return predicate.Article(sql.FieldIn(FieldShortToken, vs...))
+}
+
+// ShortTokenNotIn applies the NotIn predicate on the "short_token" field.
+func ShortTokenNotIn(vs ...string) predicate.Article {
+	return predicate.Article(sql.FieldNotIn(FieldShortToken, vs...))
+}
+
+// ShortTokenGT applies the GT predicate on the "short_token" field.
+func ShortTokenGT(v string) predicate.Article {
+	return predicate.Article(sql.FieldGT(FieldShortToken, v))
+}
+
+// ShortTokenGTE applies the GTE predicate on the "short_token" field.
+func ShortTokenGTE(v string) predicate.Article {
+	return predicate.Article(sql.FieldGTE(FieldShortToken, v))
+}
+
+// ShortTokenLT applies the LT predicate on the "short_token" field.
+func ShortTokenLT(v string) predicate.Article {
+	return predicate.Article(sql.FieldLT(FieldShortToken, v))
+}
+
+// ShortTokenLTE applies the LTE predicate on the "short_token" field.
+func ShortTokenLTE(v string) predicate.Article {
+	return predicate.Article(sql.FieldLTE(FieldShortToken, v))
+}
+
+// ShortTokenContains applies the Contains predicate on the "short_token" field.
+func ShortTokenContains(v string) predicate.Article {
+	return predicate.Article(sql.FieldContains(FieldShortToken, v))
+}
+
+// ShortTokenHasPrefix applies the HasPrefix predicate on the "short_token" field.
+func ShortTokenHasPrefix(v string) predicate.Article {
+	return predicate.Article(sql.FieldHasPrefix(FieldShortToken, v))
+}
+
+// ShortTokenHasSuffix applies the HasSuffix predicate on the "short_token" field.
+func ShortTokenHasSuffix(v string) predicate.Article {
+	return predicate.Article(sql.FieldHasSuffix(FieldShortToken, v))
+}
+
+// ShortTokenEqualFold applies the EqualFold predicate on the "short_token" field.
+func ShortTokenEqualFold(v string) predicate.Article {
+	return predicate.Article(sql.FieldEqualFold(FieldShortToken, v))
+}
+
+// ShortTokenContainsFold applies the ContainsFold predicate on the "short_token" field.
+func ShortTokenContainsFold(v string) predicate.Article {
+	return predicate.Article(sql.FieldContainsFold(FieldShortToken, v))
 }
 
 // StateEQ applies the EQ predicate on the "state" field.

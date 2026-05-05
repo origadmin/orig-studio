@@ -61,7 +61,7 @@ export const CommentStatsCards: React.FC<CommentStatsCardsProps> = React.memo(
     return (
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {cards.map(card => (
-          <Card key={card.label} className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+          <Card key={card.label} className="relative overflow-hidden shadow-sm border-none ring-1 ring-border">
             <CardContent className="pt-6">
               <div className="flex items-center gap-2">
                 <card.icon className={`h-5 w-5 ${card.color}`} />

@@ -16,7 +16,7 @@ export interface Category {
 }
 
 export const categoryApi = {
-    getAll: (params?: {page?: number; page_size?: number}) => api.get<PaginatedResponse<Category>>("/categories", {params}),
+    getAll: (params?: {page?: number; page_size?: number}) => api.get<PaginatedResponse<Category>>("/categories", params),
     get: (id: number | string) => api.get<Category>(`/categories/${id}`),
     create: (data: Partial<Category>) => api.post<Category>("/categories", data),
     update: (id: number | string, data: Partial<Category>) => api.put<Category>(`/categories/${id}`, data),
@@ -27,7 +27,7 @@ export const categoryApi = {
 export const adminCategoryApi = {
     // List all categories (Admin, includes all statuses)
     list: (params?: {page?: number; page_size?: number}) =>
-        api.get<PaginatedResponse<Category>>("/admin/categories", {params}),
+        api.get<PaginatedResponse<Category>>("/admin/categories", params),
 
     // Get category detail (Admin)
     get: (id: number | string) =>

@@ -258,15 +258,15 @@ export default function UsersPage() {
                         {/* 页面标题 */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
-                                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{t('admin.users')}</h2>
-                                <p className="text-sm text-slate-500 dark:text-muted-foreground mt-1.5">
+                                <h2 className="text-3xl font-extrabold tracking-tight text-foreground">{t('admin.users')}</h2>
+                                <p className="text-sm text-muted-foreground mt-1.5">
                                     {t('admin.manageUsers') || "Manage users, roles, and permissions"}
                                 </p>
                             </div>
                         </div>
 
                         {/* 分隔线 */}
-                        <div className="border-t border-slate-200 dark:border-slate-800 my-2"/>
+                        <div className="border-t border-border my-2"/>
 
                         {/* 搜索和筛选 */}
                         <div className="flex flex-col lg:flex-row gap-4">
@@ -331,11 +331,11 @@ export default function UsersPage() {
 
             {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card key="total-users" className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card key="total-users" className="relative overflow-hidden shadow-sm border-none ring-1 ring-border">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-500">{t('admin.totalUsers') || "Total Users"}</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.totalUsers') || "Total Users"}</p>
                                 <p className="text-2xl font-bold text-info dark:text-blue-400">{users.length}</p>
                             </div>
                             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -345,11 +345,11 @@ export default function UsersPage() {
                     </CardContent>
                     <div className="absolute bottom-0 left-0 h-1 bg-info w-full opacity-10"/>
                 </Card>
-                <Card key="active-users" className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card key="active-users" className="relative overflow-hidden shadow-sm border-none ring-1 ring-border">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-500">{t('admin.activeUsers') || "Active Users"}</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.activeUsers') || "Active Users"}</p>
                                 <p className="text-2xl font-bold text-success dark:text-green-400">{users.filter(u => getUserStatusLabel(u.status) === 'active').length}</p>
                             </div>
                             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
@@ -359,11 +359,11 @@ export default function UsersPage() {
                     </CardContent>
                     <div className="absolute bottom-0 left-0 h-1 bg-success w-full opacity-10"/>
                 </Card>
-                <Card key="admins" className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card key="admins" className="relative overflow-hidden shadow-sm border-none ring-1 ring-border">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-500">{t('admin.admins') || "Admins"}</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.admins') || "Admins"}</p>
                                 <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{users.filter(u => u.role === 'admin').length}</p>
                             </div>
                             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
@@ -373,11 +373,11 @@ export default function UsersPage() {
                     </CardContent>
                     <div className="absolute bottom-0 left-0 h-1 bg-purple-500 w-full opacity-10"/>
                 </Card>
-                <Card key="editors" className="relative overflow-hidden shadow-sm border-none ring-1 ring-slate-200 dark:ring-slate-800">
+                <Card key="editors" className="relative overflow-hidden shadow-sm border-none ring-1 ring-border">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-slate-500">{t('admin.editors') || "Editors"}</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.editors') || "Editors"}</p>
                                 <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{users.filter(u => u.role === 'editor').length}</p>
                             </div>
                             <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
@@ -434,11 +434,11 @@ export default function UsersPage() {
                                                 </Avatar>
                                                 <div>
                                                     <p className="font-medium">{user.nickname || user.username}</p>
-                                                    <p className="text-sm text-slate-500">@{user.username}</p>
+                                                    <p className="text-sm text-muted-foreground">@{user.username}</p>
                                                 </div>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-sm text-slate-500">
+                                        <TableCell className="text-sm text-muted-foreground">
                                             <div className="flex items-center gap-2">
                                                 <Mail className="w-4 h-4"/>
                                                 {user.email}
@@ -457,7 +457,7 @@ export default function UsersPage() {
                                                 <Badge variant="secondary">{t('admin.inactive') || getUserStatusLabel(user.status)}</Badge>
                                             )}
                                         </TableCell>
-                                        <TableCell className="text-sm text-slate-500">{formatDateTime(user.create_time)}</TableCell>
+                                        <TableCell className="text-sm text-muted-foreground">{formatDateTime(user.create_time)}</TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>

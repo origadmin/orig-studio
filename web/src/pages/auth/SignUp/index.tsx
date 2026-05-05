@@ -1,6 +1,7 @@
 // SignUp 注册页面 - 使用 shadcn/ui 组件
 import {useState} from "react";
 import {useNavigate, Link} from "@tanstack/react-router";
+import {useTranslation} from 'react-i18next';
 import {api, setAuth} from "@/lib/request";
 import {useAuth} from "@/hooks/useAuth";
 import {Button} from "@/components/ui/button";
@@ -29,6 +30,7 @@ export default function SignUpPage() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const {login} = useAuth();
+    const {t} = useTranslation();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -85,8 +87,8 @@ export default function SignUpPage() {
             <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
                 <Card className="w-full max-w-md">
                     <CardHeader>
-                        <CardTitle>Create an account</CardTitle>
-                        <CardDescription>Enter your details to get started</CardDescription>
+                        <CardTitle>{t('auth.signUp.title')}</CardTitle>
+                        <CardDescription>{t('auth.signUp.desc')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {error && (
@@ -96,59 +98,58 @@ export default function SignUpPage() {
                         )}
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
-                                <label htmlFor="username" className="text-sm font-medium">Username</label>
+                                <label htmlFor="username" className="text-sm font-medium">{t('auth.signUp.usernameLabel')}</label>
                                 <Input
                                     id="username"
                                     type="text"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
-                                    placeholder="Choose a username"
+                                    placeholder={t('auth.signUp.usernamePlaceholder')}
                                     required
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label htmlFor="email" className="text-sm font-medium">Email</label>
+                                <label htmlFor="email" className="text-sm font-medium">{t('auth.signUp.emailLabel')}</label>
                                 <Input
                                     id="email"
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="Enter your email"
+                                    placeholder={t('auth.signUp.emailPlaceholder')}
                                     required
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label htmlFor="password" className="text-sm font-medium">Password</label>
+                                <label htmlFor="password" className="text-sm font-medium">{t('auth.signUp.passwordLabel')}</label>
                                 <Input
                                     id="password"
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Create a password"
+                                    placeholder={t('auth.signUp.passwordPlaceholder')}
                                     required
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label htmlFor="confirmPassword" className="text-sm font-medium">Confirm
-                                    Password</label>
+                                <label htmlFor="confirmPassword" className="text-sm font-medium">{t('auth.signUp.confirmPasswordLabel')}</label>
                                 <Input
                                     id="confirmPassword"
                                     type="password"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
-                                    placeholder="Confirm your password"
+                                    placeholder={t('auth.signUp.confirmPasswordPlaceholder')}
                                     required
                                 />
                             </div>
                             <Button type="submit" className="w-full" disabled={loading}>
-                                {loading ? "Creating account..." : "Create Account"}
+                                {loading ? t('auth.signUp.submitting') : t('auth.signUp.submit')}
                             </Button>
                         </form>
                     </CardContent>
                     <CardFooter className="justify-center">
                         <p className="text-sm text-muted-foreground">
-                            Already have an account?{" "}
-                            <Link to="/auth/signin" className="text-primary hover:underline">Sign in</Link>
+                            {t('auth.signUp.hasAccount')}{" "}
+                            <Link to="/auth/signin" className="text-primary hover:underline">{t('auth.signUp.signIn')}</Link>
                         </p>
                     </CardFooter>
                 </Card>
