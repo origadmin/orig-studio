@@ -114,7 +114,6 @@ bin.7z
 docs/check_temp/
 docs/img*.png
 fix_*.py
-kill.ps1
 report.md
 task-summary-*.md
 test_all.txt
