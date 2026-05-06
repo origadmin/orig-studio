@@ -1,9 +1,11 @@
 package service
 
 import (
-	"origadmin/application/origcms/internal/handler"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/server"
 	contentbiz "origadmin/application/origcms/internal/features/content/biz"
@@ -30,46 +32,53 @@ func NewStatsHandler(mediaUC *mediabiz.MediaUseCase, likeFavoriteUC *contentbiz.
 }
 
 func (h *StatsHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	r := handler.NewGinRouterAdapter(rg)
+	r := ginadapter.NewStdRouterAdapter(rg)
 	stats := r.Group("/stats")
 	{
-		// Note: We can't use Use() directly with the Router interface
-		// We'll need to apply middleware to each route individually
-		stats.GET("/dashboard", server.WithJWT(h.jwt, server.GinHandlerToHTTP(h.getDashboardStats)))
-		stats.GET("/media", server.WithJWT(h.jwt, server.GinHandlerToHTTP(h.getMediaStats)))
-		stats.GET("/user", server.WithJWT(h.jwt, server.GinHandlerToHTTP(h.getUserStats)))
+		stats.GET("/dashboard", server.WithJWT(h.jwt, h.getDashboardStats()))
+		stats.GET("/media", server.WithJWT(h.jwt, h.getMediaStats()))
+		stats.GET("/user", server.WithJWT(h.jwt, h.getUserStats()))
 	}
 }
 
 // getDashboardStats returns dashboard statistics.
 // GET /stats/dashboard
-func (h *StatsHandler) getDashboardStats(c *gin.Context) {
-	stats, err := h.statsRepo.GetDashboardStats(c)
-	if err != nil {
-		server.Fail(c, 500, "Failed to get dashboard stats: "+err.Error())
-		return
+func (h *StatsHandler) getDashboardStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		stats, err := h.statsRepo.GetDashboardStats(r.Context())
+		if err != nil {
+			server.Fail(gc, 500, "Failed to get dashboard stats: "+err.Error())
+			return
+		}
+		server.OK(gc, stats)
 	}
-	server.OK(c, stats)
 }
 
 // getMediaStats returns media statistics.
 // GET /stats/media
-func (h *StatsHandler) getMediaStats(c *gin.Context) {
-	stats, err := h.statsRepo.GetMediaStats(c)
-	if err != nil {
-		server.Fail(c, 500, "Failed to get media stats: "+err.Error())
-		return
+func (h *StatsHandler) getMediaStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		stats, err := h.statsRepo.GetMediaStats(r.Context())
+		if err != nil {
+			server.Fail(gc, 500, "Failed to get media stats: "+err.Error())
+			return
+		}
+		server.OK(gc, stats)
 	}
-	server.OK(c, stats)
 }
 
 // getUserStats returns user statistics.
 // GET /stats/user
-func (h *StatsHandler) getUserStats(c *gin.Context) {
-	stats, err := h.statsRepo.GetUserStats(c)
-	if err != nil {
-		server.Fail(c, 500, "Failed to get user stats: "+err.Error())
-		return
+func (h *StatsHandler) getUserStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		stats, err := h.statsRepo.GetUserStats(r.Context())
+		if err != nil {
+			server.Fail(gc, 500, "Failed to get user stats: "+err.Error())
+			return
+		}
+		server.OK(gc, stats)
 	}
-	server.OK(c, stats)
 }

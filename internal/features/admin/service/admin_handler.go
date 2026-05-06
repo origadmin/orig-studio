@@ -7,6 +7,7 @@ package service
 
 import (
 	"crypto/rand"
+	"net/http"
 	"fmt"
 	"math/big"
 	"runtime"
@@ -20,7 +21,7 @@ import (
 	pb "origadmin/application/origcms/api/gen/v1/user"
 	mediapb "origadmin/application/origcms/api/gen/v1/media"
 	types "origadmin/application/origcms/api/gen/v1/types"
-	"origadmin/application/origcms/internal/handler"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/enums"
@@ -88,7 +89,7 @@ func NewAdminHandler(
 }
 
 func (h *AdminHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	r := handler.NewGinRouterAdapter(rg)
+	r := ginadapter.NewStdRouterAdapter(rg)
 	admin := r.Group("/admin")
 	{
 		// ================================
@@ -229,10 +230,11 @@ func (h *AdminHandler) RegisterRoutes(rg *gin.RouterGroup) {
 
 // --- Stats Panel Handlers ---
 
-func (h *AdminHandler) getDashboardStats() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) getDashboardStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		// TODO: Implement dashboard stats
-		server.OK(c, gin.H{
+		server.OK(gc, gin.H{
 			"total_medias":   100,
 			"total_users":    50,
 			"total_channels": 20,
@@ -243,10 +245,11 @@ func (h *AdminHandler) getDashboardStats() gin.HandlerFunc {
 	}
 }
 
-func (h *AdminHandler) getMediaStats() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) getMediaStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		// TODO: Implement media stats
-		server.OK(c, gin.H{
+		server.OK(gc, gin.H{
 			"total_media":      100,
 			"total_storage":    "10GB",
 			"video_count":      60,
@@ -257,10 +260,11 @@ func (h *AdminHandler) getMediaStats() gin.HandlerFunc {
 	}
 }
 
-func (h *AdminHandler) getUserStats() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) getUserStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		// TODO: Implement user stats
-		server.OK(c, gin.H{
+		server.OK(gc, gin.H{
 			"total_users":     50,
 			"active_users":    30,
 			"new_users_today": 2,
@@ -270,10 +274,11 @@ func (h *AdminHandler) getUserStats() gin.HandlerFunc {
 	}
 }
 
-func (h *AdminHandler) getTrafficStats() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) getTrafficStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		// TODO: Implement traffic stats
-		server.OK(c, gin.H{
+		server.OK(gc, gin.H{
 			"total_views":     10000,
 			"today_views":     1000,
 			"total_bandwidth": "100GB",
@@ -285,9 +290,10 @@ func (h *AdminHandler) getTrafficStats() gin.HandlerFunc {
 
 // --- Encoding Management Handlers ---
 
-func (h *AdminHandler) getAllEncodingTasks() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		status := c.Query("status")
+func (h *AdminHandler) getAllEncodingTasks() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		status := gc.Query("status")
 
 		var filterType mediabiz.FilterType
 		var specificStatus string
@@ -302,7 +308,7 @@ func (h *AdminHandler) getAllEncodingTasks() gin.HandlerFunc {
 		default:
 			parsedStatus := enums.ParseEncodingTaskStatus(status)
 			if parsedStatus == enums.EncodingTaskStatusUnknown {
-				server.Fail(c, server.ErrBadRequest, "Invalid status parameter")
+				server.Fail(gc, server.ErrBadRequest, "Invalid status parameter")
 				return
 			}
 			filterType = mediabiz.FilterTypeSpecific
@@ -315,19 +321,19 @@ func (h *AdminHandler) getAllEncodingTasks() gin.HandlerFunc {
 			Page:          1,
 			PageSize:      25,
 			OnlyStats:     false,
-			ProfileFilter: c.Query("profile"),
-			ChunkFilter:   c.Query("chunk"),
-			SearchQuery:   c.Query("search"),
+			ProfileFilter: gc.Query("profile"),
+			ChunkFilter:   gc.Query("chunk"),
+			SearchQuery:   gc.Query("search"),
 		}
 
-		if os := c.Query("only_stats"); os == "true" {
+		if os := gc.Query("only_stats"); os == "true" {
 			filter.OnlyStats = true
 		}
 
-		if p, err := strconv.Atoi(c.DefaultQuery("page", "1")); err == nil {
+		if p, err := strconv.Atoi(gc.DefaultQuery("page", "1")); err == nil {
 			filter.Page = p
 		}
-		if ps, err := strconv.Atoi(c.DefaultQuery("page_size", "25")); err == nil {
+		if ps, err := strconv.Atoi(gc.DefaultQuery("page_size", "25")); err == nil {
 			filter.PageSize = ps
 		}
 		// Normalize pagination parameters
@@ -336,24 +342,25 @@ func (h *AdminHandler) getAllEncodingTasks() gin.HandlerFunc {
 		filter.PageSize = pageSize
 
 		var mediaID *string
-		if m := c.Query("media_id"); m != "" {
+		if m := gc.Query("media_id"); m != "" {
 			mediaID = &m
 		}
 
-		result, err := h.mediaUC.ListEncodingTasksFlat(c.Request.Context(), filter, mediaID)
+		result, err := h.mediaUC.ListEncodingTasksFlat(r.Context(), filter, mediaID)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, result)
+		server.OK(gc, result)
 	}
 }
 
-func (h *AdminHandler) getEncodingStatus() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) getEncodingStatus() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		// TODO: Implement encoding status
-		server.OK(c, gin.H{
+		server.OK(gc, gin.H{
 			"total_tasks":  100,
 			"pending":      5,
 			"processing":   3,
@@ -364,144 +371,153 @@ func (h *AdminHandler) getEncodingStatus() gin.HandlerFunc {
 	}
 }
 
-func (h *AdminHandler) retryTask() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		taskIDStr := c.Param("taskId")
+func (h *AdminHandler) retryTask() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		taskIDStr := gc.Param("taskId")
 		if taskIDStr == "" {
-			server.Fail(c, server.ErrBadRequest, "Invalid task ID")
+			server.Fail(gc, server.ErrBadRequest, "Invalid task ID")
 			return
 		}
 
-		task, err := h.mediaUC.RetryTask(c.Request.Context(), taskIDStr)
+		task, err := h.mediaUC.RetryTask(r.Context(), taskIDStr)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, task)
+		server.OK(gc, task)
 	}
 }
 
-func (h *AdminHandler) retryAllFailedTasks() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		mediaIDStr := c.Query("media_id")
+func (h *AdminHandler) retryAllFailedTasks() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		mediaIDStr := gc.Query("media_id")
 
-		count, err := h.mediaUC.RetryAllFailedTasks(c.Request.Context(), mediaIDStr)
+		count, err := h.mediaUC.RetryAllFailedTasks(r.Context(), mediaIDStr)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, gin.H{"retried_count": count})
+		server.OK(gc, gin.H{"retried_count": count})
 	}
 }
 
 // --- Encode Profile Handlers ---
 
-func (h *AdminHandler) listEncodeProfiles() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		profiles, err := h.mediaUC.ListEncodeProfiles(c.Request.Context())
+func (h *AdminHandler) listEncodeProfiles() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		profiles, err := h.mediaUC.ListEncodeProfiles(r.Context())
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
-		server.OK(c, profiles)
+		server.OK(gc, gin.H{"profiles": profiles})
 	}
 }
 
-func (h *AdminHandler) createEncodeProfile() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) createEncodeProfile() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		var profile mediadto.EncodeProfile
-		if err := c.ShouldBindJSON(&profile); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&profile); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
-		p, err := h.mediaUC.CreateEncodeProfile(c.Request.Context(), &profile)
+		p, err := h.mediaUC.CreateEncodeProfile(r.Context(), &profile)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
-		server.Created(c, p)
+		server.Created(gc, gin.H{"profile": p})
 	}
 }
 
-func (h *AdminHandler) getEncodeProfile() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
+func (h *AdminHandler) getEncodeProfile() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id, err := strconv.Atoi(gc.Param("id"))
 		if err != nil {
-			server.Fail(c, server.ErrBadRequest, "Invalid Profile ID")
+			server.Fail(gc, server.ErrBadRequest, "Invalid Profile ID")
 			return
 		}
-		p, err := h.mediaUC.GetEncodeProfile(c.Request.Context(), id)
+		p, err := h.mediaUC.GetEncodeProfile(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "Profile not found")
+			server.Fail(gc, server.ErrNotFound, "Profile not found")
 			return
 		}
-		server.OK(c, p)
+		server.OK(gc, gin.H{"profile": p})
 	}
 }
 
-func (h *AdminHandler) updateEncodeProfile() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
+func (h *AdminHandler) updateEncodeProfile() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id, err := strconv.Atoi(gc.Param("id"))
 		if err != nil {
-			server.Fail(c, server.ErrBadRequest, "Invalid Profile ID")
+			server.Fail(gc, server.ErrBadRequest, "Invalid Profile ID")
 			return
 		}
 		var profile mediadto.EncodeProfile
-		if err := c.ShouldBindJSON(&profile); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&profile); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 		profile.Id = id
-		p, err := h.mediaUC.UpdateEncodeProfile(c.Request.Context(), &profile)
+		p, err := h.mediaUC.UpdateEncodeProfile(r.Context(), &profile)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
-		server.OK(c, p)
+		server.OK(gc, gin.H{"profile": p})
 	}
 }
 
-func (h *AdminHandler) deleteEncodeProfile() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
+func (h *AdminHandler) deleteEncodeProfile() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id, err := strconv.Atoi(gc.Param("id"))
 		if err != nil {
-			server.Fail(c, server.ErrBadRequest, "Invalid Profile ID")
+			server.Fail(gc, server.ErrBadRequest, "Invalid Profile ID")
 			return
 		}
-		if err := h.mediaUC.DeleteEncodeProfile(c.Request.Context(), id); err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+		if err := h.mediaUC.DeleteEncodeProfile(r.Context(), id); err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
-		server.OK(c, nil)
+		server.OK(gc, nil)
 	}
 }
 
-func (h *AdminHandler) previewEncodeCommand() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) previewEncodeCommand() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		var profile mediadto.EncodeProfile
-		if err := c.ShouldBindJSON(&profile); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&profile); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
-		preview := h.mediaUC.GenerateCommandPreview(c.Request.Context(), &profile)
-		server.OK(c, gin.H{"command": preview})
+		preview := h.mediaUC.GenerateCommandPreview(r.Context(), &profile)
+		server.OK(gc, gin.H{"command": preview})
 	}
 }
 
 // --- System Settings Handlers ---
 
-func (h *AdminHandler) getSystemSettings() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) getSystemSettings() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		if h.settingUC == nil {
-			server.Fail(c, server.ErrInternal, "settings service not available")
+			server.Fail(gc, server.ErrInternal, "settings service not available")
 			return
 		}
 
-		items, err := h.settingUC.ListAll(c.Request.Context())
+		items, err := h.settingUC.ListAll(r.Context())
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
@@ -512,7 +528,7 @@ func (h *AdminHandler) getSystemSettings() gin.HandlerFunc {
 			grouped[cat] = append(grouped[cat], masked)
 		}
 
-		server.OK(c, grouped)
+		server.OK(gc, grouped)
 	}
 }
 
@@ -522,8 +538,9 @@ func (h *AdminHandler) getSystemSettings() gin.HandlerFunc {
 // Future extensibility (multi-instance): The response can be extended to include
 // an "instances" array for distributed deployments, while keeping backward
 // compatibility by retaining the top-level fields as the "local" instance's data.
-func (h *AdminHandler) getSystemInfo() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) getSystemInfo() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		var m runtime.MemStats
 		runtime.ReadMemStats(&m)
 
@@ -564,14 +581,15 @@ func (h *AdminHandler) getSystemInfo() gin.HandlerFunc {
 			"numGoroutine": runtime.NumGoroutine(),
 		}
 
-		server.OK(c, info)
+		server.OK(gc, info)
 	}
 }
 
-func (h *AdminHandler) updateSystemSettings() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) updateSystemSettings() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		if h.settingUC == nil {
-			server.Fail(c, server.ErrInternal, "settings service not available")
+			server.Fail(gc, server.ErrInternal, "settings service not available")
 			return
 		}
 
@@ -582,14 +600,14 @@ func (h *AdminHandler) updateSystemSettings() gin.HandlerFunc {
 			} `json:"settings" binding:"required"`
 		}
 
-		if err := c.ShouldBindJSON(&req); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&req); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		var updated []*entity.Setting
 		for _, item := range req.Settings {
-			existing, err := h.settingUC.GetByKey(c.Request.Context(), item.Key)
+			existing, err := h.settingUC.GetByKey(r.Context(), item.Key)
 			if err != nil {
 				defaults := systembiz.DefaultSettings()
 				var defaultSetting *entity.Setting
@@ -600,14 +618,14 @@ func (h *AdminHandler) updateSystemSettings() gin.HandlerFunc {
 					}
 				}
 				if defaultSetting == nil {
-					server.Fail(c, server.ErrBadRequest, "unknown setting key: "+item.Key)
+					server.Fail(gc, server.ErrBadRequest, "unknown setting key: "+item.Key)
 					return
 				}
 				existing = defaultSetting
 			}
 
 			if err := systemservice.ValidateSettingValue(item.Value, existing.Type); err != nil {
-				server.Fail(c, server.ErrBadRequest, "invalid value for "+item.Key+": "+err.Error())
+				server.Fail(gc, server.ErrBadRequest, "invalid value for "+item.Key+": "+err.Error())
 				return
 			}
 
@@ -621,15 +639,15 @@ func (h *AdminHandler) updateSystemSettings() gin.HandlerFunc {
 				FallbackValue: existing.FallbackValue,
 				IsBuiltin:     existing.IsBuiltin,
 			}
-			result, err := h.settingUC.Upsert(c.Request.Context(), s)
+			result, err := h.settingUC.Upsert(r.Context(), s)
 			if err != nil {
-				server.Fail(c, server.ErrInternal, err.Error())
+				server.Fail(gc, server.ErrInternal, err.Error())
 				return
 			}
 			updated = append(updated, result)
 		}
 
-		server.OK(c, updated)
+		server.OK(gc, updated)
 	}
 }
 
@@ -638,28 +656,29 @@ func (h *AdminHandler) updateSystemSettings() gin.HandlerFunc {
 // Note: Tag routes are handled by AdminTagHandler, but these methods exist
 // for backward compatibility if called from AdminHandler.
 
-func (h *AdminHandler) listTags() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) listTags() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		// Parse query parameters
-		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
 
 		// B087-R2 Fix: Support both "search" and "keyword" parameters
-		search := c.Query("search")
+		search := gc.Query("search")
 		if search == "" {
-			search = c.Query("keyword")
+			search = gc.Query("keyword")
 		}
 
-		status := c.Query("status")
-		sortBy := c.DefaultQuery("sort_by", "create_time")
-		sortOrder := c.DefaultQuery("sort_order", "desc")
+		status := gc.Query("status")
+		sortBy := gc.DefaultQuery("sort_by", "create_time")
+		sortOrder := gc.DefaultQuery("sort_order", "desc")
 
 		// Normalize pagination parameters
 		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 		// Get tags
 		tags, total, err := h.tagService.List(
-			c.Request.Context(),
+			r.Context(),
 			page,
 			pageSize,
 			search,
@@ -668,7 +687,7 @@ func (h *AdminHandler) listTags() gin.HandlerFunc {
 			sortOrder,
 		)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, "Failed to list tags")
+			server.Fail(gc, server.ErrInternal, "Failed to list tags")
 			return
 		}
 
@@ -678,7 +697,7 @@ func (h *AdminHandler) listTags() gin.HandlerFunc {
 		// Calculate total pages
 		totalPages := (int(total) + pageSize - 1) / pageSize
 
-		server.OK(c, gin.H{
+		server.OK(gc, gin.H{
 			"items":       tagResponses,
 			"total":       total,
 			"page":        page,
@@ -688,23 +707,25 @@ func (h *AdminHandler) listTags() gin.HandlerFunc {
 	}
 }
 
-func (h *AdminHandler) getTag() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) getTag() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 
-		tag, err := h.tagService.Get(c.Request.Context(), id)
+		tag, err := h.tagService.Get(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "Tag not found")
+			server.Fail(gc, server.ErrNotFound, "Tag not found")
 			return
 		}
 
 		// B087-R2 Fix: Convert to TagResponse DTO
-		server.OK(c, ToTagResponse(tag))
+		server.OK(gc, ToTagResponse(tag))
 	}
 }
 
-func (h *AdminHandler) createTag() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) createTag() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		var req struct {
 			Name        string `json:"name" binding:"required"`
 			Slug        string `json:"slug"` // Optional: auto-generated from name when empty
@@ -713,8 +734,8 @@ func (h *AdminHandler) createTag() gin.HandlerFunc {
 			Status      string `json:"status"`
 		}
 
-		if err := c.ShouldBindJSON(&req); err != nil {
-			server.Fail(c, server.ErrBadRequest, "Invalid request")
+		if err := gc.ShouldBindJSON(&req); err != nil {
+			server.Fail(gc, server.ErrBadRequest, "Invalid request")
 			return
 		}
 
@@ -733,20 +754,21 @@ func (h *AdminHandler) createTag() gin.HandlerFunc {
 			tag.Slug = hashtag.GenerateTagSlug(req.Name)
 		}
 
-		createdTag, err := h.tagService.Create(c.Request.Context(), tag)
+		createdTag, err := h.tagService.Create(r.Context(), tag)
 		if err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		// B087-R2 Fix: Convert to TagResponse DTO
-		server.OK(c, ToTagResponse(createdTag))
+		server.OK(gc, ToTagResponse(createdTag))
 	}
 }
 
-func (h *AdminHandler) updateTag() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) updateTag() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 
 		var req struct {
 			Name        string `json:"name"`
@@ -756,8 +778,8 @@ func (h *AdminHandler) updateTag() gin.HandlerFunc {
 			Status      string `json:"status"`
 		}
 
-		if err := c.ShouldBindJSON(&req); err != nil {
-			server.Fail(c, server.ErrBadRequest, "Invalid request")
+		if err := gc.ShouldBindJSON(&req); err != nil {
+			server.Fail(gc, server.ErrBadRequest, "Invalid request")
 			return
 		}
 
@@ -773,71 +795,75 @@ func (h *AdminHandler) updateTag() gin.HandlerFunc {
 			updates.Slug = req.Slug
 		}
 
-		updatedTag, err := h.tagService.Update(c.Request.Context(), id, updates)
+		updatedTag, err := h.tagService.Update(r.Context(), id, updates)
 		if err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		// B087-R2 Fix: Convert to TagResponse DTO
-		server.OK(c, ToTagResponse(updatedTag))
+		server.OK(gc, ToTagResponse(updatedTag))
 	}
 }
 
-func (h *AdminHandler) deleteTag() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) deleteTag() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 
-		if err := h.tagService.Delete(c.Request.Context(), id); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := h.tagService.Delete(r.Context(), id); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
-		server.OK(c, nil)
+		server.OK(gc, nil)
 	}
 }
 
-func (h *AdminHandler) bulkTagOperation() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) bulkTagOperation() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		var req struct {
 			IDs    []string `json:"ids" binding:"required"`
 			Action string   `json:"action" binding:"required"`
 		}
 
-		if err := c.ShouldBindJSON(&req); err != nil {
-			server.Fail(c, server.ErrBadRequest, "Invalid request")
+		if err := gc.ShouldBindJSON(&req); err != nil {
+			server.Fail(gc, server.ErrBadRequest, "Invalid request")
 			return
 		}
 
 		if req.Action != "delete" {
-			server.Fail(c, server.ErrBadRequest, "Unsupported action")
+			server.Fail(gc, server.ErrBadRequest, "Unsupported action")
 			return
 		}
 
-		count, err := h.tagService.BulkDelete(c.Request.Context(), req.IDs)
+		count, err := h.tagService.BulkDelete(r.Context(), req.IDs)
 		if err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
-		server.OK(c, gin.H{
+		server.OK(gc, gin.H{
 			"success": count,
 			"failed":  len(req.IDs) - count,
 		})
 	}
 }
 
-func (h *AdminHandler) exportTags() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) exportTags() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		// TODO: Implement export functionality
-		server.OK(c, gin.H{"message": "Export functionality not implemented yet"})
+		server.OK(gc, gin.H{"message": "Export functionality not implemented yet"})
 	}
 }
 
-func (h *AdminHandler) importTags() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) importTags() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		// TODO: Implement import functionality
-		server.OK(c, gin.H{"message": "Import functionality not implemented yet"})
+		server.OK(gc, gin.H{"message": "Import functionality not implemented yet"})
 	}
 }
 
@@ -845,56 +871,59 @@ func (h *AdminHandler) importTags() gin.HandlerFunc {
 // Admin Channel Management Handlers (v3.2 - UUID only)
 // ================================
 
-func (h *AdminHandler) adminListChannels() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+func (h *AdminHandler) adminListChannels() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
 		// Normalize pagination parameters
 		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
-		items, total, err := h.channelUC.ListChannels(c.Request.Context(), page, pageSize)
+		items, total, err := h.channelUC.ListChannels(r.Context(), page, pageSize)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.Page(c, items, int64(total), page, pageSize)
+		server.Page(gc, items, int64(total), page, pageSize)
 	}
 }
 
-func (h *AdminHandler) adminGetChannelDetail() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminGetChannelDetail() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "channel id is required")
+			server.Fail(gc, server.ErrBadRequest, "channel id is required")
 			return
 		}
 
 		if !validation.IsValidUUID(id) {
-			server.Fail(c, server.ErrBadRequest, "invalid_uuid_format: Admin channel API requires UUID format")
+			server.Fail(gc, server.ErrBadRequest, "invalid_uuid_format: Admin channel API requires UUID format")
 			return
 		}
 
-		ch, err := h.channelUC.GetChannel(c.Request.Context(), id)
+		ch, err := h.channelUC.GetChannel(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "channel_not_found")
+			server.Fail(gc, server.ErrNotFound, "channel_not_found")
 			return
 		}
 
-		server.OK(c, ch)
+		server.OK(gc, ch)
 	}
 }
 
-func (h *AdminHandler) adminUpdateChannel() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminUpdateChannel() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "channel id is required")
+			server.Fail(gc, server.ErrBadRequest, "channel id is required")
 			return
 		}
 
 		if !validation.IsValidUUID(id) {
-			server.Fail(c, server.ErrBadRequest, "invalid_uuid_format: Admin channel API requires UUID format")
+			server.Fail(gc, server.ErrBadRequest, "invalid_uuid_format: Admin channel API requires UUID format")
 			return
 		}
 
@@ -910,14 +939,14 @@ func (h *AdminHandler) adminUpdateChannel() gin.HandlerFunc {
 			Tags        []string `json:"tags"`
 			CategoryID  *int64   `json:"category_id"`
 		}
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
-		existingCh, err := h.channelUC.GetChannel(c.Request.Context(), id)
+		existingCh, err := h.channelUC.GetChannel(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "channel_not_found")
+			server.Fail(gc, server.ErrNotFound, "channel_not_found")
 			return
 		}
 
@@ -978,36 +1007,37 @@ func (h *AdminHandler) adminUpdateChannel() gin.HandlerFunc {
 			chItem.CategoryID = input.CategoryID
 		}
 
-		updated, err := h.channelUC.UpdateChannel(c.Request.Context(), chItem, "", true)
+		updated, err := h.channelUC.UpdateChannel(r.Context(), chItem, "", true)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, updated)
+		server.OK(gc, updated)
 	}
 }
 
-func (h *AdminHandler) adminDeleteChannel() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminDeleteChannel() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "channel id is required")
+			server.Fail(gc, server.ErrBadRequest, "channel id is required")
 			return
 		}
 
 		if !validation.IsValidUUID(id) {
-			server.Fail(c, server.ErrBadRequest, "invalid_uuid_format: Admin channel API requires UUID format")
+			server.Fail(gc, server.ErrBadRequest, "invalid_uuid_format: Admin channel API requires UUID format")
 			return
 		}
 
-		err := h.channelUC.DeleteChannel(c.Request.Context(), id, "", true)
+		err := h.channelUC.DeleteChannel(r.Context(), id, "", true)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, nil)
+		server.OK(gc, nil)
 	}
 }
 
@@ -1015,56 +1045,59 @@ func (h *AdminHandler) adminDeleteChannel() gin.HandlerFunc {
 // Admin Playlist Management Handlers
 // ================================
 
-func (h *AdminHandler) adminListPlaylists() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+func (h *AdminHandler) adminListPlaylists() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
 		// Normalize pagination parameters
 		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
-		items, total, err := h.channelUC.ListPlaylists(c.Request.Context(), page, pageSize)
+		items, total, err := h.channelUC.ListPlaylists(r.Context(), page, pageSize)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.Page(c, items, int64(total), page, pageSize)
+		server.Page(gc, items, int64(total), page, pageSize)
 	}
 }
 
-func (h *AdminHandler) adminGetPlaylistDetail() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminGetPlaylistDetail() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "playlist id is required")
+			server.Fail(gc, server.ErrBadRequest, "playlist id is required")
 			return
 		}
 
 		if !validation.IsValidUUID(id) {
-			server.Fail(c, server.ErrBadRequest, "invalid_uuid_format: Admin playlist API requires UUID format")
+			server.Fail(gc, server.ErrBadRequest, "invalid_uuid_format: Admin playlist API requires UUID format")
 			return
 		}
 
-		playlist, err := h.channelUC.GetPlaylist(c.Request.Context(), id)
+		playlist, err := h.channelUC.GetPlaylist(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "playlist_not_found")
+			server.Fail(gc, server.ErrNotFound, "playlist_not_found")
 			return
 		}
 
-		server.OK(c, gin.H{"playlist": playlist})
+		server.OK(gc, gin.H{"playlist": playlist})
 	}
 }
 
-func (h *AdminHandler) adminCreatePlaylist() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) adminCreatePlaylist() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		var input struct {
 			Title       string `json:"title" binding:"required"`
 			Description string `json:"description"`
 			UserID      string `json:"user_id" binding:"required"`
 			IsPublic    *bool  `json:"is_public"`
 		}
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
@@ -1080,26 +1113,27 @@ func (h *AdminHandler) adminCreatePlaylist() gin.HandlerFunc {
 			IsPublic:    isPublic,
 		}
 
-		created, err := h.channelUC.CreatePlaylist(c.Request.Context(), playlist)
+		created, err := h.channelUC.CreatePlaylist(r.Context(), playlist)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, gin.H{"playlist": created})
+		server.OK(gc, gin.H{"playlist": created})
 	}
 }
 
-func (h *AdminHandler) adminUpdatePlaylist() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminUpdatePlaylist() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "playlist id is required")
+			server.Fail(gc, server.ErrBadRequest, "playlist id is required")
 			return
 		}
 
 		if !validation.IsValidUUID(id) {
-			server.Fail(c, server.ErrBadRequest, "invalid_uuid_format: Admin playlist API requires UUID format")
+			server.Fail(gc, server.ErrBadRequest, "invalid_uuid_format: Admin playlist API requires UUID format")
 			return
 		}
 
@@ -1108,14 +1142,14 @@ func (h *AdminHandler) adminUpdatePlaylist() gin.HandlerFunc {
 			Description string `json:"description"`
 			IsPublic    *bool  `json:"is_public"`
 		}
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
-		existingPlaylist, err := h.channelUC.GetPlaylist(c.Request.Context(), id)
+		existingPlaylist, err := h.channelUC.GetPlaylist(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "playlist_not_found")
+			server.Fail(gc, server.ErrNotFound, "playlist_not_found")
 			return
 		}
 
@@ -1132,36 +1166,37 @@ func (h *AdminHandler) adminUpdatePlaylist() gin.HandlerFunc {
 			playlistItem.IsPublic = *input.IsPublic
 		}
 
-		updated, err := h.channelUC.UpdatePlaylist(c.Request.Context(), playlistItem, "", true)
+		updated, err := h.channelUC.UpdatePlaylist(r.Context(), playlistItem, "", true)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, gin.H{"playlist": updated})
+		server.OK(gc, gin.H{"playlist": updated})
 	}
 }
 
-func (h *AdminHandler) adminDeletePlaylist() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminDeletePlaylist() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "playlist id is required")
+			server.Fail(gc, server.ErrBadRequest, "playlist id is required")
 			return
 		}
 
 		if !validation.IsValidUUID(id) {
-			server.Fail(c, server.ErrBadRequest, "invalid_uuid_format: Admin playlist API requires UUID format")
+			server.Fail(gc, server.ErrBadRequest, "invalid_uuid_format: Admin playlist API requires UUID format")
 			return
 		}
 
-		err := h.channelUC.DeletePlaylist(c.Request.Context(), id, "", true)
+		err := h.channelUC.DeletePlaylist(r.Context(), id, "", true)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, nil)
+		server.OK(gc, nil)
 	}
 }
 
@@ -1169,14 +1204,15 @@ func (h *AdminHandler) adminDeletePlaylist() gin.HandlerFunc {
 // Admin User Management Handlers
 // ================================
 
-func (h *AdminHandler) adminListUsers() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+func (h *AdminHandler) adminListUsers() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
 		// Normalize pagination parameters
 		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
-		keyword := c.Query("keyword")
+		keyword := gc.Query("keyword")
 
 		opts := &userdto.UserQueryOption{
 			QueryOption: repo.QueryOption{
@@ -1187,12 +1223,12 @@ func (h *AdminHandler) adminListUsers() gin.HandlerFunc {
 		}
 
 		// Filter by role if specified
-		if role := c.Query("role"); role != "" {
+		if role := gc.Query("role"); role != "" {
 			opts.Role = role
 		}
 
 		// Filter by status if specified
-		if statusStr := c.Query("status"); statusStr != "" {
+		if statusStr := gc.Query("status"); statusStr != "" {
 			statusMap := map[string]int32{
 				"pending":   1,
 				"active":    2,
@@ -1205,13 +1241,13 @@ func (h *AdminHandler) adminListUsers() gin.HandlerFunc {
 			}
 		}
 
-		users, total, err := h.userUC.ListUsers(c.Request.Context(), opts)
+		users, total, err := h.userUC.ListUsers(r.Context(), opts)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, &pb.ListUsersResponse{
+		server.OK(gc, &pb.ListUsersResponse{
 			Items:    users,
 			Total:    total,
 			Page:     int32(page),
@@ -1220,8 +1256,9 @@ func (h *AdminHandler) adminListUsers() gin.HandlerFunc {
 	}
 }
 
-func (h *AdminHandler) adminCreateUser() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) adminCreateUser() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		var input struct {
 			Username string `json:"username" binding:"required"`
 			Email    string `json:"email" binding:"required,email"`
@@ -1229,14 +1266,14 @@ func (h *AdminHandler) adminCreateUser() gin.HandlerFunc {
 			Nickname string `json:"nickname"`
 			Role     string `json:"role"`
 		}
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		// If password is provided, validate minimum length
 		if input.Password != "" && len(input.Password) < 6 {
-			server.Fail(c, server.ErrBadRequest, "password must be at least 6 characters")
+			server.Fail(gc, server.ErrBadRequest, "password must be at least 6 characters")
 			return
 		}
 
@@ -1246,7 +1283,7 @@ func (h *AdminHandler) adminCreateUser() gin.HandlerFunc {
 		if input.Password != "" {
 			hashedPassword, err = h.userUC.HashPassword(input.Password)
 			if err != nil {
-				server.Fail(c, server.ErrInternal, "failed to hash password")
+				server.Fail(gc, server.ErrInternal, "failed to hash password")
 				return
 			}
 		} else {
@@ -1254,7 +1291,7 @@ func (h *AdminHandler) adminCreateUser() gin.HandlerFunc {
 			randomPwd := generateRandomPassword(12)
 			hashedPassword, err = h.userUC.HashPassword(randomPwd)
 			if err != nil {
-				server.Fail(c, server.ErrInternal, "failed to hash password")
+				server.Fail(gc, server.ErrInternal, "failed to hash password")
 				return
 			}
 		}
@@ -1265,9 +1302,9 @@ func (h *AdminHandler) adminCreateUser() gin.HandlerFunc {
 			Nickname: input.Nickname,
 		}
 
-		created, err := h.userUC.CreateUser(c.Request.Context(), user, hashedPassword)
+		created, err := h.userUC.CreateUser(r.Context(), user, hashedPassword)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
@@ -1277,45 +1314,47 @@ func (h *AdminHandler) adminCreateUser() gin.HandlerFunc {
 			role = "user"
 		}
 		if role != "user" {
-			if err := h.userUC.SetUserRole(c.Request.Context(), created.Id, role); err != nil {
-				server.Fail(c, server.ErrInternal, "failed to set role: "+err.Error())
+			if err := h.userUC.SetUserRole(r.Context(), created.Id, role); err != nil {
+				server.Fail(gc, server.ErrInternal, "failed to set role: "+err.Error())
 				return
 			}
 		}
 
-		server.Created(c, &pb.CreateUserResponse{User: created})
+		server.Created(gc, &pb.CreateUserResponse{User: created})
 	}
 }
 
-func (h *AdminHandler) adminGetUser() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminGetUser() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "user id is required")
+			server.Fail(gc, server.ErrBadRequest, "user id is required")
 			return
 		}
 
-		user, err := h.userUC.GetUser(c.Request.Context(), id)
+		user, err := h.userUC.GetUser(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "user not found")
+			server.Fail(gc, server.ErrNotFound, "user not found")
 			return
 		}
 
-		server.OK(c, &pb.GetUserResponse{User: user})
+		server.OK(gc, &pb.GetUserResponse{User: user})
 	}
 }
 
-func (h *AdminHandler) adminUpdateUser() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminUpdateUser() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "user id is required")
+			server.Fail(gc, server.ErrBadRequest, "user id is required")
 			return
 		}
 
-		existing, err := h.userUC.GetUser(c.Request.Context(), id)
+		existing, err := h.userUC.GetUser(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "user not found")
+			server.Fail(gc, server.ErrNotFound, "user not found")
 			return
 		}
 
@@ -1329,8 +1368,8 @@ func (h *AdminHandler) adminUpdateUser() gin.HandlerFunc {
 			Status   string `json:"status"`
 		}
 
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
@@ -1349,8 +1388,8 @@ func (h *AdminHandler) adminUpdateUser() gin.HandlerFunc {
 
 		// Update role if specified
 		if input.Role != "" {
-			if err := h.userUC.SetUserRole(c.Request.Context(), id, input.Role); err != nil {
-				server.Fail(c, server.ErrInternal, "failed to update role: "+err.Error())
+			if err := h.userUC.SetUserRole(r.Context(), id, input.Role); err != nil {
+				server.Fail(gc, server.ErrInternal, "failed to update role: "+err.Error())
 				return
 			}
 		}
@@ -1365,45 +1404,47 @@ func (h *AdminHandler) adminUpdateUser() gin.HandlerFunc {
 				"rejected":  5,
 			}
 			if statusCode, ok := statusMap[input.Status]; ok {
-				if err := h.userUC.UpdateUserStatus(c.Request.Context(), id, int8(statusCode)); err != nil {
-					server.Fail(c, server.ErrInternal, "failed to update status: "+err.Error())
+				if err := h.userUC.UpdateUserStatus(r.Context(), id, int8(statusCode)); err != nil {
+					server.Fail(gc, server.ErrInternal, "failed to update status: "+err.Error())
 					return
 				}
 			}
 		}
 
-		updated, err := h.userUC.UpdateUser(c.Request.Context(), existing)
+		updated, err := h.userUC.UpdateUser(r.Context(), existing)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, &pb.UpdateUserResponse{User: updated})
+		server.OK(gc, &pb.UpdateUserResponse{User: updated})
 	}
 }
 
-func (h *AdminHandler) adminDeleteUser() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminDeleteUser() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "user id is required")
+			server.Fail(gc, server.ErrBadRequest, "user id is required")
 			return
 		}
 
-		if err := h.userUC.DeleteUser(c.Request.Context(), id); err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+		if err := h.userUC.DeleteUser(r.Context(), id); err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, &pb.DeleteUserResponse{Empty: &emptypb.Empty{}})
+		server.OK(gc, &pb.DeleteUserResponse{Empty: &emptypb.Empty{}})
 	}
 }
 
-func (h *AdminHandler) adminUpdateUserStatus() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminUpdateUserStatus() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "user id is required")
+			server.Fail(gc, server.ErrBadRequest, "user id is required")
 			return
 		}
 
@@ -1411,17 +1452,17 @@ func (h *AdminHandler) adminUpdateUserStatus() gin.HandlerFunc {
 			Status int32 `json:"status" binding:"required"`
 		}
 
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
-		if err := h.userUC.UpdateUserStatus(c.Request.Context(), id, int8(input.Status)); err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+		if err := h.userUC.UpdateUserStatus(r.Context(), id, int8(input.Status)); err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, &emptypb.Empty{})
+		server.OK(gc, &emptypb.Empty{})
 	}
 }
 
@@ -1501,44 +1542,46 @@ func generateRandomPassword(length int) string {
 // sseTranscodingEvents handles GET /admin/medias/transcoding/events
 // SSE endpoint for real-time transcoding progress updates.
 // Requires admin authentication (JWT via query parameter ?token=<jwt>).
-func (h *AdminHandler) sseTranscodingEvents() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) sseTranscodingEvents() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		if h.mediaService != nil {
-			h.mediaService.SSEHandler(c.Writer, c.Request)
+			h.mediaService.SSEHandler(gc.Writer, gc.Request)
 			return
 		}
-		c.Status(404)
+		gc.Status(404)
 	}
 }
 
 // ==================== Media Management Handlers ====================
 
 // adminListMedias handles GET /admin/medias
-func (h *AdminHandler) adminListMedias() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+func (h *AdminHandler) adminListMedias() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
 		page, pageSize = repo.NormalizePagination(page, pageSize)
 
 		opts := &mediadto.MediaQueryOption{
 			QueryOption: repo.QueryOption{
 				Page:     int32(page),
 				PageSize: int32(pageSize),
-				Keyword:  c.Query("keyword"),
+				Keyword:  gc.Query("keyword"),
 			},
 			AdminMode: true, // Admin sees all medias regardless of state
 		}
 
-		if state := c.Query("state"); state != "" {
+		if state := gc.Query("state"); state != "" {
 			opts.State = state
 		}
-		if mediaType := c.Query("type"); mediaType != "" {
+		if mediaType := gc.Query("type"); mediaType != "" {
 			opts.MediaType = mediaType
 		}
 
-		items, total, err := h.mediaUC.ListMedias(c.Request.Context(), opts)
+		items, total, err := h.mediaUC.ListMedias(r.Context(), opts)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
@@ -1547,7 +1590,7 @@ func (h *AdminHandler) adminListMedias() gin.HandlerFunc {
 			totalPages = (total + int32(pageSize) - 1) / int32(pageSize)
 		}
 
-		server.ProtoOK(c, &mediapb.ListMediasResponse{
+		server.ProtoOK(gc, &mediapb.ListMediasResponse{
 			Total:      total,
 			Items:      items,
 			Page:       int32(page),
@@ -1558,38 +1601,40 @@ func (h *AdminHandler) adminListMedias() gin.HandlerFunc {
 }
 
 // adminGetMedia handles GET /admin/medias/:id
-func (h *AdminHandler) adminGetMedia() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminGetMedia() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "media id is required")
+			server.Fail(gc, server.ErrBadRequest, "media id is required")
 			return
 		}
 
-		media, err := h.mediaUC.GetByID(c.Request.Context(), id)
+		media, err := h.mediaUC.GetByID(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "media_not_found")
+			server.Fail(gc, server.ErrNotFound, "media_not_found")
 			return
 		}
 
-		server.ProtoOK(c, media)
+		server.ProtoOK(gc, media)
 	}
 }
 
 // adminUpdateMedia handles PUT /admin/medias/:id
 // Supports partial updates: only fields present in the request body are updated.
-func (h *AdminHandler) adminUpdateMedia() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminUpdateMedia() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "media id is required")
+			server.Fail(gc, server.ErrBadRequest, "media id is required")
 			return
 		}
 
 		// Fetch existing media first for partial update
-		existing, err := h.mediaUC.GetByID(c.Request.Context(), id)
+		existing, err := h.mediaUC.GetByID(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "media_not_found")
+			server.Fail(gc, server.ErrNotFound, "media_not_found")
 			return
 		}
 
@@ -1606,8 +1651,8 @@ func (h *AdminHandler) adminUpdateMedia() gin.HandlerFunc {
 			AllowDownload  *bool    `json:"allow_download"`
 			Listable       *bool    `json:"listable"`
 		}
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
@@ -1665,50 +1710,52 @@ func (h *AdminHandler) adminUpdateMedia() gin.HandlerFunc {
 			}
 		}
 
-		updated, err := h.mediaUC.UpdateMedia(c.Request.Context(), existing)
+		updated, err := h.mediaUC.UpdateMedia(r.Context(), existing)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.ProtoOK(c, updated)
+		server.ProtoOK(gc, updated)
 	}
 }
 
 // adminDeleteMedia handles DELETE /admin/medias/:id
-func (h *AdminHandler) adminDeleteMedia() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminDeleteMedia() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "media id is required")
+			server.Fail(gc, server.ErrBadRequest, "media id is required")
 			return
 		}
 
-		if err := h.mediaUC.DeleteMedia(c.Request.Context(), id); err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+		if err := h.mediaUC.DeleteMedia(r.Context(), id); err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, &emptypb.Empty{})
+		server.OK(gc, &emptypb.Empty{})
 	}
 }
 
 // adminGetMediaStats handles GET /admin/medias/:id/stats
-func (h *AdminHandler) adminGetMediaStats() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminGetMediaStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "media id is required")
+			server.Fail(gc, server.ErrBadRequest, "media id is required")
 			return
 		}
 
-		media, err := h.mediaUC.GetByID(c.Request.Context(), id)
+		media, err := h.mediaUC.GetByID(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "media_not_found")
+			server.Fail(gc, server.ErrNotFound, "media_not_found")
 			return
 		}
 
-		server.OK(c, gin.H{
+		server.OK(gc, gin.H{
 			"id":              media.Id,
 			"view_count":      media.ViewCount,
 			"like_count":      media.LikeCount,
@@ -1721,30 +1768,32 @@ func (h *AdminHandler) adminGetMediaStats() gin.HandlerFunc {
 }
 
 // adminGetMediaVariants handles GET /admin/medias/:id/variants
-func (h *AdminHandler) adminGetMediaVariants() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminGetMediaVariants() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "media id is required")
+			server.Fail(gc, server.ErrBadRequest, "media id is required")
 			return
 		}
 
-		summary, err := h.mediaUC.GetMediaVariantsByUUID(c.Request.Context(), id)
+		summary, err := h.mediaUC.GetMediaVariantsByUUID(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, summary)
+		server.OK(gc, summary)
 	}
 }
 
 // adminUpdateMediaState handles PUT /admin/medias/:id/state
-func (h *AdminHandler) adminUpdateMediaState() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminUpdateMediaState() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "media id is required")
+			server.Fail(gc, server.ErrBadRequest, "media id is required")
 			return
 		}
 
@@ -1752,24 +1801,24 @@ func (h *AdminHandler) adminUpdateMediaState() gin.HandlerFunc {
 			State   string `json:"state" binding:"required"`
 			Comment string `json:"comment"`
 		}
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
-		if err := h.mediaUC.UpdateMediaState(c.Request.Context(), id, input.State); err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+		if err := h.mediaUC.UpdateMediaState(r.Context(), id, input.State); err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
 		// Fetch updated media to return current state
-		updated, err := h.mediaUC.GetByID(c.Request.Context(), id)
+		updated, err := h.mediaUC.GetByID(r.Context(), id)
 		if err != nil {
-			server.OK(c, gin.H{"id": id, "state": input.State})
+			server.OK(gc, gin.H{"id": id, "state": input.State})
 			return
 		}
 
-		server.OK(c, gin.H{
+		server.OK(gc, gin.H{
 			"id":          updated.Id,
 			"state":       updated.State,
 			"update_time": updated.UpdateTime,
@@ -1778,21 +1827,22 @@ func (h *AdminHandler) adminUpdateMediaState() gin.HandlerFunc {
 }
 
 // adminGetMediaTasks handles GET /admin/medias/:id/tasks
-func (h *AdminHandler) adminGetMediaTasks() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminGetMediaTasks() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "media id is required")
+			server.Fail(gc, server.ErrBadRequest, "media id is required")
 			return
 		}
 
-		tasks, err := h.mediaUC.ListEncodingTasks(c.Request.Context(), id)
+		tasks, err := h.mediaUC.ListEncodingTasks(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, gin.H{
+		server.OK(gc, gin.H{
 			"items": tasks,
 			"total": len(tasks),
 		})
@@ -1800,21 +1850,22 @@ func (h *AdminHandler) adminGetMediaTasks() gin.HandlerFunc {
 }
 
 // adminRetryMediaTask handles POST /admin/medias/:id/tasks/:taskId/retry
-func (h *AdminHandler) adminRetryMediaTask() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		taskID := c.Param("taskId")
+func (h *AdminHandler) adminRetryMediaTask() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		taskID := gc.Param("taskId")
 		if taskID == "" {
-			server.Fail(c, server.ErrBadRequest, "task id is required")
+			server.Fail(gc, server.ErrBadRequest, "task id is required")
 			return
 		}
 
-		_, err := h.mediaUC.RetryTask(c.Request.Context(), taskID)
+		_, err := h.mediaUC.RetryTask(r.Context(), taskID)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, gin.H{"message": "retry initiated"})
+		server.OK(gc, gin.H{"message": "retry initiated"})
 	}
 }
 
@@ -1822,54 +1873,57 @@ func (h *AdminHandler) adminRetryMediaTask() gin.HandlerFunc {
 // Admin Article Management Handlers
 // ================================
 
-func (h *AdminHandler) adminListArticles() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+func (h *AdminHandler) adminListArticles() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
 		// Normalize pagination parameters
 		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 		filters := make(map[string]interface{})
-		if v := c.Query("status"); v != "" {
+		if v := gc.Query("status"); v != "" {
 			filters["status"] = v
 		}
-		if v := c.Query("category_id"); v != "" {
+		if v := gc.Query("category_id"); v != "" {
 			filters["category_id"] = v
 		}
-		if v := c.Query("keyword"); v != "" {
+		if v := gc.Query("keyword"); v != "" {
 			filters["keyword"] = v
 		}
 
-		articles, total, err := h.articleUC.List(c.Request.Context(), page, pageSize, filters)
+		articles, total, err := h.articleUC.List(r.Context(), page, pageSize, filters)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.Page(c, articles, int64(total), page, pageSize)
+		server.Page(gc, articles, int64(total), page, pageSize)
 	}
 }
 
-func (h *AdminHandler) adminGetArticle() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminGetArticle() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "article id is required")
+			server.Fail(gc, server.ErrBadRequest, "article id is required")
 			return
 		}
 
-		article, err := h.articleUC.Get(c.Request.Context(), id)
+		article, err := h.articleUC.Get(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "article not found")
+			server.Fail(gc, server.ErrNotFound, "article not found")
 			return
 		}
 
-		server.OK(c, article)
+		server.OK(gc, article)
 	}
 }
 
-func (h *AdminHandler) adminCreateArticle() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) adminCreateArticle() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		var input struct {
 			Title      string   `json:"title" binding:"required"`
 			Slug       string   `json:"slug"`
@@ -1883,13 +1937,13 @@ func (h *AdminHandler) adminCreateArticle() gin.HandlerFunc {
 			Featured   bool     `json:"featured"`
 		}
 
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		userID := ""
-		if claims, exists := c.Get("claims"); exists {
+		if claims, exists := gc.Get("claims"); exists {
 			if cl, ok := claims.(*auth.Claims); ok {
 				userID = cl.GetUserID()
 			}
@@ -1919,21 +1973,22 @@ func (h *AdminHandler) adminCreateArticle() gin.HandlerFunc {
 			Featured:   input.Featured,
 		}
 
-		created, err := h.articleUC.Create(c.Request.Context(), article)
+		created, err := h.articleUC.Create(r.Context(), article)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, created)
+		server.OK(gc, created)
 	}
 }
 
-func (h *AdminHandler) adminUpdateArticle() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminUpdateArticle() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "article id is required")
+			server.Fail(gc, server.ErrBadRequest, "article id is required")
 			return
 		}
 
@@ -1950,14 +2005,14 @@ func (h *AdminHandler) adminUpdateArticle() gin.HandlerFunc {
 			Featured   bool     `json:"featured"`
 		}
 
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
-		existing, err := h.articleUC.Get(c.Request.Context(), id)
+		existing, err := h.articleUC.Get(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "article not found")
+			server.Fail(gc, server.ErrNotFound, "article not found")
 			return
 		}
 
@@ -1988,38 +2043,40 @@ func (h *AdminHandler) adminUpdateArticle() gin.HandlerFunc {
 		}
 		existing.Featured = input.Featured
 
-		updated, err := h.articleUC.Update(c.Request.Context(), existing)
+		updated, err := h.articleUC.Update(r.Context(), existing)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, updated)
+		server.OK(gc, updated)
 	}
 }
 
-func (h *AdminHandler) adminDeleteArticle() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminDeleteArticle() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "article id is required")
+			server.Fail(gc, server.ErrBadRequest, "article id is required")
 			return
 		}
 
-		if err := h.articleUC.Delete(c.Request.Context(), id); err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+		if err := h.articleUC.Delete(r.Context(), id); err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, nil)
+		server.OK(gc, nil)
 	}
 }
 
-func (h *AdminHandler) adminUpdateArticleState() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminUpdateArticleState() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "article id is required")
+			server.Fail(gc, server.ErrBadRequest, "article id is required")
 			return
 		}
 
@@ -2027,17 +2084,17 @@ func (h *AdminHandler) adminUpdateArticleState() gin.HandlerFunc {
 			State string `json:"state" binding:"required"`
 		}
 
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
-		if err := h.articleUC.UpdateState(c.Request.Context(), id, input.State); err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+		if err := h.articleUC.UpdateState(r.Context(), id, input.State); err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, nil)
+		server.OK(gc, nil)
 	}
 }
 
@@ -2045,16 +2102,17 @@ func (h *AdminHandler) adminUpdateArticleState() gin.HandlerFunc {
 // Admin Category Management Handlers
 // ================================
 
-func (h *AdminHandler) adminListCategories() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		categories, err := h.categoryUC.ListCategories(c.Request.Context())
+func (h *AdminHandler) adminListCategories() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		categories, err := h.categoryUC.ListCategories(r.Context())
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
 		// Normalize pagination parameters
 		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
@@ -2068,39 +2126,41 @@ func (h *AdminHandler) adminListCategories() gin.HandlerFunc {
 			end = total
 		}
 
-		server.Page(c, categories[start:end], int64(total), page, pageSize)
+		server.Page(gc, categories[start:end], int64(total), page, pageSize)
 	}
 }
 
-func (h *AdminHandler) adminGetCategory() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		idStr := c.Param("id")
+func (h *AdminHandler) adminGetCategory() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		idStr := gc.Param("id")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
-			server.Fail(c, server.ErrBadRequest, "invalid category id")
+			server.Fail(gc, server.ErrBadRequest, "invalid category id")
 			return
 		}
 
-		cat, err := h.categoryUC.GetCategory(c.Request.Context(), id)
+		cat, err := h.categoryUC.GetCategory(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "category not found")
+			server.Fail(gc, server.ErrNotFound, "category not found")
 			return
 		}
 
-		server.OK(c, cat)
+		server.OK(gc, cat)
 	}
 }
 
-func (h *AdminHandler) adminCreateCategory() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminHandler) adminCreateCategory() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		var input struct {
 			Name        string `json:"name" binding:"required"`
 			Slug        string `json:"slug" binding:"required"`
 			Description string `json:"description"`
 		}
 
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
@@ -2110,89 +2170,93 @@ func (h *AdminHandler) adminCreateCategory() gin.HandlerFunc {
 			Description: input.Description,
 		}
 
-		created, err := h.categoryUC.CreateCategory(c.Request.Context(), cat)
+		created, err := h.categoryUC.CreateCategory(r.Context(), cat)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, created)
+		server.OK(gc, created)
 	}
 }
 
-func (h *AdminHandler) adminUpdateCategory() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		idStr := c.Param("id")
+func (h *AdminHandler) adminUpdateCategory() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		idStr := gc.Param("id")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
-			server.Fail(c, server.ErrBadRequest, "invalid category id")
+			server.Fail(gc, server.ErrBadRequest, "invalid category id")
 			return
 		}
 
 		var input contentbiz.UpdateCategoryInput
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
-		updated, err := h.categoryUC.UpdateCategoryPartial(c.Request.Context(), id, &input)
+		updated, err := h.categoryUC.UpdateCategoryPartial(r.Context(), id, &input)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, updated)
+		server.OK(gc, updated)
 	}
 }
 
-func (h *AdminHandler) adminPatchCategory() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		idStr := c.Param("id")
+func (h *AdminHandler) adminPatchCategory() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		idStr := gc.Param("id")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
-			server.Fail(c, server.ErrBadRequest, "invalid category id")
+			server.Fail(gc, server.ErrBadRequest, "invalid category id")
 			return
 		}
 
 		var input contentbiz.UpdateCategoryInput
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
-		updated, err := h.categoryUC.UpdateCategoryPartial(c.Request.Context(), id, &input)
+		updated, err := h.categoryUC.UpdateCategoryPartial(r.Context(), id, &input)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, updated)
+		server.OK(gc, updated)
 	}
 }
 
-func (h *AdminHandler) adminDeleteCategory() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		idStr := c.Param("id")
+func (h *AdminHandler) adminDeleteCategory() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		idStr := gc.Param("id")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
-			server.Fail(c, server.ErrBadRequest, "invalid category id")
+			server.Fail(gc, server.ErrBadRequest, "invalid category id")
 			return
 		}
 
-		if err := h.categoryUC.DeleteCategory(c.Request.Context(), id); err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+		if err := h.categoryUC.DeleteCategory(r.Context(), id); err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, nil)
+		server.OK(gc, nil)
 	}
 }
 
-func (h *AdminHandler) adminUpdateUserRole() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminHandler) adminUpdateUserRole() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "user id is required")
+			server.Fail(gc, server.ErrBadRequest, "user id is required")
 			return
 		}
 
@@ -2200,22 +2264,22 @@ func (h *AdminHandler) adminUpdateUserRole() gin.HandlerFunc {
 			Role string `json:"role" binding:"required"`
 		}
 
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		validRoles := map[string]bool{"user": true, "admin": true, "editor": true}
 		if !validRoles[input.Role] {
-			server.Fail(c, server.ErrBadRequest, "invalid role, must be one of: user, admin, editor")
+			server.Fail(gc, server.ErrBadRequest, "invalid role, must be one of: user, admin, editor")
 			return
 		}
 
-		if err := h.userUC.SetUserRole(c.Request.Context(), id, input.Role); err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+		if err := h.userUC.SetUserRole(r.Context(), id, input.Role); err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, &emptypb.Empty{})
+		server.OK(gc, &emptypb.Empty{})
 	}
 }

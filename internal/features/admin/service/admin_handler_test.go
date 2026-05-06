@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 )
 
 func TestGetSystemInfo(t *testing.T) {
@@ -20,7 +21,8 @@ func TestGetSystemInfo(t *testing.T) {
 	}
 
 	r := gin.New()
-	r.GET("/api/v1/admin/settings/info", handler.getSystemInfo())
+	adapter := ginadapter.NewStdRouterAdapter(&r.RouterGroup)
+	adapter.GET("/api/v1/admin/settings/info", handler.getSystemInfo())
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/admin/settings/info", nil)
 	w := httptest.NewRecorder()
@@ -71,7 +73,8 @@ func TestGetSystemInfo_PostgresDialect(t *testing.T) {
 	}
 
 	r := gin.New()
-	r.GET("/info", handler.getSystemInfo())
+	adapter := ginadapter.NewStdRouterAdapter(&r.RouterGroup)
+	adapter.GET("/info", handler.getSystemInfo())
 
 	req := httptest.NewRequest(http.MethodGet, "/info", nil)
 	w := httptest.NewRecorder()

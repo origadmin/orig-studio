@@ -6,12 +6,13 @@
 package service
 
 import (
+	"net/http"
 	"context"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
-	"origadmin/application/origcms/internal/handler"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/setting"
@@ -39,7 +40,7 @@ func NewSystemHandler(
 }
 
 func (h *SystemHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	r := handler.NewGinRouterAdapter(rg)
+	r := ginadapter.NewStdRouterAdapter(rg)
 	system := r.Group("/system")
 	{
 		h.registerStats(system)
@@ -48,97 +49,101 @@ func (h *SystemHandler) RegisterRoutes(rg *gin.RouterGroup) {
 
 	config := r.Group("/config")
 	{
-		config.GET("", server.GinHandlerToHTTP(h.getPublicConfig()))
+		config.GET("", h.getPublicConfig())
 	}
 
 	portal := r.Group("/portal")
 	{
-		portal.GET("/config", server.GinHandlerToHTTP(h.getPortalConfig()))
+		portal.GET("/config", h.getPortalConfig())
 	}
 }
 
-func (h *SystemHandler) registerStats(g handler.Router) {
+func (h *SystemHandler) registerStats(g *ginadapter.StdRouterAdapter) {
 	stats := g.Group("/stats")
 	{
-		stats.GET("/dashboard", server.GinHandlerToHTTP(h.getDashboardStats()))
-		stats.GET("/media", server.GinHandlerToHTTP(h.getMediaStats()))
-		stats.GET("/traffic", server.GinHandlerToHTTP(h.getTrafficStats()))
-		stats.GET("/users", server.GinHandlerToHTTP(h.getUserStats()))
+		stats.GET("/dashboard", h.getDashboardStats())
+		stats.GET("/media", h.getMediaStats())
+		stats.GET("/traffic", h.getTrafficStats())
+		stats.GET("/users", h.getUserStats())
 	}
 }
 
-func (h *SystemHandler) registerSettings(g handler.Router) {
+func (h *SystemHandler) registerSettings(g *ginadapter.StdRouterAdapter) {
 	settings := g.Group("/settings")
 	{
-		settings.GET("", server.GinHandlerToHTTP(h.getSettings()))
-		settings.PUT("", server.GinHandlerToHTTP(h.updateSettings()))
-		settings.GET("/:key", server.GinHandlerToHTTP(h.getSettingByKey()))
-		settings.POST("/:key/reset", server.GinHandlerToHTTP(h.resetSetting()))
+		settings.GET("", h.getSettings())
+		settings.PUT("", h.updateSettings())
+		settings.GET("/:key", h.getSettingByKey())
+		settings.POST("/:key/reset", h.resetSetting())
 	}
 }
 
 // ==================== Stats Handlers ====================
 
-func (h *SystemHandler) getDashboardStats() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *SystemHandler) getDashboardStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		if h.statsRepo == nil {
-			server.Fail(c, server.ErrInternal, "stats service not available")
+			server.Fail(gc, server.ErrInternal, "stats service not available")
 			return
 		}
 
-		stats, err := h.statsRepo.GetDashboardStats(c.Request.Context())
+		stats, err := h.statsRepo.GetDashboardStats(r.Context())
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, stats)
+		server.OK(gc, stats)
 	}
 }
 
-func (h *SystemHandler) getMediaStats() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *SystemHandler) getMediaStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		if h.statsRepo == nil {
-			server.Fail(c, server.ErrInternal, "stats service not available")
+			server.Fail(gc, server.ErrInternal, "stats service not available")
 			return
 		}
 
-		stats, err := h.statsRepo.GetMediaStats(c.Request.Context())
+		stats, err := h.statsRepo.GetMediaStats(r.Context())
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, stats)
+		server.OK(gc, stats)
 	}
 }
 
-func (h *SystemHandler) getUserStats() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *SystemHandler) getUserStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		if h.statsRepo == nil {
-			server.Fail(c, server.ErrInternal, "stats service not available")
+			server.Fail(gc, server.ErrInternal, "stats service not available")
 			return
 		}
 
-		stats, err := h.statsRepo.GetUserStats(c.Request.Context())
+		stats, err := h.statsRepo.GetUserStats(r.Context())
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, stats)
+		server.OK(gc, stats)
 	}
 }
 
-func (h *SystemHandler) getTrafficStats() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+func (h *SystemHandler) getTrafficStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
 
 		_ = page
 		_ = pageSize
 
-		server.OK(c, gin.H{
+		server.OK(gc, gin.H{
 			"items":     []interface{}{},
 			"total":     0,
 			"page":      page,
@@ -149,16 +154,17 @@ func (h *SystemHandler) getTrafficStats() gin.HandlerFunc {
 
 // ==================== Settings Handlers ====================
 
-func (h *SystemHandler) getSettings() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *SystemHandler) getSettings() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		if h.settingUC == nil {
-			server.Fail(c, server.ErrInternal, "settings service not available")
+			server.Fail(gc, server.ErrInternal, "settings service not available")
 			return
 		}
 
-		items, err := h.settingUC.ListAll(c.Request.Context())
+		items, err := h.settingUC.ListAll(r.Context())
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
@@ -169,14 +175,15 @@ func (h *SystemHandler) getSettings() gin.HandlerFunc {
 			grouped[cat] = append(grouped[cat], masked)
 		}
 
-		server.OK(c, grouped)
+		server.OK(gc, grouped)
 	}
 }
 
-func (h *SystemHandler) updateSettings() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *SystemHandler) updateSettings() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		if h.settingUC == nil {
-			server.Fail(c, server.ErrInternal, "settings service not available")
+			server.Fail(gc, server.ErrInternal, "settings service not available")
 			return
 		}
 
@@ -187,28 +194,28 @@ func (h *SystemHandler) updateSettings() gin.HandlerFunc {
 			} `json:"settings" binding:"required"`
 		}
 
-		if err := c.ShouldBindJSON(&req); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&req); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		var updated []*entity.Setting
 		for _, item := range req.Settings {
-			existing, err := h.settingUC.GetByKey(c.Request.Context(), item.Key)
+			existing, err := h.settingUC.GetByKey(r.Context(), item.Key)
 			if err != nil {
-				server.Fail(c, server.ErrNotFound, "setting not found: "+item.Key)
+				server.Fail(gc, server.ErrNotFound, "setting not found: "+item.Key)
 				return
 			}
 
 			if err := ValidateSettingValue(item.Value, existing.Type); err != nil {
-				server.Fail(c, server.ErrBadRequest, "invalid value for "+item.Key+": "+err.Error())
+				server.Fail(gc, server.ErrBadRequest, "invalid value for "+item.Key+": "+err.Error())
 				return
 			}
 
 			if item.Key == "homepage_layout" {
 				validLayouts := map[string]bool{"auto": true, "video": true, "article": true, "mixed": true, "welcome": true, "doc": true}
 				if !validLayouts[item.Value] {
-					server.Fail(c, server.ErrBadRequest, "invalid value for homepage_layout: must be one of: auto, video, article, mixed, doc, welcome")
+					server.Fail(gc, server.ErrBadRequest, "invalid value for homepage_layout: must be one of: auto, video, article, mixed, doc, welcome")
 					return
 				}
 			}
@@ -223,77 +230,80 @@ func (h *SystemHandler) updateSettings() gin.HandlerFunc {
 				FallbackValue: existing.FallbackValue,
 				IsBuiltin:     existing.IsBuiltin,
 			}
-			result, err := h.settingUC.Upsert(c.Request.Context(), s)
+			result, err := h.settingUC.Upsert(r.Context(), s)
 			if err != nil {
-				server.Fail(c, server.ErrInternal, err.Error())
+				server.Fail(gc, server.ErrInternal, err.Error())
 				return
 			}
 			updated = append(updated, result)
 		}
 
-		server.OK(c, updated)
+		server.OK(gc, updated)
 	}
 }
 
-func (h *SystemHandler) getSettingByKey() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *SystemHandler) getSettingByKey() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		if h.settingUC == nil {
-			server.Fail(c, server.ErrInternal, "settings service not available")
+			server.Fail(gc, server.ErrInternal, "settings service not available")
 			return
 		}
 
-		key := c.Param("key")
+		key := gc.Param("key")
 		if key == "" {
-			server.Fail(c, server.ErrBadRequest, "key is required")
+			server.Fail(gc, server.ErrBadRequest, "key is required")
 			return
 		}
 
-		s, err := h.settingUC.GetByKey(c.Request.Context(), key)
+		s, err := h.settingUC.GetByKey(r.Context(), key)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "setting not found")
+			server.Fail(gc, server.ErrNotFound, "setting not found")
 			return
 		}
 
 		masked := h.settingUC.MaskSensitive(s)
-		server.OK(c, masked)
+		server.OK(gc, masked)
 	}
 }
 
-func (h *SystemHandler) resetSetting() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *SystemHandler) resetSetting() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		if h.settingUC == nil {
-			server.Fail(c, server.ErrInternal, "settings service not available")
+			server.Fail(gc, server.ErrInternal, "settings service not available")
 			return
 		}
 
-		key := c.Param("key")
+		key := gc.Param("key")
 		if key == "" {
-			server.Fail(c, server.ErrBadRequest, "key is required")
+			server.Fail(gc, server.ErrBadRequest, "key is required")
 			return
 		}
 
-		s, err := h.settingUC.ResetToDefault(c.Request.Context(), key)
+		s, err := h.settingUC.ResetToDefault(r.Context(), key)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "setting not found")
+			server.Fail(gc, server.ErrNotFound, "setting not found")
 			return
 		}
 
 		masked := h.settingUC.MaskSensitive(s)
-		server.OK(c, masked)
+		server.OK(gc, masked)
 	}
 }
 
 // ==================== Public Config Endpoint ====================
 
-func (h *SystemHandler) getPublicConfig() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *SystemHandler) getPublicConfig() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		if h.settingUC == nil {
-			server.Fail(c, server.ErrInternal, "settings service not available")
+			server.Fail(gc, server.ErrInternal, "settings service not available")
 			return
 		}
 
-		publicSettings := h.settingUC.GetPublicSettings(c.Request.Context())
-		server.OK(c, publicSettings)
+		publicSettings := h.settingUC.GetPublicSettings(r.Context())
+		server.OK(gc, publicSettings)
 	}
 }
 
@@ -318,14 +328,15 @@ type portalConfigResponse struct {
 	Site    portalSiteConfig   `json:"site"`
 }
 
-func (h *SystemHandler) getPortalConfig() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *SystemHandler) getPortalConfig() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		if h.settingUC == nil {
-			server.Fail(c, server.ErrInternal, "settings service not available")
+			server.Fail(gc, server.ErrInternal, "settings service not available")
 			return
 		}
 
-		ctx := c.Request.Context()
+		ctx := r.Context()
 
 		modules := portalModuleConfig{
 			Articles: getBoolWithDefault(h.settingUC, ctx, "module_articles", true),
@@ -346,7 +357,7 @@ func (h *SystemHandler) getPortalConfig() gin.HandlerFunc {
 			AllowUpload:       getBoolWithDefault(h.settingUC, ctx, "allow_upload", true),
 		}
 
-		server.OK(c, portalConfigResponse{
+		server.OK(gc, portalConfigResponse{
 			Modules: modules,
 			Layout:  layout,
 			Site:    site,

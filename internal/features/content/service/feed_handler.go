@@ -5,12 +5,12 @@
 package service
 
 import (
-	"origadmin/application/origcms/internal/handler"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/features/content/biz"
 	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/server"
@@ -26,7 +26,7 @@ func NewFeedHandler(uc *biz.FeedUseCase) *FeedHandler {
 }
 
 func (h *FeedHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	r := handler.NewGinRouterAdapter(rg)
+	r := ginadapter.NewStdRouterAdapter(rg)
 	r.GET("/feed", h.GetFeed)
 }
 
@@ -47,13 +47,13 @@ type Section struct {
 
 // GetFeed godoc: GET /api/v1/feed
 func (h *FeedHandler) GetFeed(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
+	gc := ginadapter.GetGinContext(r)
 	ctx := r.Context()
-	page, _ := strconv.Atoi(c.Query("page"))
+	page, _ := strconv.Atoi(gc.Query("page"))
 	if page == 0 {
 		page = 1
 	}
-	pageSize, _ := strconv.Atoi(c.Query("page_size"))
+	pageSize, _ := strconv.Atoi(gc.Query("page_size"))
 	if pageSize == 0 {
 		pageSize = 20
 	}
@@ -62,11 +62,11 @@ func (h *FeedHandler) GetFeed(w http.ResponseWriter, r *http.Request) {
 
 	medias, total, err := h.uc.ListLatest(ctx, page, pageSize)
 	if err != nil {
-		server.Fail(c.GinContext(), server.ErrInternal, "failed to fetch feed")
+		server.Fail(gc, server.ErrInternal, "failed to fetch feed")
 		return
 	}
 
-	server.OK(c.GinContext(), FeedResponse{
+	server.OK(gc, FeedResponse{
 		Page:       page,
 		PageSize:   pageSize,
 		TotalCount: total,

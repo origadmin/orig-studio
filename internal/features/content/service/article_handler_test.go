@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,6 +22,25 @@ func setupTestRouter() *gin.Engine {
 	return r
 }
 
+// registerHandler registers an http.HandlerFunc on a gin router by wrapping
+// it with the StdRouterAdapter's wrapHandler logic (injects gin.Context into
+// request context so GetGinContext works).
+func registerHandler(r *gin.Engine, method, path string, h http.HandlerFunc) {
+	adapter := ginadapter.NewStdRouterAdapter(&r.RouterGroup)
+	switch method {
+	case http.MethodGet:
+		adapter.GET(path, h)
+	case http.MethodPost:
+		adapter.POST(path, h)
+	case http.MethodPut:
+		adapter.PUT(path, h)
+	case http.MethodDelete:
+		adapter.DELETE(path, h)
+	case http.MethodPatch:
+		adapter.PATCH(path, h)
+	}
+}
+
 // ---------------------------------------------------------------------------
 // Tests: createArticle - archived state rejection (validation before DB call)
 // ---------------------------------------------------------------------------
@@ -29,7 +49,7 @@ func TestCreateArticle_RejectArchivedState(t *testing.T) {
 	r := setupTestRouter()
 	handler := &ArticleHandler{uc: nil, jwt: nil}
 
-	r.POST("/articles", handler.createArticle())
+	registerHandler(r, http.MethodPost, "/articles", handler.createArticle())
 
 	body := map[string]interface{}{
 		"title":   "Test Article",
@@ -55,7 +75,7 @@ func TestCreateArticle_MissingTitle(t *testing.T) {
 	r := setupTestRouter()
 	handler := &ArticleHandler{uc: nil, jwt: nil}
 
-	r.POST("/articles", handler.createArticle())
+	registerHandler(r, http.MethodPost, "/articles", handler.createArticle())
 
 	body := map[string]interface{}{
 		"content": "Test content",
@@ -74,7 +94,7 @@ func TestCreateArticle_MissingContent(t *testing.T) {
 	r := setupTestRouter()
 	handler := &ArticleHandler{uc: nil, jwt: nil}
 
-	r.POST("/articles", handler.createArticle())
+	registerHandler(r, http.MethodPost, "/articles", handler.createArticle())
 
 	body := map[string]interface{}{
 		"title": "Test Article",
@@ -97,7 +117,7 @@ func TestUpdateArticle_RejectArchivedState(t *testing.T) {
 	r := setupTestRouter()
 	handler := &ArticleHandler{uc: nil, jwt: nil}
 
-	r.PUT("/articles/:id", handler.updateArticle())
+	registerHandler(r, http.MethodPut, "/articles/:id", handler.updateArticle())
 
 	body := map[string]interface{}{
 		"state": "archived",
@@ -122,7 +142,7 @@ func TestUpdateArticle_MissingID(t *testing.T) {
 	handler := &ArticleHandler{uc: nil, jwt: nil}
 
 	// Route without :id param
-	r.PUT("/articles", handler.updateArticle())
+	registerHandler(r, http.MethodPut, "/articles", handler.updateArticle())
 
 	body := map[string]interface{}{
 		"title": "Updated Title",
@@ -146,7 +166,7 @@ func TestUpdateArticleState_RejectArchivedState(t *testing.T) {
 	r := setupTestRouter()
 	handler := &ArticleHandler{uc: nil, jwt: nil}
 
-	r.PATCH("/articles/:id/state", handler.updateArticleState())
+	registerHandler(r, http.MethodPatch, "/articles/:id/state", handler.updateArticleState())
 
 	body := map[string]interface{}{
 		"state": "archived",
@@ -166,7 +186,7 @@ func TestUpdateArticleState_RejectInvalidState(t *testing.T) {
 	r := setupTestRouter()
 	handler := &ArticleHandler{uc: nil, jwt: nil}
 
-	r.PATCH("/articles/:id/state", handler.updateArticleState())
+	registerHandler(r, http.MethodPatch, "/articles/:id/state", handler.updateArticleState())
 
 	body := map[string]interface{}{
 		"state": "deleted",
@@ -186,7 +206,7 @@ func TestUpdateArticleState_MissingState(t *testing.T) {
 	r := setupTestRouter()
 	handler := &ArticleHandler{uc: nil, jwt: nil}
 
-	r.PATCH("/articles/:id/state", handler.updateArticleState())
+	registerHandler(r, http.MethodPatch, "/articles/:id/state", handler.updateArticleState())
 
 	body := map[string]interface{}{}
 	jsonBody, _ := json.Marshal(body)
@@ -207,7 +227,7 @@ func TestDeleteArticle_MissingID(t *testing.T) {
 	r := setupTestRouter()
 	handler := &ArticleHandler{uc: nil, jwt: nil}
 
-	r.DELETE("/articles", handler.deleteArticle())
+	registerHandler(r, http.MethodDelete, "/articles", handler.deleteArticle())
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("DELETE", "/articles", nil)
@@ -225,7 +245,7 @@ func TestListMyArticles_RequiresAuth(t *testing.T) {
 	r := setupTestRouter()
 	handler := &ArticleHandler{uc: nil, jwt: nil}
 
-	r.GET("/articles/me", handler.listMyArticles())
+	registerHandler(r, http.MethodGet, "/articles/me", handler.listMyArticles())
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/articles/me", nil)

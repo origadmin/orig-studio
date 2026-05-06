@@ -11,7 +11,7 @@ import (
 
 	types "origadmin/application/origcms/api/gen/v1/types"
 	pb "origadmin/application/origcms/api/gen/v1/media"
-	"origadmin/application/origcms/internal/handler"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/server"
@@ -28,35 +28,14 @@ func NewTagHandler(uc *biz.CategoryTagUseCase, jwt *auth.Manager) *TagHandler {
 }
 
 func (h *TagHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	r := handler.NewGinRouterAdapter(rg)
+	r := ginadapter.NewStdRouterAdapter(rg)
 	tags := r.Group("/tags")
 	{
 		// ================================
 		// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST
 		// ================================
 		tags.GET("", h.listTags())
-		tags.POST("", server.WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
-			c := handler.NewGinContextAdapterFromHTTP(w, r)
-			var input struct {
-				Title string `json:"title"`
-			}
-			if err := c.Bind(&input); err != nil {
-				server.Fail(c.GinContext(), server.ErrBadRequest, err.Error())
-				return
-			}
-
-			t, err := h.uc.CreateTag(r.Context(), &biz.Tag{
-				Title: input.Title,
-			})
-			if err != nil {
-				server.Fail(c.GinContext(), server.ErrInternal, err.Error())
-				return
-			}
-
-			server.Created(c.GinContext(), &pb.CreateTagResponse{
-				Tag: bizTagToProto(t),
-			})
-		}))
+		tags.POST("", server.WithJWT(h.jwt, h.createTag()))
 
 		// ================================
 		// 2. NESTED RESOURCE ROUTES (WITH :id) - MUST BE BEFORE MAIN :id ROUTES
@@ -67,75 +46,110 @@ func (h *TagHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		// ================================
 		// 3. MAIN RESOURCE PARAMETER ROUTES (WITH :id) - MUST BE LAST
 		// ================================
-		tags.GET("/:id", func(w http.ResponseWriter, r *http.Request) {
-			c := handler.NewGinContextAdapterFromHTTP(w, r)
-			id, err := strconv.Atoi(c.Param("id"))
-			if err != nil {
-				server.Fail(c.GinContext(), server.ErrBadRequest, "invalid tag id")
-				return
-			}
-			t, err := h.uc.GetTag(r.Context(), id)
-			if err != nil {
-				server.Fail(c.GinContext(), server.ErrInternal, err.Error())
-				return
-			}
-			server.OK(c.GinContext(), &pb.GetTagResponse{
-				Tag: bizTagToProto(t),
-			})
+		tags.GET("/:id", h.getTag())
+		tags.PUT("/:id", server.WithJWT(h.jwt, h.updateTag()))
+		tags.DELETE("/:id", server.WithJWT(h.jwt, h.deleteTag()))
+	}
+}
+
+func (h *TagHandler) createTag() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		var input struct {
+			Title string `json:"title"`
+		}
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
+			return
+		}
+
+		t, err := h.uc.CreateTag(r.Context(), &biz.Tag{
+			Title: input.Title,
 		})
+		if err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
+			return
+		}
 
-		tags.PUT("/:id", server.WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
-			c := handler.NewGinContextAdapterFromHTTP(w, r)
-			id, err := strconv.Atoi(c.Param("id"))
-			if err != nil {
-				server.Fail(c.GinContext(), server.ErrBadRequest, "invalid tag id")
-				return
-			}
-			var input struct {
-				Title string `json:"title"`
-			}
-			if err := c.Bind(&input); err != nil {
-				server.Fail(c.GinContext(), server.ErrBadRequest, err.Error())
-				return
-			}
+		server.Created(gc, &pb.CreateTagResponse{
+			Tag: bizTagToProto(t),
+		})
+	}
+}
 
-			t, err := h.uc.UpdateTag(r.Context(), &biz.Tag{
-				ID:    id,
-				Title: input.Title,
-			})
-			if err != nil {
-				server.Fail(c.GinContext(), server.ErrInternal, err.Error())
-				return
-			}
+func (h *TagHandler) getTag() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id, err := strconv.Atoi(gc.Param("id"))
+		if err != nil {
+			server.Fail(gc, server.ErrBadRequest, "invalid tag id")
+			return
+		}
+		t, err := h.uc.GetTag(r.Context(), id)
+		if err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
+			return
+		}
+		server.OK(gc, &pb.GetTagResponse{
+			Tag: bizTagToProto(t),
+		})
+	}
+}
 
-			server.OK(c.GinContext(), &pb.UpdateTagResponse{
-				Tag: bizTagToProto(t),
-			})
-		}))
+func (h *TagHandler) updateTag() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id, err := strconv.Atoi(gc.Param("id"))
+		if err != nil {
+			server.Fail(gc, server.ErrBadRequest, "invalid tag id")
+			return
+		}
+		var input struct {
+			Title string `json:"title"`
+		}
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
+			return
+		}
 
-		tags.DELETE("/:id", server.WithJWT(h.jwt, func(w http.ResponseWriter, r *http.Request) {
-			c := handler.NewGinContextAdapterFromHTTP(w, r)
-			id, _ := strconv.Atoi(c.Param("id"))
-			err := h.uc.DeleteTag(r.Context(), id)
-			if err != nil {
-				server.Fail(c.GinContext(), server.ErrInternal, err.Error())
-				return
-			}
-			server.OK(c.GinContext(), &pb.DeleteTagResponse{
-				Empty: &emptypb.Empty{},
-			})
-		}))
+		t, err := h.uc.UpdateTag(r.Context(), &biz.Tag{
+			ID:    id,
+			Title: input.Title,
+		})
+		if err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
+			return
+		}
+
+		server.OK(gc, &pb.UpdateTagResponse{
+			Tag: bizTagToProto(t),
+		})
+	}
+}
+
+func (h *TagHandler) deleteTag() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id, _ := strconv.Atoi(gc.Param("id"))
+		err := h.uc.DeleteTag(r.Context(), id)
+		if err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
+			return
+		}
+		server.OK(gc, &pb.DeleteTagResponse{
+			Empty: &emptypb.Empty{},
+		})
 	}
 }
 
 func (h *TagHandler) listTags() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		c := handler.NewGinContextAdapterFromHTTP(w, r)
-		page, _ := strconv.Atoi(c.Query("page"))
+		gc := ginadapter.GetGinContext(r)
+		page, _ := strconv.Atoi(gc.Query("page"))
 		if page == 0 {
 			page = 1
 		}
-		limit, _ := strconv.Atoi(c.Query("page_size"))
+		limit, _ := strconv.Atoi(gc.Query("page_size"))
 		if limit == 0 {
 			limit = 100
 		}
@@ -143,7 +157,7 @@ func (h *TagHandler) listTags() http.HandlerFunc {
 		page, limit = repo.NormalizeHTTPPagination(page, limit)
 		items, total, err := h.uc.ListTags(r.Context(), page, limit)
 		if err != nil {
-			server.Fail(c.GinContext(), server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
@@ -157,7 +171,7 @@ func (h *TagHandler) listTags() http.HandlerFunc {
 			totalPages = (int32(total) + int32(limit) - 1) / int32(limit)
 		}
 
-		server.OK(c.GinContext(), &pb.ListTagsResponse{
+		server.OK(gc, &pb.ListTagsResponse{
 			Total:      int32(total),
 			Items:      pbTags,
 			Page:       int32(page),
@@ -171,8 +185,8 @@ func (h *TagHandler) listTags() http.HandlerFunc {
 // GET /api/v1/tags/:id/media
 func (h *TagHandler) getMediaByTag() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		c := handler.NewGinContextAdapterFromHTTP(w, r)
-		server.Fail(c.GinContext(), server.ErrNotFound, "not implemented in UseCase")
+		gc := ginadapter.GetGinContext(r)
+		server.Fail(gc, server.ErrNotFound, "not implemented in UseCase")
 	}
 }
 

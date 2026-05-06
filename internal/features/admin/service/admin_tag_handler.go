@@ -1,10 +1,12 @@
 package service
 
 import (
+	"net/http"
 	"regexp"
 	"strconv"
 
 	"origadmin/application/origcms/internal/data/entity"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/helpers/hashtag"
 	"origadmin/application/origcms/internal/helpers/repo"
 
@@ -25,7 +27,8 @@ func NewAdminTagHandler(service *TagService) *AdminTagHandler {
 }
 
 // RegisterRoutes registers tag routes
-func (h *AdminTagHandler) RegisterRoutes(r *gin.RouterGroup) {
+func (h *AdminTagHandler) RegisterRoutes(rg *gin.RouterGroup) {
+	r := ginadapter.NewStdRouterAdapter(rg)
 	tags := r.Group("/admin/tags")
 	{
 		tags.GET("", h.listTags())
@@ -42,30 +45,31 @@ func (h *AdminTagHandler) RegisterRoutes(r *gin.RouterGroup) {
 // listTags handles GET /admin/tags
 // B087-R2 Fix: Uses TagResponse DTO for frontend-compatible field names.
 // Also supports both "search" and "keyword" query parameters.
-func (h *AdminTagHandler) listTags() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminTagHandler) listTags() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		// Parse query parameters
-		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
 
 		// B087-R2 Fix: Support both "search" and "keyword" parameters.
 		// Frontend sends "keyword", backend originally expected "search".
-		search := c.Query("search")
+		search := gc.Query("search")
 		if search == "" {
-			search = c.Query("keyword")
+			search = gc.Query("keyword")
 		}
 
-		status := c.Query("status")
-		sortBy := c.DefaultQuery("sort_by", "create_time")
-		sortOrder := c.DefaultQuery("sort_order", "desc")
+		status := gc.Query("status")
+		sortBy := gc.DefaultQuery("sort_by", "create_time")
+		sortOrder := gc.DefaultQuery("sort_order", "desc")
 
 		// Normalize pagination parameters
 		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 		// Get tags
-		tags, total, err := h.service.List(c.Request.Context(), page, pageSize, search, status, sortBy, sortOrder)
+		tags, total, err := h.service.List(r.Context(), page, pageSize, search, status, sortBy, sortOrder)
 		if err != nil {
-			server.Fail(c, 10000, "Failed to list tags")
+			server.Fail(gc, 10000, "Failed to list tags")
 			return
 		}
 
@@ -76,7 +80,7 @@ func (h *AdminTagHandler) listTags() gin.HandlerFunc {
 		totalPages := (int(total) + pageSize - 1) / pageSize
 
 		// Return response with frontend-compatible field names
-		server.OK(c, gin.H{
+		server.OK(gc, gin.H{
 			"items":       tagResponses,
 			"total":       total,
 			"page":        page,
@@ -88,26 +92,28 @@ func (h *AdminTagHandler) listTags() gin.HandlerFunc {
 
 // getTag handles GET /admin/tags/:id
 // B087-R2 Fix: Uses TagResponse DTO for frontend-compatible field names.
-func (h *AdminTagHandler) getTag() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminTagHandler) getTag() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 
-		tag, err := h.service.Get(c.Request.Context(), id)
+		tag, err := h.service.Get(r.Context(), id)
 		if err != nil {
-			server.Fail(c, 10001, "Tag not found")
+			server.Fail(gc, 10001, "Tag not found")
 			return
 		}
 
 		// B087-R2 Fix: Convert to TagResponse DTO
-		server.OK(c, ToTagResponse(tag))
+		server.OK(gc, ToTagResponse(tag))
 	}
 }
 
 // createTag handles POST /admin/tags
 // B087-R2 Fix: Uses TagResponse DTO for frontend-compatible field names.
 // Also maps frontend "status" (lowercase) to DB enum.
-func (h *AdminTagHandler) createTag() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminTagHandler) createTag() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		var req struct {
 			Name        string `json:"name" binding:"required"`
 			Slug        string `json:"slug"` // Optional: auto-generated from name when empty
@@ -116,13 +122,13 @@ func (h *AdminTagHandler) createTag() gin.HandlerFunc {
 			Status      string `json:"status"`
 		}
 
-		if err := c.ShouldBindJSON(&req); err != nil {
-			server.Fail(c, 10004, "Invalid request")
+		if err := gc.ShouldBindJSON(&req); err != nil {
+			server.Fail(gc, 10004, "Invalid request")
 			return
 		}
 
 		if req.Color != "" && !hexColorRegex.MatchString(req.Color) {
-			server.Fail(c, 10004, "Invalid color format, expected #RRGGBB")
+			server.Fail(gc, 10004, "Invalid color format, expected #RRGGBB")
 			return
 		}
 
@@ -141,22 +147,23 @@ func (h *AdminTagHandler) createTag() gin.HandlerFunc {
 			tag.Slug = hashtag.GenerateTagSlug(req.Name)
 		}
 
-		createdTag, err := h.service.Create(c.Request.Context(), tag)
+		createdTag, err := h.service.Create(r.Context(), tag)
 		if err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		// B087-R2 Fix: Convert to TagResponse DTO
-		server.OK(c, ToTagResponse(createdTag))
+		server.OK(gc, ToTagResponse(createdTag))
 	}
 }
 
 // updateTag handles PUT /admin/tags/:id
 // B087-R2 Fix: Uses TagResponse DTO for frontend-compatible field names.
-func (h *AdminTagHandler) updateTag() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminTagHandler) updateTag() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 
 		var req struct {
 			Name        string `json:"name"`
@@ -166,13 +173,13 @@ func (h *AdminTagHandler) updateTag() gin.HandlerFunc {
 			Status      string `json:"status"`
 		}
 
-		if err := c.ShouldBindJSON(&req); err != nil {
-			server.Fail(c, 10004, "Invalid request")
+		if err := gc.ShouldBindJSON(&req); err != nil {
+			server.Fail(gc, 10004, "Invalid request")
 			return
 		}
 
 		if req.Color != "" && !hexColorRegex.MatchString(req.Color) {
-			server.Fail(c, 10004, "Invalid color format, expected #RRGGBB")
+			server.Fail(gc, 10004, "Invalid color format, expected #RRGGBB")
 			return
 		}
 
@@ -188,28 +195,29 @@ func (h *AdminTagHandler) updateTag() gin.HandlerFunc {
 			updates.Slug = req.Slug
 		}
 
-		updatedTag, err := h.service.Update(c.Request.Context(), id, updates)
+		updatedTag, err := h.service.Update(r.Context(), id, updates)
 		if err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		// B087-R2 Fix: Convert to TagResponse DTO
-		server.OK(c, ToTagResponse(updatedTag))
+		server.OK(gc, ToTagResponse(updatedTag))
 	}
 }
 
 // deleteTag handles DELETE /admin/tags/:id
-func (h *AdminTagHandler) deleteTag() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *AdminTagHandler) deleteTag() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 
-		if err := h.service.Delete(c.Request.Context(), id); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := h.service.Delete(r.Context(), id); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
-		server.OK(c, gin.H{
+		server.OK(gc, gin.H{
 			"code":    0,
 			"message": "Tag deleted successfully",
 		})
@@ -217,30 +225,31 @@ func (h *AdminTagHandler) deleteTag() gin.HandlerFunc {
 }
 
 // bulkTagOperation handles POST /admin/tags/bulk
-func (h *AdminTagHandler) bulkTagOperation() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminTagHandler) bulkTagOperation() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		var req struct {
 			IDs    []string `json:"ids" binding:"required"`
 			Action string   `json:"action" binding:"required"`
 		}
 
-		if err := c.ShouldBindJSON(&req); err != nil {
-			server.Fail(c, 10004, "Invalid request")
+		if err := gc.ShouldBindJSON(&req); err != nil {
+			server.Fail(gc, 10004, "Invalid request")
 			return
 		}
 
 		if req.Action != "delete" {
-			server.Fail(c, 10004, "Unsupported action")
+			server.Fail(gc, 10004, "Unsupported action")
 			return
 		}
 
-		count, err := h.service.BulkDelete(c.Request.Context(), req.IDs)
+		count, err := h.service.BulkDelete(r.Context(), req.IDs)
 		if err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
-		server.OK(c, gin.H{
+		server.OK(gc, gin.H{
 			"success": count,
 			"failed":  len(req.IDs) - count,
 		})
@@ -248,20 +257,22 @@ func (h *AdminTagHandler) bulkTagOperation() gin.HandlerFunc {
 }
 
 // exportTags handles GET /admin/tags/export
-func (h *AdminTagHandler) exportTags() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminTagHandler) exportTags() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		// TODO: Implement export functionality
-		server.OK(c, gin.H{
+		server.OK(gc, gin.H{
 			"message": "Export functionality not implemented yet",
 		})
 	}
 }
 
 // importTags handles POST /admin/tags/import
-func (h *AdminTagHandler) importTags() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *AdminTagHandler) importTags() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
 		// TODO: Implement import functionality
-		server.OK(c, gin.H{
+		server.OK(gc, gin.H{
 			"message": "Import functionality not implemented yet",
 		})
 	}

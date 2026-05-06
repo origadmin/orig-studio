@@ -15,7 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 
-	"origadmin/application/origcms/internal/handler"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 )
 
 // TestGetArticle_ExtractsIdParam verifies the handler extracts the :id param
@@ -70,7 +70,7 @@ func TestGetArticle_MissingIdParam_Returns400(t *testing.T) {
 	articleHandler := &ArticleHandler{uc: nil, jwt: nil}
 
 	// Use the adapter to register the route (same pattern as RegisterRoutes)
-	adapter := handler.NewGinRouterAdapter(r.Group(""))
+	adapter := ginadapter.NewStdRouterAdapter(r.Group(""))
 	adapter.GET("/articles", articleHandler.getArticle())
 
 	w := httptest.NewRecorder()

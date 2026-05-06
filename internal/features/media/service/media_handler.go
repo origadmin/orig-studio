@@ -13,7 +13,7 @@ import (
 
 	pb "origadmin/application/origcms/api/gen/v1/media"
 	types "origadmin/application/origcms/api/gen/v1/types"
-	"origadmin/application/origcms/internal/handler"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	authbiz "origadmin/application/origcms/internal/features/auth/biz"
 	contentbiz "origadmin/application/origcms/internal/features/content/biz"
@@ -69,7 +69,7 @@ func (h *MediaHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	mediasGroup := rg.Group("/medias")
 	mediasGroup.Use(systemservice.ModuleGuard(h.settingUC, "module_videos"))
 
-	r := handler.NewGinRouterAdapter(mediasGroup)
+	r := ginadapter.NewStdRouterAdapter(mediasGroup)
 	medias := r.Group("")
 	{
 		// Public routes
@@ -109,14 +109,13 @@ func (h *MediaHandler) RegisterRoutes(rg *gin.RouterGroup) {
 
 // listMedias handles GET /medias
 func (h *MediaHandler) listMedias(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	page, _ := strconv.Atoi(c.Query("page"))
+	page, _ := strconv.Atoi(gc.Query("page"))
 	if page == 0 {
 		page = 1
 	}
-	pageSize, _ := strconv.Atoi(c.Query("page_size"))
+	pageSize, _ := strconv.Atoi(gc.Query("page_size"))
 	if pageSize == 0 {
 		pageSize = 20
 	}
@@ -128,23 +127,23 @@ func (h *MediaHandler) listMedias(w http.ResponseWriter, r *http.Request) {
 		QueryOption: repo.QueryOption{
 			Page:     int32(page),
 			PageSize: int32(pageSize),
-			Keyword:  c.Query("keyword"),
+			Keyword:  gc.Query("keyword"),
 		},
 	}
 
-	if categoryIDStr := c.Query("category_id"); categoryIDStr != "" {
+	if categoryIDStr := gc.Query("category_id"); categoryIDStr != "" {
 		if cid, err := strconv.ParseInt(categoryIDStr, 10, 64); err == nil && cid > 0 {
 			opts.CategoryID = &cid
 		}
 	}
-	if categoryIDsStr := c.Query("category_ids"); categoryIDsStr != "" {
+	if categoryIDsStr := gc.Query("category_ids"); categoryIDsStr != "" {
 		for _, idStr := range strings.Split(categoryIDsStr, ",") {
 			if cid, err := strconv.ParseInt(strings.TrimSpace(idStr), 10, 64); err == nil && cid > 0 {
 				opts.CategoryIDs = append(opts.CategoryIDs, cid)
 			}
 		}
 	}
-	if state := c.Query("state"); state != "" {
+	if state := gc.Query("state"); state != "" {
 		opts.State = state
 	}
 
@@ -169,10 +168,9 @@ func (h *MediaHandler) listMedias(w http.ResponseWriter, r *http.Request) {
 
 // listFeaturedMedias handles GET /medias/featured
 func (h *MediaHandler) listFeaturedMedias(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	limit, _ := strconv.Atoi(c.Query("limit"))
+	limit, _ := strconv.Atoi(gc.Query("limit"))
 	if limit == 0 {
 		limit = 10
 	}
@@ -203,10 +201,9 @@ func (h *MediaHandler) listFeaturedMedias(w http.ResponseWriter, r *http.Request
 
 // listLatestMedias handles GET /medias/latest
 func (h *MediaHandler) listLatestMedias(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	limit, _ := strconv.Atoi(c.Query("limit"))
+	limit, _ := strconv.Atoi(gc.Query("limit"))
 	if limit == 0 {
 		limit = 10
 	}
@@ -236,10 +233,9 @@ func (h *MediaHandler) listLatestMedias(w http.ResponseWriter, r *http.Request) 
 
 // getMedia handles GET /medias/:id
 func (h *MediaHandler) getMedia(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	id := c.Param("id")
+	id := gc.Param("id")
 	if id == "" {
 		server.Fail(gc, server.ErrBadRequest, "media id is required")
 		return
@@ -264,10 +260,9 @@ func (h *MediaHandler) getMedia(w http.ResponseWriter, r *http.Request) {
 
 // incrementViewCount handles POST /medias/:id/view
 func (h *MediaHandler) incrementViewCount(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	id := c.Param("id")
+	id := gc.Param("id")
 	if id == "" {
 		server.Fail(gc, server.ErrBadRequest, "media id is required")
 		return
@@ -290,12 +285,13 @@ func (h *MediaHandler) transcodingStatus(w http.ResponseWriter, r *http.Request)
 		h.mediaService.TranscodingStatusHTTPHandler(w, r)
 		return
 	}
+	gc := ginadapter.GetGinContext(r)
 	status, err := h.mediaUC.GetTranscodingStatus(r.Context(), nil)
 	if err != nil {
-		server.Fail(handler.NewGinContextAdapterFromHTTP(w, r).GinContext(), server.ErrInternal, err.Error())
+		server.Fail(gc, server.ErrInternal, err.Error())
 		return
 	}
-	server.OK(handler.NewGinContextAdapterFromHTTP(w, r).GinContext(), &pb.GetEncodingStatusResponse{
+	server.OK(gc, &pb.GetEncodingStatusResponse{
 		ProcessingCount: int32(status.ProcessingCount),
 		PendingCount:    int32(status.PendingCount),
 		FailedCount:     int32(status.FailedCount),
@@ -309,7 +305,8 @@ func (h *MediaHandler) encodingTasks(w http.ResponseWriter, r *http.Request) {
 		h.mediaService.EncodingTasksHTTPHandler(w, r)
 		return
 	}
-	server.OK(handler.NewGinContextAdapterFromHTTP(w, r).GinContext(), &pb.ListEncodingTasksResponse{
+	gc := ginadapter.GetGinContext(r)
+	server.OK(gc, &pb.ListEncodingTasksResponse{
 		Tasks: []*types.EncodingTask{},
 	})
 }
@@ -320,7 +317,8 @@ func (h *MediaHandler) retryTask(w http.ResponseWriter, r *http.Request) {
 		h.mediaService.RetryTaskHTTPHandler(w, r)
 		return
 	}
-	server.OK(handler.NewGinContextAdapterFromHTTP(w, r).GinContext(), &pb.RetryEncodingTaskResponse{})
+	gc := ginadapter.GetGinContext(r)
+	server.OK(gc, &pb.RetryEncodingTaskResponse{})
 }
 
 // retryAllFailed handles POST /medias/encoding/retry-all-failed
@@ -329,7 +327,8 @@ func (h *MediaHandler) retryAllFailed(w http.ResponseWriter, r *http.Request) {
 		h.mediaService.RetryAllFailedHTTPHandler(w, r)
 		return
 	}
-	server.OK(handler.NewGinContextAdapterFromHTTP(w, r).GinContext(), &pb.RetryAllFailedTasksResponse{})
+	gc := ginadapter.GetGinContext(r)
+	server.OK(gc, &pb.RetryAllFailedTasksResponse{})
 }
 
 // sseHandler handles GET /medias/transcoding/events
@@ -347,9 +346,8 @@ func (h *MediaHandler) mediaVariants(w http.ResponseWriter, r *http.Request) {
 		h.mediaService.MediaVariantsHTTPHandler(w, r)
 		return
 	}
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
-	id := c.Param("id")
+	gc := ginadapter.GetGinContext(r)
+	id := gc.Param("id")
 	if id == "" {
 		server.Fail(gc, server.ErrBadRequest, "media id is required")
 		return
@@ -361,17 +359,16 @@ func (h *MediaHandler) mediaVariants(w http.ResponseWriter, r *http.Request) {
 
 // likeMedia handles POST /medias/:id/like
 func (h *MediaHandler) likeMedia(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	mediaID := c.Param("id")
+	mediaID := gc.Param("id")
 	if mediaID == "" {
 		server.Fail(gc, server.ErrBadRequest, "media id is required")
 		return
 	}
 
-	val := c.Get("claims")
-	if val == nil {
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
@@ -384,9 +381,9 @@ func (h *MediaHandler) likeMedia(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		server.OK(gc, &pb.ToggleMediaLikeResponse{
-			IsLiked:     stats.UserLikeType == "like",
-			IsDisliked:  stats.UserLikeType == "dislike",
-			LikeCount:   stats.LikeCount,
+			IsLiked:      stats.UserLikeType == "like",
+			IsDisliked:   stats.UserLikeType == "dislike",
+			LikeCount:    stats.LikeCount,
 			DislikeCount: stats.DislikeCount,
 		})
 		return
@@ -397,17 +394,16 @@ func (h *MediaHandler) likeMedia(w http.ResponseWriter, r *http.Request) {
 
 // unlikeMedia handles DELETE /medias/:id/like
 func (h *MediaHandler) unlikeMedia(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	mediaID := c.Param("id")
+	mediaID := gc.Param("id")
 	if mediaID == "" {
 		server.Fail(gc, server.ErrBadRequest, "media id is required")
 		return
 	}
 
-	val := c.Get("claims")
-	if val == nil {
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
@@ -420,9 +416,9 @@ func (h *MediaHandler) unlikeMedia(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		server.OK(gc, &pb.ToggleMediaLikeResponse{
-			IsLiked:     stats.UserLikeType == "like",
-			IsDisliked:  stats.UserLikeType == "dislike",
-			LikeCount:   stats.LikeCount,
+			IsLiked:      stats.UserLikeType == "like",
+			IsDisliked:   stats.UserLikeType == "dislike",
+			LikeCount:    stats.LikeCount,
 			DislikeCount: stats.DislikeCount,
 		})
 		return
@@ -433,17 +429,16 @@ func (h *MediaHandler) unlikeMedia(w http.ResponseWriter, r *http.Request) {
 
 // favoriteMedia handles POST /medias/:id/favorite
 func (h *MediaHandler) favoriteMedia(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	mediaID := c.Param("id")
+	mediaID := gc.Param("id")
 	if mediaID == "" {
 		server.Fail(gc, server.ErrBadRequest, "media id is required")
 		return
 	}
 
-	val := c.Get("claims")
-	if val == nil {
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
@@ -467,17 +462,16 @@ func (h *MediaHandler) favoriteMedia(w http.ResponseWriter, r *http.Request) {
 
 // unfavoriteMedia handles DELETE /medias/:id/favorite
 func (h *MediaHandler) unfavoriteMedia(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	mediaID := c.Param("id")
+	mediaID := gc.Param("id")
 	if mediaID == "" {
 		server.Fail(gc, server.ErrBadRequest, "media id is required")
 		return
 	}
 
-	val := c.Get("claims")
-	if val == nil {
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
@@ -501,10 +495,9 @@ func (h *MediaHandler) unfavoriteMedia(w http.ResponseWriter, r *http.Request) {
 
 // getMediaLikes handles GET /medias/:id/likes (plural path for frontend compatibility)
 func (h *MediaHandler) getMediaLikes(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	mediaID := c.Param("id")
+	mediaID := gc.Param("id")
 	if mediaID == "" {
 		server.Fail(gc, server.ErrBadRequest, "media id is required")
 		return
@@ -516,9 +509,9 @@ func (h *MediaHandler) getMediaLikes(w http.ResponseWriter, r *http.Request) {
 		resolvedID = mediaID
 	}
 
-	val := c.Get("claims")
+	val, exists := gc.Get("claims")
 	userID := ""
-	if val != nil {
+	if exists && val != nil {
 		claims := val.(*auth.Claims)
 		userID = claims.GetUserID()
 	}
@@ -530,9 +523,9 @@ func (h *MediaHandler) getMediaLikes(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		server.OK(gc, gin.H{
-			"is_liked":     stats.UserLikeType == "like",
-			"is_disliked":  stats.UserLikeType == "dislike",
-			"like_count":   stats.LikeCount,
+			"is_liked":      stats.UserLikeType == "like",
+			"is_disliked":   stats.UserLikeType == "dislike",
+			"like_count":    stats.LikeCount,
 			"dislike_count": stats.DislikeCount,
 		})
 		return
@@ -548,10 +541,9 @@ func (h *MediaHandler) getMediaLikes(w http.ResponseWriter, r *http.Request) {
 
 // getMediaFavorites handles GET /medias/:id/favorites (plural path for frontend compatibility)
 func (h *MediaHandler) getMediaFavorites(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	mediaID := c.Param("id")
+	mediaID := gc.Param("id")
 	if mediaID == "" {
 		server.Fail(gc, server.ErrBadRequest, "media id is required")
 		return
@@ -563,9 +555,9 @@ func (h *MediaHandler) getMediaFavorites(w http.ResponseWriter, r *http.Request)
 		resolvedID = mediaID
 	}
 
-	val := c.Get("claims")
+	val, exists := gc.Get("claims")
 	userID := ""
-	if val != nil {
+	if exists && val != nil {
 		claims := val.(*auth.Claims)
 		userID = claims.GetUserID()
 	}

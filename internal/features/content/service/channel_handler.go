@@ -28,7 +28,7 @@ import (
 
 	pb "origadmin/application/origcms/api/gen/v1/media"
 	types "origadmin/application/origcms/api/gen/v1/types"
-	"origadmin/application/origcms/internal/handler"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/features/content/biz"
@@ -56,7 +56,7 @@ func (h *ChannelHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	channelsGroup := rg.Group("/channels")
 	channelsGroup.Use(systemservice.ModuleGuard(h.settingUC, "module_videos"))
 
-	r := handler.NewGinRouterAdapter(channelsGroup)
+	r := ginadapter.NewStdRouterAdapter(channelsGroup)
 	channels := r.Group("")
 	{
 		// ================================
@@ -118,7 +118,7 @@ func (h *ChannelHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	// ================================
 	// Handle resolution route (top-level, NOT under /channels)
 	// ================================
-	resolveAdapter := handler.NewGinRouterAdapter(rg.Group("/resolve"))
+	resolveAdapter := ginadapter.NewStdRouterAdapter(rg.Group("/resolve"))
 	{
 		resolveAdapter.GET("/@:handle", h.ResolveHandle)
 	}
@@ -126,7 +126,7 @@ func (h *ChannelHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	// ================================
 	// System config routes (top-level, NOT under /channels)
 	// ================================
-	configAdapter := handler.NewGinRouterAdapter(rg.Group("/system/config"))
+	configAdapter := ginadapter.NewStdRouterAdapter(rg.Group("/system/config"))
 	{
 		configAdapter.GET("/channel-limits", h.GetChannelLimits)
 	}
@@ -134,7 +134,7 @@ func (h *ChannelHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	// ================================
 	// Subscription feed routes (top-level, NOT under /channels)
 	// ================================
-	subsAdapter := handler.NewGinRouterAdapter(rg.Group("/subscriptions"))
+	subsAdapter := ginadapter.NewStdRouterAdapter(rg.Group("/subscriptions"))
 	{
 		subsAdapter.GET("/videos", server.WithJWT(h.jwt, h.GetSubscriptionVideos))
 	}
@@ -143,10 +143,10 @@ func (h *ChannelHandler) RegisterRoutes(rg *gin.RouterGroup) {
 // GetChannelByToken returns a single channel by short_token (path parameter).
 // This is the RECOMMENDED way to access a single channel (RESTful, MediaCMS style).
 func (h *ChannelHandler) GetChannelByToken(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	token := c.Param("token")
+
+	token := gc.Param("token")
 	if token == "" {
 		server.Fail(gc, server.ErrBadRequest, "token is required")
 		return
@@ -174,17 +174,17 @@ func (h *ChannelHandler) GetChannelByToken(w http.ResponseWriter, r *http.Reques
 //  2. ?user_id={value}  -> Get all channels for a user
 //  3. (no params)       -> List all public channels (paginated)
 func (h *ChannelHandler) ListChannels(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	username := c.Query("username")
-	userId := c.Query("user_id")
 
-	limit, _ := strconv.Atoi(c.Query("limit"))
+	username := gc.Query("username")
+	userId := gc.Query("user_id")
+
+	limit, _ := strconv.Atoi(gc.Query("limit"))
 	if limit == 0 {
 		limit = 20
 	}
-	page, _ := strconv.Atoi(c.Query("page"))
+	page, _ := strconv.Atoi(gc.Query("page"))
 	if page == 0 {
 		page = 1
 	}
@@ -240,11 +240,11 @@ func (h *ChannelHandler) ListChannels(w http.ResponseWriter, r *http.Request) {
 
 // CreateChannel creates a new channel for the authenticated user.
 func (h *ChannelHandler) CreateChannel(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	val := c.Get("claims")
-	if val == nil {
+
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
@@ -262,7 +262,7 @@ func (h *ChannelHandler) CreateChannel(w http.ResponseWriter, r *http.Request) {
 		CategoryID    *int64   `json:"category_id"`
 		FriendlyToken string   `json:"friendly_token"`
 	}
-	if err := c.Bind(&input); err != nil {
+	if err := gc.Bind(&input); err != nil {
 		server.Fail(gc, server.ErrBadRequest, err.Error())
 		return
 	}
@@ -327,17 +327,17 @@ func (h *ChannelHandler) CreateChannel(w http.ResponseWriter, r *http.Request) {
 
 // UpdateChannel updates a channel by short_token. Only the owner can update.
 func (h *ChannelHandler) UpdateChannel(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	val := c.Get("claims")
-	if val == nil {
+
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
 	claims := val.(*auth.Claims)
 
-	token := c.Param("token")
+	token := gc.Param("token")
 	if token == "" {
 		server.Fail(gc, server.ErrBadRequest, "token is required")
 		return
@@ -361,7 +361,7 @@ func (h *ChannelHandler) UpdateChannel(w http.ResponseWriter, r *http.Request) {
 			Title    string `json:"title"`
 		} `json:"links"`
 	}
-	if err := c.Bind(&input); err != nil {
+	if err := gc.Bind(&input); err != nil {
 		server.Fail(gc, server.ErrBadRequest, err.Error())
 		return
 	}
@@ -460,17 +460,17 @@ func (h *ChannelHandler) UpdateChannel(w http.ResponseWriter, r *http.Request) {
 
 // DeleteChannel deletes a channel by short_token. Only the owner or admin can delete.
 func (h *ChannelHandler) DeleteChannel(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	val := c.Get("claims")
-	if val == nil {
+
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
 	claims := val.(*auth.Claims)
 
-	token := c.Param("token")
+	token := gc.Param("token")
 	if token == "" {
 		server.Fail(gc, server.ErrBadRequest, "token is required")
 		return
@@ -493,17 +493,17 @@ func (h *ChannelHandler) DeleteChannel(w http.ResponseWriter, r *http.Request) {
 
 // AddMedia adds a media item to a channel.
 func (h *ChannelHandler) AddMedia(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	val := c.Get("claims")
-	if val == nil {
+
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
 	claims := val.(*auth.Claims)
 
-	token := c.Param("token")
+	token := gc.Param("token")
 	if token == "" {
 		server.Fail(gc, server.ErrBadRequest, "Invalid channel token")
 		return
@@ -512,7 +512,7 @@ func (h *ChannelHandler) AddMedia(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		MediaID string `json:"media_id" binding:"required"`
 	}
-	if err := c.Bind(&input); err != nil {
+	if err := gc.Bind(&input); err != nil {
 		server.Fail(gc, server.ErrBadRequest, err.Error())
 		return
 	}
@@ -536,22 +536,22 @@ func (h *ChannelHandler) AddMedia(w http.ResponseWriter, r *http.Request) {
 
 // RemoveMedia removes a media item from a channel (sets channel_id to null).
 func (h *ChannelHandler) RemoveMedia(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	val := c.Get("claims")
-	if val == nil {
+
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
 	claims := val.(*auth.Claims)
 
-	token := c.Param("token")
+	token := gc.Param("token")
 	if token == "" {
 		server.Fail(gc, server.ErrBadRequest, "Invalid channel token")
 		return
 	}
-	mediaId := c.Param("mediaId")
+	mediaId := gc.Param("mediaId")
 	if mediaId == "" {
 		server.Fail(gc, server.ErrBadRequest, "Invalid media ID")
 		return
@@ -576,16 +576,16 @@ func (h *ChannelHandler) RemoveMedia(w http.ResponseWriter, r *http.Request) {
 
 // GetChannelSubscribers returns subscribers for a channel with optional count parameter.
 func (h *ChannelHandler) GetChannelSubscribers(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	token := c.Param("token")
+
+	token := gc.Param("token")
 	if token == "" {
 		server.Fail(gc, server.ErrBadRequest, "Invalid channel token")
 		return
 	}
 
-	if c.Query("count") == "true" {
+	if gc.Query("count") == "true" {
 		count, err := h.uc.GetChannelSubscriberCount(r.Context(), token)
 		if err != nil {
 			server.Fail(gc, server.ErrInternal, err.Error())
@@ -597,11 +597,11 @@ func (h *ChannelHandler) GetChannelSubscribers(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	page, _ := strconv.Atoi(c.Query("page"))
+	page, _ := strconv.Atoi(gc.Query("page"))
 	if page == 0 {
 		page = 1
 	}
-	pageSize, _ := strconv.Atoi(c.Query("page_size"))
+	pageSize, _ := strconv.Atoi(gc.Query("page_size"))
 	if pageSize == 0 {
 		pageSize = 20
 	}
@@ -628,17 +628,17 @@ func (h *ChannelHandler) GetChannelSubscribers(w http.ResponseWriter, r *http.Re
 
 // GetSubscriptionStatus returns the subscription status for the current user.
 func (h *ChannelHandler) GetSubscriptionStatus(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	token := c.Param("token")
+
+	token := gc.Param("token")
 	if token == "" {
 		server.Fail(gc, server.ErrBadRequest, "Invalid channel token")
 		return
 	}
 
-	val := c.Get("claims")
-	if val == nil {
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
@@ -657,17 +657,17 @@ func (h *ChannelHandler) GetSubscriptionStatus(w http.ResponseWriter, r *http.Re
 
 // SubscribeToChannel subscribes the current user to a channel.
 func (h *ChannelHandler) SubscribeToChannel(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	token := c.Param("token")
+
+	token := gc.Param("token")
 	if token == "" {
 		server.Fail(gc, server.ErrBadRequest, "Invalid channel token")
 		return
 	}
 
-	val := c.Get("claims")
-	if val == nil {
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
@@ -692,17 +692,17 @@ func (h *ChannelHandler) SubscribeToChannel(w http.ResponseWriter, r *http.Reque
 
 // UnsubscribeFromChannel unsubscribes the current user from a channel.
 func (h *ChannelHandler) UnsubscribeFromChannel(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	token := c.Param("token")
+
+	token := gc.Param("token")
 	if token == "" {
 		server.Fail(gc, server.ErrBadRequest, "Invalid channel token")
 		return
 	}
 
-	val := c.Get("claims")
-	if val == nil {
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
@@ -722,17 +722,17 @@ func (h *ChannelHandler) UnsubscribeFromChannel(w http.ResponseWriter, r *http.R
 
 // InviteUserToChannel invites a user to join a channel.
 func (h *ChannelHandler) InviteUserToChannel(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	token := c.Param("token")
+
+	token := gc.Param("token")
 	if token == "" {
 		server.Fail(gc, server.ErrBadRequest, "Invalid channel token")
 		return
 	}
 
-	val := c.Get("claims")
-	if val == nil {
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
@@ -741,7 +741,7 @@ func (h *ChannelHandler) InviteUserToChannel(w http.ResponseWriter, r *http.Requ
 	var input struct {
 		UserID string `json:"user_id" binding:"required"`
 	}
-	if err := c.Bind(&input); err != nil {
+	if err := gc.Bind(&input); err != nil {
 		server.Fail(gc, server.ErrBadRequest, err.Error())
 		return
 	}
@@ -760,17 +760,17 @@ func (h *ChannelHandler) InviteUserToChannel(w http.ResponseWriter, r *http.Requ
 
 // AcceptChannelInvitation accepts a channel invitation.
 func (h *ChannelHandler) AcceptChannelInvitation(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	id := c.Param("id")
+
+	id := gc.Param("id")
 	if id == "" {
 		server.Fail(gc, server.ErrBadRequest, "Invalid ID")
 		return
 	}
 
-	val := c.Get("claims")
-	if val == nil {
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
@@ -790,17 +790,17 @@ func (h *ChannelHandler) AcceptChannelInvitation(w http.ResponseWriter, r *http.
 
 // RejectChannelInvitation rejects a channel invitation.
 func (h *ChannelHandler) RejectChannelInvitation(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	id := c.Param("id")
+
+	id := gc.Param("id")
 	if id == "" {
 		server.Fail(gc, server.ErrBadRequest, "Invalid ID")
 		return
 	}
 
-	val := c.Get("claims")
-	if val == nil {
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
@@ -820,11 +820,11 @@ func (h *ChannelHandler) RejectChannelInvitation(w http.ResponseWriter, r *http.
 
 // GetChannelInvitations returns the current user's channel invitations.
 func (h *ChannelHandler) GetChannelInvitations(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	val := c.Get("claims")
-	if val == nil {
+
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
@@ -845,11 +845,11 @@ func (h *ChannelHandler) GetChannelInvitations(w http.ResponseWriter, r *http.Re
 
 // GetMyChannel returns the current authenticated user's channel.
 func (h *ChannelHandler) GetMyChannel(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	val := c.Get("claims")
-	if val == nil {
+
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
@@ -877,11 +877,11 @@ func (h *ChannelHandler) GetMyChannel(w http.ResponseWriter, r *http.Request) {
 
 // UpdateMyHandle updates the current user's channel handle/slug.
 func (h *ChannelHandler) UpdateMyHandle(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	val := c.Get("claims")
-	if val == nil {
+
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
@@ -890,7 +890,7 @@ func (h *ChannelHandler) UpdateMyHandle(w http.ResponseWriter, r *http.Request) 
 	var input struct {
 		Handle string `json:"handle" binding:"required,min=3,max=39"`
 	}
-	if err := c.Bind(&input); err != nil {
+	if err := gc.Bind(&input); err != nil {
 		server.Fail(gc, server.ErrBadRequest, err.Error())
 		return
 	}
@@ -922,17 +922,17 @@ func (h *ChannelHandler) UpdateMyHandle(w http.ResponseWriter, r *http.Request) 
 
 // UpdateNotificationSetting updates notification preferences for a channel subscription.
 func (h *ChannelHandler) UpdateNotificationSetting(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	val := c.Get("claims")
-	if val == nil {
+
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
 	claims := val.(*auth.Claims)
 
-	token := c.Param("token")
+	token := gc.Param("token")
 	if token == "" {
 		server.Fail(gc, server.ErrBadRequest, "Invalid channel token")
 		return
@@ -941,7 +941,7 @@ func (h *ChannelHandler) UpdateNotificationSetting(w http.ResponseWriter, r *htt
 	var input struct {
 		Setting string `json:"setting" binding:"required,oneof=all personalized none"`
 	}
-	if err := c.Bind(&input); err != nil {
+	if err := gc.Bind(&input); err != nil {
 		server.Fail(gc, server.ErrBadRequest, err.Error())
 		return
 	}
@@ -967,29 +967,29 @@ func (h *ChannelHandler) UpdateNotificationSetting(w http.ResponseWriter, r *htt
 // Supports pagination, sorting, and channel filtering.
 // Query params: page, limit, sort_by (newest|most_viewed|trending), channel_ids (comma-separated).
 func (h *ChannelHandler) GetSubscriptionVideos(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	val := c.Get("claims")
-	if val == nil {
+
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
 	claims := val.(*auth.Claims)
 	userID := claims.GetUserID()
 
-	page, _ := strconv.Atoi(c.Query("page"))
+	page, _ := strconv.Atoi(gc.Query("page"))
 	if page < 1 {
 		page = 1
 	}
-	limit, _ := strconv.Atoi(c.Query("limit"))
+	limit, _ := strconv.Atoi(gc.Query("limit"))
 	if limit < 1 {
 		limit = 20
 	}
 	// Normalize pagination parameters
 	page, limit = repo.NormalizeHTTPPagination(page, limit)
 
-	sortBy := c.Query("sort_by")
+	sortBy := gc.Query("sort_by")
 	switch sortBy {
 	case "newest", "most_viewed", "trending":
 		// valid
@@ -1017,7 +1017,7 @@ func (h *ChannelHandler) GetSubscriptionVideos(w http.ResponseWriter, r *http.Re
 	}
 
 	// Apply channel_ids filter if provided
-	if channelIDsParam := c.Query("channel_ids"); channelIDsParam != "" {
+	if channelIDsParam := gc.Query("channel_ids"); channelIDsParam != "" {
 		filterIDs := strings.Split(channelIDsParam, ",")
 		filtered := make([]string, 0, len(filterIDs))
 		for _, id := range filterIDs {
@@ -1054,10 +1054,10 @@ func (h *ChannelHandler) GetSubscriptionVideos(w http.ResponseWriter, r *http.Re
 // Supports pagination and sorting.
 // Query params: page, limit, sort_by (newest|oldest|popular).
 func (h *ChannelHandler) GetChannelVideos(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	token := c.Param("token")
+
+	token := gc.Param("token")
 	if token == "" {
 		server.Fail(gc, server.ErrBadRequest, "token is required")
 		return
@@ -1068,18 +1068,18 @@ func (h *ChannelHandler) GetChannelVideos(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	page, _ := strconv.Atoi(c.Query("page"))
+	page, _ := strconv.Atoi(gc.Query("page"))
 	if page < 1 {
 		page = 1
 	}
-	limit, _ := strconv.Atoi(c.Query("limit"))
+	limit, _ := strconv.Atoi(gc.Query("limit"))
 	if limit < 1 {
 		limit = 20
 	}
 	// Normalize pagination parameters
 	page, limit = repo.NormalizeHTTPPagination(page, limit)
 
-	sortBy := c.Query("sort_by")
+	sortBy := gc.Query("sort_by")
 	switch sortBy {
 	case "newest", "oldest", "popular":
 		// valid
@@ -1116,10 +1116,10 @@ func (h *ChannelHandler) GetChannelVideos(w http.ResponseWriter, r *http.Request
 // Supports pagination.
 // Query params: page, limit.
 func (h *ChannelHandler) GetChannelPlaylists(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	token := c.Param("token")
+
+	token := gc.Param("token")
 	if token == "" {
 		server.Fail(gc, server.ErrBadRequest, "token is required")
 		return
@@ -1130,11 +1130,11 @@ func (h *ChannelHandler) GetChannelPlaylists(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	page, _ := strconv.Atoi(c.Query("page"))
+	page, _ := strconv.Atoi(gc.Query("page"))
 	if page < 1 {
 		page = 1
 	}
-	limit, _ := strconv.Atoi(c.Query("limit"))
+	limit, _ := strconv.Atoi(gc.Query("limit"))
 	if limit < 1 {
 		limit = 20
 	}
@@ -1277,10 +1277,10 @@ func generateSlug(name string) string {
 // ResolveHandle resolves a @handle to a channel or user.
 // GET /api/v1/resolve/@{handle}
 func (h *ChannelHandler) ResolveHandle(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	handle := c.Param("handle")
+
+	handle := gc.Param("handle")
 	if handle == "" {
 		server.Fail(gc, server.ErrBadRequest, "handle is required")
 		return
@@ -1325,21 +1325,21 @@ func (h *ChannelHandler) ResolveHandle(w http.ResponseWriter, r *http.Request) {
 // GetMyChannels returns all channels for the authenticated user.
 // GET /api/v1/channels/me
 func (h *ChannelHandler) GetMyChannels(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	val := c.Get("claims")
-	if val == nil {
+
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
 		server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 		return
 	}
 	claims := val.(*auth.Claims)
 
-	page, _ := strconv.Atoi(c.Query("page"))
+	page, _ := strconv.Atoi(gc.Query("page"))
 	if page < 1 {
 		page = 1
 	}
-	pageSize, _ := strconv.Atoi(c.Query("page_size"))
+	pageSize, _ := strconv.Atoi(gc.Query("page_size"))
 	if pageSize < 1 {
 		pageSize = 20
 	}
@@ -1367,10 +1367,10 @@ func (h *ChannelHandler) GetMyChannels(w http.ResponseWriter, r *http.Request) {
 // GetChannelLimits returns channel creation limits for the current user.
 // GET /api/v1/system/config/channel-limits
 func (h *ChannelHandler) GetChannelLimits(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	val := c.Get("claims")
+
+	val, _ := gc.Get("claims")
 	isAdmin := false
 	var userID string
 	if val != nil {
@@ -1395,10 +1395,10 @@ func (h *ChannelHandler) GetChannelLimits(w http.ResponseWriter, r *http.Request
 // ValidateHandle checks if a handle is available.
 // GET /api/v1/channels/validate-handle?handle=xxx
 func (h *ChannelHandler) ValidateHandle(w http.ResponseWriter, r *http.Request) {
-	c := handler.NewGinContextAdapterFromHTTP(w, r)
-	gc := c.GinContext()
+	gc := ginadapter.GetGinContext(r)
 
-	handle := c.Query("handle")
+
+	handle := gc.Query("handle")
 	if handle == "" {
 		server.Fail(gc, server.ErrBadRequest, "handle query parameter is required")
 		return
