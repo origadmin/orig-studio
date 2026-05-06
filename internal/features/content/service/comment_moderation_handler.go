@@ -1,6 +1,7 @@
 package service
 
 import (
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -8,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/internal/infra/auth"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/helpers/repo"
 	contentbiz "origadmin/application/origcms/internal/features/content/biz"
 	"origadmin/application/origcms/internal/server"
@@ -29,20 +31,23 @@ func (h *CommentModerationHandler) RegisterRoutes(apiV1 *gin.RouterGroup) {
 	adminComments := apiV1.Group("/admin/comments")
 	adminComments.Use(server.JWTMiddleware(h.jwtMgr), server.AdminMiddleware(h.jwtMgr))
 	{
-		adminComments.GET("", h.listAdminComments())
-		adminComments.GET("/stats", h.getCommentStats())
-		adminComments.DELETE("/:id", h.deleteComment())
-		adminComments.POST("/:id/approve", h.approveComment())
-		adminComments.POST("/:id/reject", h.rejectComment())
-		adminComments.POST("/:id/block", h.blockComment())
-		adminComments.POST("/:id/unblock", h.unblockComment())
-		adminComments.POST("/:id/dismiss-reports", h.dismissReports())
-		adminComments.POST("/batch-approve", h.batchApproveComments())
-		adminComments.POST("/batch-reject", h.batchRejectComments())
-		adminComments.GET("/:id/reports", h.getCommentReports())
+		r := ginadapter.NewStdRouterAdapter(adminComments)
+		r.GET("", h.listAdminComments())
+		r.GET("/stats", h.getCommentStats())
+		r.DELETE("/:id", h.deleteComment())
+		r.POST("/:id/approve", h.approveComment())
+		r.POST("/:id/reject", h.rejectComment())
+		r.POST("/:id/block", h.blockComment())
+		r.POST("/:id/unblock", h.unblockComment())
+		r.POST("/:id/dismiss-reports", h.dismissReports())
+		r.POST("/batch-approve", h.batchApproveComments())
+		r.POST("/batch-reject", h.batchRejectComments())
+		r.GET("/:id/reports", h.getCommentReports())
 	}
 
-	apiV1.POST("/comments/:id/report", server.JWTMiddleware(h.jwtMgr), h.reportComment())
+	// Report comment (authenticated user)
+	reportR := ginadapter.NewStdRouterAdapter(apiV1)
+	reportR.POST("/comments/:id/report", server.WithJWT(h.jwtMgr, h.reportComment()))
 }
 
 // CommentListItem is the DTO for a comment in admin list responses.
@@ -128,19 +133,20 @@ type ReportResultDTO struct {
 	Status      string `json:"status"`
 }
 
-func (h *CommentModerationHandler) deleteComment() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		ctx := c.Request.Context()
+func (h *CommentModerationHandler) deleteComment() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		ctx := r.Context()
 
-		id := c.Param("id")
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "comment ID is required")
+			server.Fail(gc, server.ErrBadRequest, "comment ID is required")
 			return
 		}
 
-		claims, ok := server.GetClaims(c)
+		claims, ok := server.GetClaims(gc)
 		if !ok {
-			server.Fail(c, server.ErrUnauthorized, "unauthorized")
+			server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 			return
 		}
 		adminID := claims.GetUserID()
@@ -148,33 +154,34 @@ func (h *CommentModerationHandler) deleteComment() gin.HandlerFunc {
 		err := h.moderationUC.DeleteComment(ctx, id, adminID)
 		if err != nil {
 			if strings.Contains(err.Error(), "failed to get comment") {
-				server.Fail(c, server.ErrCommentNotFound, "comment not found")
+				server.Fail(gc, server.ErrCommentNotFound, "comment not found")
 			} else {
-				server.Fail(c, server.ErrInternal, err.Error())
+				server.Fail(gc, server.ErrInternal, err.Error())
 			}
 			return
 		}
 
-		server.OK(c, gin.H{"id": id, "deleted": true})
+		server.OK(gc, gin.H{"id": id, "deleted": true})
 	}
 }
 
-func (h *CommentModerationHandler) listAdminComments() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		ctx := c.Request.Context()
+func (h *CommentModerationHandler) listAdminComments() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		ctx := r.Context()
 
-		status := c.Query("status")
-		mediaID := c.Query("media_id")
-		reportStatus := c.Query("report_status")
-		tree := c.Query("tree") == "true"
-		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+		status := gc.Query("status")
+		mediaID := gc.Query("media_id")
+		reportStatus := gc.Query("report_status")
+		tree := gc.Query("tree") == "true"
+		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
 		// Normalize pagination parameters
 		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 		items, total, err := h.moderationUC.ListAdminComments(ctx, mediaID, status, reportStatus, tree, page, pageSize)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
@@ -183,23 +190,24 @@ func (h *CommentModerationHandler) listAdminComments() gin.HandlerFunc {
 			result[i] = mapBizItemToDTO(item)
 		}
 
-		server.Page(c, result, int64(total), page, pageSize)
+		server.Page(gc, result, int64(total), page, pageSize)
 	}
 }
 
-func (h *CommentModerationHandler) getCommentStats() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		ctx := c.Request.Context()
+func (h *CommentModerationHandler) getCommentStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		ctx := r.Context()
 
-		mediaID := c.Query("media_id")
+		mediaID := gc.Query("media_id")
 
 		stats, err := h.moderationUC.GetCommentStats(ctx, mediaID)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, CommentStatsDTO{
+		server.OK(gc, CommentStatsDTO{
 			Pending:         stats.Pending,
 			Approved:        stats.Approved,
 			Rejected:        stats.Rejected,
@@ -210,19 +218,20 @@ func (h *CommentModerationHandler) getCommentStats() gin.HandlerFunc {
 	}
 }
 
-func (h *CommentModerationHandler) approveComment() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		ctx := c.Request.Context()
+func (h *CommentModerationHandler) approveComment() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		ctx := r.Context()
 
-		id := c.Param("id")
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "comment ID is required")
+			server.Fail(gc, server.ErrBadRequest, "comment ID is required")
 			return
 		}
 
-		claims, ok := server.GetClaims(c)
+		claims, ok := server.GetClaims(gc)
 		if !ok {
-			server.Fail(c, server.ErrUnauthorized, "unauthorized")
+			server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 			return
 		}
 		adminID := claims.GetUserID()
@@ -230,18 +239,18 @@ func (h *CommentModerationHandler) approveComment() gin.HandlerFunc {
 		err := h.moderationUC.ModerateComment(ctx, id, "approve", adminID)
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid status transition") {
-				server.Fail(c, server.ErrBadRequest, err.Error())
+				server.Fail(gc, server.ErrBadRequest, err.Error())
 			} else if strings.Contains(err.Error(), "failed to get comment") {
-				server.Fail(c, server.ErrCommentNotFound, "comment not found")
+				server.Fail(gc, server.ErrCommentNotFound, "comment not found")
 			} else {
-				server.Fail(c, server.ErrInternal, err.Error())
+				server.Fail(gc, server.ErrInternal, err.Error())
 			}
 			return
 		}
 
 		commentObj, getErr := h.moderationUC.GetComment(ctx, id)
 		if getErr != nil {
-			server.OK(c, ModerationResultDTO{
+			server.OK(gc, ModerationResultDTO{
 				ID:          id,
 				Status:      "APPROVED",
 				ModeratedBy: adminID,
@@ -264,23 +273,24 @@ func (h *CommentModerationHandler) approveComment() gin.HandlerFunc {
 			resp.ModeratedBy = *commentObj.ModeratedBy
 		}
 
-		server.OK(c, resp)
+		server.OK(gc, resp)
 	}
 }
 
-func (h *CommentModerationHandler) rejectComment() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		ctx := c.Request.Context()
+func (h *CommentModerationHandler) rejectComment() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		ctx := r.Context()
 
-		id := c.Param("id")
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "comment ID is required")
+			server.Fail(gc, server.ErrBadRequest, "comment ID is required")
 			return
 		}
 
-		claims, ok := server.GetClaims(c)
+		claims, ok := server.GetClaims(gc)
 		if !ok {
-			server.Fail(c, server.ErrUnauthorized, "unauthorized")
+			server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 			return
 		}
 		adminID := claims.GetUserID()
@@ -288,18 +298,18 @@ func (h *CommentModerationHandler) rejectComment() gin.HandlerFunc {
 		err := h.moderationUC.ModerateComment(ctx, id, "reject", adminID)
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid status transition") {
-				server.Fail(c, server.ErrBadRequest, err.Error())
+				server.Fail(gc, server.ErrBadRequest, err.Error())
 			} else if strings.Contains(err.Error(), "failed to get comment") {
-				server.Fail(c, server.ErrCommentNotFound, "comment not found")
+				server.Fail(gc, server.ErrCommentNotFound, "comment not found")
 			} else {
-				server.Fail(c, server.ErrInternal, err.Error())
+				server.Fail(gc, server.ErrInternal, err.Error())
 			}
 			return
 		}
 
 		commentObj, getErr := h.moderationUC.GetComment(ctx, id)
 		if getErr != nil {
-			server.OK(c, ModerationResultDTO{
+			server.OK(gc, ModerationResultDTO{
 				ID:          id,
 				Status:      "REJECTED",
 				ModeratedBy: adminID,
@@ -323,17 +333,18 @@ func (h *CommentModerationHandler) rejectComment() gin.HandlerFunc {
 			resp.ModeratedAt = time.Now().Format(time.RFC3339)
 		}
 
-		server.OK(c, resp)
+		server.OK(gc, resp)
 	}
 }
 
-func (h *CommentModerationHandler) batchApproveComments() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		ctx := c.Request.Context()
+func (h *CommentModerationHandler) batchApproveComments() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		ctx := r.Context()
 
-		claims, ok := server.GetClaims(c)
+		claims, ok := server.GetClaims(gc)
 		if !ok {
-			server.Fail(c, server.ErrUnauthorized, "unauthorized")
+			server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 			return
 		}
 		adminID := claims.GetUserID()
@@ -341,27 +352,27 @@ func (h *CommentModerationHandler) batchApproveComments() gin.HandlerFunc {
 		var req struct {
 			IDs []string `json:"ids"`
 		}
-		if err := c.ShouldBindJSON(&req); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&req); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		if len(req.IDs) == 0 {
-			server.Fail(c, server.ErrBadRequest, "ids is required")
+			server.Fail(gc, server.ErrBadRequest, "ids is required")
 			return
 		}
 		if len(req.IDs) > 100 {
-			server.Fail(c, server.ErrBadRequest, "batch size cannot exceed 100")
+			server.Fail(gc, server.ErrBadRequest, "batch size cannot exceed 100")
 			return
 		}
 
 		updatedCount, skippedCount, err := h.moderationUC.BatchModerateComments(ctx, req.IDs, "approve", adminID)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, BatchResultDTO{
+		server.OK(gc, BatchResultDTO{
 			UpdatedCount: updatedCount,
 			SkippedCount: skippedCount,
 			Message:      "batch approve completed",
@@ -369,13 +380,14 @@ func (h *CommentModerationHandler) batchApproveComments() gin.HandlerFunc {
 	}
 }
 
-func (h *CommentModerationHandler) batchRejectComments() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		ctx := c.Request.Context()
+func (h *CommentModerationHandler) batchRejectComments() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		ctx := r.Context()
 
-		claims, ok := server.GetClaims(c)
+		claims, ok := server.GetClaims(gc)
 		if !ok {
-			server.Fail(c, server.ErrUnauthorized, "unauthorized")
+			server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 			return
 		}
 		adminID := claims.GetUserID()
@@ -383,27 +395,27 @@ func (h *CommentModerationHandler) batchRejectComments() gin.HandlerFunc {
 		var req struct {
 			IDs []string `json:"ids"`
 		}
-		if err := c.ShouldBindJSON(&req); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&req); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		if len(req.IDs) == 0 {
-			server.Fail(c, server.ErrBadRequest, "ids is required")
+			server.Fail(gc, server.ErrBadRequest, "ids is required")
 			return
 		}
 		if len(req.IDs) > 100 {
-			server.Fail(c, server.ErrBadRequest, "batch size cannot exceed 100")
+			server.Fail(gc, server.ErrBadRequest, "batch size cannot exceed 100")
 			return
 		}
 
 		updatedCount, skippedCount, err := h.moderationUC.BatchModerateComments(ctx, req.IDs, "reject", adminID)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, BatchResultDTO{
+		server.OK(gc, BatchResultDTO{
 			UpdatedCount: updatedCount,
 			SkippedCount: skippedCount,
 			Message:      "batch reject completed",
@@ -411,19 +423,20 @@ func (h *CommentModerationHandler) batchRejectComments() gin.HandlerFunc {
 	}
 }
 
-func (h *CommentModerationHandler) getCommentReports() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		ctx := c.Request.Context()
+func (h *CommentModerationHandler) getCommentReports() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		ctx := r.Context()
 
-		id := c.Param("id")
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "comment ID is required")
+			server.Fail(gc, server.ErrBadRequest, "comment ID is required")
 			return
 		}
 
 		reports, err := h.moderationUC.GetCommentReports(ctx, id)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
@@ -446,7 +459,7 @@ func (h *CommentModerationHandler) getCommentReports() gin.HandlerFunc {
 			reportItems[i] = entry
 		}
 
-		server.OK(c, CommentReportsResultDTO{
+		server.OK(gc, CommentReportsResultDTO{
 			CommentID:   id,
 			ReportCount: len(reports),
 			Reports:     reportItems,
@@ -454,19 +467,20 @@ func (h *CommentModerationHandler) getCommentReports() gin.HandlerFunc {
 	}
 }
 
-func (h *CommentModerationHandler) reportComment() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		ctx := c.Request.Context()
+func (h *CommentModerationHandler) reportComment() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		ctx := r.Context()
 
-		id := c.Param("id")
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "comment ID is required")
+			server.Fail(gc, server.ErrBadRequest, "comment ID is required")
 			return
 		}
 
-		claims, ok := server.GetClaims(c)
+		claims, ok := server.GetClaims(gc)
 		if !ok {
-			server.Fail(c, server.ErrUnauthorized, "unauthorized")
+			server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 			return
 		}
 		userID := claims.GetUserID()
@@ -475,13 +489,13 @@ func (h *CommentModerationHandler) reportComment() gin.HandlerFunc {
 			Reason      string `json:"reason"`
 			Description string `json:"description"`
 		}
-		if err := c.ShouldBindJSON(&req); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&req); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		if req.Reason == "" {
-			server.Fail(c, server.ErrBadRequest, "reason is required")
+			server.Fail(gc, server.ErrBadRequest, "reason is required")
 			return
 		}
 
@@ -492,29 +506,29 @@ func (h *CommentModerationHandler) reportComment() gin.HandlerFunc {
 			"OTHER":         true,
 		}
 		if !validReasons[req.Reason] {
-			server.Fail(c, server.ErrBadRequest, "invalid report reason, must be one of: SPAM, HARASSMENT, INAPPROPRIATE, OTHER")
+			server.Fail(gc, server.ErrBadRequest, "invalid report reason, must be one of: SPAM, HARASSMENT, INAPPROPRIATE, OTHER")
 			return
 		}
 
 		reportCount, _, err := h.moderationUC.ReportComment(ctx, id, userID, req.Reason, req.Description)
 		if err != nil {
 			if strings.Contains(err.Error(), "already reported") {
-				server.Fail(c, server.ErrConflict, err.Error())
+				server.Fail(gc, server.ErrConflict, err.Error())
 				return
 			}
 			if strings.Contains(err.Error(), "cannot report your own comment") {
-				server.Fail(c, server.ErrBadRequest, err.Error())
+				server.Fail(gc, server.ErrBadRequest, err.Error())
 				return
 			}
 			if strings.Contains(err.Error(), "failed to get comment") {
-				server.Fail(c, server.ErrCommentNotFound, "comment not found")
+				server.Fail(gc, server.ErrCommentNotFound, "comment not found")
 				return
 			}
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, ReportResultDTO{
+		server.OK(gc, ReportResultDTO{
 			Message:     "report submitted",
 			ReportCount: reportCount,
 			Status:      "reported",
@@ -573,19 +587,20 @@ type DismissReportsResultDTO struct {
 	Message        string `json:"message"`
 }
 
-func (h *CommentModerationHandler) blockComment() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		ctx := c.Request.Context()
+func (h *CommentModerationHandler) blockComment() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		ctx := r.Context()
 
-		id := c.Param("id")
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "comment ID is required")
+			server.Fail(gc, server.ErrBadRequest, "comment ID is required")
 			return
 		}
 
-		claims, ok := server.GetClaims(c)
+		claims, ok := server.GetClaims(gc)
 		if !ok {
-			server.Fail(c, server.ErrUnauthorized, "unauthorized")
+			server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 			return
 		}
 		adminID := claims.GetUserID()
@@ -593,11 +608,11 @@ func (h *CommentModerationHandler) blockComment() gin.HandlerFunc {
 		result, err := h.moderationUC.BlockComment(ctx, id, adminID)
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid status transition") {
-				server.Fail(c, server.ErrBadRequest, err.Error())
+				server.Fail(gc, server.ErrBadRequest, err.Error())
 			} else if strings.Contains(err.Error(), "failed to get comment") {
-				server.Fail(c, server.ErrCommentNotFound, "comment not found")
+				server.Fail(gc, server.ErrCommentNotFound, "comment not found")
 			} else {
-				server.Fail(c, server.ErrInternal, err.Error())
+				server.Fail(gc, server.ErrInternal, err.Error())
 			}
 			return
 		}
@@ -617,23 +632,24 @@ func (h *CommentModerationHandler) blockComment() gin.HandlerFunc {
 			}
 		}
 
-		server.OK(c, resp)
+		server.OK(gc, resp)
 	}
 }
 
-func (h *CommentModerationHandler) unblockComment() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		ctx := c.Request.Context()
+func (h *CommentModerationHandler) unblockComment() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		ctx := r.Context()
 
-		id := c.Param("id")
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "comment ID is required")
+			server.Fail(gc, server.ErrBadRequest, "comment ID is required")
 			return
 		}
 
-		claims, ok := server.GetClaims(c)
+		claims, ok := server.GetClaims(gc)
 		if !ok {
-			server.Fail(c, server.ErrUnauthorized, "unauthorized")
+			server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 			return
 		}
 		adminID := claims.GetUserID()
@@ -641,11 +657,11 @@ func (h *CommentModerationHandler) unblockComment() gin.HandlerFunc {
 		result, err := h.moderationUC.UnblockComment(ctx, id, adminID)
 		if err != nil {
 			if strings.Contains(err.Error(), "invalid status transition") {
-				server.Fail(c, server.ErrBadRequest, err.Error())
+				server.Fail(gc, server.ErrBadRequest, err.Error())
 			} else if strings.Contains(err.Error(), "failed to get comment") {
-				server.Fail(c, server.ErrCommentNotFound, "comment not found")
+				server.Fail(gc, server.ErrCommentNotFound, "comment not found")
 			} else {
-				server.Fail(c, server.ErrInternal, err.Error())
+				server.Fail(gc, server.ErrInternal, err.Error())
 			}
 			return
 		}
@@ -665,23 +681,24 @@ func (h *CommentModerationHandler) unblockComment() gin.HandlerFunc {
 			}
 		}
 
-		server.OK(c, resp)
+		server.OK(gc, resp)
 	}
 }
 
-func (h *CommentModerationHandler) dismissReports() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		ctx := c.Request.Context()
+func (h *CommentModerationHandler) dismissReports() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		ctx := r.Context()
 
-		id := c.Param("id")
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "comment ID is required")
+			server.Fail(gc, server.ErrBadRequest, "comment ID is required")
 			return
 		}
 
-		claims, ok := server.GetClaims(c)
+		claims, ok := server.GetClaims(gc)
 		if !ok {
-			server.Fail(c, server.ErrUnauthorized, "unauthorized")
+			server.Fail(gc, server.ErrUnauthorized, "unauthorized")
 			return
 		}
 		adminID := claims.GetUserID()
@@ -689,14 +706,14 @@ func (h *CommentModerationHandler) dismissReports() gin.HandlerFunc {
 		result, err := h.moderationUC.DismissReports(ctx, id, adminID)
 		if err != nil {
 			if strings.Contains(err.Error(), "failed to get comment") {
-				server.Fail(c, server.ErrCommentNotFound, "comment not found")
+				server.Fail(gc, server.ErrCommentNotFound, "comment not found")
 			} else {
-				server.Fail(c, server.ErrInternal, err.Error())
+				server.Fail(gc, server.ErrInternal, err.Error())
 			}
 			return
 		}
 
-		server.OK(c, DismissReportsResultDTO{
+		server.OK(gc, DismissReportsResultDTO{
 			CommentID:      result.CommentID,
 			DismissedCount: result.DismissedCount,
 			ReportCount:    result.ReportCount,

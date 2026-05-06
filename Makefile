@@ -199,13 +199,10 @@ release-%:
 
 .PHONY: build-frontend build-server build-server-dev run-server run-server-dev
 
-build-frontend: ## 🎨 Build frontend React SPA and copy to embed directory
+build-frontend: ## 🎨 Build frontend React SPA (output to web/dist, embedded by Go directly)
 	@echo "==> Building frontend..."
 	cd web && bun install && bun run build
-	@echo "==> Copying web/dist -> internal/frontend/dist/"
-	@$(call RMDIR,internal/frontend/dist)
-	@$(call CPDIR,web/dist,internal/frontend/dist)
-	@echo "✅ Frontend build complete."
+	@echo "✅ Frontend build complete (web/dist/)."
 
 build-server: build-frontend ## 📦 Build production server (frontend embedded, single binary)
 	@echo "==> Building server binary (production, frontend embedded)..."

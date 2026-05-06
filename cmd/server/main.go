@@ -13,7 +13,6 @@ import (
 	"flag"
 
 	"origadmin/application/origcms/internal/conf"
-	"origadmin/application/origcms/internal/handler"
 	confhelper "origadmin/application/origcms/internal/helpers/conf"
 	"origadmin/application/origcms/internal/server"
 
@@ -94,7 +93,7 @@ func main() {
 
 	// Create server
 	srv := server.NewServer(
-		[]handler.Module{
+		[]server.Module{
 			deps.AuthHandler,
 			deps.PermissionHandler,
 			deps.UserHandler,

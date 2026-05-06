@@ -25,7 +25,6 @@ import (
 	authdal "origadmin/application/origcms/internal/features/auth/dal"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/migrate"
-	"origadmin/application/origcms/internal/handler"
 	"origadmin/application/origcms/internal/server"
 	adminbiz "origadmin/application/origcms/internal/features/admin/biz"
 	admindal "origadmin/application/origcms/internal/features/admin/dal"
@@ -228,7 +227,7 @@ func SetupTestServer(t *testing.T) *TestServer {
 	})
 
 	srv := server.NewServer(
-		[]handler.Module{
+		[]server.Module{
 			authHandler,
 			userHandler,
 			mediaHandler,

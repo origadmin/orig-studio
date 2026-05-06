@@ -13,15 +13,21 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/origadmin/runtime/log"
-	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/frontend"
-	"origadmin/application/origcms/internal/handler"
+	"origadmin/application/origcms/internal/infra/auth"
+	"origadmin/application/origcms/web"
 )
+
+// Module defines the interface for route registration using gin.RouterGroup.
+// All feature-module handlers must implement this interface so that the
+// server can iterate over them uniformly.
+type Module interface {
+	RegisterRoutes(rg *gin.RouterGroup)
+}
 
 // Server represents the application server.
 type Server struct {
-	modules         []handler.Module
+	modules         []Module
 	entityClient    *entity.Client
 	jwtMgr          *auth.Manager
 	storageBasePath string // base directory for static file serving (resolved to absolute path)
@@ -29,7 +35,7 @@ type Server struct {
 
 // NewServer creates a new server instance.
 func NewServer(
-	modules []handler.Module,
+	modules []Module,
 	entityClient *entity.Client,
 	jwtMgr *auth.Manager,
 	storageBasePath string,
@@ -95,7 +101,7 @@ func (s *Server) Start(addr string) error {
 	s.RegisterRoutes(r)
 
 	// Register frontend SPA routes (auto-detect: serves embedded dist if present)
-	frontend.RegisterRoutes(r)
+	web.RegisterRoutes(r)
 
 	log.Infof("origcms server starting, addr: %s", addr)
 	return r.Run(addr)

@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/server"
 )
@@ -41,15 +42,17 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	adminReview := rg.Group("/admin/medias/review")
 	adminReview.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
 	{
-		adminReview.GET("/pending", h.stubReviewPending())
-		adminReview.GET("/history", h.stubReviewHistory())
-		adminReview.POST("/batch", h.stubReviewBatch())
+		r := ginadapter.NewStdRouterAdapter(adminReview)
+		r.GET("/pending", h.stubReviewPending())
+		r.GET("/history", h.stubReviewHistory())
+		r.POST("/batch", h.stubReviewBatch())
 	}
 	adminMediaReview := rg.Group("/admin/medias/:id")
 	adminMediaReview.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
 	{
-		adminMediaReview.PUT("/review", h.stubReviewMedia())
-		adminMediaReview.GET("/review-logs", h.stubReviewLogs())
+		r := ginadapter.NewStdRouterAdapter(adminMediaReview)
+		r.PUT("/review", h.stubReviewMedia())
+		r.GET("/review-logs", h.stubReviewLogs())
 	}
 
 	// ================================
@@ -64,11 +67,12 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	adminNavItems := rg.Group("/admin/nav-items")
 	adminNavItems.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
 	{
-		adminNavItems.GET("", h.stubNavItemList())
-		adminNavItems.POST("", h.stubNavItemCreate())
-		adminNavItems.PUT("/:id", h.stubNavItemUpdate())
-		adminNavItems.DELETE("/:id", h.stubNavItemDelete())
-		adminNavItems.PUT("/reorder", h.stubNavItemReorder())
+		r := ginadapter.NewStdRouterAdapter(adminNavItems)
+		r.GET("", h.stubNavItemList())
+		r.POST("", h.stubNavItemCreate())
+		r.PUT("/:id", h.stubNavItemUpdate())
+		r.DELETE("/:id", h.stubNavItemDelete())
+		r.PUT("/reorder", h.stubNavItemReorder())
 	}
 
 	// ================================
@@ -77,20 +81,22 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	adminBanners := rg.Group("/admin/banners")
 	adminBanners.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
 	{
-		adminBanners.GET("", h.stubBannerList())
-		adminBanners.POST("", h.stubBannerCreate())
-		adminBanners.PUT("/:id", h.stubBannerUpdate())
-		adminBanners.POST("/:id/toggle", h.stubBannerToggle())
+		r := ginadapter.NewStdRouterAdapter(adminBanners)
+		r.GET("", h.stubBannerList())
+		r.POST("", h.stubBannerCreate())
+		r.PUT("/:id", h.stubBannerUpdate())
+		r.POST("/:id/toggle", h.stubBannerToggle())
 	}
 
 	// ================================
 	// 6. Media Metadata / Sprite / Subtitle / Download/Stream/Thumbnail / Likes/Favorites/Shares / Update/Delete
 	// ================================
-	medias := rg.Group("/medias")
+	mediasR := ginadapter.NewStdRouterAdapter(rg)
+	medias := mediasR.Group("/medias")
 	{
 		// Metadata
 		medias.GET("/:id/metadata", h.stubMediaMetadata())
-		medias.POST("/:id/metadata/mining", server.JWTMiddleware(h.jwt), h.stubMediaMetadataMining())
+		medias.POST("/:id/metadata/mining", server.WithJWT(h.jwt, h.stubMediaMetadataMining()))
 		medias.GET("/:id/metadata/status", h.stubMediaMetadataStatus())
 		medias.GET("/:id/metadata/key-frames", h.stubMediaMetadataKeyFrames())
 		medias.GET("/:id/metadata/audio-waveform", h.stubMediaMetadataAudioWaveform())
@@ -103,7 +109,7 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 
 		// Subtitle
 		medias.GET("/:id/subtitles", h.stubSubtitleList())
-		medias.POST("/:id/subtitles", server.JWTMiddleware(h.jwt), h.stubSubtitleCreate())
+		medias.POST("/:id/subtitles", server.WithJWT(h.jwt, h.stubSubtitleCreate()))
 
 		// Download/Stream/Thumbnail
 		medias.GET("/:id/download", h.stubMediaDownload())
@@ -116,26 +122,27 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 
 		// Shares
 		medias.GET("/:id/shares", h.stubMediaShares())
-		medias.POST("/:id/shares", server.JWTMiddleware(h.jwt), h.stubMediaShareCreate())
+		medias.POST("/:id/shares", server.WithJWT(h.jwt, h.stubMediaShareCreate()))
 
 		// Update/Delete
-		medias.PUT("/:id", server.JWTMiddleware(h.jwt), h.stubMediaUpdate())
-		medias.DELETE("/:id", server.JWTMiddleware(h.jwt), h.stubMediaDelete())
+		medias.PUT("/:id", server.WithJWT(h.jwt, h.stubMediaUpdate()))
+		medias.DELETE("/:id", server.WithJWT(h.jwt, h.stubMediaDelete()))
 
 		// Upload alias
-		medias.POST("/upload", server.JWTMiddleware(h.jwt), h.stubMediaUpload())
+		medias.POST("/upload", server.WithJWT(h.jwt, h.stubMediaUpload()))
 
 		// Tasks (deprecated)
 		medias.GET("/:id/tasks", h.stubMediaTasks())
-		medias.POST("/:id/tasks/:taskId/retry", server.JWTMiddleware(h.jwt), h.stubMediaTaskRetry())
+		medias.POST("/:id/tasks/:taskId/retry", server.WithJWT(h.jwt, h.stubMediaTaskRetry()))
 	}
 
 	// ================================
 	// 7. Subtitle (root level)
 	// ================================
-	subtitles := rg.Group("/subtitles")
+	subtitlesR := ginadapter.NewStdRouterAdapter(rg)
+	subtitles := subtitlesR.Group("/subtitles")
 	{
-		subtitles.DELETE("/:id", server.JWTMiddleware(h.jwt), h.stubSubtitleDelete())
+		subtitles.DELETE("/:id", server.WithJWT(h.jwt, h.stubSubtitleDelete()))
 		subtitles.GET("/languages", h.stubSubtitleLanguages())
 	}
 
@@ -155,7 +162,8 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	adminStatsRevenue := rg.Group("/admin/stats")
 	adminStatsRevenue.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
 	{
-		adminStatsRevenue.GET("/revenue", h.stubAdminStatsRevenue())
+		r := ginadapter.NewStdRouterAdapter(adminStatsRevenue)
+		r.GET("/revenue", h.stubAdminStatsRevenue())
 	}
 
 	// ================================
@@ -170,7 +178,8 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	adminChannels := rg.Group("/admin/channels")
 	adminChannels.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
 	{
-		adminChannels.POST("", h.stubAdminChannelCreate())
+		r := ginadapter.NewStdRouterAdapter(adminChannels)
+		r.POST("", h.stubAdminChannelCreate())
 	}
 
 	// ================================
@@ -183,7 +192,8 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	notifications := rg.Group("/notifications")
 	notifications.Use(server.JWTMiddleware(h.jwt))
 	{
-		notifications.DELETE("/:id", h.stubNotificationDelete())
+		r := ginadapter.NewStdRouterAdapter(notifications)
+		r.DELETE("/:id", h.stubNotificationDelete())
 	}
 
 	// ================================
@@ -191,11 +201,12 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	// ================================
 	users := rg.Group("/users")
 	{
-		users.GET("/:id/subscription", h.stubUserSubscription())
-		users.POST("/:id/subscribe", server.JWTMiddleware(h.jwt), h.stubUserSubscribe())
-		users.DELETE("/:id/subscribe", server.JWTMiddleware(h.jwt), h.stubUserUnsubscribe())
-		users.PUT("/:id", server.JWTMiddleware(h.jwt), h.stubUserUpdate())
-		users.PATCH("/:id/status", server.JWTMiddleware(h.jwt), h.stubUserStatusUpdate())
+		r := ginadapter.NewStdRouterAdapter(users)
+		r.GET("/:id/subscription", h.stubUserSubscription())
+		r.POST("/:id/subscribe", server.WithJWT(h.jwt, h.stubUserSubscribe()))
+		r.DELETE("/:id/subscribe", server.WithJWT(h.jwt, h.stubUserUnsubscribe()))
+		r.PUT("/:id", server.WithJWT(h.jwt, h.stubUserUpdate()))
+		r.PATCH("/:id/status", server.WithJWT(h.jwt, h.stubUserStatusUpdate()))
 	}
 
 	// ================================
@@ -210,18 +221,20 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	// ================================
 	encoding := rg.Group("/encoding")
 	{
-		encoding.GET("/status", h.stubEncodingStatus())
-		encoding.GET("/events", h.stubEncodingEvents())
+		r := ginadapter.NewStdRouterAdapter(encoding)
+		r.GET("/status", h.stubEncodingStatus())
+		r.GET("/events", h.stubEncodingEvents())
 	}
 }
 
 // ==================== Admin Media Stubs ====================
 
-func (h *StubHandler) stubAdminMediaList() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
-		server.OK(c, gin.H{
+func (h *StubHandler) stubAdminMediaList() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
+		server.OK(gc, gin.H{
 			"code":    0,
 			"message": "ok",
 			"data": gin.H{
@@ -234,27 +247,31 @@ func (h *StubHandler) stubAdminMediaList() gin.HandlerFunc {
 	}
 }
 
-func (h *StubHandler) stubAdminMediaGet() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": nil})
+func (h *StubHandler) stubAdminMediaGet() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": nil})
 	}
 }
 
-func (h *StubHandler) stubAdminMediaUpdate() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": nil})
+func (h *StubHandler) stubAdminMediaUpdate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": nil})
 	}
 }
 
-func (h *StubHandler) stubAdminMediaDelete() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok"})
+func (h *StubHandler) stubAdminMediaDelete() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok"})
 	}
 }
 
-func (h *StubHandler) stubAdminMediaStats() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{
+func (h *StubHandler) stubAdminMediaStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{
 			"code":    0,
 			"message": "ok",
 			"data": gin.H{
@@ -267,68 +284,77 @@ func (h *StubHandler) stubAdminMediaStats() gin.HandlerFunc {
 	}
 }
 
-func (h *StubHandler) stubAdminMediaVariants() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
+func (h *StubHandler) stubAdminMediaVariants() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
 	}
 }
 
-func (h *StubHandler) stubAdminMediaState() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok"})
+func (h *StubHandler) stubAdminMediaState() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok"})
 	}
 }
 
-func (h *StubHandler) stubAdminMediaTasks() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": gin.H{
+func (h *StubHandler) stubAdminMediaTasks() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": gin.H{
 			"items": []interface{}{},
 			"total": 0,
 		}})
 	}
 }
 
-func (h *StubHandler) stubAdminMediaTaskRetry() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "retry initiated"})
+func (h *StubHandler) stubAdminMediaTaskRetry() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "retry initiated"})
 	}
 }
 
 // ==================== Review Stubs ====================
 
-func (h *StubHandler) stubReviewPending() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": gin.H{
+func (h *StubHandler) stubReviewPending() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": gin.H{
 			"items": []interface{}{},
 			"total": 0,
 		}})
 	}
 }
 
-func (h *StubHandler) stubReviewHistory() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": gin.H{
+func (h *StubHandler) stubReviewHistory() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": gin.H{
 			"items": []interface{}{},
 			"total": 0,
 		}})
 	}
 }
 
-func (h *StubHandler) stubReviewBatch() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "batch review completed"})
+func (h *StubHandler) stubReviewBatch() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "batch review completed"})
 	}
 }
 
-func (h *StubHandler) stubReviewMedia() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "review submitted"})
+func (h *StubHandler) stubReviewMedia() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "review submitted"})
 	}
 }
 
-func (h *StubHandler) stubReviewLogs() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": gin.H{
+func (h *StubHandler) stubReviewLogs() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": gin.H{
 			"items": []interface{}{},
 			"total": 0,
 		}})
@@ -337,67 +363,77 @@ func (h *StubHandler) stubReviewLogs() gin.HandlerFunc {
 
 // ==================== Nav Items Stubs ====================
 
-func (h *StubHandler) stubNavItemList() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
+func (h *StubHandler) stubNavItemList() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
 	}
 }
 
-func (h *StubHandler) stubNavItemCreate() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "created", "data": nil})
+func (h *StubHandler) stubNavItemCreate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "created", "data": nil})
 	}
 }
 
-func (h *StubHandler) stubNavItemUpdate() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "updated", "data": nil})
+func (h *StubHandler) stubNavItemUpdate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "updated", "data": nil})
 	}
 }
 
-func (h *StubHandler) stubNavItemDelete() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "deleted"})
+func (h *StubHandler) stubNavItemDelete() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "deleted"})
 	}
 }
 
-func (h *StubHandler) stubNavItemReorder() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "reordered"})
+func (h *StubHandler) stubNavItemReorder() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "reordered"})
 	}
 }
 
 // ==================== Banner Stubs ====================
 
-func (h *StubHandler) stubBannerList() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
+func (h *StubHandler) stubBannerList() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
 	}
 }
 
-func (h *StubHandler) stubBannerCreate() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "created", "data": nil})
+func (h *StubHandler) stubBannerCreate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "created", "data": nil})
 	}
 }
 
-func (h *StubHandler) stubBannerUpdate() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "updated", "data": nil})
+func (h *StubHandler) stubBannerUpdate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "updated", "data": nil})
 	}
 }
 
-func (h *StubHandler) stubBannerToggle() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "toggled"})
+func (h *StubHandler) stubBannerToggle() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "toggled"})
 	}
 }
 
 // ==================== Metadata Stubs ====================
 
-func (h *StubHandler) stubMediaMetadata() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": gin.H{
+func (h *StubHandler) stubMediaMetadata() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": gin.H{
 			"duration":    0,
 			"resolution":  "",
 			"codec":       "",
@@ -408,124 +444,142 @@ func (h *StubHandler) stubMediaMetadata() gin.HandlerFunc {
 	}
 }
 
-func (h *StubHandler) stubMediaMetadataMining() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "mining started"})
+func (h *StubHandler) stubMediaMetadataMining() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "mining started"})
 	}
 }
 
-func (h *StubHandler) stubMediaMetadataStatus() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": gin.H{
+func (h *StubHandler) stubMediaMetadataStatus() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": gin.H{
 			"status":   "pending",
 			"progress": 0,
 		}})
 	}
 }
 
-func (h *StubHandler) stubMediaMetadataKeyFrames() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
+func (h *StubHandler) stubMediaMetadataKeyFrames() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
 	}
 }
 
-func (h *StubHandler) stubMediaMetadataAudioWaveform() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
+func (h *StubHandler) stubMediaMetadataAudioWaveform() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
 	}
 }
 
-func (h *StubHandler) stubMediaMetadataTextContent() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": ""})
+func (h *StubHandler) stubMediaMetadataTextContent() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": ""})
 	}
 }
 
-func (h *StubHandler) stubMediaMetadataSceneChanges() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
+func (h *StubHandler) stubMediaMetadataSceneChanges() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
 	}
 }
 
 // ==================== Sprite Stubs ====================
 
-func (h *StubHandler) stubSpriteVTT() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.String(http.StatusOK, "WEBVTT\n\n")
+func (h *StubHandler) stubSpriteVTT() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		gc.String(http.StatusOK, "WEBVTT\n\n")
 	}
 }
 
-func (h *StubHandler) stubSpriteJPG() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Status(http.StatusNotFound)
+func (h *StubHandler) stubSpriteJPG() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		gc.Status(http.StatusNotFound)
 	}
 }
 
 // ==================== Subtitle Stubs ====================
 
-func (h *StubHandler) stubSubtitleList() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
+func (h *StubHandler) stubSubtitleList() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
 	}
 }
 
-func (h *StubHandler) stubSubtitleCreate() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "created", "data": nil})
+func (h *StubHandler) stubSubtitleCreate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "created", "data": nil})
 	}
 }
 
-func (h *StubHandler) stubSubtitleDelete() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "deleted"})
+func (h *StubHandler) stubSubtitleDelete() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "deleted"})
 	}
 }
 
-func (h *StubHandler) stubSubtitleLanguages() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
+func (h *StubHandler) stubSubtitleLanguages() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
 	}
 }
 
 // ==================== Media Download/Stream/Thumbnail Stubs ====================
 
-func (h *StubHandler) stubMediaDownload() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.Fail(c, server.ErrNotFound, "download not available")
+func (h *StubHandler) stubMediaDownload() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.Fail(gc, server.ErrNotFound, "download not available")
 	}
 }
 
-func (h *StubHandler) stubMediaStream() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.Fail(c, server.ErrNotFound, "stream not available")
+func (h *StubHandler) stubMediaStream() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.Fail(gc, server.ErrNotFound, "stream not available")
 	}
 }
 
-func (h *StubHandler) stubMediaThumbnail() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Status(http.StatusNotFound)
+func (h *StubHandler) stubMediaThumbnail() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		gc.Status(http.StatusNotFound)
 	}
 }
 
 // ==================== Regeneration Stubs ====================
 
-func (h *StubHandler) stubRegenerateSprite() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "sprite regeneration started"})
+func (h *StubHandler) stubRegenerateSprite() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "sprite regeneration started"})
 	}
 }
 
-func (h *StubHandler) stubRegenerateThumbnail() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "thumbnail regeneration started"})
+func (h *StubHandler) stubRegenerateThumbnail() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "thumbnail regeneration started"})
 	}
 }
 
 // ==================== Admin Stats Revenue Stub ====================
 
-func (h *StubHandler) stubAdminStatsRevenue() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{
+func (h *StubHandler) stubAdminStatsRevenue() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{
 			"code":    0,
 			"message": "ok",
 			"data": gin.H{
@@ -540,95 +594,108 @@ func (h *StubHandler) stubAdminStatsRevenue() gin.HandlerFunc {
 
 // ==================== Admin Settings Category/Key Stubs ====================
 
-func (h *StubHandler) stubAdminSettingsCategory() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
+func (h *StubHandler) stubAdminSettingsCategory() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": []interface{}{}})
 	}
 }
 
-func (h *StubHandler) stubAdminSettingsUpdateKey() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "updated"})
+func (h *StubHandler) stubAdminSettingsUpdateKey() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "updated"})
 	}
 }
 
-func (h *StubHandler) stubAdminSettingsDeleteKey() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "deleted"})
+func (h *StubHandler) stubAdminSettingsDeleteKey() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "deleted"})
 	}
 }
 
 // ==================== Admin Channel Create Stub ====================
 
-func (h *StubHandler) stubAdminChannelCreate() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "created", "data": nil})
+func (h *StubHandler) stubAdminChannelCreate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "created", "data": nil})
 	}
 }
 
 // ==================== Notification Delete Stub ====================
 
-func (h *StubHandler) stubNotificationDelete() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "deleted"})
+func (h *StubHandler) stubNotificationDelete() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "deleted"})
 	}
 }
 
 // ==================== User Subscription Stubs ====================
 
-func (h *StubHandler) stubUserSubscription() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": gin.H{
+func (h *StubHandler) stubUserSubscription() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": gin.H{
 			"is_subscribed": false,
 		}})
 	}
 }
 
-func (h *StubHandler) stubUserSubscribe() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "subscribed"})
+func (h *StubHandler) stubUserSubscribe() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "subscribed"})
 	}
 }
 
-func (h *StubHandler) stubUserUnsubscribe() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "unsubscribed"})
+func (h *StubHandler) stubUserUnsubscribe() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "unsubscribed"})
 	}
 }
 
 // ==================== User Update/Status Stubs ====================
 
-func (h *StubHandler) stubUserUpdate() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "updated", "data": nil})
+func (h *StubHandler) stubUserUpdate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "updated", "data": nil})
 	}
 }
 
-func (h *StubHandler) stubUserStatusUpdate() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "status updated"})
+func (h *StubHandler) stubUserStatusUpdate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "status updated"})
 	}
 }
 
 // ==================== Media Update/Delete Stubs ====================
 
-func (h *StubHandler) stubMediaUpdate() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "updated", "data": nil})
+func (h *StubHandler) stubMediaUpdate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "updated", "data": nil})
 	}
 }
 
-func (h *StubHandler) stubMediaDelete() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "deleted"})
+func (h *StubHandler) stubMediaDelete() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "deleted"})
 	}
 }
 
 // ==================== Media Likes/Favorites/Shares (plural) Stubs ====================
 
-func (h *StubHandler) stubMediaLikes() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{
+func (h *StubHandler) stubMediaLikes() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{
 			"is_liked":      false,
 			"is_disliked":   false,
 			"like_count":    0,
@@ -637,69 +704,77 @@ func (h *StubHandler) stubMediaLikes() gin.HandlerFunc {
 	}
 }
 
-func (h *StubHandler) stubMediaLikeToggle() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{
+func (h *StubHandler) stubMediaLikeToggle() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{
 			"is_liked":   true,
 			"like_count": 1,
 		})
 	}
 }
 
-func (h *StubHandler) stubMediaLikeRemove() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{
+func (h *StubHandler) stubMediaLikeRemove() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{
 			"is_liked":   false,
 			"like_count": 0,
 		})
 	}
 }
 
-func (h *StubHandler) stubMediaFavorites() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{
+func (h *StubHandler) stubMediaFavorites() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{
 			"is_favorited":   false,
 			"favorite_count": 0,
 		})
 	}
 }
 
-func (h *StubHandler) stubMediaFavoriteToggle() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{
+func (h *StubHandler) stubMediaFavoriteToggle() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{
 			"is_favorited":   true,
 			"favorite_count": 1,
 		})
 	}
 }
 
-func (h *StubHandler) stubMediaShares() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{
+func (h *StubHandler) stubMediaShares() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{
 			"share_count": 0,
 		})
 	}
 }
 
-func (h *StubHandler) stubMediaShareCreate() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "shared"})
+func (h *StubHandler) stubMediaShareCreate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "shared"})
 	}
 }
 
 // ==================== Media Upload Stub ====================
 
-func (h *StubHandler) stubMediaUpload() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "use /uploads/multipart for upload"})
+func (h *StubHandler) stubMediaUpload() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "use /uploads/multipart for upload"})
 	}
 }
 
 // ==================== Encoding Status/Events Stubs ====================
 
-func (h *StubHandler) stubEncodingStatus() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{
+func (h *StubHandler) stubEncodingStatus() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{
 			"total_tasks":  0,
 			"pending":      0,
 			"processing":   0,
@@ -710,25 +785,28 @@ func (h *StubHandler) stubEncodingStatus() gin.HandlerFunc {
 	}
 }
 
-func (h *StubHandler) stubEncodingEvents() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"events": []interface{}{}})
+func (h *StubHandler) stubEncodingEvents() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"events": []interface{}{}})
 	}
 }
 
 // ==================== Media Tasks (deprecated) Stubs ====================
 
-func (h *StubHandler) stubMediaTasks() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "ok", "data": gin.H{
+func (h *StubHandler) stubMediaTasks() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "ok", "data": gin.H{
 			"items": []interface{}{},
 			"total": 0,
 		}})
 	}
 }
 
-func (h *StubHandler) stubMediaTaskRetry() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		server.OK(c, gin.H{"code": 0, "message": "retry initiated"})
+func (h *StubHandler) stubMediaTaskRetry() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "retry initiated"})
 	}
 }

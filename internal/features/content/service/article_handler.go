@@ -12,7 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"origadmin/application/origcms/internal/handler"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/helpers/hashtag"
 	"origadmin/application/origcms/internal/helpers/repo"
@@ -46,7 +46,7 @@ func (h *ArticleHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	articlesGroup := rg.Group("/articles")
 	articlesGroup.Use(systemservice.ModuleGuard(h.settingUC, "module_articles"))
 
-	r := handler.NewGinRouterAdapter(articlesGroup)
+	r := ginadapter.NewStdRouterAdapter(articlesGroup)
 	articles := r.Group("")
 	{
 		// ================================
@@ -91,13 +91,13 @@ func (h *ArticleHandler) RegisterRoutes(rg *gin.RouterGroup) {
 
 func (h *ArticleHandler) listArticles() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		c := handler.NewGinContextAdapterFromHTTP(w, r)
+		gc := ginadapter.GetGinContext(r)
 
-		page, _ := strconv.Atoi(c.Query("page"))
+		page, _ := strconv.Atoi(gc.Query("page"))
 		if page == 0 {
 			page = 1
 		}
-		pageSize, _ := strconv.Atoi(c.Query("page_size"))
+		pageSize, _ := strconv.Atoi(gc.Query("page_size"))
 		if pageSize == 0 {
 			pageSize = 20
 		}
@@ -106,74 +106,74 @@ func (h *ArticleHandler) listArticles() http.HandlerFunc {
 
 		filters := map[string]interface{}{}
 
-		state := c.Query("state")
+		state := gc.Query("state")
 		if state == "" {
 			state = "published"
 		}
 		filters["state"] = state
 
-		if categoryIDStr := c.Query("category_id"); categoryIDStr != "" {
+		if categoryIDStr := gc.Query("category_id"); categoryIDStr != "" {
 			if catID, err := strconv.ParseInt(categoryIDStr, 10, 64); err == nil {
 				filters["category_id"] = catID
 			}
 		}
-		if keyword := c.Query("keyword"); keyword != "" {
+		if keyword := gc.Query("keyword"); keyword != "" {
 			_ = keyword
 		}
 
 		items, total, err := h.uc.List(r.Context(), page, pageSize, filters)
 		if err != nil {
-			server.Fail(c.GinContext(), server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.Page(c.GinContext(), items, int64(total), page, pageSize)
+		server.Page(gc, items, int64(total), page, pageSize)
 	}
 }
 
 func (h *ArticleHandler) getArticle() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		c := handler.NewGinContextAdapterFromHTTP(w, r)
-		id := c.Param("id")
+		gc := ginadapter.GetGinContext(r)
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c.GinContext(), server.ErrBadRequest, "article id is required")
+			server.Fail(gc, server.ErrBadRequest, "article id is required")
 			return
 		}
 
 		article, err := h.uc.Get(r.Context(), id)
 		if err != nil {
-			server.Fail(c.GinContext(), server.ErrNotFound, "article not found")
+			server.Fail(gc, server.ErrNotFound, "article not found")
 			return
 		}
 
-		server.OK(c.GinContext(), article)
+		server.OK(gc, article)
 	}
 }
 
 func (h *ArticleHandler) getArticleBySlug() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		c := handler.NewGinContextAdapterFromHTTP(w, r)
-		slug := c.Param("slug")
+		gc := ginadapter.GetGinContext(r)
+		slug := gc.Param("slug")
 		if slug == "" {
-			server.Fail(c.GinContext(), server.ErrBadRequest, "slug is required")
+			server.Fail(gc, server.ErrBadRequest, "slug is required")
 			return
 		}
 
 		article, err := h.uc.GetBySlug(r.Context(), slug)
 		if err != nil {
-			server.Fail(c.GinContext(), server.ErrNotFound, "article not found")
+			server.Fail(gc, server.ErrNotFound, "article not found")
 			return
 		}
 
-		server.OK(c.GinContext(), article)
+		server.OK(gc, article)
 	}
 }
 
 func (h *ArticleHandler) listFeaturedArticles() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		c := handler.NewGinContextAdapterFromHTTP(w, r)
+		gc := ginadapter.GetGinContext(r)
 
-		limit, _ := strconv.Atoi(c.Query("limit"))
+		limit, _ := strconv.Atoi(gc.Query("limit"))
 		if limit == 0 {
 			limit = 10
 		}
@@ -188,19 +188,19 @@ func (h *ArticleHandler) listFeaturedArticles() http.HandlerFunc {
 
 		items, _, err := h.uc.List(r.Context(), 1, limit, filters)
 		if err != nil {
-			server.Fail(c.GinContext(), server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c.GinContext(), items)
+		server.OK(gc, items)
 	}
 }
 
 func (h *ArticleHandler) listLatestArticles() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		c := handler.NewGinContextAdapterFromHTTP(w, r)
+		gc := ginadapter.GetGinContext(r)
 
-		limit, _ := strconv.Atoi(c.Query("limit"))
+		limit, _ := strconv.Atoi(gc.Query("limit"))
 		if limit == 0 {
 			limit = 10
 		}
@@ -214,16 +214,18 @@ func (h *ArticleHandler) listLatestArticles() http.HandlerFunc {
 
 		items, _, err := h.uc.List(r.Context(), 1, limit, filters)
 		if err != nil {
-			server.Fail(c.GinContext(), server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c.GinContext(), items)
+		server.OK(gc, items)
 	}
 }
 
-func (h *ArticleHandler) createArticle() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *ArticleHandler) createArticle() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+
 		var input struct {
 			Title      string   `json:"title" binding:"required"`
 			Slug       string   `json:"slug"`
@@ -237,18 +239,18 @@ func (h *ArticleHandler) createArticle() gin.HandlerFunc {
 			State      string   `json:"state"`
 		}
 
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		// Reject archived state from user-side requests
 		if input.State == "archived" {
-			server.Fail(c, server.ErrBadRequest, "invalid state, must be draft or published")
+			server.Fail(gc, server.ErrBadRequest, "invalid state, must be draft or published")
 			return
 		}
 
-		userID := extractUserID(c)
+		userID := extractUserID(gc)
 
 		slug := input.Slug
 		if slug == "" {
@@ -278,21 +280,23 @@ func (h *ArticleHandler) createArticle() gin.HandlerFunc {
 			Thumbnail:  input.Thumbnail,
 		}
 
-		created, err := h.uc.Create(c.Request.Context(), article)
+		created, err := h.uc.Create(r.Context(), article)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.Created(c, created)
+		server.Created(gc, created)
 	}
 }
 
-func (h *ArticleHandler) updateArticle() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *ArticleHandler) updateArticle() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "article id is required")
+			server.Fail(gc, server.ErrBadRequest, "article id is required")
 			return
 		}
 
@@ -309,27 +313,27 @@ func (h *ArticleHandler) updateArticle() gin.HandlerFunc {
 			State      string   `json:"state"`
 		}
 
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		// Reject archived state from user-side requests
 		if input.State == "archived" {
-			server.Fail(c, server.ErrBadRequest, "invalid state, must be draft or published")
+			server.Fail(gc, server.ErrBadRequest, "invalid state, must be draft or published")
 			return
 		}
 
-		existing, err := h.uc.Get(c.Request.Context(), id)
+		existing, err := h.uc.Get(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "article not found")
+			server.Fail(gc, server.ErrNotFound, "article not found")
 			return
 		}
 
 		// Ownership check: only the article owner can update
-		userID := extractUserID(c)
+		userID := extractUserID(gc)
 		if existing.UserID != userID {
-			server.Fail(c, server.ErrForbidden, "you can only edit your own articles")
+			server.Fail(gc, server.ErrForbidden, "you can only edit your own articles")
 			return
 		}
 
@@ -361,57 +365,61 @@ func (h *ArticleHandler) updateArticle() gin.HandlerFunc {
 			existing.State = input.State
 		}
 
-		updated, err := h.uc.Update(c.Request.Context(), existing)
+		updated, err := h.uc.Update(r.Context(), existing)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, updated)
+		server.OK(gc, updated)
 	}
 }
 
-func (h *ArticleHandler) deleteArticle() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *ArticleHandler) deleteArticle() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "article id is required")
+			server.Fail(gc, server.ErrBadRequest, "article id is required")
 			return
 		}
 
-		article, err := h.uc.Get(c.Request.Context(), id)
+		article, err := h.uc.Get(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "article not found")
+			server.Fail(gc, server.ErrNotFound, "article not found")
 			return
 		}
 
 		// Ownership check: only the article owner can delete
-		userID := extractUserID(c)
+		userID := extractUserID(gc)
 		if article.UserID != userID {
-			server.Fail(c, server.ErrForbidden, "you can only delete your own articles")
+			server.Fail(gc, server.ErrForbidden, "you can only delete your own articles")
 			return
 		}
 
 		// Only allow deleting draft articles
 		if article.State == "published" {
-			server.Fail(c, server.ErrBadRequest, "published articles cannot be deleted, please contact admin")
+			server.Fail(gc, server.ErrBadRequest, "published articles cannot be deleted, please contact admin")
 			return
 		}
 
-		if err := h.uc.Delete(c.Request.Context(), id); err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+		if err := h.uc.Delete(r.Context(), id); err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.OK(c, nil)
+		server.OK(gc, nil)
 	}
 }
 
-func (h *ArticleHandler) updateArticleState() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func (h *ArticleHandler) updateArticleState() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+
+		id := gc.Param("id")
 		if id == "" {
-			server.Fail(c, server.ErrBadRequest, "article id is required")
+			server.Fail(gc, server.ErrBadRequest, "article id is required")
 			return
 		}
 
@@ -419,59 +427,61 @@ func (h *ArticleHandler) updateArticleState() gin.HandlerFunc {
 			State string `json:"state" binding:"required"`
 		}
 
-		if err := c.ShouldBindJSON(&input); err != nil {
-			server.Fail(c, server.ErrBadRequest, err.Error())
+		if err := gc.ShouldBindJSON(&input); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
 			return
 		}
 
 		// Only allow draft and published states for user-side
 		validUserStates := map[string]bool{"draft": true, "published": true}
 		if !validUserStates[input.State] {
-			server.Fail(c, server.ErrBadRequest, "invalid state, must be draft or published")
+			server.Fail(gc, server.ErrBadRequest, "invalid state, must be draft or published")
 			return
 		}
 
 		// Ownership check: only the article owner can change state
-		article, err := h.uc.Get(c.Request.Context(), id)
+		article, err := h.uc.Get(r.Context(), id)
 		if err != nil {
-			server.Fail(c, server.ErrNotFound, "article not found")
+			server.Fail(gc, server.ErrNotFound, "article not found")
 			return
 		}
-		userID := extractUserID(c)
+		userID := extractUserID(gc)
 		if article.UserID != userID {
-			server.Fail(c, server.ErrForbidden, "you can only modify your own articles")
+			server.Fail(gc, server.ErrForbidden, "you can only modify your own articles")
 			return
 		}
 
-		if err := h.uc.UpdateState(c.Request.Context(), id, input.State); err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+		if err := h.uc.UpdateState(r.Context(), id, input.State); err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		updated, err := h.uc.Get(c.Request.Context(), id)
+		updated, err := h.uc.Get(r.Context(), id)
 		if err != nil {
-			server.OK(c, nil)
+			server.OK(gc, nil)
 			return
 		}
 
-		server.OK(c, updated)
+		server.OK(gc, updated)
 	}
 }
 
 // listMyArticles returns the current authenticated user's articles (all states).
-func (h *ArticleHandler) listMyArticles() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		userID := extractUserID(c)
+func (h *ArticleHandler) listMyArticles() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+
+		userID := extractUserID(gc)
 		if userID == "" {
-			server.Fail(c, server.ErrBadRequest, "authentication required")
+			server.Fail(gc, server.ErrBadRequest, "authentication required")
 			return
 		}
 
-		page, _ := strconv.Atoi(c.Query("page"))
+		page, _ := strconv.Atoi(gc.Query("page"))
 		if page == 0 {
 			page = 1
 		}
-		pageSize, _ := strconv.Atoi(c.Query("page_size"))
+		pageSize, _ := strconv.Atoi(gc.Query("page_size"))
 		if pageSize == 0 {
 			pageSize = 20
 		}
@@ -481,17 +491,17 @@ func (h *ArticleHandler) listMyArticles() gin.HandlerFunc {
 			"user_id": userID,
 		}
 
-		if state := c.Query("state"); state != "" {
+		if state := gc.Query("state"); state != "" {
 			filters["state"] = state
 		}
 
-		items, total, err := h.uc.List(c.Request.Context(), page, pageSize, filters)
+		items, total, err := h.uc.List(r.Context(), page, pageSize, filters)
 		if err != nil {
-			server.Fail(c, server.ErrInternal, err.Error())
+			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.Page(c, items, int64(total), page, pageSize)
+		server.Page(gc, items, int64(total), page, pageSize)
 	}
 }
 

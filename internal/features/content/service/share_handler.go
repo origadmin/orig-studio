@@ -1,7 +1,7 @@
 package service
 
 import (
-	"origadmin/application/origcms/internal/handler"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"net/url"
 	"strconv"
 
@@ -24,7 +24,7 @@ func NewShareHandler(uc *biz.LikeFavoriteUseCase, jwt *auth.Manager) *ShareHandl
 }
 
 func (h *ShareHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	_ = handler.NewGinRouterAdapter(rg)
+	_ = ginadapter.NewStdRouterAdapter(rg)
 	// Share routes are now defined in media.go with consistent :id parameter
 }
 
