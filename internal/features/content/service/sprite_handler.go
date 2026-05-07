@@ -231,8 +231,8 @@ func (h *SpriteHandler) RegisterRoutes(r http2.Router) {
 	// Admin sprite/thumbnail regeneration routes (auth + admin required)
 	adminMediaRegen := r.Group("/admin/medias/:id")
 	if adapter, ok := adminMediaRegen.(*ginadapter.RouterAdapter); ok {
-		adapter.Use(server.JWTMiddleware(h.jwt))
-		adapter.Use(server.AdminMiddleware(h.jwt))
+		adapter.UseGin(server.JWTMiddleware(h.jwt))
+		adapter.UseGin(server.AdminMiddleware(h.jwt))
 	}
 	{
 		adminMediaRegen.POST("/regenerate-sprite", server.GinHandlerToHandlerFunc(h.RegenerateSprite))

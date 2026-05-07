@@ -33,7 +33,7 @@ func (h *PermissionHandler) RegisterRoutes(r http2.Router) {
 	adminPerms := r.Group("/admin/permission-groups")
 	// Apply AdminMiddleware via type assertion
 	if adapter, ok := adminPerms.(*ginadapter.RouterAdapter); ok {
-		adapter.Use(server.AdminMiddleware(h.jwtMgr))
+		adapter.UseGin(server.AdminMiddleware(h.jwtMgr))
 	}
 	{
 		adminPerms.GET("", server.HTTPToHandlerFunc(h.listGroups()))
@@ -50,7 +50,7 @@ func (h *PermissionHandler) RegisterRoutes(r http2.Router) {
 	adminUsers := r.Group("/admin/users")
 	// Apply AdminMiddleware via type assertion
 	if adapter, ok := adminUsers.(*ginadapter.RouterAdapter); ok {
-		adapter.Use(server.AdminMiddleware(h.jwtMgr))
+		adapter.UseGin(server.AdminMiddleware(h.jwtMgr))
 	}
 	{
 		adminUsers.GET("/:id/permissions", server.HTTPToHandlerFunc(h.getUserPermissions()))

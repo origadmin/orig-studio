@@ -70,7 +70,7 @@ func (h *MediaHandler) RegisterRoutes(r http2.Router) {
 	mediasGroup := r.Group("/medias")
 	// Apply ModuleGuard gin middleware via type assertion
 	if adapter, ok := mediasGroup.(*ginadapter.RouterAdapter); ok {
-		adapter.Use(systemservice.ModuleGuard(h.settingUC, "module_videos"))
+		adapter.UseGin(systemservice.ModuleGuard(h.settingUC, "module_videos"))
 	}
 
 	medias := mediasGroup.Group("")

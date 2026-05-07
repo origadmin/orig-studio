@@ -57,7 +57,7 @@ func (h *CommentHandler) RegisterRoutes(r http2.Router) {
 	authComments := r.Group("/comments")
 	// Apply JWT middleware via type assertion
 	if adapter, ok := authComments.(*ginadapter.RouterAdapter); ok {
-		adapter.Use(server.JWTMiddleware(h.jwtMgr))
+		adapter.UseGin(server.JWTMiddleware(h.jwtMgr))
 	}
 	{
 		// POST /comments - Create comment (AUTH REQUIRED)

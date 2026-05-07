@@ -32,8 +32,8 @@ func (h *CommentModerationHandler) RegisterRoutes(r http2.Router) {
 	adminComments := r.Group("/admin/comments")
 	// Apply JWT + Admin middleware via type assertion
 	if adapter, ok := adminComments.(*ginadapter.RouterAdapter); ok {
-		adapter.Use(server.JWTMiddleware(h.jwtMgr))
-		adapter.Use(server.AdminMiddleware(h.jwtMgr))
+		adapter.UseGin(server.JWTMiddleware(h.jwtMgr))
+		adapter.UseGin(server.AdminMiddleware(h.jwtMgr))
 	}
 	{
 		adminComments.GET("", server.HTTPToHandlerFunc(h.listAdminComments()))

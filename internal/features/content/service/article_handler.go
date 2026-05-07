@@ -55,7 +55,7 @@ func (h *ArticleHandler) RegisterRoutes(r http2.Router) {
 	g := r.Group("/articles")
 	// Apply ModuleGuard gin middleware via type assertion
 	if adapter, ok := g.(*ginadapter.RouterAdapter); ok {
-		adapter.Use(systemservice.ModuleGuard(h.settingUC, "module_articles"))
+		adapter.UseGin(systemservice.ModuleGuard(h.settingUC, "module_articles"))
 	}
 
 	// ================================
