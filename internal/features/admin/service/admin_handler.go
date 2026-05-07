@@ -21,6 +21,7 @@ import (
 	pb "origadmin/application/origcms/api/gen/v1/user"
 	mediapb "origadmin/application/origcms/api/gen/v1/media"
 	types "origadmin/application/origcms/api/gen/v1/types"
+	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/entity"
@@ -88,8 +89,7 @@ func NewAdminHandler(
 	}
 }
 
-func (h *AdminHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	r := ginadapter.NewStdRouterAdapter(rg)
+func (h *AdminHandler) RegisterRoutes(r http2.Router) {
 	admin := r.Group("/admin")
 	{
 		// ================================
@@ -97,10 +97,10 @@ func (h *AdminHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		// ================================
 		stats := admin.Group("/stats")
 		{
-			stats.GET("/dashboard", server.WithAdmin(h.jwt, h.getDashboardStats()))
-			stats.GET("/medias", server.WithAdmin(h.jwt, h.getMediaStats()))
-			stats.GET("/users", server.WithAdmin(h.jwt, h.getUserStats()))
-			stats.GET("/traffic", server.WithAdmin(h.jwt, h.getTrafficStats()))
+			stats.GET("/dashboard", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.getDashboardStats())))
+			stats.GET("/medias", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.getMediaStats())))
+			stats.GET("/users", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.getUserStats())))
+			stats.GET("/traffic", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.getTrafficStats())))
 		}
 
 		// ================================
@@ -108,15 +108,15 @@ func (h *AdminHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		// ================================
 		medias := admin.Group("/medias")
 		{
-			medias.GET("", server.WithAdmin(h.jwt, h.adminListMedias()))
-			medias.GET("/:id", server.WithAdmin(h.jwt, h.adminGetMedia()))
-			medias.PUT("/:id", server.WithAdminAndPerm(h.jwt, h.permChecker, "media:write", h.adminUpdateMedia()))
-			medias.DELETE("/:id", server.WithAdminAndPerm(h.jwt, h.permChecker, "media:delete", h.adminDeleteMedia()))
-			medias.GET("/:id/stats", server.WithAdmin(h.jwt, h.adminGetMediaStats()))
-			medias.GET("/:id/variants", server.WithAdmin(h.jwt, h.adminGetMediaVariants()))
-			medias.PUT("/:id/state", server.WithAdminAndPerm(h.jwt, h.permChecker, "media:write", h.adminUpdateMediaState()))
-			medias.GET("/:id/tasks", server.WithAdmin(h.jwt, h.adminGetMediaTasks()))
-			medias.POST("/:id/tasks/:taskId/retry", server.WithAdminAndPerm(h.jwt, h.permChecker, "media:write", h.adminRetryMediaTask()))
+			medias.GET("", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminListMedias())))
+			medias.GET("/:id", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminGetMedia())))
+			medias.PUT("/:id", server.WithAdminAndPermCtx(h.jwt, h.permChecker, "media:write", server.HTTPToHandlerFunc(h.adminUpdateMedia())))
+			medias.DELETE("/:id", server.WithAdminAndPermCtx(h.jwt, h.permChecker, "media:delete", server.HTTPToHandlerFunc(h.adminDeleteMedia())))
+			medias.GET("/:id/stats", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminGetMediaStats())))
+			medias.GET("/:id/variants", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminGetMediaVariants())))
+			medias.PUT("/:id/state", server.WithAdminAndPermCtx(h.jwt, h.permChecker, "media:write", server.HTTPToHandlerFunc(h.adminUpdateMediaState())))
+			medias.GET("/:id/tasks", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminGetMediaTasks())))
+			medias.POST("/:id/tasks/:taskId/retry", server.WithAdminAndPermCtx(h.jwt, h.permChecker, "media:write", server.HTTPToHandlerFunc(h.adminRetryMediaTask())))
 		}
 
 		// ================================
@@ -124,10 +124,10 @@ func (h *AdminHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		// ================================
 		channels := admin.Group("/channels")
 		{
-			channels.GET("", server.WithAdmin(h.jwt, h.adminListChannels()))
-			channels.GET("/:id", server.WithAdmin(h.jwt, h.adminGetChannelDetail()))
-			channels.PUT("/:id", server.WithAdminAndPerm(h.jwt, h.permChecker, "media:write", h.adminUpdateChannel()))
-			channels.DELETE("/:id", server.WithAdminAndPerm(h.jwt, h.permChecker, "media:delete", h.adminDeleteChannel()))
+			channels.GET("", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminListChannels())))
+			channels.GET("/:id", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminGetChannelDetail())))
+			channels.PUT("/:id", server.WithAdminAndPermCtx(h.jwt, h.permChecker, "media:write", server.HTTPToHandlerFunc(h.adminUpdateChannel())))
+			channels.DELETE("/:id", server.WithAdminAndPermCtx(h.jwt, h.permChecker, "media:delete", server.HTTPToHandlerFunc(h.adminDeleteChannel())))
 		}
 
 		// ================================
@@ -135,19 +135,19 @@ func (h *AdminHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		// ================================
 		encoding := admin.Group("/encoding")
 		{
-			encoding.GET("/tasks", server.WithAdmin(h.jwt, h.getAllEncodingTasks()))
-			encoding.GET("/status", server.WithAdmin(h.jwt, h.getEncodingStatus()))
-			encoding.POST("/tasks/:taskId/retry", server.WithAdmin(h.jwt, h.retryTask()))
-			encoding.POST("/retry-failed", server.WithAdmin(h.jwt, h.retryAllFailedTasks()))
+			encoding.GET("/tasks", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.getAllEncodingTasks())))
+			encoding.GET("/status", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.getEncodingStatus())))
+			encoding.POST("/tasks/:taskId/retry", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.retryTask())))
+			encoding.POST("/retry-failed", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.retryAllFailedTasks())))
 
 			profiles := encoding.Group("/profiles")
 			{
-				profiles.GET("", server.WithAdmin(h.jwt, h.listEncodeProfiles()))
-				profiles.POST("", server.WithAdmin(h.jwt, h.createEncodeProfile()))
-				profiles.POST("/preview", server.WithAdmin(h.jwt, h.previewEncodeCommand()))
-				profiles.GET("/:id", server.WithAdmin(h.jwt, h.getEncodeProfile()))
-				profiles.PUT("/:id", server.WithAdmin(h.jwt, h.updateEncodeProfile()))
-				profiles.DELETE("/:id", server.WithAdmin(h.jwt, h.deleteEncodeProfile()))
+				profiles.GET("", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.listEncodeProfiles())))
+				profiles.POST("", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.createEncodeProfile())))
+				profiles.POST("/preview", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.previewEncodeCommand())))
+				profiles.GET("/:id", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.getEncodeProfile())))
+				profiles.PUT("/:id", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.updateEncodeProfile())))
+				profiles.DELETE("/:id", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.deleteEncodeProfile())))
 			}
 		}
 
@@ -156,16 +156,16 @@ func (h *AdminHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		// ================================
 		// Uses query parameter ?token=<jwt> for authentication because
 		// EventSource API does not support custom headers.
-		admin.GET("/medias/transcoding/events", server.WithAdmin(h.jwt, h.sseTranscodingEvents()))
+		admin.GET("/medias/transcoding/events", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.sseTranscodingEvents())))
 
 		// ================================
 		// 3. System Settings
 		// ================================
 		settings := admin.Group("/settings")
 		{
-			settings.GET("", server.WithAdmin(h.jwt, h.getSystemSettings()))
-			settings.GET("/info", server.WithAdmin(h.jwt, h.getSystemInfo()))
-			settings.PUT("", server.WithAdminAndPerm(h.jwt, h.permChecker, "system:config", h.updateSystemSettings()))
+			settings.GET("", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.getSystemSettings())))
+			settings.GET("/info", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.getSystemInfo())))
+			settings.PUT("", server.WithAdminAndPermCtx(h.jwt, h.permChecker, "system:config", server.HTTPToHandlerFunc(h.updateSystemSettings())))
 		}
 
 		// ================================
@@ -179,11 +179,11 @@ func (h *AdminHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		// ================================
 		playlists := admin.Group("/playlists")
 		{
-			playlists.GET("", server.WithAdmin(h.jwt, h.adminListPlaylists()))
-			playlists.GET("/:id", server.WithAdmin(h.jwt, h.adminGetPlaylistDetail())) // :id = UUID
-			playlists.POST("", server.WithAdmin(h.jwt, h.adminCreatePlaylist()))
-			playlists.PUT("/:id", server.WithAdmin(h.jwt, h.adminUpdatePlaylist()))    // :id = UUID
-			playlists.DELETE("/:id", server.WithAdmin(h.jwt, h.adminDeletePlaylist())) // :id = UUID
+			playlists.GET("", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminListPlaylists())))
+			playlists.GET("/:id", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminGetPlaylistDetail()))) // :id = UUID
+			playlists.POST("", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminCreatePlaylist())))
+			playlists.PUT("/:id", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminUpdatePlaylist())))    // :id = UUID
+			playlists.DELETE("/:id", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminDeletePlaylist()))) // :id = UUID
 		}
 
 		// ================================
@@ -191,13 +191,13 @@ func (h *AdminHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		// ================================
 		users := admin.Group("/users")
 		{
-			users.GET("", server.WithAdmin(h.jwt, h.adminListUsers()))
-			users.POST("", server.WithAdminAndPerm(h.jwt, h.permChecker, "user:manage", h.adminCreateUser()))
-			users.GET("/:id", server.WithAdmin(h.jwt, h.adminGetUser()))
-			users.PUT("/:id", server.WithAdminAndPerm(h.jwt, h.permChecker, "user:manage", h.adminUpdateUser()))
-			users.DELETE("/:id", server.WithAdminAndPerm(h.jwt, h.permChecker, "user:manage", h.adminDeleteUser()))
-			users.PATCH("/:id/status", server.WithAdminAndPerm(h.jwt, h.permChecker, "user:manage", h.adminUpdateUserStatus()))
-			users.PATCH("/:id/role", server.WithAdminAndPerm(h.jwt, h.permChecker, "user:manage", h.adminUpdateUserRole()))
+			users.GET("", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminListUsers())))
+			users.POST("", server.WithAdminAndPermCtx(h.jwt, h.permChecker, "user:manage", server.HTTPToHandlerFunc(h.adminCreateUser())))
+			users.GET("/:id", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminGetUser())))
+			users.PUT("/:id", server.WithAdminAndPermCtx(h.jwt, h.permChecker, "user:manage", server.HTTPToHandlerFunc(h.adminUpdateUser())))
+			users.DELETE("/:id", server.WithAdminAndPermCtx(h.jwt, h.permChecker, "user:manage", server.HTTPToHandlerFunc(h.adminDeleteUser())))
+			users.PATCH("/:id/status", server.WithAdminAndPermCtx(h.jwt, h.permChecker, "user:manage", server.HTTPToHandlerFunc(h.adminUpdateUserStatus())))
+			users.PATCH("/:id/role", server.WithAdminAndPermCtx(h.jwt, h.permChecker, "user:manage", server.HTTPToHandlerFunc(h.adminUpdateUserRole())))
 		}
 
 		// ================================
@@ -205,12 +205,12 @@ func (h *AdminHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		// ================================
 		categories := admin.Group("/categories")
 		{
-			categories.GET("", server.WithAdmin(h.jwt, h.adminListCategories()))
-			categories.GET("/:id", server.WithAdmin(h.jwt, h.adminGetCategory()))
-			categories.POST("", server.WithAdmin(h.jwt, h.adminCreateCategory()))
-			categories.PUT("/:id", server.WithAdmin(h.jwt, h.adminUpdateCategory()))
-			categories.PATCH("/:id", server.WithAdmin(h.jwt, h.adminPatchCategory()))
-			categories.DELETE("/:id", server.WithAdmin(h.jwt, h.adminDeleteCategory()))
+			categories.GET("", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminListCategories())))
+			categories.GET("/:id", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminGetCategory())))
+			categories.POST("", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminCreateCategory())))
+			categories.PUT("/:id", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminUpdateCategory())))
+			categories.PATCH("/:id", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminPatchCategory())))
+			categories.DELETE("/:id", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminDeleteCategory())))
 		}
 
 		// ================================
@@ -218,12 +218,12 @@ func (h *AdminHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		// ================================
 		articles := admin.Group("/articles")
 		{
-			articles.GET("", server.WithAdmin(h.jwt, h.adminListArticles()))
-			articles.GET("/:id", server.WithAdmin(h.jwt, h.adminGetArticle()))
-			articles.POST("", server.WithAdmin(h.jwt, h.adminCreateArticle()))
-			articles.PUT("/:id", server.WithAdmin(h.jwt, h.adminUpdateArticle()))
-			articles.DELETE("/:id", server.WithAdmin(h.jwt, h.adminDeleteArticle()))
-			articles.PATCH("/:id/state", server.WithAdmin(h.jwt, h.adminUpdateArticleState()))
+			articles.GET("", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminListArticles())))
+			articles.GET("/:id", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminGetArticle())))
+			articles.POST("", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminCreateArticle())))
+			articles.PUT("/:id", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminUpdateArticle())))
+			articles.DELETE("/:id", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminDeleteArticle())))
+			articles.PATCH("/:id/state", server.WithAdminCtx(h.jwt, server.HTTPToHandlerFunc(h.adminUpdateArticleState())))
 		}
 	}
 }

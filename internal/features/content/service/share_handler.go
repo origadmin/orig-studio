@@ -1,12 +1,13 @@
 package service
 
 import (
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"net/url"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
+	http2 "origadmin/application/origcms/internal/helpers/http"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/features/content/biz"
 	"origadmin/application/origcms/internal/server"
@@ -23,8 +24,7 @@ func NewShareHandler(uc *biz.LikeFavoriteUseCase, jwt *auth.Manager) *ShareHandl
 	return &ShareHandler{uc: uc, jwt: jwt}
 }
 
-func (h *ShareHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	_ = ginadapter.NewStdRouterAdapter(rg)
+func (h *ShareHandler) RegisterRoutes(r http2.Router) {
 	// Share routes are now defined in media.go with consistent :id parameter
 }
 
@@ -41,59 +41,67 @@ type SocialShareLinks struct {
 
 // getShareUrl returns the share URL and social media links for a media item.
 // GET /media/:mediaId/share → {"url": string, "twitter": string, ...}
-func (h *ShareHandler) getShareUrl(c *gin.Context) {
-	mediaId, err := strconv.Atoi(c.Param("mediaId"))
-	if err != nil {
-		server.Fail(c, server.ErrBadRequest, "Invalid media ID")
-		return
+func (h *ShareHandler) getShareUrl() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		mediaId, err := strconv.Atoi(gc.Param("mediaId"))
+		if err != nil {
+			server.FailCtx(ctx, server.ErrBadRequest, "Invalid media ID")
+			return nil
+		}
+
+		// Build share URL - assuming the frontend is at /watch/:mediaId
+		// You may want to make this configurable
+		shareUrl := gc.Request.Host + "/watch/" + strconv.Itoa(mediaId)
+		// Add https:// if not present
+		if len(shareUrl) > 0 && shareUrl[0] != 'h' {
+			shareUrl = "https://" + shareUrl
+		}
+
+		// Get title from query or use default
+		title := gc.DefaultQuery("title", "Check out this video!")
+		encodedUrl := url.QueryEscape(shareUrl)
+		encodedTitle := url.QueryEscape(title)
+
+		// Generate social media share links
+		socialLinks := SocialShareLinks{
+			Url:      shareUrl,
+			Title:    title,
+			Twitter:  "https://twitter.com/intent/tweet?url=" + encodedUrl + "&text=" + encodedTitle,
+			Facebook: "https://www.facebook.com/sharer/sharer.php?u=" + encodedUrl,
+			LinkedIn: "https://www.linkedin.com/sharing/share-offsite/?url=" + encodedUrl,
+			WhatsApp: "https://wa.me/?text=" + encodedTitle + "%20" + encodedUrl,
+			Telegram: "https://t.me/share/url?url=" + encodedUrl + "&text=" + encodedTitle,
+		}
+
+		server.OKCtx(ctx, socialLinks)
+		return nil
 	}
-
-	// Build share URL - assuming the frontend is at /watch/:mediaId
-	// You may want to make this configurable
-	shareUrl := c.Request.Host + "/watch/" + strconv.Itoa(mediaId)
-	// Add https:// if not present
-	if len(shareUrl) > 0 && shareUrl[0] != 'h' {
-		shareUrl = "https://" + shareUrl
-	}
-
-	// Get title from query or use default
-	title := c.DefaultQuery("title", "Check out this video!")
-	encodedUrl := url.QueryEscape(shareUrl)
-	encodedTitle := url.QueryEscape(title)
-
-	// Generate social media share links
-	socialLinks := SocialShareLinks{
-		Url:      shareUrl,
-		Title:    title,
-		Twitter:  "https://twitter.com/intent/tweet?url=" + encodedUrl + "&text=" + encodedTitle,
-		Facebook: "https://www.facebook.com/sharer/sharer.php?u=" + encodedUrl,
-		LinkedIn: "https://www.linkedin.com/sharing/share-offsite/?url=" + encodedUrl,
-		WhatsApp: "https://wa.me/?text=" + encodedTitle + "%20" + encodedUrl,
-		Telegram: "https://t.me/share/url?url=" + encodedUrl + "&text=" + encodedTitle,
-	}
-
-	server.OK(c, socialLinks)
 }
 
 // recordShare records a share event.
 // POST /media/:mediaId/share → {"success": bool}
-func (h *ShareHandler) recordShare(c *gin.Context) {
-	_, exists := c.Get("claims")
-	if !exists {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+func (h *ShareHandler) recordShare() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		_, exists := gc.Get("claims")
+		if !exists {
+			server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
+			return nil
+		}
+
+		_, err := strconv.Atoi(gc.Param("mediaId"))
+		if err != nil {
+			server.FailCtx(ctx, server.ErrBadRequest, "Invalid media ID")
+			return nil
+		}
+
+		// TODO: Implement share count increment in the future
+		// For now, just return success
+
+		server.OKCtx(ctx, gin.H{
+			"success": true,
+		})
+		return nil
 	}
-
-	_, err := strconv.Atoi(c.Param("mediaId"))
-	if err != nil {
-		server.Fail(c, server.ErrBadRequest, "Invalid media ID")
-		return
-	}
-
-	// TODO: Implement share count increment in the future
-	// For now, just return success
-
-	server.OK(c, gin.H{
-		"success": true,
-	})
 }

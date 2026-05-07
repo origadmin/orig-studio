@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	authbiz "origadmin/application/origcms/internal/features/auth/biz"
@@ -28,32 +29,35 @@ func NewPermissionHandler(permUC *authbiz.PermissionUseCase, jwtMgr *auth.Manage
 }
 
 // RegisterRoutes registers the handler's routes.
-func (h *PermissionHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	adminPerms := rg.Group("/admin/permission-groups")
-	adminPerms.Use(server.AdminMiddleware(h.jwtMgr))
+func (h *PermissionHandler) RegisterRoutes(r http2.Router) {
+	adminPerms := r.Group("/admin/permission-groups")
+	// Apply AdminMiddleware via type assertion
+	if adapter, ok := adminPerms.(*ginadapter.RouterAdapter); ok {
+		adapter.Use(server.AdminMiddleware(h.jwtMgr))
+	}
 	{
-		r := ginadapter.NewStdRouterAdapter(adminPerms)
-		r.GET("", h.listGroups())
-		r.POST("", h.createGroup())
-		r.GET("/:id", h.getGroup())
-		r.PUT("/:id", h.updateGroup())
-		r.DELETE("/:id", h.deleteGroup())
-		r.POST("/:id/toggle", h.toggleGroup())
-		r.GET("/:id/members", h.listMembers())
-		r.POST("/:id/members", h.addMembers())
-		r.DELETE("/:id/members/:user_id", h.removeMember())
+		adminPerms.GET("", server.HTTPToHandlerFunc(h.listGroups()))
+		adminPerms.POST("", server.HTTPToHandlerFunc(h.createGroup()))
+		adminPerms.GET("/:id", server.HTTPToHandlerFunc(h.getGroup()))
+		adminPerms.PUT("/:id", server.HTTPToHandlerFunc(h.updateGroup()))
+		adminPerms.DELETE("/:id", server.HTTPToHandlerFunc(h.deleteGroup()))
+		adminPerms.POST("/:id/toggle", server.HTTPToHandlerFunc(h.toggleGroup()))
+		adminPerms.GET("/:id/members", server.HTTPToHandlerFunc(h.listMembers()))
+		adminPerms.POST("/:id/members", server.HTTPToHandlerFunc(h.addMembers()))
+		adminPerms.DELETE("/:id/members/:user_id", server.HTTPToHandlerFunc(h.removeMember()))
 	}
 
-	adminUsers := rg.Group("/admin/users")
-	adminUsers.Use(server.AdminMiddleware(h.jwtMgr))
+	adminUsers := r.Group("/admin/users")
+	// Apply AdminMiddleware via type assertion
+	if adapter, ok := adminUsers.(*ginadapter.RouterAdapter); ok {
+		adapter.Use(server.AdminMiddleware(h.jwtMgr))
+	}
 	{
-		r := ginadapter.NewStdRouterAdapter(adminUsers)
-		r.GET("/:id/permissions", h.getUserPermissions())
+		adminUsers.GET("/:id/permissions", server.HTTPToHandlerFunc(h.getUserPermissions()))
 	}
 
-	// Public endpoint - use StdRouterAdapter on the root group
-	r := ginadapter.NewStdRouterAdapter(rg)
-	r.GET("/permissions", h.listPermissionEnums())
+	// Public endpoint
+	r.GET("/permissions", server.HTTPToHandlerFunc(h.listPermissionEnums()))
 }
 
 func (h *PermissionHandler) listGroups() http.HandlerFunc {

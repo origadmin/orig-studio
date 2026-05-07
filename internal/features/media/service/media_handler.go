@@ -13,6 +13,7 @@ import (
 
 	pb "origadmin/application/origcms/api/gen/v1/media"
 	types "origadmin/application/origcms/api/gen/v1/types"
+	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	authbiz "origadmin/application/origcms/internal/features/auth/biz"
@@ -65,45 +66,47 @@ func NewMediaHandler(
 }
 
 // RegisterRoutes registers the handler's routes.
-func (h *MediaHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	mediasGroup := rg.Group("/medias")
-	mediasGroup.Use(systemservice.ModuleGuard(h.settingUC, "module_videos"))
+func (h *MediaHandler) RegisterRoutes(r http2.Router) {
+	mediasGroup := r.Group("/medias")
+	// Apply ModuleGuard gin middleware via type assertion
+	if adapter, ok := mediasGroup.(*ginadapter.RouterAdapter); ok {
+		adapter.Use(systemservice.ModuleGuard(h.settingUC, "module_videos"))
+	}
 
-	r := ginadapter.NewStdRouterAdapter(mediasGroup)
-	medias := r.Group("")
+	medias := mediasGroup.Group("")
 	{
 		// Public routes
-		medias.GET("", h.listMedias)
-		medias.GET("/featured", h.listFeaturedMedias)
-		medias.GET("/latest", h.listLatestMedias)
+		medias.GET("", server.HTTPToHandlerFunc(h.listMedias))
+		medias.GET("/featured", server.HTTPToHandlerFunc(h.listFeaturedMedias))
+		medias.GET("/latest", server.HTTPToHandlerFunc(h.listLatestMedias))
 
 		// Transcoding & encoding routes
-		medias.GET("/transcoding/status", h.transcodingStatus)
-		medias.GET("/encoding/tasks", h.encodingTasks)
-		medias.POST("/encoding/retry", server.WithJWT(h.jwtMgr, h.retryTask))
-		medias.POST("/encoding/retry-all-failed", server.WithJWT(h.jwtMgr, h.retryAllFailed))
+		medias.GET("/transcoding/status", server.HTTPToHandlerFunc(h.transcodingStatus))
+		medias.GET("/encoding/tasks", server.HTTPToHandlerFunc(h.encodingTasks))
+		medias.POST("/encoding/retry", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.retryTask)))
+		medias.POST("/encoding/retry-all-failed", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.retryAllFailed)))
 
 		// NOTE: SSE endpoint moved to admin route group (/admin/medias/transcoding/events)
 		// See admin_handler.go encoding group
 
 		// Parameter routes
-		medias.GET("/:id", h.getMedia)
-		medias.GET("/:id/variants", h.mediaVariants)
-		medias.POST("/:id/view", h.incrementViewCount)
+		medias.GET("/:id", server.HTTPToHandlerFunc(h.getMedia))
+		medias.GET("/:id/variants", server.HTTPToHandlerFunc(h.mediaVariants))
+		medias.POST("/:id/view", server.HTTPToHandlerFunc(h.incrementViewCount))
 
 		// Like/favorite routes (singular - proto canonical)
-		medias.POST("/:id/like", server.WithJWT(h.jwtMgr, h.likeMedia))
-		medias.DELETE("/:id/like", server.WithJWT(h.jwtMgr, h.unlikeMedia))
-		medias.POST("/:id/favorite", server.WithJWT(h.jwtMgr, h.favoriteMedia))
-		medias.DELETE("/:id/favorite", server.WithJWT(h.jwtMgr, h.unfavoriteMedia))
+		medias.POST("/:id/like", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.likeMedia)))
+		medias.DELETE("/:id/like", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.unlikeMedia)))
+		medias.POST("/:id/favorite", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.favoriteMedia)))
+		medias.DELETE("/:id/favorite", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.unfavoriteMedia)))
 
 		// Like/favorite routes (plural - frontend compatibility)
-		medias.GET("/:id/likes", server.WithOptionalJWT(h.jwtMgr, h.getMediaLikes))
-		medias.POST("/:id/likes", server.WithJWT(h.jwtMgr, h.likeMedia))
-		medias.DELETE("/:id/likes", server.WithJWT(h.jwtMgr, h.unlikeMedia))
-		medias.GET("/:id/favorites", server.WithOptionalJWT(h.jwtMgr, h.getMediaFavorites))
-		medias.POST("/:id/favorites", server.WithJWT(h.jwtMgr, h.favoriteMedia))
-		medias.DELETE("/:id/favorites", server.WithJWT(h.jwtMgr, h.unfavoriteMedia))
+		medias.GET("/:id/likes", server.WithOptionalJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.getMediaLikes)))
+		medias.POST("/:id/likes", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.likeMedia)))
+		medias.DELETE("/:id/likes", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.unlikeMedia)))
+		medias.GET("/:id/favorites", server.WithOptionalJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.getMediaFavorites)))
+		medias.POST("/:id/favorites", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.favoriteMedia)))
+		medias.DELETE("/:id/favorites", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.unfavoriteMedia)))
 	}
 }
 

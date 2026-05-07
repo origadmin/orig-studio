@@ -2,16 +2,19 @@ package service
 
 import (
 	"context"
+	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 
-	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/comment"
-	"origadmin/application/origcms/internal/helpers/repo"
 	contentbiz "origadmin/application/origcms/internal/features/content/biz"
+	http2 "origadmin/application/origcms/internal/helpers/http"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
+	"origadmin/application/origcms/internal/helpers/repo"
+	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/server"
 )
 
@@ -39,33 +42,36 @@ func NewCommentHandler(
 }
 
 // RegisterRoutes registers the handler's routes.
-func (h *CommentHandler) RegisterRoutes(rg *gin.RouterGroup) {
+func (h *CommentHandler) RegisterRoutes(r http2.Router) {
 	// Public routes (no auth required)
-	publicComments := rg.Group("/comments")
+	publicComments := r.Group("/comments")
 	{
 		// GET /comments - List comments with filtering and pagination (PUBLIC)
-		publicComments.GET("", server.OptionalJWTMiddleware(h.jwtMgr), h.listComments)
+		publicComments.GET("", server.WithOptionalJWTCtx(h.jwtMgr, server.GinHandlerToHandlerFunc(h.listComments)))
 
 		// GET /comments/:id - Get single comment (PUBLIC)
-		publicComments.GET("/:id", server.OptionalJWTMiddleware(h.jwtMgr), h.getComment)
+		publicComments.GET("/:id", server.WithOptionalJWTCtx(h.jwtMgr, server.GinHandlerToHandlerFunc(h.getComment)))
 	}
 
 	// Authenticated routes (JWT required for write operations)
-	authComments := rg.Group("/comments")
-	authComments.Use(server.JWTMiddleware(h.jwtMgr))
+	authComments := r.Group("/comments")
+	// Apply JWT middleware via type assertion
+	if adapter, ok := authComments.(*ginadapter.RouterAdapter); ok {
+		adapter.Use(server.JWTMiddleware(h.jwtMgr))
+	}
 	{
 		// POST /comments - Create comment (AUTH REQUIRED)
-		authComments.POST("", h.createComment)
+		authComments.POST("", server.GinHandlerToHandlerFunc(h.createComment))
 
 		// PUT /comments/:id - Update comment (AUTH REQUIRED)
-		authComments.PUT("/:id", h.updateComment)
+		authComments.PUT("/:id", server.GinHandlerToHandlerFunc(h.updateComment))
 
 		// DELETE /comments/:id - Delete comment (AUTH REQUIRED)
-		authComments.DELETE("/:id", h.deleteComment)
+		authComments.DELETE("/:id", server.GinHandlerToHandlerFunc(h.deleteComment))
 	}
 
 	// Register Comment Likes routes
-	h.registerCommentLikesRoutes(rg)
+	h.registerCommentLikesRoutes(r)
 }
 
 func (h *CommentHandler) listComments(c *gin.Context) {
@@ -261,79 +267,82 @@ func (h *CommentHandler) deleteComment(c *gin.Context) {
 	server.OK(c, nil)
 }
 
-func (h *CommentHandler) registerCommentLikesRoutes(rg *gin.RouterGroup) {
-	commentLikes := rg.Group("/comments/:id")
+func (h *CommentHandler) registerCommentLikesRoutes(r http2.Router) {
+	commentLikes := r.Group("/comments/:id")
 	{
-		commentLikes.GET("/likes", server.OptionalJWTMiddleware(h.jwtMgr), func(c *gin.Context) {
-			commentID := c.Param("id")
+		commentLikes.GET("/likes", server.WithOptionalJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gc := ginadapter.GetGinContext(r)
+			commentID := gc.Param("id")
 			if commentID == "" {
-				server.Fail(c, 400, "comment ID required")
+				server.Fail(gc, 400, "comment ID required")
 				return
 			}
 
 			userID := ""
-			if claims, ok := server.GetClaims(c); ok {
+			if claims, ok := server.GetClaims(gc); ok {
 				userID = claims.GetUserID()
 			}
 
-			stats, err := h.commentLikeUC.GetStats(c.Request.Context(), userID, commentID)
+			stats, err := h.commentLikeUC.GetStats(r.Context(), userID, commentID)
 			if err != nil {
-				server.Fail(c, 500, "failed to get comment likes")
+				server.Fail(gc, 500, "failed to get comment likes")
 				return
 			}
 
-			server.OK(c, stats)
-		})
+			server.OK(gc, stats)
+		})))
 
-		commentLikes.POST("/likes", server.JWTMiddleware(h.jwtMgr), func(c *gin.Context) {
-			commentID := c.Param("id")
+		commentLikes.POST("/likes", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gc := ginadapter.GetGinContext(r)
+			commentID := gc.Param("id")
 			if commentID == "" {
-				server.Fail(c, 400, "comment ID required")
+				server.Fail(gc, 400, "comment ID required")
 				return
 			}
 
 			userID := ""
-			if claims, ok := server.GetClaims(c); ok {
-				userID = claims.GetUserID()
-			}
-			if userID == "" {
-				server.Fail(c, 401, "unauthorized")
-				return
-			}
-
-			stats, err := h.commentLikeUC.ToggleLike(c.Request.Context(), userID, commentID)
-			if err != nil {
-				server.Fail(c, 500, "failed to toggle like")
-				return
-			}
-
-			server.OK(c, stats)
-		})
-
-		commentLikes.POST("/dislikes", server.JWTMiddleware(h.jwtMgr), func(c *gin.Context) {
-			commentID := c.Param("id")
-			if commentID == "" {
-				server.Fail(c, 400, "comment ID required")
-				return
-			}
-
-			userID := ""
-			if claims, ok := server.GetClaims(c); ok {
+			if claims, ok := server.GetClaims(gc); ok {
 				userID = claims.GetUserID()
 			}
 			if userID == "" {
-				server.Fail(c, 401, "unauthorized")
+				server.Fail(gc, 401, "unauthorized")
 				return
 			}
 
-			stats, err := h.commentLikeUC.ToggleDislike(c.Request.Context(), userID, commentID)
+			stats, err := h.commentLikeUC.ToggleLike(r.Context(), userID, commentID)
 			if err != nil {
-				server.Fail(c, 500, "failed to toggle dislike")
+				server.Fail(gc, 500, "failed to toggle like")
 				return
 			}
 
-			server.OK(c, stats)
-		})
+			server.OK(gc, stats)
+		})))
+
+		commentLikes.POST("/dislikes", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gc := ginadapter.GetGinContext(r)
+			commentID := gc.Param("id")
+			if commentID == "" {
+				server.Fail(gc, 400, "comment ID required")
+				return
+			}
+
+			userID := ""
+			if claims, ok := server.GetClaims(gc); ok {
+				userID = claims.GetUserID()
+			}
+			if userID == "" {
+				server.Fail(gc, 401, "unauthorized")
+				return
+			}
+
+			stats, err := h.commentLikeUC.ToggleDislike(r.Context(), userID, commentID)
+			if err != nil {
+				server.Fail(gc, 500, "failed to toggle dislike")
+				return
+			}
+
+			server.OK(gc, stats)
+		})))
 	}
 }
 
