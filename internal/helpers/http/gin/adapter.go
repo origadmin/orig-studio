@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"io"
+	"mime/multipart"
 	"net"
 	"net/http"
 	"net/url"
@@ -79,8 +80,8 @@ func (a *StdRouterAdapter) PATCH(path string, handler http.HandlerFunc) {
 // adapter knows about gin.
 
 type RouterAdapter struct {
-	group   *ginhttp.RouterGroup
-	filters []http2.FilterFunc
+	group *ginhttp.RouterGroup
+	mws   []http2.MiddlewareFunc
 }
 
 var _ http2.Router = (*RouterAdapter)(nil)
@@ -91,48 +92,65 @@ func NewRouterAdapter(group *ginhttp.RouterGroup) *RouterAdapter {
 }
 
 // Group returns a new RouterAdapter for the given prefix, inheriting
-// any filters from the parent and appending the new ones.
-func (a *RouterAdapter) Group(prefix string, filters ...http2.FilterFunc) http2.Router {
+// any middleware from the parent and appending the new ones.
+func (a *RouterAdapter) Group(prefix string, mws ...http2.MiddlewareFunc) http2.Router {
+	ginGroup := a.group.Group(prefix)
+	for _, mw := range mws {
+		ginGroup.Use(middlewareToGin(mw))
+	}
 	return &RouterAdapter{
-		group:   a.group.Group(prefix),
-		filters: append(a.filters, filters...),
+		group: ginGroup,
+		mws:   append(a.mws, mws...),
 	}
 }
 
-// Use adds gin middleware to the underlying RouterGroup.
+// Use adds framework-agnostic middleware to the underlying RouterGroup.
+func (a *RouterAdapter) Use(mws ...http2.MiddlewareFunc) {
+	for _, mw := range mws {
+		a.group.Use(middlewareToGin(mw))
+	}
+	a.mws = append(a.mws, mws...)
+}
+
+// UseGin adds gin middleware to the underlying RouterGroup.
 // This is a convenience method for gin middleware that cannot be
-// expressed as http2.FilterFunc (e.g., middleware using c.Next()).
+// expressed as http2.MiddlewareFunc (e.g., middleware using c.Next()).
 // Handlers should type-assert the http2.Router to *RouterAdapter
 // when they need to add gin middleware.
-func (a *RouterAdapter) Use(mw ...ginhttp.HandlerFunc) {
+func (a *RouterAdapter) UseGin(mw ...ginhttp.HandlerFunc) {
 	a.group.Use(mw...)
 }
 
-func (a *RouterAdapter) GET(path string, h http2.HandlerFunc, filters ...http2.FilterFunc) {
-	a.register(http.MethodGet, path, h, filters)
+func (a *RouterAdapter) GET(path string, h http2.HandlerFunc, mws ...http2.MiddlewareFunc) {
+	a.register(http.MethodGet, path, h, mws)
 }
 
-func (a *RouterAdapter) POST(path string, h http2.HandlerFunc, filters ...http2.FilterFunc) {
-	a.register(http.MethodPost, path, h, filters)
+func (a *RouterAdapter) POST(path string, h http2.HandlerFunc, mws ...http2.MiddlewareFunc) {
+	a.register(http.MethodPost, path, h, mws)
 }
 
-func (a *RouterAdapter) PUT(path string, h http2.HandlerFunc, filters ...http2.FilterFunc) {
-	a.register(http.MethodPut, path, h, filters)
+func (a *RouterAdapter) PUT(path string, h http2.HandlerFunc, mws ...http2.MiddlewareFunc) {
+	a.register(http.MethodPut, path, h, mws)
 }
 
-func (a *RouterAdapter) DELETE(path string, h http2.HandlerFunc, filters ...http2.FilterFunc) {
-	a.register(http.MethodDelete, path, h, filters)
+func (a *RouterAdapter) DELETE(path string, h http2.HandlerFunc, mws ...http2.MiddlewareFunc) {
+	a.register(http.MethodDelete, path, h, mws)
 }
 
-func (a *RouterAdapter) PATCH(path string, h http2.HandlerFunc, filters ...http2.FilterFunc) {
-	a.register(http.MethodPatch, path, h, filters)
+func (a *RouterAdapter) PATCH(path string, h http2.HandlerFunc, mws ...http2.MiddlewareFunc) {
+	a.register(http.MethodPatch, path, h, mws)
 }
 
-func (a *RouterAdapter) register(method, relativePath string, h http2.HandlerFunc, filters []http2.FilterFunc) {
+// Static serves static files from the given root directory.
+func (a *RouterAdapter) Static(relativePath, root string) {
+	a.group.Static(relativePath, root)
+}
+
+func (a *RouterAdapter) register(method, relativePath string, h http2.HandlerFunc, mws []http2.MiddlewareFunc) {
 	handler := a.wrapHandler(h)
-	allFilters := append(a.filters, filters...)
-	if len(allFilters) > 0 {
-		handler = a.applyFilters(handler, allFilters)
+	allMws := append(a.mws, mws...)
+	if len(allMws) > 0 {
+		handler = a.applyMiddleware(handler, allMws)
 	}
 	switch method {
 	case http.MethodGet:
@@ -157,23 +175,45 @@ func (a *RouterAdapter) wrapHandler(h http2.HandlerFunc) ginhttp.HandlerFunc {
 	}
 }
 
-func (a *RouterAdapter) applyFilters(handler ginhttp.HandlerFunc, filters []http2.FilterFunc) ginhttp.HandlerFunc {
-	// Build the http.Handler chain from filters.
-	// The innermost handler converts the gin.HandlerFunc into an http.Handler
-	// that retrieves the gin.Context from request context.
-	h := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gc := GetGinContext(r)
-		if gc != nil {
-			handler(gc)
-		}
-	}))
-	for i := len(filters) - 1; i >= 0; i-- {
-		h = filters[i](h)
-	}
+// middlewareToGin converts a framework-agnostic MiddlewareFunc to a gin.HandlerFunc.
+func middlewareToGin(mw http2.MiddlewareFunc) ginhttp.HandlerFunc {
 	return func(c *ginhttp.Context) {
-		// Store gin context in request before passing to filter chain
-		r := SetGinContext(c.Request, c)
-		h.ServeHTTP(c.Writer, r)
+		ctx := &contextWrapper{ginCtx: c}
+		next := func(ctx http2.Context) error {
+			c.Next()
+			return nil
+		}
+		wrapped := mw(next)
+		if err := wrapped(ctx); err != nil {
+			handleError(c, err)
+		}
+	}
+}
+
+// applyMiddleware wraps a gin.HandlerFunc with the given middleware chain.
+func (a *RouterAdapter) applyMiddleware(handler ginhttp.HandlerFunc, mws []http2.MiddlewareFunc) ginhttp.HandlerFunc {
+	// Convert the gin handler to a framework-agnostic HandlerFunc,
+	// apply the middleware chain, then convert back to a gin handler.
+	agnosticHandler := func(ctx http2.Context) error {
+		// The ctx is a contextWrapper; extract the gin context to call the original handler.
+		if wrapper, ok := ctx.(*contextWrapper); ok {
+			handler(wrapper.ginCtx)
+			return nil
+		}
+		return nil
+	}
+
+	// Apply middleware chain: outermost first
+	wrapped := agnosticHandler
+	for i := len(mws) - 1; i >= 0; i-- {
+		wrapped = mws[i](wrapped)
+	}
+
+	return func(c *ginhttp.Context) {
+		ctx := &contextWrapper{ginCtx: c}
+		if err := wrapped(ctx); err != nil {
+			handleError(c, err)
+		}
 	}
 }
 
@@ -208,10 +248,16 @@ func (c *contextWrapper) Vars() url.Values {
 	return vars
 }
 
+func (c *contextWrapper) Var(name string) string {
+	val, _ := c.ginCtx.Params.Get(name)
+	return val
+}
+
 func (c *contextWrapper) Query() url.Values             { return c.ginCtx.Request.URL.Query() }
-func (c *contextWrapper) Request() *http.Request        { return c.ginCtx.Request }
-func (c *contextWrapper) Response() http.ResponseWriter { return c.ginCtx.Writer }
-func (c *contextWrapper) Header() http.Header           { return c.ginCtx.Request.Header }
+func (c *contextWrapper) QueryVar(name string) string   { return c.ginCtx.Query(name) }
+func (c *contextWrapper) QueryVarDefault(name, defaultValue string) string {
+	return c.ginCtx.DefaultQuery(name, defaultValue)
+}
 
 func (c *contextWrapper) Form() url.Values {
 	if err := c.ginCtx.Request.ParseForm(); err != nil {
@@ -219,11 +265,54 @@ func (c *contextWrapper) Form() url.Values {
 	}
 	return c.ginCtx.Request.Form
 }
+func (c *contextWrapper) FormVar(name string) string { return c.ginCtx.PostForm(name) }
+
+func (c *contextWrapper) Request() *http.Request        { return c.ginCtx.Request }
+func (c *contextWrapper) Response() http.ResponseWriter { return c.ginCtx.Writer }
+func (c *contextWrapper) Header() http.Header           { return c.ginCtx.Request.Header }
+func (c *contextWrapper) GetHeader(name string) string  { return c.ginCtx.GetHeader(name) }
 
 func (c *contextWrapper) Bind(v interface{}) error      { return c.ginCtx.ShouldBindJSON(v) }
+func (c *contextWrapper) BindJSON(v interface{}) error  { return c.ginCtx.ShouldBindJSON(v) }
 func (c *contextWrapper) BindVars(v interface{}) error  { return c.ginCtx.ShouldBindUri(v) }
 func (c *contextWrapper) BindQuery(v interface{}) error { return c.ginCtx.ShouldBindQuery(v) }
 func (c *contextWrapper) BindForm(v interface{}) error  { return c.ginCtx.ShouldBind(v) }
+
+func (c *contextWrapper) FormFile(name string) (multipart.File, *multipart.FileHeader, error) {
+	fileHeader, err := c.ginCtx.FormFile(name)
+	if err != nil {
+		return nil, nil, err
+	}
+	file, err := fileHeader.Open()
+	if err != nil {
+		return nil, nil, err
+	}
+	return file, fileHeader, nil
+}
+
+func (c *contextWrapper) MultipartForm() (*multipart.Form, error) {
+	return c.ginCtx.MultipartForm()
+}
+
+func (c *contextWrapper) GetRawData() ([]byte, error) {
+	return c.ginCtx.GetRawData()
+}
+
+func (c *contextWrapper) Set(key string, value interface{}) {
+	c.ginCtx.Set(key, value)
+}
+
+func (c *contextWrapper) Get(key string) (interface{}, bool) {
+	return c.ginCtx.Get(key)
+}
+
+func (c *contextWrapper) GetString(key string) string {
+	val, _ := c.ginCtx.Get(key)
+	if str, ok := val.(string); ok {
+		return str
+	}
+	return ""
+}
 
 func (c *contextWrapper) Returns(v interface{}, err error) error {
 	if err != nil {
@@ -258,20 +347,26 @@ func (c *contextWrapper) Stream(code int, contentType string, rd io.Reader) erro
 	return nil
 }
 
+func (c *contextWrapper) File(path string) error {
+	c.ginCtx.File(path)
+	return nil
+}
+
 func (c *contextWrapper) Reset(res http.ResponseWriter, req *http.Request) {
 	c.ginCtx.Request = req
 	c.ginCtx.Writer = &ginResponseWriterAdapter{w: res}
 }
 
 // GinContext returns the underlying *gin.Context.
-// This is useful for handlers that need gin-specific features
-// (e.g., c.Stream, c.FormFile) during the migration period.
+// Deprecated: Use the extended Context interface methods instead.
+// This is retained for the migration period only.
 func (c *contextWrapper) GinContext() *ginhttp.Context {
 	return c.ginCtx
 }
 
 // GinContextFromHTTP extracts the underlying *gin.Context from an http2.Context.
-// Returns nil if the context is not a contextWrapper.
+// Deprecated: Use the extended Context interface methods instead.
+// This is retained for the migration period only.
 func GinContextFromHTTP(ctx http2.Context) *ginhttp.Context {
 	if wrapper, ok := ctx.(*contextWrapper); ok {
 		return wrapper.GinContext()

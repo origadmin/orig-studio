@@ -483,7 +483,7 @@ func TestPlaylistHandler_GetPlaylistByToken_PrivatePlaylist_OwnerAccess(t *testi
 
 	r := gin.New()
 	adapterOwner := ginadapter.NewRouterAdapter(r.Group(""))
-	adapterOwner.Use(func(c *gin.Context) {
+	adapterOwner.UseGin(func(c *gin.Context) {
 		c.Set("claims", &auth.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Subject: "user-001",
@@ -519,7 +519,7 @@ func TestPlaylistHandler_GetPlaylistByToken_PrivatePlaylist_NonOwnerAccess(t *te
 
 	r := gin.New()
 	adapterNonOwner := ginadapter.NewRouterAdapter(r.Group(""))
-	adapterNonOwner.Use(func(c *gin.Context) {
+	adapterNonOwner.UseGin(func(c *gin.Context) {
 		c.Set("claims", &auth.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Subject: "user-002",
