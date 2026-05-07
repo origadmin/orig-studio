@@ -5,8 +5,8 @@
 package service
 
 import (
-	"net/http"
 	"io"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -15,6 +15,7 @@ import (
 
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/enums"
+	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/helpers/hashtag"
 	"origadmin/application/origcms/internal/server"
@@ -39,22 +40,21 @@ func NewUploadHandler(uc *biz.UploadUseCase, jwtMgr *auth.Manager, logger log.Lo
 }
 
 // RegisterRoutes registers the handler's routes with gin.RouterGroup
-func (h *UploadHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	r := ginadapter.NewStdRouterAdapter(rg)
+func (h *UploadHandler) RegisterRoutes(r http2.Router) {
 	uploads := r.Group("/uploads")
 	{
 		// Simple upload (single file, multipart/form-data)
-		uploads.POST("/simple", server.WithJWT(h.jwtMgr, h.simpleUpload()))
+		uploads.POST("/simple", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.simpleUpload())))
 
 		// Multipart upload (chunked, for large files)
-		uploads.POST("/multipart", server.WithJWT(h.jwtMgr, h.initiateMultipartUpload()))
-		uploads.POST("/:uploadId/parts/:partNumber", server.WithJWT(h.jwtMgr, h.uploadPart()))
-		uploads.POST("/:uploadId/complete", server.WithJWT(h.jwtMgr, h.completeMultipartUpload()))
-		uploads.POST("/:uploadId/abort", server.WithJWT(h.jwtMgr, h.abortMultipartUpload()))
-		uploads.GET("/:uploadId/parts", server.WithJWT(h.jwtMgr, h.listParts()))
+		uploads.POST("/multipart", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.initiateMultipartUpload())))
+		uploads.POST("/:uploadId/parts/:partNumber", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.uploadPart())))
+		uploads.POST("/:uploadId/complete", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.completeMultipartUpload())))
+		uploads.POST("/:uploadId/abort", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.abortMultipartUpload())))
+		uploads.GET("/:uploadId/parts", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.listParts())))
 
-		uploads.GET("/sessions", server.WithJWT(h.jwtMgr, h.listUploadSessions()))
-		uploads.GET("/sessions/:uploadId", server.WithJWT(h.jwtMgr, h.getUploadSession()))
+		uploads.GET("/sessions", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.listUploadSessions())))
+		uploads.GET("/sessions/:uploadId", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.getUploadSession())))
 	}
 }
 

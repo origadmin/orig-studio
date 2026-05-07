@@ -3,14 +3,14 @@ package service
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/server"
 	contentbiz "origadmin/application/origcms/internal/features/content/biz"
 	systemdal "origadmin/application/origcms/internal/features/system/dal"
 	mediabiz "origadmin/application/origcms/internal/features/media/biz"
+
+	http2 "origadmin/application/origcms/internal/helpers/http"
 )
 
 // StatsHandler handles stats-related routes.
@@ -31,13 +31,12 @@ func NewStatsHandler(mediaUC *mediabiz.MediaUseCase, likeFavoriteUC *contentbiz.
 	}
 }
 
-func (h *StatsHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	r := ginadapter.NewStdRouterAdapter(rg)
+func (h *StatsHandler) RegisterRoutes(r http2.Router) {
 	stats := r.Group("/stats")
 	{
-		stats.GET("/dashboard", server.WithJWT(h.jwt, h.getDashboardStats()))
-		stats.GET("/media", server.WithJWT(h.jwt, h.getMediaStats()))
-		stats.GET("/user", server.WithJWT(h.jwt, h.getUserStats()))
+		stats.GET("/dashboard", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.getDashboardStats())))
+		stats.GET("/media", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.getMediaStats())))
+		stats.GET("/user", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.getUserStats())))
 	}
 }
 

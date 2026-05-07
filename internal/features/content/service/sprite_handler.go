@@ -17,6 +17,8 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origcms/internal/features/media/biz"
+	http2 "origadmin/application/origcms/internal/helpers/http"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/server"
 )
@@ -218,20 +220,23 @@ func (h *SpriteHandler) RegenerateThumbnail(c *gin.Context) {
 
 // RegisterRoutes registers sprite-related routes on the given router group.
 // This replaces the stub routes in StubHandler.
-func (h *SpriteHandler) RegisterRoutes(rg *gin.RouterGroup) {
+func (h *SpriteHandler) RegisterRoutes(r http2.Router) {
 	// Public sprite routes (no auth required)
-	medias := rg.Group("/medias")
+	medias := r.Group("/medias")
 	{
-		medias.GET("/:id/sprite.vtt", h.GetSpriteVTT)
-		medias.GET("/:id/sprite.jpg", h.GetSpriteImage)
+		medias.GET("/:id/sprite.vtt", server.GinHandlerToHandlerFunc(h.GetSpriteVTT))
+		medias.GET("/:id/sprite.jpg", server.GinHandlerToHandlerFunc(h.GetSpriteImage))
 	}
 
 	// Admin sprite/thumbnail regeneration routes (auth + admin required)
-	adminMediaRegen := rg.Group("/admin/medias/:id")
-	adminMediaRegen.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
+	adminMediaRegen := r.Group("/admin/medias/:id")
+	if adapter, ok := adminMediaRegen.(*ginadapter.RouterAdapter); ok {
+		adapter.Use(server.JWTMiddleware(h.jwt))
+		adapter.Use(server.AdminMiddleware(h.jwt))
+	}
 	{
-		adminMediaRegen.POST("/regenerate-sprite", h.RegenerateSprite)
-		adminMediaRegen.POST("/regenerate-thumbnail", h.RegenerateThumbnail)
+		adminMediaRegen.POST("/regenerate-sprite", server.GinHandlerToHandlerFunc(h.RegenerateSprite))
+		adminMediaRegen.POST("/regenerate-thumbnail", server.GinHandlerToHandlerFunc(h.RegenerateThumbnail))
 	}
 }
 

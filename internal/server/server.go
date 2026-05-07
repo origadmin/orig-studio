@@ -13,17 +13,18 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/origadmin/runtime/log"
+	http2 "origadmin/application/origcms/internal/helpers/http"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/web"
 )
 
-// Module defines the interface for route registration using gin.RouterGroup.
+// Module defines the interface for route registration.
 // All feature-module handlers must implement this interface so that the
 // server can iterate over them uniformly.
-type Module interface {
-	RegisterRoutes(rg *gin.RouterGroup)
-}
+// It is a type alias for http2.Module (i.e., RegisterRoutes(r http2.Router)).
+type Module = http2.Module
 
 // Server represents the application server.
 type Server struct {
@@ -112,12 +113,13 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 	// Health check
 	r.GET("/health", HealthHandler)
 
-	// API v1 routes
+	// API v1 routes — adapt *gin.RouterGroup to http2.Router
 	apiV1 := r.Group("/api/v1")
+	router := ginadapter.NewRouterAdapter(apiV1)
 
 	// Register all handler modules
 	for _, mod := range s.modules {
-		mod.RegisterRoutes(apiV1)
+		mod.RegisterRoutes(router)
 	}
 }
 

@@ -6,12 +6,13 @@
 package service
 
 import (
-	"net/http"
 	"context"
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
+	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/entity"
@@ -39,8 +40,7 @@ func NewSystemHandler(
 	}
 }
 
-func (h *SystemHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	r := ginadapter.NewStdRouterAdapter(rg)
+func (h *SystemHandler) RegisterRoutes(r http2.Router) {
 	system := r.Group("/system")
 	{
 		h.registerStats(system)
@@ -49,32 +49,32 @@ func (h *SystemHandler) RegisterRoutes(rg *gin.RouterGroup) {
 
 	config := r.Group("/config")
 	{
-		config.GET("", h.getPublicConfig())
+		config.GET("", server.HTTPToHandlerFunc(h.getPublicConfig()))
 	}
 
 	portal := r.Group("/portal")
 	{
-		portal.GET("/config", h.getPortalConfig())
+		portal.GET("/config", server.HTTPToHandlerFunc(h.getPortalConfig()))
 	}
 }
 
-func (h *SystemHandler) registerStats(g *ginadapter.StdRouterAdapter) {
+func (h *SystemHandler) registerStats(g http2.Router) {
 	stats := g.Group("/stats")
 	{
-		stats.GET("/dashboard", h.getDashboardStats())
-		stats.GET("/media", h.getMediaStats())
-		stats.GET("/traffic", h.getTrafficStats())
-		stats.GET("/users", h.getUserStats())
+		stats.GET("/dashboard", server.HTTPToHandlerFunc(h.getDashboardStats()))
+		stats.GET("/media", server.HTTPToHandlerFunc(h.getMediaStats()))
+		stats.GET("/traffic", server.HTTPToHandlerFunc(h.getTrafficStats()))
+		stats.GET("/users", server.HTTPToHandlerFunc(h.getUserStats()))
 	}
 }
 
-func (h *SystemHandler) registerSettings(g *ginadapter.StdRouterAdapter) {
+func (h *SystemHandler) registerSettings(g http2.Router) {
 	settings := g.Group("/settings")
 	{
-		settings.GET("", h.getSettings())
-		settings.PUT("", h.updateSettings())
-		settings.GET("/:key", h.getSettingByKey())
-		settings.POST("/:key/reset", h.resetSetting())
+		settings.GET("", server.HTTPToHandlerFunc(h.getSettings()))
+		settings.PUT("", server.HTTPToHandlerFunc(h.updateSettings()))
+		settings.GET("/:key", server.HTTPToHandlerFunc(h.getSettingByKey()))
+		settings.POST("/:key/reset", server.HTTPToHandlerFunc(h.resetSetting()))
 	}
 }
 

@@ -10,6 +10,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	http2 "origadmin/application/origcms/internal/helpers/http"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/helpers/repo"
 	contentbiz "origadmin/application/origcms/internal/features/content/biz"
@@ -44,42 +46,45 @@ func NewMeHandler(
 }
 
 // RegisterRoutes registers the handler's routes.
-func (h *MeHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	me := rg.Group("/me")
-	me.Use(server.JWTMiddleware(h.jwt))
+func (h *MeHandler) RegisterRoutes(r http2.Router) {
+	me := r.Group("/me")
+	// Apply JWT middleware via type assertion
+	if adapter, ok := me.(*ginadapter.RouterAdapter); ok {
+		adapter.Use(server.JWTMiddleware(h.jwt))
+	}
 	{
 		// ================================
 		// 1. CURRENT USER PROFILE
 		// ================================
-		me.GET("", h.GetMe)
-		me.PUT("", h.UpdateMe)
-		me.PUT("/password", h.UpdatePassword)
+		me.GET("", server.GinHandlerToHandlerFunc(h.GetMe))
+		me.PUT("", server.GinHandlerToHandlerFunc(h.UpdateMe))
+		me.PUT("/password", server.GinHandlerToHandlerFunc(h.UpdatePassword))
 
 		// ================================
 		// 2. CURRENT USER RESOURCES
 		// ================================
-		me.GET("/playlists", h.GetPlaylists)
-		me.POST("/playlists", h.CreatePlaylist)
-		me.PATCH("/playlists/:id", h.UpdatePlaylist)
-		me.DELETE("/playlists/:id", h.DeletePlaylist)
-		me.POST("/playlists/:id/media", h.AddMediaToPlaylist)
-		me.DELETE("/playlists/:id/media/:mediaId", h.RemoveMediaFromPlaylist)
-		me.GET("/favorites", h.GetFavorites)
-		me.DELETE("/favorites/:id", h.RemoveFavorite)
-		me.GET("/likes", h.GetLikes)
-		me.GET("/subscriptions", h.GetSubscriptions)
-		me.GET("/followers", h.GetFollowers)
+		me.GET("/playlists", server.GinHandlerToHandlerFunc(h.GetPlaylists))
+		me.POST("/playlists", server.GinHandlerToHandlerFunc(h.CreatePlaylist))
+		me.PATCH("/playlists/:id", server.GinHandlerToHandlerFunc(h.UpdatePlaylist))
+		me.DELETE("/playlists/:id", server.GinHandlerToHandlerFunc(h.DeletePlaylist))
+		me.POST("/playlists/:id/media", server.GinHandlerToHandlerFunc(h.AddMediaToPlaylist))
+		me.DELETE("/playlists/:id/media/:mediaId", server.GinHandlerToHandlerFunc(h.RemoveMediaFromPlaylist))
+		me.GET("/favorites", server.GinHandlerToHandlerFunc(h.GetFavorites))
+		me.DELETE("/favorites/:id", server.GinHandlerToHandlerFunc(h.RemoveFavorite))
+		me.GET("/likes", server.GinHandlerToHandlerFunc(h.GetLikes))
+		me.GET("/subscriptions", server.GinHandlerToHandlerFunc(h.GetSubscriptions))
+		me.GET("/followers", server.GinHandlerToHandlerFunc(h.GetFollowers))
 
 		// ================================
 		// 3. WATCH HISTORY (independent from favorites/likes)
 		// ================================
-		me.GET("/history", h.GetHistory)
-		me.POST("/history", h.UpsertHistory)
-		me.POST("/history/sync", h.SyncHistory)
-		me.DELETE("/history", h.ClearHistory)
-		me.DELETE("/history/:id", h.RemoveHistoryItem)
+		me.GET("/history", server.GinHandlerToHandlerFunc(h.GetHistory))
+		me.POST("/history", server.GinHandlerToHandlerFunc(h.UpsertHistory))
+		me.POST("/history/sync", server.GinHandlerToHandlerFunc(h.SyncHistory))
+		me.DELETE("/history", server.GinHandlerToHandlerFunc(h.ClearHistory))
+		me.DELETE("/history/:id", server.GinHandlerToHandlerFunc(h.RemoveHistoryItem))
 
-		me.GET("/stats", h.GetStats)
+		me.GET("/stats", server.GinHandlerToHandlerFunc(h.GetStats))
 	}
 }
 

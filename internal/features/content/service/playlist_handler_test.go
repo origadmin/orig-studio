@@ -14,6 +14,7 @@ import (
 
 	"origadmin/application/origcms/internal/features/content/biz"
 	"origadmin/application/origcms/internal/infra/auth"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/server"
 )
 
@@ -270,7 +271,8 @@ func TestPlaylistHandler_GetPlaylistByToken_MissingToken(t *testing.T) {
 	handler := setupPlaylistTestHandler()
 
 	// Register without ModuleGuard (which needs settingUC)
-	r.GET("/api/v1/playlists/:token", handler.getPlaylistByToken)
+	adapter := ginadapter.NewRouterAdapter(&r.RouterGroup)
+	adapter.GET("/api/v1/playlists/:token", handler.getPlaylistByToken())
 
 	// Empty token should be caught by Gin's routing (no match)
 	// But if token is provided as empty string via param, handler should catch it
@@ -286,7 +288,8 @@ func TestPlaylistHandler_GetPlaylistByToken_ValidToken(t *testing.T) {
 	r := gin.New()
 	handler := setupPlaylistTestHandler()
 
-	r.GET("/api/v1/playlists/:token", handler.getPlaylistByToken)
+	adapter2 := ginadapter.NewRouterAdapter(&r.RouterGroup)
+	adapter2.GET("/api/v1/playlists/:token", handler.getPlaylistByToken())
 
 	// Non-existent token should return not found
 	w := httptest.NewRecorder()
@@ -368,7 +371,8 @@ func TestPlaylistHandler_ListPlaylists_DefaultPagination(t *testing.T) {
 	r := gin.New()
 	handler := setupPlaylistTestHandler()
 
-	r.GET("/api/v1/playlists", handler.listPlaylists)
+	adapter3 := ginadapter.NewRouterAdapter(&r.RouterGroup)
+	adapter3.GET("/api/v1/playlists", handler.listPlaylists())
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/playlists", nil)
@@ -386,7 +390,8 @@ func TestPlaylistHandler_ListPlaylists_CustomPagination(t *testing.T) {
 	r := gin.New()
 	handler := setupPlaylistTestHandler()
 
-	r.GET("/api/v1/playlists", handler.listPlaylists)
+	adapter4 := ginadapter.NewRouterAdapter(&r.RouterGroup)
+	adapter4.GET("/api/v1/playlists", handler.listPlaylists())
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/playlists?page=2&page_size=5", nil)
@@ -416,7 +421,8 @@ func TestPlaylistHandler_GetPlaylistByToken_PublicPlaylist(t *testing.T) {
 	})
 
 	r := gin.New()
-	r.GET("/api/v1/playlists/:token", handler.getPlaylistByToken)
+	adapterPub := ginadapter.NewRouterAdapter(&r.RouterGroup)
+	adapterPub.GET("/api/v1/playlists/:token", handler.getPlaylistByToken())
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/playlists/"+created.ShortToken, nil)
@@ -446,9 +452,8 @@ func TestPlaylistHandler_GetPlaylistByToken_PrivatePlaylist_NoAuth(t *testing.T)
 	})
 
 	r := gin.New()
-	r.GET("/api/v1/playlists/:token", handler.getPlaylistByToken)
-
-	// Access without auth - should return not found
+	adapterNoAuth := ginadapter.NewRouterAdapter(&r.RouterGroup)
+	adapterNoAuth.GET("/api/v1/playlists/:token", handler.getPlaylistByToken())
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/playlists/"+created.ShortToken, nil)
 	r.ServeHTTP(w, req)
@@ -477,14 +482,16 @@ func TestPlaylistHandler_GetPlaylistByToken_PrivatePlaylist_OwnerAccess(t *testi
 	})
 
 	r := gin.New()
-	r.GET("/api/v1/playlists/:token", func(c *gin.Context) {
+	adapterOwner := ginadapter.NewRouterAdapter(r.Group(""))
+	adapterOwner.Use(func(c *gin.Context) {
 		c.Set("claims", &auth.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Subject: "user-001",
 			},
 		})
 		c.Next()
-	}, handler.getPlaylistByToken)
+	})
+	adapterOwner.GET("/api/v1/playlists/:token", handler.getPlaylistByToken())
 
 	// Access as owner - should succeed
 	w := httptest.NewRecorder()
@@ -511,14 +518,16 @@ func TestPlaylistHandler_GetPlaylistByToken_PrivatePlaylist_NonOwnerAccess(t *te
 	})
 
 	r := gin.New()
-	r.GET("/api/v1/playlists/:token", func(c *gin.Context) {
+	adapterNonOwner := ginadapter.NewRouterAdapter(r.Group(""))
+	adapterNonOwner.Use(func(c *gin.Context) {
 		c.Set("claims", &auth.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Subject: "user-002",
 			},
 		})
 		c.Next()
-	}, handler.getPlaylistByToken)
+	})
+	adapterNonOwner.GET("/api/v1/playlists/:token", handler.getPlaylistByToken())
 
 	// Access as non-owner - should return not found
 	w := httptest.NewRecorder()

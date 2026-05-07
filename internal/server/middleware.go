@@ -9,6 +9,7 @@ import (
 
 	ginhttp "github.com/gin-gonic/gin"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
+	http2 "origadmin/application/origcms/internal/helpers/http"
 	"origadmin/application/origcms/internal/infra/auth"
 	authbiz "origadmin/application/origcms/internal/features/auth/biz"
 )
@@ -22,6 +23,18 @@ func GetClaims(c *ginhttp.Context) (*auth.Claims, bool) {
 	}
 	return nil, false
 }
+
+// GetClaimsCtx retrieves claims from an http2.Context.
+// It extracts the underlying gin.Context via GinContextFromHTTP.
+func GetClaimsCtx(ctx http2.Context) (*auth.Claims, bool) {
+	gc := ginadapter.GinContextFromHTTP(ctx)
+	if gc == nil {
+		return nil, false
+	}
+	return GetClaims(gc)
+}
+
+// ==================== http.HandlerFunc wrappers (legacy) ====================
 
 // WithJWT wraps an http.HandlerFunc with JWT middleware.
 // It retrieves the real gin.Context from the request context,
@@ -109,6 +122,93 @@ func WithAdminAndPerm(jwtMgr *auth.Manager, permChecker authbiz.PermissionChecke
 			return
 		}
 		h(w, r)
+	}
+}
+
+// ==================== http2.HandlerFunc wrappers (new) ====================
+
+// WithJWTCtx wraps an http2.HandlerFunc with JWT middleware.
+// It extracts the gin.Context from the http2.Context, runs JWT validation,
+// and proceeds only if the token is valid.
+func WithJWTCtx(jwtMgr *auth.Manager, h http2.HandlerFunc) http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		if gc == nil {
+			http2.Fail(ctx, http2.ErrInternal, "internal error")
+			return nil
+		}
+		JWTMiddleware(jwtMgr)(gc)
+		if gc.IsAborted() {
+			return nil
+		}
+		return h(ctx)
+	}
+}
+
+// WithOptionalJWTCtx wraps an http2.HandlerFunc with optional JWT middleware.
+func WithOptionalJWTCtx(jwtMgr *auth.Manager, h http2.HandlerFunc) http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		if gc != nil {
+			header := gc.GetHeader("Authorization")
+			if len(header) >= 8 && header[:7] == "Bearer " {
+				if claims, err := jwtMgr.Parse(header[7:]); err == nil {
+					gc.Set("claims", claims)
+				}
+			}
+			if _, exists := gc.Get("claims"); !exists {
+				if t := gc.Query("token"); t != "" {
+					if claims, err := jwtMgr.Parse(t); err == nil {
+						gc.Set("claims", claims)
+					}
+				}
+			}
+		}
+		return h(ctx)
+	}
+}
+
+// WithAdminCtx wraps an http2.HandlerFunc with JWT + Admin middleware.
+func WithAdminCtx(jwtMgr *auth.Manager, h http2.HandlerFunc) http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		if gc == nil {
+			http2.Fail(ctx, http2.ErrInternal, "internal error")
+			return nil
+		}
+		JWTMiddleware(jwtMgr)(gc)
+		if gc.IsAborted() {
+			return nil
+		}
+		AdminMiddleware(jwtMgr)(gc)
+		if gc.IsAborted() {
+			return nil
+		}
+		return h(ctx)
+	}
+}
+
+// WithAdminAndPermCtx wraps an http2.HandlerFunc with JWT + Admin + Permission middleware.
+func WithAdminAndPermCtx(jwtMgr *auth.Manager, permChecker authbiz.PermissionChecker, permission string, h http2.HandlerFunc) http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		if gc == nil {
+			http2.Fail(ctx, http2.ErrInternal, "internal error")
+			return nil
+		}
+		JWTMiddleware(jwtMgr)(gc)
+		if gc.IsAborted() {
+			return nil
+		}
+		AdminMiddleware(jwtMgr)(gc)
+		if gc.IsAborted() {
+			return nil
+		}
+		RequirePermission(permChecker, permission)(gc)
+		if gc.IsAborted() {
+			return nil
+		}
+		return h(ctx)
 	}
 }
 

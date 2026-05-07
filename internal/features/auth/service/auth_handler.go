@@ -11,6 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/api/gen/v1/types"
+	http2 "origadmin/application/origcms/internal/helpers/http"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/features/user/biz"
 	"origadmin/application/origcms/internal/features/user/dto"
@@ -29,14 +31,14 @@ func NewAuthHandler(uc *biz.UserUseCase, jwt *auth.Manager) *AuthHandler {
 }
 
 // RegisterRoutes registers the handler's routes.
-func (h *AuthHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	authGroup := rg.Group("/auth")
+func (h *AuthHandler) RegisterRoutes(r http2.Router) {
+	authGroup := r.Group("/auth")
 	{
 		// Public auth routes
-		authGroup.POST("/signin", h.Login)
-		authGroup.POST("/signup", h.RegisterUser)
-		authGroup.POST("/refresh", h.RefreshToken)
-		authGroup.POST("/signout", h.Logout)
+		authGroup.POST("/signin", h.login())
+		authGroup.POST("/signup", h.registerUser())
+		authGroup.POST("/refresh", h.refreshToken())
+		authGroup.POST("/signout", h.logout())
 	}
 }
 
@@ -74,194 +76,215 @@ type LoginUser struct {
 }
 
 // Login godoc: POST /api/v1/auth/signin
-func (h *AuthHandler) Login(c *gin.Context) {
-	var req LoginRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		server.Fail(c, server.ErrBadRequest, err.Error())
-		return
-	}
+func (h *AuthHandler) login() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
 
-	// Look up user by username (entity for role field)
-	u, err := h.uc.GetUserByUsername(c.Request.Context(), req.Username)
-	if err != nil {
-		server.Fail(c, server.ErrUnauthorized, "invalid credentials")
-		return
-	}
+		var req LoginRequest
+		if err := gc.ShouldBindJSON(&req); err != nil {
+			server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+			return nil
+		}
 
-	// Get role from entity (types.User doesn't have role field)
-	userRole := "user"
-	if entUser, entErr := h.uc.GetUserEntity(c.Request.Context(), u.Id); entErr == nil &&
-		entUser.Role != "" {
-		userRole = string(entUser.Role)
-	}
+		// Look up user by username (entity for role field)
+		u, err := h.uc.GetUserByUsername(ctx.Request().Context(), req.Username)
+		if err != nil {
+			server.FailCtx(ctx, server.ErrUnauthorized, "invalid credentials")
+			return nil
+		}
 
-	// Verify password
-	if err := h.uc.VerifyPassword(c.Request.Context(), u.Id, req.Password); err != nil {
-		server.Fail(c, server.ErrUnauthorized, "invalid credentials")
-		return
-	}
+		// Get role from entity (types.User doesn't have role field)
+		userRole := "user"
+		if entUser, entErr := h.uc.GetUserEntity(ctx.Request().Context(), u.Id); entErr == nil &&
+			entUser.Role != "" {
+			userRole = string(entUser.Role)
+		}
 
-	token, err := h.jwt.Generate(u.Id, u.Username, u.IsStaff, userRole)
-	if err != nil {
-		slog.Error("failed to generate token", "err", err)
-		server.Fail(c, server.ErrInternal, "token generation failed")
-		return
-	}
+		// Verify password
+		if err := h.uc.VerifyPassword(ctx.Request().Context(), u.Id, req.Password); err != nil {
+			server.FailCtx(ctx, server.ErrUnauthorized, "invalid credentials")
+			return nil
+		}
 
-	refreshToken, err := h.jwt.GenerateRefreshToken(u.Id, u.Username, u.IsStaff, userRole)
-	if err != nil {
-		slog.Error("failed to generate refresh token", "err", err)
-		server.Fail(c, server.ErrInternal, "refresh token generation failed")
-		return
-	}
+		token, err := h.jwt.Generate(u.Id, u.Username, u.IsStaff, userRole)
+		if err != nil {
+			slog.Error("failed to generate token", "err", err)
+			server.FailCtx(ctx, server.ErrInternal, "token generation failed")
+			return nil
+		}
 
-	// Return simplified user info, ensure it includes the is_staff field
-	loginUser := &LoginUser{
-		Id:       u.Id,
-		Username: u.Username,
-		Nickname: u.Nickname,
-		Email:    u.Email,
-		IsStaff:  u.IsStaff,
+		refreshToken, err := h.jwt.GenerateRefreshToken(u.Id, u.Username, u.IsStaff, userRole)
+		if err != nil {
+			slog.Error("failed to generate refresh token", "err", err)
+			server.FailCtx(ctx, server.ErrInternal, "refresh token generation failed")
+			return nil
+		}
+
+		// Return simplified user info, ensure it includes the is_staff field
+		loginUser := &LoginUser{
+			Id:       u.Id,
+			Username: u.Username,
+			Nickname: u.Nickname,
+			Email:    u.Email,
+			IsStaff:  u.IsStaff,
+		}
+		// Use server.OKCtx() to return unified response format {code:0, message:"ok", data:{...}}
+		// per C016 unified API response convention.
+		server.OKCtx(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
+		return nil
 	}
-	// Use server.OK() to return unified response format {code:0, message:"ok", data:{...}}
-	// per C016 unified API response convention.
-	server.OK(c, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
 }
 
-func (h *AuthHandler) RegisterUser(c *gin.Context) {
-	var req RegisterRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		server.Fail(c, server.ErrBadRequest, err.Error())
-		return
-	}
+func (h *AuthHandler) registerUser() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
 
-	count, _ := h.uc.CountUsers(c.Request.Context())
-	isFirstUser := count == 0
-
-	newUser := &types.User{
-		Username: req.Username,
-		Nickname: req.Nickname,
-		Email:    req.Email,
-		Status:   1,
-		IsStaff:  isFirstUser,
-	}
-
-	created, err := func() (*types.User, error) {
-		hashed, herr := h.uc.HashPassword(req.Password)
-		if herr != nil {
-			return nil, herr
+		var req RegisterRequest
+		if err := gc.ShouldBindJSON(&req); err != nil {
+			server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+			return nil
 		}
-		return h.uc.CreateUser(c.Request.Context(), newUser, hashed)
-	}()
-	if err != nil {
-		slog.Error("register failed", "err", err)
-		server.Fail(c, server.ErrConflict, "registration failed: " + err.Error())
-		return
-	}
 
-	userRole := "user"
-	if isFirstUser {
-		userRole = "admin"
-		_ = h.uc.SetUserRole(c.Request.Context(), created.Id, "admin")
-	}
+		count, _ := h.uc.CountUsers(ctx.Request().Context())
+		isFirstUser := count == 0
 
-	token, err := h.jwt.Generate(created.Id, created.Username, created.IsStaff, userRole)
-	if err != nil {
-		server.Fail(c, server.ErrInternal, "token generation failed")
-		return
-	}
+		newUser := &types.User{
+			Username: req.Username,
+			Nickname: req.Nickname,
+			Email:    req.Email,
+			Status:   1,
+			IsStaff:  isFirstUser,
+		}
 
-	// Generate refresh token
-	refreshToken, err := h.jwt.GenerateRefreshToken(created.Id, created.Username, created.IsStaff, userRole)
-	if err != nil {
-		slog.Error("failed to generate refresh token", "err", err)
-		server.Fail(c, server.ErrInternal, "refresh token generation failed")
-		return
-	}
+		created, err := func() (*types.User, error) {
+			hashed, herr := h.uc.HashPassword(req.Password)
+			if herr != nil {
+				return nil, herr
+			}
+			return h.uc.CreateUser(ctx.Request().Context(), newUser, hashed)
+		}()
+		if err != nil {
+			slog.Error("register failed", "err", err)
+			server.FailCtx(ctx, server.ErrConflict, "registration failed: "+err.Error())
+			return nil
+		}
 
-	loginUser := &LoginUser{
-		Id:       created.Id,
-		Username: created.Username,
-		Nickname: created.Nickname,
-		Email:    created.Email,
-		IsStaff:  created.IsStaff,
+		userRole := "user"
+		if isFirstUser {
+			userRole = "admin"
+			_ = h.uc.SetUserRole(ctx.Request().Context(), created.Id, "admin")
+		}
+
+		token, err := h.jwt.Generate(created.Id, created.Username, created.IsStaff, userRole)
+		if err != nil {
+			server.FailCtx(ctx, server.ErrInternal, "token generation failed")
+			return nil
+		}
+
+		// Generate refresh token
+		refreshToken, err := h.jwt.GenerateRefreshToken(created.Id, created.Username, created.IsStaff, userRole)
+		if err != nil {
+			slog.Error("failed to generate refresh token", "err", err)
+			server.FailCtx(ctx, server.ErrInternal, "refresh token generation failed")
+			return nil
+		}
+
+		loginUser := &LoginUser{
+			Id:       created.Id,
+			Username: created.Username,
+			Nickname: created.Nickname,
+			Email:    created.Email,
+			IsStaff:  created.IsStaff,
+		}
+		// Use server.CreatedCtx() to return unified response format {code:0, message:"ok", data:{...}}
+		// per C016 unified API response convention.
+		server.CreatedCtx(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
+		return nil
 	}
-	// Use server.Created() to return unified response format {code:0, message:"ok", data:{...}}
-	// per C016 unified API response convention.
-	server.Created(c, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
 }
 
 // RefreshToken godoc: POST /api/v1/auth/refresh
-func (h *AuthHandler) RefreshToken(c *gin.Context) {
-	var req struct {
-		RefreshToken string `json:"refresh_token" binding:"required"`
-	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		server.Fail(c, server.ErrBadRequest, err.Error())
-		return
-	}
+func (h *AuthHandler) refreshToken() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
 
-	// Parse the refresh token to get claims
-	claims, err := h.jwt.Parse(req.RefreshToken)
-	if err != nil {
-		server.Fail(c, server.ErrUnauthorized, "invalid refresh token")
-		return
-	}
+		var req struct {
+			RefreshToken string `json:"refresh_token" binding:"required"`
+		}
+		if err := gc.ShouldBindJSON(&req); err != nil {
+			server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+			return nil
+		}
 
-	// Get user information
-	u, err := h.uc.GetUser(c.Request.Context(), claims.GetUserID(), nil)
-	if err != nil {
-		server.Fail(c, server.ErrInternal, "user not found")
-		return
-	}
+		// Parse the refresh token to get claims
+		claims, err := h.jwt.Parse(req.RefreshToken)
+		if err != nil {
+			server.FailCtx(ctx, server.ErrUnauthorized, "invalid refresh token")
+			return nil
+		}
 
-	token, err := h.jwt.Generate(claims.GetUserID(), claims.Username, claims.IsStaff, claims.Role)
-	if err != nil {
-		slog.Error("failed to generate token", "err", err)
-		server.Fail(c, server.ErrInternal, "token generation failed")
-		return
-	}
+		// Get user information
+		u, err := h.uc.GetUser(ctx.Request().Context(), claims.GetUserID(), nil)
+		if err != nil {
+			server.FailCtx(ctx, server.ErrInternal, "user not found")
+			return nil
+		}
 
-	// Generate new refresh token
-	refreshToken, err := h.jwt.GenerateRefreshToken(claims.GetUserID(), claims.Username, claims.IsStaff, claims.Role)
-	if err != nil {
-		slog.Error("failed to generate refresh token", "err", err)
-		server.Fail(c, server.ErrInternal, "refresh token generation failed")
-		return
-	}
+		token, err := h.jwt.Generate(claims.GetUserID(), claims.Username, claims.IsStaff, claims.Role)
+		if err != nil {
+			slog.Error("failed to generate token", "err", err)
+			server.FailCtx(ctx, server.ErrInternal, "token generation failed")
+			return nil
+		}
 
-	loginUser := &LoginUser{
-		Id:       u.Id,
-		Username: u.Username,
-		Nickname: u.Nickname,
-		Email:    u.Email,
-		IsStaff:  u.IsStaff,
-	}
+		// Generate new refresh token
+		refreshToken, err := h.jwt.GenerateRefreshToken(claims.GetUserID(), claims.Username, claims.IsStaff, claims.Role)
+		if err != nil {
+			slog.Error("failed to generate refresh token", "err", err)
+			server.FailCtx(ctx, server.ErrInternal, "refresh token generation failed")
+			return nil
+		}
 
-	// Use server.OK() to return unified response format {code:0, message:"ok", data:{...}}
-	// per C016 unified API response convention.
-	server.OK(c, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
+		loginUser := &LoginUser{
+			Id:       u.Id,
+			Username: u.Username,
+			Nickname: u.Nickname,
+			Email:    u.Email,
+			IsStaff:  u.IsStaff,
+		}
+
+		// Use server.OKCtx() to return unified response format {code:0, message:"ok", data:{...}}
+		// per C016 unified API response convention.
+		server.OKCtx(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
+		return nil
+	}
 }
 
 // Logout godoc: POST /api/v1/auth/logout (stateless: client discards token)
-func (h *AuthHandler) Logout(c *gin.Context) {
-	server.OK(c, gin.H{"message": "logged out"})
+func (h *AuthHandler) logout() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		server.OKCtx(ctx, gin.H{"message": "logged out"})
+		return nil
+	}
 }
 
 // Me godoc: GET /api/v1/auth/me  (requires JWT)
-func (h *AuthHandler) Me(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
-	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
-	}
+func (h *AuthHandler) Me() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		claims, ok := server.GetClaimsCtx(ctx)
+		if !ok {
+			server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
+			return nil
+		}
 
-	u, err := h.uc.GetUser(c.Request.Context(), claims.GetUserID(), &dto.UserQueryOption{
-		WithProfile: true,
-	})
-	if err != nil {
-		server.Fail(c, server.ErrNotFound, "user not found")
-		return
+		u, err := h.uc.GetUser(ctx.Request().Context(), claims.GetUserID(), &dto.UserQueryOption{
+			WithProfile: true,
+		})
+		if err != nil {
+			server.FailCtx(ctx, server.ErrNotFound, "user not found")
+			return nil
+		}
+		server.OKCtx(ctx, u)
+		return nil
 	}
-	server.OK(c, u)
 }

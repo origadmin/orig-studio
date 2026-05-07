@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/server"
@@ -28,158 +29,147 @@ func NewStubHandler(jwt *auth.Manager) *StubHandler {
 }
 
 // RegisterRoutes registers all stub routes.
-func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
+func (h *StubHandler) RegisterRoutes(r http2.Router) {
 	// ================================
 	// 1. Admin Media Management — MOVED to AdminHandler (B079)
-	// CRUD routes (GET/PUT/DELETE /admin/medias/:id, GET /admin/medias, etc.)
-	// are now handled by AdminHandler.adminListMedias/adminGetMedia/adminUpdateMedia/etc.
-	// Only review stubs remain here.
 	// ================================
 
 	// ================================
 	// 2. Review Module
 	// ================================
-	adminReview := rg.Group("/admin/medias/review")
-	adminReview.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
-	{
-		r := ginadapter.NewStdRouterAdapter(adminReview)
-		r.GET("/pending", h.stubReviewPending())
-		r.GET("/history", h.stubReviewHistory())
-		r.POST("/batch", h.stubReviewBatch())
+	adminReview := r.Group("/admin/medias/review")
+	if adapter, ok := adminReview.(*ginadapter.RouterAdapter); ok {
+		adapter.Use(server.JWTMiddleware(h.jwt))
+		adapter.Use(server.AdminMiddleware(h.jwt))
 	}
-	adminMediaReview := rg.Group("/admin/medias/:id")
-	adminMediaReview.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
 	{
-		r := ginadapter.NewStdRouterAdapter(adminMediaReview)
-		r.PUT("/review", h.stubReviewMedia())
-		r.GET("/review-logs", h.stubReviewLogs())
+		adminReview.GET("/pending", server.HTTPToHandlerFunc(h.stubReviewPending()))
+		adminReview.GET("/history", server.HTTPToHandlerFunc(h.stubReviewHistory()))
+		adminReview.POST("/batch", server.HTTPToHandlerFunc(h.stubReviewBatch()))
+	}
+	adminMediaReview := r.Group("/admin/medias/:id")
+	if adapter, ok := adminMediaReview.(*ginadapter.RouterAdapter); ok {
+		adapter.Use(server.JWTMiddleware(h.jwt))
+		adapter.Use(server.AdminMiddleware(h.jwt))
+	}
+	{
+		adminMediaReview.PUT("/review", server.HTTPToHandlerFunc(h.stubReviewMedia()))
+		adminMediaReview.GET("/review-logs", server.HTTPToHandlerFunc(h.stubReviewLogs()))
 	}
 
 	// ================================
 	// 3. Portal / Config — MOVED to SystemHandler
-	// SystemHandler.getPortalConfig() provides real implementation
-	// reading from settings. Stub removed to avoid route conflict.
 	// ================================
 
 	// ================================
 	// 4. Admin Nav Items
 	// ================================
-	adminNavItems := rg.Group("/admin/nav-items")
-	adminNavItems.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
+	adminNavItems := r.Group("/admin/nav-items")
+	if adapter, ok := adminNavItems.(*ginadapter.RouterAdapter); ok {
+		adapter.Use(server.JWTMiddleware(h.jwt))
+		adapter.Use(server.AdminMiddleware(h.jwt))
+	}
 	{
-		r := ginadapter.NewStdRouterAdapter(adminNavItems)
-		r.GET("", h.stubNavItemList())
-		r.POST("", h.stubNavItemCreate())
-		r.PUT("/:id", h.stubNavItemUpdate())
-		r.DELETE("/:id", h.stubNavItemDelete())
-		r.PUT("/reorder", h.stubNavItemReorder())
+		adminNavItems.GET("", server.HTTPToHandlerFunc(h.stubNavItemList()))
+		adminNavItems.POST("", server.HTTPToHandlerFunc(h.stubNavItemCreate()))
+		adminNavItems.PUT("/:id", server.HTTPToHandlerFunc(h.stubNavItemUpdate()))
+		adminNavItems.DELETE("/:id", server.HTTPToHandlerFunc(h.stubNavItemDelete()))
+		adminNavItems.PUT("/reorder", server.HTTPToHandlerFunc(h.stubNavItemReorder()))
 	}
 
 	// ================================
 	// 5. Admin Banners
 	// ================================
-	adminBanners := rg.Group("/admin/banners")
-	adminBanners.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
+	adminBanners := r.Group("/admin/banners")
+	if adapter, ok := adminBanners.(*ginadapter.RouterAdapter); ok {
+		adapter.Use(server.JWTMiddleware(h.jwt))
+		adapter.Use(server.AdminMiddleware(h.jwt))
+	}
 	{
-		r := ginadapter.NewStdRouterAdapter(adminBanners)
-		r.GET("", h.stubBannerList())
-		r.POST("", h.stubBannerCreate())
-		r.PUT("/:id", h.stubBannerUpdate())
-		r.POST("/:id/toggle", h.stubBannerToggle())
+		adminBanners.GET("", server.HTTPToHandlerFunc(h.stubBannerList()))
+		adminBanners.POST("", server.HTTPToHandlerFunc(h.stubBannerCreate()))
+		adminBanners.PUT("/:id", server.HTTPToHandlerFunc(h.stubBannerUpdate()))
+		adminBanners.POST("/:id/toggle", server.HTTPToHandlerFunc(h.stubBannerToggle()))
 	}
 
 	// ================================
 	// 6. Media Metadata / Sprite / Subtitle / Download/Stream/Thumbnail / Likes/Favorites/Shares / Update/Delete
 	// ================================
-	mediasR := ginadapter.NewStdRouterAdapter(rg)
-	medias := mediasR.Group("/medias")
+	medias := r.Group("/medias")
 	{
 		// Metadata
-		medias.GET("/:id/metadata", h.stubMediaMetadata())
-		medias.POST("/:id/metadata/mining", server.WithJWT(h.jwt, h.stubMediaMetadataMining()))
-		medias.GET("/:id/metadata/status", h.stubMediaMetadataStatus())
-		medias.GET("/:id/metadata/key-frames", h.stubMediaMetadataKeyFrames())
-		medias.GET("/:id/metadata/audio-waveform", h.stubMediaMetadataAudioWaveform())
-		medias.GET("/:id/metadata/text-content", h.stubMediaMetadataTextContent())
-		medias.GET("/:id/metadata/scene-changes", h.stubMediaMetadataSceneChanges())
-
-		// Sprite (replaced by SpriteHandler - routes registered separately)
-		// medias.GET("/:id/sprite.vtt", h.stubSpriteVTT())
-		// medias.GET("/:id/sprite.jpg", h.stubSpriteJPG())
+		medias.GET("/:id/metadata", server.HTTPToHandlerFunc(h.stubMediaMetadata()))
+		medias.POST("/:id/metadata/mining", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaMetadataMining())))
+		medias.GET("/:id/metadata/status", server.HTTPToHandlerFunc(h.stubMediaMetadataStatus()))
+		medias.GET("/:id/metadata/key-frames", server.HTTPToHandlerFunc(h.stubMediaMetadataKeyFrames()))
+		medias.GET("/:id/metadata/audio-waveform", server.HTTPToHandlerFunc(h.stubMediaMetadataAudioWaveform()))
+		medias.GET("/:id/metadata/text-content", server.HTTPToHandlerFunc(h.stubMediaMetadataTextContent()))
+		medias.GET("/:id/metadata/scene-changes", server.HTTPToHandlerFunc(h.stubMediaMetadataSceneChanges()))
 
 		// Subtitle
-		medias.GET("/:id/subtitles", h.stubSubtitleList())
-		medias.POST("/:id/subtitles", server.WithJWT(h.jwt, h.stubSubtitleCreate()))
+		medias.GET("/:id/subtitles", server.HTTPToHandlerFunc(h.stubSubtitleList()))
+		medias.POST("/:id/subtitles", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubSubtitleCreate())))
 
 		// Download/Stream/Thumbnail
-		medias.GET("/:id/download", h.stubMediaDownload())
-		medias.GET("/:id/stream", h.stubMediaStream())
-		medias.GET("/:id/thumbnail", h.stubMediaThumbnail())
-
-		// NOTE: Likes/Favorites plural paths are now handled by MediaHandler
-		// (POST /:id/likes, GET /:id/likes, DELETE /:id/likes,
-		//  POST /:id/favorites, GET /:id/favorites, DELETE /:id/favorites)
+		medias.GET("/:id/download", server.HTTPToHandlerFunc(h.stubMediaDownload()))
+		medias.GET("/:id/stream", server.HTTPToHandlerFunc(h.stubMediaStream()))
+		medias.GET("/:id/thumbnail", server.HTTPToHandlerFunc(h.stubMediaThumbnail()))
 
 		// Shares
-		medias.GET("/:id/shares", h.stubMediaShares())
-		medias.POST("/:id/shares", server.WithJWT(h.jwt, h.stubMediaShareCreate()))
+		medias.GET("/:id/shares", server.HTTPToHandlerFunc(h.stubMediaShares()))
+		medias.POST("/:id/shares", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaShareCreate())))
 
 		// Update/Delete
-		medias.PUT("/:id", server.WithJWT(h.jwt, h.stubMediaUpdate()))
-		medias.DELETE("/:id", server.WithJWT(h.jwt, h.stubMediaDelete()))
+		medias.PUT("/:id", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaUpdate())))
+		medias.DELETE("/:id", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaDelete())))
 
 		// Upload alias
-		medias.POST("/upload", server.WithJWT(h.jwt, h.stubMediaUpload()))
+		medias.POST("/upload", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaUpload())))
 
 		// Tasks (deprecated)
-		medias.GET("/:id/tasks", h.stubMediaTasks())
-		medias.POST("/:id/tasks/:taskId/retry", server.WithJWT(h.jwt, h.stubMediaTaskRetry()))
+		medias.GET("/:id/tasks", server.HTTPToHandlerFunc(h.stubMediaTasks()))
+		medias.POST("/:id/tasks/:taskId/retry", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaTaskRetry())))
 	}
 
 	// ================================
 	// 7. Subtitle (root level)
 	// ================================
-	subtitlesR := ginadapter.NewStdRouterAdapter(rg)
-	subtitles := subtitlesR.Group("/subtitles")
+	subtitles := r.Group("/subtitles")
 	{
-		subtitles.DELETE("/:id", server.WithJWT(h.jwt, h.stubSubtitleDelete()))
-		subtitles.GET("/languages", h.stubSubtitleLanguages())
+		subtitles.DELETE("/:id", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubSubtitleDelete())))
+		subtitles.GET("/languages", server.HTTPToHandlerFunc(h.stubSubtitleLanguages()))
 	}
 
 	// ================================
 	// 8. Admin Sprite/Thumbnail regeneration (replaced by SpriteHandler)
 	// ================================
-	// adminMediaRegen := rg.Group("/admin/medias/:id")
-	// adminMediaRegen.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
-	// {
-	// 	adminMediaRegen.POST("/regenerate-sprite", h.stubRegenerateSprite())
-	// 	adminMediaRegen.POST("/regenerate-thumbnail", h.stubRegenerateThumbnail())
-	// }
 
 	// ================================
 	// 9. Admin Stats Revenue
 	// ================================
-	adminStatsRevenue := rg.Group("/admin/stats")
-	adminStatsRevenue.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
+	adminStatsRevenue := r.Group("/admin/stats")
+	if adapter, ok := adminStatsRevenue.(*ginadapter.RouterAdapter); ok {
+		adapter.Use(server.JWTMiddleware(h.jwt))
+		adapter.Use(server.AdminMiddleware(h.jwt))
+	}
 	{
-		r := ginadapter.NewStdRouterAdapter(adminStatsRevenue)
-		r.GET("/revenue", h.stubAdminStatsRevenue())
+		adminStatsRevenue.GET("/revenue", server.HTTPToHandlerFunc(h.stubAdminStatsRevenue()))
 	}
 
 	// ================================
 	// 10. Admin Settings — MOVED to AdminHandler
-	// AdminHandler provides real GET/PUT /admin/settings implementation.
-	// Per-key routes removed to avoid route conflict with AdminHandler.
 	// ================================
 
 	// ================================
 	// 11. Admin Channels POST
 	// ================================
-	adminChannels := rg.Group("/admin/channels")
-	adminChannels.Use(server.JWTMiddleware(h.jwt), server.AdminMiddleware(h.jwt))
+	adminChannels := r.Group("/admin/channels")
+	if adapter, ok := adminChannels.(*ginadapter.RouterAdapter); ok {
+		adapter.Use(server.JWTMiddleware(h.jwt))
+		adapter.Use(server.AdminMiddleware(h.jwt))
+	}
 	{
-		r := ginadapter.NewStdRouterAdapter(adminChannels)
-		r.POST("", h.stubAdminChannelCreate())
+		adminChannels.POST("", server.HTTPToHandlerFunc(h.stubAdminChannelCreate()))
 	}
 
 	// ================================
@@ -189,41 +179,37 @@ func (h *StubHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	// ================================
 	// 13. Notification DELETE
 	// ================================
-	notifications := rg.Group("/notifications")
-	notifications.Use(server.JWTMiddleware(h.jwt))
+	notifications := r.Group("/notifications")
+	if adapter, ok := notifications.(*ginadapter.RouterAdapter); ok {
+		adapter.Use(server.JWTMiddleware(h.jwt))
+	}
 	{
-		r := ginadapter.NewStdRouterAdapter(notifications)
-		r.DELETE("/:id", h.stubNotificationDelete())
+		notifications.DELETE("/:id", server.HTTPToHandlerFunc(h.stubNotificationDelete()))
 	}
 
 	// ================================
 	// 14. User subscription/update/status routes
 	// ================================
-	users := rg.Group("/users")
+	users := r.Group("/users")
 	{
-		r := ginadapter.NewStdRouterAdapter(users)
-		r.GET("/:id/subscription", h.stubUserSubscription())
-		r.POST("/:id/subscribe", server.WithJWT(h.jwt, h.stubUserSubscribe()))
-		r.DELETE("/:id/subscribe", server.WithJWT(h.jwt, h.stubUserUnsubscribe()))
-		r.PUT("/:id", server.WithJWT(h.jwt, h.stubUserUpdate()))
-		r.PATCH("/:id/status", server.WithJWT(h.jwt, h.stubUserStatusUpdate()))
+		users.GET("/:id/subscription", server.HTTPToHandlerFunc(h.stubUserSubscription()))
+		users.POST("/:id/subscribe", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubUserSubscribe())))
+		users.DELETE("/:id/subscribe", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubUserUnsubscribe())))
+		users.PUT("/:id", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubUserUpdate())))
+		users.PATCH("/:id/status", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubUserStatusUpdate())))
 	}
 
 	// ================================
 	// 15. Playlist — MOVED to PlaylistHandler + MeHandler + AdminHandler
-	// PlaylistHandler: GET /playlists, GET /playlists/:token (portal, short_token)
-	// MeHandler: GET/POST/PATCH/DELETE /me/playlists (user CRUD)
-	// AdminHandler: GET/POST/PUT/DELETE /admin/playlists (admin CRUD)
 	// ================================
 
 	// ================================
 	// 16. Encoding status/events (public aliases)
 	// ================================
-	encoding := rg.Group("/encoding")
+	encoding := r.Group("/encoding")
 	{
-		r := ginadapter.NewStdRouterAdapter(encoding)
-		r.GET("/status", h.stubEncodingStatus())
-		r.GET("/events", h.stubEncodingEvents())
+		encoding.GET("/status", server.HTTPToHandlerFunc(h.stubEncodingStatus()))
+		encoding.GET("/events", server.HTTPToHandlerFunc(h.stubEncodingEvents()))
 	}
 }
 

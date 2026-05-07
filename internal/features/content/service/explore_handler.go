@@ -1,12 +1,12 @@
 package service
 
 import (
-	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 
+	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/server"
@@ -21,32 +21,31 @@ func NewExploreHandler(entityClient *entity.Client) *ExploreHandler {
 	return &ExploreHandler{entityClient: entityClient}
 }
 
-func (h *ExploreHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	r := ginadapter.NewStdRouterAdapter(rg)
+func (h *ExploreHandler) RegisterRoutes(r http2.Router) {
 	explore := r.Group("/explore")
 	{
 		explore.GET("/trending", h.trending())
 	}
 }
 
-func (h *ExploreHandler) trending() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *ExploreHandler) trending() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
 		_ = gc.DefaultQuery("period", "week")
 		limit, _ := strconv.Atoi(gc.DefaultQuery("limit", "50"))
 		if limit <= 0 || limit > 100 {
 			limit = 50
 		}
 
-		ctx := r.Context()
+		reqCtx := ctx.Request().Context()
 
 		medias, err := h.entityClient.Media.Query().
 			Limit(limit).
 			Order(entity.Desc(media.FieldViewCount)).
-			All(ctx)
+			All(reqCtx)
 		if err != nil {
-			server.Fail(gc, 50000, err.Error())
-			return
+			server.FailCtx(ctx, 50000, err.Error())
+			return nil
 		}
 
 		items := make([]interface{}, 0, len(medias))
@@ -74,5 +73,6 @@ func (h *ExploreHandler) trending() http.HandlerFunc {
 		response.Data.Total = int64(len(items))
 
 		gc.JSON(200, response)
+		return nil
 	}
 }

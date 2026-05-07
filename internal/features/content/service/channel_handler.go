@@ -28,6 +28,7 @@ import (
 
 	pb "origadmin/application/origcms/api/gen/v1/media"
 	types "origadmin/application/origcms/api/gen/v1/types"
+	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/helpers/repo"
@@ -52,91 +53,93 @@ func NewChannelHandler(uc *biz.PlaylistChannelUseCase, jwt *auth.Manager, settin
 	return &ChannelHandler{uc: uc, jwt: jwt, settingUC: settingUC}
 }
 
-func (h *ChannelHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	channelsGroup := rg.Group("/channels")
-	channelsGroup.Use(systemservice.ModuleGuard(h.settingUC, "module_videos"))
+func (h *ChannelHandler) RegisterRoutes(r http2.Router) {
+	channelsGroup := r.Group("/channels")
+	// Apply ModuleGuard gin middleware via type assertion
+	if adapter, ok := channelsGroup.(*ginadapter.RouterAdapter); ok {
+		adapter.Use(systemservice.ModuleGuard(h.settingUC, "module_videos"))
+	}
 
-	r := ginadapter.NewStdRouterAdapter(channelsGroup)
-	channels := r.Group("")
+	channels := channelsGroup.Group("")
 	{
 		// ================================
 		// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST!
 		// ================================
-		channels.GET("", h.ListChannels)
+		channels.GET("", httpToHandlerFunc(h.ListChannels))
 
 		// Current user's channels (requires auth)
-		channels.GET("/me", server.WithJWT(h.jwt, h.GetMyChannels))
-		channels.PUT("/me/handle", server.WithJWT(h.jwt, h.UpdateMyHandle))
+		channels.GET("/me", server.WithJWTCtx(h.jwt, httpToHandlerFunc(h.GetMyChannels)))
+		channels.PUT("/me/handle", server.WithJWTCtx(h.jwt, httpToHandlerFunc(h.UpdateMyHandle)))
 
 		// Handle validation (public)
-		channels.GET("/validate-handle", h.ValidateHandle)
+		channels.GET("/validate-handle", httpToHandlerFunc(h.ValidateHandle))
 
 		// ================================
 		// 2. PATH PARAMETER ROUTES (WITH :token) - MUST BE AFTER STATIC
 		// ================================
 		// Single channel by short_token (RESTful, MediaCMS style)
-		channels.GET("/:token", h.GetChannelByToken)
+		channels.GET("/:token", httpToHandlerFunc(h.GetChannelByToken))
 
 		// Channel videos and playlists
-		channels.GET("/:token/videos", h.GetChannelVideos)
-		channels.GET("/:token/playlists", h.GetChannelPlaylists)
+		channels.GET("/:token/videos", httpToHandlerFunc(h.GetChannelVideos))
+		channels.GET("/:token/playlists", httpToHandlerFunc(h.GetChannelPlaylists))
 
 		// Notification settings
-		channels.PUT("/:token/notification", server.WithJWT(h.jwt, h.UpdateNotificationSetting))
+		channels.PUT("/:token/notification", server.WithJWTCtx(h.jwt, httpToHandlerFunc(h.UpdateNotificationSetting)))
 
 		// ================================
 		// 3. NESTED RESOURCE ROUTES (Subscription APIs)
 		// ================================
 		// Channel subscribers and subscription
-		channels.GET("/:token/subscribers", h.GetChannelSubscribers)
-		channels.GET("/:token/subscription", server.WithJWT(h.jwt, h.GetSubscriptionStatus))
-		channels.POST("/:token/subscription", server.WithJWT(h.jwt, h.SubscribeToChannel))
-		channels.DELETE("/:token/subscription", server.WithJWT(h.jwt, h.UnsubscribeFromChannel))
+		channels.GET("/:token/subscribers", httpToHandlerFunc(h.GetChannelSubscribers))
+		channels.GET("/:token/subscription", server.WithJWTCtx(h.jwt, httpToHandlerFunc(h.GetSubscriptionStatus)))
+		channels.POST("/:token/subscription", server.WithJWTCtx(h.jwt, httpToHandlerFunc(h.SubscribeToChannel)))
+		channels.DELETE("/:token/subscription", server.WithJWTCtx(h.jwt, httpToHandlerFunc(h.UnsubscribeFromChannel)))
 
 		// Protected write routes
 		{
-			channels.POST("", server.WithJWT(h.jwt, h.CreateChannel))
+			channels.POST("", server.WithJWTCtx(h.jwt, httpToHandlerFunc(h.CreateChannel)))
 			// Media management within channel (by :token)
-			channels.POST("/:token/medias", server.WithJWT(h.jwt, h.AddMedia))
-			channels.DELETE("/:token/medias/:mediaId", server.WithJWT(h.jwt, h.RemoveMedia))
+			channels.POST("/:token/medias", server.WithJWTCtx(h.jwt, httpToHandlerFunc(h.AddMedia)))
+			channels.DELETE("/:token/medias/:mediaId", server.WithJWTCtx(h.jwt, httpToHandlerFunc(h.RemoveMedia)))
 			// Invitation management
-			channels.POST("/:token/invitations", server.WithJWT(h.jwt, h.InviteUserToChannel))
-			channels.POST("/invitations/:id/accept", server.WithJWT(h.jwt, h.AcceptChannelInvitation))
-			channels.POST("/invitations/:id/reject", server.WithJWT(h.jwt, h.RejectChannelInvitation))
-			channels.GET("/invitations", server.WithJWT(h.jwt, h.GetChannelInvitations))
+			channels.POST("/:token/invitations", server.WithJWTCtx(h.jwt, httpToHandlerFunc(h.InviteUserToChannel)))
+			channels.POST("/invitations/:id/accept", server.WithJWTCtx(h.jwt, httpToHandlerFunc(h.AcceptChannelInvitation)))
+			channels.POST("/invitations/:id/reject", server.WithJWTCtx(h.jwt, httpToHandlerFunc(h.RejectChannelInvitation)))
+			channels.GET("/invitations", server.WithJWTCtx(h.jwt, httpToHandlerFunc(h.GetChannelInvitations)))
 
 			// ================================
 			// UPDATE & DELETE by :token (not :id!)
 			// Application uses short_token for all operations
 			// Admin uses /admin/channels/:uuid for UUID-based operations
 			// ================================
-			channels.PUT("/:token", server.WithJWT(h.jwt, h.UpdateChannel))    // :token = short_token
-			channels.DELETE("/:token", server.WithJWT(h.jwt, h.DeleteChannel)) // :token = short_token
+			channels.PUT("/:token", server.WithJWTCtx(h.jwt, httpToHandlerFunc(h.UpdateChannel)))    // :token = short_token
+			channels.DELETE("/:token", server.WithJWTCtx(h.jwt, httpToHandlerFunc(h.DeleteChannel))) // :token = short_token
 		}
 	}
 
 	// ================================
 	// Handle resolution route (top-level, NOT under /channels)
 	// ================================
-	resolveAdapter := ginadapter.NewStdRouterAdapter(rg.Group("/resolve"))
+	resolveGroup := r.Group("/resolve")
 	{
-		resolveAdapter.GET("/@:handle", h.ResolveHandle)
+		resolveGroup.GET("/@:handle", httpToHandlerFunc(h.ResolveHandle))
 	}
 
 	// ================================
 	// System config routes (top-level, NOT under /channels)
 	// ================================
-	configAdapter := ginadapter.NewStdRouterAdapter(rg.Group("/system/config"))
+	configGroup := r.Group("/system/config")
 	{
-		configAdapter.GET("/channel-limits", h.GetChannelLimits)
+		configGroup.GET("/channel-limits", httpToHandlerFunc(h.GetChannelLimits))
 	}
 
 	// ================================
 	// Subscription feed routes (top-level, NOT under /channels)
 	// ================================
-	subsAdapter := ginadapter.NewStdRouterAdapter(rg.Group("/subscriptions"))
+	subsGroup := r.Group("/subscriptions")
 	{
-		subsAdapter.GET("/videos", server.WithJWT(h.jwt, h.GetSubscriptionVideos))
+		subsGroup.GET("/videos", server.WithJWTCtx(h.jwt, httpToHandlerFunc(h.GetSubscriptionVideos)))
 	}
 }
 

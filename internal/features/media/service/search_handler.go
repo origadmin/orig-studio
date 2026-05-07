@@ -5,9 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gin-gonic/gin"
-
 	pb "origadmin/application/origcms/api/gen/v1/media"
+	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/features/media/biz"
 	"origadmin/application/origcms/internal/features/media/dto"
@@ -25,12 +24,11 @@ func NewSearchHandler(mediaUC *biz.MediaUseCase) *SearchHandler {
 	return &SearchHandler{mediaUC: mediaUC}
 }
 
-func (h *SearchHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	r := ginadapter.NewStdRouterAdapter(rg)
+func (h *SearchHandler) RegisterRoutes(r http2.Router) {
 	search := r.Group("/search")
 	{
-		search.GET("", h.search())
-		search.GET("/suggestions", h.suggestions())
+		search.GET("", server.HTTPToHandlerFunc(h.search()))
+		search.GET("/suggestions", server.HTTPToHandlerFunc(h.suggestions()))
 	}
 }
 

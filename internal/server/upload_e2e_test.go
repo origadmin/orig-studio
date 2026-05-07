@@ -29,6 +29,7 @@ import (
 	"origadmin/application/origcms/internal/features/media/biz"
 	"origadmin/application/origcms/internal/features/media/dal"
 	mediaservice "origadmin/application/origcms/internal/features/media/service"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 )
 
 func TestUploadE2E(t *testing.T) {
@@ -82,8 +83,8 @@ func TestUploadE2E(t *testing.T) {
 	uploadHandler := mediaservice.NewUploadHandler(uploadUC, jwtMgr, logger)
 	mediaHandler := mediaservice.NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC, nil, nil, nil, nil, nil)
 
-	uploadHandler.RegisterRoutes(apiV1)
-	mediaHandler.RegisterRoutes(apiV1)
+	uploadHandler.RegisterRoutes(ginadapter.NewRouterAdapter(apiV1))
+	mediaHandler.RegisterRoutes(ginadapter.NewRouterAdapter(apiV1))
 
 	// 2. Register & Login to get token
 	username := "testuser"

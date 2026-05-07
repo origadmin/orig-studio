@@ -7,6 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
+
+	http2 "origadmin/application/origcms/internal/helpers/http"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 )
 
 // Response unified response format
@@ -195,5 +198,84 @@ func getHTTPStatus(code int) int {
 			return http.StatusInternalServerError
 		}
 		return http.StatusOK
+	}
+}
+
+// ==================== http2.Context bridge functions ====================
+// These functions accept http2.Context and delegate to the gin-based
+// response functions by extracting the underlying gin.Context.
+// They provide a migration path: handler code uses http2.Context,
+// but response formatting remains consistent with the existing gin-based
+// implementation (including proto.Message detection, error code mapping, etc.).
+
+// OKCtx returns a success response with HTTP 200 via http2.Context.
+func OKCtx(ctx http2.Context, data interface{}) {
+	gc := ginadapter.GinContextFromHTTP(ctx)
+	if gc != nil {
+		OK(gc, data)
+	}
+}
+
+// CreatedCtx returns a success response with HTTP 201 via http2.Context.
+func CreatedCtx(ctx http2.Context, data interface{}) {
+	gc := ginadapter.GinContextFromHTTP(ctx)
+	if gc != nil {
+		Created(gc, data)
+	}
+}
+
+// FailCtx returns a failure response via http2.Context.
+func FailCtx(ctx http2.Context, code int, message string) {
+	gc := ginadapter.GinContextFromHTTP(ctx)
+	if gc != nil {
+		Fail(gc, code, message)
+	}
+}
+
+// PageCtx returns a paginated success response with HTTP 200 via http2.Context.
+func PageCtx(ctx http2.Context, items interface{}, total int64, page, pageSize int) {
+	gc := ginadapter.GinContextFromHTTP(ctx)
+	if gc != nil {
+		Page(gc, items, total, page, pageSize)
+	}
+}
+
+// ProtoOKCtx returns a success response for proto.Message via http2.Context.
+func ProtoOKCtx(ctx http2.Context, data proto.Message) {
+	gc := ginadapter.GinContextFromHTTP(ctx)
+	if gc != nil {
+		writeProtoResponse(gc, http.StatusOK, data)
+	}
+}
+
+// HTTPToHandlerFunc wraps a standard http.HandlerFunc into an http2.HandlerFunc.
+// It extracts the gin.Context from the http2.Context and passes it through
+// the request context so that ginadapter.GetGinContext(r) still works inside
+// the handler. This is a bridge function for the migration period.
+func HTTPToHandlerFunc(h http.HandlerFunc) http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		if gc == nil {
+			http2.Fail(ctx, http2.ErrInternal, "internal error")
+			return nil
+		}
+		r := ginadapter.SetGinContext(ctx.Request(), gc)
+		h(gc.Writer, r)
+		return nil
+	}
+}
+
+// GinHandlerToHandlerFunc wraps a gin handler function (func(*gin.Context))
+// into an http2.HandlerFunc. This is a bridge function for handlers that
+// directly accept *gin.Context as a parameter during the migration period.
+func GinHandlerToHandlerFunc(h func(*gin.Context)) http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		if gc == nil {
+			http2.Fail(ctx, http2.ErrInternal, "internal error")
+			return nil
+		}
+		h(gc)
+		return nil
 	}
 }

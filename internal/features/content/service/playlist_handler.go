@@ -5,6 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	http2 "origadmin/application/origcms/internal/helpers/http"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/features/content/biz"
 	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/infra/auth"
@@ -32,57 +34,68 @@ func NewPlaylistHandler(playlistUC *biz.PlaylistChannelUseCase, settingUC *syste
 }
 
 // RegisterRoutes registers the handler's routes.
-func (h *PlaylistHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	playlists := rg.Group("/playlists")
-	playlists.Use(systemservice.ModuleGuard(h.settingUC, "module_videos"))
+func (h *PlaylistHandler) RegisterRoutes(r http2.Router) {
+	playlists := r.Group("/playlists")
+	// Apply ModuleGuard gin middleware via type assertion
+	if adapter, ok := playlists.(*ginadapter.RouterAdapter); ok {
+		adapter.Use(systemservice.ModuleGuard(h.settingUC, "module_videos"))
+	}
 	{
-		playlists.GET("", h.listPlaylists)
+		playlists.GET("", h.listPlaylists())
 		// Use OptionalJWTMiddleware so that private playlists can be accessed
 		// by their owner. Without this, GetClaims(c) always returns ok=false
 		// for the portal route, causing 404 for any private playlist (B099).
-		playlists.GET("/:token", server.OptionalJWTMiddleware(h.jwt), h.getPlaylistByToken)
+		playlists.GET("/:token", server.WithOptionalJWTCtx(h.jwt, h.getPlaylistByToken()))
 	}
 }
 
 // listPlaylists returns all public playlists with pagination (portal view).
-func (h *PlaylistHandler) listPlaylists(c *gin.Context) {
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
-	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+func (h *PlaylistHandler) listPlaylists() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
+		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
-	items, total, err := h.playlistUC.ListPlaylists(c.Request.Context(), page, pageSize)
-	if err != nil {
-		server.Fail(c, server.ErrInternal, err.Error())
-		return
+		items, total, err := h.playlistUC.ListPlaylists(ctx.Request().Context(), page, pageSize)
+		if err != nil {
+			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			return nil
+		}
+
+		server.PageCtx(ctx, items, int64(total), page, pageSize)
+		return nil
 	}
-
-	server.Page(c, items, int64(total), page, pageSize)
 }
 
 // getPlaylistByToken returns a single playlist by short_token.
 // Public playlists are accessible to everyone.
 // Private playlists are only accessible to their owner (requires JWT).
-func (h *PlaylistHandler) getPlaylistByToken(c *gin.Context) {
-	token := c.Param("token")
-	if token == "" {
-		server.Fail(c, server.ErrBadRequest, "playlist token is required")
-		return
-	}
-
-	playlist, err := h.playlistUC.GetPlaylistByShortToken(c.Request.Context(), token)
-	if err != nil {
-		server.Fail(c, server.ErrNotFound, "playlist not found")
-		return
-	}
-
-	// Private playlists: only the owner can view them
-	if !playlist.IsPublic {
-		claims, ok := server.GetClaims(c)
-		if !ok || claims.GetUserID() != playlist.UserID {
-			server.Fail(c, server.ErrNotFound, "playlist not found")
-			return
+func (h *PlaylistHandler) getPlaylistByToken() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		token := gc.Param("token")
+		if token == "" {
+			server.FailCtx(ctx, server.ErrBadRequest, "playlist token is required")
+			return nil
 		}
-	}
 
-	server.OK(c, gin.H{"playlist": playlist})
+		playlist, err := h.playlistUC.GetPlaylistByShortToken(ctx.Request().Context(), token)
+		if err != nil {
+			server.FailCtx(ctx, server.ErrNotFound, "playlist not found")
+			return nil
+		}
+
+		// Private playlists: only the owner can view them
+		if !playlist.IsPublic {
+			claims, ok := server.GetClaimsCtx(ctx)
+			if !ok || claims.GetUserID() != playlist.UserID {
+				server.FailCtx(ctx, server.ErrNotFound, "playlist not found")
+				return nil
+			}
+		}
+
+		server.OKCtx(ctx, gin.H{"playlist": playlist})
+		return nil
+	}
 }

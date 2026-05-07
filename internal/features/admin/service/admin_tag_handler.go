@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"origadmin/application/origcms/internal/data/entity"
+	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/helpers/hashtag"
 	"origadmin/application/origcms/internal/helpers/repo"
@@ -27,18 +28,17 @@ func NewAdminTagHandler(service *TagService) *AdminTagHandler {
 }
 
 // RegisterRoutes registers tag routes
-func (h *AdminTagHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	r := ginadapter.NewStdRouterAdapter(rg)
+func (h *AdminTagHandler) RegisterRoutes(r http2.Router) {
 	tags := r.Group("/admin/tags")
 	{
-		tags.GET("", h.listTags())
-		tags.GET("/:id", h.getTag())
-		tags.POST("", h.createTag())
-		tags.PUT("/:id", h.updateTag())
-		tags.DELETE("/:id", h.deleteTag())
-		tags.POST("/bulk", h.bulkTagOperation())
-		tags.GET("/export", h.exportTags())
-		tags.POST("/import", h.importTags())
+		tags.GET("", server.HTTPToHandlerFunc(h.listTags()))
+		tags.GET("/:id", server.HTTPToHandlerFunc(h.getTag()))
+		tags.POST("", server.HTTPToHandlerFunc(h.createTag()))
+		tags.PUT("/:id", server.HTTPToHandlerFunc(h.updateTag()))
+		tags.DELETE("/:id", server.HTTPToHandlerFunc(h.deleteTag()))
+		tags.POST("/bulk", server.HTTPToHandlerFunc(h.bulkTagOperation()))
+		tags.GET("/export", server.HTTPToHandlerFunc(h.exportTags()))
+		tags.POST("/import", server.HTTPToHandlerFunc(h.importTags()))
 	}
 }
 

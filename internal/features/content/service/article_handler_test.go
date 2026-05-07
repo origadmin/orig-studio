@@ -8,13 +8,10 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"github.com/stretchr/testify/assert"
 )
-
-// ---------------------------------------------------------------------------
-// Test helpers
-// ---------------------------------------------------------------------------
 
 func setupTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
@@ -22,11 +19,8 @@ func setupTestRouter() *gin.Engine {
 	return r
 }
 
-// registerHandler registers an http.HandlerFunc on a gin router by wrapping
-// it with the StdRouterAdapter's wrapHandler logic (injects gin.Context into
-// request context so GetGinContext works).
-func registerHandler(r *gin.Engine, method, path string, h http.HandlerFunc) {
-	adapter := ginadapter.NewStdRouterAdapter(&r.RouterGroup)
+func registerHandler(r *gin.Engine, method, path string, h http2.HandlerFunc) {
+	adapter := ginadapter.NewRouterAdapter(&r.RouterGroup)
 	switch method {
 	case http.MethodGet:
 		adapter.GET(path, h)
