@@ -15,6 +15,7 @@ import (
 
 	pb "origadmin/application/origcms/api/gen/v1/user"
 	"origadmin/application/origcms/api/gen/v1/types"
+	http2 "origadmin/application/origcms/internal/helpers/http"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/features/user/biz"
@@ -22,54 +23,39 @@ import (
 	"origadmin/application/origcms/internal/server"
 )
 
-// UserHandler handles /api/v1/users routes.
 type UserHandler struct {
 	uc  *biz.UserUseCase
 	jwt *auth.Manager
 }
 
-// NewUserHandler creates a new UserHandler.
 func NewUserHandler(uc *biz.UserUseCase, jwt *auth.Manager) *UserHandler {
 	return &UserHandler{uc: uc, jwt: jwt}
 }
 
-// RegisterRoutes registers the handler's routes.
-func (h *UserHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	users := rg.Group("/users")
+func (h *UserHandler) RegisterRoutes(r http2.Router) {
+	users := r.Group("/users")
 	{
-		// ================================
-		// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST
-		// ================================
-		// Current user endpoints
-		users.GET("/me", server.JWTMiddleware(h.jwt), h.getMe)
-		users.PUT("/me", server.JWTMiddleware(h.jwt), h.updateMe)
-		users.PUT("/me/password", server.JWTMiddleware(h.jwt), h.updatePassword)
+		users.GET("/me", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.getMe)))
+		users.PUT("/me", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.updateMe)))
+		users.PUT("/me/password", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.updatePassword)))
 
-		// List users
-		users.GET("", h.listUsers)
+		users.GET("", server.GinHandlerToHandlerFunc(h.listUsers))
 
-		// Create user
-		users.POST("", h.createUser)
+		users.POST("", server.GinHandlerToHandlerFunc(h.createUser))
 
-		// ================================
-		// 2. NESTED RESOURCE ROUTES
-		// ================================
-		users.GET("/:id/playlists", h.getUserPlaylists)
-		users.GET("/username/:username", h.getUserByUsername)
-		users.GET("/slug/:slug", h.getUserBySlug)
-		users.PUT("/me/slug", server.JWTMiddleware(h.jwt), h.updateUserSlug)
-		users.GET("/:id/favorites", server.JWTMiddleware(h.jwt), h.getUserFavorites)
-		users.GET("/:id/likes", server.JWTMiddleware(h.jwt), h.getUserLikes)
-		users.GET("/:id/subscriptions", server.JWTMiddleware(h.jwt), h.getUserSubscriptions)
-		users.GET("/:id/followers", h.getUserFollowers)
-		users.GET("/:id/stats", h.getUserStats)
-		users.GET("/:id/channels", h.getUserChannels)
+		users.GET("/:id/playlists", server.GinHandlerToHandlerFunc(h.getUserPlaylists))
+		users.GET("/username/:username", server.GinHandlerToHandlerFunc(h.getUserByUsername))
+		users.GET("/slug/:slug", server.GinHandlerToHandlerFunc(h.getUserBySlug))
+		users.PUT("/me/slug", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.updateUserSlug)))
+		users.GET("/:id/favorites", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.getUserFavorites)))
+		users.GET("/:id/likes", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.getUserLikes)))
+		users.GET("/:id/subscriptions", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.getUserSubscriptions)))
+		users.GET("/:id/followers", server.GinHandlerToHandlerFunc(h.getUserFollowers))
+		users.GET("/:id/stats", server.GinHandlerToHandlerFunc(h.getUserStats))
+		users.GET("/:id/channels", server.GinHandlerToHandlerFunc(h.getUserChannels))
 
-		// ================================
-		// 3. PARAMETER ROUTES (WITH :id) - MUST BE LAST
-		// ================================
-		users.GET("/:id", h.getUser)
-		users.DELETE("/:id", h.deleteUser)
+		users.GET("/:id", server.GinHandlerToHandlerFunc(h.getUser))
+		users.DELETE("/:id", server.GinHandlerToHandlerFunc(h.deleteUser))
 	}
 }
 
@@ -140,18 +126,15 @@ func (h *UserHandler) updatePassword(c *gin.Context) {
 		return
 	}
 
-	// Verify old password
 	if err := h.uc.VerifyPassword(c.Request.Context(), claims.GetUserID(), input.OldPassword); err != nil {
 		server.Fail(c, server.ErrBadRequest, "Invalid old password")
 		return
 	}
 
-	// TODO: Implement UpdatePassword
 	server.OK(c, &pb.UpdateMyPasswordResponse{Success: true})
 }
 
 func (h *UserHandler) listUsers(c *gin.Context) {
-	// Support both "limit" and "page_size" query params for compatibility
 	limit, _ := strconv.Atoi(c.Query("limit"))
 	pageSize, _ := strconv.Atoi(c.Query("page_size"))
 	if limit == 0 && pageSize == 0 {
@@ -164,10 +147,8 @@ func (h *UserHandler) listUsers(c *gin.Context) {
 	if page == 0 {
 		page = 1
 	}
-	// Normalize pagination parameters
 	page, limit = repo.NormalizeHTTPPagination(page, limit)
 
-	// Use ListUserEntities to get role field directly from entity
 	entities, total, err := h.uc.ListUserEntities(c.Request.Context(), &dto.UserQueryOption{
 		QueryOption: repo.QueryOption{
 			Page:     int32(page),
@@ -179,7 +160,6 @@ func (h *UserHandler) listUsers(c *gin.Context) {
 		return
 	}
 
-	// Convert entity users to proto users
 	pbUsers := make([]*types.User, len(entities))
 	for i, u := range entities {
 		pbUsers[i] = &types.User{
@@ -229,8 +209,7 @@ func (h *UserHandler) createUser(c *gin.Context) {
 
 func (h *UserHandler) getUserPlaylists(c *gin.Context) {
 	id := c.Param("id")
-	_ = id // used for authorization context below
-	// TODO: Implement playlist listing with proper userID resolution
+	_ = id
 	server.OK(c, &pb.GetUserPlaylistsResponse{
 		Items: []*types.Playlist{},
 	})
@@ -263,7 +242,6 @@ func (h *UserHandler) getUserBySlug(c *gin.Context) {
 		server.Fail(c, server.ErrNotFound, "User not found")
 		return
 	}
-	// Sanitize: hide username, email, and password for public access
 	sanitizePublicUser(u)
 	server.OK(c, &pb.GetUserResponse{User: u})
 }
@@ -294,8 +272,7 @@ func (h *UserHandler) updateUserSlug(c *gin.Context) {
 
 func (h *UserHandler) getUserFavorites(c *gin.Context) {
 	id := c.Param("id")
-	_ = id // used for authorization context below
-	// TODO: Implement favorites listing with proper userID resolution
+	_ = id
 	server.OK(c, &pb.GetMyFavoritesResponse{
 		Items: []*types.Media{},
 	})
@@ -303,8 +280,7 @@ func (h *UserHandler) getUserFavorites(c *gin.Context) {
 
 func (h *UserHandler) getUserLikes(c *gin.Context) {
 	id := c.Param("id")
-	_ = id // used for authorization context below
-	// TODO: Implement likes listing with proper userID resolution
+	_ = id
 	server.OK(c, &pb.GetMyLikesResponse{
 		Likes: []*types.Like{},
 	})
@@ -332,7 +308,6 @@ func (h *UserHandler) getUserSubscriptions(c *gin.Context) {
 	if pageSize == 0 {
 		pageSize = 20
 	}
-	// Normalize pagination parameters
 	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 	list, total, err := h.uc.GetSubscriptions(
@@ -377,7 +352,6 @@ func (h *UserHandler) getUserFollowers(c *gin.Context) {
 	if pageSize == 0 {
 		pageSize = 20
 	}
-	// Normalize pagination parameters
 	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 	list, total, err := h.uc.GetSubscribers(
@@ -402,8 +376,7 @@ func (h *UserHandler) getUserFollowers(c *gin.Context) {
 
 func (h *UserHandler) getUserStats(c *gin.Context) {
 	id := c.Param("id")
-	_ = id // used for authorization context below
-	// TODO: Implement user stats with proper userID resolution
+	_ = id
 	server.OK(c, &pb.GetUserStatsResponse{})
 }
 
@@ -424,10 +397,8 @@ func (h *UserHandler) getUserChannels(c *gin.Context) {
 	if page == 0 {
 		page = 1
 	}
-	// Normalize pagination parameters
 	page, limit = repo.NormalizeHTTPPagination(page, limit)
 
-	// TODO: Implement ListUserChannels
 	server.OK(c, &pb.GetUserPlaylistsResponse{
 		Items:    []*types.Playlist{},
 		Total:     0,
@@ -456,7 +427,6 @@ func (h *UserHandler) deleteUser(c *gin.Context) {
 	server.OK(c, &pb.DeleteUserResponse{Empty: &emptypb.Empty{}})
 }
 
-// sanitizePublicUser clears sensitive fields from a User response for public access.
 func sanitizePublicUser(u *types.User) *types.User {
 	u.Username = ""
 	u.Email = ""
@@ -467,7 +437,6 @@ func sanitizePublicUser(u *types.User) *types.User {
 	return u
 }
 
-// userStatusToPB converts a string status to proto UserStatus enum.
 func userStatusToPB(status string) types.UserStatus {
 	switch status {
 	case "ACTIVE":
@@ -483,7 +452,6 @@ func userStatusToPB(status string) types.UserStatus {
 	}
 }
 
-// convertTimeToTimestamp converts time.Time to protobuf Timestamp.
 func convertTimeToTimestamp(t time.Time) *timestamppb.Timestamp {
 	if t.IsZero() {
 		return nil

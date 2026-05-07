@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origcms/internal/infra/auth"
+	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/helpers/repo"
 	contentbiz "origadmin/application/origcms/internal/features/content/biz"
@@ -27,27 +28,29 @@ func NewCommentModerationHandler(moderationUC *contentbiz.CommentModerationUseCa
 	}
 }
 
-func (h *CommentModerationHandler) RegisterRoutes(apiV1 *gin.RouterGroup) {
-	adminComments := apiV1.Group("/admin/comments")
-	adminComments.Use(server.JWTMiddleware(h.jwtMgr), server.AdminMiddleware(h.jwtMgr))
+func (h *CommentModerationHandler) RegisterRoutes(r http2.Router) {
+	adminComments := r.Group("/admin/comments")
+	// Apply JWT + Admin middleware via type assertion
+	if adapter, ok := adminComments.(*ginadapter.RouterAdapter); ok {
+		adapter.Use(server.JWTMiddleware(h.jwtMgr))
+		adapter.Use(server.AdminMiddleware(h.jwtMgr))
+	}
 	{
-		r := ginadapter.NewStdRouterAdapter(adminComments)
-		r.GET("", h.listAdminComments())
-		r.GET("/stats", h.getCommentStats())
-		r.DELETE("/:id", h.deleteComment())
-		r.POST("/:id/approve", h.approveComment())
-		r.POST("/:id/reject", h.rejectComment())
-		r.POST("/:id/block", h.blockComment())
-		r.POST("/:id/unblock", h.unblockComment())
-		r.POST("/:id/dismiss-reports", h.dismissReports())
-		r.POST("/batch-approve", h.batchApproveComments())
-		r.POST("/batch-reject", h.batchRejectComments())
-		r.GET("/:id/reports", h.getCommentReports())
+		adminComments.GET("", server.HTTPToHandlerFunc(h.listAdminComments()))
+		adminComments.GET("/stats", server.HTTPToHandlerFunc(h.getCommentStats()))
+		adminComments.DELETE("/:id", server.HTTPToHandlerFunc(h.deleteComment()))
+		adminComments.POST("/:id/approve", server.HTTPToHandlerFunc(h.approveComment()))
+		adminComments.POST("/:id/reject", server.HTTPToHandlerFunc(h.rejectComment()))
+		adminComments.POST("/:id/block", server.HTTPToHandlerFunc(h.blockComment()))
+		adminComments.POST("/:id/unblock", server.HTTPToHandlerFunc(h.unblockComment()))
+		adminComments.POST("/:id/dismiss-reports", server.HTTPToHandlerFunc(h.dismissReports()))
+		adminComments.POST("/batch-approve", server.HTTPToHandlerFunc(h.batchApproveComments()))
+		adminComments.POST("/batch-reject", server.HTTPToHandlerFunc(h.batchRejectComments()))
+		adminComments.GET("/:id/reports", server.HTTPToHandlerFunc(h.getCommentReports()))
 	}
 
 	// Report comment (authenticated user)
-	reportR := ginadapter.NewStdRouterAdapter(apiV1)
-	reportR.POST("/comments/:id/report", server.WithJWT(h.jwtMgr, h.reportComment()))
+	r.POST("/comments/:id/report", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.reportComment())))
 }
 
 // CommentListItem is the DTO for a comment in admin list responses.

@@ -12,13 +12,15 @@
 package service
 
 import (
-	"net/http"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
-	"origadmin/application/origcms/internal/server"
-	"origadmin/application/origcms/internal/helpers/repo"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+
+	http2 "origadmin/application/origcms/internal/helpers/http"
+	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
+	"origadmin/application/origcms/internal/server"
+	"origadmin/application/origcms/internal/helpers/repo"
+
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/features/content/biz"
 )
@@ -44,8 +46,8 @@ func NewInteractionHandler(
 
 // RegisterRoutes registers all interaction routes
 // DEPRECATED: Use resource-specific routes instead
-func (h *InteractionHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	interactions := rg.Group("/interactions")
+func (h *InteractionHandler) RegisterRoutes(r http2.Router) {
+	interactions := r.Group("/interactions")
 	{
 		// ========== 1. Static sub-routes (alphabetical order) ==========
 		// No static sub-routes at root level
@@ -68,134 +70,140 @@ func (h *InteractionHandler) RegisterRoutes(rg *gin.RouterGroup) {
 }
 
 // registerLikes handles all like-related routes
-func (h *InteractionHandler) registerLikes(g *gin.RouterGroup) {
-	r := ginadapter.NewStdRouterAdapter(g)
+func (h *InteractionHandler) registerLikes(r http2.Router) {
 	likes := r.Group("/likes")
 	{
 		// Static routes first
-		likes.GET("/status", server.WithJWT(h.jwtMgr, h.getLikeStatusBatch()))
+		likes.GET("/status", server.WithJWTCtx(h.jwtMgr, h.getLikeStatusBatch()))
 
 		// Collection routes
-		likes.GET("", server.WithJWT(h.jwtMgr, h.getLikes()))
-		likes.POST("", server.WithJWT(h.jwtMgr, h.toggleLike()))
+		likes.GET("", server.WithJWTCtx(h.jwtMgr, h.getLikes()))
+		likes.POST("", server.WithJWTCtx(h.jwtMgr, h.toggleLike()))
 	}
 }
 
 // registerFavorites handles all favorite-related routes
-func (h *InteractionHandler) registerFavorites(g *gin.RouterGroup) {
-	r := ginadapter.NewStdRouterAdapter(g)
+func (h *InteractionHandler) registerFavorites(r http2.Router) {
 	favorites := r.Group("/favorites")
 	{
 		// Static routes first
-		favorites.GET("/check", server.WithJWT(h.jwtMgr, h.checkFavorite()))
+		favorites.GET("/check", server.WithJWTCtx(h.jwtMgr, h.checkFavorite()))
 
 		// Collection routes
-		favorites.GET("", server.WithJWT(h.jwtMgr, h.getFavorites()))
-		favorites.POST("", server.WithJWT(h.jwtMgr, h.toggleFavorite()))
+		favorites.GET("", server.WithJWTCtx(h.jwtMgr, h.getFavorites()))
+		favorites.POST("", server.WithJWTCtx(h.jwtMgr, h.toggleFavorite()))
 	}
 }
 
 // registerSubscriptions handles all subscription-related routes
-func (h *InteractionHandler) registerSubscriptions(g *gin.RouterGroup) {
-	r := ginadapter.NewStdRouterAdapter(g)
+func (h *InteractionHandler) registerSubscriptions(r http2.Router) {
 	subscriptions := r.Group("/subscriptions")
 	{
 		// Static routes first
-		subscriptions.GET("/count", server.WithJWT(h.jwtMgr, h.getSubscriptionCount()))
+		subscriptions.GET("/count", server.WithJWTCtx(h.jwtMgr, h.getSubscriptionCount()))
 
 		// Collection routes
-		subscriptions.GET("", server.WithJWT(h.jwtMgr, h.getSubscriptions()))
+		subscriptions.GET("", server.WithJWTCtx(h.jwtMgr, h.getSubscriptions()))
 	}
 
 	followers := r.Group("/followers")
 	{
 		// Static routes first
-		followers.GET("/count", server.WithJWT(h.jwtMgr, h.getFollowerCount()))
+		followers.GET("/count", server.WithJWTCtx(h.jwtMgr, h.getFollowerCount()))
 
 		// Collection routes
-		followers.GET("", server.WithJWT(h.jwtMgr, h.getFollowers()))
+		followers.GET("", server.WithJWTCtx(h.jwtMgr, h.getFollowers()))
 	}
 }
 
 // registerShares handles all share-related routes
-func (h *InteractionHandler) registerShares(g *gin.RouterGroup) {
-	r := ginadapter.NewStdRouterAdapter(g)
+func (h *InteractionHandler) registerShares(r http2.Router) {
 	shares := r.Group("/shares")
 	{
 		// Collection routes only
-		shares.POST("", server.WithJWT(h.jwtMgr, h.createShare()))
+		shares.POST("", server.WithJWTCtx(h.jwtMgr, h.createShare()))
 	}
 }
 
 // ==================== Like Handlers ====================
 
-func (h *InteractionHandler) getLikes() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		server.OK(gc, gin.H{
+func (h *InteractionHandler) getLikes() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		server.OKCtx(ctx, gin.H{
 			"items":     []interface{}{},
 			"total":     0,
 			"page":      1,
 			"page_size": 20,
 		})
+		return nil
 	}
 }
 
-func (h *InteractionHandler) toggleLike() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *InteractionHandler) toggleLike() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		_ = gc
 		// TODO: Implement toggle like
-		server.OK(gc, gin.H{"success": true})
+		server.OKCtx(ctx, gin.H{"success": true})
+		return nil
 	}
 }
 
-func (h *InteractionHandler) getLikeStatusBatch() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *InteractionHandler) getLikeStatusBatch() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		_ = gc
 		// TODO: Implement batch like status
-		server.OK(gc, gin.H{"status": map[string]bool{}})
+		server.OKCtx(ctx, gin.H{"status": map[string]bool{}})
+		return nil
 	}
 }
 
 // ==================== Favorite Handlers ====================
 
-func (h *InteractionHandler) getFavorites() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		server.OK(gc, gin.H{
+func (h *InteractionHandler) getFavorites() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		_ = gc
+		server.OKCtx(ctx, gin.H{
 			"items":     []interface{}{},
 			"total":     0,
 			"page":      1,
 			"page_size": 20,
 		})
+		return nil
 	}
 }
 
-func (h *InteractionHandler) toggleFavorite() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *InteractionHandler) toggleFavorite() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		_ = gc
 		// TODO: Implement toggle favorite
-		server.OK(gc, gin.H{"success": true})
+		server.OKCtx(ctx, gin.H{"success": true})
+		return nil
 	}
 }
 
-func (h *InteractionHandler) checkFavorite() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *InteractionHandler) checkFavorite() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		_ = gc
 		// TODO: Implement check favorite
-		server.OK(gc, gin.H{"is_favorite": false})
+		server.OKCtx(ctx, gin.H{"is_favorite": false})
+		return nil
 	}
 }
 
 // ==================== Subscription Handlers ====================
 
-func (h *InteractionHandler) getSubscriptions() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *InteractionHandler) getSubscriptions() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
 		val, exists := gc.Get("claims")
 		if !exists {
-			server.Fail(gc, server.ErrUnauthorized, "unauthorized")
-			return
+			server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
+			return nil
 		}
 		claims := val.(*auth.Claims)
 
@@ -209,30 +217,33 @@ func (h *InteractionHandler) getSubscriptions() http.HandlerFunc {
 		_ = page
 		_ = pageSize
 
-		server.OK(gc, gin.H{
+		server.OKCtx(ctx, gin.H{
 			"items":     []interface{}{},
 			"total":     0,
 			"page":      page,
 			"page_size": pageSize,
 		})
+		return nil
 	}
 }
 
-func (h *InteractionHandler) getSubscriptionCount() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *InteractionHandler) getSubscriptionCount() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		_ = gc
 		// TODO: Implement get subscription count
-		server.OK(gc, gin.H{"count": 0})
+		server.OKCtx(ctx, gin.H{"count": 0})
+		return nil
 	}
 }
 
-func (h *InteractionHandler) getFollowers() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *InteractionHandler) getFollowers() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
 		val, exists := gc.Get("claims")
 		if !exists {
-			server.Fail(gc, server.ErrUnauthorized, "unauthorized")
-			return
+			server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
+			return nil
 		}
 		claims := val.(*auth.Claims)
 
@@ -246,29 +257,34 @@ func (h *InteractionHandler) getFollowers() http.HandlerFunc {
 		_ = page
 		_ = pageSize
 
-		server.OK(gc, gin.H{
+		server.OKCtx(ctx, gin.H{
 			"items":     []interface{}{},
 			"total":     0,
 			"page":      page,
 			"page_size": pageSize,
 		})
+		return nil
 	}
 }
 
-func (h *InteractionHandler) getFollowerCount() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *InteractionHandler) getFollowerCount() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		_ = gc
 		// TODO: Implement get follower count
-		server.OK(gc, gin.H{"count": 0})
+		server.OKCtx(ctx, gin.H{"count": 0})
+		return nil
 	}
 }
 
 // ==================== Share Handlers ====================
 
-func (h *InteractionHandler) createShare() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *InteractionHandler) createShare() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		_ = gc
 		// TODO: Implement create share
-		server.OK(gc, gin.H{"success": true})
+		server.OKCtx(ctx, gin.H{"success": true})
+		return nil
 	}
 }

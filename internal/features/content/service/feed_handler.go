@@ -1,15 +1,9 @@
-/*
- * Copyright (c) 2024 OrigAdmin. All rights reserved.
- */
-
 package service
 
 import (
-	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
-
+	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/features/content/biz"
 	"origadmin/application/origcms/internal/helpers/repo"
@@ -25,9 +19,8 @@ func NewFeedHandler(uc *biz.FeedUseCase) *FeedHandler {
 	return &FeedHandler{uc: uc}
 }
 
-func (h *FeedHandler) RegisterRoutes(rg *gin.RouterGroup) {
-	r := ginadapter.NewStdRouterAdapter(rg)
-	r.GET("/feed", h.GetFeed)
+func (h *FeedHandler) RegisterRoutes(r http2.Router) {
+	r.GET("/feed", h.getFeed())
 }
 
 // FeedResponse represents the feed response structure
@@ -45,37 +38,39 @@ type Section struct {
 	Items []*biz.MediaInfo `json:"items"`
 }
 
-// GetFeed godoc: GET /api/v1/feed
-func (h *FeedHandler) GetFeed(w http.ResponseWriter, r *http.Request) {
-	gc := ginadapter.GetGinContext(r)
-	ctx := r.Context()
-	page, _ := strconv.Atoi(gc.Query("page"))
-	if page == 0 {
-		page = 1
-	}
-	pageSize, _ := strconv.Atoi(gc.Query("page_size"))
-	if pageSize == 0 {
-		pageSize = 20
-	}
-	// Normalize pagination parameters
-	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+// getFeed godoc: GET /api/v1/feed
+func (h *FeedHandler) getFeed() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		page, _ := strconv.Atoi(gc.Query("page"))
+		if page == 0 {
+			page = 1
+		}
+		pageSize, _ := strconv.Atoi(gc.Query("page_size"))
+		if pageSize == 0 {
+			pageSize = 20
+		}
+		// Normalize pagination parameters
+		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
-	medias, total, err := h.uc.ListLatest(ctx, page, pageSize)
-	if err != nil {
-		server.Fail(gc, server.ErrInternal, "failed to fetch feed")
-		return
-	}
+		medias, total, err := h.uc.ListLatest(ctx.Request().Context(), page, pageSize)
+		if err != nil {
+			server.FailCtx(ctx, server.ErrInternal, "failed to fetch feed")
+			return nil
+		}
 
-	server.OK(gc, FeedResponse{
-		Page:       page,
-		PageSize:   pageSize,
-		TotalCount: total,
-		Sections: []Section{
-			{
-				Title: "Recommended for You",
-				Type:  "recommended",
-				Items: medias,
+		server.OKCtx(ctx, FeedResponse{
+			Page:       page,
+			PageSize:   pageSize,
+			TotalCount: total,
+			Sections: []Section{
+				{
+					Title: "Recommended for You",
+					Type:  "recommended",
+					Items: medias,
+				},
 			},
-		},
-	})
+		})
+		return nil
+	}
 }
