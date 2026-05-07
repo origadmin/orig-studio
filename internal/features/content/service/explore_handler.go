@@ -44,7 +44,7 @@ func (h *ExploreHandler) trending() http2.HandlerFunc {
 			Order(entity.Desc(media.FieldViewCount)).
 			All(reqCtx)
 		if err != nil {
-			server.FailCtx(ctx, 50000, err.Error())
+			http2.Fail(ctx, 50000, err.Error())
 			return nil
 		}
 

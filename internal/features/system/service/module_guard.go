@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	http2 "origadmin/application/origcms/internal/helpers/http"
 	"origadmin/application/origcms/internal/infra/auth"
 	systembiz "origadmin/application/origcms/internal/features/system/biz"
 )
@@ -50,5 +51,44 @@ func ModuleGuard(settingUC *systembiz.SettingUseCase, moduleKey string) gin.Hand
 			return
 		}
 		c.Next()
+	}
+}
+
+// ModuleGuardCtx returns a MiddlewareFunc that checks if a module is enabled.
+// Admin/staff users bypass the check. For regular users, the setting value
+// is looked up; if not set, the module default is used.
+func ModuleGuardCtx(settingUC *systembiz.SettingUseCase, moduleKey string) http2.MiddlewareFunc {
+	return func(next http2.HandlerFunc) http2.HandlerFunc {
+		return func(ctx http2.Context) error {
+			// Admin/staff bypass
+			if claims, ok := ctx.Get("claims"); ok {
+				if cl, ok := claims.(*auth.Claims); ok {
+					if cl.Role == "admin" || cl.IsStaff {
+						return next(ctx)
+					}
+				}
+			}
+
+			if settingUC == nil {
+				return next(ctx)
+			}
+
+			enabled := settingUC.GetBool(ctx.Request().Context(), moduleKey)
+			if !enabled {
+				val := settingUC.Get(ctx.Request().Context(), moduleKey)
+				if val == "" {
+					if def, ok := moduleDefaults[moduleKey]; ok {
+						enabled = def
+					} else {
+						enabled = true
+					}
+				}
+			}
+			if !enabled {
+				http2.Fail(ctx, http2.AppErrNotFound, "This content module is not available")
+				return nil
+			}
+			return next(ctx)
+		}
 	}
 }

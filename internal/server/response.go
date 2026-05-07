@@ -10,6 +10,7 @@ import (
 
 	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
+	"origadmin/application/origcms/internal/infra/auth"
 )
 
 // Response unified response format
@@ -202,50 +203,16 @@ func getHTTPStatus(code int) int {
 }
 
 // ==================== http2.Context bridge functions ====================
-// These functions accept http2.Context and delegate to the gin-based
-// response functions by extracting the underlying gin.Context.
-// They provide a migration path: handler code uses http2.Context,
-// but response formatting remains consistent with the existing gin-based
-// implementation (including proto.Message detection, error code mapping, etc.).
 
-// OKCtx returns a success response with HTTP 200 via http2.Context.
-func OKCtx(ctx http2.Context, data interface{}) {
-	gc := ginadapter.GinContextFromHTTP(ctx)
-	if gc != nil {
-		OK(gc, data)
+// GetClaimsCtx retrieves claims from an http2.Context.
+// It uses ctx.Get("claims") to access the claims set by middleware.
+func GetClaimsCtx(ctx http2.Context) (*auth.Claims, bool) {
+	val, ok := ctx.Get("claims")
+	if !ok {
+		return nil, false
 	}
-}
-
-// CreatedCtx returns a success response with HTTP 201 via http2.Context.
-func CreatedCtx(ctx http2.Context, data interface{}) {
-	gc := ginadapter.GinContextFromHTTP(ctx)
-	if gc != nil {
-		Created(gc, data)
-	}
-}
-
-// FailCtx returns a failure response via http2.Context.
-func FailCtx(ctx http2.Context, code int, message string) {
-	gc := ginadapter.GinContextFromHTTP(ctx)
-	if gc != nil {
-		Fail(gc, code, message)
-	}
-}
-
-// PageCtx returns a paginated success response with HTTP 200 via http2.Context.
-func PageCtx(ctx http2.Context, items interface{}, total int64, page, pageSize int) {
-	gc := ginadapter.GinContextFromHTTP(ctx)
-	if gc != nil {
-		Page(gc, items, total, page, pageSize)
-	}
-}
-
-// ProtoOKCtx returns a success response for proto.Message via http2.Context.
-func ProtoOKCtx(ctx http2.Context, data proto.Message) {
-	gc := ginadapter.GinContextFromHTTP(ctx)
-	if gc != nil {
-		writeProtoResponse(gc, http.StatusOK, data)
-	}
+	claims, ok := val.(*auth.Claims)
+	return claims, ok
 }
 
 // HTTPToHandlerFunc wraps a standard http.HandlerFunc into an http2.HandlerFunc.
