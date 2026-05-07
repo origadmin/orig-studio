@@ -55,10 +55,7 @@ func NewChannelHandler(uc *biz.PlaylistChannelUseCase, jwt *auth.Manager, settin
 
 func (h *ChannelHandler) RegisterRoutes(r http2.Router) {
 	channelsGroup := r.Group("/channels")
-	// Apply ModuleGuard gin middleware via type assertion
-	if adapter, ok := channelsGroup.(*ginadapter.RouterAdapter); ok {
-		adapter.UseGin(systemservice.ModuleGuard(h.settingUC, "module_videos"))
-	}
+	channelsGroup.Use(systemservice.ModuleGuardCtx(h.settingUC, "module_videos"))
 
 	channels := channelsGroup.Group("")
 	{

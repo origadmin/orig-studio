@@ -30,11 +30,7 @@ func NewCommentModerationHandler(moderationUC *contentbiz.CommentModerationUseCa
 
 func (h *CommentModerationHandler) RegisterRoutes(r http2.Router) {
 	adminComments := r.Group("/admin/comments")
-	// Apply JWT + Admin middleware via type assertion
-	if adapter, ok := adminComments.(*ginadapter.RouterAdapter); ok {
-		adapter.UseGin(server.JWTMiddleware(h.jwtMgr))
-		adapter.UseGin(server.AdminMiddleware(h.jwtMgr))
-	}
+	adminComments.Use(server.JWTMiddlewareCtx(h.jwtMgr), server.AdminMiddlewareCtx(h.jwtMgr))
 	{
 		adminComments.GET("", server.HTTPToHandlerFunc(h.listAdminComments()))
 		adminComments.GET("/stats", server.HTTPToHandlerFunc(h.getCommentStats()))

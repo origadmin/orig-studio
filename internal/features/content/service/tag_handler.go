@@ -57,7 +57,7 @@ func (h *TagHandler) createTag() http2.HandlerFunc {
 			Title string `json:"title"`
 		}
 		if err := gc.ShouldBindJSON(&input); err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
 		}
 
@@ -65,11 +65,11 @@ func (h *TagHandler) createTag() http2.HandlerFunc {
 			Title: input.Title,
 		})
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		server.CreatedCtx(ctx, &pb.CreateTagResponse{
+		http2.Created(ctx, &pb.CreateTagResponse{
 			Tag: bizTagToProto(t),
 		})
 		return nil
@@ -81,15 +81,15 @@ func (h *TagHandler) getTag() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		id, err := strconv.Atoi(gc.Param("id"))
 		if err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, "invalid tag id")
+			http2.Fail(ctx, server.ErrBadRequest, "invalid tag id")
 			return nil
 		}
 		t, err := h.uc.GetTag(ctx.Request().Context(), id)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
-		server.OKCtx(ctx, &pb.GetTagResponse{
+		http2.OK(ctx, &pb.GetTagResponse{
 			Tag: bizTagToProto(t),
 		})
 		return nil
@@ -101,14 +101,14 @@ func (h *TagHandler) updateTag() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		id, err := strconv.Atoi(gc.Param("id"))
 		if err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, "invalid tag id")
+			http2.Fail(ctx, server.ErrBadRequest, "invalid tag id")
 			return nil
 		}
 		var input struct {
 			Title string `json:"title"`
 		}
 		if err := gc.ShouldBindJSON(&input); err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
 		}
 
@@ -117,11 +117,11 @@ func (h *TagHandler) updateTag() http2.HandlerFunc {
 			Title: input.Title,
 		})
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		server.OKCtx(ctx, &pb.UpdateTagResponse{
+		http2.OK(ctx, &pb.UpdateTagResponse{
 			Tag: bizTagToProto(t),
 		})
 		return nil
@@ -134,10 +134,10 @@ func (h *TagHandler) deleteTag() http2.HandlerFunc {
 		id, _ := strconv.Atoi(gc.Param("id"))
 		err := h.uc.DeleteTag(ctx.Request().Context(), id)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
-		server.OKCtx(ctx, &pb.DeleteTagResponse{
+		http2.OK(ctx, &pb.DeleteTagResponse{
 			Empty: &emptypb.Empty{},
 		})
 		return nil
@@ -159,7 +159,7 @@ func (h *TagHandler) listTags() http2.HandlerFunc {
 		page, limit = repo.NormalizeHTTPPagination(page, limit)
 		items, total, err := h.uc.ListTags(ctx.Request().Context(), page, limit)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
@@ -173,7 +173,7 @@ func (h *TagHandler) listTags() http2.HandlerFunc {
 			totalPages = (int32(total) + int32(limit) - 1) / int32(limit)
 		}
 
-		server.OKCtx(ctx, &pb.ListTagsResponse{
+		http2.OK(ctx, &pb.ListTagsResponse{
 			Total:      int32(total),
 			Items:      pbTags,
 			Page:       int32(page),
@@ -188,7 +188,7 @@ func (h *TagHandler) listTags() http2.HandlerFunc {
 // GET /api/v1/tags/:id/media
 func (h *TagHandler) getMediaByTag() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		server.FailCtx(ctx, server.ErrNotFound, "not implemented in UseCase")
+		http2.Fail(ctx, server.ErrNotFound, "not implemented in UseCase")
 		return nil
 	}
 }

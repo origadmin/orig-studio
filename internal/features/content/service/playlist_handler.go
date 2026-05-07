@@ -36,10 +36,7 @@ func NewPlaylistHandler(playlistUC *biz.PlaylistChannelUseCase, settingUC *syste
 // RegisterRoutes registers the handler's routes.
 func (h *PlaylistHandler) RegisterRoutes(r http2.Router) {
 	playlists := r.Group("/playlists")
-	// Apply ModuleGuard gin middleware via type assertion
-	if adapter, ok := playlists.(*ginadapter.RouterAdapter); ok {
-		adapter.UseGin(systemservice.ModuleGuard(h.settingUC, "module_videos"))
-	}
+	playlists.Use(systemservice.ModuleGuardCtx(h.settingUC, "module_videos"))
 	{
 		playlists.GET("", h.listPlaylists())
 		// Use OptionalJWTMiddleware so that private playlists can be accessed
@@ -59,11 +56,11 @@ func (h *PlaylistHandler) listPlaylists() http2.HandlerFunc {
 
 		items, total, err := h.playlistUC.ListPlaylists(ctx.Request().Context(), page, pageSize)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		server.PageCtx(ctx, items, int64(total), page, pageSize)
+		http2.Page(ctx, items, int64(total), page, pageSize)
 		return nil
 	}
 }
@@ -76,13 +73,13 @@ func (h *PlaylistHandler) getPlaylistByToken() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		token := gc.Param("token")
 		if token == "" {
-			server.FailCtx(ctx, server.ErrBadRequest, "playlist token is required")
+			http2.Fail(ctx, server.ErrBadRequest, "playlist token is required")
 			return nil
 		}
 
 		playlist, err := h.playlistUC.GetPlaylistByShortToken(ctx.Request().Context(), token)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrNotFound, "playlist not found")
+			http2.Fail(ctx, server.ErrNotFound, "playlist not found")
 			return nil
 		}
 
@@ -90,12 +87,12 @@ func (h *PlaylistHandler) getPlaylistByToken() http2.HandlerFunc {
 		if !playlist.IsPublic {
 			claims, ok := server.GetClaimsCtx(ctx)
 			if !ok || claims.GetUserID() != playlist.UserID {
-				server.FailCtx(ctx, server.ErrNotFound, "playlist not found")
+				http2.Fail(ctx, server.ErrNotFound, "playlist not found")
 				return nil
 			}
 		}
 
-		server.OKCtx(ctx, gin.H{"playlist": playlist})
+		http2.OK(ctx, gin.H{"playlist": playlist})
 		return nil
 	}
 }

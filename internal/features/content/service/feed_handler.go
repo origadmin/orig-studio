@@ -55,11 +55,11 @@ func (h *FeedHandler) getFeed() http2.HandlerFunc {
 
 		medias, total, err := h.uc.ListLatest(ctx.Request().Context(), page, pageSize)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, "failed to fetch feed")
+			http2.Fail(ctx, server.ErrInternal, "failed to fetch feed")
 			return nil
 		}
 
-		server.OKCtx(ctx, FeedResponse{
+		http2.OK(ctx, FeedResponse{
 			Page:       page,
 			PageSize:   pageSize,
 			TotalCount: total,

@@ -18,7 +18,6 @@ import (
 
 	"origadmin/application/origcms/internal/features/media/biz"
 	http2 "origadmin/application/origcms/internal/helpers/http"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/server"
 )
@@ -230,10 +229,7 @@ func (h *SpriteHandler) RegisterRoutes(r http2.Router) {
 
 	// Admin sprite/thumbnail regeneration routes (auth + admin required)
 	adminMediaRegen := r.Group("/admin/medias/:id")
-	if adapter, ok := adminMediaRegen.(*ginadapter.RouterAdapter); ok {
-		adapter.UseGin(server.JWTMiddleware(h.jwt))
-		adapter.UseGin(server.AdminMiddleware(h.jwt))
-	}
+	adminMediaRegen.Use(server.JWTMiddlewareCtx(h.jwt), server.AdminMiddlewareCtx(h.jwt))
 	{
 		adminMediaRegen.POST("/regenerate-sprite", server.GinHandlerToHandlerFunc(h.RegenerateSprite))
 		adminMediaRegen.POST("/regenerate-thumbnail", server.GinHandlerToHandlerFunc(h.RegenerateThumbnail))

@@ -129,7 +129,7 @@ func (h *InteractionHandler) registerShares(r http2.Router) {
 
 func (h *InteractionHandler) getLikes() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		server.OKCtx(ctx, gin.H{
+		http2.OK(ctx, gin.H{
 			"items":     []interface{}{},
 			"total":     0,
 			"page":      1,
@@ -144,7 +144,7 @@ func (h *InteractionHandler) toggleLike() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		_ = gc
 		// TODO: Implement toggle like
-		server.OKCtx(ctx, gin.H{"success": true})
+		http2.OK(ctx, gin.H{"success": true})
 		return nil
 	}
 }
@@ -154,7 +154,7 @@ func (h *InteractionHandler) getLikeStatusBatch() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		_ = gc
 		// TODO: Implement batch like status
-		server.OKCtx(ctx, gin.H{"status": map[string]bool{}})
+		http2.OK(ctx, gin.H{"status": map[string]bool{}})
 		return nil
 	}
 }
@@ -165,7 +165,7 @@ func (h *InteractionHandler) getFavorites() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		_ = gc
-		server.OKCtx(ctx, gin.H{
+		http2.OK(ctx, gin.H{
 			"items":     []interface{}{},
 			"total":     0,
 			"page":      1,
@@ -180,7 +180,7 @@ func (h *InteractionHandler) toggleFavorite() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		_ = gc
 		// TODO: Implement toggle favorite
-		server.OKCtx(ctx, gin.H{"success": true})
+		http2.OK(ctx, gin.H{"success": true})
 		return nil
 	}
 }
@@ -190,7 +190,7 @@ func (h *InteractionHandler) checkFavorite() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		_ = gc
 		// TODO: Implement check favorite
-		server.OKCtx(ctx, gin.H{"is_favorite": false})
+		http2.OK(ctx, gin.H{"is_favorite": false})
 		return nil
 	}
 }
@@ -202,7 +202,7 @@ func (h *InteractionHandler) getSubscriptions() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		val, exists := gc.Get("claims")
 		if !exists {
-			server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
+			http2.Fail(ctx, server.ErrUnauthorized, "unauthorized")
 			return nil
 		}
 		claims := val.(*auth.Claims)
@@ -217,7 +217,7 @@ func (h *InteractionHandler) getSubscriptions() http2.HandlerFunc {
 		_ = page
 		_ = pageSize
 
-		server.OKCtx(ctx, gin.H{
+		http2.OK(ctx, gin.H{
 			"items":     []interface{}{},
 			"total":     0,
 			"page":      page,
@@ -232,7 +232,7 @@ func (h *InteractionHandler) getSubscriptionCount() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		_ = gc
 		// TODO: Implement get subscription count
-		server.OKCtx(ctx, gin.H{"count": 0})
+		http2.OK(ctx, gin.H{"count": 0})
 		return nil
 	}
 }
@@ -242,7 +242,7 @@ func (h *InteractionHandler) getFollowers() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		val, exists := gc.Get("claims")
 		if !exists {
-			server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
+			http2.Fail(ctx, server.ErrUnauthorized, "unauthorized")
 			return nil
 		}
 		claims := val.(*auth.Claims)
@@ -257,7 +257,7 @@ func (h *InteractionHandler) getFollowers() http2.HandlerFunc {
 		_ = page
 		_ = pageSize
 
-		server.OKCtx(ctx, gin.H{
+		http2.OK(ctx, gin.H{
 			"items":     []interface{}{},
 			"total":     0,
 			"page":      page,
@@ -272,7 +272,7 @@ func (h *InteractionHandler) getFollowerCount() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		_ = gc
 		// TODO: Implement get follower count
-		server.OKCtx(ctx, gin.H{"count": 0})
+		http2.OK(ctx, gin.H{"count": 0})
 		return nil
 	}
 }
@@ -284,7 +284,7 @@ func (h *InteractionHandler) createShare() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		_ = gc
 		// TODO: Implement create share
-		server.OKCtx(ctx, gin.H{"success": true})
+		http2.OK(ctx, gin.H{"success": true})
 		return nil
 	}
 }
