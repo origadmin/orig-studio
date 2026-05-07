@@ -68,10 +68,7 @@ func NewMediaHandler(
 // RegisterRoutes registers the handler's routes.
 func (h *MediaHandler) RegisterRoutes(r http2.Router) {
 	mediasGroup := r.Group("/medias")
-	// Apply ModuleGuard gin middleware via type assertion
-	if adapter, ok := mediasGroup.(*ginadapter.RouterAdapter); ok {
-		adapter.UseGin(systemservice.ModuleGuard(h.settingUC, "module_videos"))
-	}
+	mediasGroup.Use(systemservice.ModuleGuardCtx(h.settingUC, "module_videos"))
 
 	medias := mediasGroup.Group("")
 	{

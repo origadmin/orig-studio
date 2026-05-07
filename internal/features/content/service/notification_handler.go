@@ -133,7 +133,7 @@ func (h *NotificationHandler) createNotification() http2.HandlerFunc {
 			return nil
 		}
 
-		server.CreatedCtx(ctx, created)
+		http2.Created(ctx, created)
 		return nil
 	}
 }

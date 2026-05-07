@@ -46,7 +46,7 @@ func (h *ShareHandler) getShareUrl() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		mediaId, err := strconv.Atoi(gc.Param("mediaId"))
 		if err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, "Invalid media ID")
+			http2.Fail(ctx, server.ErrBadRequest, "Invalid media ID")
 			return nil
 		}
 
@@ -74,7 +74,7 @@ func (h *ShareHandler) getShareUrl() http2.HandlerFunc {
 			Telegram: "https://t.me/share/url?url=" + encodedUrl + "&text=" + encodedTitle,
 		}
 
-		server.OKCtx(ctx, socialLinks)
+		http2.OK(ctx, socialLinks)
 		return nil
 	}
 }
@@ -86,20 +86,20 @@ func (h *ShareHandler) recordShare() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		_, exists := gc.Get("claims")
 		if !exists {
-			server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
+			http2.Fail(ctx, server.ErrUnauthorized, "unauthorized")
 			return nil
 		}
 
 		_, err := strconv.Atoi(gc.Param("mediaId"))
 		if err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, "Invalid media ID")
+			http2.Fail(ctx, server.ErrBadRequest, "Invalid media ID")
 			return nil
 		}
 
 		// TODO: Implement share count increment in the future
 		// For now, just return success
 
-		server.OKCtx(ctx, gin.H{
+		http2.OK(ctx, gin.H{
 			"success": true,
 		})
 		return nil

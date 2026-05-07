@@ -59,7 +59,7 @@ func (h *CategoryHandler) listCategories() http2.HandlerFunc {
 		page, limit = repo.NormalizeHTTPPagination(page, limit)
 		items, err := h.uc.ListCategories(ctx.Request().Context())
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
@@ -69,7 +69,7 @@ func (h *CategoryHandler) listCategories() http2.HandlerFunc {
 			pbCategories[i] = bizCategoryToProto(item)
 		}
 
-		server.OKCtx(ctx, &pb.ListCategoriesResponse{
+		http2.OK(ctx, &pb.ListCategoriesResponse{
 			Items:     pbCategories,
 			Total:     int32(len(items)),
 			Page:      int32(page),
@@ -88,7 +88,7 @@ func (h *CategoryHandler) createCategory() http2.HandlerFunc {
 			Slug        string `json:"slug"`
 		}
 		if err := gc.Bind(&input); err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
 		}
 
@@ -98,11 +98,11 @@ func (h *CategoryHandler) createCategory() http2.HandlerFunc {
 			Slug:        input.Slug,
 		})
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		server.CreatedCtx(ctx, &pb.CreateCategoryResponse{
+		http2.Created(ctx, &pb.CreateCategoryResponse{
 			Category: bizCategoryToProto(cat),
 		})
 		return nil
@@ -114,15 +114,15 @@ func (h *CategoryHandler) getCategory() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		id, err := strconv.Atoi(gc.Param("id"))
 		if err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, "invalid category id")
+			http2.Fail(ctx, server.ErrBadRequest, "invalid category id")
 			return nil
 		}
 		cat, err := h.uc.GetCategory(ctx.Request().Context(), id)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrNotFound, "category not found")
+			http2.Fail(ctx, server.ErrNotFound, "category not found")
 			return nil
 		}
-		server.OKCtx(ctx, &pb.GetCategoryResponse{
+		http2.OK(ctx, &pb.GetCategoryResponse{
 			Category: bizCategoryToProto(cat),
 		})
 		return nil
@@ -134,7 +134,7 @@ func (h *CategoryHandler) updateCategory() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		id, err := strconv.Atoi(gc.Param("id"))
 		if err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, "invalid category id")
+			http2.Fail(ctx, server.ErrBadRequest, "invalid category id")
 			return nil
 		}
 
@@ -144,7 +144,7 @@ func (h *CategoryHandler) updateCategory() http2.HandlerFunc {
 			Slug        string `json:"slug"`
 		}
 		if err := gc.Bind(&input); err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
 		}
 
@@ -155,11 +155,11 @@ func (h *CategoryHandler) updateCategory() http2.HandlerFunc {
 			Slug:        input.Slug,
 		})
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		server.OKCtx(ctx, &pb.UpdateCategoryResponse{
+		http2.OK(ctx, &pb.UpdateCategoryResponse{
 			Category: bizCategoryToProto(cat),
 		})
 		return nil
@@ -171,23 +171,23 @@ func (h *CategoryHandler) updateCategoryPartial() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		id, err := strconv.Atoi(gc.Param("id"))
 		if err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, "invalid category id")
+			http2.Fail(ctx, server.ErrBadRequest, "invalid category id")
 			return nil
 		}
 
 		var input biz.UpdateCategoryInput
 		if err := gc.Bind(&input); err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
 		}
 
 		cat, err := h.uc.UpdateCategoryPartial(ctx.Request().Context(), id, &input)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		server.OKCtx(ctx, &pb.UpdateCategoryResponse{
+		http2.OK(ctx, &pb.UpdateCategoryResponse{
 			Category: bizCategoryToProto(cat),
 		})
 		return nil
@@ -199,15 +199,15 @@ func (h *CategoryHandler) deleteCategory() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		id, err := strconv.Atoi(gc.Param("id"))
 		if err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, "invalid category id")
+			http2.Fail(ctx, server.ErrBadRequest, "invalid category id")
 			return nil
 		}
 		err = h.uc.DeleteCategory(ctx.Request().Context(), id)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
-		server.OKCtx(ctx, &pb.DeleteCategoryResponse{
+		http2.OK(ctx, &pb.DeleteCategoryResponse{
 			Empty: &emptypb.Empty{},
 		})
 		return nil

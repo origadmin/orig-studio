@@ -11,7 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	http2 "origadmin/application/origcms/internal/helpers/http"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/helpers/repo"
 	contentbiz "origadmin/application/origcms/internal/features/content/biz"
@@ -48,10 +47,7 @@ func NewMeHandler(
 // RegisterRoutes registers the handler's routes.
 func (h *MeHandler) RegisterRoutes(r http2.Router) {
 	me := r.Group("/me")
-	// Apply JWT middleware via type assertion
-	if adapter, ok := me.(*ginadapter.RouterAdapter); ok {
-		adapter.UseGin(server.JWTMiddleware(h.jwt))
-	}
+	me.Use(server.JWTMiddlewareCtx(h.jwt))
 	{
 		// ================================
 		// 1. CURRENT USER PROFILE

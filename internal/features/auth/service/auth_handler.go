@@ -82,14 +82,14 @@ func (h *AuthHandler) login() http2.HandlerFunc {
 
 		var req LoginRequest
 		if err := gc.ShouldBindJSON(&req); err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
 		}
 
 		// Look up user by username (entity for role field)
 		u, err := h.uc.GetUserByUsername(ctx.Request().Context(), req.Username)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrUnauthorized, "invalid credentials")
+			http2.Fail(ctx, server.ErrUnauthorized, "invalid credentials")
 			return nil
 		}
 
@@ -102,21 +102,21 @@ func (h *AuthHandler) login() http2.HandlerFunc {
 
 		// Verify password
 		if err := h.uc.VerifyPassword(ctx.Request().Context(), u.Id, req.Password); err != nil {
-			server.FailCtx(ctx, server.ErrUnauthorized, "invalid credentials")
+			http2.Fail(ctx, server.ErrUnauthorized, "invalid credentials")
 			return nil
 		}
 
 		token, err := h.jwt.Generate(u.Id, u.Username, u.IsStaff, userRole)
 		if err != nil {
 			slog.Error("failed to generate token", "err", err)
-			server.FailCtx(ctx, server.ErrInternal, "token generation failed")
+			http2.Fail(ctx, server.ErrInternal, "token generation failed")
 			return nil
 		}
 
 		refreshToken, err := h.jwt.GenerateRefreshToken(u.Id, u.Username, u.IsStaff, userRole)
 		if err != nil {
 			slog.Error("failed to generate refresh token", "err", err)
-			server.FailCtx(ctx, server.ErrInternal, "refresh token generation failed")
+			http2.Fail(ctx, server.ErrInternal, "refresh token generation failed")
 			return nil
 		}
 
@@ -128,9 +128,9 @@ func (h *AuthHandler) login() http2.HandlerFunc {
 			Email:    u.Email,
 			IsStaff:  u.IsStaff,
 		}
-		// Use server.OKCtx() to return unified response format {code:0, message:"ok", data:{...}}
+		// Use http2.OK() to return unified response format {code:0, message:"ok", data:{...}}
 		// per C016 unified API response convention.
-		server.OKCtx(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
+		http2.OK(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
 		return nil
 	}
 }
@@ -141,7 +141,7 @@ func (h *AuthHandler) registerUser() http2.HandlerFunc {
 
 		var req RegisterRequest
 		if err := gc.ShouldBindJSON(&req); err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
 		}
 
@@ -165,7 +165,7 @@ func (h *AuthHandler) registerUser() http2.HandlerFunc {
 		}()
 		if err != nil {
 			slog.Error("register failed", "err", err)
-			server.FailCtx(ctx, server.ErrConflict, "registration failed: "+err.Error())
+			http2.Fail(ctx, server.ErrConflict, "registration failed: "+err.Error())
 			return nil
 		}
 
@@ -177,7 +177,7 @@ func (h *AuthHandler) registerUser() http2.HandlerFunc {
 
 		token, err := h.jwt.Generate(created.Id, created.Username, created.IsStaff, userRole)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, "token generation failed")
+			http2.Fail(ctx, server.ErrInternal, "token generation failed")
 			return nil
 		}
 
@@ -185,7 +185,7 @@ func (h *AuthHandler) registerUser() http2.HandlerFunc {
 		refreshToken, err := h.jwt.GenerateRefreshToken(created.Id, created.Username, created.IsStaff, userRole)
 		if err != nil {
 			slog.Error("failed to generate refresh token", "err", err)
-			server.FailCtx(ctx, server.ErrInternal, "refresh token generation failed")
+			http2.Fail(ctx, server.ErrInternal, "refresh token generation failed")
 			return nil
 		}
 
@@ -196,9 +196,9 @@ func (h *AuthHandler) registerUser() http2.HandlerFunc {
 			Email:    created.Email,
 			IsStaff:  created.IsStaff,
 		}
-		// Use server.CreatedCtx() to return unified response format {code:0, message:"ok", data:{...}}
+		// Use http2.Created() to return unified response format {code:0, message:"ok", data:{...}}
 		// per C016 unified API response convention.
-		server.CreatedCtx(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
+		http2.Created(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
 		return nil
 	}
 }
@@ -212,28 +212,28 @@ func (h *AuthHandler) refreshToken() http2.HandlerFunc {
 			RefreshToken string `json:"refresh_token" binding:"required"`
 		}
 		if err := gc.ShouldBindJSON(&req); err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
 		}
 
 		// Parse the refresh token to get claims
 		claims, err := h.jwt.Parse(req.RefreshToken)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrUnauthorized, "invalid refresh token")
+			http2.Fail(ctx, server.ErrUnauthorized, "invalid refresh token")
 			return nil
 		}
 
 		// Get user information
 		u, err := h.uc.GetUser(ctx.Request().Context(), claims.GetUserID(), nil)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, "user not found")
+			http2.Fail(ctx, server.ErrInternal, "user not found")
 			return nil
 		}
 
 		token, err := h.jwt.Generate(claims.GetUserID(), claims.Username, claims.IsStaff, claims.Role)
 		if err != nil {
 			slog.Error("failed to generate token", "err", err)
-			server.FailCtx(ctx, server.ErrInternal, "token generation failed")
+			http2.Fail(ctx, server.ErrInternal, "token generation failed")
 			return nil
 		}
 
@@ -241,7 +241,7 @@ func (h *AuthHandler) refreshToken() http2.HandlerFunc {
 		refreshToken, err := h.jwt.GenerateRefreshToken(claims.GetUserID(), claims.Username, claims.IsStaff, claims.Role)
 		if err != nil {
 			slog.Error("failed to generate refresh token", "err", err)
-			server.FailCtx(ctx, server.ErrInternal, "refresh token generation failed")
+			http2.Fail(ctx, server.ErrInternal, "refresh token generation failed")
 			return nil
 		}
 
@@ -253,9 +253,9 @@ func (h *AuthHandler) refreshToken() http2.HandlerFunc {
 			IsStaff:  u.IsStaff,
 		}
 
-		// Use server.OKCtx() to return unified response format {code:0, message:"ok", data:{...}}
+		// Use http2.OK() to return unified response format {code:0, message:"ok", data:{...}}
 		// per C016 unified API response convention.
-		server.OKCtx(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
+		http2.OK(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
 		return nil
 	}
 }
@@ -263,7 +263,7 @@ func (h *AuthHandler) refreshToken() http2.HandlerFunc {
 // Logout godoc: POST /api/v1/auth/logout (stateless: client discards token)
 func (h *AuthHandler) logout() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		server.OKCtx(ctx, gin.H{"message": "logged out"})
+		http2.OK(ctx, gin.H{"message": "logged out"})
 		return nil
 	}
 }
@@ -273,7 +273,7 @@ func (h *AuthHandler) Me() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		claims, ok := server.GetClaimsCtx(ctx)
 		if !ok {
-			server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
+			http2.Fail(ctx, server.ErrUnauthorized, "unauthorized")
 			return nil
 		}
 
@@ -281,10 +281,10 @@ func (h *AuthHandler) Me() http2.HandlerFunc {
 			WithProfile: true,
 		})
 		if err != nil {
-			server.FailCtx(ctx, server.ErrNotFound, "user not found")
+			http2.Fail(ctx, server.ErrNotFound, "user not found")
 			return nil
 		}
-		server.OKCtx(ctx, u)
+		http2.OK(ctx, u)
 		return nil
 	}
 }

@@ -24,16 +24,6 @@ func GetClaims(c *ginhttp.Context) (*auth.Claims, bool) {
 	return nil, false
 }
 
-// GetClaimsCtx retrieves claims from an http2.Context.
-// It extracts the underlying gin.Context via GinContextFromHTTP.
-func GetClaimsCtx(ctx http2.Context) (*auth.Claims, bool) {
-	gc := ginadapter.GinContextFromHTTP(ctx)
-	if gc == nil {
-		return nil, false
-	}
-	return GetClaims(gc)
-}
-
 // ==================== http.HandlerFunc wrappers (legacy) ====================
 
 // WithJWT wraps an http.HandlerFunc with JWT middleware.
@@ -128,88 +118,126 @@ func WithAdminAndPerm(jwtMgr *auth.Manager, permChecker authbiz.PermissionChecke
 // ==================== http2.HandlerFunc wrappers (new) ====================
 
 // WithJWTCtx wraps an http2.HandlerFunc with JWT middleware.
-// It extracts the gin.Context from the http2.Context, runs JWT validation,
-// and proceeds only if the token is valid.
 func WithJWTCtx(jwtMgr *auth.Manager, h http2.HandlerFunc) http2.HandlerFunc {
-	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-		if gc == nil {
-			http2.Fail(ctx, http2.ErrInternal, "internal error")
-			return nil
-		}
-		JWTMiddleware(jwtMgr)(gc)
-		if gc.IsAborted() {
-			return nil
-		}
-		return h(ctx)
-	}
+	return JWTMiddlewareCtx(jwtMgr)(h)
 }
 
 // WithOptionalJWTCtx wraps an http2.HandlerFunc with optional JWT middleware.
+// If a valid token is present, claims are set in the context.
+// If no token is present or the token is invalid, the handler still proceeds.
 func WithOptionalJWTCtx(jwtMgr *auth.Manager, h http2.HandlerFunc) http2.HandlerFunc {
-	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-		if gc != nil {
-			header := gc.GetHeader("Authorization")
-			if len(header) >= 8 && header[:7] == "Bearer " {
-				if claims, err := jwtMgr.Parse(header[7:]); err == nil {
-					gc.Set("claims", claims)
-				}
-			}
-			if _, exists := gc.Get("claims"); !exists {
-				if t := gc.Query("token"); t != "" {
-					if claims, err := jwtMgr.Parse(t); err == nil {
-						gc.Set("claims", claims)
-					}
-				}
-			}
-		}
-		return h(ctx)
-	}
+	return OptionalJWTMiddlewareCtx(jwtMgr)(h)
 }
 
 // WithAdminCtx wraps an http2.HandlerFunc with JWT + Admin middleware.
 func WithAdminCtx(jwtMgr *auth.Manager, h http2.HandlerFunc) http2.HandlerFunc {
-	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-		if gc == nil {
-			http2.Fail(ctx, http2.ErrInternal, "internal error")
-			return nil
-		}
-		JWTMiddleware(jwtMgr)(gc)
-		if gc.IsAborted() {
-			return nil
-		}
-		AdminMiddleware(jwtMgr)(gc)
-		if gc.IsAborted() {
-			return nil
-		}
-		return h(ctx)
-	}
+	return http2.Chain(JWTMiddlewareCtx(jwtMgr), AdminMiddlewareCtx(jwtMgr))(h)
 }
 
 // WithAdminAndPermCtx wraps an http2.HandlerFunc with JWT + Admin + Permission middleware.
 func WithAdminAndPermCtx(jwtMgr *auth.Manager, permChecker authbiz.PermissionChecker, permission string, h http2.HandlerFunc) http2.HandlerFunc {
-	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-		if gc == nil {
-			http2.Fail(ctx, http2.ErrInternal, "internal error")
-			return nil
+	return http2.Chain(JWTMiddlewareCtx(jwtMgr), AdminMiddlewareCtx(jwtMgr), RequirePermissionCtx(permChecker, permission))(h)
+}
+
+// ==================== http2.MiddlewareFunc implementations ====================
+
+// JWTMiddlewareCtx returns a MiddlewareFunc that validates JWT tokens.
+// It supports two token sources:
+//  1. Authorization header: "Bearer <token>" (standard, for regular API calls)
+//  2. Query parameter: "?token=<token>" (fallback, for SSE/EventSource which
+//     cannot set custom headers)
+func JWTMiddlewareCtx(jwtMgr *auth.Manager) http2.MiddlewareFunc {
+	return func(next http2.HandlerFunc) http2.HandlerFunc {
+		return func(ctx http2.Context) error {
+			tokenStr := extractTokenFromCtx(ctx)
+			if tokenStr == "" {
+				http2.Fail(ctx, http2.AppErrUnauthorized, "missing token")
+				return nil
+			}
+			claims, err := jwtMgr.Parse(tokenStr)
+			if err != nil {
+				http2.Fail(ctx, http2.AppErrUnauthorized, "invalid token")
+				return nil
+			}
+			ctx.Set("claims", claims)
+			return next(ctx)
 		}
-		JWTMiddleware(jwtMgr)(gc)
-		if gc.IsAborted() {
-			return nil
-		}
-		AdminMiddleware(jwtMgr)(gc)
-		if gc.IsAborted() {
-			return nil
-		}
-		RequirePermission(permChecker, permission)(gc)
-		if gc.IsAborted() {
-			return nil
-		}
-		return h(ctx)
 	}
+}
+
+// OptionalJWTMiddlewareCtx returns a MiddlewareFunc that parses JWT token if
+// present but does not require it. If a valid token is found, claims are set.
+func OptionalJWTMiddlewareCtx(jwtMgr *auth.Manager) http2.MiddlewareFunc {
+	return func(next http2.HandlerFunc) http2.HandlerFunc {
+		return func(ctx http2.Context) error {
+			tokenStr := extractTokenFromCtx(ctx)
+			if tokenStr != "" {
+				if claims, err := jwtMgr.Parse(tokenStr); err == nil {
+					ctx.Set("claims", claims)
+				}
+			}
+			return next(ctx)
+		}
+	}
+}
+
+// AdminMiddlewareCtx returns a MiddlewareFunc that requires admin (or staff) role.
+// It expects claims to already be set in the context (typically by JWTMiddlewareCtx).
+func AdminMiddlewareCtx(jwtMgr *auth.Manager) http2.MiddlewareFunc {
+	return func(next http2.HandlerFunc) http2.HandlerFunc {
+		return func(ctx http2.Context) error {
+			claims, ok := GetClaimsCtx(ctx)
+			if !ok {
+				http2.Fail(ctx, http2.AppErrUnauthorized, "no claims")
+				return nil
+			}
+			if claims.Role != "admin" && !claims.IsStaff {
+				http2.Fail(ctx, http2.AppErrForbidden, "admin required")
+				return nil
+			}
+			return next(ctx)
+		}
+	}
+}
+
+// RequirePermissionCtx returns a MiddlewareFunc that checks if the authenticated
+// user has the specified permission.
+func RequirePermissionCtx(permChecker authbiz.PermissionChecker, permission string) http2.MiddlewareFunc {
+	return func(next http2.HandlerFunc) http2.HandlerFunc {
+		return func(ctx http2.Context) error {
+			claims, ok := GetClaimsCtx(ctx)
+			if !ok {
+				http2.Fail(ctx, http2.AppErrUnauthorized, "authentication required")
+				return nil
+			}
+
+			if claims.Role == "admin" || claims.IsStaff {
+				return next(ctx)
+			}
+
+			userID := claims.GetUserID()
+			allowed, err := permChecker.CheckPermission(ctx.Request().Context(), userID, permission, "")
+			if err != nil || !allowed {
+				http2.Fail(ctx, http2.AppErrForbidden, "permission denied")
+				return nil
+			}
+			return next(ctx)
+		}
+	}
+}
+
+// extractTokenFromCtx extracts the JWT token from an http2.Context.
+// It checks the Authorization header first, then falls back to the
+// "token" query parameter (for SSE/EventSource connections).
+func extractTokenFromCtx(ctx http2.Context) string {
+	auth := ctx.GetHeader("Authorization")
+	if len(auth) >= 8 && auth[:7] == "Bearer " {
+		return auth[7:]
+	}
+	if t := ctx.QueryVar("token"); t != "" {
+		return t
+	}
+	return ""
 }
 
 // JWTMiddleware validates Bearer token and injects claims into context.

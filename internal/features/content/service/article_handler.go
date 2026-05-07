@@ -53,10 +53,7 @@ func extractUserID(c *ginhttp.Context) string {
 
 func (h *ArticleHandler) RegisterRoutes(r http2.Router) {
 	g := r.Group("/articles")
-	// Apply ModuleGuard gin middleware via type assertion
-	if adapter, ok := g.(*ginadapter.RouterAdapter); ok {
-		adapter.UseGin(systemservice.ModuleGuard(h.settingUC, "module_articles"))
-	}
+	g.Use(systemservice.ModuleGuardCtx(h.settingUC, "module_articles"))
 
 	// ================================
 	// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST
@@ -131,11 +128,11 @@ func (h *ArticleHandler) listArticles() http2.HandlerFunc {
 
 		items, total, err := h.uc.List(ctx.Request().Context(), page, pageSize, filters)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		server.PageCtx(ctx, items, int64(total), page, pageSize)
+		http2.Page(ctx, items, int64(total), page, pageSize)
 		return nil
 	}
 }
@@ -145,17 +142,17 @@ func (h *ArticleHandler) getArticle() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		id := gc.Param("id")
 		if id == "" {
-			server.FailCtx(ctx, server.ErrBadRequest, "article id is required")
+			http2.Fail(ctx, server.ErrBadRequest, "article id is required")
 			return nil
 		}
 
 		article, err := h.uc.Get(ctx.Request().Context(), id)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrNotFound, "article not found")
+			http2.Fail(ctx, server.ErrNotFound, "article not found")
 			return nil
 		}
 
-		server.OKCtx(ctx, article)
+		http2.OK(ctx, article)
 		return nil
 	}
 }
@@ -165,17 +162,17 @@ func (h *ArticleHandler) getArticleBySlug() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		slug := gc.Param("slug")
 		if slug == "" {
-			server.FailCtx(ctx, server.ErrBadRequest, "slug is required")
+			http2.Fail(ctx, server.ErrBadRequest, "slug is required")
 			return nil
 		}
 
 		article, err := h.uc.GetBySlug(ctx.Request().Context(), slug)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrNotFound, "article not found")
+			http2.Fail(ctx, server.ErrNotFound, "article not found")
 			return nil
 		}
 
-		server.OKCtx(ctx, article)
+		http2.OK(ctx, article)
 		return nil
 	}
 }
@@ -199,11 +196,11 @@ func (h *ArticleHandler) listFeaturedArticles() http2.HandlerFunc {
 
 		items, _, err := h.uc.List(ctx.Request().Context(), 1, limit, filters)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		server.OKCtx(ctx, items)
+		http2.OK(ctx, items)
 		return nil
 	}
 }
@@ -226,11 +223,11 @@ func (h *ArticleHandler) listLatestArticles() http2.HandlerFunc {
 
 		items, _, err := h.uc.List(ctx.Request().Context(), 1, limit, filters)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		server.OKCtx(ctx, items)
+		http2.OK(ctx, items)
 		return nil
 	}
 }
@@ -253,13 +250,13 @@ func (h *ArticleHandler) createArticle() http2.HandlerFunc {
 		}
 
 		if err := gc.ShouldBindJSON(&input); err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
 		}
 
 		// Reject archived state from user-side requests
 		if input.State == "archived" {
-			server.FailCtx(ctx, server.ErrBadRequest, "invalid state, must be draft or published")
+			http2.Fail(ctx, server.ErrBadRequest, "invalid state, must be draft or published")
 			return nil
 		}
 
@@ -295,11 +292,11 @@ func (h *ArticleHandler) createArticle() http2.HandlerFunc {
 
 		created, err := h.uc.Create(ctx.Request().Context(), article)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		server.CreatedCtx(ctx, created)
+		http2.Created(ctx, created)
 		return nil
 	}
 }
@@ -310,7 +307,7 @@ func (h *ArticleHandler) updateArticle() http2.HandlerFunc {
 
 		id := gc.Param("id")
 		if id == "" {
-			server.FailCtx(ctx, server.ErrBadRequest, "article id is required")
+			http2.Fail(ctx, server.ErrBadRequest, "article id is required")
 			return nil
 		}
 
@@ -328,26 +325,26 @@ func (h *ArticleHandler) updateArticle() http2.HandlerFunc {
 		}
 
 		if err := gc.ShouldBindJSON(&input); err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
 		}
 
 		// Reject archived state from user-side requests
 		if input.State == "archived" {
-			server.FailCtx(ctx, server.ErrBadRequest, "invalid state, must be draft or published")
+			http2.Fail(ctx, server.ErrBadRequest, "invalid state, must be draft or published")
 			return nil
 		}
 
 		existing, err := h.uc.Get(ctx.Request().Context(), id)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrNotFound, "article not found")
+			http2.Fail(ctx, server.ErrNotFound, "article not found")
 			return nil
 		}
 
 		// Ownership check: only the article owner can update
 		userID := extractUserIDCtx(ctx)
 		if existing.UserID != userID {
-			server.FailCtx(ctx, server.ErrForbidden, "you can only edit your own articles")
+			http2.Fail(ctx, server.ErrForbidden, "you can only edit your own articles")
 			return nil
 		}
 
@@ -381,11 +378,11 @@ func (h *ArticleHandler) updateArticle() http2.HandlerFunc {
 
 		updated, err := h.uc.Update(ctx.Request().Context(), existing)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		server.OKCtx(ctx, updated)
+		http2.OK(ctx, updated)
 		return nil
 	}
 }
@@ -396,35 +393,35 @@ func (h *ArticleHandler) deleteArticle() http2.HandlerFunc {
 
 		id := gc.Param("id")
 		if id == "" {
-			server.FailCtx(ctx, server.ErrBadRequest, "article id is required")
+			http2.Fail(ctx, server.ErrBadRequest, "article id is required")
 			return nil
 		}
 
 		article, err := h.uc.Get(ctx.Request().Context(), id)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrNotFound, "article not found")
+			http2.Fail(ctx, server.ErrNotFound, "article not found")
 			return nil
 		}
 
 		// Ownership check: only the article owner can delete
 		userID := extractUserIDCtx(ctx)
 		if article.UserID != userID {
-			server.FailCtx(ctx, server.ErrForbidden, "you can only delete your own articles")
+			http2.Fail(ctx, server.ErrForbidden, "you can only delete your own articles")
 			return nil
 		}
 
 		// Only allow deleting draft articles
 		if article.State == "published" {
-			server.FailCtx(ctx, server.ErrBadRequest, "published articles cannot be deleted, please contact admin")
+			http2.Fail(ctx, server.ErrBadRequest, "published articles cannot be deleted, please contact admin")
 			return nil
 		}
 
 		if err := h.uc.Delete(ctx.Request().Context(), id); err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		server.OKCtx(ctx, nil)
+		http2.OK(ctx, nil)
 		return nil
 	}
 }
@@ -435,7 +432,7 @@ func (h *ArticleHandler) updateArticleState() http2.HandlerFunc {
 
 		id := gc.Param("id")
 		if id == "" {
-			server.FailCtx(ctx, server.ErrBadRequest, "article id is required")
+			http2.Fail(ctx, server.ErrBadRequest, "article id is required")
 			return nil
 		}
 
@@ -444,41 +441,41 @@ func (h *ArticleHandler) updateArticleState() http2.HandlerFunc {
 		}
 
 		if err := gc.ShouldBindJSON(&input); err != nil {
-			server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
 		}
 
 		// Only allow draft and published states for user-side
 		validUserStates := map[string]bool{"draft": true, "published": true}
 		if !validUserStates[input.State] {
-			server.FailCtx(ctx, server.ErrBadRequest, "invalid state, must be draft or published")
+			http2.Fail(ctx, server.ErrBadRequest, "invalid state, must be draft or published")
 			return nil
 		}
 
 		// Ownership check: only the article owner can change state
 		article, err := h.uc.Get(ctx.Request().Context(), id)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrNotFound, "article not found")
+			http2.Fail(ctx, server.ErrNotFound, "article not found")
 			return nil
 		}
 		userID := extractUserIDCtx(ctx)
 		if article.UserID != userID {
-			server.FailCtx(ctx, server.ErrForbidden, "you can only modify your own articles")
+			http2.Fail(ctx, server.ErrForbidden, "you can only modify your own articles")
 			return nil
 		}
 
 		if err := h.uc.UpdateState(ctx.Request().Context(), id, input.State); err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
 		updated, err := h.uc.Get(ctx.Request().Context(), id)
 		if err != nil {
-			server.OKCtx(ctx, nil)
+			http2.OK(ctx, nil)
 			return nil
 		}
 
-		server.OKCtx(ctx, updated)
+		http2.OK(ctx, updated)
 		return nil
 	}
 }
@@ -490,7 +487,7 @@ func (h *ArticleHandler) listMyArticles() http2.HandlerFunc {
 
 		userID := extractUserIDCtx(ctx)
 		if userID == "" {
-			server.FailCtx(ctx, server.ErrBadRequest, "authentication required")
+			http2.Fail(ctx, server.ErrBadRequest, "authentication required")
 			return nil
 		}
 
@@ -514,11 +511,11 @@ func (h *ArticleHandler) listMyArticles() http2.HandlerFunc {
 
 		items, total, err := h.uc.List(ctx.Request().Context(), page, pageSize, filters)
 		if err != nil {
-			server.FailCtx(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		server.PageCtx(ctx, items, int64(total), page, pageSize)
+		http2.Page(ctx, items, int64(total), page, pageSize)
 		return nil
 	}
 }
