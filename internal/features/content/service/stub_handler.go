@@ -39,8 +39,8 @@ func (h *StubHandler) RegisterRoutes(r http2.Router) {
 	// ================================
 	adminReview := r.Group("/admin/medias/review")
 	if adapter, ok := adminReview.(*ginadapter.RouterAdapter); ok {
-		adapter.Use(server.JWTMiddleware(h.jwt))
-		adapter.Use(server.AdminMiddleware(h.jwt))
+		adapter.UseGin(server.JWTMiddleware(h.jwt))
+		adapter.UseGin(server.AdminMiddleware(h.jwt))
 	}
 	{
 		adminReview.GET("/pending", server.HTTPToHandlerFunc(h.stubReviewPending()))
@@ -49,8 +49,8 @@ func (h *StubHandler) RegisterRoutes(r http2.Router) {
 	}
 	adminMediaReview := r.Group("/admin/medias/:id")
 	if adapter, ok := adminMediaReview.(*ginadapter.RouterAdapter); ok {
-		adapter.Use(server.JWTMiddleware(h.jwt))
-		adapter.Use(server.AdminMiddleware(h.jwt))
+		adapter.UseGin(server.JWTMiddleware(h.jwt))
+		adapter.UseGin(server.AdminMiddleware(h.jwt))
 	}
 	{
 		adminMediaReview.PUT("/review", server.HTTPToHandlerFunc(h.stubReviewMedia()))
@@ -66,8 +66,8 @@ func (h *StubHandler) RegisterRoutes(r http2.Router) {
 	// ================================
 	adminNavItems := r.Group("/admin/nav-items")
 	if adapter, ok := adminNavItems.(*ginadapter.RouterAdapter); ok {
-		adapter.Use(server.JWTMiddleware(h.jwt))
-		adapter.Use(server.AdminMiddleware(h.jwt))
+		adapter.UseGin(server.JWTMiddleware(h.jwt))
+		adapter.UseGin(server.AdminMiddleware(h.jwt))
 	}
 	{
 		adminNavItems.GET("", server.HTTPToHandlerFunc(h.stubNavItemList()))
@@ -82,8 +82,8 @@ func (h *StubHandler) RegisterRoutes(r http2.Router) {
 	// ================================
 	adminBanners := r.Group("/admin/banners")
 	if adapter, ok := adminBanners.(*ginadapter.RouterAdapter); ok {
-		adapter.Use(server.JWTMiddleware(h.jwt))
-		adapter.Use(server.AdminMiddleware(h.jwt))
+		adapter.UseGin(server.JWTMiddleware(h.jwt))
+		adapter.UseGin(server.AdminMiddleware(h.jwt))
 	}
 	{
 		adminBanners.GET("", server.HTTPToHandlerFunc(h.stubBannerList()))
@@ -149,8 +149,8 @@ func (h *StubHandler) RegisterRoutes(r http2.Router) {
 	// ================================
 	adminStatsRevenue := r.Group("/admin/stats")
 	if adapter, ok := adminStatsRevenue.(*ginadapter.RouterAdapter); ok {
-		adapter.Use(server.JWTMiddleware(h.jwt))
-		adapter.Use(server.AdminMiddleware(h.jwt))
+		adapter.UseGin(server.JWTMiddleware(h.jwt))
+		adapter.UseGin(server.AdminMiddleware(h.jwt))
 	}
 	{
 		adminStatsRevenue.GET("/revenue", server.HTTPToHandlerFunc(h.stubAdminStatsRevenue()))
@@ -165,8 +165,8 @@ func (h *StubHandler) RegisterRoutes(r http2.Router) {
 	// ================================
 	adminChannels := r.Group("/admin/channels")
 	if adapter, ok := adminChannels.(*ginadapter.RouterAdapter); ok {
-		adapter.Use(server.JWTMiddleware(h.jwt))
-		adapter.Use(server.AdminMiddleware(h.jwt))
+		adapter.UseGin(server.JWTMiddleware(h.jwt))
+		adapter.UseGin(server.AdminMiddleware(h.jwt))
 	}
 	{
 		adminChannels.POST("", server.HTTPToHandlerFunc(h.stubAdminChannelCreate()))
@@ -181,7 +181,7 @@ func (h *StubHandler) RegisterRoutes(r http2.Router) {
 	// ================================
 	notifications := r.Group("/notifications")
 	if adapter, ok := notifications.(*ginadapter.RouterAdapter); ok {
-		adapter.Use(server.JWTMiddleware(h.jwt))
+		adapter.UseGin(server.JWTMiddleware(h.jwt))
 	}
 	{
 		notifications.DELETE("/:id", server.HTTPToHandlerFunc(h.stubNotificationDelete()))

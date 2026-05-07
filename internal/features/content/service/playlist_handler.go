@@ -38,7 +38,7 @@ func (h *PlaylistHandler) RegisterRoutes(r http2.Router) {
 	playlists := r.Group("/playlists")
 	// Apply ModuleGuard gin middleware via type assertion
 	if adapter, ok := playlists.(*ginadapter.RouterAdapter); ok {
-		adapter.Use(systemservice.ModuleGuard(h.settingUC, "module_videos"))
+		adapter.UseGin(systemservice.ModuleGuard(h.settingUC, "module_videos"))
 	}
 	{
 		playlists.GET("", h.listPlaylists())

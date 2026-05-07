@@ -50,7 +50,7 @@ func (h *MeHandler) RegisterRoutes(r http2.Router) {
 	me := r.Group("/me")
 	// Apply JWT middleware via type assertion
 	if adapter, ok := me.(*ginadapter.RouterAdapter); ok {
-		adapter.Use(server.JWTMiddleware(h.jwt))
+		adapter.UseGin(server.JWTMiddleware(h.jwt))
 	}
 	{
 		// ================================
