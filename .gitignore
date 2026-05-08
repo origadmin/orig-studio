@@ -43,7 +43,6 @@ _roadhog-api-doc
 **/dist
 
 # misc
-.DS_Store
 npm-debug.log*
 yarn-error.log
 
@@ -105,30 +104,37 @@ internal/frontend/dist/
 .opencode.json
 .mcp.json
 .team/
+.github/
+.trae/
 GEMINI.md
 AGENTS.md
 CLAUDE.md
 
-# Temporary files
-bin.7z
-docs/check_temp/
-docs/img*.png
-fix_*.py
-report.md
-task-summary-*.md
-test_all.txt
-test_ffmpeg.txt
-test_worker.txt
-test_api.ps1
-test_api.sh
-FEATURE_COMPARISON.md
-CHANGELOG.md
-bootstrap.yaml
+# AI-generated files (safe to delete contents, but keep directory structure)
+.ai/
+.ai/*/
+!.ai/*/.gitkeep
+
+# AI junk files in project root (patterns that AI creates without permission)
+# Only targets ROOT level, not subdirectories like docs/ or internal/
+/fix_*.py
+/report.md
+/task-summary-*.md
+/FEATURE_COMPARISON.md
+/CHANGELOG.md
+/bootstrap.yaml
+/test_*.txt
+/test_*.ps1
+/test_*.sh
+/test_api.*
+/init_db.go
+/Dockerfile.server
 /configs/
-Dockerfile.server
-init_db.go
 /resources/sampels/
 /tools/
+/bin.7z
+/docs/check_temp/
+/docs/img*.png
 
 # Frontend temp/test output
 web/eslint-*.txt
