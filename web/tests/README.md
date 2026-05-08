@@ -162,14 +162,14 @@ web/tests/
 
 ## Template Files
 
-Test document templates are in `_team/templates/`:
+Test document templates are in `projects/team-flow/team/templates/`:
 
 | Template | Usage |
 |----------|-------|
-| `_team/templates/feature-test-template.md` | Feature test coverage declaration |
-| `_team/templates/bug-test-template.md` | Bug reproduction test case |
-| `_team/templates/frontend-feature-test-template.md` | Frontend Feature test (new) |
-| `_team/templates/frontend-bug-test-template.md` | Frontend Bug test (new) |
+| `projects/team-flow/team/templates/feature-test-template.md` | Feature test coverage declaration |
+| `projects/team-flow/team/templates/bug-test-template.md` | Bug reproduction test case |
+| `projects/team-flow/team/templates/frontend-feature-test-template.md` | Frontend Feature test (new) |
+| `projects/team-flow/team/templates/frontend-bug-test-template.md` | Frontend Bug test (new) |
 
 ---
 

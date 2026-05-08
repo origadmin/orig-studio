@@ -122,7 +122,7 @@ func main() {
 		},
 		deps.DB,
 		deps.JWTManager,
-		"./data/uploads", // storageBasePath: base directory for static file serving
+		deps.StoragePaths,
 	)
 
 	// Start server

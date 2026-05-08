@@ -10,7 +10,10 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/data/convpb"
 	"origadmin/application/origcms/internal/data/entity"
@@ -167,16 +170,15 @@ func (r *mediaRepo) List(
 	if opt.Keyword != "" {
 		query = query.Where(media.TitleContains(opt.Keyword))
 	}
-	// TODO: Implement tag filtering
-	// if len(opt.Tags) > 0 {
-	// 	for _, tag := range opt.Tags {
-	// 		// For JSON field in SQLite, use Expr to build raw SQL query
-	// 		tagParam := fmt.Sprintf(`"%s"`, tag)
-	// 		query = query.Where(func(s *entity.MediaQuery) {
-	// 			s.Where(entity.Media.TagsContains(tag))
-	// 		})
-	// 	}
-	// }
+	if len(opt.Tags) > 0 {
+		query = query.Where(func(s *sql.Selector) {
+			predicates := make([]*sql.Predicate, 0, len(opt.Tags))
+			for _, tag := range opt.Tags {
+				predicates = append(predicates, sqljson.ValueContains(media.FieldTags, tag))
+			}
+			s.Where(sql.Or(predicates...))
+		})
+	}
 	if opt.Featured != nil {
 		query = query.Where(media.FeaturedEQ(*opt.Featured))
 	}
@@ -296,6 +298,15 @@ func (r *mediaRepo) ListWithEntities(
 	if opt.Keyword != "" {
 		query = query.Where(media.TitleContains(opt.Keyword))
 	}
+	if len(opt.Tags) > 0 {
+		query = query.Where(func(s *sql.Selector) {
+			predicates := make([]*sql.Predicate, 0, len(opt.Tags))
+			for _, tag := range opt.Tags {
+				predicates = append(predicates, sqljson.ValueContains(media.FieldTags, tag))
+			}
+			s.Where(sql.Or(predicates...))
+		})
+	}
 	if opt.Featured != nil {
 		query = query.Where(media.FeaturedEQ(*opt.Featured))
 	}
@@ -308,7 +319,6 @@ func (r *mediaRepo) ListWithEntities(
 	if opt.Privacy != nil {
 		query = query.Where(media.PrivacyEQ(convpb.ConvertPrivacyPBToMediaPrivacy(types.Privacy(*opt.Privacy))))
 	} else if !opt.AdminMode {
-		// Non-admin mode: exclude private media by default
 		query = query.Where(media.PrivacyNEQ(media.PrivacyPRIVATE))
 	}
 
@@ -458,6 +468,22 @@ func (r *mediaRepo) CreateWithEntity(
 	}
 	if in.CategoryId != 0 {
 		create = create.SetNillableCategoryID(&in.CategoryId)
+	}
+	if len(in.Tags) > 0 {
+		create = create.SetTags(in.Tags)
+	}
+	if in.ReviewStatus != "" {
+		create = create.SetReviewStatus(in.ReviewStatus)
+	}
+	create = create.SetListable(in.Listable)
+	if in.Extension != "" {
+		create = create.SetExtension(in.Extension)
+	}
+	if in.Md5Sum != "" {
+		create = create.SetMd5sum(in.Md5Sum)
+	}
+	if in.Poster != "" {
+		create = create.SetPoster(in.Poster)
 	}
 
 	m, err := create.Save(ctx)
@@ -798,4 +824,25 @@ func convertCategoryToProto(c *entity.Category) *types.Category {
 		Description: c.Description,
 		MediaCount:  int64(c.MediaCount),
 	}
+}
+
+// ListTempMediaBefore returns media records whose URL starts with "temp/" and
+// whose create_time is before the given cutoff. Used by CleanupExpiredTemp to
+// find stale temp files that were never promoted (failed/expired transcodes).
+func (r *mediaRepo) ListTempMediaBefore(ctx context.Context, cutoff time.Time) ([]*types.Media, error) {
+	items, err := r.db.Media.Query().
+		Where(
+			media.URLHasPrefix("temp/"),
+			media.CreateTimeLT(cutoff),
+		).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("query temp media before cutoff: %w", err)
+	}
+
+	result := make([]*types.Media, len(items))
+	for i, item := range items {
+		result[i] = convpb.ConvertMediaToMediaPBFull(item)
+	}
+	return result, nil
 }

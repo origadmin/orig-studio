@@ -91,6 +91,10 @@ const (
 	FieldThumbnailTime = "thumbnail_time"
 	// FieldTags holds the string denoting the tags field in the database.
 	FieldTags = "tags"
+	// FieldSyncStatus holds the string denoting the sync_status field in the database.
+	FieldSyncStatus = "sync_status"
+	// FieldSyncedAt holds the string denoting the synced_at field in the database.
+	FieldSyncedAt = "synced_at"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
 	// FieldCategoryID holds the string denoting the category_id field in the database.
@@ -242,6 +246,8 @@ var Columns = []string{
 	FieldVttPath,
 	FieldThumbnailTime,
 	FieldTags,
+	FieldSyncStatus,
+	FieldSyncedAt,
 	FieldUserID,
 	FieldCategoryID,
 	FieldChannelID,
@@ -355,6 +361,10 @@ var (
 	SpritePathValidator func(string) error
 	// VttPathValidator is a validator for the "vtt_path" field. It is called by the builders before save.
 	VttPathValidator func(string) error
+	// DefaultSyncStatus holds the default value on creation for the "sync_status" field.
+	DefaultSyncStatus string
+	// SyncStatusValidator is a validator for the "sync_status" field. It is called by the builders before save.
+	SyncStatusValidator func(string) error
 	// DefaultCreateTime holds the default value on creation for the "create_time" field.
 	DefaultCreateTime func() time.Time
 	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
@@ -590,6 +600,16 @@ func ByVttPath(opts ...sql.OrderTermOption) OrderOption {
 // ByThumbnailTime orders the results by the thumbnail_time field.
 func ByThumbnailTime(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldThumbnailTime, opts...).ToFunc()
+}
+
+// BySyncStatus orders the results by the sync_status field.
+func BySyncStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSyncStatus, opts...).ToFunc()
+}
+
+// BySyncedAt orders the results by the synced_at field.
+func BySyncedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSyncedAt, opts...).ToFunc()
 }
 
 // ByUserID orders the results by the user_id field.

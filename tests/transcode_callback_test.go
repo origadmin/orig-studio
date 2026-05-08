@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/infra/pubsub"
 	"origadmin/application/origcms/internal/features/media/biz"
 	"origadmin/application/origcms/internal/features/media/dal"
@@ -71,6 +72,7 @@ func TestTranscodeCompleteCallback(t *testing.T) {
 	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	mockWorker := NewMockTranscodeWorker()
 	mockPublisher := NewMockPublisher()
+	testPaths := conf.NewStoragePaths(t.TempDir())
 	
 	// Create test profiles
 	createTestProfiles(t, profileRepo)
@@ -96,7 +98,7 @@ func TestTranscodeCompleteCallback(t *testing.T) {
 		mockWorker,
 		mockPublisher,
 		log.NewStdLogger(),
-		"./data/uploads",
+		testPaths,
 		30*time.Minute,
 		nil,
 	)
@@ -191,7 +193,7 @@ func TestTranscodeCompleteCallback(t *testing.T) {
 			mockWorkerWithFailure,
 			mockPublisher,
 			log.NewStdLogger(),
-			"./data/uploads",
+			testPaths,
 			30*time.Minute,
 			nil,
 		)
@@ -274,7 +276,7 @@ func TestTranscodeCompleteCallback(t *testing.T) {
 			mockWorkerWithPartialFailure,
 			mockPublisher,
 			log.NewStdLogger(),
-			"./data/uploads",
+			testPaths,
 			30*time.Minute,
 			nil,
 		)
@@ -348,6 +350,7 @@ func TestTranscodeProgressCallback(t *testing.T) {
 	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	mockWorker := NewMockTranscodeWorker()
 	mockPublisher := NewMockPublisher()
+	testPaths := conf.NewStoragePaths(t.TempDir())
 	
 	// Create test profiles
 	createTestProfiles(t, profileRepo)
@@ -373,7 +376,7 @@ func TestTranscodeProgressCallback(t *testing.T) {
 		mockWorker,
 		mockPublisher,
 		log.NewStdLogger(),
-		"./data/uploads",
+		testPaths,
 		30*time.Minute,
 		nil,
 	)
@@ -443,6 +446,7 @@ func TestTranscodeTaskStatusCallback(t *testing.T) {
 	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	mockWorker := NewMockTranscodeWorker()
 	mockPublisher := NewMockPublisher()
+	testPaths := conf.NewStoragePaths(t.TempDir())
 	
 	// Create test profiles
 	createTestProfiles(t, profileRepo)
@@ -468,7 +472,7 @@ func TestTranscodeTaskStatusCallback(t *testing.T) {
 		mockWorker,
 		mockPublisher,
 		log.NewStdLogger(),
-		"./data/uploads",
+		testPaths,
 		30*time.Minute,
 		nil,
 	)

@@ -97,6 +97,10 @@ type Media struct {
 	ThumbnailTime float64 `json:"thumbnail_time,omitempty"`
 	// Tags holds the value of the "tags" field.
 	Tags []string `json:"tags,omitempty"`
+	// SyncStatus holds the value of the "sync_status" field.
+	SyncStatus string `json:"sync_status,omitempty"`
+	// SyncedAt holds the value of the "synced_at" field.
+	SyncedAt *time.Time `json:"synced_at,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
 	// CategoryID holds the value of the "category_id" field.
@@ -257,9 +261,9 @@ func (*Media) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case media.FieldDuration, media.FieldWidth, media.FieldHeight, media.FieldViewCount, media.FieldLikeCount, media.FieldDislikeCount, media.FieldCommentCount, media.FieldFavoriteCount, media.FieldDownloadCount, media.FieldShareCount, media.FieldReportedTimes, media.FieldCategoryID:
 			values[i] = new(sql.NullInt64)
-		case media.FieldID, media.FieldTitle, media.FieldDescription, media.FieldShortToken, media.FieldType, media.FieldURL, media.FieldHlsFile, media.FieldThumbnail, media.FieldPoster, media.FieldPreviewFilePath, media.FieldSize, media.FieldMimeType, media.FieldMd5sum, media.FieldExtension, media.FieldPrivacy, media.FieldEncodingStatus, media.FieldState, media.FieldUUID, media.FieldReviewStatus, media.FieldSpriteStatus, media.FieldSpritePath, media.FieldVttPath, media.FieldUserID, media.FieldChannelID, media.FieldCreateAuthor, media.FieldUpdateAuthor:
+		case media.FieldID, media.FieldTitle, media.FieldDescription, media.FieldShortToken, media.FieldType, media.FieldURL, media.FieldHlsFile, media.FieldThumbnail, media.FieldPoster, media.FieldPreviewFilePath, media.FieldSize, media.FieldMimeType, media.FieldMd5sum, media.FieldExtension, media.FieldPrivacy, media.FieldEncodingStatus, media.FieldState, media.FieldUUID, media.FieldReviewStatus, media.FieldSpriteStatus, media.FieldSpritePath, media.FieldVttPath, media.FieldSyncStatus, media.FieldUserID, media.FieldChannelID, media.FieldCreateAuthor, media.FieldUpdateAuthor:
 			values[i] = new(sql.NullString)
-		case media.FieldPublishedAt, media.FieldCreateTime, media.FieldUpdateTime:
+		case media.FieldSyncedAt, media.FieldPublishedAt, media.FieldCreateTime, media.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		case media.ForeignKeys[0]: // media_category_media
 			values[i] = new(sql.NullInt64)
@@ -515,6 +519,19 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 				if err := json.Unmarshal(*value, &_m.Tags); err != nil {
 					return fmt.Errorf("unmarshal field tags: %w", err)
 				}
+			}
+		case media.FieldSyncStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field sync_status", values[i])
+			} else if value.Valid {
+				_m.SyncStatus = value.String
+			}
+		case media.FieldSyncedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field synced_at", values[i])
+			} else if value.Valid {
+				_m.SyncedAt = new(time.Time)
+				*_m.SyncedAt = value.Time
 			}
 		case media.FieldUserID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -777,6 +794,14 @@ func (_m *Media) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("tags=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Tags))
+	builder.WriteString(", ")
+	builder.WriteString("sync_status=")
+	builder.WriteString(_m.SyncStatus)
+	builder.WriteString(", ")
+	if v := _m.SyncedAt; v != nil {
+		builder.WriteString("synced_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(_m.UserID)

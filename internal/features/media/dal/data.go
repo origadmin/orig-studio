@@ -20,7 +20,7 @@ import (
 
 // ProviderSet is data providers for monolith mode (without NewEntClient, which is
 // provided by infra.NewDatabase instead). For microservice mode, use MicroserviceProviderSet.
-// Note: NewLocalStorage requires a hardcoded basePath and is provided via bridge
+// Note: NewLocalStorage requires *conf.StoragePaths and is provided via bridge
 // function in wire.go, so it is excluded from this ProviderSet.
 var ProviderSet = wire.NewSet(
 	NewMediaRepo,

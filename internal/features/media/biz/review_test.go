@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/stretchr/testify/assert"
@@ -166,6 +167,10 @@ func (r *MockReviewRepo) UpdatePreviewFilePath(ctx context.Context, mediaID stri
 
 func (r *MockReviewRepo) UpdateDimensions(ctx context.Context, mediaID string, width, height int) error {
 	return nil
+}
+
+func (r *MockReviewRepo) ListTempMediaBefore(ctx context.Context, cutoff time.Time) ([]*Media, error) {
+	return nil, nil
 }
 
 // MockReviewLogRepo simulates the review log repository

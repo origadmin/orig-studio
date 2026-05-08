@@ -48,6 +48,7 @@ export interface UploadCallbacks {
     onStatusChange: (taskId: string, status: UploadStatus) => void;
     onSuccess: (taskId: string) => void;
     onError: (taskId: string, error: string) => void;
+    onUploadId?: (taskId: string, uploadId: string) => void;
 }
 
 // --- API layer ---
@@ -225,6 +226,9 @@ export async function startMultipartUpload(
             uploadId = resp.upload_id;
             task.uploadId = uploadId;
             actualChunkSize = resp.chunk_size || DEFAULT_CHUNK_SIZE;
+            if (callbacks.onUploadId) {
+                callbacks.onUploadId(task.id, uploadId);
+            }
         }
 
         // 2. Calculate pending parts

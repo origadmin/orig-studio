@@ -48,6 +48,7 @@ export function useMediaList(params: {
     user_id?: string | number;
     keyword?: string;
     search?: string;
+    tags?: string[];
     featured?: boolean | string;
     order_by?: string;
     descending?: boolean;
@@ -69,10 +70,9 @@ export function useMediaList(params: {
                 category_ids: params.category_ids && params.category_ids.length > 0 ? params.category_ids.join(',') : undefined,
                 user_id: params.user_id || undefined,
                 keyword: params.search || params.keyword,
-                // Map status → state (backend field name)
+                tags: params.tags && params.tags.length > 0 ? params.tags.join(',') : undefined,
                 state: params.status,
                 featured: params.featured != null ? String(params.featured) : undefined,
-                // Map sort/order → order_by/descending (backend field names)
                 order_by: params.order_by || params.sort,
                 descending: params.descending != null
                     ? params.descending

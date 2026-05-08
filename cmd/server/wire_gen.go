@@ -7,6 +7,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
@@ -40,7 +42,6 @@ import (
 	auth2 "origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/infra/pubsub"
-	"time"
 )
 
 import (
@@ -61,14 +62,21 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	encodeProfileRepo := dal.NewEncodeProfileRepo(client)
 	encodingTaskRepo := dal.NewEncodingTaskRepo(client)
 	reviewLogRepo := dal.NewReviewLogRepo(client)
-	localStorage := NewStorage()
+	localStorage := NewStorage(NewStoragePaths(NewUploadConfig()))
+	storageConfig := NewStorageConfig()
+	storage, storageCleanup, err := NewStorageInterface(localStorage, NewStoragePaths(NewUploadConfig()), storageConfig, logger)
+	if err != nil {
+		return nil, err
+	}
 	publisher := infra.NewPublisher(pubSub)
 	settingRepo := dal2.NewSettingRepo(client)
 	settingUseCase := biz.NewSettingUseCase(settingRepo)
-	spriteUseCase := NewSpriteUseCase(mediaRepo, settingUseCase, logger)
-	mediaUseCase := biz2.NewMediaUseCase(mediaRepo, encodeProfileRepo, encodingTaskRepo, reviewLogRepo, localStorage, publisher, logger, spriteUseCase)
+	storagePaths := NewStoragePaths(NewUploadConfig())
+	spriteUseCase := NewSpriteUseCase(mediaRepo, settingUseCase, storagePaths, logger)
+	mediaUseCase := biz2.NewMediaUseCase(mediaRepo, encodeProfileRepo, encodingTaskRepo, reviewLogRepo, storage, publisher, logger, spriteUseCase)
 	transcodeWorker := NewWorker(logger)
-	transcodeHandler := NewTranscodeHandler(mediaUseCase, encodeProfileRepo, encodingTaskRepo, mediaRepo, transcodeWorker, publisher, logger, spriteUseCase)
+	transcodeConfig := NewTranscodeConfig()
+	transcodeHandler := NewTranscodeHandler(mediaUseCase, encodeProfileRepo, encodingTaskRepo, mediaRepo, transcodeWorker, publisher, logger, storagePaths, transcodeConfig, spriteUseCase)
 	router, err := infra.NewRouter(transcodeHandler, pubSub, logger)
 	if err != nil {
 		return nil, err
@@ -83,7 +91,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	authHandler := NewAuthHandler(userUseCase, manager)
 	userHandler := NewUserHandler(userUseCase, manager)
 	uploadRepo := dal.NewUploadRepo(client, logger)
-	uploadUseCase := NewUploadUseCase(uploadRepo, mediaRepo, encodeProfileRepo, encodingTaskRepo, mediaUseCase, localStorage, logger)
+	uploadUseCase := NewUploadUseCase(uploadRepo, mediaRepo, encodeProfileRepo, encodingTaskRepo, mediaUseCase, storage, storagePaths, NewUploadConfig(), logger)
 	data := dal4.NewData(client)
 	likeRepo := dal4.NewLikeRepo(data, logger)
 	favoriteRepo := dal4.NewFavoriteRepo(data, logger)
@@ -142,12 +150,14 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	adminTagHandler := NewAdminTagHandler(tagService)
 	exploreHandler := NewExploreHandler(client)
 	stubHandler := NewStubHandler(manager)
-	spriteHandler := NewSpriteHandler(mediaUseCase, manager, logger)
+	spriteHandler := NewSpriteHandler(mediaUseCase, storagePaths, manager, logger)
 	appDependencies := &AppDependencies{
 		DB:                       client,
 		PubSub:                   pubSub,
 		Router:                   router,
 		JWTManager:               manager,
+		StoragePaths:             storagePaths,
+		StorageCleanup:           storageCleanup,
 		AuthHandler:              authHandler,
 		PermissionHandler:        permissionHandler,
 		UserHandler:              userHandler,
@@ -185,7 +195,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 // It aggregates all module ProviderSets and retains bridge functions
 // for constructors that require hardcoded configuration values or
 // interface bindings that cannot be expressed in module ProviderSets.
-var ProviderSet = wire.NewSet(infra.ProviderSet, media.ProviderSet, content.ProviderSet, user.ProviderSet, auth.ProviderSet, admin.ProviderSet, system.ProviderSet, NewStorage,
+var ProviderSet = wire.NewSet(infra.ProviderSet, media.ProviderSet, content.ProviderSet, user.ProviderSet, auth.ProviderSet, admin.ProviderSet, system.ProviderSet, NewStorage, NewStorageConfig, NewStorageInterface, NewUploadConfig, NewStoragePaths, NewTranscodeConfig,
 	NewWorker,
 	NewUploadUseCase,
 	NewSpriteUseCase,
@@ -215,12 +225,64 @@ var ProviderSet = wire.NewSet(infra.ProviderSet, media.ProviderSet, content.Prov
 	NewAdminTagHandler,
 	NewExploreHandler,
 	NewStubHandler,
-	NewSpriteHandler, wire.Bind(new(biz5.PermissionChecker), new(*biz5.PermissionUseCase)), wire.Bind(new(biz2.Storage), new(*dal.LocalStorage)), wire.Bind(new(biz4.MediaUseCaseInterface), new(*biz2.MediaUseCase)), wire.Bind(new(biz.ConfigProvider), new(*biz.SettingUseCase)),
+	NewSpriteHandler, wire.Bind(new(biz5.PermissionChecker), new(*biz5.PermissionUseCase)), wire.Bind(new(biz4.MediaUseCaseInterface), new(*biz2.MediaUseCase)), wire.Bind(new(biz.ConfigProvider), new(*biz.SettingUseCase)),
 )
 
-// NewStorage creates a new storage with hardcoded base path.
-func NewStorage() *dal.LocalStorage {
-	return dal.NewLocalStorage("./data/uploads")
+// NewStorage creates a LocalStorage instance (used as the base for all storage types).
+func NewStorage(sp *conf.StoragePaths) *dal.LocalStorage {
+	return dal.NewLocalStorage(sp)
+}
+
+// NewStorageConfig creates storage config from defaults.
+func NewStorageConfig() *conf.StorageConfig {
+	return conf.DefaultStorageConfig()
+}
+
+// NewStorageInterface creates the appropriate Storage implementation based on
+// StorageConfig.Type. It always creates LocalStorage; for "s3" type it also
+// creates S3Storage; for "hybrid" type it creates HybridStorage with async sync.
+func NewStorageInterface(
+	local *dal.LocalStorage,
+	sp *conf.StoragePaths,
+	cfg *conf.StorageConfig,
+	logger log.Logger,
+) (biz2.Storage, func(), error) {
+	switch cfg.Type {
+	case conf.StorageTypeS3:
+		s3Storage, err := dal.NewS3Storage(&cfg.S3, logger)
+		if err != nil {
+			return nil, func() {}, fmt.Errorf("create S3 storage: %w", err)
+		}
+		return s3Storage, func() {}, nil
+
+	case conf.StorageTypeHybrid:
+		s3Storage, err := dal.NewS3Storage(&cfg.S3, logger)
+		if err != nil {
+			return nil, func() {}, fmt.Errorf("create S3 storage for hybrid: %w", err)
+		}
+		hs := dal.NewHybridStorage(local, s3Storage, sp, cfg.Hybrid, logger)
+		return hs, func() { hs.Close() }, nil
+
+	case conf.StorageTypeLocal:
+		fallthrough
+	default:
+		return local, func() {}, nil
+	}
+}
+
+// NewUploadConfig creates upload config from defaults.
+func NewUploadConfig() *conf.UploadConfig {
+	return conf.DefaultUploadConfig()
+}
+
+// NewStoragePaths creates StoragePaths from UploadConfig.
+func NewStoragePaths(cfg *conf.UploadConfig) *conf.StoragePaths {
+	return conf.NewStoragePaths(cfg.StorageBasePath)
+}
+
+// NewTranscodeConfig creates transcode config from defaults.
+func NewTranscodeConfig() *conf.TranscodeConfig {
+	return conf.DefaultTranscodeConfig()
 }
 
 // NewWorker creates a new transcode worker with config from environment.
@@ -229,7 +291,7 @@ func NewWorker(logger log2.Logger) biz2.TranscodeWorker {
 	return biz2.NewGoroutineWorker(maxWorkers, log2.NewHelper(log2.With(logger, "module", "transcode.worker")))
 }
 
-// NewUploadUseCase creates a new upload use case with hardcoded chunk size.
+// NewUploadUseCase creates a new upload use case with config from UploadConfig.
 func NewUploadUseCase(
 	uploadRepo biz2.UploadRepo,
 	mediaRepo biz2.MediaRepo,
@@ -237,6 +299,8 @@ func NewUploadUseCase(
 	taskRepo biz2.EncodingTaskRepo,
 	mediaUC *biz2.MediaUseCase,
 	storage biz2.Storage,
+	sp *conf.StoragePaths,
+	cfg *conf.UploadConfig,
 	logger log2.Logger,
 ) *biz2.UploadUseCase {
 	return biz2.NewUploadUseCase(
@@ -246,21 +310,23 @@ func NewUploadUseCase(
 		taskRepo,
 		mediaUC,
 		storage,
-		5*1024*1024,
+		sp,
+		cfg.ChunkSize,
 		logger,
 	)
 }
 
-// NewSpriteUseCase creates a new sprite use case with hardcoded base directory.
+// NewSpriteUseCase creates a new sprite use case with paths from StoragePaths.
 func NewSpriteUseCase(
 	mediaRepo biz2.MediaRepo,
 	settingUC *biz.SettingUseCase,
+	sp *conf.StoragePaths,
 	logger log2.Logger,
 ) *biz2.SpriteUseCase {
-	return biz2.NewSpriteUseCase(mediaRepo, settingUC, "./data/uploads", logger)
+	return biz2.NewSpriteUseCase(mediaRepo, settingUC, sp, logger)
 }
 
-// NewTranscodeHandler creates a new transcode handler with hardcoded config values.
+// NewTranscodeHandler creates a new transcode handler with paths from StoragePaths.
 func NewTranscodeHandler(
 	mediaUC *biz2.MediaUseCase,
 	profileRepo biz2.EncodeProfileRepo,
@@ -269,6 +335,8 @@ func NewTranscodeHandler(
 	worker biz2.TranscodeWorker,
 	publisher message.Publisher,
 	logger log2.Logger,
+	sp *conf.StoragePaths,
+	cfg *conf.TranscodeConfig,
 	spriteUC *biz2.SpriteUseCase,
 ) *biz2.TranscodeHandler {
 	return biz2.NewTranscodeHandler(
@@ -279,8 +347,8 @@ func NewTranscodeHandler(
 		worker,
 		publisher,
 		logger,
-		"./data/uploads",
-		30*time.Minute,
+		sp,
+		cfg.TaskTimeout,
 		spriteUC,
 	)
 }
@@ -492,8 +560,8 @@ func NewStubHandler(jwt *auth2.Manager) *contentservice.StubHandler {
 }
 
 // NewSpriteHandler creates a new sprite handler for sprite sheet and VTT routes.
-func NewSpriteHandler(mediaUC *biz2.MediaUseCase, jwt *auth2.Manager, logger log2.Logger) *contentservice.SpriteHandler {
-	return contentservice.NewSpriteHandler(mediaUC, "./data/uploads", jwt, logger)
+func NewSpriteHandler(mediaUC *biz2.MediaUseCase, sp *conf.StoragePaths, jwt *auth2.Manager, logger log2.Logger) *contentservice.SpriteHandler {
+	return contentservice.NewSpriteHandler(mediaUC, sp, jwt, logger)
 }
 
 // AppDependencies holds all application dependencies.
@@ -502,6 +570,8 @@ type AppDependencies struct {
 	PubSub                   *pubsub.PubSub
 	Router                   *message.Router
 	JWTManager               *auth2.Manager
+	StoragePaths             *conf.StoragePaths
+	StorageCleanup           func()
 	AuthHandler              *authservice.AuthHandler
 	PermissionHandler        *authservice.PermissionHandler
 	UserHandler              *userservice.UserHandler
@@ -533,6 +603,9 @@ type AppDependencies struct {
 
 // Cleanup closes all resources.
 func (d *AppDependencies) Cleanup() {
+	if d.StorageCleanup != nil {
+		d.StorageCleanup()
+	}
 	if d.DB != nil {
 		d.DB.Close()
 	}

@@ -18,6 +18,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/uuid"
 
+	"origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/helpers/ffmpeg"
 	"origadmin/application/origcms/internal/infra/pubsub"
@@ -46,12 +47,13 @@ type UploadUseCase struct {
 	mediaUseCase *MediaUseCase
 	storage      Storage
 	publisher    message.Publisher // Watermill publisher for async encoding
+	paths        *conf.StoragePaths
 	chunkSize    int
 	log          *log.Helper
 	mu           sync.Mutex
 }
 
-// NewUploadUseCase .
+// NewUploadUseCase creates a new upload use case.
 func NewUploadUseCase(
 	repo UploadRepo,
 	mediaRepo MediaRepo,
@@ -59,6 +61,7 @@ func NewUploadUseCase(
 	encodingRepo dto.EncodingTaskRepo,
 	mediaUseCase *MediaUseCase,
 	storage Storage,
+	paths *conf.StoragePaths,
 	chunkSize int,
 	logger log.Logger,
 ) *UploadUseCase {
@@ -69,6 +72,7 @@ func NewUploadUseCase(
 		encodingRepo: encodingRepo,
 		mediaUseCase: mediaUseCase,
 		storage:      storage,
+		paths:        paths,
 		chunkSize:    chunkSize,
 		log:          log.NewHelper(log.With(logger, "module", "upload.biz")),
 	}
@@ -138,6 +142,15 @@ func (uc *UploadUseCase) UploadPart(
 	if session.Status == StatusCompleted || session.Status == StatusAborted {
 		return "", fmt.Errorf("upload session %s is already %s", uploadID, session.Status)
 	}
+
+	// Determine userID for path generation; fallback to "_system" if unknown
+	userID := "_system"
+	if session.UserID != nil && *session.UserID != "" {
+		userID = *session.UserID
+	}
+
+	// Inject userID into context so LocalStorage can use it for path generation
+	ctx = ContextWithUserID(ctx, userID)
 
 	etag, err := uc.storage.StorePart(ctx, uploadID, partNumber, data)
 	if err != nil {
@@ -215,9 +228,22 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 		)
 	}
 
-	// Define final path (should be configurable)
+	// Define final path using StoragePaths with user isolation and date sharding
 	ext := filepath.Ext(session.Filename)
-	finalPath := fmt.Sprintf("%s%s", uploadID, ext)
+	filename := fmt.Sprintf("%s%s", uploadID, ext)
+
+	// Determine userID for path generation; fallback to "_system" if unknown
+	userID := "_system"
+	if session.UserID != nil && *session.UserID != "" {
+		userID = *session.UserID
+	}
+
+	// Generate relative path for DB storage: temp/{userID}/{yyyy}/{MM}/{filename}
+	// File is first merged to temp, then promoted to originals after transcoding
+	finalPath := uc.paths.RelativeTemp(userID, filename)
+
+	// Inject userID into context so LocalStorage can use it for path generation
+	ctx = ContextWithUserID(ctx, userID)
 
 	if err := uc.storage.MergeParts(ctx, uploadID, session.TotalParts, finalPath); err != nil {
 		return nil, err
@@ -248,9 +274,7 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 	// Extract duration if it's a video
 	var duration time.Duration
 	if strings.Contains(session.ContentType, "video") {
-		// Use storage base path from config
-		baseDir := "./data/uploads" // TODO: Get from config
-		fullPath := filepath.Join(baseDir, finalPath)
+		fullPath := uc.paths.FullPath(finalPath)
 		if d, err := ffmpeg.GetVideoDuration(ctx, fullPath); err == nil {
 			duration = d
 		} else {
@@ -361,6 +385,46 @@ func (uc *UploadUseCase) CleanupExpiredSessions(ctx context.Context) error {
 		_ = uc.storage.DeleteParts(ctx, id)
 	}
 
+	return nil
+}
+
+// CleanupExpiredTemp removes temp directories for failed/expired transcodes.
+// It queries media records whose URL starts with "temp/" and whose create_time
+// is older than the configured TTL, then deletes the temp files and marks the
+// media encoding status as failed. Called periodically by a cron job.
+func (uc *UploadUseCase) CleanupExpiredTemp(ctx context.Context, ttl time.Duration) error {
+	if ttl <= 0 {
+		ttl = 48 * time.Hour
+	}
+	cutoff := time.Now().Add(-ttl)
+
+	uc.log.Infof("running cleanup of expired temp files (TTL=%s, cutoff=%s)", ttl, cutoff.Format(time.RFC3339))
+
+	medias, err := uc.mediaRepo.ListTempMediaBefore(ctx, cutoff)
+	if err != nil {
+		return fmt.Errorf("list temp media: %w", err)
+	}
+
+	cleaned := 0
+	for _, m := range medias {
+		if !strings.HasPrefix(m.Url, "temp/") {
+			continue
+		}
+		if err := uc.storage.Delete(ctx, m.Url); err != nil {
+			uc.log.Warnf("failed to delete temp file %s for media %s: %v", m.Url, m.Id, err)
+			continue
+		}
+
+		// Mark media as failed since it was never successfully transcoded
+		m.EncodingStatus = string(enums.MediaEncodingStatusFailed)
+		if _, err := uc.mediaRepo.Update(ctx, m); err != nil {
+			uc.log.Warnf("failed to update media %s status after temp cleanup: %v", m.Id, err)
+		}
+		cleaned++
+		uc.log.Infof("cleaned up expired temp file for media %s: %s", m.Id, m.Url)
+	}
+
+	uc.log.Infof("temp cleanup completed: %d files cleaned", cleaned)
 	return nil
 }
 

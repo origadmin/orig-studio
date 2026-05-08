@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -19,6 +20,7 @@ import (
 	"origadmin/application/origcms/api/gen/v1/types"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/features/media/dto"
 )
 
@@ -155,6 +157,25 @@ func (s *MockStorage) DeleteParts(ctx context.Context, uploadID string) error {
 	delete(s.parts, uploadID)
 	s.deleteAll = true
 	return nil
+}
+
+func (s *MockStorage) PromoteToOriginal(ctx context.Context, tempPath string) (string, error) {
+	if data, ok := s.files[tempPath]; ok {
+		originalPath := "originals/" + tempPath[5:]
+		s.files[originalPath] = data
+		delete(s.files, tempPath)
+		return originalPath, nil
+	}
+	return "", fmt.Errorf("temp file not found: %s", tempPath)
+}
+
+func (s *MockStorage) CleanupTempParts(ctx context.Context, userID, uploadID string) error {
+	delete(s.parts, uploadID)
+	return nil
+}
+
+func (s *MockStorage) SyncStatus(ctx context.Context, key string) (enums.SyncStatus, error) {
+	return enums.SyncStatusLocalOnly, nil
 }
 
 // MockMediaRepo 模拟媒体仓库
@@ -307,6 +328,16 @@ func (r *MockMediaRepo) UpdateDimensions(ctx context.Context, mediaID string, wi
 	return nil
 }
 
+func (r *MockMediaRepo) ListTempMediaBefore(ctx context.Context, cutoff time.Time) ([]*Media, error) {
+	var result []*Media
+	for _, m := range r.media {
+		if strings.HasPrefix(m.Url, "temp/") {
+			result = append(result, m)
+		}
+	}
+	return result, nil
+}
+
 // MockEncodeProfileRepo 模拟编码配置仓库
 type MockEncodeProfileRepo struct {
 	profiles map[int]*dto.EncodeProfile
@@ -436,7 +467,8 @@ func TestUploadUseCase_InitiateMultipartUpload(t *testing.T) {
 	encodingRepo := NewMockEncodingTaskRepo()
 	storage := NewMockStorage()
 	logger := log.NewStdLogger(os.Stdout)
-	
+	testPaths := conf.NewStoragePaths(t.TempDir())
+
 	uc := NewUploadUseCase(
 		repo,
 		mediaRepo,
@@ -444,6 +476,7 @@ func TestUploadUseCase_InitiateMultipartUpload(t *testing.T) {
 		encodingRepo,
 		nil,
 		storage,
+		testPaths,
 		5*1024*1024, // 5MB
 		logger,
 	)
@@ -478,7 +511,8 @@ func TestUploadUseCase_UploadPart(t *testing.T) {
 	encodingRepo := NewMockEncodingTaskRepo()
 	storage := NewMockStorage()
 	logger := log.NewStdLogger(os.Stdout)
-	
+	testPaths := conf.NewStoragePaths(t.TempDir())
+
 	uc := NewUploadUseCase(
 		repo,
 		mediaRepo,
@@ -486,6 +520,7 @@ func TestUploadUseCase_UploadPart(t *testing.T) {
 		encodingRepo,
 		nil,
 		storage,
+		testPaths,
 		5*1024*1024, // 5MB
 		logger,
 	)
@@ -531,7 +566,8 @@ func TestUploadUseCase_CompleteMultipartUpload(t *testing.T) {
 	encodingRepo := NewMockEncodingTaskRepo()
 	storage := NewMockStorage()
 	logger := log.NewStdLogger(os.Stdout)
-	
+	testPaths := conf.NewStoragePaths(t.TempDir())
+
 	uc := NewUploadUseCase(
 		repo,
 		mediaRepo,
@@ -539,6 +575,7 @@ func TestUploadUseCase_CompleteMultipartUpload(t *testing.T) {
 		encodingRepo,
 		nil,
 		storage,
+		testPaths,
 		5*1024*1024, // 5MB
 		logger,
 	)
@@ -584,11 +621,11 @@ func TestUploadUseCase_CompleteMultipartUpload(t *testing.T) {
 	assert.Equal(t, "Test Video", media.Title)
 	assert.Equal(t, "Test Description", media.Description)
 	assert.Equal(t, "video/mp4", media.MimeType)
-	
-	// 验证文件合并
-	assert.Contains(t, storage.files, session.UploadID+".mp4")
-	
-	// 验证临时分片删除
+
+	// Verify file was merged with the new path format (temp/{userID}/{yyyy}/{MM}/{uploadID}.mp4)
+	assert.NotEmpty(t, storage.files)
+
+	// Verify temp parts deleted
 	assert.True(t, storage.deleteAll)
 	
 	// 验证会话状态更新
@@ -596,4 +633,180 @@ func TestUploadUseCase_CompleteMultipartUpload(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, StatusCompleted, updatedSession.Status)
 	assert.Equal(t, "sha256hash", updatedSession.Sha256)
+}
+
+func TestUploadUseCase_UpdateUploadMetadata(t *testing.T) {
+	repo := NewMockUploadRepo()
+	mediaRepo := NewMockMediaRepo()
+	profileRepo := NewMockEncodeProfileRepo()
+	encodingRepo := NewMockEncodingTaskRepo()
+	storage := NewMockStorage()
+	logger := log.NewStdLogger(os.Stdout)
+	testPaths := conf.NewStoragePaths(t.TempDir())
+
+	uc := NewUploadUseCase(
+		repo,
+		mediaRepo,
+		profileRepo,
+		encodingRepo,
+		nil,
+		storage,
+		testPaths,
+		5*1024*1024,
+		logger,
+	)
+
+	ctx := context.Background()
+
+	session, err := uc.InitiateMultipartUpload(
+		ctx,
+		"test.mp4",
+		10*1024*1024,
+		"video/mp4",
+		"Original Title",
+		"Original Description",
+		nil,
+		[]string{"tag1"},
+		"",
+		nil,
+	)
+	assert.NoError(t, err)
+
+	err = uc.UpdateUploadMetadata(
+		ctx,
+		session.UploadID,
+		"Updated Title #tag2 #tag3",
+		"Updated Description #tag4",
+		nil,
+		[]string{"tag1", "tag5"},
+		"",
+	)
+	assert.NoError(t, err)
+
+	updatedSession, err := repo.GetSession(ctx, session.UploadID)
+	assert.NoError(t, err)
+	assert.Equal(t, "Updated Title #tag2 #tag3", updatedSession.Title)
+	assert.Equal(t, "Updated Description #tag4", updatedSession.Description)
+	assert.Equal(t, []string{"tag1", "tag5"}, updatedSession.Tags)
+}
+
+func TestUploadUseCase_CompleteMultipartUpload_FallbackToSession(t *testing.T) {
+	repo := NewMockUploadRepo()
+	mediaRepo := NewMockMediaRepo()
+	profileRepo := NewMockEncodeProfileRepo()
+	encodingRepo := NewMockEncodingTaskRepo()
+	storage := NewMockStorage()
+	logger := log.NewStdLogger(os.Stdout)
+	testPaths := conf.NewStoragePaths(t.TempDir())
+
+	uc := NewUploadUseCase(
+		repo,
+		mediaRepo,
+		profileRepo,
+		encodingRepo,
+		nil,
+		storage,
+		testPaths,
+		5*1024*1024,
+		logger,
+	)
+
+	ctx := context.Background()
+
+	session, err := uc.InitiateMultipartUpload(
+		ctx,
+		"test.mp4",
+		10*1024*1024,
+		"video/mp4",
+		"Session Title #tag1 #tag2",
+		"Session Description",
+		nil,
+		[]string{"tag1", "tag2"},
+		"",
+		nil,
+	)
+	assert.NoError(t, err)
+
+	data := make([]byte, 5*1024*1024)
+	_, err = uc.UploadPart(ctx, session.UploadID, 1, data)
+	assert.NoError(t, err)
+	_, err = uc.UploadPart(ctx, session.UploadID, 2, data)
+	assert.NoError(t, err)
+
+	media, err := uc.CompleteMultipartUpload(
+		ctx,
+		session.UploadID,
+		"",
+		"",
+		"",
+		nil,
+		nil,
+		"",
+	)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, media)
+	assert.Equal(t, "Session Title #tag1 #tag2", media.Title)
+	assert.Equal(t, "Session Description", media.Description)
+	assert.Equal(t, []string{"tag1", "tag2"}, media.Tags)
+}
+
+func TestUploadUseCase_CompleteMultipartUpload_OverrideWithTags(t *testing.T) {
+	repo := NewMockUploadRepo()
+	mediaRepo := NewMockMediaRepo()
+	profileRepo := NewMockEncodeProfileRepo()
+	encodingRepo := NewMockEncodingTaskRepo()
+	storage := NewMockStorage()
+	logger := log.NewStdLogger(os.Stdout)
+	testPaths := conf.NewStoragePaths(t.TempDir())
+
+	uc := NewUploadUseCase(
+		repo,
+		mediaRepo,
+		profileRepo,
+		encodingRepo,
+		nil,
+		storage,
+		testPaths,
+		5*1024*1024,
+		logger,
+	)
+
+	ctx := context.Background()
+
+	session, err := uc.InitiateMultipartUpload(
+		ctx,
+		"test.mp4",
+		10*1024*1024,
+		"video/mp4",
+		"Original Title",
+		"",
+		nil,
+		[]string{"old_tag"},
+		"",
+		nil,
+	)
+	assert.NoError(t, err)
+
+	data := make([]byte, 5*1024*1024)
+	_, err = uc.UploadPart(ctx, session.UploadID, 1, data)
+	assert.NoError(t, err)
+	_, err = uc.UploadPart(ctx, session.UploadID, 2, data)
+	assert.NoError(t, err)
+
+	media, err := uc.CompleteMultipartUpload(
+		ctx,
+		session.UploadID,
+		"",
+		"New Title #tag1 #tag2 #tag3",
+		"New Description",
+		nil,
+		[]string{"tag1", "tag2", "tag3"},
+		"",
+	)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, media)
+	assert.Equal(t, "New Title #tag1 #tag2 #tag3", media.Title)
+	assert.Equal(t, []string{"tag1", "tag2", "tag3"}, media.Tags)
 }

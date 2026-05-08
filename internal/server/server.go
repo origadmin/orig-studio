@@ -8,13 +8,13 @@ package server
 import (
 	"mime"
 	"os"
-	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/origadmin/runtime/log"
 	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
+	"origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/web"
@@ -28,10 +28,10 @@ type Module = http2.Module
 
 // Server represents the application server.
 type Server struct {
-	modules         []Module
-	entityClient    *entity.Client
-	jwtMgr          *auth.Manager
-	storageBasePath string // base directory for static file serving (resolved to absolute path)
+	modules      []Module
+	entityClient *entity.Client
+	jwtMgr       *auth.Manager
+	paths        *conf.StoragePaths
 }
 
 // NewServer creates a new server instance.
@@ -39,13 +39,13 @@ func NewServer(
 	modules []Module,
 	entityClient *entity.Client,
 	jwtMgr *auth.Manager,
-	storageBasePath string,
+	paths *conf.StoragePaths,
 ) *Server {
 	return &Server{
-		modules:         modules,
-		entityClient:    entityClient,
-		jwtMgr:          jwtMgr,
-		storageBasePath: storageBasePath,
+		modules:      modules,
+		entityClient: entityClient,
+		jwtMgr:       jwtMgr,
+		paths:        paths,
 	}
 }
 
@@ -77,26 +77,13 @@ func (s *Server) Start(addr string) error {
 		c.Next()
 	})
 
-	// Resolve storage base path to absolute path to avoid working directory dependency.
-	// When the server is started from a different directory (e.g., framework root
-	// instead of project root), relative paths like "./data/uploads/hls" would
-	// resolve incorrectly, causing 404 errors for static file requests.
-	storageBase := s.storageBasePath
-	if storageBase == "" {
-		storageBase = "./data/uploads"
-	}
-	absStorageBase, err := filepath.Abs(storageBase)
-	if err != nil {
-		log.Warnf("failed to resolve storage base path %q: %v, using as-is", storageBase, err)
-		absStorageBase = storageBase
-	}
-	log.Infof("static file storage base: %s (resolved to %s)", storageBase, absStorageBase)
+	// Register static file routes using StoragePaths
+	absBase := s.paths.BasePath()
+	log.Infof("static file storage base: %s", absBase)
 
-	// Static files for media uploads — use absolute paths
-	r.Static("/uploads", filepath.Join(absStorageBase, "uploads"))
-	r.Static("/thumbnails", filepath.Join(absStorageBase, "thumbnails"))
-	r.Static("/hls", filepath.Join(absStorageBase, "hls"))
-	r.Static("/sprites", filepath.Join(absStorageBase, "sprites"))
+	for urlPrefix, fsDir := range s.paths.StaticRouteMap() {
+		r.Static(urlPrefix, fsDir)
+	}
 
 	// Register all module routes
 	s.RegisterRoutes(r)

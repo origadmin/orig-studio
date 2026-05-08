@@ -345,6 +345,7 @@ export const mediaApi = {
         type?: string;
         category_id?: number;
         keyword?: string;
+        tags?: string;
         user_id?: string;
         state?: string;
         featured?: string;

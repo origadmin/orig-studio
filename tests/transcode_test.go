@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/features/media/biz"
 	"origadmin/application/origcms/internal/features/media/dal"
 )
@@ -184,6 +185,8 @@ func TestTranscode_Success(t *testing.T) {
 		nil,
 	)
 	
+	testPaths := conf.NewStoragePaths(t.TempDir())
+	
 	transcodeHandler := biz.NewTranscodeHandler(
 		mediaUC,
 		profileRepo,
@@ -192,7 +195,7 @@ func TestTranscode_Success(t *testing.T) {
 		mockWorker,
 		nil,
 		log.NewStdLogger(),
-		"./data/uploads",
+		testPaths,
 		30*time.Minute,
 		nil,
 	)
@@ -253,6 +256,7 @@ func TestTranscode_Failure(t *testing.T) {
 	mediaRepo := dal.NewInMemoryMediaRepo()
 	profileRepo := dal.NewInMemoryEncodeProfileRepo()
 	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
+	testPaths := conf.NewStoragePaths(t.TempDir())
 	
 	// Create test profiles
 	createTestProfiles(t, profileRepo)
@@ -280,7 +284,7 @@ func TestTranscode_Failure(t *testing.T) {
 			mockWorker,
 			nil,
 			log.NewStdLogger(),
-			"./data/uploads",
+			testPaths,
 			30*time.Minute,
 			nil,
 		)
@@ -355,7 +359,7 @@ func TestTranscode_Failure(t *testing.T) {
 			mockWorker,
 			nil,
 			log.NewStdLogger(),
-			"./data/uploads",
+			testPaths,
 			30*time.Minute,
 			nil,
 		)
@@ -414,6 +418,7 @@ func TestTranscode_Retry(t *testing.T) {
 	mediaRepo := dal.NewInMemoryMediaRepo()
 	profileRepo := dal.NewInMemoryEncodeProfileRepo()
 	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
+	testPaths := conf.NewStoragePaths(t.TempDir())
 	
 	// Create test profiles
 	createTestProfiles(t, profileRepo)
@@ -471,7 +476,7 @@ func TestTranscode_Retry(t *testing.T) {
 			mockWorker,
 			nil,
 			log.NewStdLogger(),
-			"./data/uploads",
+			testPaths,
 			30*time.Minute,
 			nil,
 		)
@@ -508,6 +513,7 @@ func TestTranscode_DifferentProfileTypes(t *testing.T) {
 	profileRepo := dal.NewInMemoryEncodeProfileRepo()
 	encodingRepo := dal.NewInMemoryEncodingTaskRepo()
 	mockWorker := NewMockTranscodeWorker()
+	testPaths := conf.NewStoragePaths(t.TempDir())
 	
 	// Create test profiles including preview and frames
 	createTestProfilesWithPreviewAndFrames(t, profileRepo)
@@ -531,7 +537,7 @@ func TestTranscode_DifferentProfileTypes(t *testing.T) {
 		mockWorker,
 		nil,
 		log.NewStdLogger(),
-		"./data/uploads",
+		testPaths,
 		30*time.Minute,
 		nil,
 	)

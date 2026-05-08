@@ -245,6 +245,16 @@ func ThumbnailTime(v float64) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldThumbnailTime, v))
 }
 
+// SyncStatus applies equality check predicate on the "sync_status" field. It's identical to SyncStatusEQ.
+func SyncStatus(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldSyncStatus, v))
+}
+
+// SyncedAt applies equality check predicate on the "synced_at" field. It's identical to SyncedAtEQ.
+func SyncedAt(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldSyncedAt, v))
+}
+
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v string) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldUserID, v))
@@ -2263,6 +2273,131 @@ func TagsIsNil() predicate.Media {
 // TagsNotNil applies the NotNil predicate on the "tags" field.
 func TagsNotNil() predicate.Media {
 	return predicate.Media(sql.FieldNotNull(FieldTags))
+}
+
+// SyncStatusEQ applies the EQ predicate on the "sync_status" field.
+func SyncStatusEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldSyncStatus, v))
+}
+
+// SyncStatusNEQ applies the NEQ predicate on the "sync_status" field.
+func SyncStatusNEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldSyncStatus, v))
+}
+
+// SyncStatusIn applies the In predicate on the "sync_status" field.
+func SyncStatusIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldSyncStatus, vs...))
+}
+
+// SyncStatusNotIn applies the NotIn predicate on the "sync_status" field.
+func SyncStatusNotIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldSyncStatus, vs...))
+}
+
+// SyncStatusGT applies the GT predicate on the "sync_status" field.
+func SyncStatusGT(v string) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldSyncStatus, v))
+}
+
+// SyncStatusGTE applies the GTE predicate on the "sync_status" field.
+func SyncStatusGTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldSyncStatus, v))
+}
+
+// SyncStatusLT applies the LT predicate on the "sync_status" field.
+func SyncStatusLT(v string) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldSyncStatus, v))
+}
+
+// SyncStatusLTE applies the LTE predicate on the "sync_status" field.
+func SyncStatusLTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldSyncStatus, v))
+}
+
+// SyncStatusContains applies the Contains predicate on the "sync_status" field.
+func SyncStatusContains(v string) predicate.Media {
+	return predicate.Media(sql.FieldContains(FieldSyncStatus, v))
+}
+
+// SyncStatusHasPrefix applies the HasPrefix predicate on the "sync_status" field.
+func SyncStatusHasPrefix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasPrefix(FieldSyncStatus, v))
+}
+
+// SyncStatusHasSuffix applies the HasSuffix predicate on the "sync_status" field.
+func SyncStatusHasSuffix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasSuffix(FieldSyncStatus, v))
+}
+
+// SyncStatusIsNil applies the IsNil predicate on the "sync_status" field.
+func SyncStatusIsNil() predicate.Media {
+	return predicate.Media(sql.FieldIsNull(FieldSyncStatus))
+}
+
+// SyncStatusNotNil applies the NotNil predicate on the "sync_status" field.
+func SyncStatusNotNil() predicate.Media {
+	return predicate.Media(sql.FieldNotNull(FieldSyncStatus))
+}
+
+// SyncStatusEqualFold applies the EqualFold predicate on the "sync_status" field.
+func SyncStatusEqualFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldSyncStatus, v))
+}
+
+// SyncStatusContainsFold applies the ContainsFold predicate on the "sync_status" field.
+func SyncStatusContainsFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldSyncStatus, v))
+}
+
+// SyncedAtEQ applies the EQ predicate on the "synced_at" field.
+func SyncedAtEQ(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldSyncedAt, v))
+}
+
+// SyncedAtNEQ applies the NEQ predicate on the "synced_at" field.
+func SyncedAtNEQ(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldSyncedAt, v))
+}
+
+// SyncedAtIn applies the In predicate on the "synced_at" field.
+func SyncedAtIn(vs ...time.Time) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldSyncedAt, vs...))
+}
+
+// SyncedAtNotIn applies the NotIn predicate on the "synced_at" field.
+func SyncedAtNotIn(vs ...time.Time) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldSyncedAt, vs...))
+}
+
+// SyncedAtGT applies the GT predicate on the "synced_at" field.
+func SyncedAtGT(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldSyncedAt, v))
+}
+
+// SyncedAtGTE applies the GTE predicate on the "synced_at" field.
+func SyncedAtGTE(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldSyncedAt, v))
+}
+
+// SyncedAtLT applies the LT predicate on the "synced_at" field.
+func SyncedAtLT(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldSyncedAt, v))
+}
+
+// SyncedAtLTE applies the LTE predicate on the "synced_at" field.
+func SyncedAtLTE(v time.Time) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldSyncedAt, v))
+}
+
+// SyncedAtIsNil applies the IsNil predicate on the "synced_at" field.
+func SyncedAtIsNil() predicate.Media {
+	return predicate.Media(sql.FieldIsNull(FieldSyncedAt))
+}
+
+// SyncedAtNotNil applies the NotNil predicate on the "synced_at" field.
+func SyncedAtNotNil() predicate.Media {
+	return predicate.Media(sql.FieldNotNull(FieldSyncedAt))
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.

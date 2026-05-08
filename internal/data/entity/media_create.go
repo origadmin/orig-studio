@@ -538,6 +538,34 @@ func (_c *MediaCreate) SetTags(v []string) *MediaCreate {
 	return _c
 }
 
+// SetSyncStatus sets the "sync_status" field.
+func (_c *MediaCreate) SetSyncStatus(v string) *MediaCreate {
+	_c.mutation.SetSyncStatus(v)
+	return _c
+}
+
+// SetNillableSyncStatus sets the "sync_status" field if the given value is not nil.
+func (_c *MediaCreate) SetNillableSyncStatus(v *string) *MediaCreate {
+	if v != nil {
+		_c.SetSyncStatus(*v)
+	}
+	return _c
+}
+
+// SetSyncedAt sets the "synced_at" field.
+func (_c *MediaCreate) SetSyncedAt(v time.Time) *MediaCreate {
+	_c.mutation.SetSyncedAt(v)
+	return _c
+}
+
+// SetNillableSyncedAt sets the "synced_at" field if the given value is not nil.
+func (_c *MediaCreate) SetNillableSyncedAt(v *time.Time) *MediaCreate {
+	if v != nil {
+		_c.SetSyncedAt(*v)
+	}
+	return _c
+}
+
 // SetUserID sets the "user_id" field.
 func (_c *MediaCreate) SetUserID(v string) *MediaCreate {
 	_c.mutation.SetUserID(v)
@@ -899,6 +927,10 @@ func (_c *MediaCreate) defaults() {
 		v := media.DefaultSpriteStatus
 		_c.mutation.SetSpriteStatus(v)
 	}
+	if _, ok := _c.mutation.SyncStatus(); !ok {
+		v := media.DefaultSyncStatus
+		_c.mutation.SetSyncStatus(v)
+	}
 	if _, ok := _c.mutation.CreateTime(); !ok {
 		v := media.DefaultCreateTime()
 		_c.mutation.SetCreateTime(v)
@@ -1093,6 +1125,11 @@ func (_c *MediaCreate) check() error {
 	if v, ok := _c.mutation.VttPath(); ok {
 		if err := media.VttPathValidator(v); err != nil {
 			return &ValidationError{Name: "vtt_path", err: fmt.Errorf(`entity: validator failed for field "Media.vtt_path": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.SyncStatus(); ok {
+		if err := media.SyncStatusValidator(v); err != nil {
+			return &ValidationError{Name: "sync_status", err: fmt.Errorf(`entity: validator failed for field "Media.sync_status": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
@@ -1304,6 +1341,14 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Tags(); ok {
 		_spec.SetField(media.FieldTags, field.TypeJSON, value)
 		_node.Tags = value
+	}
+	if value, ok := _c.mutation.SyncStatus(); ok {
+		_spec.SetField(media.FieldSyncStatus, field.TypeString, value)
+		_node.SyncStatus = value
+	}
+	if value, ok := _c.mutation.SyncedAt(); ok {
+		_spec.SetField(media.FieldSyncedAt, field.TypeTime, value)
+		_node.SyncedAt = &value
 	}
 	if value, ok := _c.mutation.PublishedAt(); ok {
 		_spec.SetField(media.FieldPublishedAt, field.TypeTime, value)

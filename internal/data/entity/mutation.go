@@ -13190,6 +13190,8 @@ type MediaMutation struct {
 	addthumbnail_time  *float64
 	tags               *[]string
 	appendtags         []string
+	sync_status        *string
+	synced_at          *time.Time
 	published_at       *time.Time
 	create_time        *time.Time
 	update_time        *time.Time
@@ -15139,6 +15141,104 @@ func (m *MediaMutation) ResetTags() {
 	delete(m.clearedFields, media.FieldTags)
 }
 
+// SetSyncStatus sets the "sync_status" field.
+func (m *MediaMutation) SetSyncStatus(s string) {
+	m.sync_status = &s
+}
+
+// SyncStatus returns the value of the "sync_status" field in the mutation.
+func (m *MediaMutation) SyncStatus() (r string, exists bool) {
+	v := m.sync_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSyncStatus returns the old "sync_status" field's value of the Media entity.
+// If the Media object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaMutation) OldSyncStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSyncStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSyncStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSyncStatus: %w", err)
+	}
+	return oldValue.SyncStatus, nil
+}
+
+// ClearSyncStatus clears the value of the "sync_status" field.
+func (m *MediaMutation) ClearSyncStatus() {
+	m.sync_status = nil
+	m.clearedFields[media.FieldSyncStatus] = struct{}{}
+}
+
+// SyncStatusCleared returns if the "sync_status" field was cleared in this mutation.
+func (m *MediaMutation) SyncStatusCleared() bool {
+	_, ok := m.clearedFields[media.FieldSyncStatus]
+	return ok
+}
+
+// ResetSyncStatus resets all changes to the "sync_status" field.
+func (m *MediaMutation) ResetSyncStatus() {
+	m.sync_status = nil
+	delete(m.clearedFields, media.FieldSyncStatus)
+}
+
+// SetSyncedAt sets the "synced_at" field.
+func (m *MediaMutation) SetSyncedAt(t time.Time) {
+	m.synced_at = &t
+}
+
+// SyncedAt returns the value of the "synced_at" field in the mutation.
+func (m *MediaMutation) SyncedAt() (r time.Time, exists bool) {
+	v := m.synced_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSyncedAt returns the old "synced_at" field's value of the Media entity.
+// If the Media object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaMutation) OldSyncedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSyncedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSyncedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSyncedAt: %w", err)
+	}
+	return oldValue.SyncedAt, nil
+}
+
+// ClearSyncedAt clears the value of the "synced_at" field.
+func (m *MediaMutation) ClearSyncedAt() {
+	m.synced_at = nil
+	m.clearedFields[media.FieldSyncedAt] = struct{}{}
+}
+
+// SyncedAtCleared returns if the "synced_at" field was cleared in this mutation.
+func (m *MediaMutation) SyncedAtCleared() bool {
+	_, ok := m.clearedFields[media.FieldSyncedAt]
+	return ok
+}
+
+// ResetSyncedAt resets all changes to the "synced_at" field.
+func (m *MediaMutation) ResetSyncedAt() {
+	m.synced_at = nil
+	delete(m.clearedFields, media.FieldSyncedAt)
+}
+
 // SetUserID sets the "user_id" field.
 func (m *MediaMutation) SetUserID(s string) {
 	m.user = &s
@@ -15959,7 +16059,7 @@ func (m *MediaMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MediaMutation) Fields() []string {
-	fields := make([]string, 0, 46)
+	fields := make([]string, 0, 48)
 	if m.title != nil {
 		fields = append(fields, media.FieldTitle)
 	}
@@ -16074,6 +16174,12 @@ func (m *MediaMutation) Fields() []string {
 	if m.tags != nil {
 		fields = append(fields, media.FieldTags)
 	}
+	if m.sync_status != nil {
+		fields = append(fields, media.FieldSyncStatus)
+	}
+	if m.synced_at != nil {
+		fields = append(fields, media.FieldSyncedAt)
+	}
 	if m.user != nil {
 		fields = append(fields, media.FieldUserID)
 	}
@@ -16182,6 +16288,10 @@ func (m *MediaMutation) Field(name string) (ent.Value, bool) {
 		return m.ThumbnailTime()
 	case media.FieldTags:
 		return m.Tags()
+	case media.FieldSyncStatus:
+		return m.SyncStatus()
+	case media.FieldSyncedAt:
+		return m.SyncedAt()
 	case media.FieldUserID:
 		return m.UserID()
 	case media.FieldCategoryID:
@@ -16283,6 +16393,10 @@ func (m *MediaMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldThumbnailTime(ctx)
 	case media.FieldTags:
 		return m.OldTags(ctx)
+	case media.FieldSyncStatus:
+		return m.OldSyncStatus(ctx)
+	case media.FieldSyncedAt:
+		return m.OldSyncedAt(ctx)
 	case media.FieldUserID:
 		return m.OldUserID(ctx)
 	case media.FieldCategoryID:
@@ -16574,6 +16688,20 @@ func (m *MediaMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetTags(v)
 		return nil
+	case media.FieldSyncStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSyncStatus(v)
+		return nil
+	case media.FieldSyncedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSyncedAt(v)
+		return nil
 	case media.FieldUserID:
 		v, ok := value.(string)
 		if !ok {
@@ -16849,6 +16977,12 @@ func (m *MediaMutation) ClearedFields() []string {
 	if m.FieldCleared(media.FieldTags) {
 		fields = append(fields, media.FieldTags)
 	}
+	if m.FieldCleared(media.FieldSyncStatus) {
+		fields = append(fields, media.FieldSyncStatus)
+	}
+	if m.FieldCleared(media.FieldSyncedAt) {
+		fields = append(fields, media.FieldSyncedAt)
+	}
 	if m.FieldCleared(media.FieldCategoryID) {
 		fields = append(fields, media.FieldCategoryID)
 	}
@@ -16913,6 +17047,12 @@ func (m *MediaMutation) ClearField(name string) error {
 		return nil
 	case media.FieldTags:
 		m.ClearTags()
+		return nil
+	case media.FieldSyncStatus:
+		m.ClearSyncStatus()
+		return nil
+	case media.FieldSyncedAt:
+		m.ClearSyncedAt()
 		return nil
 	case media.FieldCategoryID:
 		m.ClearCategoryID()
@@ -17044,6 +17184,12 @@ func (m *MediaMutation) ResetField(name string) error {
 		return nil
 	case media.FieldTags:
 		m.ResetTags()
+		return nil
+	case media.FieldSyncStatus:
+		m.ResetSyncStatus()
+		return nil
+	case media.FieldSyncedAt:
+		m.ResetSyncedAt()
 		return nil
 	case media.FieldUserID:
 		m.ResetUserID()

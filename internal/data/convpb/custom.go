@@ -296,3 +296,35 @@ func ConvertUserToUserPBFull(from *User) *types.User {
 func ConvertMediaToMediaPBFull(from *Media) *types.Media {
 	return ConvertMediaToMediaPB(from)
 }
+
+// ConvertChannelStatusPBToChannelStatus converts a proto ChannelStatus to entity channel.Status.
+func ConvertChannelStatusPBToChannelStatus(from types.ChannelStatus) channel.Status {
+	switch from {
+	case types.ChannelStatus_CHANNEL_STATUS_ACTIVE:
+		return channel.StatusACTIVE
+	case types.ChannelStatus_CHANNEL_STATUS_INACTIVE:
+		return channel.StatusINACTIVE
+	case types.ChannelStatus_CHANNEL_STATUS_SUSPENDED:
+		return channel.StatusSUSPENDED
+	case types.ChannelStatus_CHANNEL_STATUS_PENDING_REVIEW:
+		return channel.StatusPENDING_REVIEW
+	default:
+		return channel.StatusACTIVE
+	}
+}
+
+// ConvertChannelStatusToChannelStatusPB converts an entity channel.Status to proto ChannelStatus.
+func ConvertChannelStatusToChannelStatusPB(from channel.Status) types.ChannelStatus {
+	switch from {
+	case channel.StatusACTIVE:
+		return types.ChannelStatus_CHANNEL_STATUS_ACTIVE
+	case channel.StatusINACTIVE:
+		return types.ChannelStatus_CHANNEL_STATUS_INACTIVE
+	case channel.StatusSUSPENDED:
+		return types.ChannelStatus_CHANNEL_STATUS_SUSPENDED
+	case channel.StatusPENDING_REVIEW:
+		return types.ChannelStatus_CHANNEL_STATUS_PENDING_REVIEW
+	default:
+		return types.ChannelStatus_CHANNEL_STATUS_ACTIVE
+	}
+}
