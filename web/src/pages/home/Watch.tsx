@@ -27,6 +27,8 @@ import CommentSection from '@/components/common/CommentSection';
 import InteractionBar from '@/components/common/InteractionBar';
 import VideoPlayer, {VideoPlayerHandle} from '@/components/common/VideoPlayer';
 import {DeleteConfirmDialog} from '@/components/common/DeleteConfirmDialog';
+import {HashtagText} from '@/components/common/HashtagText';
+import {colorFromName} from '@/lib/utils/tag-color';
 import {useWatchProgress} from '@/hooks/useWatchProgress';
 import {toast} from 'sonner';
 
@@ -231,7 +233,7 @@ const WatchPage = () => {
                 {/* Video Info */}
                 <div className="mt-6 space-y-4">
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white line-clamp-2">
-                        {media.title}
+                        <HashtagText text={media.title} />
                     </h1>
 
                     {(user && (String(user.id) === String(media.user_id) || isAdmin)) && (
@@ -324,12 +326,17 @@ const WatchPage = () => {
                                 <span>{formatViews(media.view_count)} {t('watch.views')}</span>
                                 <span>{formatDate(media.create_time)}</span>
                                 {media.tags?.map(tag => (
-                                    <span key={tag}
-                                          className="text-info dark:text-blue-400 cursor-pointer hover:underline">#{tag}</span>
+                                    <Link
+                                        key={tag}
+                                        to="/search"
+                                        search={{tag: tag}}
+                                        className="text-xs px-1.5 py-0.5 rounded-full cursor-pointer hover:opacity-80 transition-opacity"
+                                        style={{color: colorFromName(tag), backgroundColor: colorFromName(tag) + '15'}}
+                                    >#{tag}</Link>
                                 ))}
                             </div>
                             <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
-                                {media.description || t('watch.noDescription')}
+                                <HashtagText text={media.description || t('watch.noDescription')} />
                             </p>
                         </CardContent>
                     </Card>

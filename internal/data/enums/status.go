@@ -107,6 +107,46 @@ func ParseMediaEncodingStatus(from string) MediaEncodingStatus {
 	}
 }
 
+// SyncStatus represents the S3 sync status of a media file.
+type SyncStatus string
+
+const (
+	SyncStatusLocalOnly SyncStatus = "local_only"
+	SyncStatusSyncing   SyncStatus = "syncing"
+	SyncStatusSynced    SyncStatus = "synced"
+	SyncStatusFailed    SyncStatus = "failed"
+)
+
+// ParseSyncStatus parses sync status strings.
+func ParseSyncStatus(from string) SyncStatus {
+	switch strings.ToLower(from) {
+	case "local_only":
+		return SyncStatusLocalOnly
+	case "syncing":
+		return SyncStatusSyncing
+	case "synced":
+		return SyncStatusSynced
+	case "failed":
+		return SyncStatusFailed
+	default:
+		return SyncStatusLocalOnly
+	}
+}
+
+// Values returns all possible values for SyncStatus.
+func (SyncStatus) Values() []string {
+	return []string{
+		string(SyncStatusLocalOnly),
+		string(SyncStatusSyncing),
+		string(SyncStatusSynced),
+		string(SyncStatusFailed),
+	}
+}
+
+func (s SyncStatus) String() string {
+	return string(s)
+}
+
 // ParseStatus parses general status strings for enable/disable statuses
 func ParseStatus(from string) Status {
 	switch strings.ToLower(from) {

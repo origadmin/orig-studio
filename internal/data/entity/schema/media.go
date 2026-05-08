@@ -67,6 +67,8 @@ func (Media) Fields() []ent.Field {
 		field.String("vtt_path").MaxLen(512).Optional(),
 		field.Float("thumbnail_time").Optional(),
 		field.JSON("tags", []string{}).Optional(),
+		field.String("sync_status").MaxLen(20).Default("local_only").Optional(),
+		field.Time("synced_at").Optional().Nillable(),
 		field.String("user_id"),
 		field.Int64("category_id").Optional().StructTag(`json:"category_id,omitempty"`),
 		field.String("channel_id").Optional(),

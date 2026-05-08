@@ -20,6 +20,7 @@ import (
 
 	"origadmin/application/origcms/api/gen/v1/types"
 	_ "github.com/sqlite3ent/sqlite3"
+	"origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/infra/auth"
 	authbiz "origadmin/application/origcms/internal/features/auth/biz"
 	authdal "origadmin/application/origcms/internal/features/auth/dal"
@@ -133,12 +134,13 @@ func SetupTestServer(t *testing.T) *TestServer {
 	taskRepo := mediadal.NewEncodingTaskRepo(db)
 	reviewLogRepo := mediadal.NewReviewLogRepo(db)
 	uploadRepo := mediadal.NewUploadRepo(db, logger)
-	storage := mediadal.NewLocalStorage("./data/test-uploads")
+	storage := mediadal.NewLocalStorage(conf.NewStoragePaths(t.TempDir()))
 
 	mockPub := &mockPublisher{}
 
 	mediaUC := mediabiz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, reviewLogRepo, storage, mockPub, logger, nil)
-	uploadUC := mediabiz.NewUploadUseCase(uploadRepo, mediaRepo, profileRepo, taskRepo, mediaUC, storage, 5*1024*1024, logger)
+	testPaths := conf.NewStoragePaths(t.TempDir())
+	uploadUC := mediabiz.NewUploadUseCase(uploadRepo, mediaRepo, profileRepo, taskRepo, mediaUC, storage, testPaths, 5*1024*1024, logger)
 	uploadUC.SetPublisher(mockPub)
 
 	contentDB := contentdal.NewData(db)
@@ -249,7 +251,7 @@ func SetupTestServer(t *testing.T) *TestServer {
 		},
 		db,
 		jwtMgr,
-		"./data/uploads", // storageBasePath
+		testPaths,
 	)
 	srv.RegisterRoutes(router)
 

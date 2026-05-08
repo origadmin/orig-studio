@@ -694,22 +694,28 @@ func init() {
 	mediaDescVttPath := mediaFields[36].Descriptor()
 	// media.VttPathValidator is a validator for the "vtt_path" field. It is called by the builders before save.
 	media.VttPathValidator = mediaDescVttPath.Validators[0].(func(string) error)
+	// mediaDescSyncStatus is the schema descriptor for sync_status field.
+	mediaDescSyncStatus := mediaFields[39].Descriptor()
+	// media.DefaultSyncStatus holds the default value on creation for the sync_status field.
+	media.DefaultSyncStatus = mediaDescSyncStatus.Default.(string)
+	// media.SyncStatusValidator is a validator for the "sync_status" field. It is called by the builders before save.
+	media.SyncStatusValidator = mediaDescSyncStatus.Validators[0].(func(string) error)
 	// mediaDescCreateTime is the schema descriptor for create_time field.
-	mediaDescCreateTime := mediaFields[43].Descriptor()
+	mediaDescCreateTime := mediaFields[45].Descriptor()
 	// media.DefaultCreateTime holds the default value on creation for the create_time field.
 	media.DefaultCreateTime = mediaDescCreateTime.Default.(func() time.Time)
 	// mediaDescUpdateTime is the schema descriptor for update_time field.
-	mediaDescUpdateTime := mediaFields[44].Descriptor()
+	mediaDescUpdateTime := mediaFields[46].Descriptor()
 	// media.DefaultUpdateTime holds the default value on creation for the update_time field.
 	media.DefaultUpdateTime = mediaDescUpdateTime.Default.(func() time.Time)
 	// media.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	media.UpdateDefaultUpdateTime = mediaDescUpdateTime.UpdateDefault.(func() time.Time)
 	// mediaDescCreateAuthor is the schema descriptor for create_author field.
-	mediaDescCreateAuthor := mediaFields[45].Descriptor()
+	mediaDescCreateAuthor := mediaFields[47].Descriptor()
 	// media.DefaultCreateAuthor holds the default value on creation for the create_author field.
 	media.DefaultCreateAuthor = mediaDescCreateAuthor.Default.(string)
 	// mediaDescUpdateAuthor is the schema descriptor for update_author field.
-	mediaDescUpdateAuthor := mediaFields[46].Descriptor()
+	mediaDescUpdateAuthor := mediaFields[48].Descriptor()
 	// media.DefaultUpdateAuthor holds the default value on creation for the update_author field.
 	media.DefaultUpdateAuthor = mediaDescUpdateAuthor.Default.(string)
 	// mediaDescID is the schema descriptor for id field.

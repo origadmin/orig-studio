@@ -8,11 +8,12 @@
 package main
 
 import (
-	"time"
+	"fmt"
 
 	"github.com/ThreeDotsLabs/watermill/message"
 	_ "github.com/lib/pq" // PostgreSQL driver
 
+	kratoslog "github.com/go-kratos/kratos/v2/log"
 	"github.com/origadmin/runtime/log"
 	_ "github.com/sqlite3ent/sqlite3" // SQLite3 driver
 
@@ -56,8 +57,15 @@ var ProviderSet = wire.NewSet(
 	admin.ProviderSet,
 	system.ProviderSet,
 
-	// Bridge functions for media module (hardcoded config values)
+	// Config providers
+	NewUploadConfig,
+	NewTranscodeConfig,
+	NewStoragePaths,
+	NewStorageConfig,
+
+	// Bridge functions for media module
 	NewStorage,
+	NewStorageInterface,
 	NewWorker,
 	NewUploadUseCase,
 	NewSpriteUseCase,
@@ -92,14 +100,65 @@ var ProviderSet = wire.NewSet(
 
 	// Wire bindings
 	wire.Bind(new(authbiz.PermissionChecker), new(*authbiz.PermissionUseCase)),
-	wire.Bind(new(mediabiz.Storage), new(*mediadal.LocalStorage)),
 	wire.Bind(new(contentbiz.MediaUseCaseInterface), new(*mediabiz.MediaUseCase)),
 	wire.Bind(new(systembiz.ConfigProvider), new(*systembiz.SettingUseCase)),
 )
 
-// NewStorage creates a new storage with hardcoded base path.
-func NewStorage() *mediadal.LocalStorage {
-	return mediadal.NewLocalStorage("./data/uploads")
+// NewStorageConfig creates storage config from defaults.
+func NewStorageConfig() *config.StorageConfig {
+	return config.DefaultStorageConfig()
+}
+
+// NewStorage creates a LocalStorage instance (used as the base for all storage types).
+func NewStorage(sp *config.StoragePaths) *mediadal.LocalStorage {
+	return mediadal.NewLocalStorage(sp)
+}
+
+// NewStorageInterface creates the appropriate Storage implementation based on
+// StorageConfig.Type. It always creates LocalStorage; for "s3" type it also
+// creates S3Storage; for "hybrid" type it creates HybridStorage with async sync.
+func NewStorageInterface(
+	local *mediadal.LocalStorage,
+	sp *config.StoragePaths,
+	cfg *config.StorageConfig,
+	logger kratoslog.Logger,
+) (mediabiz.Storage, func(), error) {
+	switch cfg.Type {
+	case config.StorageTypeS3:
+		s3Storage, err := mediadal.NewS3Storage(&cfg.S3, logger)
+		if err != nil {
+			return nil, func() {}, fmt.Errorf("create S3 storage: %w", err)
+		}
+		return s3Storage, func() {}, nil
+
+	case config.StorageTypeHybrid:
+		s3Storage, err := mediadal.NewS3Storage(&cfg.S3, logger)
+		if err != nil {
+			return nil, func() {}, fmt.Errorf("create S3 storage for hybrid: %w", err)
+		}
+		hs := mediadal.NewHybridStorage(local, s3Storage, sp, cfg.Hybrid, logger)
+		return hs, func() { hs.Close() }, nil
+
+	case config.StorageTypeLocal:
+		fallthrough
+	default:
+		return local, func() {}, nil
+	}
+}
+
+// NewUploadConfig creates upload config from defaults.
+func NewUploadConfig() *config.UploadConfig {
+	return config.DefaultUploadConfig()
+}
+
+// NewStoragePaths creates StoragePaths from UploadConfig.
+func NewStoragePaths(cfg *config.UploadConfig) *config.StoragePaths {
+	return config.NewStoragePaths(cfg.StorageBasePath)
+}
+
+// NewTranscodeConfig creates transcode config from defaults.
+func NewTranscodeConfig() *config.TranscodeConfig {
+	return config.DefaultTranscodeConfig()
 }
 
 // NewWorker creates a new transcode worker with config from environment.
@@ -108,7 +167,7 @@ func NewWorker(logger log.Logger) mediabiz.TranscodeWorker {
 	return mediabiz.NewGoroutineWorker(maxWorkers, log.NewHelper(log.With(logger, "module", "transcode.worker")))
 }
 
-// NewUploadUseCase creates a new upload use case with hardcoded chunk size.
+// NewUploadUseCase creates a new upload use case with config from UploadConfig.
 func NewUploadUseCase(
 	uploadRepo mediabiz.UploadRepo,
 	mediaRepo mediabiz.MediaRepo,
@@ -116,6 +175,8 @@ func NewUploadUseCase(
 	taskRepo mediabiz.EncodingTaskRepo,
 	mediaUC *mediabiz.MediaUseCase,
 	storage mediabiz.Storage,
+	sp *config.StoragePaths,
+	cfg *config.UploadConfig,
 	logger log.Logger,
 ) *mediabiz.UploadUseCase {
 	return mediabiz.NewUploadUseCase(
@@ -125,21 +186,23 @@ func NewUploadUseCase(
 		taskRepo,
 		mediaUC,
 		storage,
-		5*1024*1024, // 5MB chunk size
+		sp,
+		cfg.ChunkSize,
 		logger,
 	)
 }
 
-// NewSpriteUseCase creates a new sprite use case with hardcoded base directory.
+// NewSpriteUseCase creates a new sprite use case with paths from StoragePaths.
 func NewSpriteUseCase(
 	mediaRepo mediabiz.MediaRepo,
 	settingUC *systembiz.SettingUseCase,
+	sp *config.StoragePaths,
 	logger log.Logger,
 ) *mediabiz.SpriteUseCase {
-	return mediabiz.NewSpriteUseCase(mediaRepo, settingUC, "./data/uploads", logger)
+	return mediabiz.NewSpriteUseCase(mediaRepo, settingUC, sp, logger)
 }
 
-// NewTranscodeHandler creates a new transcode handler with hardcoded config values.
+// NewTranscodeHandler creates a new transcode handler with paths from StoragePaths.
 func NewTranscodeHandler(
 	mediaUC *mediabiz.MediaUseCase,
 	profileRepo mediabiz.EncodeProfileRepo,
@@ -148,6 +211,8 @@ func NewTranscodeHandler(
 	worker mediabiz.TranscodeWorker,
 	publisher message.Publisher,
 	logger log.Logger,
+	sp *config.StoragePaths,
+	cfg *config.TranscodeConfig,
 	spriteUC *mediabiz.SpriteUseCase,
 ) *mediabiz.TranscodeHandler {
 	return mediabiz.NewTranscodeHandler(
@@ -158,8 +223,8 @@ func NewTranscodeHandler(
 		worker,
 		publisher,
 		logger,
-		"./data/uploads",
-		30*time.Minute,
+		sp,
+		cfg.TaskTimeout,
 		spriteUC,
 	)
 }
@@ -212,8 +277,8 @@ func NewStubHandler(jwt *infraauth.Manager) *contentservice.StubHandler {
 }
 
 // NewSpriteHandler creates a new sprite handler for sprite sheet and VTT routes.
-func NewSpriteHandler(mediaUC *mediabiz.MediaUseCase, jwt *infraauth.Manager, logger log.Logger) *contentservice.SpriteHandler {
-	return contentservice.NewSpriteHandler(mediaUC, "./data/uploads", jwt, logger)
+func NewSpriteHandler(mediaUC *mediabiz.MediaUseCase, sp *config.StoragePaths, jwt *infraauth.Manager, logger log.Logger) *contentservice.SpriteHandler {
+	return contentservice.NewSpriteHandler(mediaUC, sp, jwt, logger)
 }
 
 // NewMeHandler creates a new me handler.
@@ -233,6 +298,8 @@ type AppDependencies struct {
 	PubSub                   *pubsub.PubSub
 	Router                   *message.Router
 	JWTManager               *infraauth.Manager
+	StoragePaths             *config.StoragePaths
+	StorageCleanup           func()
 	AuthHandler              *authservice.AuthHandler
 	PermissionHandler        *authservice.PermissionHandler
 	UserHandler              *userservice.UserHandler

@@ -17,13 +17,10 @@ type UploadConfig struct {
 	AllowedMimeTypes []string      `json:"allowed_mime_types" yaml:"allowed_mime_types"`
 }
 
-// TranscodeConfig 转码配置
+// TranscodeConfig transcode configuration
 type TranscodeConfig struct {
 	MaxParallelTasks int           `json:"max_parallel_tasks" yaml:"max_parallel_tasks"`
 	TaskTimeout      time.Duration `json:"task_timeout" yaml:"task_timeout"`
-	HLSBasePath      string        `json:"hls_base_path" yaml:"hls_base_path"`
-	ThumbnailBasePath string       `json:"thumbnail_base_path" yaml:"thumbnail_base_path"`
-	PreviewBasePath  string        `json:"preview_base_path" yaml:"preview_base_path"`
 }
 
 // DefaultUploadConfig 返回默认上传配置
@@ -49,13 +46,10 @@ func DefaultUploadConfig() *UploadConfig {
 	}
 }
 
-// DefaultTranscodeConfig 返回默认转码配置
+// DefaultTranscodeConfig returns the default transcode configuration.
 func DefaultTranscodeConfig() *TranscodeConfig {
 	return &TranscodeConfig{
 		MaxParallelTasks: 4,
 		TaskTimeout:      4 * time.Hour,
-		HLSBasePath:      "./data/hls",
-		ThumbnailBasePath: "./data/thumbnails",
-		PreviewBasePath:  "./data/previews",
 	}
 }

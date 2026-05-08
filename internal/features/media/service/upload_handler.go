@@ -50,6 +50,7 @@ func (h *UploadHandler) RegisterRoutes(r http2.Router) {
 		uploads.POST("/multipart", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.initiateMultipartUpload())))
 		uploads.POST("/:uploadId/parts/:partNumber", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.uploadPart())))
 		uploads.POST("/:uploadId/complete", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.completeMultipartUpload())))
+		uploads.PATCH("/:uploadId/metadata", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.updateMetadata())))
 		uploads.POST("/:uploadId/abort", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.abortMultipartUpload())))
 		uploads.GET("/:uploadId/parts", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.listParts())))
 
@@ -352,6 +353,40 @@ func (h *UploadHandler) abortMultipartUpload() http.HandlerFunc {
 	}
 }
 
+// updateMetadata updates the metadata of an ongoing upload session.
+func (h *UploadHandler) updateMetadata() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		uploadID := gc.Param("uploadId")
+		var req struct {
+			Title       string   `json:"title"`
+			Description string   `json:"description"`
+			CategoryID  *int64   `json:"category_id"`
+			Tags        []string `json:"tags"`
+			Thumbnail   string   `json:"thumbnail"`
+		}
+		if err := gc.ShouldBindJSON(&req); err != nil {
+			server.Fail(gc, server.ErrBadRequest, "invalid request: "+err.Error())
+			return
+		}
+
+		if err := h.uc.UpdateUploadMetadata(
+			r.Context(),
+			uploadID,
+			req.Title,
+			req.Description,
+			req.CategoryID,
+			req.Tags,
+			req.Thumbnail,
+		); err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
+			return
+		}
+
+		server.OK(gc, gin.H{"message": "metadata updated"})
+	}
+}
+
 // getUploadSession returns details for a specific upload session.
 func (h *UploadHandler) getUploadSession() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -392,24 +427,4 @@ func (h *UploadHandler) listUploadSessions() http.HandlerFunc {
 			"total":    total,
 		})
 	}
-}
-
-// mergeUploadTags merges explicit tags with parsed #hashtag names,
-// deduplicating case-insensitively. Existing tags are preserved;
-// new hashtag names are appended only if not already present.
-func mergeUploadTags(existing []string, parsed []string) []string {
-	seen := make(map[string]bool)
-	for _, t := range existing {
-		seen[strings.ToLower(strings.TrimSpace(t))] = true
-	}
-	result := make([]string, len(existing))
-	copy(result, existing)
-	for _, t := range parsed {
-		lower := strings.ToLower(t)
-		if !seen[lower] {
-			seen[lower] = true
-			result = append(result, t)
-		}
-	}
-	return result
 }

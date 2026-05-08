@@ -6,6 +6,7 @@ package dto
 
 import (
 	"context"
+	"time"
 
 	"origadmin/application/origcms/api/gen/v1/media"
 	"origadmin/application/origcms/api/gen/v1/types"
@@ -73,6 +74,11 @@ type MediaRepo interface {
 	// GetEntityByShortToken returns the raw entity.Media by short_token for accessing
 	// internal fields not exposed in types.Media.
 	GetEntityByShortToken(ctx context.Context, shortToken string) (*entity.Media, error)
+
+	// ListTempMediaBefore returns media records whose URL starts with "temp/" and
+	// whose create_time is before the given cutoff. Used by CleanupExpiredTemp to
+	// find stale temp files that were never promoted (failed/expired transcodes).
+	ListTempMediaBefore(ctx context.Context, cutoff time.Time) ([]*types.Media, error)
 }
 
 // MediaQueryOption specifies options for querying media.

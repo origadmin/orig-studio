@@ -146,6 +146,13 @@ func (h *MediaHandler) listMedias(w http.ResponseWriter, r *http.Request) {
 	if state := gc.Query("state"); state != "" {
 		opts.State = state
 	}
+	if tagsStr := gc.Query("tags"); tagsStr != "" {
+		tags := strings.Split(tagsStr, ",")
+		for i := range tags {
+			tags[i] = strings.TrimSpace(tags[i])
+		}
+		opts.Tags = tags
+	}
 
 	items, total, err := h.mediaUC.ListMedias(r.Context(), opts)
 	if err != nil {

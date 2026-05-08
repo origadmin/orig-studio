@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {Link, useLocation} from '@tanstack/react-router';
+import React, {useState, useEffect, useCallback} from 'react';
+import {Link, useLocation, useNavigate, useSearch} from '@tanstack/react-router';
 import {Filter, Eye, Play, Loader2, Search as SearchIcon} from 'lucide-react';
 import {formatDuration, formatViews, formatDate} from '@/lib/format';
 import {useTranslation} from 'react-i18next';
@@ -9,20 +9,43 @@ import {Input} from '@/components/ui/input';
 import {Spinner} from '@/components/ui/spinner';
 import {Button} from '@/components/ui/button';
 import {useCategoryList} from '@/hooks/queries';
+import {HashtagText} from '@/components/common/HashtagText';
+import {mergeTagsWithHashtags} from '@/lib/utils/hashtag';
+import {colorFromName} from '@/lib/utils/tag-color';
 
 const SearchPage = () => {
     const {t} = useTranslation();
     const location = useLocation();
-    const searchParams = new URLSearchParams(location.search);
-    const initialQuery = searchParams.get('q') || '';
-    const initialCategoryId = searchParams.get('category_id') || '';
+    const navigate = useNavigate();
+    const searchParams = useSearch({strict: false}) as { q?: string; tag?: string; category_id?: string };
 
-    const [searchQuery, setSearchQuery] = useState(initialQuery);
-    const [inputValue, setInputValue] = useState(initialQuery);
-    const [selectedCategory, setSelectedCategory] = useState<string>(initialCategoryId);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [inputValue, setInputValue] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState<string>('');
+    const [selectedTag, setSelectedTag] = useState<string>('');
     const [page, setPage] = useState(1);
     const [showFilters, setShowFilters] = useState(false);
     const pageSize = 10;
+
+    useEffect(() => {
+        const tag = searchParams.tag || '';
+        const q = searchParams.q || '';
+        const categoryId = searchParams.category_id || '';
+
+        if (tag) {
+            setSelectedTag(tag);
+            setSearchQuery(tag);
+            setInputValue(tag);
+        } else if (q) {
+            setSelectedTag('');
+            setSearchQuery(q);
+            setInputValue(q);
+        }
+        if (categoryId) {
+            setSelectedCategory(categoryId);
+        }
+        setPage(1);
+    }, [searchParams.tag, searchParams.q, searchParams.category_id]);
 
     const {data: categories} = useCategoryList();
 
@@ -30,7 +53,8 @@ const SearchPage = () => {
         page,
         page_size: pageSize,
         status: 'active',
-        keyword: searchQuery,
+        keyword: selectedTag ? undefined : searchQuery,
+        tags: selectedTag ? [selectedTag] : undefined,
         category_id: selectedCategory ? Number(selectedCategory) : undefined
     });
 
@@ -40,8 +64,8 @@ const SearchPage = () => {
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         setSearchQuery(inputValue);
+        setSelectedTag('');
         setPage(1);
-        // Update URL without reloading
         const params = new URLSearchParams();
         if (inputValue) params.set('q', inputValue);
         if (selectedCategory) params.set('category_id', selectedCategory);
@@ -61,6 +85,7 @@ const SearchPage = () => {
         setSearchQuery('');
         setInputValue('');
         setSelectedCategory('');
+        setSelectedTag('');
         setPage(1);
         window.history.replaceState({}, '', '/search');
     };
@@ -217,7 +242,7 @@ const SearchPage = () => {
                                 </div>
                                 <div className="flex-1 space-y-2 min-w-0">
                                     <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 transition-colors line-clamp-2 leading-tight">
-                                        {item.title}
+                                        <HashtagText text={item.title} />
                                     </h3>
                                     <div
                                         className="flex items-center space-x-3 text-xs font-medium text-slate-500 dark:text-muted-foreground">
@@ -233,16 +258,29 @@ const SearchPage = () => {
                                     <p className="text-sm text-slate-500 dark:text-muted-foreground line-clamp-2 leading-relaxed">
                                         {item.description || t('watch.noDescription')}
                                     </p>
-                                    {item.tags && item.tags.length > 0 && (
-                                        <div className="flex flex-wrap gap-1 pt-1">
-                                            {item.tags.slice(0, 3).map(tag => (
-                                                <span key={tag}
-                                                      className="text-xs text-emerald-600 dark:text-emerald-400">
-                                                    #{tag}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    )}
+                                    {(() => {
+                                        const allTags = mergeTagsWithHashtags(item.tags || [], item.title, item.description);
+                                        return allTags.length > 0 && (
+                                            <div className="flex flex-wrap gap-1.5 pt-1">
+                                                {allTags.map(tag => (
+                                                    <Link
+                                                        key={tag}
+                                                        to="/search"
+                                                        search={{tag: tag}}
+                                                        className="text-xs px-1.5 py-0.5 rounded-full hover:opacity-80 transition-opacity"
+                                                        style={{color: colorFromName(tag), backgroundColor: colorFromName(tag) + '15'}}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedTag(tag);
+                                                            setSearchQuery(tag);
+                                                            setInputValue(tag);
+                                                            setPage(1);
+                                                        }}
+                                                    >#{tag}</Link>
+                                                ))}
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                             </Link>
                         ))}

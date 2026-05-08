@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/stretchr/testify/assert"
@@ -127,6 +128,10 @@ func (m *mockMediaRepo) UpdatePreviewFilePath(ctx context.Context, mediaID strin
 
 func (m *mockMediaRepo) UpdateDimensions(ctx context.Context, mediaID string, width, height int) error {
 	return nil
+}
+
+func (m *mockMediaRepo) ListTempMediaBefore(ctx context.Context, cutoff time.Time) ([]*types.Media, error) {
+	return nil, nil
 }
 
 // mockEncodingTaskRepo is a mock of EncodingTaskRepo
