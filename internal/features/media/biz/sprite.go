@@ -3,12 +3,12 @@ package biz
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 	"strconv"
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/log"
 
+	"origadmin/application/origcms/internal/conf"
 	systembiz "origadmin/application/origcms/internal/features/system/biz"
 	"origadmin/application/origcms/internal/helpers/ffmpeg"
 )
@@ -85,28 +85,20 @@ type SpriteUseCase struct {
 	mediaRepo      MediaRepo
 	configProvider systembiz.ConfigProvider
 	logger         *log.Helper
-	baseDir        string
+	paths          *conf.StoragePaths
 }
 
 func NewSpriteUseCase(
 	mediaRepo MediaRepo,
 	configProvider systembiz.ConfigProvider,
-	baseDir string,
+	paths *conf.StoragePaths,
 	logger log.Logger,
 ) *SpriteUseCase {
-	// Resolve baseDir to absolute path to avoid working directory dependency.
-	// When the server is started from a different directory (e.g., framework root
-	// instead of project root), relative paths like "./data/uploads" would
-	// resolve incorrectly, causing file not found errors for sprite/VTT files.
-	absBaseDir, err := filepath.Abs(baseDir)
-	if err != nil {
-		absBaseDir = baseDir // fallback to original if resolution fails
-	}
 	return &SpriteUseCase{
 		mediaRepo:      mediaRepo,
 		configProvider: configProvider,
 		logger:         log.NewHelper(log.With(logger, "module", "media.sprite")),
-		baseDir:        absBaseDir,
+		paths:          paths,
 	}
 }
 
@@ -126,12 +118,12 @@ func (uc *SpriteUseCase) GenerateSpriteAndVTT(ctx context.Context, mediaID strin
 
 	cfg := LoadSpriteConfig(ctx, uc.configProvider)
 
-	spritePath := fmt.Sprintf("sprites/%s/sprite.jpg", mediaID)
-	vttPath := fmt.Sprintf("sprites/%s/sprite.vtt", mediaID)
+	spritePath := uc.paths.RelativeSpriteImage(mediaID)
+	vttPath := uc.paths.RelativeSpriteVTT(mediaID)
 
-	fullInputPath := filepath.Join(uc.baseDir, m.Url)
-	fullSpritePath := filepath.Join(uc.baseDir, spritePath)
-	fullVttPath := filepath.Join(uc.baseDir, vttPath)
+	fullInputPath := uc.paths.FullPath(m.Url)
+	fullSpritePath := uc.paths.SpriteImageAbsPath(mediaID)
+	fullVttPath := uc.paths.SpriteVTTAbsPath(mediaID)
 
 	frameCount, err := ffmpeg.GenerateSpriteSheet(ctx, fullInputPath, fullSpritePath, cfg.FrameInterval, cfg.FrameWidth, cfg.FrameHeight, cfg.Columns)
 	if err != nil {
@@ -164,16 +156,16 @@ func (uc *SpriteUseCase) RegenerateThumbnail(ctx context.Context, mediaID string
 	cfg := LoadThumbnailConfig(ctx, uc.configProvider)
 
 	if timestamp <= 0 {
-		duration, err := ffmpeg.GetVideoDurationSeconds(ctx, filepath.Join(uc.baseDir, m.Url))
+		duration, err := ffmpeg.GetVideoDurationSeconds(ctx, uc.paths.FullPath(m.Url))
 		if err != nil {
 			return fmt.Errorf("get video duration for media %s: %w", mediaID, err)
 		}
 		timestamp = duration * cfg.Position
 	}
 
-	thumbPath := fmt.Sprintf("thumbnails/%s.jpg", mediaID)
-	fullInputPath := filepath.Join(uc.baseDir, m.Url)
-	fullThumbPath := filepath.Join(uc.baseDir, thumbPath)
+	thumbPath := uc.paths.RelativeThumbnail(mediaID)
+	fullInputPath := uc.paths.FullPath(m.Url)
+	fullThumbPath := uc.paths.ThumbnailAbsPath(mediaID)
 
 	duration, _ := ffmpeg.GetVideoDurationSeconds(ctx, fullInputPath)
 	position := timestamp / duration
@@ -267,9 +259,9 @@ func (uc *SpriteUseCase) GenerateGIFPreview(ctx context.Context, mediaID string)
 
 	cfg := LoadGifPreviewConfig(ctx, uc.configProvider)
 
-	gifPath := fmt.Sprintf("previews/%s.gif", mediaID)
-	fullInputPath := filepath.Join(uc.baseDir, m.Url)
-	fullGifPath := filepath.Join(uc.baseDir, gifPath)
+	gifPath := uc.paths.RelativePreview(mediaID)
+	fullInputPath := uc.paths.FullPath(m.Url)
+	fullGifPath := uc.paths.PreviewAbsPath(mediaID)
 
 	duration, _ := ffmpeg.GetVideoDurationSeconds(ctx, fullInputPath)
 

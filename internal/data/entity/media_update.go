@@ -738,6 +738,46 @@ func (_u *MediaUpdate) ClearTags() *MediaUpdate {
 	return _u
 }
 
+// SetSyncStatus sets the "sync_status" field.
+func (_u *MediaUpdate) SetSyncStatus(v string) *MediaUpdate {
+	_u.mutation.SetSyncStatus(v)
+	return _u
+}
+
+// SetNillableSyncStatus sets the "sync_status" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableSyncStatus(v *string) *MediaUpdate {
+	if v != nil {
+		_u.SetSyncStatus(*v)
+	}
+	return _u
+}
+
+// ClearSyncStatus clears the value of the "sync_status" field.
+func (_u *MediaUpdate) ClearSyncStatus() *MediaUpdate {
+	_u.mutation.ClearSyncStatus()
+	return _u
+}
+
+// SetSyncedAt sets the "synced_at" field.
+func (_u *MediaUpdate) SetSyncedAt(v time.Time) *MediaUpdate {
+	_u.mutation.SetSyncedAt(v)
+	return _u
+}
+
+// SetNillableSyncedAt sets the "synced_at" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableSyncedAt(v *time.Time) *MediaUpdate {
+	if v != nil {
+		_u.SetSyncedAt(*v)
+	}
+	return _u
+}
+
+// ClearSyncedAt clears the value of the "synced_at" field.
+func (_u *MediaUpdate) ClearSyncedAt() *MediaUpdate {
+	_u.mutation.ClearSyncedAt()
+	return _u
+}
+
 // SetUserID sets the "user_id" field.
 func (_u *MediaUpdate) SetUserID(v string) *MediaUpdate {
 	_u.mutation.SetUserID(v)
@@ -1288,6 +1328,11 @@ func (_u *MediaUpdate) check() error {
 			return &ValidationError{Name: "vtt_path", err: fmt.Errorf(`entity: validator failed for field "Media.vtt_path": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.SyncStatus(); ok {
+		if err := media.SyncStatusValidator(v); err != nil {
+			return &ValidationError{Name: "sync_status", err: fmt.Errorf(`entity: validator failed for field "Media.sync_status": %w`, err)}
+		}
+	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`entity: clearing a required unique edge "Media.user"`)
 	}
@@ -1508,6 +1553,18 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.TagsCleared() {
 		_spec.ClearField(media.FieldTags, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.SyncStatus(); ok {
+		_spec.SetField(media.FieldSyncStatus, field.TypeString, value)
+	}
+	if _u.mutation.SyncStatusCleared() {
+		_spec.ClearField(media.FieldSyncStatus, field.TypeString)
+	}
+	if value, ok := _u.mutation.SyncedAt(); ok {
+		_spec.SetField(media.FieldSyncedAt, field.TypeTime, value)
+	}
+	if _u.mutation.SyncedAtCleared() {
+		_spec.ClearField(media.FieldSyncedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.PublishedAt(); ok {
 		_spec.SetField(media.FieldPublishedAt, field.TypeTime, value)
@@ -2649,6 +2706,46 @@ func (_u *MediaUpdateOne) ClearTags() *MediaUpdateOne {
 	return _u
 }
 
+// SetSyncStatus sets the "sync_status" field.
+func (_u *MediaUpdateOne) SetSyncStatus(v string) *MediaUpdateOne {
+	_u.mutation.SetSyncStatus(v)
+	return _u
+}
+
+// SetNillableSyncStatus sets the "sync_status" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableSyncStatus(v *string) *MediaUpdateOne {
+	if v != nil {
+		_u.SetSyncStatus(*v)
+	}
+	return _u
+}
+
+// ClearSyncStatus clears the value of the "sync_status" field.
+func (_u *MediaUpdateOne) ClearSyncStatus() *MediaUpdateOne {
+	_u.mutation.ClearSyncStatus()
+	return _u
+}
+
+// SetSyncedAt sets the "synced_at" field.
+func (_u *MediaUpdateOne) SetSyncedAt(v time.Time) *MediaUpdateOne {
+	_u.mutation.SetSyncedAt(v)
+	return _u
+}
+
+// SetNillableSyncedAt sets the "synced_at" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableSyncedAt(v *time.Time) *MediaUpdateOne {
+	if v != nil {
+		_u.SetSyncedAt(*v)
+	}
+	return _u
+}
+
+// ClearSyncedAt clears the value of the "synced_at" field.
+func (_u *MediaUpdateOne) ClearSyncedAt() *MediaUpdateOne {
+	_u.mutation.ClearSyncedAt()
+	return _u
+}
+
 // SetUserID sets the "user_id" field.
 func (_u *MediaUpdateOne) SetUserID(v string) *MediaUpdateOne {
 	_u.mutation.SetUserID(v)
@@ -3212,6 +3309,11 @@ func (_u *MediaUpdateOne) check() error {
 			return &ValidationError{Name: "vtt_path", err: fmt.Errorf(`entity: validator failed for field "Media.vtt_path": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.SyncStatus(); ok {
+		if err := media.SyncStatusValidator(v); err != nil {
+			return &ValidationError{Name: "sync_status", err: fmt.Errorf(`entity: validator failed for field "Media.sync_status": %w`, err)}
+		}
+	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`entity: clearing a required unique edge "Media.user"`)
 	}
@@ -3449,6 +3551,18 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	}
 	if _u.mutation.TagsCleared() {
 		_spec.ClearField(media.FieldTags, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.SyncStatus(); ok {
+		_spec.SetField(media.FieldSyncStatus, field.TypeString, value)
+	}
+	if _u.mutation.SyncStatusCleared() {
+		_spec.ClearField(media.FieldSyncStatus, field.TypeString)
+	}
+	if value, ok := _u.mutation.SyncedAt(); ok {
+		_spec.SetField(media.FieldSyncedAt, field.TypeTime, value)
+	}
+	if _u.mutation.SyncedAtCleared() {
+		_spec.ClearField(media.FieldSyncedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.PublishedAt(); ok {
 		_spec.SetField(media.FieldPublishedAt, field.TypeTime, value)

@@ -40,8 +40,8 @@ func (UploadSession) Fields() []ent.Field {
 		// Total number of parts expected
 		field.Int("total_parts").Positive().
 			Comment("Total number of parts expected"),
-		// Chunk size in bytes (default 2MB)
-		field.Int("chunk_size").Default(2 * 1024 * 1024).
+		// Chunk size in bytes (default 5MB, aligned with UploadConfig.ChunkSize)
+		field.Int("chunk_size").Default(5 * 1024 * 1024).
 			Comment("Chunk size in bytes"),
 		// Bytes uploaded so far
 		field.Int64("uploaded_size").Default(0).

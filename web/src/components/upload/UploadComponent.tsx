@@ -61,6 +61,7 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
     const [tagInput, setTagInput] = useState('');
     const [isDragging, setIsDragging] = useState(false);
     const coverInputRef = useRef<HTMLInputElement>(null);
+    const activeTasksRef = useRef<Map<string, UploadTask>>(new Map());
 
     const updateFile = useCallback((id: string, updates: Partial<UploadFileItem>) => {
         setFiles((prev) =>
@@ -102,9 +103,16 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
             onStatusChange: (taskId, status) => updateFile(taskId, {status}),
             onSuccess: (taskId) => {
                 updateFile(taskId, {status: 'success', progress: 100, completedAt: Date.now()});
+                activeTasksRef.current.delete(taskId);
                 if (onSuccess) onSuccess();
             },
-            onError: (taskId, error) => updateFile(taskId, {status: 'error', error}),
+            onError: (taskId, error) => {
+                updateFile(taskId, {status: 'error', error});
+                activeTasksRef.current.delete(taskId);
+            },
+            onUploadId: (taskId, uploadId) => {
+                updateFile(taskId, {uploadId});
+            },
         };
 
         const task: UploadTask = {
@@ -119,6 +127,8 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
             categoryId: getMetadata().category_id,
             tags: fileItem.tags,
         };
+
+        activeTasksRef.current.set(fileItem.id, task);
 
         startMultipartUpload(task, callbacks).catch(() => {
         });
@@ -173,6 +183,16 @@ export function UploadComponent({onSuccess, onCancel}: UploadComponentProps) {
     // ── 异步元数据同步 ──
     useEffect(() => {
         if (!selectedFile || !selectedFile.uploadId || selectedFile.status === 'success') return;
+
+        const activeTask = activeTasksRef.current.get(selectedFile.id);
+        if (activeTask) {
+            activeTask.title = selectedFile.title;
+            activeTask.description = selectedFile.description;
+            activeTask.tags = selectedFile.tags;
+            if (selectedFile.category) {
+                activeTask.categoryId = categories.indexOf(selectedFile.category) + 1;
+            }
+        }
 
         const timer = setTimeout(() => {
             const task: UploadTask = {

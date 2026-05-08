@@ -16,6 +16,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2/log"
 
+	"origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/features/media/biz"
 	http2 "origadmin/application/origcms/internal/helpers/http"
 	"origadmin/application/origcms/internal/infra/auth"
@@ -25,24 +26,16 @@ import (
 // SpriteHandler handles HTTP requests for sprite sheet and WebVTT files.
 type SpriteHandler struct {
 	mediaUC *biz.MediaUseCase
-	baseDir string
+	paths   *conf.StoragePaths
 	jwt     *auth.Manager
 	logger  *log.Helper
 }
 
 // NewSpriteHandler creates a new SpriteHandler.
-func NewSpriteHandler(mediaUC *biz.MediaUseCase, baseDir string, jwt *auth.Manager, logger log.Logger) *SpriteHandler {
-	// Resolve baseDir to absolute path to avoid working directory dependency.
-	// When the server is started from a different directory (e.g., framework root
-	// instead of project root), relative paths like "./data/uploads" would
-	// resolve incorrectly, causing file not found errors for sprite/VTT files.
-	absBaseDir, err := filepath.Abs(baseDir)
-	if err != nil {
-		absBaseDir = baseDir // fallback to original if resolution fails
-	}
+func NewSpriteHandler(mediaUC *biz.MediaUseCase, paths *conf.StoragePaths, jwt *auth.Manager, logger log.Logger) *SpriteHandler {
 	return &SpriteHandler{
 		mediaUC: mediaUC,
-		baseDir: absBaseDir,
+		paths:   paths,
 		jwt:     jwt,
 		logger:  log.NewHelper(log.With(logger, "module", "service.sprite")),
 	}
@@ -79,8 +72,8 @@ func (h *SpriteHandler) GetSpriteVTT(c *gin.Context) {
 	}
 
 	// Security: validate path to prevent directory traversal
-	fullPath := filepath.Join(h.baseDir, info.VttPath)
-	if err := validateSpritePath(h.baseDir, fullPath); err != nil {
+	fullPath := h.paths.FullPath(info.VttPath)
+	if err := validateSpritePath(h.paths.BasePath(), fullPath); err != nil {
 		h.logger.Warnf("invalid vtt path for media %s: %v", shortToken, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid path"})
 		return
@@ -129,8 +122,8 @@ func (h *SpriteHandler) GetSpriteImage(c *gin.Context) {
 	}
 
 	// Security: validate path to prevent directory traversal
-	fullPath := filepath.Join(h.baseDir, info.SpritePath)
-	if err := validateSpritePath(h.baseDir, fullPath); err != nil {
+	fullPath := h.paths.FullPath(info.SpritePath)
+	if err := validateSpritePath(h.paths.BasePath(), fullPath); err != nil {
 		h.logger.Warnf("invalid sprite path for media %s: %v", shortToken, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid path"})
 		return

@@ -18,6 +18,7 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/go-kratos/kratos/v2/log"
 
+	"origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/helpers/ffmpeg"
 	"origadmin/application/origcms/internal/infra/pubsub"
@@ -52,7 +53,7 @@ type TranscodeHandler struct {
 	worker       TranscodeWorker
 	publisher    message.Publisher
 	logger       *log.Helper
-	baseDir      string
+	paths        *conf.StoragePaths
 	taskTimeout  time.Duration
 	spriteUC     *SpriteUseCase
 }
@@ -66,7 +67,7 @@ func NewTranscodeHandler(
 	worker TranscodeWorker,
 	publisher message.Publisher,
 	logger log.Logger,
-	baseDir string,
+	paths *conf.StoragePaths,
 	taskTimeout time.Duration,
 	spriteUC *SpriteUseCase,
 ) *TranscodeHandler {
@@ -78,7 +79,7 @@ func NewTranscodeHandler(
 		worker:       worker,
 		publisher:    publisher,
 		logger:       log.NewHelper(log.With(logger, "module", "transcode.handler")),
-		baseDir:      baseDir,
+		paths:        paths,
 		taskTimeout:  taskTimeout,
 		spriteUC:     spriteUC,
 	}
@@ -122,7 +123,7 @@ func (h *TranscodeHandler) Handle(msg *message.Message) error {
 //     - preview task outcome does NOT affect overall status
 func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeRequest) error {
 	mediaID := req.MediaID
-	fullPath := filepath.Join(h.baseDir, req.MediaPath)
+	fullPath := h.paths.FullPath(req.MediaPath)
 
 	procCtx, cancel := context.WithTimeout(context.Background(), h.taskTimeout)
 	defer cancel()
@@ -144,10 +145,10 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 
 	// --- Step 2: Generate thumbnail ---
 	if media.Thumbnail == "" {
-		thumbDir := filepath.Join(h.baseDir, "thumbnails")
+		thumbDir := h.paths.ThumbnailsDir
 		thumbFilename := fmt.Sprintf("%s.jpg", mediaUUID)
 		if _, err := GenerateThumbnail(procCtx, fullPath, thumbDir, thumbFilename); err == nil {
-			media.Thumbnail = fmt.Sprintf("thumbnails/%s.jpg", mediaUUID)
+			media.Thumbnail = h.paths.RelativeThumbnail(mediaUUID)
 			if _, err := h.mediaRepo.Update(procCtx, media); err != nil {
 				h.logger.Warnf("failed to save thumbnail for media %s: %v", mediaID, err)
 			}
@@ -277,7 +278,7 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 	//   hls/{uuid}/{profile_name}/index.m3u8 + segment_XXX.ts  (video profiles)
 	//   previews/{uuid}.gif                                    (preview)
 
-	hlsBaseDir := filepath.Join(h.baseDir, "hls", mediaUUID)
+	hlsBaseDir := h.paths.HLSDirForMedia(mediaUUID)
 
 	var wg sync.WaitGroup
 	resultsCh := make(chan transcodeResult, len(tasks))
@@ -472,6 +473,38 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 
 	h.logger.Infof("media processing complete: media=%s uuid=%s status=%s (video: %d ok / %d fail)",
 		mediaID, mediaUUID, media.EncodingStatus, videoSuccessCount, videoFailedCount)
+
+	// Promote temp file to originals after successful transcoding
+	if media.EncodingStatus == "success" || media.EncodingStatus == "partial" {
+		// Extract uploadID from the media path (format: temp/{userID}/{yyyy}/{MM}/{uploadID}{ext})
+		if strings.HasPrefix(media.Url, "temp/") {
+			filename := filepath.Base(media.Url)
+			// Extract userID from path: temp/{userID}/{yyyy}/{MM}/{filename}
+			pathParts := strings.SplitN(media.Url, "/", 4)
+			userID := "_system"
+			if len(pathParts) >= 3 {
+				userID = pathParts[1]
+			}
+
+			promotedPath, err := h.paths.PromoteToOriginal(userID, filename)
+			if err != nil {
+				h.logger.Warnf("failed to promote temp file to originals for media %s: %v", mediaID, err)
+			} else {
+				media.Url = promotedPath
+				if _, err := h.mediaRepo.Update(procCtx, media); err != nil {
+					h.logger.Warnf("failed to update media URL after promotion for media %s: %v", mediaID, err)
+				}
+
+				// Cleanup temp parts directory
+				uploadID := strings.TrimSuffix(filename, filepath.Ext(filename))
+				if err := h.paths.CleanupTempParts(userID, uploadID); err != nil {
+					h.logger.Warnf("failed to cleanup temp parts for media %s: %v", mediaID, err)
+				}
+
+				h.logger.Infof("promoted temp file to originals for media %s: %s", mediaID, promotedPath)
+			}
+		}
+	}
 
 	if media.Type == "video" && h.spriteUC != nil {
 		go func() {

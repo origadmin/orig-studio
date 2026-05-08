@@ -13,8 +13,10 @@ import (
 	"origadmin/application/origcms/internal/data/entity/channel"
 	"origadmin/application/origcms/internal/data/entity/comment"
 	"origadmin/application/origcms/internal/data/entity/commentreport"
+	"origadmin/application/origcms/internal/data/entity/history"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/playlist"
+	"origadmin/application/origcms/internal/data/entity/schema"
 	"origadmin/application/origcms/internal/data/entity/tag"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
@@ -34,8 +36,12 @@ type (
 	Categorys            = []*entity.Category
 	Channel              = entity.Channel
 	ChannelEdges         = entity.ChannelEdges
+	ChannelLinkPB        = types.ChannelLink
+	ChannelLinksPB       = []*types.ChannelLink
 	ChannelPB            = types.Channel
 	ChannelPrivacy       = channel.Privacy
+	ChannelStatus        = channel.Status
+	ChannelStatusPB      = types.ChannelStatus
 	Channels             = []*entity.Channel
 	Comment              = entity.Comment
 	CommentEdges         = entity.CommentEdges
@@ -48,6 +54,7 @@ type (
 	CommentReports       = []*entity.CommentReport
 	CommentStatus        = comment.Status
 	CommentreportReason  = commentreport.Reason
+	CommentreportStatus  = commentreport.Status
 	Comments             = []*entity.Comment
 	EncodeProfile        = entity.EncodeProfile
 	EncodeProfilePB      = types.EncodeProfile
@@ -60,6 +67,10 @@ type (
 	GroupMember          = entity.GroupMember
 	GroupMemberEdges     = entity.GroupMemberEdges
 	GroupMembers         = []*entity.GroupMember
+	History              = entity.History
+	HistoryContentType   = history.ContentType
+	HistoryEdges         = entity.HistoryEdges
+	Historys             = []*entity.History
 	Like                 = entity.Like
 	LikeEdges            = entity.LikeEdges
 	LikePB               = types.Like
@@ -96,6 +107,8 @@ type (
 	PrivacyPB            = types.Privacy
 	RolePB               = types.Role
 	RolesPB              = []*types.Role
+	SchemaChannelLink    = schema.ChannelLink
+	SchemaChannelLinks   = []schema.ChannelLink
 	Subscription         = entity.Subscription
 	SubscriptionEdges    = entity.SubscriptionEdges
 	Subscriptions        = []*entity.Subscription
@@ -176,6 +189,33 @@ func ConvertCategoryToCategoryPB(from *Category) *CategoryPB {
 	return to
 }
 
+// ConvertChannelLinkPBToSchemaChannelLink converts *ChannelLinkPB to SchemaChannelLink.
+func ConvertChannelLinkPBToSchemaChannelLink(from *ChannelLinkPB) *SchemaChannelLink {
+	if from == nil {
+		return nil
+	}
+
+	to := &SchemaChannelLink{
+		Type:     from.Type,
+		Platform: from.Platform,
+		URL:      from.Url,
+		Title:    from.Title,
+	}
+	return to
+}
+
+// ConvertChannelLinksPBToSchemaChannelLinks converts a slice of *ChannelLinkPB to a slice of SchemaChannelLink.
+func ConvertChannelLinksPBToSchemaChannelLinks(froms ChannelLinksPB) SchemaChannelLinks {
+	if froms == nil {
+		return nil
+	}
+	tos := make(SchemaChannelLinks, len(froms))
+	for i, f := range froms {
+		tos[i] = *ConvertChannelLinkPBToSchemaChannelLink(f)
+	}
+	return tos
+}
+
 // ConvertChannelPBToChannel converts ChannelPB to Channel.
 func ConvertChannelPBToChannel(from *ChannelPB) *Channel {
 	if from == nil {
@@ -186,13 +226,25 @@ func ConvertChannelPBToChannel(from *ChannelPB) *Channel {
 	to := &Channel{
 		ID:              from.Id,
 		UserID:          from.UserId,
+		Name:            from.Name,
 		Title:           from.Title,
-		Description:     from.Description,
+		Slug:            from.Slug,
+		Handle:          from.Handle,
 		ShortToken:      from.ShortToken,
+		Description:     from.Description,
+		Avatar:          from.Avatar,
+		Banner:          from.Banner,
 		BannerLogo:      from.BannerLogo,
+		Status:          ConvertChannelStatusPBToChannelStatus(from.Status),
 		Privacy:         ConvertPrivacyPBToChannelPrivacy(from.Privacy),
+		Tags:            from.Tags,
+		CategoryID:      from.CategoryId,
+		IsVerified:      from.IsVerified,
 		SubscriberCount: from.SubscriberCount,
 		MediaCount:      int(from.MediaCount),
+		ArticleCount:    int(from.ArticleCount),
+		TotalViews:      from.TotalViews,
+		Links:           ConvertChannelLinksPBToSchemaChannelLinks(from.Links),
 		AddDate:         ConvertTimestampToTime(from.AddDate),
 		CreateTime:      ConvertTimestampToTime(from.CreateTime),
 		UpdateTime:      ConvertTimestampToTime(from.UpdateTime),
@@ -206,6 +258,8 @@ func ConvertChannelToChannelPB(from *Channel) *ChannelPB {
 		return nil
 	}
 
+	// miss: IsOwner              // target struct [Channel] has this field, but source struct [Channel] has no corresponding field
+	// miss: IsSubscribed         // target struct [Channel] has this field, but source struct [Channel] has no corresponding field
 	to := &ChannelPB{
 		Id:              from.ID,
 		CreateTime:      ConvertTimeToTimestamp(from.CreateTime),
@@ -219,6 +273,20 @@ func ConvertChannelToChannelPB(from *Channel) *ChannelPB {
 		MediaCount:      int64(from.MediaCount),
 		ShortToken:      from.ShortToken,
 		AddDate:         ConvertTimeToTimestamp(from.AddDate),
+		Name:            from.Name,
+		Slug:            from.Slug,
+		Handle:          from.Handle,
+		Avatar:          from.Avatar,
+		Banner:          from.Banner,
+		Status:          ConvertChannelStatusToChannelStatusPB(from.Status),
+		IsVerified:      from.IsVerified,
+		Tags:            from.Tags,
+		CategoryId:      from.CategoryID,
+		ArticleCount:    int32(from.ArticleCount),
+		TotalViews:      from.TotalViews,
+		Links:           ConvertSchemaChannelLinksToChannelLinksPB(from.Links),
+		User:            ConvertUserToUserPB(from.Edges.User),
+		Category:        ConvertCategoryToCategoryPB(from.Edges.Category),
 	}
 	return to
 }
@@ -433,6 +501,8 @@ func ConvertMediaPBToMedia(from *MediaPB) *Media {
 		return nil
 	}
 
+	// miss: SyncStatus           // target struct [Media] has this field, but source struct [Media] has no corresponding field
+	// miss: SyncedAt             // target struct [Media] has this field, but source struct [Media] has no corresponding field
 	// miss: Edges                // target struct [Media] has this field, but source struct [Media] has no corresponding field
 	to := &Media{
 		ID:              from.Id,
@@ -592,6 +662,33 @@ func ConvertPlaylistToPlaylistPB(from *Playlist) *PlaylistPB {
 		AddDate:     ConvertTimeToTimestamp(from.AddDate),
 	}
 	return to
+}
+
+// ConvertSchemaChannelLinkToChannelLinkPB converts SchemaChannelLink to *ChannelLinkPB.
+func ConvertSchemaChannelLinkToChannelLinkPB(from *SchemaChannelLink) *ChannelLinkPB {
+	if from == nil {
+		return nil
+	}
+
+	to := &ChannelLinkPB{
+		Type:     from.Type,
+		Platform: from.Platform,
+		Url:      from.URL,
+		Title:    from.Title,
+	}
+	return to
+}
+
+// ConvertSchemaChannelLinksToChannelLinksPB converts a slice of SchemaChannelLink to a slice of *ChannelLinkPB.
+func ConvertSchemaChannelLinksToChannelLinksPB(froms SchemaChannelLinks) ChannelLinksPB {
+	if froms == nil {
+		return nil
+	}
+	tos := make(ChannelLinksPB, len(froms))
+	for i, f := range froms {
+		tos[i] = ConvertSchemaChannelLinkToChannelLinkPB(&f)
+	}
+	return tos
 }
 
 // ConvertTagPBToTag converts TagPB to Tag.

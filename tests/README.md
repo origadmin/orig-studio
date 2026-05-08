@@ -1,7 +1,7 @@
 # 测试目录结构规范
 
 > **适用**: orig-cms 项目
-> **关联**: `_team/workflows/roles/development-standards.md`、`_team/workflows/roles/bugfix-standards.md`
+> **关联**: `projects/team-flow/team/workflows/roles/development-standards.md`、`projects/team-flow/team/workflows/roles/bugfix-standards.md`
 
 ---
 
@@ -77,12 +77,12 @@ tests/
 
 ## 模板文件
 
-测试文档模板位于 `_team/templates/`：
+测试文档模板位于 `projects/team-flow/team/templates/`：
 
 | 模板 | 用途 |
 |------|------|
-| `_team/templates/feature-test-template.md` | Feature 测试覆盖声明 |
-| `_team/templates/bug-test-template.md` | Bug 复现测试用例 |
+| `projects/team-flow/team/templates/feature-test-template.md` | Feature 测试覆盖声明 |
+| `projects/team-flow/team/templates/bug-test-template.md` | Bug 复现测试用例 |
 
 ---
 

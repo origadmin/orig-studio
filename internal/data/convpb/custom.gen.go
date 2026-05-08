@@ -3,3 +3,4 @@
 
 package convpb
 
+// ChannelStatus conversion functions are implemented in custom.go

@@ -20,6 +20,7 @@ import (
 	"github.com/origadmin/runtime/service/transport/grpc"
 	"github.com/origadmin/runtime/service/transport/http"
 
+	"origadmin/application/origcms/internal/conf"
 	media "origadmin/application/origcms/api/gen/v1/media"
 	"origadmin/application/origcms/internal/features/media/service"
 )
@@ -32,6 +33,7 @@ func NewServers(
 	app *runtime.App,
 	cfg *transportv1.Servers,
 	svc *service.MediaService,
+	paths *conf.StoragePaths,
 ) ([]transport.Server, error) {
 	if cfg == nil {
 		return nil, errors.New("servers config is nil")
@@ -50,7 +52,7 @@ func NewServers(
 			}
 			servers = append(servers, srv)
 		case "http":
-			srv, err := NewHTTPServer(app, serverCfg.GetHttp(), svc)
+			srv, err := NewHTTPServer(app, serverCfg.GetHttp(), svc, paths)
 			if err != nil {
 				return nil, err
 			}
@@ -93,7 +95,7 @@ func NewGRPCServer(app *runtime.App, cfg *grpcv1.Server, mediaSvc *service.Media
 }
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(app *runtime.App, cfg *httpv1.Server, mediaSvc *service.MediaService) (*transport.HTTPServer, error) {
+func NewHTTPServer(app *runtime.App, cfg *httpv1.Server, mediaSvc *service.MediaService, paths *conf.StoragePaths) (*transport.HTTPServer, error) {
 	if cfg == nil {
 		return nil, errors.New("http config is nil")
 	}
@@ -120,9 +122,9 @@ func NewHTTPServer(app *runtime.App, cfg *httpv1.Server, mediaSvc *service.Media
 		_, _ = w.Write([]byte(`{"status":"ok","service":"svc-media"}`))
 	}))
 
-	// Static file serving for media assets
-	uploadsDir := "./data/uploads"
-	fs := stdhttp.FileServer(stdhttp.Dir(uploadsDir))
+	// Static file serving for media assets using StoragePaths
+	routeMap := paths.StaticRouteMap()
+	fs := stdhttp.FileServer(stdhttp.Dir(paths.BasePath()))
 
 	corsStatic := func(h stdhttp.Handler) stdhttp.Handler {
 		return stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
@@ -131,10 +133,9 @@ func NewHTTPServer(app *runtime.App, cfg *httpv1.Server, mediaSvc *service.Media
 		})
 	}
 
-	srv.Handle("/thumbnails/", corsStatic(stdhttp.StripPrefix("/thumbnails/", fs)))
-	srv.Handle("/previews/", corsStatic(stdhttp.StripPrefix("/previews/", fs)))
-	srv.Handle("/uploads/", corsStatic(stdhttp.StripPrefix("/uploads/", fs)))
-	srv.Handle("/hls/", corsStatic(stdhttp.StripPrefix("/hls/", fs)))
+	for urlPrefix := range routeMap {
+		srv.Handle(urlPrefix+"/", corsStatic(stdhttp.StripPrefix(urlPrefix+"/", fs)))
+	}
 
 	// media.RegisterMediaServiceHTTPServer(srv, mediaSvc) // Not available without http annotations in proto
 	_ = mediaSvc

@@ -13,6 +13,7 @@ import (
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/features/media/biz"
+	"origadmin/application/origcms/internal/helpers/hashtag"
 	"origadmin/application/origcms/internal/helpers/repo"
 )
 
@@ -136,8 +137,28 @@ func (s *UploadService) ListParts(ctx context.Context, req *pb.ListPartsRequest)
 }
 
 func (s *UploadService) CompleteMultipartUpload(ctx context.Context, req *pb.CompleteMultipartUploadRequest) (*pb.CompleteMultipartUploadResponse, error) {
+	session, err := s.uc.GetSession(ctx, req.UploadId)
+	if err != nil {
+		s.log.Errorf("failed to get session for upload %s: %v", req.UploadId, err)
+		return nil, err
+	}
+
+	title := session.Title
+	description := session.Description
+	tags := session.Tags
+
+	parsedHashtags := hashtag.ParseHashtags(title + " " + description)
+	if len(parsedHashtags) > 0 {
+		tags = mergeUploadTags(tags, parsedHashtags)
+	}
+
+	var categoryID *int64
+	if session.CategoryID != nil {
+		categoryID = session.CategoryID
+	}
+
 	media, err := s.uc.CompleteMultipartUpload(ctx, req.UploadId, req.Sha256,
-		"", "", nil, nil, "")
+		title, description, categoryID, tags, session.Thumbnail)
 	if err != nil {
 		s.log.Errorf("failed to complete multipart upload %s: %v", req.UploadId, err)
 		return nil, err
@@ -262,4 +283,21 @@ func (s *UploadService) ListUploadSessions(ctx context.Context, req *pb.ListUplo
 		Sessions: pbSessions,
 		Total:    int32(total),
 	}, nil
+}
+
+func mergeUploadTags(existing []string, parsed []string) []string {
+	seen := make(map[string]bool)
+	for _, t := range existing {
+		seen[strings.ToLower(strings.TrimSpace(t))] = true
+	}
+	result := make([]string, len(existing))
+	copy(result, existing)
+	for _, t := range parsed {
+		lower := strings.ToLower(t)
+		if !seen[lower] {
+			seen[lower] = true
+			result = append(result, t)
+		}
+	}
+	return result
 }

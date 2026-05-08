@@ -1578,6 +1578,13 @@ func (h *AdminHandler) adminListMedias() http.HandlerFunc {
 		if mediaType := gc.Query("type"); mediaType != "" {
 			opts.MediaType = mediaType
 		}
+		if tagsStr := gc.Query("tags"); tagsStr != "" {
+			tags := strings.Split(tagsStr, ",")
+			for i := range tags {
+				tags[i] = strings.TrimSpace(tags[i])
+			}
+			opts.Tags = tags
+		}
 
 		items, total, err := h.mediaUC.ListMedias(r.Context(), opts)
 		if err != nil {
