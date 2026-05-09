@@ -28,6 +28,8 @@ func (Tag) Fields() []ent.Field {
 		field.String("listings_thumbnail").MaxLen(400).Optional().Default(""),
 		field.Enum("status").Values("ACTIVE", "INACTIVE").Default("ACTIVE"),
 		field.String("description").Optional().MaxLen(500),
+		field.JSON("title_i18n", map[string]string{}).Optional(),
+		field.JSON("description_i18n", map[string]string{}).Optional(),
 		field.String("color").MaxLen(32).Optional(),
 		field.Time("create_time").Default(time.Now),
 		field.Time("update_time").Default(time.Now).UpdateDefault(time.Now),
@@ -52,5 +54,6 @@ func (Tag) Annotations() []schema.Annotation {
 func (Tag) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).Ref("tags"),
+		edge.To("names", TagName.Type),
 	}
 }

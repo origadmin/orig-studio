@@ -87,6 +87,9 @@ type Subscription func(*sql.Selector)
 // Tag is the predicate function for tag builders.
 type Tag func(*sql.Selector)
 
+// TagName is the predicate function for tagname builders.
+type TagName func(*sql.Selector)
+
 // UploadSession is the predicate function for uploadsession builders.
 type UploadSession func(*sql.Selector)
 

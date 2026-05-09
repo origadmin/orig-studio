@@ -3,6 +3,7 @@
 package entity
 
 import (
+	"encoding/json"
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/user"
@@ -24,6 +25,10 @@ type Category struct {
 	Slug string `json:"slug,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
+	// NameI18n holds the value of the "name_i18n" field.
+	NameI18n map[string]string `json:"name_i18n,omitempty"`
+	// DescriptionI18n holds the value of the "description_i18n" field.
+	DescriptionI18n map[string]string `json:"description_i18n,omitempty"`
 	// Thumbnail holds the value of the "thumbnail" field.
 	Thumbnail string `json:"thumbnail,omitempty"`
 	// ListingsThumbnail holds the value of the "listings_thumbnail" field.
@@ -141,6 +146,8 @@ func (*Category) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case category.FieldNameI18n, category.FieldDescriptionI18n:
+			values[i] = new([]byte)
 		case category.FieldIsGlobal, category.FieldIsRbacCategory:
 			values[i] = new(sql.NullBool)
 		case category.FieldID, category.FieldParentID, category.FieldSequence, category.FieldMediaCount:
@@ -189,6 +196,22 @@ func (_m *Category) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
 				_m.Description = value.String
+			}
+		case category.FieldNameI18n:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field name_i18n", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.NameI18n); err != nil {
+					return fmt.Errorf("unmarshal field name_i18n: %w", err)
+				}
+			}
+		case category.FieldDescriptionI18n:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field description_i18n", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.DescriptionI18n); err != nil {
+					return fmt.Errorf("unmarshal field description_i18n: %w", err)
+				}
 			}
 		case category.FieldThumbnail:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -355,6 +378,12 @@ func (_m *Category) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
+	builder.WriteString(", ")
+	builder.WriteString("name_i18n=")
+	builder.WriteString(fmt.Sprintf("%v", _m.NameI18n))
+	builder.WriteString(", ")
+	builder.WriteString("description_i18n=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DescriptionI18n))
 	builder.WriteString(", ")
 	builder.WriteString("thumbnail=")
 	builder.WriteString(_m.Thumbnail)

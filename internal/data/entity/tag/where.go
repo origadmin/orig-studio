@@ -445,6 +445,26 @@ func DescriptionContainsFold(v string) predicate.Tag {
 	return predicate.Tag(sql.FieldContainsFold(FieldDescription, v))
 }
 
+// TitleI18nIsNil applies the IsNil predicate on the "title_i18n" field.
+func TitleI18nIsNil() predicate.Tag {
+	return predicate.Tag(sql.FieldIsNull(FieldTitleI18n))
+}
+
+// TitleI18nNotNil applies the NotNil predicate on the "title_i18n" field.
+func TitleI18nNotNil() predicate.Tag {
+	return predicate.Tag(sql.FieldNotNull(FieldTitleI18n))
+}
+
+// DescriptionI18nIsNil applies the IsNil predicate on the "description_i18n" field.
+func DescriptionI18nIsNil() predicate.Tag {
+	return predicate.Tag(sql.FieldIsNull(FieldDescriptionI18n))
+}
+
+// DescriptionI18nNotNil applies the NotNil predicate on the "description_i18n" field.
+func DescriptionI18nNotNil() predicate.Tag {
+	return predicate.Tag(sql.FieldNotNull(FieldDescriptionI18n))
+}
+
 // ColorEQ applies the EQ predicate on the "color" field.
 func ColorEQ(v string) predicate.Tag {
 	return predicate.Tag(sql.FieldEQ(FieldColor, v))
@@ -615,6 +635,29 @@ func HasUser() predicate.Tag {
 func HasUserWith(preds ...predicate.User) predicate.Tag {
 	return predicate.Tag(func(s *sql.Selector) {
 		step := newUserStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasNames applies the HasEdge predicate on the "names" edge.
+func HasNames() predicate.Tag {
+	return predicate.Tag(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, NamesTable, NamesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasNamesWith applies the HasEdge predicate on the "names" edge with a given conditions (other predicates).
+func HasNamesWith(preds ...predicate.TagName) predicate.Tag {
+	return predicate.Tag(func(s *sql.Selector) {
+		step := newNamesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

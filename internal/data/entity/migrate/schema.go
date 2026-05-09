@@ -22,6 +22,9 @@ var (
 		{Name: "comment_count", Type: field.TypeInt64, Default: 0},
 		{Name: "featured", Type: field.TypeBool, Default: false},
 		{Name: "tags", Type: field.TypeJSON, Nullable: true},
+		{Name: "title_i18n", Type: field.TypeJSON, Nullable: true},
+		{Name: "content_i18n", Type: field.TypeJSON, Nullable: true},
+		{Name: "summary_i18n", Type: field.TypeJSON, Nullable: true},
 		{Name: "thumbnail", Type: field.TypeString, Nullable: true, Size: 512},
 		{Name: "published_at", Type: field.TypeTime, Nullable: true},
 		{Name: "create_time", Type: field.TypeTime},
@@ -39,25 +42,25 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "content_articles_content_categories_articles",
-				Columns:    []*schema.Column{ContentArticlesColumns[15]},
+				Columns:    []*schema.Column{ContentArticlesColumns[18]},
 				RefColumns: []*schema.Column{ContentCategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "content_articles_user_channels_articles",
-				Columns:    []*schema.Column{ContentArticlesColumns[16]},
+				Columns:    []*schema.Column{ContentArticlesColumns[19]},
 				RefColumns: []*schema.Column{UserChannelsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "content_articles_content_media_articles",
-				Columns:    []*schema.Column{ContentArticlesColumns[17]},
+				Columns:    []*schema.Column{ContentArticlesColumns[20]},
 				RefColumns: []*schema.Column{ContentMediaColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "content_articles_users_articles",
-				Columns:    []*schema.Column{ContentArticlesColumns[18]},
+				Columns:    []*schema.Column{ContentArticlesColumns[21]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -96,22 +99,22 @@ var (
 			{
 				Name:    "article_create_time",
 				Unique:  false,
-				Columns: []*schema.Column{ContentArticlesColumns[13]},
+				Columns: []*schema.Column{ContentArticlesColumns[16]},
 			},
 			{
 				Name:    "article_published_at",
 				Unique:  false,
-				Columns: []*schema.Column{ContentArticlesColumns[12]},
+				Columns: []*schema.Column{ContentArticlesColumns[15]},
 			},
 			{
 				Name:    "article_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{ContentArticlesColumns[18]},
+				Columns: []*schema.Column{ContentArticlesColumns[21]},
 			},
 			{
 				Name:    "article_media_id",
 				Unique:  false,
-				Columns: []*schema.Column{ContentArticlesColumns[17]},
+				Columns: []*schema.Column{ContentArticlesColumns[20]},
 			},
 		},
 	}
@@ -121,6 +124,8 @@ var (
 		{Name: "name", Type: field.TypeString, Unique: true, Size: 128},
 		{Name: "slug", Type: field.TypeString, Unique: true, Nullable: true, Size: 128},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "name_i18n", Type: field.TypeJSON, Nullable: true},
+		{Name: "description_i18n", Type: field.TypeJSON, Nullable: true},
 		{Name: "thumbnail", Type: field.TypeString, Nullable: true, Size: 512},
 		{Name: "listings_thumbnail", Type: field.TypeString, Nullable: true, Size: 512},
 		{Name: "icon", Type: field.TypeString, Nullable: true, Size: 255},
@@ -145,19 +150,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "content_categories_content_categories_children",
-				Columns:    []*schema.Column{ContentCategoriesColumns[16]},
+				Columns:    []*schema.Column{ContentCategoriesColumns[18]},
 				RefColumns: []*schema.Column{ContentCategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "content_categories_content_media_categories_category",
-				Columns:    []*schema.Column{ContentCategoriesColumns[17]},
+				Columns:    []*schema.Column{ContentCategoriesColumns[19]},
 				RefColumns: []*schema.Column{ContentMediaCategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "content_categories_users_categories",
-				Columns:    []*schema.Column{ContentCategoriesColumns[18]},
+				Columns:    []*schema.Column{ContentCategoriesColumns[20]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -176,17 +181,17 @@ var (
 			{
 				Name:    "category_parent_id",
 				Unique:  false,
-				Columns: []*schema.Column{ContentCategoriesColumns[16]},
+				Columns: []*schema.Column{ContentCategoriesColumns[18]},
 			},
 			{
 				Name:    "category_status",
 				Unique:  false,
-				Columns: []*schema.Column{ContentCategoriesColumns[9]},
+				Columns: []*schema.Column{ContentCategoriesColumns[11]},
 			},
 			{
 				Name:    "category_is_global",
 				Unique:  false,
-				Columns: []*schema.Column{ContentCategoriesColumns[11]},
+				Columns: []*schema.Column{ContentCategoriesColumns[13]},
 			},
 		},
 	}
@@ -205,6 +210,8 @@ var (
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"ACTIVE", "INACTIVE", "SUSPENDED", "PENDING_REVIEW"}, Default: "ACTIVE"},
 		{Name: "privacy", Type: field.TypeEnum, Enums: []string{"PUBLIC", "PRIVATE", "UNLISTED", "PAID", "SUBSCRIBERS_ONLY"}, Default: "PUBLIC"},
 		{Name: "tags", Type: field.TypeJSON, Nullable: true},
+		{Name: "name_i18n", Type: field.TypeJSON, Nullable: true},
+		{Name: "description_i18n", Type: field.TypeJSON, Nullable: true},
 		{Name: "is_verified", Type: field.TypeBool, Default: false},
 		{Name: "subscriber_count", Type: field.TypeInt64, Default: 0},
 		{Name: "media_count", Type: field.TypeInt, Default: 0},
@@ -225,13 +232,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "user_channels_content_categories_channels",
-				Columns:    []*schema.Column{UserChannelsColumns[22]},
+				Columns:    []*schema.Column{UserChannelsColumns[24]},
 				RefColumns: []*schema.Column{ContentCategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "user_channels_users_channels",
-				Columns:    []*schema.Column{UserChannelsColumns[23]},
+				Columns:    []*schema.Column{UserChannelsColumns[25]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -240,7 +247,7 @@ var (
 			{
 				Name:    "channel_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{UserChannelsColumns[23]},
+				Columns: []*schema.Column{UserChannelsColumns[25]},
 			},
 			{
 				Name:    "channel_name",
@@ -270,22 +277,22 @@ var (
 			{
 				Name:    "channel_category_id",
 				Unique:  false,
-				Columns: []*schema.Column{UserChannelsColumns[22]},
+				Columns: []*schema.Column{UserChannelsColumns[24]},
 			},
 			{
 				Name:    "channel_create_time",
 				Unique:  false,
-				Columns: []*schema.Column{UserChannelsColumns[20]},
+				Columns: []*schema.Column{UserChannelsColumns[22]},
 			},
 			{
 				Name:    "channel_add_date",
 				Unique:  false,
-				Columns: []*schema.Column{UserChannelsColumns[19]},
+				Columns: []*schema.Column{UserChannelsColumns[21]},
 			},
 			{
 				Name:    "channel_user_id_status",
 				Unique:  false,
-				Columns: []*schema.Column{UserChannelsColumns[23], UserChannelsColumns[10]},
+				Columns: []*schema.Column{UserChannelsColumns[25], UserChannelsColumns[10]},
 			},
 		},
 	}
@@ -740,6 +747,8 @@ var (
 		{Name: "vtt_path", Type: field.TypeString, Nullable: true, Size: 512},
 		{Name: "thumbnail_time", Type: field.TypeFloat64, Nullable: true},
 		{Name: "tags", Type: field.TypeJSON, Nullable: true},
+		{Name: "title_i18n", Type: field.TypeJSON, Nullable: true},
+		{Name: "description_i18n", Type: field.TypeJSON, Nullable: true},
 		{Name: "sync_status", Type: field.TypeString, Nullable: true, Size: 20, Default: "local_only"},
 		{Name: "synced_at", Type: field.TypeTime, Nullable: true},
 		{Name: "published_at", Type: field.TypeTime, Nullable: true},
@@ -761,31 +770,31 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "content_media_content_categories_media",
-				Columns:    []*schema.Column{ContentMediaColumns[46]},
+				Columns:    []*schema.Column{ContentMediaColumns[48]},
 				RefColumns: []*schema.Column{ContentCategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "content_media_user_channels_media",
-				Columns:    []*schema.Column{ContentMediaColumns[47]},
+				Columns:    []*schema.Column{ContentMediaColumns[49]},
 				RefColumns: []*schema.Column{UserChannelsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "content_media_content_media_categories_media",
-				Columns:    []*schema.Column{ContentMediaColumns[48]},
+				Columns:    []*schema.Column{ContentMediaColumns[50]},
 				RefColumns: []*schema.Column{ContentMediaCategoriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "content_media_content_media_tags_media",
-				Columns:    []*schema.Column{ContentMediaColumns[49]},
+				Columns:    []*schema.Column{ContentMediaColumns[51]},
 				RefColumns: []*schema.Column{ContentMediaTagsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "content_media_users_media",
-				Columns:    []*schema.Column{ContentMediaColumns[50]},
+				Columns:    []*schema.Column{ContentMediaColumns[52]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -824,12 +833,12 @@ var (
 			{
 				Name:    "media_create_time",
 				Unique:  false,
-				Columns: []*schema.Column{ContentMediaColumns[42]},
+				Columns: []*schema.Column{ContentMediaColumns[44]},
 			},
 			{
 				Name:    "media_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{ContentMediaColumns[50]},
+				Columns: []*schema.Column{ContentMediaColumns[52]},
 			},
 			{
 				Name:    "media_short_token",
@@ -1336,6 +1345,8 @@ var (
 		{Name: "listings_thumbnail", Type: field.TypeString, Nullable: true, Size: 400, Default: ""},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"ACTIVE", "INACTIVE"}, Default: "ACTIVE"},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "title_i18n", Type: field.TypeJSON, Nullable: true},
+		{Name: "description_i18n", Type: field.TypeJSON, Nullable: true},
 		{Name: "color", Type: field.TypeString, Nullable: true, Size: 32},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
@@ -1349,7 +1360,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "content_tags_content_media_tags_tag",
-				Columns:    []*schema.Column{ContentTagsColumns[10]},
+				Columns:    []*schema.Column{ContentTagsColumns[12]},
 				RefColumns: []*schema.Column{ContentMediaTagsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -1369,6 +1380,41 @@ var (
 				Name:    "tag_media_count",
 				Unique:  false,
 				Columns: []*schema.Column{ContentTagsColumns[3]},
+			},
+		},
+	}
+	// ContentTagNamesColumns holds the columns for the "content_tag_names" table.
+	ContentTagNamesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "language", Type: field.TypeString, Size: 10},
+		{Name: "text", Type: field.TypeString, Size: 255},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "tag_id", Type: field.TypeInt},
+	}
+	// ContentTagNamesTable holds the schema information for the "content_tag_names" table.
+	ContentTagNamesTable = &schema.Table{
+		Name:       "content_tag_names",
+		Columns:    ContentTagNamesColumns,
+		PrimaryKey: []*schema.Column{ContentTagNamesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "content_tag_names_content_tags_names",
+				Columns:    []*schema.Column{ContentTagNamesColumns[5]},
+				RefColumns: []*schema.Column{ContentTagsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "tagname_tag_id_language",
+				Unique:  true,
+				Columns: []*schema.Column{ContentTagNamesColumns[5], ContentTagNamesColumns[1]},
+			},
+			{
+				Name:    "tagname_language_text",
+				Unique:  false,
+				Columns: []*schema.Column{ContentTagNamesColumns[1], ContentTagNamesColumns[2]},
 			},
 		},
 	}
@@ -1606,6 +1652,7 @@ var (
 		SystemSettingsTable,
 		UserSubscriptionsTable,
 		ContentTagsTable,
+		ContentTagNamesTable,
 		SystemUploadSessionsTable,
 		UsersTable,
 		UserPlaylistsTable,
@@ -1737,6 +1784,10 @@ func init() {
 	ContentTagsTable.ForeignKeys[0].RefTable = ContentMediaTagsTable
 	ContentTagsTable.Annotation = &entsql.Annotation{
 		Table: "content_tags",
+	}
+	ContentTagNamesTable.ForeignKeys[0].RefTable = ContentTagsTable
+	ContentTagNamesTable.Annotation = &entsql.Annotation{
+		Table: "content_tag_names",
 	}
 	SystemUploadSessionsTable.Annotation = &entsql.Annotation{
 		Table: "system_upload_sessions",

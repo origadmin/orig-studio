@@ -739,6 +739,30 @@ func (_u *MediaUpdate) ClearTags() *MediaUpdate {
 	return _u
 }
 
+// SetTitleI18n sets the "title_i18n" field.
+func (_u *MediaUpdate) SetTitleI18n(v map[string]string) *MediaUpdate {
+	_u.mutation.SetTitleI18n(v)
+	return _u
+}
+
+// ClearTitleI18n clears the value of the "title_i18n" field.
+func (_u *MediaUpdate) ClearTitleI18n() *MediaUpdate {
+	_u.mutation.ClearTitleI18n()
+	return _u
+}
+
+// SetDescriptionI18n sets the "description_i18n" field.
+func (_u *MediaUpdate) SetDescriptionI18n(v map[string]string) *MediaUpdate {
+	_u.mutation.SetDescriptionI18n(v)
+	return _u
+}
+
+// ClearDescriptionI18n clears the value of the "description_i18n" field.
+func (_u *MediaUpdate) ClearDescriptionI18n() *MediaUpdate {
+	_u.mutation.ClearDescriptionI18n()
+	return _u
+}
+
 // SetSyncStatus sets the "sync_status" field.
 func (_u *MediaUpdate) SetSyncStatus(v string) *MediaUpdate {
 	_u.mutation.SetSyncStatus(v)
@@ -1590,6 +1614,18 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.TagsCleared() {
 		_spec.ClearField(media.FieldTags, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.TitleI18n(); ok {
+		_spec.SetField(media.FieldTitleI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.TitleI18nCleared() {
+		_spec.ClearField(media.FieldTitleI18n, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.DescriptionI18n(); ok {
+		_spec.SetField(media.FieldDescriptionI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.DescriptionI18nCleared() {
+		_spec.ClearField(media.FieldDescriptionI18n, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.SyncStatus(); ok {
 		_spec.SetField(media.FieldSyncStatus, field.TypeString, value)
@@ -2788,6 +2824,30 @@ func (_u *MediaUpdateOne) ClearTags() *MediaUpdateOne {
 	return _u
 }
 
+// SetTitleI18n sets the "title_i18n" field.
+func (_u *MediaUpdateOne) SetTitleI18n(v map[string]string) *MediaUpdateOne {
+	_u.mutation.SetTitleI18n(v)
+	return _u
+}
+
+// ClearTitleI18n clears the value of the "title_i18n" field.
+func (_u *MediaUpdateOne) ClearTitleI18n() *MediaUpdateOne {
+	_u.mutation.ClearTitleI18n()
+	return _u
+}
+
+// SetDescriptionI18n sets the "description_i18n" field.
+func (_u *MediaUpdateOne) SetDescriptionI18n(v map[string]string) *MediaUpdateOne {
+	_u.mutation.SetDescriptionI18n(v)
+	return _u
+}
+
+// ClearDescriptionI18n clears the value of the "description_i18n" field.
+func (_u *MediaUpdateOne) ClearDescriptionI18n() *MediaUpdateOne {
+	_u.mutation.ClearDescriptionI18n()
+	return _u
+}
+
 // SetSyncStatus sets the "sync_status" field.
 func (_u *MediaUpdateOne) SetSyncStatus(v string) *MediaUpdateOne {
 	_u.mutation.SetSyncStatus(v)
@@ -3669,6 +3729,18 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	}
 	if _u.mutation.TagsCleared() {
 		_spec.ClearField(media.FieldTags, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.TitleI18n(); ok {
+		_spec.SetField(media.FieldTitleI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.TitleI18nCleared() {
+		_spec.ClearField(media.FieldTitleI18n, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.DescriptionI18n(); ok {
+		_spec.SetField(media.FieldDescriptionI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.DescriptionI18nCleared() {
+		_spec.ClearField(media.FieldDescriptionI18n, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.SyncStatus(); ok {
 		_spec.SetField(media.FieldSyncStatus, field.TypeString, value)

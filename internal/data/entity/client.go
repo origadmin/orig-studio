@@ -38,6 +38,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/setting"
 	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/tag"
+	"origadmin/application/origcms/internal/data/entity/tagname"
 	"origadmin/application/origcms/internal/data/entity/uploadsession"
 	"origadmin/application/origcms/internal/data/entity/user"
 
@@ -106,6 +107,8 @@ type Client struct {
 	Subscription *SubscriptionClient
 	// Tag is the client for interacting with the Tag builders.
 	Tag *TagClient
+	// TagName is the client for interacting with the TagName builders.
+	TagName *TagNameClient
 	// UploadSession is the client for interacting with the UploadSession builders.
 	UploadSession *UploadSessionClient
 	// User is the client for interacting with the User builders.
@@ -148,6 +151,7 @@ func (c *Client) init() {
 	c.Setting = NewSettingClient(c.config)
 	c.Subscription = NewSubscriptionClient(c.config)
 	c.Tag = NewTagClient(c.config)
+	c.TagName = NewTagNameClient(c.config)
 	c.UploadSession = NewUploadSessionClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -269,6 +273,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Setting:          NewSettingClient(cfg),
 		Subscription:     NewSubscriptionClient(cfg),
 		Tag:              NewTagClient(cfg),
+		TagName:          NewTagNameClient(cfg),
 		UploadSession:    NewUploadSessionClient(cfg),
 		User:             NewUserClient(cfg),
 	}, nil
@@ -317,6 +322,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Setting:          NewSettingClient(cfg),
 		Subscription:     NewSubscriptionClient(cfg),
 		Tag:              NewTagClient(cfg),
+		TagName:          NewTagNameClient(cfg),
 		UploadSession:    NewUploadSessionClient(cfg),
 		User:             NewUserClient(cfg),
 	}, nil
@@ -353,7 +359,7 @@ func (c *Client) Use(hooks ...Hook) {
 		c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaReport, c.MediaReviewLog,
 		c.MediaTag, c.Notification, c.PermissionGroup, c.Playlist, c.PortalBanner,
 		c.PortalCustomPage, c.PortalNavItem, c.Setting, c.Subscription, c.Tag,
-		c.UploadSession, c.User,
+		c.TagName, c.UploadSession, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -368,7 +374,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaReport, c.MediaReviewLog,
 		c.MediaTag, c.Notification, c.PermissionGroup, c.Playlist, c.PortalBanner,
 		c.PortalCustomPage, c.PortalNavItem, c.Setting, c.Subscription, c.Tag,
-		c.UploadSession, c.User,
+		c.TagName, c.UploadSession, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -431,6 +437,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Subscription.mutate(ctx, m)
 	case *TagMutation:
 		return c.Tag.mutate(ctx, m)
+	case *TagNameMutation:
+		return c.TagName.mutate(ctx, m)
 	case *UploadSessionMutation:
 		return c.UploadSession.mutate(ctx, m)
 	case *UserMutation:
@@ -4966,6 +4974,22 @@ func (c *TagClient) QueryUser(_m *Tag) *UserQuery {
 	return query
 }
 
+// QueryNames queries the names edge of a Tag.
+func (c *TagClient) QueryNames(_m *Tag) *TagNameQuery {
+	query := (&TagNameClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tag.Table, tag.FieldID, id),
+			sqlgraph.To(tagname.Table, tagname.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tag.NamesTable, tag.NamesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *TagClient) Hooks() []Hook {
 	return c.hooks.Tag
@@ -4988,6 +5012,155 @@ func (c *TagClient) mutate(ctx context.Context, m *TagMutation) (Value, error) {
 		return (&TagDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("entity: unknown Tag mutation op: %q", m.Op())
+	}
+}
+
+// TagNameClient is a client for the TagName schema.
+type TagNameClient struct {
+	config
+}
+
+// NewTagNameClient returns a client for the TagName from the given config.
+func NewTagNameClient(c config) *TagNameClient {
+	return &TagNameClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tagname.Hooks(f(g(h())))`.
+func (c *TagNameClient) Use(hooks ...Hook) {
+	c.hooks.TagName = append(c.hooks.TagName, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tagname.Intercept(f(g(h())))`.
+func (c *TagNameClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TagName = append(c.inters.TagName, interceptors...)
+}
+
+// Create returns a builder for creating a TagName entity.
+func (c *TagNameClient) Create() *TagNameCreate {
+	mutation := newTagNameMutation(c.config, OpCreate)
+	return &TagNameCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TagName entities.
+func (c *TagNameClient) CreateBulk(builders ...*TagNameCreate) *TagNameCreateBulk {
+	return &TagNameCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TagNameClient) MapCreateBulk(slice any, setFunc func(*TagNameCreate, int)) *TagNameCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TagNameCreateBulk{err: fmt.Errorf("calling to TagNameClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TagNameCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TagNameCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TagName.
+func (c *TagNameClient) Update() *TagNameUpdate {
+	mutation := newTagNameMutation(c.config, OpUpdate)
+	return &TagNameUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TagNameClient) UpdateOne(_m *TagName) *TagNameUpdateOne {
+	mutation := newTagNameMutation(c.config, OpUpdateOne, withTagName(_m))
+	return &TagNameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TagNameClient) UpdateOneID(id int) *TagNameUpdateOne {
+	mutation := newTagNameMutation(c.config, OpUpdateOne, withTagNameID(id))
+	return &TagNameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TagName.
+func (c *TagNameClient) Delete() *TagNameDelete {
+	mutation := newTagNameMutation(c.config, OpDelete)
+	return &TagNameDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TagNameClient) DeleteOne(_m *TagName) *TagNameDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TagNameClient) DeleteOneID(id int) *TagNameDeleteOne {
+	builder := c.Delete().Where(tagname.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TagNameDeleteOne{builder}
+}
+
+// Query returns a query builder for TagName.
+func (c *TagNameClient) Query() *TagNameQuery {
+	return &TagNameQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTagName},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TagName entity by its id.
+func (c *TagNameClient) Get(ctx context.Context, id int) (*TagName, error) {
+	return c.Query().Where(tagname.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TagNameClient) GetX(ctx context.Context, id int) *TagName {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTag queries the tag edge of a TagName.
+func (c *TagNameClient) QueryTag(_m *TagName) *TagQuery {
+	query := (&TagClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tagname.Table, tagname.FieldID, id),
+			sqlgraph.To(tag.Table, tag.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, tagname.TagTable, tagname.TagColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TagNameClient) Hooks() []Hook {
+	return c.hooks.TagName
+}
+
+// Interceptors returns the client interceptors.
+func (c *TagNameClient) Interceptors() []Interceptor {
+	return c.inters.TagName
+}
+
+func (c *TagNameClient) mutate(ctx context.Context, m *TagNameMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TagNameCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TagNameUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TagNameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TagNameDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entity: unknown TagName mutation op: %q", m.Op())
 	}
 }
 
@@ -5584,13 +5757,13 @@ type (
 		EncodingTask, Favorite, GroupMember, History, Like, Media, MediaCategory,
 		MediaPlaylist, MediaReport, MediaReviewLog, MediaTag, Notification,
 		PermissionGroup, Playlist, PortalBanner, PortalCustomPage, PortalNavItem,
-		Setting, Subscription, Tag, UploadSession, User []ent.Hook
+		Setting, Subscription, Tag, TagName, UploadSession, User []ent.Hook
 	}
 	inters struct {
 		Article, Category, Channel, Comment, CommentLike, CommentReport, EncodeProfile,
 		EncodingTask, Favorite, GroupMember, History, Like, Media, MediaCategory,
 		MediaPlaylist, MediaReport, MediaReviewLog, MediaTag, Notification,
 		PermissionGroup, Playlist, PortalBanner, PortalCustomPage, PortalNavItem,
-		Setting, Subscription, Tag, UploadSession, User []ent.Interceptor
+		Setting, Subscription, Tag, TagName, UploadSession, User []ent.Interceptor
 	}
 )

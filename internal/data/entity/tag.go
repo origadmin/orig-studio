@@ -3,6 +3,7 @@
 package entity
 
 import (
+	"encoding/json"
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/tag"
 	"strings"
@@ -29,6 +30,10 @@ type Tag struct {
 	Status tag.Status `json:"status,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
+	// TitleI18n holds the value of the "title_i18n" field.
+	TitleI18n map[string]string `json:"title_i18n,omitempty"`
+	// DescriptionI18n holds the value of the "description_i18n" field.
+	DescriptionI18n map[string]string `json:"description_i18n,omitempty"`
 	// Color holds the value of the "color" field.
 	Color string `json:"color,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
@@ -46,9 +51,11 @@ type Tag struct {
 type TagEdges struct {
 	// User holds the value of the user edge.
 	User []*User `json:"user,omitempty"`
+	// Names holds the value of the names edge.
+	Names []*TagName `json:"names,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -60,11 +67,22 @@ func (e TagEdges) UserOrErr() ([]*User, error) {
 	return nil, &NotLoadedError{edge: "user"}
 }
 
+// NamesOrErr returns the Names value or an error if the edge
+// was not loaded in eager-loading.
+func (e TagEdges) NamesOrErr() ([]*TagName, error) {
+	if e.loadedTypes[1] {
+		return e.Names, nil
+	}
+	return nil, &NotLoadedError{edge: "names"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Tag) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case tag.FieldTitleI18n, tag.FieldDescriptionI18n:
+			values[i] = new([]byte)
 		case tag.FieldID, tag.FieldMediaCount:
 			values[i] = new(sql.NullInt64)
 		case tag.FieldTitle, tag.FieldSlug, tag.FieldListingsThumbnail, tag.FieldStatus, tag.FieldDescription, tag.FieldColor:
@@ -130,6 +148,22 @@ func (_m *Tag) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Description = value.String
 			}
+		case tag.FieldTitleI18n:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field title_i18n", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.TitleI18n); err != nil {
+					return fmt.Errorf("unmarshal field title_i18n: %w", err)
+				}
+			}
+		case tag.FieldDescriptionI18n:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field description_i18n", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.DescriptionI18n); err != nil {
+					return fmt.Errorf("unmarshal field description_i18n: %w", err)
+				}
+			}
 		case tag.FieldColor:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field color", values[i])
@@ -173,6 +207,11 @@ func (_m *Tag) QueryUser() *UserQuery {
 	return NewTagClient(_m.config).QueryUser(_m)
 }
 
+// QueryNames queries the "names" edge of the Tag entity.
+func (_m *Tag) QueryNames() *TagNameQuery {
+	return NewTagClient(_m.config).QueryNames(_m)
+}
+
 // Update returns a builder for updating this Tag.
 // Note that you need to call Tag.Unwrap() before calling this method if this Tag
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -213,6 +252,12 @@ func (_m *Tag) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
+	builder.WriteString(", ")
+	builder.WriteString("title_i18n=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TitleI18n))
+	builder.WriteString(", ")
+	builder.WriteString("description_i18n=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DescriptionI18n))
 	builder.WriteString(", ")
 	builder.WriteString("color=")
 	builder.WriteString(_m.Color)

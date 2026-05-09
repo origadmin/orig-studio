@@ -27,6 +27,10 @@ const (
 	FieldStatus = "status"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// FieldTitleI18n holds the string denoting the title_i18n field in the database.
+	FieldTitleI18n = "title_i18n"
+	// FieldDescriptionI18n holds the string denoting the description_i18n field in the database.
+	FieldDescriptionI18n = "description_i18n"
 	// FieldColor holds the string denoting the color field in the database.
 	FieldColor = "color"
 	// FieldCreateTime holds the string denoting the create_time field in the database.
@@ -35,6 +39,8 @@ const (
 	FieldUpdateTime = "update_time"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
+	// EdgeNames holds the string denoting the names edge name in mutations.
+	EdgeNames = "names"
 	// Table holds the table name of the tag in the database.
 	Table = "content_tags"
 	// UserTable is the table that holds the user relation/edge. The primary key declared below.
@@ -42,6 +48,13 @@ const (
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
+	// NamesTable is the table that holds the names relation/edge.
+	NamesTable = "content_tag_names"
+	// NamesInverseTable is the table name for the TagName entity.
+	// It exists in this package in order to avoid circular dependency with the "tagname" package.
+	NamesInverseTable = "content_tag_names"
+	// NamesColumn is the table column denoting the names relation/edge.
+	NamesColumn = "tag_id"
 )
 
 // Columns holds all SQL columns for tag fields.
@@ -53,6 +66,8 @@ var Columns = []string{
 	FieldListingsThumbnail,
 	FieldStatus,
 	FieldDescription,
+	FieldTitleI18n,
+	FieldDescriptionI18n,
 	FieldColor,
 	FieldCreateTime,
 	FieldUpdateTime,
@@ -200,10 +215,31 @@ func ByUser(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newUserStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByNamesCount orders the results by names count.
+func ByNamesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newNamesStep(), opts...)
+	}
+}
+
+// ByNames orders the results by names terms.
+func ByNames(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newNamesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, true, UserTable, UserPrimaryKey...),
+	)
+}
+func newNamesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(NamesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, NamesTable, NamesColumn),
 	)
 }

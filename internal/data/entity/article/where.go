@@ -655,6 +655,36 @@ func TagsNotNil() predicate.Article {
 	return predicate.Article(sql.FieldNotNull(FieldTags))
 }
 
+// TitleI18nIsNil applies the IsNil predicate on the "title_i18n" field.
+func TitleI18nIsNil() predicate.Article {
+	return predicate.Article(sql.FieldIsNull(FieldTitleI18n))
+}
+
+// TitleI18nNotNil applies the NotNil predicate on the "title_i18n" field.
+func TitleI18nNotNil() predicate.Article {
+	return predicate.Article(sql.FieldNotNull(FieldTitleI18n))
+}
+
+// ContentI18nIsNil applies the IsNil predicate on the "content_i18n" field.
+func ContentI18nIsNil() predicate.Article {
+	return predicate.Article(sql.FieldIsNull(FieldContentI18n))
+}
+
+// ContentI18nNotNil applies the NotNil predicate on the "content_i18n" field.
+func ContentI18nNotNil() predicate.Article {
+	return predicate.Article(sql.FieldNotNull(FieldContentI18n))
+}
+
+// SummaryI18nIsNil applies the IsNil predicate on the "summary_i18n" field.
+func SummaryI18nIsNil() predicate.Article {
+	return predicate.Article(sql.FieldIsNull(FieldSummaryI18n))
+}
+
+// SummaryI18nNotNil applies the NotNil predicate on the "summary_i18n" field.
+func SummaryI18nNotNil() predicate.Article {
+	return predicate.Article(sql.FieldNotNull(FieldSummaryI18n))
+}
+
 // UserIDEQ applies the EQ predicate on the "user_id" field.
 func UserIDEQ(v string) predicate.Article {
 	return predicate.Article(sql.FieldEQ(FieldUserID, v))

@@ -159,6 +159,18 @@ func (_c *ChannelCreate) SetTags(v []string) *ChannelCreate {
 	return _c
 }
 
+// SetNameI18n sets the "name_i18n" field.
+func (_c *ChannelCreate) SetNameI18n(v map[string]string) *ChannelCreate {
+	_c.mutation.SetNameI18n(v)
+	return _c
+}
+
+// SetDescriptionI18n sets the "description_i18n" field.
+func (_c *ChannelCreate) SetDescriptionI18n(v map[string]string) *ChannelCreate {
+	_c.mutation.SetDescriptionI18n(v)
+	return _c
+}
+
 // SetCategoryID sets the "category_id" field.
 func (_c *ChannelCreate) SetCategoryID(v int64) *ChannelCreate {
 	_c.mutation.SetCategoryID(v)
@@ -620,6 +632,14 @@ func (_c *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Tags(); ok {
 		_spec.SetField(channel.FieldTags, field.TypeJSON, value)
 		_node.Tags = value
+	}
+	if value, ok := _c.mutation.NameI18n(); ok {
+		_spec.SetField(channel.FieldNameI18n, field.TypeJSON, value)
+		_node.NameI18n = value
+	}
+	if value, ok := _c.mutation.DescriptionI18n(); ok {
+		_spec.SetField(channel.FieldDescriptionI18n, field.TypeJSON, value)
+		_node.DescriptionI18n = value
 	}
 	if value, ok := _c.mutation.IsVerified(); ok {
 		_spec.SetField(channel.FieldIsVerified, field.TypeBool, value)

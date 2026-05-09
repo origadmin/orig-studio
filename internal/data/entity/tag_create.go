@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/tag"
+	"origadmin/application/origcms/internal/data/entity/tagname"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
 
@@ -97,6 +98,18 @@ func (_c *TagCreate) SetNillableDescription(v *string) *TagCreate {
 	return _c
 }
 
+// SetTitleI18n sets the "title_i18n" field.
+func (_c *TagCreate) SetTitleI18n(v map[string]string) *TagCreate {
+	_c.mutation.SetTitleI18n(v)
+	return _c
+}
+
+// SetDescriptionI18n sets the "description_i18n" field.
+func (_c *TagCreate) SetDescriptionI18n(v map[string]string) *TagCreate {
+	_c.mutation.SetDescriptionI18n(v)
+	return _c
+}
+
 // SetColor sets the "color" field.
 func (_c *TagCreate) SetColor(v string) *TagCreate {
 	_c.mutation.SetColor(v)
@@ -152,6 +165,21 @@ func (_c *TagCreate) AddUser(v ...*User) *TagCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddUserIDs(ids...)
+}
+
+// AddNameIDs adds the "names" edge to the TagName entity by IDs.
+func (_c *TagCreate) AddNameIDs(ids ...int) *TagCreate {
+	_c.mutation.AddNameIDs(ids...)
+	return _c
+}
+
+// AddNames adds the "names" edges to the TagName entity.
+func (_c *TagCreate) AddNames(v ...*TagName) *TagCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddNameIDs(ids...)
 }
 
 // Mutation returns the TagMutation object of the builder.
@@ -308,6 +336,14 @@ func (_c *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 		_spec.SetField(tag.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
+	if value, ok := _c.mutation.TitleI18n(); ok {
+		_spec.SetField(tag.FieldTitleI18n, field.TypeJSON, value)
+		_node.TitleI18n = value
+	}
+	if value, ok := _c.mutation.DescriptionI18n(); ok {
+		_spec.SetField(tag.FieldDescriptionI18n, field.TypeJSON, value)
+		_node.DescriptionI18n = value
+	}
 	if value, ok := _c.mutation.Color(); ok {
 		_spec.SetField(tag.FieldColor, field.TypeString, value)
 		_node.Color = value
@@ -329,6 +365,22 @@ func (_c *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.NamesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.NamesTable,
+			Columns: []string{tag.NamesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tagname.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
