@@ -66,6 +66,8 @@ type Tx struct {
 	Subscription *SubscriptionClient
 	// Tag is the client for interacting with the Tag builders.
 	Tag *TagClient
+	// TagName is the client for interacting with the TagName builders.
+	TagName *TagNameClient
 	// UploadSession is the client for interacting with the UploadSession builders.
 	UploadSession *UploadSessionClient
 	// User is the client for interacting with the User builders.
@@ -228,6 +230,7 @@ func (tx *Tx) init() {
 	tx.Setting = NewSettingClient(tx.config)
 	tx.Subscription = NewSubscriptionClient(tx.config)
 	tx.Tag = NewTagClient(tx.config)
+	tx.TagName = NewTagNameClient(tx.config)
 	tx.UploadSession = NewUploadSessionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }

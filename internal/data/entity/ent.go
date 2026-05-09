@@ -33,6 +33,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/setting"
 	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/tag"
+	"origadmin/application/origcms/internal/data/entity/tagname"
 	"origadmin/application/origcms/internal/data/entity/uploadsession"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"reflect"
@@ -128,6 +129,7 @@ func checkColumn(t, c string) error {
 			setting.Table:          setting.ValidColumn,
 			subscription.Table:     subscription.ValidColumn,
 			tag.Table:              tag.ValidColumn,
+			tagname.Table:          tagname.ValidColumn,
 			uploadsession.Table:    uploadsession.ValidColumn,
 			user.Table:             user.ValidColumn,
 		})

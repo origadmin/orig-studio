@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"origadmin/application/origcms/internal/data/entity/tag"
+	"origadmin/application/origcms/internal/data/entity/tagname"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
 
@@ -139,6 +140,30 @@ func (_u *TagUpdate) ClearDescription() *TagUpdate {
 	return _u
 }
 
+// SetTitleI18n sets the "title_i18n" field.
+func (_u *TagUpdate) SetTitleI18n(v map[string]string) *TagUpdate {
+	_u.mutation.SetTitleI18n(v)
+	return _u
+}
+
+// ClearTitleI18n clears the value of the "title_i18n" field.
+func (_u *TagUpdate) ClearTitleI18n() *TagUpdate {
+	_u.mutation.ClearTitleI18n()
+	return _u
+}
+
+// SetDescriptionI18n sets the "description_i18n" field.
+func (_u *TagUpdate) SetDescriptionI18n(v map[string]string) *TagUpdate {
+	_u.mutation.SetDescriptionI18n(v)
+	return _u
+}
+
+// ClearDescriptionI18n clears the value of the "description_i18n" field.
+func (_u *TagUpdate) ClearDescriptionI18n() *TagUpdate {
+	_u.mutation.ClearDescriptionI18n()
+	return _u
+}
+
 // SetColor sets the "color" field.
 func (_u *TagUpdate) SetColor(v string) *TagUpdate {
 	_u.mutation.SetColor(v)
@@ -194,6 +219,21 @@ func (_u *TagUpdate) AddUser(v ...*User) *TagUpdate {
 	return _u.AddUserIDs(ids...)
 }
 
+// AddNameIDs adds the "names" edge to the TagName entity by IDs.
+func (_u *TagUpdate) AddNameIDs(ids ...int) *TagUpdate {
+	_u.mutation.AddNameIDs(ids...)
+	return _u
+}
+
+// AddNames adds the "names" edges to the TagName entity.
+func (_u *TagUpdate) AddNames(v ...*TagName) *TagUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddNameIDs(ids...)
+}
+
 // Mutation returns the TagMutation object of the builder.
 func (_u *TagUpdate) Mutation() *TagMutation {
 	return _u.mutation
@@ -218,6 +258,27 @@ func (_u *TagUpdate) RemoveUser(v ...*User) *TagUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserIDs(ids...)
+}
+
+// ClearNames clears all "names" edges to the TagName entity.
+func (_u *TagUpdate) ClearNames() *TagUpdate {
+	_u.mutation.ClearNames()
+	return _u
+}
+
+// RemoveNameIDs removes the "names" edge to TagName entities by IDs.
+func (_u *TagUpdate) RemoveNameIDs(ids ...int) *TagUpdate {
+	_u.mutation.RemoveNameIDs(ids...)
+	return _u
+}
+
+// RemoveNames removes "names" edges to TagName entities.
+func (_u *TagUpdate) RemoveNames(v ...*TagName) *TagUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveNameIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -339,6 +400,18 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(tag.FieldDescription, field.TypeString)
 	}
+	if value, ok := _u.mutation.TitleI18n(); ok {
+		_spec.SetField(tag.FieldTitleI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.TitleI18nCleared() {
+		_spec.ClearField(tag.FieldTitleI18n, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.DescriptionI18n(); ok {
+		_spec.SetField(tag.FieldDescriptionI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.DescriptionI18nCleared() {
+		_spec.ClearField(tag.FieldDescriptionI18n, field.TypeJSON)
+	}
 	if value, ok := _u.mutation.Color(); ok {
 		_spec.SetField(tag.FieldColor, field.TypeString, value)
 	}
@@ -389,6 +462,51 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.NamesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.NamesTable,
+			Columns: []string{tag.NamesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tagname.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedNamesIDs(); len(nodes) > 0 && !_u.mutation.NamesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.NamesTable,
+			Columns: []string{tag.NamesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tagname.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.NamesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.NamesTable,
+			Columns: []string{tag.NamesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tagname.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -527,6 +645,30 @@ func (_u *TagUpdateOne) ClearDescription() *TagUpdateOne {
 	return _u
 }
 
+// SetTitleI18n sets the "title_i18n" field.
+func (_u *TagUpdateOne) SetTitleI18n(v map[string]string) *TagUpdateOne {
+	_u.mutation.SetTitleI18n(v)
+	return _u
+}
+
+// ClearTitleI18n clears the value of the "title_i18n" field.
+func (_u *TagUpdateOne) ClearTitleI18n() *TagUpdateOne {
+	_u.mutation.ClearTitleI18n()
+	return _u
+}
+
+// SetDescriptionI18n sets the "description_i18n" field.
+func (_u *TagUpdateOne) SetDescriptionI18n(v map[string]string) *TagUpdateOne {
+	_u.mutation.SetDescriptionI18n(v)
+	return _u
+}
+
+// ClearDescriptionI18n clears the value of the "description_i18n" field.
+func (_u *TagUpdateOne) ClearDescriptionI18n() *TagUpdateOne {
+	_u.mutation.ClearDescriptionI18n()
+	return _u
+}
+
 // SetColor sets the "color" field.
 func (_u *TagUpdateOne) SetColor(v string) *TagUpdateOne {
 	_u.mutation.SetColor(v)
@@ -582,6 +724,21 @@ func (_u *TagUpdateOne) AddUser(v ...*User) *TagUpdateOne {
 	return _u.AddUserIDs(ids...)
 }
 
+// AddNameIDs adds the "names" edge to the TagName entity by IDs.
+func (_u *TagUpdateOne) AddNameIDs(ids ...int) *TagUpdateOne {
+	_u.mutation.AddNameIDs(ids...)
+	return _u
+}
+
+// AddNames adds the "names" edges to the TagName entity.
+func (_u *TagUpdateOne) AddNames(v ...*TagName) *TagUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddNameIDs(ids...)
+}
+
 // Mutation returns the TagMutation object of the builder.
 func (_u *TagUpdateOne) Mutation() *TagMutation {
 	return _u.mutation
@@ -606,6 +763,27 @@ func (_u *TagUpdateOne) RemoveUser(v ...*User) *TagUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserIDs(ids...)
+}
+
+// ClearNames clears all "names" edges to the TagName entity.
+func (_u *TagUpdateOne) ClearNames() *TagUpdateOne {
+	_u.mutation.ClearNames()
+	return _u
+}
+
+// RemoveNameIDs removes the "names" edge to TagName entities by IDs.
+func (_u *TagUpdateOne) RemoveNameIDs(ids ...int) *TagUpdateOne {
+	_u.mutation.RemoveNameIDs(ids...)
+	return _u
+}
+
+// RemoveNames removes "names" edges to TagName entities.
+func (_u *TagUpdateOne) RemoveNames(v ...*TagName) *TagUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveNameIDs(ids...)
 }
 
 // Where appends a list predicates to the TagUpdate builder.
@@ -757,6 +935,18 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(tag.FieldDescription, field.TypeString)
 	}
+	if value, ok := _u.mutation.TitleI18n(); ok {
+		_spec.SetField(tag.FieldTitleI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.TitleI18nCleared() {
+		_spec.ClearField(tag.FieldTitleI18n, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.DescriptionI18n(); ok {
+		_spec.SetField(tag.FieldDescriptionI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.DescriptionI18nCleared() {
+		_spec.ClearField(tag.FieldDescriptionI18n, field.TypeJSON)
+	}
 	if value, ok := _u.mutation.Color(); ok {
 		_spec.SetField(tag.FieldColor, field.TypeString, value)
 	}
@@ -807,6 +997,51 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.NamesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.NamesTable,
+			Columns: []string{tag.NamesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tagname.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedNamesIDs(); len(nodes) > 0 && !_u.mutation.NamesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.NamesTable,
+			Columns: []string{tag.NamesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tagname.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.NamesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.NamesTable,
+			Columns: []string{tag.NamesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tagname.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -35,6 +35,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/setting"
 	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/tag"
+	"origadmin/application/origcms/internal/data/entity/tagname"
 	"origadmin/application/origcms/internal/data/entity/uploadsession"
 	"origadmin/application/origcms/internal/data/entity/user"
 	"origadmin/application/origcms/internal/data/enums"
@@ -81,6 +82,7 @@ const (
 	TypeSetting          = "Setting"
 	TypeSubscription     = "Subscription"
 	TypeTag              = "Tag"
+	TypeTagName          = "TagName"
 	TypeUploadSession    = "UploadSession"
 	TypeUser             = "User"
 )
@@ -104,6 +106,9 @@ type ArticleMutation struct {
 	featured         *bool
 	tags             *[]string
 	appendtags       []string
+	title_i18n       *map[string]string
+	content_i18n     *map[string]string
+	summary_i18n     *map[string]string
 	thumbnail        *string
 	published_at     *time.Time
 	create_time      *time.Time
@@ -682,6 +687,153 @@ func (m *ArticleMutation) ResetTags() {
 	delete(m.clearedFields, article.FieldTags)
 }
 
+// SetTitleI18n sets the "title_i18n" field.
+func (m *ArticleMutation) SetTitleI18n(value map[string]string) {
+	m.title_i18n = &value
+}
+
+// TitleI18n returns the value of the "title_i18n" field in the mutation.
+func (m *ArticleMutation) TitleI18n() (r map[string]string, exists bool) {
+	v := m.title_i18n
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitleI18n returns the old "title_i18n" field's value of the Article entity.
+// If the Article object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ArticleMutation) OldTitleI18n(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitleI18n is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitleI18n requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitleI18n: %w", err)
+	}
+	return oldValue.TitleI18n, nil
+}
+
+// ClearTitleI18n clears the value of the "title_i18n" field.
+func (m *ArticleMutation) ClearTitleI18n() {
+	m.title_i18n = nil
+	m.clearedFields[article.FieldTitleI18n] = struct{}{}
+}
+
+// TitleI18nCleared returns if the "title_i18n" field was cleared in this mutation.
+func (m *ArticleMutation) TitleI18nCleared() bool {
+	_, ok := m.clearedFields[article.FieldTitleI18n]
+	return ok
+}
+
+// ResetTitleI18n resets all changes to the "title_i18n" field.
+func (m *ArticleMutation) ResetTitleI18n() {
+	m.title_i18n = nil
+	delete(m.clearedFields, article.FieldTitleI18n)
+}
+
+// SetContentI18n sets the "content_i18n" field.
+func (m *ArticleMutation) SetContentI18n(value map[string]string) {
+	m.content_i18n = &value
+}
+
+// ContentI18n returns the value of the "content_i18n" field in the mutation.
+func (m *ArticleMutation) ContentI18n() (r map[string]string, exists bool) {
+	v := m.content_i18n
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContentI18n returns the old "content_i18n" field's value of the Article entity.
+// If the Article object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ArticleMutation) OldContentI18n(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContentI18n is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContentI18n requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContentI18n: %w", err)
+	}
+	return oldValue.ContentI18n, nil
+}
+
+// ClearContentI18n clears the value of the "content_i18n" field.
+func (m *ArticleMutation) ClearContentI18n() {
+	m.content_i18n = nil
+	m.clearedFields[article.FieldContentI18n] = struct{}{}
+}
+
+// ContentI18nCleared returns if the "content_i18n" field was cleared in this mutation.
+func (m *ArticleMutation) ContentI18nCleared() bool {
+	_, ok := m.clearedFields[article.FieldContentI18n]
+	return ok
+}
+
+// ResetContentI18n resets all changes to the "content_i18n" field.
+func (m *ArticleMutation) ResetContentI18n() {
+	m.content_i18n = nil
+	delete(m.clearedFields, article.FieldContentI18n)
+}
+
+// SetSummaryI18n sets the "summary_i18n" field.
+func (m *ArticleMutation) SetSummaryI18n(value map[string]string) {
+	m.summary_i18n = &value
+}
+
+// SummaryI18n returns the value of the "summary_i18n" field in the mutation.
+func (m *ArticleMutation) SummaryI18n() (r map[string]string, exists bool) {
+	v := m.summary_i18n
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSummaryI18n returns the old "summary_i18n" field's value of the Article entity.
+// If the Article object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ArticleMutation) OldSummaryI18n(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSummaryI18n is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSummaryI18n requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSummaryI18n: %w", err)
+	}
+	return oldValue.SummaryI18n, nil
+}
+
+// ClearSummaryI18n clears the value of the "summary_i18n" field.
+func (m *ArticleMutation) ClearSummaryI18n() {
+	m.summary_i18n = nil
+	m.clearedFields[article.FieldSummaryI18n] = struct{}{}
+}
+
+// SummaryI18nCleared returns if the "summary_i18n" field was cleared in this mutation.
+func (m *ArticleMutation) SummaryI18nCleared() bool {
+	_, ok := m.clearedFields[article.FieldSummaryI18n]
+	return ok
+}
+
+// ResetSummaryI18n resets all changes to the "summary_i18n" field.
+func (m *ArticleMutation) ResetSummaryI18n() {
+	m.summary_i18n = nil
+	delete(m.clearedFields, article.FieldSummaryI18n)
+}
+
 // SetUserID sets the "user_id" field.
 func (m *ArticleMutation) SetUserID(s string) {
 	m.user = &s
@@ -1155,7 +1307,7 @@ func (m *ArticleMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ArticleMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 20)
 	if m.title != nil {
 		fields = append(fields, article.FieldTitle)
 	}
@@ -1185,6 +1337,15 @@ func (m *ArticleMutation) Fields() []string {
 	}
 	if m.tags != nil {
 		fields = append(fields, article.FieldTags)
+	}
+	if m.title_i18n != nil {
+		fields = append(fields, article.FieldTitleI18n)
+	}
+	if m.content_i18n != nil {
+		fields = append(fields, article.FieldContentI18n)
+	}
+	if m.summary_i18n != nil {
+		fields = append(fields, article.FieldSummaryI18n)
 	}
 	if m.user != nil {
 		fields = append(fields, article.FieldUserID)
@@ -1235,6 +1396,12 @@ func (m *ArticleMutation) Field(name string) (ent.Value, bool) {
 		return m.Featured()
 	case article.FieldTags:
 		return m.Tags()
+	case article.FieldTitleI18n:
+		return m.TitleI18n()
+	case article.FieldContentI18n:
+		return m.ContentI18n()
+	case article.FieldSummaryI18n:
+		return m.SummaryI18n()
 	case article.FieldUserID:
 		return m.UserID()
 	case article.FieldCategoryID:
@@ -1278,6 +1445,12 @@ func (m *ArticleMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldFeatured(ctx)
 	case article.FieldTags:
 		return m.OldTags(ctx)
+	case article.FieldTitleI18n:
+		return m.OldTitleI18n(ctx)
+	case article.FieldContentI18n:
+		return m.OldContentI18n(ctx)
+	case article.FieldSummaryI18n:
+		return m.OldSummaryI18n(ctx)
 	case article.FieldUserID:
 		return m.OldUserID(ctx)
 	case article.FieldCategoryID:
@@ -1370,6 +1543,27 @@ func (m *ArticleMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTags(v)
+		return nil
+	case article.FieldTitleI18n:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitleI18n(v)
+		return nil
+	case article.FieldContentI18n:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContentI18n(v)
+		return nil
+	case article.FieldSummaryI18n:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSummaryI18n(v)
 		return nil
 	case article.FieldUserID:
 		v, ok := value.(string)
@@ -1486,6 +1680,15 @@ func (m *ArticleMutation) ClearedFields() []string {
 	if m.FieldCleared(article.FieldTags) {
 		fields = append(fields, article.FieldTags)
 	}
+	if m.FieldCleared(article.FieldTitleI18n) {
+		fields = append(fields, article.FieldTitleI18n)
+	}
+	if m.FieldCleared(article.FieldContentI18n) {
+		fields = append(fields, article.FieldContentI18n)
+	}
+	if m.FieldCleared(article.FieldSummaryI18n) {
+		fields = append(fields, article.FieldSummaryI18n)
+	}
 	if m.FieldCleared(article.FieldCategoryID) {
 		fields = append(fields, article.FieldCategoryID)
 	}
@@ -1520,6 +1723,15 @@ func (m *ArticleMutation) ClearField(name string) error {
 		return nil
 	case article.FieldTags:
 		m.ClearTags()
+		return nil
+	case article.FieldTitleI18n:
+		m.ClearTitleI18n()
+		return nil
+	case article.FieldContentI18n:
+		m.ClearContentI18n()
+		return nil
+	case article.FieldSummaryI18n:
+		m.ClearSummaryI18n()
 		return nil
 	case article.FieldCategoryID:
 		m.ClearCategoryID()
@@ -1570,6 +1782,15 @@ func (m *ArticleMutation) ResetField(name string) error {
 		return nil
 	case article.FieldTags:
 		m.ResetTags()
+		return nil
+	case article.FieldTitleI18n:
+		m.ResetTitleI18n()
+		return nil
+	case article.FieldContentI18n:
+		m.ResetContentI18n()
+		return nil
+	case article.FieldSummaryI18n:
+		m.ResetSummaryI18n()
 		return nil
 	case article.FieldUserID:
 		m.ResetUserID()
@@ -1743,6 +1964,8 @@ type CategoryMutation struct {
 	name               *string
 	slug               *string
 	description        *string
+	name_i18n          *map[string]string
+	description_i18n   *map[string]string
 	thumbnail          *string
 	listings_thumbnail *string
 	icon               *string
@@ -2015,6 +2238,104 @@ func (m *CategoryMutation) DescriptionCleared() bool {
 func (m *CategoryMutation) ResetDescription() {
 	m.description = nil
 	delete(m.clearedFields, category.FieldDescription)
+}
+
+// SetNameI18n sets the "name_i18n" field.
+func (m *CategoryMutation) SetNameI18n(value map[string]string) {
+	m.name_i18n = &value
+}
+
+// NameI18n returns the value of the "name_i18n" field in the mutation.
+func (m *CategoryMutation) NameI18n() (r map[string]string, exists bool) {
+	v := m.name_i18n
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNameI18n returns the old "name_i18n" field's value of the Category entity.
+// If the Category object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CategoryMutation) OldNameI18n(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNameI18n is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNameI18n requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNameI18n: %w", err)
+	}
+	return oldValue.NameI18n, nil
+}
+
+// ClearNameI18n clears the value of the "name_i18n" field.
+func (m *CategoryMutation) ClearNameI18n() {
+	m.name_i18n = nil
+	m.clearedFields[category.FieldNameI18n] = struct{}{}
+}
+
+// NameI18nCleared returns if the "name_i18n" field was cleared in this mutation.
+func (m *CategoryMutation) NameI18nCleared() bool {
+	_, ok := m.clearedFields[category.FieldNameI18n]
+	return ok
+}
+
+// ResetNameI18n resets all changes to the "name_i18n" field.
+func (m *CategoryMutation) ResetNameI18n() {
+	m.name_i18n = nil
+	delete(m.clearedFields, category.FieldNameI18n)
+}
+
+// SetDescriptionI18n sets the "description_i18n" field.
+func (m *CategoryMutation) SetDescriptionI18n(value map[string]string) {
+	m.description_i18n = &value
+}
+
+// DescriptionI18n returns the value of the "description_i18n" field in the mutation.
+func (m *CategoryMutation) DescriptionI18n() (r map[string]string, exists bool) {
+	v := m.description_i18n
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescriptionI18n returns the old "description_i18n" field's value of the Category entity.
+// If the Category object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CategoryMutation) OldDescriptionI18n(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescriptionI18n is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescriptionI18n requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescriptionI18n: %w", err)
+	}
+	return oldValue.DescriptionI18n, nil
+}
+
+// ClearDescriptionI18n clears the value of the "description_i18n" field.
+func (m *CategoryMutation) ClearDescriptionI18n() {
+	m.description_i18n = nil
+	m.clearedFields[category.FieldDescriptionI18n] = struct{}{}
+}
+
+// DescriptionI18nCleared returns if the "description_i18n" field was cleared in this mutation.
+func (m *CategoryMutation) DescriptionI18nCleared() bool {
+	_, ok := m.clearedFields[category.FieldDescriptionI18n]
+	return ok
+}
+
+// ResetDescriptionI18n resets all changes to the "description_i18n" field.
+func (m *CategoryMutation) ResetDescriptionI18n() {
+	m.description_i18n = nil
+	delete(m.clearedFields, category.FieldDescriptionI18n)
 }
 
 // SetThumbnail sets the "thumbnail" field.
@@ -2956,7 +3277,7 @@ func (m *CategoryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CategoryMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 19)
 	if m.name != nil {
 		fields = append(fields, category.FieldName)
 	}
@@ -2965,6 +3286,12 @@ func (m *CategoryMutation) Fields() []string {
 	}
 	if m.description != nil {
 		fields = append(fields, category.FieldDescription)
+	}
+	if m.name_i18n != nil {
+		fields = append(fields, category.FieldNameI18n)
+	}
+	if m.description_i18n != nil {
+		fields = append(fields, category.FieldDescriptionI18n)
 	}
 	if m.thumbnail != nil {
 		fields = append(fields, category.FieldThumbnail)
@@ -3022,6 +3349,10 @@ func (m *CategoryMutation) Field(name string) (ent.Value, bool) {
 		return m.Slug()
 	case category.FieldDescription:
 		return m.Description()
+	case category.FieldNameI18n:
+		return m.NameI18n()
+	case category.FieldDescriptionI18n:
+		return m.DescriptionI18n()
 	case category.FieldThumbnail:
 		return m.Thumbnail()
 	case category.FieldListingsThumbnail:
@@ -3065,6 +3396,10 @@ func (m *CategoryMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldSlug(ctx)
 	case category.FieldDescription:
 		return m.OldDescription(ctx)
+	case category.FieldNameI18n:
+		return m.OldNameI18n(ctx)
+	case category.FieldDescriptionI18n:
+		return m.OldDescriptionI18n(ctx)
 	case category.FieldThumbnail:
 		return m.OldThumbnail(ctx)
 	case category.FieldListingsThumbnail:
@@ -3122,6 +3457,20 @@ func (m *CategoryMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDescription(v)
+		return nil
+	case category.FieldNameI18n:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNameI18n(v)
+		return nil
+	case category.FieldDescriptionI18n:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescriptionI18n(v)
 		return nil
 	case category.FieldThumbnail:
 		v, ok := value.(string)
@@ -3284,6 +3633,12 @@ func (m *CategoryMutation) ClearedFields() []string {
 	if m.FieldCleared(category.FieldDescription) {
 		fields = append(fields, category.FieldDescription)
 	}
+	if m.FieldCleared(category.FieldNameI18n) {
+		fields = append(fields, category.FieldNameI18n)
+	}
+	if m.FieldCleared(category.FieldDescriptionI18n) {
+		fields = append(fields, category.FieldDescriptionI18n)
+	}
 	if m.FieldCleared(category.FieldThumbnail) {
 		fields = append(fields, category.FieldThumbnail)
 	}
@@ -3325,6 +3680,12 @@ func (m *CategoryMutation) ClearField(name string) error {
 	case category.FieldDescription:
 		m.ClearDescription()
 		return nil
+	case category.FieldNameI18n:
+		m.ClearNameI18n()
+		return nil
+	case category.FieldDescriptionI18n:
+		m.ClearDescriptionI18n()
+		return nil
 	case category.FieldThumbnail:
 		m.ClearThumbnail()
 		return nil
@@ -3362,6 +3723,12 @@ func (m *CategoryMutation) ResetField(name string) error {
 		return nil
 	case category.FieldDescription:
 		m.ResetDescription()
+		return nil
+	case category.FieldNameI18n:
+		m.ResetNameI18n()
+		return nil
+	case category.FieldDescriptionI18n:
+		m.ResetDescriptionI18n()
 		return nil
 	case category.FieldThumbnail:
 		m.ResetThumbnail()
@@ -3626,6 +3993,8 @@ type ChannelMutation struct {
 	privacy             *channel.Privacy
 	tags                *[]string
 	appendtags          []string
+	name_i18n           *map[string]string
+	description_i18n    *map[string]string
 	is_verified         *bool
 	subscriber_count    *int64
 	addsubscriber_count *int64
@@ -4309,6 +4678,104 @@ func (m *ChannelMutation) ResetTags() {
 	delete(m.clearedFields, channel.FieldTags)
 }
 
+// SetNameI18n sets the "name_i18n" field.
+func (m *ChannelMutation) SetNameI18n(value map[string]string) {
+	m.name_i18n = &value
+}
+
+// NameI18n returns the value of the "name_i18n" field in the mutation.
+func (m *ChannelMutation) NameI18n() (r map[string]string, exists bool) {
+	v := m.name_i18n
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNameI18n returns the old "name_i18n" field's value of the Channel entity.
+// If the Channel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChannelMutation) OldNameI18n(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNameI18n is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNameI18n requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNameI18n: %w", err)
+	}
+	return oldValue.NameI18n, nil
+}
+
+// ClearNameI18n clears the value of the "name_i18n" field.
+func (m *ChannelMutation) ClearNameI18n() {
+	m.name_i18n = nil
+	m.clearedFields[channel.FieldNameI18n] = struct{}{}
+}
+
+// NameI18nCleared returns if the "name_i18n" field was cleared in this mutation.
+func (m *ChannelMutation) NameI18nCleared() bool {
+	_, ok := m.clearedFields[channel.FieldNameI18n]
+	return ok
+}
+
+// ResetNameI18n resets all changes to the "name_i18n" field.
+func (m *ChannelMutation) ResetNameI18n() {
+	m.name_i18n = nil
+	delete(m.clearedFields, channel.FieldNameI18n)
+}
+
+// SetDescriptionI18n sets the "description_i18n" field.
+func (m *ChannelMutation) SetDescriptionI18n(value map[string]string) {
+	m.description_i18n = &value
+}
+
+// DescriptionI18n returns the value of the "description_i18n" field in the mutation.
+func (m *ChannelMutation) DescriptionI18n() (r map[string]string, exists bool) {
+	v := m.description_i18n
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescriptionI18n returns the old "description_i18n" field's value of the Channel entity.
+// If the Channel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChannelMutation) OldDescriptionI18n(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescriptionI18n is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescriptionI18n requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescriptionI18n: %w", err)
+	}
+	return oldValue.DescriptionI18n, nil
+}
+
+// ClearDescriptionI18n clears the value of the "description_i18n" field.
+func (m *ChannelMutation) ClearDescriptionI18n() {
+	m.description_i18n = nil
+	m.clearedFields[channel.FieldDescriptionI18n] = struct{}{}
+}
+
+// DescriptionI18nCleared returns if the "description_i18n" field was cleared in this mutation.
+func (m *ChannelMutation) DescriptionI18nCleared() bool {
+	_, ok := m.clearedFields[channel.FieldDescriptionI18n]
+	return ok
+}
+
+// ResetDescriptionI18n resets all changes to the "description_i18n" field.
+func (m *ChannelMutation) ResetDescriptionI18n() {
+	m.description_i18n = nil
+	delete(m.clearedFields, channel.FieldDescriptionI18n)
+}
+
 // SetCategoryID sets the "category_id" field.
 func (m *ChannelMutation) SetCategoryID(i int64) {
 	m.category = &i
@@ -4987,7 +5454,7 @@ func (m *ChannelMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ChannelMutation) Fields() []string {
-	fields := make([]string, 0, 23)
+	fields := make([]string, 0, 25)
 	if m.user != nil {
 		fields = append(fields, channel.FieldUserID)
 	}
@@ -5026,6 +5493,12 @@ func (m *ChannelMutation) Fields() []string {
 	}
 	if m.tags != nil {
 		fields = append(fields, channel.FieldTags)
+	}
+	if m.name_i18n != nil {
+		fields = append(fields, channel.FieldNameI18n)
+	}
+	if m.description_i18n != nil {
+		fields = append(fields, channel.FieldDescriptionI18n)
 	}
 	if m.category != nil {
 		fields = append(fields, channel.FieldCategoryID)
@@ -5091,6 +5564,10 @@ func (m *ChannelMutation) Field(name string) (ent.Value, bool) {
 		return m.Privacy()
 	case channel.FieldTags:
 		return m.Tags()
+	case channel.FieldNameI18n:
+		return m.NameI18n()
+	case channel.FieldDescriptionI18n:
+		return m.DescriptionI18n()
 	case channel.FieldCategoryID:
 		return m.CategoryID()
 	case channel.FieldIsVerified:
@@ -5146,6 +5623,10 @@ func (m *ChannelMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldPrivacy(ctx)
 	case channel.FieldTags:
 		return m.OldTags(ctx)
+	case channel.FieldNameI18n:
+		return m.OldNameI18n(ctx)
+	case channel.FieldDescriptionI18n:
+		return m.OldDescriptionI18n(ctx)
 	case channel.FieldCategoryID:
 		return m.OldCategoryID(ctx)
 	case channel.FieldIsVerified:
@@ -5265,6 +5746,20 @@ func (m *ChannelMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTags(v)
+		return nil
+	case channel.FieldNameI18n:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNameI18n(v)
+		return nil
+	case channel.FieldDescriptionI18n:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescriptionI18n(v)
 		return nil
 	case channel.FieldCategoryID:
 		v, ok := value.(int64)
@@ -5432,6 +5927,12 @@ func (m *ChannelMutation) ClearedFields() []string {
 	if m.FieldCleared(channel.FieldTags) {
 		fields = append(fields, channel.FieldTags)
 	}
+	if m.FieldCleared(channel.FieldNameI18n) {
+		fields = append(fields, channel.FieldNameI18n)
+	}
+	if m.FieldCleared(channel.FieldDescriptionI18n) {
+		fields = append(fields, channel.FieldDescriptionI18n)
+	}
 	if m.FieldCleared(channel.FieldCategoryID) {
 		fields = append(fields, channel.FieldCategoryID)
 	}
@@ -5466,6 +5967,12 @@ func (m *ChannelMutation) ClearField(name string) error {
 		return nil
 	case channel.FieldTags:
 		m.ClearTags()
+		return nil
+	case channel.FieldNameI18n:
+		m.ClearNameI18n()
+		return nil
+	case channel.FieldDescriptionI18n:
+		m.ClearDescriptionI18n()
 		return nil
 	case channel.FieldCategoryID:
 		m.ClearCategoryID()
@@ -5519,6 +6026,12 @@ func (m *ChannelMutation) ResetField(name string) error {
 		return nil
 	case channel.FieldTags:
 		m.ResetTags()
+		return nil
+	case channel.FieldNameI18n:
+		m.ResetNameI18n()
+		return nil
+	case channel.FieldDescriptionI18n:
+		m.ResetDescriptionI18n()
 		return nil
 	case channel.FieldCategoryID:
 		m.ResetCategoryID()
@@ -13198,6 +13711,8 @@ type MediaMutation struct {
 	addthumbnail_time  *float64
 	tags               *[]string
 	appendtags         []string
+	title_i18n         *map[string]string
+	description_i18n   *map[string]string
 	sync_status        *string
 	synced_at          *time.Time
 	published_at       *time.Time
@@ -15152,6 +15667,104 @@ func (m *MediaMutation) ResetTags() {
 	delete(m.clearedFields, media.FieldTags)
 }
 
+// SetTitleI18n sets the "title_i18n" field.
+func (m *MediaMutation) SetTitleI18n(value map[string]string) {
+	m.title_i18n = &value
+}
+
+// TitleI18n returns the value of the "title_i18n" field in the mutation.
+func (m *MediaMutation) TitleI18n() (r map[string]string, exists bool) {
+	v := m.title_i18n
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitleI18n returns the old "title_i18n" field's value of the Media entity.
+// If the Media object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaMutation) OldTitleI18n(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitleI18n is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitleI18n requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitleI18n: %w", err)
+	}
+	return oldValue.TitleI18n, nil
+}
+
+// ClearTitleI18n clears the value of the "title_i18n" field.
+func (m *MediaMutation) ClearTitleI18n() {
+	m.title_i18n = nil
+	m.clearedFields[media.FieldTitleI18n] = struct{}{}
+}
+
+// TitleI18nCleared returns if the "title_i18n" field was cleared in this mutation.
+func (m *MediaMutation) TitleI18nCleared() bool {
+	_, ok := m.clearedFields[media.FieldTitleI18n]
+	return ok
+}
+
+// ResetTitleI18n resets all changes to the "title_i18n" field.
+func (m *MediaMutation) ResetTitleI18n() {
+	m.title_i18n = nil
+	delete(m.clearedFields, media.FieldTitleI18n)
+}
+
+// SetDescriptionI18n sets the "description_i18n" field.
+func (m *MediaMutation) SetDescriptionI18n(value map[string]string) {
+	m.description_i18n = &value
+}
+
+// DescriptionI18n returns the value of the "description_i18n" field in the mutation.
+func (m *MediaMutation) DescriptionI18n() (r map[string]string, exists bool) {
+	v := m.description_i18n
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescriptionI18n returns the old "description_i18n" field's value of the Media entity.
+// If the Media object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaMutation) OldDescriptionI18n(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescriptionI18n is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescriptionI18n requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescriptionI18n: %w", err)
+	}
+	return oldValue.DescriptionI18n, nil
+}
+
+// ClearDescriptionI18n clears the value of the "description_i18n" field.
+func (m *MediaMutation) ClearDescriptionI18n() {
+	m.description_i18n = nil
+	m.clearedFields[media.FieldDescriptionI18n] = struct{}{}
+}
+
+// DescriptionI18nCleared returns if the "description_i18n" field was cleared in this mutation.
+func (m *MediaMutation) DescriptionI18nCleared() bool {
+	_, ok := m.clearedFields[media.FieldDescriptionI18n]
+	return ok
+}
+
+// ResetDescriptionI18n resets all changes to the "description_i18n" field.
+func (m *MediaMutation) ResetDescriptionI18n() {
+	m.description_i18n = nil
+	delete(m.clearedFields, media.FieldDescriptionI18n)
+}
+
 // SetSyncStatus sets the "sync_status" field.
 func (m *MediaMutation) SetSyncStatus(s string) {
 	m.sync_status = &s
@@ -16124,7 +16737,7 @@ func (m *MediaMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MediaMutation) Fields() []string {
-	fields := make([]string, 0, 48)
+	fields := make([]string, 0, 50)
 	if m.title != nil {
 		fields = append(fields, media.FieldTitle)
 	}
@@ -16238,6 +16851,12 @@ func (m *MediaMutation) Fields() []string {
 	}
 	if m.tags != nil {
 		fields = append(fields, media.FieldTags)
+	}
+	if m.title_i18n != nil {
+		fields = append(fields, media.FieldTitleI18n)
+	}
+	if m.description_i18n != nil {
+		fields = append(fields, media.FieldDescriptionI18n)
 	}
 	if m.sync_status != nil {
 		fields = append(fields, media.FieldSyncStatus)
@@ -16353,6 +16972,10 @@ func (m *MediaMutation) Field(name string) (ent.Value, bool) {
 		return m.ThumbnailTime()
 	case media.FieldTags:
 		return m.Tags()
+	case media.FieldTitleI18n:
+		return m.TitleI18n()
+	case media.FieldDescriptionI18n:
+		return m.DescriptionI18n()
 	case media.FieldSyncStatus:
 		return m.SyncStatus()
 	case media.FieldSyncedAt:
@@ -16458,6 +17081,10 @@ func (m *MediaMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldThumbnailTime(ctx)
 	case media.FieldTags:
 		return m.OldTags(ctx)
+	case media.FieldTitleI18n:
+		return m.OldTitleI18n(ctx)
+	case media.FieldDescriptionI18n:
+		return m.OldDescriptionI18n(ctx)
 	case media.FieldSyncStatus:
 		return m.OldSyncStatus(ctx)
 	case media.FieldSyncedAt:
@@ -16753,6 +17380,20 @@ func (m *MediaMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetTags(v)
 		return nil
+	case media.FieldTitleI18n:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitleI18n(v)
+		return nil
+	case media.FieldDescriptionI18n:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescriptionI18n(v)
+		return nil
 	case media.FieldSyncStatus:
 		v, ok := value.(string)
 		if !ok {
@@ -17042,6 +17683,12 @@ func (m *MediaMutation) ClearedFields() []string {
 	if m.FieldCleared(media.FieldTags) {
 		fields = append(fields, media.FieldTags)
 	}
+	if m.FieldCleared(media.FieldTitleI18n) {
+		fields = append(fields, media.FieldTitleI18n)
+	}
+	if m.FieldCleared(media.FieldDescriptionI18n) {
+		fields = append(fields, media.FieldDescriptionI18n)
+	}
 	if m.FieldCleared(media.FieldSyncStatus) {
 		fields = append(fields, media.FieldSyncStatus)
 	}
@@ -17112,6 +17759,12 @@ func (m *MediaMutation) ClearField(name string) error {
 		return nil
 	case media.FieldTags:
 		m.ClearTags()
+		return nil
+	case media.FieldTitleI18n:
+		m.ClearTitleI18n()
+		return nil
+	case media.FieldDescriptionI18n:
+		m.ClearDescriptionI18n()
 		return nil
 	case media.FieldSyncStatus:
 		m.ClearSyncStatus()
@@ -17249,6 +17902,12 @@ func (m *MediaMutation) ResetField(name string) error {
 		return nil
 	case media.FieldTags:
 		m.ResetTags()
+		return nil
+	case media.FieldTitleI18n:
+		m.ResetTitleI18n()
+		return nil
+	case media.FieldDescriptionI18n:
+		m.ResetDescriptionI18n()
 		return nil
 	case media.FieldSyncStatus:
 		m.ResetSyncStatus()
@@ -28637,6 +29296,8 @@ type TagMutation struct {
 	listings_thumbnail *string
 	status             *tag.Status
 	description        *string
+	title_i18n         *map[string]string
+	description_i18n   *map[string]string
 	color              *string
 	create_time        *time.Time
 	update_time        *time.Time
@@ -28644,6 +29305,9 @@ type TagMutation struct {
 	user               map[string]struct{}
 	removeduser        map[string]struct{}
 	cleareduser        bool
+	names              map[int]struct{}
+	removednames       map[int]struct{}
+	clearednames       bool
 	done               bool
 	oldValue           func(context.Context) (*Tag, error)
 	predicates         []predicate.Tag
@@ -29022,6 +29686,104 @@ func (m *TagMutation) ResetDescription() {
 	delete(m.clearedFields, tag.FieldDescription)
 }
 
+// SetTitleI18n sets the "title_i18n" field.
+func (m *TagMutation) SetTitleI18n(value map[string]string) {
+	m.title_i18n = &value
+}
+
+// TitleI18n returns the value of the "title_i18n" field in the mutation.
+func (m *TagMutation) TitleI18n() (r map[string]string, exists bool) {
+	v := m.title_i18n
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitleI18n returns the old "title_i18n" field's value of the Tag entity.
+// If the Tag object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TagMutation) OldTitleI18n(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitleI18n is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitleI18n requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitleI18n: %w", err)
+	}
+	return oldValue.TitleI18n, nil
+}
+
+// ClearTitleI18n clears the value of the "title_i18n" field.
+func (m *TagMutation) ClearTitleI18n() {
+	m.title_i18n = nil
+	m.clearedFields[tag.FieldTitleI18n] = struct{}{}
+}
+
+// TitleI18nCleared returns if the "title_i18n" field was cleared in this mutation.
+func (m *TagMutation) TitleI18nCleared() bool {
+	_, ok := m.clearedFields[tag.FieldTitleI18n]
+	return ok
+}
+
+// ResetTitleI18n resets all changes to the "title_i18n" field.
+func (m *TagMutation) ResetTitleI18n() {
+	m.title_i18n = nil
+	delete(m.clearedFields, tag.FieldTitleI18n)
+}
+
+// SetDescriptionI18n sets the "description_i18n" field.
+func (m *TagMutation) SetDescriptionI18n(value map[string]string) {
+	m.description_i18n = &value
+}
+
+// DescriptionI18n returns the value of the "description_i18n" field in the mutation.
+func (m *TagMutation) DescriptionI18n() (r map[string]string, exists bool) {
+	v := m.description_i18n
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescriptionI18n returns the old "description_i18n" field's value of the Tag entity.
+// If the Tag object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TagMutation) OldDescriptionI18n(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescriptionI18n is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescriptionI18n requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescriptionI18n: %w", err)
+	}
+	return oldValue.DescriptionI18n, nil
+}
+
+// ClearDescriptionI18n clears the value of the "description_i18n" field.
+func (m *TagMutation) ClearDescriptionI18n() {
+	m.description_i18n = nil
+	m.clearedFields[tag.FieldDescriptionI18n] = struct{}{}
+}
+
+// DescriptionI18nCleared returns if the "description_i18n" field was cleared in this mutation.
+func (m *TagMutation) DescriptionI18nCleared() bool {
+	_, ok := m.clearedFields[tag.FieldDescriptionI18n]
+	return ok
+}
+
+// ResetDescriptionI18n resets all changes to the "description_i18n" field.
+func (m *TagMutation) ResetDescriptionI18n() {
+	m.description_i18n = nil
+	delete(m.clearedFields, tag.FieldDescriptionI18n)
+}
+
 // SetColor sets the "color" field.
 func (m *TagMutation) SetColor(s string) {
 	m.color = &s
@@ -29197,6 +29959,60 @@ func (m *TagMutation) ResetUser() {
 	m.removeduser = nil
 }
 
+// AddNameIDs adds the "names" edge to the TagName entity by ids.
+func (m *TagMutation) AddNameIDs(ids ...int) {
+	if m.names == nil {
+		m.names = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.names[ids[i]] = struct{}{}
+	}
+}
+
+// ClearNames clears the "names" edge to the TagName entity.
+func (m *TagMutation) ClearNames() {
+	m.clearednames = true
+}
+
+// NamesCleared reports if the "names" edge to the TagName entity was cleared.
+func (m *TagMutation) NamesCleared() bool {
+	return m.clearednames
+}
+
+// RemoveNameIDs removes the "names" edge to the TagName entity by IDs.
+func (m *TagMutation) RemoveNameIDs(ids ...int) {
+	if m.removednames == nil {
+		m.removednames = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.names, ids[i])
+		m.removednames[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedNames returns the removed IDs of the "names" edge to the TagName entity.
+func (m *TagMutation) RemovedNamesIDs() (ids []int) {
+	for id := range m.removednames {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// NamesIDs returns the "names" edge IDs in the mutation.
+func (m *TagMutation) NamesIDs() (ids []int) {
+	for id := range m.names {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetNames resets all changes to the "names" edge.
+func (m *TagMutation) ResetNames() {
+	m.names = nil
+	m.clearednames = false
+	m.removednames = nil
+}
+
 // Where appends a list predicates to the TagMutation builder.
 func (m *TagMutation) Where(ps ...predicate.Tag) {
 	m.predicates = append(m.predicates, ps...)
@@ -29231,7 +30047,7 @@ func (m *TagMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TagMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 11)
 	if m.title != nil {
 		fields = append(fields, tag.FieldTitle)
 	}
@@ -29249,6 +30065,12 @@ func (m *TagMutation) Fields() []string {
 	}
 	if m.description != nil {
 		fields = append(fields, tag.FieldDescription)
+	}
+	if m.title_i18n != nil {
+		fields = append(fields, tag.FieldTitleI18n)
+	}
+	if m.description_i18n != nil {
+		fields = append(fields, tag.FieldDescriptionI18n)
 	}
 	if m.color != nil {
 		fields = append(fields, tag.FieldColor)
@@ -29279,6 +30101,10 @@ func (m *TagMutation) Field(name string) (ent.Value, bool) {
 		return m.Status()
 	case tag.FieldDescription:
 		return m.Description()
+	case tag.FieldTitleI18n:
+		return m.TitleI18n()
+	case tag.FieldDescriptionI18n:
+		return m.DescriptionI18n()
 	case tag.FieldColor:
 		return m.Color()
 	case tag.FieldCreateTime:
@@ -29306,6 +30132,10 @@ func (m *TagMutation) OldField(ctx context.Context, name string) (ent.Value, err
 		return m.OldStatus(ctx)
 	case tag.FieldDescription:
 		return m.OldDescription(ctx)
+	case tag.FieldTitleI18n:
+		return m.OldTitleI18n(ctx)
+	case tag.FieldDescriptionI18n:
+		return m.OldDescriptionI18n(ctx)
 	case tag.FieldColor:
 		return m.OldColor(ctx)
 	case tag.FieldCreateTime:
@@ -29362,6 +30192,20 @@ func (m *TagMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDescription(v)
+		return nil
+	case tag.FieldTitleI18n:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitleI18n(v)
+		return nil
+	case tag.FieldDescriptionI18n:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescriptionI18n(v)
 		return nil
 	case tag.FieldColor:
 		v, ok := value.(string)
@@ -29438,6 +30282,12 @@ func (m *TagMutation) ClearedFields() []string {
 	if m.FieldCleared(tag.FieldDescription) {
 		fields = append(fields, tag.FieldDescription)
 	}
+	if m.FieldCleared(tag.FieldTitleI18n) {
+		fields = append(fields, tag.FieldTitleI18n)
+	}
+	if m.FieldCleared(tag.FieldDescriptionI18n) {
+		fields = append(fields, tag.FieldDescriptionI18n)
+	}
 	if m.FieldCleared(tag.FieldColor) {
 		fields = append(fields, tag.FieldColor)
 	}
@@ -29463,6 +30313,12 @@ func (m *TagMutation) ClearField(name string) error {
 		return nil
 	case tag.FieldDescription:
 		m.ClearDescription()
+		return nil
+	case tag.FieldTitleI18n:
+		m.ClearTitleI18n()
+		return nil
+	case tag.FieldDescriptionI18n:
+		m.ClearDescriptionI18n()
 		return nil
 	case tag.FieldColor:
 		m.ClearColor()
@@ -29493,6 +30349,12 @@ func (m *TagMutation) ResetField(name string) error {
 	case tag.FieldDescription:
 		m.ResetDescription()
 		return nil
+	case tag.FieldTitleI18n:
+		m.ResetTitleI18n()
+		return nil
+	case tag.FieldDescriptionI18n:
+		m.ResetDescriptionI18n()
+		return nil
 	case tag.FieldColor:
 		m.ResetColor()
 		return nil
@@ -29508,9 +30370,12 @@ func (m *TagMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TagMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.user != nil {
 		edges = append(edges, tag.EdgeUser)
+	}
+	if m.names != nil {
+		edges = append(edges, tag.EdgeNames)
 	}
 	return edges
 }
@@ -29525,15 +30390,24 @@ func (m *TagMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case tag.EdgeNames:
+		ids := make([]ent.Value, 0, len(m.names))
+		for id := range m.names {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TagMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.removeduser != nil {
 		edges = append(edges, tag.EdgeUser)
+	}
+	if m.removednames != nil {
+		edges = append(edges, tag.EdgeNames)
 	}
 	return edges
 }
@@ -29548,15 +30422,24 @@ func (m *TagMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case tag.EdgeNames:
+		ids := make([]ent.Value, 0, len(m.removednames))
+		for id := range m.removednames {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TagMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.cleareduser {
 		edges = append(edges, tag.EdgeUser)
+	}
+	if m.clearednames {
+		edges = append(edges, tag.EdgeNames)
 	}
 	return edges
 }
@@ -29567,6 +30450,8 @@ func (m *TagMutation) EdgeCleared(name string) bool {
 	switch name {
 	case tag.EdgeUser:
 		return m.cleareduser
+	case tag.EdgeNames:
+		return m.clearednames
 	}
 	return false
 }
@@ -29586,8 +30471,610 @@ func (m *TagMutation) ResetEdge(name string) error {
 	case tag.EdgeUser:
 		m.ResetUser()
 		return nil
+	case tag.EdgeNames:
+		m.ResetNames()
+		return nil
 	}
 	return fmt.Errorf("unknown Tag edge %s", name)
+}
+
+// TagNameMutation represents an operation that mutates the TagName nodes in the graph.
+type TagNameMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	language      *string
+	text          *string
+	create_time   *time.Time
+	update_time   *time.Time
+	clearedFields map[string]struct{}
+	tag           *int
+	clearedtag    bool
+	done          bool
+	oldValue      func(context.Context) (*TagName, error)
+	predicates    []predicate.TagName
+}
+
+var _ ent.Mutation = (*TagNameMutation)(nil)
+
+// tagnameOption allows management of the mutation configuration using functional options.
+type tagnameOption func(*TagNameMutation)
+
+// newTagNameMutation creates new mutation for the TagName entity.
+func newTagNameMutation(c config, op Op, opts ...tagnameOption) *TagNameMutation {
+	m := &TagNameMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTagName,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTagNameID sets the ID field of the mutation.
+func withTagNameID(id int) tagnameOption {
+	return func(m *TagNameMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TagName
+		)
+		m.oldValue = func(ctx context.Context) (*TagName, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TagName.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTagName sets the old TagName of the mutation.
+func withTagName(node *TagName) tagnameOption {
+	return func(m *TagNameMutation) {
+		m.oldValue = func(context.Context) (*TagName, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TagNameMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TagNameMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("entity: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TagNameMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TagNameMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TagName.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetTagID sets the "tag_id" field.
+func (m *TagNameMutation) SetTagID(i int) {
+	m.tag = &i
+}
+
+// TagID returns the value of the "tag_id" field in the mutation.
+func (m *TagNameMutation) TagID() (r int, exists bool) {
+	v := m.tag
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTagID returns the old "tag_id" field's value of the TagName entity.
+// If the TagName object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TagNameMutation) OldTagID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTagID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTagID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTagID: %w", err)
+	}
+	return oldValue.TagID, nil
+}
+
+// ResetTagID resets all changes to the "tag_id" field.
+func (m *TagNameMutation) ResetTagID() {
+	m.tag = nil
+}
+
+// SetLanguage sets the "language" field.
+func (m *TagNameMutation) SetLanguage(s string) {
+	m.language = &s
+}
+
+// Language returns the value of the "language" field in the mutation.
+func (m *TagNameMutation) Language() (r string, exists bool) {
+	v := m.language
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLanguage returns the old "language" field's value of the TagName entity.
+// If the TagName object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TagNameMutation) OldLanguage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLanguage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLanguage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLanguage: %w", err)
+	}
+	return oldValue.Language, nil
+}
+
+// ResetLanguage resets all changes to the "language" field.
+func (m *TagNameMutation) ResetLanguage() {
+	m.language = nil
+}
+
+// SetText sets the "text" field.
+func (m *TagNameMutation) SetText(s string) {
+	m.text = &s
+}
+
+// Text returns the value of the "text" field in the mutation.
+func (m *TagNameMutation) Text() (r string, exists bool) {
+	v := m.text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldText returns the old "text" field's value of the TagName entity.
+// If the TagName object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TagNameMutation) OldText(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldText: %w", err)
+	}
+	return oldValue.Text, nil
+}
+
+// ResetText resets all changes to the "text" field.
+func (m *TagNameMutation) ResetText() {
+	m.text = nil
+}
+
+// SetCreateTime sets the "create_time" field.
+func (m *TagNameMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *TagNameMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the TagName entity.
+// If the TagName object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TagNameMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *TagNameMutation) ResetCreateTime() {
+	m.create_time = nil
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (m *TagNameMutation) SetUpdateTime(t time.Time) {
+	m.update_time = &t
+}
+
+// UpdateTime returns the value of the "update_time" field in the mutation.
+func (m *TagNameMutation) UpdateTime() (r time.Time, exists bool) {
+	v := m.update_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdateTime returns the old "update_time" field's value of the TagName entity.
+// If the TagName object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TagNameMutation) OldUpdateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdateTime: %w", err)
+	}
+	return oldValue.UpdateTime, nil
+}
+
+// ResetUpdateTime resets all changes to the "update_time" field.
+func (m *TagNameMutation) ResetUpdateTime() {
+	m.update_time = nil
+}
+
+// ClearTag clears the "tag" edge to the Tag entity.
+func (m *TagNameMutation) ClearTag() {
+	m.clearedtag = true
+	m.clearedFields[tagname.FieldTagID] = struct{}{}
+}
+
+// TagCleared reports if the "tag" edge to the Tag entity was cleared.
+func (m *TagNameMutation) TagCleared() bool {
+	return m.clearedtag
+}
+
+// TagIDs returns the "tag" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TagID instead. It exists only for internal usage by the builders.
+func (m *TagNameMutation) TagIDs() (ids []int) {
+	if id := m.tag; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTag resets all changes to the "tag" edge.
+func (m *TagNameMutation) ResetTag() {
+	m.tag = nil
+	m.clearedtag = false
+}
+
+// Where appends a list predicates to the TagNameMutation builder.
+func (m *TagNameMutation) Where(ps ...predicate.TagName) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TagNameMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TagNameMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TagName, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TagNameMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TagNameMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (TagName).
+func (m *TagNameMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TagNameMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.tag != nil {
+		fields = append(fields, tagname.FieldTagID)
+	}
+	if m.language != nil {
+		fields = append(fields, tagname.FieldLanguage)
+	}
+	if m.text != nil {
+		fields = append(fields, tagname.FieldText)
+	}
+	if m.create_time != nil {
+		fields = append(fields, tagname.FieldCreateTime)
+	}
+	if m.update_time != nil {
+		fields = append(fields, tagname.FieldUpdateTime)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TagNameMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case tagname.FieldTagID:
+		return m.TagID()
+	case tagname.FieldLanguage:
+		return m.Language()
+	case tagname.FieldText:
+		return m.Text()
+	case tagname.FieldCreateTime:
+		return m.CreateTime()
+	case tagname.FieldUpdateTime:
+		return m.UpdateTime()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TagNameMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case tagname.FieldTagID:
+		return m.OldTagID(ctx)
+	case tagname.FieldLanguage:
+		return m.OldLanguage(ctx)
+	case tagname.FieldText:
+		return m.OldText(ctx)
+	case tagname.FieldCreateTime:
+		return m.OldCreateTime(ctx)
+	case tagname.FieldUpdateTime:
+		return m.OldUpdateTime(ctx)
+	}
+	return nil, fmt.Errorf("unknown TagName field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TagNameMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case tagname.FieldTagID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTagID(v)
+		return nil
+	case tagname.FieldLanguage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLanguage(v)
+		return nil
+	case tagname.FieldText:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetText(v)
+		return nil
+	case tagname.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
+		return nil
+	case tagname.FieldUpdateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdateTime(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TagName field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TagNameMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TagNameMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TagNameMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown TagName numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TagNameMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TagNameMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TagNameMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown TagName nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TagNameMutation) ResetField(name string) error {
+	switch name {
+	case tagname.FieldTagID:
+		m.ResetTagID()
+		return nil
+	case tagname.FieldLanguage:
+		m.ResetLanguage()
+		return nil
+	case tagname.FieldText:
+		m.ResetText()
+		return nil
+	case tagname.FieldCreateTime:
+		m.ResetCreateTime()
+		return nil
+	case tagname.FieldUpdateTime:
+		m.ResetUpdateTime()
+		return nil
+	}
+	return fmt.Errorf("unknown TagName field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TagNameMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.tag != nil {
+		edges = append(edges, tagname.EdgeTag)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TagNameMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case tagname.EdgeTag:
+		if id := m.tag; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TagNameMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TagNameMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TagNameMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedtag {
+		edges = append(edges, tagname.EdgeTag)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TagNameMutation) EdgeCleared(name string) bool {
+	switch name {
+	case tagname.EdgeTag:
+		return m.clearedtag
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TagNameMutation) ClearEdge(name string) error {
+	switch name {
+	case tagname.EdgeTag:
+		m.ClearTag()
+		return nil
+	}
+	return fmt.Errorf("unknown TagName unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TagNameMutation) ResetEdge(name string) error {
+	switch name {
+	case tagname.EdgeTag:
+		m.ResetTag()
+		return nil
+	}
+	return fmt.Errorf("unknown TagName edge %s", name)
 }
 
 // UploadSessionMutation represents an operation that mutates the UploadSession nodes in the graph.

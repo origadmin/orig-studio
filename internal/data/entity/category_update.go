@@ -87,6 +87,30 @@ func (_u *CategoryUpdate) ClearDescription() *CategoryUpdate {
 	return _u
 }
 
+// SetNameI18n sets the "name_i18n" field.
+func (_u *CategoryUpdate) SetNameI18n(v map[string]string) *CategoryUpdate {
+	_u.mutation.SetNameI18n(v)
+	return _u
+}
+
+// ClearNameI18n clears the value of the "name_i18n" field.
+func (_u *CategoryUpdate) ClearNameI18n() *CategoryUpdate {
+	_u.mutation.ClearNameI18n()
+	return _u
+}
+
+// SetDescriptionI18n sets the "description_i18n" field.
+func (_u *CategoryUpdate) SetDescriptionI18n(v map[string]string) *CategoryUpdate {
+	_u.mutation.SetDescriptionI18n(v)
+	return _u
+}
+
+// ClearDescriptionI18n clears the value of the "description_i18n" field.
+func (_u *CategoryUpdate) ClearDescriptionI18n() *CategoryUpdate {
+	_u.mutation.ClearDescriptionI18n()
+	return _u
+}
+
 // SetThumbnail sets the "thumbnail" field.
 func (_u *CategoryUpdate) SetThumbnail(v string) *CategoryUpdate {
 	_u.mutation.SetThumbnail(v)
@@ -611,6 +635,18 @@ func (_u *CategoryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(category.FieldDescription, field.TypeString)
 	}
+	if value, ok := _u.mutation.NameI18n(); ok {
+		_spec.SetField(category.FieldNameI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.NameI18nCleared() {
+		_spec.ClearField(category.FieldNameI18n, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.DescriptionI18n(); ok {
+		_spec.SetField(category.FieldDescriptionI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.DescriptionI18nCleared() {
+		_spec.ClearField(category.FieldDescriptionI18n, field.TypeJSON)
+	}
 	if value, ok := _u.mutation.Thumbnail(); ok {
 		_spec.SetField(category.FieldThumbnail, field.TypeString, value)
 	}
@@ -979,6 +1015,30 @@ func (_u *CategoryUpdateOne) SetNillableDescription(v *string) *CategoryUpdateOn
 // ClearDescription clears the value of the "description" field.
 func (_u *CategoryUpdateOne) ClearDescription() *CategoryUpdateOne {
 	_u.mutation.ClearDescription()
+	return _u
+}
+
+// SetNameI18n sets the "name_i18n" field.
+func (_u *CategoryUpdateOne) SetNameI18n(v map[string]string) *CategoryUpdateOne {
+	_u.mutation.SetNameI18n(v)
+	return _u
+}
+
+// ClearNameI18n clears the value of the "name_i18n" field.
+func (_u *CategoryUpdateOne) ClearNameI18n() *CategoryUpdateOne {
+	_u.mutation.ClearNameI18n()
+	return _u
+}
+
+// SetDescriptionI18n sets the "description_i18n" field.
+func (_u *CategoryUpdateOne) SetDescriptionI18n(v map[string]string) *CategoryUpdateOne {
+	_u.mutation.SetDescriptionI18n(v)
+	return _u
+}
+
+// ClearDescriptionI18n clears the value of the "description_i18n" field.
+func (_u *CategoryUpdateOne) ClearDescriptionI18n() *CategoryUpdateOne {
+	_u.mutation.ClearDescriptionI18n()
 	return _u
 }
 
@@ -1535,6 +1595,18 @@ func (_u *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err 
 	}
 	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(category.FieldDescription, field.TypeString)
+	}
+	if value, ok := _u.mutation.NameI18n(); ok {
+		_spec.SetField(category.FieldNameI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.NameI18nCleared() {
+		_spec.ClearField(category.FieldNameI18n, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.DescriptionI18n(); ok {
+		_spec.SetField(category.FieldDescriptionI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.DescriptionI18nCleared() {
+		_spec.ClearField(category.FieldDescriptionI18n, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Thumbnail(); ok {
 		_spec.SetField(category.FieldThumbnail, field.TypeString, value)

@@ -27,6 +27,8 @@ func (Category) Fields() []ent.Field {
 		field.String("name").MaxLen(128).Unique(),
 		field.String("slug").MaxLen(128).Unique().Optional(),
 		field.Text("description").Optional(),
+		field.JSON("name_i18n", map[string]string{}).Optional(),
+		field.JSON("description_i18n", map[string]string{}).Optional(),
 		field.String("thumbnail").MaxLen(512).Optional(),
 		field.String("listings_thumbnail").MaxLen(512).Optional(),
 		field.String("icon").MaxLen(255).Optional(),

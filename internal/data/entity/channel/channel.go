@@ -41,6 +41,10 @@ const (
 	FieldPrivacy = "privacy"
 	// FieldTags holds the string denoting the tags field in the database.
 	FieldTags = "tags"
+	// FieldNameI18n holds the string denoting the name_i18n field in the database.
+	FieldNameI18n = "name_i18n"
+	// FieldDescriptionI18n holds the string denoting the description_i18n field in the database.
+	FieldDescriptionI18n = "description_i18n"
 	// FieldCategoryID holds the string denoting the category_id field in the database.
 	FieldCategoryID = "category_id"
 	// FieldIsVerified holds the string denoting the is_verified field in the database.
@@ -117,6 +121,8 @@ var Columns = []string{
 	FieldStatus,
 	FieldPrivacy,
 	FieldTags,
+	FieldNameI18n,
+	FieldDescriptionI18n,
 	FieldCategoryID,
 	FieldIsVerified,
 	FieldSubscriberCount,

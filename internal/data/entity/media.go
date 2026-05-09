@@ -97,6 +97,10 @@ type Media struct {
 	ThumbnailTime float64 `json:"thumbnail_time,omitempty"`
 	// Tags holds the value of the "tags" field.
 	Tags []string `json:"tags,omitempty"`
+	// TitleI18n holds the value of the "title_i18n" field.
+	TitleI18n map[string]string `json:"title_i18n,omitempty"`
+	// DescriptionI18n holds the value of the "description_i18n" field.
+	DescriptionI18n map[string]string `json:"description_i18n,omitempty"`
 	// SyncStatus holds the value of the "sync_status" field.
 	SyncStatus string `json:"sync_status,omitempty"`
 	// SyncedAt holds the value of the "synced_at" field.
@@ -264,7 +268,7 @@ func (*Media) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case media.FieldTags:
+		case media.FieldTags, media.FieldTitleI18n, media.FieldDescriptionI18n:
 			values[i] = new([]byte)
 		case media.FieldAllowDownload, media.FieldEnableComments, media.FieldFeatured, media.FieldListable:
 			values[i] = new(sql.NullBool)
@@ -529,6 +533,22 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &_m.Tags); err != nil {
 					return fmt.Errorf("unmarshal field tags: %w", err)
+				}
+			}
+		case media.FieldTitleI18n:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field title_i18n", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.TitleI18n); err != nil {
+					return fmt.Errorf("unmarshal field title_i18n: %w", err)
+				}
+			}
+		case media.FieldDescriptionI18n:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field description_i18n", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.DescriptionI18n); err != nil {
+					return fmt.Errorf("unmarshal field description_i18n: %w", err)
 				}
 			}
 		case media.FieldSyncStatus:
@@ -810,6 +830,12 @@ func (_m *Media) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("tags=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Tags))
+	builder.WriteString(", ")
+	builder.WriteString("title_i18n=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TitleI18n))
+	builder.WriteString(", ")
+	builder.WriteString("description_i18n=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DescriptionI18n))
 	builder.WriteString(", ")
 	builder.WriteString("sync_status=")
 	builder.WriteString(_m.SyncStatus)

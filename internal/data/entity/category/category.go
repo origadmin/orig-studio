@@ -21,6 +21,10 @@ const (
 	FieldSlug = "slug"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// FieldNameI18n holds the string denoting the name_i18n field in the database.
+	FieldNameI18n = "name_i18n"
+	// FieldDescriptionI18n holds the string denoting the description_i18n field in the database.
+	FieldDescriptionI18n = "description_i18n"
 	// FieldThumbnail holds the string denoting the thumbnail field in the database.
 	FieldThumbnail = "thumbnail"
 	// FieldListingsThumbnail holds the string denoting the listings_thumbnail field in the database.
@@ -107,6 +111,8 @@ var Columns = []string{
 	FieldName,
 	FieldSlug,
 	FieldDescription,
+	FieldNameI18n,
+	FieldDescriptionI18n,
 	FieldThumbnail,
 	FieldListingsThumbnail,
 	FieldIcon,

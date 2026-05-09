@@ -204,6 +204,42 @@ func (_u *ArticleUpdate) ClearTags() *ArticleUpdate {
 	return _u
 }
 
+// SetTitleI18n sets the "title_i18n" field.
+func (_u *ArticleUpdate) SetTitleI18n(v map[string]string) *ArticleUpdate {
+	_u.mutation.SetTitleI18n(v)
+	return _u
+}
+
+// ClearTitleI18n clears the value of the "title_i18n" field.
+func (_u *ArticleUpdate) ClearTitleI18n() *ArticleUpdate {
+	_u.mutation.ClearTitleI18n()
+	return _u
+}
+
+// SetContentI18n sets the "content_i18n" field.
+func (_u *ArticleUpdate) SetContentI18n(v map[string]string) *ArticleUpdate {
+	_u.mutation.SetContentI18n(v)
+	return _u
+}
+
+// ClearContentI18n clears the value of the "content_i18n" field.
+func (_u *ArticleUpdate) ClearContentI18n() *ArticleUpdate {
+	_u.mutation.ClearContentI18n()
+	return _u
+}
+
+// SetSummaryI18n sets the "summary_i18n" field.
+func (_u *ArticleUpdate) SetSummaryI18n(v map[string]string) *ArticleUpdate {
+	_u.mutation.SetSummaryI18n(v)
+	return _u
+}
+
+// ClearSummaryI18n clears the value of the "summary_i18n" field.
+func (_u *ArticleUpdate) ClearSummaryI18n() *ArticleUpdate {
+	_u.mutation.ClearSummaryI18n()
+	return _u
+}
+
 // SetUserID sets the "user_id" field.
 func (_u *ArticleUpdate) SetUserID(v string) *ArticleUpdate {
 	_u.mutation.SetUserID(v)
@@ -538,6 +574,24 @@ func (_u *ArticleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.TagsCleared() {
 		_spec.ClearField(article.FieldTags, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.TitleI18n(); ok {
+		_spec.SetField(article.FieldTitleI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.TitleI18nCleared() {
+		_spec.ClearField(article.FieldTitleI18n, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.ContentI18n(); ok {
+		_spec.SetField(article.FieldContentI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.ContentI18nCleared() {
+		_spec.ClearField(article.FieldContentI18n, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.SummaryI18n(); ok {
+		_spec.SetField(article.FieldSummaryI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.SummaryI18nCleared() {
+		_spec.ClearField(article.FieldSummaryI18n, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Thumbnail(); ok {
 		_spec.SetField(article.FieldThumbnail, field.TypeString, value)
@@ -878,6 +932,42 @@ func (_u *ArticleUpdateOne) AppendTags(v []string) *ArticleUpdateOne {
 // ClearTags clears the value of the "tags" field.
 func (_u *ArticleUpdateOne) ClearTags() *ArticleUpdateOne {
 	_u.mutation.ClearTags()
+	return _u
+}
+
+// SetTitleI18n sets the "title_i18n" field.
+func (_u *ArticleUpdateOne) SetTitleI18n(v map[string]string) *ArticleUpdateOne {
+	_u.mutation.SetTitleI18n(v)
+	return _u
+}
+
+// ClearTitleI18n clears the value of the "title_i18n" field.
+func (_u *ArticleUpdateOne) ClearTitleI18n() *ArticleUpdateOne {
+	_u.mutation.ClearTitleI18n()
+	return _u
+}
+
+// SetContentI18n sets the "content_i18n" field.
+func (_u *ArticleUpdateOne) SetContentI18n(v map[string]string) *ArticleUpdateOne {
+	_u.mutation.SetContentI18n(v)
+	return _u
+}
+
+// ClearContentI18n clears the value of the "content_i18n" field.
+func (_u *ArticleUpdateOne) ClearContentI18n() *ArticleUpdateOne {
+	_u.mutation.ClearContentI18n()
+	return _u
+}
+
+// SetSummaryI18n sets the "summary_i18n" field.
+func (_u *ArticleUpdateOne) SetSummaryI18n(v map[string]string) *ArticleUpdateOne {
+	_u.mutation.SetSummaryI18n(v)
+	return _u
+}
+
+// ClearSummaryI18n clears the value of the "summary_i18n" field.
+func (_u *ArticleUpdateOne) ClearSummaryI18n() *ArticleUpdateOne {
+	_u.mutation.ClearSummaryI18n()
 	return _u
 }
 
@@ -1245,6 +1335,24 @@ func (_u *ArticleUpdateOne) sqlSave(ctx context.Context) (_node *Article, err er
 	}
 	if _u.mutation.TagsCleared() {
 		_spec.ClearField(article.FieldTags, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.TitleI18n(); ok {
+		_spec.SetField(article.FieldTitleI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.TitleI18nCleared() {
+		_spec.ClearField(article.FieldTitleI18n, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.ContentI18n(); ok {
+		_spec.SetField(article.FieldContentI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.ContentI18nCleared() {
+		_spec.ClearField(article.FieldContentI18n, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.SummaryI18n(); ok {
+		_spec.SetField(article.FieldSummaryI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.SummaryI18nCleared() {
+		_spec.ClearField(article.FieldSummaryI18n, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Thumbnail(); ok {
 		_spec.SetField(article.FieldThumbnail, field.TypeString, value)

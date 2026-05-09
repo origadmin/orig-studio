@@ -58,6 +58,18 @@ func (_c *CategoryCreate) SetNillableDescription(v *string) *CategoryCreate {
 	return _c
 }
 
+// SetNameI18n sets the "name_i18n" field.
+func (_c *CategoryCreate) SetNameI18n(v map[string]string) *CategoryCreate {
+	_c.mutation.SetNameI18n(v)
+	return _c
+}
+
+// SetDescriptionI18n sets the "description_i18n" field.
+func (_c *CategoryCreate) SetDescriptionI18n(v map[string]string) *CategoryCreate {
+	_c.mutation.SetDescriptionI18n(v)
+	return _c
+}
+
 // SetThumbnail sets the "thumbnail" field.
 func (_c *CategoryCreate) SetThumbnail(v string) *CategoryCreate {
 	_c.mutation.SetThumbnail(v)
@@ -504,6 +516,14 @@ func (_c *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(category.FieldDescription, field.TypeString, value)
 		_node.Description = value
+	}
+	if value, ok := _c.mutation.NameI18n(); ok {
+		_spec.SetField(category.FieldNameI18n, field.TypeJSON, value)
+		_node.NameI18n = value
+	}
+	if value, ok := _c.mutation.DescriptionI18n(); ok {
+		_spec.SetField(category.FieldDescriptionI18n, field.TypeJSON, value)
+		_node.DescriptionI18n = value
 	}
 	if value, ok := _c.mutation.Thumbnail(); ok {
 		_spec.SetField(category.FieldThumbnail, field.TypeString, value)

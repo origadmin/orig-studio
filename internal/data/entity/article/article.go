@@ -34,6 +34,12 @@ const (
 	FieldFeatured = "featured"
 	// FieldTags holds the string denoting the tags field in the database.
 	FieldTags = "tags"
+	// FieldTitleI18n holds the string denoting the title_i18n field in the database.
+	FieldTitleI18n = "title_i18n"
+	// FieldContentI18n holds the string denoting the content_i18n field in the database.
+	FieldContentI18n = "content_i18n"
+	// FieldSummaryI18n holds the string denoting the summary_i18n field in the database.
+	FieldSummaryI18n = "summary_i18n"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
 	// FieldCategoryID holds the string denoting the category_id field in the database.
@@ -101,6 +107,9 @@ var Columns = []string{
 	FieldCommentCount,
 	FieldFeatured,
 	FieldTags,
+	FieldTitleI18n,
+	FieldContentI18n,
+	FieldSummaryI18n,
 	FieldUserID,
 	FieldCategoryID,
 	FieldMediaID,
