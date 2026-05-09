@@ -87,9 +87,11 @@ type ChannelEdges struct {
 	Articles []*Article `json:"articles,omitempty"`
 	// Category holds the value of the category edge.
 	Category *Category `json:"category,omitempty"`
+	// TagsRel holds the value of the tags_rel edge.
+	TagsRel []*ChannelTag `json:"tags_rel,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -130,6 +132,15 @@ func (e ChannelEdges) CategoryOrErr() (*Category, error) {
 		return nil, &NotFoundError{label: category.Label}
 	}
 	return nil, &NotLoadedError{edge: "category"}
+}
+
+// TagsRelOrErr returns the TagsRel value or an error if the edge
+// was not loaded in eager-loading.
+func (e ChannelEdges) TagsRelOrErr() ([]*ChannelTag, error) {
+	if e.loadedTypes[4] {
+		return e.TagsRel, nil
+	}
+	return nil, &NotLoadedError{edge: "tags_rel"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -357,6 +368,11 @@ func (_m *Channel) QueryArticles() *ArticleQuery {
 // QueryCategory queries the "category" edge of the Channel entity.
 func (_m *Channel) QueryCategory() *CategoryQuery {
 	return NewChannelClient(_m.config).QueryCategory(_m)
+}
+
+// QueryTagsRel queries the "tags_rel" edge of the Channel entity.
+func (_m *Channel) QueryTagsRel() *ChannelTagQuery {
+	return NewChannelClient(_m.config).QueryTagsRel(_m)
 }
 
 // Update returns a builder for updating this Channel.

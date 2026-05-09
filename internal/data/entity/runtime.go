@@ -1235,26 +1235,30 @@ func init() {
 	tagDescMediaCount := tagFields[2].Descriptor()
 	// tag.DefaultMediaCount holds the default value on creation for the media_count field.
 	tag.DefaultMediaCount = tagDescMediaCount.Default.(int)
+	// tagDescChannelCount is the schema descriptor for channel_count field.
+	tagDescChannelCount := tagFields[3].Descriptor()
+	// tag.DefaultChannelCount holds the default value on creation for the channel_count field.
+	tag.DefaultChannelCount = tagDescChannelCount.Default.(int)
 	// tagDescListingsThumbnail is the schema descriptor for listings_thumbnail field.
-	tagDescListingsThumbnail := tagFields[3].Descriptor()
+	tagDescListingsThumbnail := tagFields[4].Descriptor()
 	// tag.DefaultListingsThumbnail holds the default value on creation for the listings_thumbnail field.
 	tag.DefaultListingsThumbnail = tagDescListingsThumbnail.Default.(string)
 	// tag.ListingsThumbnailValidator is a validator for the "listings_thumbnail" field. It is called by the builders before save.
 	tag.ListingsThumbnailValidator = tagDescListingsThumbnail.Validators[0].(func(string) error)
 	// tagDescDescription is the schema descriptor for description field.
-	tagDescDescription := tagFields[5].Descriptor()
+	tagDescDescription := tagFields[6].Descriptor()
 	// tag.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	tag.DescriptionValidator = tagDescDescription.Validators[0].(func(string) error)
 	// tagDescColor is the schema descriptor for color field.
-	tagDescColor := tagFields[8].Descriptor()
+	tagDescColor := tagFields[9].Descriptor()
 	// tag.ColorValidator is a validator for the "color" field. It is called by the builders before save.
 	tag.ColorValidator = tagDescColor.Validators[0].(func(string) error)
 	// tagDescCreateTime is the schema descriptor for create_time field.
-	tagDescCreateTime := tagFields[9].Descriptor()
+	tagDescCreateTime := tagFields[10].Descriptor()
 	// tag.DefaultCreateTime holds the default value on creation for the create_time field.
 	tag.DefaultCreateTime = tagDescCreateTime.Default.(func() time.Time)
 	// tagDescUpdateTime is the schema descriptor for update_time field.
-	tagDescUpdateTime := tagFields[10].Descriptor()
+	tagDescUpdateTime := tagFields[11].Descriptor()
 	// tag.DefaultUpdateTime holds the default value on creation for the update_time field.
 	tag.DefaultUpdateTime = tagDescUpdateTime.Default.(func() time.Time)
 	// tag.UpdateDefaultUpdateTime holds the default value on update for the update_time field.

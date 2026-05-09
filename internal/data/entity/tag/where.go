@@ -70,6 +70,11 @@ func MediaCount(v int) predicate.Tag {
 	return predicate.Tag(sql.FieldEQ(FieldMediaCount, v))
 }
 
+// ChannelCount applies equality check predicate on the "channel_count" field. It's identical to ChannelCountEQ.
+func ChannelCount(v int) predicate.Tag {
+	return predicate.Tag(sql.FieldEQ(FieldChannelCount, v))
+}
+
 // ListingsThumbnail applies equality check predicate on the "listings_thumbnail" field. It's identical to ListingsThumbnailEQ.
 func ListingsThumbnail(v string) predicate.Tag {
 	return predicate.Tag(sql.FieldEQ(FieldListingsThumbnail, v))
@@ -273,6 +278,46 @@ func MediaCountLT(v int) predicate.Tag {
 // MediaCountLTE applies the LTE predicate on the "media_count" field.
 func MediaCountLTE(v int) predicate.Tag {
 	return predicate.Tag(sql.FieldLTE(FieldMediaCount, v))
+}
+
+// ChannelCountEQ applies the EQ predicate on the "channel_count" field.
+func ChannelCountEQ(v int) predicate.Tag {
+	return predicate.Tag(sql.FieldEQ(FieldChannelCount, v))
+}
+
+// ChannelCountNEQ applies the NEQ predicate on the "channel_count" field.
+func ChannelCountNEQ(v int) predicate.Tag {
+	return predicate.Tag(sql.FieldNEQ(FieldChannelCount, v))
+}
+
+// ChannelCountIn applies the In predicate on the "channel_count" field.
+func ChannelCountIn(vs ...int) predicate.Tag {
+	return predicate.Tag(sql.FieldIn(FieldChannelCount, vs...))
+}
+
+// ChannelCountNotIn applies the NotIn predicate on the "channel_count" field.
+func ChannelCountNotIn(vs ...int) predicate.Tag {
+	return predicate.Tag(sql.FieldNotIn(FieldChannelCount, vs...))
+}
+
+// ChannelCountGT applies the GT predicate on the "channel_count" field.
+func ChannelCountGT(v int) predicate.Tag {
+	return predicate.Tag(sql.FieldGT(FieldChannelCount, v))
+}
+
+// ChannelCountGTE applies the GTE predicate on the "channel_count" field.
+func ChannelCountGTE(v int) predicate.Tag {
+	return predicate.Tag(sql.FieldGTE(FieldChannelCount, v))
+}
+
+// ChannelCountLT applies the LT predicate on the "channel_count" field.
+func ChannelCountLT(v int) predicate.Tag {
+	return predicate.Tag(sql.FieldLT(FieldChannelCount, v))
+}
+
+// ChannelCountLTE applies the LTE predicate on the "channel_count" field.
+func ChannelCountLTE(v int) predicate.Tag {
+	return predicate.Tag(sql.FieldLTE(FieldChannelCount, v))
 }
 
 // ListingsThumbnailEQ applies the EQ predicate on the "listings_thumbnail" field.
@@ -658,6 +703,29 @@ func HasNames() predicate.Tag {
 func HasNamesWith(preds ...predicate.TagName) predicate.Tag {
 	return predicate.Tag(func(s *sql.Selector) {
 		step := newNamesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasChannelTags applies the HasEdge predicate on the "channel_tags" edge.
+func HasChannelTags() predicate.Tag {
+	return predicate.Tag(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ChannelTagsTable, ChannelTagsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasChannelTagsWith applies the HasEdge predicate on the "channel_tags" edge with a given conditions (other predicates).
+func HasChannelTagsWith(preds ...predicate.ChannelTag) predicate.Tag {
+	return predicate.Tag(func(s *sql.Selector) {
+		step := newChannelTagsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -1342,6 +1342,29 @@ func HasCategoryWith(preds ...predicate.Category) predicate.Channel {
 	})
 }
 
+// HasTagsRel applies the HasEdge predicate on the "tags_rel" edge.
+func HasTagsRel() predicate.Channel {
+	return predicate.Channel(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, TagsRelTable, TagsRelColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTagsRelWith applies the HasEdge predicate on the "tags_rel" edge with a given conditions (other predicates).
+func HasTagsRelWith(preds ...predicate.ChannelTag) predicate.Channel {
+	return predicate.Channel(func(s *sql.Selector) {
+		step := newTagsRelStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Channel) predicate.Channel {
 	return predicate.Channel(sql.AndPredicates(predicates...))

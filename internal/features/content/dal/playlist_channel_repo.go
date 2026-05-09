@@ -14,6 +14,7 @@ import (
 
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/channel"
+	"origadmin/application/origcms/internal/data/entity/channeltag"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
 	"origadmin/application/origcms/internal/data/entity/playlist"
@@ -391,11 +392,26 @@ func (r *channelRepo) Create(ctx context.Context, ch *biz.Channel) (*biz.Channel
 	if err != nil {
 		return nil, err
 	}
+
+	if len(ch.TagIDs) > 0 {
+		bulk := make([]*entity.ChannelTagCreate, 0, len(ch.TagIDs))
+		for _, tagID := range ch.TagIDs {
+			bulk = append(bulk, r.data.db.ChannelTag.Create().
+				SetChannelID(ent.ID).
+				SetTagID(tagID))
+		}
+		if _, err := r.data.db.ChannelTag.CreateBulk(bulk...).Save(ctx); err != nil {
+			r.log.Errorf("failed to create channel tags: %v", err)
+		}
+	}
+
 	return mapChannel(ent), nil
 }
 
 func (r *channelRepo) Get(ctx context.Context, id string) (*biz.Channel, error) {
-	ent, err := r.data.db.Channel.Get(ctx, id)
+	ent, err := r.data.db.Channel.Query().Where(channel.IDEQ(id)).WithTagsRel(func(q *entity.ChannelTagQuery) {
+		q.WithTag()
+	}).Only(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -423,7 +439,9 @@ func (r *channelRepo) GetByUsername(ctx context.Context, username string) (*biz.
 }
 
 func (r *channelRepo) GetByShortToken(ctx context.Context, token string) (*biz.Channel, error) {
-	ent, err := r.data.db.Channel.Query().Where(channel.ShortTokenEQ(token)).Only(ctx)
+	ent, err := r.data.db.Channel.Query().Where(channel.ShortTokenEQ(token)).WithTagsRel(func(q *entity.ChannelTagQuery) {
+		q.WithTag()
+	}).Only(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -434,6 +452,7 @@ func (r *channelRepo) GetDefaultChannel(ctx context.Context, userID string) (*bi
 	// Per A009: no default channel concept. Return first channel for backward compat.
 	ent, err := r.data.db.Channel.Query().
 		Where(channel.UserIDEQ(userID)).
+		WithTagsRel(func(q *entity.ChannelTagQuery) { q.WithTag() }).
 		Order(entity.Asc(channel.FieldID)).
 		First(ctx)
 	if err != nil {
@@ -443,7 +462,9 @@ func (r *channelRepo) GetDefaultChannel(ctx context.Context, userID string) (*bi
 }
 
 func (r *channelRepo) GetByHandle(ctx context.Context, handle string) (*biz.Channel, error) {
-	ent, err := r.data.db.Channel.Query().Where(channel.HandleEQ(handle)).Only(ctx)
+	ent, err := r.data.db.Channel.Query().Where(channel.HandleEQ(handle)).WithTagsRel(func(q *entity.ChannelTagQuery) {
+		q.WithTag()
+	}).Only(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -451,7 +472,9 @@ func (r *channelRepo) GetByHandle(ctx context.Context, handle string) (*biz.Chan
 }
 
 func (r *channelRepo) GetBySlug(ctx context.Context, slug string) (*biz.Channel, error) {
-	ent, err := r.data.db.Channel.Query().Where(channel.SlugEQ(slug)).Only(ctx)
+	ent, err := r.data.db.Channel.Query().Where(channel.SlugEQ(slug)).WithTagsRel(func(q *entity.ChannelTagQuery) {
+		q.WithTag()
+	}).Only(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -517,6 +540,24 @@ func (r *channelRepo) Update(ctx context.Context, ch *biz.Channel) (*biz.Channel
 	if err != nil {
 		return nil, err
 	}
+
+	if ch.TagIDs != nil {
+		_, _ = r.data.db.ChannelTag.Delete().
+			Where(channeltag.HasChannelWith(channel.IDEQ(ent.ID))).
+			Exec(ctx)
+		if len(ch.TagIDs) > 0 {
+			bulk := make([]*entity.ChannelTagCreate, 0, len(ch.TagIDs))
+			for _, tagID := range ch.TagIDs {
+				bulk = append(bulk, r.data.db.ChannelTag.Create().
+					SetChannelID(ent.ID).
+					SetTagID(tagID))
+			}
+			if _, err := r.data.db.ChannelTag.CreateBulk(bulk...).Save(ctx); err != nil {
+				r.log.Errorf("failed to update channel tags: %v", err)
+			}
+		}
+	}
+
 	return mapChannel(ent), nil
 }
 
@@ -531,6 +572,7 @@ func (r *channelRepo) ListByUser(ctx context.Context, userID string, page, pageS
 		return nil, 0, err
 	}
 	ents, err := query.
+		WithTagsRel(func(q *entity.ChannelTagQuery) { q.WithTag() }).
 		Order(entity.Desc(channel.FieldCreateTime)).
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
@@ -552,6 +594,7 @@ func (r *channelRepo) ListPublic(ctx context.Context, page, pageSize int) ([]*bi
 		return nil, 0, err
 	}
 	ents, err := query.
+		WithTagsRel(func(q *entity.ChannelTagQuery) { q.WithTag() }).
 		Order(entity.Desc(channel.FieldCreateTime)).
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
@@ -931,6 +974,15 @@ func mapChannel(ent *entity.Channel) *biz.Channel {
 		tags = ent.Tags
 	}
 
+	var tagIDs []int
+	if ent.Edges.TagsRel != nil {
+		for _, ct := range ent.Edges.TagsRel {
+			if ct.Edges.Tag != nil {
+				tagIDs = append(tagIDs, ct.Edges.Tag.ID)
+			}
+		}
+	}
+
 	var links []biz.ChannelLink
 	if ent.Links != nil {
 		links = convertSchemaLinksToBiz(ent.Links)
@@ -957,6 +1009,7 @@ func mapChannel(ent *entity.Channel) *biz.Channel {
 		Privacy:         string(ent.Privacy),
 		IsVerified:      ent.IsVerified,
 		Tags:            tags,
+		TagIDs:          tagIDs,
 		CategoryID:      categoryID,
 		SubscriberCount: ent.SubscriberCount,
 		MediaCount:      ent.MediaCount,

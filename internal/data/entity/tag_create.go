@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"origadmin/application/origcms/internal/data/entity/channeltag"
 	"origadmin/application/origcms/internal/data/entity/tag"
 	"origadmin/application/origcms/internal/data/entity/tagname"
 	"origadmin/application/origcms/internal/data/entity/user"
@@ -52,6 +53,20 @@ func (_c *TagCreate) SetMediaCount(v int) *TagCreate {
 func (_c *TagCreate) SetNillableMediaCount(v *int) *TagCreate {
 	if v != nil {
 		_c.SetMediaCount(*v)
+	}
+	return _c
+}
+
+// SetChannelCount sets the "channel_count" field.
+func (_c *TagCreate) SetChannelCount(v int) *TagCreate {
+	_c.mutation.SetChannelCount(v)
+	return _c
+}
+
+// SetNillableChannelCount sets the "channel_count" field if the given value is not nil.
+func (_c *TagCreate) SetNillableChannelCount(v *int) *TagCreate {
+	if v != nil {
+		_c.SetChannelCount(*v)
 	}
 	return _c
 }
@@ -182,6 +197,21 @@ func (_c *TagCreate) AddNames(v ...*TagName) *TagCreate {
 	return _c.AddNameIDs(ids...)
 }
 
+// AddChannelTagIDs adds the "channel_tags" edge to the ChannelTag entity by IDs.
+func (_c *TagCreate) AddChannelTagIDs(ids ...int) *TagCreate {
+	_c.mutation.AddChannelTagIDs(ids...)
+	return _c
+}
+
+// AddChannelTags adds the "channel_tags" edges to the ChannelTag entity.
+func (_c *TagCreate) AddChannelTags(v ...*ChannelTag) *TagCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddChannelTagIDs(ids...)
+}
+
 // Mutation returns the TagMutation object of the builder.
 func (_c *TagCreate) Mutation() *TagMutation {
 	return _c.mutation
@@ -221,6 +251,10 @@ func (_c *TagCreate) defaults() {
 		v := tag.DefaultMediaCount
 		_c.mutation.SetMediaCount(v)
 	}
+	if _, ok := _c.mutation.ChannelCount(); !ok {
+		v := tag.DefaultChannelCount
+		_c.mutation.SetChannelCount(v)
+	}
 	if _, ok := _c.mutation.ListingsThumbnail(); !ok {
 		v := tag.DefaultListingsThumbnail
 		_c.mutation.SetListingsThumbnail(v)
@@ -256,6 +290,9 @@ func (_c *TagCreate) check() error {
 	}
 	if _, ok := _c.mutation.MediaCount(); !ok {
 		return &ValidationError{Name: "media_count", err: errors.New(`entity: missing required field "Tag.media_count"`)}
+	}
+	if _, ok := _c.mutation.ChannelCount(); !ok {
+		return &ValidationError{Name: "channel_count", err: errors.New(`entity: missing required field "Tag.channel_count"`)}
 	}
 	if v, ok := _c.mutation.ListingsThumbnail(); ok {
 		if err := tag.ListingsThumbnailValidator(v); err != nil {
@@ -324,6 +361,10 @@ func (_c *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 		_spec.SetField(tag.FieldMediaCount, field.TypeInt, value)
 		_node.MediaCount = value
 	}
+	if value, ok := _c.mutation.ChannelCount(); ok {
+		_spec.SetField(tag.FieldChannelCount, field.TypeInt, value)
+		_node.ChannelCount = value
+	}
 	if value, ok := _c.mutation.ListingsThumbnail(); ok {
 		_spec.SetField(tag.FieldListingsThumbnail, field.TypeString, value)
 		_node.ListingsThumbnail = value
@@ -381,6 +422,22 @@ func (_c *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(tagname.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ChannelTagsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.ChannelTagsTable,
+			Columns: []string{tag.ChannelTagsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

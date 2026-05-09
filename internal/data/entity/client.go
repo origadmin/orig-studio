@@ -14,6 +14,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
+	"origadmin/application/origcms/internal/data/entity/channeltag"
 	"origadmin/application/origcms/internal/data/entity/comment"
 	"origadmin/application/origcms/internal/data/entity/commentlike"
 	"origadmin/application/origcms/internal/data/entity/commentreport"
@@ -59,6 +60,8 @@ type Client struct {
 	Category *CategoryClient
 	// Channel is the client for interacting with the Channel builders.
 	Channel *ChannelClient
+	// ChannelTag is the client for interacting with the ChannelTag builders.
+	ChannelTag *ChannelTagClient
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
 	// CommentLike is the client for interacting with the CommentLike builders.
@@ -127,6 +130,7 @@ func (c *Client) init() {
 	c.Article = NewArticleClient(c.config)
 	c.Category = NewCategoryClient(c.config)
 	c.Channel = NewChannelClient(c.config)
+	c.ChannelTag = NewChannelTagClient(c.config)
 	c.Comment = NewCommentClient(c.config)
 	c.CommentLike = NewCommentLikeClient(c.config)
 	c.CommentReport = NewCommentReportClient(c.config)
@@ -249,6 +253,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Article:          NewArticleClient(cfg),
 		Category:         NewCategoryClient(cfg),
 		Channel:          NewChannelClient(cfg),
+		ChannelTag:       NewChannelTagClient(cfg),
 		Comment:          NewCommentClient(cfg),
 		CommentLike:      NewCommentLikeClient(cfg),
 		CommentReport:    NewCommentReportClient(cfg),
@@ -298,6 +303,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Article:          NewArticleClient(cfg),
 		Category:         NewCategoryClient(cfg),
 		Channel:          NewChannelClient(cfg),
+		ChannelTag:       NewChannelTagClient(cfg),
 		Comment:          NewCommentClient(cfg),
 		CommentLike:      NewCommentLikeClient(cfg),
 		CommentReport:    NewCommentReportClient(cfg),
@@ -354,12 +360,12 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Article, c.Category, c.Channel, c.Comment, c.CommentLike, c.CommentReport,
-		c.EncodeProfile, c.EncodingTask, c.Favorite, c.GroupMember, c.History, c.Like,
-		c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaReport, c.MediaReviewLog,
-		c.MediaTag, c.Notification, c.PermissionGroup, c.Playlist, c.PortalBanner,
-		c.PortalCustomPage, c.PortalNavItem, c.Setting, c.Subscription, c.Tag,
-		c.TagName, c.UploadSession, c.User,
+		c.Article, c.Category, c.Channel, c.ChannelTag, c.Comment, c.CommentLike,
+		c.CommentReport, c.EncodeProfile, c.EncodingTask, c.Favorite, c.GroupMember,
+		c.History, c.Like, c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaReport,
+		c.MediaReviewLog, c.MediaTag, c.Notification, c.PermissionGroup, c.Playlist,
+		c.PortalBanner, c.PortalCustomPage, c.PortalNavItem, c.Setting, c.Subscription,
+		c.Tag, c.TagName, c.UploadSession, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -369,12 +375,12 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Article, c.Category, c.Channel, c.Comment, c.CommentLike, c.CommentReport,
-		c.EncodeProfile, c.EncodingTask, c.Favorite, c.GroupMember, c.History, c.Like,
-		c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaReport, c.MediaReviewLog,
-		c.MediaTag, c.Notification, c.PermissionGroup, c.Playlist, c.PortalBanner,
-		c.PortalCustomPage, c.PortalNavItem, c.Setting, c.Subscription, c.Tag,
-		c.TagName, c.UploadSession, c.User,
+		c.Article, c.Category, c.Channel, c.ChannelTag, c.Comment, c.CommentLike,
+		c.CommentReport, c.EncodeProfile, c.EncodingTask, c.Favorite, c.GroupMember,
+		c.History, c.Like, c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaReport,
+		c.MediaReviewLog, c.MediaTag, c.Notification, c.PermissionGroup, c.Playlist,
+		c.PortalBanner, c.PortalCustomPage, c.PortalNavItem, c.Setting, c.Subscription,
+		c.Tag, c.TagName, c.UploadSession, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -389,6 +395,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Category.mutate(ctx, m)
 	case *ChannelMutation:
 		return c.Channel.mutate(ctx, m)
+	case *ChannelTagMutation:
+		return c.ChannelTag.mutate(ctx, m)
 	case *CommentMutation:
 		return c.Comment.mutate(ctx, m)
 	case *CommentLikeMutation:
@@ -1046,6 +1054,22 @@ func (c *ChannelClient) QueryCategory(_m *Channel) *CategoryQuery {
 	return query
 }
 
+// QueryTagsRel queries the tags_rel edge of a Channel.
+func (c *ChannelClient) QueryTagsRel(_m *Channel) *ChannelTagQuery {
+	query := (&ChannelTagClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(channel.Table, channel.FieldID, id),
+			sqlgraph.To(channeltag.Table, channeltag.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, channel.TagsRelTable, channel.TagsRelColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ChannelClient) Hooks() []Hook {
 	return c.hooks.Channel
@@ -1068,6 +1092,171 @@ func (c *ChannelClient) mutate(ctx context.Context, m *ChannelMutation) (Value, 
 		return (&ChannelDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("entity: unknown Channel mutation op: %q", m.Op())
+	}
+}
+
+// ChannelTagClient is a client for the ChannelTag schema.
+type ChannelTagClient struct {
+	config
+}
+
+// NewChannelTagClient returns a client for the ChannelTag from the given config.
+func NewChannelTagClient(c config) *ChannelTagClient {
+	return &ChannelTagClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `channeltag.Hooks(f(g(h())))`.
+func (c *ChannelTagClient) Use(hooks ...Hook) {
+	c.hooks.ChannelTag = append(c.hooks.ChannelTag, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `channeltag.Intercept(f(g(h())))`.
+func (c *ChannelTagClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ChannelTag = append(c.inters.ChannelTag, interceptors...)
+}
+
+// Create returns a builder for creating a ChannelTag entity.
+func (c *ChannelTagClient) Create() *ChannelTagCreate {
+	mutation := newChannelTagMutation(c.config, OpCreate)
+	return &ChannelTagCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ChannelTag entities.
+func (c *ChannelTagClient) CreateBulk(builders ...*ChannelTagCreate) *ChannelTagCreateBulk {
+	return &ChannelTagCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ChannelTagClient) MapCreateBulk(slice any, setFunc func(*ChannelTagCreate, int)) *ChannelTagCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ChannelTagCreateBulk{err: fmt.Errorf("calling to ChannelTagClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ChannelTagCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ChannelTagCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ChannelTag.
+func (c *ChannelTagClient) Update() *ChannelTagUpdate {
+	mutation := newChannelTagMutation(c.config, OpUpdate)
+	return &ChannelTagUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ChannelTagClient) UpdateOne(_m *ChannelTag) *ChannelTagUpdateOne {
+	mutation := newChannelTagMutation(c.config, OpUpdateOne, withChannelTag(_m))
+	return &ChannelTagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ChannelTagClient) UpdateOneID(id int) *ChannelTagUpdateOne {
+	mutation := newChannelTagMutation(c.config, OpUpdateOne, withChannelTagID(id))
+	return &ChannelTagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ChannelTag.
+func (c *ChannelTagClient) Delete() *ChannelTagDelete {
+	mutation := newChannelTagMutation(c.config, OpDelete)
+	return &ChannelTagDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ChannelTagClient) DeleteOne(_m *ChannelTag) *ChannelTagDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ChannelTagClient) DeleteOneID(id int) *ChannelTagDeleteOne {
+	builder := c.Delete().Where(channeltag.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ChannelTagDeleteOne{builder}
+}
+
+// Query returns a query builder for ChannelTag.
+func (c *ChannelTagClient) Query() *ChannelTagQuery {
+	return &ChannelTagQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeChannelTag},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ChannelTag entity by its id.
+func (c *ChannelTagClient) Get(ctx context.Context, id int) (*ChannelTag, error) {
+	return c.Query().Where(channeltag.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ChannelTagClient) GetX(ctx context.Context, id int) *ChannelTag {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryChannel queries the channel edge of a ChannelTag.
+func (c *ChannelTagClient) QueryChannel(_m *ChannelTag) *ChannelQuery {
+	query := (&ChannelClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(channeltag.Table, channeltag.FieldID, id),
+			sqlgraph.To(channel.Table, channel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, channeltag.ChannelTable, channeltag.ChannelColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTag queries the tag edge of a ChannelTag.
+func (c *ChannelTagClient) QueryTag(_m *ChannelTag) *TagQuery {
+	query := (&TagClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(channeltag.Table, channeltag.FieldID, id),
+			sqlgraph.To(tag.Table, tag.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, channeltag.TagTable, channeltag.TagColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ChannelTagClient) Hooks() []Hook {
+	return c.hooks.ChannelTag
+}
+
+// Interceptors returns the client interceptors.
+func (c *ChannelTagClient) Interceptors() []Interceptor {
+	return c.inters.ChannelTag
+}
+
+func (c *ChannelTagClient) mutate(ctx context.Context, m *ChannelTagMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ChannelTagCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ChannelTagUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ChannelTagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ChannelTagDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entity: unknown ChannelTag mutation op: %q", m.Op())
 	}
 }
 
@@ -4990,6 +5179,22 @@ func (c *TagClient) QueryNames(_m *Tag) *TagNameQuery {
 	return query
 }
 
+// QueryChannelTags queries the channel_tags edge of a Tag.
+func (c *TagClient) QueryChannelTags(_m *Tag) *ChannelTagQuery {
+	query := (&ChannelTagClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tag.Table, tag.FieldID, id),
+			sqlgraph.To(channeltag.Table, channeltag.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tag.ChannelTagsTable, tag.ChannelTagsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *TagClient) Hooks() []Hook {
 	return c.hooks.Tag
@@ -5753,17 +5958,19 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Article, Category, Channel, Comment, CommentLike, CommentReport, EncodeProfile,
-		EncodingTask, Favorite, GroupMember, History, Like, Media, MediaCategory,
-		MediaPlaylist, MediaReport, MediaReviewLog, MediaTag, Notification,
-		PermissionGroup, Playlist, PortalBanner, PortalCustomPage, PortalNavItem,
-		Setting, Subscription, Tag, TagName, UploadSession, User []ent.Hook
+		Article, Category, Channel, ChannelTag, Comment, CommentLike, CommentReport,
+		EncodeProfile, EncodingTask, Favorite, GroupMember, History, Like, Media,
+		MediaCategory, MediaPlaylist, MediaReport, MediaReviewLog, MediaTag,
+		Notification, PermissionGroup, Playlist, PortalBanner, PortalCustomPage,
+		PortalNavItem, Setting, Subscription, Tag, TagName, UploadSession,
+		User []ent.Hook
 	}
 	inters struct {
-		Article, Category, Channel, Comment, CommentLike, CommentReport, EncodeProfile,
-		EncodingTask, Favorite, GroupMember, History, Like, Media, MediaCategory,
-		MediaPlaylist, MediaReport, MediaReviewLog, MediaTag, Notification,
-		PermissionGroup, Playlist, PortalBanner, PortalCustomPage, PortalNavItem,
-		Setting, Subscription, Tag, TagName, UploadSession, User []ent.Interceptor
+		Article, Category, Channel, ChannelTag, Comment, CommentLike, CommentReport,
+		EncodeProfile, EncodingTask, Favorite, GroupMember, History, Like, Media,
+		MediaCategory, MediaPlaylist, MediaReport, MediaReviewLog, MediaTag,
+		Notification, PermissionGroup, Playlist, PortalBanner, PortalCustomPage,
+		PortalNavItem, Setting, Subscription, Tag, TagName, UploadSession,
+		User []ent.Interceptor
 	}
 )
