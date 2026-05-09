@@ -28,15 +28,9 @@ func NewCategoryHandler(uc *biz.CategoryTagUseCase, jwt *auth.Manager) *Category
 func (h *CategoryHandler) RegisterRoutes(r http2.Router) {
 	categories := r.Group("/categories")
 	{
-		// ================================
-		// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST
-		// ================================
 		categories.GET("", h.listCategories())
 		categories.POST("", server.WithJWTCtx(h.jwt, h.createCategory()))
 
-		// ================================
-		// 2. PARAMETER ROUTES (WITH :id) - MUST BE LAST
-		// ================================
 		categories.GET("/:id", h.getCategory())
 		categories.PUT("/:id", server.WithJWTCtx(h.jwt, h.updateCategory()))
 		categories.PATCH("/:id", server.WithJWTCtx(h.jwt, h.updateCategoryPartial()))
@@ -55,7 +49,6 @@ func (h *CategoryHandler) listCategories() http2.HandlerFunc {
 		if limit == 0 {
 			limit = 100
 		}
-		// Normalize pagination parameters
 		page, limit = repo.NormalizeHTTPPagination(page, limit)
 		items, err := h.uc.ListCategories(ctx.Request().Context())
 		if err != nil {
@@ -63,7 +56,6 @@ func (h *CategoryHandler) listCategories() http2.HandlerFunc {
 			return nil
 		}
 
-		// Convert biz categories to proto categories
 		pbCategories := make([]*types.Category, len(items))
 		for i, item := range items {
 			pbCategories[i] = bizCategoryToProto(item)
@@ -214,7 +206,6 @@ func (h *CategoryHandler) deleteCategory() http2.HandlerFunc {
 	}
 }
 
-// bizCategoryToProto converts a biz.Category to a proto types.Category.
 func bizCategoryToProto(c *biz.Category) *types.Category {
 	pb := &types.Category{
 		Id:          int64(c.ID),

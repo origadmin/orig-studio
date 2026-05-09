@@ -9,7 +9,6 @@ import (
 	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/server"
 	"origadmin/application/origcms/internal/data/entity/media"
 )
 
@@ -44,7 +43,7 @@ func (h *ExploreHandler) trending() http2.HandlerFunc {
 			Order(entity.Desc(media.FieldViewCount)).
 			All(reqCtx)
 		if err != nil {
-			http2.Fail(ctx, 50000, err.Error())
+			http2.Fail(ctx, http2.ErrInternal, err.Error())
 			return nil
 		}
 
@@ -68,11 +67,10 @@ func (h *ExploreHandler) trending() http2.HandlerFunc {
 			})
 		}
 
-		response := server.PageResponse[interface{}]{}
-		response.Data.Items = items
-		response.Data.Total = int64(len(items))
-
-		gc.JSON(200, response)
+		http2.OK(ctx, gin.H{
+			"items": items,
+			"total": len(items),
+		})
 		return nil
 	}
 }
