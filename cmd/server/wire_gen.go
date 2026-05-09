@@ -44,6 +44,7 @@ import (
 	auth2 "origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/infra/pubsub"
+	"origadmin/application/origcms/internal/middleware"
 )
 
 import (
@@ -193,6 +194,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 		StatsHandler:             statsHandler,
 		UploadUC:                 uploadUseCase,
 		CommentLikeUC:            commentLikeUseCase,
+		SettingUC:                settingUseCase,
 	}
 	return appDependencies, nil
 }
@@ -502,6 +504,20 @@ func NewStatsHandler(
 	return systemservice.NewStatsHandler(mediaUC, likeFavoriteUC, statsRepo, jwt)
 }
 
+// NewRateLimiter creates a new rate limiter with rpm from settings.
+func NewRateLimiter(settingUC *biz.SettingUseCase) *middleware.RateLimiter {
+	defaultRPM := 60
+	if settingUC != nil {
+		if val := settingUC.Get(context.Background(), "api_rate_limit"); val != "" {
+			var rpm int
+			if _, err := fmt.Sscanf(val, "%d", &rpm); err == nil && rpm > 0 {
+				defaultRPM = rpm
+			}
+		}
+	}
+	return middleware.NewRateLimiter(defaultRPM)
+}
+
 // NewSearchHandler creates a new search handler.
 func NewSearchHandler(
 	mediaUC *biz2.MediaUseCase,
@@ -604,6 +620,15 @@ func NewExploreHandler(client *entity.Client) *contentservice.ExploreHandler {
 	return contentservice.NewExploreHandler(client)
 }
 
+// NewPortalHandler creates a new portal handler.
+func NewPortalHandler(
+	portalUC *biz4.PortalUseCase,
+	jwt *auth2.Manager,
+	settingUC *biz.SettingUseCase,
+) *contentservice.PortalHandler {
+	return contentservice.NewPortalHandler(portalUC, jwt, settingUC)
+}
+
 // NewStubHandler creates a new stub handler for missing routes.
 func NewStubHandler(jwt *auth2.Manager) *contentservice.StubHandler {
 	return contentservice.NewStubHandler(jwt)
@@ -642,14 +667,17 @@ type AppDependencies struct {
 	NotificationHandler      *contentservice.NotificationHandler
 	ShareHandler             *contentservice.ShareHandler
 	ExploreHandler           *contentservice.ExploreHandler
+	PortalHandler            *contentservice.PortalHandler
 	AdminHandler             *adminservice.AdminHandler
 	AdminTagHandler          *adminservice.AdminTagHandler
 	StubHandler              *contentservice.StubHandler
 	SpriteHandler            *contentservice.SpriteHandler
 	SystemHandler            *systemservice.SystemHandler
 	StatsHandler             *systemservice.StatsHandler
+	RateLimiter              *middleware.RateLimiter
 	UploadUC                 *biz2.UploadUseCase
 	CommentLikeUC            *biz4.CommentLikeUseCase
+	SettingUC                *biz.SettingUseCase
 }
 
 // Cleanup closes all resources.

@@ -120,6 +120,14 @@ func (r *portalRepo) ReorderNavItems(ctx context.Context, ids []string) error {
 	return nil
 }
 
+func (r *portalRepo) GetNavItemByID(ctx context.Context, id string) (*entity.PortalNavItem, error) {
+	item, err := r.data.db.PortalNavItem.Get(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("get nav item: %w", err)
+	}
+	return item, nil
+}
+
 // ==================== Banner ====================
 
 func (r *portalRepo) ListBanners(ctx context.Context) ([]*entity.PortalBanner, error) {
