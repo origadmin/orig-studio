@@ -41,6 +41,12 @@ type Article struct {
 	Featured bool `json:"featured,omitempty"`
 	// Tags holds the value of the "tags" field.
 	Tags []string `json:"tags,omitempty"`
+	// TitleI18n holds the value of the "title_i18n" field.
+	TitleI18n map[string]string `json:"title_i18n,omitempty"`
+	// ContentI18n holds the value of the "content_i18n" field.
+	ContentI18n map[string]string `json:"content_i18n,omitempty"`
+	// SummaryI18n holds the value of the "summary_i18n" field.
+	SummaryI18n map[string]string `json:"summary_i18n,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
 	// CategoryID holds the value of the "category_id" field.
@@ -124,7 +130,7 @@ func (*Article) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case article.FieldTags:
+		case article.FieldTags, article.FieldTitleI18n, article.FieldContentI18n, article.FieldSummaryI18n:
 			values[i] = new([]byte)
 		case article.FieldFeatured:
 			values[i] = new(sql.NullBool)
@@ -217,6 +223,30 @@ func (_m *Article) assignValues(columns []string, values []any) error {
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &_m.Tags); err != nil {
 					return fmt.Errorf("unmarshal field tags: %w", err)
+				}
+			}
+		case article.FieldTitleI18n:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field title_i18n", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.TitleI18n); err != nil {
+					return fmt.Errorf("unmarshal field title_i18n: %w", err)
+				}
+			}
+		case article.FieldContentI18n:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field content_i18n", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.ContentI18n); err != nil {
+					return fmt.Errorf("unmarshal field content_i18n: %w", err)
+				}
+			}
+		case article.FieldSummaryI18n:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field summary_i18n", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.SummaryI18n); err != nil {
+					return fmt.Errorf("unmarshal field summary_i18n: %w", err)
 				}
 			}
 		case article.FieldUserID:
@@ -353,6 +383,15 @@ func (_m *Article) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("tags=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Tags))
+	builder.WriteString(", ")
+	builder.WriteString("title_i18n=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TitleI18n))
+	builder.WriteString(", ")
+	builder.WriteString("content_i18n=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ContentI18n))
+	builder.WriteString(", ")
+	builder.WriteString("summary_i18n=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SummaryI18n))
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(_m.UserID)

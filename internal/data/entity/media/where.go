@@ -2275,6 +2275,26 @@ func TagsNotNil() predicate.Media {
 	return predicate.Media(sql.FieldNotNull(FieldTags))
 }
 
+// TitleI18nIsNil applies the IsNil predicate on the "title_i18n" field.
+func TitleI18nIsNil() predicate.Media {
+	return predicate.Media(sql.FieldIsNull(FieldTitleI18n))
+}
+
+// TitleI18nNotNil applies the NotNil predicate on the "title_i18n" field.
+func TitleI18nNotNil() predicate.Media {
+	return predicate.Media(sql.FieldNotNull(FieldTitleI18n))
+}
+
+// DescriptionI18nIsNil applies the IsNil predicate on the "description_i18n" field.
+func DescriptionI18nIsNil() predicate.Media {
+	return predicate.Media(sql.FieldIsNull(FieldDescriptionI18n))
+}
+
+// DescriptionI18nNotNil applies the NotNil predicate on the "description_i18n" field.
+func DescriptionI18nNotNil() predicate.Media {
+	return predicate.Media(sql.FieldNotNull(FieldDescriptionI18n))
+}
+
 // SyncStatusEQ applies the EQ predicate on the "sync_status" field.
 func SyncStatusEQ(v string) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldSyncStatus, v))

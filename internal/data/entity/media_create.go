@@ -539,6 +539,18 @@ func (_c *MediaCreate) SetTags(v []string) *MediaCreate {
 	return _c
 }
 
+// SetTitleI18n sets the "title_i18n" field.
+func (_c *MediaCreate) SetTitleI18n(v map[string]string) *MediaCreate {
+	_c.mutation.SetTitleI18n(v)
+	return _c
+}
+
+// SetDescriptionI18n sets the "description_i18n" field.
+func (_c *MediaCreate) SetDescriptionI18n(v map[string]string) *MediaCreate {
+	_c.mutation.SetDescriptionI18n(v)
+	return _c
+}
+
 // SetSyncStatus sets the "sync_status" field.
 func (_c *MediaCreate) SetSyncStatus(v string) *MediaCreate {
 	_c.mutation.SetSyncStatus(v)
@@ -1357,6 +1369,14 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Tags(); ok {
 		_spec.SetField(media.FieldTags, field.TypeJSON, value)
 		_node.Tags = value
+	}
+	if value, ok := _c.mutation.TitleI18n(); ok {
+		_spec.SetField(media.FieldTitleI18n, field.TypeJSON, value)
+		_node.TitleI18n = value
+	}
+	if value, ok := _c.mutation.DescriptionI18n(); ok {
+		_spec.SetField(media.FieldDescriptionI18n, field.TypeJSON, value)
+		_node.DescriptionI18n = value
 	}
 	if value, ok := _c.mutation.SyncStatus(); ok {
 		_spec.SetField(media.FieldSyncStatus, field.TypeString, value)

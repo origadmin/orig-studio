@@ -350,6 +350,26 @@ func DescriptionContainsFold(v string) predicate.Category {
 	return predicate.Category(sql.FieldContainsFold(FieldDescription, v))
 }
 
+// NameI18nIsNil applies the IsNil predicate on the "name_i18n" field.
+func NameI18nIsNil() predicate.Category {
+	return predicate.Category(sql.FieldIsNull(FieldNameI18n))
+}
+
+// NameI18nNotNil applies the NotNil predicate on the "name_i18n" field.
+func NameI18nNotNil() predicate.Category {
+	return predicate.Category(sql.FieldNotNull(FieldNameI18n))
+}
+
+// DescriptionI18nIsNil applies the IsNil predicate on the "description_i18n" field.
+func DescriptionI18nIsNil() predicate.Category {
+	return predicate.Category(sql.FieldIsNull(FieldDescriptionI18n))
+}
+
+// DescriptionI18nNotNil applies the NotNil predicate on the "description_i18n" field.
+func DescriptionI18nNotNil() predicate.Category {
+	return predicate.Category(sql.FieldNotNull(FieldDescriptionI18n))
+}
+
 // ThumbnailEQ applies the EQ predicate on the "thumbnail" field.
 func ThumbnailEQ(v string) predicate.Category {
 	return predicate.Category(sql.FieldEQ(FieldThumbnail, v))

@@ -140,6 +140,24 @@ func (_c *ArticleCreate) SetTags(v []string) *ArticleCreate {
 	return _c
 }
 
+// SetTitleI18n sets the "title_i18n" field.
+func (_c *ArticleCreate) SetTitleI18n(v map[string]string) *ArticleCreate {
+	_c.mutation.SetTitleI18n(v)
+	return _c
+}
+
+// SetContentI18n sets the "content_i18n" field.
+func (_c *ArticleCreate) SetContentI18n(v map[string]string) *ArticleCreate {
+	_c.mutation.SetContentI18n(v)
+	return _c
+}
+
+// SetSummaryI18n sets the "summary_i18n" field.
+func (_c *ArticleCreate) SetSummaryI18n(v map[string]string) *ArticleCreate {
+	_c.mutation.SetSummaryI18n(v)
+	return _c
+}
+
 // SetUserID sets the "user_id" field.
 func (_c *ArticleCreate) SetUserID(v string) *ArticleCreate {
 	_c.mutation.SetUserID(v)
@@ -492,6 +510,18 @@ func (_c *ArticleCreate) createSpec() (*Article, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Tags(); ok {
 		_spec.SetField(article.FieldTags, field.TypeJSON, value)
 		_node.Tags = value
+	}
+	if value, ok := _c.mutation.TitleI18n(); ok {
+		_spec.SetField(article.FieldTitleI18n, field.TypeJSON, value)
+		_node.TitleI18n = value
+	}
+	if value, ok := _c.mutation.ContentI18n(); ok {
+		_spec.SetField(article.FieldContentI18n, field.TypeJSON, value)
+		_node.ContentI18n = value
+	}
+	if value, ok := _c.mutation.SummaryI18n(); ok {
+		_spec.SetField(article.FieldSummaryI18n, field.TypeJSON, value)
+		_node.SummaryI18n = value
 	}
 	if value, ok := _c.mutation.Thumbnail(); ok {
 		_spec.SetField(article.FieldThumbnail, field.TypeString, value)

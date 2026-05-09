@@ -245,6 +245,30 @@ func (_u *ChannelUpdate) ClearTags() *ChannelUpdate {
 	return _u
 }
 
+// SetNameI18n sets the "name_i18n" field.
+func (_u *ChannelUpdate) SetNameI18n(v map[string]string) *ChannelUpdate {
+	_u.mutation.SetNameI18n(v)
+	return _u
+}
+
+// ClearNameI18n clears the value of the "name_i18n" field.
+func (_u *ChannelUpdate) ClearNameI18n() *ChannelUpdate {
+	_u.mutation.ClearNameI18n()
+	return _u
+}
+
+// SetDescriptionI18n sets the "description_i18n" field.
+func (_u *ChannelUpdate) SetDescriptionI18n(v map[string]string) *ChannelUpdate {
+	_u.mutation.SetDescriptionI18n(v)
+	return _u
+}
+
+// ClearDescriptionI18n clears the value of the "description_i18n" field.
+func (_u *ChannelUpdate) ClearDescriptionI18n() *ChannelUpdate {
+	_u.mutation.ClearDescriptionI18n()
+	return _u
+}
+
 // SetCategoryID sets the "category_id" field.
 func (_u *ChannelUpdate) SetCategoryID(v int64) *ChannelUpdate {
 	_u.mutation.SetCategoryID(v)
@@ -682,6 +706,18 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.TagsCleared() {
 		_spec.ClearField(channel.FieldTags, field.TypeJSON)
 	}
+	if value, ok := _u.mutation.NameI18n(); ok {
+		_spec.SetField(channel.FieldNameI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.NameI18nCleared() {
+		_spec.ClearField(channel.FieldNameI18n, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.DescriptionI18n(); ok {
+		_spec.SetField(channel.FieldDescriptionI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.DescriptionI18nCleared() {
+		_spec.ClearField(channel.FieldDescriptionI18n, field.TypeJSON)
+	}
 	if value, ok := _u.mutation.IsVerified(); ok {
 		_spec.SetField(channel.FieldIsVerified, field.TypeBool, value)
 	}
@@ -1106,6 +1142,30 @@ func (_u *ChannelUpdateOne) AppendTags(v []string) *ChannelUpdateOne {
 // ClearTags clears the value of the "tags" field.
 func (_u *ChannelUpdateOne) ClearTags() *ChannelUpdateOne {
 	_u.mutation.ClearTags()
+	return _u
+}
+
+// SetNameI18n sets the "name_i18n" field.
+func (_u *ChannelUpdateOne) SetNameI18n(v map[string]string) *ChannelUpdateOne {
+	_u.mutation.SetNameI18n(v)
+	return _u
+}
+
+// ClearNameI18n clears the value of the "name_i18n" field.
+func (_u *ChannelUpdateOne) ClearNameI18n() *ChannelUpdateOne {
+	_u.mutation.ClearNameI18n()
+	return _u
+}
+
+// SetDescriptionI18n sets the "description_i18n" field.
+func (_u *ChannelUpdateOne) SetDescriptionI18n(v map[string]string) *ChannelUpdateOne {
+	_u.mutation.SetDescriptionI18n(v)
+	return _u
+}
+
+// ClearDescriptionI18n clears the value of the "description_i18n" field.
+func (_u *ChannelUpdateOne) ClearDescriptionI18n() *ChannelUpdateOne {
+	_u.mutation.ClearDescriptionI18n()
 	return _u
 }
 
@@ -1575,6 +1635,18 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 	}
 	if _u.mutation.TagsCleared() {
 		_spec.ClearField(channel.FieldTags, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.NameI18n(); ok {
+		_spec.SetField(channel.FieldNameI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.NameI18nCleared() {
+		_spec.ClearField(channel.FieldNameI18n, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.DescriptionI18n(); ok {
+		_spec.SetField(channel.FieldDescriptionI18n, field.TypeJSON, value)
+	}
+	if _u.mutation.DescriptionI18nCleared() {
+		_spec.ClearField(channel.FieldDescriptionI18n, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.IsVerified(); ok {
 		_spec.SetField(channel.FieldIsVerified, field.TypeBool, value)

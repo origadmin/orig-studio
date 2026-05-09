@@ -53,6 +53,8 @@ func (Channel) Fields() []ent.Field {
 		field.Enum("status").Values("ACTIVE", "INACTIVE", "SUSPENDED", "PENDING_REVIEW").Default("ACTIVE"),
 		field.Enum("privacy").Values("PUBLIC", "PRIVATE", "UNLISTED", "PAID", "SUBSCRIBERS_ONLY").Default("PUBLIC"),
 		field.JSON("tags", []string{}).Optional(),          // Channel topic tags (0-10)
+		field.JSON("name_i18n", map[string]string{}).Optional(),
+		field.JSON("description_i18n", map[string]string{}).Optional(),
 		field.Int64("category_id").Optional(),              // Primary category FK
 
 		// Flags

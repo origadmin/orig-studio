@@ -91,6 +91,10 @@ const (
 	FieldThumbnailTime = "thumbnail_time"
 	// FieldTags holds the string denoting the tags field in the database.
 	FieldTags = "tags"
+	// FieldTitleI18n holds the string denoting the title_i18n field in the database.
+	FieldTitleI18n = "title_i18n"
+	// FieldDescriptionI18n holds the string denoting the description_i18n field in the database.
+	FieldDescriptionI18n = "description_i18n"
 	// FieldSyncStatus holds the string denoting the sync_status field in the database.
 	FieldSyncStatus = "sync_status"
 	// FieldSyncedAt holds the string denoting the synced_at field in the database.
@@ -255,6 +259,8 @@ var Columns = []string{
 	FieldVttPath,
 	FieldThumbnailTime,
 	FieldTags,
+	FieldTitleI18n,
+	FieldDescriptionI18n,
 	FieldSyncStatus,
 	FieldSyncedAt,
 	FieldUserID,

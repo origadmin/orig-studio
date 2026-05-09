@@ -47,6 +47,10 @@ type Channel struct {
 	Privacy channel.Privacy `json:"privacy,omitempty"`
 	// Tags holds the value of the "tags" field.
 	Tags []string `json:"tags,omitempty"`
+	// NameI18n holds the value of the "name_i18n" field.
+	NameI18n map[string]string `json:"name_i18n,omitempty"`
+	// DescriptionI18n holds the value of the "description_i18n" field.
+	DescriptionI18n map[string]string `json:"description_i18n,omitempty"`
 	// CategoryID holds the value of the "category_id" field.
 	CategoryID int64 `json:"category_id,omitempty"`
 	// IsVerified holds the value of the "is_verified" field.
@@ -133,7 +137,7 @@ func (*Channel) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case channel.FieldTags, channel.FieldLinks:
+		case channel.FieldTags, channel.FieldNameI18n, channel.FieldDescriptionI18n, channel.FieldLinks:
 			values[i] = new([]byte)
 		case channel.FieldIsVerified:
 			values[i] = new(sql.NullBool)
@@ -242,6 +246,22 @@ func (_m *Channel) assignValues(columns []string, values []any) error {
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &_m.Tags); err != nil {
 					return fmt.Errorf("unmarshal field tags: %w", err)
+				}
+			}
+		case channel.FieldNameI18n:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field name_i18n", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.NameI18n); err != nil {
+					return fmt.Errorf("unmarshal field name_i18n: %w", err)
+				}
+			}
+		case channel.FieldDescriptionI18n:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field description_i18n", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.DescriptionI18n); err != nil {
+					return fmt.Errorf("unmarshal field description_i18n: %w", err)
 				}
 			}
 		case channel.FieldCategoryID:
@@ -400,6 +420,12 @@ func (_m *Channel) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("tags=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Tags))
+	builder.WriteString(", ")
+	builder.WriteString("name_i18n=")
+	builder.WriteString(fmt.Sprintf("%v", _m.NameI18n))
+	builder.WriteString(", ")
+	builder.WriteString("description_i18n=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DescriptionI18n))
 	builder.WriteString(", ")
 	builder.WriteString("category_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CategoryID))
