@@ -260,7 +260,7 @@ func (h *ChannelHandler) CreateChannel(w http.ResponseWriter, r *http.Request) {
 		Privacy       string   `json:"privacy"`
 		Tags          []string `json:"tags"`
 		CategoryID    *int64   `json:"category_id"`
-		FriendlyToken string   `json:"friendly_token"`
+		ShortToken     string   `json:"short_token"`
 	}
 	if err := gc.Bind(&input); err != nil {
 		server.Fail(gc, server.ErrBadRequest, err.Error())
@@ -293,8 +293,8 @@ func (h *ChannelHandler) CreateChannel(w http.ResponseWriter, r *http.Request) {
 		Status:     "ACTIVE",
 		UserID:     claims.GetUserID(),
 	}
-	if input.FriendlyToken != "" {
-		chItem.ShortToken = input.FriendlyToken
+	if input.ShortToken != "" {
+		chItem.ShortToken = input.ShortToken
 	}
 
 	if chItem.Privacy == "" {
@@ -907,7 +907,7 @@ func (h *ChannelHandler) UpdateMyHandle(w http.ResponseWriter, r *http.Request) 
 	}
 
 	ch := channels[0]
-	ch.ShortToken = input.Handle
+	ch.Handle = input.Handle
 
 	updated, err := h.uc.UpdateChannel(r.Context(), ch, claims.GetUserID(), claims.IsStaff)
 	if err != nil {

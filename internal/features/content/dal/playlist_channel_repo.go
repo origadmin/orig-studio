@@ -486,6 +486,7 @@ func (r *channelRepo) Update(ctx context.Context, ch *biz.Channel) (*biz.Channel
 	builder := r.data.db.Channel.UpdateOneID(ch.ID).
 		SetName(ch.Name).
 		SetTitle(ch.Title).
+		SetHandle(ch.Handle).
 		SetDescription(ch.Description).
 		SetPrivacy(privacy).
 		SetStatus(status)
