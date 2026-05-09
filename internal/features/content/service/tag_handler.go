@@ -29,21 +29,9 @@ func NewTagHandler(uc *biz.CategoryTagUseCase, jwt *auth.Manager) *TagHandler {
 func (h *TagHandler) RegisterRoutes(r http2.Router) {
 	tags := r.Group("/tags")
 	{
-		// ================================
-		// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST
-		// ================================
 		tags.GET("", h.listTags())
 		tags.POST("", server.WithJWTCtx(h.jwt, h.createTag()))
-
-		// ================================
-		// 2. NESTED RESOURCE ROUTES (WITH :id) - MUST BE BEFORE MAIN :id ROUTES
-		// ================================
-		// GET /tags/:tag_id/media — list media by tag
 		tags.GET("/:id/media", h.getMediaByTag())
-
-		// ================================
-		// 3. MAIN RESOURCE PARAMETER ROUTES (WITH :id) - MUST BE LAST
-		// ================================
 		tags.GET("/:id", h.getTag())
 		tags.PUT("/:id", server.WithJWTCtx(h.jwt, h.updateTag()))
 		tags.DELETE("/:id", server.WithJWTCtx(h.jwt, h.deleteTag()))
@@ -57,7 +45,7 @@ func (h *TagHandler) createTag() http2.HandlerFunc {
 			Title string `json:"title"`
 		}
 		if err := gc.ShouldBindJSON(&input); err != nil {
-			http2.Fail(ctx, server.ErrBadRequest, err.Error())
+			http2.Fail(ctx, http2.ErrBadRequest, err.Error())
 			return nil
 		}
 
@@ -65,7 +53,7 @@ func (h *TagHandler) createTag() http2.HandlerFunc {
 			Title: input.Title,
 		})
 		if err != nil {
-			http2.Fail(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, http2.ErrInternal, err.Error())
 			return nil
 		}
 
@@ -81,12 +69,12 @@ func (h *TagHandler) getTag() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		id, err := strconv.Atoi(gc.Param("id"))
 		if err != nil {
-			http2.Fail(ctx, server.ErrBadRequest, "invalid tag id")
+			http2.Fail(ctx, http2.ErrBadRequest, "invalid tag id")
 			return nil
 		}
 		t, err := h.uc.GetTag(ctx.Request().Context(), id)
 		if err != nil {
-			http2.Fail(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, http2.ErrInternal, err.Error())
 			return nil
 		}
 		http2.OK(ctx, &pb.GetTagResponse{
@@ -101,14 +89,14 @@ func (h *TagHandler) updateTag() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		id, err := strconv.Atoi(gc.Param("id"))
 		if err != nil {
-			http2.Fail(ctx, server.ErrBadRequest, "invalid tag id")
+			http2.Fail(ctx, http2.ErrBadRequest, "invalid tag id")
 			return nil
 		}
 		var input struct {
 			Title string `json:"title"`
 		}
 		if err := gc.ShouldBindJSON(&input); err != nil {
-			http2.Fail(ctx, server.ErrBadRequest, err.Error())
+			http2.Fail(ctx, http2.ErrBadRequest, err.Error())
 			return nil
 		}
 
@@ -117,7 +105,7 @@ func (h *TagHandler) updateTag() http2.HandlerFunc {
 			Title: input.Title,
 		})
 		if err != nil {
-			http2.Fail(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, http2.ErrInternal, err.Error())
 			return nil
 		}
 
@@ -134,7 +122,7 @@ func (h *TagHandler) deleteTag() http2.HandlerFunc {
 		id, _ := strconv.Atoi(gc.Param("id"))
 		err := h.uc.DeleteTag(ctx.Request().Context(), id)
 		if err != nil {
-			http2.Fail(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, http2.ErrInternal, err.Error())
 			return nil
 		}
 		http2.OK(ctx, &pb.DeleteTagResponse{
@@ -155,11 +143,10 @@ func (h *TagHandler) listTags() http2.HandlerFunc {
 		if limit == 0 {
 			limit = 100
 		}
-		// Normalize pagination parameters
 		page, limit = repo.NormalizeHTTPPagination(page, limit)
 		items, total, err := h.uc.ListTags(ctx.Request().Context(), page, limit)
 		if err != nil {
-			http2.Fail(ctx, server.ErrInternal, err.Error())
+			http2.Fail(ctx, http2.ErrInternal, err.Error())
 			return nil
 		}
 
@@ -184,16 +171,13 @@ func (h *TagHandler) listTags() http2.HandlerFunc {
 	}
 }
 
-// getMediaByTag returns all media associated with a specific tag.
-// GET /api/v1/tags/:id/media
 func (h *TagHandler) getMediaByTag() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		http2.Fail(ctx, server.ErrNotFound, "not implemented in UseCase")
+		http2.Fail(ctx, http2.ErrNotFound, "not implemented in UseCase")
 		return nil
 	}
 }
 
-// bizTagToProto converts a biz.Tag to a proto types.Tag.
 func bizTagToProto(t *biz.Tag) *types.Tag {
 	if t == nil {
 		return nil
@@ -203,6 +187,6 @@ func bizTagToProto(t *biz.Tag) *types.Tag {
 		Name:       t.Title,
 		Slug:       t.Slug,
 		MediaCount: int64(t.MediaCount),
-		CreateTime: timestamppb.New(time.Now()), // biz.Tag lacks timestamp fields
+		CreateTime: timestamppb.New(time.Now()),
 	}
 }

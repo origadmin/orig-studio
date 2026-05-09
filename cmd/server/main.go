@@ -106,6 +106,7 @@ func main() {
 			deps.ArticleHandler,
 			deps.CommentHandler,
 			deps.CommentModerationHandler,
+			deps.MediaReportHandler,
 			deps.FeedHandler,
 			deps.ChannelHandler,
 			deps.PlaylistHandler,

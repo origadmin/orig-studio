@@ -28,43 +28,32 @@ import (
 )
 
 // NewDatabase creates a new database client.
-func NewDatabase(cfg *config.Config, logger log.Logger) (*entity.Client, error) {
+func NewDatabase(cfg *config.Config, logger log.Logger) (*entity.Client, *sql.DB, error) {
 	dbDialect, dbSource := cfg.GetDefaultDB()
 	db, err := openDB(dbSource, dbDialect, logger)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	ctx := context.Background()
 
-	// For SQLite: run pre-migration patches to add missing columns with defaults
-	// before Ent auto-migration, which would otherwise fail when copying data
-	// from old tables to new tables (NOT NULL constraint violation on new columns).
 	if dbDialect == "sqlite3" {
 		if err := patchSQLiteSchema(dbSource, logger); err != nil {
 			log.Warnf("SQLite pre-migration patch failed (non-fatal): %v", err)
 		}
 	}
 
-	// Build migration options based on database dialect
 	migrateOpts := []dbschema.MigrateOption{
 		migrate.WithDropIndex(true),
 		migrate.WithDropColumn(true),
 	}
 
 	if dbDialect == "postgres" {
-		// PostgreSQL: disable foreign keys during migration to avoid ordering issues
 		migrateOpts = append(migrateOpts, migrate.WithForeignKeys(false))
-		// Fix: PostgreSQL auto-migration may fail with "relation already exists" when
-		// indexes already exist in the database but Atlas's InspectSchema does not
-		// detect them (e.g., due to custom table names via entsql.Table annotation).
-		// Use WithApplyHook to inject IF NOT EXISTS into CREATE INDEX statements,
-		// making the migration idempotent on PostgreSQL.
 		migrateOpts = append(migrateOpts, dbschema.WithApplyHook(func(next dbschema.Applier) dbschema.Applier {
 			return dbschema.ApplyFunc(func(ctx context.Context, conn dialect.ExecQuerier, plan *atlasmigrate.Plan) error {
 				for i, c := range plan.Changes {
 					if strings.HasPrefix(c.Cmd, "CREATE INDEX ") || strings.HasPrefix(c.Cmd, "CREATE UNIQUE INDEX ") {
-						// Insert "IF NOT EXISTS" after "CREATE INDEX" or "CREATE UNIQUE INDEX"
 						c.Cmd = strings.Replace(c.Cmd, "CREATE INDEX ", "CREATE INDEX IF NOT EXISTS ", 1)
 						c.Cmd = strings.Replace(c.Cmd, "CREATE UNIQUE INDEX ", "CREATE UNIQUE INDEX IF NOT EXISTS ", 1)
 						plan.Changes[i] = c
@@ -76,18 +65,23 @@ func NewDatabase(cfg *config.Config, logger log.Logger) (*entity.Client, error) 
 	}
 
 	if err := db.Schema.Create(ctx, migrateOpts...); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if err := mediadal.SeedEncodeProfiles(ctx, db); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if err := seedSettings(ctx, db); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return db, nil
+	sqlDB, err := openSQLDB(dbSource, dbDialect)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to open raw SQL connection: %w", err)
+	}
+
+	return db, sqlDB, nil
 }
 
 // patchSQLiteSchema adds missing columns to existing SQLite tables before Ent auto-migration.
@@ -400,4 +394,31 @@ func EnvInt(key string, defaultVal int) int {
 		return defaultVal
 	}
 	return n
+}
+
+func openSQLDB(dsn, dbType string) (*sql.DB, error) {
+	driverName := "sqlite3"
+	if dbType == "postgres" {
+		driverName = "postgres"
+		if !strings.Contains(dsn, "sslmode") {
+			if strings.HasPrefix(dsn, "postgres://") || strings.HasPrefix(dsn, "postgresql://") {
+				if strings.Contains(dsn, "?") {
+					dsn = dsn + "&sslmode=disable"
+				} else {
+					dsn = dsn + "?sslmode=disable"
+				}
+			} else {
+				dsn = dsn + " sslmode=disable"
+			}
+		}
+	} else {
+		if !strings.Contains(dsn, "_fk=") {
+			if strings.Contains(dsn, "?") {
+				dsn = dsn + "&_fk=1"
+			} else {
+				dsn = dsn + "?_fk=1"
+			}
+		}
+	}
+	return sql.Open(driverName, dsn)
 }

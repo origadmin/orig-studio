@@ -7,10 +7,8 @@ import (
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/features/content/biz"
 	"origadmin/application/origcms/internal/helpers/repo"
-	"origadmin/application/origcms/internal/server"
 )
 
-// FeedHandler handles feed-related HTTP endpoints
 type FeedHandler struct {
 	uc *biz.FeedUseCase
 }
@@ -23,7 +21,6 @@ func (h *FeedHandler) RegisterRoutes(r http2.Router) {
 	r.GET("/feed", h.getFeed())
 }
 
-// FeedResponse represents the feed response structure
 type FeedResponse struct {
 	Page       int       `json:"page"`
 	PageSize   int       `json:"page_size"`
@@ -31,14 +28,12 @@ type FeedResponse struct {
 	Sections   []Section `json:"sections"`
 }
 
-// Section represents a feed section
 type Section struct {
 	Title string           `json:"title"`
 	Type  string           `json:"type"`
 	Items []*biz.MediaInfo `json:"items"`
 }
 
-// getFeed godoc: GET /api/v1/feed
 func (h *FeedHandler) getFeed() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
@@ -50,12 +45,11 @@ func (h *FeedHandler) getFeed() http2.HandlerFunc {
 		if pageSize == 0 {
 			pageSize = 20
 		}
-		// Normalize pagination parameters
 		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
 		medias, total, err := h.uc.ListLatest(ctx.Request().Context(), page, pageSize)
 		if err != nil {
-			http2.Fail(ctx, server.ErrInternal, "failed to fetch feed")
+			http2.Fail(ctx, http2.ErrInternal, "failed to fetch feed")
 			return nil
 		}
 

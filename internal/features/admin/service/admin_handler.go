@@ -1885,27 +1885,31 @@ func (h *AdminHandler) adminListArticles() http.HandlerFunc {
 		gc := ginadapter.GetGinContext(r)
 		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
-		// Normalize pagination parameters
-		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
-		filters := make(map[string]interface{})
-		if v := gc.Query("status"); v != "" {
-			filters["status"] = v
+		req := &types.ListArticlesRequest{
+			Page:     int32(page),
+			PageSize: int32(pageSize),
+		}
+
+		if v := gc.Query("state"); v != "" {
+			req.State = v
 		}
 		if v := gc.Query("category_id"); v != "" {
-			filters["category_id"] = v
+			if catID, err := strconv.ParseInt(v, 10, 64); err == nil {
+				req.CategoryId = catID
+			}
 		}
 		if v := gc.Query("keyword"); v != "" {
-			filters["keyword"] = v
+			req.Keyword = v
 		}
 
-		articles, total, err := h.articleUC.List(r.Context(), page, pageSize, filters)
+		resp, err := h.articleUC.List(r.Context(), req)
 		if err != nil {
 			server.Fail(gc, server.ErrInternal, err.Error())
 			return
 		}
 
-		server.Page(gc, articles, int64(total), page, pageSize)
+		server.OK(gc, resp)
 	}
 }
 
@@ -1966,14 +1970,14 @@ func (h *AdminHandler) adminCreateArticle() http.HandlerFunc {
 			slug = hashtag.GenerateTagSlug(input.Title)
 		}
 
-		article := &contentbiz.Article{
+		article := &types.Article{
 			Title:      input.Title,
 			Slug:       slug,
 			Content:    input.Content,
 			Summary:    input.Summary,
-			UserID:     userID,
-			CategoryID: input.CategoryID,
-			MediaID:    input.MediaID,
+			UserId:     userID,
+			CategoryId: input.CategoryID,
+			MediaId:    input.MediaID,
 			Thumbnail:  input.Thumbnail,
 			State:      state,
 			Tags:       input.Tags,
@@ -2036,10 +2040,10 @@ func (h *AdminHandler) adminUpdateArticle() http.HandlerFunc {
 			existing.Summary = input.Summary
 		}
 		if input.CategoryID != 0 {
-			existing.CategoryID = input.CategoryID
+			existing.CategoryId = input.CategoryID
 		}
 		if input.MediaID != "" {
-			existing.MediaID = input.MediaID
+			existing.MediaId = input.MediaID
 		}
 		existing.Thumbnail = input.Thumbnail // Allow empty string to clear
 		if input.State != "" {
