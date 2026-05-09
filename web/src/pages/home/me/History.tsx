@@ -179,7 +179,7 @@ const HistoryPage = () => {
 
                             {/* Info */}
                             <div className="flex-1 min-w-0">
-                                <h3 className={`text-sm font-medium line-clamp-1 transition-colors ${
+                                <h3 className={`text-sm font-medium line-clamp-2 transition-colors ${
                                     isDeleted
                                         ? 'text-gray-400 dark:text-gray-500 line-through'
                                         : 'text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400'

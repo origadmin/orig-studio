@@ -175,7 +175,7 @@ const MyArticles = () => {
 
                             <CardContent className="p-4">
                                 <div className="flex justify-between items-start gap-2">
-                                    <h3 className="font-semibold text-foreground line-clamp-1 flex-1">
+                                    <h3 className="font-semibold text-foreground line-clamp-2 flex-1">
                                         {article.title}
                                     </h3>
                                     <Badge

@@ -235,8 +235,8 @@ const ProfileHomePage: React.FC<ProfileHomePageProps> = ({username}) => {
                                     {ch.logo ? <img src={getImageUrl(ch.logo, 'avatar')} alt="" className="w-12 h-12 rounded-lg object-cover"/> : <Tv className="w-6 h-6 text-muted-foreground"/>}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <p className="font-medium text-sm truncate">{ch.name}</p>
-                                    <p className="text-xs text-muted-foreground truncate">{ch.description || t('profile.noDescription') || 'No description'}</p>
+                                    <p className="font-medium text-sm line-clamp-2">{ch.name}</p>
+                                    <p className="text-xs text-muted-foreground line-clamp-2">{ch.description || t('profile.noDescription') || 'No description'}</p>
                                 </div>
                                 <Settings className="w-4 h-4 text-muted-foreground flex-shrink-0"/>
                             </div>

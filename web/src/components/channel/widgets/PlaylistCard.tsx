@@ -159,7 +159,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
                 </div>
 
                 {playlist.description && (
-                    <p className="text-xs text-muted-foreground mt-1.5 line-clamp-1">
+                    <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
                         {playlist.description}
                     </p>
                 )}
