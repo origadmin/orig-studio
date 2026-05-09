@@ -56,29 +56,12 @@ func (h *StubHandler) RegisterRoutes(r http2.Router) {
 	// ================================
 
 	// ================================
-	// 4. Admin Nav Items
+	// 4. Admin Nav Items — MOVED to PortalHandler (F031)
 	// ================================
-	adminNavItems := r.Group("/admin/nav-items")
-	adminNavItems.Use(server.JWTMiddlewareCtx(h.jwt), server.AdminMiddlewareCtx(h.jwt))
-	{
-		adminNavItems.GET("", server.HTTPToHandlerFunc(h.stubNavItemList()))
-		adminNavItems.POST("", server.HTTPToHandlerFunc(h.stubNavItemCreate()))
-		adminNavItems.PUT("/:id", server.HTTPToHandlerFunc(h.stubNavItemUpdate()))
-		adminNavItems.DELETE("/:id", server.HTTPToHandlerFunc(h.stubNavItemDelete()))
-		adminNavItems.PUT("/reorder", server.HTTPToHandlerFunc(h.stubNavItemReorder()))
-	}
 
 	// ================================
-	// 5. Admin Banners
+	// 5. Admin Banners — MOVED to PortalHandler (F031)
 	// ================================
-	adminBanners := r.Group("/admin/banners")
-	adminBanners.Use(server.JWTMiddlewareCtx(h.jwt), server.AdminMiddlewareCtx(h.jwt))
-	{
-		adminBanners.GET("", server.HTTPToHandlerFunc(h.stubBannerList()))
-		adminBanners.POST("", server.HTTPToHandlerFunc(h.stubBannerCreate()))
-		adminBanners.PUT("/:id", server.HTTPToHandlerFunc(h.stubBannerUpdate()))
-		adminBanners.POST("/:id/toggle", server.HTTPToHandlerFunc(h.stubBannerToggle()))
-	}
 
 	// ================================
 	// 6. Media Metadata / Sprite / Subtitle / Download/Stream/Thumbnail / Likes/Favorites/Shares / Update/Delete
