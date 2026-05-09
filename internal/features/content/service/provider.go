@@ -20,4 +20,5 @@ var ProviderSet = wire.NewSet(
 	NewNotificationHandler,
 	NewShareHandler,
 	NewExploreHandler,
+	NewPortalHandler,
 )
