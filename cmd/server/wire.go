@@ -8,6 +8,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
@@ -35,6 +36,7 @@ import (
 	mediaservice "origadmin/application/origcms/internal/features/media/service"
 	"origadmin/application/origcms/internal/features/system"
 	systembiz "origadmin/application/origcms/internal/features/system/biz"
+	systemdal "origadmin/application/origcms/internal/features/system/dal"
 	systemservice "origadmin/application/origcms/internal/features/system/service"
 	"origadmin/application/origcms/internal/features/user"
 	userbiz "origadmin/application/origcms/internal/features/user/biz"
@@ -108,8 +110,33 @@ var ProviderSet = wire.NewSet(
 )
 
 // NewStorageConfig creates storage config from defaults.
-func NewStorageConfig() *config.StorageConfig {
-	return config.DefaultStorageConfig()
+func NewStorageConfig(settingUC *systembiz.SettingUseCase) *config.StorageConfig {
+	cfg := config.DefaultStorageConfig()
+	if basePath := settingUC.Get(context.Background(), "storage_base_path"); basePath != "" {
+		cfg.BasePath = basePath
+	}
+	if storageType := settingUC.Get(context.Background(), "storage_type"); storageType != "" {
+		cfg.Type = config.StorageType(storageType)
+	}
+	if endpoint := settingUC.Get(context.Background(), "s3_endpoint"); endpoint != "" {
+		cfg.S3.Endpoint = endpoint
+	}
+	if region := settingUC.Get(context.Background(), "s3_region"); region != "" {
+		cfg.S3.Region = region
+	}
+	if bucket := settingUC.Get(context.Background(), "s3_bucket"); bucket != "" {
+		cfg.S3.Bucket = bucket
+	}
+	if accessKey := settingUC.Get(context.Background(), "s3_access_key"); accessKey != "" {
+		cfg.S3.AccessKey = accessKey
+	}
+	if secretKey := settingUC.Get(context.Background(), "s3_secret_key"); secretKey != "" {
+		cfg.S3.SecretKey = secretKey
+	}
+	if usePathStyle := settingUC.GetBool(context.Background(), "s3_use_path_style"); usePathStyle {
+		cfg.S3.UsePathStyle = true
+	}
+	return cfg
 }
 
 // NewStorage creates a LocalStorage instance (used as the base for all storage types).
@@ -185,6 +212,7 @@ func NewUploadUseCase(
 	sp *config.StoragePaths,
 	cfg *config.UploadConfig,
 	logger log.Logger,
+	settingUC *systembiz.SettingUseCase,
 ) *mediabiz.UploadUseCase {
 	return mediabiz.NewUploadUseCase(
 		uploadRepo,
@@ -196,6 +224,7 @@ func NewUploadUseCase(
 		sp,
 		cfg.ChunkSize,
 		logger,
+		settingUC,
 	)
 }
 
@@ -243,6 +272,21 @@ func NewArticleHandler(
 	settingUC *systembiz.SettingUseCase,
 ) *contentservice.ArticleHandler {
 	return contentservice.NewArticleHandler(uc, jwt, settingUC)
+}
+
+// NewAuthHandler creates a new auth handler with config provider.
+func NewAuthHandler(uc *userbiz.UserUseCase, jwt *infraauth.Manager, settingUC *systembiz.SettingUseCase) *authservice.AuthHandler {
+	return authservice.NewAuthHandler(uc, jwt, settingUC)
+}
+
+// NewSystemHandler creates a new system handler with email use case.
+func NewSystemHandler(
+	jwt *infraauth.Manager,
+	statsRepo *systemdal.StatsRepo,
+	settingUC *systembiz.SettingUseCase,
+	emailUC *systembiz.EmailUseCase,
+) *systemservice.SystemHandler {
+	return systemservice.NewSystemHandler(jwt, statsRepo, settingUC, emailUC)
 }
 
 // NewCommentHandler creates a new comment handler.
