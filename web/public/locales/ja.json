@@ -899,7 +899,26 @@
     "slugLabel": "スラッグ",
     "unblocked": "ブロック解除",
     "commentDeleted": "コメントを削除しました",
-    "reportsDismissed": "通報を却下しました"
+    "reportsDismissed": "通報を却下しました",
+    "pages": {
+      "title": "カスタムページ",
+      "description": "カスタムページとポータルナビゲーションを管理",
+      "create": "新規ページ",
+      "list": "ページ一覧",
+      "empty": "カスタムページはまだありません。作成してみましょう。",
+      "published": "公開済み",
+      "draft": "下書き",
+      "edit": "ページを編集",
+      "form": {
+        "title": "タイトル",
+        "slug": "スラッグ",
+        "type": "タイプ",
+        "format": "コンテンツ形式",
+        "content": "内容",
+        "seoTitle": "SEOタイトル",
+        "seoDescription": "SEO説明"
+      }
+    }
   },
   "settings": {
     "title": "システム設定",
