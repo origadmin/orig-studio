@@ -9,11 +9,17 @@ import (
 	"golang.org/x/time/rate"
 )
 
+type visitor struct {
+	limiter   *rate.Limiter
+	lastSeen  time.Time
+}
+
 type RateLimiter struct {
-	visitors map[string]*rate.Limiter
+	visitors map[string]*visitor
 	mu       sync.RWMutex
 	rate     rate.Limit
 	burst    int
+	stopCh   chan struct{}
 }
 
 func NewRateLimiter(rpm int) *RateLimiter {
@@ -21,31 +27,51 @@ func NewRateLimiter(rpm int) *RateLimiter {
 		rpm = 60
 	}
 	return &RateLimiter{
-		visitors: make(map[string]*rate.Limiter),
+		visitors: make(map[string]*visitor),
 		rate:     rate.Every(time.Minute / time.Duration(rpm)),
 		burst:    rpm,
+		stopCh:   make(chan struct{}),
 	}
+}
+
+func (rl *RateLimiter) Stop() {
+	close(rl.stopCh)
 }
 
 func (rl *RateLimiter) getVisitor(ip string) *rate.Limiter {
 	rl.mu.Lock()
 	defer rl.mu.Unlock()
 
-	limiter, exists := rl.visitors[ip]
+	v, exists := rl.visitors[ip]
 	if !exists {
-		limiter = rate.NewLimiter(rl.rate, rl.burst)
-		rl.visitors[ip] = limiter
+		v = &visitor{
+			limiter:  rate.NewLimiter(rl.rate, rl.burst),
+			lastSeen: time.Now(),
+		}
+		rl.visitors[ip] = v
 	}
-	return limiter
+	v.lastSeen = time.Now()
+	return v.limiter
 }
 
 func (rl *RateLimiter) Middleware() gin.HandlerFunc {
 	go func() {
+		ticker := time.NewTicker(5 * time.Minute)
+		defer ticker.Stop()
+		threshold := 30 * time.Minute
 		for {
-			time.Sleep(10 * time.Minute)
-			rl.mu.Lock()
-			rl.visitors = make(map[string]*rate.Limiter)
-			rl.mu.Unlock()
+			select {
+			case <-ticker.C:
+				rl.mu.Lock()
+				for ip, v := range rl.visitors {
+					if time.Since(v.lastSeen) > threshold {
+						delete(rl.visitors, ip)
+					}
+				}
+				rl.mu.Unlock()
+			case <-rl.stopCh:
+				return
+			}
 		}
 	}()
 

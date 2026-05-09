@@ -39,8 +39,10 @@ func (uc *EmailUseCase) SendEmail(ctx context.Context, to, subject, body string)
 	d := mail.NewDialer(host, port, user, password)
 	if port == 465 {
 		d.SSL = true
-	} else {
+	} else if uc.settingUC.Get(ctx, "smtp_use_tls") == "true" {
 		d.StartTLSPolicy = mail.MandatoryStartTLS
+	} else {
+		d.StartTLSPolicy = mail.NoStartTLS
 	}
 
 	return d.DialAndSend(m)

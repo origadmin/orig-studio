@@ -402,6 +402,7 @@ func (r *channelRepo) Create(ctx context.Context, ch *biz.Channel) (*biz.Channel
 		}
 		if _, err := r.data.db.ChannelTag.CreateBulk(bulk...).Save(ctx); err != nil {
 			r.log.Errorf("failed to create channel tags: %v", err)
+			return nil, fmt.Errorf("channel created but failed to associate tags: %w", err)
 		}
 	}
 
@@ -554,6 +555,7 @@ func (r *channelRepo) Update(ctx context.Context, ch *biz.Channel) (*biz.Channel
 			}
 			if _, err := r.data.db.ChannelTag.CreateBulk(bulk...).Save(ctx); err != nil {
 				r.log.Errorf("failed to update channel tags: %v", err)
+				return nil, fmt.Errorf("channel updated but failed to update tags: %w", err)
 			}
 		}
 	}

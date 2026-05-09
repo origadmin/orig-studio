@@ -6,11 +6,13 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origcms/internal/data/entity"
+	systembiz "origadmin/application/origcms/internal/features/system/biz"
 )
 
 type PortalRepo interface {
 	ListNavItems(ctx context.Context) ([]*entity.PortalNavItem, error)
 	CreateNavItem(ctx context.Context, item *entity.PortalNavItem) (*entity.PortalNavItem, error)
+	GetNavItemByID(ctx context.Context, id string) (*entity.PortalNavItem, error)
 	UpdateNavItem(ctx context.Context, item *entity.PortalNavItem) (*entity.PortalNavItem, error)
 	DeleteNavItem(ctx context.Context, id string) error
 	ReorderNavItems(ctx context.Context, ids []string) error
@@ -48,21 +50,25 @@ type PortalModules struct {
 }
 
 type PortalSite struct {
-	SiteName          string `json:"site_name"`
-	SiteDescription   string `json:"site_description"`
-	AllowRegistration bool   `json:"allow_registration"`
-	AllowUpload       bool   `json:"allow_upload"`
+	SiteName          string   `json:"site_name"`
+	SiteDescription   string   `json:"site_description"`
+	AllowRegistration bool     `json:"allow_registration"`
+	AllowUpload       bool     `json:"allow_upload"`
+	PrimaryURL        string   `json:"primary_url"`
+	AllowedURLs       []string `json:"allowed_urls"`
 }
 
 type PortalUseCase struct {
-	repo PortalRepo
-	log  *log.Helper
+	repo        PortalRepo
+	settingUC   *systembiz.SettingUseCase
+	log         *log.Helper
 }
 
-func NewPortalUseCase(repo PortalRepo, logger log.Logger) *PortalUseCase {
+func NewPortalUseCase(repo PortalRepo, settingUC *systembiz.SettingUseCase, logger log.Logger) *PortalUseCase {
 	return &PortalUseCase{
-		repo: repo,
-		log:  log.NewHelper(log.With(logger, "module", "portal.biz")),
+		repo:      repo,
+		settingUC: settingUC,
+		log:       log.NewHelper(log.With(logger, "module", "portal.biz")),
 	}
 }
 
@@ -72,6 +78,10 @@ func (uc *PortalUseCase) ListNavItems(ctx context.Context) ([]*entity.PortalNavI
 
 func (uc *PortalUseCase) CreateNavItem(ctx context.Context, item *entity.PortalNavItem) (*entity.PortalNavItem, error) {
 	return uc.repo.CreateNavItem(ctx, item)
+}
+
+func (uc *PortalUseCase) GetNavItemByID(ctx context.Context, id string) (*entity.PortalNavItem, error) {
+	return uc.repo.GetNavItemByID(ctx, id)
 }
 
 func (uc *PortalUseCase) UpdateNavItem(ctx context.Context, item *entity.PortalNavItem) (*entity.PortalNavItem, error) {
