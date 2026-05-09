@@ -1,0 +1,104 @@
+syntax = "proto3";
+
+package api.v1.services.types;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "origadmin/application/origcms/api/gen/v1/types;types";
+option java_multiple_files = true;
+option java_outer_classname = "OrigCMSServiceTypeArticleProto";
+option java_package = "com.origcms.api.v1.services.types";
+option objc_class_prefix = "OrigCMS";
+
+// ArticleState defines the publication state of an Article.
+enum ArticleState {
+  ARTICLE_STATE_UNSPECIFIED = 0;
+  ARTICLE_STATE_DRAFT = 1;
+  ARTICLE_STATE_PUBLISHED = 2;
+  ARTICLE_STATE_ARCHIVED = 3;
+}
+
+// Article is the model entity for Article.
+message Article {
+  string id = 1 [json_name = "id"];
+  string title = 2 [json_name = "title"];
+  string content = 3 [json_name = "content"];
+  string summary = 4 [json_name = "summary"];
+  string slug = 5 [json_name = "slug"];
+  string short_token = 6 [json_name = "short_token"];
+  string state = 7 [json_name = "state"];
+  int64 view_count = 8 [json_name = "view_count"];
+  int64 comment_count = 9 [json_name = "comment_count"];
+  bool featured = 10 [json_name = "featured"];
+  repeated string tags = 11 [json_name = "tags"];
+  string user_id = 12 [json_name = "user_id"];
+  int64 category_id = 13 [json_name = "category_id"];
+  string media_id = 14 [json_name = "media_id"];
+  string thumbnail = 15 [json_name = "thumbnail"];
+  google.protobuf.Timestamp published_at = 16 [json_name = "published_at"];
+  google.protobuf.Timestamp create_time = 17 [json_name = "create_time"];
+  google.protobuf.Timestamp update_time = 18 [json_name = "update_time"];
+
+  // TODO: Add edge fields (User, Media, Category) after defining unified edge types
+  // These fields depend on Proto-first architecture defining consistent edge types
+  // User user = 50 [json_name = "user"];
+  // Media media = 51 [json_name = "media"];
+  // Category category = 52 [json_name = "category"];
+}
+
+// ListArticlesRequest for paginated article listing.
+message ListArticlesRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+  string state = 3 [json_name = "state"];
+  bool featured = 4 [json_name = "featured"];
+  string user_id = 5 [json_name = "user_id"];
+  int64 category_id = 6 [json_name = "category_id"];
+  string keyword = 7 [json_name = "keyword"];
+}
+
+// ListArticlesResponse with pagination metadata.
+message ListArticlesResponse {
+  repeated Article articles = 1 [json_name = "articles"];
+  int32 total = 2 [json_name = "total"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+  int32 total_pages = 5 [json_name = "total_pages"];
+}
+
+// GetArticleResponse for single article retrieval.
+message GetArticleResponse {
+  Article article = 1 [json_name = "article"];
+}
+
+// CreateArticleRequest for creating a new article.
+message CreateArticleRequest {
+  string title = 1 [json_name = "title"];
+  string content = 2 [json_name = "content"];
+  string summary = 3 [json_name = "summary"];
+  string state = 4 [json_name = "state"];
+  repeated string tags = 5 [json_name = "tags"];
+  int64 category_id = 6 [json_name = "category_id"];
+  string media_id = 7 [json_name = "media_id"];
+  string thumbnail = 8 [json_name = "thumbnail"];
+}
+
+// UpdateArticleRequest for updating an existing article.
+message UpdateArticleRequest {
+  string id = 1 [json_name = "id"];
+  string title = 2 [json_name = "title"];
+  string content = 3 [json_name = "content"];
+  string summary = 4 [json_name = "summary"];
+  string state = 5 [json_name = "state"];
+  repeated string tags = 6 [json_name = "tags"];
+  int64 category_id = 7 [json_name = "category_id"];
+  string media_id = 8 [json_name = "media_id"];
+  string thumbnail = 9 [json_name = "thumbnail"];
+  bool featured = 10 [json_name = "featured"];
+}
+
+// UpdateArticleStateRequest for changing article state.
+message UpdateArticleStateRequest {
+  string id = 1 [json_name = "id"];
+  string state = 2 [json_name = "state"];
+}
