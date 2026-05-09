@@ -9,4 +9,5 @@ import "github.com/google/wire"
 // ProviderSet is the wire provider set for the system biz layer.
 var ProviderSet = wire.NewSet(
 	NewSettingUseCase,
+	NewEmailUseCase,
 )

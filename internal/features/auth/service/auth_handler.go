@@ -6,6 +6,7 @@
 package service
 
 import (
+	"fmt"
 	"log/slog"
 
 	"github.com/gin-gonic/gin"
@@ -17,15 +18,17 @@ import (
 	"origadmin/application/origcms/internal/features/user/biz"
 	"origadmin/application/origcms/internal/features/user/dto"
 	"origadmin/application/origcms/internal/server"
+	systembiz "origadmin/application/origcms/internal/features/system/biz"
 )
 
 type AuthHandler struct {
-	uc  *biz.UserUseCase
-	jwt *auth.Manager
+	uc            *biz.UserUseCase
+	jwt           *auth.Manager
+	configProvider systembiz.ConfigProvider
 }
 
-func NewAuthHandler(uc *biz.UserUseCase, jwt *auth.Manager) *AuthHandler {
-	return &AuthHandler{uc: uc, jwt: jwt}
+func NewAuthHandler(uc *biz.UserUseCase, jwt *auth.Manager, configProvider systembiz.ConfigProvider) *AuthHandler {
+	return &AuthHandler{uc: uc, jwt: jwt, configProvider: configProvider}
 }
 
 func (h *AuthHandler) RegisterRoutes(r http2.Router) {
@@ -126,6 +129,22 @@ func (h *AuthHandler) registerUser() http2.HandlerFunc {
 		var req RegisterRequest
 		if err := gc.ShouldBindJSON(&req); err != nil {
 			http2.Fail(ctx, server.ErrBadRequest, err.Error())
+			return nil
+		}
+
+		if h.configProvider != nil && !h.configProvider.GetBool(ctx.Request().Context(), "allow_registration") {
+			http2.Fail(ctx, server.ErrForbidden, "registration is disabled")
+			return nil
+		}
+
+		minLen := 6
+		if h.configProvider != nil {
+			if v := h.configProvider.GetInt(ctx.Request().Context(), "min_password_length"); v > 0 {
+				minLen = v
+			}
+		}
+		if len(req.Password) < minLen {
+			http2.Fail(ctx, server.ErrBadRequest, fmt.Sprintf("password must be at least %d characters", minLen))
 			return nil
 		}
 

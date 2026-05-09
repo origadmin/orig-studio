@@ -7,6 +7,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
@@ -63,16 +64,17 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	encodeProfileRepo := dal.NewEncodeProfileRepo(client)
 	encodingTaskRepo := dal.NewEncodingTaskRepo(client)
 	reviewLogRepo := dal.NewReviewLogRepo(client)
-	localStorage := NewStorage(NewStoragePaths(NewUploadConfig()))
-	storageConfig := NewStorageConfig()
-	storage, storageCleanup, err := NewStorageInterface(localStorage, NewStoragePaths(NewUploadConfig()), storageConfig, logger)
+	settingRepo := dal2.NewSettingRepo(client)
+	settingUseCase := biz.NewSettingUseCase(settingRepo)
+	emailUseCase := biz.NewEmailUseCase(settingUseCase)
+	storagePaths := NewStoragePaths(NewUploadConfig())
+	storageConfig := NewStorageConfig(settingUseCase)
+	localStorage := NewStorage(storagePaths)
+	storage, storageCleanup, err := NewStorageInterface(localStorage, storagePaths, storageConfig, logger)
 	if err != nil {
 		return nil, err
 	}
 	publisher := infra.NewPublisher(pubSub)
-	settingRepo := dal2.NewSettingRepo(client)
-	settingUseCase := biz.NewSettingUseCase(settingRepo)
-	storagePaths := NewStoragePaths(NewUploadConfig())
 	spriteUseCase := NewSpriteUseCase(mediaRepo, settingUseCase, storagePaths, logger)
 	mediaUseCase := biz2.NewMediaUseCase(mediaRepo, encodeProfileRepo, encodingTaskRepo, reviewLogRepo, storage, publisher, logger, spriteUseCase)
 	transcodeWorker := NewWorker(logger)
@@ -89,10 +91,10 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 		return nil, err
 	}
 	userUseCase := biz3.NewUserUseCase(userRepo, crypto, logger)
-	authHandler := NewAuthHandler(userUseCase, manager)
+	authHandler := NewAuthHandler(userUseCase, manager, settingUseCase)
 	userHandler := NewUserHandler(userUseCase, manager)
 	uploadRepo := dal.NewUploadRepo(client, logger)
-	uploadUseCase := NewUploadUseCase(uploadRepo, mediaRepo, encodeProfileRepo, encodingTaskRepo, mediaUseCase, storage, storagePaths, NewUploadConfig(), logger)
+	uploadUseCase := NewUploadUseCase(uploadRepo, mediaRepo, encodeProfileRepo, encodingTaskRepo, mediaUseCase, storage, storagePaths, NewUploadConfig(), logger, settingUseCase)
 	data := newContentData(client, sqlDB)
 	likeRepo := dal4.NewLikeRepo(data, logger)
 	favoriteRepo := dal4.NewFavoriteRepo(data, logger)
@@ -126,7 +128,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	channelHandler := NewChannelHandler(playlistChannelUseCase, manager, settingUseCase)
 	shareHandler := NewShareHandler(likeFavoriteUseCase, manager)
 	statsRepo := dal2.NewStatsRepo(client)
-	systemHandler := NewSystemHandler(manager, statsRepo, settingUseCase)
+	systemHandler := NewSystemHandler(manager, statsRepo, settingUseCase, emailUseCase)
 	statsHandler := NewStatsHandler(mediaUseCase, likeFavoriteUseCase, statsRepo, manager)
 	searchHandler := NewSearchHandler(mediaUseCase)
 	meHandler := NewMeHandler(userUseCase, likeFavoriteUseCase, playlistChannelUseCase, historyUseCase, manager)
@@ -245,8 +247,33 @@ func newContentData(client *entity.Client, _ *sql.DB) *dal4.Data {
 }
 
 // NewStorageConfig creates storage config from defaults.
-func NewStorageConfig() *conf.StorageConfig {
-	return conf.DefaultStorageConfig()
+func NewStorageConfig(settingUC *biz.SettingUseCase) *conf.StorageConfig {
+	cfg := conf.DefaultStorageConfig()
+	if basePath := settingUC.Get(context.Background(), "storage_base_path"); basePath != "" {
+		cfg.BasePath = basePath
+	}
+	if storageType := settingUC.Get(context.Background(), "storage_type"); storageType != "" {
+		cfg.Type = conf.StorageType(storageType)
+	}
+	if endpoint := settingUC.Get(context.Background(), "s3_endpoint"); endpoint != "" {
+		cfg.S3.Endpoint = endpoint
+	}
+	if region := settingUC.Get(context.Background(), "s3_region"); region != "" {
+		cfg.S3.Region = region
+	}
+	if bucket := settingUC.Get(context.Background(), "s3_bucket"); bucket != "" {
+		cfg.S3.Bucket = bucket
+	}
+	if accessKey := settingUC.Get(context.Background(), "s3_access_key"); accessKey != "" {
+		cfg.S3.AccessKey = accessKey
+	}
+	if secretKey := settingUC.Get(context.Background(), "s3_secret_key"); secretKey != "" {
+		cfg.S3.SecretKey = secretKey
+	}
+	if usePathStyle := settingUC.GetBool(context.Background(), "s3_use_path_style"); usePathStyle {
+		cfg.S3.UsePathStyle = true
+	}
+	return cfg
 }
 
 // NewStorageInterface creates the appropriate Storage implementation based on
@@ -313,6 +340,7 @@ func NewUploadUseCase(
 	sp *conf.StoragePaths,
 	cfg *conf.UploadConfig,
 	logger log2.Logger,
+	settingUC *biz.SettingUseCase,
 ) *biz2.UploadUseCase {
 	return biz2.NewUploadUseCase(
 		uploadRepo,
@@ -324,6 +352,7 @@ func NewUploadUseCase(
 		sp,
 		cfg.ChunkSize,
 		logger,
+		settingUC,
 	)
 }
 
@@ -368,8 +397,9 @@ func NewTranscodeHandler(
 func NewAuthHandler(
 	userUC *biz3.UserUseCase,
 	jwt *auth2.Manager,
+	settingUC *biz.SettingUseCase,
 ) *authservice.AuthHandler {
-	return authservice.NewAuthHandler(userUC, jwt)
+	return authservice.NewAuthHandler(userUC, jwt, settingUC)
 }
 
 // NewUserHandler creates a new user handler.
@@ -457,8 +487,9 @@ func NewSystemHandler(
 	jwt *auth2.Manager,
 	statsRepo *dal2.StatsRepo,
 	settingUC *biz.SettingUseCase,
+	emailUC *biz.EmailUseCase,
 ) *systemservice.SystemHandler {
-	return systemservice.NewSystemHandler(jwt, statsRepo, settingUC)
+	return systemservice.NewSystemHandler(jwt, statsRepo, settingUC, emailUC)
 }
 
 // NewStatsHandler creates a new stats handler.
