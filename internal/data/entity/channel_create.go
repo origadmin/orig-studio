@@ -9,6 +9,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
+	"origadmin/application/origcms/internal/data/entity/channeltag"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/schema"
 	"origadmin/application/origcms/internal/data/entity/user"
@@ -355,6 +356,21 @@ func (_c *ChannelCreate) AddArticles(v ...*Article) *ChannelCreate {
 // SetCategory sets the "category" edge to the Category entity.
 func (_c *ChannelCreate) SetCategory(v *Category) *ChannelCreate {
 	return _c.SetCategoryID(v.ID)
+}
+
+// AddTagsRelIDs adds the "tags_rel" edge to the ChannelTag entity by IDs.
+func (_c *ChannelCreate) AddTagsRelIDs(ids ...int) *ChannelCreate {
+	_c.mutation.AddTagsRelIDs(ids...)
+	return _c
+}
+
+// AddTagsRel adds the "tags_rel" edges to the ChannelTag entity.
+func (_c *ChannelCreate) AddTagsRel(v ...*ChannelTag) *ChannelCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddTagsRelIDs(ids...)
 }
 
 // Mutation returns the ChannelMutation object of the builder.
@@ -741,6 +757,22 @@ func (_c *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.CategoryID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.TagsRelIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.TagsRelTable,
+			Columns: []string{channel.TagsRelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -259,8 +259,9 @@ func (h *ChannelHandler) CreateChannel(w http.ResponseWriter, r *http.Request) {
 		BannerLogo    string   `json:"banner_logo"`
 		Privacy       string   `json:"privacy"`
 		Tags          []string `json:"tags"`
+		TagIDs        []int    `json:"tag_ids"`
 		CategoryID    *int64   `json:"category_id"`
-		ShortToken     string   `json:"short_token"`
+		ShortToken    string   `json:"short_token"`
 	}
 	if err := gc.Bind(&input); err != nil {
 		server.Fail(gc, server.ErrBadRequest, err.Error())
@@ -289,6 +290,7 @@ func (h *ChannelHandler) CreateChannel(w http.ResponseWriter, r *http.Request) {
 		// otherwise let ent schema's DefaultFunc (idutil.GenShortID) auto-generate one.
 		Privacy:    input.Privacy,
 		Tags:       input.Tags,
+		TagIDs:     input.TagIDs,
 		CategoryID: input.CategoryID,
 		Status:     "ACTIVE",
 		UserID:     claims.GetUserID(),
@@ -353,6 +355,7 @@ func (h *ChannelHandler) UpdateChannel(w http.ResponseWriter, r *http.Request) {
 		Privacy     *string  `json:"privacy"`
 		Status      *string  `json:"status"`
 		Tags        []string `json:"tags"`
+		TagIDs      []int    `json:"tag_ids"`
 		CategoryID  *int64   `json:"category_id"`
 		Links       []struct {
 			Type     string `json:"type"`
@@ -388,6 +391,7 @@ func (h *ChannelHandler) UpdateChannel(w http.ResponseWriter, r *http.Request) {
 		Privacy:         existingChannel.Privacy,
 		IsVerified:      existingChannel.IsVerified,
 		Tags:            existingChannel.Tags,
+		TagIDs:          existingChannel.TagIDs,
 		CategoryID:      existingChannel.CategoryID,
 		SubscriberCount: existingChannel.SubscriberCount,
 		MediaCount:      existingChannel.MediaCount,
@@ -426,6 +430,9 @@ func (h *ChannelHandler) UpdateChannel(w http.ResponseWriter, r *http.Request) {
 	}
 	if input.Tags != nil {
 		chItem.Tags = input.Tags
+	}
+	if input.TagIDs != nil {
+		chItem.TagIDs = input.TagIDs
 	}
 	if input.CategoryID != nil {
 		chItem.CategoryID = input.CategoryID

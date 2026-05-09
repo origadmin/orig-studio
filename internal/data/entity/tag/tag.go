@@ -21,6 +21,8 @@ const (
 	FieldSlug = "slug"
 	// FieldMediaCount holds the string denoting the media_count field in the database.
 	FieldMediaCount = "media_count"
+	// FieldChannelCount holds the string denoting the channel_count field in the database.
+	FieldChannelCount = "channel_count"
 	// FieldListingsThumbnail holds the string denoting the listings_thumbnail field in the database.
 	FieldListingsThumbnail = "listings_thumbnail"
 	// FieldStatus holds the string denoting the status field in the database.
@@ -41,6 +43,8 @@ const (
 	EdgeUser = "user"
 	// EdgeNames holds the string denoting the names edge name in mutations.
 	EdgeNames = "names"
+	// EdgeChannelTags holds the string denoting the channel_tags edge name in mutations.
+	EdgeChannelTags = "channel_tags"
 	// Table holds the table name of the tag in the database.
 	Table = "content_tags"
 	// UserTable is the table that holds the user relation/edge. The primary key declared below.
@@ -55,6 +59,13 @@ const (
 	NamesInverseTable = "content_tag_names"
 	// NamesColumn is the table column denoting the names relation/edge.
 	NamesColumn = "tag_id"
+	// ChannelTagsTable is the table that holds the channel_tags relation/edge.
+	ChannelTagsTable = "content_channel_tags"
+	// ChannelTagsInverseTable is the table name for the ChannelTag entity.
+	// It exists in this package in order to avoid circular dependency with the "channeltag" package.
+	ChannelTagsInverseTable = "content_channel_tags"
+	// ChannelTagsColumn is the table column denoting the channel_tags relation/edge.
+	ChannelTagsColumn = "tag_channel_tags"
 )
 
 // Columns holds all SQL columns for tag fields.
@@ -63,6 +74,7 @@ var Columns = []string{
 	FieldTitle,
 	FieldSlug,
 	FieldMediaCount,
+	FieldChannelCount,
 	FieldListingsThumbnail,
 	FieldStatus,
 	FieldDescription,
@@ -107,6 +119,8 @@ var (
 	SlugValidator func(string) error
 	// DefaultMediaCount holds the default value on creation for the "media_count" field.
 	DefaultMediaCount int
+	// DefaultChannelCount holds the default value on creation for the "channel_count" field.
+	DefaultChannelCount int
 	// DefaultListingsThumbnail holds the default value on creation for the "listings_thumbnail" field.
 	DefaultListingsThumbnail string
 	// ListingsThumbnailValidator is a validator for the "listings_thumbnail" field. It is called by the builders before save.
@@ -172,6 +186,11 @@ func ByMediaCount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMediaCount, opts...).ToFunc()
 }
 
+// ByChannelCount orders the results by the channel_count field.
+func ByChannelCount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldChannelCount, opts...).ToFunc()
+}
+
 // ByListingsThumbnail orders the results by the listings_thumbnail field.
 func ByListingsThumbnail(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldListingsThumbnail, opts...).ToFunc()
@@ -229,6 +248,20 @@ func ByNames(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newNamesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByChannelTagsCount orders the results by channel_tags count.
+func ByChannelTagsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newChannelTagsStep(), opts...)
+	}
+}
+
+// ByChannelTags orders the results by channel_tags terms.
+func ByChannelTags(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newChannelTagsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -241,5 +274,12 @@ func newNamesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(NamesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, NamesTable, NamesColumn),
+	)
+}
+func newChannelTagsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ChannelTagsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ChannelTagsTable, ChannelTagsColumn),
 	)
 }

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"origadmin/application/origcms/internal/data/entity/channeltag"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"origadmin/application/origcms/internal/data/entity/tag"
 	"origadmin/application/origcms/internal/data/entity/tagname"
@@ -83,6 +84,27 @@ func (_u *TagUpdate) SetNillableMediaCount(v *int) *TagUpdate {
 // AddMediaCount adds value to the "media_count" field.
 func (_u *TagUpdate) AddMediaCount(v int) *TagUpdate {
 	_u.mutation.AddMediaCount(v)
+	return _u
+}
+
+// SetChannelCount sets the "channel_count" field.
+func (_u *TagUpdate) SetChannelCount(v int) *TagUpdate {
+	_u.mutation.ResetChannelCount()
+	_u.mutation.SetChannelCount(v)
+	return _u
+}
+
+// SetNillableChannelCount sets the "channel_count" field if the given value is not nil.
+func (_u *TagUpdate) SetNillableChannelCount(v *int) *TagUpdate {
+	if v != nil {
+		_u.SetChannelCount(*v)
+	}
+	return _u
+}
+
+// AddChannelCount adds value to the "channel_count" field.
+func (_u *TagUpdate) AddChannelCount(v int) *TagUpdate {
+	_u.mutation.AddChannelCount(v)
 	return _u
 }
 
@@ -234,6 +256,21 @@ func (_u *TagUpdate) AddNames(v ...*TagName) *TagUpdate {
 	return _u.AddNameIDs(ids...)
 }
 
+// AddChannelTagIDs adds the "channel_tags" edge to the ChannelTag entity by IDs.
+func (_u *TagUpdate) AddChannelTagIDs(ids ...int) *TagUpdate {
+	_u.mutation.AddChannelTagIDs(ids...)
+	return _u
+}
+
+// AddChannelTags adds the "channel_tags" edges to the ChannelTag entity.
+func (_u *TagUpdate) AddChannelTags(v ...*ChannelTag) *TagUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddChannelTagIDs(ids...)
+}
+
 // Mutation returns the TagMutation object of the builder.
 func (_u *TagUpdate) Mutation() *TagMutation {
 	return _u.mutation
@@ -279,6 +316,27 @@ func (_u *TagUpdate) RemoveNames(v ...*TagName) *TagUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveNameIDs(ids...)
+}
+
+// ClearChannelTags clears all "channel_tags" edges to the ChannelTag entity.
+func (_u *TagUpdate) ClearChannelTags() *TagUpdate {
+	_u.mutation.ClearChannelTags()
+	return _u
+}
+
+// RemoveChannelTagIDs removes the "channel_tags" edge to ChannelTag entities by IDs.
+func (_u *TagUpdate) RemoveChannelTagIDs(ids ...int) *TagUpdate {
+	_u.mutation.RemoveChannelTagIDs(ids...)
+	return _u
+}
+
+// RemoveChannelTags removes "channel_tags" edges to ChannelTag entities.
+func (_u *TagUpdate) RemoveChannelTags(v ...*ChannelTag) *TagUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveChannelTagIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -384,6 +442,12 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedMediaCount(); ok {
 		_spec.AddField(tag.FieldMediaCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.ChannelCount(); ok {
+		_spec.SetField(tag.FieldChannelCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedChannelCount(); ok {
+		_spec.AddField(tag.FieldChannelCount, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ListingsThumbnail(); ok {
 		_spec.SetField(tag.FieldListingsThumbnail, field.TypeString, value)
@@ -514,6 +578,51 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.ChannelTagsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.ChannelTagsTable,
+			Columns: []string{tag.ChannelTagsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedChannelTagsIDs(); len(nodes) > 0 && !_u.mutation.ChannelTagsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.ChannelTagsTable,
+			Columns: []string{tag.ChannelTagsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ChannelTagsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.ChannelTagsTable,
+			Columns: []string{tag.ChannelTagsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -588,6 +697,27 @@ func (_u *TagUpdateOne) SetNillableMediaCount(v *int) *TagUpdateOne {
 // AddMediaCount adds value to the "media_count" field.
 func (_u *TagUpdateOne) AddMediaCount(v int) *TagUpdateOne {
 	_u.mutation.AddMediaCount(v)
+	return _u
+}
+
+// SetChannelCount sets the "channel_count" field.
+func (_u *TagUpdateOne) SetChannelCount(v int) *TagUpdateOne {
+	_u.mutation.ResetChannelCount()
+	_u.mutation.SetChannelCount(v)
+	return _u
+}
+
+// SetNillableChannelCount sets the "channel_count" field if the given value is not nil.
+func (_u *TagUpdateOne) SetNillableChannelCount(v *int) *TagUpdateOne {
+	if v != nil {
+		_u.SetChannelCount(*v)
+	}
+	return _u
+}
+
+// AddChannelCount adds value to the "channel_count" field.
+func (_u *TagUpdateOne) AddChannelCount(v int) *TagUpdateOne {
+	_u.mutation.AddChannelCount(v)
 	return _u
 }
 
@@ -739,6 +869,21 @@ func (_u *TagUpdateOne) AddNames(v ...*TagName) *TagUpdateOne {
 	return _u.AddNameIDs(ids...)
 }
 
+// AddChannelTagIDs adds the "channel_tags" edge to the ChannelTag entity by IDs.
+func (_u *TagUpdateOne) AddChannelTagIDs(ids ...int) *TagUpdateOne {
+	_u.mutation.AddChannelTagIDs(ids...)
+	return _u
+}
+
+// AddChannelTags adds the "channel_tags" edges to the ChannelTag entity.
+func (_u *TagUpdateOne) AddChannelTags(v ...*ChannelTag) *TagUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddChannelTagIDs(ids...)
+}
+
 // Mutation returns the TagMutation object of the builder.
 func (_u *TagUpdateOne) Mutation() *TagMutation {
 	return _u.mutation
@@ -784,6 +929,27 @@ func (_u *TagUpdateOne) RemoveNames(v ...*TagName) *TagUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveNameIDs(ids...)
+}
+
+// ClearChannelTags clears all "channel_tags" edges to the ChannelTag entity.
+func (_u *TagUpdateOne) ClearChannelTags() *TagUpdateOne {
+	_u.mutation.ClearChannelTags()
+	return _u
+}
+
+// RemoveChannelTagIDs removes the "channel_tags" edge to ChannelTag entities by IDs.
+func (_u *TagUpdateOne) RemoveChannelTagIDs(ids ...int) *TagUpdateOne {
+	_u.mutation.RemoveChannelTagIDs(ids...)
+	return _u
+}
+
+// RemoveChannelTags removes "channel_tags" edges to ChannelTag entities.
+func (_u *TagUpdateOne) RemoveChannelTags(v ...*ChannelTag) *TagUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveChannelTagIDs(ids...)
 }
 
 // Where appends a list predicates to the TagUpdate builder.
@@ -920,6 +1086,12 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 	if value, ok := _u.mutation.AddedMediaCount(); ok {
 		_spec.AddField(tag.FieldMediaCount, field.TypeInt, value)
 	}
+	if value, ok := _u.mutation.ChannelCount(); ok {
+		_spec.SetField(tag.FieldChannelCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedChannelCount(); ok {
+		_spec.AddField(tag.FieldChannelCount, field.TypeInt, value)
+	}
 	if value, ok := _u.mutation.ListingsThumbnail(); ok {
 		_spec.SetField(tag.FieldListingsThumbnail, field.TypeString, value)
 	}
@@ -1042,6 +1214,51 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(tagname.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ChannelTagsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.ChannelTagsTable,
+			Columns: []string{tag.ChannelTagsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedChannelTagsIDs(); len(nodes) > 0 && !_u.mutation.ChannelTagsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.ChannelTagsTable,
+			Columns: []string{tag.ChannelTagsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ChannelTagsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.ChannelTagsTable,
+			Columns: []string{tag.ChannelTagsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
