@@ -184,7 +184,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
                                         {item.title}
                                     </h2>
 
-                                    <p className="text-sm md:text-base text-muted-foreground line-clamp-1 md:line-clamp-2 mb-5">
+                                    <p className="text-sm md:text-base text-muted-foreground line-clamp-2 mb-5">
                                         {item.description || t('watch.noDescription')}
                                     </p>
 

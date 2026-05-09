@@ -155,7 +155,7 @@ const PlaylistDetailPage: React.FC = () => {
                             <ArrowLeft className="w-5 h-5"/>
                         </Link>
                         <ListVideo size={24} className="text-emerald-600 flex-shrink-0"/>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white truncate">{playlist.title}</h1>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white line-clamp-2">{playlist.title}</h1>
                         <Badge variant={playlist.is_public ? 'default' : 'secondary'} className="flex-shrink-0">
                             {playlist.is_public ? (
                                 <><Globe className="w-3 h-3 mr-1"/>{t('common.public')}</>

@@ -48,7 +48,7 @@ const RecentlyUpdated: React.FC = () => {
             params={{ slug: article.slug }}
             className="block py-3 hover:bg-muted/50 -mx-2 px-2 rounded-lg transition-colors"
           >
-            <h3 className="font-medium text-sm mb-1 line-clamp-1">{article.title}</h3>
+            <h3 className="font-medium text-sm mb-1 line-clamp-2">{article.title}</h3>
             {article.summary && (
               <p className="text-sm text-muted-foreground line-clamp-2 mb-1">{article.summary}</p>
             )}

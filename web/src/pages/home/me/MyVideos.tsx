@@ -124,11 +124,11 @@ const MyVideos = () => {
                             </div>
                             <CardContent className="p-4">
                                 <div className="flex justify-between items-start gap-2">
-                                    <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-1 flex-1">
+                                    <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 flex-1">
                                         {item.title}
                                     </h3>
                                     <Badge variant={item.state === 'active' ? 'default' : 'secondary'}
-                                           className="text-[10px] px-1.5 py-0 capitalize">
+                                           className="text-[10px] px-1.5 py-0 capitalize shrink-0">
                                         {item.state}
                                     </Badge>
                                 </div>

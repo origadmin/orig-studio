@@ -742,7 +742,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({userId: propUserId}) => {
                                                 </div>
                                             </div>
                                             <div className="p-4">
-                                                <h3 className="font-semibold text-slate-900 dark:text-white truncate group-hover:text-emerald-600 transition-colors">{pl.title}</h3>
+                                                <h3 className="font-semibold text-slate-900 dark:text-white line-clamp-2 group-hover:text-emerald-600 transition-colors">{pl.title}</h3>
                                                 <p className="text-xs text-slate-500 dark:text-muted-foreground mt-1">
                                                     {t('playlists.updated', {date: formatDate(pl.update_time || pl.create_time)})}
                                                 </p>

@@ -137,7 +137,7 @@ const MixedHomeLayout: React.FC = () => {
                                                 {formatDate(article.create_time)}
                                             </span>
                                         </div>
-                                        <h3 className="font-semibold text-sm line-clamp-1">{article.title}</h3>
+                                        <h3 className="font-semibold text-sm line-clamp-2">{article.title}</h3>
                                     </Link>
                                 ))}
                             </div>

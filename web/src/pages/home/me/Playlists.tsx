@@ -171,7 +171,7 @@ const PlaylistsPage = () => {
                                         {pl.title}
                                     </h3>
                                 </Link>
-                                <p className="text-sm text-gray-500 dark:text-muted-foreground line-clamp-1">{pl.description}</p>
+                                <p className="text-sm text-gray-500 dark:text-muted-foreground line-clamp-2">{pl.description}</p>
                                 <div className="flex items-center justify-between mt-2">
                                     <p className="text-xs text-muted-foreground">{t('playlists.updated', {date: formatDate(pl.update_time)})}</p>
                                     <Button
