@@ -147,9 +147,11 @@ type MediaEdges struct {
 	ReviewLogs []*MediaReviewLog `json:"review_logs,omitempty"`
 	// Articles holds the value of the articles edge.
 	Articles []*Article `json:"articles,omitempty"`
+	// Reports holds the value of the reports edge.
+	Reports []*MediaReport `json:"reports,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [10]bool
+	loadedTypes [11]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -246,6 +248,15 @@ func (e MediaEdges) ArticlesOrErr() ([]*Article, error) {
 		return e.Articles, nil
 	}
 	return nil, &NotLoadedError{edge: "articles"}
+}
+
+// ReportsOrErr returns the Reports value or an error if the edge
+// was not loaded in eager-loading.
+func (e MediaEdges) ReportsOrErr() ([]*MediaReport, error) {
+	if e.loadedTypes[10] {
+		return e.Reports, nil
+	}
+	return nil, &NotLoadedError{edge: "reports"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -656,6 +667,11 @@ func (_m *Media) QueryReviewLogs() *MediaReviewLogQuery {
 // QueryArticles queries the "articles" edge of the Media entity.
 func (_m *Media) QueryArticles() *ArticleQuery {
 	return NewMediaClient(_m.config).QueryArticles(_m)
+}
+
+// QueryReports queries the "reports" edge of the Media entity.
+func (_m *Media) QueryReports() *MediaReportQuery {
+	return NewMediaClient(_m.config).QueryReports(_m)
 }
 
 // Update returns a builder for updating this Media.

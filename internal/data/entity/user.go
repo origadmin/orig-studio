@@ -127,6 +127,8 @@ type UserEdges struct {
 	ReviewLogs []*MediaReviewLog `json:"review_logs,omitempty"`
 	// CommentReports holds the value of the comment_reports edge.
 	CommentReports []*CommentReport `json:"comment_reports,omitempty"`
+	// MediaReports holds the value of the media_reports edge.
+	MediaReports []*MediaReport `json:"media_reports,omitempty"`
 	// ModeratedComments holds the value of the moderated_comments edge.
 	ModeratedComments []*Comment `json:"moderated_comments,omitempty"`
 	// GroupMemberships holds the value of the group_memberships edge.
@@ -137,7 +139,7 @@ type UserEdges struct {
 	History []*History `json:"history,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [19]bool
+	loadedTypes [20]bool
 }
 
 // MediaOrErr returns the Media value or an error if the edge
@@ -275,10 +277,19 @@ func (e UserEdges) CommentReportsOrErr() ([]*CommentReport, error) {
 	return nil, &NotLoadedError{edge: "comment_reports"}
 }
 
+// MediaReportsOrErr returns the MediaReports value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) MediaReportsOrErr() ([]*MediaReport, error) {
+	if e.loadedTypes[15] {
+		return e.MediaReports, nil
+	}
+	return nil, &NotLoadedError{edge: "media_reports"}
+}
+
 // ModeratedCommentsOrErr returns the ModeratedComments value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) ModeratedCommentsOrErr() ([]*Comment, error) {
-	if e.loadedTypes[15] {
+	if e.loadedTypes[16] {
 		return e.ModeratedComments, nil
 	}
 	return nil, &NotLoadedError{edge: "moderated_comments"}
@@ -287,7 +298,7 @@ func (e UserEdges) ModeratedCommentsOrErr() ([]*Comment, error) {
 // GroupMembershipsOrErr returns the GroupMemberships value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) GroupMembershipsOrErr() ([]*GroupMember, error) {
-	if e.loadedTypes[16] {
+	if e.loadedTypes[17] {
 		return e.GroupMemberships, nil
 	}
 	return nil, &NotLoadedError{edge: "group_memberships"}
@@ -296,7 +307,7 @@ func (e UserEdges) GroupMembershipsOrErr() ([]*GroupMember, error) {
 // CreatedGroupsOrErr returns the CreatedGroups value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) CreatedGroupsOrErr() ([]*PermissionGroup, error) {
-	if e.loadedTypes[17] {
+	if e.loadedTypes[18] {
 		return e.CreatedGroups, nil
 	}
 	return nil, &NotLoadedError{edge: "created_groups"}
@@ -305,7 +316,7 @@ func (e UserEdges) CreatedGroupsOrErr() ([]*PermissionGroup, error) {
 // HistoryOrErr returns the History value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) HistoryOrErr() ([]*History, error) {
-	if e.loadedTypes[18] {
+	if e.loadedTypes[19] {
 		return e.History, nil
 	}
 	return nil, &NotLoadedError{edge: "history"}
@@ -647,6 +658,11 @@ func (_m *User) QueryReviewLogs() *MediaReviewLogQuery {
 // QueryCommentReports queries the "comment_reports" edge of the User entity.
 func (_m *User) QueryCommentReports() *CommentReportQuery {
 	return NewUserClient(_m.config).QueryCommentReports(_m)
+}
+
+// QueryMediaReports queries the "media_reports" edge of the User entity.
+func (_m *User) QueryMediaReports() *MediaReportQuery {
+	return NewUserClient(_m.config).QueryMediaReports(_m)
 }
 
 // QueryModeratedComments queries the "moderated_comments" edge of the User entity.

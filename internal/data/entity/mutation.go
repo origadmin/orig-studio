@@ -21,6 +21,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediacategory"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
+	"origadmin/application/origcms/internal/data/entity/mediareport"
 	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/mediatag"
 	"origadmin/application/origcms/internal/data/entity/notification"
@@ -65,6 +66,7 @@ const (
 	TypeMedia           = "Media"
 	TypeMediaCategory   = "MediaCategory"
 	TypeMediaPlaylist   = "MediaPlaylist"
+	TypeMediaReport     = "MediaReport"
 	TypeMediaReviewLog  = "MediaReviewLog"
 	TypeMediaTag        = "MediaTag"
 	TypeNotification    = "Notification"
@@ -13225,6 +13227,9 @@ type MediaMutation struct {
 	articles           map[string]struct{}
 	removedarticles    map[string]struct{}
 	clearedarticles    bool
+	reports            map[string]struct{}
+	removedreports     map[string]struct{}
+	clearedreports     bool
 	done               bool
 	oldValue           func(context.Context) (*Media, error)
 	predicates         []predicate.Media
@@ -16025,6 +16030,60 @@ func (m *MediaMutation) ResetArticles() {
 	m.removedarticles = nil
 }
 
+// AddReportIDs adds the "reports" edge to the MediaReport entity by ids.
+func (m *MediaMutation) AddReportIDs(ids ...string) {
+	if m.reports == nil {
+		m.reports = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.reports[ids[i]] = struct{}{}
+	}
+}
+
+// ClearReports clears the "reports" edge to the MediaReport entity.
+func (m *MediaMutation) ClearReports() {
+	m.clearedreports = true
+}
+
+// ReportsCleared reports if the "reports" edge to the MediaReport entity was cleared.
+func (m *MediaMutation) ReportsCleared() bool {
+	return m.clearedreports
+}
+
+// RemoveReportIDs removes the "reports" edge to the MediaReport entity by IDs.
+func (m *MediaMutation) RemoveReportIDs(ids ...string) {
+	if m.removedreports == nil {
+		m.removedreports = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.reports, ids[i])
+		m.removedreports[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedReports returns the removed IDs of the "reports" edge to the MediaReport entity.
+func (m *MediaMutation) RemovedReportsIDs() (ids []string) {
+	for id := range m.removedreports {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ReportsIDs returns the "reports" edge IDs in the mutation.
+func (m *MediaMutation) ReportsIDs() (ids []string) {
+	for id := range m.reports {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetReports resets all changes to the "reports" edge.
+func (m *MediaMutation) ResetReports() {
+	m.reports = nil
+	m.clearedreports = false
+	m.removedreports = nil
+}
+
 // Where appends a list predicates to the MediaMutation builder.
 func (m *MediaMutation) Where(ps ...predicate.Media) {
 	m.predicates = append(m.predicates, ps...)
@@ -17221,7 +17280,7 @@ func (m *MediaMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *MediaMutation) AddedEdges() []string {
-	edges := make([]string, 0, 10)
+	edges := make([]string, 0, 11)
 	if m.user != nil {
 		edges = append(edges, media.EdgeUser)
 	}
@@ -17251,6 +17310,9 @@ func (m *MediaMutation) AddedEdges() []string {
 	}
 	if m.articles != nil {
 		edges = append(edges, media.EdgeArticles)
+	}
+	if m.reports != nil {
+		edges = append(edges, media.EdgeReports)
 	}
 	return edges
 }
@@ -17313,13 +17375,19 @@ func (m *MediaMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case media.EdgeReports:
+		ids := make([]ent.Value, 0, len(m.reports))
+		for id := range m.reports {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *MediaMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 10)
+	edges := make([]string, 0, 11)
 	if m.removedcomments != nil {
 		edges = append(edges, media.EdgeComments)
 	}
@@ -17340,6 +17408,9 @@ func (m *MediaMutation) RemovedEdges() []string {
 	}
 	if m.removedarticles != nil {
 		edges = append(edges, media.EdgeArticles)
+	}
+	if m.removedreports != nil {
+		edges = append(edges, media.EdgeReports)
 	}
 	return edges
 }
@@ -17390,13 +17461,19 @@ func (m *MediaMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case media.EdgeReports:
+		ids := make([]ent.Value, 0, len(m.removedreports))
+		for id := range m.removedreports {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *MediaMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 10)
+	edges := make([]string, 0, 11)
 	if m.cleareduser {
 		edges = append(edges, media.EdgeUser)
 	}
@@ -17427,6 +17504,9 @@ func (m *MediaMutation) ClearedEdges() []string {
 	if m.clearedarticles {
 		edges = append(edges, media.EdgeArticles)
 	}
+	if m.clearedreports {
+		edges = append(edges, media.EdgeReports)
+	}
 	return edges
 }
 
@@ -17454,6 +17534,8 @@ func (m *MediaMutation) EdgeCleared(name string) bool {
 		return m.clearedreview_logs
 	case media.EdgeArticles:
 		return m.clearedarticles
+	case media.EdgeReports:
+		return m.clearedreports
 	}
 	return false
 }
@@ -17508,6 +17590,9 @@ func (m *MediaMutation) ResetEdge(name string) error {
 		return nil
 	case media.EdgeArticles:
 		m.ResetArticles()
+		return nil
+	case media.EdgeReports:
+		m.ResetReports()
 		return nil
 	}
 	return fmt.Errorf("unknown Media edge %s", name)
@@ -18581,6 +18666,730 @@ func (m *MediaPlaylistMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown MediaPlaylist edge %s", name)
+}
+
+// MediaReportMutation represents an operation that mutates the MediaReport nodes in the graph.
+type MediaReportMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *string
+	reason          *mediareport.Reason
+	description     *string
+	status          *mediareport.Status
+	create_time     *time.Time
+	clearedFields   map[string]struct{}
+	media           *string
+	clearedmedia    bool
+	reporter        *string
+	clearedreporter bool
+	done            bool
+	oldValue        func(context.Context) (*MediaReport, error)
+	predicates      []predicate.MediaReport
+}
+
+var _ ent.Mutation = (*MediaReportMutation)(nil)
+
+// mediareportOption allows management of the mutation configuration using functional options.
+type mediareportOption func(*MediaReportMutation)
+
+// newMediaReportMutation creates new mutation for the MediaReport entity.
+func newMediaReportMutation(c config, op Op, opts ...mediareportOption) *MediaReportMutation {
+	m := &MediaReportMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeMediaReport,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withMediaReportID sets the ID field of the mutation.
+func withMediaReportID(id string) mediareportOption {
+	return func(m *MediaReportMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *MediaReport
+		)
+		m.oldValue = func(ctx context.Context) (*MediaReport, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().MediaReport.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withMediaReport sets the old MediaReport of the mutation.
+func withMediaReport(node *MediaReport) mediareportOption {
+	return func(m *MediaReportMutation) {
+		m.oldValue = func(context.Context) (*MediaReport, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m MediaReportMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m MediaReportMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("entity: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of MediaReport entities.
+func (m *MediaReportMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *MediaReportMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *MediaReportMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().MediaReport.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetMediaID sets the "media_id" field.
+func (m *MediaReportMutation) SetMediaID(s string) {
+	m.media = &s
+}
+
+// MediaID returns the value of the "media_id" field in the mutation.
+func (m *MediaReportMutation) MediaID() (r string, exists bool) {
+	v := m.media
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMediaID returns the old "media_id" field's value of the MediaReport entity.
+// If the MediaReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaReportMutation) OldMediaID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMediaID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMediaID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMediaID: %w", err)
+	}
+	return oldValue.MediaID, nil
+}
+
+// ResetMediaID resets all changes to the "media_id" field.
+func (m *MediaReportMutation) ResetMediaID() {
+	m.media = nil
+}
+
+// SetReporterID sets the "reporter_id" field.
+func (m *MediaReportMutation) SetReporterID(s string) {
+	m.reporter = &s
+}
+
+// ReporterID returns the value of the "reporter_id" field in the mutation.
+func (m *MediaReportMutation) ReporterID() (r string, exists bool) {
+	v := m.reporter
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReporterID returns the old "reporter_id" field's value of the MediaReport entity.
+// If the MediaReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaReportMutation) OldReporterID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReporterID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReporterID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReporterID: %w", err)
+	}
+	return oldValue.ReporterID, nil
+}
+
+// ResetReporterID resets all changes to the "reporter_id" field.
+func (m *MediaReportMutation) ResetReporterID() {
+	m.reporter = nil
+}
+
+// SetReason sets the "reason" field.
+func (m *MediaReportMutation) SetReason(value mediareport.Reason) {
+	m.reason = &value
+}
+
+// Reason returns the value of the "reason" field in the mutation.
+func (m *MediaReportMutation) Reason() (r mediareport.Reason, exists bool) {
+	v := m.reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReason returns the old "reason" field's value of the MediaReport entity.
+// If the MediaReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaReportMutation) OldReason(ctx context.Context) (v mediareport.Reason, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReason: %w", err)
+	}
+	return oldValue.Reason, nil
+}
+
+// ResetReason resets all changes to the "reason" field.
+func (m *MediaReportMutation) ResetReason() {
+	m.reason = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *MediaReportMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *MediaReportMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the MediaReport entity.
+// If the MediaReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaReportMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *MediaReportMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[mediareport.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *MediaReportMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[mediareport.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *MediaReportMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, mediareport.FieldDescription)
+}
+
+// SetStatus sets the "status" field.
+func (m *MediaReportMutation) SetStatus(value mediareport.Status) {
+	m.status = &value
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *MediaReportMutation) Status() (r mediareport.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the MediaReport entity.
+// If the MediaReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaReportMutation) OldStatus(ctx context.Context) (v mediareport.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *MediaReportMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetCreateTime sets the "create_time" field.
+func (m *MediaReportMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *MediaReportMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the MediaReport entity.
+// If the MediaReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaReportMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *MediaReportMutation) ResetCreateTime() {
+	m.create_time = nil
+}
+
+// ClearMedia clears the "media" edge to the Media entity.
+func (m *MediaReportMutation) ClearMedia() {
+	m.clearedmedia = true
+	m.clearedFields[mediareport.FieldMediaID] = struct{}{}
+}
+
+// MediaCleared reports if the "media" edge to the Media entity was cleared.
+func (m *MediaReportMutation) MediaCleared() bool {
+	return m.clearedmedia
+}
+
+// MediaIDs returns the "media" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// MediaID instead. It exists only for internal usage by the builders.
+func (m *MediaReportMutation) MediaIDs() (ids []string) {
+	if id := m.media; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetMedia resets all changes to the "media" edge.
+func (m *MediaReportMutation) ResetMedia() {
+	m.media = nil
+	m.clearedmedia = false
+}
+
+// ClearReporter clears the "reporter" edge to the User entity.
+func (m *MediaReportMutation) ClearReporter() {
+	m.clearedreporter = true
+	m.clearedFields[mediareport.FieldReporterID] = struct{}{}
+}
+
+// ReporterCleared reports if the "reporter" edge to the User entity was cleared.
+func (m *MediaReportMutation) ReporterCleared() bool {
+	return m.clearedreporter
+}
+
+// ReporterIDs returns the "reporter" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ReporterID instead. It exists only for internal usage by the builders.
+func (m *MediaReportMutation) ReporterIDs() (ids []string) {
+	if id := m.reporter; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetReporter resets all changes to the "reporter" edge.
+func (m *MediaReportMutation) ResetReporter() {
+	m.reporter = nil
+	m.clearedreporter = false
+}
+
+// Where appends a list predicates to the MediaReportMutation builder.
+func (m *MediaReportMutation) Where(ps ...predicate.MediaReport) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the MediaReportMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *MediaReportMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.MediaReport, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *MediaReportMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *MediaReportMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (MediaReport).
+func (m *MediaReportMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *MediaReportMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.media != nil {
+		fields = append(fields, mediareport.FieldMediaID)
+	}
+	if m.reporter != nil {
+		fields = append(fields, mediareport.FieldReporterID)
+	}
+	if m.reason != nil {
+		fields = append(fields, mediareport.FieldReason)
+	}
+	if m.description != nil {
+		fields = append(fields, mediareport.FieldDescription)
+	}
+	if m.status != nil {
+		fields = append(fields, mediareport.FieldStatus)
+	}
+	if m.create_time != nil {
+		fields = append(fields, mediareport.FieldCreateTime)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *MediaReportMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case mediareport.FieldMediaID:
+		return m.MediaID()
+	case mediareport.FieldReporterID:
+		return m.ReporterID()
+	case mediareport.FieldReason:
+		return m.Reason()
+	case mediareport.FieldDescription:
+		return m.Description()
+	case mediareport.FieldStatus:
+		return m.Status()
+	case mediareport.FieldCreateTime:
+		return m.CreateTime()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *MediaReportMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case mediareport.FieldMediaID:
+		return m.OldMediaID(ctx)
+	case mediareport.FieldReporterID:
+		return m.OldReporterID(ctx)
+	case mediareport.FieldReason:
+		return m.OldReason(ctx)
+	case mediareport.FieldDescription:
+		return m.OldDescription(ctx)
+	case mediareport.FieldStatus:
+		return m.OldStatus(ctx)
+	case mediareport.FieldCreateTime:
+		return m.OldCreateTime(ctx)
+	}
+	return nil, fmt.Errorf("unknown MediaReport field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *MediaReportMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case mediareport.FieldMediaID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMediaID(v)
+		return nil
+	case mediareport.FieldReporterID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReporterID(v)
+		return nil
+	case mediareport.FieldReason:
+		v, ok := value.(mediareport.Reason)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReason(v)
+		return nil
+	case mediareport.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case mediareport.FieldStatus:
+		v, ok := value.(mediareport.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case mediareport.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
+		return nil
+	}
+	return fmt.Errorf("unknown MediaReport field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *MediaReportMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *MediaReportMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *MediaReportMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown MediaReport numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *MediaReportMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(mediareport.FieldDescription) {
+		fields = append(fields, mediareport.FieldDescription)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *MediaReportMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *MediaReportMutation) ClearField(name string) error {
+	switch name {
+	case mediareport.FieldDescription:
+		m.ClearDescription()
+		return nil
+	}
+	return fmt.Errorf("unknown MediaReport nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *MediaReportMutation) ResetField(name string) error {
+	switch name {
+	case mediareport.FieldMediaID:
+		m.ResetMediaID()
+		return nil
+	case mediareport.FieldReporterID:
+		m.ResetReporterID()
+		return nil
+	case mediareport.FieldReason:
+		m.ResetReason()
+		return nil
+	case mediareport.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case mediareport.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case mediareport.FieldCreateTime:
+		m.ResetCreateTime()
+		return nil
+	}
+	return fmt.Errorf("unknown MediaReport field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *MediaReportMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.media != nil {
+		edges = append(edges, mediareport.EdgeMedia)
+	}
+	if m.reporter != nil {
+		edges = append(edges, mediareport.EdgeReporter)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *MediaReportMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case mediareport.EdgeMedia:
+		if id := m.media; id != nil {
+			return []ent.Value{*id}
+		}
+	case mediareport.EdgeReporter:
+		if id := m.reporter; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *MediaReportMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *MediaReportMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *MediaReportMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedmedia {
+		edges = append(edges, mediareport.EdgeMedia)
+	}
+	if m.clearedreporter {
+		edges = append(edges, mediareport.EdgeReporter)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *MediaReportMutation) EdgeCleared(name string) bool {
+	switch name {
+	case mediareport.EdgeMedia:
+		return m.clearedmedia
+	case mediareport.EdgeReporter:
+		return m.clearedreporter
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *MediaReportMutation) ClearEdge(name string) error {
+	switch name {
+	case mediareport.EdgeMedia:
+		m.ClearMedia()
+		return nil
+	case mediareport.EdgeReporter:
+		m.ClearReporter()
+		return nil
+	}
+	return fmt.Errorf("unknown MediaReport unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *MediaReportMutation) ResetEdge(name string) error {
+	switch name {
+	case mediareport.EdgeMedia:
+		m.ResetMedia()
+		return nil
+	case mediareport.EdgeReporter:
+		m.ResetReporter()
+		return nil
+	}
+	return fmt.Errorf("unknown MediaReport edge %s", name)
 }
 
 // MediaReviewLogMutation represents an operation that mutates the MediaReviewLog nodes in the graph.
@@ -26689,6 +27498,9 @@ type UserMutation struct {
 	comment_reports           map[string]struct{}
 	removedcomment_reports    map[string]struct{}
 	clearedcomment_reports    bool
+	media_reports             map[string]struct{}
+	removedmedia_reports      map[string]struct{}
+	clearedmedia_reports      bool
 	moderated_comments        map[string]struct{}
 	removedmoderated_comments map[string]struct{}
 	clearedmoderated_comments bool
@@ -29131,6 +29943,60 @@ func (m *UserMutation) ResetCommentReports() {
 	m.removedcomment_reports = nil
 }
 
+// AddMediaReportIDs adds the "media_reports" edge to the MediaReport entity by ids.
+func (m *UserMutation) AddMediaReportIDs(ids ...string) {
+	if m.media_reports == nil {
+		m.media_reports = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.media_reports[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMediaReports clears the "media_reports" edge to the MediaReport entity.
+func (m *UserMutation) ClearMediaReports() {
+	m.clearedmedia_reports = true
+}
+
+// MediaReportsCleared reports if the "media_reports" edge to the MediaReport entity was cleared.
+func (m *UserMutation) MediaReportsCleared() bool {
+	return m.clearedmedia_reports
+}
+
+// RemoveMediaReportIDs removes the "media_reports" edge to the MediaReport entity by IDs.
+func (m *UserMutation) RemoveMediaReportIDs(ids ...string) {
+	if m.removedmedia_reports == nil {
+		m.removedmedia_reports = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.media_reports, ids[i])
+		m.removedmedia_reports[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMediaReports returns the removed IDs of the "media_reports" edge to the MediaReport entity.
+func (m *UserMutation) RemovedMediaReportsIDs() (ids []string) {
+	for id := range m.removedmedia_reports {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MediaReportsIDs returns the "media_reports" edge IDs in the mutation.
+func (m *UserMutation) MediaReportsIDs() (ids []string) {
+	for id := range m.media_reports {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMediaReports resets all changes to the "media_reports" edge.
+func (m *UserMutation) ResetMediaReports() {
+	m.media_reports = nil
+	m.clearedmedia_reports = false
+	m.removedmedia_reports = nil
+}
+
 // AddModeratedCommentIDs adds the "moderated_comments" edge to the Comment entity by ids.
 func (m *UserMutation) AddModeratedCommentIDs(ids ...string) {
 	if m.moderated_comments == nil {
@@ -30183,7 +31049,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 19)
+	edges := make([]string, 0, 20)
 	if m.media != nil {
 		edges = append(edges, user.EdgeMedia)
 	}
@@ -30228,6 +31094,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.comment_reports != nil {
 		edges = append(edges, user.EdgeCommentReports)
+	}
+	if m.media_reports != nil {
+		edges = append(edges, user.EdgeMediaReports)
 	}
 	if m.moderated_comments != nil {
 		edges = append(edges, user.EdgeModeratedComments)
@@ -30338,6 +31207,12 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeMediaReports:
+		ids := make([]ent.Value, 0, len(m.media_reports))
+		for id := range m.media_reports {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeModeratedComments:
 		ids := make([]ent.Value, 0, len(m.moderated_comments))
 		for id := range m.moderated_comments {
@@ -30368,7 +31243,7 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 19)
+	edges := make([]string, 0, 20)
 	if m.removedmedia != nil {
 		edges = append(edges, user.EdgeMedia)
 	}
@@ -30413,6 +31288,9 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedcomment_reports != nil {
 		edges = append(edges, user.EdgeCommentReports)
+	}
+	if m.removedmedia_reports != nil {
+		edges = append(edges, user.EdgeMediaReports)
 	}
 	if m.removedmoderated_comments != nil {
 		edges = append(edges, user.EdgeModeratedComments)
@@ -30523,6 +31401,12 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeMediaReports:
+		ids := make([]ent.Value, 0, len(m.removedmedia_reports))
+		for id := range m.removedmedia_reports {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeModeratedComments:
 		ids := make([]ent.Value, 0, len(m.removedmoderated_comments))
 		for id := range m.removedmoderated_comments {
@@ -30553,7 +31437,7 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 19)
+	edges := make([]string, 0, 20)
 	if m.clearedmedia {
 		edges = append(edges, user.EdgeMedia)
 	}
@@ -30598,6 +31482,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedcomment_reports {
 		edges = append(edges, user.EdgeCommentReports)
+	}
+	if m.clearedmedia_reports {
+		edges = append(edges, user.EdgeMediaReports)
 	}
 	if m.clearedmoderated_comments {
 		edges = append(edges, user.EdgeModeratedComments)
@@ -30648,6 +31535,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedreview_logs
 	case user.EdgeCommentReports:
 		return m.clearedcomment_reports
+	case user.EdgeMediaReports:
+		return m.clearedmedia_reports
 	case user.EdgeModeratedComments:
 		return m.clearedmoderated_comments
 	case user.EdgeGroupMemberships:
@@ -30716,6 +31605,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeCommentReports:
 		m.ResetCommentReports()
+		return nil
+	case user.EdgeMediaReports:
+		m.ResetMediaReports()
 		return nil
 	case user.EdgeModeratedComments:
 		m.ResetModeratedComments()

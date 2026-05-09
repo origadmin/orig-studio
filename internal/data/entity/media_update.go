@@ -14,6 +14,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
+	"origadmin/application/origcms/internal/data/entity/mediareport"
 	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/mediatag"
 	"origadmin/application/origcms/internal/data/entity/predicate"
@@ -1020,6 +1021,21 @@ func (_u *MediaUpdate) AddArticles(v ...*Article) *MediaUpdate {
 	return _u.AddArticleIDs(ids...)
 }
 
+// AddReportIDs adds the "reports" edge to the MediaReport entity by IDs.
+func (_u *MediaUpdate) AddReportIDs(ids ...string) *MediaUpdate {
+	_u.mutation.AddReportIDs(ids...)
+	return _u
+}
+
+// AddReports adds the "reports" edges to the MediaReport entity.
+func (_u *MediaUpdate) AddReports(v ...*MediaReport) *MediaUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddReportIDs(ids...)
+}
+
 // Mutation returns the MediaMutation object of the builder.
 func (_u *MediaUpdate) Mutation() *MediaMutation {
 	return _u.mutation
@@ -1188,6 +1204,27 @@ func (_u *MediaUpdate) RemoveArticles(v ...*Article) *MediaUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveArticleIDs(ids...)
+}
+
+// ClearReports clears all "reports" edges to the MediaReport entity.
+func (_u *MediaUpdate) ClearReports() *MediaUpdate {
+	_u.mutation.ClearReports()
+	return _u
+}
+
+// RemoveReportIDs removes the "reports" edge to MediaReport entities by IDs.
+func (_u *MediaUpdate) RemoveReportIDs(ids ...string) *MediaUpdate {
+	_u.mutation.RemoveReportIDs(ids...)
+	return _u
+}
+
+// RemoveReports removes "reports" edges to MediaReport entities.
+func (_u *MediaUpdate) RemoveReports(v ...*MediaReport) *MediaUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveReportIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -1979,6 +2016,51 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ReportsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ReportsTable,
+			Columns: []string{media.ReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareport.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedReportsIDs(); len(nodes) > 0 && !_u.mutation.ReportsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ReportsTable,
+			Columns: []string{media.ReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareport.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ReportsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ReportsTable,
+			Columns: []string{media.ReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareport.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -2988,6 +3070,21 @@ func (_u *MediaUpdateOne) AddArticles(v ...*Article) *MediaUpdateOne {
 	return _u.AddArticleIDs(ids...)
 }
 
+// AddReportIDs adds the "reports" edge to the MediaReport entity by IDs.
+func (_u *MediaUpdateOne) AddReportIDs(ids ...string) *MediaUpdateOne {
+	_u.mutation.AddReportIDs(ids...)
+	return _u
+}
+
+// AddReports adds the "reports" edges to the MediaReport entity.
+func (_u *MediaUpdateOne) AddReports(v ...*MediaReport) *MediaUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddReportIDs(ids...)
+}
+
 // Mutation returns the MediaMutation object of the builder.
 func (_u *MediaUpdateOne) Mutation() *MediaMutation {
 	return _u.mutation
@@ -3156,6 +3253,27 @@ func (_u *MediaUpdateOne) RemoveArticles(v ...*Article) *MediaUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveArticleIDs(ids...)
+}
+
+// ClearReports clears all "reports" edges to the MediaReport entity.
+func (_u *MediaUpdateOne) ClearReports() *MediaUpdateOne {
+	_u.mutation.ClearReports()
+	return _u
+}
+
+// RemoveReportIDs removes the "reports" edge to MediaReport entities by IDs.
+func (_u *MediaUpdateOne) RemoveReportIDs(ids ...string) *MediaUpdateOne {
+	_u.mutation.RemoveReportIDs(ids...)
+	return _u
+}
+
+// RemoveReports removes "reports" edges to MediaReport entities.
+func (_u *MediaUpdateOne) RemoveReports(v ...*MediaReport) *MediaUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveReportIDs(ids...)
 }
 
 // Where appends a list predicates to the MediaUpdate builder.
@@ -3977,6 +4095,51 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ReportsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ReportsTable,
+			Columns: []string{media.ReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareport.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedReportsIDs(); len(nodes) > 0 && !_u.mutation.ReportsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ReportsTable,
+			Columns: []string{media.ReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareport.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ReportsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ReportsTable,
+			Columns: []string{media.ReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareport.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

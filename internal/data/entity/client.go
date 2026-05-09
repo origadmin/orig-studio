@@ -26,6 +26,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediacategory"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
+	"origadmin/application/origcms/internal/data/entity/mediareport"
 	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/mediatag"
 	"origadmin/application/origcms/internal/data/entity/notification"
@@ -78,6 +79,8 @@ type Client struct {
 	MediaCategory *MediaCategoryClient
 	// MediaPlaylist is the client for interacting with the MediaPlaylist builders.
 	MediaPlaylist *MediaPlaylistClient
+	// MediaReport is the client for interacting with the MediaReport builders.
+	MediaReport *MediaReportClient
 	// MediaReviewLog is the client for interacting with the MediaReviewLog builders.
 	MediaReviewLog *MediaReviewLogClient
 	// MediaTag is the client for interacting with the MediaTag builders.
@@ -124,6 +127,7 @@ func (c *Client) init() {
 	c.Media = NewMediaClient(c.config)
 	c.MediaCategory = NewMediaCategoryClient(c.config)
 	c.MediaPlaylist = NewMediaPlaylistClient(c.config)
+	c.MediaReport = NewMediaReportClient(c.config)
 	c.MediaReviewLog = NewMediaReviewLogClient(c.config)
 	c.MediaTag = NewMediaTagClient(c.config)
 	c.Notification = NewNotificationClient(c.config)
@@ -241,6 +245,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Media:           NewMediaClient(cfg),
 		MediaCategory:   NewMediaCategoryClient(cfg),
 		MediaPlaylist:   NewMediaPlaylistClient(cfg),
+		MediaReport:     NewMediaReportClient(cfg),
 		MediaReviewLog:  NewMediaReviewLogClient(cfg),
 		MediaTag:        NewMediaTagClient(cfg),
 		Notification:    NewNotificationClient(cfg),
@@ -285,6 +290,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Media:           NewMediaClient(cfg),
 		MediaCategory:   NewMediaCategoryClient(cfg),
 		MediaPlaylist:   NewMediaPlaylistClient(cfg),
+		MediaReport:     NewMediaReportClient(cfg),
 		MediaReviewLog:  NewMediaReviewLogClient(cfg),
 		MediaTag:        NewMediaTagClient(cfg),
 		Notification:    NewNotificationClient(cfg),
@@ -326,9 +332,9 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Article, c.Category, c.Channel, c.Comment, c.CommentLike, c.CommentReport,
 		c.EncodeProfile, c.EncodingTask, c.Favorite, c.GroupMember, c.History, c.Like,
-		c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaReviewLog, c.MediaTag,
-		c.Notification, c.PermissionGroup, c.Playlist, c.Setting, c.Subscription,
-		c.Tag, c.UploadSession, c.User,
+		c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaReport, c.MediaReviewLog,
+		c.MediaTag, c.Notification, c.PermissionGroup, c.Playlist, c.Setting,
+		c.Subscription, c.Tag, c.UploadSession, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -340,9 +346,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Article, c.Category, c.Channel, c.Comment, c.CommentLike, c.CommentReport,
 		c.EncodeProfile, c.EncodingTask, c.Favorite, c.GroupMember, c.History, c.Like,
-		c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaReviewLog, c.MediaTag,
-		c.Notification, c.PermissionGroup, c.Playlist, c.Setting, c.Subscription,
-		c.Tag, c.UploadSession, c.User,
+		c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaReport, c.MediaReviewLog,
+		c.MediaTag, c.Notification, c.PermissionGroup, c.Playlist, c.Setting,
+		c.Subscription, c.Tag, c.UploadSession, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -381,6 +387,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.MediaCategory.mutate(ctx, m)
 	case *MediaPlaylistMutation:
 		return c.MediaPlaylist.mutate(ctx, m)
+	case *MediaReportMutation:
+		return c.MediaReport.mutate(ctx, m)
 	case *MediaReviewLogMutation:
 		return c.MediaReviewLog.mutate(ctx, m)
 	case *MediaTagMutation:
@@ -2782,6 +2790,22 @@ func (c *MediaClient) QueryArticles(_m *Media) *ArticleQuery {
 	return query
 }
 
+// QueryReports queries the reports edge of a Media.
+func (c *MediaClient) QueryReports(_m *Media) *MediaReportQuery {
+	query := (&MediaReportClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(media.Table, media.FieldID, id),
+			sqlgraph.To(mediareport.Table, mediareport.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, media.ReportsTable, media.ReportsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *MediaClient) Hooks() []Hook {
 	return c.hooks.Media
@@ -3134,6 +3158,171 @@ func (c *MediaPlaylistClient) mutate(ctx context.Context, m *MediaPlaylistMutati
 		return (&MediaPlaylistDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("entity: unknown MediaPlaylist mutation op: %q", m.Op())
+	}
+}
+
+// MediaReportClient is a client for the MediaReport schema.
+type MediaReportClient struct {
+	config
+}
+
+// NewMediaReportClient returns a client for the MediaReport from the given config.
+func NewMediaReportClient(c config) *MediaReportClient {
+	return &MediaReportClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `mediareport.Hooks(f(g(h())))`.
+func (c *MediaReportClient) Use(hooks ...Hook) {
+	c.hooks.MediaReport = append(c.hooks.MediaReport, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `mediareport.Intercept(f(g(h())))`.
+func (c *MediaReportClient) Intercept(interceptors ...Interceptor) {
+	c.inters.MediaReport = append(c.inters.MediaReport, interceptors...)
+}
+
+// Create returns a builder for creating a MediaReport entity.
+func (c *MediaReportClient) Create() *MediaReportCreate {
+	mutation := newMediaReportMutation(c.config, OpCreate)
+	return &MediaReportCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of MediaReport entities.
+func (c *MediaReportClient) CreateBulk(builders ...*MediaReportCreate) *MediaReportCreateBulk {
+	return &MediaReportCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *MediaReportClient) MapCreateBulk(slice any, setFunc func(*MediaReportCreate, int)) *MediaReportCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &MediaReportCreateBulk{err: fmt.Errorf("calling to MediaReportClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*MediaReportCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &MediaReportCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for MediaReport.
+func (c *MediaReportClient) Update() *MediaReportUpdate {
+	mutation := newMediaReportMutation(c.config, OpUpdate)
+	return &MediaReportUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MediaReportClient) UpdateOne(_m *MediaReport) *MediaReportUpdateOne {
+	mutation := newMediaReportMutation(c.config, OpUpdateOne, withMediaReport(_m))
+	return &MediaReportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MediaReportClient) UpdateOneID(id string) *MediaReportUpdateOne {
+	mutation := newMediaReportMutation(c.config, OpUpdateOne, withMediaReportID(id))
+	return &MediaReportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for MediaReport.
+func (c *MediaReportClient) Delete() *MediaReportDelete {
+	mutation := newMediaReportMutation(c.config, OpDelete)
+	return &MediaReportDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *MediaReportClient) DeleteOne(_m *MediaReport) *MediaReportDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *MediaReportClient) DeleteOneID(id string) *MediaReportDeleteOne {
+	builder := c.Delete().Where(mediareport.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MediaReportDeleteOne{builder}
+}
+
+// Query returns a query builder for MediaReport.
+func (c *MediaReportClient) Query() *MediaReportQuery {
+	return &MediaReportQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeMediaReport},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a MediaReport entity by its id.
+func (c *MediaReportClient) Get(ctx context.Context, id string) (*MediaReport, error) {
+	return c.Query().Where(mediareport.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MediaReportClient) GetX(ctx context.Context, id string) *MediaReport {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryMedia queries the media edge of a MediaReport.
+func (c *MediaReportClient) QueryMedia(_m *MediaReport) *MediaQuery {
+	query := (&MediaClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(mediareport.Table, mediareport.FieldID, id),
+			sqlgraph.To(media.Table, media.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, mediareport.MediaTable, mediareport.MediaColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryReporter queries the reporter edge of a MediaReport.
+func (c *MediaReportClient) QueryReporter(_m *MediaReport) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(mediareport.Table, mediareport.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, mediareport.ReporterTable, mediareport.ReporterColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *MediaReportClient) Hooks() []Hook {
+	return c.hooks.MediaReport
+}
+
+// Interceptors returns the client interceptors.
+func (c *MediaReportClient) Interceptors() []Interceptor {
+	return c.inters.MediaReport
+}
+
+func (c *MediaReportClient) mutate(ctx context.Context, m *MediaReportMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&MediaReportCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&MediaReportUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&MediaReportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&MediaReportDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entity: unknown MediaReport mutation op: %q", m.Op())
 	}
 }
 
@@ -4858,6 +5047,22 @@ func (c *UserClient) QueryCommentReports(_m *User) *CommentReportQuery {
 	return query
 }
 
+// QueryMediaReports queries the media_reports edge of a User.
+func (c *UserClient) QueryMediaReports(_m *User) *MediaReportQuery {
+	query := (&MediaReportClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(mediareport.Table, mediareport.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.MediaReportsTable, user.MediaReportsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryModeratedComments queries the moderated_comments edge of a User.
 func (c *UserClient) QueryModeratedComments(_m *User) *CommentQuery {
 	query := (&CommentClient{config: c.config}).Query()
@@ -4952,13 +5157,15 @@ type (
 	hooks struct {
 		Article, Category, Channel, Comment, CommentLike, CommentReport, EncodeProfile,
 		EncodingTask, Favorite, GroupMember, History, Like, Media, MediaCategory,
-		MediaPlaylist, MediaReviewLog, MediaTag, Notification, PermissionGroup,
-		Playlist, Setting, Subscription, Tag, UploadSession, User []ent.Hook
+		MediaPlaylist, MediaReport, MediaReviewLog, MediaTag, Notification,
+		PermissionGroup, Playlist, Setting, Subscription, Tag, UploadSession,
+		User []ent.Hook
 	}
 	inters struct {
 		Article, Category, Channel, Comment, CommentLike, CommentReport, EncodeProfile,
 		EncodingTask, Favorite, GroupMember, History, Like, Media, MediaCategory,
-		MediaPlaylist, MediaReviewLog, MediaTag, Notification, PermissionGroup,
-		Playlist, Setting, Subscription, Tag, UploadSession, User []ent.Interceptor
+		MediaPlaylist, MediaReport, MediaReviewLog, MediaTag, Notification,
+		PermissionGroup, Playlist, Setting, Subscription, Tag, UploadSession,
+		User []ent.Interceptor
 	}
 )

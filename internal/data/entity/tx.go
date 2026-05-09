@@ -42,6 +42,8 @@ type Tx struct {
 	MediaCategory *MediaCategoryClient
 	// MediaPlaylist is the client for interacting with the MediaPlaylist builders.
 	MediaPlaylist *MediaPlaylistClient
+	// MediaReport is the client for interacting with the MediaReport builders.
+	MediaReport *MediaReportClient
 	// MediaReviewLog is the client for interacting with the MediaReviewLog builders.
 	MediaReviewLog *MediaReviewLogClient
 	// MediaTag is the client for interacting with the MediaTag builders.
@@ -208,6 +210,7 @@ func (tx *Tx) init() {
 	tx.Media = NewMediaClient(tx.config)
 	tx.MediaCategory = NewMediaCategoryClient(tx.config)
 	tx.MediaPlaylist = NewMediaPlaylistClient(tx.config)
+	tx.MediaReport = NewMediaReportClient(tx.config)
 	tx.MediaReviewLog = NewMediaReviewLogClient(tx.config)
 	tx.MediaTag = NewMediaTagClient(tx.config)
 	tx.Notification = NewNotificationClient(tx.config)

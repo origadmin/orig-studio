@@ -2340,6 +2340,29 @@ func HasCommentReportsWith(preds ...predicate.CommentReport) predicate.User {
 	})
 }
 
+// HasMediaReports applies the HasEdge predicate on the "media_reports" edge.
+func HasMediaReports() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, MediaReportsTable, MediaReportsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasMediaReportsWith applies the HasEdge predicate on the "media_reports" edge with a given conditions (other predicates).
+func HasMediaReportsWith(preds ...predicate.MediaReport) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newMediaReportsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasModeratedComments applies the HasEdge predicate on the "moderated_comments" edge.
 func HasModeratedComments() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

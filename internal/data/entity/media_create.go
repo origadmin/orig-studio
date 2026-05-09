@@ -14,6 +14,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
+	"origadmin/application/origcms/internal/data/entity/mediareport"
 	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/mediatag"
 	"origadmin/application/origcms/internal/data/entity/user"
@@ -804,6 +805,21 @@ func (_c *MediaCreate) AddArticles(v ...*Article) *MediaCreate {
 	return _c.AddArticleIDs(ids...)
 }
 
+// AddReportIDs adds the "reports" edge to the MediaReport entity by IDs.
+func (_c *MediaCreate) AddReportIDs(ids ...string) *MediaCreate {
+	_c.mutation.AddReportIDs(ids...)
+	return _c
+}
+
+// AddReports adds the "reports" edges to the MediaReport entity.
+func (_c *MediaCreate) AddReports(v ...*MediaReport) *MediaCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddReportIDs(ids...)
+}
+
 // Mutation returns the MediaMutation object of the builder.
 func (_c *MediaCreate) Mutation() *MediaMutation {
 	return _c.mutation
@@ -1526,6 +1542,22 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ReportsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.ReportsTable,
+			Columns: []string{media.ReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareport.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

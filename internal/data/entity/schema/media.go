@@ -116,6 +116,7 @@ func (Media) Edges() []ent.Edge {
 		edge.To("likes", Like.Type),
 		edge.To("review_logs", MediaReviewLog.Type),
 		edge.To("articles", Article.Type),
+		edge.To("reports", MediaReport.Type),
 		// edge.To("tasks", EncodingTask.Type),
 	}
 }

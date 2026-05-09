@@ -22,6 +22,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediacategory"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
+	"origadmin/application/origcms/internal/data/entity/mediareport"
 	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/mediatag"
 	"origadmin/application/origcms/internal/data/entity/notification"
@@ -498,6 +499,33 @@ func (f TraverseMediaPlaylist) Traverse(ctx context.Context, q entity.Query) err
 	return fmt.Errorf("unexpected query type %T. expect *entity.MediaPlaylistQuery", q)
 }
 
+// The MediaReportFunc type is an adapter to allow the use of ordinary function as a Querier.
+type MediaReportFunc func(context.Context, *entity.MediaReportQuery) (entity.Value, error)
+
+// Query calls f(ctx, q).
+func (f MediaReportFunc) Query(ctx context.Context, q entity.Query) (entity.Value, error) {
+	if q, ok := q.(*entity.MediaReportQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *entity.MediaReportQuery", q)
+}
+
+// The TraverseMediaReport type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseMediaReport func(context.Context, *entity.MediaReportQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseMediaReport) Intercept(next entity.Querier) entity.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseMediaReport) Traverse(ctx context.Context, q entity.Query) error {
+	if q, ok := q.(*entity.MediaReportQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *entity.MediaReportQuery", q)
+}
+
 // The MediaReviewLogFunc type is an adapter to allow the use of ordinary function as a Querier.
 type MediaReviewLogFunc func(context.Context, *entity.MediaReviewLogQuery) (entity.Value, error)
 
@@ -801,6 +829,8 @@ func NewQuery(q entity.Query) (Query, error) {
 		return &query[*entity.MediaCategoryQuery, predicate.MediaCategory, mediacategory.OrderOption]{typ: entity.TypeMediaCategory, tq: q}, nil
 	case *entity.MediaPlaylistQuery:
 		return &query[*entity.MediaPlaylistQuery, predicate.MediaPlaylist, mediaplaylist.OrderOption]{typ: entity.TypeMediaPlaylist, tq: q}, nil
+	case *entity.MediaReportQuery:
+		return &query[*entity.MediaReportQuery, predicate.MediaReport, mediareport.OrderOption]{typ: entity.TypeMediaReport, tq: q}, nil
 	case *entity.MediaReviewLogQuery:
 		return &query[*entity.MediaReviewLogQuery, predicate.MediaReviewLog, mediareviewlog.OrderOption]{typ: entity.TypeMediaReviewLog, tq: q}, nil
 	case *entity.MediaTagQuery:

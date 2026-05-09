@@ -51,6 +51,9 @@ type MediaCategory func(*sql.Selector)
 // MediaPlaylist is the predicate function for mediaplaylist builders.
 type MediaPlaylist func(*sql.Selector)
 
+// MediaReport is the predicate function for mediareport builders.
+type MediaReport func(*sql.Selector)
+
 // MediaReviewLog is the predicate function for mediareviewlog builders.
 type MediaReviewLog func(*sql.Selector)
 

@@ -17,6 +17,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/mediaplaylist"
+	"origadmin/application/origcms/internal/data/entity/mediareport"
 	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/permissiongroup"
@@ -740,6 +741,18 @@ func init() {
 	mediaplaylist.DefaultID = mediaplaylistDescID.Default.(func() string)
 	// mediaplaylist.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	mediaplaylist.IDValidator = mediaplaylistDescID.Validators[0].(func(string) error)
+	mediareportFields := schema.MediaReport{}.Fields()
+	_ = mediareportFields
+	// mediareportDescCreateTime is the schema descriptor for create_time field.
+	mediareportDescCreateTime := mediareportFields[6].Descriptor()
+	// mediareport.DefaultCreateTime holds the default value on creation for the create_time field.
+	mediareport.DefaultCreateTime = mediareportDescCreateTime.Default.(func() time.Time)
+	// mediareportDescID is the schema descriptor for id field.
+	mediareportDescID := mediareportFields[0].Descriptor()
+	// mediareport.DefaultID holds the default value on creation for the id field.
+	mediareport.DefaultID = mediareportDescID.Default.(func() string)
+	// mediareport.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	mediareport.IDValidator = mediareportDescID.Validators[0].(func(string) error)
 	mediareviewlogFields := schema.MediaReviewLog{}.Fields()
 	_ = mediareviewlogFields
 	// mediareviewlogDescAction is the schema descriptor for action field.
