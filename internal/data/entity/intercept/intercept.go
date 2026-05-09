@@ -28,6 +28,9 @@ import (
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/permissiongroup"
 	"origadmin/application/origcms/internal/data/entity/playlist"
+	"origadmin/application/origcms/internal/data/entity/portalbanner"
+	"origadmin/application/origcms/internal/data/entity/portalcustompage"
+	"origadmin/application/origcms/internal/data/entity/portalnavitem"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"origadmin/application/origcms/internal/data/entity/setting"
 	"origadmin/application/origcms/internal/data/entity/subscription"
@@ -661,6 +664,87 @@ func (f TraversePlaylist) Traverse(ctx context.Context, q entity.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *entity.PlaylistQuery", q)
 }
 
+// The PortalBannerFunc type is an adapter to allow the use of ordinary function as a Querier.
+type PortalBannerFunc func(context.Context, *entity.PortalBannerQuery) (entity.Value, error)
+
+// Query calls f(ctx, q).
+func (f PortalBannerFunc) Query(ctx context.Context, q entity.Query) (entity.Value, error) {
+	if q, ok := q.(*entity.PortalBannerQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *entity.PortalBannerQuery", q)
+}
+
+// The TraversePortalBanner type is an adapter to allow the use of ordinary function as Traverser.
+type TraversePortalBanner func(context.Context, *entity.PortalBannerQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraversePortalBanner) Intercept(next entity.Querier) entity.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraversePortalBanner) Traverse(ctx context.Context, q entity.Query) error {
+	if q, ok := q.(*entity.PortalBannerQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *entity.PortalBannerQuery", q)
+}
+
+// The PortalCustomPageFunc type is an adapter to allow the use of ordinary function as a Querier.
+type PortalCustomPageFunc func(context.Context, *entity.PortalCustomPageQuery) (entity.Value, error)
+
+// Query calls f(ctx, q).
+func (f PortalCustomPageFunc) Query(ctx context.Context, q entity.Query) (entity.Value, error) {
+	if q, ok := q.(*entity.PortalCustomPageQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *entity.PortalCustomPageQuery", q)
+}
+
+// The TraversePortalCustomPage type is an adapter to allow the use of ordinary function as Traverser.
+type TraversePortalCustomPage func(context.Context, *entity.PortalCustomPageQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraversePortalCustomPage) Intercept(next entity.Querier) entity.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraversePortalCustomPage) Traverse(ctx context.Context, q entity.Query) error {
+	if q, ok := q.(*entity.PortalCustomPageQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *entity.PortalCustomPageQuery", q)
+}
+
+// The PortalNavItemFunc type is an adapter to allow the use of ordinary function as a Querier.
+type PortalNavItemFunc func(context.Context, *entity.PortalNavItemQuery) (entity.Value, error)
+
+// Query calls f(ctx, q).
+func (f PortalNavItemFunc) Query(ctx context.Context, q entity.Query) (entity.Value, error) {
+	if q, ok := q.(*entity.PortalNavItemQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *entity.PortalNavItemQuery", q)
+}
+
+// The TraversePortalNavItem type is an adapter to allow the use of ordinary function as Traverser.
+type TraversePortalNavItem func(context.Context, *entity.PortalNavItemQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraversePortalNavItem) Intercept(next entity.Querier) entity.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraversePortalNavItem) Traverse(ctx context.Context, q entity.Query) error {
+	if q, ok := q.(*entity.PortalNavItemQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *entity.PortalNavItemQuery", q)
+}
+
 // The SettingFunc type is an adapter to allow the use of ordinary function as a Querier.
 type SettingFunc func(context.Context, *entity.SettingQuery) (entity.Value, error)
 
@@ -841,6 +925,12 @@ func NewQuery(q entity.Query) (Query, error) {
 		return &query[*entity.PermissionGroupQuery, predicate.PermissionGroup, permissiongroup.OrderOption]{typ: entity.TypePermissionGroup, tq: q}, nil
 	case *entity.PlaylistQuery:
 		return &query[*entity.PlaylistQuery, predicate.Playlist, playlist.OrderOption]{typ: entity.TypePlaylist, tq: q}, nil
+	case *entity.PortalBannerQuery:
+		return &query[*entity.PortalBannerQuery, predicate.PortalBanner, portalbanner.OrderOption]{typ: entity.TypePortalBanner, tq: q}, nil
+	case *entity.PortalCustomPageQuery:
+		return &query[*entity.PortalCustomPageQuery, predicate.PortalCustomPage, portalcustompage.OrderOption]{typ: entity.TypePortalCustomPage, tq: q}, nil
+	case *entity.PortalNavItemQuery:
+		return &query[*entity.PortalNavItemQuery, predicate.PortalNavItem, portalnavitem.OrderOption]{typ: entity.TypePortalNavItem, tq: q}, nil
 	case *entity.SettingQuery:
 		return &query[*entity.SettingQuery, predicate.Setting, setting.OrderOption]{typ: entity.TypeSetting, tq: q}, nil
 	case *entity.SubscriptionQuery:

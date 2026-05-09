@@ -69,6 +69,15 @@ type PermissionGroup func(*sql.Selector)
 // Playlist is the predicate function for playlist builders.
 type Playlist func(*sql.Selector)
 
+// PortalBanner is the predicate function for portalbanner builders.
+type PortalBanner func(*sql.Selector)
+
+// PortalCustomPage is the predicate function for portalcustompage builders.
+type PortalCustomPage func(*sql.Selector)
+
+// PortalNavItem is the predicate function for portalnavitem builders.
+type PortalNavItem func(*sql.Selector)
+
 // Setting is the predicate function for setting builders.
 type Setting func(*sql.Selector)
 

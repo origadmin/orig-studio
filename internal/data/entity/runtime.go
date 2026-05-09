@@ -22,6 +22,9 @@ import (
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/permissiongroup"
 	"origadmin/application/origcms/internal/data/entity/playlist"
+	"origadmin/application/origcms/internal/data/entity/portalbanner"
+	"origadmin/application/origcms/internal/data/entity/portalcustompage"
+	"origadmin/application/origcms/internal/data/entity/portalnavitem"
 	"origadmin/application/origcms/internal/data/entity/schema"
 	"origadmin/application/origcms/internal/data/entity/setting"
 	"origadmin/application/origcms/internal/data/entity/subscription"
@@ -895,6 +898,254 @@ func init() {
 	playlist.DefaultID = playlistDescID.Default.(func() string)
 	// playlist.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	playlist.IDValidator = playlistDescID.Validators[0].(func(string) error)
+	portalbannerFields := schema.PortalBanner{}.Fields()
+	_ = portalbannerFields
+	// portalbannerDescTitle is the schema descriptor for title field.
+	portalbannerDescTitle := portalbannerFields[1].Descriptor()
+	// portalbanner.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	portalbanner.TitleValidator = func() func(string) error {
+		validators := portalbannerDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// portalbannerDescSubtitle is the schema descriptor for subtitle field.
+	portalbannerDescSubtitle := portalbannerFields[3].Descriptor()
+	// portalbanner.SubtitleValidator is a validator for the "subtitle" field. It is called by the builders before save.
+	portalbanner.SubtitleValidator = portalbannerDescSubtitle.Validators[0].(func(string) error)
+	// portalbannerDescBadgeText is the schema descriptor for badge_text field.
+	portalbannerDescBadgeText := portalbannerFields[5].Descriptor()
+	// portalbanner.BadgeTextValidator is a validator for the "badge_text" field. It is called by the builders before save.
+	portalbanner.BadgeTextValidator = portalbannerDescBadgeText.Validators[0].(func(string) error)
+	// portalbannerDescImageURL is the schema descriptor for image_url field.
+	portalbannerDescImageURL := portalbannerFields[6].Descriptor()
+	// portalbanner.ImageURLValidator is a validator for the "image_url" field. It is called by the builders before save.
+	portalbanner.ImageURLValidator = portalbannerDescImageURL.Validators[0].(func(string) error)
+	// portalbannerDescImageMobileURL is the schema descriptor for image_mobile_url field.
+	portalbannerDescImageMobileURL := portalbannerFields[7].Descriptor()
+	// portalbanner.ImageMobileURLValidator is a validator for the "image_mobile_url" field. It is called by the builders before save.
+	portalbanner.ImageMobileURLValidator = portalbannerDescImageMobileURL.Validators[0].(func(string) error)
+	// portalbannerDescBgColorStart is the schema descriptor for bg_color_start field.
+	portalbannerDescBgColorStart := portalbannerFields[8].Descriptor()
+	// portalbanner.BgColorStartValidator is a validator for the "bg_color_start" field. It is called by the builders before save.
+	portalbanner.BgColorStartValidator = portalbannerDescBgColorStart.Validators[0].(func(string) error)
+	// portalbannerDescBgColorEnd is the schema descriptor for bg_color_end field.
+	portalbannerDescBgColorEnd := portalbannerFields[9].Descriptor()
+	// portalbanner.BgColorEndValidator is a validator for the "bg_color_end" field. It is called by the builders before save.
+	portalbanner.BgColorEndValidator = portalbannerDescBgColorEnd.Validators[0].(func(string) error)
+	// portalbannerDescBgOverlayOpacity is the schema descriptor for bg_overlay_opacity field.
+	portalbannerDescBgOverlayOpacity := portalbannerFields[10].Descriptor()
+	// portalbanner.DefaultBgOverlayOpacity holds the default value on creation for the bg_overlay_opacity field.
+	portalbanner.DefaultBgOverlayOpacity = portalbannerDescBgOverlayOpacity.Default.(float64)
+	// portalbannerDescPrimaryBtnText is the schema descriptor for primary_btn_text field.
+	portalbannerDescPrimaryBtnText := portalbannerFields[11].Descriptor()
+	// portalbanner.PrimaryBtnTextValidator is a validator for the "primary_btn_text" field. It is called by the builders before save.
+	portalbanner.PrimaryBtnTextValidator = portalbannerDescPrimaryBtnText.Validators[0].(func(string) error)
+	// portalbannerDescPrimaryBtnURL is the schema descriptor for primary_btn_url field.
+	portalbannerDescPrimaryBtnURL := portalbannerFields[12].Descriptor()
+	// portalbanner.PrimaryBtnURLValidator is a validator for the "primary_btn_url" field. It is called by the builders before save.
+	portalbanner.PrimaryBtnURLValidator = portalbannerDescPrimaryBtnURL.Validators[0].(func(string) error)
+	// portalbannerDescSecondaryBtnText is the schema descriptor for secondary_btn_text field.
+	portalbannerDescSecondaryBtnText := portalbannerFields[13].Descriptor()
+	// portalbanner.SecondaryBtnTextValidator is a validator for the "secondary_btn_text" field. It is called by the builders before save.
+	portalbanner.SecondaryBtnTextValidator = portalbannerDescSecondaryBtnText.Validators[0].(func(string) error)
+	// portalbannerDescSecondaryBtnURL is the schema descriptor for secondary_btn_url field.
+	portalbannerDescSecondaryBtnURL := portalbannerFields[14].Descriptor()
+	// portalbanner.SecondaryBtnURLValidator is a validator for the "secondary_btn_url" field. It is called by the builders before save.
+	portalbanner.SecondaryBtnURLValidator = portalbannerDescSecondaryBtnURL.Validators[0].(func(string) error)
+	// portalbannerDescSequence is the schema descriptor for sequence field.
+	portalbannerDescSequence := portalbannerFields[15].Descriptor()
+	// portalbanner.DefaultSequence holds the default value on creation for the sequence field.
+	portalbanner.DefaultSequence = portalbannerDescSequence.Default.(int)
+	// portalbannerDescIsActive is the schema descriptor for is_active field.
+	portalbannerDescIsActive := portalbannerFields[16].Descriptor()
+	// portalbanner.DefaultIsActive holds the default value on creation for the is_active field.
+	portalbanner.DefaultIsActive = portalbannerDescIsActive.Default.(bool)
+	// portalbannerDescAutoSlideInterval is the schema descriptor for auto_slide_interval field.
+	portalbannerDescAutoSlideInterval := portalbannerFields[19].Descriptor()
+	// portalbanner.DefaultAutoSlideInterval holds the default value on creation for the auto_slide_interval field.
+	portalbanner.DefaultAutoSlideInterval = portalbannerDescAutoSlideInterval.Default.(int)
+	// portalbannerDescID is the schema descriptor for id field.
+	portalbannerDescID := portalbannerFields[0].Descriptor()
+	// portalbanner.DefaultID holds the default value on creation for the id field.
+	portalbanner.DefaultID = portalbannerDescID.Default.(func() string)
+	// portalbanner.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	portalbanner.IDValidator = portalbannerDescID.Validators[0].(func(string) error)
+	portalcustompageFields := schema.PortalCustomPage{}.Fields()
+	_ = portalcustompageFields
+	// portalcustompageDescTitle is the schema descriptor for title field.
+	portalcustompageDescTitle := portalcustompageFields[1].Descriptor()
+	// portalcustompage.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	portalcustompage.TitleValidator = func() func(string) error {
+		validators := portalcustompageDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// portalcustompageDescSlug is the schema descriptor for slug field.
+	portalcustompageDescSlug := portalcustompageFields[2].Descriptor()
+	// portalcustompage.SlugValidator is a validator for the "slug" field. It is called by the builders before save.
+	portalcustompage.SlugValidator = func() func(string) error {
+		validators := portalcustompageDescSlug.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(slug string) error {
+			for _, fn := range fns {
+				if err := fn(slug); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// portalcustompageDescType is the schema descriptor for type field.
+	portalcustompageDescType := portalcustompageFields[3].Descriptor()
+	// portalcustompage.DefaultType holds the default value on creation for the type field.
+	portalcustompage.DefaultType = portalcustompageDescType.Default.(string)
+	// portalcustompage.TypeValidator is a validator for the "type" field. It is called by the builders before save.
+	portalcustompage.TypeValidator = portalcustompageDescType.Validators[0].(func(string) error)
+	// portalcustompageDescContentFormat is the schema descriptor for content_format field.
+	portalcustompageDescContentFormat := portalcustompageFields[4].Descriptor()
+	// portalcustompage.DefaultContentFormat holds the default value on creation for the content_format field.
+	portalcustompage.DefaultContentFormat = portalcustompageDescContentFormat.Default.(string)
+	// portalcustompage.ContentFormatValidator is a validator for the "content_format" field. It is called by the builders before save.
+	portalcustompage.ContentFormatValidator = portalcustompageDescContentFormat.Validators[0].(func(string) error)
+	// portalcustompageDescLayout is the schema descriptor for layout field.
+	portalcustompageDescLayout := portalcustompageFields[6].Descriptor()
+	// portalcustompage.DefaultLayout holds the default value on creation for the layout field.
+	portalcustompage.DefaultLayout = portalcustompageDescLayout.Default.(string)
+	// portalcustompage.LayoutValidator is a validator for the "layout" field. It is called by the builders before save.
+	portalcustompage.LayoutValidator = portalcustompageDescLayout.Validators[0].(func(string) error)
+	// portalcustompageDescIsPublished is the schema descriptor for is_published field.
+	portalcustompageDescIsPublished := portalcustompageFields[7].Descriptor()
+	// portalcustompage.DefaultIsPublished holds the default value on creation for the is_published field.
+	portalcustompage.DefaultIsPublished = portalcustompageDescIsPublished.Default.(bool)
+	// portalcustompageDescSeoTitle is the schema descriptor for seo_title field.
+	portalcustompageDescSeoTitle := portalcustompageFields[9].Descriptor()
+	// portalcustompage.SeoTitleValidator is a validator for the "seo_title" field. It is called by the builders before save.
+	portalcustompage.SeoTitleValidator = portalcustompageDescSeoTitle.Validators[0].(func(string) error)
+	// portalcustompageDescSeoDescription is the schema descriptor for seo_description field.
+	portalcustompageDescSeoDescription := portalcustompageFields[10].Descriptor()
+	// portalcustompage.SeoDescriptionValidator is a validator for the "seo_description" field. It is called by the builders before save.
+	portalcustompage.SeoDescriptionValidator = portalcustompageDescSeoDescription.Validators[0].(func(string) error)
+	// portalcustompageDescFeaturedImage is the schema descriptor for featured_image field.
+	portalcustompageDescFeaturedImage := portalcustompageFields[11].Descriptor()
+	// portalcustompage.FeaturedImageValidator is a validator for the "featured_image" field. It is called by the builders before save.
+	portalcustompage.FeaturedImageValidator = portalcustompageDescFeaturedImage.Validators[0].(func(string) error)
+	// portalcustompageDescViewCount is the schema descriptor for view_count field.
+	portalcustompageDescViewCount := portalcustompageFields[12].Descriptor()
+	// portalcustompage.DefaultViewCount holds the default value on creation for the view_count field.
+	portalcustompage.DefaultViewCount = portalcustompageDescViewCount.Default.(int64)
+	// portalcustompageDescID is the schema descriptor for id field.
+	portalcustompageDescID := portalcustompageFields[0].Descriptor()
+	// portalcustompage.DefaultID holds the default value on creation for the id field.
+	portalcustompage.DefaultID = portalcustompageDescID.Default.(func() string)
+	// portalcustompage.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	portalcustompage.IDValidator = portalcustompageDescID.Validators[0].(func(string) error)
+	portalnavitemFields := schema.PortalNavItem{}.Fields()
+	_ = portalnavitemFields
+	// portalnavitemDescType is the schema descriptor for type field.
+	portalnavitemDescType := portalnavitemFields[1].Descriptor()
+	// portalnavitem.TypeValidator is a validator for the "type" field. It is called by the builders before save.
+	portalnavitem.TypeValidator = func() func(string) error {
+		validators := portalnavitemDescType.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(_type string) error {
+			for _, fn := range fns {
+				if err := fn(_type); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// portalnavitemDescLabel is the schema descriptor for label field.
+	portalnavitemDescLabel := portalnavitemFields[2].Descriptor()
+	// portalnavitem.LabelValidator is a validator for the "label" field. It is called by the builders before save.
+	portalnavitem.LabelValidator = func() func(string) error {
+		validators := portalnavitemDescLabel.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(label string) error {
+			for _, fn := range fns {
+				if err := fn(label); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// portalnavitemDescURL is the schema descriptor for url field.
+	portalnavitemDescURL := portalnavitemFields[4].Descriptor()
+	// portalnavitem.URLValidator is a validator for the "url" field. It is called by the builders before save.
+	portalnavitem.URLValidator = portalnavitemDescURL.Validators[0].(func(string) error)
+	// portalnavitemDescTargetType is the schema descriptor for target_type field.
+	portalnavitemDescTargetType := portalnavitemFields[5].Descriptor()
+	// portalnavitem.TargetTypeValidator is a validator for the "target_type" field. It is called by the builders before save.
+	portalnavitem.TargetTypeValidator = portalnavitemDescTargetType.Validators[0].(func(string) error)
+	// portalnavitemDescTargetID is the schema descriptor for target_id field.
+	portalnavitemDescTargetID := portalnavitemFields[6].Descriptor()
+	// portalnavitem.TargetIDValidator is a validator for the "target_id" field. It is called by the builders before save.
+	portalnavitem.TargetIDValidator = portalnavitemDescTargetID.Validators[0].(func(string) error)
+	// portalnavitemDescIcon is the schema descriptor for icon field.
+	portalnavitemDescIcon := portalnavitemFields[7].Descriptor()
+	// portalnavitem.IconValidator is a validator for the "icon" field. It is called by the builders before save.
+	portalnavitem.IconValidator = portalnavitemDescIcon.Validators[0].(func(string) error)
+	// portalnavitemDescColor is the schema descriptor for color field.
+	portalnavitemDescColor := portalnavitemFields[8].Descriptor()
+	// portalnavitem.ColorValidator is a validator for the "color" field. It is called by the builders before save.
+	portalnavitem.ColorValidator = portalnavitemDescColor.Validators[0].(func(string) error)
+	// portalnavitemDescSequence is the schema descriptor for sequence field.
+	portalnavitemDescSequence := portalnavitemFields[9].Descriptor()
+	// portalnavitem.DefaultSequence holds the default value on creation for the sequence field.
+	portalnavitem.DefaultSequence = portalnavitemDescSequence.Default.(int)
+	// portalnavitemDescParentID is the schema descriptor for parent_id field.
+	portalnavitemDescParentID := portalnavitemFields[10].Descriptor()
+	// portalnavitem.ParentIDValidator is a validator for the "parent_id" field. It is called by the builders before save.
+	portalnavitem.ParentIDValidator = portalnavitemDescParentID.Validators[0].(func(string) error)
+	// portalnavitemDescIsVisible is the schema descriptor for is_visible field.
+	portalnavitemDescIsVisible := portalnavitemFields[11].Descriptor()
+	// portalnavitem.DefaultIsVisible holds the default value on creation for the is_visible field.
+	portalnavitem.DefaultIsVisible = portalnavitemDescIsVisible.Default.(bool)
+	// portalnavitemDescOpenNewTab is the schema descriptor for open_new_tab field.
+	portalnavitemDescOpenNewTab := portalnavitemFields[12].Descriptor()
+	// portalnavitem.DefaultOpenNewTab holds the default value on creation for the open_new_tab field.
+	portalnavitem.DefaultOpenNewTab = portalnavitemDescOpenNewTab.Default.(bool)
+	// portalnavitemDescCSSClass is the schema descriptor for css_class field.
+	portalnavitemDescCSSClass := portalnavitemFields[13].Descriptor()
+	// portalnavitem.CSSClassValidator is a validator for the "css_class" field. It is called by the builders before save.
+	portalnavitem.CSSClassValidator = portalnavitemDescCSSClass.Validators[0].(func(string) error)
+	// portalnavitemDescID is the schema descriptor for id field.
+	portalnavitemDescID := portalnavitemFields[0].Descriptor()
+	// portalnavitem.DefaultID holds the default value on creation for the id field.
+	portalnavitem.DefaultID = portalnavitemDescID.Default.(func() string)
+	// portalnavitem.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	portalnavitem.IDValidator = portalnavitemDescID.Validators[0].(func(string) error)
 	settingFields := schema.Setting{}.Fields()
 	_ = settingFields
 	// settingDescKey is the schema descriptor for key field.

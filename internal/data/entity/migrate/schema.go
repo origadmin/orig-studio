@@ -1136,6 +1136,116 @@ var (
 			},
 		},
 	}
+	// PortalBannersColumns holds the columns for the "portal_banners" table.
+	PortalBannersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "title", Type: field.TypeString, Size: 255},
+		{Name: "title_i18n", Type: field.TypeJSON, Nullable: true},
+		{Name: "subtitle", Type: field.TypeString, Nullable: true, Size: 255},
+		{Name: "subtitle_i18n", Type: field.TypeJSON, Nullable: true},
+		{Name: "badge_text", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "image_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "image_mobile_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "bg_color_start", Type: field.TypeString, Nullable: true, Size: 32},
+		{Name: "bg_color_end", Type: field.TypeString, Nullable: true, Size: 32},
+		{Name: "bg_overlay_opacity", Type: field.TypeFloat64, Default: 0},
+		{Name: "primary_btn_text", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "primary_btn_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "secondary_btn_text", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "secondary_btn_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "sequence", Type: field.TypeInt, Default: 0},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "start_at", Type: field.TypeTime, Nullable: true},
+		{Name: "end_at", Type: field.TypeTime, Nullable: true},
+		{Name: "auto_slide_interval", Type: field.TypeInt, Default: 5000},
+	}
+	// PortalBannersTable holds the schema information for the "portal_banners" table.
+	PortalBannersTable = &schema.Table{
+		Name:       "portal_banners",
+		Columns:    PortalBannersColumns,
+		PrimaryKey: []*schema.Column{PortalBannersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "portalbanner_sequence",
+				Unique:  false,
+				Columns: []*schema.Column{PortalBannersColumns[15]},
+			},
+			{
+				Name:    "portalbanner_is_active",
+				Unique:  false,
+				Columns: []*schema.Column{PortalBannersColumns[16]},
+			},
+		},
+	}
+	// PortalCustomPagesColumns holds the columns for the "portal_custom_pages" table.
+	PortalCustomPagesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "title", Type: field.TypeString, Size: 255},
+		{Name: "slug", Type: field.TypeString, Unique: true, Size: 150},
+		{Name: "type", Type: field.TypeString, Size: 32, Default: "custom"},
+		{Name: "content_format", Type: field.TypeString, Size: 32, Default: "markdown"},
+		{Name: "content", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "layout", Type: field.TypeString, Size: 32, Default: "full"},
+		{Name: "is_published", Type: field.TypeBool, Default: false},
+		{Name: "published_at", Type: field.TypeTime, Nullable: true},
+		{Name: "seo_title", Type: field.TypeString, Nullable: true, Size: 255},
+		{Name: "seo_description", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "featured_image", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "view_count", Type: field.TypeInt64, Default: 0},
+	}
+	// PortalCustomPagesTable holds the schema information for the "portal_custom_pages" table.
+	PortalCustomPagesTable = &schema.Table{
+		Name:       "portal_custom_pages",
+		Columns:    PortalCustomPagesColumns,
+		PrimaryKey: []*schema.Column{PortalCustomPagesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "portalcustompage_slug",
+				Unique:  true,
+				Columns: []*schema.Column{PortalCustomPagesColumns[2]},
+			},
+			{
+				Name:    "portalcustompage_is_published",
+				Unique:  false,
+				Columns: []*schema.Column{PortalCustomPagesColumns[7]},
+			},
+		},
+	}
+	// PortalNavItemsColumns holds the columns for the "portal_nav_items" table.
+	PortalNavItemsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "type", Type: field.TypeString, Size: 32},
+		{Name: "label", Type: field.TypeString, Size: 128},
+		{Name: "label_i18n", Type: field.TypeJSON, Nullable: true},
+		{Name: "url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "target_type", Type: field.TypeString, Nullable: true, Size: 32},
+		{Name: "target_id", Type: field.TypeString, Nullable: true, Size: 36},
+		{Name: "icon", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "color", Type: field.TypeString, Nullable: true, Size: 32},
+		{Name: "sequence", Type: field.TypeInt, Default: 0},
+		{Name: "parent_id", Type: field.TypeString, Nullable: true, Size: 36},
+		{Name: "is_visible", Type: field.TypeBool, Default: true},
+		{Name: "open_new_tab", Type: field.TypeBool, Default: false},
+		{Name: "css_class", Type: field.TypeString, Nullable: true, Size: 128},
+	}
+	// PortalNavItemsTable holds the schema information for the "portal_nav_items" table.
+	PortalNavItemsTable = &schema.Table{
+		Name:       "portal_nav_items",
+		Columns:    PortalNavItemsColumns,
+		PrimaryKey: []*schema.Column{PortalNavItemsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "portalnavitem_sequence",
+				Unique:  false,
+				Columns: []*schema.Column{PortalNavItemsColumns[9]},
+			},
+			{
+				Name:    "portalnavitem_is_visible",
+				Unique:  false,
+				Columns: []*schema.Column{PortalNavItemsColumns[11]},
+			},
+		},
+	}
 	// SystemSettingsColumns holds the columns for the "system_settings" table.
 	SystemSettingsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
@@ -1490,6 +1600,9 @@ var (
 		UserNotificationsTable,
 		AuthPermissionGroupsTable,
 		ContentPlaylistsTable,
+		PortalBannersTable,
+		PortalCustomPagesTable,
+		PortalNavItemsTable,
 		SystemSettingsTable,
 		UserSubscriptionsTable,
 		ContentTagsTable,
@@ -1603,6 +1716,15 @@ func init() {
 	}
 	ContentPlaylistsTable.Annotation = &entsql.Annotation{
 		Table: "content_playlists",
+	}
+	PortalBannersTable.Annotation = &entsql.Annotation{
+		Table: "portal_banners",
+	}
+	PortalCustomPagesTable.Annotation = &entsql.Annotation{
+		Table: "portal_custom_pages",
+	}
+	PortalNavItemsTable.Annotation = &entsql.Annotation{
+		Table: "portal_nav_items",
 	}
 	SystemSettingsTable.Annotation = &entsql.Annotation{
 		Table: "system_settings",
