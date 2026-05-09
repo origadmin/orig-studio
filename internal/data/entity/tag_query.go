@@ -7,6 +7,7 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"math"
+	"origadmin/application/origcms/internal/data/entity/channeltag"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"origadmin/application/origcms/internal/data/entity/tag"
 	"origadmin/application/origcms/internal/data/entity/tagname"
@@ -22,14 +23,15 @@ import (
 // TagQuery is the builder for querying Tag entities.
 type TagQuery struct {
 	config
-	ctx        *QueryContext
-	order      []tag.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Tag
-	withUser   *UserQuery
-	withNames  *TagNameQuery
-	withFKs    bool
-	modifiers  []func(*sql.Selector)
+	ctx             *QueryContext
+	order           []tag.OrderOption
+	inters          []Interceptor
+	predicates      []predicate.Tag
+	withUser        *UserQuery
+	withNames       *TagNameQuery
+	withChannelTags *ChannelTagQuery
+	withFKs         bool
+	modifiers       []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -103,6 +105,28 @@ func (_q *TagQuery) QueryNames() *TagNameQuery {
 			sqlgraph.From(tag.Table, tag.FieldID, selector),
 			sqlgraph.To(tagname.Table, tagname.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, tag.NamesTable, tag.NamesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryChannelTags chains the current query on the "channel_tags" edge.
+func (_q *TagQuery) QueryChannelTags() *ChannelTagQuery {
+	query := (&ChannelTagClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tag.Table, tag.FieldID, selector),
+			sqlgraph.To(channeltag.Table, channeltag.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tag.ChannelTagsTable, tag.ChannelTagsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -297,13 +321,14 @@ func (_q *TagQuery) Clone() *TagQuery {
 		return nil
 	}
 	return &TagQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]tag.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.Tag{}, _q.predicates...),
-		withUser:   _q.withUser.Clone(),
-		withNames:  _q.withNames.Clone(),
+		config:          _q.config,
+		ctx:             _q.ctx.Clone(),
+		order:           append([]tag.OrderOption{}, _q.order...),
+		inters:          append([]Interceptor{}, _q.inters...),
+		predicates:      append([]predicate.Tag{}, _q.predicates...),
+		withUser:        _q.withUser.Clone(),
+		withNames:       _q.withNames.Clone(),
+		withChannelTags: _q.withChannelTags.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -330,6 +355,17 @@ func (_q *TagQuery) WithNames(opts ...func(*TagNameQuery)) *TagQuery {
 		opt(query)
 	}
 	_q.withNames = query
+	return _q
+}
+
+// WithChannelTags tells the query-builder to eager-load the nodes that are connected to
+// the "channel_tags" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TagQuery) WithChannelTags(opts ...func(*ChannelTagQuery)) *TagQuery {
+	query := (&ChannelTagClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withChannelTags = query
 	return _q
 }
 
@@ -412,9 +448,10 @@ func (_q *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, err
 		nodes       = []*Tag{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			_q.withUser != nil,
 			_q.withNames != nil,
+			_q.withChannelTags != nil,
 		}
 	)
 	if withFKs {
@@ -452,6 +489,13 @@ func (_q *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, err
 		if err := _q.loadNames(ctx, query, nodes,
 			func(n *Tag) { n.Edges.Names = []*TagName{} },
 			func(n *Tag, e *TagName) { n.Edges.Names = append(n.Edges.Names, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withChannelTags; query != nil {
+		if err := _q.loadChannelTags(ctx, query, nodes,
+			func(n *Tag) { n.Edges.ChannelTags = []*ChannelTag{} },
+			func(n *Tag, e *ChannelTag) { n.Edges.ChannelTags = append(n.Edges.ChannelTags, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -544,6 +588,37 @@ func (_q *TagQuery) loadNames(ctx context.Context, query *TagNameQuery, nodes []
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "tag_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TagQuery) loadChannelTags(ctx context.Context, query *ChannelTagQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *ChannelTag)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tag)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.ChannelTag(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tag.ChannelTagsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.tag_channel_tags
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "tag_channel_tags" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tag_channel_tags" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

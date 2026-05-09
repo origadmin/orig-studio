@@ -104,7 +104,8 @@ func (Channel) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).Ref("channels").Field("user_id").Unique().Required(),
 		edge.To("media", Media.Type),
-		edge.To("articles", Article.Type),                                  // NEW: Channel has articles
-		edge.From("category", Category.Type).Ref("channels").Field("category_id").Unique(), // NEW: Channel belongs to category
+		edge.To("articles", Article.Type),
+		edge.From("category", Category.Type).Ref("channels").Field("category_id").Unique(),
+		edge.To("tags_rel", ChannelTag.Type),
 	}
 }

@@ -44,6 +44,18 @@ func (f ChannelFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.ChannelMutation", m)
 }
 
+// The ChannelTagFunc type is an adapter to allow the use of ordinary
+// function as ChannelTag mutator.
+type ChannelTagFunc func(context.Context, *entity.ChannelTagMutation) (entity.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ChannelTagFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Value, error) {
+	if mv, ok := m.(*entity.ChannelTagMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.ChannelTagMutation", m)
+}
+
 // The CommentFunc type is an adapter to allow the use of ordinary
 // function as Comment mutator.
 type CommentFunc func(context.Context, *entity.CommentMutation) (entity.Value, error)

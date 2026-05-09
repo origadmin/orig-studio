@@ -63,6 +63,7 @@ type Channel struct {
 	Privacy         string         `json:"privacy"`
 	IsVerified      bool           `json:"is_verified"`
 	Tags            []string       `json:"tags"`
+	TagIDs          []int          `json:"tag_ids,omitempty"`
 	CategoryID      *int64         `json:"category_id,omitempty"`
 	SubscriberCount int64          `json:"subscriber_count"`
 	MediaCount      int            `json:"media_count"`

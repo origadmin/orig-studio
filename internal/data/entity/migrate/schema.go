@@ -296,6 +296,32 @@ var (
 			},
 		},
 	}
+	// ContentChannelTagsColumns holds the columns for the "content_channel_tags" table.
+	ContentChannelTagsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "channel_tags_rel", Type: field.TypeString, Nullable: true, Size: 36},
+		{Name: "tag_channel_tags", Type: field.TypeInt, Nullable: true},
+	}
+	// ContentChannelTagsTable holds the schema information for the "content_channel_tags" table.
+	ContentChannelTagsTable = &schema.Table{
+		Name:       "content_channel_tags",
+		Columns:    ContentChannelTagsColumns,
+		PrimaryKey: []*schema.Column{ContentChannelTagsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "content_channel_tags_user_channels_tags_rel",
+				Columns:    []*schema.Column{ContentChannelTagsColumns[1]},
+				RefColumns: []*schema.Column{UserChannelsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "content_channel_tags_content_tags_channel_tags",
+				Columns:    []*schema.Column{ContentChannelTagsColumns[2]},
+				RefColumns: []*schema.Column{ContentTagsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// ContentCommentsColumns holds the columns for the "content_comments" table.
 	ContentCommentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
@@ -1342,6 +1368,7 @@ var (
 		{Name: "title", Type: field.TypeString, Unique: true, Size: 100},
 		{Name: "slug", Type: field.TypeString, Unique: true, Nullable: true, Size: 100},
 		{Name: "media_count", Type: field.TypeInt, Default: 0},
+		{Name: "channel_count", Type: field.TypeInt, Default: 0},
 		{Name: "listings_thumbnail", Type: field.TypeString, Nullable: true, Size: 400, Default: ""},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"ACTIVE", "INACTIVE"}, Default: "ACTIVE"},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 500},
@@ -1360,7 +1387,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "content_tags_content_media_tags_tag",
-				Columns:    []*schema.Column{ContentTagsColumns[12]},
+				Columns:    []*schema.Column{ContentTagsColumns[13]},
 				RefColumns: []*schema.Column{ContentMediaTagsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -1380,6 +1407,11 @@ var (
 				Name:    "tag_media_count",
 				Unique:  false,
 				Columns: []*schema.Column{ContentTagsColumns[3]},
+			},
+			{
+				Name:    "tag_channel_count",
+				Unique:  false,
+				Columns: []*schema.Column{ContentTagsColumns[4]},
 			},
 		},
 	}
@@ -1628,6 +1660,7 @@ var (
 		ContentArticlesTable,
 		ContentCategoriesTable,
 		UserChannelsTable,
+		ContentChannelTagsTable,
 		ContentCommentsTable,
 		ContentCommentLikesTable,
 		ContentCommentReportsTable,
@@ -1679,6 +1712,11 @@ func init() {
 	UserChannelsTable.ForeignKeys[1].RefTable = UsersTable
 	UserChannelsTable.Annotation = &entsql.Annotation{
 		Table: "user_channels",
+	}
+	ContentChannelTagsTable.ForeignKeys[0].RefTable = UserChannelsTable
+	ContentChannelTagsTable.ForeignKeys[1].RefTable = ContentTagsTable
+	ContentChannelTagsTable.Annotation = &entsql.Annotation{
+		Table: "content_channel_tags",
 	}
 	ContentCommentsTable.ForeignKeys[0].RefTable = ContentArticlesTable
 	ContentCommentsTable.ForeignKeys[1].RefTable = ContentCommentsTable

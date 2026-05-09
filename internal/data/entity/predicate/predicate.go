@@ -15,6 +15,9 @@ type Category func(*sql.Selector)
 // Channel is the predicate function for channel builders.
 type Channel func(*sql.Selector)
 
+// ChannelTag is the predicate function for channeltag builders.
+type ChannelTag func(*sql.Selector)
+
 // Comment is the predicate function for comment builders.
 type Comment func(*sql.Selector)
 

@@ -9,6 +9,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
+	"origadmin/application/origcms/internal/data/entity/channeltag"
 	"origadmin/application/origcms/internal/data/entity/media"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"origadmin/application/origcms/internal/data/entity/schema"
@@ -479,6 +480,21 @@ func (_u *ChannelUpdate) SetCategory(v *Category) *ChannelUpdate {
 	return _u.SetCategoryID(v.ID)
 }
 
+// AddTagsRelIDs adds the "tags_rel" edge to the ChannelTag entity by IDs.
+func (_u *ChannelUpdate) AddTagsRelIDs(ids ...int) *ChannelUpdate {
+	_u.mutation.AddTagsRelIDs(ids...)
+	return _u
+}
+
+// AddTagsRel adds the "tags_rel" edges to the ChannelTag entity.
+func (_u *ChannelUpdate) AddTagsRel(v ...*ChannelTag) *ChannelUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddTagsRelIDs(ids...)
+}
+
 // Mutation returns the ChannelMutation object of the builder.
 func (_u *ChannelUpdate) Mutation() *ChannelMutation {
 	return _u.mutation
@@ -536,6 +552,27 @@ func (_u *ChannelUpdate) RemoveArticles(v ...*Article) *ChannelUpdate {
 func (_u *ChannelUpdate) ClearCategory() *ChannelUpdate {
 	_u.mutation.ClearCategory()
 	return _u
+}
+
+// ClearTagsRel clears all "tags_rel" edges to the ChannelTag entity.
+func (_u *ChannelUpdate) ClearTagsRel() *ChannelUpdate {
+	_u.mutation.ClearTagsRel()
+	return _u
+}
+
+// RemoveTagsRelIDs removes the "tags_rel" edge to ChannelTag entities by IDs.
+func (_u *ChannelUpdate) RemoveTagsRelIDs(ids ...int) *ChannelUpdate {
+	_u.mutation.RemoveTagsRelIDs(ids...)
+	return _u
+}
+
+// RemoveTagsRel removes "tags_rel" edges to ChannelTag entities.
+func (_u *ChannelUpdate) RemoveTagsRel(v ...*ChannelTag) *ChannelUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveTagsRelIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -906,6 +943,51 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.TagsRelCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.TagsRelTable,
+			Columns: []string{channel.TagsRelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedTagsRelIDs(); len(nodes) > 0 && !_u.mutation.TagsRelCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.TagsRelTable,
+			Columns: []string{channel.TagsRelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TagsRelIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.TagsRelTable,
+			Columns: []string{channel.TagsRelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1379,6 +1461,21 @@ func (_u *ChannelUpdateOne) SetCategory(v *Category) *ChannelUpdateOne {
 	return _u.SetCategoryID(v.ID)
 }
 
+// AddTagsRelIDs adds the "tags_rel" edge to the ChannelTag entity by IDs.
+func (_u *ChannelUpdateOne) AddTagsRelIDs(ids ...int) *ChannelUpdateOne {
+	_u.mutation.AddTagsRelIDs(ids...)
+	return _u
+}
+
+// AddTagsRel adds the "tags_rel" edges to the ChannelTag entity.
+func (_u *ChannelUpdateOne) AddTagsRel(v ...*ChannelTag) *ChannelUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddTagsRelIDs(ids...)
+}
+
 // Mutation returns the ChannelMutation object of the builder.
 func (_u *ChannelUpdateOne) Mutation() *ChannelMutation {
 	return _u.mutation
@@ -1436,6 +1533,27 @@ func (_u *ChannelUpdateOne) RemoveArticles(v ...*Article) *ChannelUpdateOne {
 func (_u *ChannelUpdateOne) ClearCategory() *ChannelUpdateOne {
 	_u.mutation.ClearCategory()
 	return _u
+}
+
+// ClearTagsRel clears all "tags_rel" edges to the ChannelTag entity.
+func (_u *ChannelUpdateOne) ClearTagsRel() *ChannelUpdateOne {
+	_u.mutation.ClearTagsRel()
+	return _u
+}
+
+// RemoveTagsRelIDs removes the "tags_rel" edge to ChannelTag entities by IDs.
+func (_u *ChannelUpdateOne) RemoveTagsRelIDs(ids ...int) *ChannelUpdateOne {
+	_u.mutation.RemoveTagsRelIDs(ids...)
+	return _u
+}
+
+// RemoveTagsRel removes "tags_rel" edges to ChannelTag entities.
+func (_u *ChannelUpdateOne) RemoveTagsRel(v ...*ChannelTag) *ChannelUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveTagsRelIDs(ids...)
 }
 
 // Where appends a list predicates to the ChannelUpdate builder.
@@ -1836,6 +1954,51 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.TagsRelCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.TagsRelTable,
+			Columns: []string{channel.TagsRelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedTagsRelIDs(); len(nodes) > 0 && !_u.mutation.TagsRelCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.TagsRelTable,
+			Columns: []string{channel.TagsRelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.TagsRelIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.TagsRelTable,
+			Columns: []string{channel.TagsRelColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

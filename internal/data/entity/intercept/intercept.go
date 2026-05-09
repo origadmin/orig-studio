@@ -10,6 +10,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
+	"origadmin/application/origcms/internal/data/entity/channeltag"
 	"origadmin/application/origcms/internal/data/entity/comment"
 	"origadmin/application/origcms/internal/data/entity/commentlike"
 	"origadmin/application/origcms/internal/data/entity/commentreport"
@@ -177,6 +178,33 @@ func (f TraverseChannel) Traverse(ctx context.Context, q entity.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *entity.ChannelQuery", q)
+}
+
+// The ChannelTagFunc type is an adapter to allow the use of ordinary function as a Querier.
+type ChannelTagFunc func(context.Context, *entity.ChannelTagQuery) (entity.Value, error)
+
+// Query calls f(ctx, q).
+func (f ChannelTagFunc) Query(ctx context.Context, q entity.Query) (entity.Value, error) {
+	if q, ok := q.(*entity.ChannelTagQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *entity.ChannelTagQuery", q)
+}
+
+// The TraverseChannelTag type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseChannelTag func(context.Context, *entity.ChannelTagQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseChannelTag) Intercept(next entity.Querier) entity.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseChannelTag) Traverse(ctx context.Context, q entity.Query) error {
+	if q, ok := q.(*entity.ChannelTagQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *entity.ChannelTagQuery", q)
 }
 
 // The CommentFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -917,6 +945,8 @@ func NewQuery(q entity.Query) (Query, error) {
 		return &query[*entity.CategoryQuery, predicate.Category, category.OrderOption]{typ: entity.TypeCategory, tq: q}, nil
 	case *entity.ChannelQuery:
 		return &query[*entity.ChannelQuery, predicate.Channel, channel.OrderOption]{typ: entity.TypeChannel, tq: q}, nil
+	case *entity.ChannelTagQuery:
+		return &query[*entity.ChannelTagQuery, predicate.ChannelTag, channeltag.OrderOption]{typ: entity.TypeChannelTag, tq: q}, nil
 	case *entity.CommentQuery:
 		return &query[*entity.CommentQuery, predicate.Comment, comment.OrderOption]{typ: entity.TypeComment, tq: q}, nil
 	case *entity.CommentLikeQuery:

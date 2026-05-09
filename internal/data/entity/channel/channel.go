@@ -73,6 +73,8 @@ const (
 	EdgeArticles = "articles"
 	// EdgeCategory holds the string denoting the category edge name in mutations.
 	EdgeCategory = "category"
+	// EdgeTagsRel holds the string denoting the tags_rel edge name in mutations.
+	EdgeTagsRel = "tags_rel"
 	// Table holds the table name of the channel in the database.
 	Table = "user_channels"
 	// UserTable is the table that holds the user relation/edge.
@@ -103,6 +105,13 @@ const (
 	CategoryInverseTable = "content_categories"
 	// CategoryColumn is the table column denoting the category relation/edge.
 	CategoryColumn = "category_id"
+	// TagsRelTable is the table that holds the tags_rel relation/edge.
+	TagsRelTable = "content_channel_tags"
+	// TagsRelInverseTable is the table name for the ChannelTag entity.
+	// It exists in this package in order to avoid circular dependency with the "channeltag" package.
+	TagsRelInverseTable = "content_channel_tags"
+	// TagsRelColumn is the table column denoting the tags_rel relation/edge.
+	TagsRelColumn = "channel_tags_rel"
 )
 
 // Columns holds all SQL columns for channel fields.
@@ -399,6 +408,20 @@ func ByCategoryField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newCategoryStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByTagsRelCount orders the results by tags_rel count.
+func ByTagsRelCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTagsRelStep(), opts...)
+	}
+}
+
+// ByTagsRel orders the results by tags_rel terms.
+func ByTagsRel(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTagsRelStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -425,5 +448,12 @@ func newCategoryStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CategoryInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, CategoryTable, CategoryColumn),
+	)
+}
+func newTagsRelStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TagsRelInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TagsRelTable, TagsRelColumn),
 	)
 }

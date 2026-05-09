@@ -9,6 +9,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
+	"origadmin/application/origcms/internal/data/entity/channeltag"
 	"origadmin/application/origcms/internal/data/entity/comment"
 	"origadmin/application/origcms/internal/data/entity/commentlike"
 	"origadmin/application/origcms/internal/data/entity/commentreport"
@@ -58,6 +59,7 @@ const (
 	TypeArticle          = "Article"
 	TypeCategory         = "Category"
 	TypeChannel          = "Channel"
+	TypeChannelTag       = "ChannelTag"
 	TypeComment          = "Comment"
 	TypeCommentLike      = "CommentLike"
 	TypeCommentReport    = "CommentReport"
@@ -4020,6 +4022,9 @@ type ChannelMutation struct {
 	clearedarticles     bool
 	category            *int64
 	clearedcategory     bool
+	tags_rel            map[int]struct{}
+	removedtags_rel     map[int]struct{}
+	clearedtags_rel     bool
 	done                bool
 	oldValue            func(context.Context) (*Channel, error)
 	predicates          []predicate.Channel
@@ -5420,6 +5425,60 @@ func (m *ChannelMutation) ResetCategory() {
 	m.clearedcategory = false
 }
 
+// AddTagsRelIDs adds the "tags_rel" edge to the ChannelTag entity by ids.
+func (m *ChannelMutation) AddTagsRelIDs(ids ...int) {
+	if m.tags_rel == nil {
+		m.tags_rel = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.tags_rel[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTagsRel clears the "tags_rel" edge to the ChannelTag entity.
+func (m *ChannelMutation) ClearTagsRel() {
+	m.clearedtags_rel = true
+}
+
+// TagsRelCleared reports if the "tags_rel" edge to the ChannelTag entity was cleared.
+func (m *ChannelMutation) TagsRelCleared() bool {
+	return m.clearedtags_rel
+}
+
+// RemoveTagsRelIDs removes the "tags_rel" edge to the ChannelTag entity by IDs.
+func (m *ChannelMutation) RemoveTagsRelIDs(ids ...int) {
+	if m.removedtags_rel == nil {
+		m.removedtags_rel = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.tags_rel, ids[i])
+		m.removedtags_rel[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTagsRel returns the removed IDs of the "tags_rel" edge to the ChannelTag entity.
+func (m *ChannelMutation) RemovedTagsRelIDs() (ids []int) {
+	for id := range m.removedtags_rel {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TagsRelIDs returns the "tags_rel" edge IDs in the mutation.
+func (m *ChannelMutation) TagsRelIDs() (ids []int) {
+	for id := range m.tags_rel {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTagsRel resets all changes to the "tags_rel" edge.
+func (m *ChannelMutation) ResetTagsRel() {
+	m.tags_rel = nil
+	m.clearedtags_rel = false
+	m.removedtags_rel = nil
+}
+
 // Where appends a list predicates to the ChannelMutation builder.
 func (m *ChannelMutation) Where(ps ...predicate.Channel) {
 	m.predicates = append(m.predicates, ps...)
@@ -6069,7 +6128,7 @@ func (m *ChannelMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ChannelMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.user != nil {
 		edges = append(edges, channel.EdgeUser)
 	}
@@ -6081,6 +6140,9 @@ func (m *ChannelMutation) AddedEdges() []string {
 	}
 	if m.category != nil {
 		edges = append(edges, channel.EdgeCategory)
+	}
+	if m.tags_rel != nil {
+		edges = append(edges, channel.EdgeTagsRel)
 	}
 	return edges
 }
@@ -6109,18 +6171,27 @@ func (m *ChannelMutation) AddedIDs(name string) []ent.Value {
 		if id := m.category; id != nil {
 			return []ent.Value{*id}
 		}
+	case channel.EdgeTagsRel:
+		ids := make([]ent.Value, 0, len(m.tags_rel))
+		for id := range m.tags_rel {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ChannelMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.removedmedia != nil {
 		edges = append(edges, channel.EdgeMedia)
 	}
 	if m.removedarticles != nil {
 		edges = append(edges, channel.EdgeArticles)
+	}
+	if m.removedtags_rel != nil {
+		edges = append(edges, channel.EdgeTagsRel)
 	}
 	return edges
 }
@@ -6141,13 +6212,19 @@ func (m *ChannelMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case channel.EdgeTagsRel:
+		ids := make([]ent.Value, 0, len(m.removedtags_rel))
+		for id := range m.removedtags_rel {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ChannelMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.cleareduser {
 		edges = append(edges, channel.EdgeUser)
 	}
@@ -6159,6 +6236,9 @@ func (m *ChannelMutation) ClearedEdges() []string {
 	}
 	if m.clearedcategory {
 		edges = append(edges, channel.EdgeCategory)
+	}
+	if m.clearedtags_rel {
+		edges = append(edges, channel.EdgeTagsRel)
 	}
 	return edges
 }
@@ -6175,6 +6255,8 @@ func (m *ChannelMutation) EdgeCleared(name string) bool {
 		return m.clearedarticles
 	case channel.EdgeCategory:
 		return m.clearedcategory
+	case channel.EdgeTagsRel:
+		return m.clearedtags_rel
 	}
 	return false
 }
@@ -6209,8 +6291,401 @@ func (m *ChannelMutation) ResetEdge(name string) error {
 	case channel.EdgeCategory:
 		m.ResetCategory()
 		return nil
+	case channel.EdgeTagsRel:
+		m.ResetTagsRel()
+		return nil
 	}
 	return fmt.Errorf("unknown Channel edge %s", name)
+}
+
+// ChannelTagMutation represents an operation that mutates the ChannelTag nodes in the graph.
+type ChannelTagMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *int
+	clearedFields  map[string]struct{}
+	channel        *string
+	clearedchannel bool
+	tag            *int
+	clearedtag     bool
+	done           bool
+	oldValue       func(context.Context) (*ChannelTag, error)
+	predicates     []predicate.ChannelTag
+}
+
+var _ ent.Mutation = (*ChannelTagMutation)(nil)
+
+// channeltagOption allows management of the mutation configuration using functional options.
+type channeltagOption func(*ChannelTagMutation)
+
+// newChannelTagMutation creates new mutation for the ChannelTag entity.
+func newChannelTagMutation(c config, op Op, opts ...channeltagOption) *ChannelTagMutation {
+	m := &ChannelTagMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeChannelTag,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withChannelTagID sets the ID field of the mutation.
+func withChannelTagID(id int) channeltagOption {
+	return func(m *ChannelTagMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ChannelTag
+		)
+		m.oldValue = func(ctx context.Context) (*ChannelTag, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ChannelTag.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withChannelTag sets the old ChannelTag of the mutation.
+func withChannelTag(node *ChannelTag) channeltagOption {
+	return func(m *ChannelTagMutation) {
+		m.oldValue = func(context.Context) (*ChannelTag, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ChannelTagMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ChannelTagMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("entity: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ChannelTagMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ChannelTagMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ChannelTag.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetChannelID sets the "channel" edge to the Channel entity by id.
+func (m *ChannelTagMutation) SetChannelID(id string) {
+	m.channel = &id
+}
+
+// ClearChannel clears the "channel" edge to the Channel entity.
+func (m *ChannelTagMutation) ClearChannel() {
+	m.clearedchannel = true
+}
+
+// ChannelCleared reports if the "channel" edge to the Channel entity was cleared.
+func (m *ChannelTagMutation) ChannelCleared() bool {
+	return m.clearedchannel
+}
+
+// ChannelID returns the "channel" edge ID in the mutation.
+func (m *ChannelTagMutation) ChannelID() (id string, exists bool) {
+	if m.channel != nil {
+		return *m.channel, true
+	}
+	return
+}
+
+// ChannelIDs returns the "channel" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ChannelID instead. It exists only for internal usage by the builders.
+func (m *ChannelTagMutation) ChannelIDs() (ids []string) {
+	if id := m.channel; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetChannel resets all changes to the "channel" edge.
+func (m *ChannelTagMutation) ResetChannel() {
+	m.channel = nil
+	m.clearedchannel = false
+}
+
+// SetTagID sets the "tag" edge to the Tag entity by id.
+func (m *ChannelTagMutation) SetTagID(id int) {
+	m.tag = &id
+}
+
+// ClearTag clears the "tag" edge to the Tag entity.
+func (m *ChannelTagMutation) ClearTag() {
+	m.clearedtag = true
+}
+
+// TagCleared reports if the "tag" edge to the Tag entity was cleared.
+func (m *ChannelTagMutation) TagCleared() bool {
+	return m.clearedtag
+}
+
+// TagID returns the "tag" edge ID in the mutation.
+func (m *ChannelTagMutation) TagID() (id int, exists bool) {
+	if m.tag != nil {
+		return *m.tag, true
+	}
+	return
+}
+
+// TagIDs returns the "tag" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TagID instead. It exists only for internal usage by the builders.
+func (m *ChannelTagMutation) TagIDs() (ids []int) {
+	if id := m.tag; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTag resets all changes to the "tag" edge.
+func (m *ChannelTagMutation) ResetTag() {
+	m.tag = nil
+	m.clearedtag = false
+}
+
+// Where appends a list predicates to the ChannelTagMutation builder.
+func (m *ChannelTagMutation) Where(ps ...predicate.ChannelTag) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ChannelTagMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ChannelTagMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ChannelTag, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ChannelTagMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ChannelTagMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (ChannelTag).
+func (m *ChannelTagMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ChannelTagMutation) Fields() []string {
+	fields := make([]string, 0, 0)
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ChannelTagMutation) Field(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ChannelTagMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	return nil, fmt.Errorf("unknown ChannelTag field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ChannelTagMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown ChannelTag field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ChannelTagMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ChannelTagMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ChannelTagMutation) AddField(name string, value ent.Value) error {
+	return fmt.Errorf("unknown ChannelTag numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ChannelTagMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ChannelTagMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ChannelTagMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown ChannelTag nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ChannelTagMutation) ResetField(name string) error {
+	return fmt.Errorf("unknown ChannelTag field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ChannelTagMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.channel != nil {
+		edges = append(edges, channeltag.EdgeChannel)
+	}
+	if m.tag != nil {
+		edges = append(edges, channeltag.EdgeTag)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ChannelTagMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case channeltag.EdgeChannel:
+		if id := m.channel; id != nil {
+			return []ent.Value{*id}
+		}
+	case channeltag.EdgeTag:
+		if id := m.tag; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ChannelTagMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ChannelTagMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ChannelTagMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedchannel {
+		edges = append(edges, channeltag.EdgeChannel)
+	}
+	if m.clearedtag {
+		edges = append(edges, channeltag.EdgeTag)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ChannelTagMutation) EdgeCleared(name string) bool {
+	switch name {
+	case channeltag.EdgeChannel:
+		return m.clearedchannel
+	case channeltag.EdgeTag:
+		return m.clearedtag
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ChannelTagMutation) ClearEdge(name string) error {
+	switch name {
+	case channeltag.EdgeChannel:
+		m.ClearChannel()
+		return nil
+	case channeltag.EdgeTag:
+		m.ClearTag()
+		return nil
+	}
+	return fmt.Errorf("unknown ChannelTag unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ChannelTagMutation) ResetEdge(name string) error {
+	switch name {
+	case channeltag.EdgeChannel:
+		m.ResetChannel()
+		return nil
+	case channeltag.EdgeTag:
+		m.ResetTag()
+		return nil
+	}
+	return fmt.Errorf("unknown ChannelTag edge %s", name)
 }
 
 // CommentMutation represents an operation that mutates the Comment nodes in the graph.
@@ -29286,31 +29761,36 @@ func (m *SubscriptionMutation) ResetEdge(name string) error {
 // TagMutation represents an operation that mutates the Tag nodes in the graph.
 type TagMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *int
-	title              *string
-	slug               *string
-	media_count        *int
-	addmedia_count     *int
-	listings_thumbnail *string
-	status             *tag.Status
-	description        *string
-	title_i18n         *map[string]string
-	description_i18n   *map[string]string
-	color              *string
-	create_time        *time.Time
-	update_time        *time.Time
-	clearedFields      map[string]struct{}
-	user               map[string]struct{}
-	removeduser        map[string]struct{}
-	cleareduser        bool
-	names              map[int]struct{}
-	removednames       map[int]struct{}
-	clearednames       bool
-	done               bool
-	oldValue           func(context.Context) (*Tag, error)
-	predicates         []predicate.Tag
+	op                  Op
+	typ                 string
+	id                  *int
+	title               *string
+	slug                *string
+	media_count         *int
+	addmedia_count      *int
+	channel_count       *int
+	addchannel_count    *int
+	listings_thumbnail  *string
+	status              *tag.Status
+	description         *string
+	title_i18n          *map[string]string
+	description_i18n    *map[string]string
+	color               *string
+	create_time         *time.Time
+	update_time         *time.Time
+	clearedFields       map[string]struct{}
+	user                map[string]struct{}
+	removeduser         map[string]struct{}
+	cleareduser         bool
+	names               map[int]struct{}
+	removednames        map[int]struct{}
+	clearednames        bool
+	channel_tags        map[int]struct{}
+	removedchannel_tags map[int]struct{}
+	clearedchannel_tags bool
+	done                bool
+	oldValue            func(context.Context) (*Tag, error)
+	predicates          []predicate.Tag
 }
 
 var _ ent.Mutation = (*TagMutation)(nil)
@@ -29550,6 +30030,62 @@ func (m *TagMutation) AddedMediaCount() (r int, exists bool) {
 func (m *TagMutation) ResetMediaCount() {
 	m.media_count = nil
 	m.addmedia_count = nil
+}
+
+// SetChannelCount sets the "channel_count" field.
+func (m *TagMutation) SetChannelCount(i int) {
+	m.channel_count = &i
+	m.addchannel_count = nil
+}
+
+// ChannelCount returns the value of the "channel_count" field in the mutation.
+func (m *TagMutation) ChannelCount() (r int, exists bool) {
+	v := m.channel_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChannelCount returns the old "channel_count" field's value of the Tag entity.
+// If the Tag object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TagMutation) OldChannelCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChannelCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChannelCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChannelCount: %w", err)
+	}
+	return oldValue.ChannelCount, nil
+}
+
+// AddChannelCount adds i to the "channel_count" field.
+func (m *TagMutation) AddChannelCount(i int) {
+	if m.addchannel_count != nil {
+		*m.addchannel_count += i
+	} else {
+		m.addchannel_count = &i
+	}
+}
+
+// AddedChannelCount returns the value that was added to the "channel_count" field in this mutation.
+func (m *TagMutation) AddedChannelCount() (r int, exists bool) {
+	v := m.addchannel_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetChannelCount resets all changes to the "channel_count" field.
+func (m *TagMutation) ResetChannelCount() {
+	m.channel_count = nil
+	m.addchannel_count = nil
 }
 
 // SetListingsThumbnail sets the "listings_thumbnail" field.
@@ -30013,6 +30549,60 @@ func (m *TagMutation) ResetNames() {
 	m.removednames = nil
 }
 
+// AddChannelTagIDs adds the "channel_tags" edge to the ChannelTag entity by ids.
+func (m *TagMutation) AddChannelTagIDs(ids ...int) {
+	if m.channel_tags == nil {
+		m.channel_tags = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.channel_tags[ids[i]] = struct{}{}
+	}
+}
+
+// ClearChannelTags clears the "channel_tags" edge to the ChannelTag entity.
+func (m *TagMutation) ClearChannelTags() {
+	m.clearedchannel_tags = true
+}
+
+// ChannelTagsCleared reports if the "channel_tags" edge to the ChannelTag entity was cleared.
+func (m *TagMutation) ChannelTagsCleared() bool {
+	return m.clearedchannel_tags
+}
+
+// RemoveChannelTagIDs removes the "channel_tags" edge to the ChannelTag entity by IDs.
+func (m *TagMutation) RemoveChannelTagIDs(ids ...int) {
+	if m.removedchannel_tags == nil {
+		m.removedchannel_tags = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.channel_tags, ids[i])
+		m.removedchannel_tags[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedChannelTags returns the removed IDs of the "channel_tags" edge to the ChannelTag entity.
+func (m *TagMutation) RemovedChannelTagsIDs() (ids []int) {
+	for id := range m.removedchannel_tags {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ChannelTagsIDs returns the "channel_tags" edge IDs in the mutation.
+func (m *TagMutation) ChannelTagsIDs() (ids []int) {
+	for id := range m.channel_tags {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetChannelTags resets all changes to the "channel_tags" edge.
+func (m *TagMutation) ResetChannelTags() {
+	m.channel_tags = nil
+	m.clearedchannel_tags = false
+	m.removedchannel_tags = nil
+}
+
 // Where appends a list predicates to the TagMutation builder.
 func (m *TagMutation) Where(ps ...predicate.Tag) {
 	m.predicates = append(m.predicates, ps...)
@@ -30047,7 +30637,7 @@ func (m *TagMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TagMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.title != nil {
 		fields = append(fields, tag.FieldTitle)
 	}
@@ -30056,6 +30646,9 @@ func (m *TagMutation) Fields() []string {
 	}
 	if m.media_count != nil {
 		fields = append(fields, tag.FieldMediaCount)
+	}
+	if m.channel_count != nil {
+		fields = append(fields, tag.FieldChannelCount)
 	}
 	if m.listings_thumbnail != nil {
 		fields = append(fields, tag.FieldListingsThumbnail)
@@ -30095,6 +30688,8 @@ func (m *TagMutation) Field(name string) (ent.Value, bool) {
 		return m.Slug()
 	case tag.FieldMediaCount:
 		return m.MediaCount()
+	case tag.FieldChannelCount:
+		return m.ChannelCount()
 	case tag.FieldListingsThumbnail:
 		return m.ListingsThumbnail()
 	case tag.FieldStatus:
@@ -30126,6 +30721,8 @@ func (m *TagMutation) OldField(ctx context.Context, name string) (ent.Value, err
 		return m.OldSlug(ctx)
 	case tag.FieldMediaCount:
 		return m.OldMediaCount(ctx)
+	case tag.FieldChannelCount:
+		return m.OldChannelCount(ctx)
 	case tag.FieldListingsThumbnail:
 		return m.OldListingsThumbnail(ctx)
 	case tag.FieldStatus:
@@ -30171,6 +30768,13 @@ func (m *TagMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMediaCount(v)
+		return nil
+	case tag.FieldChannelCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChannelCount(v)
 		return nil
 	case tag.FieldListingsThumbnail:
 		v, ok := value.(string)
@@ -30239,6 +30843,9 @@ func (m *TagMutation) AddedFields() []string {
 	if m.addmedia_count != nil {
 		fields = append(fields, tag.FieldMediaCount)
 	}
+	if m.addchannel_count != nil {
+		fields = append(fields, tag.FieldChannelCount)
+	}
 	return fields
 }
 
@@ -30249,6 +30856,8 @@ func (m *TagMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case tag.FieldMediaCount:
 		return m.AddedMediaCount()
+	case tag.FieldChannelCount:
+		return m.AddedChannelCount()
 	}
 	return nil, false
 }
@@ -30264,6 +30873,13 @@ func (m *TagMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddMediaCount(v)
+		return nil
+	case tag.FieldChannelCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddChannelCount(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Tag numeric field %s", name)
@@ -30340,6 +30956,9 @@ func (m *TagMutation) ResetField(name string) error {
 	case tag.FieldMediaCount:
 		m.ResetMediaCount()
 		return nil
+	case tag.FieldChannelCount:
+		m.ResetChannelCount()
+		return nil
 	case tag.FieldListingsThumbnail:
 		m.ResetListingsThumbnail()
 		return nil
@@ -30370,12 +30989,15 @@ func (m *TagMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TagMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.user != nil {
 		edges = append(edges, tag.EdgeUser)
 	}
 	if m.names != nil {
 		edges = append(edges, tag.EdgeNames)
+	}
+	if m.channel_tags != nil {
+		edges = append(edges, tag.EdgeChannelTags)
 	}
 	return edges
 }
@@ -30396,18 +31018,27 @@ func (m *TagMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case tag.EdgeChannelTags:
+		ids := make([]ent.Value, 0, len(m.channel_tags))
+		for id := range m.channel_tags {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TagMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removeduser != nil {
 		edges = append(edges, tag.EdgeUser)
 	}
 	if m.removednames != nil {
 		edges = append(edges, tag.EdgeNames)
+	}
+	if m.removedchannel_tags != nil {
+		edges = append(edges, tag.EdgeChannelTags)
 	}
 	return edges
 }
@@ -30428,18 +31059,27 @@ func (m *TagMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case tag.EdgeChannelTags:
+		ids := make([]ent.Value, 0, len(m.removedchannel_tags))
+		for id := range m.removedchannel_tags {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TagMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.cleareduser {
 		edges = append(edges, tag.EdgeUser)
 	}
 	if m.clearednames {
 		edges = append(edges, tag.EdgeNames)
+	}
+	if m.clearedchannel_tags {
+		edges = append(edges, tag.EdgeChannelTags)
 	}
 	return edges
 }
@@ -30452,6 +31092,8 @@ func (m *TagMutation) EdgeCleared(name string) bool {
 		return m.cleareduser
 	case tag.EdgeNames:
 		return m.clearednames
+	case tag.EdgeChannelTags:
+		return m.clearedchannel_tags
 	}
 	return false
 }
@@ -30473,6 +31115,9 @@ func (m *TagMutation) ResetEdge(name string) error {
 		return nil
 	case tag.EdgeNames:
 		m.ResetNames()
+		return nil
+	case tag.EdgeChannelTags:
+		m.ResetChannelTags()
 		return nil
 	}
 	return fmt.Errorf("unknown Tag edge %s", name)

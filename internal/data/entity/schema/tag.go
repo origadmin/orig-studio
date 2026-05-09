@@ -25,6 +25,7 @@ func (Tag) Fields() []ent.Field {
 		field.String("title").NotEmpty().Unique().MaxLen(100),
 		field.String("slug").MaxLen(100).Unique().Optional(),
 		field.Int("media_count").Default(0),
+		field.Int("channel_count").Default(0),
 		field.String("listings_thumbnail").MaxLen(400).Optional().Default(""),
 		field.Enum("status").Values("ACTIVE", "INACTIVE").Default("ACTIVE"),
 		field.String("description").Optional().MaxLen(500),
@@ -41,6 +42,7 @@ func (Tag) Indexes() []ent.Index {
 		index.Fields("title"),
 		index.Fields("slug"),
 		index.Fields("media_count"),
+		index.Fields("channel_count"),
 	}
 }
 
@@ -55,5 +57,6 @@ func (Tag) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).Ref("tags"),
 		edge.To("names", TagName.Type),
+		edge.To("channel_tags", ChannelTag.Type),
 	}
 }

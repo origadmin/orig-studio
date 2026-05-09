@@ -9,6 +9,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/article"
 	"origadmin/application/origcms/internal/data/entity/category"
 	"origadmin/application/origcms/internal/data/entity/channel"
+	"origadmin/application/origcms/internal/data/entity/channeltag"
 	"origadmin/application/origcms/internal/data/entity/comment"
 	"origadmin/application/origcms/internal/data/entity/commentlike"
 	"origadmin/application/origcms/internal/data/entity/commentreport"
@@ -105,6 +106,7 @@ func checkColumn(t, c string) error {
 			article.Table:          article.ValidColumn,
 			category.Table:         category.ValidColumn,
 			channel.Table:          channel.ValidColumn,
+			channeltag.Table:       channeltag.ValidColumn,
 			comment.Table:          comment.ValidColumn,
 			commentlike.Table:      commentlike.ValidColumn,
 			commentreport.Table:    commentreport.ValidColumn,
