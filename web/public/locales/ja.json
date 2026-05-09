@@ -223,6 +223,25 @@
     "loginToFavorite": "お気に入りに保存するにはログインしてください",
     "loginToSave": "プレイリストに保存するにはログインしてください"
   },
+  "report": {
+    "reportVideo": "動画を報告",
+    "reportComment": "コメントを報告",
+    "reportVideoDesc": "この動画の報告を送信してください。チームが確認します。",
+    "reportCommentDesc": "このコメントの報告を送信してください。チームが確認します。",
+    "reason": "理由",
+    "selectReason": "理由を選択",
+    "reasonSpam": "スパム",
+    "reasonHarassment": "嫌がらせ",
+    "reasonInappropriate": "不適切なコンテンツ",
+    "reasonOther": "その他",
+    "description": "説明",
+    "descriptionPlaceholder": "詳細を追加...",
+    "submit": "報告を送信",
+    "submitting": "送信中...",
+    "submitted": "報告が送信されました",
+    "submitFailed": "報告の送信に失敗しました",
+    "alreadyReported": "このコンテンツはすでに報告済みです"
+  },
   "channel": {
     "manageChannel": "チャンネル管理",
     "customizeChannel": "チャンネルをカスタマイズ",

@@ -223,6 +223,25 @@
     "loginToFavorite": "Please login to save this video",
     "loginToSave": "Please login to save to playlist"
   },
+  "report": {
+    "reportVideo": "Report Video",
+    "reportComment": "Report Comment",
+    "reportVideoDesc": "Submit a report about this video. Our team will review it.",
+    "reportCommentDesc": "Submit a report about this comment. Our team will review it.",
+    "reason": "Reason",
+    "selectReason": "Select a reason",
+    "reasonSpam": "Spam",
+    "reasonHarassment": "Harassment",
+    "reasonInappropriate": "Inappropriate Content",
+    "reasonOther": "Other",
+    "description": "Description",
+    "descriptionPlaceholder": "Add more details...",
+    "submit": "Submit Report",
+    "submitting": "Submitting...",
+    "submitted": "Report submitted successfully",
+    "submitFailed": "Failed to submit report",
+    "alreadyReported": "You have already reported this content"
+  },
   "channel": {
     "manageChannel": "Manage Channel",
     "customizeChannel": "Customize Channel",
