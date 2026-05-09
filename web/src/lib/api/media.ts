@@ -511,6 +511,10 @@ export const mediaApi = {
         share: (mediaId: string | number) =>
             api.post<{ success: boolean }>(`/medias/${mediaId}/shares`),
     },
+
+    // ==================== 举报 API ====================
+    report: (mediaId: string | number, data: { reason: string; description?: string }) =>
+        api.post<{ message: string; report_count: number; status: string }>(`/medias/${mediaId}/report`, data),
 };
 
 // MediaVariantSummary is the aggregated transcoding status for a single media.
@@ -717,6 +721,10 @@ export const publicMediaApi = {
         share: (shortToken: string) =>
             api.post<{ success: boolean }>(`/medias/${shortToken}/shares`),
     },
+
+    // ==================== 举报 API (使用 short_token) ====================
+    report: (shortToken: string, data: { reason: string; description?: string }) =>
+        api.post<{ message: string; report_count: number; status: string }>(`/medias/${shortToken}/report`, data),
 };
 
 // ==================== Admin Media API (ID based, requires JWT + Admin) ====================

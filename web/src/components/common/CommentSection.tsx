@@ -1,5 +1,5 @@
-﻿import React, {useState, useEffect, useRef} from 'react';
-import {MessageCircle, ThumbsUp, ThumbsDown, Loader2, LogIn, List, Reply, SmilePlus, Trash2, ChevronDown, ShieldOff} from 'lucide-react';
+import React, {useState, useEffect, useRef} from 'react';
+import {MessageCircle, ThumbsUp, ThumbsDown, Loader2, LogIn, List, Reply, SmilePlus, Trash2, ChevronDown, ShieldOff, Flag} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {Button} from '@/components/ui/button';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
@@ -9,6 +9,8 @@ import {useAuth} from '@/hooks/useAuth';
 import {useNavigate, Link} from '@tanstack/react-router';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
+import ReportDialog from '@/components/common/ReportDialog';
+import {toast} from 'sonner';
 
 interface CommentSectionProps {
     mediaId: string;
@@ -58,6 +60,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
     const [sortBy, setSortBy] = useState<CommentSortBy>('newest');
     const [showSortMenu, setShowSortMenu] = useState(false);
     const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
+    const [reportingCommentId, setReportingCommentId] = useState<string | null>(null);
+    const [showReportDialog, setShowReportDialog] = useState(false);
     const sortMenuRef = useRef<HTMLDivElement>(null);
 
     const emojiPickerRef = useRef<HTMLDivElement>(null);
@@ -294,6 +298,25 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
         } finally {
             setDeletingCommentId(null);
         }
+    };
+
+    const handleReportComment = async (data: { reason: string; description?: string }) => {
+        if (!reportingCommentId) return;
+        try {
+            await commentApi.report(reportingCommentId, data);
+            toast.success(t('report.submitted') || 'Report submitted successfully');
+        } catch (err: any) {
+            throw err;
+        }
+    };
+
+    const handleOpenReportDialog = (commentId: string) => {
+        if (!isAuthenticated) {
+            navigate({to: '/auth/signin'});
+            return;
+        }
+        setReportingCommentId(commentId);
+        setShowReportDialog(true);
     };
 
     const addEmoji = (emoji: any) => {
@@ -588,6 +611,15 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                                             )}
                                         </button>
                                     )}
+
+                                    {isAuthenticated && user && String(comment.user_id) !== String(user.id) && (
+                                        <button
+                                            className="flex items-center gap-1.5 text-gray-500 hover:text-amber-600 font-medium text-sm px-2 py-1 rounded-full hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                                            onClick={() => handleOpenReportDialog(comment.id)}
+                                        >
+                                            <Flag className="w-4 h-4"/>
+                                        </button>
+                                    )}
                                 </div>
                                 )}
 
@@ -712,6 +744,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({mediaId}) => {
                     </button>
                 </div>
             )}
+
+            <ReportDialog
+                open={showReportDialog}
+                onOpenChange={setShowReportDialog}
+                targetId={reportingCommentId || ''}
+                targetType="comment"
+                onSubmit={handleReportComment}
+            />
         </div>
     );
 };

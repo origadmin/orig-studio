@@ -223,6 +223,25 @@
     "loginToFavorite": "请登录后收藏",
     "loginToSave": "请登录后保存到播放列表"
   },
+  "report": {
+    "reportVideo": "举报视频",
+    "reportComment": "举报评论",
+    "reportVideoDesc": "提交关于此视频的举报，我们的团队将会审核。",
+    "reportCommentDesc": "提交关于此评论的举报，我们的团队将会审核。",
+    "reason": "原因",
+    "selectReason": "选择举报原因",
+    "reasonSpam": "垃圾信息",
+    "reasonHarassment": "骚扰",
+    "reasonInappropriate": "不当内容",
+    "reasonOther": "其他",
+    "description": "描述",
+    "descriptionPlaceholder": "添加更多详情...",
+    "submit": "提交举报",
+    "submitting": "提交中...",
+    "submitted": "举报提交成功",
+    "submitFailed": "举报提交失败",
+    "alreadyReported": "您已举报过此内容"
+  },
   "channel": {
     "manageChannel": "管理频道",
     "customizeChannel": "自定义频道",

@@ -109,6 +109,9 @@ export const commentApi = {
         toggleDislike: (commentId: string) =>
             api.post<CommentLikeResponse>(`/comments/${commentId}/dislikes`),
     },
+
+    report: (commentId: string, data: { reason: string; description?: string }) =>
+        api.post<{ message: string; report_count: number; status: string }>(`/comments/${commentId}/report`, data),
 };
 
 export const adminCommentApi = {
