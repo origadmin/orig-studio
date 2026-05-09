@@ -17,6 +17,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/history"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
+	"origadmin/application/origcms/internal/data/entity/mediareport"
 	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/permissiongroup"
@@ -864,6 +865,21 @@ func (_u *UserUpdate) AddCommentReports(v ...*CommentReport) *UserUpdate {
 	return _u.AddCommentReportIDs(ids...)
 }
 
+// AddMediaReportIDs adds the "media_reports" edge to the MediaReport entity by IDs.
+func (_u *UserUpdate) AddMediaReportIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddMediaReportIDs(ids...)
+	return _u
+}
+
+// AddMediaReports adds the "media_reports" edges to the MediaReport entity.
+func (_u *UserUpdate) AddMediaReports(v ...*MediaReport) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddMediaReportIDs(ids...)
+}
+
 // AddModeratedCommentIDs adds the "moderated_comments" edge to the Comment entity by IDs.
 func (_u *UserUpdate) AddModeratedCommentIDs(ids ...string) *UserUpdate {
 	_u.mutation.AddModeratedCommentIDs(ids...)
@@ -1242,6 +1258,27 @@ func (_u *UserUpdate) RemoveCommentReports(v ...*CommentReport) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveCommentReportIDs(ids...)
+}
+
+// ClearMediaReports clears all "media_reports" edges to the MediaReport entity.
+func (_u *UserUpdate) ClearMediaReports() *UserUpdate {
+	_u.mutation.ClearMediaReports()
+	return _u
+}
+
+// RemoveMediaReportIDs removes the "media_reports" edge to MediaReport entities by IDs.
+func (_u *UserUpdate) RemoveMediaReportIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemoveMediaReportIDs(ids...)
+	return _u
+}
+
+// RemoveMediaReports removes "media_reports" edges to MediaReport entities.
+func (_u *UserUpdate) RemoveMediaReports(v ...*MediaReport) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveMediaReportIDs(ids...)
 }
 
 // ClearModeratedComments clears all "moderated_comments" edges to the Comment entity.
@@ -2303,6 +2340,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.MediaReportsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MediaReportsTable,
+			Columns: []string{user.MediaReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareport.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedMediaReportsIDs(); len(nodes) > 0 && !_u.mutation.MediaReportsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MediaReportsTable,
+			Columns: []string{user.MediaReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareport.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MediaReportsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MediaReportsTable,
+			Columns: []string{user.MediaReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareport.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _u.mutation.ModeratedCommentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -3323,6 +3405,21 @@ func (_u *UserUpdateOne) AddCommentReports(v ...*CommentReport) *UserUpdateOne {
 	return _u.AddCommentReportIDs(ids...)
 }
 
+// AddMediaReportIDs adds the "media_reports" edge to the MediaReport entity by IDs.
+func (_u *UserUpdateOne) AddMediaReportIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddMediaReportIDs(ids...)
+	return _u
+}
+
+// AddMediaReports adds the "media_reports" edges to the MediaReport entity.
+func (_u *UserUpdateOne) AddMediaReports(v ...*MediaReport) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddMediaReportIDs(ids...)
+}
+
 // AddModeratedCommentIDs adds the "moderated_comments" edge to the Comment entity by IDs.
 func (_u *UserUpdateOne) AddModeratedCommentIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.AddModeratedCommentIDs(ids...)
@@ -3701,6 +3798,27 @@ func (_u *UserUpdateOne) RemoveCommentReports(v ...*CommentReport) *UserUpdateOn
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveCommentReportIDs(ids...)
+}
+
+// ClearMediaReports clears all "media_reports" edges to the MediaReport entity.
+func (_u *UserUpdateOne) ClearMediaReports() *UserUpdateOne {
+	_u.mutation.ClearMediaReports()
+	return _u
+}
+
+// RemoveMediaReportIDs removes the "media_reports" edge to MediaReport entities by IDs.
+func (_u *UserUpdateOne) RemoveMediaReportIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemoveMediaReportIDs(ids...)
+	return _u
+}
+
+// RemoveMediaReports removes "media_reports" edges to MediaReport entities.
+func (_u *UserUpdateOne) RemoveMediaReports(v ...*MediaReport) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveMediaReportIDs(ids...)
 }
 
 // ClearModeratedComments clears all "moderated_comments" edges to the Comment entity.
@@ -4785,6 +4903,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(commentreport.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.MediaReportsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MediaReportsTable,
+			Columns: []string{user.MediaReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareport.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedMediaReportsIDs(); len(nodes) > 0 && !_u.mutation.MediaReportsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MediaReportsTable,
+			Columns: []string{user.MediaReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareport.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MediaReportsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MediaReportsTable,
+			Columns: []string{user.MediaReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareport.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

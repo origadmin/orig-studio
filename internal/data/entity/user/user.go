@@ -117,6 +117,8 @@ const (
 	EdgeReviewLogs = "review_logs"
 	// EdgeCommentReports holds the string denoting the comment_reports edge name in mutations.
 	EdgeCommentReports = "comment_reports"
+	// EdgeMediaReports holds the string denoting the media_reports edge name in mutations.
+	EdgeMediaReports = "media_reports"
 	// EdgeModeratedComments holds the string denoting the moderated_comments edge name in mutations.
 	EdgeModeratedComments = "moderated_comments"
 	// EdgeGroupMemberships holds the string denoting the group_memberships edge name in mutations.
@@ -226,6 +228,13 @@ const (
 	CommentReportsInverseTable = "content_comment_reports"
 	// CommentReportsColumn is the table column denoting the comment_reports relation/edge.
 	CommentReportsColumn = "reporter_id"
+	// MediaReportsTable is the table that holds the media_reports relation/edge.
+	MediaReportsTable = "content_media_reports"
+	// MediaReportsInverseTable is the table name for the MediaReport entity.
+	// It exists in this package in order to avoid circular dependency with the "mediareport" package.
+	MediaReportsInverseTable = "content_media_reports"
+	// MediaReportsColumn is the table column denoting the media_reports relation/edge.
+	MediaReportsColumn = "reporter_id"
 	// ModeratedCommentsTable is the table that holds the moderated_comments relation/edge.
 	ModeratedCommentsTable = "content_comments"
 	// ModeratedCommentsInverseTable is the table name for the Comment entity.
@@ -842,6 +851,20 @@ func ByCommentReports(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByMediaReportsCount orders the results by media_reports count.
+func ByMediaReportsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newMediaReportsStep(), opts...)
+	}
+}
+
+// ByMediaReports orders the results by media_reports terms.
+func ByMediaReports(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newMediaReportsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByModeratedCommentsCount orders the results by moderated_comments count.
 func ByModeratedCommentsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -1000,6 +1023,13 @@ func newCommentReportsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CommentReportsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, CommentReportsTable, CommentReportsColumn),
+	)
+}
+func newMediaReportsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(MediaReportsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, MediaReportsTable, MediaReportsColumn),
 	)
 }
 func newModeratedCommentsStep() *sqlgraph.Step {

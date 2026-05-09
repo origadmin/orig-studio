@@ -17,6 +17,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/history"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
+	"origadmin/application/origcms/internal/data/entity/mediareport"
 	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/permissiongroup"
@@ -746,6 +747,21 @@ func (_c *UserCreate) AddCommentReports(v ...*CommentReport) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddCommentReportIDs(ids...)
+}
+
+// AddMediaReportIDs adds the "media_reports" edge to the MediaReport entity by IDs.
+func (_c *UserCreate) AddMediaReportIDs(ids ...string) *UserCreate {
+	_c.mutation.AddMediaReportIDs(ids...)
+	return _c
+}
+
+// AddMediaReports adds the "media_reports" edges to the MediaReport entity.
+func (_c *UserCreate) AddMediaReports(v ...*MediaReport) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddMediaReportIDs(ids...)
 }
 
 // AddModeratedCommentIDs adds the "moderated_comments" edge to the Comment entity by IDs.
@@ -1484,6 +1500,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(commentreport.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.MediaReportsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.MediaReportsTable,
+			Columns: []string{user.MediaReportsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediareport.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
