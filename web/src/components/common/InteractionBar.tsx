@@ -10,7 +10,8 @@ import {
     LogIn,
     Check,
     Link2,
-    BookmarkPlus
+    BookmarkPlus,
+    Flag
 } from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {Button} from '@/components/ui/button';
@@ -19,6 +20,8 @@ import {mediaApi, publicMediaApi, LikeResponse, FavoriteResponse, ShareResponse}
 import {playlistApi} from '@/lib/api/playlist';
 import {useAuth} from '@/hooks/useAuth';
 import {useNavigate} from '@tanstack/react-router';
+import {toast} from 'sonner';
+import ReportDialog from '@/components/common/ReportDialog';
 import {
     Dialog,
     DialogContent,
@@ -30,6 +33,7 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -83,6 +87,9 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
     // Login dialog
     const [showLoginDialog, setShowLoginDialog] = useState(false);
     const [loginAction, setLoginAction] = useState<string>('');
+
+    // Report dialog
+    const [showReportDialog, setShowReportDialog] = useState(false);
 
     // Fetch initial status
     useEffect(() => {
@@ -340,6 +347,24 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
         }
     };
 
+    const handleReport = async (data: { reason: string; description?: string }) => {
+        try {
+            if (usePublicApi) {
+                await publicMediaApi.report(apiIdentifier, data);
+            } else {
+                await mediaApi.report(mediaId, data);
+            }
+            toast.success(t('report.submitted') || 'Report submitted successfully');
+        } catch (err: any) {
+            throw err;
+        }
+    };
+
+    const handleOpenReportDialog = () => {
+        if (!requireAuth('report')) return;
+        setShowReportDialog(true);
+    };
+
     return (
         <div className="flex items-center gap-2 flex-wrap">
             {/* Like Button */}
@@ -436,6 +461,11 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
                     <DropdownMenuItem onClick={handleDownload} disabled={isDownloading}>
                         <Download className="w-4 h-4 mr-2"/>
                         {isDownloading ? t('common.loading') : (t('watch.download') || 'Download')}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleOpenReportDialog} className="text-amber-600 focus:text-amber-600">
+                        <Flag className="w-4 h-4 mr-2"/>
+                        {t('report.reportVideo') || 'Report Video'}
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
@@ -730,6 +760,14 @@ const InteractionBar: React.FC<InteractionBarProps> = ({mediaId, shortToken, com
                     </div>
                 </DialogContent>
             </Dialog>
+
+            <ReportDialog
+                open={showReportDialog}
+                onOpenChange={setShowReportDialog}
+                targetId={usePublicApi ? apiIdentifier : String(mediaId)}
+                targetType="media"
+                onSubmit={handleReport}
+            />
         </div>
     );
 };
