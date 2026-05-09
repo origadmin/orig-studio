@@ -79,7 +79,7 @@ const VideoCard = ({video}: { video: MediaItem }) => {
                         />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <p className="font-black text-foreground truncate hover:text-info transition-colors cursor-pointer text-sm">
+                        <p className="font-black text-foreground line-clamp-2 hover:text-info transition-colors cursor-pointer text-sm">
                             {authorName}
                         </p>
                         <div
