@@ -99,6 +99,19 @@ func (uc *UploadUseCase) InitiateMultipartUpload(
 	thumbnail string,
 	userID *string,
 ) (*UploadSession, error) {
+	if !uc.isUploadAllowed(ctx) {
+		return nil, fmt.Errorf("upload is disabled")
+	}
+
+	maxSize := uc.getMaxUploadSize(ctx, contentType)
+	if maxSize > 0 && fileSize > maxSize {
+		return nil, fmt.Errorf("file size %d exceeds maximum allowed size %d", fileSize, maxSize)
+	}
+
+	if !uc.isFormatAllowed(ctx, contentType) {
+		return nil, fmt.Errorf("file format %s is not allowed", contentType)
+	}
+
 	uploadID := uuid.New().String()
 	totalParts := int(math.Ceil(float64(fileSize) / float64(uc.chunkSize)))
 
@@ -282,6 +295,11 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 			duration = d
 		} else {
 			uc.log.Errorf("failed to extract duration for %s: %v", fullPath, err)
+		}
+
+		if maxDuration := uc.getMaxVideoDuration(ctx); maxDuration > 0 && duration > maxDuration {
+			_ = uc.storage.Delete(ctx, finalPath)
+			return nil, fmt.Errorf("video duration %s exceeds maximum allowed duration %s", duration, maxDuration)
 		}
 	}
 
@@ -481,4 +499,87 @@ func (uc *UploadUseCase) RetryTranscode(ctx context.Context, mediaID string) err
 
 	uc.log.Infof("retry transcoding requested for media %s", mediaID)
 	return nil
+}
+
+func (uc *UploadUseCase) isUploadAllowed(ctx context.Context) bool {
+	if uc.configProvider == nil {
+		return true
+	}
+	val := uc.configProvider.Get(ctx, "allow_upload")
+	return val != "false" && val != "0"
+}
+
+func (uc *UploadUseCase) getMaxUploadSize(ctx context.Context, contentType string) int64 {
+	if uc.configProvider == nil {
+		return 0
+	}
+	switch {
+	case strings.HasPrefix(contentType, "video/"):
+		if val := uc.configProvider.Get(ctx, "max_upload_size_video"); val != "" {
+			if size, err := parseSize(val); err == nil {
+				return size
+			}
+		}
+	case strings.HasPrefix(contentType, "image/"):
+		if val := uc.configProvider.Get(ctx, "max_upload_size_image"); val != "" {
+			if size, err := parseSize(val); err == nil {
+				return size
+			}
+		}
+	}
+	return 0
+}
+
+func (uc *UploadUseCase) isFormatAllowed(ctx context.Context, contentType string) bool {
+	if uc.configProvider == nil {
+		return true
+	}
+	var allowedFormats string
+	switch {
+	case strings.HasPrefix(contentType, "video/"):
+		allowedFormats = uc.configProvider.Get(ctx, "allowed_video_formats")
+	case strings.HasPrefix(contentType, "image/"):
+		allowedFormats = uc.configProvider.Get(ctx, "allowed_image_formats")
+	default:
+		return true
+	}
+	if allowedFormats == "" {
+		return true
+	}
+	ext := strings.TrimPrefix(contentType, "video/")
+	ext = strings.TrimPrefix(ext, "image/")
+	allowedList := strings.Split(strings.ToLower(allowedFormats), ",")
+	for _, f := range allowedList {
+		if strings.TrimSpace(f) == ext {
+			return true
+		}
+	}
+	return false
+}
+
+func (uc *UploadUseCase) getMaxVideoDuration(ctx context.Context) time.Duration {
+	if uc.configProvider == nil {
+		return 0
+	}
+	val := uc.configProvider.Get(ctx, "max_video_duration")
+	if val == "" {
+		return 0
+	}
+	seconds, err := parseSizeInt(val)
+	if err != nil {
+		return 0
+	}
+	return time.Duration(seconds) * time.Second
+}
+
+func parseSize(s string) (int64, error) {
+	var size int64
+	_, err := fmt.Sscanf(s, "%d", &size)
+	return size, err
+}
+
+func parseSizeInt(s string) (int, error) {
+	var size int
+	_, err := fmt.Sscanf(s, "%d", &size)
+	return size, err
 }

@@ -6,6 +6,8 @@
 package server
 
 import (
+	"context"
+	"encoding/json"
 	"mime"
 	"os"
 
@@ -32,9 +34,14 @@ type Server struct {
 	entityClient *entity.Client
 	jwtMgr       *auth.Manager
 	paths        *conf.StoragePaths
+	settingUC    SettingProvider
+	rateLimiter  interface{ Middleware() gin.HandlerFunc; Stop() }
 }
 
-// NewServer creates a new server instance.
+type SettingProvider interface {
+	Get(ctx context.Context, key string) string
+}
+
 func NewServer(
 	modules []Module,
 	entityClient *entity.Client,
@@ -46,6 +53,20 @@ func NewServer(
 		entityClient: entityClient,
 		jwtMgr:       jwtMgr,
 		paths:        paths,
+	}
+}
+
+func (s *Server) SetSettingProvider(uc SettingProvider) {
+	s.settingUC = uc
+}
+
+func (s *Server) SetRateLimiter(rl interface{ Middleware() gin.HandlerFunc; Stop() }) {
+	s.rateLimiter = rl
+}
+
+func (s *Server) Stop() {
+	if s.rateLimiter != nil {
+		s.rateLimiter.Stop()
 	}
 }
 
@@ -64,7 +85,25 @@ func (s *Server) Start(addr string) error {
 
 	// CORS
 	r.Use(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		origin := c.GetHeader("Origin")
+		allowedOrigin := "*"
+
+		if s.settingUC != nil && origin != "" {
+			urls := s.settingUC.Get(c.Request.Context(), "base_urls")
+			if urls != "" {
+				var allowed []string
+				if err := json.Unmarshal([]byte(urls), &allowed); err == nil {
+					for _, u := range allowed {
+						if u != "" && u == origin {
+							allowedOrigin = origin
+							break
+						}
+					}
+				}
+			}
+		}
+
+		c.Writer.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, Range")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH")
@@ -76,6 +115,11 @@ func (s *Server) Start(addr string) error {
 
 		c.Next()
 	})
+
+	// Rate limiting (applied to all routes)
+	if s.rateLimiter != nil {
+		r.Use(s.rateLimiter.Middleware())
+	}
 
 	// Register static file routes using StoragePaths
 	absBase := s.paths.BasePath()
@@ -91,7 +135,28 @@ func (s *Server) Start(addr string) error {
 	// Register frontend SPA routes (auto-detect: serves embedded dist if present)
 	web.RegisterRoutes(r)
 
-	log.Infof("origcms server starting, addr: %s", addr)
+	// Print access URLs
+	displayAddr := addr
+	if len(displayAddr) > 0 && displayAddr[0] == ':' {
+		displayAddr = "localhost" + displayAddr
+	}
+
+	log.Infof("=")
+	log.Infof("  OrigCMS Server Started")
+	log.Infof("=")
+
+	if !web.IsDistEmpty() {
+		log.Infof("  -> Web UI (Embedded): http://%s", displayAddr)
+	} else {
+		log.Infof("  -> Backend API Only")
+		log.Infof("  (Frontend not embedded - run dev server separately)")
+	}
+
+	log.Infof("  -> API Base: http://%s/api/v1", displayAddr)
+	log.Infof("  -> Health Check: http://%s/health", displayAddr)
+	log.Infof("=")
+	
+	log.Infof("listening on: %s", addr)
 	return r.Run(addr)
 }
 

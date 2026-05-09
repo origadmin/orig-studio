@@ -44,6 +44,7 @@ import (
 	"origadmin/application/origcms/internal/infra"
 	infraauth "origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/infra/pubsub"
+	"origadmin/application/origcms/internal/middleware"
 
 	"github.com/google/wire"
 )
@@ -66,6 +67,7 @@ var ProviderSet = wire.NewSet(
 	NewTranscodeConfig,
 	NewStoragePaths,
 	NewStorageConfig,
+	NewRateLimiter,
 
 	// Bridge functions for media module
 	NewStorage,
@@ -100,6 +102,7 @@ var ProviderSet = wire.NewSet(
 	NewInteractionHandler,
 	NewAdminTagHandler,
 	NewExploreHandler,
+	NewPortalHandler,
 	NewStubHandler,
 	NewSpriteHandler,
 
@@ -185,9 +188,9 @@ func NewUploadConfig() *config.UploadConfig {
 	return config.DefaultUploadConfig()
 }
 
-// NewStoragePaths creates StoragePaths from UploadConfig.
-func NewStoragePaths(cfg *config.UploadConfig) *config.StoragePaths {
-	return config.NewStoragePaths(cfg.StorageBasePath)
+// NewStoragePaths creates StoragePaths from StorageConfig.
+func NewStoragePaths(cfg *config.StorageConfig) *config.StoragePaths {
+	return config.NewStoragePaths(cfg.BasePath)
 }
 
 // NewTranscodeConfig creates transcode config from defaults.
@@ -199,6 +202,20 @@ func NewTranscodeConfig() *config.TranscodeConfig {
 func NewWorker(logger log.Logger) mediabiz.TranscodeWorker {
 	maxWorkers := int32(infra.EnvInt("TRANSCODE_MAX_WORKERS", 3))
 	return mediabiz.NewGoroutineWorker(maxWorkers, log.NewHelper(log.With(logger, "module", "transcode.worker")))
+}
+
+// NewRateLimiter creates a new rate limiter with rpm from settings.
+func NewRateLimiter(settingUC *systembiz.SettingUseCase) *middleware.RateLimiter {
+	defaultRPM := 60
+	if settingUC != nil {
+		if val := settingUC.Get(context.Background(), "api_rate_limit"); val != "" {
+			var rpm int
+			if _, err := fmt.Sscanf(val, "%d", &rpm); err == nil && rpm > 0 {
+				defaultRPM = rpm
+			}
+		}
+	}
+	return middleware.NewRateLimiter(defaultRPM)
 }
 
 // NewUploadUseCase creates a new upload use case with config from UploadConfig.
@@ -338,6 +355,11 @@ func NewExploreHandler(client *entity.Client) *contentservice.ExploreHandler {
 	return contentservice.NewExploreHandler(client)
 }
 
+// NewPortalHandler creates a new portal handler.
+func NewPortalHandler(uc *contentbiz.PortalUseCase, jwt *infraauth.Manager, settingUC *systembiz.SettingUseCase) *contentservice.PortalHandler {
+	return contentservice.NewPortalHandler(uc, jwt, settingUC)
+}
+
 // NewStubHandler creates a new stub handler for missing routes.
 func NewStubHandler(jwt *infraauth.Manager) *contentservice.StubHandler {
 	return contentservice.NewStubHandler(jwt)
@@ -387,12 +409,14 @@ type AppDependencies struct {
 	NotificationHandler      *contentservice.NotificationHandler
 	ShareHandler             *contentservice.ShareHandler
 	ExploreHandler           *contentservice.ExploreHandler
-	AdminHandler             *adminservice.AdminHandler
+	PortalHandler            *contentservice.PortalHandler
+	AdminHandler            *adminservice.AdminHandler
 	AdminTagHandler          *adminservice.AdminTagHandler
 	StubHandler              *contentservice.StubHandler
 	SpriteHandler            *contentservice.SpriteHandler
 	SystemHandler            *systemservice.SystemHandler
 	StatsHandler             *systemservice.StatsHandler
+	RateLimiter              *middleware.RateLimiter
 	UploadUC                 *mediabiz.UploadUseCase
 	CommentLikeUC            *contentbiz.CommentLikeUseCase
 }

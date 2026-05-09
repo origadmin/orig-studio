@@ -165,12 +165,12 @@ func (h *PortalHandler) updateNavItem() http.HandlerFunc {
 			return
 		}
 
-		existing, err := h.uc.GetCustomPageByID(r.Context(), id)
-		_ = existing
+		existing, err := h.uc.GetNavItemByID(r.Context(), id)
 		if err != nil {
 			server.Fail(gc, server.ErrNotFound, "nav item not found")
 			return
 		}
+		_ = existing
 
 		item := &entity.PortalNavItem{
 			ID: id,

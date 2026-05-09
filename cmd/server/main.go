@@ -114,6 +114,7 @@ func main() {
 			deps.NotificationHandler,
 			deps.ShareHandler,
 			deps.ExploreHandler,
+			deps.PortalHandler,
 			deps.AdminHandler,
 			deps.AdminTagHandler,
 			deps.StubHandler,
@@ -125,6 +126,9 @@ func main() {
 		deps.JWTManager,
 		deps.StoragePaths,
 	)
+
+	srv.SetSettingProvider(deps.SettingUC)
+	srv.SetRateLimiter(deps.RateLimiter)
 
 	// Start server
 	addr := cfg.Server.HTTP.Addr
