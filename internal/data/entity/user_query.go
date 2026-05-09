@@ -18,6 +18,7 @@ import (
 	"origadmin/application/origcms/internal/data/entity/history"
 	"origadmin/application/origcms/internal/data/entity/like"
 	"origadmin/application/origcms/internal/data/entity/media"
+	"origadmin/application/origcms/internal/data/entity/mediareport"
 	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/permissiongroup"
@@ -56,6 +57,7 @@ type UserQuery struct {
 	withSubscribers       *SubscriptionQuery
 	withReviewLogs        *MediaReviewLogQuery
 	withCommentReports    *CommentReportQuery
+	withMediaReports      *MediaReportQuery
 	withModeratedComments *CommentQuery
 	withGroupMemberships  *GroupMemberQuery
 	withCreatedGroups     *PermissionGroupQuery
@@ -427,6 +429,28 @@ func (_q *UserQuery) QueryCommentReports() *CommentReportQuery {
 	return query
 }
 
+// QueryMediaReports chains the current query on the "media_reports" edge.
+func (_q *UserQuery) QueryMediaReports() *MediaReportQuery {
+	query := (&MediaReportClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(mediareport.Table, mediareport.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.MediaReportsTable, user.MediaReportsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryModeratedComments chains the current query on the "moderated_comments" edge.
 func (_q *UserQuery) QueryModeratedComments() *CommentQuery {
 	query := (&CommentClient{config: _q.config}).Query()
@@ -722,6 +746,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		withSubscribers:       _q.withSubscribers.Clone(),
 		withReviewLogs:        _q.withReviewLogs.Clone(),
 		withCommentReports:    _q.withCommentReports.Clone(),
+		withMediaReports:      _q.withMediaReports.Clone(),
 		withModeratedComments: _q.withModeratedComments.Clone(),
 		withGroupMemberships:  _q.withGroupMemberships.Clone(),
 		withCreatedGroups:     _q.withCreatedGroups.Clone(),
@@ -898,6 +923,17 @@ func (_q *UserQuery) WithCommentReports(opts ...func(*CommentReportQuery)) *User
 	return _q
 }
 
+// WithMediaReports tells the query-builder to eager-load the nodes that are connected to
+// the "media_reports" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithMediaReports(opts ...func(*MediaReportQuery)) *UserQuery {
+	query := (&MediaReportClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withMediaReports = query
+	return _q
+}
+
 // WithModeratedComments tells the query-builder to eager-load the nodes that are connected to
 // the "moderated_comments" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithModeratedComments(opts ...func(*CommentQuery)) *UserQuery {
@@ -1020,7 +1056,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [19]bool{
+		loadedTypes = [20]bool{
 			_q.withMedia != nil,
 			_q.withArticles != nil,
 			_q.withChannels != nil,
@@ -1036,6 +1072,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			_q.withSubscribers != nil,
 			_q.withReviewLogs != nil,
 			_q.withCommentReports != nil,
+			_q.withMediaReports != nil,
 			_q.withModeratedComments != nil,
 			_q.withGroupMemberships != nil,
 			_q.withCreatedGroups != nil,
@@ -1165,6 +1202,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadCommentReports(ctx, query, nodes,
 			func(n *User) { n.Edges.CommentReports = []*CommentReport{} },
 			func(n *User, e *CommentReport) { n.Edges.CommentReports = append(n.Edges.CommentReports, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withMediaReports; query != nil {
+		if err := _q.loadMediaReports(ctx, query, nodes,
+			func(n *User) { n.Edges.MediaReports = []*MediaReport{} },
+			func(n *User, e *MediaReport) { n.Edges.MediaReports = append(n.Edges.MediaReports, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1731,6 +1775,36 @@ func (_q *UserQuery) loadCommentReports(ctx context.Context, query *CommentRepor
 	}
 	query.Where(predicate.CommentReport(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.CommentReportsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ReporterID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "reporter_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadMediaReports(ctx context.Context, query *MediaReportQuery, nodes []*User, init func(*User), assign func(*User, *MediaReport)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(mediareport.FieldReporterID)
+	}
+	query.Where(predicate.MediaReport(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.MediaReportsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

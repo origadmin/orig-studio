@@ -898,6 +898,63 @@ var (
 			},
 		},
 	}
+	// ContentMediaReportsColumns holds the columns for the "content_media_reports" table.
+	ContentMediaReportsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "reason", Type: field.TypeEnum, Enums: []string{"SPAM", "HARASSMENT", "INAPPROPRIATE", "OTHER"}},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "REVIEWED", "DISMISSED"}, Default: "PENDING"},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "media_id", Type: field.TypeString, Size: 36},
+		{Name: "reporter_id", Type: field.TypeString, Size: 36},
+	}
+	// ContentMediaReportsTable holds the schema information for the "content_media_reports" table.
+	ContentMediaReportsTable = &schema.Table{
+		Name:       "content_media_reports",
+		Columns:    ContentMediaReportsColumns,
+		PrimaryKey: []*schema.Column{ContentMediaReportsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "content_media_reports_content_media_reports",
+				Columns:    []*schema.Column{ContentMediaReportsColumns[5]},
+				RefColumns: []*schema.Column{ContentMediaColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "content_media_reports_users_media_reports",
+				Columns:    []*schema.Column{ContentMediaReportsColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "mediareport_reporter_id_media_id",
+				Unique:  true,
+				Columns: []*schema.Column{ContentMediaReportsColumns[6], ContentMediaReportsColumns[5]},
+			},
+			{
+				Name:    "mediareport_media_id",
+				Unique:  false,
+				Columns: []*schema.Column{ContentMediaReportsColumns[5]},
+			},
+			{
+				Name:    "mediareport_reason",
+				Unique:  false,
+				Columns: []*schema.Column{ContentMediaReportsColumns[1]},
+			},
+			{
+				Name:    "mediareport_create_time",
+				Unique:  false,
+				Columns: []*schema.Column{ContentMediaReportsColumns[4]},
+			},
+			{
+				Name:    "mediareport_status",
+				Unique:  false,
+				Columns: []*schema.Column{ContentMediaReportsColumns[3]},
+			},
+		},
+	}
 	// ContentMediaReviewLogsColumns holds the columns for the "content_media_review_logs" table.
 	ContentMediaReviewLogsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
@@ -1427,6 +1484,7 @@ var (
 		ContentMediaTable,
 		ContentMediaCategoriesTable,
 		ContentPlaylistMediaTable,
+		ContentMediaReportsTable,
 		ContentMediaReviewLogsTable,
 		ContentMediaTagsTable,
 		UserNotificationsTable,
@@ -1521,6 +1579,11 @@ func init() {
 	ContentPlaylistMediaTable.ForeignKeys[2].RefTable = ContentPlaylistsTable
 	ContentPlaylistMediaTable.Annotation = &entsql.Annotation{
 		Table: "content_playlist_media",
+	}
+	ContentMediaReportsTable.ForeignKeys[0].RefTable = ContentMediaTable
+	ContentMediaReportsTable.ForeignKeys[1].RefTable = UsersTable
+	ContentMediaReportsTable.Annotation = &entsql.Annotation{
+		Table: "content_media_reports",
 	}
 	ContentMediaReviewLogsTable.ForeignKeys[0].RefTable = ContentMediaTable
 	ContentMediaReviewLogsTable.ForeignKeys[1].RefTable = UsersTable

@@ -188,6 +188,18 @@ func (f MediaPlaylistFunc) Mutate(ctx context.Context, m entity.Mutation) (entit
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.MediaPlaylistMutation", m)
 }
 
+// The MediaReportFunc type is an adapter to allow the use of ordinary
+// function as MediaReport mutator.
+type MediaReportFunc func(context.Context, *entity.MediaReportMutation) (entity.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MediaReportFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Value, error) {
+	if mv, ok := m.(*entity.MediaReportMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.MediaReportMutation", m)
+}
+
 // The MediaReviewLogFunc type is an adapter to allow the use of ordinary
 // function as MediaReviewLog mutator.
 type MediaReviewLogFunc func(context.Context, *entity.MediaReviewLogMutation) (entity.Value, error)
