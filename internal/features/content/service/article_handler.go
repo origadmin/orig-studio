@@ -7,17 +7,14 @@ package service
 import (
 	"fmt"
 	"math/rand"
-	"strconv"
-
-	ginhttp "github.com/gin-gonic/gin"
 
 	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/helpers/hashtag"
-	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/server"
 	"origadmin/application/origcms/internal/features/content/biz"
+	"origadmin/application/origcms/api/gen/v1/types"
 	systembiz "origadmin/application/origcms/internal/features/system/biz"
 	systemservice "origadmin/application/origcms/internal/features/system/service"
 )
@@ -36,17 +33,6 @@ func NewArticleHandler(uc *biz.ArticleUseCase, jwt *auth.Manager, settingUC *sys
 func extractUserIDCtx(ctx http2.Context) string {
 	if claims, ok := server.GetClaimsCtx(ctx); ok {
 		return claims.GetUserID()
-	}
-	return ""
-}
-
-// extractUserID extracts the user ID from JWT claims in the Gin context.
-// Deprecated: Use extractUserIDCtx instead.
-func extractUserID(c *ginhttp.Context) string {
-	if claims, exists := c.Get("claims"); exists {
-		if cl, ok := claims.(*auth.Claims); ok {
-			return cl.GetUserID()
-		}
 	}
 	return ""
 }
@@ -98,41 +84,43 @@ func (h *ArticleHandler) listArticles() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 
-		page, _ := strconv.Atoi(gc.Query("page"))
-		if page == 0 {
-			page = 1
+		req := &types.ListArticlesRequest{
+			Page:     1,
+			PageSize: 20,
 		}
-		pageSize, _ := strconv.Atoi(gc.Query("page_size"))
-		if pageSize == 0 {
-			pageSize = 20
-		}
-		// Normalize pagination parameters
-		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
-		filters := map[string]interface{}{}
+		if page := gc.Query("page"); page != "" {
+			fmt.Sscanf(page, "%d", &req.Page)
+		}
+		if req.Page <= 0 {
+			req.Page = 1
+		}
+
+		if pageSize := gc.Query("page_size"); pageSize != "" {
+			fmt.Sscanf(pageSize, "%d", &req.PageSize)
+		}
+		if req.PageSize <= 0 {
+			req.PageSize = 20
+		}
 
 		state := gc.Query("state")
 		if state == "" {
 			state = "published"
 		}
-		filters["state"] = state
+		req.State = state
 
 		if categoryIDStr := gc.Query("category_id"); categoryIDStr != "" {
-			if catID, err := strconv.ParseInt(categoryIDStr, 10, 64); err == nil {
-				filters["category_id"] = catID
-			}
+			fmt.Sscanf(categoryIDStr, "%d", &req.CategoryId)
 		}
-		if keyword := gc.Query("keyword"); keyword != "" {
-			_ = keyword
-		}
+		req.Keyword = gc.Query("keyword")
 
-		items, total, err := h.uc.List(ctx.Request().Context(), page, pageSize, filters)
+		resp, err := h.uc.List(ctx.Request().Context(), req)
 		if err != nil {
 			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		http2.Page(ctx, items, int64(total), page, pageSize)
+		http2.OK(ctx, resp)
 		return nil
 	}
 }
@@ -181,26 +169,31 @@ func (h *ArticleHandler) listFeaturedArticles() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 
-		limit, _ := strconv.Atoi(gc.Query("limit"))
-		if limit == 0 {
+		limit := 10
+		if limitStr := gc.Query("limit"); limitStr != "" {
+			fmt.Sscanf(limitStr, "%d", &limit)
+		}
+		if limit <= 0 {
 			limit = 10
 		}
 		if limit > 50 {
 			limit = 50
 		}
 
-		filters := map[string]interface{}{
-			"state":    "published",
-			"featured": true,
+		req := &types.ListArticlesRequest{
+			Page:     1,
+			PageSize: int32(limit),
+			State:    "published",
+			Featured: true,
 		}
 
-		items, _, err := h.uc.List(ctx.Request().Context(), 1, limit, filters)
+		resp, err := h.uc.List(ctx.Request().Context(), req)
 		if err != nil {
 			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		http2.OK(ctx, items)
+		http2.OK(ctx, resp.Articles)
 		return nil
 	}
 }
@@ -209,25 +202,30 @@ func (h *ArticleHandler) listLatestArticles() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 
-		limit, _ := strconv.Atoi(gc.Query("limit"))
-		if limit == 0 {
+		limit := 10
+		if limitStr := gc.Query("limit"); limitStr != "" {
+			fmt.Sscanf(limitStr, "%d", &limit)
+		}
+		if limit <= 0 {
 			limit = 10
 		}
 		if limit > 50 {
 			limit = 50
 		}
 
-		filters := map[string]interface{}{
-			"state": "published",
+		req := &types.ListArticlesRequest{
+			Page:     1,
+			PageSize: int32(limit),
+			State:    "published",
 		}
 
-		items, _, err := h.uc.List(ctx.Request().Context(), 1, limit, filters)
+		resp, err := h.uc.List(ctx.Request().Context(), req)
 		if err != nil {
 			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		http2.OK(ctx, items)
+		http2.OK(ctx, resp.Articles)
 		return nil
 	}
 }
@@ -254,7 +252,6 @@ func (h *ArticleHandler) createArticle() http2.HandlerFunc {
 			return nil
 		}
 
-		// Reject archived state from user-side requests
 		if input.State == "archived" {
 			http2.Fail(ctx, server.ErrBadRequest, "invalid state, must be draft or published")
 			return nil
@@ -265,28 +262,25 @@ func (h *ArticleHandler) createArticle() http2.HandlerFunc {
 		slug := input.Slug
 		if slug == "" {
 			slug = hashtag.GenerateTagSlug(input.Title)
-			// Append random suffix to auto-generated slugs to avoid collisions
-			// (article slug is Unique in schema; same-titled articles would conflict)
 			slug = fmt.Sprintf("%s-%s", slug, randomSuffix(4))
 		}
 
-		// Determine state: default to draft, only allow draft or published
 		state := "draft"
 		if input.State == "published" {
 			state = "published"
 		}
 
-		article := &biz.Article{
+		article := &types.Article{
 			Title:      input.Title,
 			Slug:       slug,
 			Content:    input.Content,
 			Summary:    input.Summary,
 			State:      state,
-			Featured:   false, // Always false for user-side; ignore user input
+			Featured:   false,
 			Tags:       input.Tags,
-			UserID:     userID,
-			CategoryID: input.CategoryID,
-			MediaID:    input.MediaID,
+			UserId:     userID,
+			CategoryId: input.CategoryID,
+			MediaId:    input.MediaID,
 			Thumbnail:  input.Thumbnail,
 		}
 
@@ -329,7 +323,6 @@ func (h *ArticleHandler) updateArticle() http2.HandlerFunc {
 			return nil
 		}
 
-		// Reject archived state from user-side requests
 		if input.State == "archived" {
 			http2.Fail(ctx, server.ErrBadRequest, "invalid state, must be draft or published")
 			return nil
@@ -341,9 +334,8 @@ func (h *ArticleHandler) updateArticle() http2.HandlerFunc {
 			return nil
 		}
 
-		// Ownership check: only the article owner can update
 		userID := extractUserIDCtx(ctx)
-		if existing.UserID != userID {
+		if existing.UserId != userID {
 			http2.Fail(ctx, server.ErrForbidden, "you can only edit your own articles")
 			return nil
 		}
@@ -361,17 +353,15 @@ func (h *ArticleHandler) updateArticle() http2.HandlerFunc {
 			existing.Summary = input.Summary
 		}
 		if input.CategoryID != 0 {
-			existing.CategoryID = input.CategoryID
+			existing.CategoryId = input.CategoryID
 		}
 		if input.MediaID != "" {
-			existing.MediaID = input.MediaID
+			existing.MediaId = input.MediaID
 		}
-		existing.Thumbnail = input.Thumbnail // Allow empty string to clear
+		existing.Thumbnail = input.Thumbnail
 		if input.Tags != nil {
 			existing.Tags = input.Tags
 		}
-		// Preserve existing featured value; ignore user input
-		// existing.Featured is NOT modified from input.Featured
 		if input.State != "" {
 			existing.State = input.State
 		}
@@ -403,14 +393,12 @@ func (h *ArticleHandler) deleteArticle() http2.HandlerFunc {
 			return nil
 		}
 
-		// Ownership check: only the article owner can delete
 		userID := extractUserIDCtx(ctx)
-		if article.UserID != userID {
+		if article.UserId != userID {
 			http2.Fail(ctx, server.ErrForbidden, "you can only delete your own articles")
 			return nil
 		}
 
-		// Only allow deleting draft articles
 		if article.State == "published" {
 			http2.Fail(ctx, server.ErrBadRequest, "published articles cannot be deleted, please contact admin")
 			return nil
@@ -445,21 +433,20 @@ func (h *ArticleHandler) updateArticleState() http2.HandlerFunc {
 			return nil
 		}
 
-		// Only allow draft and published states for user-side
 		validUserStates := map[string]bool{"draft": true, "published": true}
 		if !validUserStates[input.State] {
 			http2.Fail(ctx, server.ErrBadRequest, "invalid state, must be draft or published")
 			return nil
 		}
 
-		// Ownership check: only the article owner can change state
 		article, err := h.uc.Get(ctx.Request().Context(), id)
 		if err != nil {
 			http2.Fail(ctx, server.ErrNotFound, "article not found")
 			return nil
 		}
+
 		userID := extractUserIDCtx(ctx)
-		if article.UserID != userID {
+		if article.UserId != userID {
 			http2.Fail(ctx, server.ErrForbidden, "you can only modify your own articles")
 			return nil
 		}
@@ -491,31 +478,37 @@ func (h *ArticleHandler) listMyArticles() http2.HandlerFunc {
 			return nil
 		}
 
-		page, _ := strconv.Atoi(gc.Query("page"))
-		if page == 0 {
-			page = 1
+		req := &types.ListArticlesRequest{
+			Page:     1,
+			PageSize: 20,
+			UserId:   userID,
 		}
-		pageSize, _ := strconv.Atoi(gc.Query("page_size"))
-		if pageSize == 0 {
-			pageSize = 20
-		}
-		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
 
-		filters := map[string]interface{}{
-			"user_id": userID,
+		if page := gc.Query("page"); page != "" {
+			fmt.Sscanf(page, "%d", &req.Page)
+		}
+		if req.Page <= 0 {
+			req.Page = 1
+		}
+
+		if pageSize := gc.Query("page_size"); pageSize != "" {
+			fmt.Sscanf(pageSize, "%d", &req.PageSize)
+		}
+		if req.PageSize <= 0 {
+			req.PageSize = 20
 		}
 
 		if state := gc.Query("state"); state != "" {
-			filters["state"] = state
+			req.State = state
 		}
 
-		items, total, err := h.uc.List(ctx.Request().Context(), page, pageSize, filters)
+		resp, err := h.uc.List(ctx.Request().Context(), req)
 		if err != nil {
 			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		http2.Page(ctx, items, int64(total), page, pageSize)
+		http2.OK(ctx, resp)
 		return nil
 	}
 }

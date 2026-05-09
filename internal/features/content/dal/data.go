@@ -25,4 +25,6 @@ var ProviderSet = wire.NewSet(
 	NewCommentReportRepo,
 	NewCommentLikeRepo,
 	NewHistoryRepo,
+	NewMediaReportRepo,
+	NewMediaReportModerationRepo,
 )
