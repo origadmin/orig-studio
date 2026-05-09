@@ -4,9 +4,12 @@ export interface NavItem {
     id: string;
     type: "internal_link" | "external_link" | "category";
     label: string;
+    label_i18n?: Record<string, string>;
     url: string;
     icon?: string;
+    color?: string;
     sequence: number;
+    is_visible?: boolean;
     open_new_tab: boolean;
 }
 
@@ -36,9 +39,12 @@ export interface UpdateNavItemRequest {
 export interface Banner {
     id: string;
     title: string;
+    title_i18n?: Record<string, string>;
     subtitle?: string;
+    subtitle_i18n?: Record<string, string>;
     badge_text?: string;
     image_url?: string;
+    image_mobile_url?: string;
     primary_btn_text?: string;
     primary_btn_url?: string;
     secondary_btn_text?: string;
@@ -82,6 +88,55 @@ export interface UpdateBannerRequest {
     sequence?: number;
     start_time?: string;
     end_time?: string;
+}
+
+export interface CustomPage {
+    id: string;
+    title: string;
+    slug: string;
+    type: "static" | "markdown" | "rich_text";
+    content_format: "markdown" | "html" | "plain";
+    content: string;
+    layout: "default" | "full_width" | "sidebar";
+    is_published: boolean;
+    published_at?: string;
+    seo_title?: string;
+    seo_description?: string;
+    featured_image?: string;
+    view_count: number;
+    create_time: string;
+    update_time: string;
+}
+
+export interface CustomPageListResponse {
+    items: CustomPage[];
+    total: number;
+}
+
+export interface CreateCustomPageRequest {
+    title: string;
+    slug: string;
+    type?: "static" | "markdown" | "rich_text";
+    content_format?: "markdown" | "html" | "plain";
+    content: string;
+    layout?: "default" | "full_width" | "sidebar";
+    is_published?: boolean;
+    seo_title?: string;
+    seo_description?: string;
+    featured_image?: string;
+}
+
+export interface UpdateCustomPageRequest {
+    title?: string;
+    slug?: string;
+    type?: "static" | "markdown" | "rich_text";
+    content_format?: "markdown" | "html" | "plain";
+    content?: string;
+    layout?: "default" | "full_width" | "sidebar";
+    is_published?: boolean;
+    seo_title?: string;
+    seo_description?: string;
+    featured_image?: string;
 }
 
 export interface FeaturedUser {
@@ -154,4 +209,19 @@ export const adminPortalApi = {
 
     toggleBanner: (id: string) =>
         api.post<Banner>(`/admin/banners/${id}/toggle`),
+
+    listPages: () =>
+        api.get<CustomPageListResponse>('/admin/pages'),
+
+    createPage: (data: CreateCustomPageRequest) =>
+        api.post<CustomPage>('/admin/pages', data),
+
+    updatePage: (id: string, data: UpdateCustomPageRequest) =>
+        api.put<CustomPage>(`/admin/pages/${id}`, data),
+
+    deletePage: (id: string) =>
+        api.del<void>(`/admin/pages/${id}`),
+
+    getPage: (slug: string) =>
+        api.get<CustomPage>(`/p/${slug}`),
 };

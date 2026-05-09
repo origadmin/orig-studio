@@ -899,7 +899,26 @@
     "slugLabel": "Slug",
     "unblocked": "Unblocked",
     "commentDeleted": "Comment deleted",
-    "reportsDismissed": "Reports dismissed"
+    "reportsDismissed": "Reports dismissed",
+    "pages": {
+      "title": "Custom Pages",
+      "description": "Manage custom pages and portal navigation",
+      "create": "New Page",
+      "list": "Pages",
+      "empty": "No custom pages yet. Create one to get started.",
+      "published": "Published",
+      "draft": "Draft",
+      "edit": "Edit Page",
+      "form": {
+        "title": "Title",
+        "slug": "Slug",
+        "type": "Type",
+        "format": "Content Format",
+        "content": "Content",
+        "seoTitle": "SEO Title",
+        "seoDescription": "SEO Description"
+      }
+    }
   },
   "settings": {
     "title": "System Settings",

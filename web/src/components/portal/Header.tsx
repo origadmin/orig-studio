@@ -21,11 +21,13 @@ import {
     FileText,
     Tv,
     UserCircle,
+    ExternalLink,
 } from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {useAuth} from '@/hooks/useAuth';
 import {useModuleConfig} from '@/hooks/useModuleConfig';
 import {useModuleState} from '@/contexts/ModuleConfigContext';
+import {usePortalConfig} from '@/hooks/queries';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 
 /* ── QuickLink 定义 ──────────────────────────────────────────────────────── */
@@ -80,28 +82,20 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
     const location = useLocation();
     const {isAuthenticated, user, logout, isAdmin} = useAuth();
     const {data: moduleConfig} = useModuleConfig();
+    const {data: portalConfig} = usePortalConfig();
     const {site} = useModuleState();
     const articlesEnabled = moduleConfig?.modules?.articles !== false;
 
-    // 从 localStorage 读取自定义 QuickLinks
-    const [customLinks] = useState<QuickLink[]>(() => {
-        try {
-            const raw = localStorage.getItem('origcms_quicklinks');
-            return raw ? JSON.parse(raw) : [];
-        } catch {
-            return [];
-        }
-    });
+    const dynamicNavItems = (portalConfig?.navigation?.items || [])
+        .filter(item => item.is_visible !== false)
+        .sort((a, b) => a.sequence - b.sequence);
 
-    const quickLinks: QuickLink[] = [
-        {label: t('nav.featured'), to: '/featured'},
-        {label: t('nav.latest'), to: '/latest'},
-        {label: t('nav.categories'), to: '/categories'},
-        {label: t('nav.tags'), to: '/tags'},
-        {label: t('nav.members'), to: '/members'},
-    ];
+    const quickLinks: QuickLink[] = dynamicNavItems.map(item => ({
+        label: item.label_i18n?.[i18n.language] || item.label,
+        to: item.url,
+    }));
 
-    const allLinks = [...quickLinks, ...customLinks];
+    const allLinks = [...quickLinks];
     const visibleLinks = allLinks.slice(0, VISIBLE_QUICK_LINKS);
     const moreLinks = allLinks.slice(VISIBLE_QUICK_LINKS);
 
@@ -160,21 +154,38 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
 
                 {/* 中间: QuickLinks */}
                 <nav className="hidden md:flex items-center gap-1 ml-4">
-                    {visibleLinks.map((link) => (
-                        <Link
-                            key={link.to}
-                            to={link.to}
-                            className={`px-3 py-1.5 text-sm rounded-full transition-colors whitespace-nowrap ${
-                                isActive(link.to)
-                                    ? 'bg-brand/10 dark:bg-brand/20 text-brand dark:text-brand font-medium'
-                                    : 'text-muted-foreground hover:bg-accent'
-                            }`}
-                        >
-                            {link.label}
-                        </Link>
-                    ))}
+                    {visibleLinks.map((link, idx) => {
+                        const navItem = dynamicNavItems[idx];
+                        const isExternal = navItem?.type === 'external_link' || link.to.startsWith('http');
+                        if (isExternal) {
+                            return (
+                                <a
+                                    key={link.to + idx}
+                                    href={link.to}
+                                    target={navItem?.open_new_tab ? '_blank' : undefined}
+                                    rel={navItem?.open_new_tab ? 'noopener noreferrer' : undefined}
+                                    className="px-3 py-1.5 text-sm rounded-full transition-colors whitespace-nowrap text-muted-foreground hover:bg-accent flex items-center gap-1"
+                                >
+                                    {link.label}
+                                    <ExternalLink className="h-3 w-3"/>
+                                </a>
+                            );
+                        }
+                        return (
+                            <Link
+                                key={link.to}
+                                to={link.to}
+                                className={`px-3 py-1.5 text-sm rounded-full transition-colors whitespace-nowrap ${
+                                    isActive(link.to)
+                                        ? 'bg-brand/10 dark:bg-brand/20 text-brand dark:text-brand font-medium'
+                                        : 'text-muted-foreground hover:bg-accent'
+                                }`}
+                            >
+                                {link.label}
+                            </Link>
+                        );
+                    })}
 
-                    {/* 更多下拉 */}
                     {moreLinks.length > 0 && (
                         <div className="relative" ref={moreMenuRef}>
                             <button
@@ -188,20 +199,39 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                             {moreMenuOpen && (
                                 <div
                                     className="absolute top-full left-0 mt-1 bg-popover border border-border rounded-xl shadow-lg py-1 min-w-[140px]">
-                                    {moreLinks.map((link) => (
-                                        <Link
-                                            key={link.to}
-                                            to={link.to}
-                                            onClick={() => setMoreMenuOpen(false)}
-                                            className={`block px-4 py-2 text-sm transition-colors ${
-                                                isActive(link.to)
-                                                    ? 'bg-brand/10 dark:bg-brand/20 text-brand dark:text-brand font-medium'
-                                                    : 'text-muted-foreground hover:bg-accent'
-                                            }`}
-                                        >
-                                            {link.label}
-                                        </Link>
-                                    ))}
+                                    {moreLinks.map((link, idx) => {
+                                        const navItem = dynamicNavItems[VISIBLE_QUICK_LINKS + idx];
+                                        const isExternal = navItem?.type === 'external_link' || link.to.startsWith('http');
+                                        if (isExternal) {
+                                            return (
+                                                <a
+                                                    key={link.to + idx}
+                                                    href={link.to}
+                                                    target={navItem?.open_new_tab ? '_blank' : undefined}
+                                                    rel={navItem?.open_new_tab ? 'noopener noreferrer' : undefined}
+                                                    onClick={() => setMoreMenuOpen(false)}
+                                                    className="block px-4 py-2 text-sm transition-colors text-muted-foreground hover:bg-accent flex items-center gap-1"
+                                                >
+                                                    {link.label}
+                                                    <ExternalLink className="h-3 w-3"/>
+                                                </a>
+                                            );
+                                        }
+                                        return (
+                                            <Link
+                                                key={link.to}
+                                                to={link.to}
+                                                onClick={() => setMoreMenuOpen(false)}
+                                                className={`block px-4 py-2 text-sm transition-colors ${
+                                                    isActive(link.to)
+                                                        ? 'bg-brand/10 dark:bg-brand/20 text-brand dark:text-brand font-medium'
+                                                        : 'text-muted-foreground hover:bg-accent'
+                                                }`}
+                                            >
+                                                {link.label}
+                                            </Link>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>

@@ -899,7 +899,26 @@
     "slugLabel": "别名",
     "unblocked": "已取消屏蔽",
     "commentDeleted": "评论已删除",
-    "reportsDismissed": "举报已忽略"
+    "reportsDismissed": "举报已忽略",
+    "pages": {
+      "title": "自定义页面",
+      "description": "管理自定义页面和门户导航",
+      "create": "新建页面",
+      "list": "页面列表",
+      "empty": "暂无自定义页面，创建一个开始吧。",
+      "published": "已发布",
+      "draft": "草稿",
+      "edit": "编辑页面",
+      "form": {
+        "title": "标题",
+        "slug": "别名",
+        "type": "类型",
+        "format": "内容格式",
+        "content": "内容",
+        "seoTitle": "SEO 标题",
+        "seoDescription": "SEO 描述"
+      }
+    }
   },
   "settings": {
     "title": "系统设置",
