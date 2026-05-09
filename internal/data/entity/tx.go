@@ -54,6 +54,12 @@ type Tx struct {
 	PermissionGroup *PermissionGroupClient
 	// Playlist is the client for interacting with the Playlist builders.
 	Playlist *PlaylistClient
+	// PortalBanner is the client for interacting with the PortalBanner builders.
+	PortalBanner *PortalBannerClient
+	// PortalCustomPage is the client for interacting with the PortalCustomPage builders.
+	PortalCustomPage *PortalCustomPageClient
+	// PortalNavItem is the client for interacting with the PortalNavItem builders.
+	PortalNavItem *PortalNavItemClient
 	// Setting is the client for interacting with the Setting builders.
 	Setting *SettingClient
 	// Subscription is the client for interacting with the Subscription builders.
@@ -216,6 +222,9 @@ func (tx *Tx) init() {
 	tx.Notification = NewNotificationClient(tx.config)
 	tx.PermissionGroup = NewPermissionGroupClient(tx.config)
 	tx.Playlist = NewPlaylistClient(tx.config)
+	tx.PortalBanner = NewPortalBannerClient(tx.config)
+	tx.PortalCustomPage = NewPortalCustomPageClient(tx.config)
+	tx.PortalNavItem = NewPortalNavItemClient(tx.config)
 	tx.Setting = NewSettingClient(tx.config)
 	tx.Subscription = NewSubscriptionClient(tx.config)
 	tx.Tag = NewTagClient(tx.config)

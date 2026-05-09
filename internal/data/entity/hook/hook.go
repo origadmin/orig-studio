@@ -260,6 +260,42 @@ func (f PlaylistFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Val
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.PlaylistMutation", m)
 }
 
+// The PortalBannerFunc type is an adapter to allow the use of ordinary
+// function as PortalBanner mutator.
+type PortalBannerFunc func(context.Context, *entity.PortalBannerMutation) (entity.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PortalBannerFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Value, error) {
+	if mv, ok := m.(*entity.PortalBannerMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.PortalBannerMutation", m)
+}
+
+// The PortalCustomPageFunc type is an adapter to allow the use of ordinary
+// function as PortalCustomPage mutator.
+type PortalCustomPageFunc func(context.Context, *entity.PortalCustomPageMutation) (entity.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PortalCustomPageFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Value, error) {
+	if mv, ok := m.(*entity.PortalCustomPageMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.PortalCustomPageMutation", m)
+}
+
+// The PortalNavItemFunc type is an adapter to allow the use of ordinary
+// function as PortalNavItem mutator.
+type PortalNavItemFunc func(context.Context, *entity.PortalNavItemMutation) (entity.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PortalNavItemFunc) Mutate(ctx context.Context, m entity.Mutation) (entity.Value, error) {
+	if mv, ok := m.(*entity.PortalNavItemMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *entity.PortalNavItemMutation", m)
+}
+
 // The SettingFunc type is an adapter to allow the use of ordinary
 // function as Setting mutator.
 type SettingFunc func(context.Context, *entity.SettingMutation) (entity.Value, error)

@@ -32,6 +32,9 @@ import (
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/permissiongroup"
 	"origadmin/application/origcms/internal/data/entity/playlist"
+	"origadmin/application/origcms/internal/data/entity/portalbanner"
+	"origadmin/application/origcms/internal/data/entity/portalcustompage"
+	"origadmin/application/origcms/internal/data/entity/portalnavitem"
 	"origadmin/application/origcms/internal/data/entity/setting"
 	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/tag"
@@ -91,6 +94,12 @@ type Client struct {
 	PermissionGroup *PermissionGroupClient
 	// Playlist is the client for interacting with the Playlist builders.
 	Playlist *PlaylistClient
+	// PortalBanner is the client for interacting with the PortalBanner builders.
+	PortalBanner *PortalBannerClient
+	// PortalCustomPage is the client for interacting with the PortalCustomPage builders.
+	PortalCustomPage *PortalCustomPageClient
+	// PortalNavItem is the client for interacting with the PortalNavItem builders.
+	PortalNavItem *PortalNavItemClient
 	// Setting is the client for interacting with the Setting builders.
 	Setting *SettingClient
 	// Subscription is the client for interacting with the Subscription builders.
@@ -133,6 +142,9 @@ func (c *Client) init() {
 	c.Notification = NewNotificationClient(c.config)
 	c.PermissionGroup = NewPermissionGroupClient(c.config)
 	c.Playlist = NewPlaylistClient(c.config)
+	c.PortalBanner = NewPortalBannerClient(c.config)
+	c.PortalCustomPage = NewPortalCustomPageClient(c.config)
+	c.PortalNavItem = NewPortalNavItemClient(c.config)
 	c.Setting = NewSettingClient(c.config)
 	c.Subscription = NewSubscriptionClient(c.config)
 	c.Tag = NewTagClient(c.config)
@@ -228,34 +240,37 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:             ctx,
-		config:          cfg,
-		Article:         NewArticleClient(cfg),
-		Category:        NewCategoryClient(cfg),
-		Channel:         NewChannelClient(cfg),
-		Comment:         NewCommentClient(cfg),
-		CommentLike:     NewCommentLikeClient(cfg),
-		CommentReport:   NewCommentReportClient(cfg),
-		EncodeProfile:   NewEncodeProfileClient(cfg),
-		EncodingTask:    NewEncodingTaskClient(cfg),
-		Favorite:        NewFavoriteClient(cfg),
-		GroupMember:     NewGroupMemberClient(cfg),
-		History:         NewHistoryClient(cfg),
-		Like:            NewLikeClient(cfg),
-		Media:           NewMediaClient(cfg),
-		MediaCategory:   NewMediaCategoryClient(cfg),
-		MediaPlaylist:   NewMediaPlaylistClient(cfg),
-		MediaReport:     NewMediaReportClient(cfg),
-		MediaReviewLog:  NewMediaReviewLogClient(cfg),
-		MediaTag:        NewMediaTagClient(cfg),
-		Notification:    NewNotificationClient(cfg),
-		PermissionGroup: NewPermissionGroupClient(cfg),
-		Playlist:        NewPlaylistClient(cfg),
-		Setting:         NewSettingClient(cfg),
-		Subscription:    NewSubscriptionClient(cfg),
-		Tag:             NewTagClient(cfg),
-		UploadSession:   NewUploadSessionClient(cfg),
-		User:            NewUserClient(cfg),
+		ctx:              ctx,
+		config:           cfg,
+		Article:          NewArticleClient(cfg),
+		Category:         NewCategoryClient(cfg),
+		Channel:          NewChannelClient(cfg),
+		Comment:          NewCommentClient(cfg),
+		CommentLike:      NewCommentLikeClient(cfg),
+		CommentReport:    NewCommentReportClient(cfg),
+		EncodeProfile:    NewEncodeProfileClient(cfg),
+		EncodingTask:     NewEncodingTaskClient(cfg),
+		Favorite:         NewFavoriteClient(cfg),
+		GroupMember:      NewGroupMemberClient(cfg),
+		History:          NewHistoryClient(cfg),
+		Like:             NewLikeClient(cfg),
+		Media:            NewMediaClient(cfg),
+		MediaCategory:    NewMediaCategoryClient(cfg),
+		MediaPlaylist:    NewMediaPlaylistClient(cfg),
+		MediaReport:      NewMediaReportClient(cfg),
+		MediaReviewLog:   NewMediaReviewLogClient(cfg),
+		MediaTag:         NewMediaTagClient(cfg),
+		Notification:     NewNotificationClient(cfg),
+		PermissionGroup:  NewPermissionGroupClient(cfg),
+		Playlist:         NewPlaylistClient(cfg),
+		PortalBanner:     NewPortalBannerClient(cfg),
+		PortalCustomPage: NewPortalCustomPageClient(cfg),
+		PortalNavItem:    NewPortalNavItemClient(cfg),
+		Setting:          NewSettingClient(cfg),
+		Subscription:     NewSubscriptionClient(cfg),
+		Tag:              NewTagClient(cfg),
+		UploadSession:    NewUploadSessionClient(cfg),
+		User:             NewUserClient(cfg),
 	}, nil
 }
 
@@ -273,34 +288,37 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:             ctx,
-		config:          cfg,
-		Article:         NewArticleClient(cfg),
-		Category:        NewCategoryClient(cfg),
-		Channel:         NewChannelClient(cfg),
-		Comment:         NewCommentClient(cfg),
-		CommentLike:     NewCommentLikeClient(cfg),
-		CommentReport:   NewCommentReportClient(cfg),
-		EncodeProfile:   NewEncodeProfileClient(cfg),
-		EncodingTask:    NewEncodingTaskClient(cfg),
-		Favorite:        NewFavoriteClient(cfg),
-		GroupMember:     NewGroupMemberClient(cfg),
-		History:         NewHistoryClient(cfg),
-		Like:            NewLikeClient(cfg),
-		Media:           NewMediaClient(cfg),
-		MediaCategory:   NewMediaCategoryClient(cfg),
-		MediaPlaylist:   NewMediaPlaylistClient(cfg),
-		MediaReport:     NewMediaReportClient(cfg),
-		MediaReviewLog:  NewMediaReviewLogClient(cfg),
-		MediaTag:        NewMediaTagClient(cfg),
-		Notification:    NewNotificationClient(cfg),
-		PermissionGroup: NewPermissionGroupClient(cfg),
-		Playlist:        NewPlaylistClient(cfg),
-		Setting:         NewSettingClient(cfg),
-		Subscription:    NewSubscriptionClient(cfg),
-		Tag:             NewTagClient(cfg),
-		UploadSession:   NewUploadSessionClient(cfg),
-		User:            NewUserClient(cfg),
+		ctx:              ctx,
+		config:           cfg,
+		Article:          NewArticleClient(cfg),
+		Category:         NewCategoryClient(cfg),
+		Channel:          NewChannelClient(cfg),
+		Comment:          NewCommentClient(cfg),
+		CommentLike:      NewCommentLikeClient(cfg),
+		CommentReport:    NewCommentReportClient(cfg),
+		EncodeProfile:    NewEncodeProfileClient(cfg),
+		EncodingTask:     NewEncodingTaskClient(cfg),
+		Favorite:         NewFavoriteClient(cfg),
+		GroupMember:      NewGroupMemberClient(cfg),
+		History:          NewHistoryClient(cfg),
+		Like:             NewLikeClient(cfg),
+		Media:            NewMediaClient(cfg),
+		MediaCategory:    NewMediaCategoryClient(cfg),
+		MediaPlaylist:    NewMediaPlaylistClient(cfg),
+		MediaReport:      NewMediaReportClient(cfg),
+		MediaReviewLog:   NewMediaReviewLogClient(cfg),
+		MediaTag:         NewMediaTagClient(cfg),
+		Notification:     NewNotificationClient(cfg),
+		PermissionGroup:  NewPermissionGroupClient(cfg),
+		Playlist:         NewPlaylistClient(cfg),
+		PortalBanner:     NewPortalBannerClient(cfg),
+		PortalCustomPage: NewPortalCustomPageClient(cfg),
+		PortalNavItem:    NewPortalNavItemClient(cfg),
+		Setting:          NewSettingClient(cfg),
+		Subscription:     NewSubscriptionClient(cfg),
+		Tag:              NewTagClient(cfg),
+		UploadSession:    NewUploadSessionClient(cfg),
+		User:             NewUserClient(cfg),
 	}, nil
 }
 
@@ -333,8 +351,9 @@ func (c *Client) Use(hooks ...Hook) {
 		c.Article, c.Category, c.Channel, c.Comment, c.CommentLike, c.CommentReport,
 		c.EncodeProfile, c.EncodingTask, c.Favorite, c.GroupMember, c.History, c.Like,
 		c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaReport, c.MediaReviewLog,
-		c.MediaTag, c.Notification, c.PermissionGroup, c.Playlist, c.Setting,
-		c.Subscription, c.Tag, c.UploadSession, c.User,
+		c.MediaTag, c.Notification, c.PermissionGroup, c.Playlist, c.PortalBanner,
+		c.PortalCustomPage, c.PortalNavItem, c.Setting, c.Subscription, c.Tag,
+		c.UploadSession, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -347,8 +366,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.Article, c.Category, c.Channel, c.Comment, c.CommentLike, c.CommentReport,
 		c.EncodeProfile, c.EncodingTask, c.Favorite, c.GroupMember, c.History, c.Like,
 		c.Media, c.MediaCategory, c.MediaPlaylist, c.MediaReport, c.MediaReviewLog,
-		c.MediaTag, c.Notification, c.PermissionGroup, c.Playlist, c.Setting,
-		c.Subscription, c.Tag, c.UploadSession, c.User,
+		c.MediaTag, c.Notification, c.PermissionGroup, c.Playlist, c.PortalBanner,
+		c.PortalCustomPage, c.PortalNavItem, c.Setting, c.Subscription, c.Tag,
+		c.UploadSession, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -399,6 +419,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PermissionGroup.mutate(ctx, m)
 	case *PlaylistMutation:
 		return c.Playlist.mutate(ctx, m)
+	case *PortalBannerMutation:
+		return c.PortalBanner.mutate(ctx, m)
+	case *PortalCustomPageMutation:
+		return c.PortalCustomPage.mutate(ctx, m)
+	case *PortalNavItemMutation:
+		return c.PortalNavItem.mutate(ctx, m)
 	case *SettingMutation:
 		return c.Setting.mutate(ctx, m)
 	case *SubscriptionMutation:
@@ -4119,6 +4145,405 @@ func (c *PlaylistClient) mutate(ctx context.Context, m *PlaylistMutation) (Value
 	}
 }
 
+// PortalBannerClient is a client for the PortalBanner schema.
+type PortalBannerClient struct {
+	config
+}
+
+// NewPortalBannerClient returns a client for the PortalBanner from the given config.
+func NewPortalBannerClient(c config) *PortalBannerClient {
+	return &PortalBannerClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `portalbanner.Hooks(f(g(h())))`.
+func (c *PortalBannerClient) Use(hooks ...Hook) {
+	c.hooks.PortalBanner = append(c.hooks.PortalBanner, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `portalbanner.Intercept(f(g(h())))`.
+func (c *PortalBannerClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PortalBanner = append(c.inters.PortalBanner, interceptors...)
+}
+
+// Create returns a builder for creating a PortalBanner entity.
+func (c *PortalBannerClient) Create() *PortalBannerCreate {
+	mutation := newPortalBannerMutation(c.config, OpCreate)
+	return &PortalBannerCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PortalBanner entities.
+func (c *PortalBannerClient) CreateBulk(builders ...*PortalBannerCreate) *PortalBannerCreateBulk {
+	return &PortalBannerCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PortalBannerClient) MapCreateBulk(slice any, setFunc func(*PortalBannerCreate, int)) *PortalBannerCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PortalBannerCreateBulk{err: fmt.Errorf("calling to PortalBannerClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PortalBannerCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PortalBannerCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PortalBanner.
+func (c *PortalBannerClient) Update() *PortalBannerUpdate {
+	mutation := newPortalBannerMutation(c.config, OpUpdate)
+	return &PortalBannerUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PortalBannerClient) UpdateOne(_m *PortalBanner) *PortalBannerUpdateOne {
+	mutation := newPortalBannerMutation(c.config, OpUpdateOne, withPortalBanner(_m))
+	return &PortalBannerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PortalBannerClient) UpdateOneID(id string) *PortalBannerUpdateOne {
+	mutation := newPortalBannerMutation(c.config, OpUpdateOne, withPortalBannerID(id))
+	return &PortalBannerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PortalBanner.
+func (c *PortalBannerClient) Delete() *PortalBannerDelete {
+	mutation := newPortalBannerMutation(c.config, OpDelete)
+	return &PortalBannerDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PortalBannerClient) DeleteOne(_m *PortalBanner) *PortalBannerDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PortalBannerClient) DeleteOneID(id string) *PortalBannerDeleteOne {
+	builder := c.Delete().Where(portalbanner.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PortalBannerDeleteOne{builder}
+}
+
+// Query returns a query builder for PortalBanner.
+func (c *PortalBannerClient) Query() *PortalBannerQuery {
+	return &PortalBannerQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePortalBanner},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PortalBanner entity by its id.
+func (c *PortalBannerClient) Get(ctx context.Context, id string) (*PortalBanner, error) {
+	return c.Query().Where(portalbanner.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PortalBannerClient) GetX(ctx context.Context, id string) *PortalBanner {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *PortalBannerClient) Hooks() []Hook {
+	return c.hooks.PortalBanner
+}
+
+// Interceptors returns the client interceptors.
+func (c *PortalBannerClient) Interceptors() []Interceptor {
+	return c.inters.PortalBanner
+}
+
+func (c *PortalBannerClient) mutate(ctx context.Context, m *PortalBannerMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PortalBannerCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PortalBannerUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PortalBannerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PortalBannerDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entity: unknown PortalBanner mutation op: %q", m.Op())
+	}
+}
+
+// PortalCustomPageClient is a client for the PortalCustomPage schema.
+type PortalCustomPageClient struct {
+	config
+}
+
+// NewPortalCustomPageClient returns a client for the PortalCustomPage from the given config.
+func NewPortalCustomPageClient(c config) *PortalCustomPageClient {
+	return &PortalCustomPageClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `portalcustompage.Hooks(f(g(h())))`.
+func (c *PortalCustomPageClient) Use(hooks ...Hook) {
+	c.hooks.PortalCustomPage = append(c.hooks.PortalCustomPage, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `portalcustompage.Intercept(f(g(h())))`.
+func (c *PortalCustomPageClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PortalCustomPage = append(c.inters.PortalCustomPage, interceptors...)
+}
+
+// Create returns a builder for creating a PortalCustomPage entity.
+func (c *PortalCustomPageClient) Create() *PortalCustomPageCreate {
+	mutation := newPortalCustomPageMutation(c.config, OpCreate)
+	return &PortalCustomPageCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PortalCustomPage entities.
+func (c *PortalCustomPageClient) CreateBulk(builders ...*PortalCustomPageCreate) *PortalCustomPageCreateBulk {
+	return &PortalCustomPageCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PortalCustomPageClient) MapCreateBulk(slice any, setFunc func(*PortalCustomPageCreate, int)) *PortalCustomPageCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PortalCustomPageCreateBulk{err: fmt.Errorf("calling to PortalCustomPageClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PortalCustomPageCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PortalCustomPageCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PortalCustomPage.
+func (c *PortalCustomPageClient) Update() *PortalCustomPageUpdate {
+	mutation := newPortalCustomPageMutation(c.config, OpUpdate)
+	return &PortalCustomPageUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PortalCustomPageClient) UpdateOne(_m *PortalCustomPage) *PortalCustomPageUpdateOne {
+	mutation := newPortalCustomPageMutation(c.config, OpUpdateOne, withPortalCustomPage(_m))
+	return &PortalCustomPageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PortalCustomPageClient) UpdateOneID(id string) *PortalCustomPageUpdateOne {
+	mutation := newPortalCustomPageMutation(c.config, OpUpdateOne, withPortalCustomPageID(id))
+	return &PortalCustomPageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PortalCustomPage.
+func (c *PortalCustomPageClient) Delete() *PortalCustomPageDelete {
+	mutation := newPortalCustomPageMutation(c.config, OpDelete)
+	return &PortalCustomPageDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PortalCustomPageClient) DeleteOne(_m *PortalCustomPage) *PortalCustomPageDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PortalCustomPageClient) DeleteOneID(id string) *PortalCustomPageDeleteOne {
+	builder := c.Delete().Where(portalcustompage.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PortalCustomPageDeleteOne{builder}
+}
+
+// Query returns a query builder for PortalCustomPage.
+func (c *PortalCustomPageClient) Query() *PortalCustomPageQuery {
+	return &PortalCustomPageQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePortalCustomPage},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PortalCustomPage entity by its id.
+func (c *PortalCustomPageClient) Get(ctx context.Context, id string) (*PortalCustomPage, error) {
+	return c.Query().Where(portalcustompage.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PortalCustomPageClient) GetX(ctx context.Context, id string) *PortalCustomPage {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *PortalCustomPageClient) Hooks() []Hook {
+	return c.hooks.PortalCustomPage
+}
+
+// Interceptors returns the client interceptors.
+func (c *PortalCustomPageClient) Interceptors() []Interceptor {
+	return c.inters.PortalCustomPage
+}
+
+func (c *PortalCustomPageClient) mutate(ctx context.Context, m *PortalCustomPageMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PortalCustomPageCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PortalCustomPageUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PortalCustomPageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PortalCustomPageDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entity: unknown PortalCustomPage mutation op: %q", m.Op())
+	}
+}
+
+// PortalNavItemClient is a client for the PortalNavItem schema.
+type PortalNavItemClient struct {
+	config
+}
+
+// NewPortalNavItemClient returns a client for the PortalNavItem from the given config.
+func NewPortalNavItemClient(c config) *PortalNavItemClient {
+	return &PortalNavItemClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `portalnavitem.Hooks(f(g(h())))`.
+func (c *PortalNavItemClient) Use(hooks ...Hook) {
+	c.hooks.PortalNavItem = append(c.hooks.PortalNavItem, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `portalnavitem.Intercept(f(g(h())))`.
+func (c *PortalNavItemClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PortalNavItem = append(c.inters.PortalNavItem, interceptors...)
+}
+
+// Create returns a builder for creating a PortalNavItem entity.
+func (c *PortalNavItemClient) Create() *PortalNavItemCreate {
+	mutation := newPortalNavItemMutation(c.config, OpCreate)
+	return &PortalNavItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PortalNavItem entities.
+func (c *PortalNavItemClient) CreateBulk(builders ...*PortalNavItemCreate) *PortalNavItemCreateBulk {
+	return &PortalNavItemCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PortalNavItemClient) MapCreateBulk(slice any, setFunc func(*PortalNavItemCreate, int)) *PortalNavItemCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PortalNavItemCreateBulk{err: fmt.Errorf("calling to PortalNavItemClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PortalNavItemCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PortalNavItemCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PortalNavItem.
+func (c *PortalNavItemClient) Update() *PortalNavItemUpdate {
+	mutation := newPortalNavItemMutation(c.config, OpUpdate)
+	return &PortalNavItemUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PortalNavItemClient) UpdateOne(_m *PortalNavItem) *PortalNavItemUpdateOne {
+	mutation := newPortalNavItemMutation(c.config, OpUpdateOne, withPortalNavItem(_m))
+	return &PortalNavItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PortalNavItemClient) UpdateOneID(id string) *PortalNavItemUpdateOne {
+	mutation := newPortalNavItemMutation(c.config, OpUpdateOne, withPortalNavItemID(id))
+	return &PortalNavItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PortalNavItem.
+func (c *PortalNavItemClient) Delete() *PortalNavItemDelete {
+	mutation := newPortalNavItemMutation(c.config, OpDelete)
+	return &PortalNavItemDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PortalNavItemClient) DeleteOne(_m *PortalNavItem) *PortalNavItemDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PortalNavItemClient) DeleteOneID(id string) *PortalNavItemDeleteOne {
+	builder := c.Delete().Where(portalnavitem.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PortalNavItemDeleteOne{builder}
+}
+
+// Query returns a query builder for PortalNavItem.
+func (c *PortalNavItemClient) Query() *PortalNavItemQuery {
+	return &PortalNavItemQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePortalNavItem},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PortalNavItem entity by its id.
+func (c *PortalNavItemClient) Get(ctx context.Context, id string) (*PortalNavItem, error) {
+	return c.Query().Where(portalnavitem.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PortalNavItemClient) GetX(ctx context.Context, id string) *PortalNavItem {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *PortalNavItemClient) Hooks() []Hook {
+	return c.hooks.PortalNavItem
+}
+
+// Interceptors returns the client interceptors.
+func (c *PortalNavItemClient) Interceptors() []Interceptor {
+	return c.inters.PortalNavItem
+}
+
+func (c *PortalNavItemClient) mutate(ctx context.Context, m *PortalNavItemMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PortalNavItemCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PortalNavItemUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PortalNavItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PortalNavItemDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("entity: unknown PortalNavItem mutation op: %q", m.Op())
+	}
+}
+
 // SettingClient is a client for the Setting schema.
 type SettingClient struct {
 	config
@@ -5158,14 +5583,14 @@ type (
 		Article, Category, Channel, Comment, CommentLike, CommentReport, EncodeProfile,
 		EncodingTask, Favorite, GroupMember, History, Like, Media, MediaCategory,
 		MediaPlaylist, MediaReport, MediaReviewLog, MediaTag, Notification,
-		PermissionGroup, Playlist, Setting, Subscription, Tag, UploadSession,
-		User []ent.Hook
+		PermissionGroup, Playlist, PortalBanner, PortalCustomPage, PortalNavItem,
+		Setting, Subscription, Tag, UploadSession, User []ent.Hook
 	}
 	inters struct {
 		Article, Category, Channel, Comment, CommentLike, CommentReport, EncodeProfile,
 		EncodingTask, Favorite, GroupMember, History, Like, Media, MediaCategory,
 		MediaPlaylist, MediaReport, MediaReviewLog, MediaTag, Notification,
-		PermissionGroup, Playlist, Setting, Subscription, Tag, UploadSession,
-		User []ent.Interceptor
+		PermissionGroup, Playlist, PortalBanner, PortalCustomPage, PortalNavItem,
+		Setting, Subscription, Tag, UploadSession, User []ent.Interceptor
 	}
 )

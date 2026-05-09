@@ -27,6 +27,9 @@ import (
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/permissiongroup"
 	"origadmin/application/origcms/internal/data/entity/playlist"
+	"origadmin/application/origcms/internal/data/entity/portalbanner"
+	"origadmin/application/origcms/internal/data/entity/portalcustompage"
+	"origadmin/application/origcms/internal/data/entity/portalnavitem"
 	"origadmin/application/origcms/internal/data/entity/predicate"
 	"origadmin/application/origcms/internal/data/entity/schema"
 	"origadmin/application/origcms/internal/data/entity/setting"
@@ -51,32 +54,35 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeArticle         = "Article"
-	TypeCategory        = "Category"
-	TypeChannel         = "Channel"
-	TypeComment         = "Comment"
-	TypeCommentLike     = "CommentLike"
-	TypeCommentReport   = "CommentReport"
-	TypeEncodeProfile   = "EncodeProfile"
-	TypeEncodingTask    = "EncodingTask"
-	TypeFavorite        = "Favorite"
-	TypeGroupMember     = "GroupMember"
-	TypeHistory         = "History"
-	TypeLike            = "Like"
-	TypeMedia           = "Media"
-	TypeMediaCategory   = "MediaCategory"
-	TypeMediaPlaylist   = "MediaPlaylist"
-	TypeMediaReport     = "MediaReport"
-	TypeMediaReviewLog  = "MediaReviewLog"
-	TypeMediaTag        = "MediaTag"
-	TypeNotification    = "Notification"
-	TypePermissionGroup = "PermissionGroup"
-	TypePlaylist        = "Playlist"
-	TypeSetting         = "Setting"
-	TypeSubscription    = "Subscription"
-	TypeTag             = "Tag"
-	TypeUploadSession   = "UploadSession"
-	TypeUser            = "User"
+	TypeArticle          = "Article"
+	TypeCategory         = "Category"
+	TypeChannel          = "Channel"
+	TypeComment          = "Comment"
+	TypeCommentLike      = "CommentLike"
+	TypeCommentReport    = "CommentReport"
+	TypeEncodeProfile    = "EncodeProfile"
+	TypeEncodingTask     = "EncodingTask"
+	TypeFavorite         = "Favorite"
+	TypeGroupMember      = "GroupMember"
+	TypeHistory          = "History"
+	TypeLike             = "Like"
+	TypeMedia            = "Media"
+	TypeMediaCategory    = "MediaCategory"
+	TypeMediaPlaylist    = "MediaPlaylist"
+	TypeMediaReport      = "MediaReport"
+	TypeMediaReviewLog   = "MediaReviewLog"
+	TypeMediaTag         = "MediaTag"
+	TypeNotification     = "Notification"
+	TypePermissionGroup  = "PermissionGroup"
+	TypePlaylist         = "Playlist"
+	TypePortalBanner     = "PortalBanner"
+	TypePortalCustomPage = "PortalCustomPage"
+	TypePortalNavItem    = "PortalNavItem"
+	TypeSetting          = "Setting"
+	TypeSubscription     = "Subscription"
+	TypeTag              = "Tag"
+	TypeUploadSession    = "UploadSession"
+	TypeUser             = "User"
 )
 
 // ArticleMutation represents an operation that mutates the Article nodes in the graph.
@@ -23311,6 +23317,3912 @@ func (m *PlaylistMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Playlist edge %s", name)
+}
+
+// PortalBannerMutation represents an operation that mutates the PortalBanner nodes in the graph.
+type PortalBannerMutation struct {
+	config
+	op                     Op
+	typ                    string
+	id                     *string
+	title                  *string
+	title_i18n             *map[string]string
+	subtitle               *string
+	subtitle_i18n          *map[string]string
+	badge_text             *string
+	image_url              *string
+	image_mobile_url       *string
+	bg_color_start         *string
+	bg_color_end           *string
+	bg_overlay_opacity     *float64
+	addbg_overlay_opacity  *float64
+	primary_btn_text       *string
+	primary_btn_url        *string
+	secondary_btn_text     *string
+	secondary_btn_url      *string
+	sequence               *int
+	addsequence            *int
+	is_active              *bool
+	start_at               *time.Time
+	end_at                 *time.Time
+	auto_slide_interval    *int
+	addauto_slide_interval *int
+	clearedFields          map[string]struct{}
+	done                   bool
+	oldValue               func(context.Context) (*PortalBanner, error)
+	predicates             []predicate.PortalBanner
+}
+
+var _ ent.Mutation = (*PortalBannerMutation)(nil)
+
+// portalbannerOption allows management of the mutation configuration using functional options.
+type portalbannerOption func(*PortalBannerMutation)
+
+// newPortalBannerMutation creates new mutation for the PortalBanner entity.
+func newPortalBannerMutation(c config, op Op, opts ...portalbannerOption) *PortalBannerMutation {
+	m := &PortalBannerMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePortalBanner,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPortalBannerID sets the ID field of the mutation.
+func withPortalBannerID(id string) portalbannerOption {
+	return func(m *PortalBannerMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PortalBanner
+		)
+		m.oldValue = func(ctx context.Context) (*PortalBanner, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PortalBanner.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPortalBanner sets the old PortalBanner of the mutation.
+func withPortalBanner(node *PortalBanner) portalbannerOption {
+	return func(m *PortalBannerMutation) {
+		m.oldValue = func(context.Context) (*PortalBanner, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PortalBannerMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PortalBannerMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("entity: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of PortalBanner entities.
+func (m *PortalBannerMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PortalBannerMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PortalBannerMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PortalBanner.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetTitle sets the "title" field.
+func (m *PortalBannerMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *PortalBannerMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *PortalBannerMutation) ResetTitle() {
+	m.title = nil
+}
+
+// SetTitleI18n sets the "title_i18n" field.
+func (m *PortalBannerMutation) SetTitleI18n(value map[string]string) {
+	m.title_i18n = &value
+}
+
+// TitleI18n returns the value of the "title_i18n" field in the mutation.
+func (m *PortalBannerMutation) TitleI18n() (r map[string]string, exists bool) {
+	v := m.title_i18n
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitleI18n returns the old "title_i18n" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldTitleI18n(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitleI18n is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitleI18n requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitleI18n: %w", err)
+	}
+	return oldValue.TitleI18n, nil
+}
+
+// ClearTitleI18n clears the value of the "title_i18n" field.
+func (m *PortalBannerMutation) ClearTitleI18n() {
+	m.title_i18n = nil
+	m.clearedFields[portalbanner.FieldTitleI18n] = struct{}{}
+}
+
+// TitleI18nCleared returns if the "title_i18n" field was cleared in this mutation.
+func (m *PortalBannerMutation) TitleI18nCleared() bool {
+	_, ok := m.clearedFields[portalbanner.FieldTitleI18n]
+	return ok
+}
+
+// ResetTitleI18n resets all changes to the "title_i18n" field.
+func (m *PortalBannerMutation) ResetTitleI18n() {
+	m.title_i18n = nil
+	delete(m.clearedFields, portalbanner.FieldTitleI18n)
+}
+
+// SetSubtitle sets the "subtitle" field.
+func (m *PortalBannerMutation) SetSubtitle(s string) {
+	m.subtitle = &s
+}
+
+// Subtitle returns the value of the "subtitle" field in the mutation.
+func (m *PortalBannerMutation) Subtitle() (r string, exists bool) {
+	v := m.subtitle
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubtitle returns the old "subtitle" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldSubtitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubtitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubtitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubtitle: %w", err)
+	}
+	return oldValue.Subtitle, nil
+}
+
+// ClearSubtitle clears the value of the "subtitle" field.
+func (m *PortalBannerMutation) ClearSubtitle() {
+	m.subtitle = nil
+	m.clearedFields[portalbanner.FieldSubtitle] = struct{}{}
+}
+
+// SubtitleCleared returns if the "subtitle" field was cleared in this mutation.
+func (m *PortalBannerMutation) SubtitleCleared() bool {
+	_, ok := m.clearedFields[portalbanner.FieldSubtitle]
+	return ok
+}
+
+// ResetSubtitle resets all changes to the "subtitle" field.
+func (m *PortalBannerMutation) ResetSubtitle() {
+	m.subtitle = nil
+	delete(m.clearedFields, portalbanner.FieldSubtitle)
+}
+
+// SetSubtitleI18n sets the "subtitle_i18n" field.
+func (m *PortalBannerMutation) SetSubtitleI18n(value map[string]string) {
+	m.subtitle_i18n = &value
+}
+
+// SubtitleI18n returns the value of the "subtitle_i18n" field in the mutation.
+func (m *PortalBannerMutation) SubtitleI18n() (r map[string]string, exists bool) {
+	v := m.subtitle_i18n
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubtitleI18n returns the old "subtitle_i18n" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldSubtitleI18n(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubtitleI18n is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubtitleI18n requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubtitleI18n: %w", err)
+	}
+	return oldValue.SubtitleI18n, nil
+}
+
+// ClearSubtitleI18n clears the value of the "subtitle_i18n" field.
+func (m *PortalBannerMutation) ClearSubtitleI18n() {
+	m.subtitle_i18n = nil
+	m.clearedFields[portalbanner.FieldSubtitleI18n] = struct{}{}
+}
+
+// SubtitleI18nCleared returns if the "subtitle_i18n" field was cleared in this mutation.
+func (m *PortalBannerMutation) SubtitleI18nCleared() bool {
+	_, ok := m.clearedFields[portalbanner.FieldSubtitleI18n]
+	return ok
+}
+
+// ResetSubtitleI18n resets all changes to the "subtitle_i18n" field.
+func (m *PortalBannerMutation) ResetSubtitleI18n() {
+	m.subtitle_i18n = nil
+	delete(m.clearedFields, portalbanner.FieldSubtitleI18n)
+}
+
+// SetBadgeText sets the "badge_text" field.
+func (m *PortalBannerMutation) SetBadgeText(s string) {
+	m.badge_text = &s
+}
+
+// BadgeText returns the value of the "badge_text" field in the mutation.
+func (m *PortalBannerMutation) BadgeText() (r string, exists bool) {
+	v := m.badge_text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBadgeText returns the old "badge_text" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldBadgeText(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBadgeText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBadgeText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBadgeText: %w", err)
+	}
+	return oldValue.BadgeText, nil
+}
+
+// ClearBadgeText clears the value of the "badge_text" field.
+func (m *PortalBannerMutation) ClearBadgeText() {
+	m.badge_text = nil
+	m.clearedFields[portalbanner.FieldBadgeText] = struct{}{}
+}
+
+// BadgeTextCleared returns if the "badge_text" field was cleared in this mutation.
+func (m *PortalBannerMutation) BadgeTextCleared() bool {
+	_, ok := m.clearedFields[portalbanner.FieldBadgeText]
+	return ok
+}
+
+// ResetBadgeText resets all changes to the "badge_text" field.
+func (m *PortalBannerMutation) ResetBadgeText() {
+	m.badge_text = nil
+	delete(m.clearedFields, portalbanner.FieldBadgeText)
+}
+
+// SetImageURL sets the "image_url" field.
+func (m *PortalBannerMutation) SetImageURL(s string) {
+	m.image_url = &s
+}
+
+// ImageURL returns the value of the "image_url" field in the mutation.
+func (m *PortalBannerMutation) ImageURL() (r string, exists bool) {
+	v := m.image_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImageURL returns the old "image_url" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldImageURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImageURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImageURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImageURL: %w", err)
+	}
+	return oldValue.ImageURL, nil
+}
+
+// ClearImageURL clears the value of the "image_url" field.
+func (m *PortalBannerMutation) ClearImageURL() {
+	m.image_url = nil
+	m.clearedFields[portalbanner.FieldImageURL] = struct{}{}
+}
+
+// ImageURLCleared returns if the "image_url" field was cleared in this mutation.
+func (m *PortalBannerMutation) ImageURLCleared() bool {
+	_, ok := m.clearedFields[portalbanner.FieldImageURL]
+	return ok
+}
+
+// ResetImageURL resets all changes to the "image_url" field.
+func (m *PortalBannerMutation) ResetImageURL() {
+	m.image_url = nil
+	delete(m.clearedFields, portalbanner.FieldImageURL)
+}
+
+// SetImageMobileURL sets the "image_mobile_url" field.
+func (m *PortalBannerMutation) SetImageMobileURL(s string) {
+	m.image_mobile_url = &s
+}
+
+// ImageMobileURL returns the value of the "image_mobile_url" field in the mutation.
+func (m *PortalBannerMutation) ImageMobileURL() (r string, exists bool) {
+	v := m.image_mobile_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImageMobileURL returns the old "image_mobile_url" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldImageMobileURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImageMobileURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImageMobileURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImageMobileURL: %w", err)
+	}
+	return oldValue.ImageMobileURL, nil
+}
+
+// ClearImageMobileURL clears the value of the "image_mobile_url" field.
+func (m *PortalBannerMutation) ClearImageMobileURL() {
+	m.image_mobile_url = nil
+	m.clearedFields[portalbanner.FieldImageMobileURL] = struct{}{}
+}
+
+// ImageMobileURLCleared returns if the "image_mobile_url" field was cleared in this mutation.
+func (m *PortalBannerMutation) ImageMobileURLCleared() bool {
+	_, ok := m.clearedFields[portalbanner.FieldImageMobileURL]
+	return ok
+}
+
+// ResetImageMobileURL resets all changes to the "image_mobile_url" field.
+func (m *PortalBannerMutation) ResetImageMobileURL() {
+	m.image_mobile_url = nil
+	delete(m.clearedFields, portalbanner.FieldImageMobileURL)
+}
+
+// SetBgColorStart sets the "bg_color_start" field.
+func (m *PortalBannerMutation) SetBgColorStart(s string) {
+	m.bg_color_start = &s
+}
+
+// BgColorStart returns the value of the "bg_color_start" field in the mutation.
+func (m *PortalBannerMutation) BgColorStart() (r string, exists bool) {
+	v := m.bg_color_start
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBgColorStart returns the old "bg_color_start" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldBgColorStart(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBgColorStart is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBgColorStart requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBgColorStart: %w", err)
+	}
+	return oldValue.BgColorStart, nil
+}
+
+// ClearBgColorStart clears the value of the "bg_color_start" field.
+func (m *PortalBannerMutation) ClearBgColorStart() {
+	m.bg_color_start = nil
+	m.clearedFields[portalbanner.FieldBgColorStart] = struct{}{}
+}
+
+// BgColorStartCleared returns if the "bg_color_start" field was cleared in this mutation.
+func (m *PortalBannerMutation) BgColorStartCleared() bool {
+	_, ok := m.clearedFields[portalbanner.FieldBgColorStart]
+	return ok
+}
+
+// ResetBgColorStart resets all changes to the "bg_color_start" field.
+func (m *PortalBannerMutation) ResetBgColorStart() {
+	m.bg_color_start = nil
+	delete(m.clearedFields, portalbanner.FieldBgColorStart)
+}
+
+// SetBgColorEnd sets the "bg_color_end" field.
+func (m *PortalBannerMutation) SetBgColorEnd(s string) {
+	m.bg_color_end = &s
+}
+
+// BgColorEnd returns the value of the "bg_color_end" field in the mutation.
+func (m *PortalBannerMutation) BgColorEnd() (r string, exists bool) {
+	v := m.bg_color_end
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBgColorEnd returns the old "bg_color_end" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldBgColorEnd(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBgColorEnd is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBgColorEnd requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBgColorEnd: %w", err)
+	}
+	return oldValue.BgColorEnd, nil
+}
+
+// ClearBgColorEnd clears the value of the "bg_color_end" field.
+func (m *PortalBannerMutation) ClearBgColorEnd() {
+	m.bg_color_end = nil
+	m.clearedFields[portalbanner.FieldBgColorEnd] = struct{}{}
+}
+
+// BgColorEndCleared returns if the "bg_color_end" field was cleared in this mutation.
+func (m *PortalBannerMutation) BgColorEndCleared() bool {
+	_, ok := m.clearedFields[portalbanner.FieldBgColorEnd]
+	return ok
+}
+
+// ResetBgColorEnd resets all changes to the "bg_color_end" field.
+func (m *PortalBannerMutation) ResetBgColorEnd() {
+	m.bg_color_end = nil
+	delete(m.clearedFields, portalbanner.FieldBgColorEnd)
+}
+
+// SetBgOverlayOpacity sets the "bg_overlay_opacity" field.
+func (m *PortalBannerMutation) SetBgOverlayOpacity(f float64) {
+	m.bg_overlay_opacity = &f
+	m.addbg_overlay_opacity = nil
+}
+
+// BgOverlayOpacity returns the value of the "bg_overlay_opacity" field in the mutation.
+func (m *PortalBannerMutation) BgOverlayOpacity() (r float64, exists bool) {
+	v := m.bg_overlay_opacity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBgOverlayOpacity returns the old "bg_overlay_opacity" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldBgOverlayOpacity(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBgOverlayOpacity is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBgOverlayOpacity requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBgOverlayOpacity: %w", err)
+	}
+	return oldValue.BgOverlayOpacity, nil
+}
+
+// AddBgOverlayOpacity adds f to the "bg_overlay_opacity" field.
+func (m *PortalBannerMutation) AddBgOverlayOpacity(f float64) {
+	if m.addbg_overlay_opacity != nil {
+		*m.addbg_overlay_opacity += f
+	} else {
+		m.addbg_overlay_opacity = &f
+	}
+}
+
+// AddedBgOverlayOpacity returns the value that was added to the "bg_overlay_opacity" field in this mutation.
+func (m *PortalBannerMutation) AddedBgOverlayOpacity() (r float64, exists bool) {
+	v := m.addbg_overlay_opacity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetBgOverlayOpacity resets all changes to the "bg_overlay_opacity" field.
+func (m *PortalBannerMutation) ResetBgOverlayOpacity() {
+	m.bg_overlay_opacity = nil
+	m.addbg_overlay_opacity = nil
+}
+
+// SetPrimaryBtnText sets the "primary_btn_text" field.
+func (m *PortalBannerMutation) SetPrimaryBtnText(s string) {
+	m.primary_btn_text = &s
+}
+
+// PrimaryBtnText returns the value of the "primary_btn_text" field in the mutation.
+func (m *PortalBannerMutation) PrimaryBtnText() (r string, exists bool) {
+	v := m.primary_btn_text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPrimaryBtnText returns the old "primary_btn_text" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldPrimaryBtnText(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPrimaryBtnText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPrimaryBtnText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPrimaryBtnText: %w", err)
+	}
+	return oldValue.PrimaryBtnText, nil
+}
+
+// ClearPrimaryBtnText clears the value of the "primary_btn_text" field.
+func (m *PortalBannerMutation) ClearPrimaryBtnText() {
+	m.primary_btn_text = nil
+	m.clearedFields[portalbanner.FieldPrimaryBtnText] = struct{}{}
+}
+
+// PrimaryBtnTextCleared returns if the "primary_btn_text" field was cleared in this mutation.
+func (m *PortalBannerMutation) PrimaryBtnTextCleared() bool {
+	_, ok := m.clearedFields[portalbanner.FieldPrimaryBtnText]
+	return ok
+}
+
+// ResetPrimaryBtnText resets all changes to the "primary_btn_text" field.
+func (m *PortalBannerMutation) ResetPrimaryBtnText() {
+	m.primary_btn_text = nil
+	delete(m.clearedFields, portalbanner.FieldPrimaryBtnText)
+}
+
+// SetPrimaryBtnURL sets the "primary_btn_url" field.
+func (m *PortalBannerMutation) SetPrimaryBtnURL(s string) {
+	m.primary_btn_url = &s
+}
+
+// PrimaryBtnURL returns the value of the "primary_btn_url" field in the mutation.
+func (m *PortalBannerMutation) PrimaryBtnURL() (r string, exists bool) {
+	v := m.primary_btn_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPrimaryBtnURL returns the old "primary_btn_url" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldPrimaryBtnURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPrimaryBtnURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPrimaryBtnURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPrimaryBtnURL: %w", err)
+	}
+	return oldValue.PrimaryBtnURL, nil
+}
+
+// ClearPrimaryBtnURL clears the value of the "primary_btn_url" field.
+func (m *PortalBannerMutation) ClearPrimaryBtnURL() {
+	m.primary_btn_url = nil
+	m.clearedFields[portalbanner.FieldPrimaryBtnURL] = struct{}{}
+}
+
+// PrimaryBtnURLCleared returns if the "primary_btn_url" field was cleared in this mutation.
+func (m *PortalBannerMutation) PrimaryBtnURLCleared() bool {
+	_, ok := m.clearedFields[portalbanner.FieldPrimaryBtnURL]
+	return ok
+}
+
+// ResetPrimaryBtnURL resets all changes to the "primary_btn_url" field.
+func (m *PortalBannerMutation) ResetPrimaryBtnURL() {
+	m.primary_btn_url = nil
+	delete(m.clearedFields, portalbanner.FieldPrimaryBtnURL)
+}
+
+// SetSecondaryBtnText sets the "secondary_btn_text" field.
+func (m *PortalBannerMutation) SetSecondaryBtnText(s string) {
+	m.secondary_btn_text = &s
+}
+
+// SecondaryBtnText returns the value of the "secondary_btn_text" field in the mutation.
+func (m *PortalBannerMutation) SecondaryBtnText() (r string, exists bool) {
+	v := m.secondary_btn_text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSecondaryBtnText returns the old "secondary_btn_text" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldSecondaryBtnText(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSecondaryBtnText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSecondaryBtnText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSecondaryBtnText: %w", err)
+	}
+	return oldValue.SecondaryBtnText, nil
+}
+
+// ClearSecondaryBtnText clears the value of the "secondary_btn_text" field.
+func (m *PortalBannerMutation) ClearSecondaryBtnText() {
+	m.secondary_btn_text = nil
+	m.clearedFields[portalbanner.FieldSecondaryBtnText] = struct{}{}
+}
+
+// SecondaryBtnTextCleared returns if the "secondary_btn_text" field was cleared in this mutation.
+func (m *PortalBannerMutation) SecondaryBtnTextCleared() bool {
+	_, ok := m.clearedFields[portalbanner.FieldSecondaryBtnText]
+	return ok
+}
+
+// ResetSecondaryBtnText resets all changes to the "secondary_btn_text" field.
+func (m *PortalBannerMutation) ResetSecondaryBtnText() {
+	m.secondary_btn_text = nil
+	delete(m.clearedFields, portalbanner.FieldSecondaryBtnText)
+}
+
+// SetSecondaryBtnURL sets the "secondary_btn_url" field.
+func (m *PortalBannerMutation) SetSecondaryBtnURL(s string) {
+	m.secondary_btn_url = &s
+}
+
+// SecondaryBtnURL returns the value of the "secondary_btn_url" field in the mutation.
+func (m *PortalBannerMutation) SecondaryBtnURL() (r string, exists bool) {
+	v := m.secondary_btn_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSecondaryBtnURL returns the old "secondary_btn_url" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldSecondaryBtnURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSecondaryBtnURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSecondaryBtnURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSecondaryBtnURL: %w", err)
+	}
+	return oldValue.SecondaryBtnURL, nil
+}
+
+// ClearSecondaryBtnURL clears the value of the "secondary_btn_url" field.
+func (m *PortalBannerMutation) ClearSecondaryBtnURL() {
+	m.secondary_btn_url = nil
+	m.clearedFields[portalbanner.FieldSecondaryBtnURL] = struct{}{}
+}
+
+// SecondaryBtnURLCleared returns if the "secondary_btn_url" field was cleared in this mutation.
+func (m *PortalBannerMutation) SecondaryBtnURLCleared() bool {
+	_, ok := m.clearedFields[portalbanner.FieldSecondaryBtnURL]
+	return ok
+}
+
+// ResetSecondaryBtnURL resets all changes to the "secondary_btn_url" field.
+func (m *PortalBannerMutation) ResetSecondaryBtnURL() {
+	m.secondary_btn_url = nil
+	delete(m.clearedFields, portalbanner.FieldSecondaryBtnURL)
+}
+
+// SetSequence sets the "sequence" field.
+func (m *PortalBannerMutation) SetSequence(i int) {
+	m.sequence = &i
+	m.addsequence = nil
+}
+
+// Sequence returns the value of the "sequence" field in the mutation.
+func (m *PortalBannerMutation) Sequence() (r int, exists bool) {
+	v := m.sequence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSequence returns the old "sequence" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldSequence(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSequence is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSequence requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSequence: %w", err)
+	}
+	return oldValue.Sequence, nil
+}
+
+// AddSequence adds i to the "sequence" field.
+func (m *PortalBannerMutation) AddSequence(i int) {
+	if m.addsequence != nil {
+		*m.addsequence += i
+	} else {
+		m.addsequence = &i
+	}
+}
+
+// AddedSequence returns the value that was added to the "sequence" field in this mutation.
+func (m *PortalBannerMutation) AddedSequence() (r int, exists bool) {
+	v := m.addsequence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSequence resets all changes to the "sequence" field.
+func (m *PortalBannerMutation) ResetSequence() {
+	m.sequence = nil
+	m.addsequence = nil
+}
+
+// SetIsActive sets the "is_active" field.
+func (m *PortalBannerMutation) SetIsActive(b bool) {
+	m.is_active = &b
+}
+
+// IsActive returns the value of the "is_active" field in the mutation.
+func (m *PortalBannerMutation) IsActive() (r bool, exists bool) {
+	v := m.is_active
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsActive returns the old "is_active" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldIsActive(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsActive is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsActive requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsActive: %w", err)
+	}
+	return oldValue.IsActive, nil
+}
+
+// ResetIsActive resets all changes to the "is_active" field.
+func (m *PortalBannerMutation) ResetIsActive() {
+	m.is_active = nil
+}
+
+// SetStartAt sets the "start_at" field.
+func (m *PortalBannerMutation) SetStartAt(t time.Time) {
+	m.start_at = &t
+}
+
+// StartAt returns the value of the "start_at" field in the mutation.
+func (m *PortalBannerMutation) StartAt() (r time.Time, exists bool) {
+	v := m.start_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStartAt returns the old "start_at" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldStartAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStartAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStartAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStartAt: %w", err)
+	}
+	return oldValue.StartAt, nil
+}
+
+// ClearStartAt clears the value of the "start_at" field.
+func (m *PortalBannerMutation) ClearStartAt() {
+	m.start_at = nil
+	m.clearedFields[portalbanner.FieldStartAt] = struct{}{}
+}
+
+// StartAtCleared returns if the "start_at" field was cleared in this mutation.
+func (m *PortalBannerMutation) StartAtCleared() bool {
+	_, ok := m.clearedFields[portalbanner.FieldStartAt]
+	return ok
+}
+
+// ResetStartAt resets all changes to the "start_at" field.
+func (m *PortalBannerMutation) ResetStartAt() {
+	m.start_at = nil
+	delete(m.clearedFields, portalbanner.FieldStartAt)
+}
+
+// SetEndAt sets the "end_at" field.
+func (m *PortalBannerMutation) SetEndAt(t time.Time) {
+	m.end_at = &t
+}
+
+// EndAt returns the value of the "end_at" field in the mutation.
+func (m *PortalBannerMutation) EndAt() (r time.Time, exists bool) {
+	v := m.end_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEndAt returns the old "end_at" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldEndAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEndAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEndAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEndAt: %w", err)
+	}
+	return oldValue.EndAt, nil
+}
+
+// ClearEndAt clears the value of the "end_at" field.
+func (m *PortalBannerMutation) ClearEndAt() {
+	m.end_at = nil
+	m.clearedFields[portalbanner.FieldEndAt] = struct{}{}
+}
+
+// EndAtCleared returns if the "end_at" field was cleared in this mutation.
+func (m *PortalBannerMutation) EndAtCleared() bool {
+	_, ok := m.clearedFields[portalbanner.FieldEndAt]
+	return ok
+}
+
+// ResetEndAt resets all changes to the "end_at" field.
+func (m *PortalBannerMutation) ResetEndAt() {
+	m.end_at = nil
+	delete(m.clearedFields, portalbanner.FieldEndAt)
+}
+
+// SetAutoSlideInterval sets the "auto_slide_interval" field.
+func (m *PortalBannerMutation) SetAutoSlideInterval(i int) {
+	m.auto_slide_interval = &i
+	m.addauto_slide_interval = nil
+}
+
+// AutoSlideInterval returns the value of the "auto_slide_interval" field in the mutation.
+func (m *PortalBannerMutation) AutoSlideInterval() (r int, exists bool) {
+	v := m.auto_slide_interval
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAutoSlideInterval returns the old "auto_slide_interval" field's value of the PortalBanner entity.
+// If the PortalBanner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalBannerMutation) OldAutoSlideInterval(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAutoSlideInterval is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAutoSlideInterval requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAutoSlideInterval: %w", err)
+	}
+	return oldValue.AutoSlideInterval, nil
+}
+
+// AddAutoSlideInterval adds i to the "auto_slide_interval" field.
+func (m *PortalBannerMutation) AddAutoSlideInterval(i int) {
+	if m.addauto_slide_interval != nil {
+		*m.addauto_slide_interval += i
+	} else {
+		m.addauto_slide_interval = &i
+	}
+}
+
+// AddedAutoSlideInterval returns the value that was added to the "auto_slide_interval" field in this mutation.
+func (m *PortalBannerMutation) AddedAutoSlideInterval() (r int, exists bool) {
+	v := m.addauto_slide_interval
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAutoSlideInterval resets all changes to the "auto_slide_interval" field.
+func (m *PortalBannerMutation) ResetAutoSlideInterval() {
+	m.auto_slide_interval = nil
+	m.addauto_slide_interval = nil
+}
+
+// Where appends a list predicates to the PortalBannerMutation builder.
+func (m *PortalBannerMutation) Where(ps ...predicate.PortalBanner) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PortalBannerMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PortalBannerMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PortalBanner, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PortalBannerMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PortalBannerMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PortalBanner).
+func (m *PortalBannerMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PortalBannerMutation) Fields() []string {
+	fields := make([]string, 0, 19)
+	if m.title != nil {
+		fields = append(fields, portalbanner.FieldTitle)
+	}
+	if m.title_i18n != nil {
+		fields = append(fields, portalbanner.FieldTitleI18n)
+	}
+	if m.subtitle != nil {
+		fields = append(fields, portalbanner.FieldSubtitle)
+	}
+	if m.subtitle_i18n != nil {
+		fields = append(fields, portalbanner.FieldSubtitleI18n)
+	}
+	if m.badge_text != nil {
+		fields = append(fields, portalbanner.FieldBadgeText)
+	}
+	if m.image_url != nil {
+		fields = append(fields, portalbanner.FieldImageURL)
+	}
+	if m.image_mobile_url != nil {
+		fields = append(fields, portalbanner.FieldImageMobileURL)
+	}
+	if m.bg_color_start != nil {
+		fields = append(fields, portalbanner.FieldBgColorStart)
+	}
+	if m.bg_color_end != nil {
+		fields = append(fields, portalbanner.FieldBgColorEnd)
+	}
+	if m.bg_overlay_opacity != nil {
+		fields = append(fields, portalbanner.FieldBgOverlayOpacity)
+	}
+	if m.primary_btn_text != nil {
+		fields = append(fields, portalbanner.FieldPrimaryBtnText)
+	}
+	if m.primary_btn_url != nil {
+		fields = append(fields, portalbanner.FieldPrimaryBtnURL)
+	}
+	if m.secondary_btn_text != nil {
+		fields = append(fields, portalbanner.FieldSecondaryBtnText)
+	}
+	if m.secondary_btn_url != nil {
+		fields = append(fields, portalbanner.FieldSecondaryBtnURL)
+	}
+	if m.sequence != nil {
+		fields = append(fields, portalbanner.FieldSequence)
+	}
+	if m.is_active != nil {
+		fields = append(fields, portalbanner.FieldIsActive)
+	}
+	if m.start_at != nil {
+		fields = append(fields, portalbanner.FieldStartAt)
+	}
+	if m.end_at != nil {
+		fields = append(fields, portalbanner.FieldEndAt)
+	}
+	if m.auto_slide_interval != nil {
+		fields = append(fields, portalbanner.FieldAutoSlideInterval)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PortalBannerMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case portalbanner.FieldTitle:
+		return m.Title()
+	case portalbanner.FieldTitleI18n:
+		return m.TitleI18n()
+	case portalbanner.FieldSubtitle:
+		return m.Subtitle()
+	case portalbanner.FieldSubtitleI18n:
+		return m.SubtitleI18n()
+	case portalbanner.FieldBadgeText:
+		return m.BadgeText()
+	case portalbanner.FieldImageURL:
+		return m.ImageURL()
+	case portalbanner.FieldImageMobileURL:
+		return m.ImageMobileURL()
+	case portalbanner.FieldBgColorStart:
+		return m.BgColorStart()
+	case portalbanner.FieldBgColorEnd:
+		return m.BgColorEnd()
+	case portalbanner.FieldBgOverlayOpacity:
+		return m.BgOverlayOpacity()
+	case portalbanner.FieldPrimaryBtnText:
+		return m.PrimaryBtnText()
+	case portalbanner.FieldPrimaryBtnURL:
+		return m.PrimaryBtnURL()
+	case portalbanner.FieldSecondaryBtnText:
+		return m.SecondaryBtnText()
+	case portalbanner.FieldSecondaryBtnURL:
+		return m.SecondaryBtnURL()
+	case portalbanner.FieldSequence:
+		return m.Sequence()
+	case portalbanner.FieldIsActive:
+		return m.IsActive()
+	case portalbanner.FieldStartAt:
+		return m.StartAt()
+	case portalbanner.FieldEndAt:
+		return m.EndAt()
+	case portalbanner.FieldAutoSlideInterval:
+		return m.AutoSlideInterval()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PortalBannerMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case portalbanner.FieldTitle:
+		return m.OldTitle(ctx)
+	case portalbanner.FieldTitleI18n:
+		return m.OldTitleI18n(ctx)
+	case portalbanner.FieldSubtitle:
+		return m.OldSubtitle(ctx)
+	case portalbanner.FieldSubtitleI18n:
+		return m.OldSubtitleI18n(ctx)
+	case portalbanner.FieldBadgeText:
+		return m.OldBadgeText(ctx)
+	case portalbanner.FieldImageURL:
+		return m.OldImageURL(ctx)
+	case portalbanner.FieldImageMobileURL:
+		return m.OldImageMobileURL(ctx)
+	case portalbanner.FieldBgColorStart:
+		return m.OldBgColorStart(ctx)
+	case portalbanner.FieldBgColorEnd:
+		return m.OldBgColorEnd(ctx)
+	case portalbanner.FieldBgOverlayOpacity:
+		return m.OldBgOverlayOpacity(ctx)
+	case portalbanner.FieldPrimaryBtnText:
+		return m.OldPrimaryBtnText(ctx)
+	case portalbanner.FieldPrimaryBtnURL:
+		return m.OldPrimaryBtnURL(ctx)
+	case portalbanner.FieldSecondaryBtnText:
+		return m.OldSecondaryBtnText(ctx)
+	case portalbanner.FieldSecondaryBtnURL:
+		return m.OldSecondaryBtnURL(ctx)
+	case portalbanner.FieldSequence:
+		return m.OldSequence(ctx)
+	case portalbanner.FieldIsActive:
+		return m.OldIsActive(ctx)
+	case portalbanner.FieldStartAt:
+		return m.OldStartAt(ctx)
+	case portalbanner.FieldEndAt:
+		return m.OldEndAt(ctx)
+	case portalbanner.FieldAutoSlideInterval:
+		return m.OldAutoSlideInterval(ctx)
+	}
+	return nil, fmt.Errorf("unknown PortalBanner field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PortalBannerMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case portalbanner.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case portalbanner.FieldTitleI18n:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitleI18n(v)
+		return nil
+	case portalbanner.FieldSubtitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubtitle(v)
+		return nil
+	case portalbanner.FieldSubtitleI18n:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubtitleI18n(v)
+		return nil
+	case portalbanner.FieldBadgeText:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBadgeText(v)
+		return nil
+	case portalbanner.FieldImageURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImageURL(v)
+		return nil
+	case portalbanner.FieldImageMobileURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImageMobileURL(v)
+		return nil
+	case portalbanner.FieldBgColorStart:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBgColorStart(v)
+		return nil
+	case portalbanner.FieldBgColorEnd:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBgColorEnd(v)
+		return nil
+	case portalbanner.FieldBgOverlayOpacity:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBgOverlayOpacity(v)
+		return nil
+	case portalbanner.FieldPrimaryBtnText:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPrimaryBtnText(v)
+		return nil
+	case portalbanner.FieldPrimaryBtnURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPrimaryBtnURL(v)
+		return nil
+	case portalbanner.FieldSecondaryBtnText:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSecondaryBtnText(v)
+		return nil
+	case portalbanner.FieldSecondaryBtnURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSecondaryBtnURL(v)
+		return nil
+	case portalbanner.FieldSequence:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSequence(v)
+		return nil
+	case portalbanner.FieldIsActive:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsActive(v)
+		return nil
+	case portalbanner.FieldStartAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStartAt(v)
+		return nil
+	case portalbanner.FieldEndAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEndAt(v)
+		return nil
+	case portalbanner.FieldAutoSlideInterval:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAutoSlideInterval(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PortalBanner field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PortalBannerMutation) AddedFields() []string {
+	var fields []string
+	if m.addbg_overlay_opacity != nil {
+		fields = append(fields, portalbanner.FieldBgOverlayOpacity)
+	}
+	if m.addsequence != nil {
+		fields = append(fields, portalbanner.FieldSequence)
+	}
+	if m.addauto_slide_interval != nil {
+		fields = append(fields, portalbanner.FieldAutoSlideInterval)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PortalBannerMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case portalbanner.FieldBgOverlayOpacity:
+		return m.AddedBgOverlayOpacity()
+	case portalbanner.FieldSequence:
+		return m.AddedSequence()
+	case portalbanner.FieldAutoSlideInterval:
+		return m.AddedAutoSlideInterval()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PortalBannerMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case portalbanner.FieldBgOverlayOpacity:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBgOverlayOpacity(v)
+		return nil
+	case portalbanner.FieldSequence:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSequence(v)
+		return nil
+	case portalbanner.FieldAutoSlideInterval:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAutoSlideInterval(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PortalBanner numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PortalBannerMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(portalbanner.FieldTitleI18n) {
+		fields = append(fields, portalbanner.FieldTitleI18n)
+	}
+	if m.FieldCleared(portalbanner.FieldSubtitle) {
+		fields = append(fields, portalbanner.FieldSubtitle)
+	}
+	if m.FieldCleared(portalbanner.FieldSubtitleI18n) {
+		fields = append(fields, portalbanner.FieldSubtitleI18n)
+	}
+	if m.FieldCleared(portalbanner.FieldBadgeText) {
+		fields = append(fields, portalbanner.FieldBadgeText)
+	}
+	if m.FieldCleared(portalbanner.FieldImageURL) {
+		fields = append(fields, portalbanner.FieldImageURL)
+	}
+	if m.FieldCleared(portalbanner.FieldImageMobileURL) {
+		fields = append(fields, portalbanner.FieldImageMobileURL)
+	}
+	if m.FieldCleared(portalbanner.FieldBgColorStart) {
+		fields = append(fields, portalbanner.FieldBgColorStart)
+	}
+	if m.FieldCleared(portalbanner.FieldBgColorEnd) {
+		fields = append(fields, portalbanner.FieldBgColorEnd)
+	}
+	if m.FieldCleared(portalbanner.FieldPrimaryBtnText) {
+		fields = append(fields, portalbanner.FieldPrimaryBtnText)
+	}
+	if m.FieldCleared(portalbanner.FieldPrimaryBtnURL) {
+		fields = append(fields, portalbanner.FieldPrimaryBtnURL)
+	}
+	if m.FieldCleared(portalbanner.FieldSecondaryBtnText) {
+		fields = append(fields, portalbanner.FieldSecondaryBtnText)
+	}
+	if m.FieldCleared(portalbanner.FieldSecondaryBtnURL) {
+		fields = append(fields, portalbanner.FieldSecondaryBtnURL)
+	}
+	if m.FieldCleared(portalbanner.FieldStartAt) {
+		fields = append(fields, portalbanner.FieldStartAt)
+	}
+	if m.FieldCleared(portalbanner.FieldEndAt) {
+		fields = append(fields, portalbanner.FieldEndAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PortalBannerMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PortalBannerMutation) ClearField(name string) error {
+	switch name {
+	case portalbanner.FieldTitleI18n:
+		m.ClearTitleI18n()
+		return nil
+	case portalbanner.FieldSubtitle:
+		m.ClearSubtitle()
+		return nil
+	case portalbanner.FieldSubtitleI18n:
+		m.ClearSubtitleI18n()
+		return nil
+	case portalbanner.FieldBadgeText:
+		m.ClearBadgeText()
+		return nil
+	case portalbanner.FieldImageURL:
+		m.ClearImageURL()
+		return nil
+	case portalbanner.FieldImageMobileURL:
+		m.ClearImageMobileURL()
+		return nil
+	case portalbanner.FieldBgColorStart:
+		m.ClearBgColorStart()
+		return nil
+	case portalbanner.FieldBgColorEnd:
+		m.ClearBgColorEnd()
+		return nil
+	case portalbanner.FieldPrimaryBtnText:
+		m.ClearPrimaryBtnText()
+		return nil
+	case portalbanner.FieldPrimaryBtnURL:
+		m.ClearPrimaryBtnURL()
+		return nil
+	case portalbanner.FieldSecondaryBtnText:
+		m.ClearSecondaryBtnText()
+		return nil
+	case portalbanner.FieldSecondaryBtnURL:
+		m.ClearSecondaryBtnURL()
+		return nil
+	case portalbanner.FieldStartAt:
+		m.ClearStartAt()
+		return nil
+	case portalbanner.FieldEndAt:
+		m.ClearEndAt()
+		return nil
+	}
+	return fmt.Errorf("unknown PortalBanner nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PortalBannerMutation) ResetField(name string) error {
+	switch name {
+	case portalbanner.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case portalbanner.FieldTitleI18n:
+		m.ResetTitleI18n()
+		return nil
+	case portalbanner.FieldSubtitle:
+		m.ResetSubtitle()
+		return nil
+	case portalbanner.FieldSubtitleI18n:
+		m.ResetSubtitleI18n()
+		return nil
+	case portalbanner.FieldBadgeText:
+		m.ResetBadgeText()
+		return nil
+	case portalbanner.FieldImageURL:
+		m.ResetImageURL()
+		return nil
+	case portalbanner.FieldImageMobileURL:
+		m.ResetImageMobileURL()
+		return nil
+	case portalbanner.FieldBgColorStart:
+		m.ResetBgColorStart()
+		return nil
+	case portalbanner.FieldBgColorEnd:
+		m.ResetBgColorEnd()
+		return nil
+	case portalbanner.FieldBgOverlayOpacity:
+		m.ResetBgOverlayOpacity()
+		return nil
+	case portalbanner.FieldPrimaryBtnText:
+		m.ResetPrimaryBtnText()
+		return nil
+	case portalbanner.FieldPrimaryBtnURL:
+		m.ResetPrimaryBtnURL()
+		return nil
+	case portalbanner.FieldSecondaryBtnText:
+		m.ResetSecondaryBtnText()
+		return nil
+	case portalbanner.FieldSecondaryBtnURL:
+		m.ResetSecondaryBtnURL()
+		return nil
+	case portalbanner.FieldSequence:
+		m.ResetSequence()
+		return nil
+	case portalbanner.FieldIsActive:
+		m.ResetIsActive()
+		return nil
+	case portalbanner.FieldStartAt:
+		m.ResetStartAt()
+		return nil
+	case portalbanner.FieldEndAt:
+		m.ResetEndAt()
+		return nil
+	case portalbanner.FieldAutoSlideInterval:
+		m.ResetAutoSlideInterval()
+		return nil
+	}
+	return fmt.Errorf("unknown PortalBanner field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PortalBannerMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PortalBannerMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PortalBannerMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PortalBannerMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PortalBannerMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PortalBannerMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PortalBannerMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown PortalBanner unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PortalBannerMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown PortalBanner edge %s", name)
+}
+
+// PortalCustomPageMutation represents an operation that mutates the PortalCustomPage nodes in the graph.
+type PortalCustomPageMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *string
+	title           *string
+	slug            *string
+	_type           *string
+	content_format  *string
+	content         *string
+	layout          *string
+	is_published    *bool
+	published_at    *time.Time
+	seo_title       *string
+	seo_description *string
+	featured_image  *string
+	view_count      *int64
+	addview_count   *int64
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*PortalCustomPage, error)
+	predicates      []predicate.PortalCustomPage
+}
+
+var _ ent.Mutation = (*PortalCustomPageMutation)(nil)
+
+// portalcustompageOption allows management of the mutation configuration using functional options.
+type portalcustompageOption func(*PortalCustomPageMutation)
+
+// newPortalCustomPageMutation creates new mutation for the PortalCustomPage entity.
+func newPortalCustomPageMutation(c config, op Op, opts ...portalcustompageOption) *PortalCustomPageMutation {
+	m := &PortalCustomPageMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePortalCustomPage,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPortalCustomPageID sets the ID field of the mutation.
+func withPortalCustomPageID(id string) portalcustompageOption {
+	return func(m *PortalCustomPageMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PortalCustomPage
+		)
+		m.oldValue = func(ctx context.Context) (*PortalCustomPage, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PortalCustomPage.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPortalCustomPage sets the old PortalCustomPage of the mutation.
+func withPortalCustomPage(node *PortalCustomPage) portalcustompageOption {
+	return func(m *PortalCustomPageMutation) {
+		m.oldValue = func(context.Context) (*PortalCustomPage, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PortalCustomPageMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PortalCustomPageMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("entity: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of PortalCustomPage entities.
+func (m *PortalCustomPageMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PortalCustomPageMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PortalCustomPageMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PortalCustomPage.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetTitle sets the "title" field.
+func (m *PortalCustomPageMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *PortalCustomPageMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the PortalCustomPage entity.
+// If the PortalCustomPage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalCustomPageMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *PortalCustomPageMutation) ResetTitle() {
+	m.title = nil
+}
+
+// SetSlug sets the "slug" field.
+func (m *PortalCustomPageMutation) SetSlug(s string) {
+	m.slug = &s
+}
+
+// Slug returns the value of the "slug" field in the mutation.
+func (m *PortalCustomPageMutation) Slug() (r string, exists bool) {
+	v := m.slug
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSlug returns the old "slug" field's value of the PortalCustomPage entity.
+// If the PortalCustomPage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalCustomPageMutation) OldSlug(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSlug is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSlug requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSlug: %w", err)
+	}
+	return oldValue.Slug, nil
+}
+
+// ResetSlug resets all changes to the "slug" field.
+func (m *PortalCustomPageMutation) ResetSlug() {
+	m.slug = nil
+}
+
+// SetType sets the "type" field.
+func (m *PortalCustomPageMutation) SetType(s string) {
+	m._type = &s
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *PortalCustomPageMutation) GetType() (r string, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the PortalCustomPage entity.
+// If the PortalCustomPage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalCustomPageMutation) OldType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *PortalCustomPageMutation) ResetType() {
+	m._type = nil
+}
+
+// SetContentFormat sets the "content_format" field.
+func (m *PortalCustomPageMutation) SetContentFormat(s string) {
+	m.content_format = &s
+}
+
+// ContentFormat returns the value of the "content_format" field in the mutation.
+func (m *PortalCustomPageMutation) ContentFormat() (r string, exists bool) {
+	v := m.content_format
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContentFormat returns the old "content_format" field's value of the PortalCustomPage entity.
+// If the PortalCustomPage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalCustomPageMutation) OldContentFormat(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContentFormat is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContentFormat requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContentFormat: %w", err)
+	}
+	return oldValue.ContentFormat, nil
+}
+
+// ResetContentFormat resets all changes to the "content_format" field.
+func (m *PortalCustomPageMutation) ResetContentFormat() {
+	m.content_format = nil
+}
+
+// SetContent sets the "content" field.
+func (m *PortalCustomPageMutation) SetContent(s string) {
+	m.content = &s
+}
+
+// Content returns the value of the "content" field in the mutation.
+func (m *PortalCustomPageMutation) Content() (r string, exists bool) {
+	v := m.content
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContent returns the old "content" field's value of the PortalCustomPage entity.
+// If the PortalCustomPage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalCustomPageMutation) OldContent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContent: %w", err)
+	}
+	return oldValue.Content, nil
+}
+
+// ClearContent clears the value of the "content" field.
+func (m *PortalCustomPageMutation) ClearContent() {
+	m.content = nil
+	m.clearedFields[portalcustompage.FieldContent] = struct{}{}
+}
+
+// ContentCleared returns if the "content" field was cleared in this mutation.
+func (m *PortalCustomPageMutation) ContentCleared() bool {
+	_, ok := m.clearedFields[portalcustompage.FieldContent]
+	return ok
+}
+
+// ResetContent resets all changes to the "content" field.
+func (m *PortalCustomPageMutation) ResetContent() {
+	m.content = nil
+	delete(m.clearedFields, portalcustompage.FieldContent)
+}
+
+// SetLayout sets the "layout" field.
+func (m *PortalCustomPageMutation) SetLayout(s string) {
+	m.layout = &s
+}
+
+// Layout returns the value of the "layout" field in the mutation.
+func (m *PortalCustomPageMutation) Layout() (r string, exists bool) {
+	v := m.layout
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLayout returns the old "layout" field's value of the PortalCustomPage entity.
+// If the PortalCustomPage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalCustomPageMutation) OldLayout(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLayout is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLayout requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLayout: %w", err)
+	}
+	return oldValue.Layout, nil
+}
+
+// ResetLayout resets all changes to the "layout" field.
+func (m *PortalCustomPageMutation) ResetLayout() {
+	m.layout = nil
+}
+
+// SetIsPublished sets the "is_published" field.
+func (m *PortalCustomPageMutation) SetIsPublished(b bool) {
+	m.is_published = &b
+}
+
+// IsPublished returns the value of the "is_published" field in the mutation.
+func (m *PortalCustomPageMutation) IsPublished() (r bool, exists bool) {
+	v := m.is_published
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsPublished returns the old "is_published" field's value of the PortalCustomPage entity.
+// If the PortalCustomPage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalCustomPageMutation) OldIsPublished(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsPublished is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsPublished requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsPublished: %w", err)
+	}
+	return oldValue.IsPublished, nil
+}
+
+// ResetIsPublished resets all changes to the "is_published" field.
+func (m *PortalCustomPageMutation) ResetIsPublished() {
+	m.is_published = nil
+}
+
+// SetPublishedAt sets the "published_at" field.
+func (m *PortalCustomPageMutation) SetPublishedAt(t time.Time) {
+	m.published_at = &t
+}
+
+// PublishedAt returns the value of the "published_at" field in the mutation.
+func (m *PortalCustomPageMutation) PublishedAt() (r time.Time, exists bool) {
+	v := m.published_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPublishedAt returns the old "published_at" field's value of the PortalCustomPage entity.
+// If the PortalCustomPage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalCustomPageMutation) OldPublishedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPublishedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPublishedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPublishedAt: %w", err)
+	}
+	return oldValue.PublishedAt, nil
+}
+
+// ClearPublishedAt clears the value of the "published_at" field.
+func (m *PortalCustomPageMutation) ClearPublishedAt() {
+	m.published_at = nil
+	m.clearedFields[portalcustompage.FieldPublishedAt] = struct{}{}
+}
+
+// PublishedAtCleared returns if the "published_at" field was cleared in this mutation.
+func (m *PortalCustomPageMutation) PublishedAtCleared() bool {
+	_, ok := m.clearedFields[portalcustompage.FieldPublishedAt]
+	return ok
+}
+
+// ResetPublishedAt resets all changes to the "published_at" field.
+func (m *PortalCustomPageMutation) ResetPublishedAt() {
+	m.published_at = nil
+	delete(m.clearedFields, portalcustompage.FieldPublishedAt)
+}
+
+// SetSeoTitle sets the "seo_title" field.
+func (m *PortalCustomPageMutation) SetSeoTitle(s string) {
+	m.seo_title = &s
+}
+
+// SeoTitle returns the value of the "seo_title" field in the mutation.
+func (m *PortalCustomPageMutation) SeoTitle() (r string, exists bool) {
+	v := m.seo_title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSeoTitle returns the old "seo_title" field's value of the PortalCustomPage entity.
+// If the PortalCustomPage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalCustomPageMutation) OldSeoTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSeoTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSeoTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSeoTitle: %w", err)
+	}
+	return oldValue.SeoTitle, nil
+}
+
+// ClearSeoTitle clears the value of the "seo_title" field.
+func (m *PortalCustomPageMutation) ClearSeoTitle() {
+	m.seo_title = nil
+	m.clearedFields[portalcustompage.FieldSeoTitle] = struct{}{}
+}
+
+// SeoTitleCleared returns if the "seo_title" field was cleared in this mutation.
+func (m *PortalCustomPageMutation) SeoTitleCleared() bool {
+	_, ok := m.clearedFields[portalcustompage.FieldSeoTitle]
+	return ok
+}
+
+// ResetSeoTitle resets all changes to the "seo_title" field.
+func (m *PortalCustomPageMutation) ResetSeoTitle() {
+	m.seo_title = nil
+	delete(m.clearedFields, portalcustompage.FieldSeoTitle)
+}
+
+// SetSeoDescription sets the "seo_description" field.
+func (m *PortalCustomPageMutation) SetSeoDescription(s string) {
+	m.seo_description = &s
+}
+
+// SeoDescription returns the value of the "seo_description" field in the mutation.
+func (m *PortalCustomPageMutation) SeoDescription() (r string, exists bool) {
+	v := m.seo_description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSeoDescription returns the old "seo_description" field's value of the PortalCustomPage entity.
+// If the PortalCustomPage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalCustomPageMutation) OldSeoDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSeoDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSeoDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSeoDescription: %w", err)
+	}
+	return oldValue.SeoDescription, nil
+}
+
+// ClearSeoDescription clears the value of the "seo_description" field.
+func (m *PortalCustomPageMutation) ClearSeoDescription() {
+	m.seo_description = nil
+	m.clearedFields[portalcustompage.FieldSeoDescription] = struct{}{}
+}
+
+// SeoDescriptionCleared returns if the "seo_description" field was cleared in this mutation.
+func (m *PortalCustomPageMutation) SeoDescriptionCleared() bool {
+	_, ok := m.clearedFields[portalcustompage.FieldSeoDescription]
+	return ok
+}
+
+// ResetSeoDescription resets all changes to the "seo_description" field.
+func (m *PortalCustomPageMutation) ResetSeoDescription() {
+	m.seo_description = nil
+	delete(m.clearedFields, portalcustompage.FieldSeoDescription)
+}
+
+// SetFeaturedImage sets the "featured_image" field.
+func (m *PortalCustomPageMutation) SetFeaturedImage(s string) {
+	m.featured_image = &s
+}
+
+// FeaturedImage returns the value of the "featured_image" field in the mutation.
+func (m *PortalCustomPageMutation) FeaturedImage() (r string, exists bool) {
+	v := m.featured_image
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFeaturedImage returns the old "featured_image" field's value of the PortalCustomPage entity.
+// If the PortalCustomPage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalCustomPageMutation) OldFeaturedImage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFeaturedImage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFeaturedImage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFeaturedImage: %w", err)
+	}
+	return oldValue.FeaturedImage, nil
+}
+
+// ClearFeaturedImage clears the value of the "featured_image" field.
+func (m *PortalCustomPageMutation) ClearFeaturedImage() {
+	m.featured_image = nil
+	m.clearedFields[portalcustompage.FieldFeaturedImage] = struct{}{}
+}
+
+// FeaturedImageCleared returns if the "featured_image" field was cleared in this mutation.
+func (m *PortalCustomPageMutation) FeaturedImageCleared() bool {
+	_, ok := m.clearedFields[portalcustompage.FieldFeaturedImage]
+	return ok
+}
+
+// ResetFeaturedImage resets all changes to the "featured_image" field.
+func (m *PortalCustomPageMutation) ResetFeaturedImage() {
+	m.featured_image = nil
+	delete(m.clearedFields, portalcustompage.FieldFeaturedImage)
+}
+
+// SetViewCount sets the "view_count" field.
+func (m *PortalCustomPageMutation) SetViewCount(i int64) {
+	m.view_count = &i
+	m.addview_count = nil
+}
+
+// ViewCount returns the value of the "view_count" field in the mutation.
+func (m *PortalCustomPageMutation) ViewCount() (r int64, exists bool) {
+	v := m.view_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldViewCount returns the old "view_count" field's value of the PortalCustomPage entity.
+// If the PortalCustomPage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalCustomPageMutation) OldViewCount(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldViewCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldViewCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldViewCount: %w", err)
+	}
+	return oldValue.ViewCount, nil
+}
+
+// AddViewCount adds i to the "view_count" field.
+func (m *PortalCustomPageMutation) AddViewCount(i int64) {
+	if m.addview_count != nil {
+		*m.addview_count += i
+	} else {
+		m.addview_count = &i
+	}
+}
+
+// AddedViewCount returns the value that was added to the "view_count" field in this mutation.
+func (m *PortalCustomPageMutation) AddedViewCount() (r int64, exists bool) {
+	v := m.addview_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetViewCount resets all changes to the "view_count" field.
+func (m *PortalCustomPageMutation) ResetViewCount() {
+	m.view_count = nil
+	m.addview_count = nil
+}
+
+// Where appends a list predicates to the PortalCustomPageMutation builder.
+func (m *PortalCustomPageMutation) Where(ps ...predicate.PortalCustomPage) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PortalCustomPageMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PortalCustomPageMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PortalCustomPage, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PortalCustomPageMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PortalCustomPageMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PortalCustomPage).
+func (m *PortalCustomPageMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PortalCustomPageMutation) Fields() []string {
+	fields := make([]string, 0, 12)
+	if m.title != nil {
+		fields = append(fields, portalcustompage.FieldTitle)
+	}
+	if m.slug != nil {
+		fields = append(fields, portalcustompage.FieldSlug)
+	}
+	if m._type != nil {
+		fields = append(fields, portalcustompage.FieldType)
+	}
+	if m.content_format != nil {
+		fields = append(fields, portalcustompage.FieldContentFormat)
+	}
+	if m.content != nil {
+		fields = append(fields, portalcustompage.FieldContent)
+	}
+	if m.layout != nil {
+		fields = append(fields, portalcustompage.FieldLayout)
+	}
+	if m.is_published != nil {
+		fields = append(fields, portalcustompage.FieldIsPublished)
+	}
+	if m.published_at != nil {
+		fields = append(fields, portalcustompage.FieldPublishedAt)
+	}
+	if m.seo_title != nil {
+		fields = append(fields, portalcustompage.FieldSeoTitle)
+	}
+	if m.seo_description != nil {
+		fields = append(fields, portalcustompage.FieldSeoDescription)
+	}
+	if m.featured_image != nil {
+		fields = append(fields, portalcustompage.FieldFeaturedImage)
+	}
+	if m.view_count != nil {
+		fields = append(fields, portalcustompage.FieldViewCount)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PortalCustomPageMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case portalcustompage.FieldTitle:
+		return m.Title()
+	case portalcustompage.FieldSlug:
+		return m.Slug()
+	case portalcustompage.FieldType:
+		return m.GetType()
+	case portalcustompage.FieldContentFormat:
+		return m.ContentFormat()
+	case portalcustompage.FieldContent:
+		return m.Content()
+	case portalcustompage.FieldLayout:
+		return m.Layout()
+	case portalcustompage.FieldIsPublished:
+		return m.IsPublished()
+	case portalcustompage.FieldPublishedAt:
+		return m.PublishedAt()
+	case portalcustompage.FieldSeoTitle:
+		return m.SeoTitle()
+	case portalcustompage.FieldSeoDescription:
+		return m.SeoDescription()
+	case portalcustompage.FieldFeaturedImage:
+		return m.FeaturedImage()
+	case portalcustompage.FieldViewCount:
+		return m.ViewCount()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PortalCustomPageMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case portalcustompage.FieldTitle:
+		return m.OldTitle(ctx)
+	case portalcustompage.FieldSlug:
+		return m.OldSlug(ctx)
+	case portalcustompage.FieldType:
+		return m.OldType(ctx)
+	case portalcustompage.FieldContentFormat:
+		return m.OldContentFormat(ctx)
+	case portalcustompage.FieldContent:
+		return m.OldContent(ctx)
+	case portalcustompage.FieldLayout:
+		return m.OldLayout(ctx)
+	case portalcustompage.FieldIsPublished:
+		return m.OldIsPublished(ctx)
+	case portalcustompage.FieldPublishedAt:
+		return m.OldPublishedAt(ctx)
+	case portalcustompage.FieldSeoTitle:
+		return m.OldSeoTitle(ctx)
+	case portalcustompage.FieldSeoDescription:
+		return m.OldSeoDescription(ctx)
+	case portalcustompage.FieldFeaturedImage:
+		return m.OldFeaturedImage(ctx)
+	case portalcustompage.FieldViewCount:
+		return m.OldViewCount(ctx)
+	}
+	return nil, fmt.Errorf("unknown PortalCustomPage field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PortalCustomPageMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case portalcustompage.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case portalcustompage.FieldSlug:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSlug(v)
+		return nil
+	case portalcustompage.FieldType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
+		return nil
+	case portalcustompage.FieldContentFormat:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContentFormat(v)
+		return nil
+	case portalcustompage.FieldContent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContent(v)
+		return nil
+	case portalcustompage.FieldLayout:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLayout(v)
+		return nil
+	case portalcustompage.FieldIsPublished:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsPublished(v)
+		return nil
+	case portalcustompage.FieldPublishedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPublishedAt(v)
+		return nil
+	case portalcustompage.FieldSeoTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSeoTitle(v)
+		return nil
+	case portalcustompage.FieldSeoDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSeoDescription(v)
+		return nil
+	case portalcustompage.FieldFeaturedImage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFeaturedImage(v)
+		return nil
+	case portalcustompage.FieldViewCount:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetViewCount(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PortalCustomPage field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PortalCustomPageMutation) AddedFields() []string {
+	var fields []string
+	if m.addview_count != nil {
+		fields = append(fields, portalcustompage.FieldViewCount)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PortalCustomPageMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case portalcustompage.FieldViewCount:
+		return m.AddedViewCount()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PortalCustomPageMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case portalcustompage.FieldViewCount:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddViewCount(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PortalCustomPage numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PortalCustomPageMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(portalcustompage.FieldContent) {
+		fields = append(fields, portalcustompage.FieldContent)
+	}
+	if m.FieldCleared(portalcustompage.FieldPublishedAt) {
+		fields = append(fields, portalcustompage.FieldPublishedAt)
+	}
+	if m.FieldCleared(portalcustompage.FieldSeoTitle) {
+		fields = append(fields, portalcustompage.FieldSeoTitle)
+	}
+	if m.FieldCleared(portalcustompage.FieldSeoDescription) {
+		fields = append(fields, portalcustompage.FieldSeoDescription)
+	}
+	if m.FieldCleared(portalcustompage.FieldFeaturedImage) {
+		fields = append(fields, portalcustompage.FieldFeaturedImage)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PortalCustomPageMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PortalCustomPageMutation) ClearField(name string) error {
+	switch name {
+	case portalcustompage.FieldContent:
+		m.ClearContent()
+		return nil
+	case portalcustompage.FieldPublishedAt:
+		m.ClearPublishedAt()
+		return nil
+	case portalcustompage.FieldSeoTitle:
+		m.ClearSeoTitle()
+		return nil
+	case portalcustompage.FieldSeoDescription:
+		m.ClearSeoDescription()
+		return nil
+	case portalcustompage.FieldFeaturedImage:
+		m.ClearFeaturedImage()
+		return nil
+	}
+	return fmt.Errorf("unknown PortalCustomPage nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PortalCustomPageMutation) ResetField(name string) error {
+	switch name {
+	case portalcustompage.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case portalcustompage.FieldSlug:
+		m.ResetSlug()
+		return nil
+	case portalcustompage.FieldType:
+		m.ResetType()
+		return nil
+	case portalcustompage.FieldContentFormat:
+		m.ResetContentFormat()
+		return nil
+	case portalcustompage.FieldContent:
+		m.ResetContent()
+		return nil
+	case portalcustompage.FieldLayout:
+		m.ResetLayout()
+		return nil
+	case portalcustompage.FieldIsPublished:
+		m.ResetIsPublished()
+		return nil
+	case portalcustompage.FieldPublishedAt:
+		m.ResetPublishedAt()
+		return nil
+	case portalcustompage.FieldSeoTitle:
+		m.ResetSeoTitle()
+		return nil
+	case portalcustompage.FieldSeoDescription:
+		m.ResetSeoDescription()
+		return nil
+	case portalcustompage.FieldFeaturedImage:
+		m.ResetFeaturedImage()
+		return nil
+	case portalcustompage.FieldViewCount:
+		m.ResetViewCount()
+		return nil
+	}
+	return fmt.Errorf("unknown PortalCustomPage field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PortalCustomPageMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PortalCustomPageMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PortalCustomPageMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PortalCustomPageMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PortalCustomPageMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PortalCustomPageMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PortalCustomPageMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown PortalCustomPage unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PortalCustomPageMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown PortalCustomPage edge %s", name)
+}
+
+// PortalNavItemMutation represents an operation that mutates the PortalNavItem nodes in the graph.
+type PortalNavItemMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *string
+	_type         *string
+	label         *string
+	label_i18n    *map[string]string
+	url           *string
+	target_type   *string
+	target_id     *string
+	icon          *string
+	color         *string
+	sequence      *int
+	addsequence   *int
+	parent_id     *string
+	is_visible    *bool
+	open_new_tab  *bool
+	css_class     *string
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*PortalNavItem, error)
+	predicates    []predicate.PortalNavItem
+}
+
+var _ ent.Mutation = (*PortalNavItemMutation)(nil)
+
+// portalnavitemOption allows management of the mutation configuration using functional options.
+type portalnavitemOption func(*PortalNavItemMutation)
+
+// newPortalNavItemMutation creates new mutation for the PortalNavItem entity.
+func newPortalNavItemMutation(c config, op Op, opts ...portalnavitemOption) *PortalNavItemMutation {
+	m := &PortalNavItemMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePortalNavItem,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPortalNavItemID sets the ID field of the mutation.
+func withPortalNavItemID(id string) portalnavitemOption {
+	return func(m *PortalNavItemMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PortalNavItem
+		)
+		m.oldValue = func(ctx context.Context) (*PortalNavItem, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PortalNavItem.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPortalNavItem sets the old PortalNavItem of the mutation.
+func withPortalNavItem(node *PortalNavItem) portalnavitemOption {
+	return func(m *PortalNavItemMutation) {
+		m.oldValue = func(context.Context) (*PortalNavItem, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PortalNavItemMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PortalNavItemMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("entity: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of PortalNavItem entities.
+func (m *PortalNavItemMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PortalNavItemMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PortalNavItemMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PortalNavItem.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetType sets the "type" field.
+func (m *PortalNavItemMutation) SetType(s string) {
+	m._type = &s
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *PortalNavItemMutation) GetType() (r string, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the PortalNavItem entity.
+// If the PortalNavItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalNavItemMutation) OldType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *PortalNavItemMutation) ResetType() {
+	m._type = nil
+}
+
+// SetLabel sets the "label" field.
+func (m *PortalNavItemMutation) SetLabel(s string) {
+	m.label = &s
+}
+
+// Label returns the value of the "label" field in the mutation.
+func (m *PortalNavItemMutation) Label() (r string, exists bool) {
+	v := m.label
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLabel returns the old "label" field's value of the PortalNavItem entity.
+// If the PortalNavItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalNavItemMutation) OldLabel(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLabel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLabel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLabel: %w", err)
+	}
+	return oldValue.Label, nil
+}
+
+// ResetLabel resets all changes to the "label" field.
+func (m *PortalNavItemMutation) ResetLabel() {
+	m.label = nil
+}
+
+// SetLabelI18n sets the "label_i18n" field.
+func (m *PortalNavItemMutation) SetLabelI18n(value map[string]string) {
+	m.label_i18n = &value
+}
+
+// LabelI18n returns the value of the "label_i18n" field in the mutation.
+func (m *PortalNavItemMutation) LabelI18n() (r map[string]string, exists bool) {
+	v := m.label_i18n
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLabelI18n returns the old "label_i18n" field's value of the PortalNavItem entity.
+// If the PortalNavItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalNavItemMutation) OldLabelI18n(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLabelI18n is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLabelI18n requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLabelI18n: %w", err)
+	}
+	return oldValue.LabelI18n, nil
+}
+
+// ClearLabelI18n clears the value of the "label_i18n" field.
+func (m *PortalNavItemMutation) ClearLabelI18n() {
+	m.label_i18n = nil
+	m.clearedFields[portalnavitem.FieldLabelI18n] = struct{}{}
+}
+
+// LabelI18nCleared returns if the "label_i18n" field was cleared in this mutation.
+func (m *PortalNavItemMutation) LabelI18nCleared() bool {
+	_, ok := m.clearedFields[portalnavitem.FieldLabelI18n]
+	return ok
+}
+
+// ResetLabelI18n resets all changes to the "label_i18n" field.
+func (m *PortalNavItemMutation) ResetLabelI18n() {
+	m.label_i18n = nil
+	delete(m.clearedFields, portalnavitem.FieldLabelI18n)
+}
+
+// SetURL sets the "url" field.
+func (m *PortalNavItemMutation) SetURL(s string) {
+	m.url = &s
+}
+
+// URL returns the value of the "url" field in the mutation.
+func (m *PortalNavItemMutation) URL() (r string, exists bool) {
+	v := m.url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldURL returns the old "url" field's value of the PortalNavItem entity.
+// If the PortalNavItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalNavItemMutation) OldURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldURL: %w", err)
+	}
+	return oldValue.URL, nil
+}
+
+// ClearURL clears the value of the "url" field.
+func (m *PortalNavItemMutation) ClearURL() {
+	m.url = nil
+	m.clearedFields[portalnavitem.FieldURL] = struct{}{}
+}
+
+// URLCleared returns if the "url" field was cleared in this mutation.
+func (m *PortalNavItemMutation) URLCleared() bool {
+	_, ok := m.clearedFields[portalnavitem.FieldURL]
+	return ok
+}
+
+// ResetURL resets all changes to the "url" field.
+func (m *PortalNavItemMutation) ResetURL() {
+	m.url = nil
+	delete(m.clearedFields, portalnavitem.FieldURL)
+}
+
+// SetTargetType sets the "target_type" field.
+func (m *PortalNavItemMutation) SetTargetType(s string) {
+	m.target_type = &s
+}
+
+// TargetType returns the value of the "target_type" field in the mutation.
+func (m *PortalNavItemMutation) TargetType() (r string, exists bool) {
+	v := m.target_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTargetType returns the old "target_type" field's value of the PortalNavItem entity.
+// If the PortalNavItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalNavItemMutation) OldTargetType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTargetType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTargetType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTargetType: %w", err)
+	}
+	return oldValue.TargetType, nil
+}
+
+// ClearTargetType clears the value of the "target_type" field.
+func (m *PortalNavItemMutation) ClearTargetType() {
+	m.target_type = nil
+	m.clearedFields[portalnavitem.FieldTargetType] = struct{}{}
+}
+
+// TargetTypeCleared returns if the "target_type" field was cleared in this mutation.
+func (m *PortalNavItemMutation) TargetTypeCleared() bool {
+	_, ok := m.clearedFields[portalnavitem.FieldTargetType]
+	return ok
+}
+
+// ResetTargetType resets all changes to the "target_type" field.
+func (m *PortalNavItemMutation) ResetTargetType() {
+	m.target_type = nil
+	delete(m.clearedFields, portalnavitem.FieldTargetType)
+}
+
+// SetTargetID sets the "target_id" field.
+func (m *PortalNavItemMutation) SetTargetID(s string) {
+	m.target_id = &s
+}
+
+// TargetID returns the value of the "target_id" field in the mutation.
+func (m *PortalNavItemMutation) TargetID() (r string, exists bool) {
+	v := m.target_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTargetID returns the old "target_id" field's value of the PortalNavItem entity.
+// If the PortalNavItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalNavItemMutation) OldTargetID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTargetID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTargetID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTargetID: %w", err)
+	}
+	return oldValue.TargetID, nil
+}
+
+// ClearTargetID clears the value of the "target_id" field.
+func (m *PortalNavItemMutation) ClearTargetID() {
+	m.target_id = nil
+	m.clearedFields[portalnavitem.FieldTargetID] = struct{}{}
+}
+
+// TargetIDCleared returns if the "target_id" field was cleared in this mutation.
+func (m *PortalNavItemMutation) TargetIDCleared() bool {
+	_, ok := m.clearedFields[portalnavitem.FieldTargetID]
+	return ok
+}
+
+// ResetTargetID resets all changes to the "target_id" field.
+func (m *PortalNavItemMutation) ResetTargetID() {
+	m.target_id = nil
+	delete(m.clearedFields, portalnavitem.FieldTargetID)
+}
+
+// SetIcon sets the "icon" field.
+func (m *PortalNavItemMutation) SetIcon(s string) {
+	m.icon = &s
+}
+
+// Icon returns the value of the "icon" field in the mutation.
+func (m *PortalNavItemMutation) Icon() (r string, exists bool) {
+	v := m.icon
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIcon returns the old "icon" field's value of the PortalNavItem entity.
+// If the PortalNavItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalNavItemMutation) OldIcon(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIcon is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIcon requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIcon: %w", err)
+	}
+	return oldValue.Icon, nil
+}
+
+// ClearIcon clears the value of the "icon" field.
+func (m *PortalNavItemMutation) ClearIcon() {
+	m.icon = nil
+	m.clearedFields[portalnavitem.FieldIcon] = struct{}{}
+}
+
+// IconCleared returns if the "icon" field was cleared in this mutation.
+func (m *PortalNavItemMutation) IconCleared() bool {
+	_, ok := m.clearedFields[portalnavitem.FieldIcon]
+	return ok
+}
+
+// ResetIcon resets all changes to the "icon" field.
+func (m *PortalNavItemMutation) ResetIcon() {
+	m.icon = nil
+	delete(m.clearedFields, portalnavitem.FieldIcon)
+}
+
+// SetColor sets the "color" field.
+func (m *PortalNavItemMutation) SetColor(s string) {
+	m.color = &s
+}
+
+// Color returns the value of the "color" field in the mutation.
+func (m *PortalNavItemMutation) Color() (r string, exists bool) {
+	v := m.color
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldColor returns the old "color" field's value of the PortalNavItem entity.
+// If the PortalNavItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalNavItemMutation) OldColor(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldColor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldColor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldColor: %w", err)
+	}
+	return oldValue.Color, nil
+}
+
+// ClearColor clears the value of the "color" field.
+func (m *PortalNavItemMutation) ClearColor() {
+	m.color = nil
+	m.clearedFields[portalnavitem.FieldColor] = struct{}{}
+}
+
+// ColorCleared returns if the "color" field was cleared in this mutation.
+func (m *PortalNavItemMutation) ColorCleared() bool {
+	_, ok := m.clearedFields[portalnavitem.FieldColor]
+	return ok
+}
+
+// ResetColor resets all changes to the "color" field.
+func (m *PortalNavItemMutation) ResetColor() {
+	m.color = nil
+	delete(m.clearedFields, portalnavitem.FieldColor)
+}
+
+// SetSequence sets the "sequence" field.
+func (m *PortalNavItemMutation) SetSequence(i int) {
+	m.sequence = &i
+	m.addsequence = nil
+}
+
+// Sequence returns the value of the "sequence" field in the mutation.
+func (m *PortalNavItemMutation) Sequence() (r int, exists bool) {
+	v := m.sequence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSequence returns the old "sequence" field's value of the PortalNavItem entity.
+// If the PortalNavItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalNavItemMutation) OldSequence(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSequence is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSequence requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSequence: %w", err)
+	}
+	return oldValue.Sequence, nil
+}
+
+// AddSequence adds i to the "sequence" field.
+func (m *PortalNavItemMutation) AddSequence(i int) {
+	if m.addsequence != nil {
+		*m.addsequence += i
+	} else {
+		m.addsequence = &i
+	}
+}
+
+// AddedSequence returns the value that was added to the "sequence" field in this mutation.
+func (m *PortalNavItemMutation) AddedSequence() (r int, exists bool) {
+	v := m.addsequence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSequence resets all changes to the "sequence" field.
+func (m *PortalNavItemMutation) ResetSequence() {
+	m.sequence = nil
+	m.addsequence = nil
+}
+
+// SetParentID sets the "parent_id" field.
+func (m *PortalNavItemMutation) SetParentID(s string) {
+	m.parent_id = &s
+}
+
+// ParentID returns the value of the "parent_id" field in the mutation.
+func (m *PortalNavItemMutation) ParentID() (r string, exists bool) {
+	v := m.parent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldParentID returns the old "parent_id" field's value of the PortalNavItem entity.
+// If the PortalNavItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalNavItemMutation) OldParentID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldParentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldParentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldParentID: %w", err)
+	}
+	return oldValue.ParentID, nil
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (m *PortalNavItemMutation) ClearParentID() {
+	m.parent_id = nil
+	m.clearedFields[portalnavitem.FieldParentID] = struct{}{}
+}
+
+// ParentIDCleared returns if the "parent_id" field was cleared in this mutation.
+func (m *PortalNavItemMutation) ParentIDCleared() bool {
+	_, ok := m.clearedFields[portalnavitem.FieldParentID]
+	return ok
+}
+
+// ResetParentID resets all changes to the "parent_id" field.
+func (m *PortalNavItemMutation) ResetParentID() {
+	m.parent_id = nil
+	delete(m.clearedFields, portalnavitem.FieldParentID)
+}
+
+// SetIsVisible sets the "is_visible" field.
+func (m *PortalNavItemMutation) SetIsVisible(b bool) {
+	m.is_visible = &b
+}
+
+// IsVisible returns the value of the "is_visible" field in the mutation.
+func (m *PortalNavItemMutation) IsVisible() (r bool, exists bool) {
+	v := m.is_visible
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsVisible returns the old "is_visible" field's value of the PortalNavItem entity.
+// If the PortalNavItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalNavItemMutation) OldIsVisible(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsVisible is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsVisible requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsVisible: %w", err)
+	}
+	return oldValue.IsVisible, nil
+}
+
+// ResetIsVisible resets all changes to the "is_visible" field.
+func (m *PortalNavItemMutation) ResetIsVisible() {
+	m.is_visible = nil
+}
+
+// SetOpenNewTab sets the "open_new_tab" field.
+func (m *PortalNavItemMutation) SetOpenNewTab(b bool) {
+	m.open_new_tab = &b
+}
+
+// OpenNewTab returns the value of the "open_new_tab" field in the mutation.
+func (m *PortalNavItemMutation) OpenNewTab() (r bool, exists bool) {
+	v := m.open_new_tab
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOpenNewTab returns the old "open_new_tab" field's value of the PortalNavItem entity.
+// If the PortalNavItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalNavItemMutation) OldOpenNewTab(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOpenNewTab is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOpenNewTab requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOpenNewTab: %w", err)
+	}
+	return oldValue.OpenNewTab, nil
+}
+
+// ResetOpenNewTab resets all changes to the "open_new_tab" field.
+func (m *PortalNavItemMutation) ResetOpenNewTab() {
+	m.open_new_tab = nil
+}
+
+// SetCSSClass sets the "css_class" field.
+func (m *PortalNavItemMutation) SetCSSClass(s string) {
+	m.css_class = &s
+}
+
+// CSSClass returns the value of the "css_class" field in the mutation.
+func (m *PortalNavItemMutation) CSSClass() (r string, exists bool) {
+	v := m.css_class
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCSSClass returns the old "css_class" field's value of the PortalNavItem entity.
+// If the PortalNavItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortalNavItemMutation) OldCSSClass(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCSSClass is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCSSClass requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCSSClass: %w", err)
+	}
+	return oldValue.CSSClass, nil
+}
+
+// ClearCSSClass clears the value of the "css_class" field.
+func (m *PortalNavItemMutation) ClearCSSClass() {
+	m.css_class = nil
+	m.clearedFields[portalnavitem.FieldCSSClass] = struct{}{}
+}
+
+// CSSClassCleared returns if the "css_class" field was cleared in this mutation.
+func (m *PortalNavItemMutation) CSSClassCleared() bool {
+	_, ok := m.clearedFields[portalnavitem.FieldCSSClass]
+	return ok
+}
+
+// ResetCSSClass resets all changes to the "css_class" field.
+func (m *PortalNavItemMutation) ResetCSSClass() {
+	m.css_class = nil
+	delete(m.clearedFields, portalnavitem.FieldCSSClass)
+}
+
+// Where appends a list predicates to the PortalNavItemMutation builder.
+func (m *PortalNavItemMutation) Where(ps ...predicate.PortalNavItem) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PortalNavItemMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PortalNavItemMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PortalNavItem, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PortalNavItemMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PortalNavItemMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PortalNavItem).
+func (m *PortalNavItemMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PortalNavItemMutation) Fields() []string {
+	fields := make([]string, 0, 13)
+	if m._type != nil {
+		fields = append(fields, portalnavitem.FieldType)
+	}
+	if m.label != nil {
+		fields = append(fields, portalnavitem.FieldLabel)
+	}
+	if m.label_i18n != nil {
+		fields = append(fields, portalnavitem.FieldLabelI18n)
+	}
+	if m.url != nil {
+		fields = append(fields, portalnavitem.FieldURL)
+	}
+	if m.target_type != nil {
+		fields = append(fields, portalnavitem.FieldTargetType)
+	}
+	if m.target_id != nil {
+		fields = append(fields, portalnavitem.FieldTargetID)
+	}
+	if m.icon != nil {
+		fields = append(fields, portalnavitem.FieldIcon)
+	}
+	if m.color != nil {
+		fields = append(fields, portalnavitem.FieldColor)
+	}
+	if m.sequence != nil {
+		fields = append(fields, portalnavitem.FieldSequence)
+	}
+	if m.parent_id != nil {
+		fields = append(fields, portalnavitem.FieldParentID)
+	}
+	if m.is_visible != nil {
+		fields = append(fields, portalnavitem.FieldIsVisible)
+	}
+	if m.open_new_tab != nil {
+		fields = append(fields, portalnavitem.FieldOpenNewTab)
+	}
+	if m.css_class != nil {
+		fields = append(fields, portalnavitem.FieldCSSClass)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PortalNavItemMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case portalnavitem.FieldType:
+		return m.GetType()
+	case portalnavitem.FieldLabel:
+		return m.Label()
+	case portalnavitem.FieldLabelI18n:
+		return m.LabelI18n()
+	case portalnavitem.FieldURL:
+		return m.URL()
+	case portalnavitem.FieldTargetType:
+		return m.TargetType()
+	case portalnavitem.FieldTargetID:
+		return m.TargetID()
+	case portalnavitem.FieldIcon:
+		return m.Icon()
+	case portalnavitem.FieldColor:
+		return m.Color()
+	case portalnavitem.FieldSequence:
+		return m.Sequence()
+	case portalnavitem.FieldParentID:
+		return m.ParentID()
+	case portalnavitem.FieldIsVisible:
+		return m.IsVisible()
+	case portalnavitem.FieldOpenNewTab:
+		return m.OpenNewTab()
+	case portalnavitem.FieldCSSClass:
+		return m.CSSClass()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PortalNavItemMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case portalnavitem.FieldType:
+		return m.OldType(ctx)
+	case portalnavitem.FieldLabel:
+		return m.OldLabel(ctx)
+	case portalnavitem.FieldLabelI18n:
+		return m.OldLabelI18n(ctx)
+	case portalnavitem.FieldURL:
+		return m.OldURL(ctx)
+	case portalnavitem.FieldTargetType:
+		return m.OldTargetType(ctx)
+	case portalnavitem.FieldTargetID:
+		return m.OldTargetID(ctx)
+	case portalnavitem.FieldIcon:
+		return m.OldIcon(ctx)
+	case portalnavitem.FieldColor:
+		return m.OldColor(ctx)
+	case portalnavitem.FieldSequence:
+		return m.OldSequence(ctx)
+	case portalnavitem.FieldParentID:
+		return m.OldParentID(ctx)
+	case portalnavitem.FieldIsVisible:
+		return m.OldIsVisible(ctx)
+	case portalnavitem.FieldOpenNewTab:
+		return m.OldOpenNewTab(ctx)
+	case portalnavitem.FieldCSSClass:
+		return m.OldCSSClass(ctx)
+	}
+	return nil, fmt.Errorf("unknown PortalNavItem field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PortalNavItemMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case portalnavitem.FieldType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
+		return nil
+	case portalnavitem.FieldLabel:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLabel(v)
+		return nil
+	case portalnavitem.FieldLabelI18n:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLabelI18n(v)
+		return nil
+	case portalnavitem.FieldURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetURL(v)
+		return nil
+	case portalnavitem.FieldTargetType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTargetType(v)
+		return nil
+	case portalnavitem.FieldTargetID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTargetID(v)
+		return nil
+	case portalnavitem.FieldIcon:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIcon(v)
+		return nil
+	case portalnavitem.FieldColor:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetColor(v)
+		return nil
+	case portalnavitem.FieldSequence:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSequence(v)
+		return nil
+	case portalnavitem.FieldParentID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetParentID(v)
+		return nil
+	case portalnavitem.FieldIsVisible:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsVisible(v)
+		return nil
+	case portalnavitem.FieldOpenNewTab:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOpenNewTab(v)
+		return nil
+	case portalnavitem.FieldCSSClass:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCSSClass(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PortalNavItem field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PortalNavItemMutation) AddedFields() []string {
+	var fields []string
+	if m.addsequence != nil {
+		fields = append(fields, portalnavitem.FieldSequence)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PortalNavItemMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case portalnavitem.FieldSequence:
+		return m.AddedSequence()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PortalNavItemMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case portalnavitem.FieldSequence:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSequence(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PortalNavItem numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PortalNavItemMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(portalnavitem.FieldLabelI18n) {
+		fields = append(fields, portalnavitem.FieldLabelI18n)
+	}
+	if m.FieldCleared(portalnavitem.FieldURL) {
+		fields = append(fields, portalnavitem.FieldURL)
+	}
+	if m.FieldCleared(portalnavitem.FieldTargetType) {
+		fields = append(fields, portalnavitem.FieldTargetType)
+	}
+	if m.FieldCleared(portalnavitem.FieldTargetID) {
+		fields = append(fields, portalnavitem.FieldTargetID)
+	}
+	if m.FieldCleared(portalnavitem.FieldIcon) {
+		fields = append(fields, portalnavitem.FieldIcon)
+	}
+	if m.FieldCleared(portalnavitem.FieldColor) {
+		fields = append(fields, portalnavitem.FieldColor)
+	}
+	if m.FieldCleared(portalnavitem.FieldParentID) {
+		fields = append(fields, portalnavitem.FieldParentID)
+	}
+	if m.FieldCleared(portalnavitem.FieldCSSClass) {
+		fields = append(fields, portalnavitem.FieldCSSClass)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PortalNavItemMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PortalNavItemMutation) ClearField(name string) error {
+	switch name {
+	case portalnavitem.FieldLabelI18n:
+		m.ClearLabelI18n()
+		return nil
+	case portalnavitem.FieldURL:
+		m.ClearURL()
+		return nil
+	case portalnavitem.FieldTargetType:
+		m.ClearTargetType()
+		return nil
+	case portalnavitem.FieldTargetID:
+		m.ClearTargetID()
+		return nil
+	case portalnavitem.FieldIcon:
+		m.ClearIcon()
+		return nil
+	case portalnavitem.FieldColor:
+		m.ClearColor()
+		return nil
+	case portalnavitem.FieldParentID:
+		m.ClearParentID()
+		return nil
+	case portalnavitem.FieldCSSClass:
+		m.ClearCSSClass()
+		return nil
+	}
+	return fmt.Errorf("unknown PortalNavItem nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PortalNavItemMutation) ResetField(name string) error {
+	switch name {
+	case portalnavitem.FieldType:
+		m.ResetType()
+		return nil
+	case portalnavitem.FieldLabel:
+		m.ResetLabel()
+		return nil
+	case portalnavitem.FieldLabelI18n:
+		m.ResetLabelI18n()
+		return nil
+	case portalnavitem.FieldURL:
+		m.ResetURL()
+		return nil
+	case portalnavitem.FieldTargetType:
+		m.ResetTargetType()
+		return nil
+	case portalnavitem.FieldTargetID:
+		m.ResetTargetID()
+		return nil
+	case portalnavitem.FieldIcon:
+		m.ResetIcon()
+		return nil
+	case portalnavitem.FieldColor:
+		m.ResetColor()
+		return nil
+	case portalnavitem.FieldSequence:
+		m.ResetSequence()
+		return nil
+	case portalnavitem.FieldParentID:
+		m.ResetParentID()
+		return nil
+	case portalnavitem.FieldIsVisible:
+		m.ResetIsVisible()
+		return nil
+	case portalnavitem.FieldOpenNewTab:
+		m.ResetOpenNewTab()
+		return nil
+	case portalnavitem.FieldCSSClass:
+		m.ResetCSSClass()
+		return nil
+	}
+	return fmt.Errorf("unknown PortalNavItem field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PortalNavItemMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PortalNavItemMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PortalNavItemMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PortalNavItemMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PortalNavItemMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PortalNavItemMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PortalNavItemMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown PortalNavItem unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PortalNavItemMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown PortalNavItem edge %s", name)
 }
 
 // SettingMutation represents an operation that mutates the Setting nodes in the graph.

@@ -27,6 +27,9 @@ import (
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/permissiongroup"
 	"origadmin/application/origcms/internal/data/entity/playlist"
+	"origadmin/application/origcms/internal/data/entity/portalbanner"
+	"origadmin/application/origcms/internal/data/entity/portalcustompage"
+	"origadmin/application/origcms/internal/data/entity/portalnavitem"
 	"origadmin/application/origcms/internal/data/entity/setting"
 	"origadmin/application/origcms/internal/data/entity/subscription"
 	"origadmin/application/origcms/internal/data/entity/tag"
@@ -98,32 +101,35 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			article.Table:         article.ValidColumn,
-			category.Table:        category.ValidColumn,
-			channel.Table:         channel.ValidColumn,
-			comment.Table:         comment.ValidColumn,
-			commentlike.Table:     commentlike.ValidColumn,
-			commentreport.Table:   commentreport.ValidColumn,
-			encodeprofile.Table:   encodeprofile.ValidColumn,
-			encodingtask.Table:    encodingtask.ValidColumn,
-			favorite.Table:        favorite.ValidColumn,
-			groupmember.Table:     groupmember.ValidColumn,
-			history.Table:         history.ValidColumn,
-			like.Table:            like.ValidColumn,
-			media.Table:           media.ValidColumn,
-			mediacategory.Table:   mediacategory.ValidColumn,
-			mediaplaylist.Table:   mediaplaylist.ValidColumn,
-			mediareport.Table:     mediareport.ValidColumn,
-			mediareviewlog.Table:  mediareviewlog.ValidColumn,
-			mediatag.Table:        mediatag.ValidColumn,
-			notification.Table:    notification.ValidColumn,
-			permissiongroup.Table: permissiongroup.ValidColumn,
-			playlist.Table:        playlist.ValidColumn,
-			setting.Table:         setting.ValidColumn,
-			subscription.Table:    subscription.ValidColumn,
-			tag.Table:             tag.ValidColumn,
-			uploadsession.Table:   uploadsession.ValidColumn,
-			user.Table:            user.ValidColumn,
+			article.Table:          article.ValidColumn,
+			category.Table:         category.ValidColumn,
+			channel.Table:          channel.ValidColumn,
+			comment.Table:          comment.ValidColumn,
+			commentlike.Table:      commentlike.ValidColumn,
+			commentreport.Table:    commentreport.ValidColumn,
+			encodeprofile.Table:    encodeprofile.ValidColumn,
+			encodingtask.Table:     encodingtask.ValidColumn,
+			favorite.Table:         favorite.ValidColumn,
+			groupmember.Table:      groupmember.ValidColumn,
+			history.Table:          history.ValidColumn,
+			like.Table:             like.ValidColumn,
+			media.Table:            media.ValidColumn,
+			mediacategory.Table:    mediacategory.ValidColumn,
+			mediaplaylist.Table:    mediaplaylist.ValidColumn,
+			mediareport.Table:      mediareport.ValidColumn,
+			mediareviewlog.Table:   mediareviewlog.ValidColumn,
+			mediatag.Table:         mediatag.ValidColumn,
+			notification.Table:     notification.ValidColumn,
+			permissiongroup.Table:  permissiongroup.ValidColumn,
+			playlist.Table:         playlist.ValidColumn,
+			portalbanner.Table:     portalbanner.ValidColumn,
+			portalcustompage.Table: portalcustompage.ValidColumn,
+			portalnavitem.Table:    portalnavitem.ValidColumn,
+			setting.Table:          setting.ValidColumn,
+			subscription.Table:     subscription.ValidColumn,
+			tag.Table:              tag.ValidColumn,
+			uploadsession.Table:    uploadsession.ValidColumn,
+			user.Table:             user.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)
