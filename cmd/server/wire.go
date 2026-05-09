@@ -8,6 +8,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/ThreeDotsLabs/watermill/message"
@@ -19,6 +20,7 @@ import (
 
 	config "origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/data/entity"
+	dal4 "origadmin/application/origcms/internal/features/content/dal"
 	"origadmin/application/origcms/internal/features/admin"
 	adminservice "origadmin/application/origcms/internal/features/admin/service"
 	featureauth "origadmin/application/origcms/internal/features/auth"
@@ -88,6 +90,7 @@ var ProviderSet = wire.NewSet(
 	NewMeHandler,
 	NewAdminHandler,
 	NewCommentModerationHandler,
+	NewMediaReportHandler,
 	NewPermissionHandler,
 	NewArticleHandler,
 	NewCommentHandler,
@@ -112,6 +115,10 @@ func NewStorageConfig() *config.StorageConfig {
 // NewStorage creates a LocalStorage instance (used as the base for all storage types).
 func NewStorage(sp *config.StoragePaths) *mediadal.LocalStorage {
 	return mediadal.NewLocalStorage(sp)
+}
+
+func newContentData(client *entity.Client, _ *sql.DB) *dal4.Data {
+	return dal4.NewData(client)
 }
 
 // NewStorageInterface creates the appropriate Storage implementation based on
@@ -248,6 +255,22 @@ func NewCommentHandler(
 	return contentservice.NewCommentHandler(client, jwt, commentLikeUC, moderationUC)
 }
 
+// NewCommentModerationHandler creates a new comment moderation handler.
+func NewCommentModerationHandler(
+	moderationUC *contentbiz.CommentModerationUseCase,
+	jwt *infraauth.Manager,
+) *contentservice.CommentModerationHandler {
+	return contentservice.NewCommentModerationHandler(moderationUC, jwt)
+}
+
+// NewMediaReportHandler creates a new media report handler.
+func NewMediaReportHandler(
+	mediaReportUC *contentbiz.MediaReportUseCase,
+	jwt *infraauth.Manager,
+) *contentservice.MediaReportHandler {
+	return contentservice.NewMediaReportHandler(mediaReportUC, jwt)
+}
+
 // NewPlaylistHandler creates a new playlist handler.
 func NewPlaylistHandler(playlistUC *contentbiz.PlaylistChannelUseCase, settingUC *systembiz.SettingUseCase) *contentservice.PlaylistHandler {
 	return contentservice.NewPlaylistHandler(playlistUC, settingUC)
@@ -312,6 +335,7 @@ type AppDependencies struct {
 	ArticleHandler           *contentservice.ArticleHandler
 	CommentHandler           *contentservice.CommentHandler
 	CommentModerationHandler *contentservice.CommentModerationHandler
+	MediaReportHandler       *contentservice.MediaReportHandler
 	FeedHandler              *contentservice.FeedHandler
 	ChannelHandler           *contentservice.ChannelHandler
 	PlaylistHandler          *contentservice.PlaylistHandler

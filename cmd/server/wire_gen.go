@@ -7,6 +7,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/ThreeDotsLabs/watermill/message"
@@ -53,7 +54,7 @@ import (
 
 // wireApp initializes the application dependencies.
 func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
-	client, err := infra.NewDatabase(cfg, logger)
+	client, sqlDB, err := infra.NewDatabase(cfg, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +93,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	userHandler := NewUserHandler(userUseCase, manager)
 	uploadRepo := dal.NewUploadRepo(client, logger)
 	uploadUseCase := NewUploadUseCase(uploadRepo, mediaRepo, encodeProfileRepo, encodingTaskRepo, mediaUseCase, storage, storagePaths, NewUploadConfig(), logger)
-	data := dal4.NewData(client)
+	data := newContentData(client, sqlDB)
 	likeRepo := dal4.NewLikeRepo(data, logger)
 	favoriteRepo := dal4.NewFavoriteRepo(data, logger)
 	likeFavoriteUseCase := biz4.NewLikeFavoriteUseCase(likeRepo, favoriteRepo, mediaUseCase, logger)
@@ -142,6 +143,10 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	commentReportRepo := dal4.NewCommentReportRepo(data, logger)
 	commentModerationUseCase := biz4.NewCommentModerationUseCase(commentModerationRepo, commentReportRepo, settingUseCase, logger)
 	commentModerationHandler := NewCommentModerationHandler(commentModerationUseCase, manager)
+	mediaReportRepo := dal4.NewMediaReportRepo(data, logger)
+	mediaReportModerationRepo := dal4.NewMediaReportModerationRepo(data, logger)
+	mediaReportUseCase := biz4.NewMediaReportUseCase(mediaReportRepo, mediaReportModerationRepo, settingUseCase, logger)
+	mediaReportHandler := NewMediaReportHandler(mediaReportUseCase, manager)
 	permissionHandler := NewPermissionHandler(permissionUseCase, manager)
 	articleHandler := NewArticleHandler(articleUseCase, manager, settingUseCase)
 	commentHandler := NewCommentHandler(client, manager, commentLikeUseCase, commentModerationUseCase)
@@ -170,6 +175,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 		ArticleHandler:           articleHandler,
 		CommentHandler:           commentHandler,
 		CommentModerationHandler: commentModerationHandler,
+		MediaReportHandler:       mediaReportHandler,
 		FeedHandler:              feedHandler,
 		ChannelHandler:           channelHandler,
 		PlaylistHandler:          playlistHandler,
@@ -217,6 +223,7 @@ var ProviderSet = wire.NewSet(infra.ProviderSet, media.ProviderSet, content.Prov
 	NewMeHandler,
 	NewAdminHandler,
 	NewCommentModerationHandler,
+	NewMediaReportHandler,
 	NewPermissionHandler,
 	NewArticleHandler,
 	NewCommentHandler,
@@ -231,6 +238,10 @@ var ProviderSet = wire.NewSet(infra.ProviderSet, media.ProviderSet, content.Prov
 // NewStorage creates a LocalStorage instance (used as the base for all storage types).
 func NewStorage(sp *conf.StoragePaths) *dal.LocalStorage {
 	return dal.NewLocalStorage(sp)
+}
+
+func newContentData(client *entity.Client, _ *sql.DB) *dal4.Data {
+	return dal4.NewData(client)
 }
 
 // NewStorageConfig creates storage config from defaults.
@@ -504,6 +515,14 @@ func NewCommentModerationHandler(
 	return contentservice.NewCommentModerationHandler(moderationUC, jwt)
 }
 
+// NewMediaReportHandler creates a new media report handler.
+func NewMediaReportHandler(
+	mediaReportUC *biz4.MediaReportUseCase,
+	jwt *auth2.Manager,
+) *contentservice.MediaReportHandler {
+	return contentservice.NewMediaReportHandler(mediaReportUC, jwt)
+}
+
 // NewPermissionHandler creates a new permission handler.
 func NewPermissionHandler(
 	permUC *biz5.PermissionUseCase,
@@ -584,6 +603,7 @@ type AppDependencies struct {
 	ArticleHandler           *contentservice.ArticleHandler
 	CommentHandler           *contentservice.CommentHandler
 	CommentModerationHandler *contentservice.CommentModerationHandler
+	MediaReportHandler       *contentservice.MediaReportHandler
 	FeedHandler              *contentservice.FeedHandler
 	ChannelHandler           *contentservice.ChannelHandler
 	PlaylistHandler          *contentservice.PlaylistHandler
