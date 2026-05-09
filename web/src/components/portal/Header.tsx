@@ -25,6 +25,7 @@ import {
 import {useTranslation} from 'react-i18next';
 import {useAuth} from '@/hooks/useAuth';
 import {useModuleConfig} from '@/hooks/useModuleConfig';
+import {useModuleState} from '@/contexts/ModuleConfigContext';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 
 /* ── QuickLink 定义 ──────────────────────────────────────────────────────── */
@@ -79,6 +80,7 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
     const location = useLocation();
     const {isAuthenticated, user, logout, isAdmin} = useAuth();
     const {data: moduleConfig} = useModuleConfig();
+    const {site} = useModuleState();
     const articlesEnabled = moduleConfig?.modules?.articles !== false;
 
     // 从 localStorage 读取自定义 QuickLinks
@@ -150,9 +152,9 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                 </button>
 
                 <Link to="/" className="flex items-center gap-2 shrink-0">
-                    <img src="/logo.svg" alt="OrigCMS" className="h-8 w-8" />
+                    <img src="/logo.svg" alt={site?.site_name || 'OrigCMS'} className="h-8 w-8" />
                     <span className="text-lg font-bold text-foreground hidden sm:inline">
-                        OrigCMS
+                        {site?.site_name || 'OrigCMS'}
                     </span>
                 </Link>
 

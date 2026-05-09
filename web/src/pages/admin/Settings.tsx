@@ -28,6 +28,7 @@ import {
     LayoutGrid
 } from 'lucide-react';
 import {settingsApi, type GroupedSettings, type SettingItem} from '@/lib/api/system';
+import {api} from '@/lib/request';
 
 interface FormData {
     site_name: string;
@@ -81,6 +82,8 @@ interface SystemInfo {
     usedMemory: string;
     cpuUsage: string;
     memoryUsage: number;
+    numCPU: number;
+    numGoroutine: number;
 }
 
 const defaultFormData: FormData = {
@@ -206,13 +209,8 @@ const Settings: React.FC = () => {
 
     const fetchSystemInfo = async () => {
         try {
-            const response = await fetch('/api/v1/admin/settings/info');
-            if (response.ok) {
-                const info = await response.json();
-                if (info.data) {
-                    setSystemInfo(info.data);
-                }
-            }
+            const info = await api.get<SystemInfo>('/admin/settings/info');
+            setSystemInfo(info);
         } catch (error) {
             console.error('Failed to fetch system info:', error);
             setSystemInfo(null);
@@ -469,8 +467,7 @@ const Settings: React.FC = () => {
                                     >
                                         <option value="local">{t('settings.storageLocal')}</option>
                                         <option value="s3">{t('settings.storageS3')}</option>
-                                        <option value="minio">{t('settings.storageMinio')}</option>
-                                        <option value="oss">{t('settings.storageOss')}</option>
+                                        <option value="hybrid">{t('settings.storageHybrid')}</option>
                                     </select>
                                 </div>
                                 <div className="space-y-2">
@@ -893,10 +890,18 @@ const Settings: React.FC = () => {
                                             <span className="text-muted-foreground">{t('settings.uptime')}</span>
                                             <span className="font-medium">{systemInfo.uptime || '-'}</span>
                                         </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">{t('settings.numCPU')}</span>
+                                            <span className="font-medium">{systemInfo.numCPU ?? '-'}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">{t('settings.numGoroutine')}</span>
+                                            <span className="font-medium">{systemInfo.numGoroutine ?? '-'}</span>
+                                        </div>
                                     </div>
                                 ) : (
                                     <div className="space-y-3">
-                                        {[1, 2, 3, 4, 5].map(i => (
+                                        {[1, 2, 3, 4, 5, 6, 7].map(i => (
                                             <div key={i} className="flex justify-between">
                                                 <Skeleton className="h-4 w-24"/>
                                                 <Skeleton className="h-4 w-16"/>
