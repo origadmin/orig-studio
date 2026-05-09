@@ -7,6 +7,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -26,17 +27,20 @@ type SystemHandler struct {
 	jwtMgr    *auth.Manager
 	statsRepo *systemData.StatsRepo
 	settingUC *systembiz.SettingUseCase
+	emailUC   *systembiz.EmailUseCase
 }
 
 func NewSystemHandler(
 	jwtMgr *auth.Manager,
 	statsRepo *systemData.StatsRepo,
 	settingUC *systembiz.SettingUseCase,
+	emailUC *systembiz.EmailUseCase,
 ) *SystemHandler {
 	return &SystemHandler{
 		jwtMgr:    jwtMgr,
 		statsRepo: statsRepo,
 		settingUC: settingUC,
+		emailUC:   emailUC,
 	}
 }
 
@@ -75,6 +79,9 @@ func (h *SystemHandler) registerSettings(g http2.Router) {
 		settings.PUT("", server.HTTPToHandlerFunc(h.updateSettings()))
 		settings.GET("/:key", server.HTTPToHandlerFunc(h.getSettingByKey()))
 		settings.POST("/:key/reset", server.HTTPToHandlerFunc(h.resetSetting()))
+		settings.GET("/storage/capabilities", server.HTTPToHandlerFunc(h.getStorageCapabilities()))
+		settings.GET("/email/status", server.HTTPToHandlerFunc(h.getEmailStatus()))
+		settings.POST("/email/test", server.HTTPToHandlerFunc(h.sendTestEmail()))
 	}
 }
 
@@ -316,10 +323,12 @@ type portalModuleConfig struct {
 }
 
 type portalSiteConfig struct {
-	SiteName          string `json:"site_name"`
-	SiteDescription   string `json:"site_description"`
-	AllowRegistration bool   `json:"allow_registration"`
-	AllowUpload       bool   `json:"allow_upload"`
+	SiteName          string   `json:"site_name"`
+	SiteDescription   string   `json:"site_description"`
+	PrimaryURL        string   `json:"primary_url"`
+	AllowedURLs       []string `json:"allowed_urls"`
+	AllowRegistration bool     `json:"allow_registration"`
+	AllowUpload       bool     `json:"allow_upload"`
 }
 
 type portalConfigResponse struct {
@@ -353,8 +362,12 @@ func (h *SystemHandler) getPortalConfig() http.HandlerFunc {
 		site := portalSiteConfig{
 			SiteName:          h.settingUC.Get(ctx, "site_name"),
 			SiteDescription:   h.settingUC.Get(ctx, "site_description"),
+			PrimaryURL:        h.settingUC.Get(ctx, "primary_url"),
 			AllowRegistration: getBoolWithDefault(h.settingUC, ctx, "allow_registration", true),
 			AllowUpload:       getBoolWithDefault(h.settingUC, ctx, "allow_upload", true),
+		}
+		if urls := h.settingUC.Get(ctx, "base_urls"); urls != "" {
+			_ = json.Unmarshal([]byte(urls), &site.AllowedURLs)
 		}
 
 		server.OK(gc, portalConfigResponse{
@@ -414,6 +427,73 @@ func resolveLayout(modules portalModuleConfig, configuredLayout string) string {
 		return "doc"
 	default:
 		return "mixed"
+	}
+}
+
+// ==================== Storage & Email Handlers ====================
+
+func (h *SystemHandler) getStorageCapabilities() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		if h.settingUC == nil {
+			server.Fail(gc, server.ErrInternal, "settings service not available")
+			return
+		}
+
+		ctx := r.Context()
+		s3Configured := h.settingUC.Get(ctx, "s3_endpoint") != "" &&
+			h.settingUC.Get(ctx, "s3_bucket") != "" &&
+			h.settingUC.Get(ctx, "s3_access_key") != ""
+
+		currentType := h.settingUC.Get(ctx, "storage_type")
+		if currentType == "" {
+			currentType = "local"
+		}
+
+		server.OK(gc, gin.H{
+			"current_type":     currentType,
+			"available_types":  []string{"local"},
+			"s3_configured":    s3Configured,
+			"s3_available":     s3Configured,
+			"hybrid_available": s3Configured,
+		})
+	}
+}
+
+func (h *SystemHandler) getEmailStatus() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		if h.emailUC == nil {
+			server.OK(gc, gin.H{"configured": false})
+			return
+		}
+		server.OK(gc, gin.H{
+			"configured": h.emailUC.IsConfigured(r.Context()),
+		})
+	}
+}
+
+func (h *SystemHandler) sendTestEmail() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		if h.emailUC == nil {
+			server.Fail(gc, server.ErrInternal, "email service not available")
+			return
+		}
+
+		var req struct {
+			To string `json:"to" binding:"required,email"`
+		}
+		if err := gc.ShouldBindJSON(&req); err != nil {
+			server.Fail(gc, server.ErrBadRequest, err.Error())
+			return
+		}
+
+		if err := h.emailUC.SendTestEmail(r.Context(), req.To); err != nil {
+			server.Fail(gc, server.ErrInternal, "Failed to send test email: "+err.Error())
+			return
+		}
+		server.OK(gc, gin.H{"message": "Test email sent"})
 	}
 }
 

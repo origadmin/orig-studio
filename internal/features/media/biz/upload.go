@@ -23,6 +23,7 @@ import (
 	"origadmin/application/origcms/internal/helpers/ffmpeg"
 	"origadmin/application/origcms/internal/infra/pubsub"
 	"origadmin/application/origcms/internal/features/media/dto"
+	systembiz "origadmin/application/origcms/internal/features/system/biz"
 )
 
 // Upload status constants
@@ -40,20 +41,20 @@ type UploadSession = dto.UploadSession
 type UploadRepo = dto.UploadRepo
 
 type UploadUseCase struct {
-	repo         UploadRepo
-	mediaRepo    MediaRepo
-	profileRepo  dto.EncodeProfileRepo
-	encodingRepo dto.EncodingTaskRepo
-	mediaUseCase *MediaUseCase
-	storage      Storage
-	publisher    message.Publisher // Watermill publisher for async encoding
-	paths        *conf.StoragePaths
-	chunkSize    int
-	log          *log.Helper
-	mu           sync.Mutex
+	repo           UploadRepo
+	mediaRepo      MediaRepo
+	profileRepo    dto.EncodeProfileRepo
+	encodingRepo   dto.EncodingTaskRepo
+	mediaUseCase   *MediaUseCase
+	storage        Storage
+	publisher      message.Publisher
+	paths          *conf.StoragePaths
+	chunkSize      int
+	log            *log.Helper
+	mu             sync.Mutex
+	configProvider systembiz.ConfigProvider
 }
 
-// NewUploadUseCase creates a new upload use case.
 func NewUploadUseCase(
 	repo UploadRepo,
 	mediaRepo MediaRepo,
@@ -64,17 +65,19 @@ func NewUploadUseCase(
 	paths *conf.StoragePaths,
 	chunkSize int,
 	logger log.Logger,
+	configProvider systembiz.ConfigProvider,
 ) *UploadUseCase {
 	return &UploadUseCase{
-		repo:         repo,
-		mediaRepo:    mediaRepo,
-		profileRepo:  profileRepo,
-		encodingRepo: encodingRepo,
-		mediaUseCase: mediaUseCase,
-		storage:      storage,
-		paths:        paths,
-		chunkSize:    chunkSize,
-		log:          log.NewHelper(log.With(logger, "module", "upload.biz")),
+		repo:           repo,
+		mediaRepo:      mediaRepo,
+		profileRepo:    profileRepo,
+		encodingRepo:   encodingRepo,
+		mediaUseCase:   mediaUseCase,
+		storage:        storage,
+		paths:          paths,
+		chunkSize:      chunkSize,
+		log:            log.NewHelper(log.With(logger, "module", "upload.biz")),
+		configProvider: configProvider,
 	}
 }
 

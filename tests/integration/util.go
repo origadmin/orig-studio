@@ -140,7 +140,7 @@ func SetupTestServer(t *testing.T) *TestServer {
 
 	mediaUC := mediabiz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, reviewLogRepo, storage, mockPub, logger, nil)
 	testPaths := conf.NewStoragePaths(t.TempDir())
-	uploadUC := mediabiz.NewUploadUseCase(uploadRepo, mediaRepo, profileRepo, taskRepo, mediaUC, storage, testPaths, 5*1024*1024, logger)
+	uploadUC := mediabiz.NewUploadUseCase(uploadRepo, mediaRepo, profileRepo, taskRepo, mediaUC, storage, testPaths, 5*1024*1024, logger, nil)
 	uploadUC.SetPublisher(mockPub)
 
 	contentDB := contentdal.NewData(db)
@@ -161,7 +161,7 @@ func SetupTestServer(t *testing.T) *TestServer {
 	feedUC := contentbiz.NewFeedUseCase(feedRepo, logger)
 	notificationUC := contentbiz.NewNotificationUseCase(notificationRepo, logger)
 
-	authHandler := authservice.NewAuthHandler(userUC, jwtMgr)
+	authHandler := authservice.NewAuthHandler(userUC, jwtMgr, nil)
 	userHandler := userservice.NewUserHandler(userUC, jwtMgr)
 	mediaHandler := mediaservice.NewMediaHandler(jwtMgr, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC, nil, nil, nil)
 	uploadHandler := mediaservice.NewUploadHandler(uploadUC, jwtMgr, logger)
@@ -180,7 +180,7 @@ func SetupTestServer(t *testing.T) *TestServer {
 	// System handler
 	settingRepo := systemdal.NewSettingRepo(db)
 	settingUC := systembiz.NewSettingUseCase(settingRepo)
-	systemHandler := systemservice.NewSystemHandler(jwtMgr, statsRepo, settingUC)
+	systemHandler := systemservice.NewSystemHandler(jwtMgr, statsRepo, settingUC, nil)
 
 	// Admin handler (needs TagService from svc-admin)
 	adminTagRepo := admindal.NewTagRepository(db)
