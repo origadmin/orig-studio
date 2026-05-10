@@ -13,6 +13,7 @@ import {useTranslation} from 'react-i18next';
 import {useMediaList, useInfiniteMediaList} from '@/hooks/queries';
 import ErrorPage from '@/components/common/ErrorPage';
 import HeroCarousel, {HeroCarouselSkeleton} from '@/components/common/HeroCarousel';
+import BannerCarousel, {BannerCarouselSkeleton} from '@/components/common/BannerCarousel';
 import CategoryFilter, {CategoryFilterSkeleton} from '@/components/common/CategoryFilter';
 import HorizontalScroll from '@/components/common/HorizontalScroll';
 import VideoCardSkeleton from '@/components/common/VideoCardSkeleton';
@@ -141,6 +142,8 @@ const FeaturedPage = () => {
 
     return (
         <div className="space-y-6">
+            <BannerCarousel className="mb-6" />
+
             <HeroCarousel
                 items={heroItems}
                 autoPlayInterval={6000}
