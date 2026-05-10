@@ -25,47 +25,55 @@ import {
     CheckCircle,
     AlertCircle,
     Blocks,
-    LayoutGrid
+    LayoutGrid,
+    Plus,
+    X,
+    Send
 } from 'lucide-react';
-import {settingsApi, type GroupedSettings, type SettingItem} from '@/lib/api/system';
+import {settingsApi, type GroupedSettings} from '@/lib/api/system';
 import {api} from '@/lib/request';
 
 interface FormData {
     site_name: string;
     site_description: string;
-    site_url: string;
-    base_url: string;
-    timezone: string;
-    default_theme: string;
-    theme_color: string;
-    upload_dir: string;
-    encode_dir: string;
-    thumb_dir: string;
-    max_file_size: string;
+    base_urls: string[];
+    primary_url: string;
+    allow_registration: string;
+    allow_upload: string;
+    storage_base_path: string;
     storage_type: string;
-    bucket_name: string;
-    access_key: string;
-    secret_key: string;
-    endpoint_url: string;
+    s3_endpoint: string;
+    s3_region: string;
+    s3_bucket: string;
+    s3_access_key: string;
+    s3_secret_key: string;
+    s3_use_path_style: string;
+    max_upload_size_video: string;
+    max_upload_size_image: string;
     auto_transcode: string;
     transcode_method: string;
-    video_formats: string;
-    image_formats: string;
-    max_duration: string;
-    max_file_size2: string;
-    smtp_server: string;
+    allowed_video_formats: string;
+    allowed_image_formats: string;
+    max_video_duration: string;
+    sprite_frame_interval: string;
+    sprite_columns: string;
+    sprite_frame_width: string;
+    sprite_frame_height: string;
+    sprite_max_frames: string;
+    thumbnail_quality: string;
+    thumbnail_resolution: string;
+    thumbnail_position: string;
+    auto_approve: string;
+    require_review: string;
+    smtp_host: string;
     smtp_port: string;
-    smtp_username: string;
+    smtp_user: string;
     smtp_password: string;
-    sender_name: string;
-    use_tls: string;
-    enable_register: string;
-    require_email_verify: string;
-    min_password_len: string;
-    jwt_expiry: string;
-    enable_rest_api: string;
-    rate_limit: string;
-    allow_upload: string;
+    smtp_sender_name: string;
+    smtp_use_tls: string;
+    min_password_length: string;
+    require_email_verification: string;
+    api_rate_limit: string;
     module_articles: boolean;
     module_videos: boolean;
     module_music: boolean;
@@ -86,42 +94,59 @@ interface SystemInfo {
     numGoroutine: number;
 }
 
+interface StorageCapabilities {
+    current_type: string;
+    available_types: string[];
+    s3_configured: boolean;
+    s3_available: boolean;
+    hybrid_available: boolean;
+}
+
+interface EmailStatus {
+    configured: boolean;
+}
+
 const defaultFormData: FormData = {
     site_name: '',
     site_description: '',
-    site_url: '',
-    base_url: '',
-    timezone: 'Asia/Shanghai',
-    default_theme: 'system',
-    theme_color: '#3b82f6',
-    upload_dir: '/var/media/uploads',
-    encode_dir: '/var/media/encoded',
-    thumb_dir: '/var/media/thumbnails',
-    max_file_size: '2048',
+    base_urls: [],
+    primary_url: '',
+    allow_registration: 'true',
+    allow_upload: 'true',
+    storage_base_path: '/var/media',
     storage_type: 'local',
-    bucket_name: '',
-    access_key: '',
-    secret_key: '',
-    endpoint_url: '',
+    s3_endpoint: '',
+    s3_region: '',
+    s3_bucket: '',
+    s3_access_key: '',
+    s3_secret_key: '',
+    s3_use_path_style: 'false',
+    max_upload_size_video: '5120',
+    max_upload_size_image: '20',
     auto_transcode: 'true',
     transcode_method: 'ffmpeg',
-    video_formats: 'mp4, webm, mkv, avi, mov',
-    image_formats: 'jpg, png, gif, webp',
-    max_duration: '120',
-    max_file_size2: '2048',
-    smtp_server: '',
+    allowed_video_formats: 'mp4, webm, mkv, avi, mov',
+    allowed_image_formats: 'jpg, png, gif, webp',
+    max_video_duration: '120',
+    sprite_frame_interval: '10',
+    sprite_columns: '10',
+    sprite_frame_width: '120',
+    sprite_frame_height: '68',
+    sprite_max_frames: '100',
+    thumbnail_quality: '85',
+    thumbnail_resolution: '320x180',
+    thumbnail_position: '00:00:01',
+    auto_approve: 'true',
+    require_review: 'false',
+    smtp_host: '',
     smtp_port: '587',
-    smtp_username: '',
+    smtp_user: '',
     smtp_password: '',
-    sender_name: '',
-    use_tls: 'true',
-    enable_register: 'true',
-    require_email_verify: 'false',
-    min_password_len: '8',
-    jwt_expiry: '7',
-    enable_rest_api: 'true',
-    rate_limit: '60',
-    allow_upload: 'true',
+    smtp_sender_name: '',
+    smtp_use_tls: 'true',
+    min_password_length: '8',
+    require_email_verification: 'false',
+    api_rate_limit: '60',
     module_articles: true,
     module_videos: true,
     module_music: false,
@@ -135,25 +160,32 @@ const Settings: React.FC = () => {
     const [systemInfo, setSystemInfo] = useState<SystemInfo | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [initialLoad, setInitialLoad] = useState(true);
     const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+    const [storageCaps, setStorageCaps] = useState<StorageCapabilities>({
+        current_type: 'local',
+        available_types: ['local'],
+        s3_configured: false,
+        s3_available: false,
+        hybrid_available: false,
+    });
+    const [emailStatus, setEmailStatus] = useState<EmailStatus>({configured: false});
+    const [emailTestSending, setEmailTestSending] = useState(false);
+    const [emailTestTo, setEmailTestTo] = useState('');
 
     useEffect(() => {
         fetchSettings();
         fetchSystemInfo();
+        fetchStorageCapabilities();
+        fetchEmailStatus();
     }, []);
 
     const fetchSettings = async () => {
         try {
             const raw = await settingsApi.get();
-            // Defensive: handle possible double-wrapped response from backend
-            // Backend may return {code, message, data: {general: [...], ...}} (double-wrapped)
-            // or {general: [...], ...} (correct format)
             let grouped: GroupedSettings | null = null;
             if (raw && typeof raw === 'object') {
-                // Check if double-wrapped: has 'code' and 'data' keys at top level
-                if ('code' in raw && 'data' in raw && typeof (raw as any).data === 'object') {
-                    grouped = (raw as any).data as GroupedSettings;
+                if ('code' in raw && 'data' in raw && typeof (raw as Record<string, unknown>).data === 'object') {
+                    grouped = (raw as Record<string, unknown>).data as GroupedSettings;
                 } else {
                     grouped = raw as GroupedSettings;
                 }
@@ -162,35 +194,71 @@ const Settings: React.FC = () => {
             if (grouped) {
                 const getSettingValue = (key: string): string => {
                     for (const category of Object.values(grouped!)) {
-                        // Defensive: ensure category is an array before calling .find()
                         if (!Array.isArray(category)) continue;
                         const found = category.find(s => s.key === key);
                         if (found) return found.value;
                     }
                     return '';
                 };
+
+                const parseBytesToMB = (val: string): string => {
+                    const bytes = parseInt(val);
+                    if (isNaN(bytes) || bytes <= 0) return '';
+                    return String(Math.round(bytes / 1024 / 1024));
+                };
+
+                const parseBaseUrls = (val: string): string[] => {
+                    if (!val) return [];
+                    try {
+                        const parsed = JSON.parse(val);
+                        return Array.isArray(parsed) ? parsed : [];
+                    } catch {
+                        return val ? [val] : [];
+                    }
+                };
+
                 setFormData(prev => ({
                     ...prev,
                     site_name: getSettingValue('site_name') || prev.site_name,
                     site_description: getSettingValue('site_description') || prev.site_description,
-                    site_url: getSettingValue('base_url') || prev.site_url,
-                    base_url: getSettingValue('base_url') || prev.base_url,
-                    timezone: getSettingValue('timezone') || prev.timezone,
-                    default_theme: getSettingValue('default_theme') || prev.default_theme,
-                    enable_register: getSettingValue('allow_registration') || prev.enable_register,
+                    base_urls: parseBaseUrls(getSettingValue('base_urls')),
+                    primary_url: getSettingValue('primary_url') || prev.primary_url,
+                    allow_registration: getSettingValue('allow_registration') || prev.allow_registration,
                     allow_upload: getSettingValue('allow_upload') || prev.allow_upload,
-                    max_file_size: getSettingValue('max_upload_size_video') ? String(Math.round(parseInt(getSettingValue('max_upload_size_video')) / 1024 / 1024)) || prev.max_file_size : prev.max_file_size,
+                    storage_base_path: getSettingValue('storage_base_path') || prev.storage_base_path,
                     storage_type: getSettingValue('storage_type') || prev.storage_type,
-                    auto_transcode: getSettingValue('auto_approve') || prev.auto_transcode,
-                    smtp_server: getSettingValue('smtp_host') || prev.smtp_server,
+                    s3_endpoint: getSettingValue('s3_endpoint') || prev.s3_endpoint,
+                    s3_region: getSettingValue('s3_region') || prev.s3_region,
+                    s3_bucket: getSettingValue('s3_bucket') || prev.s3_bucket,
+                    s3_access_key: getSettingValue('s3_access_key') || prev.s3_access_key,
+                    s3_secret_key: getSettingValue('s3_secret_key') || prev.s3_secret_key,
+                    s3_use_path_style: getSettingValue('s3_use_path_style') || prev.s3_use_path_style,
+                    max_upload_size_video: parseBytesToMB(getSettingValue('max_upload_size_video')) || prev.max_upload_size_video,
+                    max_upload_size_image: parseBytesToMB(getSettingValue('max_upload_size_image')) || prev.max_upload_size_image,
+                    auto_transcode: getSettingValue('auto_transcode') || prev.auto_transcode,
+                    transcode_method: getSettingValue('transcode_method') || prev.transcode_method,
+                    allowed_video_formats: getSettingValue('allowed_video_formats') || prev.allowed_video_formats,
+                    allowed_image_formats: getSettingValue('allowed_image_formats') || prev.allowed_image_formats,
+                    max_video_duration: getSettingValue('max_video_duration') || prev.max_video_duration,
+                    sprite_frame_interval: getSettingValue('sprite_frame_interval') || prev.sprite_frame_interval,
+                    sprite_columns: getSettingValue('sprite_columns') || prev.sprite_columns,
+                    sprite_frame_width: getSettingValue('sprite_frame_width') || prev.sprite_frame_width,
+                    sprite_frame_height: getSettingValue('sprite_frame_height') || prev.sprite_frame_height,
+                    sprite_max_frames: getSettingValue('sprite_max_frames') || prev.sprite_max_frames,
+                    thumbnail_quality: getSettingValue('thumbnail_quality') || prev.thumbnail_quality,
+                    thumbnail_resolution: getSettingValue('thumbnail_resolution') || prev.thumbnail_resolution,
+                    thumbnail_position: getSettingValue('thumbnail_position') || prev.thumbnail_position,
+                    auto_approve: getSettingValue('auto_approve') || prev.auto_approve,
+                    require_review: getSettingValue('require_review') || prev.require_review,
+                    smtp_host: getSettingValue('smtp_host') || prev.smtp_host,
                     smtp_port: getSettingValue('smtp_port') || prev.smtp_port,
-                    smtp_username: getSettingValue('smtp_user') || prev.smtp_username,
+                    smtp_user: getSettingValue('smtp_user') || prev.smtp_user,
                     smtp_password: getSettingValue('smtp_password') || prev.smtp_password,
-                    require_email_verify: getSettingValue('require_email_verify') || prev.require_email_verify,
-                    min_password_len: getSettingValue('min_password_len') || prev.min_password_len,
-                    jwt_expiry: getSettingValue('jwt_expiry') || prev.jwt_expiry,
-                    enable_rest_api: getSettingValue('enable_rest_api') || prev.enable_rest_api,
-                    rate_limit: getSettingValue('rate_limit') || prev.rate_limit,
+                    smtp_sender_name: getSettingValue('smtp_sender_name') || prev.smtp_sender_name,
+                    smtp_use_tls: getSettingValue('smtp_use_tls') || prev.smtp_use_tls,
+                    min_password_length: getSettingValue('min_password_length') || prev.min_password_length,
+                    require_email_verification: getSettingValue('require_email_verification') || prev.require_email_verification,
+                    api_rate_limit: getSettingValue('api_rate_limit') || prev.api_rate_limit,
                     module_articles: getSettingValue('module_articles') === 'true',
                     module_videos: getSettingValue('module_videos') === 'true',
                     module_music: getSettingValue('module_music') === 'true',
@@ -203,7 +271,6 @@ const Settings: React.FC = () => {
             setTimeout(() => setMessage(null), 3000);
         } finally {
             setLoading(false);
-            setTimeout(() => setInitialLoad(false), 100);
         }
     };
 
@@ -217,26 +284,113 @@ const Settings: React.FC = () => {
         }
     };
 
-    const handleInputChange = (field: keyof FormData, value: string) => {
+    const fetchStorageCapabilities = async () => {
+        try {
+            const caps = await api.get<StorageCapabilities>('/admin/settings/storage/capabilities');
+            setStorageCaps(caps);
+        } catch (error) {
+            console.error('Failed to fetch storage capabilities:', error);
+        }
+    };
+
+    const fetchEmailStatus = async () => {
+        try {
+            const status = await api.get<EmailStatus>('/admin/settings/email/status');
+            setEmailStatus(status);
+        } catch (error) {
+            console.error('Failed to fetch email status:', error);
+        }
+    };
+
+    const handleInputChange = (field: keyof FormData, value: string | boolean) => {
         setFormData(prev => ({...prev, [field]: value}));
+    };
+
+    const handleBaseUrlChange = (index: number, value: string) => {
+        setFormData(prev => {
+            const newUrls = [...prev.base_urls];
+            newUrls[index] = value;
+            return {...prev, base_urls: newUrls};
+        });
+    };
+
+    const handleAddBaseUrl = () => {
+        setFormData(prev => ({...prev, base_urls: [...prev.base_urls, '']}));
+    };
+
+    const handleRemoveBaseUrl = (index: number) => {
+        setFormData(prev => {
+            const newUrls = prev.base_urls.filter((_, i) => i !== index);
+            return {...prev, base_urls: newUrls};
+        });
+    };
+
+    const handleEmailTest = async () => {
+        if (!emailTestTo) return;
+        try {
+            setEmailTestSending(true);
+            await api.post('/admin/settings/email/test', {to: emailTestTo});
+            setMessage({type: 'success', text: t('settings.emailTestSuccess')});
+            setTimeout(() => setMessage(null), 3000);
+        } catch (error) {
+            console.error('Failed to send test email:', error);
+            setMessage({type: 'error', text: t('settings.emailTestFailed')});
+            setTimeout(() => setMessage(null), 3000);
+        } finally {
+            setEmailTestSending(false);
+        }
     };
 
     const handleSave = async () => {
         try {
             setSaving(true);
+            const mbToBytes = (mb: string): string => {
+                const val = parseInt(mb);
+                if (isNaN(val) || val <= 0) return '0';
+                return String(val * 1024 * 1024);
+            };
+
             const settings = [
                 {key: 'site_name', value: formData.site_name},
                 {key: 'site_description', value: formData.site_description},
-                {key: 'base_url', value: formData.base_url},
-                {key: 'allow_registration', value: formData.enable_register},
-                {key: 'allow_upload', value: formData.allow_upload || 'true'},
-                {key: 'max_upload_size_video', value: String((parseInt(formData.max_file_size) || 5120) * 1024 * 1024)},
-                {key: 'auto_approve', value: formData.auto_transcode},
-                {key: 'require_review', value: formData.auto_transcode === 'true' ? 'false' : 'true'},
-                {key: 'smtp_host', value: formData.smtp_server},
+                {key: 'base_urls', value: JSON.stringify(formData.base_urls.filter(u => u.trim()))},
+                {key: 'primary_url', value: formData.primary_url},
+                {key: 'allow_registration', value: formData.allow_registration},
+                {key: 'allow_upload', value: formData.allow_upload},
+                {key: 'storage_base_path', value: formData.storage_base_path},
+                {key: 'storage_type', value: formData.storage_type},
+                {key: 's3_endpoint', value: formData.s3_endpoint},
+                {key: 's3_region', value: formData.s3_region},
+                {key: 's3_bucket', value: formData.s3_bucket},
+                {key: 's3_access_key', value: formData.s3_access_key},
+                {key: 's3_secret_key', value: formData.s3_secret_key},
+                {key: 's3_use_path_style', value: formData.s3_use_path_style},
+                {key: 'max_upload_size_video', value: mbToBytes(formData.max_upload_size_video)},
+                {key: 'max_upload_size_image', value: mbToBytes(formData.max_upload_size_image)},
+                {key: 'auto_transcode', value: formData.auto_transcode},
+                {key: 'transcode_method', value: formData.transcode_method},
+                {key: 'allowed_video_formats', value: formData.allowed_video_formats},
+                {key: 'allowed_image_formats', value: formData.allowed_image_formats},
+                {key: 'max_video_duration', value: formData.max_video_duration},
+                {key: 'sprite_frame_interval', value: formData.sprite_frame_interval},
+                {key: 'sprite_columns', value: formData.sprite_columns},
+                {key: 'sprite_frame_width', value: formData.sprite_frame_width},
+                {key: 'sprite_frame_height', value: formData.sprite_frame_height},
+                {key: 'sprite_max_frames', value: formData.sprite_max_frames},
+                {key: 'thumbnail_quality', value: formData.thumbnail_quality},
+                {key: 'thumbnail_resolution', value: formData.thumbnail_resolution},
+                {key: 'thumbnail_position', value: formData.thumbnail_position},
+                {key: 'auto_approve', value: formData.auto_approve},
+                {key: 'require_review', value: formData.require_review},
+                {key: 'smtp_host', value: formData.smtp_host},
                 {key: 'smtp_port', value: formData.smtp_port},
-                {key: 'smtp_user', value: formData.smtp_username},
+                {key: 'smtp_user', value: formData.smtp_user},
                 {key: 'smtp_password', value: formData.smtp_password},
+                {key: 'smtp_sender_name', value: formData.smtp_sender_name},
+                {key: 'smtp_use_tls', value: formData.smtp_use_tls},
+                {key: 'min_password_length', value: formData.min_password_length},
+                {key: 'require_email_verification', value: formData.require_email_verification},
+                {key: 'api_rate_limit', value: formData.api_rate_limit},
                 {key: 'module_articles', value: String(formData.module_articles)},
                 {key: 'module_videos', value: String(formData.module_videos)},
                 {key: 'module_music', value: String(formData.module_music)},
@@ -253,6 +407,8 @@ const Settings: React.FC = () => {
             setSaving(false);
         }
     };
+
+    const showS3Config = formData.storage_type === 's3' || formData.storage_type === 'hybrid';
 
     if (loading) {
         return (
@@ -294,7 +450,6 @@ const Settings: React.FC = () => {
 
     return (
         <div className="space-y-6 p-4 md:p-6">
-            {/* Message Alert */}
             {message && (
                 <div className={`flex items-center gap-3 p-4 rounded-lg border ${
                     message.type === 'success'
@@ -342,7 +497,6 @@ const Settings: React.FC = () => {
                     <TabsTrigger value="system">{t('settings.tabSystem')}</TabsTrigger>
                 </TabsList>
 
-                {/* 通用设置 */}
                 <TabsContent value="general" className="space-y-6">
                     <Card>
                         <CardHeader>
@@ -370,21 +524,55 @@ const Settings: React.FC = () => {
                                         placeholder={t('settings.enterSiteDesc')}
                                     />
                                 </div>
+                            </div>
+
+                            <Separator/>
+
+                            <div className="space-y-3">
+                                <label className="text-sm font-medium">{t('settings.baseUrls')}</label>
+                                <p className="text-xs text-muted-foreground">{t('settings.baseUrlsDesc')}</p>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.siteUrl')}</label>
-                                    <Input
-                                        value={formData.site_url}
-                                        onChange={(e) => handleInputChange('site_url', e.target.value)}
-                                        placeholder="https://example.com"
-                                    />
+                                    {formData.base_urls.map((url, index) => (
+                                        <div key={index} className="flex items-center gap-2">
+                                            <div className="flex-1 relative">
+                                                <Input
+                                                    value={url}
+                                                    onChange={(e) => handleBaseUrlChange(index, e.target.value)}
+                                                    placeholder="https://example.com"
+                                                />
+                                                {index === 0 && (
+                                                    <Badge className="absolute right-2 top-1/2 -translate-y-1/2 text-xs"
+                                                           variant="secondary">
+                                                        {t('settings.primaryUrlBadge')}
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                            {formData.base_urls.length > 1 && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => handleRemoveBaseUrl(index)}
+                                                    className="flex-shrink-0"
+                                                >
+                                                    <X className="h-4 w-4"/>
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ))}
+                                    <Button variant="outline" size="sm" onClick={handleAddBaseUrl}>
+                                        <Plus className="mr-1 h-3 w-3"/>
+                                        {t('settings.addUrl')}
+                                    </Button>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.timezone')}</label>
-                                    <Input
-                                        value={formData.timezone}
-                                        onChange={(e) => handleInputChange('timezone', e.target.value)}
-                                    />
-                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">{t('settings.primaryUrl')}</label>
+                                <Input
+                                    value={formData.primary_url}
+                                    onChange={(e) => handleInputChange('primary_url', e.target.value)}
+                                    placeholder="https://example.com"
+                                />
                             </div>
                         </CardContent>
                     </Card>
@@ -403,7 +591,6 @@ const Settings: React.FC = () => {
                     </Card>
                 </TabsContent>
 
-                {/* 存储设置 */}
                 <TabsContent value="storage" className="space-y-6">
                     <Card>
                         <CardHeader>
@@ -414,143 +601,206 @@ const Settings: React.FC = () => {
                             <CardDescription>{t('settings.localStorageDesc')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.uploadDir')}</label>
-                                    <Input
-                                        value={formData.upload_dir}
-                                        onChange={(e) => handleInputChange('upload_dir', e.target.value)}
-                                    />
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">{t('settings.storageBasePath')}</label>
+                                <Input
+                                    value={formData.storage_base_path}
+                                    onChange={(e) => handleInputChange('storage_base_path', e.target.value)}
+                                    placeholder="/var/media"
+                                />
+                                <p className="text-xs text-muted-foreground">{t('settings.storageRestartNote')}</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-muted-foreground">
+                                    {t('settings.subdirectoryPreview')}
+                                </label>
+                                <div className="flex flex-wrap gap-2">
+                                    {['originals/', 'temp/', 'thumbnails/', 'hls/', 'previews/', 'sprites/'].map(dir => (
+                                        <code key={dir}
+                                              className="px-2 py-1 text-xs rounded bg-muted font-mono">
+                                            {formData.storage_base_path ? `${formData.storage_base_path}/${dir}` : dir}
+                                        </code>
+                                    ))}
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.encodeDir')}</label>
-                                    <Input
-                                        value={formData.encode_dir}
-                                        onChange={(e) => handleInputChange('encode_dir', e.target.value)}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.thumbDir')}</label>
-                                    <Input
-                                        value={formData.thumb_dir}
-                                        onChange={(e) => handleInputChange('thumb_dir', e.target.value)}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.maxFileSize')}</label>
-                                    <Input
-                                        type="number"
-                                        value={formData.max_file_size}
-                                        onChange={(e) => handleInputChange('max_file_size', e.target.value)}
-                                    />
-                                </div>
+                            </div>
+
+                            <Separator/>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">{t('settings.storageType')}</label>
+                                <select
+                                    className="w-full px-3 py-2 border rounded-md bg-background"
+                                    value={formData.storage_type}
+                                    onChange={(e) => handleInputChange('storage_type', e.target.value)}
+                                >
+                                    <option value="local">{t('settings.storageLocal')}</option>
+                                    <option value="s3" disabled={!storageCaps.s3_available}>
+                                        {t('settings.storageS3')}
+                                        {!storageCaps.s3_available ? ` (${t('settings.s3NotAvailable')})` : ''}
+                                    </option>
+                                    <option value="hybrid" disabled={!storageCaps.hybrid_available}>
+                                        {t('settings.storageHybrid')}
+                                        {!storageCaps.hybrid_available ? ` (${t('settings.s3NotAvailable')})` : ''}
+                                    </option>
+                                </select>
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Server className="h-5 w-5"/>
-                                {t('settings.objectStorage')}
-                            </CardTitle>
-                            <CardDescription>{t('settings.objectStorageDesc')}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.storageType')}</label>
-                                    <select
-                                        className="w-full px-3 py-2 border rounded-md bg-background"
-                                        value={formData.storage_type}
-                                        onChange={(e) => handleInputChange('storage_type', e.target.value)}
-                                    >
-                                        <option value="local">{t('settings.storageLocal')}</option>
-                                        <option value="s3">{t('settings.storageS3')}</option>
-                                        <option value="hybrid">{t('settings.storageHybrid')}</option>
-                                    </select>
+                    {showS3Config && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Server className="h-5 w-5"/>
+                                    {t('settings.s3Config')}
+                                </CardTitle>
+                                <CardDescription>{t('settings.s3ConfigDesc')}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2 md:col-span-2">
+                                        <label className="text-sm font-medium">{t('settings.endpointUrl')}</label>
+                                        <Input
+                                            value={formData.s3_endpoint}
+                                            onChange={(e) => handleInputChange('s3_endpoint', e.target.value)}
+                                            placeholder="https://s3.amazonaws.com"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">{t('settings.s3Region')}</label>
+                                        <Input
+                                            value={formData.s3_region}
+                                            onChange={(e) => handleInputChange('s3_region', e.target.value)}
+                                            placeholder="us-east-1"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">{t('settings.bucketName')}</label>
+                                        <Input
+                                            value={formData.s3_bucket}
+                                            onChange={(e) => handleInputChange('s3_bucket', e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">{t('settings.accessKey')}</label>
+                                        <Input
+                                            type="password"
+                                            value={formData.s3_access_key}
+                                            onChange={(e) => handleInputChange('s3_access_key', e.target.value)}
+                                            placeholder="••••••••"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">{t('settings.secretKey')}</label>
+                                        <Input
+                                            type="password"
+                                            value={formData.s3_secret_key}
+                                            onChange={(e) => handleInputChange('s3_secret_key', e.target.value)}
+                                            placeholder="••••••••"
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between p-3 rounded-lg border md:col-span-2">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-sm font-medium">{t('settings.s3UsePathStyle')}</Label>
+                                            <p className="text-xs text-muted-foreground">
+                                                {t('settings.s3UsePathStyleDesc')}
+                                            </p>
+                                        </div>
+                                        <Switch
+                                            checked={formData.s3_use_path_style === 'true'}
+                                            onCheckedChange={(checked: boolean) =>
+                                                handleInputChange('s3_use_path_style', String(checked))
+                                            }
+                                        />
+                                    </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.bucketName')}</label>
-                                    <Input
-                                        value={formData.bucket_name}
-                                        onChange={(e) => handleInputChange('bucket_name', e.target.value)}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.accessKey')}</label>
-                                    <Input
-                                        type="password"
-                                        value={formData.access_key}
-                                        onChange={(e) => handleInputChange('access_key', e.target.value)}
-                                        placeholder="••••••••"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.secretKey')}</label>
-                                    <Input
-                                        type="password"
-                                        value={formData.secret_key}
-                                        onChange={(e) => handleInputChange('secret_key', e.target.value)}
-                                        placeholder="••••••••"
-                                    />
-                                </div>
-                                <div className="space-y-2 md:col-span-2">
-                                    <label className="text-sm font-medium">{t('settings.endpointUrl')}</label>
-                                    <Input
-                                        value={formData.endpoint_url}
-                                        onChange={(e) => handleInputChange('endpoint_url', e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                            </CardContent>
+                        </Card>
+                    )}
                 </TabsContent>
 
-                {/* 媒体设置 */}
                 <TabsContent value="media" className="space-y-6">
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <SettingsIcon className="h-5 w-5"/>
-                                {t('settings.transcode')}
+                                {t('settings.transcodeSettings')}
                             </CardTitle>
-                            <CardDescription>{t('settings.transcodeDesc')}</CardDescription>
+                            <CardDescription>{t('settings.transcodeSettingsDesc')}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex items-center justify-between p-3 rounded-lg border">
+                                <div className="space-y-0.5">
+                                    <Label className="text-sm font-medium">{t('settings.autoTranscode')}</Label>
+                                    <p className="text-xs text-muted-foreground">
+                                        {t('settings.autoTranscodeDesc')}
+                                    </p>
+                                </div>
+                                <Switch
+                                    checked={formData.auto_transcode === 'true'}
+                                    onCheckedChange={(checked: boolean) =>
+                                        handleInputChange('auto_transcode', String(checked))
+                                    }
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">{t('settings.transcodeMethod')}</label>
+                                <select
+                                    className="w-full px-3 py-2 border rounded-md bg-background"
+                                    value={formData.transcode_method}
+                                    onChange={(e) => handleInputChange('transcode_method', e.target.value)}
+                                >
+                                    <option value="ffmpeg">FFmpeg</option>
+                                </select>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{t('settings.uploadLimits')}</CardTitle>
+                            <CardDescription>{t('settings.uploadLimitsDesc')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.autoTranscode')}</label>
-                                    <select
-                                        className="w-full px-3 py-2 border rounded-md bg-background"
-                                        value={formData.auto_transcode}
-                                        onChange={(e) => handleInputChange('auto_transcode', e.target.value)}
-                                    >
-                                        <option value="true">{t('settings.enable')}</option>
-                                        <option value="false">{t('settings.disable')}</option>
-                                    </select>
+                                    <label className="text-sm font-medium">{t('settings.maxUploadSizeVideo')}</label>
+                                    <Input
+                                        type="number"
+                                        value={formData.max_upload_size_video}
+                                        onChange={(e) => handleInputChange('max_upload_size_video', e.target.value)}
+                                    />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.transcodeMethod')}</label>
-                                    <select
-                                        className="w-full px-3 py-2 border rounded-md bg-background"
-                                        value={formData.transcode_method}
-                                        onChange={(e) => handleInputChange('transcode_method', e.target.value)}
-                                    >
-                                        <option value="ffmpeg">FFmpeg</option>
-                                        <option value="handbrake">HandBrake</option>
-                                    </select>
+                                    <label className="text-sm font-medium">{t('settings.maxUploadSizeImage')}</label>
+                                    <Input
+                                        type="number"
+                                        value={formData.max_upload_size_image}
+                                        onChange={(e) => handleInputChange('max_upload_size_image', e.target.value)}
+                                    />
                                 </div>
-                            </div>
-                            <Separator/>
-                            <div className="space-y-3">
-                                <label className="text-sm font-medium">{t('settings.outputRes')}</label>
-                                <div className="flex flex-wrap gap-2">
-                                    {['2160p (4K)', '1080p', '720p', '480p', '360p'].map((res) => (
-                                        <Badge key={res} variant="outline" className="cursor-pointer">
-                                            {res}
-                                        </Badge>
-                                    ))}
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">{t('settings.maxVideoDuration')}</label>
+                                    <Input
+                                        type="number"
+                                        value={formData.max_video_duration}
+                                        onChange={(e) => handleInputChange('max_video_duration', e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">{t('settings.videoFormats')}</label>
+                                    <Input
+                                        value={formData.allowed_video_formats}
+                                        onChange={(e) => handleInputChange('allowed_video_formats', e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2 md:col-span-2">
+                                    <label className="text-sm font-medium">{t('settings.imageFormats')}</label>
+                                    <Input
+                                        value={formData.allowed_image_formats}
+                                        onChange={(e) => handleInputChange('allowed_image_formats', e.target.value)}
+                                    />
                                 </div>
                             </div>
                         </CardContent>
@@ -558,39 +808,73 @@ const Settings: React.FC = () => {
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>{t('settings.uploadLimit')}</CardTitle>
-                            <CardDescription>{t('settings.uploadLimitDesc')}</CardDescription>
+                            <CardTitle>{t('settings.thumbnailSprite')}</CardTitle>
+                            <CardDescription>{t('settings.thumbnailSpriteDesc')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.videoFormats')}</label>
-                                    <Input
-                                        value={formData.video_formats}
-                                        onChange={(e) => handleInputChange('video_formats', e.target.value)}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.imageFormats')}</label>
-                                    <Input
-                                        value={formData.image_formats}
-                                        onChange={(e) => handleInputChange('image_formats', e.target.value)}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.maxDuration')}</label>
+                                    <label className="text-sm font-medium">{t('settings.thumbnailQuality')}</label>
                                     <Input
                                         type="number"
-                                        value={formData.max_duration}
-                                        onChange={(e) => handleInputChange('max_duration', e.target.value)}
+                                        value={formData.thumbnail_quality}
+                                        onChange={(e) => handleInputChange('thumbnail_quality', e.target.value)}
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.maxFileSize2')}</label>
+                                    <label className="text-sm font-medium">{t('settings.thumbnailResolution')}</label>
+                                    <Input
+                                        value={formData.thumbnail_resolution}
+                                        onChange={(e) => handleInputChange('thumbnail_resolution', e.target.value)}
+                                        placeholder="320x180"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">{t('settings.thumbnailPosition')}</label>
+                                    <Input
+                                        value={formData.thumbnail_position}
+                                        onChange={(e) => handleInputChange('thumbnail_position', e.target.value)}
+                                        placeholder="00:00:01"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">{t('settings.spriteFrameInterval')}</label>
                                     <Input
                                         type="number"
-                                        value={formData.max_file_size2}
-                                        onChange={(e) => handleInputChange('max_file_size2', e.target.value)}
+                                        value={formData.sprite_frame_interval}
+                                        onChange={(e) => handleInputChange('sprite_frame_interval', e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">{t('settings.spriteColumns')}</label>
+                                    <Input
+                                        type="number"
+                                        value={formData.sprite_columns}
+                                        onChange={(e) => handleInputChange('sprite_columns', e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">{t('settings.spriteFrameWidth')}</label>
+                                    <Input
+                                        type="number"
+                                        value={formData.sprite_frame_width}
+                                        onChange={(e) => handleInputChange('sprite_frame_width', e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">{t('settings.spriteFrameHeight')}</label>
+                                    <Input
+                                        type="number"
+                                        value={formData.sprite_frame_height}
+                                        onChange={(e) => handleInputChange('sprite_frame_height', e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">{t('settings.spriteMaxFrames')}</label>
+                                    <Input
+                                        type="number"
+                                        value={formData.sprite_max_frames}
+                                        onChange={(e) => handleInputChange('sprite_max_frames', e.target.value)}
                                     />
                                 </div>
                             </div>
@@ -598,7 +882,6 @@ const Settings: React.FC = () => {
                     </Card>
                 </TabsContent>
 
-                {/* 邮件设置 */}
                 <TabsContent value="email" className="space-y-6">
                     <Card>
                         <CardHeader>
@@ -609,12 +892,29 @@ const Settings: React.FC = () => {
                             <CardDescription>{t('settings.smtpDesc')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                            <div className="flex items-center gap-2 p-3 rounded-lg border">
+                                <span className="text-sm font-medium">{t('settings.emailStatus')}:</span>
+                                {emailStatus.configured ? (
+                                    <Badge variant="default"
+                                           className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                        <CheckCircle className="w-3 h-3 mr-1"/>
+                                        {t('settings.emailConfigured')}
+                                    </Badge>
+                                ) : (
+                                    <Badge variant="secondary"
+                                           className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                                        <AlertCircle className="w-3 h-3 mr-1"/>
+                                        {t('settings.emailNotConfigured')}
+                                    </Badge>
+                                )}
+                            </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t('settings.smtpServer')}</label>
                                     <Input
-                                        value={formData.smtp_server}
-                                        onChange={(e) => handleInputChange('smtp_server', e.target.value)}
+                                        value={formData.smtp_host}
+                                        onChange={(e) => handleInputChange('smtp_host', e.target.value)}
                                         placeholder="smtp.example.com"
                                     />
                                 </div>
@@ -629,8 +929,8 @@ const Settings: React.FC = () => {
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t('settings.username')}</label>
                                     <Input
-                                        value={formData.smtp_username}
-                                        onChange={(e) => handleInputChange('smtp_username', e.target.value)}
+                                        value={formData.smtp_user}
+                                        onChange={(e) => handleInputChange('smtp_user', e.target.value)}
                                         placeholder="noreply@example.com"
                                     />
                                 </div>
@@ -646,30 +946,52 @@ const Settings: React.FC = () => {
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t('settings.senderName')}</label>
                                     <Input
-                                        value={formData.sender_name}
-                                        onChange={(e) => handleInputChange('sender_name', e.target.value)}
+                                        value={formData.smtp_sender_name}
+                                        onChange={(e) => handleInputChange('smtp_sender_name', e.target.value)}
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.useTls')}</label>
-                                    <select
-                                        className="w-full px-3 py-2 border rounded-md bg-background"
-                                        value={formData.use_tls}
-                                        onChange={(e) => handleInputChange('use_tls', e.target.value)}
-                                    >
-                                        <option value="true">{t('settings.yes')}</option>
-                                        <option value="false">{t('settings.no')}</option>
-                                    </select>
+                                <div className="flex items-center justify-between p-3 rounded-lg border">
+                                    <div className="space-y-0.5">
+                                        <Label className="text-sm font-medium">{t('settings.useTls')}</Label>
+                                    </div>
+                                    <Switch
+                                        checked={formData.smtp_use_tls === 'true'}
+                                        onCheckedChange={(checked: boolean) =>
+                                            handleInputChange('smtp_use_tls', String(checked))
+                                        }
+                                    />
                                 </div>
                             </div>
-                            <div className="flex justify-end">
-                                <Button variant="outline">{t('settings.sendTest')}</Button>
+
+                            <Separator/>
+
+                            <div className="space-y-3">
+                                <label className="text-sm font-medium">{t('settings.sendTest')}</label>
+                                <div className="flex gap-2">
+                                    <Input
+                                        value={emailTestTo}
+                                        onChange={(e) => setEmailTestTo(e.target.value)}
+                                        placeholder="test@example.com"
+                                        className="flex-1"
+                                    />
+                                    <Button
+                                        variant="outline"
+                                        onClick={handleEmailTest}
+                                        disabled={emailTestSending || !emailTestTo}
+                                    >
+                                        {emailTestSending ? (
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
+                                        ) : (
+                                            <Send className="mr-2 h-4 w-4"/>
+                                        )}
+                                        {t('settings.sendTest')}
+                                    </Button>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
 
-                {/* 安全设置 */}
                 <TabsContent value="security" className="space-y-6">
                     <Card>
                         <CardHeader>
@@ -680,43 +1002,43 @@ const Settings: React.FC = () => {
                             <CardDescription>{t('settings.authDesc')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                            <div className="flex items-center justify-between p-3 rounded-lg border">
+                                <div className="space-y-0.5">
+                                    <Label className="text-sm font-medium">{t('settings.enableRegister')}</Label>
+                                </div>
+                                <Switch
+                                    checked={formData.allow_registration === 'true'}
+                                    onCheckedChange={(checked: boolean) =>
+                                        handleInputChange('allow_registration', String(checked))
+                                    }
+                                />
+                            </div>
+                            <div className="flex items-center justify-between p-3 rounded-lg border">
+                                <div className="space-y-0.5">
+                                    <Label className="text-sm font-medium">{t('settings.requireEmailVerify')}</Label>
+                                </div>
+                                <Switch
+                                    checked={formData.require_email_verification === 'true'}
+                                    onCheckedChange={(checked: boolean) =>
+                                        handleInputChange('require_email_verification', String(checked))
+                                    }
+                                />
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.enableRegister')}</label>
-                                    <select
-                                        className="w-full px-3 py-2 border rounded-md bg-background"
-                                        value={formData.enable_register}
-                                        onChange={(e) => handleInputChange('enable_register', e.target.value)}
-                                    >
-                                        <option value="true">{t('settings.enable')}</option>
-                                        <option value="false">{t('settings.disable')}</option>
-                                    </select>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.requireEmailVerify')}</label>
-                                    <select
-                                        className="w-full px-3 py-2 border rounded-md bg-background"
-                                        value={formData.require_email_verify}
-                                        onChange={(e) => handleInputChange('require_email_verify', e.target.value)}
-                                    >
-                                        <option value="true">{t('settings.enable')}</option>
-                                        <option value="false">{t('settings.disable')}</option>
-                                    </select>
-                                </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t('settings.minPasswordLen')}</label>
                                     <Input
                                         type="number"
-                                        value={formData.min_password_len}
-                                        onChange={(e) => handleInputChange('min_password_len', e.target.value)}
+                                        value={formData.min_password_length}
+                                        onChange={(e) => handleInputChange('min_password_length', e.target.value)}
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.jwtExpiry')}</label>
+                                    <label className="text-sm font-medium">{t('settings.rateLimit')}</label>
                                     <Input
                                         type="number"
-                                        value={formData.jwt_expiry}
-                                        onChange={(e) => handleInputChange('jwt_expiry', e.target.value)}
+                                        value={formData.api_rate_limit}
+                                        onChange={(e) => handleInputChange('api_rate_limit', e.target.value)}
                                     />
                                 </div>
                             </div>
@@ -725,36 +1047,29 @@ const Settings: React.FC = () => {
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>{t('settings.apiAccess')}</CardTitle>
-                            <CardDescription>{t('settings.apiAccessDesc')}</CardDescription>
+                            <CardTitle>{t('settings.reviewSettings')}</CardTitle>
+                            <CardDescription>{t('settings.reviewSettingsDesc')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.enableRestApi')}</label>
-                                    <select
-                                        className="w-full px-3 py-2 border rounded-md bg-background"
-                                        value={formData.enable_rest_api}
-                                        onChange={(e) => handleInputChange('enable_rest_api', e.target.value)}
-                                    >
-                                        <option value="true">{t('settings.enable')}</option>
-                                        <option value="false">{t('settings.disable')}</option>
-                                    </select>
+                            <div className="flex items-center justify-between p-3 rounded-lg border">
+                                <div className="space-y-0.5">
+                                    <Label className="text-sm font-medium">{t('settings.autoApprove')}</Label>
+                                    <p className="text-xs text-muted-foreground">
+                                        {t('settings.autoApproveDesc')}
+                                    </p>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('settings.rateLimit')}</label>
-                                    <Input
-                                        type="number"
-                                        value={formData.rate_limit}
-                                        onChange={(e) => handleInputChange('rate_limit', e.target.value)}
-                                    />
-                                </div>
+                                <Switch
+                                    checked={formData.auto_approve === 'true'}
+                                    onCheckedChange={(checked: boolean) => {
+                                        handleInputChange('auto_approve', String(checked));
+                                        handleInputChange('require_review', String(!checked));
+                                    }}
+                                />
                             </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
 
-                {/* Modules & Layout */}
                 <TabsContent value="modules" className="space-y-6">
                     <Card>
                         <CardHeader>
@@ -776,7 +1091,10 @@ const Settings: React.FC = () => {
                                 </div>
                                 <Switch
                                     checked={formData.module_articles}
-                                    onCheckedChange={(checked: boolean) => setFormData(prev => ({...prev, module_articles: checked}))}
+                                    onCheckedChange={(checked: boolean) => setFormData(prev => ({
+                                        ...prev,
+                                        module_articles: checked
+                                    }))}
                                 />
                             </div>
                             <div className="flex items-center justify-between p-4 rounded-lg border">
@@ -788,7 +1106,10 @@ const Settings: React.FC = () => {
                                 </div>
                                 <Switch
                                     checked={formData.module_videos}
-                                    onCheckedChange={(checked: boolean) => setFormData(prev => ({...prev, module_videos: checked}))}
+                                    onCheckedChange={(checked: boolean) => setFormData(prev => ({
+                                        ...prev,
+                                        module_videos: checked
+                                    }))}
                                 />
                             </div>
                             <div className="flex items-center justify-between p-4 rounded-lg border">
@@ -800,7 +1121,10 @@ const Settings: React.FC = () => {
                                 </div>
                                 <Switch
                                     checked={formData.module_music}
-                                    onCheckedChange={(checked: boolean) => setFormData(prev => ({...prev, module_music: checked}))}
+                                    onCheckedChange={(checked: boolean) => setFormData(prev => ({
+                                        ...prev,
+                                        module_music: checked
+                                    }))}
                                 />
                             </div>
                         </CardContent>
@@ -821,10 +1145,18 @@ const Settings: React.FC = () => {
                                 {[
                                     {value: 'auto', label: t('settings.layoutAuto'), desc: t('settings.layoutAutoDesc')},
                                     {value: 'video', label: t('settings.layoutVideo'), desc: t('settings.layoutVideoDesc')},
-                                    {value: 'article', label: t('settings.layoutArticle'), desc: t('settings.layoutArticleDesc')},
+                                    {
+                                        value: 'article',
+                                        label: t('settings.layoutArticle'),
+                                        desc: t('settings.layoutArticleDesc')
+                                    },
                                     {value: 'mixed', label: t('settings.layoutMixed'), desc: t('settings.layoutMixedDesc')},
                                     {value: 'doc', label: t('settings.layoutDoc'), desc: t('settings.layoutDocDesc')},
-                                    {value: 'welcome', label: t('settings.layoutWelcome'), desc: t('settings.layoutWelcomeDesc')},
+                                    {
+                                        value: 'welcome',
+                                        label: t('settings.layoutWelcome'),
+                                        desc: t('settings.layoutWelcomeDesc')
+                                    },
                                 ].map((option) => (
                                     <button
                                         key={option.value}
@@ -845,19 +1177,22 @@ const Settings: React.FC = () => {
                             {formData.homepage_layout === 'auto' && (
                                 <div className="p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
                                     {t('settings.autoLayoutPreview')} <strong>{
-                                        !formData.module_articles && !formData.module_videos && !formData.module_music ? t('settings.layoutWelcome') :
-                                        formData.module_videos && !formData.module_articles ? t('settings.layoutVideo') :
-                                        formData.module_articles && !formData.module_videos ? t('settings.layoutDoc') :
-                                        formData.module_articles && formData.module_videos ? t('settings.layoutMixed') :
-                                        t('settings.layoutWelcome')
-                                    }</strong>
+                                    !formData.module_articles && !formData.module_videos && !formData.module_music
+                                        ? t('settings.layoutWelcome') :
+                                        formData.module_videos && !formData.module_articles
+                                            ? t('settings.layoutVideo') :
+                                            formData.module_articles && !formData.module_videos
+                                                ? t('settings.layoutDoc') :
+                                                formData.module_articles && formData.module_videos
+                                                    ? t('settings.layoutMixed') :
+                                                    t('settings.layoutWelcome')
+                                }</strong>
                                 </div>
                             )}
                         </CardContent>
                     </Card>
                 </TabsContent>
 
-                {/* 系统信息 */}
                 <TabsContent value="system" className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Card>
