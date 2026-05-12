@@ -100,3 +100,23 @@ export const systemApi = {
     stats: statsApi,
     settings: settingsApi,
 };
+
+// ==================== Email Status Types ====================
+export interface EmailStatus {
+    configured: boolean;
+    host: string;
+    port: number;
+    from: string;
+    nickname: string;
+    ssl: boolean;
+    auto_derived: boolean;
+}
+
+// ==================== Email Settings API ====================
+export const emailSettingsApi = {
+    getStatus: () =>
+        api.get<EmailStatus>("/system/settings/email/status"),
+
+    sendTest: (to: string) =>
+        api.post<{ message: string }>("/system/settings/email/test", { to }),
+};

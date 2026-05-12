@@ -11,7 +11,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2/log"
@@ -22,6 +24,9 @@ import (
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/server"
 )
+
+const spriteProcessingStuckTimeout = 5 * time.Minute
+const spriteGenerateTimeout = 30 * time.Minute
 
 // SpriteHandler handles HTTP requests for sprite sheet and WebVTT files.
 type SpriteHandler struct {
@@ -87,7 +92,7 @@ func (h *SpriteHandler) GetSpriteVTT(c *gin.Context) {
 	}
 
 	c.Header("Content-Type", "text/vtt")
-	c.Header("Cache-Control", "public, max-age=86400")
+	c.Header("Cache-Control", "public, max-age=3600, must-revalidate")
 	c.String(http.StatusOK, string(data))
 }
 
@@ -130,7 +135,7 @@ func (h *SpriteHandler) GetSpriteImage(c *gin.Context) {
 	}
 
 	c.Header("Content-Type", "image/jpeg")
-	c.Header("Cache-Control", "public, max-age=86400")
+	c.Header("Cache-Control", "public, max-age=3600, must-revalidate")
 	c.File(fullPath)
 }
 
@@ -155,8 +160,12 @@ func (h *SpriteHandler) RegenerateSprite(c *gin.Context) {
 	}
 
 	if info.SpriteStatus == "processing" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "sprite already processing"})
-		return
+		if time.Since(info.UpdateTime) < spriteProcessingStuckTimeout {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "sprite already processing"})
+			return
+		}
+		h.logger.Warnf("sprite status stuck at processing for media %s (since %v), allowing retry",
+			mediaID, info.UpdateTime)
 	}
 
 	// Trigger asynchronous regeneration.
@@ -165,7 +174,14 @@ func (h *SpriteHandler) RegenerateSprite(c *gin.Context) {
 	// exec.CommandContext. Use context.Background() so the regeneration runs to
 	// completion independently of the request lifecycle.
 	go func() {
-		if err := h.mediaUC.RegenerateSprite(context.Background(), mediaID); err != nil {
+		defer func() {
+			if r := recover(); r != nil {
+				h.logger.Errorf("sprite regeneration panicked for media %s: %v\n%s", mediaID, r, string(debug.Stack()))
+			}
+		}()
+		ctx, cancel := context.WithTimeout(context.Background(), spriteGenerateTimeout)
+		defer cancel()
+		if err := h.mediaUC.RegenerateSprite(ctx, mediaID); err != nil {
 			h.logger.Warnf("sprite regeneration failed for media %s: %v", mediaID, err)
 		}
 	}()

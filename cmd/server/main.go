@@ -75,10 +75,11 @@ func main() {
 
 	// Initialize dependencies
 	var err error
-	deps, err = wireApp(cfg, logger)
+	deps, cleanup, err := wireApp(cfg, logger)
 	if err != nil {
 		log.Fatalf("failed to initialize dependencies: %v", err)
 	}
+	defer cleanup()
 	defer deps.Cleanup()
 
 	// Start Watermill router

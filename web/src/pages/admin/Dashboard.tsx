@@ -88,21 +88,21 @@ const Dashboard = () => {
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
                                 <h1 className="text-3xl font-extrabold text-foreground">{t('admin.dashboard')}</h1>
-                                <p className="text-muted-foreground text-sm mt-1">{t('admin.dashboardDesc') || 'Overview of your platform performance'}</p>
+                                <p className="text-muted-foreground text-sm mt-1">{t('admin.dashboardDesc')}</p>
                             </div>
                             <div className="flex gap-2">
                                 <Button
                                     variant="outline"
                                     size="sm"
                                 >
-                                    {t('admin.exportReport') || 'Export Report'}
+                                    {t('admin.exportReport')}
                                 </Button>
                                 <Link to="/admin/articles">
                                     <Button
                                         variant="default"
                                         size="sm"
                                     >
-                                        {t('admin.manageArticles') || 'Manage Articles'}
+                                        {t('admin.manageArticles')}
                                     </Button>
                                 </Link>
                             </div>
@@ -115,7 +115,7 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard
                     icon={<Film className="h-6 w-6"/>}
-                    label={t('admin.totalMedia') || 'Total Medias'}
+                    label={t('admin.totalMedia')}
                     value={formatNumber(stats.total_media)}
                     trend={`+${stats.new_media_today} today`}
                     trendUp={stats.new_media_today > 0}
@@ -123,7 +123,7 @@ const Dashboard = () => {
                 />
                 <StatCard
                     icon={<Users className="h-6 w-6"/>}
-                    label={t('admin.totalUsers') || 'Total Users'}
+                    label={t('admin.totalUsers')}
                     value={formatNumber(stats.total_users)}
                     trend={`+${stats.new_users_today} today`}
                     trendUp={stats.new_users_today > 0}
@@ -131,7 +131,7 @@ const Dashboard = () => {
                 />
                 <StatCard
                     icon={<Eye className="h-6 w-6"/>}
-                    label={t('admin.totalViews') || 'Total Views'}
+                    label={t('admin.totalViews')}
                     value={formatNumber(stats.total_views)}
                     trend={`+${formatNumber(stats.new_views_today)} today`}
                     trendUp={stats.new_views_today > 0}
@@ -139,7 +139,7 @@ const Dashboard = () => {
                 />
                 <StatCard
                     icon={<MessageCircle className="h-6 w-6"/>}
-                    label={t('admin.totalComments') || 'Total Comments'}
+                    label={t('admin.totalComments')}
                     value={formatNumber(stats.total_comments)}
                     trend={`+${stats.new_comments_today} today`}
                     trendUp={stats.new_comments_today > 0}
@@ -151,7 +151,7 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <StatCard
                     icon={<Heart className="h-6 w-6"/>}
-                    label={t('admin.totalSubscribers') || 'Total Subscribers'}
+                    label={t('admin.totalSubscribers')}
                     value={formatNumber(stats.total_subscribers)}
                     trend={`+${stats.new_subscribers_today} today`}
                     trendUp={stats.new_subscribers_today > 0}
@@ -160,7 +160,7 @@ const Dashboard = () => {
                 />
                 <StatCard
                     icon={<DollarSign className="h-6 w-6"/>}
-                    label={t('admin.totalRevenue') || 'Total Revenue'}
+                    label={t('admin.totalRevenue')}
                     value={`$${formatNumber(stats.total_revenue)}`}
                     trend="+12% this month"
                     trendUp={true}
@@ -169,7 +169,7 @@ const Dashboard = () => {
                 />
                 <StatCard
                     icon={<Users className="h-6 w-6"/>}
-                    label={t('admin.activeUsers') || 'Active Users'}
+                    label={t('admin.activeUsers')}
                     value={formatNumber(stats.active_users)}
                     trend="Currently online"
                     trendUp={true}
@@ -185,7 +185,7 @@ const Dashboard = () => {
                     <CardContent className="p-6">
                         <h3 className="font-bold text-foreground mb-6 flex items-center gap-2">
                             <BarChart3 size={20} className="text-info"/>
-                            {t('admin.mediaByType') || 'Media by Type'}
+                            {t('admin.mediaByType')}
                         </h3>
                         <div className="space-y-4">
                             <TypeBar label="Videos" count={stats.media_by_type?.video || 0} total={stats.total_media}
@@ -206,7 +206,7 @@ const Dashboard = () => {
                     <CardContent className="p-6">
                         <h3 className="font-bold text-foreground mb-6 flex items-center gap-2">
                             <Users size={20} className="text-destructive"/>
-                            {t('admin.usersByRole') || 'Users by Role'}
+                            {t('admin.usersByRole')}
                         </h3>
                         <div className="space-y-4">
                             <TypeBar label="Admins" count={stats.users_by_role?.admin || 0} total={stats.total_users}
@@ -225,7 +225,7 @@ const Dashboard = () => {
                     <CardContent className="p-6">
                         <h3 className="font-bold text-foreground mb-6 flex items-center gap-2">
                             <TrendingUp size={20} className="text-success"/>
-                            {t('admin.trendingContent') || 'Trending Content'}
+                            {t('admin.trendingContent')}
                         </h3>
                         <div className="space-y-4">
                             {stats.top_media?.slice(0, 5).map((item: any, index: number) => (
@@ -252,7 +252,7 @@ const Dashboard = () => {
                     <CardContent className="p-6">
                         <h3 className="font-bold text-foreground mb-6 flex items-center gap-2">
                             <BarChart3 size={20} className="text-emerald-500"/>
-                            {t('admin.topCategories') || 'Top Categories'}
+                            {t('admin.topCategories')}
                         </h3>
                         <div className="absolute bottom-0 left-0 h-1 bg-emerald-500 w-full opacity-10"/>
                         <div className="space-y-3">
@@ -282,7 +282,7 @@ const Dashboard = () => {
                     <CardContent className="p-6">
                         <h3 className="font-bold text-foreground mb-6 flex items-center gap-2">
                             <Users size={20} className="text-info"/>
-                            {t('admin.topCreators') || 'Top Creators'}
+                            {t('admin.topCreators')}
                         </h3>
                         <div className="absolute bottom-0 left-0 h-1 bg-info w-full opacity-10"/>
                         <div className="space-y-3">

@@ -287,16 +287,26 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 		finalThumbnail = session.Thumbnail
 	}
 
-	// Extract duration if it's a video
+	// Extract full media info via ffprobe for video/audio files
+	fullPath := uc.paths.FullPath(finalPath)
+	var mediaInfo *ffmpeg.MediaInfo
 	var duration time.Duration
-	if strings.Contains(session.ContentType, "video") {
-		fullPath := uc.paths.FullPath(finalPath)
-		if d, err := ffmpeg.GetVideoDuration(ctx, fullPath); err == nil {
-			duration = d
+	if strings.Contains(session.ContentType, "video") || strings.Contains(session.ContentType, "audio") {
+		if info, err := ffmpeg.GetMediaInfo(ctx, fullPath); err != nil {
+			uc.log.Errorf("failed to extract media info for %s: %v", fullPath, err)
 		} else {
-			uc.log.Errorf("failed to extract duration for %s: %v", fullPath, err)
+			mediaInfo = info
+			if info.Duration > 0 {
+				duration = time.Duration(info.Duration * float64(time.Second))
+			}
+			uc.log.Infof("media info: codec=%s/%s bitrate=%d/%d fps=%.2f res=%dx%d sample=%d channels=%d",
+				info.VideoCodec, info.AudioCodec, info.VideoBitRate, info.AudioBitRate,
+				info.FPS, info.Width, info.Height, info.SampleRate, info.Channels)
 		}
+	}
 
+	// Check max duration for video files
+	if strings.Contains(session.ContentType, "video") {
 		if maxDuration := uc.getMaxVideoDuration(ctx); maxDuration > 0 && duration > maxDuration {
 			_ = uc.storage.Delete(ctx, finalPath)
 			return nil, fmt.Errorf("video duration %s exceeds maximum allowed duration %s", duration, maxDuration)
@@ -313,6 +323,7 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 		Thumbnail:      finalThumbnail,
 		Tags:           finalTags,
 		Duration:       int32(duration.Seconds()),
+		Extension:      filepath.Ext(session.Filename),
 		EncodingStatus: string(enums.MediaEncodingStatusPending),
 	}
 	if finalCategoryID != nil {
@@ -320,6 +331,10 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 	}
 	if session.UserID != nil {
 		media.UserId = *session.UserID
+	}
+	if mediaInfo != nil {
+		media.Width = int32(mediaInfo.Width)
+		media.Height = int32(mediaInfo.Height)
 	}
 
 	media.Type = "file"
@@ -336,8 +351,22 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 		return nil, err
 	}
 
+	// Promote temp file to originals immediately after media record creation
+	promoteFilename := filepath.Base(finalPath)
+	promotedPath, err := uc.paths.PromoteToOriginal(userID, promoteFilename)
+	if err != nil {
+		_ = uc.storage.Delete(ctx, finalPath)
+		_ = uc.mediaRepo.Delete(ctx, entityMedia.ID)
+		return nil, fmt.Errorf("promote to originals: %w", err)
+	}
+	createdMedia.Url = promotedPath
+	media.Url = promotedPath
+	if _, err := uc.mediaRepo.Update(ctx, media); err != nil {
+		uc.log.Errorf("failed to update media URL after promotion: %v", err)
+	}
+
 	session.Status = StatusCompleted
-	session.StoragePath = finalPath
+	session.StoragePath = promotedPath
 	session.Sha256 = sha256
 	_ = uc.repo.UpdateSession(ctx, session)
 
@@ -348,7 +377,7 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 	if strings.HasPrefix(session.ContentType, "video/") {
 		payload, _ := json.Marshal(MediaEncodeRequest{
 			MediaID:     entityMedia.ID,
-			MediaPath:   finalPath,
+			MediaPath:   media.Url,
 			ContentType: session.ContentType,
 		})
 		msg := pubsub.NewMessage(payload)

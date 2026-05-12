@@ -467,9 +467,8 @@ func (h *SystemHandler) getEmailStatus() http.HandlerFunc {
 			server.OK(gc, gin.H{"configured": false})
 			return
 		}
-		server.OK(gc, gin.H{
-			"configured": h.emailUC.IsConfigured(r.Context()),
-		})
+		cfg := h.emailUC.GetSMTPConfig(r.Context())
+		server.OK(gc, cfg)
 	}
 }
 

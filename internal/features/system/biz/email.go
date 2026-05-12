@@ -77,3 +77,63 @@ func (uc *EmailUseCase) RenderTemplate(templateName string, data map[string]stri
 	}
 	return subject, body, nil
 }
+
+// SMTPConfig contains the resolved SMTP configuration with defaults applied.
+type SMTPConfig struct {
+	Host        string `json:"host"`
+	Port        int    `json:"port"`
+	From        string `json:"from"`
+	Nickname    string `json:"nickname"`
+	SSL         bool   `json:"ssl"`
+	Configured  bool   `json:"configured"`
+	AutoDerived bool   `json:"auto_derived"`
+}
+
+// GetSMTPConfig returns the resolved SMTP configuration.
+// If smtp_host is empty, derives defaults from the site domain.
+func (uc *EmailUseCase) GetSMTPConfig(ctx context.Context) SMTPConfig {
+	host := uc.settingUC.Get(ctx, "smtp_host")
+	port := uc.settingUC.GetInt(ctx, "smtp_port")
+	user := uc.settingUC.Get(ctx, "smtp_user")
+	nickname := uc.settingUC.Get(ctx, "smtp_sender_name")
+	if nickname == "" {
+		nickname = "OrigCMS"
+	}
+	ssl := port == 465
+	if !ssl && uc.settingUC.Get(ctx, "smtp_use_tls") == "true" {
+		ssl = false
+	}
+
+	cfg := SMTPConfig{
+		Host:     host,
+		Port:     port,
+		From:     user,
+		Nickname: nickname,
+		SSL:      ssl,
+	}
+
+	if host != "" && user != "" {
+		cfg.Configured = true
+		cfg.AutoDerived = false
+		return cfg
+	}
+
+	domain := uc.settingUC.Get(ctx, "site_url")
+	if domain == "" {
+		domain = "example.com"
+	}
+	domain = strings.TrimPrefix(domain, "http://")
+	domain = strings.TrimPrefix(domain, "https://")
+	if idx := strings.Index(domain, "/"); idx >= 0 {
+		domain = domain[:idx]
+	}
+
+	cfg.Host = "smtp." + domain
+	cfg.Port = 587
+	cfg.From = "noreply@" + domain
+	cfg.Nickname = nickname
+	cfg.SSL = false
+	cfg.Configured = false
+	cfg.AutoDerived = true
+	return cfg
+}

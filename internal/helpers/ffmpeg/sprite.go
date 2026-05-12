@@ -41,6 +41,8 @@ func GenerateSpriteSheet(ctx context.Context, inputPath string, outputPath strin
 		return 0, fmt.Errorf("failed to create sprite output directory: %w", err)
 	}
 
+	os.Remove(outputPath)
+
 	duration, err := GetVideoDurationSeconds(ctx, inputPath)
 	if err != nil {
 		return 0, fmt.Errorf("failed to get video duration: %w", err)
@@ -58,6 +60,7 @@ func GenerateSpriteSheet(ctx context.Context, inputPath string, outputPath strin
 	args := []string{
 		"-i", inputPath,
 		"-vf", tileFilter,
+		"-frames:v", "1",
 		"-q:v", "3",
 		"-y",
 		outputPath,

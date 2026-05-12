@@ -3,6 +3,7 @@ package ffmpeg
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -545,6 +546,109 @@ func PreviewGIFCommand(inputPath, outputPath, scale string) string {
 		"-t", "3", "-y", outputPath,
 	}, " ")
 	return paletteCmd + " && " + gifCmd
+}
+
+// MediaInfo holds comprehensive media file information extracted via ffprobe.
+type MediaInfo struct {
+	Duration     float64
+	Size         int64
+	BitRate      int64
+	FormatName   string
+	Width        int
+	Height       int
+	VideoCodec   string
+	VideoBitRate int64
+	FPS          float64
+	AudioCodec   string
+	AudioBitRate int64
+	Channels     int
+	SampleRate   int
+}
+
+type ffprobeOutput struct {
+	Streams []ffprobeStream `json:"streams"`
+	Format  ffprobeFormat   `json:"format"`
+}
+
+type ffprobeStream struct {
+	CodecType  string `json:"codec_type"`
+	CodecName  string `json:"codec_name"`
+	Width      int    `json:"width"`
+	Height     int    `json:"height"`
+	RFrameRate string `json:"r_frame_rate"`
+	BitRate    string `json:"bit_rate"`
+	Channels   int    `json:"channels"`
+	SampleRate string `json:"sample_rate"`
+}
+
+type ffprobeFormat struct {
+	Duration   string `json:"duration"`
+	Size       string `json:"size"`
+	BitRate    string `json:"bit_rate"`
+	FormatName string `json:"format_name"`
+}
+
+// GetMediaInfo extracts comprehensive media information using ffprobe.
+func GetMediaInfo(ctx context.Context, inputPath string) (*MediaInfo, error) {
+	args := []string{
+		"-v", "error",
+		"-print_format", "json",
+		"-show_format",
+		"-show_streams",
+		inputPath,
+	}
+
+	cmd := exec.CommandContext(ctx, ffprobePath, args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("ffprobe media info failed: %w, output: %s", err, string(output))
+	}
+
+	var probe ffprobeOutput
+	if err := json.Unmarshal(output, &probe); err != nil {
+		return nil, fmt.Errorf("parse ffprobe JSON: %w", err)
+	}
+
+	info := &MediaInfo{}
+
+	info.Duration, _ = strconv.ParseFloat(probe.Format.Duration, 64)
+	info.Size, _ = strconv.ParseInt(probe.Format.Size, 10, 64)
+	info.BitRate, _ = strconv.ParseInt(probe.Format.BitRate, 10, 64)
+	info.FormatName = probe.Format.FormatName
+
+	for _, s := range probe.Streams {
+		switch s.CodecType {
+		case "video":
+			info.Width = s.Width
+			info.Height = s.Height
+			info.VideoCodec = s.CodecName
+			info.VideoBitRate, _ = strconv.ParseInt(s.BitRate, 10, 64)
+			info.FPS = parseRFrameRate(s.RFrameRate)
+		case "audio":
+			info.AudioCodec = s.CodecName
+			info.AudioBitRate, _ = strconv.ParseInt(s.BitRate, 10, 64)
+			info.Channels = s.Channels
+			info.SampleRate, _ = strconv.Atoi(s.SampleRate)
+		}
+	}
+
+	return info, nil
+}
+
+func parseRFrameRate(rate string) float64 {
+	if rate == "" {
+		return 0
+	}
+	parts := strings.SplitN(rate, "/", 2)
+	if len(parts) == 2 {
+		num, _ := strconv.ParseFloat(parts[0], 64)
+		den, _ := strconv.ParseFloat(parts[1], 64)
+		if den > 0 {
+			return num / den
+		}
+	}
+	fps, _ := strconv.ParseFloat(rate, 64)
+	return fps
 }
 
 

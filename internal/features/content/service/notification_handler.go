@@ -52,7 +52,7 @@ func (h *NotificationHandler) listNotifications() http2.HandlerFunc {
 			return nil
 		}
 
-		limit, _ := strconv.Atoi(gc.Query("limit"))
+		limit, _ := strconv.Atoi(gc.Query("page_size"))
 		if limit == 0 {
 			limit = 20
 		}

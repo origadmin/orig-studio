@@ -5,6 +5,7 @@ import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {Toaster} from 'sonner';
 import {AuthProvider} from '@/contexts/auth';
 import {AuthContext} from '@/contexts/auth/AuthContext';
+import {NotificationProvider} from '@/contexts/NotificationContext';
 import {ThemeProvider} from '@/themes';
 import {routeTree} from './routes.gen';
 import './i18n';
@@ -58,7 +59,9 @@ createRoot(rootElement).render(
         <QueryClientProvider client={queryClient}>
             <ThemeProvider>
                 <AuthProvider>
-                    <InnerApp/>
+                    <NotificationProvider>
+                        <InnerApp/>
+                    </NotificationProvider>
                 </AuthProvider>
                 <Toaster position="top-right" richColors closeButton/>
             </ThemeProvider>

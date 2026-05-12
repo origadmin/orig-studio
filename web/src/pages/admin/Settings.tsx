@@ -295,7 +295,7 @@ const Settings: React.FC = () => {
 
     const fetchEmailStatus = async () => {
         try {
-            const status = await api.get<EmailStatus>('/admin/settings/email/status');
+            const status = await api.get<EmailStatus>('/system/settings/email/status');
             setEmailStatus(status);
         } catch (error) {
             console.error('Failed to fetch email status:', error);
@@ -329,7 +329,7 @@ const Settings: React.FC = () => {
         if (!emailTestTo) return;
         try {
             setEmailTestSending(true);
-            await api.post('/admin/settings/email/test', {to: emailTestTo});
+            await api.post('/system/settings/email/test', {to: emailTestTo});
             setMessage({type: 'success', text: t('settings.emailTestSuccess')});
             setTimeout(() => setMessage(null), 3000);
         } catch (error) {

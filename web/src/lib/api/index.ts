@@ -85,12 +85,13 @@ export type {
 } from "./stats";
 
 // ==================== System ====================
-export {systemApi, settingsApi} from "./system";
+export {systemApi, settingsApi, emailSettingsApi} from "./system";
 export type {
     GroupedSettings,
     SettingItem,
     UpdateSettingsRequest,
     UpdateSettingItem,
+    EmailStatus,
 } from "./system";
 
 // ==================== History ====================
