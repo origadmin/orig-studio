@@ -479,6 +479,7 @@ func TestUploadUseCase_InitiateMultipartUpload(t *testing.T) {
 		testPaths,
 		5*1024*1024, // 5MB
 		logger,
+		nil,
 	)
 	
 	ctx := context.Background()
@@ -523,10 +524,11 @@ func TestUploadUseCase_UploadPart(t *testing.T) {
 		testPaths,
 		5*1024*1024, // 5MB
 		logger,
+		nil,
 	)
-	
+
 	ctx := context.Background()
-	
+
 	// 初始化上传
 	session, err := uc.InitiateMultipartUpload(
 		ctx,
@@ -578,8 +580,9 @@ func TestUploadUseCase_CompleteMultipartUpload(t *testing.T) {
 		testPaths,
 		5*1024*1024, // 5MB
 		logger,
+		nil,
 	)
-	
+
 	ctx := context.Background()
 	
 	// 初始化上传
@@ -654,10 +657,12 @@ func TestUploadUseCase_UpdateUploadMetadata(t *testing.T) {
 		testPaths,
 		5*1024*1024,
 		logger,
+		nil,
 	)
 
 	ctx := context.Background()
 
+	// 初始化
 	session, err := uc.InitiateMultipartUpload(
 		ctx,
 		"test.mp4",
@@ -709,6 +714,7 @@ func TestUploadUseCase_CompleteMultipartUpload_FallbackToSession(t *testing.T) {
 		testPaths,
 		5*1024*1024,
 		logger,
+		nil,
 	)
 
 	ctx := context.Background()
@@ -770,6 +776,7 @@ func TestUploadUseCase_CompleteMultipartUpload_OverrideWithTags(t *testing.T) {
 		testPaths,
 		5*1024*1024,
 		logger,
+		nil,
 	)
 
 	ctx := context.Background()
