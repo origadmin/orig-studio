@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/notification"
 	"origadmin/application/origcms/internal/data/entity/predicate"
-	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -73,23 +72,16 @@ func (_u *NotificationUpdate) SetNillableMethod(v *string) *NotificationUpdate {
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *NotificationUpdate) SetUserID(v int) *NotificationUpdate {
-	_u.mutation.ResetUserID()
+func (_u *NotificationUpdate) SetUserID(v string) *NotificationUpdate {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *NotificationUpdate) SetNillableUserID(v *int) *NotificationUpdate {
+func (_u *NotificationUpdate) SetNillableUserID(v *string) *NotificationUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
-	return _u
-}
-
-// AddUserID adds value to the "user_id" field.
-func (_u *NotificationUpdate) AddUserID(v int) *NotificationUpdate {
-	_u.mutation.AddUserID(v)
 	return _u
 }
 
@@ -121,45 +113,51 @@ func (_u *NotificationUpdate) SetNillableCreateTime(v *time.Time) *NotificationU
 	return _u
 }
 
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *NotificationUpdate) AddUserIDs(ids ...string) *NotificationUpdate {
-	_u.mutation.AddUserIDs(ids...)
+// SetTitle sets the "title" field.
+func (_u *NotificationUpdate) SetTitle(v string) *NotificationUpdate {
+	_u.mutation.SetTitle(v)
 	return _u
 }
 
-// AddUser adds the "user" edges to the User entity.
-func (_u *NotificationUpdate) AddUser(v ...*User) *NotificationUpdate {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (_u *NotificationUpdate) SetNillableTitle(v *string) *NotificationUpdate {
+	if v != nil {
+		_u.SetTitle(*v)
 	}
-	return _u.AddUserIDs(ids...)
+	return _u
+}
+
+// SetBody sets the "body" field.
+func (_u *NotificationUpdate) SetBody(v string) *NotificationUpdate {
+	_u.mutation.SetBody(v)
+	return _u
+}
+
+// SetNillableBody sets the "body" field if the given value is not nil.
+func (_u *NotificationUpdate) SetNillableBody(v *string) *NotificationUpdate {
+	if v != nil {
+		_u.SetBody(*v)
+	}
+	return _u
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_u *NotificationUpdate) SetUpdateTime(v time.Time) *NotificationUpdate {
+	_u.mutation.SetUpdateTime(v)
+	return _u
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (_u *NotificationUpdate) SetNillableUpdateTime(v *time.Time) *NotificationUpdate {
+	if v != nil {
+		_u.SetUpdateTime(*v)
+	}
+	return _u
 }
 
 // Mutation returns the NotificationMutation object of the builder.
 func (_u *NotificationUpdate) Mutation() *NotificationMutation {
 	return _u.mutation
-}
-
-// ClearUser clears all "user" edges to the User entity.
-func (_u *NotificationUpdate) ClearUser() *NotificationUpdate {
-	_u.mutation.ClearUser()
-	return _u
-}
-
-// RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (_u *NotificationUpdate) RemoveUserIDs(ids ...string) *NotificationUpdate {
-	_u.mutation.RemoveUserIDs(ids...)
-	return _u
-}
-
-// RemoveUser removes "user" edges to User entities.
-func (_u *NotificationUpdate) RemoveUser(v ...*User) *NotificationUpdate {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveUserIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -201,6 +199,21 @@ func (_u *NotificationUpdate) check() error {
 			return &ValidationError{Name: "method", err: fmt.Errorf(`entity: validator failed for field "Notification.method": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.UserID(); ok {
+		if err := notification.UserIDValidator(v); err != nil {
+			return &ValidationError{Name: "user_id", err: fmt.Errorf(`entity: validator failed for field "Notification.user_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Title(); ok {
+		if err := notification.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Notification.title": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Body(); ok {
+		if err := notification.BodyValidator(v); err != nil {
+			return &ValidationError{Name: "body", err: fmt.Errorf(`entity: validator failed for field "Notification.body": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -232,10 +245,7 @@ func (_u *NotificationUpdate) sqlSave(ctx context.Context) (_node int, err error
 		_spec.SetField(notification.FieldMethod, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(notification.FieldUserID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(notification.FieldUserID, field.TypeInt, value)
+		_spec.SetField(notification.FieldUserID, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.IsRead(); ok {
 		_spec.SetField(notification.FieldIsRead, field.TypeBool, value)
@@ -243,50 +253,14 @@ func (_u *NotificationUpdate) sqlSave(ctx context.Context) (_node int, err error
 	if value, ok := _u.mutation.CreateTime(); ok {
 		_spec.SetField(notification.FieldCreateTime, field.TypeTime, value)
 	}
-	if _u.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   notification.UserTable,
-			Columns: notification.UserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	if value, ok := _u.mutation.Title(); ok {
+		_spec.SetField(notification.FieldTitle, field.TypeString, value)
 	}
-	if nodes := _u.mutation.RemovedUserIDs(); len(nodes) > 0 && !_u.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   notification.UserTable,
-			Columns: notification.UserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	if value, ok := _u.mutation.Body(); ok {
+		_spec.SetField(notification.FieldBody, field.TypeString, value)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   notification.UserTable,
-			Columns: notification.UserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(notification.FieldUpdateTime, field.TypeTime, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -353,23 +327,16 @@ func (_u *NotificationUpdateOne) SetNillableMethod(v *string) *NotificationUpdat
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *NotificationUpdateOne) SetUserID(v int) *NotificationUpdateOne {
-	_u.mutation.ResetUserID()
+func (_u *NotificationUpdateOne) SetUserID(v string) *NotificationUpdateOne {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *NotificationUpdateOne) SetNillableUserID(v *int) *NotificationUpdateOne {
+func (_u *NotificationUpdateOne) SetNillableUserID(v *string) *NotificationUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
-	return _u
-}
-
-// AddUserID adds value to the "user_id" field.
-func (_u *NotificationUpdateOne) AddUserID(v int) *NotificationUpdateOne {
-	_u.mutation.AddUserID(v)
 	return _u
 }
 
@@ -401,45 +368,51 @@ func (_u *NotificationUpdateOne) SetNillableCreateTime(v *time.Time) *Notificati
 	return _u
 }
 
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *NotificationUpdateOne) AddUserIDs(ids ...string) *NotificationUpdateOne {
-	_u.mutation.AddUserIDs(ids...)
+// SetTitle sets the "title" field.
+func (_u *NotificationUpdateOne) SetTitle(v string) *NotificationUpdateOne {
+	_u.mutation.SetTitle(v)
 	return _u
 }
 
-// AddUser adds the "user" edges to the User entity.
-func (_u *NotificationUpdateOne) AddUser(v ...*User) *NotificationUpdateOne {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (_u *NotificationUpdateOne) SetNillableTitle(v *string) *NotificationUpdateOne {
+	if v != nil {
+		_u.SetTitle(*v)
 	}
-	return _u.AddUserIDs(ids...)
+	return _u
+}
+
+// SetBody sets the "body" field.
+func (_u *NotificationUpdateOne) SetBody(v string) *NotificationUpdateOne {
+	_u.mutation.SetBody(v)
+	return _u
+}
+
+// SetNillableBody sets the "body" field if the given value is not nil.
+func (_u *NotificationUpdateOne) SetNillableBody(v *string) *NotificationUpdateOne {
+	if v != nil {
+		_u.SetBody(*v)
+	}
+	return _u
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_u *NotificationUpdateOne) SetUpdateTime(v time.Time) *NotificationUpdateOne {
+	_u.mutation.SetUpdateTime(v)
+	return _u
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (_u *NotificationUpdateOne) SetNillableUpdateTime(v *time.Time) *NotificationUpdateOne {
+	if v != nil {
+		_u.SetUpdateTime(*v)
+	}
+	return _u
 }
 
 // Mutation returns the NotificationMutation object of the builder.
 func (_u *NotificationUpdateOne) Mutation() *NotificationMutation {
 	return _u.mutation
-}
-
-// ClearUser clears all "user" edges to the User entity.
-func (_u *NotificationUpdateOne) ClearUser() *NotificationUpdateOne {
-	_u.mutation.ClearUser()
-	return _u
-}
-
-// RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (_u *NotificationUpdateOne) RemoveUserIDs(ids ...string) *NotificationUpdateOne {
-	_u.mutation.RemoveUserIDs(ids...)
-	return _u
-}
-
-// RemoveUser removes "user" edges to User entities.
-func (_u *NotificationUpdateOne) RemoveUser(v ...*User) *NotificationUpdateOne {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveUserIDs(ids...)
 }
 
 // Where appends a list predicates to the NotificationUpdate builder.
@@ -494,6 +467,21 @@ func (_u *NotificationUpdateOne) check() error {
 			return &ValidationError{Name: "method", err: fmt.Errorf(`entity: validator failed for field "Notification.method": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.UserID(); ok {
+		if err := notification.UserIDValidator(v); err != nil {
+			return &ValidationError{Name: "user_id", err: fmt.Errorf(`entity: validator failed for field "Notification.user_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Title(); ok {
+		if err := notification.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Notification.title": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Body(); ok {
+		if err := notification.BodyValidator(v); err != nil {
+			return &ValidationError{Name: "body", err: fmt.Errorf(`entity: validator failed for field "Notification.body": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -542,10 +530,7 @@ func (_u *NotificationUpdateOne) sqlSave(ctx context.Context) (_node *Notificati
 		_spec.SetField(notification.FieldMethod, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(notification.FieldUserID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(notification.FieldUserID, field.TypeInt, value)
+		_spec.SetField(notification.FieldUserID, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.IsRead(); ok {
 		_spec.SetField(notification.FieldIsRead, field.TypeBool, value)
@@ -553,50 +538,14 @@ func (_u *NotificationUpdateOne) sqlSave(ctx context.Context) (_node *Notificati
 	if value, ok := _u.mutation.CreateTime(); ok {
 		_spec.SetField(notification.FieldCreateTime, field.TypeTime, value)
 	}
-	if _u.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   notification.UserTable,
-			Columns: notification.UserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	if value, ok := _u.mutation.Title(); ok {
+		_spec.SetField(notification.FieldTitle, field.TypeString, value)
 	}
-	if nodes := _u.mutation.RemovedUserIDs(); len(nodes) > 0 && !_u.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   notification.UserTable,
-			Columns: notification.UserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	if value, ok := _u.mutation.Body(); ok {
+		_spec.SetField(notification.FieldBody, field.TypeString, value)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   notification.UserTable,
-			Columns: notification.UserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if value, ok := _u.mutation.UpdateTime(); ok {
+		_spec.SetField(notification.FieldUpdateTime, field.TypeTime, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Notification{config: _u.config}

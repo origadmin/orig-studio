@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // ID filters vertices based on their ID field.
@@ -71,7 +70,7 @@ func Method(v string) predicate.Notification {
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int) predicate.Notification {
+func UserID(v string) predicate.Notification {
 	return predicate.Notification(sql.FieldEQ(FieldUserID, v))
 }
 
@@ -226,43 +225,68 @@ func MethodContainsFold(v string) predicate.Notification {
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int) predicate.Notification {
+func UserIDEQ(v string) predicate.Notification {
 	return predicate.Notification(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int) predicate.Notification {
+func UserIDNEQ(v string) predicate.Notification {
 	return predicate.Notification(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int) predicate.Notification {
+func UserIDIn(vs ...string) predicate.Notification {
 	return predicate.Notification(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int) predicate.Notification {
+func UserIDNotIn(vs ...string) predicate.Notification {
 	return predicate.Notification(sql.FieldNotIn(FieldUserID, vs...))
 }
 
 // UserIDGT applies the GT predicate on the "user_id" field.
-func UserIDGT(v int) predicate.Notification {
+func UserIDGT(v string) predicate.Notification {
 	return predicate.Notification(sql.FieldGT(FieldUserID, v))
 }
 
 // UserIDGTE applies the GTE predicate on the "user_id" field.
-func UserIDGTE(v int) predicate.Notification {
+func UserIDGTE(v string) predicate.Notification {
 	return predicate.Notification(sql.FieldGTE(FieldUserID, v))
 }
 
 // UserIDLT applies the LT predicate on the "user_id" field.
-func UserIDLT(v int) predicate.Notification {
+func UserIDLT(v string) predicate.Notification {
 	return predicate.Notification(sql.FieldLT(FieldUserID, v))
 }
 
 // UserIDLTE applies the LTE predicate on the "user_id" field.
-func UserIDLTE(v int) predicate.Notification {
+func UserIDLTE(v string) predicate.Notification {
 	return predicate.Notification(sql.FieldLTE(FieldUserID, v))
+}
+
+// UserIDContains applies the Contains predicate on the "user_id" field.
+func UserIDContains(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldContains(FieldUserID, v))
+}
+
+// UserIDHasPrefix applies the HasPrefix predicate on the "user_id" field.
+func UserIDHasPrefix(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldHasPrefix(FieldUserID, v))
+}
+
+// UserIDHasSuffix applies the HasSuffix predicate on the "user_id" field.
+func UserIDHasSuffix(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldHasSuffix(FieldUserID, v))
+}
+
+// UserIDEqualFold applies the EqualFold predicate on the "user_id" field.
+func UserIDEqualFold(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldEqualFold(FieldUserID, v))
+}
+
+// UserIDContainsFold applies the ContainsFold predicate on the "user_id" field.
+func UserIDContainsFold(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldContainsFold(FieldUserID, v))
 }
 
 // IsReadEQ applies the EQ predicate on the "is_read" field.
@@ -315,27 +339,174 @@ func CreateTimeLTE(v time.Time) predicate.Notification {
 	return predicate.Notification(sql.FieldLTE(FieldCreateTime, v))
 }
 
-// HasUser applies the HasEdge predicate on the "user" edge.
-func HasUser() predicate.Notification {
-	return predicate.Notification(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, UserTable, UserPrimaryKey...),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
+// TitleEQ applies the EQ predicate on the "title" field.
+func TitleEQ(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldEQ(FieldTitle, v))
 }
 
-// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
-func HasUserWith(preds ...predicate.User) predicate.Notification {
-	return predicate.Notification(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
+// TitleNEQ applies the NEQ predicate on the "title" field.
+func TitleNEQ(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldNEQ(FieldTitle, v))
+}
+
+// TitleIn applies the In predicate on the "title" field.
+func TitleIn(vs ...string) predicate.Notification {
+	return predicate.Notification(sql.FieldIn(FieldTitle, vs...))
+}
+
+// TitleNotIn applies the NotIn predicate on the "title" field.
+func TitleNotIn(vs ...string) predicate.Notification {
+	return predicate.Notification(sql.FieldNotIn(FieldTitle, vs...))
+}
+
+// TitleGT applies the GT predicate on the "title" field.
+func TitleGT(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldGT(FieldTitle, v))
+}
+
+// TitleGTE applies the GTE predicate on the "title" field.
+func TitleGTE(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldGTE(FieldTitle, v))
+}
+
+// TitleLT applies the LT predicate on the "title" field.
+func TitleLT(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldLT(FieldTitle, v))
+}
+
+// TitleLTE applies the LTE predicate on the "title" field.
+func TitleLTE(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldLTE(FieldTitle, v))
+}
+
+// TitleContains applies the Contains predicate on the "title" field.
+func TitleContains(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldContains(FieldTitle, v))
+}
+
+// TitleHasPrefix applies the HasPrefix predicate on the "title" field.
+func TitleHasPrefix(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldHasPrefix(FieldTitle, v))
+}
+
+// TitleHasSuffix applies the HasSuffix predicate on the "title" field.
+func TitleHasSuffix(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldHasSuffix(FieldTitle, v))
+}
+
+// TitleEqualFold applies the EqualFold predicate on the "title" field.
+func TitleEqualFold(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldEqualFold(FieldTitle, v))
+}
+
+// TitleContainsFold applies the ContainsFold predicate on the "title" field.
+func TitleContainsFold(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldContainsFold(FieldTitle, v))
+}
+
+// BodyEQ applies the EQ predicate on the "body" field.
+func BodyEQ(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldEQ(FieldBody, v))
+}
+
+// BodyNEQ applies the NEQ predicate on the "body" field.
+func BodyNEQ(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldNEQ(FieldBody, v))
+}
+
+// BodyIn applies the In predicate on the "body" field.
+func BodyIn(vs ...string) predicate.Notification {
+	return predicate.Notification(sql.FieldIn(FieldBody, vs...))
+}
+
+// BodyNotIn applies the NotIn predicate on the "body" field.
+func BodyNotIn(vs ...string) predicate.Notification {
+	return predicate.Notification(sql.FieldNotIn(FieldBody, vs...))
+}
+
+// BodyGT applies the GT predicate on the "body" field.
+func BodyGT(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldGT(FieldBody, v))
+}
+
+// BodyGTE applies the GTE predicate on the "body" field.
+func BodyGTE(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldGTE(FieldBody, v))
+}
+
+// BodyLT applies the LT predicate on the "body" field.
+func BodyLT(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldLT(FieldBody, v))
+}
+
+// BodyLTE applies the LTE predicate on the "body" field.
+func BodyLTE(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldLTE(FieldBody, v))
+}
+
+// BodyContains applies the Contains predicate on the "body" field.
+func BodyContains(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldContains(FieldBody, v))
+}
+
+// BodyHasPrefix applies the HasPrefix predicate on the "body" field.
+func BodyHasPrefix(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldHasPrefix(FieldBody, v))
+}
+
+// BodyHasSuffix applies the HasSuffix predicate on the "body" field.
+func BodyHasSuffix(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldHasSuffix(FieldBody, v))
+}
+
+// BodyEqualFold applies the EqualFold predicate on the "body" field.
+func BodyEqualFold(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldEqualFold(FieldBody, v))
+}
+
+// BodyContainsFold applies the ContainsFold predicate on the "body" field.
+func BodyContainsFold(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldContainsFold(FieldBody, v))
+}
+
+// UpdateTimeEQ applies the EQ predicate on the "update_time" field.
+func UpdateTimeEQ(v time.Time) predicate.Notification {
+	return predicate.Notification(sql.FieldEQ(FieldUpdateTime, v))
+}
+
+// UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
+func UpdateTimeNEQ(v time.Time) predicate.Notification {
+	return predicate.Notification(sql.FieldNEQ(FieldUpdateTime, v))
+}
+
+// UpdateTimeIn applies the In predicate on the "update_time" field.
+func UpdateTimeIn(vs ...time.Time) predicate.Notification {
+	return predicate.Notification(sql.FieldIn(FieldUpdateTime, vs...))
+}
+
+// UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
+func UpdateTimeNotIn(vs ...time.Time) predicate.Notification {
+	return predicate.Notification(sql.FieldNotIn(FieldUpdateTime, vs...))
+}
+
+// UpdateTimeGT applies the GT predicate on the "update_time" field.
+func UpdateTimeGT(v time.Time) predicate.Notification {
+	return predicate.Notification(sql.FieldGT(FieldUpdateTime, v))
+}
+
+// UpdateTimeGTE applies the GTE predicate on the "update_time" field.
+func UpdateTimeGTE(v time.Time) predicate.Notification {
+	return predicate.Notification(sql.FieldGTE(FieldUpdateTime, v))
+}
+
+// UpdateTimeLT applies the LT predicate on the "update_time" field.
+func UpdateTimeLT(v time.Time) predicate.Notification {
+	return predicate.Notification(sql.FieldLT(FieldUpdateTime, v))
+}
+
+// UpdateTimeLTE applies the LTE predicate on the "update_time" field.
+func UpdateTimeLTE(v time.Time) predicate.Notification {
+	return predicate.Notification(sql.FieldLTE(FieldUpdateTime, v))
 }
 
 // And groups predicates with the AND operator between them.

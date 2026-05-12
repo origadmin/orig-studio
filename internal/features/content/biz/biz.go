@@ -10,6 +10,7 @@ import "github.com/google/wire"
 var ProviderSet = wire.NewSet(
 	NewCommentUseCase,
 	NewCommentModerationUseCase,
+	NewMediaReportUseCase,
 	NewNotificationUseCase,
 	NewLikeFavoriteUseCase,
 	NewCategoryTagUseCase,

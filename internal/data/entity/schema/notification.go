@@ -6,13 +6,13 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
-	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"time"
 )
 
 type Notification struct {
@@ -24,9 +24,12 @@ func (Notification) Fields() []ent.Field {
 		field.String("action").MaxLen(30),
 		field.Bool("notify").Default(false),
 		field.String("method").MaxLen(20).Default("email"),
-		field.Int("user_id"),
+		field.String("user_id").MaxLen(36),
+		field.String("title").MaxLen(200),
+		field.Text("body"),
 		field.Bool("is_read").Default(false),
 		field.Time("create_time").Default(time.Now),
+		field.Time("update_time").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 
@@ -46,7 +49,5 @@ func (Notification) Annotations() []schema.Annotation {
 }
 
 func (Notification) Edges() []ent.Edge {
-	return []ent.Edge{
-		edge.From("user", User.Type).Ref("notifications").Required(),
-	}
+	return nil
 }
