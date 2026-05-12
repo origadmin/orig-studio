@@ -410,9 +410,7 @@ func (r *channelRepo) Create(ctx context.Context, ch *biz.Channel) (*biz.Channel
 }
 
 func (r *channelRepo) Get(ctx context.Context, id string) (*biz.Channel, error) {
-	ent, err := r.data.db.Channel.Query().Where(channel.IDEQ(id)).WithTagsRel(func(q *entity.ChannelTagQuery) {
-		q.WithTag()
-	}).Only(ctx)
+	ent, err := r.data.db.Channel.Query().Where(channel.IDEQ(id)).Only(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -440,9 +438,7 @@ func (r *channelRepo) GetByUsername(ctx context.Context, username string) (*biz.
 }
 
 func (r *channelRepo) GetByShortToken(ctx context.Context, token string) (*biz.Channel, error) {
-	ent, err := r.data.db.Channel.Query().Where(channel.ShortTokenEQ(token)).WithTagsRel(func(q *entity.ChannelTagQuery) {
-		q.WithTag()
-	}).Only(ctx)
+	ent, err := r.data.db.Channel.Query().Where(channel.ShortTokenEQ(token)).Only(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -453,7 +449,6 @@ func (r *channelRepo) GetDefaultChannel(ctx context.Context, userID string) (*bi
 	// Per A009: no default channel concept. Return first channel for backward compat.
 	ent, err := r.data.db.Channel.Query().
 		Where(channel.UserIDEQ(userID)).
-		WithTagsRel(func(q *entity.ChannelTagQuery) { q.WithTag() }).
 		Order(entity.Asc(channel.FieldID)).
 		First(ctx)
 	if err != nil {
@@ -463,9 +458,7 @@ func (r *channelRepo) GetDefaultChannel(ctx context.Context, userID string) (*bi
 }
 
 func (r *channelRepo) GetByHandle(ctx context.Context, handle string) (*biz.Channel, error) {
-	ent, err := r.data.db.Channel.Query().Where(channel.HandleEQ(handle)).WithTagsRel(func(q *entity.ChannelTagQuery) {
-		q.WithTag()
-	}).Only(ctx)
+	ent, err := r.data.db.Channel.Query().Where(channel.HandleEQ(handle)).Only(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -473,9 +466,7 @@ func (r *channelRepo) GetByHandle(ctx context.Context, handle string) (*biz.Chan
 }
 
 func (r *channelRepo) GetBySlug(ctx context.Context, slug string) (*biz.Channel, error) {
-	ent, err := r.data.db.Channel.Query().Where(channel.SlugEQ(slug)).WithTagsRel(func(q *entity.ChannelTagQuery) {
-		q.WithTag()
-	}).Only(ctx)
+	ent, err := r.data.db.Channel.Query().Where(channel.SlugEQ(slug)).Only(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -574,7 +565,6 @@ func (r *channelRepo) ListByUser(ctx context.Context, userID string, page, pageS
 		return nil, 0, err
 	}
 	ents, err := query.
-		WithTagsRel(func(q *entity.ChannelTagQuery) { q.WithTag() }).
 		Order(entity.Desc(channel.FieldCreateTime)).
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
@@ -596,7 +586,6 @@ func (r *channelRepo) ListPublic(ctx context.Context, page, pageSize int) ([]*bi
 		return nil, 0, err
 	}
 	ents, err := query.
-		WithTagsRel(func(q *entity.ChannelTagQuery) { q.WithTag() }).
 		Order(entity.Desc(channel.FieldCreateTime)).
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).

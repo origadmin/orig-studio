@@ -3987,22 +3987,6 @@ func (c *NotificationClient) GetX(ctx context.Context, id int) *Notification {
 	return obj
 }
 
-// QueryUser queries the user edge of a Notification.
-func (c *NotificationClient) QueryUser(_m *Notification) *UserQuery {
-	query := (&UserClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(notification.Table, notification.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, notification.UserTable, notification.UserPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *NotificationClient) Hooks() []Hook {
 	return c.hooks.Notification

@@ -21759,14 +21759,13 @@ type NotificationMutation struct {
 	action        *string
 	notify        *bool
 	method        *string
-	user_id       *int
-	adduser_id    *int
+	user_id       *string
 	is_read       *bool
 	create_time   *time.Time
+	title         *string
+	body          *string
+	update_time   *time.Time
 	clearedFields map[string]struct{}
-	user          map[string]struct{}
-	removeduser   map[string]struct{}
-	cleareduser   bool
 	done          bool
 	oldValue      func(context.Context) (*Notification, error)
 	predicates    []predicate.Notification
@@ -21979,13 +21978,12 @@ func (m *NotificationMutation) ResetMethod() {
 }
 
 // SetUserID sets the "user_id" field.
-func (m *NotificationMutation) SetUserID(i int) {
-	m.user_id = &i
-	m.adduser_id = nil
+func (m *NotificationMutation) SetUserID(s string) {
+	m.user_id = &s
 }
 
 // UserID returns the value of the "user_id" field in the mutation.
-func (m *NotificationMutation) UserID() (r int, exists bool) {
+func (m *NotificationMutation) UserID() (r string, exists bool) {
 	v := m.user_id
 	if v == nil {
 		return
@@ -21996,7 +21994,7 @@ func (m *NotificationMutation) UserID() (r int, exists bool) {
 // OldUserID returns the old "user_id" field's value of the Notification entity.
 // If the Notification object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NotificationMutation) OldUserID(ctx context.Context) (v int, err error) {
+func (m *NotificationMutation) OldUserID(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
 	}
@@ -22010,28 +22008,9 @@ func (m *NotificationMutation) OldUserID(ctx context.Context) (v int, err error)
 	return oldValue.UserID, nil
 }
 
-// AddUserID adds i to the "user_id" field.
-func (m *NotificationMutation) AddUserID(i int) {
-	if m.adduser_id != nil {
-		*m.adduser_id += i
-	} else {
-		m.adduser_id = &i
-	}
-}
-
-// AddedUserID returns the value that was added to the "user_id" field in this mutation.
-func (m *NotificationMutation) AddedUserID() (r int, exists bool) {
-	v := m.adduser_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ResetUserID resets all changes to the "user_id" field.
 func (m *NotificationMutation) ResetUserID() {
 	m.user_id = nil
-	m.adduser_id = nil
 }
 
 // SetIsRead sets the "is_read" field.
@@ -22106,58 +22085,112 @@ func (m *NotificationMutation) ResetCreateTime() {
 	m.create_time = nil
 }
 
-// AddUserIDs adds the "user" edge to the User entity by ids.
-func (m *NotificationMutation) AddUserIDs(ids ...string) {
-	if m.user == nil {
-		m.user = make(map[string]struct{})
-	}
-	for i := range ids {
-		m.user[ids[i]] = struct{}{}
-	}
+// SetTitle sets the "title" field.
+func (m *NotificationMutation) SetTitle(s string) {
+	m.title = &s
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (m *NotificationMutation) ClearUser() {
-	m.cleareduser = true
-}
-
-// UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *NotificationMutation) UserCleared() bool {
-	return m.cleareduser
-}
-
-// RemoveUserIDs removes the "user" edge to the User entity by IDs.
-func (m *NotificationMutation) RemoveUserIDs(ids ...string) {
-	if m.removeduser == nil {
-		m.removeduser = make(map[string]struct{})
+// Title returns the value of the "title" field in the mutation.
+func (m *NotificationMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
 	}
-	for i := range ids {
-		delete(m.user, ids[i])
-		m.removeduser[ids[i]] = struct{}{}
-	}
+	return *v, true
 }
 
-// RemovedUser returns the removed IDs of the "user" edge to the User entity.
-func (m *NotificationMutation) RemovedUserIDs() (ids []string) {
-	for id := range m.removeduser {
-		ids = append(ids, id)
+// OldTitle returns the old "title" field's value of the Notification entity.
+// If the Notification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
 	}
-	return
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
 }
 
-// UserIDs returns the "user" edge IDs in the mutation.
-func (m *NotificationMutation) UserIDs() (ids []string) {
-	for id := range m.user {
-		ids = append(ids, id)
-	}
-	return
+// ResetTitle resets all changes to the "title" field.
+func (m *NotificationMutation) ResetTitle() {
+	m.title = nil
 }
 
-// ResetUser resets all changes to the "user" edge.
-func (m *NotificationMutation) ResetUser() {
-	m.user = nil
-	m.cleareduser = false
-	m.removeduser = nil
+// SetBody sets the "body" field.
+func (m *NotificationMutation) SetBody(s string) {
+	m.body = &s
+}
+
+// Body returns the value of the "body" field in the mutation.
+func (m *NotificationMutation) Body() (r string, exists bool) {
+	v := m.body
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBody returns the old "body" field's value of the Notification entity.
+// If the Notification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationMutation) OldBody(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBody is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBody requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBody: %w", err)
+	}
+	return oldValue.Body, nil
+}
+
+// ResetBody resets all changes to the "body" field.
+func (m *NotificationMutation) ResetBody() {
+	m.body = nil
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (m *NotificationMutation) SetUpdateTime(t time.Time) {
+	m.update_time = &t
+}
+
+// UpdateTime returns the value of the "update_time" field in the mutation.
+func (m *NotificationMutation) UpdateTime() (r time.Time, exists bool) {
+	v := m.update_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdateTime returns the old "update_time" field's value of the Notification entity.
+// If the Notification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationMutation) OldUpdateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdateTime: %w", err)
+	}
+	return oldValue.UpdateTime, nil
+}
+
+// ResetUpdateTime resets all changes to the "update_time" field.
+func (m *NotificationMutation) ResetUpdateTime() {
+	m.update_time = nil
 }
 
 // Where appends a list predicates to the NotificationMutation builder.
@@ -22194,7 +22227,7 @@ func (m *NotificationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *NotificationMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 9)
 	if m.action != nil {
 		fields = append(fields, notification.FieldAction)
 	}
@@ -22212,6 +22245,15 @@ func (m *NotificationMutation) Fields() []string {
 	}
 	if m.create_time != nil {
 		fields = append(fields, notification.FieldCreateTime)
+	}
+	if m.title != nil {
+		fields = append(fields, notification.FieldTitle)
+	}
+	if m.body != nil {
+		fields = append(fields, notification.FieldBody)
+	}
+	if m.update_time != nil {
+		fields = append(fields, notification.FieldUpdateTime)
 	}
 	return fields
 }
@@ -22233,6 +22275,12 @@ func (m *NotificationMutation) Field(name string) (ent.Value, bool) {
 		return m.IsRead()
 	case notification.FieldCreateTime:
 		return m.CreateTime()
+	case notification.FieldTitle:
+		return m.Title()
+	case notification.FieldBody:
+		return m.Body()
+	case notification.FieldUpdateTime:
+		return m.UpdateTime()
 	}
 	return nil, false
 }
@@ -22254,6 +22302,12 @@ func (m *NotificationMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldIsRead(ctx)
 	case notification.FieldCreateTime:
 		return m.OldCreateTime(ctx)
+	case notification.FieldTitle:
+		return m.OldTitle(ctx)
+	case notification.FieldBody:
+		return m.OldBody(ctx)
+	case notification.FieldUpdateTime:
+		return m.OldUpdateTime(ctx)
 	}
 	return nil, fmt.Errorf("unknown Notification field %s", name)
 }
@@ -22285,7 +22339,7 @@ func (m *NotificationMutation) SetField(name string, value ent.Value) error {
 		m.SetMethod(v)
 		return nil
 	case notification.FieldUserID:
-		v, ok := value.(int)
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -22305,6 +22359,27 @@ func (m *NotificationMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCreateTime(v)
 		return nil
+	case notification.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case notification.FieldBody:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBody(v)
+		return nil
+	case notification.FieldUpdateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdateTime(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Notification field %s", name)
 }
@@ -22312,21 +22387,13 @@ func (m *NotificationMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *NotificationMutation) AddedFields() []string {
-	var fields []string
-	if m.adduser_id != nil {
-		fields = append(fields, notification.FieldUserID)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *NotificationMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case notification.FieldUserID:
-		return m.AddedUserID()
-	}
 	return nil, false
 }
 
@@ -22334,15 +22401,6 @@ func (m *NotificationMutation) AddedField(name string) (ent.Value, bool) {
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
 func (m *NotificationMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case notification.FieldUserID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddUserID(v)
-		return nil
-	}
 	return fmt.Errorf("unknown Notification numeric field %s", name)
 }
 
@@ -22387,91 +22445,64 @@ func (m *NotificationMutation) ResetField(name string) error {
 	case notification.FieldCreateTime:
 		m.ResetCreateTime()
 		return nil
+	case notification.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case notification.FieldBody:
+		m.ResetBody()
+		return nil
+	case notification.FieldUpdateTime:
+		m.ResetUpdateTime()
+		return nil
 	}
 	return fmt.Errorf("unknown Notification field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *NotificationMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.user != nil {
-		edges = append(edges, notification.EdgeUser)
-	}
+	edges := make([]string, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *NotificationMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case notification.EdgeUser:
-		ids := make([]ent.Value, 0, len(m.user))
-		for id := range m.user {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *NotificationMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.removeduser != nil {
-		edges = append(edges, notification.EdgeUser)
-	}
+	edges := make([]string, 0)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *NotificationMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case notification.EdgeUser:
-		ids := make([]ent.Value, 0, len(m.removeduser))
-		for id := range m.removeduser {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *NotificationMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.cleareduser {
-		edges = append(edges, notification.EdgeUser)
-	}
+	edges := make([]string, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *NotificationMutation) EdgeCleared(name string) bool {
-	switch name {
-	case notification.EdgeUser:
-		return m.cleareduser
-	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *NotificationMutation) ClearEdge(name string) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Notification unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *NotificationMutation) ResetEdge(name string) error {
-	switch name {
-	case notification.EdgeUser:
-		m.ResetUser()
-		return nil
-	}
 	return fmt.Errorf("unknown Notification edge %s", name)
 }
 
