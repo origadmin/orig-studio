@@ -1063,9 +1063,12 @@ var (
 		{Name: "action", Type: field.TypeString, Size: 30},
 		{Name: "notify", Type: field.TypeBool, Default: false},
 		{Name: "method", Type: field.TypeString, Size: 20, Default: "email"},
-		{Name: "user_id", Type: field.TypeInt},
+		{Name: "user_id", Type: field.TypeString, Size: 36},
+		{Name: "title", Type: field.TypeString, Size: 200},
+		{Name: "body", Type: field.TypeString, Size: 2147483647},
 		{Name: "is_read", Type: field.TypeBool, Default: false},
 		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 	}
 	// UserNotificationsTable holds the schema information for the "user_notifications" table.
 	UserNotificationsTable = &schema.Table{
@@ -1081,12 +1084,12 @@ var (
 			{
 				Name:    "notification_create_time",
 				Unique:  false,
-				Columns: []*schema.Column{UserNotificationsColumns[6]},
+				Columns: []*schema.Column{UserNotificationsColumns[8]},
 			},
 			{
 				Name:    "notification_is_read",
 				Unique:  false,
-				Columns: []*schema.Column{UserNotificationsColumns[5]},
+				Columns: []*schema.Column{UserNotificationsColumns[7]},
 			},
 		},
 	}

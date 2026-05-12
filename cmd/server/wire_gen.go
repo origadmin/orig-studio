@@ -8,41 +8,39 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
-
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
 	log2 "github.com/origadmin/runtime/log"
+	"origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/features/admin"
 	biz6 "origadmin/application/origcms/internal/features/admin/biz"
 	dal6 "origadmin/application/origcms/internal/features/admin/dal"
-	adminservice "origadmin/application/origcms/internal/features/admin/service"
-	authservice "origadmin/application/origcms/internal/features/auth/service"
+	service5 "origadmin/application/origcms/internal/features/admin/service"
 	"origadmin/application/origcms/internal/features/auth"
-	biz5 "origadmin/application/origcms/internal/features/auth/biz"
-	dal5 "origadmin/application/origcms/internal/features/auth/dal"
+	biz4 "origadmin/application/origcms/internal/features/auth/biz"
+	dal4 "origadmin/application/origcms/internal/features/auth/dal"
+	"origadmin/application/origcms/internal/features/auth/service"
 	"origadmin/application/origcms/internal/features/content"
-	biz4 "origadmin/application/origcms/internal/features/content/biz"
-	dal4 "origadmin/application/origcms/internal/features/content/dal"
-	contentservice "origadmin/application/origcms/internal/features/content/service"
+	biz5 "origadmin/application/origcms/internal/features/content/biz"
+	dal5 "origadmin/application/origcms/internal/features/content/dal"
+	service4 "origadmin/application/origcms/internal/features/content/service"
 	"origadmin/application/origcms/internal/features/media"
 	biz2 "origadmin/application/origcms/internal/features/media/biz"
 	"origadmin/application/origcms/internal/features/media/dal"
-	mediaservice "origadmin/application/origcms/internal/features/media/service"
+	service3 "origadmin/application/origcms/internal/features/media/service"
 	"origadmin/application/origcms/internal/features/system"
 	"origadmin/application/origcms/internal/features/system/biz"
 	dal2 "origadmin/application/origcms/internal/features/system/dal"
-	systemservice "origadmin/application/origcms/internal/features/system/service"
+	service6 "origadmin/application/origcms/internal/features/system/service"
 	"origadmin/application/origcms/internal/features/user"
 	biz3 "origadmin/application/origcms/internal/features/user/biz"
 	dal3 "origadmin/application/origcms/internal/features/user/dal"
-	userservice "origadmin/application/origcms/internal/features/user/service"
+	service2 "origadmin/application/origcms/internal/features/user/service"
 	"origadmin/application/origcms/internal/infra"
 	auth2 "origadmin/application/origcms/internal/infra/auth"
-	"origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/infra/pubsub"
 	"origadmin/application/origcms/internal/middleware"
 )
@@ -55,10 +53,10 @@ import (
 // Injectors from wire.go:
 
 // wireApp initializes the application dependencies.
-func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
-	client, sqlDB, err := infra.NewDatabase(cfg, logger)
+func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, func(), error) {
+	client, err := NewDatabaseBridge(cfg, logger)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	pubSub := infra.NewPubSub(logger)
 	mediaRepo := dal.NewMediaRepo(client)
@@ -67,13 +65,12 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	reviewLogRepo := dal.NewReviewLogRepo(client)
 	settingRepo := dal2.NewSettingRepo(client)
 	settingUseCase := biz.NewSettingUseCase(settingRepo)
-	emailUseCase := biz.NewEmailUseCase(settingUseCase)
-	storagePaths := NewStoragePaths(NewUploadConfig())
 	storageConfig := NewStorageConfig(settingUseCase)
+	storagePaths := NewStoragePaths(storageConfig)
 	localStorage := NewStorage(storagePaths)
-	storage, storageCleanup, err := NewStorageInterface(localStorage, storagePaths, storageConfig, logger)
+	storage, cleanup, err := NewStorageInterface(localStorage, storagePaths, storageConfig, logger)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	publisher := infra.NewPublisher(pubSub)
 	spriteUseCase := NewSpriteUseCase(mediaRepo, settingUseCase, storagePaths, logger)
@@ -83,89 +80,95 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 	transcodeHandler := NewTranscodeHandler(mediaUseCase, encodeProfileRepo, encodingTaskRepo, mediaRepo, transcodeWorker, publisher, logger, storagePaths, transcodeConfig, spriteUseCase)
 	router, err := infra.NewRouter(transcodeHandler, pubSub, logger)
 	if err != nil {
-		return nil, err
+		cleanup()
+		return nil, nil, err
 	}
 	manager := infra.NewJWTManager(cfg)
 	userRepo := dal3.NewUserRepo(client)
 	crypto, err := infra.NewHasher()
 	if err != nil {
-		return nil, err
+		cleanup()
+		return nil, nil, err
 	}
 	userUseCase := biz3.NewUserUseCase(userRepo, crypto, logger)
 	authHandler := NewAuthHandler(userUseCase, manager, settingUseCase)
-	userHandler := NewUserHandler(userUseCase, manager)
-	uploadRepo := dal.NewUploadRepo(client, logger)
-	uploadUseCase := NewUploadUseCase(uploadRepo, mediaRepo, encodeProfileRepo, encodingTaskRepo, mediaUseCase, storage, storagePaths, NewUploadConfig(), logger, settingUseCase)
-	data := newContentData(client, sqlDB)
-	likeRepo := dal4.NewLikeRepo(data, logger)
-	favoriteRepo := dal4.NewFavoriteRepo(data, logger)
-	likeFavoriteUseCase := biz4.NewLikeFavoriteUseCase(likeRepo, favoriteRepo, mediaUseCase, logger)
-	playlistRepo := dal4.NewPlaylistRepo(data, logger)
-	channelRepo := dal4.NewChannelRepo(data, logger)
-	systemConfigRepo := dal4.NewSystemConfigRepo(data, logger)
-	channelUserRepo := dal4.NewChannelUserRepo(data, logger)
-	playlistChannelUseCase := biz4.NewPlaylistChannelUseCase(playlistRepo, channelRepo, systemConfigRepo, channelUserRepo, logger)
-	historyRepo := dal4.NewHistoryRepo(data, logger)
-	historyUseCase := biz4.NewHistoryUseCase(historyRepo, logger)
+	data := dal4.NewData(client)
+	permissionGroupRepo := dal4.NewPermissionGroupRepo(data, logger)
+	groupMemberRepo := dal4.NewGroupMemberRepo(data, logger)
+	userPermRepo := dal4.NewUserPermRepo(data, logger)
+	permissionUseCase := biz4.NewPermissionUseCase(permissionGroupRepo, groupMemberRepo, userPermRepo, logger)
+	permissionHandler := service.NewPermissionHandler(permissionUseCase, manager)
+	userHandler := service2.NewUserHandler(userUseCase, manager)
 	dalData := dal5.NewData(client)
-	permissionGroupRepo := dal5.NewPermissionGroupRepo(dalData, logger)
-	groupMemberRepo := dal5.NewGroupMemberRepo(dalData, logger)
-	userPermRepo := dal5.NewUserPermRepo(dalData, logger)
-	permissionUseCase := biz5.NewPermissionUseCase(permissionGroupRepo, groupMemberRepo, userPermRepo, logger)
-	mediaService := mediaservice.NewMediaService(mediaUseCase, logger)
-	mediaHandler := NewMediaHandler(manager, mediaUseCase, uploadUseCase, likeFavoriteUseCase, playlistChannelUseCase, userUseCase, permissionUseCase, mediaService, settingUseCase)
-	uploadHandler := NewUploadHandler(uploadUseCase, manager, logger)
-	categoryRepo := dal4.NewCategoryRepo(data, logger)
-	tagRepo := dal4.NewTagRepo(data, logger)
-	categoryTagUseCase := biz4.NewCategoryTagUseCase(categoryRepo, tagRepo, logger)
-	categoryHandler := NewCategoryHandler(categoryTagUseCase, manager)
-	tagHandler := NewTagHandler(categoryTagUseCase, manager)
-	feedRepo := dal4.NewFeedRepo(data, logger)
-	feedUseCase := biz4.NewFeedUseCase(feedRepo, logger)
-	feedHandler := NewFeedHandler(feedUseCase)
-	notificationRepo := dal4.NewNotificationRepo(data, logger)
-	notificationUseCase := biz4.NewNotificationUseCase(notificationRepo, logger)
-	notificationHandler := NewNotificationHandler(notificationUseCase, manager)
-	channelHandler := NewChannelHandler(playlistChannelUseCase, manager, settingUseCase)
-	shareHandler := NewShareHandler(likeFavoriteUseCase, manager)
-	statsRepo := dal2.NewStatsRepo(client)
-	systemHandler := NewSystemHandler(manager, statsRepo, settingUseCase, emailUseCase)
-	statsHandler := NewStatsHandler(mediaUseCase, likeFavoriteUseCase, statsRepo, manager)
-	searchHandler := NewSearchHandler(mediaUseCase)
-	meHandler := NewMeHandler(userUseCase, likeFavoriteUseCase, playlistChannelUseCase, historyUseCase, manager)
+	likeRepo := dal5.NewLikeRepo(dalData, logger)
+	favoriteRepo := dal5.NewFavoriteRepo(dalData, logger)
+	likeFavoriteUseCase := biz5.NewLikeFavoriteUseCase(likeRepo, favoriteRepo, mediaUseCase, logger)
+	playlistRepo := dal5.NewPlaylistRepo(dalData, logger)
+	channelRepo := dal5.NewChannelRepo(dalData, logger)
+	systemConfigRepo := dal5.NewSystemConfigRepo(dalData, logger)
+	bizUserRepo := dal5.NewChannelUserRepo(dalData, logger)
+	playlistChannelUseCase := biz5.NewPlaylistChannelUseCase(playlistRepo, channelRepo, systemConfigRepo, bizUserRepo, logger)
+	historyRepo := dal5.NewHistoryRepo(dalData, logger)
+	historyUseCase := biz5.NewHistoryUseCase(historyRepo, logger)
+	meHandler := service2.NewMeHandler(userUseCase, likeFavoriteUseCase, playlistChannelUseCase, historyUseCase, manager)
+	uploadRepo := dal.NewUploadRepo(client, logger)
+	uploadConfig := NewUploadConfig()
+	uploadUseCase := NewUploadUseCase(uploadRepo, mediaRepo, encodeProfileRepo, encodingTaskRepo, mediaUseCase, storage, storagePaths, uploadConfig, logger, settingUseCase)
+	mediaService := service3.NewMediaService(mediaUseCase, logger)
+	mediaHandler := service3.NewMediaHandler(manager, mediaUseCase, uploadUseCase, likeFavoriteUseCase, playlistChannelUseCase, userUseCase, permissionUseCase, mediaService, settingUseCase)
+	uploadHandler := service3.NewUploadHandler(uploadUseCase, manager, logger)
+	searchHandler := service3.NewSearchHandler(mediaUseCase)
+	categoryRepo := dal5.NewCategoryRepo(dalData, logger)
+	tagRepo := dal5.NewTagRepo(dalData, logger)
+	categoryTagUseCase := biz5.NewCategoryTagUseCase(categoryRepo, tagRepo, logger)
+	categoryHandler := service4.NewCategoryHandler(categoryTagUseCase, manager)
+	tagHandler := service4.NewTagHandler(categoryTagUseCase, manager)
+	articleRepo := dal5.NewArticleRepo(dalData, logger)
+	articleUseCase := biz5.NewArticleUseCase(articleRepo, logger)
+	articleHandler := service4.NewArticleHandler(articleUseCase, manager, settingUseCase)
+	commentLikeRepo := dal5.NewCommentLikeRepo(dalData, logger)
+	commentLikeUseCase := biz5.NewCommentLikeUseCase(commentLikeRepo, logger)
+	commentModerationRepo := dal5.NewCommentModerationRepo(dalData, logger)
+	commentReportRepo := dal5.NewCommentReportRepo(dalData, logger)
+	commentModerationUseCase := biz5.NewCommentModerationUseCase(commentModerationRepo, commentReportRepo, settingUseCase, logger)
+	commentHandler := service4.NewCommentHandler(client, manager, commentLikeUseCase, commentModerationUseCase)
+	commentModerationHandler := service4.NewCommentModerationHandler(commentModerationUseCase, manager)
+	mediaReportRepo := dal5.NewMediaReportRepo(dalData, logger)
+	mediaReportModerationRepo := dal5.NewMediaReportModerationRepo(dalData, logger)
+	mediaReportUseCase := biz5.NewMediaReportUseCase(mediaReportRepo, mediaReportModerationRepo, settingUseCase, logger)
+	mediaReportHandler := NewMediaReportHandler(mediaReportUseCase, manager)
+	feedRepo := dal5.NewFeedRepo(dalData, logger)
+	feedUseCase := biz5.NewFeedUseCase(feedRepo, logger)
+	feedHandler := service4.NewFeedHandler(feedUseCase)
+	channelHandler := service4.NewChannelHandler(playlistChannelUseCase, manager, settingUseCase)
+	playlistHandler := service4.NewPlaylistHandler(playlistChannelUseCase, settingUseCase, manager)
+	interactionHandler := service4.NewInteractionHandler(manager, likeFavoriteUseCase)
+	notificationRepo := dal5.NewNotificationRepo(dalData, logger)
+	notificationUseCase := biz5.NewNotificationUseCase(notificationRepo, logger)
+	notificationHandler := service4.NewNotificationHandler(notificationUseCase, manager)
+	shareHandler := service4.NewShareHandler(likeFavoriteUseCase, manager)
+	exploreHandler := service4.NewExploreHandler(client)
+	portalRepo := dal5.NewPortalRepo(dalData, logger)
+	portalUseCase := biz5.NewPortalUseCase(portalRepo, settingUseCase, logger)
+	portalHandler := service4.NewPortalHandler(portalUseCase, manager, settingUseCase)
 	tagRepository := dal6.NewTagRepository(client)
 	tagUseCase := biz6.NewTagUseCase(tagRepository)
-	tagService := adminservice.NewTagService(tagUseCase)
-	articleRepo := dal4.NewArticleRepo(data, logger)
-	articleUseCase := biz4.NewArticleUseCase(articleRepo, logger)
-	dbDialect, _ := cfg.GetDefaultDB()
-	adminHandler := NewAdminHandler(manager, mediaUseCase, mediaService, playlistChannelUseCase, tagService, settingUseCase, categoryTagUseCase, articleUseCase, userUseCase, permissionUseCase, Version, dbDialect)
-	commentLikeRepo := dal4.NewCommentLikeRepo(data, logger)
-	commentLikeUseCase := biz4.NewCommentLikeUseCase(commentLikeRepo, logger)
-	commentModerationRepo := dal4.NewCommentModerationRepo(data, logger)
-	commentReportRepo := dal4.NewCommentReportRepo(data, logger)
-	commentModerationUseCase := biz4.NewCommentModerationUseCase(commentModerationRepo, commentReportRepo, settingUseCase, logger)
-	commentModerationHandler := NewCommentModerationHandler(commentModerationUseCase, manager)
-	mediaReportRepo := dal4.NewMediaReportRepo(data, logger)
-	mediaReportModerationRepo := dal4.NewMediaReportModerationRepo(data, logger)
-	mediaReportUseCase := biz4.NewMediaReportUseCase(mediaReportRepo, mediaReportModerationRepo, settingUseCase, logger)
-	mediaReportHandler := NewMediaReportHandler(mediaReportUseCase, manager)
-	permissionHandler := NewPermissionHandler(permissionUseCase, manager)
-	articleHandler := NewArticleHandler(articleUseCase, manager, settingUseCase)
-	commentHandler := NewCommentHandler(client, manager, commentLikeUseCase, commentModerationUseCase)
-	playlistHandler := NewPlaylistHandler(playlistChannelUseCase, settingUseCase, manager)
-	interactionHandler := NewInteractionHandler(manager, likeFavoriteUseCase)
-	adminTagHandler := NewAdminTagHandler(tagService)
-	exploreHandler := NewExploreHandler(client)
+	tagService := service5.NewTagService(tagUseCase)
+	adminHandler := NewAdminHandlerBridge(manager, mediaUseCase, mediaService, playlistChannelUseCase, tagService, settingUseCase, categoryTagUseCase, articleUseCase, userUseCase, permissionUseCase, client, cfg)
+	adminTagHandler := service5.NewAdminTagHandler(tagService)
 	stubHandler := NewStubHandler(manager)
 	spriteHandler := NewSpriteHandler(mediaUseCase, storagePaths, manager, logger)
+	statsRepo := dal2.NewStatsRepo(client)
+	emailUseCase := biz.NewEmailUseCase(settingUseCase)
+	systemHandler := service6.NewSystemHandler(manager, statsRepo, settingUseCase, emailUseCase)
+	statsHandler := service6.NewStatsHandler(mediaUseCase, likeFavoriteUseCase, statsRepo, manager)
+	rateLimiter := NewRateLimiter(settingUseCase)
 	appDependencies := &AppDependencies{
 		DB:                       client,
 		PubSub:                   pubSub,
 		Router:                   router,
 		JWTManager:               manager,
 		StoragePaths:             storagePaths,
-		StorageCleanup:           storageCleanup,
 		AuthHandler:              authHandler,
 		PermissionHandler:        permissionHandler,
 		UserHandler:              userHandler,
@@ -186,17 +189,21 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 		NotificationHandler:      notificationHandler,
 		ShareHandler:             shareHandler,
 		ExploreHandler:           exploreHandler,
+		PortalHandler:            portalHandler,
 		AdminHandler:             adminHandler,
 		AdminTagHandler:          adminTagHandler,
 		StubHandler:              stubHandler,
 		SpriteHandler:            spriteHandler,
 		SystemHandler:            systemHandler,
 		StatsHandler:             statsHandler,
+		RateLimiter:              rateLimiter,
 		UploadUC:                 uploadUseCase,
 		CommentLikeUC:            commentLikeUseCase,
 		SettingUC:                settingUseCase,
 	}
-	return appDependencies, nil
+	return appDependencies, func() {
+		cleanup()
+	}, nil
 }
 
 // wire.go:
@@ -205,47 +212,55 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, error) {
 // It aggregates all module ProviderSets and retains bridge functions
 // for constructors that require hardcoded configuration values or
 // interface bindings that cannot be expressed in module ProviderSets.
-var ProviderSet = wire.NewSet(infra.ProviderSet, media.ProviderSet, content.ProviderSet, user.ProviderSet, auth.ProviderSet, admin.ProviderSet, system.ProviderSet, NewStorage, NewStorageConfig, NewStorageInterface, NewUploadConfig, NewStoragePaths, NewTranscodeConfig,
+var ProviderSet = wire.NewSet(infra.ProviderSet, media.ProviderSet, content.ProviderSet, user.ProviderSet, auth.ProviderSet, admin.ProviderSet, system.ProviderSet, NewUploadConfig,
+	NewTranscodeConfig,
+	NewStoragePaths,
+	NewStorageConfig,
+	NewRateLimiter,
+
+	NewStorage,
+	NewStorageInterface,
 	NewWorker,
 	NewUploadUseCase,
 	NewSpriteUseCase,
 	NewTranscodeHandler,
+	NewDatabaseBridge,
+	NewAdminHandlerBridge,
 
 	NewAuthHandler,
-	NewUserHandler,
-	NewMediaHandler,
-	NewUploadHandler,
-	NewCategoryHandler,
-	NewTagHandler,
-	NewFeedHandler,
-	NewNotificationHandler,
-	NewChannelHandler,
-	NewShareHandler,
-	NewSystemHandler,
-	NewStatsHandler,
-	NewSearchHandler,
-	NewMeHandler,
-	NewAdminHandler,
-	NewCommentModerationHandler,
 	NewMediaReportHandler,
-	NewPermissionHandler,
-	NewArticleHandler,
-	NewCommentHandler,
-	NewPlaylistHandler,
-	NewInteractionHandler,
-	NewAdminTagHandler,
-	NewExploreHandler,
 	NewStubHandler,
-	NewSpriteHandler, wire.Bind(new(biz5.PermissionChecker), new(*biz5.PermissionUseCase)), wire.Bind(new(biz4.MediaUseCaseInterface), new(*biz2.MediaUseCase)), wire.Bind(new(biz.ConfigProvider), new(*biz.SettingUseCase)),
+	NewSpriteHandler, wire.Bind(new(biz4.PermissionChecker), new(*biz4.PermissionUseCase)), wire.Bind(new(biz5.MediaUseCaseInterface), new(*biz2.MediaUseCase)), wire.Bind(new(biz.ConfigProvider), new(*biz.SettingUseCase)),
 )
 
-// NewStorage creates a LocalStorage instance (used as the base for all storage types).
-func NewStorage(sp *conf.StoragePaths) *dal.LocalStorage {
-	return dal.NewLocalStorage(sp)
+// NewDatabaseBridge wraps infra.NewDatabase to return a cleanup function
+// instead of *sql.DB, which is required by wire's provider signature convention.
+func NewDatabaseBridge(cfg *conf.Config, logger log2.Logger) (*entity.Client, error) {
+	client, _, err := infra.NewDatabase(cfg, logger)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
 }
 
-func newContentData(client *entity.Client, _ *sql.DB) *dal4.Data {
-	return dal4.NewData(client)
+// NewAdminHandlerBridge creates a new admin handler with hardcoded string parameters
+// that wire cannot inject automatically (multiple string params).
+func NewAdminHandlerBridge(
+	jwt *auth2.Manager,
+	mediaUC *biz2.MediaUseCase,
+	mediaService *service3.MediaService,
+	channelUC *biz5.PlaylistChannelUseCase,
+	tagService *service5.TagService,
+	settingUC *biz.SettingUseCase,
+	categoryUC *biz5.CategoryTagUseCase,
+	articleUC *biz5.ArticleUseCase,
+	userUC *biz3.UserUseCase,
+	permChecker biz4.PermissionChecker,
+	db *entity.Client,
+	cfg *conf.Config,
+) *service5.AdminHandler {
+	dbDialect, _ := cfg.GetDefaultDB()
+	return service5.NewAdminHandler(jwt, mediaUC, mediaService, channelUC, tagService, settingUC, categoryUC, articleUC, userUC, permChecker, db, Version, dbDialect)
 }
 
 // NewStorageConfig creates storage config from defaults.
@@ -276,6 +291,15 @@ func NewStorageConfig(settingUC *biz.SettingUseCase) *conf.StorageConfig {
 		cfg.S3.UsePathStyle = true
 	}
 	return cfg
+}
+
+// NewStorage creates a LocalStorage instance (used as the base for all storage types).
+func NewStorage(sp *conf.StoragePaths) *dal.LocalStorage {
+	return dal.NewLocalStorage(sp)
+}
+
+func newContentData(client *entity.Client) *dal5.Data {
+	return dal5.NewData(client)
 }
 
 // NewStorageInterface creates the appropriate Storage implementation based on
@@ -315,9 +339,9 @@ func NewUploadConfig() *conf.UploadConfig {
 	return conf.DefaultUploadConfig()
 }
 
-// NewStoragePaths creates StoragePaths from UploadConfig.
-func NewStoragePaths(cfg *conf.UploadConfig) *conf.StoragePaths {
-	return conf.NewStoragePaths(cfg.StorageBasePath)
+// NewStoragePaths creates StoragePaths from StorageConfig.
+func NewStoragePaths(cfg *conf.StorageConfig) *conf.StoragePaths {
+	return conf.NewStoragePaths(cfg.BasePath)
 }
 
 // NewTranscodeConfig creates transcode config from defaults.
@@ -329,6 +353,21 @@ func NewTranscodeConfig() *conf.TranscodeConfig {
 func NewWorker(logger log2.Logger) biz2.TranscodeWorker {
 	maxWorkers := int32(infra.EnvInt("TRANSCODE_MAX_WORKERS", 3))
 	return biz2.NewGoroutineWorker(maxWorkers, log2.NewHelper(log2.With(logger, "module", "transcode.worker")))
+}
+
+// NewRateLimiter creates a new rate limiter with rpm from settings.
+// Upload endpoints are excluded from rate limiting to prevent upload failures.
+func NewRateLimiter(settingUC *biz.SettingUseCase) *middleware.RateLimiter {
+	defaultRPM := 60
+	if settingUC != nil {
+		if val := settingUC.Get(context.Background(), "api_rate_limit"); val != "" {
+			var rpm int
+			if _, err := fmt.Sscanf(val, "%d", &rpm); err == nil && rpm > 0 {
+				defaultRPM = rpm
+			}
+		}
+	}
+	return middleware.NewRateLimiter(defaultRPM, "/api/v1/uploads")
 }
 
 // NewUploadUseCase creates a new upload use case with config from UploadConfig.
@@ -395,248 +434,27 @@ func NewTranscodeHandler(
 	)
 }
 
-// NewAuthHandler creates a new auth handler.
-func NewAuthHandler(
-	userUC *biz3.UserUseCase,
-	jwt *auth2.Manager,
-	settingUC *biz.SettingUseCase,
-) *authservice.AuthHandler {
-	return authservice.NewAuthHandler(userUC, jwt, settingUC)
-}
-
-// NewUserHandler creates a new user handler.
-func NewUserHandler(
-	userUC *biz3.UserUseCase,
-	jwt *auth2.Manager,
-) *userservice.UserHandler {
-	return userservice.NewUserHandler(userUC, jwt)
-}
-
-// NewMediaHandler creates a new media handler.
-func NewMediaHandler(
-	jwt *auth2.Manager,
-	mediaUC *biz2.MediaUseCase,
-	uploadUC *biz2.UploadUseCase,
-	likeFavoriteUC *biz4.LikeFavoriteUseCase,
-	playlistChannelUC *biz4.PlaylistChannelUseCase,
-	userUC *biz3.UserUseCase,
-	permChecker biz5.PermissionChecker,
-	mediaService *mediaservice.MediaService,
-	settingUC *biz.SettingUseCase,
-) *mediaservice.MediaHandler {
-	return mediaservice.NewMediaHandler(jwt, mediaUC, uploadUC, likeFavoriteUC, playlistChannelUC, userUC, permChecker, mediaService, settingUC)
-}
-
-// NewUploadHandler creates a new upload handler.
-func NewUploadHandler(
-	uploadUC *biz2.UploadUseCase,
-	jwt *auth2.Manager,
-	logger log2.Logger,
-) *mediaservice.UploadHandler {
-	return mediaservice.NewUploadHandler(uploadUC, jwt, logger)
-}
-
-// NewCategoryHandler creates a new category handler.
-func NewCategoryHandler(
-	categoryTagUC *biz4.CategoryTagUseCase,
-	jwt *auth2.Manager,
-) *contentservice.CategoryHandler {
-	return contentservice.NewCategoryHandler(categoryTagUC, jwt)
-}
-
-// NewTagHandler creates a new tag handler.
-func NewTagHandler(
-	categoryTagUC *biz4.CategoryTagUseCase,
-	jwt *auth2.Manager,
-) *contentservice.TagHandler {
-	return contentservice.NewTagHandler(categoryTagUC, jwt)
-}
-
-// NewFeedHandler creates a new feed handler.
-func NewFeedHandler(
-	feedUC *biz4.FeedUseCase,
-) *contentservice.FeedHandler {
-	return contentservice.NewFeedHandler(feedUC)
-}
-
-// NewNotificationHandler creates a new notification handler.
-func NewNotificationHandler(
-	notificationUC *biz4.NotificationUseCase,
-	jwt *auth2.Manager,
-) *contentservice.NotificationHandler {
-	return contentservice.NewNotificationHandler(notificationUC, jwt)
-}
-
-// NewChannelHandler creates a new channel handler.
-func NewChannelHandler(
-	playlistChannelUC *biz4.PlaylistChannelUseCase,
-	jwt *auth2.Manager,
-	settingUC *biz.SettingUseCase,
-) *contentservice.ChannelHandler {
-	return contentservice.NewChannelHandler(playlistChannelUC, jwt, settingUC)
-}
-
-// NewShareHandler creates a new share handler.
-func NewShareHandler(
-	likeFavoriteUC *biz4.LikeFavoriteUseCase,
-	jwt *auth2.Manager,
-) *contentservice.ShareHandler {
-	return contentservice.NewShareHandler(likeFavoriteUC, jwt)
-}
-
-// NewSystemHandler creates a new system handler.
-func NewSystemHandler(
-	jwt *auth2.Manager,
-	statsRepo *dal2.StatsRepo,
-	settingUC *biz.SettingUseCase,
-	emailUC *biz.EmailUseCase,
-) *systemservice.SystemHandler {
-	return systemservice.NewSystemHandler(jwt, statsRepo, settingUC, emailUC)
-}
-
-// NewStatsHandler creates a new stats handler.
-func NewStatsHandler(
-	mediaUC *biz2.MediaUseCase,
-	likeFavoriteUC *biz4.LikeFavoriteUseCase,
-	statsRepo *dal2.StatsRepo,
-	jwt *auth2.Manager,
-) *systemservice.StatsHandler {
-	return systemservice.NewStatsHandler(mediaUC, likeFavoriteUC, statsRepo, jwt)
-}
-
-// NewRateLimiter creates a new rate limiter with rpm from settings.
-func NewRateLimiter(settingUC *biz.SettingUseCase) *middleware.RateLimiter {
-	defaultRPM := 60
-	if settingUC != nil {
-		if val := settingUC.Get(context.Background(), "api_rate_limit"); val != "" {
-			var rpm int
-			if _, err := fmt.Sscanf(val, "%d", &rpm); err == nil && rpm > 0 {
-				defaultRPM = rpm
-			}
-		}
-	}
-	return middleware.NewRateLimiter(defaultRPM)
-}
-
-// NewSearchHandler creates a new search handler.
-func NewSearchHandler(
-	mediaUC *biz2.MediaUseCase,
-) *mediaservice.SearchHandler {
-	return mediaservice.NewSearchHandler(mediaUC)
-}
-
-// NewMeHandler creates a new me handler.
-func NewMeHandler(
-	userUC *biz3.UserUseCase,
-	likeFavoriteUC *biz4.LikeFavoriteUseCase,
-	playlistChannelUC *biz4.PlaylistChannelUseCase,
-	historyUC *biz4.HistoryUseCase,
-	jwt *auth2.Manager,
-) *userservice.MeHandler {
-	return userservice.NewMeHandler(userUC, likeFavoriteUC, playlistChannelUC, historyUC, jwt)
-}
-
-// NewAdminHandler creates a new admin handler.
-func NewAdminHandler(
-	jwt *auth2.Manager,
-	mediaUC *biz2.MediaUseCase,
-	mediaService *mediaservice.MediaService,
-	channelUC *biz4.PlaylistChannelUseCase,
-	tagService *adminservice.TagService,
-	settingUC *biz.SettingUseCase,
-	categoryUC *biz4.CategoryTagUseCase,
-	articleUC *biz4.ArticleUseCase,
-	userUC *biz3.UserUseCase,
-	permChecker biz5.PermissionChecker,
-	appVersion string,
-	dbDialect string,
-) *adminservice.AdminHandler {
-	return adminservice.NewAdminHandler(jwt, mediaUC, mediaService, channelUC, tagService, settingUC, categoryUC, articleUC, userUC, permChecker, appVersion, dbDialect)
-}
-
-// NewCommentModerationHandler creates a new comment moderation handler.
-func NewCommentModerationHandler(
-	moderationUC *biz4.CommentModerationUseCase,
-	jwt *auth2.Manager,
-) *contentservice.CommentModerationHandler {
-	return contentservice.NewCommentModerationHandler(moderationUC, jwt)
+// NewAuthHandler creates a new auth handler with config provider.
+func NewAuthHandler(uc *biz3.UserUseCase, jwt *auth2.Manager, settingUC *biz.SettingUseCase) *service.AuthHandler {
+	return service.NewAuthHandler(uc, jwt, settingUC)
 }
 
 // NewMediaReportHandler creates a new media report handler.
 func NewMediaReportHandler(
-	mediaReportUC *biz4.MediaReportUseCase,
+	mediaReportUC *biz5.MediaReportUseCase,
 	jwt *auth2.Manager,
-) *contentservice.MediaReportHandler {
-	return contentservice.NewMediaReportHandler(mediaReportUC, jwt)
-}
-
-// NewPermissionHandler creates a new permission handler.
-func NewPermissionHandler(
-	permUC *biz5.PermissionUseCase,
-	jwt *auth2.Manager,
-) *authservice.PermissionHandler {
-	return authservice.NewPermissionHandler(permUC, jwt)
-}
-
-// NewArticleHandler creates a new article handler.
-func NewArticleHandler(
-	uc *biz4.ArticleUseCase,
-	jwt *auth2.Manager,
-	settingUC *biz.SettingUseCase,
-) *contentservice.ArticleHandler {
-	return contentservice.NewArticleHandler(uc, jwt, settingUC)
-}
-
-// NewCommentHandler creates a new comment handler.
-func NewCommentHandler(
-	client *entity.Client,
-	jwt *auth2.Manager,
-	commentLikeUC *biz4.CommentLikeUseCase,
-	moderationUC *biz4.CommentModerationUseCase,
-) *contentservice.CommentHandler {
-	return contentservice.NewCommentHandler(client, jwt, commentLikeUC, moderationUC)
-}
-
-// NewPlaylistHandler creates a new playlist handler.
-func NewPlaylistHandler(playlistUC *biz4.PlaylistChannelUseCase, settingUC *biz.SettingUseCase, jwt *auth2.Manager) *contentservice.PlaylistHandler {
-	return contentservice.NewPlaylistHandler(playlistUC, settingUC, jwt)
-}
-
-// NewInteractionHandler creates a new interaction handler.
-func NewInteractionHandler(
-	jwt *auth2.Manager,
-	likeFavoriteUC *biz4.LikeFavoriteUseCase,
-) *contentservice.InteractionHandler {
-	return contentservice.NewInteractionHandler(jwt, likeFavoriteUC)
-}
-
-// NewAdminTagHandler creates a new admin tag handler.
-func NewAdminTagHandler(service *adminservice.TagService) *adminservice.AdminTagHandler {
-	return adminservice.NewAdminTagHandler(service)
-}
-
-// NewExploreHandler creates a new explore handler.
-func NewExploreHandler(client *entity.Client) *contentservice.ExploreHandler {
-	return contentservice.NewExploreHandler(client)
-}
-
-// NewPortalHandler creates a new portal handler.
-func NewPortalHandler(
-	portalUC *biz4.PortalUseCase,
-	jwt *auth2.Manager,
-	settingUC *biz.SettingUseCase,
-) *contentservice.PortalHandler {
-	return contentservice.NewPortalHandler(portalUC, jwt, settingUC)
+) *service4.MediaReportHandler {
+	return service4.NewMediaReportHandler(mediaReportUC, jwt)
 }
 
 // NewStubHandler creates a new stub handler for missing routes.
-func NewStubHandler(jwt *auth2.Manager) *contentservice.StubHandler {
-	return contentservice.NewStubHandler(jwt)
+func NewStubHandler(jwt *auth2.Manager) *service4.StubHandler {
+	return service4.NewStubHandler(jwt)
 }
 
 // NewSpriteHandler creates a new sprite handler for sprite sheet and VTT routes.
-func NewSpriteHandler(mediaUC *biz2.MediaUseCase, sp *conf.StoragePaths, jwt *auth2.Manager, logger log2.Logger) *contentservice.SpriteHandler {
-	return contentservice.NewSpriteHandler(mediaUC, sp, jwt, logger)
+func NewSpriteHandler(mediaUC *biz2.MediaUseCase, sp *conf.StoragePaths, jwt *auth2.Manager, logger log2.Logger) *service4.SpriteHandler {
+	return service4.NewSpriteHandler(mediaUC, sp, jwt, logger)
 }
 
 // AppDependencies holds all application dependencies.
@@ -646,45 +464,41 @@ type AppDependencies struct {
 	Router                   *message.Router
 	JWTManager               *auth2.Manager
 	StoragePaths             *conf.StoragePaths
-	StorageCleanup           func()
-	AuthHandler              *authservice.AuthHandler
-	PermissionHandler        *authservice.PermissionHandler
-	UserHandler              *userservice.UserHandler
-	MeHandler                *userservice.MeHandler
-	MediaHandler             *mediaservice.MediaHandler
-	UploadHandler            *mediaservice.UploadHandler
-	SearchHandler            *mediaservice.SearchHandler
-	CategoryHandler          *contentservice.CategoryHandler
-	TagHandler               *contentservice.TagHandler
-	ArticleHandler           *contentservice.ArticleHandler
-	CommentHandler           *contentservice.CommentHandler
-	CommentModerationHandler *contentservice.CommentModerationHandler
-	MediaReportHandler       *contentservice.MediaReportHandler
-	FeedHandler              *contentservice.FeedHandler
-	ChannelHandler           *contentservice.ChannelHandler
-	PlaylistHandler          *contentservice.PlaylistHandler
-	InteractionHandler       *contentservice.InteractionHandler
-	NotificationHandler      *contentservice.NotificationHandler
-	ShareHandler             *contentservice.ShareHandler
-	ExploreHandler           *contentservice.ExploreHandler
-	PortalHandler            *contentservice.PortalHandler
-	AdminHandler             *adminservice.AdminHandler
-	AdminTagHandler          *adminservice.AdminTagHandler
-	StubHandler              *contentservice.StubHandler
-	SpriteHandler            *contentservice.SpriteHandler
-	SystemHandler            *systemservice.SystemHandler
-	StatsHandler             *systemservice.StatsHandler
+	AuthHandler              *service.AuthHandler
+	PermissionHandler        *service.PermissionHandler
+	UserHandler              *service2.UserHandler
+	MeHandler                *service2.MeHandler
+	MediaHandler             *service3.MediaHandler
+	UploadHandler            *service3.UploadHandler
+	SearchHandler            *service3.SearchHandler
+	CategoryHandler          *service4.CategoryHandler
+	TagHandler               *service4.TagHandler
+	ArticleHandler           *service4.ArticleHandler
+	CommentHandler           *service4.CommentHandler
+	CommentModerationHandler *service4.CommentModerationHandler
+	MediaReportHandler       *service4.MediaReportHandler
+	FeedHandler              *service4.FeedHandler
+	ChannelHandler           *service4.ChannelHandler
+	PlaylistHandler          *service4.PlaylistHandler
+	InteractionHandler       *service4.InteractionHandler
+	NotificationHandler      *service4.NotificationHandler
+	ShareHandler             *service4.ShareHandler
+	ExploreHandler           *service4.ExploreHandler
+	PortalHandler            *service4.PortalHandler
+	AdminHandler             *service5.AdminHandler
+	AdminTagHandler          *service5.AdminTagHandler
+	StubHandler              *service4.StubHandler
+	SpriteHandler            *service4.SpriteHandler
+	SystemHandler            *service6.SystemHandler
+	StatsHandler             *service6.StatsHandler
 	RateLimiter              *middleware.RateLimiter
 	UploadUC                 *biz2.UploadUseCase
-	CommentLikeUC            *biz4.CommentLikeUseCase
+	CommentLikeUC            *biz5.CommentLikeUseCase
 	SettingUC                *biz.SettingUseCase
 }
 
 // Cleanup closes all resources.
 func (d *AppDependencies) Cleanup() {
-	if d.StorageCleanup != nil {
-		d.StorageCleanup()
-	}
 	if d.DB != nil {
 		d.DB.Close()
 	}

@@ -25,6 +25,10 @@ import (
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origcms/internal/data/entity/comment"
+	"origadmin/application/origcms/internal/data/entity/media"
+	"origadmin/application/origcms/internal/data/entity/subscription"
+	"origadmin/application/origcms/internal/data/entity/user"
 	"origadmin/application/origcms/internal/data/enums"
 	"origadmin/application/origcms/internal/helpers/repo"
 	"origadmin/application/origcms/internal/helpers/hashtag"
@@ -53,6 +57,7 @@ type AdminHandler struct {
 	articleUC      *contentbiz.ArticleUseCase
 	userUC         *userbiz.UserUseCase
 	permChecker    authbiz.PermissionChecker
+	db             *entity.Client
 	appVersion     string
 	dbDialect      string
 	startTime      time.Time
@@ -69,6 +74,7 @@ func NewAdminHandler(
 	articleUC *contentbiz.ArticleUseCase,
 	userUC *userbiz.UserUseCase,
 	permChecker authbiz.PermissionChecker,
+	db *entity.Client,
 	appVersion string,
 	dbDialect string,
 ) *AdminHandler {
@@ -83,6 +89,7 @@ func NewAdminHandler(
 		articleUC:      articleUC,
 		userUC:         userUC,
 		permChecker:    permChecker,
+		db:             db,
 		appVersion:     appVersion,
 		dbDialect:      dbDialect,
 		startTime:      time.Now(),
@@ -233,14 +240,83 @@ func (h *AdminHandler) RegisterRoutes(r http2.Router) {
 func (h *AdminHandler) getDashboardStats() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		gc := ginadapter.GetGinContext(r)
-		// TODO: Implement dashboard stats
+		ctx := r.Context()
+
+		today := time.Now().Truncate(24 * time.Hour)
+
+		// Total users
+		totalUsers, _ := h.db.User.Query().Count(ctx)
+
+		// Total media
+		totalMedia, _ := h.db.Media.Query().Count(ctx)
+
+		// Total views
+		var totalViews int64
+		mediaList, err := h.db.Media.Query().All(ctx)
+		if err == nil {
+			for _, m := range mediaList {
+				totalViews += m.ViewCount
+			}
+		}
+
+		// Total comments
+		totalComments, _ := h.db.Comment.Query().Count(ctx)
+
+		// Total subscribers (subscriptions)
+		totalSubscribers, _ := h.db.Subscription.Query().Count(ctx)
+
+		// New users today
+		newUsersToday, _ := h.db.User.Query().Where(user.DateAddedGTE(today)).Count(ctx)
+
+		// New media today
+		newMediaToday, _ := h.db.Media.Query().Where(media.CreateTimeGTE(today)).Count(ctx)
+
+		// New comments today
+		newCommentsToday, _ := h.db.Comment.Query().Where(comment.CreateTimeGTE(today)).Count(ctx)
+
+		// New subscribers today
+		newSubscribersToday, _ := h.db.Subscription.Query().Where(subscription.CreateTimeGTE(today)).Count(ctx)
+
+		// Media by type
+		videoCount, _ := h.db.Media.Query().Where(media.TypeEQ("video")).Count(ctx)
+		imageCount, _ := h.db.Media.Query().Where(media.TypeEQ("image")).Count(ctx)
+		audioCount, _ := h.db.Media.Query().Where(media.TypeEQ("audio")).Count(ctx)
+		otherMediaCount := totalMedia - videoCount - imageCount - audioCount
+
+		// Users by role
+		adminCount, _ := h.db.User.Query().Where(user.RoleEQ("admin")).Count(ctx)
+		editorCount, _ := h.db.User.Query().Where(user.RoleEQ("editor")).Count(ctx)
+		regularCount, _ := h.db.User.Query().Where(user.RoleEQ("user")).Count(ctx)
+
 		server.OK(gc, gin.H{
-			"total_medias":   100,
-			"total_users":    50,
-			"total_channels": 20,
-			"total_comments": 300,
-			"today_uploads":  5,
-			"today_views":    1000,
+			"total_users":           totalUsers,
+			"total_media":           totalMedia,
+			"total_views":           totalViews,
+			"total_comments":        totalComments,
+			"total_subscribers":     totalSubscribers,
+			"total_revenue":         0,
+			"active_users":          0,
+			"new_users_today":       newUsersToday,
+			"new_media_today":       newMediaToday,
+			"new_views_today":       0,
+			"new_comments_today":    newCommentsToday,
+			"new_subscribers_today": newSubscribersToday,
+			"media_by_type": gin.H{
+				"video": videoCount,
+				"image": imageCount,
+				"audio": audioCount,
+				"other": otherMediaCount,
+			},
+			"users_by_role": gin.H{
+				"admin":  adminCount,
+				"editor": editorCount,
+				"user":   regularCount,
+			},
+			"views_by_date":   []interface{}{},
+			"media_by_date":   []interface{}{},
+			"top_categories":  []interface{}{},
+			"top_creators":    []interface{}{},
+			"top_media":       []interface{}{},
 		})
 	}
 }

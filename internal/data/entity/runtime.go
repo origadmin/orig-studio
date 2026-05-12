@@ -795,6 +795,7 @@ func init() {
 	notificationDescTitle := notificationFields[4].Descriptor()
 	notification.TitleValidator = notificationDescTitle.Validators[0].(func(string) error)
 	_ = notificationFields[5].Descriptor()
+	notification.BodyValidator = func(body string) error { return nil }
 	notificationDescIsRead := notificationFields[6].Descriptor()
 	notification.DefaultIsRead = notificationDescIsRead.Default.(bool)
 	notificationDescCreateTime := notificationFields[7].Descriptor()

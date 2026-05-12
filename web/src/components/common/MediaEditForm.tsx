@@ -3,6 +3,7 @@ import {Input} from '@/components/ui/input';
 import {Badge} from '@/components/ui/badge';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Separator} from '@/components/ui/separator';
+import {formatFileSize, formatDuration} from '@/lib/format';
 import type {Media} from '@/lib/api/media';
 
 export interface MediaEditFormState {
@@ -28,10 +29,16 @@ interface MediaEditFormProps {
     showAdminOnlyFields?: boolean;
 }
 
-export function MediaEditForm({form, setForm, media: _media, categories, isAdmin, showAdminOnlyFields = true}: MediaEditFormProps) {
+export function MediaEditForm({form, setForm, media, categories, isAdmin, showAdminOnlyFields = true}: MediaEditFormProps) {
     const categoriesList = (categories as any)?.items
         ? (categories as any).items
         : Array.isArray(categories) ? categories : [];
+
+    const techResolution = media.width && media.height ? `${media.width} x ${media.height}` : 'N/A';
+    const techDuration = media.duration ? formatDuration(media.duration) : 'N/A';
+    const techMimeType = media.mime_type || 'N/A';
+    const techFileSize = media.size ? formatFileSize(Number(media.size)) : 'N/A';
+    const techExtension = media.extension || 'N/A';
 
     return (
         <div className="space-y-6">
@@ -91,6 +98,36 @@ export function MediaEditForm({form, setForm, media: _media, categories, isAdmin
                     </div>
                 )}
             </div>
+
+            <Separator/>
+
+            <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Technical Info</h3>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                    <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">Resolution</Label>
+                        <p className="text-sm font-mono">{techResolution}</p>
+                    </div>
+                    <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">Duration</Label>
+                        <p className="text-sm font-mono">{techDuration}</p>
+                    </div>
+                    <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">MIME Type</Label>
+                        <p className="text-sm font-mono">{techMimeType}</p>
+                    </div>
+                    <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">File Size</Label>
+                        <p className="text-sm font-mono">{techFileSize}</p>
+                    </div>
+                    <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">Extension</Label>
+                        <p className="text-sm font-mono">{techExtension}</p>
+                    </div>
+                </div>
+            </div>
+
+            <Separator/>
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
