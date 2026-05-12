@@ -482,11 +482,12 @@ func (_q *ChannelQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Chan
 	var (
 		nodes       = []*Channel{}
 		_spec       = _q.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [5]bool{
 			_q.withUser != nil,
 			_q.withMedia != nil,
 			_q.withArticles != nil,
 			_q.withCategory != nil,
+			false,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {

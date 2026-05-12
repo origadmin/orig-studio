@@ -32,6 +32,8 @@ func (r *notificationRepo) Create(ctx context.Context, n *biz.Notification) (*bi
 		SetNotify(n.Notify).
 		SetMethod(n.Method).
 		SetUserID(n.UserID).
+		SetTitle(n.Title).
+		SetBody(n.Body).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -52,6 +54,8 @@ func (r *notificationRepo) Update(ctx context.Context, n *biz.Notification) (*bi
 		SetAction(n.Action).
 		SetNotify(n.Notify).
 		SetMethod(n.Method).
+		SetTitle(n.Title).
+		SetBody(n.Body).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -63,7 +67,7 @@ func (r *notificationRepo) Delete(ctx context.Context, id int) error {
 	return r.data.db.Notification.DeleteOneID(id).Exec(ctx)
 }
 
-func (r *notificationRepo) ListByUser(ctx context.Context, userID int, page, pageSize int) ([]*biz.Notification, int, error) {
+func (r *notificationRepo) ListByUser(ctx context.Context, userID string, page, pageSize int) ([]*biz.Notification, int, error) {
 	query := r.data.db.Notification.Query().Where(notification.UserIDEQ(userID))
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -90,7 +94,7 @@ func (r *notificationRepo) MarkAsRead(ctx context.Context, id int) error {
 	return r.data.db.Notification.UpdateOneID(id).SetIsRead(true).Exec(ctx)
 }
 
-func (r *notificationRepo) MarkAllAsRead(ctx context.Context, userID int) error {
+func (r *notificationRepo) MarkAllAsRead(ctx context.Context, userID string) error {
 	_, err := r.data.db.Notification.Update().
 		Where(notification.UserIDEQ(userID)).
 		SetIsRead(true).
@@ -98,7 +102,7 @@ func (r *notificationRepo) MarkAllAsRead(ctx context.Context, userID int) error 
 	return err
 }
 
-func (r *notificationRepo) GetUnreadCount(ctx context.Context, userID int) (int, error) {
+func (r *notificationRepo) GetUnreadCount(ctx context.Context, userID string) (int, error) {
 	return r.data.db.Notification.Query().
 		Where(notification.UserIDEQ(userID), notification.IsReadEQ(false)).
 		Count(ctx)
@@ -106,12 +110,15 @@ func (r *notificationRepo) GetUnreadCount(ctx context.Context, userID int) (int,
 
 func mapNotification(ent *entity.Notification) *biz.Notification {
 	return &biz.Notification{
-		ID:        ent.ID,
-		Action:    ent.Action,
-		Notify:    ent.Notify,
-		Method:    ent.Method,
-		UserID:    ent.UserID,
-		IsRead:    ent.IsRead,
+		ID:         ent.ID,
+		Action:     ent.Action,
+		Notify:     ent.Notify,
+		Method:     ent.Method,
+		UserID:     ent.UserID,
+		Title:      ent.Title,
+		Body:       ent.Body,
+		IsRead:     ent.IsRead,
 		CreateTime: ent.CreateTime,
+		UpdateTime: ent.UpdateTime,
 	}
 }

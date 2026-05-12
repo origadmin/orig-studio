@@ -91,7 +91,6 @@ type (
 	MediaTags            = []*entity.MediaTag
 	Medias               = []*entity.Media
 	Notification         = entity.Notification
-	NotificationEdges    = entity.NotificationEdges
 	Notifications        = []*entity.Notification
 	PermissionGroup      = entity.PermissionGroup
 	PermissionGroupEdges = entity.PermissionGroupEdges

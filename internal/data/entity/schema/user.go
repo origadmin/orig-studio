@@ -89,7 +89,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("channels", Channel.Type),
 		edge.To("playlists", Playlist.Type),
 		edge.To("comments", Comment.Type),
-		edge.To("notifications", Notification.Type).StorageKey(edge.Table("user_notification_mappings")),
+		edge.To("notifications", Notification.Type),
 		edge.To("categories", Category.Type),
 		edge.To("tags", Tag.Type),
 		edge.To("favorites", Favorite.Type),

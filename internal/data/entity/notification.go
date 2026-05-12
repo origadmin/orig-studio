@@ -24,33 +24,18 @@ type Notification struct {
 	// Method holds the value of the "method" field.
 	Method string `json:"method,omitempty"`
 	// UserID holds the value of the "user_id" field.
-	UserID int `json:"user_id,omitempty"`
+	UserID string `json:"user_id,omitempty"`
 	// IsRead holds the value of the "is_read" field.
 	IsRead bool `json:"is_read,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
 	CreateTime time.Time `json:"create_time,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the NotificationQuery when eager-loading is set.
-	Edges        NotificationEdges `json:"edges"`
+	// Title holds the value of the "title" field.
+	Title string `json:"title,omitempty"`
+	// Body holds the value of the "body" field.
+	Body string `json:"body,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	selectValues sql.SelectValues
-}
-
-// NotificationEdges holds the relations/edges for other nodes in the graph.
-type NotificationEdges struct {
-	// User holds the value of the user edge.
-	User []*User `json:"user,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
-}
-
-// UserOrErr returns the User value or an error if the edge
-// was not loaded in eager-loading.
-func (e NotificationEdges) UserOrErr() ([]*User, error) {
-	if e.loadedTypes[0] {
-		return e.User, nil
-	}
-	return nil, &NotLoadedError{edge: "user"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -60,11 +45,11 @@ func (*Notification) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case notification.FieldNotify, notification.FieldIsRead:
 			values[i] = new(sql.NullBool)
-		case notification.FieldID, notification.FieldUserID:
+		case notification.FieldID:
 			values[i] = new(sql.NullInt64)
-		case notification.FieldAction, notification.FieldMethod:
+		case notification.FieldAction, notification.FieldMethod, notification.FieldUserID, notification.FieldTitle, notification.FieldBody:
 			values[i] = new(sql.NullString)
-		case notification.FieldCreateTime:
+		case notification.FieldCreateTime, notification.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -106,10 +91,10 @@ func (_m *Notification) assignValues(columns []string, values []any) error {
 				_m.Method = value.String
 			}
 		case notification.FieldUserID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				_m.UserID = int(value.Int64)
+				_m.UserID = value.String
 			}
 		case notification.FieldIsRead:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -123,6 +108,24 @@ func (_m *Notification) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.CreateTime = value.Time
 			}
+		case notification.FieldTitle:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field title", values[i])
+			} else if value.Valid {
+				_m.Title = value.String
+			}
+		case notification.FieldBody:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field body", values[i])
+			} else if value.Valid {
+				_m.Body = value.String
+			}
+		case notification.FieldUpdateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
+			} else if value.Valid {
+				_m.UpdateTime = value.Time
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -134,11 +137,6 @@ func (_m *Notification) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Notification) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
-}
-
-// QueryUser queries the "user" edge of the Notification entity.
-func (_m *Notification) QueryUser() *UserQuery {
-	return NewNotificationClient(_m.config).QueryUser(_m)
 }
 
 // Update returns a builder for updating this Notification.
@@ -174,13 +172,22 @@ func (_m *Notification) String() string {
 	builder.WriteString(_m.Method)
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(_m.UserID)
 	builder.WriteString(", ")
 	builder.WriteString("is_read=")
 	builder.WriteString(fmt.Sprintf("%v", _m.IsRead))
 	builder.WriteString(", ")
 	builder.WriteString("create_time=")
 	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("title=")
+	builder.WriteString(_m.Title)
+	builder.WriteString(", ")
+	builder.WriteString("body=")
+	builder.WriteString(_m.Body)
+	builder.WriteString(", ")
+	builder.WriteString("update_time=")
+	builder.WriteString(_m.UpdateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

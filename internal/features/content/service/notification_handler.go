@@ -7,19 +7,17 @@ import (
 
 	http2 "origadmin/application/origcms/internal/helpers/http"
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
-	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/helpers/repo"
+	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/server"
 	"origadmin/application/origcms/internal/features/content/biz"
 )
 
-// NotificationHandler handles /api/v1/notifications routes.
 type NotificationHandler struct {
 	uc  *biz.NotificationUseCase
 	jwt *auth.Manager
 }
 
-// NewNotificationHandler creates a new NotificationHandler.
 func NewNotificationHandler(uc *biz.NotificationUseCase, jwt *auth.Manager) *NotificationHandler {
 	return &NotificationHandler{uc: uc, jwt: jwt}
 }
@@ -27,34 +25,32 @@ func NewNotificationHandler(uc *biz.NotificationUseCase, jwt *auth.Manager) *Not
 func (h *NotificationHandler) RegisterRoutes(r http2.Router) {
 	notifs := r.Group("/notifications")
 	{
-		// Protected routes — all notification operations require auth
-
-		// ================================
-		// 1. STATIC ROUTES (NO PARAMETERS) - MUST BE FIRST
-		// ================================
 		notifs.GET("", server.WithJWTCtx(h.jwt, h.listNotifications()))
 		notifs.POST("", server.WithJWTCtx(h.jwt, h.createNotification()))
 		notifs.POST("/read-all", server.WithJWTCtx(h.jwt, h.markAllRead()))
 		notifs.GET("/unread-count", server.WithJWTCtx(h.jwt, h.unreadCount()))
-
-		// ================================
-		// 2. PARAMETER ROUTES (WITH :id) - MUST BE LAST
-		// ================================
+		notifs.DELETE("/:id", server.WithJWTCtx(h.jwt, h.deleteNotification()))
 		notifs.POST("/:id/read", server.WithJWTCtx(h.jwt, h.markAsRead()))
 	}
 }
 
-// listNotifications returns notifications for the authenticated user,
-// ordered by most recent, with pagination support.
+func getUserID(gc *gin.Context) (string, bool) {
+	val, exists := gc.Get("claims")
+	if !exists || val == nil {
+		return "", false
+	}
+	claims := val.(*auth.Claims)
+	return claims.GetUserID(), true
+}
+
 func (h *NotificationHandler) listNotifications() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
-		val, exists := gc.Get("claims")
-		if !exists || val == nil {
+		userID, ok := getUserID(gc)
+		if !ok {
 			gc.JSON(401, server.Response[interface{}]{Code: server.ErrUnauthorized, Message: "unauthorized"})
 			return nil
 		}
-		claims := val.(*auth.Claims)
 
 		limit, _ := strconv.Atoi(gc.Query("limit"))
 		if limit == 0 {
@@ -64,10 +60,8 @@ func (h *NotificationHandler) listNotifications() http2.HandlerFunc {
 		if page == 0 {
 			page = 1
 		}
-		// Normalize pagination parameters
 		page, limit = repo.NormalizeHTTPPagination(page, limit)
 
-		userID, _ := strconv.Atoi(claims.GetUserID())
 		items, total, err := h.uc.ListUserNotifications(
 			ctx.Request().Context(),
 			userID,
@@ -92,8 +86,6 @@ func (h *NotificationHandler) listNotifications() http2.HandlerFunc {
 	}
 }
 
-// createNotification creates a new notification.
-// POST body: {"action": string, "notify": bool, "method": string, "user_id": int}
 func (h *NotificationHandler) createNotification() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
@@ -101,7 +93,9 @@ func (h *NotificationHandler) createNotification() http2.HandlerFunc {
 			Action string `json:"action" binding:"required,max=30"`
 			Notify bool   `json:"notify"`
 			Method string `json:"method"`
-			UserID int    `json:"user_id"` // optional; defaults to current user
+			UserID string `json:"user_id"`
+			Title  string `json:"title" binding:"required,max=200"`
+			Body   string `json:"body" binding:"required"`
 		}
 		if err := gc.Bind(&input); err != nil {
 			gc.JSON(400, server.Response[interface{}]{Code: server.ErrBadRequest, Message: err.Error()})
@@ -109,15 +103,13 @@ func (h *NotificationHandler) createNotification() http2.HandlerFunc {
 		}
 
 		targetUserID := input.UserID
-		if targetUserID == 0 {
-			val, exists := gc.Get("claims")
-			if !exists || val == nil {
+		if targetUserID == "" {
+			id, ok := getUserID(gc)
+			if !ok {
 				gc.JSON(400, server.Response[interface{}]{Code: server.ErrBadRequest, Message: "user_id required"})
 				return nil
 			}
-			claims := val.(*auth.Claims)
-			userID, _ := strconv.Atoi(claims.GetUserID())
-			targetUserID = userID
+			targetUserID = id
 		}
 
 		n := &biz.Notification{
@@ -125,6 +117,8 @@ func (h *NotificationHandler) createNotification() http2.HandlerFunc {
 			Notify: input.Notify,
 			Method: input.Method,
 			UserID: targetUserID,
+			Title:  input.Title,
+			Body:   input.Body,
 		}
 
 		created, err := h.uc.CreateNotification(ctx.Request().Context(), n)
@@ -138,16 +132,14 @@ func (h *NotificationHandler) createNotification() http2.HandlerFunc {
 	}
 }
 
-// markAsRead marks a specific notification as read.
 func (h *NotificationHandler) markAsRead() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
-		val, exists := gc.Get("claims")
-		if !exists || val == nil {
+		userID, ok := getUserID(gc)
+		if !ok {
 			gc.JSON(401, server.Response[interface{}]{Code: server.ErrUnauthorized, Message: "unauthorized"})
 			return nil
 		}
-		claims := val.(*auth.Claims)
 
 		id, err := strconv.Atoi(gc.Param("id"))
 		if err != nil {
@@ -155,7 +147,6 @@ func (h *NotificationHandler) markAsRead() http2.HandlerFunc {
 			return nil
 		}
 
-		userID, _ := strconv.Atoi(claims.GetUserID())
 		err = h.uc.MarkAsRead(ctx.Request().Context(), id, userID)
 		if err != nil {
 			gc.JSON(500, server.Response[interface{}]{Code: server.ErrInternal, Message: err.Error()})
@@ -167,18 +158,15 @@ func (h *NotificationHandler) markAsRead() http2.HandlerFunc {
 	}
 }
 
-// markAllRead marks all notifications as read for the current user.
 func (h *NotificationHandler) markAllRead() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
-		val, exists := gc.Get("claims")
-		if !exists || val == nil {
+		userID, ok := getUserID(gc)
+		if !ok {
 			gc.JSON(401, server.Response[interface{}]{Code: server.ErrUnauthorized, Message: "unauthorized"})
 			return nil
 		}
-		claims := val.(*auth.Claims)
 
-		userID, _ := strconv.Atoi(claims.GetUserID())
 		err := h.uc.MarkAllAsRead(ctx.Request().Context(), userID)
 		if err != nil {
 			gc.JSON(500, server.Response[interface{}]{Code: server.ErrInternal, Message: err.Error()})
@@ -190,18 +178,15 @@ func (h *NotificationHandler) markAllRead() http2.HandlerFunc {
 	}
 }
 
-// unreadCount returns the count of unread notifications for the current user.
 func (h *NotificationHandler) unreadCount() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
-		val, exists := gc.Get("claims")
-		if !exists || val == nil {
+		userID, ok := getUserID(gc)
+		if !ok {
 			gc.JSON(401, server.Response[interface{}]{Code: server.ErrUnauthorized, Message: "unauthorized"})
 			return nil
 		}
-		claims := val.(*auth.Claims)
 
-		userID, _ := strconv.Atoi(claims.GetUserID())
 		count, err := h.uc.GetUnreadCount(ctx.Request().Context(), userID)
 		if err != nil {
 			gc.JSON(500, server.Response[interface{}]{Code: server.ErrInternal, Message: err.Error()})
@@ -209,6 +194,32 @@ func (h *NotificationHandler) unreadCount() http2.HandlerFunc {
 		}
 
 		gc.JSON(200, server.Response[interface{}]{Code: 0, Message: "ok", Data: gin.H{"unread_count": count}})
+		return nil
+	}
+}
+
+func (h *NotificationHandler) deleteNotification() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		gc := ginadapter.GinContextFromHTTP(ctx)
+		userID, ok := getUserID(gc)
+		if !ok {
+			gc.JSON(401, server.Response[interface{}]{Code: server.ErrUnauthorized, Message: "unauthorized"})
+			return nil
+		}
+
+		id, err := strconv.Atoi(gc.Param("id"))
+		if err != nil {
+			gc.JSON(400, server.Response[interface{}]{Code: server.ErrBadRequest, Message: "Invalid ID"})
+			return nil
+		}
+
+		err = h.uc.DeleteNotification(ctx.Request().Context(), id, userID)
+		if err != nil {
+			gc.JSON(500, server.Response[interface{}]{Code: server.ErrInternal, Message: err.Error()})
+			return nil
+		}
+
+		gc.JSON(200, server.Response[interface{}]{Code: 0, Message: "ok", Data: gin.H{"message": "deleted"}})
 		return nil
 	}
 }

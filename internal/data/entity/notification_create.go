@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"origadmin/application/origcms/internal/data/entity/notification"
-	"origadmin/application/origcms/internal/data/entity/user"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -56,7 +55,7 @@ func (_c *NotificationCreate) SetNillableMethod(v *string) *NotificationCreate {
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *NotificationCreate) SetUserID(v int) *NotificationCreate {
+func (_c *NotificationCreate) SetUserID(v string) *NotificationCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
@@ -89,19 +88,30 @@ func (_c *NotificationCreate) SetNillableCreateTime(v *time.Time) *NotificationC
 	return _c
 }
 
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_c *NotificationCreate) AddUserIDs(ids ...string) *NotificationCreate {
-	_c.mutation.AddUserIDs(ids...)
+// SetTitle sets the "title" field.
+func (_c *NotificationCreate) SetTitle(v string) *NotificationCreate {
+	_c.mutation.SetTitle(v)
 	return _c
 }
 
-// AddUser adds the "user" edges to the User entity.
-func (_c *NotificationCreate) AddUser(v ...*User) *NotificationCreate {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// SetBody sets the "body" field.
+func (_c *NotificationCreate) SetBody(v string) *NotificationCreate {
+	_c.mutation.SetBody(v)
+	return _c
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_c *NotificationCreate) SetUpdateTime(v time.Time) *NotificationCreate {
+	_c.mutation.SetUpdateTime(v)
+	return _c
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (_c *NotificationCreate) SetNillableUpdateTime(v *time.Time) *NotificationCreate {
+	if v != nil {
+		_c.SetUpdateTime(*v)
 	}
-	return _c.AddUserIDs(ids...)
+	return _c
 }
 
 // Mutation returns the NotificationMutation object of the builder.
@@ -155,6 +165,10 @@ func (_c *NotificationCreate) defaults() {
 		v := notification.DefaultCreateTime()
 		_c.mutation.SetCreateTime(v)
 	}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		v := notification.DefaultUpdateTime()
+		_c.mutation.SetUpdateTime(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -181,14 +195,26 @@ func (_c *NotificationCreate) check() error {
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`entity: missing required field "Notification.user_id"`)}
 	}
+	if v, ok := _c.mutation.UserID(); ok {
+		if err := notification.UserIDValidator(v); err != nil {
+			return &ValidationError{Name: "user_id", err: fmt.Errorf(`entity: validator failed for field "Notification.user_id": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.IsRead(); !ok {
 		return &ValidationError{Name: "is_read", err: errors.New(`entity: missing required field "Notification.is_read"`)}
 	}
 	if _, ok := _c.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "Notification.create_time"`)}
 	}
-	if len(_c.mutation.UserIDs()) == 0 {
-		return &ValidationError{Name: "user", err: errors.New(`entity: missing required edge "Notification.user"`)}
+	if v, ok := _c.mutation.Title(); ok {
+		if err := notification.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Notification.title": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.Body(); ok {
+		if err := notification.BodyValidator(v); err != nil {
+			return &ValidationError{Name: "body", err: fmt.Errorf(`entity: validator failed for field "Notification.body": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -229,7 +255,7 @@ func (_c *NotificationCreate) createSpec() (*Notification, *sqlgraph.CreateSpec)
 		_node.Method = value
 	}
 	if value, ok := _c.mutation.UserID(); ok {
-		_spec.SetField(notification.FieldUserID, field.TypeInt, value)
+		_spec.SetField(notification.FieldUserID, field.TypeString, value)
 		_node.UserID = value
 	}
 	if value, ok := _c.mutation.IsRead(); ok {
@@ -240,21 +266,17 @@ func (_c *NotificationCreate) createSpec() (*Notification, *sqlgraph.CreateSpec)
 		_spec.SetField(notification.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   notification.UserTable,
-			Columns: notification.UserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
+	if value, ok := _c.mutation.Title(); ok {
+		_spec.SetField(notification.FieldTitle, field.TypeString, value)
+		_node.Title = value
+	}
+	if value, ok := _c.mutation.Body(); ok {
+		_spec.SetField(notification.FieldBody, field.TypeString, value)
+		_node.Body = value
+	}
+	if value, ok := _c.mutation.UpdateTime(); ok {
+		_spec.SetField(notification.FieldUpdateTime, field.TypeTime, value)
+		_node.UpdateTime = value
 	}
 	return _node, _spec
 }
