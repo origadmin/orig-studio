@@ -22,6 +22,7 @@ import (
 	config "origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/data/entity"
 	"origadmin/application/origcms/internal/data/entity/migrate"
+	contentdal "origadmin/application/origcms/internal/features/content/dal"
 	mediadal "origadmin/application/origcms/internal/features/media/dal"
 	systembiz "origadmin/application/origcms/internal/features/system/biz"
 	systemdal "origadmin/application/origcms/internal/features/system/dal"
@@ -73,6 +74,14 @@ func NewDatabase(cfg *config.Config, logger log.Logger) (*entity.Client, *sql.DB
 	}
 
 	if err := seedSettings(ctx, db); err != nil {
+		return nil, nil, err
+	}
+
+	if err := contentdal.SeedCategories(ctx, db); err != nil {
+		return nil, nil, err
+	}
+
+	if err := contentdal.SeedTags(ctx, db); err != nil {
 		return nil, nil, err
 	}
 
