@@ -2,15 +2,14 @@
 import {api} from "../request";
 
 export interface Notification {
-    id: string;
+    id: number;
     user_id: string;
-    type: string;
+    action: string;
     title: string;
     body: string;
     read: boolean;
     create_time: string;
     update_time: string;
-    data?: Record<string, any>;
 }
 
 export interface NotificationListResponse {
@@ -31,7 +30,7 @@ export const notificationApi = {
         api.get<{ unread_count: number }>('/notifications/unread-count'),
 
     // 标记通知为已读 (使用 POST 方法)
-    markAsRead: (id: string) =>
+    markAsRead: (id: number) =>
         api.post<Notification>(`/notifications/${id}/read`),
 
     // 标记所有通知为已读 (使用 POST 方法)
@@ -39,6 +38,6 @@ export const notificationApi = {
         api.post<{ success: boolean }>('/notifications/read-all'),
 
     // 删除通知
-    delete: (id: string) =>
+    delete: (id: number) =>
         api.del<void>(`/notifications/${id}`),
 };

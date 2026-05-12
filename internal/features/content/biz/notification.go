@@ -21,7 +21,7 @@ type Notification struct {
 	Body       string    `json:"body"`
 	CreateTime time.Time `json:"create_time"`
 	UpdateTime time.Time `json:"update_time"`
-	IsRead     bool      `json:"is_read"`
+	IsRead     bool      `json:"read"`
 }
 
 type NotificationRepo interface {

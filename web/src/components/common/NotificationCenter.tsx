@@ -1,4 +1,4 @@
-﻿﻿import {Spinner} from "@/components/ui/spinner"
+﻿import {Spinner} from "@/components/ui/spinner"
 import React, {useState, useEffect} from 'react';
 import {Bell, Check, Trash2, Loader2, X} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
@@ -45,7 +45,7 @@ const NotificationCenter: React.FC = () => {
         }
     };
 
-    const handleMarkAsRead = async (id: string) => {
+    const handleMarkAsRead = async (id: number) => {
         try {
             await notificationApi.markAsRead(id);
             setNotifications(prev => prev.map(notification =>
@@ -70,7 +70,7 @@ const NotificationCenter: React.FC = () => {
         }
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (id: number) => {
         try {
             await notificationApi.delete(id);
             setNotifications(prev => prev.filter(notification => notification.id !== id));
