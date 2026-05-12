@@ -4,6 +4,8 @@ export const DEFAULT_CHUNK_SIZE = 5 * 1024 * 1024; // 5 MB fallback
 export const MAX_CONCURRENT_CHUNKS = 3; // 并发上传数
 export const MAX_RETRIES = 3; // 每个分片最大重试次数
 export const RETRY_DELAY_BASE = 1000; // 重试延迟基数 (ms)
+export const RATE_LIMIT_RETRY_DELAY = 2000; // 429 专用重试初始延迟 (ms)
+export const RATE_LIMIT_MAX_RETRIES = 5; // 429 最大重试次数
 
 // --- Types ---
 
@@ -89,6 +91,15 @@ async function initiateMultipartUpload(task: UploadTask): Promise<InitiateRespon
     });
 }
 
+export class RateLimitError extends Error {
+    retryAfter: number;
+    constructor(retryAfter: number) {
+        super('rate limit exceeded');
+        this.name = 'RateLimitError';
+        this.retryAfter = retryAfter;
+    }
+}
+
 // 上传单个分片
 async function uploadPart(
     uploadId: string,
@@ -109,6 +120,10 @@ async function uploadPart(
     });
 
     if (!response.ok) {
+        if (response.status === 429) {
+            const retryAfter = parseInt(response.headers.get('Retry-After') || '60', 10) * 1000;
+            throw new RateLimitError(retryAfter);
+        }
         throw new Error(`Upload part failed: ${response.statusText}`);
     }
 
@@ -257,9 +272,10 @@ export async function startMultipartUpload(
                 );
 
                 let retry = 0;
+                let rateLimitRetry = 0;
                 let etag: string | null = null;
 
-                while (retry < MAX_RETRIES && !etag && !signal?.aborted) {
+                while ((retry < MAX_RETRIES || rateLimitRetry < RATE_LIMIT_MAX_RETRIES) && !etag && !signal?.aborted) {
                     try {
                         const resp = await uploadPart(uploadId!, partNum, chunk, signal);
                         etag = resp.etag;
@@ -270,12 +286,22 @@ export async function startMultipartUpload(
                         });
                     } catch (e) {
                         if (signal?.aborted) throw e;
-                        retry++;
-                        if (retry >= MAX_RETRIES) {
-                            pending.unshift(idx);
-                            throw e;
+                        if (e instanceof RateLimitError) {
+                            rateLimitRetry++;
+                            if (rateLimitRetry >= RATE_LIMIT_MAX_RETRIES) {
+                                pending.unshift(idx);
+                                throw e;
+                            }
+                            const delay = Math.min(e.retryAfter, RATE_LIMIT_RETRY_DELAY * Math.pow(2, rateLimitRetry - 1));
+                            await new Promise((r) => setTimeout(r, delay));
+                        } else {
+                            retry++;
+                            if (retry >= MAX_RETRIES) {
+                                pending.unshift(idx);
+                                throw e;
+                            }
+                            await new Promise((r) => setTimeout(r, RETRY_DELAY_BASE * retry));
                         }
-                        await new Promise((r) => setTimeout(r, RETRY_DELAY_BASE * retry));
                     }
                 }
 

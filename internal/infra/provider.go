@@ -8,7 +8,6 @@ import "github.com/google/wire"
 
 // ProviderSet is the wire provider set for infrastructure components.
 var ProviderSet = wire.NewSet(
-	NewDatabase,
 	NewHasher,
 	NewJWTManager,
 	NewPubSub,

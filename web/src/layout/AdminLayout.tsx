@@ -20,7 +20,8 @@ import {
     PanelLeftClose,
     PanelLeftOpen,
     Home,
-    FileText
+    FileText,
+    Bell
 } from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {useTheme} from '@/themes';
@@ -52,6 +53,7 @@ const AdminLayout = () => {
         {id: "channels", icon: Radio, label: t('admin.channels'), path: "/admin/channels"},
         {id: "tags", icon: Tags, label: t('admin.tags'), path: "/admin/tags"},
         {id: "comments", icon: MessageSquare, label: t('admin.comments'), path: "/admin/comments"},
+        {id: "notifications", icon: Bell, label: t('admin.notifications') || "Notifications", path: "/admin/notifications"},
         {id: "playlists", icon: PlayCircle, label: t('admin.playlists'), path: "/admin/playlists"},
         {id: "articles", icon: FileText, label: t('admin.articles'), path: "/admin/articles"},
         {id: "settings", icon: Settings, label: t('admin.settings'), path: "/admin/settings"},
@@ -82,6 +84,8 @@ const AdminLayout = () => {
             breadcrumbs.push({label: t('admin.tags'), path: "/admin/tags"});
         } else if (path.startsWith("/admin/comments")) {
             breadcrumbs.push({label: t('admin.comments'), path: "/admin/comments"});
+        } else if (path.startsWith("/admin/notifications")) {
+            breadcrumbs.push({label: t('admin.notifications') || "Notifications", path: "/admin/notifications"});
         } else if (path.startsWith("/admin/playlists")) {
             breadcrumbs.push({label: t('admin.playlists'), path: "/admin/playlists"});
         } else if (path.startsWith("/admin/articles")) {

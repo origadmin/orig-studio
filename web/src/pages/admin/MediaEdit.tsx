@@ -291,11 +291,10 @@ export default function MediaEditPage() {
         try {
             await api.post(`/admin/medias/${id}/regenerate-thumbnail`, {});
             toast.success(t('mediaEdit.thumbnailRegenerateScheduled'));
-            // Refresh tasks to reflect any status changes
             const res = await adminMediaApi.getTasks(id);
             setTasks((res as any)?.tasks || (res as any)?.items || []);
         } catch (err: any) {
-            const errMsg = err?.response?.data?.error || err?.response?.data?.message || err?.message || '未知错误';
+            const errMsg = err?.message || '未知错误';
             toast.error(`${t('mediaEdit.thumbnailRegenerateFailed')}: ${errMsg}`);
             console.error('Failed to regenerate thumbnail', err);
         } finally {
@@ -310,11 +309,10 @@ export default function MediaEditPage() {
         try {
             await api.post(`/admin/medias/${id}/regenerate-sprite`, {});
             toast.success(t('mediaEdit.spriteRegenerateScheduled'));
-            // Refresh tasks to reflect any status changes
             const res = await adminMediaApi.getTasks(id);
             setTasks((res as any)?.tasks || (res as any)?.items || []);
         } catch (err: any) {
-            const errMsg = err?.response?.data?.error || err?.response?.data?.message || err?.message || '未知错误';
+            const errMsg = err?.message || '未知错误';
             if (errMsg.includes('already processing') || errMsg.includes('already in progress')) {
                 toast.warning(t('mediaEdit.spriteRegenerateScheduled'));
             } else {

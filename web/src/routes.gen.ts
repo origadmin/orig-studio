@@ -33,6 +33,7 @@ import { Route as AuthenticatedPortalRouteImport } from "./routes/_authenticated
 import { Route as AuthenticatedAdminIndexRouteImport } from "./routes/_authenticated/admin/index";
 import { Route as PortalUIdRouteImport } from "./routes/_portal/u.$id";
 import { Route as PortalPlaylistTokenRouteImport } from "./routes/_portal/playlist.$token";
+import { Route as PortalPSlugRouteImport } from "./routes/_portal/p.$slug";
 import { Route as PortalChannelIdRouteImport } from "./routes/_portal/channel.$id";
 import { Route as PortalCIdRouteImport } from "./routes/_portal/c.$id";
 import { Route as AuthenticatedAdminUsersRouteImport } from "./routes/_authenticated/admin/users";
@@ -41,6 +42,7 @@ import { Route as AuthenticatedAdminSettingsRouteImport } from "./routes/_authen
 import { Route as AuthenticatedAdminPortalRouteImport } from "./routes/_authenticated/admin/portal";
 import { Route as AuthenticatedAdminPlaylistsRouteImport } from "./routes/_authenticated/admin/playlists";
 import { Route as AuthenticatedAdminPermissionsRouteImport } from "./routes/_authenticated/admin/permissions";
+import { Route as AuthenticatedAdminNotificationsRouteImport } from "./routes/_authenticated/admin/notifications";
 import { Route as AuthenticatedAdminCommentsRouteImport } from "./routes/_authenticated/admin/comments";
 import { Route as AuthenticatedAdminChannelsRouteImport } from "./routes/_authenticated/admin/channels";
 import { Route as AuthenticatedAdminCategoriesRouteImport } from "./routes/_authenticated/admin/categories";
@@ -189,6 +191,11 @@ const PortalPlaylistTokenRoute = PortalPlaylistTokenRouteImport.update({
   path: "/playlist/$token",
   getParentRoute: () => PortalRouteRoute,
 } as any);
+const PortalPSlugRoute = PortalPSlugRouteImport.update({
+  id: "/p/$slug",
+  path: "/p/$slug",
+  getParentRoute: () => PortalRouteRoute,
+} as any);
 const PortalChannelIdRoute = PortalChannelIdRouteImport.update({
   id: "/channel/$id",
   path: "/channel/$id",
@@ -231,6 +238,12 @@ const AuthenticatedAdminPermissionsRoute =
   AuthenticatedAdminPermissionsRouteImport.update({
     id: "/permissions",
     path: "/permissions",
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any);
+const AuthenticatedAdminNotificationsRoute =
+  AuthenticatedAdminNotificationsRouteImport.update({
+    id: "/notifications",
+    path: "/notifications",
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any);
 const AuthenticatedAdminCommentsRoute =
@@ -440,6 +453,7 @@ export interface FileRoutesByFullPath {
   "/admin/categories": typeof AuthenticatedAdminCategoriesRoute;
   "/admin/channels": typeof AuthenticatedAdminChannelsRoute;
   "/admin/comments": typeof AuthenticatedAdminCommentsRoute;
+  "/admin/notifications": typeof AuthenticatedAdminNotificationsRoute;
   "/admin/permissions": typeof AuthenticatedAdminPermissionsRoute;
   "/admin/playlists": typeof AuthenticatedAdminPlaylistsRoute;
   "/admin/portal": typeof AuthenticatedAdminPortalRoute;
@@ -448,6 +462,7 @@ export interface FileRoutesByFullPath {
   "/admin/users": typeof AuthenticatedAdminUsersRoute;
   "/c/$id": typeof PortalCIdRoute;
   "/channel/$id": typeof PortalChannelIdRoute;
+  "/p/$slug": typeof PortalPSlugRoute;
   "/playlist/$token": typeof PortalPlaylistTokenRoute;
   "/u/$id": typeof PortalUIdRoute;
   "/admin/": typeof AuthenticatedAdminIndexRoute;
@@ -497,6 +512,7 @@ export interface FileRoutesByTo {
   "/admin/categories": typeof AuthenticatedAdminCategoriesRoute;
   "/admin/channels": typeof AuthenticatedAdminChannelsRoute;
   "/admin/comments": typeof AuthenticatedAdminCommentsRoute;
+  "/admin/notifications": typeof AuthenticatedAdminNotificationsRoute;
   "/admin/permissions": typeof AuthenticatedAdminPermissionsRoute;
   "/admin/playlists": typeof AuthenticatedAdminPlaylistsRoute;
   "/admin/portal": typeof AuthenticatedAdminPortalRoute;
@@ -505,6 +521,7 @@ export interface FileRoutesByTo {
   "/admin/users": typeof AuthenticatedAdminUsersRoute;
   "/c/$id": typeof PortalCIdRoute;
   "/channel/$id": typeof PortalChannelIdRoute;
+  "/p/$slug": typeof PortalPSlugRoute;
   "/playlist/$token": typeof PortalPlaylistTokenRoute;
   "/u/$id": typeof PortalUIdRoute;
   "/admin": typeof AuthenticatedAdminIndexRoute;
@@ -561,6 +578,7 @@ export interface FileRoutesById {
   "/_authenticated/admin/categories": typeof AuthenticatedAdminCategoriesRoute;
   "/_authenticated/admin/channels": typeof AuthenticatedAdminChannelsRoute;
   "/_authenticated/admin/comments": typeof AuthenticatedAdminCommentsRoute;
+  "/_authenticated/admin/notifications": typeof AuthenticatedAdminNotificationsRoute;
   "/_authenticated/admin/permissions": typeof AuthenticatedAdminPermissionsRoute;
   "/_authenticated/admin/playlists": typeof AuthenticatedAdminPlaylistsRoute;
   "/_authenticated/admin/portal": typeof AuthenticatedAdminPortalRoute;
@@ -569,6 +587,7 @@ export interface FileRoutesById {
   "/_authenticated/admin/users": typeof AuthenticatedAdminUsersRoute;
   "/_portal/c/$id": typeof PortalCIdRoute;
   "/_portal/channel/$id": typeof PortalChannelIdRoute;
+  "/_portal/p/$slug": typeof PortalPSlugRoute;
   "/_portal/playlist/$token": typeof PortalPlaylistTokenRoute;
   "/_portal/u/$id": typeof PortalUIdRoute;
   "/_authenticated/admin/": typeof AuthenticatedAdminIndexRoute;
@@ -624,6 +643,7 @@ export interface FileRouteTypes {
     | "/admin/categories"
     | "/admin/channels"
     | "/admin/comments"
+    | "/admin/notifications"
     | "/admin/permissions"
     | "/admin/playlists"
     | "/admin/portal"
@@ -632,6 +652,7 @@ export interface FileRouteTypes {
     | "/admin/users"
     | "/c/$id"
     | "/channel/$id"
+    | "/p/$slug"
     | "/playlist/$token"
     | "/u/$id"
     | "/admin/"
@@ -681,6 +702,7 @@ export interface FileRouteTypes {
     | "/admin/categories"
     | "/admin/channels"
     | "/admin/comments"
+    | "/admin/notifications"
     | "/admin/permissions"
     | "/admin/playlists"
     | "/admin/portal"
@@ -689,6 +711,7 @@ export interface FileRouteTypes {
     | "/admin/users"
     | "/c/$id"
     | "/channel/$id"
+    | "/p/$slug"
     | "/playlist/$token"
     | "/u/$id"
     | "/admin"
@@ -744,6 +767,7 @@ export interface FileRouteTypes {
     | "/_authenticated/admin/categories"
     | "/_authenticated/admin/channels"
     | "/_authenticated/admin/comments"
+    | "/_authenticated/admin/notifications"
     | "/_authenticated/admin/permissions"
     | "/_authenticated/admin/playlists"
     | "/_authenticated/admin/portal"
@@ -752,6 +776,7 @@ export interface FileRouteTypes {
     | "/_authenticated/admin/users"
     | "/_portal/c/$id"
     | "/_portal/channel/$id"
+    | "/_portal/p/$slug"
     | "/_portal/playlist/$token"
     | "/_portal/u/$id"
     | "/_authenticated/admin/"
@@ -956,6 +981,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PortalPlaylistTokenRouteImport;
       parentRoute: typeof PortalRouteRoute;
     };
+    "/_portal/p/$slug": {
+      id: "/_portal/p/$slug";
+      path: "/p/$slug";
+      fullPath: "/p/$slug";
+      preLoaderRoute: typeof PortalPSlugRouteImport;
+      parentRoute: typeof PortalRouteRoute;
+    };
     "/_portal/channel/$id": {
       id: "/_portal/channel/$id";
       path: "/channel/$id";
@@ -1010,6 +1042,13 @@ declare module "@tanstack/react-router" {
       path: "/permissions";
       fullPath: "/admin/permissions";
       preLoaderRoute: typeof AuthenticatedAdminPermissionsRouteImport;
+      parentRoute: typeof AuthenticatedAdminRoute;
+    };
+    "/_authenticated/admin/notifications": {
+      id: "/_authenticated/admin/notifications";
+      path: "/notifications";
+      fullPath: "/admin/notifications";
+      preLoaderRoute: typeof AuthenticatedAdminNotificationsRouteImport;
       parentRoute: typeof AuthenticatedAdminRoute;
     };
     "/_authenticated/admin/comments": {
@@ -1243,6 +1282,7 @@ interface PortalRouteRouteChildren {
   PortalIndexRoute: typeof PortalIndexRoute;
   PortalCIdRoute: typeof PortalCIdRoute;
   PortalChannelIdRoute: typeof PortalChannelIdRoute;
+  PortalPSlugRoute: typeof PortalPSlugRoute;
   PortalPlaylistTokenRoute: typeof PortalPlaylistTokenRoute;
   PortalUIdRoute: typeof PortalUIdRoute;
 }
@@ -1265,6 +1305,7 @@ const PortalRouteRouteChildren: PortalRouteRouteChildren = {
   PortalIndexRoute: PortalIndexRoute,
   PortalCIdRoute: PortalCIdRoute,
   PortalChannelIdRoute: PortalChannelIdRoute,
+  PortalPSlugRoute: PortalPSlugRoute,
   PortalPlaylistTokenRoute: PortalPlaylistTokenRoute,
   PortalUIdRoute: PortalUIdRoute,
 };
@@ -1402,6 +1443,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCategoriesRoute: typeof AuthenticatedAdminCategoriesRoute;
   AuthenticatedAdminChannelsRoute: typeof AuthenticatedAdminChannelsRoute;
   AuthenticatedAdminCommentsRoute: typeof AuthenticatedAdminCommentsRoute;
+  AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute;
   AuthenticatedAdminPermissionsRoute: typeof AuthenticatedAdminPermissionsRoute;
   AuthenticatedAdminPlaylistsRoute: typeof AuthenticatedAdminPlaylistsRoute;
   AuthenticatedAdminPortalRoute: typeof AuthenticatedAdminPortalRoute;
@@ -1421,6 +1463,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCategoriesRoute: AuthenticatedAdminCategoriesRoute,
   AuthenticatedAdminChannelsRoute: AuthenticatedAdminChannelsRoute,
   AuthenticatedAdminCommentsRoute: AuthenticatedAdminCommentsRoute,
+  AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
   AuthenticatedAdminPermissionsRoute: AuthenticatedAdminPermissionsRoute,
   AuthenticatedAdminPlaylistsRoute: AuthenticatedAdminPlaylistsRoute,
   AuthenticatedAdminPortalRoute: AuthenticatedAdminPortalRoute,

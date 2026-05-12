@@ -474,38 +474,6 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 	h.logger.Infof("media processing complete: media=%s uuid=%s status=%s (video: %d ok / %d fail)",
 		mediaID, mediaUUID, media.EncodingStatus, videoSuccessCount, videoFailedCount)
 
-	// Promote temp file to originals after successful transcoding
-	if media.EncodingStatus == "success" || media.EncodingStatus == "partial" {
-		// Extract uploadID from the media path (format: temp/{userID}/{yyyy}/{MM}/{uploadID}{ext})
-		if strings.HasPrefix(media.Url, "temp/") {
-			filename := filepath.Base(media.Url)
-			// Extract userID from path: temp/{userID}/{yyyy}/{MM}/{filename}
-			pathParts := strings.SplitN(media.Url, "/", 4)
-			userID := "_system"
-			if len(pathParts) >= 3 {
-				userID = pathParts[1]
-			}
-
-			promotedPath, err := h.paths.PromoteToOriginal(userID, filename)
-			if err != nil {
-				h.logger.Warnf("failed to promote temp file to originals for media %s: %v", mediaID, err)
-			} else {
-				media.Url = promotedPath
-				if _, err := h.mediaRepo.Update(procCtx, media); err != nil {
-					h.logger.Warnf("failed to update media URL after promotion for media %s: %v", mediaID, err)
-				}
-
-				// Cleanup temp parts directory
-				uploadID := strings.TrimSuffix(filename, filepath.Ext(filename))
-				if err := h.paths.CleanupTempParts(userID, uploadID); err != nil {
-					h.logger.Warnf("failed to cleanup temp parts for media %s: %v", mediaID, err)
-				}
-
-				h.logger.Infof("promoted temp file to originals for media %s: %s", mediaID, promotedPath)
-			}
-		}
-	}
-
 	if media.Type == "video" && h.spriteUC != nil {
 		go func() {
 			if err := h.spriteUC.ProcessPostTranscode(context.Background(), mediaID); err != nil {

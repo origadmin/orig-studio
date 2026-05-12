@@ -103,6 +103,13 @@ func NewSpriteUseCase(
 }
 
 func (uc *SpriteUseCase) GenerateSpriteAndVTT(ctx context.Context, mediaID string) error {
+	defer func() {
+		if r := recover(); r != nil {
+			uc.mediaRepo.UpdateSpriteFields(context.Background(), mediaID, "failed", "", "")
+			uc.logger.Errorf("GenerateSpriteAndVTT panicked for media %s: %v", mediaID, r)
+		}
+	}()
+
 	m, err := uc.mediaRepo.Get(ctx, mediaID)
 	if err != nil {
 		return fmt.Errorf("get media %s: %w", mediaID, err)

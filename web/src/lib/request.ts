@@ -410,11 +410,14 @@ async function fetchApi<T>(
         });
         return response.data;
     } catch (error: unknown) {
-        const axiosError = error as { response?: { data?: ApiError }; message?: string };
+        const axiosError = error as { response?: { data?: Record<string, unknown> }; message?: string };
         const errorData = axiosError.response?.data;
 
-        if (errorData?.message) {
-            throw new Error(errorData.message);
+        if (errorData) {
+            const msg = (errorData.message || errorData.error || errorData.msg) as string | undefined;
+            if (msg) {
+                throw new Error(msg);
+            }
         }
         throw new Error(axiosError.message || "Request failed");
     }

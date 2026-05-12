@@ -191,7 +191,7 @@ func SetupTestServer(t *testing.T) *TestServer {
 	articleRepo := contentdal.NewArticleRepo(contentDB, logger)
 	articleUC := contentbiz.NewArticleUseCase(articleRepo, logger)
 
-	adminHandler := adminservice.NewAdminHandler(jwtMgr, mediaUC, nil, playlistChannelUC, tagService, settingUC, categoryTagUC, articleUC, userUC, nil, "test", "sqlite3")
+	adminHandler := adminservice.NewAdminHandler(jwtMgr, mediaUC, nil, playlistChannelUC, tagService, settingUC, categoryTagUC, articleUC, userUC, nil, db, "test", "sqlite3")
 
 	// Explore handler
 	exploreHandler := contentservice.NewExploreHandler(db)
