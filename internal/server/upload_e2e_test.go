@@ -22,6 +22,7 @@ import (
 
 	_ "github.com/sqlite3ent/sqlite3"
 	pb "origadmin/application/origcms/api/gen/v1/upload"
+	"origadmin/application/origcms/internal/conf"
 	"origadmin/application/origcms/internal/infra/auth"
 	"origadmin/application/origcms/internal/data/entity"
 	contentbiz "origadmin/application/origcms/internal/features/content/biz"
@@ -56,7 +57,8 @@ func TestUploadE2E(t *testing.T) {
 	mediaRepo := dal.NewMediaRepo(client)
 	profileRepo := dal.NewEncodeProfileRepo(client)
 	taskRepo := dal.NewEncodingTaskRepo(client)
-	storage := dal.NewLocalStorage("data/uploads")
+	storage := dal.NewLocalStorage(conf.NewStoragePaths("data/uploads"))
+	testPaths := conf.NewStoragePaths("data/uploads")
 	mediaUC := biz.NewMediaUseCase(mediaRepo, profileRepo, taskRepo, nil, storage, nil, logger, nil)
 
 	uploadUC := biz.NewUploadUseCase(
@@ -66,8 +68,10 @@ func TestUploadE2E(t *testing.T) {
 		taskRepo,
 		mediaUC,
 		storage,
+		testPaths,
 		5*1024*1024,
 		logger,
+		nil,
 	)
 
 	// Setup content layer dependencies
