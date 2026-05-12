@@ -142,13 +142,8 @@ func (h *StubHandler) RegisterRoutes(r http2.Router) {
 	// ================================
 
 	// ================================
-	// 13. Notification DELETE
+	// 13. Notification DELETE — MOVED to NotificationHandler
 	// ================================
-	notifications := r.Group("/notifications")
-	notifications.Use(server.JWTMiddlewareCtx(h.jwt))
-	{
-		notifications.DELETE("/:id", server.HTTPToHandlerFunc(h.stubNotificationDelete()))
-	}
 
 	// ================================
 	// 14. User subscription/update/status routes
@@ -574,13 +569,6 @@ func (h *StubHandler) stubAdminChannelCreate() http.HandlerFunc {
 }
 
 // ==================== Notification Delete Stub ====================
-
-func (h *StubHandler) stubNotificationDelete() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		server.OK(gc, gin.H{"code": 0, "message": "deleted"})
-	}
-}
 
 // ==================== User Subscription Stubs ====================
 
