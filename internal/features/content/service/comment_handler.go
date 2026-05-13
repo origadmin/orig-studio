@@ -67,6 +67,9 @@ func (h *CommentHandler) RegisterRoutes(r http2.Router) {
 		authComments.DELETE("/:id", server.GinHandlerToHandlerFunc(h.deleteComment))
 	}
 
+	// Register routes at top-level for media-scoped comments
+	r.GET("/medias/:id/comments", server.WithOptionalJWTCtx(h.jwtMgr, server.GinHandlerToHandlerFunc(h.listMediaComments)))
+
 	// Register Comment Likes routes
 	h.registerCommentLikesRoutes(r)
 }
@@ -151,6 +154,14 @@ func (h *CommentHandler) listComments(c *gin.Context) {
 	}
 
 	server.Page(c, comments, int64(total), page, pageSize)
+}
+
+func (h *CommentHandler) listMediaComments(c *gin.Context) {
+	mediaID := c.Param("id")
+	q := c.Request.URL.Query()
+	q.Set("media_id", mediaID)
+	c.Request.URL.RawQuery = q.Encode()
+	h.listComments(c)
 }
 
 func (h *CommentHandler) getComment(c *gin.Context) {

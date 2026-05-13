@@ -93,6 +93,9 @@ func NewMediaUseCase(
 	logger log.Logger,
 	spriteUC *SpriteUseCase,
 ) *MediaUseCase {
+	if logger == nil {
+		logger = log.DefaultLogger
+	}
 	return &MediaUseCase{
 		repo:          repo,
 		profileRepo:   profileRepo,
