@@ -186,6 +186,7 @@ func SetupTestServer(t *testing.T) *TestServer {
 	adminTagRepo := admindal.NewTagRepository(db)
 	tagUC := adminbiz.NewTagUseCase(adminTagRepo)
 	tagService := adminservice.NewTagService(tagUC)
+	adminTagHandler := adminservice.NewAdminTagHandler(tagService, jwtMgr)
 
 	// Article use case for admin content management
 	articleRepo := contentdal.NewArticleRepo(contentDB, logger)
@@ -198,13 +199,16 @@ func SetupTestServer(t *testing.T) *TestServer {
 
 	// Comment like use case
 	commentLikeRepo := contentdal.NewCommentLikeRepo(contentDB, logger)
-	_ = contentbiz.NewCommentLikeUseCase(commentLikeRepo, logger)
+	commentLikeUC := contentbiz.NewCommentLikeUseCase(commentLikeRepo, logger)
 
 	// Comment moderation handler
 	commentModRepo := contentdal.NewCommentModerationRepo(contentDB, logger)
 	commentReportRepo := contentdal.NewCommentReportRepo(contentDB, logger)
 	commentModUC := contentbiz.NewCommentModerationUseCase(commentModRepo, commentReportRepo, settingUC, logger)
 	commentModerationHandler := contentservice.NewCommentModerationHandler(commentModUC, jwtMgr)
+
+	// Public comment handler (must be after commentModUC)
+	commentHandler := contentservice.NewCommentHandler(db, jwtMgr, commentLikeUC, commentModUC)
 
 	// Permission handler
 	authData := authdal.NewData(db)
@@ -245,8 +249,10 @@ func SetupTestServer(t *testing.T) *TestServer {
 			searchHandler,
 			meHandler,
 			adminHandler,
+			adminTagHandler,
 			exploreHandler,
 			commentModerationHandler,
+			commentHandler,
 			permissionHandler,
 		},
 		db,

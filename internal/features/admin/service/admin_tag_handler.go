@@ -10,6 +10,7 @@ import (
 	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
 	"origadmin/application/origcms/internal/helpers/hashtag"
 	"origadmin/application/origcms/internal/helpers/repo"
+	"origadmin/application/origcms/internal/infra/auth"
 
 	"github.com/gin-gonic/gin"
 	"origadmin/application/origcms/internal/server"
@@ -20,25 +21,26 @@ var hexColorRegex = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
 // AdminTagHandler handles tag HTTP requests in admin panel
 type AdminTagHandler struct {
 	service *TagService
+	jwtMgr  *auth.Manager
 }
 
 // NewAdminTagHandler creates a new AdminTagHandler
-func NewAdminTagHandler(service *TagService) *AdminTagHandler {
-	return &AdminTagHandler{service: service}
+func NewAdminTagHandler(service *TagService, jwtMgr *auth.Manager) *AdminTagHandler {
+	return &AdminTagHandler{service: service, jwtMgr: jwtMgr}
 }
 
 // RegisterRoutes registers tag routes
 func (h *AdminTagHandler) RegisterRoutes(r http2.Router) {
 	tags := r.Group("/admin/tags")
 	{
-		tags.GET("", server.HTTPToHandlerFunc(h.listTags()))
-		tags.GET("/:id", server.HTTPToHandlerFunc(h.getTag()))
-		tags.POST("", server.HTTPToHandlerFunc(h.createTag()))
-		tags.PUT("/:id", server.HTTPToHandlerFunc(h.updateTag()))
-		tags.DELETE("/:id", server.HTTPToHandlerFunc(h.deleteTag()))
-		tags.POST("/bulk", server.HTTPToHandlerFunc(h.bulkTagOperation()))
-		tags.GET("/export", server.HTTPToHandlerFunc(h.exportTags()))
-		tags.POST("/import", server.HTTPToHandlerFunc(h.importTags()))
+		tags.GET("", server.WithAdminCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.listTags())))
+		tags.GET("/:id", server.WithAdminCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.getTag())))
+		tags.POST("", server.WithAdminCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.createTag())))
+		tags.PUT("/:id", server.WithAdminCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.updateTag())))
+		tags.DELETE("/:id", server.WithAdminCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.deleteTag())))
+		tags.POST("/bulk", server.WithAdminCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.bulkTagOperation())))
+		tags.GET("/export", server.WithAdminCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.exportTags())))
+		tags.POST("/import", server.WithAdminCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.importTags())))
 	}
 }
 

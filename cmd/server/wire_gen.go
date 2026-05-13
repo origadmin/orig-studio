@@ -155,7 +155,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, func(), err
 	tagUseCase := biz6.NewTagUseCase(tagRepository)
 	tagService := service5.NewTagService(tagUseCase)
 	adminHandler := NewAdminHandlerBridge(manager, mediaUseCase, mediaService, playlistChannelUseCase, tagService, settingUseCase, categoryTagUseCase, articleUseCase, userUseCase, permissionUseCase, client, cfg)
-	adminTagHandler := service5.NewAdminTagHandler(tagService)
+	adminTagHandler := service5.NewAdminTagHandler(tagService, manager)
 	stubHandler := NewStubHandler(manager)
 	spriteHandler := NewSpriteHandler(mediaUseCase, storagePaths, manager, logger)
 	statsRepo := dal2.NewStatsRepo(client)
