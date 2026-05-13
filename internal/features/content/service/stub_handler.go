@@ -86,10 +86,6 @@ func (h *StubHandler) RegisterRoutes(r http2.Router) {
 		medias.GET("/:id/stream", server.HTTPToHandlerFunc(h.stubMediaStream()))
 		medias.GET("/:id/thumbnail", server.HTTPToHandlerFunc(h.stubMediaThumbnail()))
 
-		// Shares
-		medias.GET("/:id/shares", server.HTTPToHandlerFunc(h.stubMediaShares()))
-		medias.POST("/:id/shares", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaShareCreate())))
-
 		// Update/Delete
 		medias.PUT("/:id", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaUpdate())))
 		medias.DELETE("/:id", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaDelete())))
