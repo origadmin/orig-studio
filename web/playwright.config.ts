@@ -7,22 +7,30 @@ export default defineConfig({
     retries: process.env.CI ? 2 : 0,
     workers: process.env.CI ? 1 : undefined,
     reporter: 'html',
+    timeout: 60000,
     use: {
         baseURL: 'http://localhost:18080',
         trace: 'on-first-retry',
-        screenshot: 'only-on-failure',
+        screenshot: 'on',
     },
     projects: [
+        {name: 'setup', testMatch: /auth\.setup\.ts/},
+        {
+            name: 'chromium-auth',
+            use: {
+                ...devices['Desktop Chrome'],
+                storageState: '.auth/user.json',
+            },
+            dependencies: ['setup'],
+            testMatch: /admin-interaction\.spec\.ts/,
+        },
         {
             name: 'chromium',
             use: {...devices['Desktop Chrome']},
-        },
-        {
-            name: 'firefox',
-            use: {...devices['Desktop Firefox']},
+            dependencies: ['setup'],
+            testMatch: /(portal-interaction|auth)\.spec\.ts/,
         },
     ],
-    // 使用 Rsbuild dev server (端口 18080)
     webServer: {
         command: 'bun run dev',
         url: 'http://localhost:18080',
