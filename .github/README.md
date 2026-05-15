@@ -1,3 +1,3 @@
-# GitHub Configuration for orig-cms
+﻿# GitHub Configuration for orig-studio
 
-This directory contains GitHub-specific configurations for the orig-cms project.
+This directory contains GitHub-specific configurations for the orig-studio project.

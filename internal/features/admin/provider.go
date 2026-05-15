@@ -6,9 +6,9 @@ package admin
 
 import (
 	"github.com/google/wire"
-	"origadmin/application/origcms/internal/features/admin/biz"
-	"origadmin/application/origcms/internal/features/admin/dal"
-	"origadmin/application/origcms/internal/features/admin/service"
+	"origadmin/application/origstudio/internal/features/admin/biz"
+	"origadmin/application/origstudio/internal/features/admin/dal"
+	"origadmin/application/origstudio/internal/features/admin/service"
 )
 
 // ProviderSet is the wire provider set for the admin feature module.

@@ -10,7 +10,7 @@ export default defineConfig({
     plugins: [pluginReact()],
     html: {
         template: './index.html',
-        title: 'OrigCMS - Shared Platform',
+        title: 'OrigStudio - Shared Platform',
     },
     source: {
         entry: {

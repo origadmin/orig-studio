@@ -11,9 +11,9 @@ import {Spinner} from '@/components/ui/spinner';
 import type {User, AuthContextValue, AuthProviderProps} from './types';
 
 // Shared localStorage keys (must match request.ts)
-const TOKEN_KEY = 'origcms_token';
-const USER_KEY = 'origcms_user';
-const REFRESH_TOKEN_KEY = 'origcms_refresh_token';
+const TOKEN_KEY = 'origstudio_token';
+const USER_KEY = 'origstudio_user';
+const REFRESH_TOKEN_KEY = 'origstudio_refresh_token';
 const EXPIRES_KEY = 'token_expires_at';
 
 /** Read token from localStorage */

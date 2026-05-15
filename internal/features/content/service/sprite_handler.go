@@ -18,11 +18,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origcms/internal/conf"
-	"origadmin/application/origcms/internal/features/media/biz"
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	"origadmin/application/origcms/internal/infra/auth"
-	"origadmin/application/origcms/internal/server"
+	"origadmin/application/origstudio/internal/conf"
+	"origadmin/application/origstudio/internal/features/media/biz"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	"origadmin/application/origstudio/internal/infra/auth"
+	"origadmin/application/origstudio/internal/server"
 )
 
 const spriteProcessingStuckTimeout = 5 * time.Minute

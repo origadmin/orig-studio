@@ -7,9 +7,9 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"math"
-	"origadmin/application/origcms/internal/data/entity/playlist"
-	"origadmin/application/origcms/internal/data/entity/predicate"
-	"origadmin/application/origcms/internal/data/entity/user"
+	"origadmin/application/origstudio/internal/data/entity/playlist"
+	"origadmin/application/origstudio/internal/data/entity/predicate"
+	"origadmin/application/origstudio/internal/data/entity/user"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"

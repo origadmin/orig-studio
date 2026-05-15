@@ -7,7 +7,7 @@ package biz
 import (
 	"context"
 
-	"origadmin/application/origcms/api/gen/v1/types"
+	"origadmin/application/origstudio/api/gen/v1/types"
 
 	"github.com/go-kratos/kratos/v2/log"
 )

@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
 	"github.com/stretchr/testify/assert"
 )
 

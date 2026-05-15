@@ -3,10 +3,10 @@ package service
 import (
 	"strconv"
 
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
-	"origadmin/application/origcms/internal/features/content/biz"
-	"origadmin/application/origcms/internal/helpers/repo"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	"origadmin/application/origstudio/internal/features/content/biz"
+	"origadmin/application/origstudio/internal/helpers/repo"
 )
 
 type FeedHandler struct {

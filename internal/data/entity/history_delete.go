@@ -4,8 +4,8 @@ package entity
 
 import (
 	"context"
-	"origadmin/application/origcms/internal/data/entity/history"
-	"origadmin/application/origcms/internal/data/entity/predicate"
+	"origadmin/application/origstudio/internal/data/entity/history"
+	"origadmin/application/origstudio/internal/data/entity/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

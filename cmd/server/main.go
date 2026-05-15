@@ -12,9 +12,9 @@ import (
 	"context"
 	"flag"
 
-	"origadmin/application/origcms/internal/conf"
-	confhelper "origadmin/application/origcms/internal/helpers/conf"
-	"origadmin/application/origcms/internal/server"
+	"origadmin/application/origstudio/internal/conf"
+	confhelper "origadmin/application/origstudio/internal/helpers/conf"
+	"origadmin/application/origstudio/internal/server"
 
 	"github.com/origadmin/runtime"
 	runtimebootstrap "github.com/origadmin/runtime/engine/bootstrap"

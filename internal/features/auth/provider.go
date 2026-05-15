@@ -6,9 +6,9 @@ package auth
 
 import (
 	"github.com/google/wire"
-	"origadmin/application/origcms/internal/features/auth/biz"
-	"origadmin/application/origcms/internal/features/auth/dal"
-	"origadmin/application/origcms/internal/features/auth/service"
+	"origadmin/application/origstudio/internal/features/auth/biz"
+	"origadmin/application/origstudio/internal/features/auth/dal"
+	"origadmin/application/origstudio/internal/features/auth/service"
 )
 
 // ProviderSet is the wire provider set for the auth feature module.

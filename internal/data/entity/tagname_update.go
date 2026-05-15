@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/predicate"
-	"origadmin/application/origcms/internal/data/entity/tag"
-	"origadmin/application/origcms/internal/data/entity/tagname"
+	"origadmin/application/origstudio/internal/data/entity/predicate"
+	"origadmin/application/origstudio/internal/data/entity/tag"
+	"origadmin/application/origstudio/internal/data/entity/tagname"
 	"time"
 
 	"entgo.io/ent/dialect/sql"

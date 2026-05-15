@@ -1,9 +1,9 @@
-# F001: R3 — API Contract
+﻿# F001: R3 — API Contract
 
 ## New Function: ffmpeg.GetMediaInfo
 
 ```go
-// Package: origadmin/application/origcms/internal/helpers/ffmpeg
+// Package: origadmin/application/origstudio/internal/helpers/ffmpeg
 
 func GetMediaInfo(ctx context.Context, inputPath string) (*MediaInfo, error)
 ```
@@ -26,7 +26,7 @@ func GetMediaInfo(ctx context.Context, inputPath string) (*MediaInfo, error)
 ## Modified: CompleteMultipartUpload
 
 ```go
-// Package: origadmin/application/origcms/internal/features/media/biz
+// Package: origadmin/application/origstudio/internal/features/media/biz
 
 func (uc *UploadUseCase) CompleteMultipartUpload(
     ctx context.Context, uploadID string, sha256 string,
@@ -47,7 +47,7 @@ func (uc *UploadUseCase) CompleteMultipartUpload(
 ## Removed: TranscodeHandler promote block
 
 ```go
-// Package: origadmin/application/origcms/internal/features/media/biz
+// Package: origadmin/application/origstudio/internal/features/media/biz
 
 // REMOVED: L477-L506 in transcode_handler.go
 // if strings.HasPrefix(media.Url, "temp/") { ... PromoteToOriginal ... }

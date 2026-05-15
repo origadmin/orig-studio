@@ -13,8 +13,8 @@ import (
 	"fmt"
 	"strings"
 
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/tag"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/tag"
 )
 
 // TagResponse is the frontend-compatible DTO for tag API responses.

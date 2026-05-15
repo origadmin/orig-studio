@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"time"
 
-	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/uuid"

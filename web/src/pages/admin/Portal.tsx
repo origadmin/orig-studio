@@ -1,4 +1,4 @@
-﻿import React, {useState} from 'react';
+import React, {useState} from 'react';
 import {
     Layout, Plus, Edit, Trash2, ToggleLeft, ToggleRight,
     GripVertical, ArrowUp, ArrowDown,

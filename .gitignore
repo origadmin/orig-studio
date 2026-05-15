@@ -141,3 +141,18 @@ web/playwright-report/
 web/test-results/
 web/testoutput.outlog
 web/TESTING.md
+
+# Temp files and test videos
+tmp/
+*.mp4
+*.mkv
+*.avi
+*.mov
+web/screenshots/
+web/open/
+web/.auth/
+Start-All.ps1
+start-all.bat
+commit-msg-portal.txt
+rewrite-commits.py
+criptssafe_rm_aliases.ps1

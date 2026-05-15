@@ -465,9 +465,9 @@
     "noMatch": "没有找到匹配的成员"
   },
   "about": {
-    "title": "关于 OrigCMS",
-    "whatIs": "什么是 OrigCMS？",
-    "description": "OrigCMS 是一个开源的视频内容管理系统，基于 Go + React 构建。它提供了完整的视频上传、转码、管理和播放功能，适用于个人、团队和企业使用。",
+    "title": "关于 OrigStudio",
+    "whatIs": "什么是 OrigStudio？",
+    "description": "OrigStudio 是一个开源的视频内容管理系统，基于 Go + React 构建。它提供了完整的视频上传、转码、管理和播放功能，适用于个人、团队和企业使用。",
     "goReact": "Go + React",
     "modernStack": "现代技术栈",
     "openSource": "开源免费",

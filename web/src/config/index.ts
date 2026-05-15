@@ -8,7 +8,7 @@ const config: Config = {
         timeout: REQUEST_TIMEOUT,
     },
     app: {
-        name: 'OrigCMS',
+        name: 'OrigStudio',
         version: '1.0.0',
     },
 };

@@ -7,12 +7,12 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/history"
-	"origadmin/application/origcms/internal/data/entity/media"
-	"origadmin/application/origcms/internal/data/entity/predicate"
-	"origadmin/application/origcms/internal/data/entity/user"
-	"origadmin/application/origcms/internal/features/content/biz"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/history"
+	"origadmin/application/origstudio/internal/data/entity/media"
+	"origadmin/application/origstudio/internal/data/entity/predicate"
+	"origadmin/application/origstudio/internal/data/entity/user"
+	"origadmin/application/origstudio/internal/features/content/biz"
 )
 
 type historyRepo struct {

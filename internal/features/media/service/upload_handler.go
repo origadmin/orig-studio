@@ -13,13 +13,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origcms/internal/infra/auth"
-	"origadmin/application/origcms/internal/data/enums"
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
-	"origadmin/application/origcms/internal/helpers/hashtag"
-	"origadmin/application/origcms/internal/server"
-	"origadmin/application/origcms/internal/features/media/biz"
+	"origadmin/application/origstudio/internal/infra/auth"
+	"origadmin/application/origstudio/internal/data/enums"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	"origadmin/application/origstudio/internal/helpers/hashtag"
+	"origadmin/application/origstudio/internal/server"
+	"origadmin/application/origstudio/internal/features/media/biz"
 )
 
 // --- Route registration ---

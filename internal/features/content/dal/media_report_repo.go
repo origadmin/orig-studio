@@ -6,11 +6,11 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origcms/internal/data/entity/media"
-	"origadmin/application/origcms/internal/data/entity/mediareport"
-	"origadmin/application/origcms/internal/data/entity/user"
-	"origadmin/application/origcms/internal/features/content/biz"
-	"origadmin/application/origcms/internal/helpers/idutil"
+	"origadmin/application/origstudio/internal/data/entity/media"
+	"origadmin/application/origstudio/internal/data/entity/mediareport"
+	"origadmin/application/origstudio/internal/data/entity/user"
+	"origadmin/application/origstudio/internal/features/content/biz"
+	"origadmin/application/origstudio/internal/helpers/idutil"
 )
 
 type mediaReportRepo struct {

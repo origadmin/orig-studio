@@ -1,4 +1,4 @@
-﻿import React, {useState} from 'react';
+import React, {useState} from 'react';
 import {mediaApi} from '../lib/api/media';
 import {Button} from './ui/button';
 import {Card, CardHeader, CardTitle, CardContent, CardFooter} from './ui/card';

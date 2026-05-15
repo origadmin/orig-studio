@@ -8,15 +8,15 @@ import (
 	"fmt"
 	"math/rand"
 
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
-	"origadmin/application/origcms/internal/infra/auth"
-	"origadmin/application/origcms/internal/helpers/hashtag"
-	"origadmin/application/origcms/internal/server"
-	"origadmin/application/origcms/internal/features/content/biz"
-	"origadmin/application/origcms/api/gen/v1/types"
-	systembiz "origadmin/application/origcms/internal/features/system/biz"
-	systemservice "origadmin/application/origcms/internal/features/system/service"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	"origadmin/application/origstudio/internal/infra/auth"
+	"origadmin/application/origstudio/internal/helpers/hashtag"
+	"origadmin/application/origstudio/internal/server"
+	"origadmin/application/origstudio/internal/features/content/biz"
+	"origadmin/application/origstudio/api/gen/v1/types"
+	systembiz "origadmin/application/origstudio/internal/features/system/biz"
+	systemservice "origadmin/application/origstudio/internal/features/system/service"
 )
 
 type ArticleHandler struct {

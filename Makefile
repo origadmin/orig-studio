@@ -1,4 +1,4 @@
-# Makefile for the orig-cms project.
+# Makefile for the orig-studio project.
 
 # ---------------------------------------------------------------------------- #
 #                             Project Configuration                            #
@@ -185,7 +185,7 @@ build-%:
 # Pattern rule for building a single Docker image
 build-docker-%:
 	@echo "--> Building Docker image for: $*"
-	@docker build . -t ghcr.io/origadmin/orig-cms/$*:latest --build-arg service_name=$*
+	@docker build . -t ghcr.io/origadmin/orig-studio/$*:latest --build-arg service_name=$*
 
 # Pattern rule for releasing a single application via GoReleaser
 release-%:

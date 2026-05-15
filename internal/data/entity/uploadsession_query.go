@@ -6,8 +6,8 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"origadmin/application/origcms/internal/data/entity/predicate"
-	"origadmin/application/origcms/internal/data/entity/uploadsession"
+	"origadmin/application/origstudio/internal/data/entity/predicate"
+	"origadmin/application/origstudio/internal/data/entity/uploadsession"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"

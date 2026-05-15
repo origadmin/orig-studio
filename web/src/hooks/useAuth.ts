@@ -14,8 +14,8 @@ export type {User, AuthState, AuthContextValue as UseAuthReturn} from '@/context
 // Preserve localStorage read functions for backward compatibility.
 // All route guards have been migrated to context.auth in R3.
 // These functions will be removed in a future version.
-const TOKEN_KEY = 'origcms_token';
-const USER_KEY = 'origcms_user';
+const TOKEN_KEY = 'origstudio_token';
+const USER_KEY = 'origstudio_user';
 
 /**
  * @deprecated Use useAuth() instead. All route guards now read from context.auth.

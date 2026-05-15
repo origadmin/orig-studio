@@ -15,10 +15,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"origadmin/application/origcms/internal/data/enums"
-	"origadmin/application/origcms/internal/conf"
-	"origadmin/application/origcms/internal/features/media/biz"
-	"origadmin/application/origcms/internal/features/media/dal"
+	"origadmin/application/origstudio/internal/data/enums"
+	"origadmin/application/origstudio/internal/conf"
+	"origadmin/application/origstudio/internal/features/media/biz"
+	"origadmin/application/origstudio/internal/features/media/dal"
 )
 
 // MockTranscodeWorker implements TranscodeWorker interface for testing

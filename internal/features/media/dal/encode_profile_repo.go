@@ -3,9 +3,9 @@ package dal
 import (
 	"context"
 
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/encodeprofile"
-	"origadmin/application/origcms/internal/features/media/dto"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/encodeprofile"
+	"origadmin/application/origstudio/internal/features/media/dto"
 )
 
 type encodeProfileRepo struct {

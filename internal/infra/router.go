@@ -9,8 +9,8 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/origadmin/runtime/log"
 
-	"origadmin/application/origcms/internal/infra/pubsub"
-	mediabiz "origadmin/application/origcms/internal/features/media/biz"
+	"origadmin/application/origstudio/internal/infra/pubsub"
+	mediabiz "origadmin/application/origstudio/internal/features/media/biz"
 )
 
 // NewRouter creates a new Watermill router.

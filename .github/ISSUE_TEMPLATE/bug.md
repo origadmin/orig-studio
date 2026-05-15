@@ -1,4 +1,4 @@
----
+﻿---
 name: "🐛 Bug Report"
 about: "If something isn't working as expected 🤔."
 title: 'bug: '
@@ -20,7 +20,7 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen.
 
 ### Environment
-- **`origadmin/orig-cms` version**: (e.g., `v1.2.3` or commit hash)
+- **`origadmin/orig-studio` version**: (e.g., `v1.2.3` or commit hash)
 - **Go version**: (output of `go version`)
 - **OS/Arch**: (e.g., `linux/amd64`, `windows/amd64`, `darwin/arm64`)
 

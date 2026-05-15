@@ -8,7 +8,7 @@ import (
 	"context"
 	"io"
 
-	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origstudio/internal/data/enums"
 )
 
 // Storage defines the interface for media storage operations.

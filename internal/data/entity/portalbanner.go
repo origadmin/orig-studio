@@ -5,7 +5,7 @@ package entity
 import (
 	"encoding/json"
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/portalbanner"
+	"origadmin/application/origstudio/internal/data/entity/portalbanner"
 	"strings"
 	"time"
 

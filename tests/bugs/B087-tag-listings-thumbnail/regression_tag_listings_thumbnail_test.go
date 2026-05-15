@@ -14,8 +14,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/tag"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/tag"
 )
 
 // TestB087_TagEntity_ListingsThumbnailAcceptsEmpty verifies that the Tag entity struct

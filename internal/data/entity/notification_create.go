@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/notification"
+	"origadmin/application/origstudio/internal/data/entity/notification"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"

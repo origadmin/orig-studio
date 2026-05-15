@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/comment"
-	"origadmin/application/origcms/internal/data/entity/commentlike"
-	"origadmin/application/origcms/internal/data/entity/user"
+	"origadmin/application/origstudio/internal/data/entity/comment"
+	"origadmin/application/origstudio/internal/data/entity/commentlike"
+	"origadmin/application/origstudio/internal/data/entity/user"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"

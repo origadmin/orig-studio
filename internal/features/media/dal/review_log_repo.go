@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
-	"origadmin/application/origcms/internal/features/media/biz"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/mediareviewlog"
+	"origadmin/application/origstudio/internal/features/media/biz"
 )
 
 type reviewLogRepo struct {

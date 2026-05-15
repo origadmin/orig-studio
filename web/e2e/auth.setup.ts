@@ -14,7 +14,7 @@ setup('authenticate as admin', async ({page}) => {
     await page.locator('button[type="submit"]').first().click();
     await page.waitForTimeout(5000);
 
-    let token = await page.evaluate(() => localStorage.getItem('origcms_token'));
+    let token = await page.evaluate(() => localStorage.getItem('origstudio_token'));
 
     if (!token) {
         console.log('Admin user not found, registering new admin via signup...');
@@ -28,7 +28,7 @@ setup('authenticate as admin', async ({page}) => {
         await page.locator('button[type="submit"]').click();
         await page.waitForTimeout(5000);
 
-        token = await page.evaluate(() => localStorage.getItem('origcms_token'));
+        token = await page.evaluate(() => localStorage.getItem('origstudio_token'));
 
         if (!token) {
             console.log('Signup done but no auto-login token, trying signin...');
@@ -38,7 +38,7 @@ setup('authenticate as admin', async ({page}) => {
             await page.fill('#password', 'admin123');
             await page.locator('button[type="submit"]').first().click();
             await page.waitForTimeout(5000);
-            token = await page.evaluate(() => localStorage.getItem('origcms_token'));
+            token = await page.evaluate(() => localStorage.getItem('origstudio_token'));
         }
     }
 

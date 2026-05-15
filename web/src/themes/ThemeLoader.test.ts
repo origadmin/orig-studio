@@ -361,8 +361,8 @@ describe('ThemeLoader', () => {
 
     it('should clear all theme CSS caches when no themeId provided', () => {
       // Directly set items in the mock's internal store
-      localStorageMock.setItem('origcms-theme-css-feishu-blue', 'some css');
-      localStorageMock.setItem('origcms-theme-css-stripe-indigo', 'some css');
+      localStorageMock.setItem('origstudio-theme-css-feishu-blue', 'some css');
+      localStorageMock.setItem('origstudio-theme-css-stripe-indigo', 'some css');
       localStorageMock.setItem('other-key', 'other value');
 
       // Reset mocks to use actual store behavior for iteration
@@ -371,8 +371,8 @@ describe('ThemeLoader', () => {
       themeLoader.clearCache();
 
       // Should have called removeItem for theme CSS keys
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('origcms-theme-css-feishu-blue');
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('origcms-theme-css-stripe-indigo');
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith('origstudio-theme-css-feishu-blue');
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith('origstudio-theme-css-stripe-indigo');
       // Should NOT remove non-theme keys
       expect(localStorageMock.removeItem).not.toHaveBeenCalledWith('other-key');
     });

@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/history"
-	"origadmin/application/origcms/internal/data/entity/user"
+	"origadmin/application/origstudio/internal/data/entity/history"
+	"origadmin/application/origstudio/internal/data/entity/user"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"

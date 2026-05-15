@@ -17,8 +17,8 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/uuid"
 
-	"origadmin/application/origcms/internal/helpers/ffmpeg"
-	"origadmin/application/origcms/internal/features/media/dto"
+	"origadmin/application/origstudio/internal/helpers/ffmpeg"
+	"origadmin/application/origstudio/internal/features/media/dto"
 )
 
 // abs returns the absolute value of an integer

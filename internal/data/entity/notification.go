@@ -4,7 +4,7 @@ package entity
 
 import (
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/notification"
+	"origadmin/application/origstudio/internal/data/entity/notification"
 	"strings"
 	"time"
 

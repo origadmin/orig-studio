@@ -6,7 +6,7 @@
       "id": "default",
       "name": "默认蓝",
       "nameEn": "Default Blue",
-      "description": "OrigCMS 默认蓝色主题，专业稳重",
+      "description": "OrigStudio 默认蓝色主题，专业稳重",
       "category": "professional",
       "preview": {
         "primary": "#055AD6",
@@ -90,7 +90,7 @@
         "default",
         "blue"
       ],
-      "author": "OrigCMS",
+      "author": "OrigStudio",
       "version": "1.0.0"
     },
     {
@@ -181,7 +181,7 @@
         "clean",
         "blue"
       ],
-      "author": "OrigCMS",
+      "author": "OrigStudio",
       "version": "1.0.0"
     },
     {
@@ -272,7 +272,7 @@
         "tech",
         "indigo"
       ],
-      "author": "OrigCMS",
+      "author": "OrigStudio",
       "version": "1.0.0"
     },
     {
@@ -363,7 +363,7 @@
         "collaboration",
         "blue"
       ],
-      "author": "OrigCMS",
+      "author": "OrigStudio",
       "version": "1.0.0"
     },
     {
@@ -454,7 +454,7 @@
         "video",
         "red"
       ],
-      "author": "OrigCMS",
+      "author": "OrigStudio",
       "version": "1.0.0"
     },
     {
@@ -545,7 +545,7 @@
         "community",
         "orange"
       ],
-      "author": "OrigCMS",
+      "author": "OrigStudio",
       "version": "1.0.0"
     },
     {
@@ -636,7 +636,7 @@
         "video",
         "pink"
       ],
-      "author": "OrigCMS",
+      "author": "OrigStudio",
       "version": "1.0.0"
     },
     {
@@ -727,7 +727,7 @@
         "design",
         "pink"
       ],
-      "author": "OrigCMS",
+      "author": "OrigStudio",
       "version": "1.0.0"
     },
     {
@@ -818,7 +818,7 @@
         "music",
         "green"
       ],
-      "author": "OrigCMS",
+      "author": "OrigStudio",
       "version": "1.0.0"
     },
     {
@@ -909,7 +909,7 @@
         "design",
         "blue"
       ],
-      "author": "OrigCMS",
+      "author": "OrigStudio",
       "version": "1.0.0"
     },
     {
@@ -1000,7 +1000,7 @@
         "developer",
         "gray"
       ],
-      "author": "OrigCMS",
+      "author": "OrigStudio",
       "version": "1.0.0"
     },
     {
@@ -1091,7 +1091,7 @@
         "productivity",
         "indigo"
       ],
-      "author": "OrigCMS",
+      "author": "OrigStudio",
       "version": "1.0.0"
     },
     {
@@ -1182,7 +1182,7 @@
         "developer",
         "monochrome"
       ],
-      "author": "OrigCMS",
+      "author": "OrigStudio",
       "version": "1.0.0"
     },
     {
@@ -1273,7 +1273,7 @@
         "gradient",
         "indigo"
       ],
-      "author": "OrigCMS",
+      "author": "OrigStudio",
       "version": "1.0.0"
     },
     {
@@ -1364,7 +1364,7 @@
         "studio",
         "red"
       ],
-      "author": "OrigCMS",
+      "author": "OrigStudio",
       "version": "1.0.0"
     }
   ]

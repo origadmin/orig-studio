@@ -78,7 +78,7 @@ func ParseDuration(s string, fallback time.Duration) time.Duration {
 	return d
 }
 
-// Transformer implements bootstrap.ConfigTransformer for orig-cms Config.
+// Transformer implements bootstrap.ConfigTransformer for orig-studio Config.
 var Transformer bootstrap.ConfigTransformer = bootstrap.ConfigTransformFunc(transformer)
 
 func transformer(cfg config.KConfig) (any, error) {

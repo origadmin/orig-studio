@@ -12,9 +12,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"origadmin/application/origcms/internal/data/enums"
-	"origadmin/application/origcms/internal/features/media/biz"
-	"origadmin/application/origcms/internal/features/media/dal"
+	"origadmin/application/origstudio/internal/data/enums"
+	"origadmin/application/origstudio/internal/features/media/biz"
+	"origadmin/application/origstudio/internal/features/media/dal"
 )
 
 // TestMediaCreation tests media creation after upload

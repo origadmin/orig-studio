@@ -4,9 +4,9 @@ package entity
 
 import (
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/channel"
-	"origadmin/application/origcms/internal/data/entity/channeltag"
-	"origadmin/application/origcms/internal/data/entity/tag"
+	"origadmin/application/origstudio/internal/data/entity/channel"
+	"origadmin/application/origstudio/internal/data/entity/channeltag"
+	"origadmin/application/origstudio/internal/data/entity/tag"
 	"strings"
 
 	"entgo.io/ent"

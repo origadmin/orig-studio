@@ -15,11 +15,11 @@ import (
 
 	"github.com/origadmin/runtime/errors"
 	"github.com/origadmin/runtime/log"
-	"origadmin/application/origcms/api/gen/v1/media"
-	"origadmin/application/origcms/api/gen/v1/types"
-	"origadmin/application/origcms/internal/helpers/repo"
-	"origadmin/application/origcms/internal/features/media/biz"
-	"origadmin/application/origcms/internal/features/media/dto"
+	"origadmin/application/origstudio/api/gen/v1/media"
+	"origadmin/application/origstudio/api/gen/v1/types"
+	"origadmin/application/origstudio/internal/helpers/repo"
+	"origadmin/application/origstudio/internal/features/media/biz"
+	"origadmin/application/origstudio/internal/features/media/dto"
 )
 
 type MediaService struct {

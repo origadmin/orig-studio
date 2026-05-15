@@ -5,11 +5,11 @@ package api.v1.services.types;
 import "google/protobuf/timestamp.proto";
 import "v1/types/user.proto";
 
-option go_package = "origadmin/application/origcms/api/gen/v1/types;types";
+option go_package = "origadmin/application/origstudio/api/gen/v1/types;types";
 option java_multiple_files = true;
-option java_outer_classname = "OrigCMSServiceTypeMediaProto";
-option java_package = "com.origcms.api.v1.services.types";
-option objc_class_prefix = "OrigCMS";
+option java_outer_classname = "OrigStudioServiceTypeMediaProto";
+option java_package = "com.origstudio.api.v1.services.types";
+option objc_class_prefix = "OrigStudio";
 
 // Privacy defines the visibility/access level for Media, Channel, and Playlist.
 enum Privacy {

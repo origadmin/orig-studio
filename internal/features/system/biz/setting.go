@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/setting"
-	systemdal "origadmin/application/origcms/internal/features/system/dal"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/setting"
+	systemdal "origadmin/application/origstudio/internal/features/system/dal"
 )
 
 type ConfigProvider interface {
@@ -220,11 +220,11 @@ func DefaultSettings() []*entity.Setting {
 	return []*entity.Setting{
 		{
 			Key:           "site_name",
-			Value:         "OrigCMS",
+			Value:         "OrigStudio",
 			Type:          setting.TypeString,
 			Category:      setting.CategoryGeneral,
 			Description:   "Site name",
-			FallbackValue: "OrigCMS",
+			FallbackValue: "OrigStudio",
 			IsBuiltin:     true,
 		},
 		{
@@ -583,11 +583,11 @@ func DefaultSettings() []*entity.Setting {
 		},
 		{
 			Key:           "smtp_sender_name",
-			Value:         "OrigCMS",
+			Value:         "OrigStudio",
 			Type:          setting.TypeString,
 			Category:      setting.CategoryEmail,
 			Description:   "Sender display name for outgoing emails",
-			FallbackValue: "OrigCMS",
+			FallbackValue: "OrigStudio",
 			IsBuiltin:     true,
 		},
 		{

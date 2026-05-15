@@ -10,11 +10,11 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origcms/api/gen/v1/types"
-	"origadmin/application/origcms/internal/data/convpb"
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/article"
-	"origadmin/application/origcms/internal/features/content/biz"
+	"origadmin/application/origstudio/api/gen/v1/types"
+	"origadmin/application/origstudio/internal/data/convpb"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/article"
+	"origadmin/application/origstudio/internal/features/content/biz"
 )
 
 type articleRepo struct {

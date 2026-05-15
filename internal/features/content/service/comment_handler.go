@@ -8,14 +8,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/comment"
-	contentbiz "origadmin/application/origcms/internal/features/content/biz"
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
-	"origadmin/application/origcms/internal/helpers/repo"
-	"origadmin/application/origcms/internal/infra/auth"
-	"origadmin/application/origcms/internal/server"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/comment"
+	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	"origadmin/application/origstudio/internal/helpers/repo"
+	"origadmin/application/origstudio/internal/infra/auth"
+	"origadmin/application/origstudio/internal/server"
 )
 
 // CommentHandler handles comment-related HTTP endpoints.

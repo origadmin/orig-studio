@@ -465,9 +465,9 @@
     "noMatch": "No matching members found"
   },
   "about": {
-    "title": "About OrigCMS",
-    "whatIs": "What is OrigCMS?",
-    "description": "OrigCMS is an open-source video content management system built with Go + React. It provides complete features for video uploading, transcoding, management, and playback, suitable for individuals, teams, and enterprises.",
+    "title": "About OrigStudio",
+    "whatIs": "What is OrigStudio?",
+    "description": "OrigStudio is an open-source video content management system built with Go + React. It provides complete features for video uploading, transcoding, management, and playback, suitable for individuals, teams, and enterprises.",
     "goReact": "Go + React",
     "modernStack": "Modern Stack",
     "openSource": "Open Source & Free",
@@ -629,7 +629,7 @@
     "settings": "System Settings",
     "exitAdmin": "Back to Home",
     "myAccount": "My Account",
-    "welcomeAdmin": "OrigCMS Admin",
+    "welcomeAdmin": "OrigStudio Admin",
     "search": "Search...",
     "view": "View",
     "edit": "Edit",

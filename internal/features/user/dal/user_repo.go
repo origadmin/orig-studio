@@ -12,13 +12,13 @@ import (
 	"regexp"
 	"strings"
 
-	"origadmin/application/origcms/api/gen/v1/types"
-	"origadmin/application/origcms/internal/data/convpb"
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/subscription"
-	"origadmin/application/origcms/internal/data/entity/user"
-	"origadmin/application/origcms/internal/helpers/idutil"
-	"origadmin/application/origcms/internal/features/user/dto"
+	"origadmin/application/origstudio/api/gen/v1/types"
+	"origadmin/application/origstudio/internal/data/convpb"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/subscription"
+	"origadmin/application/origstudio/internal/data/entity/user"
+	"origadmin/application/origstudio/internal/helpers/idutil"
+	"origadmin/application/origstudio/internal/features/user/dto"
 )
 
 // userRepo implements the dto.UserRepo interface using the shared entity package.

@@ -3,7 +3,7 @@
 package playlist
 
 import (
-	"origadmin/application/origcms/internal/data/entity/predicate"
+	"origadmin/application/origstudio/internal/data/entity/predicate"
 	"time"
 
 	"entgo.io/ent/dialect/sql"

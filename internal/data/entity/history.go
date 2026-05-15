@@ -4,8 +4,8 @@ package entity
 
 import (
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/history"
-	"origadmin/application/origcms/internal/data/entity/user"
+	"origadmin/application/origstudio/internal/data/entity/history"
+	"origadmin/application/origstudio/internal/data/entity/user"
 	"strings"
 	"time"
 

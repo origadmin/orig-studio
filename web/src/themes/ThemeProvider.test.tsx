@@ -267,8 +267,8 @@ describe('useTheme', () => {
 
   it('should restore saved theme from localStorage', async () => {
     localStorageMock.getItem.mockImplementation((key: string) => {
-      if (key === 'origcms-theme') return 'feishu-blue';
-      if (key === 'origcms-color-mode') return 'dark';
+      if (key === 'origstudio-theme') return 'feishu-blue';
+      if (key === 'origstudio-color-mode') return 'dark';
       return null;
     });
 

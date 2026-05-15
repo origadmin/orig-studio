@@ -14,7 +14,7 @@ const HeroSection: React.FC = () => {
   return (
     <section className="text-center py-12 md:py-16">
       <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
-        {site.site_name || 'OrigCMS'}
+        {site.site_name || 'OrigStudio'}
       </h1>
       {site.site_description && (
         <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">

@@ -26,9 +26,9 @@ var File_v1_annotations_proto protoreflect.FileDescriptor
 const file_v1_annotations_proto_rawDesc = "" +
 	"\n" +
 	"\x14v1/annotations.proto\x12\x0fapi.v1.services\x1a$gnostic/openapi/v3/annotations.protoB\xb6\x04\xbaG\xf1\x02\x12\xee\x01\n" +
-	"\vOrigCMS API\x12BOrigCMS is a modern Content Management System for video platforms.\"@\n" +
+	"\vOrigStudio API\x12BOrigStudio is a modern Content Management System for video platforms.\"@\n" +
 	"\aGodCong\x12\x1chttps://github.com/origadmin\x1a\x17waitforadding@gmail.com*@\n" +
-	"\x03MIT\x129https://origadmin/application/origcms/blob/master/LICENSE2\x17Version from annotation\x1a\x18\n" +
+	"\x03MIT\x129https://origadmin/application/origstudio/blob/master/LICENSE2\x17Version from annotation\x1a\x18\n" +
 	"\x16http://localhost:18080\x1a\x19\n" +
 	"\x17https://localhost:18080*I:G\n" +
 	"\x18\n" +
@@ -39,7 +39,7 @@ const file_v1_annotations_proto_rawDesc = "" +
 	"\x06Bearer\x12!\n" +
 	"\x1f\n" +
 	"\x06apiKey\x1a\rAuthorization\"\x06header\n" +
-	"\x13com.api.v1.servicesB\x10AnnotationsProtoP\x01Z:origadmin/application/origcms/api/gen/v1/services;services\xa2\x02\x03AVS\xaa\x02\x0fApi.V1.Services\xca\x02\x0fApi\\V1\\Services\xe2\x02\x1bApi\\V1\\Services\\GPBMetadata\xea\x02\x11Api::V1::Servicesb\x06proto3"
+	"\x13com.api.v1.servicesB\x10AnnotationsProtoP\x01Z:origadmin/application/origstudio/api/gen/v1/services;services\xa2\x02\x03AVS\xaa\x02\x0fApi.V1.Services\xca\x02\x0fApi\\V1\\Services\xe2\x02\x1bApi\\V1\\Services\\GPBMetadata\xea\x02\x11Api::V1::Servicesb\x06proto3"
 
 var file_v1_annotations_proto_goTypes = []any{}
 var file_v1_annotations_proto_depIdxs = []int32{

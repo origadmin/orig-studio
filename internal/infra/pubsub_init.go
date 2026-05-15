@@ -9,7 +9,7 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/origadmin/runtime/log"
 
-	"origadmin/application/origcms/internal/infra/pubsub"
+	"origadmin/application/origstudio/internal/infra/pubsub"
 )
 
 // NewPubSub creates a new pubsub instance.

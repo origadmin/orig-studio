@@ -1,4 +1,4 @@
-﻿import {Spinner} from "@/components/ui/spinner"
+import {Spinner} from "@/components/ui/spinner"
 import { createFileRoute } from '@tanstack/react-router';
 import { lazy, Suspense } from 'react';
 

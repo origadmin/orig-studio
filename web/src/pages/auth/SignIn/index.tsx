@@ -74,13 +74,13 @@ export default function SignInPage() {
             <div
                 className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex-col justify-between p-12">
                 <div className="flex items-center gap-2 text-white">
-                    <img src="/logo.svg" alt="OrigCMS" className="h-8 w-8" />
-                    <span className="text-2xl font-bold">OrigCMS</span>
+                    <img src="/logo.svg" alt="OrigStudio" className="h-8 w-8" />
+                    <span className="text-2xl font-bold">OrigStudio</span>
                 </div>
                 <blockquote className="text-white/90 text-xl italic">
                     "A powerful content management system that helps you manage your media and content with ease."
                 </blockquote>
-                <div className="text-white/40 text-sm">&copy; 2026 OrigCMS. All rights reserved.</div>
+                <div className="text-white/40 text-sm">&copy; 2026 OrigStudio. All rights reserved.</div>
             </div>
 
             {/* Right form panel */}

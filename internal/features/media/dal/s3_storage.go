@@ -17,8 +17,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origcms/internal/conf"
-	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origstudio/internal/conf"
+	"origadmin/application/origstudio/internal/data/enums"
 )
 
 // S3Storage implements the Storage interface using S3-compatible object storage.

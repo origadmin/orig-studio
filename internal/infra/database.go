@@ -19,13 +19,13 @@ import (
 
 	"github.com/origadmin/runtime/log"
 
-	config "origadmin/application/origcms/internal/conf"
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/migrate"
-	contentdal "origadmin/application/origcms/internal/features/content/dal"
-	mediadal "origadmin/application/origcms/internal/features/media/dal"
-	systembiz "origadmin/application/origcms/internal/features/system/biz"
-	systemdal "origadmin/application/origcms/internal/features/system/dal"
+	config "origadmin/application/origstudio/internal/conf"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/migrate"
+	contentdal "origadmin/application/origstudio/internal/features/content/dal"
+	mediadal "origadmin/application/origstudio/internal/features/media/dal"
+	systembiz "origadmin/application/origstudio/internal/features/system/biz"
+	systemdal "origadmin/application/origstudio/internal/features/system/dal"
 )
 
 // NewDatabase creates a new database client.

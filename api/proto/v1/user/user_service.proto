@@ -8,11 +8,11 @@ import "google/protobuf/field_mask.proto";
 import "v1/types/user.proto";
 import "v1/types/media.proto";
 
-option go_package = "origadmin/application/origcms/api/gen/v1/user;user";
+option go_package = "origadmin/application/origstudio/api/gen/v1/user;user";
 option java_multiple_files = true;
-option java_outer_classname = "OrigCMSServiceUserProto";
-option java_package = "com.origcms.api.v1.services.user";
-option objc_class_prefix = "OrigCMSUser";
+option java_outer_classname = "OrigStudioServiceUserProto";
+option java_package = "com.origstudio.api.v1.services.user";
+option objc_class_prefix = "OrigStudioUser";
 
 // The user service definition.
 service UserService {

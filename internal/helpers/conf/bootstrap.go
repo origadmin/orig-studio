@@ -21,7 +21,7 @@ data:
     default:
       name: origcms
       dialect: sqlite3
-      source: "data/origcms.db?_fk=1"
+      source: "data/origstudio.db?_fk=1"
 
 security:
   authn:

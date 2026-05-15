@@ -13,7 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"time"
 
-	"origadmin/application/origcms/internal/helpers/idutil"
+	"origadmin/application/origstudio/internal/helpers/idutil"
 )
 
 type MediaPlaylist struct {

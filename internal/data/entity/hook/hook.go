@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity"
 )
 
 // The ArticleFunc type is an adapter to allow the use of ordinary

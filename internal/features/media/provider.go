@@ -6,9 +6,9 @@ package media
 
 import (
 	"github.com/google/wire"
-	"origadmin/application/origcms/internal/features/media/biz"
-	"origadmin/application/origcms/internal/features/media/dal"
-	"origadmin/application/origcms/internal/features/media/service"
+	"origadmin/application/origstudio/internal/features/media/biz"
+	"origadmin/application/origstudio/internal/features/media/dal"
+	"origadmin/application/origstudio/internal/features/media/service"
 )
 
 // ProviderSet is media providers.

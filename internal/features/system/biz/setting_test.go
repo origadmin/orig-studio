@@ -3,8 +3,8 @@ package biz
 import (
 	"testing"
 
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/setting"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/setting"
 )
 
 func TestDefaultSettings(t *testing.T) {
@@ -127,12 +127,12 @@ func TestMaskSensitive(t *testing.T) {
 
 	normal := &entity.Setting{
 		Key:         "site_name",
-		Value:       "OrigCMS",
+		Value:       "OrigStudio",
 		IsSensitive: false,
 	}
 	notMasked := uc.MaskSensitive(normal)
-	if notMasked.Value != "OrigCMS" {
-		t.Errorf("expected value to remain 'OrigCMS', got '%s'", notMasked.Value)
+	if notMasked.Value != "OrigStudio" {
+		t.Errorf("expected value to remain 'OrigStudio', got '%s'", notMasked.Value)
 	}
 }
 

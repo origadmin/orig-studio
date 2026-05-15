@@ -12,10 +12,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
-	"origadmin/application/origcms/internal/infra/auth"
-	"origadmin/application/origcms/internal/server"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	"origadmin/application/origstudio/internal/infra/auth"
+	"origadmin/application/origstudio/internal/server"
 )
 
 // StubHandler registers all missing routes as stubs returning empty/mock data.

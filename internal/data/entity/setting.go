@@ -4,7 +4,7 @@ package entity
 
 import (
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/setting"
+	"origadmin/application/origstudio/internal/data/entity/setting"
 	"strings"
 	"time"
 

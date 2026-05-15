@@ -8,9 +8,9 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origcms/internal/conf"
-	systembiz "origadmin/application/origcms/internal/features/system/biz"
-	"origadmin/application/origcms/internal/helpers/ffmpeg"
+	"origadmin/application/origstudio/internal/conf"
+	systembiz "origadmin/application/origstudio/internal/features/system/biz"
+	"origadmin/application/origstudio/internal/helpers/ffmpeg"
 )
 
 type SpriteConfig struct {

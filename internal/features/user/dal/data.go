@@ -6,7 +6,7 @@
 package dal
 
 import (
-	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity"
 )
 
 // CategoryEnt is the component category for Ent database.

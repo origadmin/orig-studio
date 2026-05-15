@@ -6,15 +6,15 @@ package convpb
 import (
 	"strconv"
 
-	"origadmin/application/origcms/api/gen/v1/types"
-	"origadmin/application/origcms/internal/data/entity/category"
-	"origadmin/application/origcms/internal/data/entity/channel"
-	"origadmin/application/origcms/internal/data/entity/comment"
-	"origadmin/application/origcms/internal/data/entity/media"
-	"origadmin/application/origcms/internal/data/entity/playlist"
-	"origadmin/application/origcms/internal/data/entity/tag"
-	"origadmin/application/origcms/internal/data/entity/user"
-	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origstudio/api/gen/v1/types"
+	"origadmin/application/origstudio/internal/data/entity/category"
+	"origadmin/application/origstudio/internal/data/entity/channel"
+	"origadmin/application/origstudio/internal/data/entity/comment"
+	"origadmin/application/origstudio/internal/data/entity/media"
+	"origadmin/application/origstudio/internal/data/entity/playlist"
+	"origadmin/application/origstudio/internal/data/entity/tag"
+	"origadmin/application/origstudio/internal/data/entity/user"
+	"origadmin/application/origstudio/internal/data/enums"
 )
 
 // ConvertCategoryStatusToInt32 converts a category.Status to int32.

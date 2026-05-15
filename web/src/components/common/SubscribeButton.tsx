@@ -1,4 +1,4 @@
-﻿import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {Button} from '@/components/ui/button';
 import {UserPlus, UserCheck, Loader2, ChevronDown, Bell, BellOff, AlertTriangle} from 'lucide-react';
 import {useTranslation} from 'react-i18next';

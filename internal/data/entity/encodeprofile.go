@@ -4,7 +4,7 @@ package entity
 
 import (
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/encodeprofile"
+	"origadmin/application/origstudio/internal/data/entity/encodeprofile"
 	"strings"
 	"time"
 

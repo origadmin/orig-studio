@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"origadmin/application/origcms/api/gen/v1/types"
-	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origstudio/api/gen/v1/types"
+	"origadmin/application/origstudio/internal/data/entity"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

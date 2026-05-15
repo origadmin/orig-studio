@@ -27,7 +27,7 @@ func (uc *EmailUseCase) SendEmail(ctx context.Context, to, subject, body string)
 	password := uc.settingUC.Get(ctx, "smtp_password")
 	senderName := uc.settingUC.Get(ctx, "smtp_sender_name")
 	if senderName == "" {
-		senderName = "OrigCMS"
+		senderName = "OrigStudio"
 	}
 
 	m := mail.NewMessage()
@@ -51,7 +51,7 @@ func (uc *EmailUseCase) SendEmail(ctx context.Context, to, subject, body string)
 func (uc *EmailUseCase) SendTestEmail(ctx context.Context, to string) error {
 	siteName := uc.settingUC.Get(ctx, "site_name")
 	if siteName == "" {
-		siteName = "OrigCMS"
+		siteName = "OrigStudio"
 	}
 	subject := siteName + " - Email Test"
 	body := fmt.Sprintf(`<h2>Email Test</h2><p>If you received this email, SMTP is configured correctly.</p><p>From: %s</p>`, siteName)
@@ -97,7 +97,7 @@ func (uc *EmailUseCase) GetSMTPConfig(ctx context.Context) SMTPConfig {
 	user := uc.settingUC.Get(ctx, "smtp_user")
 	nickname := uc.settingUC.Get(ctx, "smtp_sender_name")
 	if nickname == "" {
-		nickname = "OrigCMS"
+		nickname = "OrigStudio"
 	}
 	ssl := port == 465
 	if !ssl && uc.settingUC.Get(ctx, "smtp_use_tls") == "true" {

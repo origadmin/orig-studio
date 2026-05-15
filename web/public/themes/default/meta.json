@@ -2,7 +2,7 @@
   "id": "default",
   "name": "默认蓝",
   "nameEn": "Default Blue",
-  "description": "OrigCMS 默认蓝色主题，专业稳重",
+  "description": "OrigStudio 默认蓝色主题，专业稳重",
   "category": "professional",
   "preview": {
     "primary": "#0B6CFA",
@@ -11,6 +11,6 @@
     "surface": "#f5f6f7"
   },
   "tags": ["business", "default", "blue"],
-  "author": "OrigCMS",
+  "author": "OrigStudio",
   "version": "1.0.0"
 }

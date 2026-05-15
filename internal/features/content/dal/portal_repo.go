@@ -7,11 +7,11 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/portalbanner"
-	"origadmin/application/origcms/internal/data/entity/portalcustompage"
-	"origadmin/application/origcms/internal/data/entity/portalnavitem"
-	"origadmin/application/origcms/internal/features/content/biz"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/portalbanner"
+	"origadmin/application/origstudio/internal/data/entity/portalcustompage"
+	"origadmin/application/origstudio/internal/data/entity/portalnavitem"
+	"origadmin/application/origstudio/internal/features/content/biz"
 )
 
 type portalRepo struct {

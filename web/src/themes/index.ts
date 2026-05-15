@@ -1,5 +1,5 @@
 /**
- * ThemeLoader - Runtime theme discovery and loading for OrigCMS.
+ * ThemeLoader - Runtime theme discovery and loading for OrigStudio.
  *
  * Loads theme CSS from public/themes/ directory via fetch(),
  * caches CSS text in localStorage for FOUC prevention.
@@ -20,10 +20,10 @@ function isValidThemeId(id: string): boolean {
 
 /** localStorage key names */
 const STORAGE_KEYS = {
-  theme: 'origcms-theme',
-  colorMode: 'origcms-color-mode',
-  themeCss: (id: string) => `origcms-theme-css-${id}`,
-  registryCache: 'origcms-theme-registry',
+  theme: 'origstudio-theme',
+  colorMode: 'origstudio-color-mode',
+  themeCss: (id: string) => `origstudio-theme-css-${id}`,
+  registryCache: 'origstudio-theme-registry',
 } as const;
 
 /** CSS injection style tag IDs */
@@ -209,7 +209,7 @@ class ThemeLoader {
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key?.startsWith('origcms-theme-css-')) {
+        if (key?.startsWith('origstudio-theme-css-')) {
           keysToRemove.push(key);
         }
       }

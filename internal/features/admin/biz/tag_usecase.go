@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/features/admin/dal"
-	"origadmin/application/origcms/internal/helpers/repo"
-	"origadmin/application/origcms/internal/helpers/tagcolor"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/features/admin/dal"
+	"origadmin/application/origstudio/internal/helpers/repo"
+	"origadmin/application/origstudio/internal/helpers/tagcolor"
 )
 
 // TagUseCase handles tag business logic

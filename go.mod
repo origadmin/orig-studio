@@ -1,4 +1,4 @@
-module origadmin/application/origcms
+module origadmin/application/origstudio
 
 go 1.25.5
 
@@ -82,7 +82,6 @@ require (
 	github.com/aws/smithy-go v1.25.1 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
-	github.com/bmatcuk/doublestar/v4 v4.10.0 // indirect
 	github.com/bufbuild/buf v1.64.0 // indirect
 	github.com/bufbuild/protocompile v0.14.2-0.20260114160500-16922e24f2b6 // indirect
 	github.com/bufbuild/protoplugin v0.0.0-20250218205857-750e09ce93e1 // indirect
@@ -256,7 +255,6 @@ require (
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gotest.tools/v3 v3.5.2 // indirect
 	modernc.org/libc v1.72.0 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect

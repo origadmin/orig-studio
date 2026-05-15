@@ -1,5 +1,5 @@
 /**
- * Theme system type definitions for OrigCMS dynamic theme system.
+ * Theme system type definitions for OrigStudio dynamic theme system.
  * Supports runtime theme loading from public/themes/ directory.
  */
 

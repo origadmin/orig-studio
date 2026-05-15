@@ -13,9 +13,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 
-	contentbiz "origadmin/application/origcms/internal/features/content/biz"
-	"origadmin/application/origcms/internal/infra/auth"
-	"origadmin/application/origcms/internal/server"
+	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
+	"origadmin/application/origstudio/internal/infra/auth"
+	"origadmin/application/origstudio/internal/server"
 )
 
 // ---------------------------------------------------------------------------

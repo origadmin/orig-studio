@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	systembiz "origadmin/application/origcms/internal/features/system/biz"
+	systembiz "origadmin/application/origstudio/internal/features/system/biz"
 
 	"github.com/go-kratos/kratos/v2/log"
 )

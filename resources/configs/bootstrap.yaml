@@ -11,7 +11,7 @@ sources:
 app:
   name: "${APP_NAME:origcms.server}"
   version: "${APP_VERSION:v1.0.0}"
-  id: "${APP_ID:origcms-server}"
+  id: "${APP_ID:origstudio-server}"
 
 server:
   http:
@@ -40,7 +40,7 @@ security:
     configs:
       - type: jwt
         jwt:
-          signing_key: "${JWT_SIGNING_KEY:origcms-secret-key-change-in-production}"
+          signing_key: "${JWT_SIGNING_KEY:origstudio-secret-key-change-in-production}"
           signing_method: "${JWT_SIGNING_METHOD:HS256}"
           access_token_ttl: "${JWT_ACCESS_TOKEN_TTL:3600s}"
           refresh_token_ttl: "${JWT_REFRESH_TOKEN_TTL:7200s}"

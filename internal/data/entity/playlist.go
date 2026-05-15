@@ -4,7 +4,7 @@ package entity
 
 import (
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/playlist"
+	"origadmin/application/origstudio/internal/data/entity/playlist"
 	"strings"
 	"time"
 

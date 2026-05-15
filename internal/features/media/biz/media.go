@@ -17,13 +17,13 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origcms/api/gen/v1/types" // Import the generated Media type
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/enums"
-	"origadmin/application/origcms/internal/helpers/ffmpeg"
-	"origadmin/application/origcms/internal/helpers/repo"
-	"origadmin/application/origcms/internal/infra/pubsub"
-	"origadmin/application/origcms/internal/features/media/dto"
+	"origadmin/application/origstudio/api/gen/v1/types" // Import the generated Media type
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/enums"
+	"origadmin/application/origstudio/internal/helpers/ffmpeg"
+	"origadmin/application/origstudio/internal/helpers/repo"
+	"origadmin/application/origstudio/internal/infra/pubsub"
+	"origadmin/application/origstudio/internal/features/media/dto"
 )
 
 // EncodingEvent represents a status change event for an encoding task.

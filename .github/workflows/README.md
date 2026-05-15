@@ -1,3 +1,3 @@
-# GitHub Actions Workflows for orig-cms
+﻿# GitHub Actions Workflows for orig-studio
 
-This directory contains GitHub Actions workflow definitions for the orig-cms project.
+This directory contains GitHub Actions workflow definitions for the orig-studio project.

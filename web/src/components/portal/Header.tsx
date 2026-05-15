@@ -147,9 +147,9 @@ const Header: React.FC<HeaderProps> = ({onToggleSidebar, onOpenMobileSidebar, si
                 </button>
 
                 <Link to="/" className="flex items-center gap-2 shrink-0">
-                    <img src="/logo.svg" alt={site?.site_name || 'OrigCMS'} className="h-8 w-8" />
+                    <img src="/logo.svg" alt={site?.site_name || 'OrigStudio'} className="h-8 w-8" />
                     <span className="text-lg font-bold text-foreground hidden sm:inline">
-                        {site?.site_name || 'OrigCMS'}
+                        {site?.site_name || 'OrigStudio'}
                     </span>
                 </Link>
 

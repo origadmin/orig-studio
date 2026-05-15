@@ -5,9 +5,9 @@ package entity
 import (
 	"context"
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/channel"
-	"origadmin/application/origcms/internal/data/entity/channeltag"
-	"origadmin/application/origcms/internal/data/entity/tag"
+	"origadmin/application/origstudio/internal/data/entity/channel"
+	"origadmin/application/origstudio/internal/data/entity/channeltag"
+	"origadmin/application/origstudio/internal/data/entity/tag"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"

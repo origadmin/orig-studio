@@ -1,6 +1,6 @@
-# F001: Upload Page Refactor — SPEC
+﻿# F001: Upload Page Refactor — SPEC
 
-> beads: orig-cms-02q | type: feature | priority: P2
+> beads: orig-studio-02q | type: feature | priority: P2
 
 ## Summary
 

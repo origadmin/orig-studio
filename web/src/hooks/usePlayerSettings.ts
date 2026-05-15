@@ -8,7 +8,7 @@ interface PlayerSettings {
     autoPlayNext: boolean;
 }
 
-const STORAGE_KEY = 'origcms_player_settings';
+const STORAGE_KEY = 'origstudio_player_settings';
 
 const DEFAULT_SETTINGS: PlayerSettings = {
     volume: 1,

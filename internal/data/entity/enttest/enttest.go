@@ -5,11 +5,11 @@ package enttest
 import (
 	"context"
 
-	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity"
 	// required by schema hooks.
-	_ "origadmin/application/origcms/internal/data/entity/runtime"
+	_ "origadmin/application/origstudio/internal/data/entity/runtime"
 
-	"origadmin/application/origcms/internal/data/entity/migrate"
+	"origadmin/application/origstudio/internal/data/entity/migrate"
 
 	"entgo.io/ent/dialect/sql/schema"
 )

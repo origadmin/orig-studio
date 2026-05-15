@@ -1,4 +1,4 @@
-# F001 - Admin Settings 页面全面修复设计文档
+﻿# F001 - Admin Settings 页面全面修复设计文档
 
 > 版本: 1.0 | 日期: 2026-05-09 | 状态: Draft
 
@@ -540,7 +540,7 @@ useEffect(() => {
 
 ### 6.1 根因
 
-- Portal Header 硬编码 `"OrigCMS"`，不从配置读取
+- Portal Header 硬编码 `"OrigStudio"`，不从配置读取
 - HTML `<title>` 和 `<meta>` 标签不使用站点设置
 - `usePortalConfig()` hook 已定义但从未被使用
 
@@ -551,7 +551,7 @@ useEffect(() => {
 | DocHeader | ✅ `site.site_name` |
 | HeroSection | ✅ `site.site_name` + `site.site_description` |
 | WelcomeLayout | ✅ `site.site_name` + `site.site_description` |
-| **Portal Header** | ❌ 硬编码 `"OrigCMS"` |
+| **Portal Header** | ❌ 硬编码 `"OrigStudio"` |
 | **HTML `<title>`** | ❌ 未设置 |
 | **Meta 标签** | ❌ 未设置 |
 
@@ -564,9 +564,9 @@ useEffect(() => {
 const { site } = useModuleState();
 
 <Link to="/" className="flex items-center gap-2 shrink-0">
-    <img src="/logo.svg" alt={site.site_name || 'OrigCMS'} className="h-8 w-8" />
+    <img src="/logo.svg" alt={site.site_name || 'OrigStudio'} className="h-8 w-8" />
     <span className="text-lg font-bold text-foreground hidden sm:inline">
-        {site.site_name || 'OrigCMS'}
+        {site.site_name || 'OrigStudio'}
     </span>
 </Link>
 ```
@@ -589,7 +589,7 @@ function PortalRouteComponent() {
     useEffect(() => {
         document.title = site.site_name
             ? `${site.site_name} - ${site.site_description || 'CMS'}`
-            : 'OrigCMS';
+            : 'OrigStudio';
 
         // 设置 meta description
         let metaDesc = document.querySelector('meta[name="description"]');
@@ -989,7 +989,7 @@ func (uc *EmailUseCase) SendEmail(ctx context.Context, to, subject, body string)
 
 // SendTestEmail 发送测试邮件
 func (uc *EmailUseCase) SendTestEmail(ctx context.Context, to string) error {
-    subject := "OrigCMS - 邮件测试"
+    subject := "OrigStudio - 邮件测试"
     body := `<h2>邮件测试</h2><p>如果您收到此邮件，说明SMTP配置正确。</p>`
     return uc.SendEmail(ctx, to, subject, body)
 }
@@ -1102,11 +1102,11 @@ func (h *SystemHandler) getEmailStatus() http.HandlerFunc {
 ```go
 {
     Key:           "smtp_sender_name",
-    Value:         "OrigCMS",
+    Value:         "OrigStudio",
     Type:          setting.TypeString,
     Category:      setting.CategoryEmail,
     Description:   "Sender display name for outgoing emails",
-    FallbackValue: "OrigCMS",
+    FallbackValue: "OrigStudio",
     IsBuiltin:     true,
 },
 {

@@ -6,9 +6,9 @@ package system
 
 import (
 	"github.com/google/wire"
-	"origadmin/application/origcms/internal/features/system/biz"
-	"origadmin/application/origcms/internal/features/system/dal"
-	"origadmin/application/origcms/internal/features/system/service"
+	"origadmin/application/origstudio/internal/features/system/biz"
+	"origadmin/application/origstudio/internal/features/system/dal"
+	"origadmin/application/origstudio/internal/features/system/service"
 )
 
 // ProviderSet is the wire provider set for the system feature module.

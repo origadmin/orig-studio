@@ -3,15 +3,15 @@
 
 openapi: 3.0.3
 info:
-    title: OrigCMS API
-    description: OrigCMS is a modern Content Management System for video platforms.
+    title: OrigStudio API
+    description: OrigStudio is a modern Content Management System for video platforms.
     contact:
         name: GodCong
         url: https://github.com/origadmin
         email: waitforadding@gmail.com
     license:
         name: MIT
-        url: https://origadmin/application/origcms/blob/master/LICENSE
+        url: https://origadmin/application/origstudio/blob/master/LICENSE
     version: Version from annotation
 servers:
     - url: http://localhost:18080

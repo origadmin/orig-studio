@@ -20,9 +20,9 @@ import (
 	"github.com/origadmin/runtime/service/transport/grpc"
 	"github.com/origadmin/runtime/service/transport/http"
 
-	"origadmin/application/origcms/internal/conf"
-	media "origadmin/application/origcms/api/gen/v1/media"
-	"origadmin/application/origcms/internal/features/media/service"
+	"origadmin/application/origstudio/internal/conf"
+	media "origadmin/application/origstudio/api/gen/v1/media"
+	"origadmin/application/origstudio/internal/features/media/service"
 )
 
 // ProviderSet is server providers.

@@ -15,7 +15,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 
-	"origadmin/application/origcms/internal/helpers/idutil"
+	"origadmin/application/origstudio/internal/helpers/idutil"
 )
 
 type Comment struct {

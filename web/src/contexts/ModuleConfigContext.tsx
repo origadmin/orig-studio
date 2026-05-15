@@ -5,7 +5,7 @@ const DEFAULT_CONFIG: ModulePortalConfig = {
     modules: {articles: true, videos: true, music: false},
     layout: 'video',
     site: {
-        site_name: 'OrigCMS',
+        site_name: 'OrigStudio',
         site_description: '',
         allow_registration: true,
         allow_upload: true,

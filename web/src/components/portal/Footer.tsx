@@ -13,8 +13,8 @@ const Footer = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
                     <div className="space-y-6">
                         <Link to="/" className="flex items-center space-x-2">
-                            <img src="/logo.svg" alt="OrigCMS" className="h-8 w-8" />
-                            <span className="text-xl font-black text-foreground tracking-tighter">OrigCMS</span>
+                            <img src="/logo.svg" alt="OrigStudio" className="h-8 w-8" />
+                            <span className="text-xl font-black text-foreground tracking-tighter">OrigStudio</span>
                         </Link>
                         <p className="text-sm text-muted-foreground font-medium leading-relaxed">
                             Next-generation video platform powered by Go microservices.

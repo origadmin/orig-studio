@@ -465,9 +465,9 @@
     "noMatch": "一致するメンバーが見つかりません"
   },
   "about": {
-    "title": "OrigCMSについて",
-    "whatIs": "OrigCMSとは？",
-    "description": "OrigCMSはGo + Reactで構築されたオープンソースの動画コンテンツ管理システムです。動画のアップロード、トランスコード、管理、再生の完全な機能を提供し、個人、チーム、企業に適しています。",
+    "title": "OrigStudioについて",
+    "whatIs": "OrigStudioとは？",
+    "description": "OrigStudioはGo + Reactで構築されたオープンソースの動画コンテンツ管理システムです。動画のアップロード、トランスコード、管理、再生の完全な機能を提供し、個人、チーム、企業に適しています。",
     "goReact": "Go + React",
     "modernStack": "モダンスタック",
     "openSource": "オープンソース＆無料",

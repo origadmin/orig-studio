@@ -8,10 +8,10 @@ package dto
 import (
 	"context"
 
-	"origadmin/application/origcms/api/gen/v1/types"
-	"origadmin/application/origcms/api/gen/v1/user"
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/helpers/repo"
+	"origadmin/application/origstudio/api/gen/v1/types"
+	"origadmin/application/origstudio/api/gen/v1/user"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/helpers/repo"
 )
 
 // UserRepo is a User repository interface.

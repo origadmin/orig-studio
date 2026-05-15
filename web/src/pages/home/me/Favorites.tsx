@@ -1,4 +1,4 @@
-﻿import {Spinner} from "@/components/ui/spinner"
+import {Spinner} from "@/components/ui/spinner"
 import React, {useState} from 'react';
 import {Link} from '@tanstack/react-router';
 import {Heart, Trash2, ChevronLeft, ChevronRight} from 'lucide-react';

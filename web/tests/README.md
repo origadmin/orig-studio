@@ -1,6 +1,6 @@
-# Frontend Test Directory Structure
+﻿# Frontend Test Directory Structure
 
-> **Project**: orig-cms/web
+> **Project**: orig-studio/web
 > **Tech Stack**: Bun + Rsbuild + Jest + React + Playwright
 > **Reference**: Backend `tests/README.md`
 

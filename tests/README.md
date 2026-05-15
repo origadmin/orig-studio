@@ -1,6 +1,6 @@
-# 测试目录结构规范
+﻿# 测试目录结构规范
 
-> **适用**: orig-cms 项目
+> **适用**: orig-studio 项目
 > **关联**: `projects/team-flow/team/workflows/roles/development-standards.md`、`projects/team-flow/team/workflows/roles/bugfix-standards.md`
 
 ---

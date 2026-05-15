@@ -106,7 +106,7 @@ const AdminLayout = () => {
                 className={`${sidebarCollapsed ? 'w-20' : 'w-64'} bg-sidebar text-sidebar-foreground flex-shrink-0 flex flex-col transition-all duration-300 ease-in-out`}>
                 <div className={`flex items-center border-b border-sidebar-border ${sidebarCollapsed ? 'justify-center py-3' : 'px-4 py-3'}`}>
                     <Link to="/admin" className="flex items-center gap-2 transition-all duration-300 ease-in-out">
-                        <img src="/logo.svg" alt="OrigCMS" className="h-14 w-14 flex-shrink-0" />
+                        <img src="/logo.svg" alt="OrigStudio" className="h-14 w-14 flex-shrink-0" />
                         {!sidebarCollapsed && (
                             <span className="text-lg font-semibold tracking-tight text-brand whitespace-nowrap">{t('admin.welcomeAdmin')}</span>
                         )}

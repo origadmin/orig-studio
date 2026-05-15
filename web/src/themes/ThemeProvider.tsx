@@ -1,5 +1,5 @@
 /**
- * ThemeProvider - React context provider for the OrigCMS dynamic theme system.
+ * ThemeProvider - React context provider for the OrigStudio dynamic theme system.
  *
  * Manages theme ID, color mode (light/dark/system), and provides
  * theme switching functionality with async CSS loading support.
@@ -10,8 +10,8 @@ import { themeLoader } from './index';
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-const STORAGE_THEME_KEY = 'origcms-theme';
-const STORAGE_MODE_KEY = 'origcms-color-mode';
+const STORAGE_THEME_KEY = 'origstudio-theme';
+const STORAGE_MODE_KEY = 'origstudio-color-mode';
 
 function getSystemPreference(): 'light' | 'dark' {
   if (typeof window === 'undefined') return 'light';

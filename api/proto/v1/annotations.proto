@@ -4,9 +4,9 @@ package api.v1.services;
 
 import "gnostic/openapi/v3/annotations.proto";
 
-option go_package = "origadmin/application/origcms/api/gen/v1/services;services";
+option go_package = "origadmin/application/origstudio/api/gen/v1/services;services";
 
-// OpenAPI v3 metadata for OrigCMS API documentation.
+// OpenAPI v3 metadata for OrigStudio API documentation.
 // This file provides API metadata that is used to generate OpenAPI/Swagger documentation.
 //
 // Reference:
@@ -16,9 +16,9 @@ option go_package = "origadmin/application/origcms/api/gen/v1/services;services"
 
 option (gnostic.openapi.v3.document) = {
   info: {
-    title: "OrigCMS API"
+    title: "OrigStudio API"
     version: "Version from annotation"
-    description: "OrigCMS is a modern Content Management System for video platforms."
+    description: "OrigStudio is a modern Content Management System for video platforms."
     contact: {
       name: "GodCong"
       url: "https://github.com/origadmin"
@@ -26,7 +26,7 @@ option (gnostic.openapi.v3.document) = {
     }
     license: {
       name: "MIT"
-      url: "https://origadmin/application/origcms/blob/master/LICENSE"
+      url: "https://origadmin/application/origstudio/blob/master/LICENSE"
     }
   }
   servers: [

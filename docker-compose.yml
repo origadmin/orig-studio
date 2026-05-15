@@ -13,8 +13,8 @@ services:
       APP_VERSION: ${APP_VERSION:-v1.0.0}
       SERVER_HTTP_ADDR: "0.0.0.0:8080"
       DATABASE_DIALECT: ${DATABASE_DIALECT:-sqlite3}
-      DATABASE_SOURCE: ${DATABASE_SOURCE:-file:origcms.db?cache=shared&_fk=1}
-      JWT_SIGNING_KEY: ${JWT_SIGNING_KEY:-origcms-secret-key-change-in-production}
+      DATABASE_SOURCE: ${DATABASE_SOURCE:-file:origstudio.db?cache=shared&_fk=1}
+      JWT_SIGNING_KEY: ${JWT_SIGNING_KEY:-origstudio-secret-key-change-in-production}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     volumes:
       - db-data:/app/data

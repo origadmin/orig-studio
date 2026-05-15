@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/encodingtask"
-	"origadmin/application/origcms/internal/data/enums"
-	"origadmin/application/origcms/internal/features/media/dto"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/encodingtask"
+	"origadmin/application/origstudio/internal/data/enums"
+	"origadmin/application/origstudio/internal/features/media/dto"
 )
 
 type encodingTaskRepo struct {
