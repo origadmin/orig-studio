@@ -1,4 +1,10 @@
+version: 2
+
 project_name: orig-cms
+
+before:
+  hooks:
+    - go mod tidy
 
 changelog:
   sort: asc
@@ -28,53 +34,48 @@ builds:
     ignore:
       - goos: windows
         goarch: arm64
+      - goos: darwin
+        goarch: amd64
     mod_timestamp: "{{ .CommitTimestamp }}"
     flags:
       - -trimpath
       - -tags=dev
     ldflags:
-      - -s -w -extldflags "-static"
-      - -X github.com/origadmin/toolkits/version.Version={{.Version}}
-      - -X github.com/origadmin/toolkits/version.GitCommit={{.Commit}}
-      - -X github.com/origadmin/toolkits/version.BuildDate={{.Date}}
+      - -s -w
+      - -X github.com/origadmin/toolkits/version.version={{.Version}}
+      - -X github.com/origadmin/toolkits/version.gitCommit={{.ShortCommit}}
+      - -X github.com/origadmin/toolkits/version.gitTag={{.Tag}}
+      - -X github.com/origadmin/toolkits/version.buildDate={{.Date}}
+      - -X github.com/origadmin/toolkits/version.gitTreeState=clean
 
 archives:
-  - id: "{{ .ProjectName }}"
+  - id: orig-cms
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "arm64" }}aarch64
+      {{- else }}{{ .Arch }}{{ end }}
     format_overrides:
       - goos: windows
         format: zip
-    name_template: >
-      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
     files:
-      - LICENSE
-      - README.md
+      - LICENSE*
+      - README*
       - resources/configs/**/*
 
 checksum:
   name_template: 'checksums.txt'
   algorithm: sha256
 
-dockers:
-  - id: "server"
-    builds:
-      - server
-    image_templates:
-      - "ghcr.io/origadmin/orig-cms/server:{{ .Tag }}"
-      - "ghcr.io/origadmin/orig-cms/server:latest"
-    dockerfile: Dockerfile
-    use: buildx
-    build_flag_templates:
-      - --platform=linux/amd64
-      - --build-arg=SERVICE_NAME=server
-    extra_files:
-      - LICENSE
-      - README.md
-      - resources/
+snapshot:
+  version_template: "{{ .Version }}-next"
 
 release:
   github:
-    owner: 'origadmin'
-    name: 'orig-media'
+    owner: origadmin
+    name: orig-studio
   draft: false
   prerelease: auto
   name_template: 'OrigCMS CE {{ .Version }}'
@@ -88,10 +89,4 @@ release:
     ```bash
     # Download from assets below, then:
     ./origcms-server -conf bootstrap.yaml
-    ```
-
-    ## Docker
-
-    ```bash
-    docker pull ghcr.io/origadmin/orig-cms/server:{{ .Tag }}
     ```
